@@ -6,6 +6,9 @@ from apps.bot.classes.VkEvent import VkEvent
 class CommonBot():
     def __init__(self):
         self.mentions = []
+        self.BOT_CAN_WORK = True
+        self.DEBUG = False
+        self.DEVELOP_DEBUG = False
 
     def run(self):
         self.listen()
@@ -17,7 +20,7 @@ class CommonBot():
         pass
 
     @staticmethod
-    def parse_message(peer_id, result):
+    def parse_message(result):
         if isinstance(result, str) or isinstance(result, int) or isinstance(result, float):
             result = {'msg': result}
         if isinstance(result, dict):
@@ -30,7 +33,7 @@ class CommonBot():
                     return msg
 
     def parse_and_send_msgs(self, peer_id, result):
-        msg = self.parse_message(peer_id, result)
+        msg = self.parse_message(result)
         self.send_message(peer_id, **msg)
 
     # Отправляет сообщения юзерам в разных потоках
@@ -61,6 +64,13 @@ class CommonBot():
                 return True
         return False
 
+    def get_user_by_id(self, user_id):
+        pass
+
+    @staticmethod
+    def get_chat_by_id(chat_id):
+        pass
+
     @staticmethod
     def have_audio_message(vk_event):
         if isinstance(vk_event, VkEvent):
@@ -83,9 +93,6 @@ class CommonBot():
                         return True
         return False
 
-    def get_user_by_id(self, user_id):
-        pass
-
     @staticmethod
     def parse_date(date):
         date_arr = date.split('.')
@@ -93,3 +100,18 @@ class CommonBot():
             return f"1970-{date_arr[1]}-{date_arr[0]}"
         else:
             return f"{date_arr[2]}-{date_arr[1]}-{date_arr[0]}"
+
+    @staticmethod
+    def add_group_to_user(vk_user, chat):
+        chats = vk_user.chats
+        if chat not in chats.all():
+            chats.add(chat)
+
+    @staticmethod
+    def remove_group_from_user(vk_user, chat):
+        chats = vk_user.chats
+        if chat in chats.all():
+            chats.remove(chat)
+
+    def can_bot_working(self):
+        return self.BOT_CAN_WORK

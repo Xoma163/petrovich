@@ -112,3 +112,69 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
+
+CORS_ORIGIN_ALLOW_ALL = True
+VK_URL = "https://vk.com/"
+TEST_CHAT_ID = 2
+
+# Logging
+LOGS_DIR = os.path.join(BASE_DIR, 'logs')
+if not os.path.exists(LOGS_DIR):
+    os.mkdir(LOGS_DIR)
+
+DEBUG_FILE = os.path.join(LOGS_DIR, 'commands-debug.log')
+ERROR_FILE = os.path.join(LOGS_DIR, 'commands-error.log')
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        # 'verbose': {
+        #     'format': '%(asctime)s %(name)-12s --> %(funcName)-20s --> %(lineno)-4d  %(levelname)-8s %(message)s',
+        # },
+        # 'simple': {
+        #     'format': '%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
+        # },
+        'commands': {
+            'format': '%(levelname)-8s %(asctime)-25s %(message)s',
+            # 'datefmt': '%d.%m.%Y %H:%M:%S'
+        },
+        'commands-console': {
+            'format': '%(levelname)-8s %(message)s',
+        }
+    },
+    'handlers': {
+        'file-debug': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': DEBUG_FILE,
+            'formatter': 'commands',
+        },
+        'file-warn': {
+            'level': 'WARNING',
+            'class': 'logging.FileHandler',
+            'filename': ERROR_FILE,
+            'formatter': 'commands',
+        },
+        'console-warn': {
+            'level': 'WARNING',
+            'class': 'logging.StreamHandler',
+            'formatter': 'commands-console',
+        },
+        'db_log': {
+            'level': 'DEBUG',
+            'class': 'apps.db_logger.db_log_handler.DatabaseLogHandler'
+        },
+    },
+    'loggers': {
+        'bot': {
+            'handlers': ['file-debug', 'file-warn', 'console-warn', 'db_log'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}
+
+CORS_ORIGIN_ALLOW_ALL = True
+VK_URL = "https://vk.com/"
+TEST_CHAT_ID = 2
