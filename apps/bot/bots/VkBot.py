@@ -1,11 +1,15 @@
 from threading import Thread
 
+from django.contrib.auth.models import Group
 from vk_api import VkUpload, VkApi
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 
 from apps.bot.bots.CommonBot import CommonBot
 from apps.bot.bots.VkUser import VkUser
+from apps.bot.classes.Consts import Role
+from apps.bot.commands.City import add_city_to_db
 from petrovich.settings import env
+from apps.bot.models import VkUser as VkUserModel
 
 
 class VkBot(CommonBot, Thread):
@@ -28,41 +32,41 @@ class VkBot(CommonBot, Thread):
         self.DEVELOP_DEBUG = False
 
     def get_user_by_id(self, user_id):
-        # vk_user = VkUser.objects.filter(user_id=user_id)
-        # if len(vk_user) > 0:
-        #     vk_user = vk_user.first()
-        # else:
-        #     # Прозрачная регистрация
-        #     user = self.vk.users.get(user_id=user_id, lang='ru', fields='sex, bdate, city, screen_name')[0]
-        #     vk_user = VkUserModel()
-        #     vk_user.user_id = user_id
-        #     vk_user.name = user['first_name']
-        #     vk_user.surname = user['last_name']
-        #     if 'sex' in user:
-        #         vk_user.gender = user['sex']
-        #     if 'bdate' in user:
-        #         vk_user.birthday = self.parse_date(user['bdate'])
-        #     if 'city' in user:
-        #         from apps.service.models import City
-        #         city_name = user['city']['title']
-        #         city = City.objects.filter(name=city_name)
-        #         if len(city) > 0:
-        #             city = city.first()
-        #         else:
-        #             try:
-        #                 city = add_city_to_db(city_name)
-        #             except Exception:
-        #                 city = None
-        #         vk_user.city = city
-        #     else:
-        #         vk_user.city = None
-        #     if 'screen_name' in user:
-        #         vk_user.nickname = user['screen_name']
-        #     vk_user.save()
-        #     group_user = Group.objects.get(name=Role.USER.name)
-        #     vk_user.groups.add(group_user)
-        #     vk_user.save()
-        # return vk_user
+        vk_user = VkUserModel.objects.filter(user_id=user_id)
+        if len(vk_user) > 0:
+            vk_user = vk_user.first()
+        else:
+            # Прозрачная регистрация
+            user = self.vk.users.get(user_id=user_id, lang='ru', fields='sex, bdate, city, screen_name')[0]
+            vk_user = VkUserModel()
+            vk_user.user_id = user_id
+            vk_user.name = user['first_name']
+            vk_user.surname = user['last_name']
+            if 'sex' in user:
+                vk_user.gender = user['sex']
+            if 'bdate' in user:
+                vk_user.birthday = self.parse_date(user['bdate'])
+            if 'city' in user:
+                from apps.service.models import City
+                city_name = user['city']['title']
+                city = City.objects.filter(name=city_name)
+                if len(city) > 0:
+                    city = city.first()
+                else:
+                    try:
+                        city = add_city_to_db(city_name)
+                    except Exception:
+                        city = None
+                vk_user.city = city
+            else:
+                vk_user.city = None
+            if 'screen_name' in user:
+                vk_user.nickname = user['screen_name']
+            vk_user.save()
+            group_user = Group.objects.get(name=Role.USER.name)
+            vk_user.groups.add(group_user)
+            vk_user.save()
+        return vk_user
         pass
 
     def listen(self):
