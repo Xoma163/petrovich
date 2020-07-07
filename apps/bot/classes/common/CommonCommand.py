@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from apps.bot.classes.CommonMethods import check_user_group, get_help_for_command, remove_tz
+from apps.bot.classes.common.CommonMethods import check_user_group, get_help_for_command, remove_tz
 from apps.bot.classes.Consts import Role
 from apps.service.models import Service
 from petrovich.settings import env

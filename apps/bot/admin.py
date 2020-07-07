@@ -1,14 +1,12 @@
 from django.contrib import admin
 
 # Register your models here.
-from apps.bot.models import VkUser, VkChat, VkBot, APIUser, APITempUser
+from apps.bot.models import VkUser, VkChat, VkBot, APIUser, APITempUser, TgUser, TgChat, TgBot
 
 
-@admin.register(VkUser)
-class VkUserAdmin(admin.ModelAdmin):
+class AbstractUserAdmin(admin.ModelAdmin):
     list_display = (
         'user_id', 'name', 'surname', 'nickname', 'nickname_real', 'gender', 'birthday', 'city',
-        # 'is_admin', 'is_moderator', 'is_student', 'is_banned', 'is_minecraft', 'is_terraria'
     )
     list_filter = ('gender',
                    ('city', admin.RelatedOnlyFieldListFilter),
@@ -17,14 +15,24 @@ class VkUserAdmin(admin.ModelAdmin):
     search_fields = ['name', 'surname', 'nickname', 'nickname_real', 'id']
 
 
-@admin.register(VkChat)
-class VkChatAdmin(admin.ModelAdmin):
+admin.site.register(VkUser, AbstractUserAdmin)
+admin.site.register(TgUser, AbstractUserAdmin)
+
+
+class AbstractChatAdmin(admin.ModelAdmin):
     list_display = ('chat_id', 'name', 'admin', 'need_reaction')
 
 
-@admin.register(VkBot)
-class VkBotAdmin(admin.ModelAdmin):
+admin.site.register(VkChat, AbstractChatAdmin)
+admin.site.register(TgChat, AbstractChatAdmin)
+
+
+class AbstractBotAdmin(admin.ModelAdmin):
     list_display = ('bot_id', 'name',)
+
+
+admin.site.register(VkBot, AbstractBotAdmin)
+admin.site.register(TgBot, AbstractBotAdmin)
 
 
 @admin.register(APIUser)

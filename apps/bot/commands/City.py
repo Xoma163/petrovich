@@ -1,6 +1,6 @@
 from apps.bot.APIs.TimezoneDBAPI import TimezoneDBAPI
 from apps.bot.APIs.YandexGeoAPI import YandexGeoAPI
-from apps.bot.classes.CommonCommand import CommonCommand
+from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.service.models import City as CityModel, TimeZone
 
 

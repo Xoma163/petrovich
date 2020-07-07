@@ -3,7 +3,7 @@ from datetime import datetime
 
 import requests
 
-from apps.bot.classes.CommonMethods import remove_tz
+from apps.bot.classes.common.CommonMethods import remove_tz
 from apps.bot.classes.Consts import DAY_TRANSLATE
 from apps.service.models import Service
 from petrovich.settings import env

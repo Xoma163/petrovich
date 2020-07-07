@@ -10,13 +10,13 @@ from vk_api import VkUpload, VkApi
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 from vk_api.utils import get_random_id
 
-from apps.bot.bots.CommonBot import CommonBot
-from apps.bot.bots.VkUser import VkUser
-from apps.bot.classes.CommonMethods import check_user_group, get_user_groups, tanimoto
 from apps.bot.classes.Consts import Role
-from apps.bot.classes.VkEvent import VkEvent
+from apps.bot.classes.bots.CommonBot import CommonBot
+from apps.bot.classes.bots.VkUser import VkUser
+from apps.bot.classes.common.CommonMethods import check_user_group, get_user_groups, tanimoto
+from apps.bot.classes.events.VkEvent import VkEvent
 from apps.bot.commands.City import add_city_to_db
-from apps.bot.models import VkUser as VkUserModel, VkChat
+from apps.bot.models import VkUser as VkUserModel, VkChat as VkChatModel, VkBot as VkBotModel
 from apps.service.views import append_command_to_statistics
 from petrovich.settings import env
 
@@ -42,14 +42,18 @@ class VkBot(CommonBot, Thread):
         self.DEBUG = False
         self.DEVELOP_DEBUG = False
 
+        self.user_model = VkUserModel
+        self.chat_model = VkChatModel
+        self.bot_model = VkBotModel
+
     def get_user_by_id(self, user_id):
-        vk_user = VkUserModel.objects.filter(user_id=user_id)
+        vk_user = self.user_model.objects.filter(user_id=user_id)
         if len(vk_user) > 0:
             vk_user = vk_user.first()
         else:
             # Прозрачная регистрация
             user = self.vk.users.get(user_id=user_id, lang='ru', fields='sex, bdate, city, screen_name')[0]
-            vk_user = VkUserModel()
+            vk_user = self.user_model()
             vk_user.user_id = user_id
             vk_user.name = user['first_name']
             vk_user.surname = user['last_name']
@@ -80,13 +84,12 @@ class VkBot(CommonBot, Thread):
         return vk_user
         pass
 
-    @staticmethod
-    def get_chat_by_id(chat_id):
-        vk_chat = VkChat.objects.filter(chat_id=chat_id)
+    def get_chat_by_id(self, chat_id):
+        vk_chat = self.chat_model.objects.filter(chat_id=chat_id)
         if len(vk_chat) > 0:
             vk_chat = vk_chat.first()
         else:
-            vk_chat = VkChat(chat_id=chat_id)
+            vk_chat = self.chat_model(chat_id=chat_id)
             vk_chat.save()
         return vk_chat
 
@@ -155,7 +158,7 @@ class VkBot(CommonBot, Thread):
                     f"original_args = {vk_event.original_args}\n"
             self.send_message(vk_event.peer_id, debug_message)
 
-        log_vk_event = {'vk_event': vk_event}
+        log_vk_event = {'event': vk_event}
         logger.debug(log_vk_event)
 
         from apps.bot.initial import get_commands
@@ -249,7 +252,7 @@ class VkBot(CommonBot, Thread):
                     if not self.need_a_response(vk_event):
                         continue
 
-                    # Обработка вложенных сообщений в vk_event['fwd']. reply и fwd для вк это разные вещи.
+                    # Обработка вложенных сообщений в event['fwd']. reply и fwd для вк это разные вещи.
                     if event.message.reply_message:
                         vk_event['fwd'] = [event.message.reply_message]
                     elif len(event.message.fwd_messages) != 0:

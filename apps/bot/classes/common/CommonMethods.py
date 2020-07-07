@@ -154,6 +154,7 @@ def get_attachments_from_attachments_or_fwd(vk_event, _type=None, from_first_fwd
             msgs = vk_event.fwd
         for msg in msgs:
             if msg['attachments']:
+                # ToDo: в зависимости от типа парсить те или иные атачменты
                 fwd_attachments = vk_event.parse_attachments(msg['attachments'])
                 for att in fwd_attachments:
                     if att['type'] in _type:

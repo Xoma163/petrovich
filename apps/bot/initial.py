@@ -2,7 +2,7 @@ import importlib
 import os
 import pkgutil
 
-from apps.bot.classes.CommonCommand import CommonCommand
+from apps.bot.classes.common.CommonCommand import CommonCommand
 from petrovich.settings import BASE_DIR
 
 

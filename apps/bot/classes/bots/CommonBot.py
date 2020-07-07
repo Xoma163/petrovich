@@ -1,6 +1,6 @@
 import threading
 
-from apps.bot.classes.VkEvent import VkEvent
+from apps.bot.classes.events.VkEvent import Event
 
 
 class CommonBot():
@@ -9,6 +9,10 @@ class CommonBot():
         self.BOT_CAN_WORK = True
         self.DEBUG = False
         self.DEVELOP_DEBUG = False
+
+        self.user_model = None
+        self.chat_model = None
+        self.bot_model = None
 
     def run(self):
         self.listen()
@@ -73,7 +77,7 @@ class CommonBot():
 
     @staticmethod
     def have_audio_message(vk_event):
-        if isinstance(vk_event, VkEvent):
+        if isinstance(vk_event, Event):
             all_attachments = vk_event.attachments or []
             if vk_event.fwd:
                 all_attachments += vk_event.fwd[0]['attachments']
@@ -89,7 +93,7 @@ class CommonBot():
                 for attachment in all_attachments:
                     if attachment['type'] == 'audio_message':
                         # Костыль, чтобы при пересланном сообщении он не выполнял никакие другие команды
-                        # vk_event['message']['text'] = ''
+                        # event['message']['text'] = ''
                         return True
         return False
 

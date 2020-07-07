@@ -20,11 +20,11 @@ class DatabaseLogHandler(logging.Handler):
         }
 
         if isinstance(record.msg, dict):
-            if 'vk_event' in record.msg:
-                kwargs['sender'] = record.msg['vk_event'].sender
-                kwargs['chat'] = record.msg['vk_event'].chat
-                kwargs['user_msg'] = record.msg['vk_event'].msg
-                kwargs['vk_event'] = "\n".join(str(record.msg['vk_event']).split(','))
+            if 'event' in record.msg:
+                kwargs['sender'] = record.msg['event'].sender
+                kwargs['chat'] = record.msg['event'].chat
+                kwargs['user_msg'] = record.msg['event'].msg
+                kwargs['event'] = "\n".join(str(record.msg['event']).split(','))
 
                 Logger.objects.create(**kwargs)
             else:
