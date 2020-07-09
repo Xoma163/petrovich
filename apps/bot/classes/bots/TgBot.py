@@ -123,31 +123,29 @@ class TgBot(CommonBot, Thread):
 class MyTgBotLongPoll:
     def __init__(self, token):
         self.token = token
-        self.last_update_id = None
+        self.last_update_id = 1
+        self._get_last_update_id()
+
+    def _get_last_update_id(self):
+        result = requests.get(f'https://api.telegram.org/bot{self.token}/getUpdates')
+        if result.status_code == 200:
+            result = result.json()['result']
+            if len(result) > 0:
+                self.last_update_id = result[-1]['update_id'] + 1
 
     def check(self):
-        result = requests.get(f'https://api.telegram.org/bot{self.token}/getUpdates')
+        result = requests.get(f'https://api.telegram.org/bot{self.token}/getUpdates', {'offset': self.last_update_id})
         if result.status_code != 200:
             return []
         result = result.json()['result']
-        if not self.last_update_id:
-            if len(result) > 0:
-                self.last_update_id = result[-1]['update_id']
-            else:
-                self.last_update_id = 1
-        result = list(filter(lambda x: x['update_id'] > self.last_update_id, result))
-
-        if result:
-            return result
-        else:
-            return []
+        return result
 
     def listen(self):
         while True:
             try:
                 for event in self.check():
                     yield event
-                    self.last_update_id = event['update_id']
+                    self.last_update_id = event['update_id'] + 1
                 time.sleep(0.5)
 
             except Exception as e:
