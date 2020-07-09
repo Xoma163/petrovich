@@ -129,15 +129,8 @@ LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
-        # 'verbose': {
-        #     'format': '%(asctime)s %(name)-12s --> %(funcName)-20s --> %(lineno)-4d  %(levelname)-8s %(message)s',
-        # },
-        # 'simple': {
-        #     'format': '%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
-        # },
         'commands': {
             'format': '%(levelname)-8s %(asctime)-25s %(message)s',
-            # 'datefmt': '%d.%m.%Y %H:%M:%S'
         },
         'commands-console': {
             'format': '%(levelname)-8s %(message)s',
@@ -168,6 +161,16 @@ LOGGING = {
     },
     'loggers': {
         'bot': {
+            'handlers': ['file-debug', 'file-warn', 'console-warn', 'db_log'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'vk_bot': {
+            'handlers': ['file-debug', 'file-warn', 'console-warn', 'db_log'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'tg_bot': {
             'handlers': ['file-debug', 'file-warn', 'console-warn', 'db_log'],
             'level': 'DEBUG',
             'propagate': True,

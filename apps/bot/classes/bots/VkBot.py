@@ -1,7 +1,6 @@
 import json
 import logging
 import threading
-import traceback
 from threading import Thread
 
 import vk_api
@@ -13,14 +12,12 @@ from vk_api.utils import get_random_id
 from apps.bot.classes.Consts import Role
 from apps.bot.classes.bots.CommonBot import CommonBot
 from apps.bot.classes.bots.VkUser import VkUser
-from apps.bot.classes.common.CommonMethods import check_user_group, get_user_groups, tanimoto
 from apps.bot.classes.events.VkEvent import VkEvent
 from apps.bot.commands.City import add_city_to_db
 from apps.bot.models import VkUser as VkUserModel, VkChat as VkChatModel, VkBot as VkBotModel
-from apps.service.views import append_command_to_statistics
 from petrovich.settings import env
 
-logger = logging.getLogger('bot')
+
 
 
 class VkBot(CommonBot, Thread):
@@ -45,6 +42,8 @@ class VkBot(CommonBot, Thread):
         self.user_model = VkUserModel
         self.chat_model = VkChatModel
         self.bot_model = VkBotModel
+
+        self.logger = logging.getLogger('vk_bot')
 
     def get_user_by_id(self, user_id):
         vk_user = self.user_model.objects.filter(user_id=user_id)
@@ -121,113 +120,6 @@ class VkBot(CommonBot, Thread):
             else:
                 print("Ошибка отправки сообщения\n"
                       f"{e}")
-
-    def menu(self, vk_event, send=True):
-
-        # Проверяем не остановлен ли бот, если так, то проверяем вводимая команда = старт?
-        if not self.can_bot_working():
-            if not check_user_group(vk_event.sender, Role.ADMIN):
-                return
-
-            if vk_event.command in ['старт']:
-                self.BOT_CAN_WORK = True
-                # cameraHandler.resume()
-                msg = "Стартуем!"
-                self.send_message(vk_event.peer_id, msg)
-                log_result = {'result': msg}
-                logger.debug(log_result)
-                return msg
-            return
-
-        group = vk_event.sender.groups.filter(name=Role.BANNED.name)
-        if len(group) > 0:
-            return
-
-        if self.DEBUG and send:
-            if hasattr(vk_event, 'payload') and vk_event.payload:
-                debug_message = \
-                    f"msg = {vk_event.msg}\n" \
-                    f"command = {vk_event.command}\n" \
-                    f"args = {vk_event.args}\n" \
-                    f"payload = {vk_event.payload}\n"
-            else:
-                debug_message = \
-                    f"msg = {vk_event.msg}\n" \
-                    f"command = {vk_event.command}\n" \
-                    f"args = {vk_event.args}\n" \
-                    f"original_args = {vk_event.original_args}\n"
-            self.send_message(vk_event.peer_id, debug_message)
-
-        log_vk_event = {'event': vk_event}
-        logger.debug(log_vk_event)
-
-        from apps.bot.initial import get_commands
-        commands = get_commands()
-        for command in commands:
-            try:
-                if command.accept(vk_event):
-                    result = command.__class__().check_and_start(self, vk_event)
-                    if send:
-                        self.parse_and_send_msgs(vk_event.peer_id, result)
-                    append_command_to_statistics(vk_event.command)
-                    log_result = {'result': result}
-                    logger.debug(log_result)
-                    return result
-            except RuntimeWarning as e:
-                msg = str(e)
-                log_runtime_warning = {'result': msg}
-                logger.warning(log_runtime_warning)
-
-                if send:
-                    self.parse_and_send_msgs(vk_event.peer_id, msg)
-                return msg
-            except RuntimeError as e:
-                exception = str(e)
-                log_runtime_error = {'exception': exception, 'result': exception}
-                logger.error(log_runtime_error)
-                if send:
-                    self.parse_and_send_msgs(vk_event.peer_id, exception)
-                return exception
-            except Exception as e:
-                msg = "Непредвиденная ошибка. Сообщите разработчику в группе или команда /баг"
-                tb = traceback.format_exc()
-                log_exception = {
-                    'exception': str(e),
-                    'result': msg
-                }
-                logger.error(log_exception, exc_info=tb)
-                if send:
-                    self.parse_and_send_msgs(vk_event.peer_id, msg)
-                return msg
-
-        if vk_event.chat and not vk_event.chat.need_reaction:
-            return None
-        similar_command = commands[0].names[0]
-        tanimoto_max = 0
-        user_groups = get_user_groups(vk_event.sender)
-        for command in commands:
-            # Выдача пользователю только тех команд, которые ему доступны
-            command_access = command.access
-            if isinstance(command_access, str):
-                command_access = [command_access]
-            if command_access.name not in user_groups:
-                continue
-
-            for name in command.names:
-                if name:
-                    tanimoto_current = tanimoto(vk_event.command, name)
-                    if tanimoto_current > tanimoto_max:
-                        tanimoto_max = tanimoto_current
-                        similar_command = name
-
-        msg = f"Я не понял команды \"{vk_event.command}\"\n"
-        if tanimoto_max != 0:
-            msg += f"Возможно вы имели в виду команду \"{similar_command}\""
-        logger_result = {'result': msg}
-        logger.debug(logger_result)
-        if send:
-            self.send_message(vk_event.peer_id, msg)
-        return msg
 
     def listen(self):
         for event in self.longpoll.listen():

@@ -2,7 +2,7 @@ import logging
 
 from django.db import models
 
-from apps.bot.models import VkUser, VkChat
+from apps.bot.models import VkUser, VkChat, TgChat, TgUser
 
 
 class Logger(models.Model):
@@ -19,10 +19,8 @@ class Logger(models.Model):
     level = models.PositiveSmallIntegerField("Уровень", choices=LOG_LEVELS, default=logging.ERROR, db_index=True)
     create_datetime = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
 
-    vk_event = models.TextField("Запрос пользователя", blank=True, null=True)
+    event = models.TextField("Запрос пользователя", blank=True, null=True)
 
-    sender = models.ForeignKey(VkUser, verbose_name="Пользователь", on_delete=models.SET_NULL, null=True)
-    chat = models.ForeignKey(VkChat, verbose_name="Чат", on_delete=models.SET_NULL, null=True)
     user_msg = models.TextField("Сообщение пользователя", blank=True, null=True)
     msg = models.TextField("Сообщение")
 
@@ -34,9 +32,26 @@ class Logger(models.Model):
         return self.msg
 
     class Meta:
+        abstract = True
         ordering = ('-create_datetime',)
-        verbose_name = "Лог"
-        verbose_name_plural = 'Логи'
+
+
+class VkLogger(Logger):
+    sender = models.ForeignKey(VkUser, verbose_name="Пользователь", on_delete=models.SET_NULL, null=True)
+    chat = models.ForeignKey(VkChat, verbose_name="Чат", on_delete=models.SET_NULL, null=True)
+
+    class Meta:
+        verbose_name = "Лог ВК"
+        verbose_name_plural = 'Логи ВК'
+
+
+class TgLogger(Logger):
+    sender = models.ForeignKey(TgUser, verbose_name="Пользователь", on_delete=models.SET_NULL, null=True)
+    chat = models.ForeignKey(TgChat, verbose_name="Чат", on_delete=models.SET_NULL, null=True)
+
+    class Meta:
+        verbose_name = "Лог ТГ"
+        verbose_name_plural = 'Логи ТГ'
 
 
 class MovementLog(models.Model):

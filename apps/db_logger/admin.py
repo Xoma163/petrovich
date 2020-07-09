@@ -8,10 +8,9 @@ from django.forms import Textarea
 from django.utils.html import format_html
 
 from apps.db_logger.config import DJANGO_DB_LOGGER_ADMIN_LIST_PER_PAGE
-from apps.db_logger.models import Logger, MovementLog
+from apps.db_logger.models import MovementLog, VkLogger, TgLogger
 
 
-@admin.register(Logger)
 class LoggerAdmin(admin.ModelAdmin):
     formfield_overrides = {
         models.TextField: {'widget': Textarea(attrs={'rows': 15, 'cols': 150})},
@@ -42,6 +41,17 @@ class LoggerAdmin(admin.ModelAdmin):
         return instance.create_datetime.strftime('%d.%m.%Y %X')
 
     create_datetime_format.short_description = "Дата создания"
+
+
+@admin.register(TgLogger)
+class TgLoggerAdmin(LoggerAdmin):
+    pass
+
+
+@admin.register(VkLogger)
+class VkLoggerAdmin(LoggerAdmin):
+    pass
+
 
 @admin.register(MovementLog)
 class LogAdmin(admin.ModelAdmin):

@@ -1,11 +1,12 @@
 import json
 import re
 
-from petrovich.settings import VK_URL, env
+from petrovich.settings import env
 
 
 def auto_str(cls):
     def __str__(self):
+        # ToDo: интерполяция
         return '%s(%s)' % (
             type(self).__name__, ', '.join('%s=%s' % item for item in vars(self).items())
         )
@@ -59,7 +60,7 @@ class Event:
         return msg_dict
 
     def parse_attachments(self, vk_attachments):
-       pass
+        pass
 
     def __init__(self, event):
         mentions = env.list('VK_BOT_MENTIONS')

@@ -1,8 +1,7 @@
-from apps.bot.classes.events.Event import Event, auto_str
+from apps.bot.classes.events.Event import Event
 
 
-@auto_str
-class VkEvent(Event):
+class TgEvent(Event):
     def parse_attachments(self, vk_attachments):
         pass
 

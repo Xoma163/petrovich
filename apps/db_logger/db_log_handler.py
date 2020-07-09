@@ -1,13 +1,22 @@
 import logging
 
+from apps.bot.classes.events.Event import Event
+
 db_default_formatter = logging.Formatter()
 
 
 class DatabaseLogHandler(logging.Handler):
     def emit(self, record):
-        from .models import Logger
+        from apps.db_logger.models import TgLogger, VkLogger
 
         traceback = None
+
+        if record.name == 'tg_bot':
+            Logger = TgLogger
+        elif record.name == 'vk_bot':
+            Logger = VkLogger
+        else:
+            return
 
         if record.exc_info:
             traceback = db_default_formatter.formatException(record.exc_info)
@@ -20,23 +29,22 @@ class DatabaseLogHandler(logging.Handler):
         }
 
         if isinstance(record.msg, dict):
-            if 'event' in record.msg:
-                kwargs['sender'] = record.msg['event'].sender
-                kwargs['chat'] = record.msg['event'].chat
-                kwargs['user_msg'] = record.msg['event'].msg
-                kwargs['event'] = "\n".join(str(record.msg['event']).split(','))
-
-                Logger.objects.create(**kwargs)
+            last_log = Logger.objects.first()
+            if not last_log.result:
+                kwargs.update(record.msg)
+                for kwarg in kwargs:
+                    setattr(last_log, kwarg, kwargs[kwarg])
+                last_log.level = record.levelno
+                last_log.save()
             else:
-                last_log = Logger.objects.first()
-                if not last_log.result:
-                    kwargs.update(record.msg)
-                    for kwarg in kwargs:
-                        setattr(last_log, kwarg, kwargs[kwarg])
-                    last_log.level = record.levelno
-                    last_log.save()
-                else:
-                    Logger.objects.create(**kwargs)
+                Logger.objects.create(**kwargs)
+        elif isinstance(record.msg, Event):
+            kwargs['sender'] = record.msg.sender
+            kwargs['chat'] = record.msg.chat
+            kwargs['user_msg'] = record.msg.msg
+            kwargs['event'] = "\n".join(str(record.msg).split(','))
+
+            Logger.objects.create(**kwargs)
         else:
             kwargs['msg'] = record.msg
             Logger.objects.create(**kwargs)
