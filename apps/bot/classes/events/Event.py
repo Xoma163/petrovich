@@ -6,10 +6,8 @@ from petrovich.settings import env
 
 def auto_str(cls):
     def __str__(self):
-        # ToDo: интерполяция
-        return '%s(%s)' % (
-            type(self).__name__, ', '.join('%s=%s' % item for item in vars(self).items())
-        )
+        items_str = ', '.join('%s=%s' % item for item in vars(self).items())
+        return f"{type(self).__name__}({items_str}"
 
     cls.__str__ = __str__
     return cls

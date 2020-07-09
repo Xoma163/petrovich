@@ -19,7 +19,7 @@ class TgRequests:
 
     def get(self, url, params=None, **kwargs):
         url = f'https://api.telegram.org/bot{self.token}/{url}'
-        requests.get(url, params, **kwargs)
+        return requests.get(url, params, **kwargs)
 
 
 class TgBot(CommonBot, Thread):
@@ -28,8 +28,8 @@ class TgBot(CommonBot, Thread):
         Thread.__init__(self)
 
         self.token = env.str("TG_TOKEN")
-        self.longpoll = MyTgBotLongPoll(self.token)
         self.requests = TgRequests(self.token)
+        self.longpoll = MyTgBotLongPoll(self.token, self.requests)
 
         self.user_model = TgUserModel
         self.chat_model = TgChatModel
@@ -121,20 +121,25 @@ class TgBot(CommonBot, Thread):
 
 
 class MyTgBotLongPoll:
-    def __init__(self, token):
+    def __init__(self, token, request=None):
         self.token = token
+        if request is None:
+            self.request = TgRequests(token)
+        else:
+            self.request = request
+
         self.last_update_id = 1
         self._get_last_update_id()
 
     def _get_last_update_id(self):
-        result = requests.get(f'https://api.telegram.org/bot{self.token}/getUpdates')
+        result = self.request.get('getUpdates')
         if result.status_code == 200:
             result = result.json()['result']
             if len(result) > 0:
                 self.last_update_id = result[-1]['update_id'] + 1
 
     def check(self):
-        result = requests.get(f'https://api.telegram.org/bot{self.token}/getUpdates', {'offset': self.last_update_id})
+        result = self.request.get('getUpdates', {'offset': self.last_update_id})
         if result.status_code != 200:
             return []
         result = result.json()['result']
