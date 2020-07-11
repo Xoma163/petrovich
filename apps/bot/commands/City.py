@@ -8,12 +8,11 @@ class City(CommonCommand):
     def __init__(self):
         names = ["город"]
         help_text = "Город - добавляет город в базу или устанавливает город пользователю"
-        detail_help_text = "Город - устанавливает пользователю город, смотря его в профиле\n" \
-                           "Город [название] - устанавливает пользователю город из аргумента\n" \
-                           "Город добавить (название города)\n"
+        detail_help_text = "Город (название) - устанавливает пользователю город\n" \
+                           "Город добавить (название) - добавляет новый город в базу (часовой пояс и координаты устанавливаются автоматически)\n" \
+                           "Город - присылает текущий город пользователя"
         super().__init__(names, help_text, detail_help_text)
 
-    # ToDo: working for TG
     def start(self):
 
         if self.event.args:
@@ -27,7 +26,7 @@ class City(CommonCommand):
                 city_name = self.event.args[0]
                 city = CityModel.objects.filter(synonyms__icontains=city_name).first()
                 if not city:
-                    return "Не нашёл такого города. /город добавить (название города)"
+                    return "Не нашёл такого города. /город добавить (название)"
                 else:
                     self.event.sender.city = city
                     self.event.sender.save()
@@ -35,19 +34,9 @@ class City(CommonCommand):
         else:
             if self.event.sender.city is not None:
                 return f"Ваш город - {self.event.sender.city}"
-            user = self.bot.vk.users.get(user_id=self.event.sender.user_id,
-                                         lang='ru',
-                                         fields='city')[0]
-            if 'city' not in user:
-                return "Город в профиле скрыт или не установлен. Пришлите название в аргументах - /город (название " \
-                       "города)"
-
-            city = CityModel.objects.filter(synonyms__icontains=user['city']['title']).first()
-            if not city:
-                city = add_city_to_db(user['city']['title'])
-            self.event.sender.city = city
-            self.event.sender.save()
-            return f"Изменил город на {city.name}"
+            else:
+                return "Не знаю ваш город.\n" \
+                       "/Город [название] - устанавливает пользователю город "
 
 
 def add_city_to_db(city_name):
