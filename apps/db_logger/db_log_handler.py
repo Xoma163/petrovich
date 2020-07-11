@@ -29,7 +29,7 @@ class DatabaseLogHandler(logging.Handler):
         }
 
         if isinstance(record.msg, dict):
-            last_log = Logger.objects.first()
+            last_log = Logger.objects.last()
             if not last_log.result:
                 kwargs.update(record.msg)
                 for kwarg in kwargs:
