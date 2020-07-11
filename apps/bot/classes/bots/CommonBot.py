@@ -195,7 +195,7 @@ class CommonBot():
                         return True
         else:
             all_attachments = event['message']['attachments'].copy()
-            if event['fwd']:
+            if event['fwd'] and 'attachments' in event['fwd'][0]:
                 all_attachments += event['fwd'][0]['attachments']
             if all_attachments:
                 for attachment in all_attachments:
@@ -256,6 +256,12 @@ class CommonBot():
             raise RuntimeWarning("Пользователь не найден. Возможно опечатка или он мне ещё ни разу не писал")
 
         return user.first()
+
+    def get_chat_by_id(self, chat_id):
+        pass
+
+    def get_bot_by_id(self, bot_id):
+        pass
 
     def get_chat_by_name(self, args):
         if not args:

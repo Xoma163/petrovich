@@ -52,7 +52,12 @@ class AbstractUser(models.Model):
         ordering = ["name", "surname"]
 
     def __str__(self):
-        return f"{self.name} {self.surname}"
+        if self.name and self.surname:
+            return f"{self.name} {self.surname}"
+        elif self.name:
+            return str(self.name)
+        else:
+            return "Незарегистрированный пользователь"
 
 
 class AbstractBot(models.Model):
@@ -64,7 +69,10 @@ class AbstractBot(models.Model):
         ordering = ["id"]
 
     def __str__(self):
-        return self.name
+        if self.name:
+            return self.name
+        else:
+            return self.bot_id
 
 
 class VkChat(AbstractChat):

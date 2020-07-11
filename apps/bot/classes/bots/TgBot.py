@@ -1,6 +1,7 @@
 import logging
 import threading
 import time
+import traceback
 from threading import Thread
 
 import requests
@@ -53,7 +54,7 @@ class TgBot(CommonBot, Thread):
         if len(tg_user) > 0:
             tg_user = tg_user.first()
 
-            if tg_user.name == "Незарегистрированный":
+            if tg_user.name is None:
                 set_fields(tg_user)
         else:
             tg_user = self.user_model()
@@ -69,8 +70,6 @@ class TgBot(CommonBot, Thread):
             # Если пользователь из fwd
             tg_user = self.user_model()
             tg_user.user_id = user_id
-            tg_user.name = "Незарегистрированный"
-            tg_user.surname = "Пользователь"
             tg_user.save()
 
             group_user = Group.objects.get(name=Role.USER.name)
@@ -87,11 +86,31 @@ class TgBot(CommonBot, Thread):
             tg_chat.save()
         return tg_chat
 
+    def get_bot_by_id(self, bot_id):
+        if bot_id > 0:
+            bot_id = -bot_id
+        bot = self.bot_model.objects.filter(bot_id=bot_id)
+        if len(bot) > 0:
+            bot = bot.first()
+        else:
+            # Прозрачная регистрация
+            bot = self.bot_model()
+            bot.bot_id = bot_id
+            bot.save()
+
+        return bot
+
+    def send_photo(self, peer_id, msg, attachments):
+        prepared_photo = {'chat_id': peer_id, 'caption': msg, 'photo': attachments}
+        self.requests.get('sendPhoto', params=prepared_photo)
+
     def send_message(self, peer_id, msg="ᅠ", attachments=None, keyboard=None, dont_parse_links=False, **kwargs):
+        if attachments:
+            self.send_photo(peer_id, msg, attachments)
+            return
         prepared_message = {'chat_id': peer_id, 'text': msg}
         self.requests.get('sendMessage', params=prepared_message)
 
-    # @bot.message_handler()
     def listen(self):
         for event in self.longpoll.listen():
             try:
@@ -102,20 +121,45 @@ class TgBot(CommonBot, Thread):
                     'peer_id': event['message']['chat']['id'],
                     'message': {
                         'id': event['message']['message_id'],
-                        'text': event['message']['text'],
+                        'text': event['message'].get('text', None) or event['message'].get('caption', None) or "",
                         # 'payload': event.message.payload,
                         'attachments': [],
                         'action': None
                     },
-                    'fwd': None
+                    'fwd': None,
                 }
+                # actions
+                if 'new_chat_members' in event['message']:
+                    tg_event['message']['action'] = {
+                        'type': 'chat_invite_user',
+                        'member_ids': [],
+                    }
+                    for member in event['message']['new_chat_members']:
+                        if member['is_bot']:
+                            tg_event['message']['action']['member_ids'].append(-member['id'])
+                        else:
+                            tg_event['message']['action']['member_ids'].append(member['id'])
+                elif 'group_chat_created' in event['message']:
+                    tg_event['message']['action'] = {
+                        'type': 'chat_invite_user',
+                        'member_ids': [-env.int('TG_BOT_GROUP_ID')],
+                    }
+                elif 'left_chat_member' in event['message'] and not event['message']['left_chat_member']['is_bot']:
+                    tg_event['message']['action'] = {
+                        'type': 'chat_kick_user',
+                        'member_id': event['message']['left_chat_member']['id'],
+                    }
+
+                if event['message']['chat']['id'] != event['message']['from']['id']:
+                    tg_event['chat_id'] = -event['message']['chat']['id']
                 if not tg_event['from_user']:
                     tg_event['chat_id'] = event['message']['chat']['id']
                 if 'reply_to_message' in event['message']:
-                    tg_event['fwd'] = {
+                    tg_event['fwd'] = [{
                         'id': event['message']['reply_to_message']['message_id'],
                         'text': event['message']['reply_to_message']['text'],
-                    }
+                        'attachments': event['message'].get('photo', None) or event['message'].get('voice', None)
+                    }]
                 # Игнорим forward
                 if 'forward_from' in event['message']:
                     continue
@@ -124,17 +168,14 @@ class TgBot(CommonBot, Thread):
                     continue
 
                 # Узнаём пользователя
-                # ToDo: проверить что вернёт бот если сообщение отправит чат-бот
-                if tg_event['user_id'] > 0:
+                if tg_event['from_user']:
                     tg_event['sender'] = self.register_user(event['message']['from'])
                 else:
                     self.send_message(tg_event['peer_id'], "Боты не могут общаться с Петровичем :(")
                     continue
 
-                # ToDo: not tested
-                # Узнаём конфу
                 if tg_event['chat_id']:
-                    tg_event['chat'] = self.get_chat_by_id(int(tg_event['peer_id']))
+                    tg_event['chat'] = self.get_chat_by_id(int(tg_event['chat_id']))
                     if tg_event['sender'] and tg_event['chat']:
                         self.add_group_to_user(tg_event['sender'], tg_event['chat'])
                 else:
@@ -144,8 +185,9 @@ class TgBot(CommonBot, Thread):
                 thread = threading.Thread(target=self.menu, args=(tg_event_object,))
                 thread.start()
             except Exception as e:
-                print(e)
-                pass
+                print(str(e))
+                tb = traceback.format_exc()
+                print(tb)
 
 
 class MyTgBotLongPoll:

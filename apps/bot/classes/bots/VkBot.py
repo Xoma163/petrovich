@@ -18,8 +18,6 @@ from apps.bot.models import VkUser as VkUserModel, VkChat as VkChatModel, VkBot 
 from petrovich.settings import env
 
 
-
-
 class VkBot(CommonBot, Thread):
     def __init__(self):
         CommonBot.__init__(self)
@@ -92,6 +90,23 @@ class VkBot(CommonBot, Thread):
             vk_chat.save()
         return vk_chat
 
+    def get_bot_by_id(self, bot_id):
+        if bot_id > 0:
+            bot_id = -bot_id
+        bot = self.bot_model.objects.filter(bot_id=bot_id)
+        if len(bot) > 0:
+            bot = bot.first()
+        else:
+            # Прозрачная регистрация
+            vk_bot = self.vk.groups.getById(group_id=bot_id)[0]
+
+            bot = self.bot_model()
+            bot.bot_id = bot_id
+            bot.name = vk_bot['name']
+            bot.save()
+
+        return bot
+
     def send_message(self, peer_id, msg="ᅠ", attachments=None, keyboard=None, dont_parse_links=False, **kwargs):
         if attachments is None:
             attachments = []
@@ -140,6 +155,10 @@ class VkBot(CommonBot, Thread):
                         },
                         'fwd': None
                     }
+                    # ToDo: VK. Проверить при добавлении пользователя/бота в конфу - что будет.
+                    if vk_event['message'].get('action', None) and vk_event['message']['action']['type'] in [
+                        'chat_invite_user', 'chat_invite_user_by_link']:
+                        vk_event['message']['action']['members_id'] = [vk_event['message']['action'].pop('member_id')]
                     # Сообщение либо мне в лс, либо упоминание меня, либо есть аудиосообщение, либо есть экшн
                     if not self.need_a_response(vk_event):
                         continue
