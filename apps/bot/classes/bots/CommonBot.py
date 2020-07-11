@@ -136,8 +136,7 @@ class CommonBot():
     def send_message(self, peer_id, msg="ᅠ", attachments=None, keyboard=None, dont_parse_links=False, **kwargs):
         pass
 
-    @staticmethod
-    def parse_message(result):
+    def parse_and_send_msgs(self, peer_id, result):
         if isinstance(result, str) or isinstance(result, int) or isinstance(result, float):
             result = {'msg': result}
         if isinstance(result, dict):
@@ -147,11 +146,7 @@ class CommonBot():
                 if isinstance(msg, str):
                     msg = {'msg': msg}
                 if isinstance(msg, dict):
-                    return msg
-
-    def parse_and_send_msgs(self, peer_id, result):
-        msg = self.parse_message(result)
-        self.send_message(peer_id, **msg)
+                    self.send_message(peer_id, **msg)
 
     # Отправляет сообщения юзерам в разных потоках
     def parse_and_send_msgs_thread(self, chat_ids, message):
