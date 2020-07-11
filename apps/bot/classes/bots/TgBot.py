@@ -209,7 +209,7 @@ class MyTgBotLongPoll:
                 self.last_update_id = result[-1]['update_id'] + 1
 
     def check(self):
-        result = self.request.get('getUpdates', {'offset': self.last_update_id})
+        result = self.request.get('getUpdates', {'offset': self.last_update_id, 'timeout': 30})
         if result.status_code != 200:
             return []
         result = result.json()['result']
