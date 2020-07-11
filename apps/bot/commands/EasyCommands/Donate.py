@@ -17,4 +17,6 @@ class Donate(CommonCommand):
             attachment = self.bot.get_attachment_by_id('photo', None, 457243301)
             return {'msg': url, 'attachments': [attachment, url]}
         elif isinstance(self.event, TgEvent):
-            return url
+            return {'msg': url,
+                    'attachments': ['https://coub.com/view/2g7hmu']}
+            # return url

@@ -1,3 +1,4 @@
+import json
 import logging
 import threading
 import time
@@ -100,13 +101,35 @@ class TgBot(CommonBot, Thread):
 
         return bot
 
-    def send_photo(self, peer_id, msg, attachments):
-        prepared_photo = {'chat_id': peer_id, 'caption': msg, 'photo': attachments}
-        self.requests.get('sendPhoto', params=prepared_photo)
+    def send_media_group(self, peer_id, msg, attachments):
+        media = []
+        for attachment in attachments:
+            # ToDo: type photo
+            media.append({'type': 'photo', 'media': attachment, 'caption': msg})
+        self.requests.get('sendMediaGroup', params={
+            'chat_id': peer_id,
+            'media': json.dumps(media)})
+
+    # image (link)
+    def send_photo(self, peer_id, msg, photos):
+        self.requests.get('sendPhoto', params={
+            'chat_id': peer_id,
+            'caption': msg,
+            'photo': photos})
+
+    # gif coub (link)
+    def send_video(self, peer_id, msg, videos):
+        self.requests.get('sendVideo', params={
+            'chat_id': peer_id,
+            'caption': msg,
+            'video': videos})
 
     def send_message(self, peer_id, msg="ᅠ", attachments=None, keyboard=None, dont_parse_links=False, **kwargs):
         if attachments:
-            self.send_photo(peer_id, msg, attachments)
+            if len(attachments) > 1:
+                self.send_media_group(peer_id, msg, attachments)
+            else:
+                self.send_video(peer_id, msg, attachments)
             return
         prepared_message = {'chat_id': peer_id, 'text': msg}
         self.requests.get('sendMessage', params=prepared_message)
@@ -158,7 +181,7 @@ class TgBot(CommonBot, Thread):
                     tg_event['fwd'] = [{
                         'id': event['message']['reply_to_message']['message_id'],
                         'text': event['message']['reply_to_message']['text'],
-                        'attachments': event['message'].get('photo', None) or event['message'].get('voice', None)
+                        'attachments': event['message'].get('photo', []) or event['message'].get('voice', [])
                     }]
                 # Игнорим forward
                 if 'forward_from' in event['message']:
@@ -188,6 +211,16 @@ class TgBot(CommonBot, Thread):
                 print(str(e))
                 tb = traceback.format_exc()
                 print(tb)
+
+    @staticmethod
+    def _prepare_obj_to_upload(file_like_object, allowed_exts_url=None):
+        pass
+
+    def get_attachment_by_id(self, _type, group_id, _id):
+        pass
+
+    def upload_photos(self, images, max_count=10):
+        pass
 
 
 class MyTgBotLongPoll:

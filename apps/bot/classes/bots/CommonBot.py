@@ -1,5 +1,10 @@
+import io
 import threading
 import traceback
+from urllib.parse import urlparse
+
+import requests
+from requests.exceptions import SSLError
 
 from apps.bot.classes.Consts import Role
 from apps.bot.classes.common.CommonMethods import tanimoto, check_user_group, get_user_groups
@@ -278,3 +283,4 @@ class CommonBot():
         if len(vk_chats) == 0:
             raise RuntimeWarning("Чат не найден")
         return vk_chats.first()
+

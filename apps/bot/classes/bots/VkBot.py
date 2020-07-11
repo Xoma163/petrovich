@@ -1,10 +1,15 @@
+import io
 import json
 import logging
+import os
 import threading
 from threading import Thread
 
+import requests
+import urllib3
 import vk_api
 from django.contrib.auth.models import Group
+from requests.exceptions import ReadTimeout, ConnectTimeout
 from vk_api import VkUpload, VkApi
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 from vk_api.utils import get_random_id
@@ -191,6 +196,80 @@ class VkBot(CommonBot, Thread):
                     print('message')
             except:
                 pass
+
+    @staticmethod
+    def _prepare_obj_to_upload(file_like_object, allowed_exts_url=None):
+        # bytes array
+        if isinstance(file_like_object, bytes):
+            obj = io.BytesIO(file_like_object)
+            obj.seek(0)
+        # bytesIO
+        elif isinstance(file_like_object, io.BytesIO):
+            obj = file_like_object
+            obj.seek(0)
+        # url
+        elif urlparse(file_like_object).hostname:
+            if allowed_exts_url:
+                if file_like_object.split('.')[-1].lower() not in allowed_exts_url:
+                    raise RuntimeWarning(f"Загрузка по URL доступна только для {' '.join(allowed_exts_url)}")
+            try:
+                response = requests.get(file_like_object, stream=True, timeout=3)
+            except SSLError:
+                raise RuntimeWarning(f"SSLError")
+            except requests.exceptions.ConnectionError:
+                raise RuntimeWarning(f"ConnectionError")
+            obj = response.raw
+        # path
+        else:
+            obj = file_like_object
+        return obj
+
+    def get_attachment_by_id(self, _type, group_id, _id):
+        if group_id is None:
+            group_id = f'-{self.group_id}'
+        return f"{_type}{group_id}_{_id}"
+
+    def upload_photos(self, images, max_count=10):
+        if not isinstance(images, list):
+            images = [images]
+
+        attachments = []
+        images_to_load = []
+        for image in images:
+            try:
+                image = self._prepare_obj_to_upload(image, ['jpg', 'jpeg', 'png'])
+            except RuntimeWarning:
+                continue
+            except ReadTimeout:
+                continue
+            except ConnectTimeout:
+                continue
+            # Если Content-Length > 50mb
+            bytes_count = None
+            if isinstance(image, io.BytesIO):
+                bytes_count = image.getbuffer().nbytes
+            elif isinstance(image, urllib3.response.HTTPResponse) or isinstance(image,
+                                                                                requests.packages.urllib3.response.HTTPResponse):
+                bytes_count = image.headers.get('Content-Length')
+            elif os.path.exists(image):
+                bytes_count = os.path.getsize(image)
+            else:
+                print("ШТО ТЫ ТАКОЕ", type(image))
+            if not bytes_count:
+                continue
+            if int(bytes_count) / 1024 / 1024 > 50:
+                continue
+            images_to_load.append(image)
+
+            if len(images_to_load) >= max_count:
+                break
+        try:
+            vk_photos = self.upload.photo_messages(images_to_load)
+            for vk_photo in vk_photos:
+                attachments.append(self.get_attachment_by_id('photo', vk_photo['owner_id'], vk_photo['id']))
+        except vk_api.exceptions.ApiError as e:
+            print(e)
+        return attachments
 
 
 class MyVkBotLongPoll(VkBotLongPoll):
