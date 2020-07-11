@@ -14,7 +14,6 @@ class Apologize(CommonCommand):
         phrases = ["Извини", "Нет", "Сам извинись", "за что?", "КАВО", "Ты уверен?"]
         phrase = random_event(phrases)
         self.bot.send_message(self.event.peer_id, phrase)
-        # ToDo: запускать асинхронную таску по отправке сообщения, результат ретёрнить
         if phrase == "Извини":
             if random_probability(25):
                 time.sleep(3)

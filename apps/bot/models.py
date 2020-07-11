@@ -32,8 +32,8 @@ class AbstractUser(models.Model):
     id = models.AutoField(primary_key=True, verbose_name='ID')
 
     user_id = models.CharField(verbose_name='ID пользователя', max_length=20)
-    name = models.CharField(verbose_name='Имя', max_length=40, default="")
-    surname = models.CharField(verbose_name='Фамилия', max_length=40, default="")
+    name = models.CharField(verbose_name='Имя', max_length=40, blank=True, default="")
+    surname = models.CharField(verbose_name='Фамилия', max_length=40, blank=True, default="")
     nickname = models.CharField(verbose_name="Никнейм", max_length=40, blank=True, default="")
     nickname_real = models.CharField(verbose_name="Прозвище", max_length=40, blank=True, default="")
     gender = models.CharField(verbose_name='Пол', max_length=2, blank=True, default="", choices=GENDER_CHOICES)

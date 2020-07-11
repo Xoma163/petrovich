@@ -101,7 +101,6 @@ class CommonCommand:
     # Проверяет роль отправителя
     def check_sender(self, role):
         if check_user_group(self.event.sender, role):
-            # ToDo: проверка на админа в ТГ
             if role == Role.ADMIN:
                 if isinstance(self.event, VkEvent):
                     if self.event.sender.user_id == env.str("VK_ADMIN_ID"):
@@ -133,7 +132,7 @@ class CommonCommand:
 
         error = "Для работы команды требуются аргументы"
         error += f"\n\n{get_help_for_command(self)}"
-        raise RuntimeError(error)
+        raise RuntimeWarning(error)
 
     # Проверяет интовый аргумент в диапазоне
     @staticmethod

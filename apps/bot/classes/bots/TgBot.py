@@ -41,9 +41,10 @@ class TgBot(CommonBot, Thread):
 
     def register_user(self, user):
         def set_fields(_user):
-            _user.name = user['first_name']
-            _user.surname = user['last_name']
-            _user.nickname = user['username']
+            _user.name = user.get('first_name', None)
+            _user.surname = user.get('last_name', None)
+            _user.nickname = user.get('username', None)
+            tg_user.save()
             group_user = Group.objects.get(name=Role.USER.name)
             tg_user.groups.add(group_user)
             tg_user.save()
@@ -93,54 +94,58 @@ class TgBot(CommonBot, Thread):
     # @bot.message_handler()
     def listen(self):
         for event in self.longpoll.listen():
-            tg_event = {
-                'from_user': not event['message']['from']['is_bot'],
-                'user_id': event['message']['from']['id'],
-                'chat_id': None,
-                'peer_id': event['message']['chat']['id'],
-                'message': {
-                    'id': event['message']['message_id'],
-                    'text': event['message']['text'],
-                    # 'payload': event.message.payload,
-                    'attachments': [],
-                    'action': None
-                },
-                'fwd': None
-            }
-            if not tg_event['from_user']:
-                tg_event['chat_id'] = event['message']['chat']['id']
-            if 'reply_to_message' in event['message']:
-                tg_event['fwd'] = {
-                    'id': event['message']['reply_to_message']['message_id'],
-                    'text': event['message']['reply_to_message']['text'],
+            try:
+                tg_event = {
+                    'from_user': not event['message']['from']['is_bot'],
+                    'user_id': event['message']['from']['id'],
+                    'chat_id': None,
+                    'peer_id': event['message']['chat']['id'],
+                    'message': {
+                        'id': event['message']['message_id'],
+                        'text': event['message']['text'],
+                        # 'payload': event.message.payload,
+                        'attachments': [],
+                        'action': None
+                    },
+                    'fwd': None
                 }
-            # Игнорим forward
-            if 'forward_from' in event['message']:
-                continue
+                if not tg_event['from_user']:
+                    tg_event['chat_id'] = event['message']['chat']['id']
+                if 'reply_to_message' in event['message']:
+                    tg_event['fwd'] = {
+                        'id': event['message']['reply_to_message']['message_id'],
+                        'text': event['message']['reply_to_message']['text'],
+                    }
+                # Игнорим forward
+                if 'forward_from' in event['message']:
+                    continue
 
-            if not self.need_a_response(tg_event):
-                continue
+                if not self.need_a_response(tg_event):
+                    continue
 
-            # Узнаём пользователя
-            # ToDo: проверить что вернёт бот если сообщение отправит чат-бот
-            if tg_event['user_id'] > 0:
-                tg_event['sender'] = self.register_user(event['message']['from'])
-            else:
-                self.send_message(tg_event['peer_id'], "Боты не могут общаться с Петровичем :(")
-                continue
+                # Узнаём пользователя
+                # ToDo: проверить что вернёт бот если сообщение отправит чат-бот
+                if tg_event['user_id'] > 0:
+                    tg_event['sender'] = self.register_user(event['message']['from'])
+                else:
+                    self.send_message(tg_event['peer_id'], "Боты не могут общаться с Петровичем :(")
+                    continue
 
-            # ToDo: not tested
-            # Узнаём конфу
-            if tg_event['chat_id']:
-                tg_event['chat'] = self.get_chat_by_id(int(tg_event['peer_id']))
-                if tg_event['sender'] and tg_event['chat']:
-                    self.add_group_to_user(tg_event['sender'], tg_event['chat'])
-            else:
-                tg_event['chat'] = None
+                # ToDo: not tested
+                # Узнаём конфу
+                if tg_event['chat_id']:
+                    tg_event['chat'] = self.get_chat_by_id(int(tg_event['peer_id']))
+                    if tg_event['sender'] and tg_event['chat']:
+                        self.add_group_to_user(tg_event['sender'], tg_event['chat'])
+                else:
+                    tg_event['chat'] = None
 
-            tg_event_object = TgEvent(tg_event)
-            thread = threading.Thread(target=self.menu, args=(tg_event_object,))
-            thread.start()
+                tg_event_object = TgEvent(tg_event)
+                thread = threading.Thread(target=self.menu, args=(tg_event_object,))
+                thread.start()
+            except Exception as e:
+                print(e)
+                pass
 
 
 class MyTgBotLongPoll:
