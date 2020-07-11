@@ -13,30 +13,31 @@ class City(CommonCommand):
                            "Город добавить (название города)\n"
         super().__init__(names, help_text, detail_help_text)
 
+    # ToDo: working for TG
     def start(self):
 
-        if self.vk_event.args:
-            if self.vk_event.args[0] == 'добавить':
+        if self.event.args:
+            if self.event.args[0] == 'добавить':
                 self.check_args(2)
-                city_name = self.vk_event.args[1:len(self.vk_event.args)]
+                city_name = self.event.args[1:len(self.event.args)]
                 city_name = " ".join(city_name)
                 city = add_city_to_db(city_name)
                 return f"Добавил новый город - {city.name}"
             else:
-                city_name = self.vk_event.args[0]
+                city_name = self.event.args[0]
                 city = CityModel.objects.filter(synonyms__icontains=city_name).first()
                 if not city:
                     return "Не нашёл такого города. /город добавить (название города)"
                 else:
-                    self.vk_event.sender.city = city
-                    self.vk_event.sender.save()
+                    self.event.sender.city = city
+                    self.event.sender.save()
                     return f"Изменил город на {city.name}"
         else:
-            if self.vk_event.sender.city is not None:
-                return f"Ваш город - {self.vk_event.sender.city}"
-            user = self.vk_bot.vk.users.get(user_id=self.vk_event.sender.user_id,
-                                            lang='ru',
-                                            fields='city')[0]
+            if self.event.sender.city is not None:
+                return f"Ваш город - {self.event.sender.city}"
+            user = self.bot.vk.users.get(user_id=self.event.sender.user_id,
+                                         lang='ru',
+                                         fields='city')[0]
             if 'city' not in user:
                 return "Город в профиле скрыт или не установлен. Пришлите название в аргументах - /город (название " \
                        "города)"
@@ -44,8 +45,8 @@ class City(CommonCommand):
             city = CityModel.objects.filter(synonyms__icontains=user['city']['title']).first()
             if not city:
                 city = add_city_to_db(user['city']['title'])
-            self.vk_event.sender.city = city
-            self.vk_event.sender.save()
+            self.event.sender.city = city
+            self.event.sender.save()
             return f"Изменил город на {city.name}"
 
 

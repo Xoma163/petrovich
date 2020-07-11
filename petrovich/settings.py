@@ -160,11 +160,6 @@ LOGGING = {
         },
     },
     'loggers': {
-        'bot': {
-            'handlers': ['file-debug', 'file-warn', 'console-warn', 'db_log'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
         'vk_bot': {
             'handlers': ['file-debug', 'file-warn', 'console-warn', 'db_log'],
             'level': 'DEBUG',

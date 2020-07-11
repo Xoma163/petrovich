@@ -8,8 +8,8 @@ tg_bot = TgBot()
 
 
 def start_vk(debug=False):
-    # vk_bot.DEVELOP_DEBUG = debug
-    # vk_bot.start()
+    # bot.DEVELOP_DEBUG = debug
+    # bot.start()
     # print('start vk')
     pass
 

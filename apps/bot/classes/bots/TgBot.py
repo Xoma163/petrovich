@@ -35,19 +35,41 @@ class TgBot(CommonBot, Thread):
         self.chat_model = TgChatModel
         self.bot_model = TgBotModel
 
+        # self.tg_user = TgUser()
+
         self.logger = logging.getLogger('tg_bot')
 
-    def get_user_by_id(self, user_id, user):
+    def register_user(self, user):
+        def set_fields(_user):
+            _user.name = user['first_name']
+            _user.surname = user['last_name']
+            _user.nickname = user['username']
+            group_user = Group.objects.get(name=Role.USER.name)
+            tg_user.groups.add(group_user)
+            tg_user.save()
+
+        tg_user = self.user_model.objects.filter(user_id=user['id'])
+        if len(tg_user) > 0:
+            tg_user = tg_user.first()
+
+            if tg_user.name == "Незарегистрированный":
+                set_fields(tg_user)
+        else:
+            tg_user = self.user_model()
+            tg_user.user_id = user['id']
+            set_fields(tg_user)
+        return tg_user
+
+    def get_user_by_id(self, user_id):
         tg_user = self.user_model.objects.filter(user_id=user_id)
         if len(tg_user) > 0:
             tg_user = tg_user.first()
         else:
-            # Прозрачная регистрация
+            # Если пользователь из fwd
             tg_user = self.user_model()
-            tg_user.user_id = user['id']
-            tg_user.name = user['first_name']
-            tg_user.surname = user['last_name']
-            tg_user.nickname = user['username']
+            tg_user.user_id = user_id
+            tg_user.name = "Незарегистрированный"
+            tg_user.surname = "Пользователь"
             tg_user.save()
 
             group_user = Group.objects.get(name=Role.USER.name)
@@ -100,8 +122,9 @@ class TgBot(CommonBot, Thread):
                 continue
 
             # Узнаём пользователя
+            # ToDo: проверить что вернёт бот если сообщение отправит чат-бот
             if tg_event['user_id'] > 0:
-                tg_event['sender'] = self.get_user_by_id(tg_event['user_id'], event['message']['from'])
+                tg_event['sender'] = self.register_user(event['message']['from'])
             else:
                 self.send_message(tg_event['peer_id'], "Боты не могут общаться с Петровичем :(")
                 continue

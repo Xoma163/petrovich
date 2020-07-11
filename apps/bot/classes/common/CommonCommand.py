@@ -1,7 +1,9 @@
 from datetime import datetime
 
-from apps.bot.classes.common.CommonMethods import check_user_group, get_help_for_command, remove_tz
 from apps.bot.classes.Consts import Role
+from apps.bot.classes.common.CommonMethods import check_user_group, get_help_for_command, remove_tz
+from apps.bot.classes.events.TgEvent import TgEvent
+from apps.bot.classes.events.VkEvent import VkEvent
 from apps.service.models import Service
 from petrovich.settings import env
 
@@ -55,20 +57,20 @@ class CommonCommand:
         self.enabled = enabled
         self.priority = priority
 
-        self.vk_bot = None
-        self.vk_event = None
+        self.bot = None
+        self.event = None
 
     # Метод, определяющий на что среагирует команда
-    def accept(self, vk_event):
-        if vk_event.command in self.names:
+    def accept(self, event):
+        if event.command in self.names:
             return True
 
         return False
 
     # Выполнение всех проверок и старт команды
-    def check_and_start(self, vk_bot, vk_event):
-        self.vk_bot = vk_bot
-        self.vk_event = vk_event
+    def check_and_start(self, bot, event):
+        self.bot = bot
+        self.event = event
 
         self.checks()
         return self.start()
@@ -98,16 +100,21 @@ class CommonCommand:
 
     # Проверяет роль отправителя
     def check_sender(self, role):
-        if check_user_group(self.vk_event.sender, role):
+        if check_user_group(self.event.sender, role):
+            # ToDo: проверка на админа в ТГ
             if role == Role.ADMIN:
-                if self.vk_event.sender.user_id == env.str("VK_ADMIN_ID"):
-                    return True
+                if isinstance(self.event, VkEvent):
+                    if self.event.sender.user_id == env.str("VK_ADMIN_ID"):
+                        return True
+                elif isinstance(self.event, TgEvent):
+                    if self.event.sender.user_id == env.str("TG_ADMIN_ID"):
+                        return True
                 else:
                     print("Попытка доступа под админом не с моего id O_o")
             else:
                 return True
         if role == Role.CONFERENCE_ADMIN:
-            if self.vk_event.chat.admin == self.vk_event.sender:
+            if self.event.chat.admin == self.event.sender:
                 return True
         error = f"Команда доступна только для пользователей с уровнем прав {role.value}"
         raise RuntimeError(error)
@@ -116,8 +123,8 @@ class CommonCommand:
     def check_args(self, args=None):
         if args is None:
             args = self.args
-        if self.vk_event.args:
-            if len(self.vk_event.args) >= args:
+        if self.event.args:
+            if len(self.event.args) >= args:
                 return True
             else:
                 error = "Передано недостаточно аргументов"
@@ -161,15 +168,15 @@ class CommonCommand:
 
     # Парсит аргументы в тип int
     def parse_int(self):
-        if not self.vk_event.args:
+        if not self.event.args:
             return True
         for checked_arg_index in self.int_args:
-            if len(self.vk_event.args) - 1 >= checked_arg_index:
-                if isinstance(self.vk_event.args[checked_arg_index], int):
+            if len(self.event.args) - 1 >= checked_arg_index:
+                if isinstance(self.event.args[checked_arg_index], int):
                     continue
                 try:
-                    self.vk_event.args[checked_arg_index] = self._transform_k(self.vk_event.args[checked_arg_index])
-                    self.vk_event.args[checked_arg_index] = int(self.vk_event.args[checked_arg_index])
+                    self.event.args[checked_arg_index] = self._transform_k(self.event.args[checked_arg_index])
+                    self.event.args[checked_arg_index] = int(self.event.args[checked_arg_index])
                 except ValueError:
                     error = "Аргумент должен быть целочисленным"
                     raise RuntimeError(error)
@@ -177,15 +184,15 @@ class CommonCommand:
 
     # Парсит аргументы в тип float
     def parse_float(self):
-        if not self.vk_event.args:
+        if not self.event.args:
             return True
         for checked_arg_index in self.float_args:
-            if len(self.vk_event.args) - 1 >= checked_arg_index:
-                if isinstance(self.vk_event.args[checked_arg_index], float):
+            if len(self.event.args) - 1 >= checked_arg_index:
+                if isinstance(self.event.args[checked_arg_index], float):
                     continue
                 try:
-                    self.vk_event.args[checked_arg_index] = self._transform_k(self.vk_event.args[checked_arg_index])
-                    self.vk_event.args[checked_arg_index] = float(self.vk_event.args[checked_arg_index])
+                    self.event.args[checked_arg_index] = self._transform_k(self.event.args[checked_arg_index])
+                    self.event.args[checked_arg_index] = float(self.event.args[checked_arg_index])
                 except ValueError:
                     error = "Аргумент должен быть с плавающей запятой"
                     raise RuntimeError(error)
@@ -193,7 +200,7 @@ class CommonCommand:
 
     # Проверяет, прислано ли сообщение в лс
     def check_pm(self):
-        if self.vk_event.from_user:
+        if self.event.from_user:
             return True
 
         error = "Команда работает только в ЛС"
@@ -201,7 +208,7 @@ class CommonCommand:
 
     # Проверяет, прислано ли пересланное сообщение
     def check_fwd(self):
-        if self.vk_event.fwd:
+        if self.event.fwd:
             return True
 
         error = "Перешлите сообщения"
@@ -209,7 +216,7 @@ class CommonCommand:
 
     # Проверяет, прислано ли сообщение в чат
     def check_conversation(self):
-        if self.vk_event.from_chat:
+        if self.event.from_chat:
             return True
 
         error = "Команда работает только в беседах"
@@ -233,21 +240,21 @@ class CommonCommand:
     # Проверяет, прислано ли сообщение через API
     def check_api(self):
         # Если запрос пришёл через api
-        if self.vk_event.from_api:
+        if self.event.from_api:
             if self.api == False:
                 error = "Команда недоступна для API"
                 raise RuntimeError(error)
 
-        if not self.vk_event.from_api:
+        if not self.event.from_api:
             if self.api:
-                error = "Команда недоступна для VK"
+                error = "Команда недоступна для VK/TG"
                 raise RuntimeError(error)
 
         return True
 
     # ToDo: check on types
     def check_attachments(self, types=None):
-        if self.vk_event.attachments:
+        if self.event.attachments:
             if types:
                 pass
             return True
