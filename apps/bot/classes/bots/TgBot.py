@@ -1,9 +1,11 @@
 import json
 import logging
+import os
 import threading
 import time
 import traceback
 from threading import Thread
+from urllib.parse import urlparse
 
 import requests
 from django.contrib.auth.models import Group
@@ -22,6 +24,10 @@ class TgRequests:
     def get(self, url, params=None, **kwargs):
         url = f'https://api.telegram.org/bot{self.token}/{url}'
         return requests.get(url, params, **kwargs)
+
+    def post(self, url, params=None, **kwargs):
+        url = f'https://api.telegram.org/bot{self.token}/{url}'
+        return requests.post(url, params, **kwargs)
 
 
 class TgBot(CommonBot, Thread):
@@ -101,37 +107,37 @@ class TgBot(CommonBot, Thread):
 
         return bot
 
-    def send_media_group(self, peer_id, msg, attachments):
+    # URL Only. Bytes not supported
+    def _send_media_group(self, peer_id, msg, attachments):
         media = []
         for attachment in attachments:
-            # ToDo: type photo
-            media.append({'type': 'photo', 'media': attachment, 'caption': msg})
-        self.requests.get('sendMediaGroup', params={
-            'chat_id': peer_id,
-            'media': json.dumps(media)})
+            media.append({'type': attachment['type'], 'media': attachment['attachment'], 'caption': msg})
+        self.requests.get('sendMediaGroup', {'chat_id': peer_id, 'media': json.dumps(media)})
 
-    # image (link)
-    def send_photo(self, peer_id, msg, photos):
-        self.requests.get('sendPhoto', params={
-            'chat_id': peer_id,
-            'caption': msg,
-            'photo': photos})
+    def _send_photo(self, peer_id, msg, photo):
+        if isinstance(photo, str) and urlparse(photo).hostname:
+            self.requests.get('sendPhoto', {'chat_id': peer_id, 'caption': msg, 'photo': photo})
+        else:
+            self.requests.get('sendPhoto', {'chat_id': peer_id, 'caption': msg}, files={'photo': photo})
 
-    # gif coub (link)
-    def send_video(self, peer_id, msg, videos):
-        self.requests.get('sendVideo', params={
-            'chat_id': peer_id,
-            'caption': msg,
-            'video': videos})
+    def _send_video(self, peer_id, msg, video):
+        if isinstance(video, str) and urlparse(video).hostname:
+            self.requests.get('sendVideo', params={'chat_id': peer_id, 'caption': msg, 'video': video})
+        else:
+            self.requests.get('sendVideo', params={'chat_id': peer_id, 'caption': msg}, files={'video': video})
 
     def send_message(self, peer_id, msg="ᅠ", attachments=None, keyboard=None, dont_parse_links=False, **kwargs):
         if attachments:
+            # Убираем все ссылки, потому что телега в них не умеет похоже
+            attachments = list(filter(lambda x: not (isinstance(x, str) and urlparse(x).hostname), attachments))
             if len(attachments) > 1:
-                self.send_media_group(peer_id, msg, attachments)
-            else:
-                self.send_video(peer_id, msg, attachments)
+                self._send_media_group(peer_id, msg, attachments)
+            elif attachments[0]['type'] == 'video':
+                self._send_video(peer_id, msg, attachments[0]['attachment'])
+            elif attachments[0]['type'] == 'photo':
+                self._send_photo(peer_id, msg, attachments[0]['attachment'])
             return
-        prepared_message = {'chat_id': peer_id, 'text': msg}
+        prepared_message = {'chat_id': peer_id, 'text': msg, 'parse_mode': 'HTML'}
         self.requests.get('sendMessage', params=prepared_message)
 
     def listen(self):
@@ -213,14 +219,31 @@ class TgBot(CommonBot, Thread):
                 print(tb)
 
     @staticmethod
+    # ToDo:
     def _prepare_obj_to_upload(file_like_object, allowed_exts_url=None):
-        pass
+        # url
+        if urlparse(file_like_object).hostname:
+            return file_like_object
+            # path
+        if os.path.exists(file_like_object):
+            with open(file_like_object, 'rb') as file:
+                file_like_object = file.read()
+                return file_like_object
+        return None
 
     def get_attachment_by_id(self, _type, group_id, _id):
         pass
 
     def upload_photos(self, images, max_count=10):
-        pass
+        if not isinstance(images, list):
+            images = [images]
+        images_list = []
+        for image in images:
+            images_list.append({'type': 'photo', 'attachment': self._prepare_obj_to_upload(image)})
+        return images_list
+
+    def upload_document(self, document, peer_id=None, title='Документ'):
+        return {'type': 'video', 'attachment': document}
 
 
 class MyTgBotLongPoll:

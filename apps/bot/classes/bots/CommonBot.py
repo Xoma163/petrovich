@@ -1,10 +1,5 @@
-import io
 import threading
 import traceback
-from urllib.parse import urlparse
-
-import requests
-from requests.exceptions import SSLError
 
 from apps.bot.classes.Consts import Role
 from apps.bot.classes.common.CommonMethods import tanimoto, check_user_group, get_user_groups
@@ -284,3 +279,8 @@ class CommonBot():
             raise RuntimeWarning("Чат не найден")
         return vk_chats.first()
 
+    def upload_document(self, document, peer_id=None, title='Документ'):
+        pass
+
+    def upload_photos(self, images, max_count=10):
+        pass

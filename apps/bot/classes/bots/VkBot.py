@@ -4,12 +4,13 @@ import logging
 import os
 import threading
 from threading import Thread
+from urllib.parse import urlparse
 
 import requests
 import urllib3
 import vk_api
 from django.contrib.auth.models import Group
-from requests.exceptions import ReadTimeout, ConnectTimeout
+from requests.exceptions import ReadTimeout, ConnectTimeout, SSLError
 from vk_api import VkUpload, VkApi
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 from vk_api.utils import get_random_id
@@ -270,6 +271,11 @@ class VkBot(CommonBot, Thread):
         except vk_api.exceptions.ApiError as e:
             print(e)
         return attachments
+
+    def upload_document(self, document, peer_id=None, title='Документ'):
+        document = self._prepare_obj_to_upload(document)
+        vk_document = self.upload.document_message(document, title=title, peer_id=peer_id)['doc']
+        return self.get_attachment_by_id('doc', vk_document['owner_id'], vk_document['id'])
 
 
 class MyVkBotLongPoll(VkBotLongPoll):
