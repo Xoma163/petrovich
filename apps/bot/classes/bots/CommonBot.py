@@ -21,6 +21,15 @@ class CommonBot():
 
         self.logger = None
 
+    def get_user_by_id(self, user_id):
+        pass
+
+    def get_chat_by_id(self, chat_id):
+        pass
+
+    def get_bot_by_id(self, bot_id):
+        pass
+
     def run(self):
         self.listen()
 
@@ -177,13 +186,6 @@ class CommonBot():
                 return True
         return False
 
-    # def get_user_by_id(self, user_id):
-    #     pass
-    #
-    # @staticmethod
-    # def get_chat_by_id(chat_id):
-    #     pass
-
     @staticmethod
     def have_audio_message(event):
         if isinstance(event, Event):
@@ -257,12 +259,6 @@ class CommonBot():
             raise RuntimeWarning("Пользователь не найден. Возможно опечатка или он мне ещё ни разу не писал")
 
         return user.first()
-
-    def get_chat_by_id(self, chat_id):
-        pass
-
-    def get_bot_by_id(self, bot_id):
-        pass
 
     def get_chat_by_name(self, args):
         if not args:

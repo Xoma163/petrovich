@@ -227,7 +227,6 @@ class TgBot(CommonBot, Thread):
                 print(tb)
 
     @staticmethod
-    # ToDo:
     def _prepare_obj_to_upload(file_like_object, allowed_exts_url=None):
         # url
         if isinstance(file_like_object, str) and urlparse(file_like_object).hostname:
@@ -241,6 +240,7 @@ class TgBot(CommonBot, Thread):
             file_like_object.seek(0)
             return file_like_object.read()
 
+    # ToDo: remove
     def get_attachment_by_id(self, _type, group_id, _id):
         pass
 

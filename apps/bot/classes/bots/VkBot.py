@@ -21,7 +21,7 @@ from apps.bot.classes.bots.VkUser import VkUser
 from apps.bot.classes.events.VkEvent import VkEvent
 from apps.bot.commands.City import add_city_to_db
 from apps.bot.models import VkUser as VkUserModel, VkChat as VkChatModel, VkBot as VkBotModel
-from apps.db_logger.models import TgLogger, VkLogger
+from apps.db_logger.models import VkLogger
 from petrovich.settings import env
 
 
@@ -30,25 +30,19 @@ class VkBot(CommonBot, Thread):
         CommonBot.__init__(self)
         Thread.__init__(self)
 
-        self._TOKEN = env.str('VK_BOT_TOKEN')
+        self.token = env.str('VK_BOT_TOKEN')
         self.group_id = env.str('VK_BOT_GROUP_ID')
-        vk_session = VkApi(token=self._TOKEN, api_version="5.107", config_filename="secrets/vk_bot_config.json")
+        vk_session = VkApi(token=self.token, api_version="5.107", config_filename="secrets/vk_bot_config.json")
         self.longpoll = MyVkBotLongPoll(vk_session, group_id=self.group_id)
         self.upload = VkUpload(vk_session)
         self.vk = vk_session.get_api()
-        self.mentions = env.list('VK_BOT_MENTIONS')
 
         self.vk_user = VkUser()
-
-        self.BOT_CAN_WORK = True
-        self.DEBUG = False
-        self.DEVELOP_DEBUG = False
 
         self.user_model = VkUserModel
         self.chat_model = VkChatModel
         self.bot_model = VkBotModel
         self.log_model = VkLogger
-
 
         self.logger = logging.getLogger('vk_bot')
 
@@ -137,7 +131,7 @@ class VkBot(CommonBot, Thread):
         try:
             self.vk.messages.send(peer_id=peer_id,
                                   message=msg,
-                                  access_token=self._TOKEN,
+                                  access_token=self.token,
                                   random_id=get_random_id(),
                                   attachment=','.join(attachments),
                                   keyboard=keyboard,
