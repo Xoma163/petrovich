@@ -2,7 +2,6 @@ import os
 from tempfile import NamedTemporaryFile
 from urllib.request import urlopen
 
-from django.conf.global_settings import MEDIA_ROOT
 from django.contrib.postgres.fields import JSONField
 from django.core.files import File
 from django.db import models
@@ -13,6 +12,9 @@ from apps.bot.models import VkChat, VkUser, VkBot
 
 
 # Create your models here.
+from petrovich.settings import MEDIA_ROOT
+
+
 class TimeZone(models.Model):
     name = models.CharField(verbose_name="Временная зона UTC", null=True, max_length=30)
 

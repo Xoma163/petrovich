@@ -21,6 +21,7 @@ from apps.bot.classes.bots.VkUser import VkUser
 from apps.bot.classes.events.VkEvent import VkEvent
 from apps.bot.commands.City import add_city_to_db
 from apps.bot.models import VkUser as VkUserModel, VkChat as VkChatModel, VkBot as VkBotModel
+from apps.db_logger.models import TgLogger, VkLogger
 from petrovich.settings import env
 
 
@@ -46,8 +47,15 @@ class VkBot(CommonBot, Thread):
         self.user_model = VkUserModel
         self.chat_model = VkChatModel
         self.bot_model = VkBotModel
+        self.log_model = VkLogger
+
 
         self.logger = logging.getLogger('vk_bot')
+
+    def set_activity(self, peer_id, activity='typing'):
+        if activity not in ['typing', 'audiomessage']:
+            raise RuntimeWarning("Не знаю такого типа активности")
+        self.vk.messages.setActivity(type=activity, peer_id=peer_id, group_id=self.group_id)
 
     def get_user_by_id(self, user_id):
         vk_user = self.user_model.objects.filter(user_id=user_id)

@@ -4,6 +4,7 @@ import os
 import threading
 import time
 import traceback
+from io import BytesIO
 from threading import Thread
 from urllib.parse import urlparse
 
@@ -14,6 +15,7 @@ from apps.bot.classes.Consts import Role
 from apps.bot.classes.bots.CommonBot import CommonBot
 from apps.bot.classes.events.TgEvent import TgEvent
 from apps.bot.models import TgUser as TgUserModel, TgChat as TgChatModel, TgBot as TgBotModel
+from apps.db_logger.models import TgLogger
 from petrovich.settings import env
 
 
@@ -42,10 +44,15 @@ class TgBot(CommonBot, Thread):
         self.user_model = TgUserModel
         self.chat_model = TgChatModel
         self.bot_model = TgBotModel
-
+        self.log_model = TgLogger
         # self.tg_user = TgUser()
 
         self.logger = logging.getLogger('tg_bot')
+
+    def set_activity(self, peer_id, activity='typing'):
+        if activity not in ['typing', 'audiomessage']:
+            raise RuntimeWarning("Не знаю такого типа активности")
+        self.requests.get('sendChatAction', {'chat_id': peer_id, 'action': activity})
 
     def register_user(self, user):
         def set_fields(_user):
@@ -126,16 +133,17 @@ class TgBot(CommonBot, Thread):
         else:
             self.requests.get('sendVideo', params={'chat_id': peer_id, 'caption': msg}, files={'video': video})
 
-    def send_message(self, peer_id, msg="ᅠ", attachments=None, keyboard=None, dont_parse_links=False, **kwargs):
+    def send_message(self, peer_id, msg='', attachments=None, keyboard=None, dont_parse_links=False, **kwargs):
         if attachments:
             # Убираем все ссылки, потому что телега в них не умеет похоже
             attachments = list(filter(lambda x: not (isinstance(x, str) and urlparse(x).hostname), attachments))
-            if len(attachments) > 1:
-                self._send_media_group(peer_id, msg, attachments)
-            elif attachments[0]['type'] == 'video':
-                self._send_video(peer_id, msg, attachments[0]['attachment'])
-            elif attachments[0]['type'] == 'photo':
-                self._send_photo(peer_id, msg, attachments[0]['attachment'])
+            if attachments:
+                if len(attachments) > 1:
+                    self._send_media_group(peer_id, msg, attachments)
+                elif attachments[0]['type'] == 'video':
+                    self._send_video(peer_id, msg, attachments[0]['attachment'])
+                elif attachments[0]['type'] == 'photo':
+                    self._send_photo(peer_id, msg, attachments[0]['attachment'])
             return
         prepared_message = {'chat_id': peer_id, 'text': msg, 'parse_mode': 'HTML'}
         self.requests.get('sendMessage', params=prepared_message)
@@ -222,14 +230,16 @@ class TgBot(CommonBot, Thread):
     # ToDo:
     def _prepare_obj_to_upload(file_like_object, allowed_exts_url=None):
         # url
-        if urlparse(file_like_object).hostname:
+        if isinstance(file_like_object, str) and urlparse(file_like_object).hostname:
             return file_like_object
             # path
-        if os.path.exists(file_like_object):
+        if isinstance(file_like_object, str) and os.path.exists(file_like_object):
             with open(file_like_object, 'rb') as file:
                 file_like_object = file.read()
                 return file_like_object
-        return None
+        if isinstance(file_like_object, BytesIO):
+            file_like_object.seek(0)
+            return file_like_object.read()
 
     def get_attachment_by_id(self, _type, group_id, _id):
         pass

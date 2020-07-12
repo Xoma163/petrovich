@@ -6,11 +6,11 @@ import re
 import pytz
 # Вероятность события в процентах
 from PIL import Image, ImageDraw, ImageFont
-from django.conf.global_settings import STATIC_ROOT
 from django.core.management import get_commands
 
 from apps.bot.classes.Consts import Role
 from apps.bot.models import VkChat
+from petrovich.settings import STATIC_ROOT
 
 
 def random_probability(probability):

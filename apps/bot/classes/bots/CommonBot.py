@@ -17,6 +17,7 @@ class CommonBot():
         self.user_model = None
         self.chat_model = None
         self.bot_model = None
+        self.log_model = None
 
         self.logger = None
 
