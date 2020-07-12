@@ -139,14 +139,13 @@ class TgBot(CommonBot, Thread):
             attachments = list(filter(lambda x: not (isinstance(x, str) and urlparse(x).hostname), attachments))
             if attachments:
                 if len(attachments) > 1:
-                    self._send_media_group(peer_id, msg, attachments)
+                    return self._send_media_group(peer_id, msg, attachments)
                 elif attachments[0]['type'] == 'video':
-                    self._send_video(peer_id, msg, attachments[0]['attachment'])
+                    return self._send_video(peer_id, msg, attachments[0]['attachment'])
                 elif attachments[0]['type'] == 'photo':
-                    self._send_photo(peer_id, msg, attachments[0]['attachment'])
-            return
+                    return self._send_photo(peer_id, msg, attachments[0]['attachment'])
         prepared_message = {'chat_id': peer_id, 'text': msg, 'parse_mode': 'HTML'}
-        self.requests.get('sendMessage', params=prepared_message)
+        return self.requests.get('sendMessage', params=prepared_message)
 
     def listen(self):
         for event in self.longpoll.listen():
@@ -231,7 +230,9 @@ class TgBot(CommonBot, Thread):
         # url
         if isinstance(file_like_object, str) and urlparse(file_like_object).hostname:
             return file_like_object
-            # path
+        if isinstance(file_like_object, bytes):
+            return file_like_object
+        # path
         if isinstance(file_like_object, str) and os.path.exists(file_like_object):
             with open(file_like_object, 'rb') as file:
                 file_like_object = file.read()
@@ -239,10 +240,7 @@ class TgBot(CommonBot, Thread):
         if isinstance(file_like_object, BytesIO):
             file_like_object.seek(0)
             return file_like_object.read()
-
-    # ToDo: remove
-    def get_attachment_by_id(self, _type, group_id, _id):
-        pass
+        return None
 
     def upload_photos(self, images, max_count=10):
         if not isinstance(images, list):
@@ -253,7 +251,7 @@ class TgBot(CommonBot, Thread):
         return images_list
 
     def upload_document(self, document, peer_id=None, title='Документ'):
-        return {'type': 'video', 'attachment': document}
+        return {'type': 'video', 'attachment': self._prepare_obj_to_upload(document)}
 
 
 class MyTgBotLongPoll:

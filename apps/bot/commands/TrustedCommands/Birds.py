@@ -1,7 +1,8 @@
 from apps.bot.classes.Consts import Role
+from apps.bot.classes.bots.VkBot import VkBot
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import get_inline_keyboard
-from apps.bot.commands.TrustedCommands.Start import cameraHandler
+from apps.bot.management.commands.start import camera_handler
 
 
 class Birds(CommonCommand):
@@ -19,7 +20,7 @@ class Birds(CommonCommand):
         self.bot.set_activity(self.event.peer_id)
         attachments = []
         try:
-            image = cameraHandler.get_img()
+            image = camera_handler.get_img()
         except RuntimeError as e:
             print(e)
             return "какая-то дичь с синичками. Зовите разраба"
@@ -29,18 +30,23 @@ class Birds(CommonCommand):
         frames = 20
         if self.event.args:
             frames = self.event.args[0]
-            self.check_number_arg_range(frames, 0, cameraHandler.MAX_FRAMES)
+            self.check_number_arg_range(frames, 0, camera_handler.MAX_FRAMES)
 
         if frames != 0:
             try:
-                document = cameraHandler.get_gif(frames)
+                document = camera_handler.get_gif(frames)
             except RuntimeError as e:
                 return str(e)
             attachment = self.bot.upload_document(document, self.event.peer_id, "Синички")
             attachments.append(attachment)
         attachments.append('https://birds.xoma163.xyz')
-        return {
-            'attachments': attachments,
-            "keyboard": get_inline_keyboard(self.names[0], args={"frames": frames}),
-            'dont_parse_links': True
-        }
+        if len(attachments) == 2 or isinstance(self.bot, VkBot):
+            return {
+                'attachments': attachments,
+                "keyboard": get_inline_keyboard(self.names[0], args={"frames": frames}),
+                'dont_parse_links': True
+            }
+        else:
+            self.bot.send_message(self.event.peer_id, attachments=[attachments[0]])
+            self.bot.send_message(self.event.peer_id, attachments=[attachments[1]])
+            return None

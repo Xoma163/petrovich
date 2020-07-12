@@ -227,7 +227,7 @@ class VkBot(CommonBot, Thread):
             obj = file_like_object
         return obj
 
-    def get_attachment_by_id(self, _type, group_id, _id):
+    def _get_attachment_by_id(self, _type, group_id, _id):
         if group_id is None:
             group_id = f'-{self.group_id}'
         return f"{_type}{group_id}_{_id}"
@@ -269,7 +269,7 @@ class VkBot(CommonBot, Thread):
         try:
             vk_photos = self.upload.photo_messages(images_to_load)
             for vk_photo in vk_photos:
-                attachments.append(self.get_attachment_by_id('photo', vk_photo['owner_id'], vk_photo['id']))
+                attachments.append(self._get_attachment_by_id('photo', vk_photo['owner_id'], vk_photo['id']))
         except vk_api.exceptions.ApiError as e:
             print(e)
         return attachments
@@ -277,7 +277,7 @@ class VkBot(CommonBot, Thread):
     def upload_document(self, document, peer_id=None, title='Документ'):
         document = self._prepare_obj_to_upload(document)
         vk_document = self.upload.document_message(document, title=title, peer_id=peer_id)['doc']
-        return self.get_attachment_by_id('doc', vk_document['owner_id'], vk_document['id'])
+        return self._get_attachment_by_id('doc', vk_document['owner_id'], vk_document['id'])
 
 
 class MyVkBotLongPoll(VkBotLongPoll):

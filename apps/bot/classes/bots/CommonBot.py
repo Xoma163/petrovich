@@ -229,28 +229,28 @@ class CommonBot():
             chats.remove(chat)
 
     def can_bot_working(self):
-        return self.BOT_CAN_WORK
-
+        return self.BOT_CAN_WORK        
+    
     def get_user_by_name(self, args, filter_chat=None):
         if not args:
             raise RuntimeWarning("Отсутствуют аргументы")
         if isinstance(args, str):
             args = [args]
-        vk_users = self.user_model.objects
+        users = self.user_model.objects
         if filter_chat:
-            vk_users = vk_users.filter(chats=filter_chat)
+            users = users.filter(chats=filter_chat)
         if len(args) >= 2:
-            user = vk_users.filter(name=args[0].capitalize(), surname=args[1].capitalize())
+            user = users.filter(name=args[0].capitalize(), surname=args[1].capitalize())
         else:
-            user = vk_users.filter(nickname_real=args[0].capitalize())
+            user = users.filter(nickname_real=args[0].capitalize())
             if len(user) == 0:
-                user = vk_users.filter(name=args[0].capitalize())
+                user = users.filter(name=args[0].capitalize())
                 if len(user) == 0:
-                    user = vk_users.filter(surname=args[0].capitalize())
+                    user = users.filter(surname=args[0].capitalize())
                     if len(user) == 0:
-                        user = vk_users.filter(nickname=args[0])
+                        user = users.filter(nickname=args[0])
                         if len(user) == 0:
-                            user = vk_users.filter(user_id=args[0])
+                            user = users.filter(user_id=args[0])
 
         if len(user) > 1:
             raise RuntimeWarning("2 и более пользователей подходит под поиск")
@@ -265,16 +265,16 @@ class CommonBot():
             raise RuntimeWarning("Отсутствуют аргументы")
         if isinstance(args, str):
             args = [args]
-        vk_chats = self.chat_model.objects
+        chats = self.chat_model.objects
         for arg in args:
-            vk_chats = vk_chats.filter(name__icontains=arg)
+            chats = chats.filter(name__icontains=arg)
 
-        if len(vk_chats) > 1:
+        if len(chats) > 1:
             raise RuntimeWarning("2 и более чатов подходит под поиск")
 
-        if len(vk_chats) == 0:
+        if len(chats) == 0:
             raise RuntimeWarning("Чат не найден")
-        return vk_chats.first()
+        return chats.first()
 
     def upload_document(self, document, peer_id=None, title='Документ'):
         pass
