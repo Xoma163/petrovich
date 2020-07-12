@@ -144,29 +144,35 @@ class VkBot(CommonBot, Thread):
                 print("Ошибка отправки сообщения\n"
                       f"{e}")
 
+    @staticmethod
+    def _setup_event(event):
+        vk_event = {
+            'from_user': event.from_user,
+            'chat_id': event.chat_id,
+            'user_id': event.message.from_id,
+            'peer_id': event.message.peer_id,
+            'message': {
+                # 'id': event.message.id,
+                'text': event.message.text,
+                'payload': event.message.payload,
+                'attachments': event.message.attachments,
+                'action': event.message.action
+            },
+            'fwd': None
+        }
+        # ToDo: VK. Проверить при добавлении пользователя/бота в конфу - что будет.
+        if vk_event['message'].get('action', None) and vk_event['message']['action']['type'] in [
+            'chat_invite_user', 'chat_invite_user_by_link']:
+            vk_event['message']['action']['members_id'] = [vk_event['message']['action'].pop('member_id')]
+        return vk_event
+
     def listen(self):
         for event in self.longpoll.listen():
             try:
                 # Если пришло новое сообщение
                 if event.type == VkBotEventType.MESSAGE_NEW:
-                    vk_event = {
-                        'from_user': event.from_user,
-                        'chat_id': event.chat_id,
-                        'user_id': event.message.from_id,
-                        'peer_id': event.message.peer_id,
-                        'message': {
-                            # 'id': event.message.id,
-                            'text': event.message.text,
-                            'payload': event.message.payload,
-                            'attachments': event.message.attachments,
-                            'action': event.message.action
-                        },
-                        'fwd': None
-                    }
-                    # ToDo: VK. Проверить при добавлении пользователя/бота в конфу - что будет.
-                    if vk_event['message'].get('action', None) and vk_event['message']['action']['type'] in [
-                        'chat_invite_user', 'chat_invite_user_by_link']:
-                        vk_event['message']['action']['members_id'] = [vk_event['message']['action'].pop('member_id')]
+                    vk_event = self._setup_event(event)
+
                     # Сообщение либо мне в лс, либо упоминание меня, либо есть аудиосообщение, либо есть экшн
                     if not self.need_a_response(vk_event):
                         continue

@@ -7,6 +7,7 @@ from apps.db_logger.models import MovementLog
 from petrovich.settings import TIME_ZONE
 
 
+# ToDo: TG
 class Where(CommonCommand):
     def __init__(self):
         names = ["где"]
@@ -14,7 +15,6 @@ class Where(CommonCommand):
         detail_help_text = "Где (N) - информация о чекточках, где N - имя, фамилия, логин/id, никнейм"
         super().__init__(names, help_text, detail_help_text, args=1, access=Role.TRUSTED, enabled=False)
 
-    # ToDo: Tg
     def start(self):
 
         user = self.bot.get_user_by_name(self.event.args, self.event.chat)

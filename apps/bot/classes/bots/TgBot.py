@@ -146,56 +146,87 @@ class TgBot(CommonBot, Thread):
                     return self._send_photo(peer_id, msg, attachments[0]['attachment'])
         prepared_message = {'chat_id': peer_id, 'text': msg, 'parse_mode': 'HTML'}
         return self.requests.get('sendMessage', params=prepared_message)
+    @staticmethod
+    def _setup_event(event):
+        tg_event = {
+            'from_user': not event['message']['from']['is_bot'],
+            'user_id': event['message']['from']['id'],
+            'chat_id': None,
+            'peer_id': event['message']['chat']['id'],
+            'message': {
+                'id': event['message']['message_id'],
+                'text': event['message'].get('text', None) or event['message'].get('caption', None) or "",
+                # 'payload': event.message.payload,
+                'attachments': [],
+                'action': None
+            },
+            'fwd': None,
+        }
+
+        if 'new_chat_members' in event['message']:
+            tg_event['message']['action'] = {
+                'type': 'chat_invite_user',
+                'member_ids': [],
+            }
+            for member in event['message']['new_chat_members']:
+                if member['is_bot']:
+                    tg_event['message']['action']['member_ids'].append(-member['id'])
+                else:
+                    tg_event['message']['action']['member_ids'].append(member['id'])
+        elif 'group_chat_created' in event['message']:
+            tg_event['message']['action'] = {
+                'type': 'chat_invite_user',
+                'member_ids': [-env.int('TG_BOT_GROUP_ID')],
+            }
+        elif 'left_chat_member' in event['message'] and not event['message']['left_chat_member']['is_bot']:
+            tg_event['message']['action'] = {
+                'type': 'chat_kick_user',
+                'member_id': event['message']['left_chat_member']['id'],
+            }
+
+        if event['message']['chat']['id'] != event['message']['from']['id']:
+            tg_event['chat_id'] = -event['message']['chat']['id']
+        if not tg_event['from_user']:
+            tg_event['chat_id'] = event['message']['chat']['id']
+        if 'reply_to_message' in event['message']:
+            tg_event['fwd'] = [{
+                'id': event['message']['reply_to_message']['message_id'],
+                'text': event['message']['reply_to_message']['text'],
+                'attachments': event['message']['reply_to_message'].get('photo', []) or
+                               event['message']['reply_to_message'].get('voice', [])
+            }]
+        if 'photo' in event['message']:
+            tg_event['message']['attachments'].append(event['message']['photo'][-1])
+            tg_event['message']['attachments'][-1]['type'] = 'photo'
+
+        if 'voice' in event['message']:
+            tg_event['message']['attachments'].append(event['message']['photo'][-1])
+            tg_event['message']['attachments'][-1]['type'] = 'audio_message'
+
+            # if tg_event['message']['attachments']:
+            #     try:
+            #         response = self.requests.get('getFile',
+            #                                      params={
+            #                                          'file_id': tg_event['message']['attachments'][-1]['file_id']}).json()
+            #         if 'result' in response:
+            #             file_path = response['result'].get('file_path', None)
+            #             if file_path:
+            #                 file = requests.get(f'https://api.telegram.org/file/bot{self.token}/{file_path}')
+            #                 tg_event['message']['attachments'] = {
+            #                     'type': 'photo',
+            #                     'url': f'https://api.telegram.org/file/bot{self.token}/{file_path}',
+            #                     'bytes': file.content
+            #                 }
+            #                 pass
+            #     except:
+            #         tg_event['message']['attachments'] = []
+        return tg_event
 
     def listen(self):
         for event in self.longpoll.listen():
             try:
-                tg_event = {
-                    'from_user': not event['message']['from']['is_bot'],
-                    'user_id': event['message']['from']['id'],
-                    'chat_id': None,
-                    'peer_id': event['message']['chat']['id'],
-                    'message': {
-                        'id': event['message']['message_id'],
-                        'text': event['message'].get('text', None) or event['message'].get('caption', None) or "",
-                        # 'payload': event.message.payload,
-                        'attachments': [],
-                        'action': None
-                    },
-                    'fwd': None,
-                }
-                # actions
-                if 'new_chat_members' in event['message']:
-                    tg_event['message']['action'] = {
-                        'type': 'chat_invite_user',
-                        'member_ids': [],
-                    }
-                    for member in event['message']['new_chat_members']:
-                        if member['is_bot']:
-                            tg_event['message']['action']['member_ids'].append(-member['id'])
-                        else:
-                            tg_event['message']['action']['member_ids'].append(member['id'])
-                elif 'group_chat_created' in event['message']:
-                    tg_event['message']['action'] = {
-                        'type': 'chat_invite_user',
-                        'member_ids': [-env.int('TG_BOT_GROUP_ID')],
-                    }
-                elif 'left_chat_member' in event['message'] and not event['message']['left_chat_member']['is_bot']:
-                    tg_event['message']['action'] = {
-                        'type': 'chat_kick_user',
-                        'member_id': event['message']['left_chat_member']['id'],
-                    }
+                tg_event = self._setup_event(event)
 
-                if event['message']['chat']['id'] != event['message']['from']['id']:
-                    tg_event['chat_id'] = -event['message']['chat']['id']
-                if not tg_event['from_user']:
-                    tg_event['chat_id'] = event['message']['chat']['id']
-                if 'reply_to_message' in event['message']:
-                    tg_event['fwd'] = [{
-                        'id': event['message']['reply_to_message']['message_id'],
-                        'text': event['message']['reply_to_message']['text'],
-                        'attachments': event['message'].get('photo', []) or event['message'].get('voice', [])
-                    }]
                 # Игнорим forward
                 if 'forward_from' in event['message']:
                     continue
@@ -229,6 +260,9 @@ class TgBot(CommonBot, Thread):
     def _prepare_obj_to_upload(file_like_object, allowed_exts_url=None):
         # url
         if isinstance(file_like_object, str) and urlparse(file_like_object).hostname:
+            if allowed_exts_url:
+                if file_like_object.split('.')[-1].lower() not in allowed_exts_url:
+                    raise RuntimeWarning(f"Загрузка по URL доступна только для {' '.join(allowed_exts_url)}")
             return file_like_object
         if isinstance(file_like_object, bytes):
             return file_like_object
@@ -247,7 +281,13 @@ class TgBot(CommonBot, Thread):
             images = [images]
         images_list = []
         for image in images:
-            images_list.append({'type': 'photo', 'attachment': self._prepare_obj_to_upload(image)})
+            try:
+                images_list.append(
+                    {'type': 'photo', 'attachment': self._prepare_obj_to_upload(image, ['jpg', 'jpeg', 'png'])})
+            except:
+                continue
+            if len(images_list) >= max_count:
+                break
         return images_list
 
     def upload_document(self, document, peer_id=None, title='Документ'):
