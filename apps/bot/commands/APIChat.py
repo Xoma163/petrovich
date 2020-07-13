@@ -1,11 +1,6 @@
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import get_one_chat_with_user
-from apps.bot.models import Users, APITempUser, APIUser
-
-
-def get_users(chat, who):
-    params = {'chats': chat, 'groups__name': who}
-    return list(Users.objects.filter(**params))
+from apps.bot.models import APITempUser, APIUser
 
 
 # ToDo: TG

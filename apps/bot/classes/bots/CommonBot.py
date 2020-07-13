@@ -282,3 +282,24 @@ class CommonBot():
 
     def upload_photos(self, images, max_count=10):
         pass
+
+    def get_one_chat_with_user(self, chat_name, user_id):
+        chats = self.chat_model.filter(name__icontains=chat_name)
+        if len(chats) == 0:
+            raise RuntimeWarning("Не нашёл такого чата")
+
+        chats_with_user = []
+        for chat in chats:
+            user_contains = chat.vkuser_set.filter(user_id=user_id)
+            if user_contains:
+                chats_with_user.append(chat)
+
+        if len(chats_with_user) == 0:
+            raise RuntimeWarning("Не нашёл доступного чата с пользователем в этом чате")
+        elif len(chats_with_user) > 1:
+            chats_str = '\n'.join(chats_with_user)
+            raise RuntimeWarning("Нашёл несколько чатов. Уточните какой:\n"
+                                 f"{chats_str}")
+
+        elif len(chats_with_user) == 1:
+            return chats_with_user[0]

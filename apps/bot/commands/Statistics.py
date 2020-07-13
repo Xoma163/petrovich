@@ -1,7 +1,6 @@
 from django.db.models import Count
 
 from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.models import Users
 from apps.games.models import Gamer
 from apps.games.models import PetrovichUser
 from apps.service.models import Meme
@@ -74,7 +73,7 @@ class Statistics(CommonCommand):
         return msg
 
     def menu_memes(self):
-        users = Users.objects.filter(chats=self.event.chat)
+        users = self.bot.user_model.filter(chats=self.event.chat)
 
         result_list = list(
             Meme.objects.filter(author__in=users).values('author').annotate(total=Count('author')).order_by('-total'))

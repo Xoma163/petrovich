@@ -1,6 +1,5 @@
 from apps.bot.classes.Consts import Role
 from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.models import Chat
 
 
 class Conference(CommonCommand):
@@ -20,7 +19,7 @@ class Conference(CommonCommand):
             if self.event.args:
                 try:
                     self.check_sender(Role.CONFERENCE_ADMIN)
-                    same_chats = Chat.objects.filter(name=self.event.original_args)
+                    same_chats = self.bot.chat_model.filter(name=self.event.original_args)
                     if len(same_chats) > 0:
                         return "Конфа с таким названием уже есть. Придумайте другое"
                     self.event.chat.name = self.event.original_args
@@ -30,7 +29,7 @@ class Conference(CommonCommand):
                     if self.event.chat.admin is None:
                         msg = "Так как администратора конфы не было, то теперь вы стали администратором конфы!"
                         self.event.chat.admin = self.event.sender
-                        same_chats = Chat.objects.filter(name=self.event.original_args)
+                        same_chats = self.bot.chat_model.filter(name=self.event.original_args)
                         if len(same_chats) > 0:
                             msg += "\nКонфа с таким названием уже есть. Придумайте другое"
                             return msg

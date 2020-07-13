@@ -1,11 +1,8 @@
 from apps.bot.classes.Consts import Role
 from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.models import Users
 
 
-def get_users(chat, who):
-    params = {'chats': chat, 'groups__name': who}
-    return list(Users.objects.filter(**params))
+
 
 
 # ToDo: TG check
@@ -42,10 +39,14 @@ class Who(CommonCommand):
             return str(self.event.chat.admin)
         else:
             return "Не знаю такой роли"
-        users = get_users(self.event.chat, who)
+        users = self.get_users(self.event.chat, who)
         if len(users) > 0:
             users_list = [str(user) for user in users]
             result = "\n".join(users_list)
             return str(result)
         else:
             return "Нет людей с данной ролью"
+
+    def get_users(self, chat, who):
+        params = {'chats': chat, 'groups__name': who}
+        return list(self.bot.user_model.objects.filter(**params))
