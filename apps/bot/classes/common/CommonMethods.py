@@ -1,5 +1,4 @@
 import io
-import json
 import os
 import re
 
@@ -9,7 +8,6 @@ from PIL import Image, ImageDraw, ImageFont
 from django.core.management import get_commands
 
 from apps.bot.classes.Consts import Role
-from apps.bot.models import Chat
 from petrovich.settings import STATIC_ROOT
 
 
@@ -138,24 +136,6 @@ def get_attachments_from_attachments_or_fwd(vk_event, _type=None, from_first_fwd
                         attachments.append(att)
 
     return attachments
-
-
-# Возвращает клавиатуру с кнопкой "Ещё"
-def get_inline_keyboard(command_text, button_text="Ещё", args=None):
-    if args is None:
-        args = {}
-    return {
-        'inline': True,
-        'buttons': [[
-            {
-                'action': {
-                    'type': 'text',
-                    'label': button_text,
-                    "payload": json.dumps({"command": command_text, "args": args}, ensure_ascii=False)
-                },
-                'color': 'primary',
-            }
-        ]]}
 
 
 # Ищет команду по имени

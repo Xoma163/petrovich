@@ -7,7 +7,6 @@ from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import check_user_group
 from apps.service.models import YoutubeSubscribe
 
-
 MAX_USER_SUBS_COUNT = 3
 
 

@@ -1,7 +1,7 @@
 from apps.bot.classes.Consts import Role
 from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import get_inline_keyboard, get_attachments_from_attachments_or_fwd, \
-    check_user_group, get_one_chat_with_user, tanimoto
+from apps.bot.classes.common.CommonMethods import get_attachments_from_attachments_or_fwd, \
+    check_user_group, tanimoto
 from apps.service.models import Meme as MemeModel
 from petrovich.settings import VK_URL, TEST_CHAT_ID
 
@@ -159,7 +159,7 @@ class Meme(CommonCommand):
 
     def menu_conference(self):
         self.check_args(3)
-        chat = get_one_chat_with_user(self.event.args[1], self.event.sender.user_id)
+        chat = self.bot.get_one_chat_with_user(self.event.args[1], self.event.sender.user_id)
         if self.event.chat == chat:
             return "Зачем мне отправлять мем в эту же конфу?"
         if self.event.args[-1].lower() in ['рандом', 'р']:
@@ -360,5 +360,5 @@ def prepare_meme_to_send(bot, event, meme, print_name=False, send_keyboard=False
         msg['msg'] = meme.name
 
     if send_keyboard:
-        msg['keyboard'] = get_inline_keyboard(name, args={"random": "р"})
+        msg['keyboard'] = self.bot.get_inline_keyboard(name, args={"random": "р"})
     return msg

@@ -300,7 +300,7 @@ class WakeOnLanUserData(models.Model):
 
 class QuoteBook(models.Model):
     text = models.TextField(verbose_name="Текст", max_length=5000)
-    date = models.DateTimeField(verbose_name="Дата", auto_now_add=True, blank=True)
+    date = models.DateTimeField(verbose_name="Дата",blank=True)
     user = models.ForeignKey(Users, verbose_name="Автор", on_delete=models.CASCADE, null=True, blank=True)
     chat = models.ForeignKey(Chat, verbose_name="Чат", on_delete=models.CASCADE, null=True, blank=True)
 

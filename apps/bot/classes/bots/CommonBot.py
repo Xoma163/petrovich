@@ -169,7 +169,10 @@ class CommonBot():
 
     def need_a_response(self, event):
         message = event['message']['text']
-        from_user = event['from_user']
+
+        have_payload = 'payload' in event
+        if have_payload:
+            return True
         have_audio_message = self.have_audio_message(event)
         if have_audio_message:
             return True
@@ -178,6 +181,7 @@ class CommonBot():
             return True
         if len(message) == 0:
             return False
+        from_user = event['from_user']
         if from_user:
             return True
         if message[0] == '/':

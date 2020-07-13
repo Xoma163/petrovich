@@ -1,6 +1,5 @@
 from apps.bot.APIs.BashAPI import BashAPI
 from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import get_inline_keyboard
 
 MAX_QUOTES = 20
 
@@ -23,4 +22,4 @@ class Bash(CommonCommand):
         if self.event.from_api:
             return msg
         else:
-            return {"msg": msg, "keyboard": get_inline_keyboard(self.names[0], args={"quotes_count": quotes_count})}
+            return {"msg": msg, "keyboard": self.bot.get_inline_keyboard(self.names[0], args={"quotes_count": quotes_count})}

@@ -74,7 +74,7 @@ class Users(Platform):
 
 class Bot(Platform):
     bot_id = models.CharField(verbose_name='ID бота', max_length=20)
-    name = models.CharField(verbose_name='Имя', max_length=40, default="")
+    name = models.CharField(verbose_name='Имя', max_length=40)
 
     class Meta:
         ordering = ["id"]
@@ -83,7 +83,7 @@ class Bot(Platform):
         if self.name:
             return self.name
         else:
-            return self.id
+            return f"Неопознанный бот #{self.id}"
 
 
 class APIUser(models.Model):

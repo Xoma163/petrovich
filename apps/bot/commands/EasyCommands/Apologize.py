@@ -4,6 +4,7 @@ from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import random_event, random_probability
 
 
+# By E.Korsakov
 class Apologize(CommonCommand):
     def __init__(self):
         names = ["извинись", "извиняйся", "извинитесь"]

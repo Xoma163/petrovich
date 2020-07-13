@@ -24,7 +24,6 @@ def get_notifies_from_object(notifies_obj, timezone, print_username=False):
 
     return result
 
-# ToDo: TG
 class Notifies(CommonCommand):
     def __init__(self):
         names = ["напоминания", "оповещения"]
@@ -34,7 +33,7 @@ class Notifies(CommonCommand):
                            "Напоминания конфа - выводит все напоминания по конфе\n" \
                            "Напоминания (имя, фамилия, логин/id, никнейм) - напоминания пользователя по конфе\n" \
                            "Админ конфы может удалять напоминания остальных участников"
-        super().__init__(names, help_text, detail_help_text, api=False, enabled=False)
+        super().__init__(names, help_text, detail_help_text, api=False)
 
     def start(self):
         if self.event.sender.city is None:

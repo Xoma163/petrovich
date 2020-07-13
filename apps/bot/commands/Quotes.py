@@ -20,7 +20,7 @@ class Quotes(CommonCommand):
                            "1) N - номер страницы;\n" \
                            "2) N - фраза для поиска;\n" \
                            "3) N - фраза для поиска M - номер страницы"
-        super().__init__(names, help_text, detail_help_text, api=False, enabled=False)
+        super().__init__(names, help_text, detail_help_text, api=False)
 
     def start(self):
         text_filter = None

@@ -2,7 +2,6 @@ import wikipedia
 
 from apps.bot.classes.bots.VkBot import VkBot
 from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import get_inline_keyboard
 
 wikipedia.set_lang("ru")
 
@@ -11,7 +10,8 @@ class Wikipedia(CommonCommand):
     def __init__(self):
         names = ["вики", "википедия"]
         help_text = "Вики - поиск информации в википедии"
-        detail_help_text = "Вики (фраза) - поиск информации в википедии"
+        detail_help_text = "Вики (фраза) - поиск информации в википедии\n" \
+                           "Вики р - рандомная статья в википедии"
         super().__init__(names, help_text, detail_help_text, args=1)
 
     def start(self):
@@ -37,9 +37,10 @@ class Wikipedia(CommonCommand):
                 if isinstance(self.bot, VkBot):
                     output['attachments'] += attachments
                 else:
-                    self.bot.parse_and_send_msgs(self.event.peer_id, {'msg': msg, 'attachments': attachments})
+                    if len(attachments) > 1:
+                        self.bot.parse_and_send_msgs(self.event.peer_id, {'msg': msg, 'attachments': attachments})
             if is_random:
-                output['keyboard'] = get_inline_keyboard(self.names[0], args={"random": "р"})
+                output['keyboard'] = self.bot.get_inline_keyboard(self.names[0], args={"random": "р"})
             return output
         except wikipedia.DisambiguationError as e:
             options = set(e.options)

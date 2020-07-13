@@ -282,6 +282,23 @@ class VkBot(CommonBot, Thread):
         vk_document = self.upload.document_message(document, title=title, peer_id=peer_id)['doc']
         return self._get_attachment_by_id('doc', vk_document['owner_id'], vk_document['id'])
 
+    @staticmethod
+    def get_inline_keyboard(command_text, button_text="Ещё", args=None):
+        if args is None:
+            args = {}
+        return {
+            'inline': True,
+            'buttons': [[
+                {
+                    'action': {
+                        'type': 'text',
+                        'label': button_text,
+                        "payload": json.dumps({"command": command_text, "args": args}, ensure_ascii=False)
+                    },
+                    'color': 'primary',
+                }
+            ]]}
+
 
 class MyVkBotLongPoll(VkBotLongPoll):
 

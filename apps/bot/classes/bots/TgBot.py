@@ -1,5 +1,4 @@
 import json
-import logging
 import os
 import threading
 import time
@@ -39,8 +38,6 @@ class TgBot(CommonBot, Thread):
         self.token = env.str("TG_TOKEN")
         self.requests = TgRequests(self.token)
         self.longpoll = MyTgBotLongPoll(self.token, self.requests)
-
-        self.logger = logging.getLogger('tg_bot')
 
     def set_activity(self, peer_id, activity='typing'):
         if activity not in ['typing', 'audiomessage']:
@@ -110,40 +107,49 @@ class TgBot(CommonBot, Thread):
         return bot
 
     # URL Only. Bytes not supported
-    def _send_media_group(self, peer_id, msg, attachments):
+    def _send_media_group(self, peer_id, msg, attachments, keyboard):
         media = []
         for attachment in attachments:
             media.append({'type': attachment['type'], 'media': attachment['attachment'], 'caption': msg})
-        self.requests.get('sendMediaGroup', {'chat_id': peer_id, 'media': json.dumps(media)})
+        self.requests.get('sendMediaGroup', {'chat_id': peer_id, 'media': json.dumps(media), 'reply_markup': keyboard})
 
-    def _send_photo(self, peer_id, msg, photo):
+    def _send_photo(self, peer_id, msg, photo, keyboard):
         if isinstance(photo, str) and urlparse(photo).hostname:
-            self.requests.get('sendPhoto', {'chat_id': peer_id, 'caption': msg, 'photo': photo})
+            self.requests.get('sendPhoto',
+                              {'chat_id': peer_id, 'caption': msg, 'photo': photo, 'reply_markup': keyboard})
         else:
-            self.requests.get('sendPhoto', {'chat_id': peer_id, 'caption': msg}, files={'photo': photo})
+            self.requests.get('sendPhoto', {'chat_id': peer_id, 'caption': msg, 'reply_markup': keyboard},
+                              files={'photo': photo})
 
-    def _send_video(self, peer_id, msg, video):
+    def _send_video(self, peer_id, msg, video, keyboard):
         if isinstance(video, str) and urlparse(video).hostname:
-            self.requests.get('sendVideo', params={'chat_id': peer_id, 'caption': msg, 'video': video})
+            self.requests.get('sendVideo',
+                              params={'chat_id': peer_id, 'caption': msg, 'reply_markup': keyboard, 'video': video})
         else:
-            self.requests.get('sendVideo', params={'chat_id': peer_id, 'caption': msg}, files={'video': video})
+            self.requests.get('sendVideo', params={'chat_id': peer_id, 'caption': msg, 'reply_markup': keyboard},
+                              files={'video': video})
 
     def send_message(self, peer_id, msg='', attachments=None, keyboard=None, dont_parse_links=False, **kwargs):
+        if keyboard:
+            keyboard = json.dumps(keyboard)
         if attachments:
             # Убираем все ссылки, потому что телега в них не умеет похоже
             attachments = list(filter(lambda x: not (isinstance(x, str) and urlparse(x).hostname), attachments))
             if attachments:
                 if len(attachments) > 1:
-                    return self._send_media_group(peer_id, msg, attachments)
+                    return self._send_media_group(peer_id, msg, attachments, keyboard)
                 elif attachments[0]['type'] == 'video':
-                    return self._send_video(peer_id, msg, attachments[0]['attachment'])
+                    return self._send_video(peer_id, msg, attachments[0]['attachment'], keyboard)
                 elif attachments[0]['type'] == 'photo':
-                    return self._send_photo(peer_id, msg, attachments[0]['attachment'])
-        prepared_message = {'chat_id': peer_id, 'text': msg, 'parse_mode': 'HTML'}
+                    return self._send_photo(peer_id, msg, attachments[0]['attachment'], keyboard)
+        prepared_message = {'chat_id': peer_id, 'text': msg, 'parse_mode': 'HTML', 'reply_markup': keyboard}
         return self.requests.get('sendMessage', params=prepared_message)
 
     @staticmethod
     def _setup_event(event):
+        if 'callback_query' in event:
+            event = event['callback_query']
+            event['message']['from'] = event['from']
         tg_event = {
             'from_user': not event['message']['from']['is_bot'],
             'user_id': event['message']['from']['id'],
@@ -154,9 +160,11 @@ class TgBot(CommonBot, Thread):
                 'text': event['message'].get('text', None) or event['message'].get('caption', None) or "",
                 # 'payload': event.message.payload,
                 'attachments': [],
-                'action': None
+                'action': None,
+                'payload': event.get('data', None)
             },
             'fwd': None,
+
         }
 
         if 'new_chat_members' in event['message']:
@@ -187,14 +195,24 @@ class TgBot(CommonBot, Thread):
         if 'reply_to_message' in event['message']:
             tg_event['fwd'] = [{
                 'id': event['message']['reply_to_message']['message_id'],
-                'text': event['message']['reply_to_message']['text'],
-                'attachments': event['message']['reply_to_message'].get('photo', []) or
-                               event['message']['reply_to_message'].get('voice', [])
+                'text': event['message']['reply_to_message'].get('text', None) or event['message'][
+                    'reply_to_message'].get('caption', None),
+                'attachments': [],
+                'from_id': event['message']['reply_to_message']['from']['id'],
+                'date': event['message']['reply_to_message']['date'],
             }]
+            if 'photo' in event['message']['reply_to_message']:
+                tg_event['fwd'][0]['attachments'].append(event['message']['reply_to_message']['photo'][-1])
+                tg_event['fwd'][0]['attachments'][-1]['type'] = 'photo'
+            if 'voice' in event['message']['reply_to_message']:
+                tg_event['fwd'][0]['attachments'].append(event['message']['reply_to_message']['photo'][-1])
+                tg_event['fwd'][0]['attachments'][-1]['type'] = 'audio_message'
+
+            if event['message']['reply_to_message']['from']['is_bot']:
+                tg_event['fwd'][0]['from_id'] *= -1
         if 'photo' in event['message']:
             tg_event['message']['attachments'].append(event['message']['photo'][-1])
             tg_event['message']['attachments'][-1]['type'] = 'photo'
-
         if 'voice' in event['message']:
             tg_event['message']['attachments'].append(event['message']['photo'][-1])
             tg_event['message']['attachments'][-1]['type'] = 'audio_message'
@@ -224,7 +242,7 @@ class TgBot(CommonBot, Thread):
                 tg_event = self._setup_event(event)
 
                 # Игнорим forward
-                if 'forward_from' in event['message']:
+                if event.get('message') and event['message'].get('forward_from'):
                     continue
 
                 if not self.need_a_response(tg_event):
@@ -232,7 +250,7 @@ class TgBot(CommonBot, Thread):
 
                 # Узнаём пользователя
                 if tg_event['from_user']:
-                    tg_event['sender'] = self.register_user(event['message']['from'])
+                    tg_event['sender'] = self.register_user(event.get('callback_query', event)['message']['from'])
                 else:
                     self.send_message(tg_event['peer_id'], "Боты не могут общаться с Петровичем :(")
                     continue
@@ -288,6 +306,30 @@ class TgBot(CommonBot, Thread):
 
     def upload_document(self, document, peer_id=None, title='Документ'):
         return {'type': 'video', 'attachment': self._prepare_obj_to_upload(document)}
+
+    @staticmethod
+    def get_inline_keyboard(command_text, button_text="Ещё", args=None):
+        if args is None:
+            args = {}
+        return {
+            'inline_keyboard': [[
+                {
+                    'text': button_text,
+                    'callback_data': json.dumps({'command': command_text, "args": args}, ensure_ascii=False)
+                }
+            ]]
+        }
+
+    # 'buttons': [[
+    #     {
+    #         'action': {
+    #             'type': 'text',
+    #             'label': button_text,
+    #             "payload": json.dumps({"command": command_text, "args": args}, ensure_ascii=False)
+    #         },
+    #         'color': 'primary',
+    #     }
+    # ]]}
 
 
 class MyTgBotLongPoll:

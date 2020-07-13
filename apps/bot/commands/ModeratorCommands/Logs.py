@@ -2,6 +2,7 @@ from apps.bot.classes.Consts import Role
 from apps.bot.classes.DoTheLinuxComand import do_the_linux_command
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import draw_text_on_image
+from apps.db_logger.models import Logger
 from petrovich.settings import BASE_DIR
 
 
@@ -107,7 +108,7 @@ class Logs(CommonCommand):
 
     def get_db_logs(self):
         count = self.get_count(1, 5)
-        logs = self.bot.log_model.objects.filter(traceback__isnull=False)[:count]
+        logs = Logger.objects.filter(traceback__isnull=False)[:count]
         if not logs:
             return "Не нашёл логов с ошибками"
         msg = ""

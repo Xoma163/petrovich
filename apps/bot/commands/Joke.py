@@ -1,6 +1,5 @@
 from apps.bot.APIs.RzhunemoguAPI import RzhunemoguAPI
 from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import get_inline_keyboard
 
 
 class Joke(CommonCommand):
@@ -35,4 +34,4 @@ class Joke(CommonCommand):
         if self.event.from_api:
             return msg
         else:
-            return {"msg": msg, "keyboard": get_inline_keyboard(self.names[0], args={"a_type": a_type})}
+            return {"msg": msg, "keyboard": self.bot.get_inline_keyboard(self.names[0], args={"a_type": a_type})}

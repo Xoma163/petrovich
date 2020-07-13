@@ -1,5 +1,4 @@
 from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import get_one_chat_with_user
 from apps.bot.models import APITempUser, APIUser
 
 
@@ -21,7 +20,7 @@ class APIChat(CommonCommand):
         if self.event.args[0] == 'привязать':
             self.check_args(2)
             chat_name = self.event.original_args.split(' ', 1)[1]
-            chat_with_user = get_one_chat_with_user(chat_name, self.event.sender.user_id)
+            chat_with_user = self.bot.get_one_chat_with_user(chat_name, self.event.sender.user_id)
 
             APITempUser.objects.filter(user_id=self.event.yandex['client_id']).delete()
             yandex_temp_user = APITempUser(

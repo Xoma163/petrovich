@@ -1,5 +1,5 @@
 from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import get_random_int, get_inline_keyboard
+from apps.bot.classes.common.CommonMethods import get_random_int
 
 
 class Waifu(CommonCommand):
@@ -27,7 +27,7 @@ class Waifu(CommonCommand):
         attachment = self.bot.upload_photos(URL)
 
         if self.event.args:
-            keyboard = get_inline_keyboard(self.names[0], "Следующая", args={"waifu_number": waifu_number + 1})
+            keyboard = self.bot.get_inline_keyboard(self.names[0], "Следующая", args={"waifu_number": waifu_number + 1})
         else:
-            keyboard = get_inline_keyboard(self.names[0])
+            keyboard = self.bot.get_inline_keyboard(self.names[0])
         return {"msg": waifu_number, "attachments": attachment, "keyboard": keyboard}

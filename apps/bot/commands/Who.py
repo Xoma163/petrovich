@@ -2,10 +2,6 @@ from apps.bot.classes.Consts import Role
 from apps.bot.classes.common.CommonCommand import CommonCommand
 
 
-
-
-
-# ToDo: TG check
 class Who(CommonCommand):
     def __init__(self):
         names = ["кто"]
@@ -49,4 +45,4 @@ class Who(CommonCommand):
 
     def get_users(self, chat, who):
         params = {'chats': chat, 'groups__name': who}
-        return list(self.bot.user_model.objects.filter(**params))
+        return list(self.bot.user_model.filter(**params))

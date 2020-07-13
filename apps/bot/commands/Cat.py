@@ -1,6 +1,6 @@
 from apps.bot.classes.Consts import Role
 from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import get_inline_keyboard, get_attachments_from_attachments_or_fwd
+from apps.bot.classes.common.CommonMethods import get_attachments_from_attachments_or_fwd
 from apps.service.models import Cat as CatModel
 from petrovich.settings import MAIN_SITE
 
@@ -41,7 +41,7 @@ class Cat(CommonCommand):
 
             return {
                 'attachments': attachments,
-                "keyboard": get_inline_keyboard(self.names[0])
+                "keyboard": self.bot.get_inline_keyboard(self.names[0])
             }
         else:
             self.check_sender(Role.TRUSTED)

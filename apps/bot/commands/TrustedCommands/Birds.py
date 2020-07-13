@@ -1,7 +1,6 @@
 from apps.bot.classes.Consts import Role
 from apps.bot.classes.bots.VkBot import VkBot
 from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import get_inline_keyboard
 from apps.bot.management.commands.start import camera_handler
 
 
@@ -43,7 +42,7 @@ class Birds(CommonCommand):
         if len(attachments) == 2 or isinstance(self.bot, VkBot):
             return {
                 'attachments': attachments,
-                "keyboard": get_inline_keyboard(self.names[0], args={"frames": frames}),
+                "keyboard": self.bot.get_inline_keyboard(self.names[0], args={"frames": frames}),
                 'dont_parse_links': True
             }
         else:

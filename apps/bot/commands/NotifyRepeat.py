@@ -15,14 +15,14 @@ def get_time(time):
         return None
 
 
-# ToDo: TG
+# ToDo: TG check
 class NotifyRepeat(CommonCommand):
     def __init__(self):
         names = ["напоминай", "оповещай"]
         help_text = "Напоминай - напоминает о чём-либо постояно"
         detail_help_text = "Напоминай (время) (сообщение/команда) [Прикреплённые вложения] - напоминает о чём-то каждый день в заданное время\n" \
                            "Максимум можно добавить 5 напоминаний"
-        super().__init__(names, help_text, detail_help_text, args=2, api=False, enabled=False)
+        super().__init__(names, help_text, detail_help_text, args=2, api=False)
 
     def start(self):
         if self.event.sender.city is None:
