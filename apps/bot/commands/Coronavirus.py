@@ -52,8 +52,8 @@ class Coronavirus(CommonCommand):
         if result:
             msg = f"{country.capitalize()}\n\n{result}"
             if detail in ["Gist", "Graphic"]:
-                self.api = False
-                self.check_api()
+                self.platforms = ['vk', 'tg']
+                self.check_platforms()
                 if detail == "Gist":
                     datas = covid19_api.get_detail_by_country()
                     _, a = plt.subplots()

@@ -1,7 +1,7 @@
 import datetime
 
 from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import localize_datetime
+from apps.bot.classes.common.CommonMethods import localize_datetime, normalize_datetime
 from apps.service.models import QuoteBook
 
 
@@ -22,17 +22,17 @@ class Quote(CommonCommand):
             if msg['from_id'] > 0:
                 quote_user_id = int(msg['from_id'])
                 quote_user = self.bot.get_user_by_id(quote_user_id)
-                username = quote_user.name + " " + quote_user.surname
+                username = str(quote_user)
             else:
                 quote_bot_id = int(msgs[0]['from_id'])
                 quote_bot = self.bot.get_bot_by_id(quote_bot_id)
-                username = quote_bot.name
+                username = str(quote_bot)
             quote_text += f"{username}:\n{text}\n\n"
         quote.text = quote_text
         if self.event.chat:
             quote.chat = self.event.chat
         else:
             quote.user = self.event.sender
-        quote.date = localize_datetime(datetime.datetime.utcnow(), "Europe/Moscow")
+        quote.date = datetime.datetime.utcnow()
         quote.save()
         return "Цитата сохранена"

@@ -5,7 +5,6 @@ import re
 import pytz
 # Вероятность события в процентах
 from PIL import Image, ImageDraw, ImageFont
-from django.core.management import get_commands
 
 from apps.bot.classes.Consts import Role
 from petrovich.settings import STATIC_ROOT
@@ -140,6 +139,7 @@ def get_attachments_from_attachments_or_fwd(vk_event, _type=None, from_first_fwd
 
 # Ищет команду по имени
 def find_command_by_name(command_name):
+    from apps.bot.initial import get_commands
     commands = get_commands()
 
     for command in commands:

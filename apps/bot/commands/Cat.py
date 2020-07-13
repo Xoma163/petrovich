@@ -26,6 +26,8 @@ class Cat(CommonCommand):
         if self.event.args and self.event.args[0].lower() in ['аватар']:
             self.check_sender(Role.ADMIN)
             cat = CatModel.objects.filter(to_send=True).order_by('?').first()
+            if not cat:
+                return "Нет котов"
             cat.to_send = False
             cat.save()
             attachments = self.bot.upload_photos(cat.image.path)

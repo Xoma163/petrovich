@@ -26,7 +26,7 @@ class Music(CommonCommand):
         help_text = "Музыка - скачивает аудиодорожку из YouTube и присылает её в виде аудио"
         detail_help_text = "Музыка (ссылка на видео youtube) - скачивает аудиодорожку из YouTube и присылает её в " \
                            "виде аудио. Продолжительность видео максимум 10 минут"
-        super().__init__(names, help_text, detail_help_text, args=1, platforms=['vk'], enabled=False)
+        super().__init__(names, help_text, detail_help_text, args=1, platforms=['vk'])
 
     def start(self):
         self.bot.set_activity(self.event.peer_id, 'audiomessage')

@@ -18,7 +18,7 @@ class Time(CommonCommand):
         else:
             city = self.event.sender.city
         if not city:
-            return "Город не найден. /город добавить"
+            return "Город не найден. Чтобы указать город: /город (название города)"
         if not city.timezone:
             return "Таймзона у города не найдена"
 
