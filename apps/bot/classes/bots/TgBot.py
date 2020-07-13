@@ -330,3 +330,4 @@ class MyTgBotLongPoll:
             except Exception as e:
                 error = {'exception': f'Longpoll Error (TG): {str(e)}'}
                 # logger.error(error)
+
