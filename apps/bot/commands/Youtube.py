@@ -5,13 +5,13 @@ from apps.bot.APIs.YoutubeInfo import YoutubeInfo
 from apps.bot.classes.Consts import Role
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import check_user_group
-from apps.bot.models import VkUser
+from apps.bot.models import Users
 from apps.service.models import YoutubeSubscribe
 
 
 def get_users(chat, who):
     params = {'chats': chat, 'groups__name': who}
-    return list(VkUser.objects.filter(**params))
+    return list(Users.objects.filter(**params))
 
 
 MAX_USER_SUBS_COUNT = 3

@@ -8,7 +8,7 @@ from django.forms import Textarea
 from django.utils.html import format_html
 
 from apps.db_logger.config import DJANGO_DB_LOGGER_ADMIN_LIST_PER_PAGE
-from apps.db_logger.models import MovementLog, VkLogger, TgLogger
+from apps.db_logger.models import MovementLog, Logger
 
 
 class LoggerAdmin(admin.ModelAdmin):
@@ -43,13 +43,8 @@ class LoggerAdmin(admin.ModelAdmin):
     create_datetime_format.short_description = "Дата создания"
 
 
-@admin.register(TgLogger)
-class TgLoggerAdmin(LoggerAdmin):
-    pass
-
-
-@admin.register(VkLogger)
-class VkLoggerAdmin(LoggerAdmin):
+@admin.register(Logger)
+class LoggerAdmin(LoggerAdmin):
     pass
 
 

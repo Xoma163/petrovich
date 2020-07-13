@@ -9,7 +9,7 @@ from apps.bot.classes.bots.VkBot import VkBot
 from apps.bot.classes.common.CommonMethods import remove_tz
 from apps.bot.classes.Consts import Role
 from apps.bot.classes.DoTheLinuxComand import do_the_linux_command
-from apps.bot.models import VkUser
+from apps.bot.models import Users
 from apps.service.models import Service
 from petrovich.settings import env, BASE_DIR, MAIN_DOMAIN
 
@@ -108,7 +108,7 @@ class MinecraftAPI:
         return result
 
     def send_notify(self, message):
-        users_notify = VkUser.objects.filter(groups__name=Role.MINECRAFT_NOTIFY.name)
+        users_notify = Users.objects.filter(groups__name=Role.MINECRAFT_NOTIFY.name)
         if self.event:
             users_notify = users_notify.exclude(id=self.event.sender.id)
         users_chat_id_notify = [user.user_id for user in users_notify]
@@ -124,7 +124,7 @@ class MinecraftAPI:
             # Создание событие. Уведомление, что мы скоро всё отрубим
             if created:
                 message = f"Если никто не зайдёт на сервак по майну {self.version}, то через полчаса я его остановлю"
-                users_notify = VkUser.objects.filter(groups__name=Role.MINECRAFT_NOTIFY.name)
+                users_notify = Users.objects.filter(groups__name=Role.MINECRAFT_NOTIFY.name)
                 users_chat_id_notify = [user.user_id for user in users_notify]
                 self.bot.parse_and_send_msgs_thread(users_chat_id_notify, message)
 
@@ -139,7 +139,7 @@ class MinecraftAPI:
                     self.stop(send_notify=False)
 
                     message = f"Вырубаю майн {self.version}"
-                    users_notify = VkUser.objects.filter(groups__name=Role.MINECRAFT_NOTIFY.name)
+                    users_notify = Users.objects.filter(groups__name=Role.MINECRAFT_NOTIFY.name)
                     users_chat_id_notify = [user.user_id for user in users_notify]
                     self.bot.parse_and_send_msgs_thread(users_chat_id_notify, message)
                 else:

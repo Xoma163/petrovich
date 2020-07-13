@@ -8,10 +8,7 @@ from django.db import models
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 
-from apps.bot.models import VkChat, VkUser, VkBot
-
-
-# Create your models here.
+from apps.bot.models import Chat, Users, Bot
 from petrovich.settings import MEDIA_ROOT
 
 
@@ -28,7 +25,6 @@ class TimeZone(models.Model):
 
 
 class City(models.Model):
-    id = models.AutoField(primary_key=True)
     name = models.CharField(verbose_name="Название", max_length=100)
     synonyms = models.CharField(verbose_name="Похожие названия", max_length=300)
     timezone = models.ForeignKey(TimeZone, verbose_name="Временная зона UTC", null=True, max_length=30, default="",
@@ -46,7 +42,6 @@ class City(models.Model):
 
 
 class Statistic(models.Model):
-    id = models.AutoField(primary_key=True, verbose_name='ID')
     command = models.CharField(verbose_name='Команда', max_length=20)
     count_queries = models.IntegerField(verbose_name='Количество запросов', default=0)
 
@@ -59,8 +54,7 @@ class Statistic(models.Model):
 
 
 class Issue(models.Model):
-    id = models.AutoField(primary_key=True, verbose_name='ID')
-    author = models.ForeignKey(VkUser, verbose_name="Автор", on_delete=models.SET_NULL, null=True)
+    author = models.ForeignKey(Users, verbose_name="Автор", on_delete=models.SET_NULL, null=True)
     text = models.TextField(verbose_name='Фича', max_length=5000)
 
     class Meta:
@@ -85,10 +79,9 @@ class Service(models.Model):
 
 
 class Counter(models.Model):
-    id = models.AutoField(primary_key=True)
     name = models.CharField(verbose_name="Имя", max_length=50, blank=True)
     count = models.IntegerField(verbose_name="Количество", default=0)
-    chat = models.ForeignKey(VkChat, verbose_name='Чат', null=True, blank=True, on_delete=models.CASCADE)
+    chat = models.ForeignKey(Chat, verbose_name='Чат', null=True, blank=True, on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = "счётчик"
@@ -109,9 +102,8 @@ def get_image_from_url(url):
 
 
 class Cat(models.Model):
-    id = models.AutoField(primary_key=True)
     image = models.ImageField(upload_to='service/cats/', verbose_name="Изображение")
-    author = models.ForeignKey(VkUser, verbose_name="Автор", on_delete=models.SET_NULL, null=True)
+    author = models.ForeignKey(Users, verbose_name="Автор", on_delete=models.SET_NULL, null=True)
     to_send = models.BooleanField(verbose_name="Ещё не было", default=True)
 
     class Meta:
@@ -143,10 +135,9 @@ class Meme(models.Model):
         ('doc', 'Документ'),
     ]
 
-    id = models.AutoField(primary_key=True)
     name = models.CharField(verbose_name="Название", max_length=1000, default="")
     link = models.CharField(verbose_name="Ссылка", max_length=1000, default="", null=True, blank=True)
-    author = models.ForeignKey(VkUser, verbose_name="Автор", on_delete=models.SET_NULL, null=True)
+    author = models.ForeignKey(Users, verbose_name="Автор", on_delete=models.SET_NULL, null=True)
     type = models.CharField(verbose_name="Тип", max_length=5, choices=types, blank=True)
     uses = models.PositiveIntegerField(verbose_name="Использований", default=0)
     approved = models.BooleanField(verbose_name="Разрешённый", default=False)
@@ -185,12 +176,11 @@ def log_deleted_question(sender, instance, using, **kwargs):
 
 
 class Notify(models.Model):
-    id = models.AutoField(primary_key=True)
     date = models.DateTimeField(verbose_name="Дата напоминания")
     text = models.CharField(verbose_name="Текст/команда", max_length=1000, default="")
     text_for_filter = models.CharField(verbose_name="Текст для поиска", max_length=1000, default="")
-    chat = models.ForeignKey(VkChat, verbose_name='Чат', null=True, on_delete=models.CASCADE, blank=True)
-    author = models.ForeignKey(VkUser, verbose_name="Автор", on_delete=models.CASCADE, null=True)
+    chat = models.ForeignKey(Chat, verbose_name='Чат', null=True, on_delete=models.CASCADE, blank=True)
+    author = models.ForeignKey(Users, verbose_name="Автор", on_delete=models.CASCADE, null=True)
     repeat = models.BooleanField(verbose_name="Повторять", default=False)
     attachments = JSONField(null=True, verbose_name="Вложения", blank=True)
 
@@ -204,8 +194,7 @@ class Notify(models.Model):
 
 
 class AudioList(models.Model):
-    id = models.AutoField(primary_key=True)
-    author = models.ForeignKey(VkUser, verbose_name="Автор", on_delete=models.CASCADE, null=True)
+    author = models.ForeignKey(Users, verbose_name="Автор", on_delete=models.CASCADE, null=True)
     name = models.CharField(verbose_name="Название", max_length=300)
     attachment = models.CharField(verbose_name="Вложение", max_length=100, default="", null=True, blank=True)
 
@@ -219,10 +208,9 @@ class AudioList(models.Model):
 
 
 class LaterMessage(models.Model):
-    id = models.AutoField(primary_key=True)
-    message_author = models.ForeignKey(VkUser, verbose_name="Автор сообщения", on_delete=models.CASCADE, null=True,
+    message_author = models.ForeignKey(Users, verbose_name="Автор сообщения", on_delete=models.CASCADE, null=True,
                                        related_name="message_author_%(class)ss", blank=True)
-    message_bot = models.ForeignKey(VkBot, verbose_name="Автор сообщения(бот)", on_delete=models.SET_NULL, null=True,
+    message_bot = models.ForeignKey(Bot, verbose_name="Автор сообщения(бот)", on_delete=models.SET_NULL, null=True,
                                     blank=True)
     text = models.CharField(verbose_name="Текст", max_length=300, blank=True)
     date = models.DateTimeField(verbose_name="Дата сообщения")
@@ -238,7 +226,7 @@ class LaterMessage(models.Model):
 
 
 class LaterMessageSession(models.Model):
-    author = models.ForeignKey(VkUser, verbose_name="Автор", on_delete=models.CASCADE, null=True)
+    author = models.ForeignKey(Users, verbose_name="Автор", on_delete=models.CASCADE, null=True)
     later_messages = models.ManyToManyField(LaterMessage, verbose_name="Сообщения")
     date = models.DateTimeField(verbose_name="Дата сообщения")
 
@@ -268,8 +256,8 @@ class Donations(models.Model):
 
 
 class YoutubeSubscribe(models.Model):
-    author = models.ForeignKey(VkUser, verbose_name="Автор", on_delete=models.CASCADE, null=True)
-    chat = models.ForeignKey(VkChat, verbose_name='Чат', null=True, on_delete=models.CASCADE, blank=True)
+    author = models.ForeignKey(Users, verbose_name="Автор", on_delete=models.CASCADE, null=True)
+    chat = models.ForeignKey(Chat, verbose_name='Чат', null=True, on_delete=models.CASCADE, blank=True)
 
     channel_id = models.CharField(verbose_name="ID канала", max_length=100)
     title = models.CharField(verbose_name="Название канала", max_length=100)
@@ -296,7 +284,7 @@ class Horoscope(models.Model):
 
 
 class WakeOnLanUserData(models.Model):
-    user = models.ForeignKey(VkUser, verbose_name="Пользователь", on_delete=models.CASCADE, null=True)
+    user = models.ForeignKey(Users, verbose_name="Пользователь", on_delete=models.CASCADE, null=True)
     name = models.CharField(verbose_name="Название", max_length=100)
     ip = models.CharField(verbose_name="IP", max_length=16)
     port = models.SmallIntegerField(verbose_name="Порт")
@@ -313,8 +301,8 @@ class WakeOnLanUserData(models.Model):
 class QuoteBook(models.Model):
     text = models.TextField(verbose_name="Текст", max_length=5000)
     date = models.DateTimeField(verbose_name="Дата", auto_now_add=True, blank=True)
-    vk_user = models.ForeignKey(VkUser, verbose_name="Автор", on_delete=models.CASCADE, null=True, blank=True)
-    vk_chat = models.ForeignKey(VkChat, verbose_name="Чат", on_delete=models.CASCADE, null=True, blank=True)
+    user = models.ForeignKey(Users, verbose_name="Автор", on_delete=models.CASCADE, null=True, blank=True)
+    chat = models.ForeignKey(Chat, verbose_name="Чат", on_delete=models.CASCADE, null=True, blank=True)
 
     class Meta:
         verbose_name = "Цитата"
@@ -326,8 +314,6 @@ class QuoteBook(models.Model):
 
 
 class Words(models.Model):
-    id = models.AutoField(primary_key=True, verbose_name='ID')
-
     m1 = models.CharField(verbose_name="Мужской", max_length=500, null=True)
     f1 = models.CharField(verbose_name="Женский", max_length=500, null=True)
     n1 = models.CharField(verbose_name="Средний", max_length=500, null=True)

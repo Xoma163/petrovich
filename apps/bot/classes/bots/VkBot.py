@@ -20,15 +20,14 @@ from apps.bot.classes.bots.CommonBot import CommonBot
 from apps.bot.classes.bots.VkUser import VkUser
 from apps.bot.classes.events.VkEvent import VkEvent
 from apps.bot.commands.City import add_city_to_db
-from apps.bot.models import VkUser as VkUserModel, VkChat as VkChatModel, VkBot as VkBotModel
-from apps.db_logger.models import VkLogger
+from apps.bot.models import Users, Chat
 from petrovich.settings import env
 
 
 class VkBot(CommonBot, Thread):
     def __init__(self):
-        CommonBot.__init__(self)
         Thread.__init__(self)
+        CommonBot.__init__(self, 'vk')
 
         self.token = env.str('VK_BOT_TOKEN')
         self.group_id = env.str('VK_BOT_GROUP_ID')
@@ -39,11 +38,6 @@ class VkBot(CommonBot, Thread):
 
         self.vk_user = VkUser()
 
-        self.user_model = VkUserModel
-        self.chat_model = VkChatModel
-        self.bot_model = VkBotModel
-        self.log_model = VkLogger
-
         self.logger = logging.getLogger('vk_bot')
 
     def set_activity(self, peer_id, activity='typing'):
@@ -52,16 +46,18 @@ class VkBot(CommonBot, Thread):
         self.vk.messages.setActivity(type=activity, peer_id=peer_id, group_id=self.group_id)
 
     def get_user_by_id(self, user_id):
-        vk_user = self.user_model.objects.filter(user_id=user_id)
+        vk_user = self.user_model.filter(user_id=user_id)
         if len(vk_user) > 0:
             vk_user = vk_user.first()
         else:
             # Прозрачная регистрация
             user = self.vk.users.get(user_id=user_id, lang='ru', fields='sex, bdate, city, screen_name')[0]
-            vk_user = self.user_model()
+            vk_user = Users()
             vk_user.user_id = user_id
             vk_user.name = user['first_name']
             vk_user.surname = user['last_name']
+            vk_user.platform = self.name
+
             if 'sex' in user:
                 vk_user.gender = user['sex']
             if 'bdate' in user:
@@ -94,7 +90,7 @@ class VkBot(CommonBot, Thread):
         if len(vk_chat) > 0:
             vk_chat = vk_chat.first()
         else:
-            vk_chat = self.chat_model(chat_id=chat_id)
+            vk_chat = Chat(chat_id=chat_id, platform=self.name)
             vk_chat.save()
         return vk_chat
 
@@ -111,6 +107,7 @@ class VkBot(CommonBot, Thread):
             bot = self.bot_model()
             bot.bot_id = bot_id
             bot.name = vk_bot['name']
+            bot.platform = self.name
             bot.save()
 
         return bot

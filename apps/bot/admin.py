@@ -1,12 +1,12 @@
 from django.contrib import admin
 
 # Register your models here.
-from apps.bot.models import VkUser, VkChat, VkBot, APIUser, APITempUser, TgUser, TgChat, TgBot
+from apps.bot.models import Users, Chat, Bot, APIUser, APITempUser
 
 
-class AbstractUserAdmin(admin.ModelAdmin):
+class UserAdmin(admin.ModelAdmin):
     list_display = (
-        'user_id', 'name', 'surname', 'nickname', 'nickname_real', 'gender', 'birthday', 'city',
+        'id', 'name', 'surname', 'nickname', 'nickname_real', 'gender', 'birthday', 'city',
     )
     list_filter = ('gender',
                    ('city', admin.RelatedOnlyFieldListFilter),
@@ -15,31 +15,28 @@ class AbstractUserAdmin(admin.ModelAdmin):
     search_fields = ['name', 'surname', 'nickname', 'nickname_real', 'id']
 
 
-admin.site.register(VkUser, AbstractUserAdmin)
-admin.site.register(TgUser, AbstractUserAdmin)
+admin.site.register(Users, UserAdmin)
 
 
-class AbstractChatAdmin(admin.ModelAdmin):
-    list_display = ('chat_id', 'name', 'admin', 'need_reaction')
+class ChatAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'admin', 'need_reaction')
 
 
-admin.site.register(VkChat, AbstractChatAdmin)
-admin.site.register(TgChat, AbstractChatAdmin)
+admin.site.register(Chat, ChatAdmin)
 
 
-class AbstractBotAdmin(admin.ModelAdmin):
-    list_display = ('bot_id', 'name',)
+class BotAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name',)
 
 
-admin.site.register(VkBot, AbstractBotAdmin)
-admin.site.register(TgBot, AbstractBotAdmin)
+admin.site.register(Bot, BotAdmin)
 
 
 @admin.register(APIUser)
 class APIUserAdmin(admin.ModelAdmin):
-    list_display = ('user_id', 'vk_user', 'vk_chat')
+    list_display = ('id', 'user', 'chat')
 
 
 @admin.register(APITempUser)
 class APITempUserAdmin(admin.ModelAdmin):
-    list_display = ('user_id', 'vk_user', 'vk_chat', 'code', 'tries')
+    list_display = ('id', 'user', 'chat', 'code', 'tries')

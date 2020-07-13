@@ -1,25 +1,26 @@
+import logging
 import threading
 import traceback
 
 from apps.bot.classes.Consts import Role
 from apps.bot.classes.common.CommonMethods import tanimoto, check_user_group, get_user_groups
 from apps.bot.classes.events.Event import Event
+from apps.bot.models import Users, Chat, Bot
 from apps.service.views import append_command_to_statistics
 
 
 class CommonBot():
-    def __init__(self):
+    def __init__(self, name):
+        self.name = name
         self.mentions = []
         self.BOT_CAN_WORK = True
         self.DEBUG = False
         self.DEVELOP_DEBUG = False
+        self.user_model = Users.objects.filter(platform=self.name)
+        self.chat_model = Chat.objects.filter(platform=self.name)
+        self.bot_model = Bot.objects.filter(platform=self.name)
 
-        self.user_model = None
-        self.chat_model = None
-        self.bot_model = None
-        self.log_model = None
-
-        self.logger = None
+        self.logger = logging.getLogger(self.name)
 
     def get_user_by_id(self, user_id):
         pass
@@ -229,14 +230,14 @@ class CommonBot():
             chats.remove(chat)
 
     def can_bot_working(self):
-        return self.BOT_CAN_WORK        
-    
+        return self.BOT_CAN_WORK
+
     def get_user_by_name(self, args, filter_chat=None):
         if not args:
             raise RuntimeWarning("Отсутствуют аргументы")
         if isinstance(args, str):
             args = [args]
-        users = self.user_model.objects
+        users = self.user_model
         if filter_chat:
             users = users.filter(chats=filter_chat)
         if len(args) >= 2:
@@ -265,7 +266,7 @@ class CommonBot():
             raise RuntimeWarning("Отсутствуют аргументы")
         if isinstance(args, str):
             args = [args]
-        chats = self.chat_model.objects
+        chats = self.chat_model
         for arg in args:
             chats = chats.filter(name__icontains=arg)
 

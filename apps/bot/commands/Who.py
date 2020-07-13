@@ -1,11 +1,11 @@
 from apps.bot.classes.Consts import Role
 from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.models import VkUser
+from apps.bot.models import Users
 
 
 def get_users(chat, who):
     params = {'chats': chat, 'groups__name': who}
-    return list(VkUser.objects.filter(**params))
+    return list(Users.objects.filter(**params))
 
 
 # ToDo: TG check

@@ -14,8 +14,7 @@ from django.contrib.auth.models import Group
 from apps.bot.classes.Consts import Role
 from apps.bot.classes.bots.CommonBot import CommonBot
 from apps.bot.classes.events.TgEvent import TgEvent
-from apps.bot.models import TgUser as TgUserModel, TgChat as TgChatModel, TgBot as TgBotModel
-from apps.db_logger.models import TgLogger
+from apps.bot.models import Users, Chat, Bot
 from petrovich.settings import env
 
 
@@ -34,18 +33,12 @@ class TgRequests:
 
 class TgBot(CommonBot, Thread):
     def __init__(self):
-        CommonBot.__init__(self)
         Thread.__init__(self)
+        CommonBot.__init__(self, 'tg')
 
         self.token = env.str("TG_TOKEN")
         self.requests = TgRequests(self.token)
         self.longpoll = MyTgBotLongPoll(self.token, self.requests)
-
-        self.user_model = TgUserModel
-        self.chat_model = TgChatModel
-        self.bot_model = TgBotModel
-        self.log_model = TgLogger
-        # self.tg_user = TgUser()
 
         self.logger = logging.getLogger('tg_bot')
 
@@ -59,31 +52,34 @@ class TgBot(CommonBot, Thread):
             _user.name = user.get('first_name', None)
             _user.surname = user.get('last_name', None)
             _user.nickname = user.get('username', None)
+            _user.platform = self.name
             tg_user.save()
             group_user = Group.objects.get(name=Role.USER.name)
             tg_user.groups.add(group_user)
             tg_user.save()
 
-        tg_user = self.user_model.objects.filter(user_id=user['id'])
+        tg_user = self.user_model.filter(user_id=user['id'])
         if len(tg_user) > 0:
             tg_user = tg_user.first()
 
             if tg_user.name is None:
                 set_fields(tg_user)
         else:
-            tg_user = self.user_model()
+            tg_user = Users()
             tg_user.user_id = user['id']
             set_fields(tg_user)
         return tg_user
 
     def get_user_by_id(self, user_id):
-        tg_user = self.user_model.objects.filter(user_id=user_id)
+        tg_user = self.user_model.filter(user_id=user_id)
         if len(tg_user) > 0:
             tg_user = tg_user.first()
         else:
             # Если пользователь из fwd
-            tg_user = self.user_model()
+            tg_user = Users()
             tg_user.user_id = user_id
+            tg_user.platform = self.name
+
             tg_user.save()
 
             group_user = Group.objects.get(name=Role.USER.name)
@@ -92,24 +88,23 @@ class TgBot(CommonBot, Thread):
         return tg_user
 
     def get_chat_by_id(self, chat_id):
-        tg_chat = self.chat_model.objects.filter(chat_id=chat_id)
+        tg_chat = self.chat_model.filter(chat_id=chat_id)
         if len(tg_chat) > 0:
             tg_chat = tg_chat.first()
         else:
-            tg_chat = self.chat_model(chat_id=chat_id)
+            tg_chat = Chat(chat_id=chat_id, platform=self.name)
             tg_chat.save()
         return tg_chat
 
     def get_bot_by_id(self, bot_id):
         if bot_id > 0:
             bot_id = -bot_id
-        bot = self.bot_model.objects.filter(bot_id=bot_id)
+        bot = self.bot_model.filter(bot_id=bot_id)
         if len(bot) > 0:
             bot = bot.first()
         else:
             # Прозрачная регистрация
-            bot = self.bot_model()
-            bot.bot_id = bot_id
+            bot = Bot(bot_id=bot_id, platform=self.name)
             bot.save()
 
         return bot
@@ -146,6 +141,7 @@ class TgBot(CommonBot, Thread):
                     return self._send_photo(peer_id, msg, attachments[0]['attachment'])
         prepared_message = {'chat_id': peer_id, 'text': msg, 'parse_mode': 'HTML'}
         return self.requests.get('sendMessage', params=prepared_message)
+
     @staticmethod
     def _setup_event(event):
         tg_event = {
@@ -330,4 +326,3 @@ class MyTgBotLongPoll:
             except Exception as e:
                 error = {'exception': f'Longpoll Error (TG): {str(e)}'}
                 # logger.error(error)
-

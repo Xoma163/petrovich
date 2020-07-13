@@ -9,7 +9,7 @@ from PIL import Image, ImageDraw, ImageFont
 from django.core.management import get_commands
 
 from apps.bot.classes.Consts import Role
-from apps.bot.models import VkChat
+from apps.bot.models import Chat
 from petrovich.settings import STATIC_ROOT
 
 
@@ -78,8 +78,9 @@ def normalize_datetime(datetime, tz):
 
 
 # Возвращает чат по названию, где есть пользователь
+# ToDo: TG + VK ?
 def get_one_chat_with_user(chat_name, user_id):
-    chats = VkChat.objects.filter(name__icontains=chat_name)
+    chats = Chat.objects.filter(name__icontains=chat_name)
     if len(chats) == 0:
         raise RuntimeWarning("Не нашёл такого чата")
 
