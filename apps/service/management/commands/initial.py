@@ -16,6 +16,8 @@ class Command(BaseCommand):
     def init_groups():
         groups = [{'name': x.name} for x in Role]
         for group in groups:
+            if group['name'] == "админ конфы":
+                continue
             Group.objects.update_or_create(name=group['name'], defaults=group)
 
     @staticmethod

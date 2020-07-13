@@ -3,7 +3,6 @@ from apps.bot.classes.common.CommonMethods import get_attachments_from_attachmen
 from apps.service.models import AudioList
 
 
-# ToDo: TG
 class Audio(CommonCommand):
     def __init__(self):
         names = ["аудио", "плейлист"]

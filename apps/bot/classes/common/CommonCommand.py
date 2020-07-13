@@ -2,8 +2,6 @@ from datetime import datetime
 
 from apps.bot.classes.Consts import Role
 from apps.bot.classes.common.CommonMethods import check_user_group, get_help_for_command, remove_tz
-from apps.bot.classes.events.TgEvent import TgEvent
-from apps.bot.classes.events.VkEvent import VkEvent
 from apps.service.models import Service
 from petrovich.settings import env
 
@@ -100,10 +98,10 @@ class CommonCommand:
     def check_sender(self, role):
         if check_user_group(self.event.sender, role):
             if role == Role.ADMIN:
-                if isinstance(self.event, VkEvent):
+                if self.event.platform == 'vk':
                     if self.event.sender.user_id == env.str("VK_ADMIN_ID"):
                         return True
-                elif isinstance(self.event, TgEvent):
+                elif self.event.platform == 'tg':
                     if self.event.sender.user_id == env.str("TG_ADMIN_ID"):
                         return True
                 else:
