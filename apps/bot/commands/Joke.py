@@ -31,7 +31,7 @@ class Joke(CommonCommand):
             self.check_number_arg_range(a_type, 1, 19, [9, 10, 17, 19])
         rzhunemogu_api = RzhunemoguAPI()
         msg = rzhunemogu_api.get_joke(a_type)
-        if self.event.from_api:
+        if self.event.platform == 'api':
             return msg
         else:
             return {"msg": msg, "keyboard": self.bot.get_inline_keyboard(self.names[0], args={"a_type": a_type})}

@@ -1,13 +1,13 @@
 from apps.bot.classes.common.CommonCommand import CommonCommand
 
-# ToDo: TG: vk only
+
 class ShortLinks(CommonCommand):
     def __init__(self):
         names = ["сс", "cc"]
         help_text = "Сс - сокращение ссылки"
         detail_help_text = "Сс (ссылка) - сокращение ссылки\n" \
                            "Сс (Пересылаемое сообщение) - сокращение ссылки"
-        super().__init__(names, help_text, detail_help_text, args=1, enabled=False)
+        super().__init__(names, help_text, detail_help_text, args=1, platforms=['vk','api'], enabled=False)
 
     def start(self):
         msgs = self.event.fwd

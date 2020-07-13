@@ -141,9 +141,9 @@ class VkBot(CommonBot, Thread):
                 print("Ошибка отправки сообщения\n"
                       f"{e}")
 
-    @staticmethod
-    def _setup_event(event):
+    def _setup_event(self, event):
         vk_event = {
+            'platform': self.name,
             'from_user': event.from_user,
             'chat_id': event.chat_id,
             'user_id': event.message.from_id,

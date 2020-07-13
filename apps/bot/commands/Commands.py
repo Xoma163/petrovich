@@ -12,7 +12,7 @@ class Commands(CommonCommand):
     def start(self):
         from apps.bot.initial import API_HELP_TEXT, HELP_TEXT
 
-        if self.event.from_api:
+        if self.event.platform == 'api':
             help_texts = API_HELP_TEXT
         else:
             help_texts = HELP_TEXT

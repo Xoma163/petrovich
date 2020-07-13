@@ -5,13 +5,12 @@ from apps.bot.classes.common.CommonMethods import localize_datetime
 from apps.service.models import QuoteBook
 
 
-# ToDo: vk_only или удаляем
 class Quote(CommonCommand):
     def __init__(self):
         names = ["цитата", "(c)", "(с)"]
         help_text = "Цитата - сохраняет в цитатник сообщения"
         detail_help_text = "Цитата (Пересылаемые сообщение) - сохраняет в цитатник сообщения"
-        super().__init__(names, help_text, detail_help_text, fwd=True, api=False)
+        super().__init__(names, help_text, detail_help_text, fwd=True, platforms=['vk','tg'])
 
     def start(self):
         msgs = self.event.fwd

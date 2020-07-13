@@ -2,13 +2,12 @@ from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.service.models import Issue as IssueModel
 
 
-# ToDo: TG
 class Issue(CommonCommand):
     def __init__(self):
         names = ["баг", "ошибка", "ишю", "ишью"]
         help_text = "Баг - добавляет проблему Петровича, которую нужно решить"
         detail_help_text = "Баг (текст/пересланные сообщения) - добавляет проблему Петровича, которую нужно решить"
-        super().__init__(names, help_text, detail_help_text, api=False)
+        super().__init__(names, help_text, detail_help_text, platforms=['vk','tg'])
 
     def start(self):
         msgs = self.event.fwd

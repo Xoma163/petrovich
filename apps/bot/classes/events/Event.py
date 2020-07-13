@@ -99,5 +99,7 @@ class Event:
             self.from_chat = False
 
         self.fwd = event.get('fwd', None)
-        self.from_api = event.get('api', None)
+
+        self.platform = event.get('platform', None)
+
         self.yandex = event.get('yandex', None)

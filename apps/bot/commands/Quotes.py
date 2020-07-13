@@ -11,7 +11,6 @@ def check_int_arg(arg):
         return arg, False
 
 
-# ToDo: vk_only или удаляем
 class Quotes(CommonCommand):
     def __init__(self):
         names = ["цитаты"]
@@ -20,7 +19,7 @@ class Quotes(CommonCommand):
                            "1) N - номер страницы;\n" \
                            "2) N - фраза для поиска;\n" \
                            "3) N - фраза для поиска M - номер страницы"
-        super().__init__(names, help_text, detail_help_text, api=False)
+        super().__init__(names, help_text, detail_help_text, platforms=['vk','tg'])
 
     def start(self):
         text_filter = None
@@ -62,12 +61,12 @@ class Quotes(CommonCommand):
         objs_on_page = p.page(page)
         msg = f"Страница {page}/{p.num_pages}\n\n"
         for i, obj_on_page in enumerate(objs_on_page):
-            if not self.event.from_api:
-                msg += f"------------------------------{i + 1}------------------------------\n" \
+            if self.event.platform == 'api':
+                msg += f"Цитата #{i + 1}\n" \
                        f"{obj_on_page.text}\n" \
                        f"(c) {obj_on_page.date.strftime('%d.%m.%Y %H:%M:%S')}\n"
             else:
-                msg += f"Цитата #{i + 1}\n" \
+                msg += f"------------------------------{i + 1}------------------------------\n" \
                        f"{obj_on_page.text}\n" \
                        f"(c) {obj_on_page.date.strftime('%d.%m.%Y %H:%M:%S')}\n"
 

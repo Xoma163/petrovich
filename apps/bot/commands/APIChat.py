@@ -11,7 +11,7 @@ class APIChat(CommonCommand):
                            "Чат привязать (название конфы) - отправляет код в выбранную конфу\n" \
                            "Чат отвязать (название конфы) - отправляет код в выбранную конфу\n" \
                            "Чат код (код) - привязывает чат к пользователю"
-        super().__init__(names, help_text, detail_help_text, api=True, args=1, enabled=False)
+        super().__init__(names, help_text, detail_help_text, args=1, enabled=False)
 
     def start(self):
         if self.event.sender.user_id == "ANONYMOUS":

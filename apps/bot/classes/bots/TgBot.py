@@ -145,12 +145,12 @@ class TgBot(CommonBot, Thread):
         prepared_message = {'chat_id': peer_id, 'text': msg, 'parse_mode': 'HTML', 'reply_markup': keyboard}
         return self.requests.get('sendMessage', params=prepared_message)
 
-    @staticmethod
-    def _setup_event(event):
+    def _setup_event(self, event):
         if 'callback_query' in event:
             event = event['callback_query']
             event['message']['from'] = event['from']
         tg_event = {
+            'platform': self.name,
             'from_user': not event['message']['from']['is_bot'],
             'user_id': event['message']['from']['id'],
             'chat_id': None,

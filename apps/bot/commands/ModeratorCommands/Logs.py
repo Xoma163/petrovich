@@ -75,7 +75,7 @@ class Logs(CommonCommand):
                            "Логи бд [кол-во записей = 1] - последний лог с трейсбеком.\n" \
                            "Макс 5 записей"
         keyboard = {'for': Role.MODERATOR, 'text': 'Логи', 'color': 'blue', 'row': 1, 'col': 1}
-        super().__init__(names, help_text, detail_help_text, access=Role.MODERATOR, keyboard=keyboard, api=False)
+        super().__init__(names, help_text, detail_help_text, access=Role.MODERATOR, keyboard=keyboard, platforms=['vk','tg'])
 
     def start(self):
         arg0 = None

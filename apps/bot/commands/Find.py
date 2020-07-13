@@ -8,7 +8,7 @@ class Find(CommonCommand):
         help_text = "Поиск  - ищет информацию по картинкам"
         detail_help_text = "Поиск (запрос) - ищет информацию по картинкам"
 
-        super().__init__(names, help_text, detail_help_text, args=1, api=False)
+        super().__init__(names, help_text, detail_help_text, args=1, platforms=['vk','tg'])
 
     def start(self):
         self.bot.set_activity(self.event.peer_id)

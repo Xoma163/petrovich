@@ -34,8 +34,7 @@ class CommonCommand:
                  args=None,
                  int_args=None,
                  float_args=None,
-                 api=None,
-                 tg=None,
+                 platforms=None,
                  attachments=False,
                  enabled=True,
                  priority=0,
@@ -51,8 +50,7 @@ class CommonCommand:
         self.args = args
         self.int_args = int_args
         self.float_args = float_args
-        self.api = api
-        self.tg = tg
+        self.platforms = platforms or ['vk', 'tg', 'api']
         self.attachments = attachments
         self.enabled = enabled
         self.priority = priority
@@ -78,7 +76,7 @@ class CommonCommand:
     # Проверки
     def checks(self):
         # Если команда не для api
-        self.check_api()
+        self.check_platforms()
         self.check_sender(self.access)
         if self.pm:
             self.check_pm()
@@ -237,18 +235,10 @@ class CommonCommand:
         return True
 
     # Проверяет, прислано ли сообщение через API
-    def check_api(self):
-        # Если запрос пришёл через api
-        if self.event.from_api:
-            if self.api == False:
-                error = "Команда недоступна для API"
-                raise RuntimeError(error)
-
-        if not self.event.from_api:
-            if self.api:
-                error = "Команда недоступна для VK/TG"
-                raise RuntimeError(error)
-
+    def check_platforms(self):
+        if self.event.platform not in self.platforms:
+            error = f"Команда недоступна для {self.event.platform.upper()}"
+            raise RuntimeError(error)
         return True
 
     # ToDo: check on types

@@ -19,7 +19,7 @@ class Fix(CommonCommand):
         names = ["фикс", "раскладка"]
         help_text = "Фикс - исправляет раскладку текста"
         detail_help_text = "Фикс (Пересылаемые сообщения) - исправляет раскладку текста"
-        super().__init__(names, help_text, detail_help_text, fwd=True, api=False)
+        super().__init__(names, help_text, detail_help_text, fwd=True, platforms=['vk','tg'])
 
     def start(self):
         msgs = ""

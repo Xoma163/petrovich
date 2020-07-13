@@ -24,7 +24,7 @@ class Horoscope(CommonCommand):
         help_text = "Гороскоп - мемный гороскоп"
         detail_help_text = "Гороскоп [знак зодиака = по др в профиле] - пришлёт мемный гороскоп на день для знака зодиака\n" \
                            "Гороскоп все - пришлёт мемный гороскоп для всех знаков зодиака"
-        super().__init__(names, help_text, detail_help_text, api=False)
+        super().__init__(names, help_text, detail_help_text, platforms=['vk','tg'])
 
     def start(self):
 

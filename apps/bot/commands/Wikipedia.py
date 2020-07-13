@@ -29,7 +29,7 @@ class Wikipedia(CommonCommand):
                 msg = f"{page.original_title}\n\n{page.summary}\n\nПодробнее: {page.url}"
             else:
                 msg = f"{page.original_title}\n\n{page.content}\n\nПодробнее: {page.url}"
-            if self.event.from_api:
+            if self.event.platform == 'api':
                 return msg
             output = {'msg': msg, 'attachments': [page.url]}
             if page.images:
