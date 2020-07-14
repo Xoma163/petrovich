@@ -321,3 +321,14 @@ class CommonBot:
             raise RuntimeWarning("Два и более игрока подходит под поиск")
         else:
             return gamers.first()
+
+
+def get_bot_by_platform(platform):
+    from apps.bot.classes.bots.VkBot import VkBot
+    from apps.bot.classes.bots.TgBot import TgBot
+
+    platforms = {
+        'vk': VkBot,
+        'tg': TgBot
+    }
+    return platforms[platform]

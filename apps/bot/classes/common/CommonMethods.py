@@ -74,13 +74,6 @@ def normalize_datetime(datetime, tz):
     return pytz.utc.normalize(localized_time, is_dst=None).astimezone(tz_utc)  # .replace(tzinfo=None)
 
 
-# Возвращает упоминание пользователя
-def get_mention(user, name=None):
-    if not name:
-        name = user.name
-    return f"[id{user.user_id}|{name}]"
-
-
 # Склоняет существительное после числительного
 # number - число, titles - 3 склонения.
 def decl_of_num(number, titles):

@@ -299,6 +299,28 @@ class VkBot(CommonBot, Thread):
                 }
             ]]}
 
+    @staticmethod
+    def get_group_id(_id):
+        return 2000000000 + int(_id)
+
+    @staticmethod
+    def get_mention(user, name=None):
+        name = name or str(user)
+        return f"[id{user.user_id}|{name}]"
+
+    def upload_video_by_link(self, link, name):
+        values = {
+            'name': name,
+            'is_private': True,
+            'link': link,
+        }
+
+        response = self.vk_user.vk.video.save(**values)
+        response2 = requests.post(response['upload_url']).json()
+        print(response2)
+
+        return f"video{response['owner_id']}_{response['video_id']}"
+
 
 class MyVkBotLongPoll(VkBotLongPoll):
 

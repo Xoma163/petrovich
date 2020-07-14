@@ -85,6 +85,8 @@ class TgBot(CommonBot, Thread):
         return tg_user
 
     def get_chat_by_id(self, chat_id):
+        if chat_id > 0:
+            chat_id *= -1
         tg_chat = self.chat_model.filter(chat_id=chat_id)
         if len(tg_chat) > 0:
             tg_chat = tg_chat.first()
@@ -135,8 +137,9 @@ class TgBot(CommonBot, Thread):
         if attachments:
             # Убираем все ссылки, потому что телега в них не умеет похоже
             attachments = list(filter(lambda x: not (isinstance(x, str) and urlparse(x).hostname), attachments))
+            attachments = list(filter(lambda x: x, attachments))
             if attachments:
-                if len(attachments) > 1:
+                if len(attachments) > 1 and attachments[0]:
                     return self._send_media_group(peer_id, msg, attachments, keyboard)
                 elif attachments[0]['type'] == 'video':
                     return self._send_video(peer_id, msg, attachments[0]['attachment'], keyboard)
@@ -320,16 +323,16 @@ class TgBot(CommonBot, Thread):
             ]]
         }
 
-    # 'buttons': [[
-    #     {
-    #         'action': {
-    #             'type': 'text',
-    #             'label': button_text,
-    #             "payload": json.dumps({"command": command_text, "args": args}, ensure_ascii=False)
-    #         },
-    #         'color': 'primary',
-    #     }
-    # ]]}
+    @staticmethod
+    def get_group_id(_id):
+        return _id
+
+    @staticmethod
+    def get_mention(user, name=None):
+        return f"@{user.nickname}"
+
+    def upload_video_by_link(self, link, name):
+        return None
 
 
 class MyTgBotLongPoll:
