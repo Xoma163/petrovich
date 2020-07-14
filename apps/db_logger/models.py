@@ -35,7 +35,6 @@ class Logger(models.Model):
         return self.msg
 
     class Meta:
-        # abstract = True
         ordering = ('-create_datetime',)
 
 

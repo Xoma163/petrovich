@@ -1,30 +1,32 @@
+from datetime import datetime
+
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.commands.Meme import prepare_meme_to_send
 from apps.service.models import Horoscope as HoroscopeModel
 
 zodiac_signs = {
-    "овен": 80,
-    "телец": 111,
-    "близнецы": 142,
-    "рак": 173,
-    "лев": 204,
-    "дева": 234,
-    "весы": 268,
-    "скорпион": 298,
-    "стрелец": 328,
-    "козерог": 358,
-    "водолей": 21,
-    "рыбы": 51,
+    "водолей": "21.01",
+    "рыбы": "19.02",
+    "овен": "21.03",
+    "телец": "21.04",
+    "близнецы": "22.05",
+    "рак": "22.06",
+    "лев": "23.07",
+    "дева": "24.08",
+    "весы": "24.09",
+    "скорпион": "24.10",
+    "стрелец": "23.11",
+    "козерог": "22.12",
 }
 
-# ToDo: TG. недотестировано
+
 class Horoscope(CommonCommand):
     def __init__(self):
         names = ["гороскоп"]
         help_text = "Гороскоп - мемный гороскоп"
         detail_help_text = "Гороскоп [знак зодиака = по др в профиле] - пришлёт мемный гороскоп на день для знака зодиака\n" \
                            "Гороскоп все - пришлёт мемный гороскоп для всех знаков зодиака"
-        super().__init__(names, help_text, detail_help_text, platforms=['vk','tg'])
+        super().__init__(names, help_text, detail_help_text, platforms=['vk', 'tg'])
 
     def start(self):
 
@@ -45,35 +47,30 @@ class Horoscope(CommonCommand):
                 zodiac_index = list(zodiac_signs.keys()).index(zodiac_sign)
             except ValueError:
                 return "Не знаю такого знака зодиака"
-            return self.get_horoscope_by_zodiac(zodiac_sign, zodiac_index)
+            return self.get_horoscope_by_zodiac(zodiac_index)
 
         # Гороскоп по ДР из профиля
         elif self.event.sender.birthday:
-            zodiac_sign, zodiac_index = self.get_zodiac_of_date(self.event.sender.birthday)
-            return self.get_horoscope_by_zodiac(zodiac_sign, zodiac_index)
+            zodiac_index = self.get_zodiac_index_of_date(self.event.sender.birthday)
+            return self.get_horoscope_by_zodiac(zodiac_index)
         else:
             return "Не указана дата рождения в профиле, не могу прислать гороскоп((. \n" \
                    "Укажи знак зодиака в аргументе: /гороскоп девы"
 
-    def get_horoscope_by_zodiac(self, zodiac_sign, zodiac_index):
+    def get_horoscope_by_zodiac(self, zodiac_index):
         horoscope = HoroscopeModel.objects.first()
-        if not horoscope:
-            raise RuntimeWarning('На сегодня гороскопа нет')
         meme = horoscope.memes.all()[zodiac_index]
         prepared_meme = prepare_meme_to_send(self.bot, self.event, meme)
-        prepared_meme['msg'] = zodiac_sign.capitalize()
+        prepared_meme['msg'] = zodiac_signs[zodiac_index].capitalize()
         return prepared_meme
 
-    def get_zodiac_of_date(self, date):
-        day_number = int(date.strftime("%j"))
-        deltas = []
-        min_delta = 999
-        min_delta_index = 0
-        for i, zodiac in enumerate(zodiac_signs):
-            delta = day_number - zodiac_signs[zodiac]
-            if delta >= 0:
-                if delta < min_delta:
-                    min_delta = delta
-                    min_delta_index = i
-            deltas.append(day_number - zodiac_signs[zodiac])
-        return list(zodiac_signs.keys())[min_delta_index], min_delta_index
+    @staticmethod
+    def get_zodiac_index_of_date(date):
+        date = date.replace(year=1900)
+        zodiac_days = list(zodiac_signs.values())
+        for i in range(len(zodiac_days) - 1):
+            zodiac_date_start = datetime.strptime(zodiac_days[i], "%d.%m").date()
+            zodiac_date_end = datetime.strptime(zodiac_days[i + 1], "%d.%m").date()
+            if zodiac_date_start <= date < zodiac_date_end:
+                return i
+        return len(zodiac_days) - 1
