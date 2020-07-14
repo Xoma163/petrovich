@@ -5,6 +5,7 @@ from threading import Lock
 from apps.bot.classes.Consts import Role
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.games.models import CodenamesUser, CodenamesSession, Gamer
+from petrovich.settings import STATIC_ROOT
 
 lock = Lock()
 
@@ -136,7 +137,7 @@ class Codenames(CommonCommand):
                            "слов умещается больше, но всё равно некоторые урезаются. Для того, чтобы этого избежать " \
                            "можно поправить стили контакта, чтобы они не урезали почти половину полезного места. Для " \
                            "этого я сделал отдельную инструкцию, которую можно получить по команде /кн фиксклавы"
-        super().__init__(names, help_text, detail_help_text, platforms=['vk', 'tg'], args=1, enabled=False)
+        super().__init__(names, help_text, detail_help_text, platforms=['vk'], args=1)
 
     def init_var(self):
 
@@ -341,7 +342,7 @@ class Codenames(CommonCommand):
               "4) Сохраняем\n" \
               "5) Обновляем страницу с перезагрузкой кэша (Ctrl+F5)\n" \
               "6) Ура! Теперь клава будет нормально выводиться у всех ботов"
-        attachment = self.bot.get_attachment_by_id('photo', None, '457243904')
+        attachment = self.bot.upload_photos(f"{STATIC_ROOT}/bot/img/fix_keyboard.jpg")
         return {'msg': msg, 'attachments': attachment}
 
     # END MENU

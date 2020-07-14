@@ -45,7 +45,7 @@ class VoiceRecognition(CommonCommand):
         detail_help_text = "Распознай (Пересланное сообщение с голосовым сообщением) - распознаёт голосовое " \
                            "сообщение\n" \
                            "Если дан доступ к переписке, то распознает автоматически"
-        super().__init__(names, help_text, detail_help_text, platforms=['vk', 'tg'], priority=-100, enabled=False)
+        super().__init__(names, help_text, detail_help_text, platforms=['vk'], priority=-100)
 
     def accept(self, event):
         if have_audio_message(event):

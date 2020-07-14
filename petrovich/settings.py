@@ -177,4 +177,4 @@ LOGGING = {
 
 CORS_ORIGIN_ALLOW_ALL = True
 VK_URL = "https://vk.com/"
-TEST_CHAT_ID = 2
+TEST_CHAT_ID = 3

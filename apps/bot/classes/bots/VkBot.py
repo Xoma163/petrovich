@@ -3,6 +3,7 @@ import json
 import logging
 import os
 import threading
+import traceback
 from threading import Thread
 from urllib.parse import urlparse
 
@@ -20,8 +21,8 @@ from apps.bot.classes.bots.CommonBot import CommonBot
 from apps.bot.classes.bots.VkUser import VkUser
 from apps.bot.classes.events.VkEvent import VkEvent
 from apps.bot.commands.City import add_city_to_db
-from apps.bot.models import Users, Chat
-from petrovich.settings import env
+from apps.bot.models import Users, Chat, Bot
+from petrovich.settings import env, TEST_CHAT_ID
 
 
 class VkBot(CommonBot, Thread):
@@ -86,7 +87,7 @@ class VkBot(CommonBot, Thread):
         pass
 
     def get_chat_by_id(self, chat_id):
-        vk_chat = self.chat_model.objects.filter(chat_id=chat_id)
+        vk_chat = self.chat_model.filter(chat_id=chat_id)
         if len(vk_chat) > 0:
             vk_chat = vk_chat.first()
         else:
@@ -97,14 +98,14 @@ class VkBot(CommonBot, Thread):
     def get_bot_by_id(self, bot_id):
         if bot_id > 0:
             bot_id = -bot_id
-        bot = self.bot_model.objects.filter(bot_id=bot_id)
+        bot = self.bot_model.filter(bot_id=bot_id)
         if len(bot) > 0:
             bot = bot.first()
         else:
             # Прозрачная регистрация
             vk_bot = self.vk.groups.getById(group_id=bot_id)[0]
 
-            bot = self.bot_model()
+            bot = Bot()
             bot.bot_id = bot_id
             bot.name = vk_bot['name']
             bot.platform = self.name
@@ -170,6 +171,12 @@ class VkBot(CommonBot, Thread):
                 if event.type == VkBotEventType.MESSAGE_NEW:
                     vk_event = self._setup_event(event)
 
+                    if self.DEVELOP_DEBUG:
+                        from_test_chat = vk_event['chat_id'] == TEST_CHAT_ID
+                        from_me = str(vk_event['user_id']) == env.str('VK_ADMIN_ID')
+                        if not from_test_chat or not from_me:
+                            continue
+
                     # Сообщение либо мне в лс, либо упоминание меня, либо есть аудиосообщение, либо есть экшн
                     if not self.need_a_response(vk_event):
                         continue
@@ -198,10 +205,10 @@ class VkBot(CommonBot, Thread):
                     vk_event_object = VkEvent(vk_event)
                     thread = threading.Thread(target=self.menu, args=(vk_event_object,))
                     thread.start()
-
-                    print('message')
-            except:
-                pass
+            except Exception as e:
+                print(str(e))
+                tb = traceback.format_exc()
+                print(tb)
 
     @staticmethod
     def _prepare_obj_to_upload(file_like_object, allowed_exts_url=None):
@@ -320,6 +327,11 @@ class VkBot(CommonBot, Thread):
         print(response2)
 
         return f"video{response['owner_id']}_{response['video_id']}"
+
+    def get_attachment_by_id(self, _type, group_id, _id):
+        if group_id is None:
+            group_id = f'-{self.group_id}'
+        return f"{_type}{group_id}_{_id}"
 
 
 class MyVkBotLongPoll(VkBotLongPoll):

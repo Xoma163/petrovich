@@ -10,14 +10,14 @@ camera_handler = CameraHandler()
 
 
 def start_vk(debug=False):
-    # bot.DEVELOP_DEBUG = debug
-    # bot.start()
+    vk_bot.DEVELOP_DEBUG = debug
+    vk_bot.start()
     print('start vk')
     pass
 
 
 def start_tg(debug=False):
-    # tg_bot.DEVELOP_DEBUG = debug
+    tg_bot.DEVELOP_DEBUG = debug
     tg_bot.start()
     print('start tg')
 

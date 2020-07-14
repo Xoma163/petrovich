@@ -170,7 +170,7 @@ class CommonBot:
     def need_a_response(self, event):
         message = event['message']['text']
 
-        have_payload = 'payload' in event
+        have_payload = 'message' in event and 'payload' in event['message'] and event['message']['payload']
         if have_payload:
             return True
         have_audio_message = self.have_audio_message(event)

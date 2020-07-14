@@ -4,6 +4,7 @@ from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.service.models import QuoteBook
 
 
+# ToDo: Deprecated
 class Quote(CommonCommand):
     def __init__(self):
         names = ["цитата", "(c)", "(с)"]

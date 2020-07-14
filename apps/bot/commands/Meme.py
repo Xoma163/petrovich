@@ -12,7 +12,7 @@ def check_name_exists(name):
     return MemeModel.objects.filter(name=name).exists()
 
 
-# ToDo: TG
+# ToDo: TG вложения
 class Meme(CommonCommand):
     def __init__(self):
         names = ["мем"]
@@ -31,7 +31,7 @@ class Meme(CommonCommand):
                            "Мем переименовать (id) (новое название) - переименовывает мем\n" \
                            "Мем удалить (название) - удаляет мем\n" \
                            "Мем удалить (id) [причина] - удаляет мем"
-        super().__init__(names, help_text, detail_help_text, args=1, platforms=['vk', 'tg'], enabled=False)
+        super().__init__(names, help_text, detail_help_text, args=1, platforms=['vk', 'tg'])
 
     def start(self):
         arg0 = self.event.args[0].lower()
@@ -320,7 +320,10 @@ class Meme(CommonCommand):
         return MemeModel.objects.filter(approved=True).order_by('?').first()
 
     def prepare_meme_to_send(self, meme, print_name=False, send_keyboard=False):
-        return prepare_meme_to_send(self.bot, self.event, meme, print_name, send_keyboard, self.names[0])
+        prepared_meme = prepare_meme_to_send(self.bot, self.event, meme, print_name, send_keyboard, self.names[0])
+        if send_keyboard:
+            prepared_meme['keyboard'] = self.bot.get_inline_keyboard("мем", args={"random": "р"})
+        return prepared_meme
 
     @staticmethod
     def get_similar_memes_names(memes):
@@ -360,6 +363,4 @@ def prepare_meme_to_send(bot, event, meme, print_name=False, send_keyboard=False
     if print_name:
         msg['msg'] = meme.name
 
-    if send_keyboard:
-        msg['keyboard'] = self.bot.get_inline_keyboard(name, args={"random": "р"})
     return msg

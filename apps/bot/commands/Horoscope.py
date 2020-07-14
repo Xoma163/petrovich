@@ -59,6 +59,8 @@ class Horoscope(CommonCommand):
 
     def get_horoscope_by_zodiac(self, zodiac_index):
         horoscope = HoroscopeModel.objects.first()
+        if not horoscope:
+            raise RuntimeWarning("Нет гороскопа на сегодня")
         meme = horoscope.memes.all()[zodiac_index]
         prepared_meme = prepare_meme_to_send(self.bot, self.event, meme)
         prepared_meme['msg'] = zodiac_signs[zodiac_index].capitalize()

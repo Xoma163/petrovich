@@ -13,6 +13,7 @@ def check_int_arg(arg):
         return arg, False
 
 
+# ToDo: Deprecated
 class Quotes(CommonCommand):
     def __init__(self):
         names = ["цитаты"]

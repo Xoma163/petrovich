@@ -2,7 +2,7 @@ from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.models import APITempUser, APIUser
 
 
-# ToDo: TG
+# ToDo: retest
 class APIChat(CommonCommand):
     def __init__(self):
         names = ["чат"]

@@ -170,7 +170,7 @@ def get_minecraft_version_by_args(args):
 
 
 servers_minecraft = [
-    MinecraftAPI("1_16_1", env.str("MINECRAFT_1_16_1_IP"), 25565, amazon=True),
+    MinecraftAPI("1.16.1", env.str("MINECRAFT_1_16_1_IP"), 25565, amazon=True),
     MinecraftAPI("1.12.2", MAIN_DOMAIN, 25565),
     MinecraftAPI("1.15.1", MAIN_DOMAIN, 25566),
 ]

@@ -8,7 +8,7 @@ from apps.bot.classes.common.CommonMethods import random_event, localize_datetim
     get_random_int
 from apps.games.models import RouletteRate, Gamer
 # Кратно 12
-from petrovich.settings import DEFAULT_TIME_ZONE
+from petrovich.settings import DEFAULT_TIME_ZONE, STATIC_ROOT
 
 MAX_NUMBERS = 36
 
@@ -116,11 +116,12 @@ class Roulette(CommonCommand):
             return f"Ваш баланс - {self.gamer.roulette_points}"
 
     def menu_picture(self):
-        attachment = random_event(
-            [self.bot.get_attachment_by_id('photo', None, 457242125),
-             self.bot.get_attachment_by_id('photo', None, 457242126)],
+        photos = random_event(
+            [f"{STATIC_ROOT}/bot/img/roulette_game.jpg",
+             f"{STATIC_ROOT}/bot/img/roulette.jpg"],
             [90, 10])
-        return {'attachments': [attachment]}
+        attachments = self.bot.upload_photos(photos)
+        return {'attachments': attachments}
 
     def menu_bonus(self):
         datetime_now = localize_datetime(datetime.datetime.utcnow(), DEFAULT_TIME_ZONE)

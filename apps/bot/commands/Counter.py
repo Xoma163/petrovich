@@ -1,7 +1,7 @@
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.service.models import Counter as CounterModel
 
-
+# ToDo: Deprecated
 class Counter(CommonCommand):
     def __init__(self):
         names = ["счётчик", "счетчик", "счёт", "счет"]

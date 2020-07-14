@@ -9,7 +9,7 @@ class EstimatePhoto(CommonCommand):
         names = ["оцени", "оценить"]
         help_text = "Оцени - оценить качество фотографии"
         detail_help_text = "Оцени (Изображение/Пересылаемое сообщение с изображением) - оценивает качество изображения"
-        super().__init__(names, help_text, detail_help_text, platforms=['vk', 'tg'], enabled=False)
+        super().__init__(names, help_text, detail_help_text, platforms=['vk'])
 
     def start(self):
         images = get_attachments_from_attachments_or_fwd(self.event, 'photo')

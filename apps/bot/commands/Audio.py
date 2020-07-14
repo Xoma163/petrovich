@@ -2,7 +2,7 @@ from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import get_attachments_from_attachments_or_fwd, decl_of_num
 from apps.service.models import AudioList
 
-
+# ToDo: Deprecated
 class Audio(CommonCommand):
     def __init__(self):
         names = ["аудио", "плейлист"]

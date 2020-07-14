@@ -6,7 +6,7 @@ from apps.bot.classes.common.CommonMethods import check_user_group
 class Commands(CommonCommand):
     def __init__(self):
         names = ["команды"]
-        help_text = "команды - список всех команд"
+        help_text = "Команды - список всех команд"
         super().__init__(names, help_text)
 
     def start(self):
