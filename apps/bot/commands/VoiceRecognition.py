@@ -37,7 +37,7 @@ def have_audio_message(event):
     return False
 
 
-# ToDo: TG
+# ToDo: TG вложения
 class VoiceRecognition(CommonCommand):
     def __init__(self):
         names = ["распознай", "голос", "голосовое"]

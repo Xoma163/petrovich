@@ -114,7 +114,7 @@ def get_str_players(players):
     return "\n".join(codenames_users_list)
 
 
-# ToDo: TG
+# ToDo: TG клавы
 class Codenames(CommonCommand):
     def __init__(self):
         names = ["коднеймс", "кн"]

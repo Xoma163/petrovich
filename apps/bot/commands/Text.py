@@ -3,7 +3,7 @@ from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import get_attachments_from_attachments_or_fwd
 
 
-# ToDo: TG
+# ToDo: TG вложения
 class Text(CommonCommand):
     def __init__(self):
         names = ["текст"]

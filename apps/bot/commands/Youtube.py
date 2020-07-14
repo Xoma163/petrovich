@@ -10,7 +10,6 @@ from apps.service.models import YoutubeSubscribe
 MAX_USER_SUBS_COUNT = 3
 
 
-# ToDo: TG check
 class YouTube(CommonCommand):
     def __init__(self):
         names = ["ютуб", 'youtube']

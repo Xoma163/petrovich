@@ -15,7 +15,6 @@ def get_time(time):
         return None
 
 
-# ToDo: TG check
 class NotifyRepeat(CommonCommand):
     def __init__(self):
         names = ["напоминай", "оповещай"]

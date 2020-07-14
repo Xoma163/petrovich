@@ -42,7 +42,6 @@ def get_time(arg1, arg2):
             return None, None, None
 
 
-# ToDo: TG check
 class Notify(CommonCommand):
     def __init__(self):
         names = ["напомни", "напомнить", "оповещение", "оповести"]

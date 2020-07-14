@@ -42,7 +42,7 @@ def draw_on_images(image_url, faces):
     return _bytes
 
 
-# ToDo: TG
+# ToDo: TG вложения
 class Age(CommonCommand):
     def __init__(self):
         names = ["возраст"]

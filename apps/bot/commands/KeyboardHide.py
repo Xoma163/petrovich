@@ -1,7 +1,7 @@
 from apps.bot.classes.common.CommonCommand import CommonCommand
 
 
-# ToDo: TG
+# ToDo: TG клавы
 class KeyboardHide(CommonCommand):
 
     def __init__(self):
