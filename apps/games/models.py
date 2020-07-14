@@ -26,7 +26,7 @@ class Gamer(models.Model):
     tic_tac_toe_points = models.IntegerField(verbose_name="Очки крестики-нолики", default=0)
     codenames_points = models.IntegerField(verbose_name="Очки коднеймса", default=0)
     roulette_points = models.IntegerField(verbose_name="Очки рулетки", default=500)
-    roulette_points_today = models.DateTimeField(verbose_name="Дата получения очков", default=datetime.datetime.utcnow)
+    roulette_points_today = models.DateTimeField(verbose_name="Дата получения очков", auto_now_add=True)
 
     class Meta:
         verbose_name = "Игрок"

@@ -9,7 +9,7 @@ from apps.bot.models import Users, Chat, Bot
 from apps.service.views import append_command_to_statistics
 
 
-class CommonBot():
+class CommonBot:
     def __init__(self, name):
         self.name = name
         self.mentions = []
@@ -307,3 +307,17 @@ class CommonBot():
 
         elif len(chats_with_user) == 1:
             return chats_with_user[0]
+
+    @staticmethod
+    def get_gamer_by_user(user):
+        from apps.games.models import Gamer
+
+        gamers = Gamer.objects.filter(user=user)
+        if len(gamers) == 0:
+            gamer = Gamer(user=user)
+            gamer.save()
+            return gamer
+        elif len(gamers) > 1:
+            raise RuntimeWarning("Два и более игрока подходит под поиск")
+        else:
+            return gamers.first()
