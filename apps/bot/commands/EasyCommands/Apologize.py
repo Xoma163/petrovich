@@ -9,7 +9,7 @@ class Apologize(CommonCommand):
     def __init__(self):
         names = ["извинись", "извиняйся", "извинитесь"]
 
-        super().__init__(names, platforms=['vk','tg'])
+        super().__init__(names, platforms=['vk', 'tg'])
 
     def start(self):
         phrases = ["Извини", "Нет", "Сам извинись", "за что?", "КАВО", "Ты уверен?"]

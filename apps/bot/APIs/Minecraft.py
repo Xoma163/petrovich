@@ -5,10 +5,10 @@ from datetime import datetime
 import requests
 from mcrcon import MCRcon
 
-from apps.bot.classes.bots.VkBot import VkBot
-from apps.bot.classes.common.CommonMethods import remove_tz
 from apps.bot.classes.Consts import Role
 from apps.bot.classes.DoTheLinuxComand import do_the_linux_command
+from apps.bot.classes.bots.VkBot import VkBot
+from apps.bot.classes.common.CommonMethods import remove_tz
 from apps.bot.models import Users
 from apps.service.models import Service
 from petrovich.settings import env, BASE_DIR, MAIN_DOMAIN

@@ -8,7 +8,7 @@ class Waifu(CommonCommand):
         help_text = "Вайфу - присылает несуществующую вайфу"
         detail_help_text = "Вайфу [номер=рандом] - присылает несуществующую вайфу по номеру (0-100000)\n" \
                            "Вайфу (слово) - присылает несуществующую вайфу вычисляя её номер"
-        super().__init__(names, help_text, detail_help_text, platforms=['vk','tg'])
+        super().__init__(names, help_text, detail_help_text, platforms=['vk', 'tg'])
 
     def start(self):
         WAIFUS_COUNT = 100000

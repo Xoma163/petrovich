@@ -32,6 +32,7 @@ MORE_HIDE_KEYBOARD = {
 
 lock = Lock()
 
+
 # ToDo: TG
 class TicTacToe(CommonCommand):
     def __init__(self):

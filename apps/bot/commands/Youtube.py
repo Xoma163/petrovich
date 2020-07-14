@@ -28,7 +28,7 @@ class YouTube(CommonCommand):
             "Чтобы узнать название канала, нужно перейти на канал и скопировать содержимое после " \
             "https://www.youtube.com/user/********** или https://www.youtube.com/**********\n\n" \
             "Проверка новых видео проходит каждый час"
-        super().__init__(names, help_text, detail_help_text, args=1, platforms=['vk','tg'])
+        super().__init__(names, help_text, detail_help_text, args=1, platforms=['vk', 'tg'])
 
     def start(self):
         action = self.event.args[0].lower()

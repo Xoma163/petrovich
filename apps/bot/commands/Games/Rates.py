@@ -15,7 +15,7 @@ class Rates(CommonCommand):
         detail_help_text = "Ставки - играет ставки.\n\n" \
                            "Ставки f - играет независимо от количества игроков. Только для админов конфы"
 
-        super().__init__(names, help_text, detail_help_text, conversation=True, platforms=['vk','tg'])
+        super().__init__(names, help_text, detail_help_text, conversation=True, platforms=['vk', 'tg'])
 
     def start(self):
         with lock:

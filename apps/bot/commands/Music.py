@@ -20,6 +20,7 @@ class NothingLogger(object):
     def error(msg):
         print(msg)
 
+
 class Music(CommonCommand):
     def __init__(self):
         names = ["музыка"]

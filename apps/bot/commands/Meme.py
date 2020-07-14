@@ -11,6 +11,7 @@ IMAGE_EXTS = ['jpg', 'jpeg', 'png']
 def check_name_exists(name):
     return MemeModel.objects.filter(name=name).exists()
 
+
 # ToDo: TG
 class Meme(CommonCommand):
     def __init__(self):
@@ -30,7 +31,7 @@ class Meme(CommonCommand):
                            "Мем переименовать (id) (новое название) - переименовывает мем\n" \
                            "Мем удалить (название) - удаляет мем\n" \
                            "Мем удалить (id) [причина] - удаляет мем"
-        super().__init__(names, help_text, detail_help_text, args=1, platforms=['vk','tg'], enabled=False)
+        super().__init__(names, help_text, detail_help_text, args=1, platforms=['vk', 'tg'], enabled=False)
 
     def start(self):
         arg0 = self.event.args[0].lower()

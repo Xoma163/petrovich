@@ -7,7 +7,8 @@ class Flood(CommonCommand):
         names = ["флуд"]
         help_text = "Флуд - флудит"
         detail_help_text = "Флуд (N) - флудит N сообщений"
-        super().__init__(names, help_text, detail_help_text, access=Role.ADMIN, args=1, int_args=[0], platforms=['vk','tg'])
+        super().__init__(names, help_text, detail_help_text, access=Role.ADMIN, args=1, int_args=[0],
+                         platforms=['vk', 'tg'])
 
     def start(self):
         msg = "ыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыы"

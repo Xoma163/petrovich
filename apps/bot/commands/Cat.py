@@ -14,7 +14,7 @@ class Cat(CommonCommand):
                            "Кот (Изображения/Пересылаемое сообщение с изображениями) - добавляет кота в базу\n\n" \
                            "Для админа:\n" \
                            "Кот аватар - присылает нового кота для аватарки, которого ещё не было"
-        super().__init__(names, help_text, detail_help_text, platforms=['vk','tg'])
+        super().__init__(names, help_text, detail_help_text, platforms=['vk', 'tg'])
 
     def add_cat(self, cat_image):
         cat = CatModel(author=self.event.sender)

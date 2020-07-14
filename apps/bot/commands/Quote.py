@@ -1,7 +1,6 @@
 import datetime
 
 from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import localize_datetime, normalize_datetime
 from apps.service.models import QuoteBook
 
 
@@ -10,7 +9,7 @@ class Quote(CommonCommand):
         names = ["цитата", "(c)", "(с)"]
         help_text = "Цитата - сохраняет в цитатник сообщения"
         detail_help_text = "Цитата (Пересылаемые сообщение) - сохраняет в цитатник сообщения"
-        super().__init__(names, help_text, detail_help_text, fwd=True, platforms=['vk','tg'])
+        super().__init__(names, help_text, detail_help_text, fwd=True, platforms=['vk', 'tg'])
 
     def start(self):
         msgs = self.event.fwd

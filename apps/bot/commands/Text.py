@@ -10,7 +10,7 @@ class Text(CommonCommand):
         help_text = "Текст - распознаёт текст на изображении"
         detail_help_text = "Текст (Изображения/Пересылаемое сообщение с изображением) [язык=rus] - распознаёт текст на изображении\n" \
                            'Язык нужно указывать в 3 символа. Пример - "eng", "rus", "fre", "ger" и так далее'
-        super().__init__(names, help_text, detail_help_text, platforms=['vk','tg'], enabled=False)
+        super().__init__(names, help_text, detail_help_text, platforms=['vk', 'tg'], enabled=False)
 
     def start(self):
         lang = "rus"

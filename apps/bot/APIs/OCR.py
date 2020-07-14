@@ -1,6 +1,5 @@
 import requests
 
-
 # https://ocr.space/OCRAPI
 from petrovich.settings import env
 

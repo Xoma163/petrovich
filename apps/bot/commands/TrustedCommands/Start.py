@@ -1,8 +1,8 @@
+from apps.birds.CameraHandler import CameraHandler
 from apps.bot.APIs.Minecraft import get_minecraft_version_by_args, MinecraftAPI
 from apps.bot.classes.Consts import Role
 from apps.bot.classes.DoTheLinuxComand import do_the_linux_command
 from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.birds.CameraHandler import CameraHandler
 
 cameraHandler = CameraHandler()
 
