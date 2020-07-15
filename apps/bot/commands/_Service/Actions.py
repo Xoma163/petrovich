@@ -1,6 +1,4 @@
 from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.events.TgEvent import TgEvent
-from apps.bot.classes.events.VkEvent import VkEvent
 from petrovich.settings import env
 
 
@@ -22,9 +20,9 @@ class Actions(CommonCommand):
                         user = self.bot.get_user_by_id(_id)
                         self.bot.add_group_to_user(user, self.event.chat)
                     else:
-                        if isinstance(self.event, VkEvent):
+                        if self.event.platform == 'vk':
                             bot_group_id = -env.int('VK_BOT_GROUP_ID')
-                        elif isinstance(self.event, TgEvent):
+                        elif self.event.platform == 'tg':
                             bot_group_id = -env.int('TG_BOT_GROUP_ID')
                         if _id == bot_group_id:
                             if self.event.chat.admin is None:

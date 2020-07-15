@@ -104,14 +104,16 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'ru-ru'
 TIME_ZONE = 'Europe/Samara'
+DEFAULT_TIME_ZONE = 'Europe/Moscow'
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/3.0/howto/static-files/
-
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 CORS_ORIGIN_ALLOW_ALL = True
 VK_URL = "https://vk.com/"
@@ -160,12 +162,12 @@ LOGGING = {
         },
     },
     'loggers': {
-        'vk_bot': {
+        'vk': {
             'handlers': ['file-debug', 'file-warn', 'console-warn', 'db_log'],
             'level': 'DEBUG',
             'propagate': True,
         },
-        'tg_bot': {
+        'tg': {
             'handlers': ['file-debug', 'file-warn', 'console-warn', 'db_log'],
             'level': 'DEBUG',
             'propagate': True,
@@ -175,4 +177,4 @@ LOGGING = {
 
 CORS_ORIGIN_ALLOW_ALL = True
 VK_URL = "https://vk.com/"
-TEST_CHAT_ID = 2
+TEST_CHAT_ID = 3

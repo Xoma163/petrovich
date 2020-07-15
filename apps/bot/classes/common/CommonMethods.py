@@ -1,16 +1,13 @@
 import io
-import json
 import os
 import re
 
 import pytz
 # Вероятность события в процентах
 from PIL import Image, ImageDraw, ImageFont
-from django.conf.global_settings import STATIC_ROOT
-from django.core.management import get_commands
 
 from apps.bot.classes.Consts import Role
-from apps.bot.models import VkChat
+from petrovich.settings import STATIC_ROOT
 
 
 def random_probability(probability):
@@ -77,36 +74,6 @@ def normalize_datetime(datetime, tz):
     return pytz.utc.normalize(localized_time, is_dst=None).astimezone(tz_utc)  # .replace(tzinfo=None)
 
 
-# Возвращает чат по названию, где есть пользователь
-def get_one_chat_with_user(chat_name, user_id):
-    chats = VkChat.objects.filter(name__icontains=chat_name)
-    if len(chats) == 0:
-        raise RuntimeWarning("Не нашёл такого чата")
-
-    chats_with_user = []
-    for chat in chats:
-        user_contains = chat.vkuser_set.filter(user_id=user_id)
-        if user_contains:
-            chats_with_user.append(chat)
-
-    if len(chats_with_user) == 0:
-        raise RuntimeWarning("Не нашёл доступного чата с пользователем в этом чате")
-    elif len(chats_with_user) > 1:
-        chats_str = '\n'.join(chats_with_user)
-        raise RuntimeWarning("Нашёл несколько чатов. Уточните какой:\n"
-                             f"{chats_str}")
-
-    elif len(chats_with_user) == 1:
-        return chats_with_user[0]
-
-
-# Возвращает упоминание пользователя
-def get_mention(user, name=None):
-    if not name:
-        name = user.name
-    return f"[id{user.user_id}|{name}]"
-
-
 # Склоняет существительное после числительного
 # number - число, titles - 3 склонения.
 def decl_of_num(number, titles):
@@ -163,26 +130,9 @@ def get_attachments_from_attachments_or_fwd(vk_event, _type=None, from_first_fwd
     return attachments
 
 
-# Возвращает клавиатуру с кнопкой "Ещё"
-def get_inline_keyboard(command_text, button_text="Ещё", args=None):
-    if args is None:
-        args = {}
-    return {
-        'inline': True,
-        'buttons': [[
-            {
-                'action': {
-                    'type': 'text',
-                    'label': button_text,
-                    "payload": json.dumps({"command": command_text, "args": args}, ensure_ascii=False)
-                },
-                'color': 'primary',
-            }
-        ]]}
-
-
 # Ищет команду по имени
 def find_command_by_name(command_name):
+    from apps.bot.initial import get_commands
     commands = get_commands()
 
     for command in commands:

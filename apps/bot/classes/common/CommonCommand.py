@@ -2,8 +2,6 @@ from datetime import datetime
 
 from apps.bot.classes.Consts import Role
 from apps.bot.classes.common.CommonMethods import check_user_group, get_help_for_command, remove_tz
-from apps.bot.classes.events.TgEvent import TgEvent
-from apps.bot.classes.events.VkEvent import VkEvent
 from apps.service.models import Service
 from petrovich.settings import env
 
@@ -34,8 +32,7 @@ class CommonCommand:
                  args=None,
                  int_args=None,
                  float_args=None,
-                 api=None,
-                 tg=None,
+                 platforms=None,
                  attachments=False,
                  enabled=True,
                  priority=0,
@@ -51,8 +48,7 @@ class CommonCommand:
         self.args = args
         self.int_args = int_args
         self.float_args = float_args
-        self.api = api
-        self.tg = tg
+        self.platforms = platforms or ['vk', 'tg', 'api']
         self.attachments = attachments
         self.enabled = enabled
         self.priority = priority
@@ -78,7 +74,7 @@ class CommonCommand:
     # Проверки
     def checks(self):
         # Если команда не для api
-        self.check_api()
+        self.check_platforms()
         self.check_sender(self.access)
         if self.pm:
             self.check_pm()
@@ -102,10 +98,10 @@ class CommonCommand:
     def check_sender(self, role):
         if check_user_group(self.event.sender, role):
             if role == Role.ADMIN:
-                if isinstance(self.event, VkEvent):
+                if self.event.platform == 'vk':
                     if self.event.sender.user_id == env.str("VK_ADMIN_ID"):
                         return True
-                elif isinstance(self.event, TgEvent):
+                elif self.event.platform == 'tg':
                     if self.event.sender.user_id == env.str("TG_ADMIN_ID"):
                         return True
                 else:
@@ -237,18 +233,10 @@ class CommonCommand:
         return True
 
     # Проверяет, прислано ли сообщение через API
-    def check_api(self):
-        # Если запрос пришёл через api
-        if self.event.from_api:
-            if self.api == False:
-                error = "Команда недоступна для API"
-                raise RuntimeError(error)
-
-        if not self.event.from_api:
-            if self.api:
-                error = "Команда недоступна для VK/TG"
-                raise RuntimeError(error)
-
+    def check_platforms(self):
+        if self.event.platform not in self.platforms:
+            error = f"Команда недоступна для {self.event.platform.upper()}"
+            raise RuntimeError(error)
         return True
 
     # ToDo: check on types

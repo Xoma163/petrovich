@@ -5,31 +5,31 @@ from datetime import datetime
 import requests
 from mcrcon import MCRcon
 
-from apps.bot.classes.bots.VkBot import VkBot
-from apps.bot.classes.common.CommonMethods import remove_tz
 from apps.bot.classes.Consts import Role
 from apps.bot.classes.DoTheLinuxComand import do_the_linux_command
-from apps.bot.models import VkUser
+from apps.bot.classes.bots.VkBot import VkBot
+from apps.bot.classes.common.CommonMethods import remove_tz
+from apps.bot.models import Users
 from apps.service.models import Service
 from petrovich.settings import env, BASE_DIR, MAIN_DOMAIN
 
 
 class MinecraftAPI:
 
-    def __init__(self, version, ip=None, port=None, amazon=False, vk_bot=None, vk_event=None):
+    def __init__(self, version, ip=None, port=None, amazon=False, bot=None, event=None):
         self.version = version
         self.ip = ip
         self.port = port
         self.amazon = amazon
-        self.vk_bot = vk_bot or VkBot()
-        self.vk_event = vk_event
+        self.bot = bot or VkBot()
+        self.event = event
 
         self.server_info = None
 
     def send_rcon(self, command):
         try:
-            with MCRcon(env.str("MINECRAFT_1.16.1_IP"),
-                        env.str("MINECRAFT_1.16.1_RCON_PASSWORD")) as mcr:
+            with MCRcon(env.str("MINECRAFT_1_16_1_IP"),
+                        env.str("MINECRAFT_1_16_1_RCON_PASSWORD")) as mcr:
                 resp = mcr.command(command)
                 if resp:
                     return resp
@@ -39,7 +39,7 @@ class MinecraftAPI:
             return False
 
     def check_amazon_server_status(self):
-        URL = env.str("MINECRAFT_1.16.1_STATUS_URL")
+        URL = env.str("MINECRAFT_1_16_1_STATUS_URL")
         response = requests.get(URL).json()
         return response['Name'] == 'running'
 
@@ -47,13 +47,13 @@ class MinecraftAPI:
         translator = {'start': 'Стартуем', 'stop': "Финишируем"}
 
         return f"{translator[action]} майн {self.version}!" \
-               f"\nИнициатор - {self.vk_event.sender}"
+               f"\nИнициатор - {self.event.sender}"
 
     def _start_local(self):
         do_the_linux_command(f'sudo systemctl start minecraft_{self.version}')
 
     def _start_amazon(self):
-        URL = env.str("MINECRAFT_1.16.1_START_URL")
+        URL = env.str("MINECRAFT_1_16_1_START_URL")
         requests.post(URL)
 
     def start(self, send_notify=True):
@@ -79,7 +79,7 @@ class MinecraftAPI:
                 break
             time.sleep(5)
 
-        URL = env.str("MINECRAFT_1.16.1_STOP_URL")
+        URL = env.str("MINECRAFT_1_16_1_STOP_URL")
         requests.post(URL)
         Service.objects.filter(name=f'stop_minecraft_{self.version}').delete()
         return True
@@ -108,12 +108,12 @@ class MinecraftAPI:
         return result
 
     def send_notify(self, message):
-        users_notify = VkUser.objects.filter(groups__name=Role.MINECRAFT_NOTIFY.name)
-        if self.vk_event:
-            users_notify = users_notify.exclude(id=self.vk_event.sender.id)
+        users_notify = Users.objects.filter(groups__name=Role.MINECRAFT_NOTIFY.name)
+        if self.event:
+            users_notify = users_notify.exclude(id=self.event.sender.id)
         users_chat_id_notify = [user.user_id for user in users_notify]
 
-        self.vk_bot.parse_and_send_msgs_thread(users_chat_id_notify, message)
+        self.bot.parse_and_send_msgs_thread(users_chat_id_notify, message)
 
     def stop_if_need(self):
         self.get_server_info()
@@ -124,9 +124,9 @@ class MinecraftAPI:
             # Создание событие. Уведомление, что мы скоро всё отрубим
             if created:
                 message = f"Если никто не зайдёт на сервак по майну {self.version}, то через полчаса я его остановлю"
-                users_notify = VkUser.objects.filter(groups__name=Role.MINECRAFT_NOTIFY.name)
+                users_notify = Users.objects.filter(groups__name=Role.MINECRAFT_NOTIFY.name)
                 users_chat_id_notify = [user.user_id for user in users_notify]
-                self.vk_bot.parse_and_send_msgs_thread(users_chat_id_notify, message)
+                self.bot.parse_and_send_msgs_thread(users_chat_id_notify, message)
 
             # Если событие уже было создано, значит пора отрубать
             else:
@@ -139,9 +139,9 @@ class MinecraftAPI:
                     self.stop(send_notify=False)
 
                     message = f"Вырубаю майн {self.version}"
-                    users_notify = VkUser.objects.filter(groups__name=Role.MINECRAFT_NOTIFY.name)
+                    users_notify = Users.objects.filter(groups__name=Role.MINECRAFT_NOTIFY.name)
                     users_chat_id_notify = [user.user_id for user in users_notify]
-                    self.vk_bot.parse_and_send_msgs_thread(users_chat_id_notify, message)
+                    self.bot.parse_and_send_msgs_thread(users_chat_id_notify, message)
                 else:
                     obj.delete()
 
@@ -170,7 +170,7 @@ def get_minecraft_version_by_args(args):
 
 
 servers_minecraft = [
-    MinecraftAPI("1.16.1", env.str("MINECRAFT_1.16.1_IP"), 25565, amazon=True),
+    MinecraftAPI("1.16.1", env.str("MINECRAFT_1_16_1_IP"), 25565, amazon=True),
     MinecraftAPI("1.12.2", MAIN_DOMAIN, 25565),
     MinecraftAPI("1.15.1", MAIN_DOMAIN, 25566),
 ]

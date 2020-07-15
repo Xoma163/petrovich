@@ -2,7 +2,7 @@ import logging
 
 from django.db import models
 
-from apps.bot.models import VkUser, VkChat, TgChat, TgUser
+from apps.bot.models import Users, Chat
 
 
 class Logger(models.Model):
@@ -24,6 +24,9 @@ class Logger(models.Model):
     user_msg = models.TextField("Сообщение пользователя", blank=True, null=True)
     msg = models.TextField("Сообщение")
 
+    sender = models.ForeignKey(Users, verbose_name="Пользователь", on_delete=models.SET_NULL, null=True)
+    chat = models.ForeignKey(Chat, verbose_name="Чат", on_delete=models.SET_NULL, null=True)
+
     result = models.TextField("Результат выполнения", blank=True, null=True)
     exception = models.TextField("Ошибка", blank=True, null=True)
     traceback = models.TextField(blank=True, null=True, verbose_name="Traceback")
@@ -32,26 +35,7 @@ class Logger(models.Model):
         return self.msg
 
     class Meta:
-        abstract = True
         ordering = ('-create_datetime',)
-
-
-class VkLogger(Logger):
-    sender = models.ForeignKey(VkUser, verbose_name="Пользователь", on_delete=models.SET_NULL, null=True)
-    chat = models.ForeignKey(VkChat, verbose_name="Чат", on_delete=models.SET_NULL, null=True)
-
-    class Meta:
-        verbose_name = "Лог ВК"
-        verbose_name_plural = 'Логи ВК'
-
-
-class TgLogger(Logger):
-    sender = models.ForeignKey(TgUser, verbose_name="Пользователь", on_delete=models.SET_NULL, null=True)
-    chat = models.ForeignKey(TgChat, verbose_name="Чат", on_delete=models.SET_NULL, null=True)
-
-    class Meta:
-        verbose_name = "Лог ТГ"
-        verbose_name_plural = 'Логи ТГ'
 
 
 class MovementLog(models.Model):
@@ -59,10 +43,9 @@ class MovementLog(models.Model):
                       ('work', 'работа'),
                       ('university', 'университет'),
                       ('somewhere', 'где-то'))
-    id = models.AutoField(primary_key=True, verbose_name='ID')
     date = models.DateTimeField(verbose_name="Дата", auto_now_add=True, blank=True)
     imei = models.CharField(verbose_name='IMEI', max_length=20, null=True)
-    author = models.ForeignKey(VkUser, verbose_name="Автор", on_delete=models.SET_NULL, null=True)
+    author = models.ForeignKey(Users, verbose_name="Автор", on_delete=models.SET_NULL, null=True)
     event = models.CharField(verbose_name='Событие', choices=EVENTS_CHOICES,
                              max_length=20,
                              null=True)

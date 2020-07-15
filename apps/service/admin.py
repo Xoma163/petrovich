@@ -98,8 +98,8 @@ class HoroscopeAdmin(admin.ModelAdmin):
 
 @admin.register(QuoteBook)
 class QuoteBookAdmin(admin.ModelAdmin):
-    list_display = ('vk_chat', 'vk_user', 'date', 'text')
-    list_filter = (('vk_chat', admin.RelatedOnlyFieldListFilter), ('vk_user', admin.RelatedOnlyFieldListFilter),)
+    list_display = ('chat', 'user', 'date', 'text')
+    list_filter = (('chat', admin.RelatedOnlyFieldListFilter), ('user', admin.RelatedOnlyFieldListFilter),)
 
 
 @admin.register(Words)

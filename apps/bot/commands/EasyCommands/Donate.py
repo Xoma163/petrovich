@@ -1,6 +1,5 @@
 from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.events.TgEvent import TgEvent
-from apps.bot.classes.events.VkEvent import VkEvent
+from petrovich.settings import STATIC_ROOT
 
 
 class Donate(CommonCommand):
@@ -9,12 +8,8 @@ class Donate(CommonCommand):
         help_text = "Донат - ссылка на донат"
         super().__init__(names, help_text)
 
-    # ToDo: photo for TG
     def start(self):
         url = 'https://www.donationalerts.com/r/xoma163'
-
-        if isinstance(self.event, VkEvent):
-            attachment = self.bot.get_attachment_by_id('photo', None, 457243301)
-            return {'msg': url, 'attachments': [attachment, url]}
-        elif isinstance(self.event, TgEvent):
-            return url
+        attachments = self.bot.upload_photos(f"{STATIC_ROOT}/bot/img/donate.jpg")
+        attachments.append(url)
+        return {'msg': url, 'attachments': attachments}

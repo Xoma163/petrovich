@@ -9,6 +9,6 @@ class StartLada(CommonCommand):
     def start(self):
         if self.event.args:
             who = self.event.original_args
-            return ["уи ви ви ви ви ви ви ви", f'завёл {who}']
+            return ["уи ви ви ви ви ви ви ви", f'завожу {who}']
 
         return "уи ви ви ви ви ви ви ви"

@@ -71,7 +71,7 @@ def generate_help_text():
                 for text in help_text:
                     if command.enabled:
                         append_to_list(help_text_list)
-                        if command.api is None or command.api:
+                        if 'api' in command.platforms:
                             append_to_list(api_help_text_list)
 
     for group in GROUPS_WITH_GAMES:

@@ -1,30 +1,41 @@
+import logging
 import threading
 import traceback
 
 from apps.bot.classes.Consts import Role
 from apps.bot.classes.common.CommonMethods import tanimoto, check_user_group, get_user_groups
 from apps.bot.classes.events.Event import Event
+from apps.bot.models import Users, Chat, Bot
 from apps.service.views import append_command_to_statistics
 
 
-class CommonBot():
-    def __init__(self):
+class CommonBot:
+    def __init__(self, name):
+        self.name = name
         self.mentions = []
         self.BOT_CAN_WORK = True
         self.DEBUG = False
         self.DEVELOP_DEBUG = False
+        self.user_model = Users.objects.filter(platform=self.name)
+        self.chat_model = Chat.objects.filter(platform=self.name)
+        self.bot_model = Bot.objects.filter(platform=self.name)
 
-        self.user_model = None
-        self.chat_model = None
-        self.bot_model = None
+        self.logger = logging.getLogger(self.name)
 
-        self.logger = None
+    def get_user_by_id(self, user_id):
+        raise NotImplementedError
+
+    def get_chat_by_id(self, chat_id):
+        raise NotImplementedError
+
+    def get_bot_by_id(self, bot_id):
+        raise NotImplementedError
 
     def run(self):
         self.listen()
 
     def listen(self):
-        pass
+        raise NotImplementedError
 
     def menu(self, event, send=True):
 
@@ -134,7 +145,7 @@ class CommonBot():
         return msg
 
     def send_message(self, peer_id, msg="ᅠ", attachments=None, keyboard=None, dont_parse_links=False, **kwargs):
-        pass
+        raise NotImplementedError
 
     def parse_and_send_msgs(self, peer_id, result):
         if isinstance(result, str) or isinstance(result, int) or isinstance(result, float):
@@ -158,7 +169,10 @@ class CommonBot():
 
     def need_a_response(self, event):
         message = event['message']['text']
-        from_user = event['from_user']
+
+        have_payload = 'message' in event and 'payload' in event['message'] and event['message']['payload']
+        if have_payload:
+            return True
         have_audio_message = self.have_audio_message(event)
         if have_audio_message:
             return True
@@ -167,6 +181,7 @@ class CommonBot():
             return True
         if len(message) == 0:
             return False
+        from_user = event['from_user']
         if from_user:
             return True
         if message[0] == '/':
@@ -175,13 +190,6 @@ class CommonBot():
             if message.find(mention) != -1:
                 return True
         return False
-
-    # def get_user_by_id(self, user_id):
-    #     pass
-    #
-    # @staticmethod
-    # def get_chat_by_id(chat_id):
-    #     pass
 
     @staticmethod
     def have_audio_message(event):
@@ -233,21 +241,21 @@ class CommonBot():
             raise RuntimeWarning("Отсутствуют аргументы")
         if isinstance(args, str):
             args = [args]
-        vk_users = self.user_model.objects
+        users = self.user_model
         if filter_chat:
-            vk_users = vk_users.filter(chats=filter_chat)
+            users = users.filter(chats=filter_chat)
         if len(args) >= 2:
-            user = vk_users.filter(name=args[0].capitalize(), surname=args[1].capitalize())
+            user = users.filter(name=args[0].capitalize(), surname=args[1].capitalize())
         else:
-            user = vk_users.filter(nickname_real=args[0].capitalize())
+            user = users.filter(nickname_real=args[0].capitalize())
             if len(user) == 0:
-                user = vk_users.filter(name=args[0].capitalize())
+                user = users.filter(name=args[0].capitalize())
                 if len(user) == 0:
-                    user = vk_users.filter(surname=args[0].capitalize())
+                    user = users.filter(surname=args[0].capitalize())
                     if len(user) == 0:
-                        user = vk_users.filter(nickname=args[0])
+                        user = users.filter(nickname=args[0])
                         if len(user) == 0:
-                            user = vk_users.filter(user_id=args[0])
+                            user = users.filter(user_id=args[0])
 
         if len(user) > 1:
             raise RuntimeWarning("2 и более пользователей подходит под поиск")
@@ -257,24 +265,70 @@ class CommonBot():
 
         return user.first()
 
-    def get_chat_by_id(self, chat_id):
-        pass
-
-    def get_bot_by_id(self, bot_id):
-        pass
-
     def get_chat_by_name(self, args):
         if not args:
             raise RuntimeWarning("Отсутствуют аргументы")
         if isinstance(args, str):
             args = [args]
-        vk_chats = self.chat_model.objects
+        chats = self.chat_model
         for arg in args:
-            vk_chats = vk_chats.filter(name__icontains=arg)
+            chats = chats.filter(name__icontains=arg)
 
-        if len(vk_chats) > 1:
+        if len(chats) > 1:
             raise RuntimeWarning("2 и более чатов подходит под поиск")
 
-        if len(vk_chats) == 0:
+        if len(chats) == 0:
             raise RuntimeWarning("Чат не найден")
-        return vk_chats.first()
+        return chats.first()
+
+    def upload_document(self, document, peer_id=None, title='Документ'):
+        raise NotImplementedError
+
+    def upload_photos(self, images, max_count=10):
+        raise NotImplementedError
+
+    def get_one_chat_with_user(self, chat_name, user_id):
+        chats = self.chat_model.filter(name__icontains=chat_name)
+        if len(chats) == 0:
+            raise RuntimeWarning("Не нашёл такого чата")
+
+        chats_with_user = []
+        for chat in chats:
+            user_contains = chat.vkuser_set.filter(user_id=user_id)
+            if user_contains:
+                chats_with_user.append(chat)
+
+        if len(chats_with_user) == 0:
+            raise RuntimeWarning("Не нашёл доступного чата с пользователем в этом чате")
+        elif len(chats_with_user) > 1:
+            chats_str = '\n'.join(chats_with_user)
+            raise RuntimeWarning("Нашёл несколько чатов. Уточните какой:\n"
+                                 f"{chats_str}")
+
+        elif len(chats_with_user) == 1:
+            return chats_with_user[0]
+
+    @staticmethod
+    def get_gamer_by_user(user):
+        from apps.games.models import Gamer
+
+        gamers = Gamer.objects.filter(user=user)
+        if len(gamers) == 0:
+            gamer = Gamer(user=user)
+            gamer.save()
+            return gamer
+        elif len(gamers) > 1:
+            raise RuntimeWarning("Два и более игрока подходит под поиск")
+        else:
+            return gamers.first()
+
+
+def get_bot_by_platform(platform):
+    from apps.bot.classes.bots.VkBot import VkBot
+    from apps.bot.classes.bots.TgBot import TgBot
+
+    platforms = {
+        'vk': VkBot,
+        'tg': TgBot
+    }
+    return platforms[platform]

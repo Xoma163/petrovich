@@ -1,16 +1,14 @@
-import datetime
 import json
 
 from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.utils.safestring import mark_safe
-
 # ToDo: избавляемся от этого
 from pygments import highlight
 from pygments.formatters.html import HtmlFormatter
 from pygments.lexers.data import JsonLexer
 
-from apps.bot.models import VkUser, VkChat
+from apps.bot.models import Users, Chat
 
 
 def _get_pretty(field):
@@ -22,12 +20,12 @@ def _get_pretty(field):
 
 
 class Gamer(models.Model):
-    user = models.ForeignKey(VkUser, verbose_name="Игрок", on_delete=models.CASCADE, null=True)
+    user = models.ForeignKey(Users, verbose_name="Игрок", on_delete=models.CASCADE, null=True)
     points = models.IntegerField(verbose_name="Очки", default=0)
     tic_tac_toe_points = models.IntegerField(verbose_name="Очки крестики-нолики", default=0)
     codenames_points = models.IntegerField(verbose_name="Очки коднеймса", default=0)
     roulette_points = models.IntegerField(verbose_name="Очки рулетки", default=500)
-    roulette_points_today = models.DateTimeField(verbose_name="Дата получения очков", default=datetime.datetime.utcnow)
+    roulette_points_today = models.DateTimeField(verbose_name="Дата получения очков", auto_now_add=True)
 
     class Meta:
         verbose_name = "Игрок"
@@ -39,9 +37,8 @@ class Gamer(models.Model):
 
 
 class Rate(models.Model):
-    id = models.AutoField(primary_key=True, verbose_name='ID')
     gamer = models.ForeignKey(Gamer, verbose_name="Пользователь", on_delete=models.CASCADE, null=True)
-    chat = models.ForeignKey(VkChat, verbose_name="Чат", on_delete=models.CASCADE, null=True)
+    chat = models.ForeignKey(Chat, verbose_name="Чат", on_delete=models.CASCADE, null=True)
     rate = models.IntegerField(verbose_name="Ставка")
     date = models.DateTimeField(verbose_name="Дата", auto_now_add=True, blank=True)
     random = models.BooleanField(verbose_name="Случайная", default=False)
@@ -55,15 +52,9 @@ class Rate(models.Model):
         return str(self.chat) + " " + str(self.gamer)
 
 
-# class RateDelete(models.Model):
-#     id = models.AutoField(primary_key=True, verbose_name='ID')
-#     chat = models.ForeignKey(VkChat, verbose_name="Чат", on_delete=models.CASCADE, null=True)
-#     message_id = models.IntegerField(verbose_name="ID сообщения")
-
-
 class PetrovichUser(models.Model):
-    user = models.ForeignKey(VkUser, on_delete=models.CASCADE, null=True, verbose_name="Пользователь")
-    chat = models.ForeignKey(VkChat, verbose_name='Чат', null=True, blank=True, on_delete=models.CASCADE)
+    user = models.ForeignKey(Users, on_delete=models.CASCADE, null=True, verbose_name="Пользователь")
+    chat = models.ForeignKey(Chat, verbose_name='Чат', null=True, blank=True, on_delete=models.CASCADE)
     wins = models.IntegerField(verbose_name="Побед в Петровиче", default=0)
     active = models.BooleanField(verbose_name="Активность", default=True)
 
@@ -77,8 +68,8 @@ class PetrovichUser(models.Model):
 
 
 class PetrovichGames(models.Model):
-    user = models.ForeignKey(VkUser, on_delete=models.CASCADE, null=True, verbose_name="Пользователь")
-    chat = models.ForeignKey(VkChat, verbose_name='Чат', null=True, blank=True, on_delete=models.CASCADE)
+    user = models.ForeignKey(Users, on_delete=models.CASCADE, null=True, verbose_name="Пользователь")
+    chat = models.ForeignKey(Chat, verbose_name='Чат', null=True, blank=True, on_delete=models.CASCADE)
     date = models.DateTimeField(verbose_name="Дата", auto_now_add=True, editable=True)
 
     class Meta:
@@ -95,11 +86,11 @@ def get_default_board():
 
 
 class TicTacToeSession(models.Model):
-    user1 = models.ForeignKey(VkUser, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Пользователь *",
+    user1 = models.ForeignKey(Users, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Пользователь *",
                               related_name="user1_%(class)ss")
-    user2 = models.ForeignKey(VkUser, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Пользователь o",
+    user2 = models.ForeignKey(Users, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Пользователь o",
                               related_name="user2_%(class)ss")
-    next_step = models.ForeignKey(VkUser, on_delete=models.CASCADE, null=True, blank=True,
+    next_step = models.ForeignKey(Users, on_delete=models.CASCADE, null=True, blank=True,
                                   verbose_name="Следующий шаг",
                                   related_name="next_%(class)ss")
     board = JSONField(null=True, verbose_name="Поле", default=get_default_board)
@@ -117,9 +108,8 @@ class TicTacToeSession(models.Model):
 
 
 class CodenamesUser(models.Model):
-    id = models.AutoField(primary_key=True, verbose_name='ID')
-    user = models.ForeignKey(VkUser, verbose_name="Пользователь", on_delete=models.CASCADE, null=True)
-    chat = models.ForeignKey(VkChat, verbose_name="Чат", on_delete=models.CASCADE, null=True)
+    user = models.ForeignKey(Users, verbose_name="Пользователь", on_delete=models.CASCADE, null=True)
+    chat = models.ForeignKey(Chat, verbose_name="Чат", on_delete=models.CASCADE, null=True)
     command_list = [('blue', "Синие"), ('red', "Красные")]
     command = models.CharField('Команда', choices=command_list, max_length=4, null=True, blank=True)
     role_list = [('captain', "Капитан"), ('player', "Игрок")]
@@ -137,8 +127,7 @@ class CodenamesUser(models.Model):
 
 
 class CodenamesSession(models.Model):
-    id = models.AutoField(primary_key=True, verbose_name='ID')
-    chat = models.ForeignKey(VkChat, verbose_name="Чат", on_delete=models.CASCADE, null=True)
+    chat = models.ForeignKey(Chat, verbose_name="Чат", on_delete=models.CASCADE, null=True)
     # red, blue, red_wait, blue_wait, red_wait
     next_step_list = [('red', "Синие"), ('blue', "Красные"), ('blue_wait', "Капитан синих"),
                       ('red_wait', "Капитан красных")]
@@ -162,10 +151,8 @@ class CodenamesSession(models.Model):
 
 
 class RouletteRate(models.Model):
-    id = models.AutoField(primary_key=True, verbose_name='ID')
-
     gamer = models.ForeignKey(Gamer, verbose_name="Игрок", on_delete=models.CASCADE, null=True)
-    chat = models.ForeignKey(VkChat, verbose_name="Чат", on_delete=models.CASCADE, null=True)
+    chat = models.ForeignKey(Chat, verbose_name="Чат", on_delete=models.CASCADE, null=True)
 
     rate_on = JSONField(verbose_name="Ставка")
     rate = models.IntegerField(verbose_name="Ставка")

@@ -4,7 +4,7 @@ from apps.bot.classes.common.CommonCommand import CommonCommand
 
 class Control(CommonCommand):
     def __init__(self):
-        names = ["отправить", "сообщение"]
+        names = ["отправить", "сообщение", "отправь"]
         help_text = "Отправить - отправление сообщение в любую конфу"
         detail_help_text = "Отправить (id чата/название чата) (сообщение)"
         super().__init__(names, help_text, detail_help_text, access=Role.ADMIN, args=2)
@@ -19,4 +19,8 @@ class Control(CommonCommand):
             msg_chat_name = self.event.args[0]
             chat = self.bot.get_chat_by_name(msg_chat_name)
         msg = self.event.original_args.split(' ', 1)[1]
-        self.bot.send_message(chat.chat_id, msg)
+        if self.event.platform == 'vk':
+            self.bot.send_message(chat.chat_id, msg)
+        elif self.event.platform == 'tg':
+            self.bot.send_message(f'-{chat.chat_id}', msg)
+        return "Отправил"

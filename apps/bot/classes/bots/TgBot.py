@@ -1,8 +1,11 @@
-import logging
+import json
+import os
 import threading
 import time
 import traceback
+from io import BytesIO
 from threading import Thread
+from urllib.parse import urlparse
 
 import requests
 from django.contrib.auth.models import Group
@@ -10,7 +13,7 @@ from django.contrib.auth.models import Group
 from apps.bot.classes.Consts import Role
 from apps.bot.classes.bots.CommonBot import CommonBot
 from apps.bot.classes.events.TgEvent import TgEvent
-from apps.bot.models import TgUser as TgUserModel, TgChat as TgChatModel, TgBot as TgBotModel
+from apps.bot.models import Users, Chat, Bot
 from petrovich.settings import env
 
 
@@ -22,54 +25,58 @@ class TgRequests:
         url = f'https://api.telegram.org/bot{self.token}/{url}'
         return requests.get(url, params, **kwargs)
 
+    def post(self, url, params=None, **kwargs):
+        url = f'https://api.telegram.org/bot{self.token}/{url}'
+        return requests.post(url, params, **kwargs)
+
 
 class TgBot(CommonBot, Thread):
     def __init__(self):
-        CommonBot.__init__(self)
         Thread.__init__(self)
+        CommonBot.__init__(self, 'tg')
 
         self.token = env.str("TG_TOKEN")
         self.requests = TgRequests(self.token)
         self.longpoll = MyTgBotLongPoll(self.token, self.requests)
 
-        self.user_model = TgUserModel
-        self.chat_model = TgChatModel
-        self.bot_model = TgBotModel
-
-        # self.tg_user = TgUser()
-
-        self.logger = logging.getLogger('tg_bot')
+    def set_activity(self, peer_id, activity='typing'):
+        if activity not in ['typing', 'audiomessage']:
+            raise RuntimeWarning("Не знаю такого типа активности")
+        self.requests.get('sendChatAction', {'chat_id': peer_id, 'action': activity})
 
     def register_user(self, user):
         def set_fields(_user):
             _user.name = user.get('first_name', None)
             _user.surname = user.get('last_name', None)
             _user.nickname = user.get('username', None)
-            tg_user.save()
+            _user.platform = self.name
+            _user.save()
             group_user = Group.objects.get(name=Role.USER.name)
-            tg_user.groups.add(group_user)
-            tg_user.save()
+            _user.groups.add(group_user)
+            _user.save()
 
-        tg_user = self.user_model.objects.filter(user_id=user['id'])
+        tg_user = self.user_model.filter(user_id=user['id'])
         if len(tg_user) > 0:
             tg_user = tg_user.first()
 
             if tg_user.name is None:
                 set_fields(tg_user)
         else:
-            tg_user = self.user_model()
+            tg_user = Users()
             tg_user.user_id = user['id']
             set_fields(tg_user)
         return tg_user
 
     def get_user_by_id(self, user_id):
-        tg_user = self.user_model.objects.filter(user_id=user_id)
+        tg_user = self.user_model.filter(user_id=user_id)
         if len(tg_user) > 0:
             tg_user = tg_user.first()
         else:
             # Если пользователь из fwd
-            tg_user = self.user_model()
+            tg_user = Users()
             tg_user.user_id = user_id
+            tg_user.platform = self.name
+
             tg_user.save()
 
             group_user = Group.objects.get(name=Role.USER.name)
@@ -78,90 +85,167 @@ class TgBot(CommonBot, Thread):
         return tg_user
 
     def get_chat_by_id(self, chat_id):
-        tg_chat = self.chat_model.objects.filter(chat_id=chat_id)
+        if chat_id > 0:
+            chat_id *= -1
+        tg_chat = self.chat_model.filter(chat_id=chat_id)
         if len(tg_chat) > 0:
             tg_chat = tg_chat.first()
         else:
-            tg_chat = self.chat_model(chat_id=chat_id)
+            tg_chat = Chat(chat_id=chat_id, platform=self.name)
             tg_chat.save()
         return tg_chat
 
     def get_bot_by_id(self, bot_id):
         if bot_id > 0:
             bot_id = -bot_id
-        bot = self.bot_model.objects.filter(bot_id=bot_id)
+        bot = self.bot_model.filter(bot_id=bot_id)
         if len(bot) > 0:
             bot = bot.first()
         else:
             # Прозрачная регистрация
-            bot = self.bot_model()
-            bot.bot_id = bot_id
+            bot = Bot(bot_id=bot_id, platform=self.name)
             bot.save()
 
         return bot
 
-    def send_photo(self, peer_id, msg, attachments):
-        prepared_photo = {'chat_id': peer_id, 'caption': msg, 'photo': attachments}
-        self.requests.get('sendPhoto', params=prepared_photo)
+    # URL Only. Bytes not supported
+    def _send_media_group(self, peer_id, msg, attachments, keyboard):
+        media = []
+        for attachment in attachments:
+            media.append({'type': attachment['type'], 'media': attachment['attachment'], 'caption': msg})
+        self.requests.get('sendMediaGroup', {'chat_id': peer_id, 'media': json.dumps(media), 'reply_markup': keyboard})
 
-    def send_message(self, peer_id, msg="ᅠ", attachments=None, keyboard=None, dont_parse_links=False, **kwargs):
+    def _send_photo(self, peer_id, msg, photo, keyboard):
+        if isinstance(photo, str) and urlparse(photo).hostname:
+            self.requests.get('sendPhoto',
+                              {'chat_id': peer_id, 'caption': msg, 'photo': photo, 'reply_markup': keyboard})
+        else:
+            self.requests.get('sendPhoto', {'chat_id': peer_id, 'caption': msg, 'reply_markup': keyboard},
+                              files={'photo': photo})
+
+    def _send_video(self, peer_id, msg, video, keyboard):
+        if isinstance(video, str) and urlparse(video).hostname:
+            self.requests.get('sendVideo',
+                              params={'chat_id': peer_id, 'caption': msg, 'reply_markup': keyboard, 'video': video})
+        else:
+            self.requests.get('sendVideo', params={'chat_id': peer_id, 'caption': msg, 'reply_markup': keyboard},
+                              files={'video': video})
+
+    def send_message(self, peer_id, msg='', attachments=None, keyboard=None, dont_parse_links=False, **kwargs):
+        if keyboard:
+            keyboard = json.dumps(keyboard)
         if attachments:
-            self.send_photo(peer_id, msg, attachments)
-            return
-        prepared_message = {'chat_id': peer_id, 'text': msg}
-        self.requests.get('sendMessage', params=prepared_message)
+            # Убираем все ссылки, потому что телега в них не умеет похоже
+            attachments = list(filter(lambda x: not (isinstance(x, str) and urlparse(x).hostname), attachments))
+            attachments = list(filter(lambda x: x, attachments))
+            if attachments:
+                if len(attachments) > 1 and attachments[0]:
+                    return self._send_media_group(peer_id, msg, attachments, keyboard)
+                elif attachments[0]['type'] == 'video':
+                    return self._send_video(peer_id, msg, attachments[0]['attachment'], keyboard)
+                elif attachments[0]['type'] == 'photo':
+                    return self._send_photo(peer_id, msg, attachments[0]['attachment'], keyboard)
+        prepared_message = {'chat_id': peer_id, 'text': msg, 'parse_mode': 'HTML', 'reply_markup': keyboard}
+        return self.requests.get('sendMessage', params=prepared_message)
+
+    def _setup_event(self, event):
+        if 'callback_query' in event:
+            event = event['callback_query']
+            event['message']['from'] = event['from']
+        tg_event = {
+            'platform': self.name,
+            'from_user': not event['message']['from']['is_bot'],
+            'user_id': event['message']['from']['id'],
+            'chat_id': None,
+            'peer_id': event['message']['chat']['id'],
+            'message': {
+                'id': event['message']['message_id'],
+                'text': event['message'].get('text', None) or event['message'].get('caption', None) or "",
+                # 'payload': event.message.payload,
+                'attachments': [],
+                'action': None,
+                'payload': event.get('data', None)
+            },
+            'fwd': None,
+
+        }
+
+        if 'new_chat_members' in event['message']:
+            tg_event['message']['action'] = {
+                'type': 'chat_invite_user',
+                'member_ids': [],
+            }
+            for member in event['message']['new_chat_members']:
+                if member['is_bot']:
+                    tg_event['message']['action']['member_ids'].append(-member['id'])
+                else:
+                    tg_event['message']['action']['member_ids'].append(member['id'])
+        elif 'group_chat_created' in event['message']:
+            tg_event['message']['action'] = {
+                'type': 'chat_invite_user',
+                'member_ids': [-env.int('TG_BOT_GROUP_ID')],
+            }
+        elif 'left_chat_member' in event['message'] and not event['message']['left_chat_member']['is_bot']:
+            tg_event['message']['action'] = {
+                'type': 'chat_kick_user',
+                'member_id': event['message']['left_chat_member']['id'],
+            }
+
+        if event['message']['chat']['id'] != event['message']['from']['id']:
+            tg_event['chat_id'] = -event['message']['chat']['id']
+        if not tg_event['from_user']:
+            tg_event['chat_id'] = event['message']['chat']['id']
+        if 'reply_to_message' in event['message']:
+            tg_event['fwd'] = [{
+                'id': event['message']['reply_to_message']['message_id'],
+                'text': event['message']['reply_to_message'].get('text', None) or event['message'][
+                    'reply_to_message'].get('caption', None),
+                'attachments': [],
+                'from_id': event['message']['reply_to_message']['from']['id'],
+                'date': event['message']['reply_to_message']['date'],
+            }]
+            if 'photo' in event['message']['reply_to_message']:
+                tg_event['fwd'][0]['attachments'].append(event['message']['reply_to_message']['photo'][-1])
+                tg_event['fwd'][0]['attachments'][-1]['type'] = 'photo'
+            if 'voice' in event['message']['reply_to_message']:
+                tg_event['fwd'][0]['attachments'].append(event['message']['reply_to_message']['photo'][-1])
+                tg_event['fwd'][0]['attachments'][-1]['type'] = 'audio_message'
+
+            if event['message']['reply_to_message']['from']['is_bot']:
+                tg_event['fwd'][0]['from_id'] *= -1
+        if 'photo' in event['message']:
+            tg_event['message']['attachments'].append(event['message']['photo'][-1])
+            tg_event['message']['attachments'][-1]['type'] = 'photo'
+        if 'voice' in event['message']:
+            tg_event['message']['attachments'].append(event['message']['photo'][-1])
+            tg_event['message']['attachments'][-1]['type'] = 'audio_message'
+
+            # if tg_event['message']['attachments']:
+            #     try:
+            #         response = self.requests.get('getFile',
+            #                                      params={
+            #                                          'file_id': tg_event['message']['attachments'][-1]['file_id']}).json()
+            #         if 'result' in response:
+            #             file_path = response['result'].get('file_path', None)
+            #             if file_path:
+            #                 file = requests.get(f'https://api.telegram.org/file/bot{self.token}/{file_path}')
+            #                 tg_event['message']['attachments'] = {
+            #                     'type': 'photo',
+            #                     'url': f'https://api.telegram.org/file/bot{self.token}/{file_path}',
+            #                     'bytes': file.content
+            #                 }
+            #                 pass
+            #     except:
+            #         tg_event['message']['attachments'] = []
+        return tg_event
 
     def listen(self):
         for event in self.longpoll.listen():
             try:
-                tg_event = {
-                    'from_user': not event['message']['from']['is_bot'],
-                    'user_id': event['message']['from']['id'],
-                    'chat_id': None,
-                    'peer_id': event['message']['chat']['id'],
-                    'message': {
-                        'id': event['message']['message_id'],
-                        'text': event['message'].get('text', None) or event['message'].get('caption', None) or "",
-                        # 'payload': event.message.payload,
-                        'attachments': [],
-                        'action': None
-                    },
-                    'fwd': None,
-                }
-                # actions
-                if 'new_chat_members' in event['message']:
-                    tg_event['message']['action'] = {
-                        'type': 'chat_invite_user',
-                        'member_ids': [],
-                    }
-                    for member in event['message']['new_chat_members']:
-                        if member['is_bot']:
-                            tg_event['message']['action']['member_ids'].append(-member['id'])
-                        else:
-                            tg_event['message']['action']['member_ids'].append(member['id'])
-                elif 'group_chat_created' in event['message']:
-                    tg_event['message']['action'] = {
-                        'type': 'chat_invite_user',
-                        'member_ids': [-env.int('TG_BOT_GROUP_ID')],
-                    }
-                elif 'left_chat_member' in event['message'] and not event['message']['left_chat_member']['is_bot']:
-                    tg_event['message']['action'] = {
-                        'type': 'chat_kick_user',
-                        'member_id': event['message']['left_chat_member']['id'],
-                    }
+                tg_event = self._setup_event(event)
 
-                if event['message']['chat']['id'] != event['message']['from']['id']:
-                    tg_event['chat_id'] = -event['message']['chat']['id']
-                if not tg_event['from_user']:
-                    tg_event['chat_id'] = event['message']['chat']['id']
-                if 'reply_to_message' in event['message']:
-                    tg_event['fwd'] = [{
-                        'id': event['message']['reply_to_message']['message_id'],
-                        'text': event['message']['reply_to_message']['text'],
-                        'attachments': event['message'].get('photo', None) or event['message'].get('voice', None)
-                    }]
                 # Игнорим forward
-                if 'forward_from' in event['message']:
+                if event.get('message') and event['message'].get('forward_from'):
                     continue
 
                 if not self.need_a_response(tg_event):
@@ -169,7 +253,7 @@ class TgBot(CommonBot, Thread):
 
                 # Узнаём пользователя
                 if tg_event['from_user']:
-                    tg_event['sender'] = self.register_user(event['message']['from'])
+                    tg_event['sender'] = self.register_user(event.get('callback_query', event)['message']['from'])
                 else:
                     self.send_message(tg_event['peer_id'], "Боты не могут общаться с Петровичем :(")
                     continue
@@ -188,6 +272,67 @@ class TgBot(CommonBot, Thread):
                 print(str(e))
                 tb = traceback.format_exc()
                 print(tb)
+
+    @staticmethod
+    def _prepare_obj_to_upload(file_like_object, allowed_exts_url=None):
+        # url
+        if isinstance(file_like_object, str) and urlparse(file_like_object).hostname:
+            if allowed_exts_url:
+                if file_like_object.split('.')[-1].lower() not in allowed_exts_url:
+                    raise RuntimeWarning(f"Загрузка по URL доступна только для {' '.join(allowed_exts_url)}")
+            return file_like_object
+        if isinstance(file_like_object, bytes):
+            return file_like_object
+        # path
+        if isinstance(file_like_object, str) and os.path.exists(file_like_object):
+            with open(file_like_object, 'rb') as file:
+                file_like_object = file.read()
+                return file_like_object
+        if isinstance(file_like_object, BytesIO):
+            file_like_object.seek(0)
+            return file_like_object.read()
+        return None
+
+    def upload_photos(self, images, max_count=10):
+        if not isinstance(images, list):
+            images = [images]
+        images_list = []
+        for image in images:
+            try:
+                images_list.append(
+                    {'type': 'photo', 'attachment': self._prepare_obj_to_upload(image, ['jpg', 'jpeg', 'png'])})
+            except:
+                continue
+            if len(images_list) >= max_count:
+                break
+        return images_list
+
+    def upload_document(self, document, peer_id=None, title='Документ'):
+        return {'type': 'video', 'attachment': self._prepare_obj_to_upload(document)}
+
+    @staticmethod
+    def get_inline_keyboard(command_text, button_text="Ещё", args=None):
+        if args is None:
+            args = {}
+        return {
+            'inline_keyboard': [[
+                {
+                    'text': button_text,
+                    'callback_data': json.dumps({'command': command_text, "args": args}, ensure_ascii=False)
+                }
+            ]]
+        }
+
+    @staticmethod
+    def get_group_id(_id):
+        return _id
+
+    @staticmethod
+    def get_mention(user, name=None):
+        return f"@{user.nickname}"
+
+    def upload_video_by_link(self, link, name):
+        return None
 
 
 class MyTgBotLongPoll:
@@ -209,7 +354,7 @@ class MyTgBotLongPoll:
                 self.last_update_id = result[-1]['update_id'] + 1
 
     def check(self):
-        result = self.request.get('getUpdates', {'offset': self.last_update_id})
+        result = self.request.get('getUpdates', {'offset': self.last_update_id, 'timeout': 30})
         if result.status_code != 200:
             return []
         result = result.json()['result']

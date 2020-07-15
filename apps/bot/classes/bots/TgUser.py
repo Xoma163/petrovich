@@ -1,6 +1,6 @@
-from petrovich.settings import env
 from telethon import TelegramClient
 
+from petrovich.settings import env
 
 
 class TgUser:

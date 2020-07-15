@@ -9,4 +9,4 @@ class Documentation(CommonCommand):
 
     def start(self):
         url = 'https://vk.com/@igor_petrovich_ksta-instrukciya-po-ispolzovaniu'
-        return {'msg': url, 'attachments': url}
+        return {'msg': url, 'attachments': [url]}

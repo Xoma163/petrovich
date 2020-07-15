@@ -7,16 +7,9 @@ db_default_formatter = logging.Formatter()
 
 class DatabaseLogHandler(logging.Handler):
     def emit(self, record):
-        from apps.db_logger.models import TgLogger, VkLogger
+        from apps.db_logger.models import Logger
 
         traceback = None
-
-        if record.name == 'tg_bot':
-            Logger = TgLogger
-        elif record.name == 'vk_bot':
-            Logger = VkLogger
-        else:
-            return
 
         if record.exc_info:
             traceback = db_default_formatter.formatException(record.exc_info)
@@ -29,7 +22,7 @@ class DatabaseLogHandler(logging.Handler):
         }
 
         if isinstance(record.msg, dict):
-            last_log = Logger.objects.last()
+            last_log = Logger.objects.first()
             if not last_log.result:
                 kwargs.update(record.msg)
                 for kwarg in kwargs:

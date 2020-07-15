@@ -1,0 +1,12 @@
+[Unit]
+Description=petrobich bot
+
+[Service]
+User=server
+Type=simple
+SuccessExitStatus=0 1
+WorkingDirectory=/var/www/petrovich/
+ExecStart=/var/www/petrovich/venv/bin/python -u manage.py start
+
+[Install]
+WantedBy=multi-user.target

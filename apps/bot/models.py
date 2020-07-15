@@ -6,21 +6,36 @@ from django.db import models
 
 # Create your models here.
 
-class AbstractChat(models.Model):
-    id = models.AutoField(primary_key=True, verbose_name='ID')
-    chat_id = models.CharField(verbose_name='ID чата', max_length=20, default="")
-    name = models.CharField(verbose_name='Название', max_length=40, default="", blank=True)
-    need_reaction = models.BooleanField(verbose_name='Реагировать', default=True)
+class Platform(models.Model):
+    PLATFORM_TG = 'tg'
+    PLATFORM_VK = 'vk'
+    PLATFORM_CHOICES = (
+        (PLATFORM_TG, 'Telegram'),
+        (PLATFORM_VK, 'Vk'))
+    platform = models.CharField(verbose_name='Тип платформы', max_length=3, choices=PLATFORM_CHOICES)
 
     class Meta:
         abstract = True
+        ordering = ["chat_id"]
+
+
+class Chat(Platform):
+    id = models.AutoField(primary_key=True)
+    chat_id = models.CharField(verbose_name='ID чата', max_length=20, default="")
+    name = models.CharField(verbose_name='Название', max_length=40, default="", blank=True)
+    need_reaction = models.BooleanField(verbose_name='Реагировать', default=True)
+    admin = models.ForeignKey('Users', verbose_name='Админ', blank=True, null=True, on_delete=models.SET_NULL)
+
+    class Meta:
+        verbose_name = "Чат"
+        verbose_name_plural = "Чаты"
         ordering = ["chat_id"]
 
     def __str__(self):
         return str(self.name)
 
 
-class AbstractUser(models.Model):
+class Users(Platform):
     GENDER_FEMALE = '1'
     GENDER_MALE = '2'
     GENDER_NONE = ''
@@ -29,8 +44,7 @@ class AbstractUser(models.Model):
         (GENDER_MALE, 'мужской'),
         (GENDER_NONE, 'не указан'))
 
-    id = models.AutoField(primary_key=True, verbose_name='ID')
-
+    id = models.AutoField(primary_key=True)
     user_id = models.CharField(verbose_name='ID пользователя', max_length=20)
     name = models.CharField(verbose_name='Имя', max_length=40, blank=True, null=True)
     surname = models.CharField(verbose_name='Фамилия', max_length=40, blank=True, null=True)
@@ -46,9 +60,11 @@ class AbstractUser(models.Model):
     groups = models.ManyToManyField(Group, verbose_name="Группы")
 
     # send_notify_to = models.ManyToManyField('self', verbose_name="Отправление уведомлений", blank=True)
+    chats = models.ManyToManyField(Chat, verbose_name="Чаты", blank=True)
 
     class Meta:
-        abstract = True
+        verbose_name = "Пользователь"
+        verbose_name_plural = "Пользователи"
         ordering = ["name", "surname"]
 
     def __str__(self):
@@ -60,77 +76,33 @@ class AbstractUser(models.Model):
             return "Незарегистрированный пользователь"
 
 
-class AbstractBot(models.Model):
-    id = models.AutoField(primary_key=True, verbose_name='ID')
+class Bot(Platform):
+    id = models.AutoField(primary_key=True)
     bot_id = models.CharField(verbose_name='ID бота', max_length=20)
-    name = models.CharField(verbose_name='Имя', max_length=40, default="")
+    name = models.CharField(verbose_name='Имя', max_length=40)
 
     class Meta:
+        verbose_name = "Бот"
+        verbose_name_plural = "Боты"
         ordering = ["id"]
 
     def __str__(self):
         if self.name:
             return self.name
         else:
-            return self.bot_id
-
-
-class VkChat(AbstractChat):
-    admin = models.ForeignKey('VkUser', verbose_name='Админ', blank=True, null=True, on_delete=models.SET_NULL)
-
-    class Meta:
-        verbose_name = "ВК Чат"
-        verbose_name_plural = "ВК Чаты"
-
-
-class VkUser(AbstractUser):
-    chats = models.ManyToManyField(VkChat, verbose_name="Чаты", blank=True)
-
-    class Meta:
-        verbose_name = "ВК Пользователь"
-        verbose_name_plural = "ВК Пользователи"
-
-
-class VkBot(AbstractBot):
-    class Meta:
-        verbose_name = "ВК Бот"
-        verbose_name_plural = "ВК Боты"
-
-
-class TgChat(AbstractChat):
-    admin = models.ForeignKey('TgUser', verbose_name='Админ', blank=True, null=True, on_delete=models.SET_NULL)
-
-    class Meta:
-        verbose_name = "ТГ Чат"
-        verbose_name_plural = "ТГ Чаты"
-
-
-class TgUser(AbstractUser):
-    chats = models.ManyToManyField(TgChat, verbose_name="Чаты", blank=True)
-
-    class Meta:
-        verbose_name = "ТГ Пользователь"
-        verbose_name_plural = "ТГ Пользователи"
-
-
-class TgBot(AbstractBot):
-    class Meta:
-        verbose_name = "ТГ Бот"
-        verbose_name_plural = "ТГ Боты"
+            return f"Неопознанный бот #{self.id}"
 
 
 class APIUser(models.Model):
-    id = models.AutoField(primary_key=True, verbose_name='ID')
-    user_id = models.CharField(verbose_name="ID пользователя", max_length=100)
-    vk_user = models.ForeignKey(VkUser, verbose_name="Вк юзер", on_delete=models.CASCADE, null=True, blank=True)
-    vk_chat = models.ForeignKey(VkChat, verbose_name="Вк чат", on_delete=models.CASCADE, null=True, blank=True)
+    user = models.ForeignKey(Users, verbose_name="Юзер", on_delete=models.CASCADE, null=True, blank=True)
+    chat = models.ForeignKey(Chat, verbose_name="Вк чат", on_delete=models.CASCADE, null=True, blank=True)
 
     class Meta:
         verbose_name = "API Пользователь"
         verbose_name_plural = "API Пользователи"
 
     def __str__(self):
-        return str(self.vk_user)
+        return str(self.user)
 
 
 def random_digits():
@@ -139,10 +111,8 @@ def random_digits():
 
 
 class APITempUser(models.Model):
-    id = models.AutoField(primary_key=True, verbose_name='ID')
-    user_id = models.CharField(verbose_name="ID пользователя", max_length=100)
-    vk_user = models.ForeignKey(VkUser, verbose_name="Вк юзер", on_delete=models.CASCADE, null=True, blank=True)
-    vk_chat = models.ForeignKey(VkChat, verbose_name="Вк чат", on_delete=models.CASCADE, null=True, blank=True)
+    user = models.ForeignKey(Users, verbose_name="Пользователь", on_delete=models.CASCADE, null=True, blank=True)
+    chat = models.ForeignKey(Chat, verbose_name="Чат", on_delete=models.CASCADE, null=True, blank=True)
     code = models.CharField(verbose_name="Код подтверждения", default=random_digits, max_length=6)
     tries = models.IntegerField(verbose_name="Кол-во попыток", default=5)
 
@@ -151,4 +121,4 @@ class APITempUser(models.Model):
         verbose_name_plural = "API Временные пользователи"
 
     def __str__(self):
-        return str(self.vk_user)
+        return str(self.user)
