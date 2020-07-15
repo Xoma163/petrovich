@@ -4,7 +4,7 @@ from apps.bot.classes.common.CommonMethods import find_command_by_name, get_help
 
 class Help(CommonCommand):
     def __init__(self):
-        names = ["помощь", "хелп", "ман", "команды", "помоги", "памаги", "спаси", "хелб", "манул", "help"]
+        names = ["помощь", "хелп", "ман", "команды", "помоги", "памаги", "спаси", "хелб", "манул", "help", "start"]
         help_text = "Помощь - помощь по командам и боту"
         super().__init__(names, help_text)
 

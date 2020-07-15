@@ -36,7 +36,7 @@ class Command(BaseCommand):
                         bot = get_bot_by_platform(notify.chat.platform)()
                         event_model = get_event_by_platform(notify.chat.platform)
                     else:
-                        bot = get_bot_by_platform(notify.author.platform)
+                        bot = get_bot_by_platform(notify.author.platform)()
                         event_model = get_event_by_platform(notify.author.platform)
 
                     if notify.attachments and notify.attachments != "null":

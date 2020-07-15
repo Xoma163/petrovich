@@ -20,13 +20,15 @@ class Platform(models.Model):
 
 
 class Chat(Platform):
+    id = models.AutoField(primary_key=True)
     chat_id = models.CharField(verbose_name='ID чата', max_length=20, default="")
     name = models.CharField(verbose_name='Название', max_length=40, default="", blank=True)
     need_reaction = models.BooleanField(verbose_name='Реагировать', default=True)
     admin = models.ForeignKey('Users', verbose_name='Админ', blank=True, null=True, on_delete=models.SET_NULL)
 
     class Meta:
-        # abstract = True
+        verbose_name = "Чат"
+        verbose_name_plural = "Чаты"
         ordering = ["chat_id"]
 
     def __str__(self):
@@ -42,6 +44,7 @@ class Users(Platform):
         (GENDER_MALE, 'мужской'),
         (GENDER_NONE, 'не указан'))
 
+    id = models.AutoField(primary_key=True)
     user_id = models.CharField(verbose_name='ID пользователя', max_length=20)
     name = models.CharField(verbose_name='Имя', max_length=40, blank=True, null=True)
     surname = models.CharField(verbose_name='Фамилия', max_length=40, blank=True, null=True)
@@ -60,7 +63,8 @@ class Users(Platform):
     chats = models.ManyToManyField(Chat, verbose_name="Чаты", blank=True)
 
     class Meta:
-        # abstract = True
+        verbose_name = "Пользователь"
+        verbose_name_plural = "Пользователи"
         ordering = ["name", "surname"]
 
     def __str__(self):
@@ -73,10 +77,13 @@ class Users(Platform):
 
 
 class Bot(Platform):
+    id = models.AutoField(primary_key=True)
     bot_id = models.CharField(verbose_name='ID бота', max_length=20)
     name = models.CharField(verbose_name='Имя', max_length=40)
 
     class Meta:
+        verbose_name = "Бот"
+        verbose_name_plural = "Боты"
         ordering = ["id"]
 
     def __str__(self):

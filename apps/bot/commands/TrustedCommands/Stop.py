@@ -9,7 +9,7 @@ cameraHandler = CameraHandler()
 
 class Stop(CommonCommand):
     def __init__(self):
-        names = ["стоп", "stop"]
+        names = ["стоп"]
         help_text = "Стоп - останавливает работу бота или модуля"
         detail_help_text = "Стоп [сервис=бот [версия=1.15.1]] - останавливает сервис\n" \
                            "Сервис - бот/синички/майнкрафт/террария\n" \

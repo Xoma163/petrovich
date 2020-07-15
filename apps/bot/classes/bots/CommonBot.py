@@ -23,19 +23,19 @@ class CommonBot:
         self.logger = logging.getLogger(self.name)
 
     def get_user_by_id(self, user_id):
-        pass
+        raise NotImplementedError
 
     def get_chat_by_id(self, chat_id):
-        pass
+        raise NotImplementedError
 
     def get_bot_by_id(self, bot_id):
-        pass
+        raise NotImplementedError
 
     def run(self):
         self.listen()
 
     def listen(self):
-        pass
+        raise NotImplementedError
 
     def menu(self, event, send=True):
 
@@ -145,7 +145,7 @@ class CommonBot:
         return msg
 
     def send_message(self, peer_id, msg="ᅠ", attachments=None, keyboard=None, dont_parse_links=False, **kwargs):
-        pass
+        raise NotImplementedError
 
     def parse_and_send_msgs(self, peer_id, result):
         if isinstance(result, str) or isinstance(result, int) or isinstance(result, float):
@@ -282,10 +282,10 @@ class CommonBot:
         return chats.first()
 
     def upload_document(self, document, peer_id=None, title='Документ'):
-        pass
+        raise NotImplementedError
 
     def upload_photos(self, images, max_count=10):
-        pass
+        raise NotImplementedError
 
     def get_one_chat_with_user(self, chat_name, user_id):
         chats = self.chat_model.filter(name__icontains=chat_name)

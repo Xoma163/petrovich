@@ -50,10 +50,10 @@ class TgBot(CommonBot, Thread):
             _user.surname = user.get('last_name', None)
             _user.nickname = user.get('username', None)
             _user.platform = self.name
-            tg_user.save()
+            _user.save()
             group_user = Group.objects.get(name=Role.USER.name)
-            tg_user.groups.add(group_user)
-            tg_user.save()
+            _user.groups.add(group_user)
+            _user.save()
 
         tg_user = self.user_model.filter(user_id=user['id'])
         if len(tg_user) > 0:

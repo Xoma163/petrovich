@@ -9,7 +9,7 @@ cameraHandler = CameraHandler()
 
 class Start(CommonCommand):
     def __init__(self):
-        names = ["старт", "start"]
+        names = ["старт"]
         help_text = "Старт - возобновляет работу бота или модуля"
         detail_help_text = "Старт [сервис=бот [версия=1.15.1]] - стартует сервис\n" \
                            "Сервис - бот/синички/майнкрафт/террария\n" \
