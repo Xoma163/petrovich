@@ -98,7 +98,7 @@ class Meme(CommonCommand):
             try:
                 self.parse_int()
                 _id = self.event.args[1]
-            except RuntimeWarning:
+            except RuntimeError:
                 pass
         attachments = get_attachments_from_attachments_or_fwd(self.event, ['audio', 'video', 'photo', 'doc'])
         if len(attachments) == 0:
