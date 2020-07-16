@@ -283,6 +283,8 @@ class Meme(CommonCommand):
             if filter_list is None:
                 filter_list = []
             memes = memes.filter(approved=approved)
+            if self.event.platform == 'tg':
+                memes = memes.filter(type='photo')
             if filter_list:
                 filter_list = list(map(lambda x: x.lower(), filter_list))
                 for _filter in filter_list:

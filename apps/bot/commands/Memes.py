@@ -33,7 +33,11 @@ class Memes(CommonCommand):
             else:
                 page = 1
 
-            memes = MemeModel.objects.all()
+            if self.event.platform == 'tg':
+                memes = MemeModel.objects.filter(type='photo')
+            else:
+                memes = MemeModel.objects.all()
+
             p = Paginator(memes, 20)
 
             if page <= 0:
