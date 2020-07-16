@@ -61,6 +61,7 @@ class Command(BaseCommand):
                                 'text': msg
                             },
                             'sender': notify.author,
+                            'platform': notify.author.platform
                         }
                         if notify.chat:
                             event['chat'] = notify.chat
