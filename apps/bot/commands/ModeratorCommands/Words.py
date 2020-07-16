@@ -8,7 +8,7 @@ class Words(CommonCommand):
         names = ["слова"]
         help_text = "Слова - принудительно затягивает слова с Google Drive"
         # ToDo:
-        super().__init__(names, help_text, access=Role.MODERATOR, enabled=False)
+        super().__init__(names, help_text, access=Role.MODERATOR)
 
     def start(self):
         get_words = Command()
