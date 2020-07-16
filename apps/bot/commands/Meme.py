@@ -45,6 +45,7 @@ class Meme(CommonCommand):
             [['отклонить', 'отменить', '-'], self.menu_reject],
             [['переименовать', 'правка'], self.menu_rename],
             [['id', 'ид'], self.menu_id],
+            [['инфо'], self.menu_info],
             [['default'], self.menu_default]
         ]
         method = self.handle_menu(menu, arg0)
@@ -253,6 +254,23 @@ class Meme(CommonCommand):
         _id = self.event.args[1]
         meme = self.get_meme(_id=_id)
         return self.prepare_meme_to_send(meme, True)
+
+    def menu_info(self):
+
+        self.check_args(2)
+        _id = None
+        if len(self.event.args) == 2:
+            self.int_args = [1]
+            try:
+                self.parse_int()
+                _id = self.event.args[1]
+            except RuntimeError:
+                pass
+        meme = self.get_meme(self.event.args[1:], _id=_id)
+        return f"Название: {meme.name}\n" \
+               f"Автор: {meme.author}\n" \
+               f"Ссылка: {meme.link}\n" \
+               f"Использований: {meme.uses}\n"
 
     def menu_default(self):
         memes = self.get_meme(self.event.args, use_tanimoto=True)

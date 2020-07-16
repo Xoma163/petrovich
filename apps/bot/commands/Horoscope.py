@@ -57,7 +57,7 @@ class Horoscope(CommonCommand):
             return self.get_horoscope_by_zodiac(zodiac_index)
         else:
             return "Не указана дата рождения в профиле, не могу прислать гороскоп((. \n" \
-                   "Укажи знак зодиака в аргументе: /гороскоп девы"
+                   "Укажи знак зодиака в аргументе: /гороскоп дева"
 
     def get_horoscope_by_zodiac(self, zodiac_index):
         horoscope = HoroscopeModel.objects.first()

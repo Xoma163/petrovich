@@ -50,8 +50,9 @@ class Command(BaseCommand):
                     result_msg = {'msg': message, 'attachments': attachments}
                     if notify.chat:
                         bot.parse_and_send_msgs_thread(notify.chat.chat_id, result_msg)
-                    else:
-                        bot.parse_and_send_msgs_thread(notify.author.user_id, result_msg)
+                    # Раскоментить если отправлять в лс пользователю, что это его напоминание
+                    # else:
+                    #     bot.parse_and_send_msgs_thread(notify.author.user_id, result_msg)
 
                     # Если отложенная команда
                     if notify.text.startswith('/'):
