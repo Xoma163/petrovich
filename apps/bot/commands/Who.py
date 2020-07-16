@@ -33,6 +33,8 @@ class Who(CommonCommand):
         elif arg in ['админ конфы', 'админ беседы', 'админ конференции', 'админ чата',
                      'администратор конфы', 'администратор беседы', 'администратор конференции', 'администратор чата']:
             return str(self.event.chat.admin)
+        elif arg in ['пидор']:
+            return "ты"
         else:
             return "Не знаю такой роли"
         users = self.get_users(self.event.chat, who)
