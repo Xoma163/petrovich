@@ -11,6 +11,7 @@ from apps.db_logger.config import DJANGO_DB_LOGGER_ADMIN_LIST_PER_PAGE
 from apps.db_logger.models import MovementLog, Logger
 
 
+@admin.register(Logger)
 class LoggerAdmin(admin.ModelAdmin):
     formfield_overrides = {
         models.TextField: {'widget': Textarea(attrs={'rows': 15, 'cols': 150})},
@@ -19,7 +20,8 @@ class LoggerAdmin(admin.ModelAdmin):
     list_display = ('create_datetime_format', 'logger_name', 'colored_level', 'sender', 'chat', 'user_msg', 'exception')
     list_filter = ('level',
                    ('sender', admin.RelatedOnlyFieldListFilter),
-                   ('chat', admin.RelatedOnlyFieldListFilter))
+                   ('chat', admin.RelatedOnlyFieldListFilter),
+                   'logger_name',)
     list_per_page = DJANGO_DB_LOGGER_ADMIN_LIST_PER_PAGE
 
     def colored_level(self, instance):
@@ -43,13 +45,8 @@ class LoggerAdmin(admin.ModelAdmin):
     create_datetime_format.short_description = "Дата создания"
 
 
-@admin.register(Logger)
-class LoggerAdmin(LoggerAdmin):
-    pass
-
-
 @admin.register(MovementLog)
-class LogAdmin(admin.ModelAdmin):
+class MovementLogAdmin(admin.ModelAdmin):
     readonly_fields = ('date',)
     list_display = ('date', 'imei', 'author', 'event', 'msg', 'success')
     list_filter = (('author', admin.RelatedOnlyFieldListFilter),)

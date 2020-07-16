@@ -39,7 +39,7 @@ class VkBot(CommonBot, Thread):
 
         self.vk_user = VkUser()
 
-        self.logger = logging.getLogger('vk_bot')
+        self.logger = logging.getLogger(self.name)
 
     def set_activity(self, peer_id, activity='typing'):
         if activity not in ['typing', 'audiomessage']:
