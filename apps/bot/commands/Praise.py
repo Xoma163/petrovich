@@ -21,9 +21,10 @@ def get_from_db(field_name, _type):
     try:
         word = getattr(Words.objects.filter(**my_field).order_by('?').first(), field_name).lower()
     except AttributeError:
-        word = "Нет такого слова :("
+        raise RuntimeWarning("Нет такого слова :(")
     except Exception as e:
-        word = f"Нет такого слова :( Ошибочка - {str(e)}"
+        raise RuntimeWarning("Нет такого слова :(\n"
+                             f"Ошибка - {str(e)}")
     return word
 
 
@@ -33,7 +34,7 @@ def add_phrase_before(recipient, word, field_name):
     elif field_name[1] == 'm':
         return f"{recipient}, вы {word}"
     else:
-        return "EXCEPTION LOLOLOL"
+        raise RuntimeWarning(f"Ошибка определения числа и рода")
 
 
 def get_praise_or_scold(bot, event, _type):
