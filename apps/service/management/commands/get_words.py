@@ -51,9 +51,8 @@ class Command(BaseCommand):
                 records = worksheet.get_all_records()
                 for j, record in enumerate(records):
                     record['type'] = word_type
-                    if 'id' not in record or not record['id'] or not isinstance(record['id'], int):
-                        msg += f'Проверьте строку {j} {{"type":{word_type}}}. Слово без id\n'
-                        continue
+                    if 'id' in record:
+                        del record['id']
 
                     for item in record:
                         if not record[item] or record[item] == '' or str(record[item]).lower() == 'none':
