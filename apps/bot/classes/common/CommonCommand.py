@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from apps.bot.classes.Consts import Role
+from apps.bot.classes.Consts import Role, ATTACHMENT_TRANSLATOR
 from apps.bot.classes.common.CommonMethods import check_user_group, get_help_for_command, remove_tz
 from apps.service.models import Service
 from petrovich.settings import env
@@ -21,21 +21,21 @@ class CommonCommand:
     """
 
     def __init__(self,
-                 names,
-                 help_text=None,
-                 detail_help_text=None,
+                 names: list,
+                 help_text: str = None,
+                 detail_help_text: str = None,
                  keyboard=None,
-                 access=None,
-                 pm=False,
-                 conversation=False,
-                 fwd=False,
-                 args=None,
-                 int_args=None,
-                 float_args=None,
-                 platforms=None,
-                 attachments=False,
-                 enabled=True,
-                 priority=0,
+                 access: Role = None,
+                 pm: bool = False,
+                 conversation: bool = False,
+                 fwd: bool = False,
+                 args: int = None,
+                 int_args: list = None,
+                 float_args: list = None,
+                 platforms: list = None,
+                 attachments: list = False,
+                 enabled: bool = True,
+                 priority: int = 0,
                  ):
         self.names = names
         self.help_text = help_text
@@ -240,13 +240,14 @@ class CommonCommand:
         return True
 
     # ToDo: check on types
-    def check_attachments(self, types=None):
+    def check_attachments(self):
         if self.event.attachments:
-            if types:
-                pass
-            return True
+            for att in self.event.attachments:
+                if att in self.attachments:
+                    return True
 
-        error = "Пришлите вложения"
+        allowed_types = ' '.join([ATTACHMENT_TRANSLATOR[_type] for _type in self.attachments])
+        error = f"Для работы команды требуются вложения: {allowed_types}"
         raise RuntimeError(error)
 
     # example:

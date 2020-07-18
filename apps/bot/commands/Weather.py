@@ -1,7 +1,7 @@
 import json
 
 from apps.bot.APIs.YandexWeatherAPI import YandexWeatherAPI
-from apps.bot.classes.Consts import WEATHER_TRANSLATE, DAY_TRANSLATE
+from apps.bot.classes.Consts import WEATHER_TRANSLATOR, DAY_TRANSLATOR
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.service.models import City, Service
 
@@ -61,7 +61,7 @@ class Weather(CommonCommand):
             # Если погода не ясная или не облачная
             clear_weather_statuses = ['clear', 'partly-cloudy', 'cloudy', 'overcast']
             if today_part['condition'] not in clear_weather_statuses:
-                weather_today_str = WEATHER_TRANSLATE[today_part['condition']].lower()
+                weather_today_str = WEATHER_TRANSLATOR[today_part['condition']].lower()
                 difference_for_part += f"Ожидается {weather_today_str}\n"
 
             if part in parts_yesterday:
@@ -89,7 +89,7 @@ class Weather(CommonCommand):
                     difference_for_part += f"Порывы скорости ветра до {today_part['wind_gust']}м/с\n"
 
             if difference_for_part:
-                difference_total.append(f"Изменения на {DAY_TRANSLATE[part]}:\n"
+                difference_total.append(f"Изменения на {DAY_TRANSLATOR[part]}:\n"
                                         f"{difference_for_part}")
         if not difference_total:
             return f"Нет изменений погоды в г. {city}"
@@ -126,7 +126,7 @@ class Weather(CommonCommand):
 def get_weather_str(city, weather_data):
     now = \
         f"Погода в г. {city.name} сейчас:\n" \
-        f"{WEATHER_TRANSLATE[weather_data['now']['condition']]}\n" \
+        f"{WEATHER_TRANSLATOR[weather_data['now']['condition']]}\n" \
         f"Температура {weather_data['now']['temp']}°С(ощущается как {weather_data['now']['temp_feels_like']}°С)\n" \
         f"Ветер {weather_data['now']['wind_speed']}м/c(порывы до {weather_data['now']['wind_gust']}м/c)\n" \
         f"Давление {weather_data['now']['pressure']}мм.рт.ст., влажность {weather_data['now']['humidity']}%"
@@ -135,8 +135,8 @@ def get_weather_str(city, weather_data):
     for x in weather_data['forecast']:
         forecast += \
             f"\n\n" \
-            f"Прогноз на {DAY_TRANSLATE[x['part_name']]}:\n" \
-            f"{WEATHER_TRANSLATE[x['condition']]}\n"
+            f"Прогноз на {DAY_TRANSLATOR[x['part_name']]}:\n" \
+            f"{WEATHER_TRANSLATOR[x['condition']]}\n"
 
         if x['temp_min'] != x['temp_max']:
             forecast += f"Температура от {x['temp_min']} до {x['temp_max']}°С"

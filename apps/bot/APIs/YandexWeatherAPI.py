@@ -3,7 +3,7 @@ from datetime import datetime
 
 import requests
 
-from apps.bot.classes.Consts import DAY_TRANSLATE
+from apps.bot.classes.Consts import DAY_TRANSLATOR
 from apps.bot.classes.common.CommonMethods import remove_tz
 from apps.service.models import Service
 from petrovich.settings import env
@@ -42,8 +42,8 @@ class YandexWeatherAPI:
             'forecast': []}
 
         # Проставление part_name для времени сейчас
-        index = list(DAY_TRANSLATE.keys()).index(response['forecast']['parts'][0]['part_name'])
-        weather['now']['part_name'] = list(DAY_TRANSLATE.keys())[index - 1]
+        index = list(DAY_TRANSLATOR.keys()).index(response['forecast']['parts'][0]['part_name'])
+        weather['now']['part_name'] = list(DAY_TRANSLATOR.keys())[index - 1]
 
         for x in response['forecast']['parts']:
             weather['forecast'].append({

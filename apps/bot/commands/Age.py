@@ -49,14 +49,10 @@ class Age(CommonCommand):
         help_text = "Возраст - оценить возраст людей на фотографии"
         detail_help_text = "Возраст (Изображения/Пересылаемое сообщение с изображением) - оценивает возраст людей на " \
                            "фотографии"
-        super().__init__(names, help_text, detail_help_text, platforms=['vk'])
+        super().__init__(names, help_text, detail_help_text, platforms=['vk'], attachments=['photo'])
 
     def start(self):
-        images = get_attachments_from_attachments_or_fwd(self.event, 'photo')
-
-        if not images:
-            return "Не нашёл картинки"
-        image = images[0]
+        image = get_attachments_from_attachments_or_fwd(self.event, 'photo')[0]
         everypixel_api = EveryPixelAPI(image['download_url'])
         faces = everypixel_api.get_faces_on_photo()
 

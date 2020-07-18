@@ -53,7 +53,7 @@ TRUE_FALSE_TRANSLATOR = {
     False: 'выкл ⛔'
 }
 
-WEATHER_TRANSLATE = {
+WEATHER_TRANSLATOR = {
     'clear': 'Ясно ☀',
     'partly-cloudy': 'Малооблачно ⛅',
     'cloudy': 'Облачно с прояснениями 🌥',
@@ -73,11 +73,19 @@ WEATHER_TRANSLATE = {
     'overcast-and-light-snow': 'Небольшой снег 🌨',
     'cloudy-and-snow': 'Снег 🌨'}
 
-DAY_TRANSLATE = {
+DAY_TRANSLATOR = {
     'night': 'ночь',
     'morning': 'утро',
     'day': 'день',
     'evening': 'вечер',
+}
+
+ATTACHMENT_TRANSLATOR = {
+    'audio': 'аудио',
+    'video': 'видео',
+    'photo': 'фото',
+    'doc': 'документ',
+    'audio_message': 'голосовое'
 }
 
 BAD_ANSWERS = ['как же вы меня затрахали...',
