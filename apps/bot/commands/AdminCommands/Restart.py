@@ -27,12 +27,12 @@ class Restart(CommonCommand):
 
     def menu_bot(self):
         self.bot.parse_and_send_msgs_thread(self.event.peer_id, 'Рестартим бота')
-        do_the_linux_command('sudo systemctl restart xoma163bot')
+        do_the_linux_command('sudo systemctl restart petrovich')
         return 'Рестартим бота'
 
     @staticmethod
     def menu_web():
-        do_the_linux_command('sudo systemctl restart xoma163site')
+        do_the_linux_command('sudo systemctl restart petrovich_site')
         return 'Рестартим веб'
 
     @staticmethod

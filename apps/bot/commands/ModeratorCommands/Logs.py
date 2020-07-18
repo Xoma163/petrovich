@@ -93,7 +93,7 @@ class Logs(CommonCommand):
 
     def get_web_logs(self):
         count = self.get_count(50, 1000)
-        command = f"systemctl status xoma163site -n{count}"
+        command = f"systemctl status petrovich_site -n{count}"
         res = get_server_logs(command)
         img = draw_text_on_image(res)
         att = self.bot.upload_photos(img)
@@ -101,7 +101,7 @@ class Logs(CommonCommand):
 
     def get_bot_logs(self):
         count = self.get_count(50, 1000)
-        command = f"systemctl status xoma163bot -n{count}"
+        command = f"systemctl status petrovich -n{count}"
         res = get_bot_logs(command)
         img = draw_text_on_image(res)
         att = self.bot.upload_photos(img)
