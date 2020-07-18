@@ -7,13 +7,13 @@ from petrovich.settings import BASE_DIR
 
 
 def import_all_commands():
-    BASE_COMMANDS_FOLDER_DIR = f"{BASE_DIR}/apps/bot/commands"
-    COMMANDS_DIRS = []
-    for path in os.walk(BASE_COMMANDS_FOLDER_DIR):
+    base_commands_folder_dir = f"{BASE_DIR}/apps/bot/commands"
+    commands_dirs = []
+    for path in os.walk(base_commands_folder_dir):
         if not path[0].endswith('__pycache__'):
-            COMMANDS_DIRS.append(path[0])
+            commands_dirs.append(path[0])
 
-    for (module_loader, name, _) in pkgutil.iter_modules(COMMANDS_DIRS):
+    for (module_loader, name, _) in pkgutil.iter_modules(commands_dirs):
         package = module_loader.path.replace(BASE_DIR, '')[1:].replace('/', '.')
         importlib.import_module('.' + name, package)
 
@@ -52,12 +52,12 @@ def generate_help_text():
             else:
                 print(f"Warn: Ошибка в генерации help_text. Ключ {text_for} не найден")
 
-    GROUPS_WITH_GAMES = GROUPS + ["games"]
-    help_text_generated = {group: "" for group in GROUPS_WITH_GAMES}
-    api_help_text_generated = {group: "" for group in GROUPS_WITH_GAMES}
+    groups_with_games = GROUPS + ["games"]
+    help_text_generated = {group: "" for group in groups_with_games}
+    api_help_text_generated = {group: "" for group in groups_with_games}
 
-    help_text_list = {group: [] for group in GROUPS_WITH_GAMES}
-    api_help_text_list = {group: [] for group in GROUPS_WITH_GAMES}
+    help_text_list = {group: [] for group in groups_with_games}
+    api_help_text_list = {group: [] for group in groups_with_games}
     for command in COMMANDS:
         if command.help_text:
             help_text = command.help_text
@@ -74,7 +74,7 @@ def generate_help_text():
                         if 'api' in command.platforms:
                             append_to_list(api_help_text_list)
 
-    for group in GROUPS_WITH_GAMES:
+    for group in groups_with_games:
         help_text_list[group].sort()
         help_text_generated[group] = "\n".join(help_text_list[group])
 

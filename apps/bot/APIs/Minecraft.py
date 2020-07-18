@@ -41,8 +41,8 @@ class MinecraftAPI:
 
     @staticmethod
     def check_amazon_server_status():
-        URL = env.str("MINECRAFT_1_16_1_STATUS_URL")
-        response = requests.get(URL).json()
+        url = env.str("MINECRAFT_1_16_1_STATUS_URL")
+        response = requests.get(url).json()
         return response['Name'] == 'running'
 
     def _prepare_message(self, action):
@@ -56,8 +56,8 @@ class MinecraftAPI:
 
     @staticmethod
     def _start_amazon():
-        URL = env.str("MINECRAFT_1_16_1_START_URL")
-        requests.post(URL)
+        url = env.str("MINECRAFT_1_16_1_START_URL")
+        requests.post(url)
 
     def start(self, send_notify=True):
         if self.amazon:
@@ -82,8 +82,8 @@ class MinecraftAPI:
                 break
             time.sleep(5)
 
-        URL = env.str("MINECRAFT_1_16_1_STOP_URL")
-        requests.post(URL)
+        url = env.str("MINECRAFT_1_16_1_STOP_URL")
+        requests.post(url)
         Service.objects.filter(name=f'stop_minecraft_{self.version}').delete()
         return True
 

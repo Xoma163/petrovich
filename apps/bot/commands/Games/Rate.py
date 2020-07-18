@@ -18,9 +18,9 @@ class Rate(CommonCommand):
         with lock:
             gamer = self.bot.get_gamer_by_user(self.event.sender)
 
-            MIN_GAMERS = int(len(self.bot.user_model.filter(chats=self.event.chat)) / 2)
-            if MIN_GAMERS < 2:
-                MIN_GAMERS = 2
+            min_gamers = int(len(self.bot.user_model.filter(chats=self.event.chat)) / 2)
+            if min_gamers < 2:
+                min_gamers = 2
             rates_gamers = RateModel.objects.filter(chat=self.event.chat)
             existed_rate = rates_gamers.filter(gamer=gamer)
 
@@ -33,7 +33,7 @@ class Rate(CommonCommand):
 
             if len(existed_rate) > 0:
                 return f"Ставка уже поставлена\n" \
-                       f"Игроки {len(rates_gamers)}/{MIN_GAMERS}:\n" \
+                       f"Игроки {len(rates_gamers)}/{min_gamers}:\n" \
                        f"{rate_gamer_str}"
             if self.event.args:
                 random = False
@@ -60,5 +60,5 @@ class Rate(CommonCommand):
             else:
                 rate_gamer_str += f"{gamer} - {arg}\n"
 
-            return f"Игроки {len(rates_gamers) + 1}/{MIN_GAMERS}:\n" \
+            return f"Игроки {len(rates_gamers) + 1}/{min_gamers}:\n" \
                    f"{rate_gamer_str}"

@@ -11,20 +11,20 @@ class Waifu(CommonCommand):
         super().__init__(names, help_text, detail_help_text, platforms=['vk', 'tg'])
 
     def start(self):
-        WAIFUS_COUNT = 100000
+        waifus_count = 100000
         if self.event.args:
             try:
                 self.int_args = [0]
                 self.parse_int()
                 waifu_number = self.event.args[0]
-                self.check_number_arg_range(waifu_number, 0, WAIFUS_COUNT)
+                self.check_number_arg_range(waifu_number, 0, waifus_count)
             except RuntimeError:
                 seed = " ".join(self.event.args)
-                waifu_number = get_random_int(WAIFUS_COUNT, seed=seed)
+                waifu_number = get_random_int(waifus_count, seed=seed)
         else:
-            waifu_number = get_random_int(WAIFUS_COUNT)
-        URL = f"https://www.thiswaifudoesnotexist.net/example-{waifu_number}.jpg"
-        attachment = self.bot.upload_photos(URL)
+            waifu_number = get_random_int(waifus_count)
+        url = f"https://www.thiswaifudoesnotexist.net/example-{waifu_number}.jpg"
+        attachment = self.bot.upload_photos(url)
 
         if self.event.args:
             keyboard = self.bot.get_inline_keyboard(self.names[0], "Следующая", args={"waifu_number": waifu_number + 1})

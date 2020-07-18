@@ -13,6 +13,7 @@ def check_name_exists(name):
 
 
 # ToDo: TG вложения
+# noinspection PyUnresolvedReferences,PyUnresolvedReferences
 class Meme(CommonCommand):
     def __init__(self):
         names = ["мем"]
@@ -53,7 +54,7 @@ class Meme(CommonCommand):
         method = self.handle_menu(menu, arg0)
         return method()
 
-    ### MENU ###
+    # MENU #
     def menu_add(self):
         self.check_args(2)
         attachments = get_attachments_from_attachments_or_fwd(self.event, ['audio', 'video', 'photo', 'doc'])
@@ -289,7 +290,7 @@ class Meme(CommonCommand):
             msg = self.get_similar_memes_names(memes)
             return [prepared_meme, msg]
 
-    ### END MENU ###
+    # END MENU #
 
     def get_meme(self, filter_list=None, filter_user=None, approved=True, _id=None, use_tanimoto=False):
         """
@@ -371,6 +372,7 @@ def get_tanimoto_memes(memes, query):
     return memes_list
 
 
+# ToDo: check
 def prepare_meme_to_send(bot, event, meme, print_name=False, send_keyboard=False, name=None):
     msg = {}
     if meme.type == 'video' or meme.type == 'audio':

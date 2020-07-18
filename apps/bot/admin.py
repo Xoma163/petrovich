@@ -30,6 +30,7 @@ class BotAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'platform',)
     list_filter = ('platform',)
 
+
 admin.site.register(Bot, BotAdmin)
 
 

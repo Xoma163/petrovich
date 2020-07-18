@@ -104,29 +104,10 @@ class TicTacToe(CommonCommand):
         if res:
             session.delete()
             if res == 'x':
-                self.bot.send_message(session.user1.user_id,
-                                      f"Игра закончена. Победитель - {session.user1}\n"
-                                      f"{print_table(table)}",
-                                      keyboard=MORE_HIDE_KEYBOARD)
-                self.bot.send_message(session.user2.user_id,
-                                      f"Игра закончена. Победитель - {session.user1}\n"
-                                      f"{print_table(table)}",
-                                      keyboard=MORE_HIDE_KEYBOARD)
-                gamer = Gamer.objects.get(user=session.user1)
-                gamer.tic_tac_toe_points += 1
-                gamer.save()
+                self.end_game(session, table, session.user1)
             elif res == 'o':
-                self.bot.send_message(session.user1.user_id,
-                                      f"Игра закончена. Победитель - {session.user2}\n"
-                                      f"{print_table(table)}",
-                                      keyboard=MORE_HIDE_KEYBOARD)
-                self.bot.send_message(session.user2.user_id,
-                                      f"Игра закончена. Победитель - {session.user2}\n"
-                                      f"{print_table(table)}",
-                                      keyboard=MORE_HIDE_KEYBOARD)
-                gamer = Gamer.objects.get(user=session.user2)
-                gamer.tic_tac_toe_points += 1
-                gamer.save()
+                self.end_game(session, table, session.user2)
+
             return
         elif check_end(table):
             session.delete()
@@ -163,6 +144,19 @@ class TicTacToe(CommonCommand):
         self.bot.send_message(session.user2.user_id,
                               f"Второй игрок - {session.user1}\nХод второго игрока\nВы играете за ⭕",
                               keyboard=keyboard)
+
+    def end_game(self, session, table, winner):
+        self.bot.send_message(session.user1.user_id,
+                              f"Игра закончена. Победитель - {winner}\n"
+                              f"{print_table(table)}",
+                              keyboard=MORE_HIDE_KEYBOARD)
+        self.bot.send_message(session.user2.user_id,
+                              f"Игра закончена. Победитель - {winner}\n"
+                              f"{print_table(table)}",
+                              keyboard=MORE_HIDE_KEYBOARD)
+        gamer = Gamer.objects.get(user=session.user1)
+        gamer.tic_tac_toe_points += 1
+        gamer.save()
 
 
 def check_win(table):

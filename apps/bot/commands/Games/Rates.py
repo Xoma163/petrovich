@@ -19,9 +19,9 @@ class Rates(CommonCommand):
 
     def start(self):
         with lock:
-            MIN_GAMERS = int(len(self.bot.user_model.filter(chats=self.event.chat)) / 2)
-            if MIN_GAMERS < 2:
-                MIN_GAMERS = 2
+            min_gamers = int(len(self.bot.user_model.filter(chats=self.event.chat)) / 2)
+            if min_gamers < 2:
+                min_gamers = 2
 
             gamers = RateModel.objects.filter(chat=self.event.chat).order_by("date")
             if self.event.args and self.event.args[0] == 'f':
@@ -29,8 +29,8 @@ class Rates(CommonCommand):
                 if len(gamers) <= 1:
                     return "Ну ты ваще обалдел? Хотя бы один игрок-то пусть будет"
             else:
-                if len(gamers) < MIN_GAMERS:
-                    return f"Минимальное количество игроков - {MIN_GAMERS}"
+                if len(gamers) < min_gamers:
+                    return f"Минимальное количество игроков - {min_gamers}"
             messages = ["Ставки сделаны, ставок больше нет."]
 
             rnd = get_random_int(1, 100)

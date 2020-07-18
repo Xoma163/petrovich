@@ -540,8 +540,8 @@ class Codenames(CommonCommand):
 
             _commands = {'red': [], 'blue': []}
             commands_msg = {'red': None, 'blue': None}
-            for _player in self.players:
-                _commands[_player.command].append(_player)
+            for player in self.players:
+                _commands[player.command].append(player)
             for _command in _commands:
                 commands_msg[_command] = get_command_msg(_command, _commands[_command])
 

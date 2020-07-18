@@ -17,16 +17,16 @@ class Command(BaseCommand):
 
         notifies = Notify.objects.all()
 
-        DATETIME_NOW = datetime.utcnow()
+        datetime_now = datetime.utcnow()
         for notify in notifies:
             try:
                 if notify.repeat:
                     datetime1 = datetime.combine(date.min, remove_tz(notify.date).time())
-                    datetime2 = datetime.combine(date.min, DATETIME_NOW.time())
+                    datetime2 = datetime.combine(date.min, datetime_now.time())
                     delta_time = datetime1 - datetime2 + timedelta(minutes=1)
                     flag = delta_time.seconds <= 60
                 else:
-                    delta_time = remove_tz(notify.date) - DATETIME_NOW + timedelta(minutes=1)
+                    delta_time = remove_tz(notify.date) - datetime_now + timedelta(minutes=1)
                     flag = delta_time.days == 0 and delta_time.seconds <= 60
 
                 if flag:
@@ -74,8 +74,9 @@ class Command(BaseCommand):
                         event_object = event_model(event)
                         bot.menu(event_object, send=True)
                     if notify.repeat:
-                        # Для постоянных уведомлений дата должа быть на завтрашний день обязательно. Это важно для сортировки
-                        new_datetime = datetime.combine(DATETIME_NOW.date(), notify.date.time()) + timedelta(days=1)
+                        # Для постоянных уведомлений дата должа быть на завтрашний день обязательно.
+                        # Это важно для сортировки
+                        new_datetime = datetime.combine(datetime_now.date(), notify.date.time()) + timedelta(days=1)
                         new_datetime = localize_datetime(remove_tz(new_datetime), notify.author.city.timezone.name)
                         notify.date = new_datetime
                         notify.save()

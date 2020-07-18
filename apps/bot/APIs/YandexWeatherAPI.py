@@ -15,15 +15,15 @@ class YandexWeatherAPI:
         self.city = city
 
     def send_weather_request(self):
-        TOKEN = env.str("YANDEX_WEATHER_TOKEN")
+        token = env.str("YANDEX_WEATHER_TOKEN")
 
         params = {
             'lat': self.city.lat,
             'lon': self.city.lon,
             'lang': 'ru_RU'
         }
-        HEADERS = {'X-Yandex-API-Key': TOKEN}
-        response = requests.get(self.url, params, headers=HEADERS).json()
+        headers = {'X-Yandex-API-Key': token}
+        response = requests.get(self.url, params, headers=headers).json()
         if 'status' in response:
             if response['status'] == 403:
                 return "На сегодня я исчерпал все запросы к Yandex Weather :("

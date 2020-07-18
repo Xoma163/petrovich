@@ -167,9 +167,9 @@ def tanimoto(s1, s2):
 
 
 def get_image_size_by_text(txt, font):
-    testImg = Image.new('RGB', (1, 1))
-    testDraw = ImageDraw.Draw(testImg)
-    return testDraw.textsize(txt, font)
+    img = Image.new('RGB', (1, 1))
+    draw = ImageDraw.Draw(img)
+    return draw.textsize(txt, font)
 
 
 def draw_text_on_image(text):
@@ -178,17 +178,17 @@ def draw_text_on_image(text):
     """
     fontsize = 16
 
-    colorText = "black"
-    colorBackground = "white"
+    text_color = "black"
+    background_color = "white"
 
     font = ImageFont.truetype(os.path.join(STATIC_ROOT, 'fonts/consolas.ttf'), fontsize, encoding="unic")
     width, height = get_image_size_by_text(text, font)
     width += 10
     height += 10
-    img = Image.new('RGB', (width + 20, height + 20), colorBackground)
+    img = Image.new('RGB', (width + 20, height + 20), background_color)
     d = ImageDraw.Draw(img)
-    d.text((10, 10), text, fill=colorText, font=font)
+    d.text((10, 10), text, fill=text_color, font=font)
 
-    imgByteArr = io.BytesIO()
-    img.save(imgByteArr, format='PNG')
-    return imgByteArr
+    img_byte_arr = io.BytesIO()
+    img.save(img_byte_arr, format='PNG')
+    return img_byte_arr
