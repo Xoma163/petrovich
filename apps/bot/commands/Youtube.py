@@ -112,7 +112,7 @@ class YouTube(CommonCommand):
             msg = f"Нашёл сразу {yt_subs_count}. уточните:\n\n" \
                   f"{yt_subs_titles_str}" + '.'
             if yt_subs_count > 10:
-                msg += f"\n..."
+                msg += "\n..."
             raise RuntimeWarning(msg)
 
     def get_subs(self, conversation=False):

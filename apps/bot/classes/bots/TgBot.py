@@ -301,7 +301,7 @@ class TgBot(CommonBot, Thread):
             try:
                 images_list.append(
                     {'type': 'photo', 'attachment': self._prepare_obj_to_upload(image, ['jpg', 'jpeg', 'png'])})
-            except:
+            except Exception:
                 continue
             if len(images_list) >= max_count:
                 break
@@ -370,4 +370,4 @@ class MyTgBotLongPoll:
 
             except Exception as e:
                 error = {'exception': f'Longpoll Error (TG): {str(e)}'}
-                # logger.error(error)
+                print(error)

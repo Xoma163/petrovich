@@ -24,7 +24,8 @@ class LoggerAdmin(admin.ModelAdmin):
                    'logger_name',)
     list_per_page = DJANGO_DB_LOGGER_ADMIN_LIST_PER_PAGE
 
-    def colored_level(self, instance):
+    @staticmethod
+    def colored_level(instance):
         if instance.level in [logging.NOTSET, logging.INFO, logging.DEBUG]:
             color = 'green'
         elif instance.level in [logging.WARNING]:
@@ -36,10 +37,12 @@ class LoggerAdmin(admin.ModelAdmin):
 
     colored_level.short_description = 'Уровень'
 
-    def traceback(self, instance):
+    @staticmethod
+    def traceback(instance):
         return format_html('<pre><code>{content}</code></pre>', content=instance.trace if instance.trace else '')
 
-    def create_datetime_format(self, instance):
+    @staticmethod
+    def create_datetime_format(instance):
         return instance.create_datetime.strftime('%d.%m.%Y %X')
 
     create_datetime_format.short_description = "Дата создания"

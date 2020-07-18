@@ -57,7 +57,7 @@ class Event:
 
         return msg_dict
 
-    def parse_attachments(self, vk_attachments):
+    def parse_attachments(self, attachments):
         pass
 
     def __init__(self, event):

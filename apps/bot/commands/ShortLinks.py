@@ -17,6 +17,6 @@ class ShortLinks(CommonCommand):
             long_link = self.event.args[0]
         try:
             short_link = self.bot.get_short_link(long_link)
-        except:
+        except Exception:
             return "Неверный формат ссылки"
         return short_link

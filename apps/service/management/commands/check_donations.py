@@ -12,7 +12,7 @@ vk_bot = VkBot()
 class Command(BaseCommand):
 
     def handle(self, *args, **options):
-        URL = f"https://www.donationalerts.com/api/v1/alerts/donations"
+        URL = "https://www.donationalerts.com/api/v1/alerts/donations"
         headers = {'Authorization': 'Bearer ' + env.str('DONATIONALERT_ACCESS_TOKEN')}
         response = requests.get(URL, headers=headers).json()
         donations, created = Service.objects.get_or_create(name='donations')

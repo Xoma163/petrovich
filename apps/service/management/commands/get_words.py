@@ -67,4 +67,5 @@ class Command(BaseCommand):
                    f"Добавлено слов - {created_words}"
             return msg
         except Exception as e:
-            return "Ошибка при обновлении слов"
+            return "Ошибка при обновлении слов\n" \
+                   f"{str(e)}"

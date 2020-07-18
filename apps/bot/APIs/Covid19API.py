@@ -53,7 +53,7 @@ class Covid19API:
                    f"Выздоровело - {data['TotalRecovered']}\n" \
                    f"Болеют сейчас - {data['TotalConfirmed'] - data['TotalDeaths'] - data['TotalRecovered']}\n"
 
-        url = f"https://api.covid19api.com/summary"
+        url = "https://api.covid19api.com/summary"
         try:
             response = self.do_the_request(url, timeout=10)
         except requests.exceptions.ReadTimeout:

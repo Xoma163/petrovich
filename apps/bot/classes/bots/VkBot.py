@@ -84,7 +84,6 @@ class VkBot(CommonBot, Thread):
             vk_user.groups.add(group_user)
             vk_user.save()
         return vk_user
-        pass
 
     def get_chat_by_id(self, chat_id):
         vk_chat = self.chat_model.filter(chat_id=chat_id)
@@ -228,9 +227,9 @@ class VkBot(CommonBot, Thread):
             try:
                 response = requests.get(file_like_object, stream=True, timeout=3)
             except SSLError:
-                raise RuntimeWarning(f"SSLError")
+                raise RuntimeWarning("SSLError")
             except requests.exceptions.ConnectionError:
-                raise RuntimeWarning(f"ConnectionError")
+                raise RuntimeWarning("ConnectionError")
             obj = response.raw
         # path
         else:
@@ -343,4 +342,4 @@ class MyVkBotLongPoll(VkBotLongPoll):
                     yield event
             except Exception as e:
                 error = {'exception': f'Longpoll Error (VK): {str(e)}'}
-                # logger.error(error)
+                print(error)

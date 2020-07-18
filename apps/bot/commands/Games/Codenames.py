@@ -441,13 +441,13 @@ class Codenames(CommonCommand):
                 self.session.next_step = f"{another_command}_wait"
                 self.bot.send_message(self.session.chat.chat_id,
                                       f"Угадали!\nПередаём ход капитану {translator_commands[another_command]} "
-                                      f"команды",
+                                      "команды",
                                       keyboard=self.get_keyboard(board))
                 for captain in self.players_captains:
                     self.send_captain_keyboard(board, captain)
             else:
                 self.bot.send_message(self.session.chat.chat_id,
-                                      f"Угадали!\nПродолжайте угадывать",
+                                      "Угадали!\nПродолжайте угадывать",
                                       keyboard=self.get_keyboard(board))
             self.session.save()
         elif selected_word['type'] == another_command or selected_word['type'] == 'neutral':
@@ -460,7 +460,7 @@ class Codenames(CommonCommand):
             for captain in self.players_captains:
                 self.send_captain_keyboard(board, captain)
         elif selected_word['type'] == 'death':
-            self.bot.send_message(self.session.chat.chat_id, f"Смэрт")
+            self.bot.send_message(self.session.chat.chat_id, "Смэрт")
             self.game_over(another_command, board)
             return
 

@@ -357,7 +357,7 @@ class Meme(CommonCommand):
         msg = f"Нашёл сразу {total_memes_count}, уточните:\n\n" \
               f"{meme_names_str}" + '.'
         if total_memes_count > 10:
-            msg += f"\n..."
+            msg += "\n..."
         return msg
 
 

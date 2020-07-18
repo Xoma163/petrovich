@@ -4,11 +4,11 @@ from petrovich.settings import VK_URL
 
 @auto_str
 class VkEvent(Event):
-    def parse_attachments(self, vk_attachments):
-        attachments = []
+    def parse_attachments(self, attachments):
+        new_attachments = []
 
-        if vk_attachments:
-            for attachment in vk_attachments:
+        if attachments:
+            for attachment in attachments:
                 attachment_type = attachment[attachment['type']]
 
                 new_attachment = {
@@ -61,10 +61,10 @@ class VkEvent(Event):
                     new_attachment['description'] = attachment_type['description']
                     new_attachment['caption'] = attachment_type['caption']
 
-                attachments.append(new_attachment)
+                new_attachments.append(new_attachment)
 
-        if attachments and len(attachments) > 0:
-            return attachments
+        if new_attachments and len(new_attachments) > 0:
+            return new_attachments
         else:
             return None
 

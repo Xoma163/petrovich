@@ -13,7 +13,6 @@ def start_vk(debug=False):
     vk_bot.DEVELOP_DEBUG = debug
     vk_bot.start()
     print('start vk')
-    pass
 
 
 def start_tg(debug=False):

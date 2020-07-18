@@ -26,7 +26,8 @@ class MinecraftAPI:
 
         self.server_info = None
 
-    def send_rcon(self, command):
+    @staticmethod
+    def send_rcon(command):
         try:
             with MCRcon(env.str("MINECRAFT_1_16_1_IP"),
                         env.str("MINECRAFT_1_16_1_RCON_PASSWORD")) as mcr:
@@ -35,10 +36,11 @@ class MinecraftAPI:
                     return resp
                 else:
                     return False
-        except:
+        except Exception:
             return False
 
-    def check_amazon_server_status(self):
+    @staticmethod
+    def check_amazon_server_status():
         URL = env.str("MINECRAFT_1_16_1_STATUS_URL")
         response = requests.get(URL).json()
         return response['Name'] == 'running'
@@ -52,7 +54,8 @@ class MinecraftAPI:
     def _start_local(self):
         do_the_linux_command(f'sudo systemctl start minecraft_{self.version}')
 
-    def _start_amazon(self):
+    @staticmethod
+    def _start_amazon():
         URL = env.str("MINECRAFT_1_16_1_START_URL")
         requests.post(URL)
 
