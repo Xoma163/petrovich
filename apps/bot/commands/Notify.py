@@ -49,22 +49,20 @@ class Notify(CommonCommand):
         help_text = "Напомни - напоминает о чём-либо"
         detail_help_text = "Напомни (дата/дата и время/день недели) (сообщение/команда) [Прикреплённые вложения] - добавляет напоминание\n" \
                            "Максимум можно добавить 5 напоминаний"
-        super().__init__(names, help_text, detail_help_text, args=2, platforms=['vk', 'tg'])
+        super().__init__(names, help_text, detail_help_text, args=2, platforms=['vk', 'tg'], city=True)
 
     def start(self):
-        if self.event.sender.city is None:
-            return "Не знаю ваш город. /город"
         if not check_user_group(self.event.sender, Role.TRUSTED) and \
                 len(NotifyModel.objects.filter(author=self.event.sender)) >= 5:
             return "Нельзя добавлять более 5 напоминаний"
-        user_timezone = self.event.sender.city.timezone.name
+        timezone = self.event.sender.city.timezone.name
 
         date, args_count, exact_time_flag = get_time(self.event.args[0], self.event.args[1])
         if args_count == 2:
             self.check_args(3)
         if not date:
             return "Не смог распарсить дату"
-        date = normalize_datetime(date, user_timezone)
+        date = normalize_datetime(date, timezone)
         datetime_now = localize_datetime(datetime.utcnow(), "UTC")
 
         if (date - datetime_now).seconds < 60:
@@ -84,7 +82,7 @@ class Notify(CommonCommand):
             from apps.bot.commands.NotifyRepeat import NotifyRepeat
             if command in self.names or command in NotifyRepeat().names:
                 text = f"/обосрать {self.event.sender.name}"
-        notify_datetime = localize_datetime(remove_tz(date), user_timezone)
+        notify_datetime = localize_datetime(remove_tz(date), timezone)
 
         notify = NotifyModel(date=date,
                              text=text,

@@ -36,6 +36,7 @@ class CommonCommand:
                  attachments: list = False,
                  enabled: bool = True,
                  priority: int = 0,
+                 city: bool = False,
                  ):
         self.names = names
         self.help_text = help_text
@@ -52,6 +53,7 @@ class CommonCommand:
         self.attachments = attachments
         self.enabled = enabled
         self.priority = priority
+        self.city = city
 
         self.bot = None
         self.event = None
@@ -90,6 +92,8 @@ class CommonCommand:
             self.parse_float()
         if self.attachments:
             self.check_attachments()
+        if self.city:
+            self.check_city()
 
     def start(self):
         pass
@@ -239,7 +243,6 @@ class CommonCommand:
             raise RuntimeError(error)
         return True
 
-    # ToDo: check on types
     def check_attachments(self):
         if self.event.attachments:
             for att in self.event.attachments:
@@ -248,6 +251,15 @@ class CommonCommand:
 
         allowed_types = ' '.join([ATTACHMENT_TRANSLATOR[_type] for _type in self.attachments])
         error = f"Для работы команды требуются вложения: {allowed_types}"
+        raise RuntimeError(error)
+
+    def check_city(self, city=None):
+        if city:
+            return True
+        if self.event.sender.city:
+            return True
+
+        error = "Не указан город в профиле. /город (название) - устанавливает город пользователю"
         raise RuntimeError(error)
 
     # example:

@@ -22,16 +22,10 @@ class Weather(CommonCommand):
             changes = True
             del self.event.args[-1]
         if self.event.args:
-            city = City.objects.filter(synonyms__icontains=self.event.args[0])
-            if not city.exists():
-                return "Не нашёл такой город. /город"
-            city = city.first()
+            city = City.objects.filter(synonyms__icontains=self.event.args[0]).first()
         else:
             city = self.event.sender.city
-            if not city:
-                return "Не указан город в профиле. /город"
-        if not (city.lat and city.lon):
-            return "У города не указаны широта и долгота"
+        self.check_city(city)
 
         # Изменения погоды теперь слиты в одну команду с погодой
         if changes:

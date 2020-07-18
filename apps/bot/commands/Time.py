@@ -17,10 +17,7 @@ class Time(CommonCommand):
             city = City.objects.filter(synonyms__icontains=self.event.args[0]).first()
         else:
             city = self.event.sender.city
-        if not city:
-            return "Город не найден. Чтобы указать город: /город (название города)"
-        if not city.timezone:
-            return "Таймзона у города не найдена"
+        self.check_city(city)
 
         new_date = localize_datetime(datetime.datetime.utcnow(), city.timezone.name)
         return new_date.strftime("%d.%m.%Y\n%H:%M:%S")

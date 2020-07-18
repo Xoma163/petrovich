@@ -62,12 +62,15 @@ class Quotes(CommonCommand):
             page = p.num_pages
 
         objs_on_page = p.page(page)
+
+        if self.event.sender.city:
+            time_zone = self.event.sender.city.timezone
+        else:
+            time_zone = DEFAULT_TIME_ZONE
+
         msg = f"Страница {page}/{p.num_pages}\n\n"
+
         for i, obj_on_page in enumerate(objs_on_page):
-            if self.event.sender.city:
-                time_zone = self.event.sender.city.timezone
-            else:
-                time_zone = DEFAULT_TIME_ZONE
             dt = localize_datetime(remove_tz(obj_on_page.date), str(time_zone)).strftime('%d.%m.%Y %H:%M:%S')
 
             if self.event.platform == 'api':

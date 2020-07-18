@@ -18,7 +18,7 @@ class Where(CommonCommand):
 
         user = self.bot.get_user_by_name(self.event.args, self.event.chat)
 
-        if self.event.sender.city and self.event.sender.city.timezone:
+        if self.event.sender.city:
             timezone = self.event.sender.city.timezone.name
         else:
             timezone = TIME_ZONE
