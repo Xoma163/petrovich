@@ -246,7 +246,11 @@ class CommonCommand:
     def check_attachments(self):
         if self.event.attachments:
             for att in self.event.attachments:
-                if att in self.attachments:
+                if att['type'] in self.attachments:
+                    return True
+        if self.event.fwd and self.event.fwd[0]['attachments']:
+            for att in self.event.fwd[0]['attachments']:
+                if att['type'] in self.attachments:
                     return True
 
         allowed_types = ' '.join([ATTACHMENT_TRANSLATOR[_type] for _type in self.attachments])
