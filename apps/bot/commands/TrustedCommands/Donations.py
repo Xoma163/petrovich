@@ -12,7 +12,7 @@ class Donations(CommonCommand):
     def start(self):
         donations = DonationsModel.objects.all()
         if len(donations) == 0:
-            return "Нема :("
+            raise RuntimeWarning("Нема :(")
         msg = ""
         total = {}
         for donation in donations:

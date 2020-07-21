@@ -6,7 +6,7 @@ from apps.service.models import Notify
 
 def get_notifies_from_object(notifies_obj, timezone, print_username=False):
     if len(notifies_obj) == 0:
-        return "Нет напоминаний"
+        raise RuntimeWarning("Нет напоминаний")
     result = ""
 
     for notify in notifies_obj:

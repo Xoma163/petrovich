@@ -123,7 +123,7 @@ class YouTube(CommonCommand):
             if self.event.chat:
                 yt_subs = yt_subs.filter(chat=self.event.chat)
         if yt_subs.count() == 0:
-            return "Нет активных подписок"
+            raise RuntimeWarning("Нет активных подписок")
 
         yt_subs_titles_str = ""
         for yt_sub in yt_subs:

@@ -252,7 +252,7 @@ class Roulette(CommonCommand):
             else:
                 rrs = RouletteRate.objects.filter(chat__isnull=True, gamer=self.gamer)
             if len(rrs) == 0:
-                return "Ставок нет"
+                raise RuntimeWarning("Ставок нет")
             msg1 = "Ставки сделаны. Ставок больше нет\n"
             roulette_ball = get_random_int(MAX_NUMBERS)
             msg2 = f"Крутим колесо. Выпало - {roulette_ball}\n\n"

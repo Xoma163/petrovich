@@ -39,7 +39,7 @@ class Who(CommonCommand):
             raise RuntimeWarning("Не знаю такой роли")
         users = self.get_users(self.event.chat, who)
         if len(users) == 0:
-            return "Нет людей с данной ролью"
+            raise RuntimeWarning("Нет людей с данной ролью")
         users_list = [str(user) for user in users]
         result = "\n".join(users_list)
         return str(result)

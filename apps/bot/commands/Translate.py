@@ -15,7 +15,7 @@ class Translate(CommonCommand):
         fwd = self.event.fwd
         if not fwd:
             if not self.event.original_args:
-                return "Требуется аргументы или пересылаемые сообщения"
+                raise RuntimeWarning("Требуется аргументы или пересылаемые сообщения")
 
             text = self.event.original_args
         else:
@@ -25,7 +25,7 @@ class Translate(CommonCommand):
                     text += f"{msg['text']}\n"
 
         if not text:
-            return "Нет текста в сообщении или пересланных сообщениях"
+            raise RuntimeWarning("Нет текста в сообщении или пересланных сообщениях")
         if has_cyrillic(text):
             lang = 'ru-en'
         else:

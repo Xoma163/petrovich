@@ -74,7 +74,7 @@ class Meme(CommonCommand):
         }
 
         if MemeModel.objects.filter(name=new_meme['name']).exists():
-            return "Мем с таким названием уже есть в базе"
+            raise RuntimeWarning("Мем с таким названием уже есть в базе")
 
         if attachment['type'] == 'video' or attachment['type'] == 'audio':
             new_meme['link'] = attachment['url']

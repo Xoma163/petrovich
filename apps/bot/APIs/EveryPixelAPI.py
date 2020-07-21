@@ -24,7 +24,7 @@ class EveryPixelAPI:
             return f"{round(response['quality']['score'] * 100, 2)}%"
         else:
             print(response)
-            return "Ошибка"
+            raise RuntimeError("Ошибка")
 
     def get_faces_on_photo(self):
         params = {'url': self.image_URL}

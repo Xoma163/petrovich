@@ -183,9 +183,9 @@ class Codenames(CommonCommand):
 
         self.check_conversation()
         if len(CodenamesUser.objects.filter(chat=self.event.chat, user=self.event.sender)) > 0:
-            return 'Ты уже зарегистрирован'
+            raise RuntimeWarning('Ты уже зарегистрирован')
         if len(CodenamesUser.objects.filter(user=self.event.sender)) > 0:
-            return 'Нельзя участвовать сразу в двух играх'
+            raise RuntimeWarning('Нельзя участвовать сразу в двух играх')
 
         role_preference = None
         if len(self.event.args) >= 2:
@@ -194,7 +194,7 @@ class Codenames(CommonCommand):
             elif self.event.args[1].lower() in ["игрок"]:
                 role_preference = "player"
             else:
-                return "Не знаю такой роли для регистрации"
+                raise RuntimeWarning("Не знаю такой роли для регистрации")
 
         codenames_user = CodenamesUser(user=self.event.sender,
                                        chat=self.event.chat,
@@ -240,7 +240,7 @@ class Codenames(CommonCommand):
         command = self.player.command
         check_next_step(self.session, command + "_wait")
         if len(self.event.args) < 3:
-            return "Недостаточно аргументов"
+            raise RuntimeWarning("Недостаточно аргументов")
         self.int_args = [1]
         try:
             self.parse_int()
@@ -255,7 +255,7 @@ class Codenames(CommonCommand):
         if count > 9:
             count = 9
         elif count < 1:
-            return "Число загадываемых слов не может быть меньше 1"
+            raise RuntimeWarning("Число загадываемых слов не может быть меньше 1")
 
         self.do_the_riddle(command, count, word)
         return 'Отправил в конфу'
@@ -265,13 +265,13 @@ class Codenames(CommonCommand):
         check_session(self.session)
         check_player(self.player)
         if self.player.role == 'captain':
-            return "Капитан не может угадывать"
+            raise RuntimeWarning("Капитан не может угадывать")
         check_next_step(self.session, self.player.command)
         if self.event.payload:
             if self.event.payload['args']['action'] in ['слово']:
                 return self.select_word(self.event.payload['args']['row'],
                                         self.event.payload['args']['col'])
-            return "Внутренняя ошибка. Неизвестный action в payload"
+            raise RuntimeError("Внутренняя ошибка. Неизвестный action в payload")
         elif self.event.args[0].lower() in ['слово']:
             self.check_args(2)
             word = self.event.args[1].capitalize()
@@ -287,7 +287,7 @@ class Codenames(CommonCommand):
                         find_row = i
                         find_col = j
                         if elem['state'] == 'open':
-                            return "Слово уже открыто"
+                            raise RuntimeWarning("Слово уже открыто")
                         break
             self.select_word(find_row, find_col)
             return
@@ -320,7 +320,7 @@ class Codenames(CommonCommand):
     def menu_delete(self):
         self.check_sender(Role.CONFERENCE_ADMIN)
         if self.session is None:
-            return "Нечего удалять"
+            raise RuntimeWarning("Нечего удалять")
         else:
             self.session.delete()
             return "Удалил"
@@ -383,7 +383,7 @@ class Codenames(CommonCommand):
             captains = preference_captain.order_by('?')[:2]
 
         if len(captains) < 2:
-            return "Недостаточно игроков на роль капитана"
+            raise RuntimeWarning("Недостаточно игроков на роль капитана")
 
         for captain in captains:
             captain.role = 'captain'
@@ -426,7 +426,7 @@ class Codenames(CommonCommand):
     def select_word(self, row, col):
         board = json.loads(self.session.board)
         if board[row][col]['state'] == 'open':
-            return "Слово уже открыто"
+            raise RuntimeWarning("Слово уже открыто")
 
         command = self.player.command
         another_command = get_another_command(command)

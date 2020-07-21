@@ -3,6 +3,7 @@ from apps.bot.models import APITempUser, APIUser
 
 
 # ToDo: retest
+# ToDo: menu
 class APIChat(CommonCommand):
     def __init__(self):
         names = ["чат"]
@@ -41,18 +42,18 @@ class APIChat(CommonCommand):
                                                           user=self.event.sender,
                                                           chat__isnull=False).first()
             if not yandex_temp_user:
-                return "Не нашёл привязок. Привяжите /чат привязать {название конфы}"
+                raise RuntimeWarning("Не нашёл привязок. Привяжите /чат привязать {название конфы}")
             if yandex_temp_user.tries <= 0:
-                return "Вы превысили максимальное число попыток"
+                raise RuntimeWarning("Вы превысили максимальное число попыток")
 
             if yandex_temp_user.code != code:
                 yandex_temp_user.tries -= 1
                 yandex_temp_user.save()
-                return f"Неверный код. Осталось попыток - {yandex_temp_user.tries}"
+                raise RuntimeWarning(f"Неверный код. Осталось попыток - {yandex_temp_user.tries}")
 
             yandex_users = APIUser.objects.filter(user=yandex_temp_user.user)
             if len(yandex_users) == 0:
-                return "Не нашёл пользователя APIUser, оч странная хрень. Напишите разрабу"
+                raise RuntimeWarning("Не нашёл пользователя APIUser, оч странная хрень. Напишите разрабу")
             for yandex_user in yandex_users:
                 yandex_user.chat = yandex_temp_user.chat
                 yandex_user.save()
@@ -61,10 +62,10 @@ class APIChat(CommonCommand):
         elif self.event.args[0] == 'отвязать':
             yandex_users = APIUser.objects.filter(user=self.event.sender)
             if len(yandex_users) == 0:
-                return "Не нашёл пользователя APIUser, оч странная хрень. Напишите разрабу"
+                raise RuntimeWarning("Не нашёл пользователя APIUser, оч странная хрень. Напишите разрабу")
             for yandex_user in yandex_users:
                 yandex_user.chat = None
                 yandex_user.save()
             return "Успешно отвязал"
         else:
-            return "Не понял. Доступно: Чат привязать/код/отвязать."
+            raise RuntimeWarning("Не понял. Доступно: Чат привязать/код/отвязать.")
