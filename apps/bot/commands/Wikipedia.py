@@ -46,7 +46,7 @@ class Wikipedia(CommonCommand):
             options = set(e.options)
             msg = "Нашел сразу несколько. Уточните\n"
             msg += "\n".join([x for x in options])
-            return msg
+            raise RuntimeWarning(msg)
         except wikipedia.PageError:
             msg = "Не нашёл такой страницы\n"
             search = wikipedia.search(self.event.original_args)

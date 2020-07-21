@@ -65,7 +65,7 @@ class Memes(CommonCommand):
             for arg in self.event.args:
                 memes = memes.filter(name__icontains=arg)
             if len(memes) == 0:
-                return "Не нашёл мемов по заданному запросу"
+                raise RuntimeWarning("Не нашёл мемов по заданному запросу")
             memes = get_tanimoto_memes(memes, self.event.original_args)
             memes_sliced = memes[:20]
             meme_names = get_memes_names(memes_sliced, self.event.sender)

@@ -70,32 +70,32 @@ translator_role = {
 def check_player_captain(player):
     if player.role == 'captain':
         return True
-    raise RuntimeError("Загадывать может только капитан")
+    raise RuntimeWarning("Загадывать может только капитан")
 
 
 def check_next_step(session, step_name):
     if session.next_step == step_name:
         return True
 
-    raise RuntimeError("Сейчас не ваш ход")
+    raise RuntimeWarning("Сейчас не ваш ход")
 
 
 def check_player(player):
     if player:
         return True
-    raise RuntimeError("Вы не игрок")
+    raise RuntimeWarning("Вы не игрок")
 
 
 def check_session(session):
     if session:
         return True
-    raise RuntimeError("Игра ещё не началась")
+    raise RuntimeWarning("Игра ещё не началась")
 
 
 def check_not_session(session):
     if not session:
         return True
-    raise RuntimeError("Игра уже началась")
+    raise RuntimeWarning("Игра уже началась")
 
 
 def get_another_command(command):

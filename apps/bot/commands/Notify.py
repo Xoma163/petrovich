@@ -54,23 +54,23 @@ class Notify(CommonCommand):
     def start(self):
         if not check_user_group(self.event.sender, Role.TRUSTED) and \
                 len(NotifyModel.objects.filter(author=self.event.sender)) >= 5:
-            return "Нельзя добавлять более 5 напоминаний"
+            raise RuntimeWarning("Нельзя добавлять более 5 напоминаний")
         timezone = self.event.sender.city.timezone.name
 
         date, args_count, exact_time_flag = get_time(self.event.args[0], self.event.args[1])
         if args_count == 2:
             self.check_args(3)
         if not date:
-            return "Не смог распарсить дату"
+            raise RuntimeWarning("Не смог распарсить дату")
         date = normalize_datetime(date, timezone)
         datetime_now = localize_datetime(datetime.utcnow(), "UTC")
 
         if (date - datetime_now).seconds < 60:
-            return "Нельзя добавлять напоминание на ближайшую минуту"
+            raise RuntimeWarning("Нельзя добавлять напоминание на ближайшую минуту")
         if not exact_time_flag and ((date - datetime_now).days < 0 or (datetime_now - date).seconds < 0):
             date = date + timedelta(days=1)
         if (date - datetime_now).days < 0 or (datetime_now - date).seconds < 0:
-            return "Нельзя указывать дату в прошлом"
+            raise RuntimeWarning("Нельзя указывать дату в прошлом")
 
         text = self.event.original_args.split(' ', args_count)[args_count]
         if text[0] == '/':

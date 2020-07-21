@@ -27,10 +27,10 @@ class Rates(CommonCommand):
             if self.event.args and self.event.args[0] == 'f':
                 self.check_sender(Role.CONFERENCE_ADMIN)
                 if len(gamers) <= 1:
-                    return "Ну ты ваще обалдел? Хотя бы один игрок-то пусть будет"
+                    raise RuntimeWarning("Ну ты ваще обалдел? Хотя бы один игрок-то пусть будет")
             else:
                 if len(gamers) < min_gamers:
-                    return f"Минимальное количество игроков - {min_gamers}"
+                    raise RuntimeWarning(f"Минимальное количество игроков - {min_gamers}")
             messages = ["Ставки сделаны, ставок больше нет."]
 
             rnd = get_random_int(1, 100)

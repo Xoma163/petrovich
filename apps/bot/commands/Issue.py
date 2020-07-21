@@ -13,7 +13,7 @@ class Issue(CommonCommand):
         msgs = self.event.fwd
         if not msgs:
             if not self.event.original_args:
-                return "Требуется аргументы или пересылаемые сообщения"
+                raise RuntimeWarning("Требуется аргументы или пересылаемые сообщения")
 
             msgs = [{'text': self.event.original_args, 'from_id': int(self.event.sender.user_id)}]
         issue_text = ""

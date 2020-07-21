@@ -35,7 +35,7 @@ class Horoscope(CommonCommand):
             if self.event.args[0] in "все":
                 horoscope = HoroscopeModel.objects.first()
                 if not horoscope:
-                    return "На сегодня ещё нет гороскопа"
+                    raise RuntimeWarning("На сегодня ещё нет гороскопа")
                 for i, zodiac_sign in enumerate(zodiac_signs):
                     meme = horoscope.memes.all()[i]
                     prepared_meme = prepare_meme_to_send(self.bot, self.event, meme)
@@ -59,7 +59,7 @@ class Horoscope(CommonCommand):
                 zodiac_sign = self.event.args[0].lower()
                 zodiac_index = list(zodiac_signs.keys()).index(zodiac_sign)
             except ValueError:
-                return "Не знаю такого знака зодиака"
+                raise RuntimeWarning("Не знаю такого знака зодиака")
             return self.get_horoscope_by_zodiac(zodiac_index)
 
         # Гороскоп по ДР из профиля
@@ -67,8 +67,8 @@ class Horoscope(CommonCommand):
             zodiac_index = self.get_zodiac_index_of_date(self.event.sender.birthday)
             return self.get_horoscope_by_zodiac(zodiac_index)
         else:
-            return "Не указана дата рождения в профиле, не могу прислать гороскоп((. \n" \
-                   "Укажи знак зодиака в аргументе: /гороскоп дева"
+            raise RuntimeWarning("Не указана дата рождения в профиле, не могу прислать гороскоп((. \n" \
+                                 "Укажи знак зодиака в аргументе: /гороскоп дева")
 
     def get_horoscope_by_zodiac(self, zodiac_index):
         horoscope = HoroscopeModel.objects.first()

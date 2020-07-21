@@ -50,7 +50,7 @@ class Stop(CommonCommand):
             version = self.event.args[1]
         minecraft_server = get_minecraft_version_by_args(version)
         if not minecraft_server:
-            return "Я не знаю такой версии"
+            raise RuntimeWarning("Я не знаю такой версии")
         version = minecraft_server['names'][0]
         self.check_command_time(f'minecraft_{version}', minecraft_server['delay'])
         minecraft_api = MinecraftAPI(

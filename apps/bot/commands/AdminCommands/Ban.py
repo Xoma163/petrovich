@@ -16,7 +16,7 @@ class Ban(CommonCommand):
         user = self.bot.get_user_by_name(self.event.args, self.event.chat)
 
         if check_user_group(user, Role.ADMIN):
-            return "Нельзя банить админа"
+            raise RuntimeWarning("Нельзя банить админа")
         group_banned = Group.objects.get(name=Role.BANNED.name)
         user.groups.add(group_banned)
         user.save()

@@ -18,5 +18,5 @@ class ShortLinks(CommonCommand):
         try:
             short_link = self.bot.get_short_link(long_link)
         except Exception:
-            return "Неверный формат ссылки"
+            raise RuntimeWarning("Неверный формат ссылки")
         return short_link

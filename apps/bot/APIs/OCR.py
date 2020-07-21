@@ -21,7 +21,7 @@ class OCRApi:
             if response['OCRExitCode'] == 99:
                 raise RuntimeWarning("Неправильный язык")
         if 'ParsedResults' not in response:
-            return "Ничего не распознал"
+            raise RuntimeWarning("Ничего не распознал")
         text_list = [x['ParsedText'].strip() for x in response['ParsedResults']]
         texts = "\n".join(text_list)
         return texts

@@ -29,10 +29,8 @@ class Where(CommonCommand):
                                          date__day=today.day,
                                          author=user).first()
         if user is None:
-            msg = "Такого пользователя нет"
-        elif log is None:
-            msg = "Информации пока ещё нет"
-        else:
-            localized_date = localize_datetime(remove_tz(log.date), timezone)
-            msg = "%s\n%s" % (localized_date.strftime("%H:%M:%S"), log.msg)
-        return str(msg)
+            raise RuntimeWarning("Такого пользователя нет")
+        if log is None:
+            raise RuntimeWarning("Информации пока ещё нет")
+        localized_date = localize_datetime(remove_tz(log.date), timezone).strftime("%H:%M:%S")
+        return f"{localized_date}\n{log.msg}"

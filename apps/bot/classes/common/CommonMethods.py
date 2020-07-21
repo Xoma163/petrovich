@@ -12,7 +12,7 @@ from petrovich.settings import STATIC_ROOT
 
 def random_probability(probability):
     if 1 > probability > 99:
-        raise RuntimeError("Вероятность события должна быть от 1 до 99")
+        raise RuntimeWarning("Вероятность события должна быть от 1 до 99")
     rand_int = get_random_int(1, 100)
     if rand_int <= probability:
         return True

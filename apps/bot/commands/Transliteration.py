@@ -24,7 +24,7 @@ class Transliteration(CommonCommand):
         msgs = self.event.fwd
         if not msgs:
             if not self.event.original_args:
-                return "Требуется аргументы или пересылаемые сообщения"
+                raise RuntimeWarning("Требуется аргументы или пересылаемые сообщения")
 
             msgs = [{'text': self.event.original_args, 'from_id': int(self.event.sender.user_id)}]
         translite_text = ""
@@ -34,7 +34,7 @@ class Transliteration(CommonCommand):
                 translite_text += f"{text}\n\n"
 
         if not translite_text:
-            return "Нет текста в сообщении или пересланных сообщениях"
+            raise RuntimeWarning("Нет текста в сообщении или пересланных сообщениях")
 
         if has_cyrillic(translite_text):
             return get_en_transliterate(translite_text)

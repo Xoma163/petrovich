@@ -26,17 +26,17 @@ class NotifyRepeat(CommonCommand):
     def start(self):
         if not check_user_group(self.event.sender, Role.TRUSTED) and \
                 len(NotifyModel.objects.filter(author=self.event.sender)) >= 5:
-            return "Нельзя добавлять более 5 напоминаний"
+            raise RuntimeWarning("Нельзя добавлять более 5 напоминаний")
         timezone = self.event.sender.city.timezone.name
 
         date = get_time(self.event.args[0])
         if not date:
-            return "Не смог распарсить дату"
+            raise RuntimeWarning("Не смог распарсить дату")
         date = normalize_datetime(date, timezone)
         datetime_now = localize_datetime(datetime.utcnow(), "UTC")
 
         if (date - datetime_now).seconds < 60:
-            return "Нельзя добавлять напоминание на ближайшую минуту"
+            raise RuntimeWarning("Нельзя добавлять напоминание на ближайшую минуту")
 
         if (date - datetime_now).days < 0 or (datetime_now - date).seconds < 0:
             date = date + timedelta(days=1)

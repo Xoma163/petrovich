@@ -9,7 +9,7 @@ from apps.service.models import YoutubeSubscribe
 
 MAX_USER_SUBS_COUNT = 3
 
-
+# ToDo: menu
 class YouTube(CommonCommand):
     def __init__(self):
         names = ["ютуб", 'youtube']
@@ -49,7 +49,7 @@ class YouTube(CommonCommand):
                 existed_sub = YoutubeSubscribe.objects.filter(chat__isnull=True,
                                                               channel_id=channel_id)
             if existed_sub.exists():
-                return f"Ты уже и так подписан на канал {existed_sub.first().title}"
+                raise RuntimeWarning(f"Ты уже и так подписан на канал {existed_sub.first().title}")
 
             user_subs_count = YoutubeSubscribe.objects.filter(author=self.event.sender).count()
 
@@ -80,7 +80,7 @@ class YouTube(CommonCommand):
             self.check_conversation()
             return self.get_subs(conversation=True)
         else:
-            return "Не понял команды (добавить/удалить/подписки)"
+            raise RuntimeWarning("Не понял команды (добавить/удалить/подписки)")
 
     def get_sub(self, filters, for_delete=False):
         if self.event.chat:

@@ -40,7 +40,7 @@ class ExchangeRates(CommonCommand):
                         msg = "Перевод в рубли:\n"
                         msg += f"{total_value} руб."
                         return msg
-                return "Пока не знаю как переводить из этой валюты"
+                raise RuntimeWarning("Пока не знаю как переводить из этой валюты")
 
         else:
             msg = "Курс валют:\n"

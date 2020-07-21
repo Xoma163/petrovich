@@ -58,8 +58,6 @@ class VoiceRecognition(CommonCommand):
 
     def start(self):
         audio_messages = get_attachments_from_attachments_or_fwd(self.event, 'audio_message')
-        if not audio_messages:
-            return "Не нашёл голосового сообщения"
         self.bot.set_activity(self.event.peer_id, 'audiomessage')
 
         audio_message = audio_messages[0]
@@ -80,7 +78,7 @@ class VoiceRecognition(CommonCommand):
             msg = r.recognize_google(audio, language='ru_RU')
             return msg
         except sr.UnknownValueError:
-            return "Ничего не понял(("
+            raise RuntimeWarning("Ничего не понял((")
         except sr.RequestError as e:
             print(str(e))
-            return "Проблема с форматом"
+            raise RuntimeWarning("Проблема с форматом")

@@ -18,13 +18,13 @@ class Stream(CommonCommand):
             stream, _ = Service.objects.get_or_create(name="stream")
             stream_link = stream.value
             if len(stream_link) < 5:
-                return "Стрим пока не идёт"
+                raise RuntimeWarning("Стрим пока не идёт")
             else:
                 return {'msg': stream_link, 'attachments': [stream_link]}
         else:
             self.check_sender(Role.MODERATOR)
 
             if len(self.event.args[0]) >= 5 and not urlparse(self.event.args[0]).hostname:
-                return "Пришлите ссылку"
+                raise RuntimeWarning("Пришлите ссылку")
             Service.objects.update_or_create(name="stream", defaults={'value': self.event.args[0]})
             return "Ссылка изменена на " + self.event.args[0]

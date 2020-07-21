@@ -66,13 +66,13 @@ class Notifies(CommonCommand):
             notifies = notifies.filter(text_for_filter__icontains=_filter)
 
         if len(notifies) == 0:
-            return "Не нашёл напоминаний по такому тексту"
+            raise RuntimeWarning("Не нашёл напоминаний по такому тексту")
         if len(notifies) > 1:
             notifies10 = notifies[:10]
             notifies_texts = [str(notify.author) + " " + notify.text_for_filter for notify in notifies10]
             notifies_texts_str = "\n".join(notifies_texts)
-            return f"Нашёл сразу несколько. Уточните:\n" \
-                   f"{notifies_texts_str}"
+            raise RuntimeWarning(f"Нашёл сразу несколько. Уточните:\n"
+                                 f"{notifies_texts_str}")
 
         notifies.delete()
         return "Удалил"

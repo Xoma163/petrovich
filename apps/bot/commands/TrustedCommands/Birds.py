@@ -1,5 +1,4 @@
 from apps.bot.classes.Consts import Role
-from apps.bot.classes.bots.VkBot import VkBot
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.management.commands.start import camera_handler
 
@@ -23,7 +22,7 @@ class Birds(CommonCommand):
             image = camera_handler.get_img()
         except RuntimeError as e:
             print(e)
-            return "какая-то дичь с синичками. Зовите разраба"
+            raise RuntimeWarning("какая-то дичь с синичками. Зовите разраба")
         attachment = self.bot.upload_photos(image)[0]
         attachments.append(attachment)
 
@@ -40,7 +39,7 @@ class Birds(CommonCommand):
             attachment = self.bot.upload_document(document, self.event.peer_id, "Синички")
             attachments.append(attachment)
         attachments.append('https://birds.xoma163.xyz')
-        if len(attachments) == 2 or isinstance(self.bot, VkBot):
+        if len(attachments) == 2 or self.event.platform == 'vk ':
             return {
                 'attachments': attachments,
                 "keyboard": self.bot.get_inline_keyboard(self.names[0], args={"frames": frames}),

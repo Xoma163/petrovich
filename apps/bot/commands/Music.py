@@ -42,17 +42,17 @@ class Music(CommonCommand):
         try:
             video_info = ydl.extract_info(url, download=False)
         except youtube_dl.utils.DownloadError:
-            return "Не смог найти видео по этой ссылке"
+            raise RuntimeWarning("Не смог найти видео по этой ссылке")
         audio_urls = []
         if video_info['duration'] > 600:
-            return "Нельзя грузить музяку > 10 минут"
+            raise RuntimeWarning("Нельзя грузить музяку > 10 минут")
         if 'formats' in video_info:
             for _format in video_info['formats']:
                 if _format['ext'] == 'm4a':
                     audio_urls.append(_format)
 
         if len(audio_urls) == 0:
-            return "Чёт проблемки, напишите разрабу и пришлите ссылку на видео"
+            raise RuntimeWarning("Чёт проблемки, напишите разрабу и пришлите ссылку на видео")
         max_asr_i = 0
         max_asr = audio_urls[0]['asr']
         for i, audio_url in enumerate(audio_urls):
@@ -76,8 +76,8 @@ class Music(CommonCommand):
 
         response = requests.get(audio_link)
         if response.status_code == 403:
-            return "Нет доступа к ссылке, не могу скачать((\n" \
-                   "Пока сам не понял как решить эту проблему, думаю над этим"
+            raise RuntimeWarning("Нет доступа к ссылке, не могу скачать((\n"
+                                 "Пока сам не понял как решить эту проблему, думаю над этим")
         i = io.BytesIO(response.content)
         i.seek(0)
         o = io.BytesIO()
@@ -90,4 +90,4 @@ class Music(CommonCommand):
             msg = f"{str(e)}\n\nСсылка на скачивание: {audio_link}"
             return msg
 
-        return {'attachments': audio_attachment}
+        return {'attachments': [audio_attachment]}

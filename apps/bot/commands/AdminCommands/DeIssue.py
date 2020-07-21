@@ -12,7 +12,7 @@ class DeIssue(CommonCommand):
     def start(self):
         issue = Issue.objects.last()
         if not issue:
-            return "Нет ишюс!"
+            raise RuntimeWarning("Нет ишюс!")
         issue_text = issue.text
         issue.delete()
         return f'Ишю удалено:\n{issue_text}'

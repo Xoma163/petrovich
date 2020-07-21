@@ -59,7 +59,7 @@ class Meme(CommonCommand):
         self.check_args(2)
         attachments = get_attachments_from_attachments_or_fwd(self.event, ['audio', 'video', 'photo', 'doc'])
         if len(attachments) == 0:
-            return "Не нашёл вложений в сообщении или пересланном сообщении"
+            raise RuntimeWarning("Не нашёл вложений в сообщении или пересланном сообщении")
         attachment = attachments[0]
 
         for i, _ in enumerate(self.event.args):
@@ -81,7 +81,7 @@ class Meme(CommonCommand):
         elif attachment['type'] == 'photo' or attachment['type'] == 'doc':
             new_meme['link'] = attachment['download_url']
         else:
-            return "Невозможно"
+            raise RuntimeError("Невозможно")
 
         new_meme_obj = MemeModel.objects.create(**new_meme)
         if new_meme['approved']:
@@ -106,14 +106,14 @@ class Meme(CommonCommand):
                 pass
         attachments = get_attachments_from_attachments_or_fwd(self.event, ['audio', 'video', 'photo', 'doc'])
         if len(attachments) == 0:
-            return "Не нашёл вложений в сообщении или пересланном сообщении"
+            raise RuntimeWarning("Не нашёл вложений в сообщении или пересланном сообщении")
         attachment = attachments[0]
         if attachment['type'] == 'video' or attachment['type'] == 'audio':
             new_meme_link = attachment['url']
         elif attachment['type'] == 'photo' or attachment['type'] == 'doc':
             new_meme_link = attachment['download_url']
         else:
-            return "Невозможно"
+            raise RuntimeError("Невозможно")
 
         if (check_user_group(self.event.sender, Role.MODERATOR) or
                 check_user_group(self.event.sender, Role.TRUSTED)):
@@ -166,7 +166,7 @@ class Meme(CommonCommand):
         self.check_args(3)
         chat = self.bot.get_one_chat_with_user(self.event.args[1], self.event.sender.user_id)
         if self.event.chat == chat:
-            return "Зачем мне отправлять мем в эту же конфу?"
+            raise RuntimeWarning("Зачем мне отправлять мем в эту же конфу?")
         if self.event.args[-1].lower() in ['рандом', 'р']:
             meme = self.get_random_meme()
         else:
@@ -185,7 +185,7 @@ class Meme(CommonCommand):
             try:
                 meme = self.get_meme(approved=False)
             except RuntimeWarning:
-                return "Не нашёл мемов для подтверждения"
+                raise RuntimeWarning("Не нашёл мемов для подтверждения")
             meme_to_send = self.prepare_meme_to_send(meme)
             meme_to_send['msg'] = f"{meme.author}\n" \
                                   f"{meme.name} ({meme.id})"
@@ -195,9 +195,9 @@ class Meme(CommonCommand):
             self.parse_int()
             non_approved_meme = self.get_meme(_id=self.event.args[1])
             if not non_approved_meme:
-                return "Не нашёл мема с таким id"
+                raise RuntimeWarning("Не нашёл мема с таким id")
             if non_approved_meme.approved:
-                return "Мем уже подтверждён"
+                raise RuntimeWarning("Мем уже подтверждён")
 
             user_msg = f'Мем с названием "{non_approved_meme.name}" подтверждён.'
             self.bot.send_message(non_approved_meme.author.user_id, user_msg)
@@ -213,9 +213,9 @@ class Meme(CommonCommand):
         self.parse_int()
         non_approved_meme = self.get_meme(_id=self.event.args[1])
         if not non_approved_meme:
-            return "Не нашёл мема с таким id"
+            raise RuntimeWarning("Не нашёл мема с таким id")
         if non_approved_meme.approved:
-            return "Мем уже подтверждён"
+            raise RuntimeWarning("Мем уже подтверждён")
 
         reason = None
         if len(self.event.args) > 2:
@@ -235,13 +235,13 @@ class Meme(CommonCommand):
         self.parse_int()
         renamed_meme = self.get_meme(_id=self.event.args[1])
         if not renamed_meme:
-            return "Не нашёл мема с таким id"
+            raise RuntimeWarning("Не нашёл мема с таким id")
 
         new_name = None
         if len(self.event.args) > 2:
             new_name = " ".join(self.event.args[2:])
         if MemeModel.objects.filter(name=new_name).exists():
-            return "Мем с таким названием уже есть"
+            raise RuntimeWarning("Мем с таким названием уже есть")
         user_msg = f'Мем с названием "{renamed_meme.name}" переименован.\n' \
                    f'Новое название - "{new_name}"'
         if renamed_meme.author != self.event.sender:

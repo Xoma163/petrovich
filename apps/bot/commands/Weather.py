@@ -38,7 +38,7 @@ class Weather(CommonCommand):
     def weather_changes(self, city):
         entity_yesterday = Service.objects.filter(name=f'weatherchange_yesterday_{city.name}')
         if not entity_yesterday.exists():
-            return "Не нашёл вчерашней погоды для этого города."
+            raise RuntimeWarning("Не нашёл вчерашней погоды для этого города.")
         yandexweather_api = YandexWeatherAPI(city)
 
         weather_yesterday = json.loads(entity_yesterday.first().value)

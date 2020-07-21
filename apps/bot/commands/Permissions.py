@@ -30,12 +30,12 @@ class Permissions(CommonCommand):
             user = self.event.sender
 
         roles = get_roles(user)
-        if len(roles) > 0:
-            result = "\n".join(roles)
+        if len(roles) == 0:
+            raise RuntimeWarning("Нет прав")
 
-            if self.event.chat and self.event.chat.admin == user:
-                result += "\n" \
-                          "админ конфы (в этой)"
-            return result
-        else:
-            return "Нет прав :("
+        result = "\n".join(roles)
+
+        if self.event.chat and self.event.chat.admin == user:
+            result += "\n" \
+                      "админ конфы (в этой)"
+        return result

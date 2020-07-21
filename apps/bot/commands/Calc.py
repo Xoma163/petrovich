@@ -36,14 +36,14 @@ class Calc(CommonCommand):
         for operation in operations:
             operations_count += expression.count(operation)
         if operations_count > MAX_OPERATIONS:
-            return "Слишком много операций, процессор перегреется(("
+            raise RuntimeWarning("Слишком много операций, процессор перегреется((")
 
         try:
             root = build_subtree(expression, compiled_grammars)
         except ZeroDivisionError:
-            return "Деление на 0"
+            raise RuntimeWarning("Деление на 0")
         if root is None:
-            return "Не смог распарсить выражение"
+            raise RuntimeWarning("Не смог распарсить выражение")
         else:
             try:
                 if isinstance(root.value, float) and root.value == int(root.value):

@@ -136,8 +136,8 @@ class CommonCommand:
 
     # Проверяет интовый аргумент в диапазоне
     @staticmethod
-    def check_number_arg_range(arg, val1, val2, banned_list=None):
-        if val1 <= arg <= val2:
+    def check_number_arg_range(arg, _min, _max, banned_list=None):
+        if _min <= arg <= _max:
             if banned_list:
                 if arg not in banned_list:
                     return True
@@ -147,7 +147,7 @@ class CommonCommand:
             else:
                 return True
         else:
-            error = f"Значение может быть в диапазоне [{val1};{val2}]"
+            error = f"Значение может быть в диапазоне [{_min};{_max}]"
             raise RuntimeError(error)
 
     @staticmethod

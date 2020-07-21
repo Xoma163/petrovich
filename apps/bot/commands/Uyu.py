@@ -23,7 +23,7 @@ class Uyu(CommonCommand):
 
         new_msg = new_msg.strip()
         if not new_msg:
-            return "Нет текста в сообщении или пересланных сообщениях"
+            raise RuntimeWarning("Нет текста в сообщении или пересланных сообщениях")
 
         symbols_first_priority = ['...']
         symbols_left = ['.', ',', '?', '!', ':']

@@ -20,7 +20,7 @@ class Help(CommonCommand):
         if self.event.args:
             command = find_command_by_name(self.event.args[0].lower())
             if not command:
-                return "Я не знаю такой команды"
+                raise RuntimeWarning("Я не знаю такой команды")
             else:
                 self.check_sender(command.access)
                 return get_help_for_command(command)

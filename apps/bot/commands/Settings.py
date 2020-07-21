@@ -23,7 +23,7 @@ class Settings(CommonCommand):
             if self.event.args[1].lower() in ON_OFF_TRANSLATOR:
                 value = ON_OFF_TRANSLATOR[self.event.args[1]]
             else:
-                return "Не понял, включить или выключить?"
+                raise RuntimeWarning("Не понял, включить или выключить?")
             arg0 = self.event.args[0].lower()
             if arg0 in ['реагировать', 'реагируй', 'реагирование']:
                 self.check_conversation()
@@ -44,7 +44,7 @@ class Settings(CommonCommand):
                     self.event.sender.save()
                     return "Отписал от рассылки о сервере майна"
             else:
-                return "Не знаю такой настройки"
+                raise RuntimeWarning("Не знаю такой настройки")
         else:
             msg = "Настройки:\n"
             if self.event.chat:

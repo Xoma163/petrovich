@@ -12,7 +12,7 @@ class Issues(CommonCommand):
     def start(self):
         issues = Issue.objects.all()
         if not issues:
-            return "Нет ишюсов!"
+            raise RuntimeWarning("Нет ишюсов!")
         features_text = "Добавленные ишю:\n\n"
         for i, feature in enumerate(issues):
             features_text += f"------------------------------{i + 1}------------------------------\n" \

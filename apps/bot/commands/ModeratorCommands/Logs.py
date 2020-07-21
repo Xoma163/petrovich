@@ -111,7 +111,7 @@ class Logs(CommonCommand):
         count = self.get_count(1, 5)
         logs = Logger.objects.filter(traceback__isnull=False)[:count]
         if not logs:
-            return "Не нашёл логов с ошибками"
+            raise RuntimeWarning("Не нашёл логов с ошибками")
         msg = ""
         for log in logs:
             msg += f"{log.create_datetime.strftime('%d.%m.%Y %H:%M:%S')}\n\n" \

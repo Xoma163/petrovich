@@ -32,9 +32,9 @@ class Rate(CommonCommand):
                     rate_gamer_str += f"{str(rate_gamer.gamer)} - {rate_gamer.rate}\n"
 
             if len(existed_rate) > 0:
-                return f"Ставка уже поставлена\n" \
-                       f"Игроки {len(rates_gamers)}/{min_gamers}:\n" \
-                       f"{rate_gamer_str}"
+                raise RuntimeWarning(f"Ставка уже поставлена\n"
+                                     f"Игроки {len(rates_gamers)}/{min_gamers}:\n"
+                                     f"{rate_gamer_str}")
             if self.event.args:
                 random = False
                 arg = self.event.args[0]
@@ -46,12 +46,13 @@ class Rate(CommonCommand):
                 for rate_entity in rates:
                     available_list.pop(available_list.index(rate_entity.rate))
                 if len(available_list) == 0:
-                    return "Какая-то жесть, 100 игроков в ставке, я не могу больше придумать чисел, играйте(("
+                    raise RuntimeWarning(
+                        "Какая-то жесть, 100 игроков в ставке, я не могу больше придумать чисел, играйте((")
                 arg = random_event(available_list)
 
             existed_another_rate = RateModel.objects.filter(chat=self.event.chat, rate=arg)
             if len(existed_another_rate) > 0:
-                return "Эта ставка уже поставлена другим игроком"
+                raise RuntimeWarning("Эта ставка уже поставлена другим игроком")
 
             RateModel(
                 **{'gamer': gamer, 'chat': self.event.chat, 'rate': arg, 'random': random}).save()

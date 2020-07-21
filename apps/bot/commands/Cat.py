@@ -27,7 +27,7 @@ class Cat(CommonCommand):
             self.check_sender(Role.ADMIN)
             cat = CatModel.objects.filter(to_send=True).order_by('?').first()
             if not cat:
-                return "Нет котов"
+                raise RuntimeWarning("Нет котов")
             cat.to_send = False
             cat.save()
             attachments = self.bot.upload_photos(cat.image.path)
@@ -38,7 +38,7 @@ class Cat(CommonCommand):
         if len(images) == 0:
             cat = CatModel.objects.filter().order_by('?').first()
             if not cat:
-                return "Нет котов"
+                raise RuntimeWarning("Нет котов")
             attachments = self.bot.upload_photos(cat.image.path)
 
             return {

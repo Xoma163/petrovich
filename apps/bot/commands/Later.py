@@ -47,7 +47,7 @@ class Later(CommonCommand):
                         self._append_message_to_lms(fwd, lms)
                         lms.save()
                 else:
-                    return "Не понял аргумента"
+                    raise RuntimeWarning("Не понял аргумента")
             else:
                 lms = LaterMessageSession()
                 lms.date = localize_datetime(datetime.utcnow(), "UTC")
@@ -60,7 +60,7 @@ class Later(CommonCommand):
         else:
             lms = LaterMessageSession.objects.filter(author=self.event.sender).order_by('date').first()
             if not lms:
-                return "Ничего не нашёл :("
+                raise RuntimeWarning("Ничего не нашёл :(")
             else:
                 author = None
                 msgs = []

@@ -110,7 +110,7 @@ class Roulette(CommonCommand):
             user = self.bot.get_user_by_name(username, self.event.chat)
             user_gamer = Gamer.objects.filter(user=user).first()
             if not user_gamer:
-                return "Не нашёл такого игрока"
+                raise RuntimeWarning("Не нашёл такого игрока")
             return f"Баланс игрока {user} - {user_gamer.roulette_points}"
         else:
             return f"Ваш баланс - {self.gamer.roulette_points}"
@@ -127,14 +127,14 @@ class Roulette(CommonCommand):
         datetime_now = localize_datetime(datetime.datetime.utcnow(), DEFAULT_TIME_ZONE)
         datetime_last = localize_datetime(remove_tz(self.gamer.roulette_points_today), DEFAULT_TIME_ZONE)
         if self.gamer.roulette_points > 10000:
-            return "Тебе хватит и так"
+            raise RuntimeWarning("Тебе хватит и так")
         if (datetime_now.date() - datetime_last.date()).days > 0:
             self.gamer.roulette_points += 500
             self.gamer.roulette_points_today = datetime_now
             self.gamer.save()
             return "Выдал пособие по безработице"
         else:
-            return "Приходи завтра"
+            raise RuntimeWarning("Приходи завтра")
 
     def menu_transfer(self):
         self.check_conversation()
@@ -145,17 +145,17 @@ class Roulette(CommonCommand):
 
         points_transfer = self.event.args[-1]
         if points_transfer > self.gamer.roulette_points:
-            return "Недостаточно очков"
+            raise RuntimeWarning("Недостаточно очков")
         if points_transfer <= 0:
-            return "Очков должно быть >0"
+            raise RuntimeWarning("Очков должно быть >0")
         username = " ".join(self.event.args[1:-1])
         user = self.bot.get_user_by_name(username, self.event.chat)
         user_gamer = self.bot.get_gamer_by_user(user)
         if not user_gamer:
-            return "Не нашёл такого игрока"
+            raise RuntimeWarning("Не нашёл такого игрока")
 
         if self.gamer == user_gamer:
-            return "))"
+            raise RuntimeWarning("))")
 
         self.gamer.roulette_points -= points_transfer
         self.gamer.save()
@@ -177,7 +177,7 @@ class Roulette(CommonCommand):
         user = self.bot.get_user_by_name(username, self.event.chat)
         user_gamer = self.bot.get_gamer_by_user(user)
         if not user_gamer:
-            return "Не нашёл такого игрока"
+            raise RuntimeWarning("Не нашёл такого игрока")
 
         user_gamer.roulette_points += points_transfer
         user_gamer.save()
@@ -196,7 +196,7 @@ class Roulette(CommonCommand):
         else:
             rrs = RouletteRate.objects.filter(chat__isnull=True, gamer=self.gamer)
         if len(rrs) == 0:
-            return "Ставок нет"
+            raise RuntimeWarning("Ставок нет")
 
         msg = ""
         for rr in rrs:
@@ -217,9 +217,9 @@ class Roulette(CommonCommand):
                 self.parse_int()
                 rate = self.event.args[-1]
             if rate <= 0:
-                return "Ставка не может быть ⩽0"
+                raise RuntimeWarning("Ставка не может быть ⩽0")
             if rate > self.gamer.roulette_points:
-                return f"Ставка не может быть больше ваших очков - {self.gamer.roulette_points}"
+                raise RuntimeWarning(f"Ставка не может быть больше ваших очков - {self.gamer.roulette_points}")
 
             if rate_on in ['строка', 'столбец']:
                 self.args = 3
@@ -243,7 +243,7 @@ class Roulette(CommonCommand):
             return "Поставил"
 
         else:
-            return "Не могу понять на что вы поставили. /ман рулетка"
+            raise RuntimeWarning("Не могу понять на что вы поставили. /ман рулетка")
 
     def menu_play(self):
         with lock:

@@ -36,14 +36,13 @@ class Who(CommonCommand):
         elif arg in ['пидор']:
             return "ты"
         else:
-            return "Не знаю такой роли"
+            raise RuntimeWarning("Не знаю такой роли")
         users = self.get_users(self.event.chat, who)
-        if len(users) > 0:
-            users_list = [str(user) for user in users]
-            result = "\n".join(users_list)
-            return str(result)
-        else:
+        if len(users) == 0:
             return "Нет людей с данной ролью"
+        users_list = [str(user) for user in users]
+        result = "\n".join(users_list)
+        return str(result)
 
     def get_users(self, chat, who):
         params = {'chats': chat, 'groups__name': who}

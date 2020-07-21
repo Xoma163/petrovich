@@ -27,5 +27,5 @@ class Fix(CommonCommand):
             if msg['text']:
                 msgs += f"{fix_layout(msg['text'], has_cyrillic(msg['text']))}\n"
         if not msgs:
-            return "Нет текста в сообщении или пересланных сообщениях"
+            raise RuntimeWarning("Нет текста в сообщении или пересланных сообщениях")
         return msgs

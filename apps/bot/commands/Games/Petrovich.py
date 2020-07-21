@@ -80,7 +80,7 @@ class Petrovich(CommonCommand):
             if winner:
                 winner = winner.user
             else:
-                return "Нет участников игры. Зарегистрируйтесь! /петрович рег"
+                raise RuntimeWarning("Нет участников игры. Зарегистрируйтесь! /петрович рег")
 
             PetrovichGames.objects.filter(chat=self.event.chat).delete()
             PetrovichGames(user=winner, chat=self.event.chat).save()

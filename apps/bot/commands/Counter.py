@@ -13,7 +13,7 @@ class Counter(CommonCommand):
     def start(self):
         name = self.event.original_args.capitalize()
         if len(name) >= 50:
-            return "Длина названия счётчика не может превышать 50"
+            raise RuntimeWarning("Длина названия счётчика не может превышать 50")
         counter, _ = CounterModel.objects.update_or_create(
             name=name, chat=self.event.chat,
             defaults={

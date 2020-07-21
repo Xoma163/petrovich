@@ -15,7 +15,7 @@ class APIChat(CommonCommand):
 
     def start(self):
         if self.event.sender.user_id == "ANONYMOUS":
-            return "Анонимный пользователь не может иметь привязанных чатов"
+            raise RuntimeWarning("Анонимный пользователь не может иметь привязанных чатов")
 
         if self.event.args[0] == 'привязать':
             self.check_args(2)

@@ -57,7 +57,7 @@ class Age(CommonCommand):
         faces = everypixel_api.get_faces_on_photo()
 
         if len(faces) == 0:
-            return "Не нашёл лиц на фото"
+            raise RuntimeWarning("Не нашёл лиц на фото")
         file_path = draw_on_images(image['download_url'], faces)
         attachments = self.bot.upload_photos(file_path)
         return {"attachments": attachments}

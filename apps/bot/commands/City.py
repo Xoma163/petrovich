@@ -26,7 +26,7 @@ class City(CommonCommand):
                 city_name = self.event.args[0]
                 city = CityModel.objects.filter(synonyms__icontains=city_name).first()
                 if not city:
-                    return "Не нашёл такого города. /город добавить (название)"
+                    raise RuntimeWarning("Не нашёл такого города. /город добавить (название)")
                 else:
                     self.event.sender.city = city
                     self.event.sender.save()
@@ -35,23 +35,23 @@ class City(CommonCommand):
             if self.event.sender.city is not None:
                 return f"Ваш город - {self.event.sender.city}"
             else:
-                return "Не знаю ваш город.\n" \
-                       "/Город [название] - устанавливает пользователю город "
+                raise RuntimeWarning("Не знаю ваш город.\n"
+                                     "/Город [название] - устанавливает пользователю город ")
 
 
 def add_city_to_db(city_name):
     yandexgeo_api = YandexGeoAPI()
     city_info = yandexgeo_api.get_city_info_by_name(city_name)
     if not city_info:
-        raise RuntimeError("Не смог найти координаты для города")
+        raise RuntimeWarning("Не смог найти координаты для города")
     city = CityModel.objects.filter(name=city_info['name'])
     if len(city) != 0:
-        raise RuntimeError("Такой город уже есть")
+        raise RuntimeWarning("Такой город уже есть")
     city_info['synonyms'] = city_info['name'].lower()
     timezonedb_api = TimezoneDBAPI()
     timezone_name = timezonedb_api.get_timezone_by_coordinates(city_info['lat'], city_info['lon'])
     if not timezone_name:
-        raise RuntimeError("Не смог найти таймзону для города")
+        raise RuntimeWarning("Не смог найти таймзону для города")
     timezone_obj, _ = TimeZone.objects.get_or_create(name=timezone_name)
 
     city_info['timezone'] = timezone_obj

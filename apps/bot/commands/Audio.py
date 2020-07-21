@@ -27,7 +27,7 @@ class Audio(CommonCommand):
             audios = AudioList.objects.filter(
                 pk__in=AudioList.objects.filter(author=self.event.sender).order_by('?')[:count])
             if len(audios) == 0:
-                return "Не нашёл ваших аудио"
+                raise RuntimeWarning("Не нашёл ваших аудио")
             attachments = [audio.attachment for audio in audios]
             if len(audios) != count:
                 msg = f"Нашёл только {len(audios)} {decl_of_num(len(audios), ['штуку', 'штуки', 'штук'])}"

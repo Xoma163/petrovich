@@ -15,7 +15,6 @@ class YandexTranslateAPI:
             'text': text
         }
         response = requests.get(self.url, params).json()
-        if response['code'] == 200:
-            return response['text'][0]
-        else:
-            return f"Ошибка:\n{response}"
+        if response['code'] != 200:
+            raise RuntimeWarning(f"Ошибка:\n{response}")
+        return response['text'][0]
