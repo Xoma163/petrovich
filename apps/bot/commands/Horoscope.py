@@ -25,11 +25,11 @@ class Horoscope(CommonCommand):
         names = ["гороскоп"]
         help_text = "Гороскоп - мемный гороскоп"
         detail_help_text = "Гороскоп [знак зодиака = по др в профиле] - пришлёт мемный гороскоп на день для знака зодиака\n" \
-                           "Гороскоп все - пришлёт мемный гороскоп для всех знаков зодиака"
+                           "Гороскоп все - пришлёт мемный гороскоп для всех знаков зодиака\n" \
+                           "Гороскоп инфо (знак зодиака) - пришлёт информацию о мемасе в гороскопе по знаку зодиака"
         super().__init__(names, help_text, detail_help_text, platforms=['vk', 'tg'])
 
     def start(self):
-
         if self.event.args:
             # Гороскоп для всех знаков
             if self.event.args[0] in "все":
@@ -42,7 +42,18 @@ class Horoscope(CommonCommand):
                     prepared_meme['msg'] = zodiac_sign.capitalize()
                     self.bot.parse_and_send_msgs_thread(self.event.peer_id, prepared_meme)
                 return
-
+            elif self.event.args[0] in "инфо":
+                self.check_args(2)
+                try:
+                    zodiac_sign = self.event.args[1].lower()
+                    zodiac_index = list(zodiac_signs.keys()).index(zodiac_sign)
+                except:
+                    raise RuntimeWarning("Не знаю такого знака зодиака")
+                horoscope = HoroscopeModel.objects.first()
+                if not horoscope:
+                    raise RuntimeWarning("На сегодня ещё нет гороскопа")
+                meme = horoscope.memes.all()[zodiac_index]
+                return f"{zodiac_sign.capitalize()}\nНазвание мема - {meme.name}"
             # Гороскоп для знака зодиака в аргументах
             try:
                 zodiac_sign = self.event.args[0].lower()
