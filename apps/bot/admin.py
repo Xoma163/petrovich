@@ -5,9 +5,20 @@ from apps.bot.models import Users, Chat, Bot, APIUser, APITempUser
 
 
 class UserAdmin(admin.ModelAdmin):
-    list_display = (
-        'id', 'name', 'surname', 'nickname', 'nickname_real', 'gender', 'birthday', 'city',
+    fieldsets = (
+        ('Информация о пользователе', {
+            'fields': (
+                'user_id', 'name', 'surname', 'nickname', 'nickname_real', 'gender', 'birthday', 'city'),
+        }),
+        ('Прочее', {
+            'fields': ('groups', 'chats', 'platform'),
+        }),
+
+        ('Отправка уведомлений', {
+            'fields': ('imei', 'send_notify_to'),
+        }),
     )
+
     list_filter = ('platform', 'gender',
                    ('city', admin.RelatedOnlyFieldListFilter),
                    ('groups', admin.RelatedOnlyFieldListFilter),

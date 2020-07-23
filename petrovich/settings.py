@@ -117,7 +117,6 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 CORS_ORIGIN_ALLOW_ALL = True
 VK_URL = "https://vk.com/"
-TEST_CHAT_ID = 2
 
 # Logging
 LOGS_DIR = os.path.join(BASE_DIR, 'logs')
@@ -177,4 +176,3 @@ LOGGING = {
 
 CORS_ORIGIN_ALLOW_ALL = True
 VK_URL = "https://vk.com/"
-TEST_CHAT_ID = 3

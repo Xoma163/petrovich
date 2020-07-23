@@ -55,12 +55,12 @@ class Users(Platform):
     # Здесь такой странный ForeignKey потому что проблема импортов
     city = models.ForeignKey('service.City', verbose_name='Город', null=True, blank=True, on_delete=models.SET_NULL)
 
-    # imei = models.CharField(verbose_name='IMEI', max_length=20, null=True, blank=True)
-
     groups = models.ManyToManyField(Group, verbose_name="Группы")
 
-    # send_notify_to = models.ManyToManyField('self', verbose_name="Отправление уведомлений", blank=True)
     chats = models.ManyToManyField(Chat, verbose_name="Чаты", blank=True)
+
+    imei = models.CharField('IMEI', max_length=20, null=True, blank=True)
+    send_notify_to = models.ManyToManyField('self', verbose_name="Отправлять уведомления", blank=True)
 
     class Meta:
         verbose_name = "Пользователь"
