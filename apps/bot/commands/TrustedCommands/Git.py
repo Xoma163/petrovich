@@ -9,5 +9,5 @@ class Git(CommonCommand):
         super().__init__(names, help_text, access=Role.TRUSTED)
 
     def start(self):
-        url = 'https://github.com/Xoma163/xoma163site/'
+        url = 'https://github.com/Xoma163/petrovich/'
         return {'msg': url, 'attachments': [url]}
