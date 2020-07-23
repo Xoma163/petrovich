@@ -22,7 +22,7 @@ from apps.bot.classes.bots.VkUser import VkUser
 from apps.bot.classes.events.VkEvent import VkEvent
 from apps.bot.commands.City import add_city_to_db
 from apps.bot.models import Users, Chat, Bot
-from petrovich.settings import env, TEST_CHAT_ID
+from petrovich.settings import env
 
 
 class VkBot(CommonBot, Thread):
@@ -40,6 +40,7 @@ class VkBot(CommonBot, Thread):
         self.vk_user = VkUser()
 
         self.logger = logging.getLogger(self.name)
+        self.test_chat = Chat.objects.get(pk=env.str("VK_TEST_CHAT_ID"))
 
     def set_activity(self, peer_id, activity='typing'):
         if activity not in ['typing', 'audiomessage']:
@@ -171,7 +172,7 @@ class VkBot(CommonBot, Thread):
                     vk_event = self._setup_event(event)
 
                     if self.DEVELOP_DEBUG:
-                        from_test_chat = vk_event['chat_id'] == TEST_CHAT_ID
+                        from_test_chat = vk_event['chat_id'] == self.test_chat.id
                         from_me = str(vk_event['user_id']) == env.str('VK_ADMIN_ID')
                         if not from_test_chat or not from_me:
                             continue

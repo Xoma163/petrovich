@@ -39,6 +39,7 @@ class TgBot(CommonBot, Thread):
         self.requests = TgRequests(self.token)
         self.longpoll = MyTgBotLongPoll(self.token, self.requests)
 
+        # self.test_chat = Chat.objects.get(pk=env.str("TG_TEST_CHAT_ID"))
     def set_activity(self, peer_id, activity='typing'):
         if activity not in ['typing', 'audiomessage']:
             raise RuntimeWarning("Не знаю такого типа активности")
