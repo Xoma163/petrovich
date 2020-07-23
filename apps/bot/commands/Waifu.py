@@ -19,11 +19,10 @@ class Waifu(CommonCommand):
                 waifu_number = self.event.args[0]
                 self.check_number_arg_range(waifu_number, 0, waifus_count)
             except RuntimeError:
-                seed = " ".join(self.event.args)
+                seed = self.event.original_args
                 waifu_number = get_random_int(waifus_count, seed=seed)
         else:
             waifu_number = get_random_int(waifus_count)
-        self.check_number_arg_range(waifu_number, 0, waifus_count)
         url = f"https://www.thiswaifudoesnotexist.net/example-{waifu_number}.jpg"
         attachment = self.bot.upload_photos(url)
 
