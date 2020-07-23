@@ -53,7 +53,7 @@ def where_is_me(request):
         log.msg = "Where is None"
         log.save()
         return json_response({'status': 'error', 'message': log.msg})
-    log.where = where
+    log.event = where
 
     imei = request.GET.get('imei', None)
     if not imei:
@@ -67,6 +67,7 @@ def where_is_me(request):
         log.msg = "Author is None"
         log.save()
         return json_response({'status': 'error', 'message': log.msg})
+    log.author = author
 
     recipients = author.send_notify_to.all()
     if not recipients:
@@ -95,4 +96,5 @@ def where_is_me(request):
     for recipient in recipients:
         bot = get_bot_by_platform(recipient.platform)()
         bot.parse_and_send_msgs(recipient.user_id, msg)
+    log.success = True
     return json_response({'status': 'success'})
