@@ -78,7 +78,7 @@ class TicTacToeSession(models.Model):
     next_step = models.ForeignKey(Users, models.CASCADE, "next_%(class)ss", verbose_name="Следующий шаг", null=True,
                                   blank=True)
 
-    board = JSONField("Вложения", blank=True, default=get_default_board)
+    board = JSONField("Поле", blank=True, default=get_default_board)
 
     class Meta:
         verbose_name = "Крестики-нолики сессия"

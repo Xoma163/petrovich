@@ -1,17 +1,19 @@
 from django.contrib import admin
+from django.contrib.postgres import fields
+from django_json_widget.widgets import JSONEditorWidget
 
 from apps.service.models import Statistic, Issue, Service, Counter, Cat, Meme, Notify, City, AudioList, LaterMessage, \
     Donations, TimeZone, LaterMessageSession, YoutubeSubscribe, WakeOnLanUserData, Horoscope, QuoteBook, Words
 
 
 @admin.register(Statistic)
-class VkUserAdmin(admin.ModelAdmin):
+class StatisticsAdmin(admin.ModelAdmin):
     list_display = ('command', 'count_queries',)
     ordering = ('-count_queries',)
 
 
 @admin.register(Issue)
-class FeatureAdmin(admin.ModelAdmin):
+class IssueAdmin(admin.ModelAdmin):
     list_display = ('author', 'text',)
 
 
@@ -44,6 +46,9 @@ class NotifyAdmin(admin.ModelAdmin):
     list_display = ('id', 'date', 'text', 'author', 'chat', 'repeat')
     search_fields = ['date', 'text', 'text_for_filter']
     list_filter = (('author', admin.RelatedOnlyFieldListFilter), ('chat', admin.RelatedOnlyFieldListFilter), 'repeat',)
+    formfield_overrides = {
+        fields.JSONField: {'widget': JSONEditorWidget},
+    }
 
 
 @admin.register(City)
@@ -71,6 +76,9 @@ class LaterMessageAdmin(admin.ModelAdmin):
     list_display = ('message_author', 'message_bot', 'text', 'date', 'attachments')
     list_filter = (('message_author', admin.RelatedOnlyFieldListFilter),
                    ('message_bot', admin.RelatedOnlyFieldListFilter))
+    formfield_overrides = {
+        fields.JSONField: {'widget': JSONEditorWidget},
+    }
 
 
 @admin.register(LaterMessageSession)
