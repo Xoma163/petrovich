@@ -24,8 +24,8 @@ class Logger(models.Model):
     user_msg = models.TextField("Сообщение пользователя", blank=True, null=True)
     msg = models.TextField("Сообщение")
 
-    sender = models.ForeignKey(Users, verbose_name="Пользователь", on_delete=models.SET_NULL, null=True)
-    chat = models.ForeignKey(Chat, verbose_name="Чат", on_delete=models.SET_NULL, null=True)
+    sender = models.ForeignKey(Users, models.SET_NULL, verbose_name="Пользователь", null=True)
+    chat = models.ForeignKey(Chat, models.SET_NULL, verbose_name="Чат", null=True)
 
     result = models.TextField("Результат выполнения", blank=True, null=True)
     exception = models.TextField("Ошибка", blank=True, null=True)
@@ -43,14 +43,12 @@ class MovementLog(models.Model):
                       ('work', 'работа'),
                       ('university', 'университет'),
                       ('somewhere', 'где-то'))
-    date = models.DateTimeField(verbose_name="Дата", auto_now_add=True, blank=True)
-    imei = models.CharField(verbose_name='IMEI', max_length=20, null=True)
-    author = models.ForeignKey(Users, verbose_name="Автор", on_delete=models.SET_NULL, null=True)
-    event = models.CharField(verbose_name='Событие', choices=EVENTS_CHOICES,
-                             max_length=20,
-                             null=True)
-    msg = models.CharField(verbose_name='Сообщение', max_length=2000)
-    success = models.BooleanField(verbose_name='Отправлено', default=False)
+    date = models.DateTimeField("Дата", auto_now_add=True, blank=True)
+    imei = models.CharField('IMEI', max_length=20, null=True)
+    author = models.ForeignKey(Users, models.SET_NULL, verbose_name="Автор", null=True)
+    event = models.CharField('Событие', choices=EVENTS_CHOICES, max_length=20, null=True)
+    msg = models.CharField('Сообщение', max_length=2000)
+    success = models.BooleanField('Отправлено', default=False)
 
     @classmethod
     def create(cls, imei, author, event, msg, success):

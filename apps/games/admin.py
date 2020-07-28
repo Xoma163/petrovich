@@ -29,7 +29,7 @@ class PetrovichGamesAdmin(admin.ModelAdmin):
 
 @admin.register(TicTacToeSession)
 class TicTacToeSessionAdmin(admin.ModelAdmin):
-    list_display = ('user1', 'user2', 'board', 'pretty_board')
+    list_display = ('user1', 'user2', 'board',)
 
 
 @admin.register(CodenamesUser)
@@ -40,7 +40,7 @@ class CodenamesUserAdmin(admin.ModelAdmin):
 
 @admin.register(CodenamesSession)
 class CodenamesSessionAdmin(admin.ModelAdmin):
-    list_display = ('chat', 'next_step', 'board', 'pretty_board')
+    list_display = ('chat', 'next_step', 'board')
 
 
 @admin.register(RouletteRate)

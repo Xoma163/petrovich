@@ -12,7 +12,7 @@ class Platform(models.Model):
     PLATFORM_CHOICES = (
         (PLATFORM_TG, 'Telegram'),
         (PLATFORM_VK, 'Vk'))
-    platform = models.CharField(verbose_name='Тип платформы', max_length=3, choices=PLATFORM_CHOICES)
+    platform = models.CharField('Тип платформы', max_length=3, choices=PLATFORM_CHOICES)
 
     class Meta:
         abstract = True
@@ -21,10 +21,10 @@ class Platform(models.Model):
 
 class Chat(Platform):
     id = models.AutoField(primary_key=True)
-    chat_id = models.CharField(verbose_name='ID чата', max_length=20, default="")
-    name = models.CharField(verbose_name='Название', max_length=40, default="", blank=True)
-    need_reaction = models.BooleanField(verbose_name='Реагировать', default=True)
-    admin = models.ForeignKey('Users', verbose_name='Админ', blank=True, null=True, on_delete=models.SET_NULL)
+    chat_id = models.CharField('ID чата', max_length=20, default="")
+    name = models.CharField('Название', max_length=40, default="", blank=True)
+    need_reaction = models.BooleanField('Реагировать', default=True)
+    admin = models.ForeignKey('Users', models.SET_NULL, verbose_name='Админ', blank=True, null=True)
 
     class Meta:
         verbose_name = "Чат"
@@ -45,15 +45,15 @@ class Users(Platform):
         (GENDER_NONE, 'не указан'))
 
     id = models.AutoField(primary_key=True)
-    user_id = models.CharField(verbose_name='ID пользователя', max_length=20)
-    name = models.CharField(verbose_name='Имя', max_length=40, blank=True, null=True)
-    surname = models.CharField(verbose_name='Фамилия', max_length=40, blank=True, null=True)
-    nickname = models.CharField(verbose_name="Никнейм", max_length=40, blank=True, null=True)
-    nickname_real = models.CharField(verbose_name="Прозвище", max_length=40, blank=True, default="")
-    gender = models.CharField(verbose_name='Пол', max_length=2, blank=True, default="", choices=GENDER_CHOICES)
-    birthday = models.DateField(verbose_name='Дата рождения', null=True, blank=True)
+    user_id = models.CharField('ID пользователя', max_length=20)
+    name = models.CharField('Имя', max_length=40, blank=True, null=True)
+    surname = models.CharField('Фамилия', max_length=40, blank=True, null=True)
+    nickname = models.CharField("Никнейм", max_length=40, blank=True, null=True)
+    nickname_real = models.CharField("Прозвище", max_length=40, blank=True)
+    gender = models.CharField('Пол', max_length=2, blank=True, choices=GENDER_CHOICES)
+    birthday = models.DateField('Дата рождения', null=True, blank=True)
     # Здесь такой странный ForeignKey потому что проблема импортов
-    city = models.ForeignKey('service.City', verbose_name='Город', null=True, blank=True, on_delete=models.SET_NULL)
+    city = models.ForeignKey('service.City', models.SET_NULL, verbose_name='Город', null=True, blank=True)
 
     groups = models.ManyToManyField(Group, verbose_name="Группы")
 
@@ -78,8 +78,8 @@ class Users(Platform):
 
 class Bot(Platform):
     id = models.AutoField(primary_key=True)
-    bot_id = models.CharField(verbose_name='ID бота', max_length=20)
-    name = models.CharField(verbose_name='Имя', max_length=40)
+    bot_id = models.CharField('ID бота', max_length=20)
+    name = models.CharField('Имя', max_length=40)
 
     class Meta:
         verbose_name = "Бот"
@@ -94,8 +94,8 @@ class Bot(Platform):
 
 
 class APIUser(models.Model):
-    user = models.ForeignKey(Users, verbose_name="Юзер", on_delete=models.CASCADE, null=True, blank=True)
-    chat = models.ForeignKey(Chat, verbose_name="Вк чат", on_delete=models.CASCADE, null=True, blank=True)
+    user = models.ForeignKey(Users, models.CASCADE, verbose_name="Юзер", null=True, blank=True)
+    chat = models.ForeignKey(Chat, models.CASCADE, verbose_name="Вк чат", null=True, blank=True)
 
     class Meta:
         verbose_name = "API Пользователь"
@@ -111,10 +111,10 @@ def random_digits():
 
 
 class APITempUser(models.Model):
-    user = models.ForeignKey(Users, verbose_name="Пользователь", on_delete=models.CASCADE, null=True, blank=True)
-    chat = models.ForeignKey(Chat, verbose_name="Чат", on_delete=models.CASCADE, null=True, blank=True)
-    code = models.CharField(verbose_name="Код подтверждения", default=random_digits, max_length=6)
-    tries = models.IntegerField(verbose_name="Кол-во попыток", default=5)
+    user = models.ForeignKey(Users, models.CASCADE, verbose_name="Пользователь", null=True, blank=True)
+    chat = models.ForeignKey(Chat, models.CASCADE, verbose_name="Чат", null=True, blank=True)
+    code = models.CharField("Код подтверждения", default=random_digits, max_length=6)
+    tries = models.IntegerField("Кол-во попыток", default=5)
 
     class Meta:
         verbose_name = "API Временный пользователь"
