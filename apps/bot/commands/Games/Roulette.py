@@ -1,5 +1,4 @@
 import datetime
-import json
 from threading import Lock
 
 from apps.bot.classes.Consts import Role
@@ -200,7 +199,7 @@ class Roulette(CommonCommand):
 
         msg = ""
         for rr in rrs:
-            rate_on_dict = json.loads(rr.rate_on)
+            rate_on_dict = rr.rate_on
             msg += f"{rr.gamer.user} поставил на {rate_on_dict['verbose_name']} {rr.rate} очков\n"
         return msg
 
@@ -235,7 +234,7 @@ class Roulette(CommonCommand):
             #     rate_obj = {'win_numbers': [int(rate_on)], 'coefficient': MAX_NUMBERS}
             else:
                 rate_obj = TRANSLATOR[rate_on]
-            rr = RouletteRate(gamer=self.gamer, chat=self.event.chat, rate_on=json.dumps(rate_obj), rate=rate)
+            rr = RouletteRate(gamer=self.gamer, chat=self.event.chat, rate_on=rate_obj, rate=rate)
             rr.save()
             self.gamer.roulette_points -= rate
             self.gamer.save()
@@ -259,7 +258,7 @@ class Roulette(CommonCommand):
 
             winners = []
             for rr in rrs:
-                rate_on = json.loads(rr.rate_on)
+                rate_on = rr.rate_on
                 if roulette_ball in rate_on['win_numbers']:
                     win_points = rr.rate * rate_on['coefficient']
                     rr.gamer.roulette_points += win_points

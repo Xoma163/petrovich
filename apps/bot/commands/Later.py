@@ -1,4 +1,3 @@
-import json
 from datetime import datetime
 
 from apps.bot.classes.common.CommonCommand import CommonCommand
@@ -31,7 +30,7 @@ class Later(CommonCommand):
 
         attachments = self.event.parse_attachments(fwd['attachments'])
         if attachments:
-            lm.attachments = json.dumps(attachments)
+            lm.attachments = attachments
         lm.save()
         lms.later_messages.add(lm)
 
@@ -74,7 +73,7 @@ class Later(CommonCommand):
                           f"{lm.text}"
                     attachments = []
                     if lm.attachments and lm.attachments != "null":
-                        lm_attachments = json.loads(lm.attachments)
+                        lm_attachments = lm.attachments
                         attachments = get_attachments_for_upload(self.bot, lm_attachments)
                     msgs.append({'msg': msg, 'attachments': attachments})
 

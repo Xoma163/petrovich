@@ -62,7 +62,7 @@ class TicTacToe(CommonCommand):
                     else:
                         # Возвращаем пользователю клавиатуру, если он её потерял
                         self.bot.send_message(sender.user_id, "Да держи ты свою клаву, ё-моё",
-                                              keyboard=get_keyboard_by_board(json.loads(session.board)))
+                                              keyboard=get_keyboard_by_board(session.board))
                         return
                 # Если игрок только один и 99.9% что это user1
                 else:
@@ -93,7 +93,7 @@ class TicTacToe(CommonCommand):
         elif session.user2 == sender:
             elem = 'o'
 
-        table = json.loads(session.board)
+        table = session.board
         if table[args[0]][args[1]] != '':
             self.bot.send_message(sender.user_id, "Сюда нельзя ставить")
             return
@@ -130,14 +130,14 @@ class TicTacToe(CommonCommand):
             self.bot.send_message(session.user2.user_id, "Ход сделан, ждём хода второго игрока", keyboard=board)
             session.next_step = session.user1
 
-        session.board = json.dumps(table)
+        session.board = table
         session.save()
 
     def start_game(self, session):
         session.user2 = self.event.sender
         session.next_step = session.user1
         session.save()
-        keyboard = get_keyboard_by_board(json.loads(session.board))
+        keyboard = get_keyboard_by_board(session.board)
         self.bot.send_message(session.user1.user_id,
                               f"Второй игрок - {session.user2}\nВаш ход\nВы играете за ❌",
                               keyboard=keyboard)

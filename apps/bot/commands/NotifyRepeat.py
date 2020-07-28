@@ -1,4 +1,3 @@
-import json
 from datetime import datetime, timedelta
 
 from apps.bot.classes.Consts import Role
@@ -59,7 +58,7 @@ class NotifyRepeat(CommonCommand):
                              chat=self.event.chat,
                              repeat=True,
                              text_for_filter=notify_datetime.strftime("%H:%M") + " " + text,
-                             attachments=json.dumps(self.event.attachments))
+                             attachments=self.event.attachments)
 
         notify.save()
         notify.text_for_filter += f" ({notify.id})"

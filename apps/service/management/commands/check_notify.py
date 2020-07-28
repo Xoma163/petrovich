@@ -1,4 +1,3 @@
-import json
 import traceback
 from datetime import datetime, timedelta, date
 
@@ -40,7 +39,7 @@ class Command(BaseCommand):
                         event_model = get_event_by_platform(notify.author.platform)
 
                     if notify.attachments and notify.attachments != "null":
-                        notify_attachments = json.loads(notify.attachments)
+                        notify_attachments = notify.attachments
                         attachments = get_attachments_for_upload(bot, notify_attachments)
 
                     notify_datetime = localize_datetime(remove_tz(notify.date), notify.author.city.timezone.name)

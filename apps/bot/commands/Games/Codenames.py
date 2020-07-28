@@ -275,7 +275,7 @@ class Codenames(CommonCommand):
         elif self.event.args[0].lower() in ['слово']:
             self.check_args(2)
             word = self.event.args[1].capitalize()
-            board = json.loads(self.session.board)
+            board = self.session.board
 
             find_row = None
             find_col = None
@@ -295,7 +295,7 @@ class Codenames(CommonCommand):
     def menu_keyboard(self):
         check_session(self.session)
         check_player(self.player)
-        board = json.loads(self.session.board)
+        board = self.session.board
         user_is_captain = self.player.role == 'captain'
         if user_is_captain:
             if self.event.from_chat:
@@ -412,7 +412,7 @@ class Codenames(CommonCommand):
         board = get_random_words()
         session = CodenamesSession()
         session.chat = self.event.chat
-        session.board = json.dumps(board)
+        session.board = board
         session.save()
         self.session = session
 
@@ -424,7 +424,7 @@ class Codenames(CommonCommand):
 
     # Тык игрока
     def select_word(self, row, col):
-        board = json.loads(self.session.board)
+        board = self.session.board
         if board[row][col]['state'] == 'open':
             raise RuntimeWarning("Слово уже открыто")
 
@@ -432,8 +432,7 @@ class Codenames(CommonCommand):
         another_command = get_another_command(command)
         selected_word = board[row][col]
         selected_word['state'] = 'open'
-        self.session.board = json.dumps(board)
-        board = json.loads(self.session.board)
+        self.session.board = board
 
         if selected_word['type'] == command:
             self.session.count -= 1
@@ -480,7 +479,7 @@ class Codenames(CommonCommand):
         self.session.word = word
         self.session.save()
 
-        board = json.loads(self.session.board)
+        board = self.session.board
         return {"msg": "Лови клаву", "keyboard": self.get_keyboard(board)}
 
     # Метод получает количество оставшихся закрытых слов команд
@@ -551,7 +550,7 @@ class Codenames(CommonCommand):
 
         commands = get_commands()
 
-        board = json.loads(self.session.board)
+        board = self.session.board
         words_left = self.get_team_words(board)
 
         riddle = None

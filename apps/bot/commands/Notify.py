@@ -1,4 +1,3 @@
-import json
 from datetime import datetime, timedelta
 
 import dateutil
@@ -90,7 +89,7 @@ class Notify(CommonCommand):
                              chat=self.event.chat,
                              text_for_filter=notify_datetime.strftime("%d.%m.%Y %H:%M") + " " + text)
         if self.event.attachments:
-            notify.attachments = json.dumps(self.event.attachments)
+            notify.attachments = self.event.attachments
         notify.save()
         notify.text_for_filter += f" ({notify.id})"
         notify.save()
