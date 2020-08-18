@@ -333,6 +333,9 @@ class VkBot(CommonBot, Thread):
             group_id = f'-{self.group_id}'
         return f"{_type}{group_id}_{_id}"
 
+    def get_video(self, owner_id, _id):
+        return self.vk_user.vk.video.get(videos=f'{owner_id}_{_id}')
+
 
 class MyVkBotLongPoll(VkBotLongPoll):
 

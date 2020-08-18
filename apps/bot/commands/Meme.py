@@ -306,7 +306,7 @@ class Meme(CommonCommand):
                 filter_list = []
             memes = memes.filter(approved=approved)
             if self.event.platform == 'tg':
-                memes = memes.filter(type='photo')
+                memes = memes.exclude(type='audio')
             if filter_list:
                 filter_list = list(map(lambda x: x.lower(), filter_list))
                 for _filter in filter_list:
@@ -376,16 +376,29 @@ def get_tanimoto_memes(memes, query):
 # ToDo: check
 def prepare_meme_to_send(bot, event, meme, print_name=False, send_keyboard=False, name=None):
     msg = {}
-    if meme.type == 'video' or meme.type == 'audio':
-        msg['attachments'] = [meme.link.replace(VK_URL, '')]
-    elif meme.type == 'photo':
-        msg['attachments'] = bot.upload_photos(meme.link)
-    elif meme.type == 'doc':
-        msg['attachments'] = bot.upload_document(meme.link, event.peer_id)
-    else:
-        raise RuntimeError("У мема нет типа. Тыкай разраба")
+
+    if event.platform == 'tg':
+        if meme.type == 'photo':
+            msg['attachments'] = bot.upload_photos(meme.link)
+        else:
+            msg['msg'] = meme.link
+    elif event.platform == 'vk':
+        if meme.type == 'video':
+            msg['attachments'] = [meme.link.replace(VK_URL, '')]
+            owner_id, _id = msg['attachments'][0].replace('video', '').split('_')
+            if bot.get_video(owner_id, _id)['count'] == 0:
+                raise RuntimeError("Мем был удалён, перезалейте плиз")
+
+        elif meme.type == 'audio':
+            msg['attachments'] = [meme.link.replace(VK_URL, '')]
+        elif meme.type == 'photo':
+            msg['attachments'] = bot.upload_photos(meme.link)
+        elif meme.type == 'doc':
+            msg['attachments'] = bot.upload_document(meme.link, event.peer_id)
+        else:
+            raise RuntimeError("У мема нет типа. Тыкай разраба")
 
     if print_name:
-        msg['msg'] = meme.name
-
+        if msg.get('msg', None):
+            msg['msg'] += f"\n{meme.name}"
     return msg

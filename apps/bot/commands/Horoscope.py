@@ -39,7 +39,11 @@ class Horoscope(CommonCommand):
                 for i, zodiac_sign in enumerate(zodiac_signs):
                     meme = horoscope.memes.all()[i]
                     prepared_meme = prepare_meme_to_send(self.bot, self.event, meme)
-                    prepared_meme['msg'] = zodiac_sign.capitalize()
+                    zodiac_sign = zodiac_sign.capitalize()
+                    if prepared_meme.get('msg', None):
+                        prepared_meme['msg'] += f"{zodiac_sign}\n{prepared_meme['msg']}"
+                    else:
+                        prepared_meme['msg'] = zodiac_sign
                     self.bot.parse_and_send_msgs_thread(self.event.peer_id, prepared_meme)
                 return
             elif self.event.args[0] in "инфо":
@@ -76,7 +80,11 @@ class Horoscope(CommonCommand):
             raise RuntimeWarning("На сегодня ещё нет гороскопа")
         meme = horoscope.memes.all()[zodiac_index]
         prepared_meme = prepare_meme_to_send(self.bot, self.event, meme)
-        prepared_meme['msg'] = list(zodiac_signs.keys())[zodiac_index].capitalize()
+        zodiac_sign = list(zodiac_signs.keys())[zodiac_index].capitalize()
+        if prepared_meme.get('msg', None):
+            prepared_meme['msg'] = f"{zodiac_sign}\n{prepared_meme['msg']}"
+        else:
+            prepared_meme['msg'] = zodiac_sign
         return prepared_meme
 
     @staticmethod
