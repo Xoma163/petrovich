@@ -10,7 +10,7 @@ from apps.service.models import Notify as NotifyModel
 
 
 # Возвращает datetime, кол-во аргументов использованных для получения даты, была ли передана точная дата и время
-def get_time(arg1, arg2):
+def get_time(arg1, arg2, timezone=None):
     exact_datetime_flag = True
     if arg1 == "завтра":
         exact_datetime_flag = False
@@ -26,7 +26,8 @@ def get_time(arg1, arg2):
             delta_days += 7
         arg1 = (datetime.today().date() + timedelta(days=delta_days)).strftime("%d.%m.%Y")
 
-    default_datetime = datetime.now().replace(hour=10, minute=0, second=0, microsecond=0)  # + timedelta(days=1)
+    default_datetime = datetime.utcnow().replace(hour=10, minute=0, second=0, microsecond=0)  # + timedelta(days=1)
+    default_datetime = remove_tz(normalize_datetime(default_datetime, tz=timezone.name))
     try:
         if arg1.count('.') == 1:
             arg1 = f"{arg1}.{default_datetime.year}"
@@ -56,7 +57,8 @@ class Notify(CommonCommand):
             raise RuntimeWarning("Нельзя добавлять более 5 напоминаний")
         timezone = self.event.sender.city.timezone.name
 
-        date, args_count, exact_time_flag = get_time(self.event.args[0], self.event.args[1])
+        date, args_count, exact_time_flag = get_time(self.event.args[0], self.event.args[1],
+                                                     self.event.sender.city.timezone)
         if args_count == 2:
             self.check_args(3)
         if not date:
