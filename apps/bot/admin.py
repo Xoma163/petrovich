@@ -5,6 +5,7 @@ from apps.bot.models import Users, Chat, Bot, APIUser, APITempUser
 
 
 class UserAdmin(admin.ModelAdmin):
+    list_display = ('user_id', 'name', 'surname', 'nickname', 'nickname_real', 'gender', 'birthday', 'city')
     fieldsets = (
         ('Информация о пользователе', {
             'fields': (
