@@ -25,6 +25,7 @@ class Command(BaseCommand):
                     bot = get_bot_by_platform(yt_sub.author.platform)()
                     peer_id = yt_sub.author.user_id
                 msg = f"Новое видео на канале {yt_sub.title}\n" \
+                      f"{youtube_data['last_video']['title']}\n" \
                       f"{youtube_data['last_video']['link']}"
 
                 video_attachment = bot.upload_video_by_link(youtube_data['last_video']['link'],
