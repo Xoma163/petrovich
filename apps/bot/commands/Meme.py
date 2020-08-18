@@ -271,6 +271,7 @@ class Meme(CommonCommand):
                 pass
         meme = self.get_meme(self.event.args[1:], _id=_id)
         return f"Название: {meme.name}\n" \
+               f"ID: {meme.pk}\n" \
                f"Автор: {meme.author}\n" \
                f"Ссылка: {meme.link}\n" \
                f"Использований: {meme.uses}\n"
