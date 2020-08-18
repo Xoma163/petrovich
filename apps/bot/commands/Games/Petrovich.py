@@ -92,5 +92,5 @@ class Petrovich(CommonCommand):
             else:
                 winner_gender = "Наш сегодняшний Петрович дня"
             messages = ["Такс такс такс, кто тут у нас",
-                        f"{winner_gender} - [{winner.nickname}|{winner.name} {winner.surname}]"]
+                        f"{winner_gender} - {winner_today.user}"]
             return messages
