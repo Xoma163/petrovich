@@ -130,3 +130,6 @@ dmypy.json
 /secrets
 secrets/
 .idea/
+
+.clocignore
+cloc.exe
