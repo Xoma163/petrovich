@@ -34,8 +34,6 @@ sudo ln -s "$PWD/config/petrovich_nginx.conf" /etc/nginx/sites-available/ || ech
 sudo ln -s "$PWD/config/petrovich_nginx.conf" /etc/nginx/sites-enabled/ || echo $
 sudo systemctl restart nginx
 
-
-
 # migrations
 python manage.py migrate
 python manage.py initial
