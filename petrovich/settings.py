@@ -179,3 +179,5 @@ LOGGING = {
 
 CORS_ORIGIN_ALLOW_ALL = True
 VK_URL = "https://vk.com/"
+
+AMAZON_REGION = "eu-north-1"

@@ -4,7 +4,7 @@ from threading import Lock
 import matplotlib.pyplot as plt
 
 from apps.bot.APIs.Covid19API import Covid19API
-from apps.bot.APIs.YandexTranslateAPI import YandexTranslateAPI
+from apps.bot.APIs.amazon.AmazonTranslateAPI import AmazonTranslateAPI
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import has_cyrillic
 
@@ -38,8 +38,8 @@ class Coronavirus(CommonCommand):
 
         if country != "Мир":
             if has_cyrillic(country):
-                yandextranslate_api = YandexTranslateAPI()
-                country_transliterate = yandextranslate_api.get_translate('en', country).replace(' ', '-')
+                amazon_translate_api = AmazonTranslateAPI()
+                country_transliterate = amazon_translate_api.get_translate(country, 'en').replace(' ', '-')
             else:
                 country_transliterate = country
         else:

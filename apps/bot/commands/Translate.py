@@ -1,4 +1,4 @@
-from apps.bot.APIs.YandexTranslateAPI import YandexTranslateAPI
+from apps.bot.APIs.amazon.AmazonTranslateAPI import AmazonTranslateAPI
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import has_cyrillic
 
@@ -27,8 +27,8 @@ class Translate(CommonCommand):
         if not text:
             raise RuntimeWarning("Нет текста в сообщении или пересланных сообщениях")
         if has_cyrillic(text):
-            lang = 'ru-en'
+            lang = 'en'
         else:
-            lang = 'en-ru'
-        yandextranslate_api = YandexTranslateAPI()
-        return yandextranslate_api.get_translate(lang, text)
+            lang = 'ru'
+        amazon_translate_api = AmazonTranslateAPI()
+        return amazon_translate_api.get_translate(text, lang)
