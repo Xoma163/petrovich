@@ -3,7 +3,9 @@ from datetime import datetime, timedelta, date
 
 from django.core.management.base import BaseCommand
 
+from apps.bot.classes.Consts import Role
 from apps.bot.classes.bots.CommonBot import get_bot_by_platform
+from apps.bot.classes.common.CommonMethods import check_user_group
 from apps.bot.classes.events.Event import get_event_by_platform
 from apps.service.models import Notify
 
@@ -19,6 +21,9 @@ class Command(BaseCommand):
         datetime_now = datetime.utcnow()
         for notify in notifies:
             try:
+                if check_user_group(notify.author, Role.BANNED):
+                    continue
+
                 if notify.repeat:
                     datetime1 = datetime.combine(date.min, remove_tz(notify.date).time())
                     datetime2 = datetime.combine(date.min, datetime_now.time())

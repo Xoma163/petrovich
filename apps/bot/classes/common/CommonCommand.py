@@ -135,6 +135,7 @@ class CommonCommand:
                         return True
                 else:
                     print("Попытка доступа под админом не с моего id O_o")
+                    raise RuntimeError("Э ты чё, ты не админ. Где мой админ???")
             else:
                 return True
         if role == Role.CONFERENCE_ADMIN:
