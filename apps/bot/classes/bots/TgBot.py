@@ -40,6 +40,7 @@ class TgBot(CommonBot, Thread):
         self.longpoll = MyTgBotLongPoll(self.token, self.requests)
 
         # self.test_chat = Chat.objects.get(pk=env.str("TG_TEST_CHAT_ID"))
+
     def set_activity(self, peer_id, activity='typing'):
         if activity not in ['typing', 'audiomessage']:
             raise RuntimeWarning("Не знаю такого типа активности")
@@ -155,7 +156,6 @@ class TgBot(CommonBot, Thread):
             event['message']['from'] = event['from']
         tg_event = {
             'platform': self.name,
-            'from_user': not event['message']['from']['is_bot'],
             'user_id': event['message']['from']['id'],
             'chat_id': None,
             'peer_id': event['message']['chat']['id'],
@@ -194,8 +194,13 @@ class TgBot(CommonBot, Thread):
 
         if event['message']['chat']['id'] != event['message']['from']['id']:
             tg_event['chat_id'] = -event['message']['chat']['id']
-        if not tg_event['from_user']:
+            tg_event['from_user'] = False
+        else:
+            tg_event['from_user'] = True
+        if event['message']['from']['is_bot']:
             tg_event['chat_id'] = event['message']['chat']['id']
+            tg_event['from_bot'] = True
+
         if 'reply_to_message' in event['message']:
             tg_event['fwd'] = [{
                 'id': event['message']['reply_to_message']['message_id'],
@@ -253,7 +258,7 @@ class TgBot(CommonBot, Thread):
                     continue
 
                 # Узнаём пользователя
-                if tg_event['from_user']:
+                if tg_event['user_id'] > 0:
                     tg_event['sender'] = self.register_user(event.get('callback_query', event)['message']['from'])
                 else:
                     self.send_message(tg_event['peer_id'], "Боты не могут общаться с Петровичем :(")

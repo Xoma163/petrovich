@@ -179,12 +179,14 @@ class CommonBot:
         have_action = event['message']['action'] is not None
         if have_action:
             return True
-        if len(message) == 0:
+        empty_message = len(message) == 0
+        if empty_message:
             return False
         from_user = event['from_user']
         if from_user:
             return True
-        if message[0] == '/':
+        message_is_command = message[0] == '/'
+        if message_is_command:
             return True
         for mention in self.mentions:
             if message.find(mention) != -1:
