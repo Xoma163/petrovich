@@ -66,6 +66,10 @@ class Users(Platform):
         group = self.groups.filter(name=role.name)
         return group.exists()
 
+    def get_list_of_role_names(self):
+        groups = self.groups.all().values()
+        return [group['name'] for group in groups]
+
     class Meta:
         verbose_name = "Пользователь"
         verbose_name_plural = "Пользователи"

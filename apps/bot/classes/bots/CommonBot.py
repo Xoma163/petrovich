@@ -3,7 +3,7 @@ import threading
 import traceback
 
 from apps.bot.classes.Consts import Role
-from apps.bot.classes.common.CommonMethods import tanimoto, get_user_groups
+from apps.bot.classes.common.CommonMethods import tanimoto
 from apps.bot.classes.events.Event import Event
 from apps.bot.models import Users, Chat, Bot
 from apps.service.views import append_command_to_statistics
@@ -119,7 +119,7 @@ class CommonBot:
             return None
         similar_command = commands[0].names[0]
         tanimoto_max = 0
-        user_groups = get_user_groups(event.sender)
+        user_groups = event.sender.get_list_of_role_names()
         for command in commands:
             # Выдача пользователю только тех команд, которые ему доступны
             command_access = command.access

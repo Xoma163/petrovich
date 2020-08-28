@@ -46,12 +46,6 @@ def has_cyrillic(text):
     return bool(re.search('[а-яА-Я]', text))
 
 
-# Получить все группы пользователя
-def get_user_groups(user):
-    groups = user.groups.all().values()
-    return [group['name'] for group in groups]
-
-
 # Убирает временную зону у datetime
 def remove_tz(datetime):
     return datetime.replace(tzinfo=None)

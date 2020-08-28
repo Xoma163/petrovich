@@ -1,6 +1,5 @@
 from apps.bot.classes.Consts import Role
 from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import get_user_groups
 
 
 class Keyboard(CommonCommand):
@@ -19,7 +18,7 @@ def get_keyboard(sender):
 
     buttons = []
 
-    user_groups = get_user_groups(sender)
+    user_groups = sender.get_list_of_role_names()
 
     for group in user_groups:
         buttons += KEYBOARDS[group]
