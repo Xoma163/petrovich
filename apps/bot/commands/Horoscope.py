@@ -4,21 +4,6 @@ from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.commands.Meme import prepare_meme_to_send
 from apps.service.models import Horoscope as HoroscopeModel
 
-zodiac_signs = {
-    "водолей": "21.01",
-    "рыбы": "19.02",
-    "овен": "21.03",
-    "телец": "21.04",
-    "близнецы": "22.05",
-    "рак": "22.06",
-    "лев": "23.07",
-    "дева": "24.08",
-    "весы": "24.09",
-    "скорпион": "24.10",
-    "стрелец": "23.11",
-    "козерог": "22.12",
-}
-
 
 class Horoscope(CommonCommand):
     def __init__(self):
@@ -29,6 +14,21 @@ class Horoscope(CommonCommand):
                            "Гороскоп инфо (знак зодиака) - пришлёт информацию о мемасе в гороскопе по знаку зодиака"
         super().__init__(names, help_text, detail_help_text, platforms=['vk', 'tg'])
 
+        self.zodiac_signs = ZodiacSigns([
+            ZodiacSign("водолей", ['♒', "♒️"], "21.01"),
+            ZodiacSign("рыбы", ["♓", "♓️"], "19.02"),
+            ZodiacSign("овен", ["♈", "♈️"], "21.03"),
+            ZodiacSign("телец", ["♉", "♉️"], "21.04"),
+            ZodiacSign("близнецы", ["♊", "♊️"], "22.05"),
+            ZodiacSign("рак", ["♋", "♋️"], "22.06"),
+            ZodiacSign("лев", ["♌", "♌️"], "23.07"),
+            ZodiacSign("дева", ["♍", "♍️"], "24.08"),
+            ZodiacSign("весы", ["♎", "♎️"], "24.09"),
+            ZodiacSign("скорпион", ["♏", "♏️"], "24.10"),
+            ZodiacSign("стрелец", ["♐", "♐️"], "23.11"),
+            ZodiacSign("козерог", ["♑", "♑️"], "22.12"),
+        ])
+
     def start(self):
         if self.event.args:
             # Гороскоп для всех знаков
@@ -36,64 +36,92 @@ class Horoscope(CommonCommand):
                 horoscope = HoroscopeModel.objects.first()
                 if not horoscope:
                     raise RuntimeWarning("На сегодня ещё нет гороскопа")
-                for i, zodiac_sign in enumerate(zodiac_signs):
+                for i, zodiac_sign in enumerate(self.zodiac_signs.get_zodiac_signs()):
                     meme = horoscope.memes.all()[i]
                     prepared_meme = prepare_meme_to_send(self.bot, self.event, meme)
-                    zodiac_sign = zodiac_sign.capitalize()
+                    zodiac_sign_name = zodiac_sign.name.capitalize()
                     if prepared_meme.get('msg', None):
-                        prepared_meme['msg'] += f"{zodiac_sign}\n{prepared_meme['msg']}"
+                        prepared_meme['msg'] += f"{zodiac_sign_name}\n{prepared_meme['msg']}"
                     else:
-                        prepared_meme['msg'] = zodiac_sign
+                        prepared_meme['msg'] = zodiac_sign_name
                     self.bot.parse_and_send_msgs_thread(self.event.peer_id, prepared_meme)
                 return
             elif self.event.args[0] in "инфо":
                 self.check_args(2)
                 try:
-                    zodiac_sign = self.event.args[1].lower()
-                    zodiac_index = list(zodiac_signs.keys()).index(zodiac_sign)
+                    zodiac_sign_name = self.event.args[1].lower()
+                    zodiac_sign = self.zodiac_signs.get_zodiac_sign_by_sign_or_name(zodiac_sign_name)
+                    zodiac_sign_index = self.zodiac_signs.get_zodiac_sign_index(zodiac_sign)
                 except:
                     raise RuntimeWarning("Не знаю такого знака зодиака")
                 horoscope = HoroscopeModel.objects.first()
                 if not horoscope:
                     raise RuntimeWarning("На сегодня ещё нет гороскопа")
-                meme = horoscope.memes.all()[zodiac_index]
-                return f"{zodiac_sign.capitalize()}\nНазвание мема - {meme.name}"
+                meme = horoscope.memes.all()[zodiac_sign_index]
+                return f"{zodiac_sign.name.capitalize()}\nНазвание мема - {meme.name}"
             # Гороскоп для знака зодиака в аргументах
-            try:
-                zodiac_sign = self.event.args[0].lower()
-                zodiac_index = list(zodiac_signs.keys()).index(zodiac_sign)
-            except ValueError:
-                raise RuntimeWarning("Не знаю такого знака зодиака")
-            return self.get_horoscope_by_zodiac(zodiac_index)
+            zodiac_sign_name = self.event.args[0].lower()
+            zodiac_sign = self.zodiac_signs.get_zodiac_sign_by_sign_or_name(zodiac_sign_name)
+            return self.get_horoscope_by_zodiac_sign(zodiac_sign)
 
         # Гороскоп по ДР из профиля
         elif self.event.sender.birthday:
-            zodiac_index = self.get_zodiac_index_of_date(self.event.sender.birthday)
-            return self.get_horoscope_by_zodiac(zodiac_index)
+            zodiac_sign = self.zodiac_signs.find_zodiac_sign_by_date(self.event.sender.birthday)
+            return self.get_horoscope_by_zodiac_sign(zodiac_sign)
         else:
             raise RuntimeWarning("Не указана дата рождения в профиле, не могу прислать гороскоп((. \n" \
                                  "Укажи знак зодиака в аргументе: /гороскоп дева")
 
-    def get_horoscope_by_zodiac(self, zodiac_index):
+    def get_horoscope_by_zodiac_sign(self, zodiac_sign):
         horoscope = HoroscopeModel.objects.first()
         if not horoscope:
             raise RuntimeWarning("На сегодня ещё нет гороскопа")
-        meme = horoscope.memes.all()[zodiac_index]
+        zodiac_sign_index = self.zodiac_signs.get_zodiac_sign_index(zodiac_sign)
+        zodiac_sign_name = zodiac_sign.name.capitalize()
+        meme = horoscope.memes.all()[zodiac_sign_index]
         prepared_meme = prepare_meme_to_send(self.bot, self.event, meme)
-        zodiac_sign = list(zodiac_signs.keys())[zodiac_index].capitalize()
         if prepared_meme.get('msg', None):
-            prepared_meme['msg'] = f"{zodiac_sign}\n{prepared_meme['msg']}"
+            prepared_meme['msg'] = f"{zodiac_sign_name}\n{prepared_meme['msg']}"
         else:
-            prepared_meme['msg'] = zodiac_sign
+            prepared_meme['msg'] = zodiac_sign_name
         return prepared_meme
 
-    @staticmethod
-    def get_zodiac_index_of_date(date):
+
+class ZodiacSign:
+    def __init__(self, name, signs, start_date):
+        self.name = name
+        self.signs = signs
+        self.start_date = start_date
+
+    def is_contains_name_or_sign(self, text):
+        if text in self.name or text in self.signs:
+            return True
+
+
+class ZodiacSigns:
+    def __init__(self, signs: list):
+        self.signs = signs
+
+    def find_zodiac_sign_by_date(self, date):
         date = date.replace(year=1900)
-        zodiac_days = list(zodiac_signs.values())
+        zodiac_days = [x.start_date for x in self.signs]
         for i in range(len(zodiac_days) - 1):
             zodiac_date_start = datetime.strptime(zodiac_days[i], "%d.%m").date()
             zodiac_date_end = datetime.strptime(zodiac_days[i + 1], "%d.%m").date()
             if zodiac_date_start <= date < zodiac_date_end:
+                return self.signs[i]
+        return self.signs[-1]
+
+    def get_zodiac_sign_index(self, zodiac_sign: ZodiacSign):
+        for i, _zodiac_sign in enumerate(self.signs):
+            if zodiac_sign == _zodiac_sign:
                 return i
-        return len(zodiac_days) - 1
+
+    def get_zodiac_sign_by_sign_or_name(self, text):
+        for zodiac_sign in self.signs:
+            if zodiac_sign.is_contains_name_or_sign(text):
+                return zodiac_sign
+        raise RuntimeWarning("Не знаю такого знака зодиака")
+
+    def get_zodiac_signs(self):
+        return self.signs
