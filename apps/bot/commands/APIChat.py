@@ -2,8 +2,7 @@ from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.models import APITempUser, APIUser
 
 
-# ToDo: retest
-# ToDo: menu
+# ToDo: DEPRECATED
 class APIChat(CommonCommand):
     def __init__(self):
         names = ["чат"]

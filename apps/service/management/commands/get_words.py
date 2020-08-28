@@ -28,7 +28,6 @@ class Command(BaseCommand):
     def __init__(self):
         super().__init__()
 
-    # ToDo: не работает
     def handle(self, *args, **kwargs):
         scopes = ['https://spreadsheets.google.com/feeds',
                   'https://www.googleapis.com/auth/drive']

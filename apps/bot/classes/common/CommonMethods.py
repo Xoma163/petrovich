@@ -10,6 +10,8 @@ from apps.bot.classes.Consts import Role
 from petrovich.settings import STATIC_ROOT
 
 
+# ToDo: documentation
+
 def random_probability(probability):
     if 1 > probability > 99:
         raise RuntimeWarning("Вероятность события должна быть от 1 до 99")
@@ -88,7 +90,6 @@ def decl_of_num(number, titles):
 
 # Получает вложения и загружает необходимые на сервер, на которых нет прав
 # Прикрепляет только фото, видео, аудио и документы.
-# ToDo: придумать как обрабатывать посты или ссылки
 def get_attachments_for_upload(vk_bot, attachments):
     uploaded_attachments = []
     for attachment in attachments:
@@ -121,7 +122,6 @@ def get_attachments_from_attachments_or_fwd(vk_event, _type=None, from_first_fwd
             msgs = vk_event.fwd
         for msg in msgs:
             if msg['attachments']:
-                # ToDo: в зависимости от типа парсить те или иные атачменты
                 fwd_attachments = vk_event.parse_attachments(msg['attachments'])
                 for att in fwd_attachments:
                     if att['type'] in _type:

@@ -373,7 +373,6 @@ def get_tanimoto_memes(memes, query):
     return memes_list
 
 
-# ToDo: check
 def prepare_meme_to_send(bot, event, meme, print_name=False, send_keyboard=False, name=None):
     msg = {}
 

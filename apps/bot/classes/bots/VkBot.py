@@ -158,7 +158,6 @@ class VkBot(CommonBot, Thread):
             },
             'fwd': None
         }
-        # ToDo: VK. Проверить при добавлении пользователя/бота в конфу - что будет.
         if (vk_event['message'].get('action', None)
                 and vk_event['message']['action']['type'] in ['chat_invite_user', 'chat_invite_user_by_link']):
             vk_event['message']['action']['member_ids'] = [vk_event['message']['action'].pop('member_id')]
