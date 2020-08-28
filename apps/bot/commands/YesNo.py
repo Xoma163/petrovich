@@ -1,6 +1,6 @@
 from apps.bot.classes.Consts import Role, BAD_ANSWERS
 from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import check_user_group, get_random_int, random_event
+from apps.bot.classes.common.CommonMethods import get_random_int, random_event
 
 
 def get_bad_words():
@@ -31,7 +31,7 @@ class YesNo(CommonCommand):
 
         bad_words = get_bad_words()
 
-        if not check_user_group(self.event.sender, Role.ADMIN):
+        if not self.event.sender.check_role(Role.ADMIN):
             min_index_bad = len(self.event.msg)
             max_index_bad = -1
             for word in bad_words:

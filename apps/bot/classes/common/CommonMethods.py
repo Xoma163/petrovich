@@ -46,13 +46,6 @@ def has_cyrillic(text):
     return bool(re.search('[а-яА-Я]', text))
 
 
-# ToDo: перенести в класс User
-# Проверить вхождение пользователя в группу
-def check_user_group(user, role):
-    group = user.groups.filter(name=role.name)
-    return group.exists()
-
-
 # Получить все группы пользователя
 def get_user_groups(user):
     groups = user.groups.all().values()

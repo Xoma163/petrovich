@@ -5,7 +5,6 @@ from django.core.management.base import BaseCommand
 
 from apps.bot.classes.Consts import Role
 from apps.bot.classes.bots.CommonBot import get_bot_by_platform
-from apps.bot.classes.common.CommonMethods import check_user_group
 from apps.bot.classes.events.Event import get_event_by_platform
 from apps.service.models import Notify
 
@@ -21,7 +20,7 @@ class Command(BaseCommand):
         datetime_now = datetime.utcnow()
         for notify in notifies:
             try:
-                if check_user_group(notify.author, Role.BANNED):
+                if notify.author.check_role(Role.BANNED):
                     continue
 
                 if notify.repeat:
@@ -34,7 +33,6 @@ class Command(BaseCommand):
                     flag = delta_time.days == 0 and delta_time.seconds <= 60
 
                 if flag:
-
                     attachments = []
                     if notify.chat:
                         bot = get_bot_by_platform(notify.chat.platform)()

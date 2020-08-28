@@ -1,6 +1,5 @@
 from apps.bot.classes.Consts import Role
 from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import check_user_group
 
 
 class Commands(CommonCommand):
@@ -29,7 +28,7 @@ class Commands(CommonCommand):
         ]
         output = ""
         for role in ordered_roles:
-            if check_user_group(self.event.sender, role['role']) and help_texts[role['role'].name]:
+            if self.event.sender.check_role(role['role']) and help_texts[role['role'].name]:
                 output += f"\n\n— {role['text']} —\n"
                 output += help_texts[role['role'].name]
         if help_texts['games']:

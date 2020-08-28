@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 
 from apps.bot.classes.Consts import Role
 from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import localize_datetime, normalize_datetime, remove_tz, check_user_group
+from apps.bot.classes.common.CommonMethods import localize_datetime, normalize_datetime, remove_tz
 from apps.service.models import Notify as NotifyModel
 
 
@@ -23,7 +23,7 @@ class NotifyRepeat(CommonCommand):
         super().__init__(names, help_text, detail_help_text, args=2, platforms=['vk', 'tg'], city=True)
 
     def start(self):
-        if not check_user_group(self.event.sender, Role.TRUSTED) and \
+        if not self.event.sender.check_role(Role.TRUSTED) and \
                 len(NotifyModel.objects.filter(author=self.event.sender)) >= 5:
             raise RuntimeWarning("Нельзя добавлять более 5 напоминаний")
         timezone = self.event.sender.city.timezone.name

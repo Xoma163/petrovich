@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from apps.bot.classes.Consts import Role, ATTACHMENT_TRANSLATOR
-from apps.bot.classes.common.CommonMethods import check_user_group, get_help_for_command, remove_tz
+from apps.bot.classes.common.CommonMethods import get_help_for_command, remove_tz
 from apps.service.models import Service
 from petrovich.settings import env
 
@@ -125,7 +125,7 @@ class CommonCommand:
         :param role: требуемая роль
         :return: bool
         """
-        if check_user_group(self.event.sender, role):
+        if self.event.sender.check_role(role):
             if role == Role.ADMIN:
                 if self.event.platform == 'vk':
                     if self.event.sender.user_id == env.str("VK_ADMIN_ID"):

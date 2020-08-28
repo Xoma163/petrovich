@@ -2,13 +2,12 @@ from django.core.paginator import Paginator
 
 from apps.bot.classes.Consts import Role
 from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import check_user_group
 from apps.bot.commands.Meme import get_tanimoto_memes
 from apps.service.models import Meme as MemeModel
 
 
 def get_memes_names(memes, sender):
-    if check_user_group(sender, Role.MODERATOR):
+    if sender.check_role(Role.MODERATOR):
         meme_names = [f"{meme.name} (id - {meme.id})" for meme in memes]
     else:
         meme_names = [meme.name for meme in memes]

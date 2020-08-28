@@ -3,7 +3,7 @@ import threading
 import traceback
 
 from apps.bot.classes.Consts import Role
-from apps.bot.classes.common.CommonMethods import tanimoto, check_user_group, get_user_groups
+from apps.bot.classes.common.CommonMethods import tanimoto, get_user_groups
 from apps.bot.classes.events.Event import Event
 from apps.bot.models import Users, Chat, Bot
 from apps.service.views import append_command_to_statistics
@@ -41,7 +41,7 @@ class CommonBot:
 
         # Проверяем не остановлен ли бот, если так, то проверяем вводимая команда = старт?
         if not self.can_bot_working():
-            if not check_user_group(event.sender, Role.ADMIN):
+            if not event.sender.check_role(Role.ADMIN):
                 return
 
             if event.command in ['старт']:

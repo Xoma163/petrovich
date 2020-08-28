@@ -4,7 +4,6 @@ from bs4 import BeautifulSoup
 from apps.bot.APIs.YoutubeInfo import YoutubeInfo
 from apps.bot.classes.Consts import Role
 from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import check_user_group
 from apps.service.models import YoutubeSubscribe
 
 MAX_USER_SUBS_COUNT = 3
@@ -54,7 +53,7 @@ class YouTube(CommonCommand):
             user_subs_count = YoutubeSubscribe.objects.filter(author=self.event.sender).count()
 
             # Ограничение 3 подписки для нетрастед
-            if not check_user_group(self.event.sender, Role.TRUSTED) and user_subs_count >= MAX_USER_SUBS_COUNT:
+            if not self.event.sender.check_role(Role.TRUSTED) and user_subs_count >= MAX_USER_SUBS_COUNT:
                 return f"Максимальное число подписок - {MAX_USER_SUBS_COUNT}"
             youtube_info = YoutubeInfo(channel_id)
             youtube_data = youtube_info.get_youtube_channel_info()

@@ -3,7 +3,6 @@ from django.contrib.auth.models import Group
 # ToDo: menu
 from apps.bot.classes.Consts import ON_OFF_TRANSLATOR, Role, TRUE_FALSE_TRANSLATOR
 from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import check_user_group
 
 
 class Settings(CommonCommand):
@@ -51,7 +50,7 @@ class Settings(CommonCommand):
                 reaction = self.event.chat.need_reaction
                 msg += f"Реагировать на неправильные команды - {TRUE_FALSE_TRANSLATOR[reaction]}\n"
 
-            if check_user_group(self.event.sender, Role.TRUSTED):
-                minecraft_notify = check_user_group(self.event.sender, Role.MINECRAFT_NOTIFY)
+            if self.event.sender.check_role(Role.TRUSTED):
+                minecraft_notify = self.event.sender.check_role(Role.MINECRAFT_NOTIFY)
                 msg += f"Уведомления по майну - {TRUE_FALSE_TRANSLATOR[minecraft_notify]}\n"
             return msg

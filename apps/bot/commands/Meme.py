@@ -1,7 +1,6 @@
 from apps.bot.classes.Consts import Role
 from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import get_attachments_from_attachments_or_fwd, \
-    check_user_group, tanimoto
+from apps.bot.classes.common.CommonMethods import get_attachments_from_attachments_or_fwd, tanimoto
 from apps.service.models import Meme as MemeModel
 from petrovich.settings import VK_URL
 
@@ -69,8 +68,7 @@ class Meme(CommonCommand):
             'name': " ".join(self.event.args[1:]),
             'type': attachment['type'],
             'author': self.event.sender,
-            'approved': check_user_group(self.event.sender, Role.MODERATOR) or check_user_group(
-                self.event.sender, Role.TRUSTED)
+            'approved': self.event.sender.check_role(Role.MODERATOR) or self.event.sender.check_role(Role.TRUSTED)
         }
 
         if MemeModel.objects.filter(name=new_meme['name']).exists():
@@ -115,8 +113,7 @@ class Meme(CommonCommand):
         else:
             raise RuntimeError("Невозможно")
 
-        if (check_user_group(self.event.sender, Role.MODERATOR) or
-                check_user_group(self.event.sender, Role.TRUSTED)):
+        if self.event.sender.check_role(Role.MODERATOR) or self.event.sender.check_role(Role.TRUSTED):
             meme = self.get_meme(self.event.args[1:], _id=_id)
             meme.link = new_meme_link
             meme.type = attachment['type']
@@ -138,7 +135,7 @@ class Meme(CommonCommand):
 
     def menu_delete(self):
         self.check_args(2)
-        if check_user_group(self.event.sender, Role.MODERATOR):
+        if self.event.sender.check_role(Role.MODERATOR):
             try:
                 self.int_args = [1]
                 self.parse_int()

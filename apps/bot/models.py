@@ -62,6 +62,10 @@ class Users(Platform):
     imei = models.CharField('IMEI', max_length=20, null=True, blank=True)
     send_notify_to = models.ManyToManyField('self', verbose_name="Отправлять уведомления", blank=True)
 
+    def check_role(self, role):
+        group = self.groups.filter(name=role.name)
+        return group.exists()
+
     class Meta:
         verbose_name = "Пользователь"
         verbose_name_plural = "Пользователи"
