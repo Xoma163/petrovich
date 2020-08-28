@@ -335,7 +335,8 @@ class TgBot(CommonBot, Thread):
 
     @staticmethod
     def get_mention(user, name=None):
-        return f"@{user.nickname}"
+        mention = user.nickname or user.name
+        return f"@{mention}"
 
     def upload_video_by_link(self, link, name):
         return None
