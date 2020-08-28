@@ -8,16 +8,23 @@ from petrovich.settings import env
 
 class CommonCommand:
     """
-    # names - Имена, на которые откликается команда
-        help_text - Текст в помощи
-        keyboard - Клавиатура
-        access - Команда для ?
-        pm - Команда для лс
-        conversation - Команда для конф
-        fwd - Требуются пересылаемые сообщения
-        args - Требуются аргументы(число)
-        int_args - Требуются интовые аргументы (позиции)
-        api - Работает ли команда для api
+        names: Имена команды,
+        help_text: Текст в /команды,
+        detail_help_text: Текст в детальной помощи по команде /помощь (название команды),
+        keyboard: Клавиатура для команды /клава
+        access: Необходимые права для выполнения команды
+        pm: Должно ли сообщение обрабатываться только в лс
+        conversation: Должно ли сообщение обрабатываться только в конфе
+        fwd: Должно ли сообщение обрабатываться только с пересланными сообщениями
+        args: Должно ли сообщение обрабатываться только с заданным количеством аргументов
+        int_args: Список аргументов, которые должны быть целым числом
+        float_args: Список аргументов, которые должны быть числом
+        platforms: Список платформ, которые могут обрабатывать команду
+        attachments: Должно ли сообщение обрабатываться только с вложениями
+        enabled: Включена ли команда
+        priority: Приоритет обработки команды
+        city: Должно ли сообщение обрабатываться только с заданным городом у пользователя
+
     """
 
     def __init__(self,
@@ -58,23 +65,34 @@ class CommonCommand:
         self.bot = None
         self.event = None
 
-    # Метод, определяющий на что среагирует команда
     def accept(self, event):
+        """
+        Метод, определяющий на что среагирует команда. По умолчанию ищет команду в названиях
+        :param event: событие
+        :return: bool
+        """
         if event.command in self.names:
             return True
 
         return False
 
-    # Выполнение всех проверок и старт команды
     def check_and_start(self, bot, event):
+        """
+        Выполнение всех проверок и старт команды
+        :param bot: сущность Bot
+        :param event: сущность Event
+        """
         self.bot = bot
         self.event = event
 
         self.checks()
         return self.start()
 
-    # Проверки
     def checks(self):
+        """
+        Проверки
+        :return:
+        """
         # Если команда не для api
         self.check_platforms()
         self.check_sender(self.access)
@@ -96,10 +114,18 @@ class CommonCommand:
             self.check_city()
 
     def start(self):
-        pass
+        """
+        Обработка самой команды
+        :return: result (см. документацию)
+        """
+        raise NotImplemented()
 
-    # Проверяет роль отправителя
     def check_sender(self, role):
+        """
+        Проверка на роль отправителя
+        :param role: требуемая роль
+        :return: bool
+        """
         if check_user_group(self.event.sender, role):
             if role == Role.ADMIN:
                 if self.event.platform == 'vk':
@@ -118,8 +144,12 @@ class CommonCommand:
         error = f"Команда доступна только для пользователей с уровнем прав {role.value}"
         raise RuntimeError(error)
 
-    # Проверяет количество переданных аргументов
     def check_args(self, args=None):
+        """
+        Проверка на кол-во переданных аргументов
+        :param args: количество требуемых аргументов
+        :return: bool
+        """
         if args is None:
             args = self.args
         if self.event.args:
@@ -134,9 +164,16 @@ class CommonCommand:
         error += f"\n\n{get_help_for_command(self)}"
         raise RuntimeWarning(error)
 
-    # Проверяет интовый аргумент в диапазоне
     @staticmethod
     def check_number_arg_range(arg, _min, _max, banned_list=None):
+        """
+        Проверка на вхождение числа в диапазон и исключение его из заданного списка
+        :param arg: число
+        :param _min: мин. значение числа
+        :param _max: макс. значение числа
+        :param banned_list: список недопустимых значений
+        :return: bool
+        """
         if _min <= arg <= _max:
             if banned_list:
                 if arg not in banned_list:
@@ -152,6 +189,11 @@ class CommonCommand:
 
     @staticmethod
     def _transform_k(arg):
+        """
+        Перевод из строки с К в число. Пример: 1.3к = 1300
+        :param arg: текстовое число с К
+        :return: int
+        """
         arg = arg.lower()
         count_m = arg.count('m') + arg.count('м')
         count_k = arg.count('k') + arg.count('к') + count_m * 2
@@ -165,8 +207,11 @@ class CommonCommand:
             arg *= 10 ** (3 * count_k)
         return arg
 
-    # Парсит аргументы в тип int
     def parse_int(self):
+        """
+        Парсинг аргументов в int из заданного диапазона индексов(self.int_args)
+        :return: bool
+        """
         if not self.event.args:
             return True
         for checked_arg_index in self.int_args:
@@ -181,8 +226,11 @@ class CommonCommand:
                     raise RuntimeError(error)
         return True
 
-    # Парсит аргументы в тип float
     def parse_float(self):
+        """
+        Парсинг аргументов в float из заданного диапазона индексов(self.float_args)
+        :return: bool
+        """
         if not self.event.args:
             return True
         for checked_arg_index in self.float_args:
@@ -197,33 +245,47 @@ class CommonCommand:
                     raise RuntimeError(error)
         return True
 
-    # Проверяет, прислано ли сообщение в лс
     def check_pm(self):
+        """
+        Проверка на сообщение из ЛС
+        :return: bool
+        """
         if self.event.from_user:
             return True
 
         error = "Команда работает только в ЛС"
         raise RuntimeError(error)
 
-    # Проверяет, прислано ли пересланное сообщение
-    def check_fwd(self):
-        if self.event.fwd:
-            return True
-
-        error = "Перешлите сообщения"
-        raise RuntimeError(error)
-
-    # Проверяет, прислано ли сообщение в чат
     def check_conversation(self):
+        """
+        Проверка на сообщение из чата
+        :return: bool
+        """
         if self.event.from_chat:
             return True
 
         error = "Команда работает только в беседах"
         raise RuntimeError(error)
 
-    # Проверяет, прошло ли время с последнего выполнения команды и можно ли выполнять команду
+    def check_fwd(self):
+        """
+        Проверка на вложенные сообщения
+        :return: bool
+        """
+        if self.event.fwd:
+            return True
+
+        error = "Перешлите сообщения"
+        raise RuntimeError(error)
+
     @staticmethod
     def check_command_time(name, seconds):
+        """
+        Проверка на то, прошло ли время с последнего выполнения команды и можно ли выполнять команду
+        :param name: название команды
+        :param seconds: количество времени, после которого разрешается повторно выполнить команду
+        :return: bool
+        """
         entity, created = Service.objects.get_or_create(name=name)
         if created:
             return True
@@ -236,14 +298,21 @@ class CommonCommand:
         entity.save()
         return True
 
-    # Проверяет, прислано ли сообщение через API
     def check_platforms(self):
+        """
+        Проверка на вид платформы
+        :return: bool
+        """
         if self.event.platform not in self.platforms:
             error = f"Команда недоступна для {self.event.platform.upper()}"
             raise RuntimeError(error)
         return True
 
     def check_attachments(self):
+        """
+        Проверка на вложения в сообщении или пересланных сообщениях
+        :return: bool
+        """
         if self.event.attachments:
             for att in self.event.attachments:
                 if att['type'] in self.attachments:
@@ -258,6 +327,11 @@ class CommonCommand:
         raise RuntimeError(error)
 
     def check_city(self, city=None):
+        """
+        Проверяет на город у пользователя или в присланном сообщении
+        :param city: город
+        :return: bool
+        """
         if city:
             return True
         if self.event.sender.city:
@@ -266,9 +340,13 @@ class CommonCommand:
         error = "Не указан город в профиле. /город (название) - устанавливает город пользователю"
         raise RuntimeError(error)
 
-    # example:
-    # [[[key1],[method1]],[[key2],[method2]]]
     def handle_menu(self, menu, arg):
+        """
+        Вызов 'подпрограмм' основной команды по присланному аргументу
+        :param menu: [[[keys1],[method1]],[[keys2],[method2]]]
+        :param arg: переданный аргумент
+        :return:
+        """
         default_item = None
         for item in menu:
             if arg in item[0]:
