@@ -57,8 +57,9 @@ class NotifyRepeat(CommonCommand):
                              author=self.event.sender,
                              chat=self.event.chat,
                              repeat=True,
-                             text_for_filter=notify_datetime.strftime("%H:%M") + " " + text,
-                             attachments=self.event.attachments)
+                             text_for_filter=notify_datetime.strftime("%H:%M") + " " + text)
+        if self.event.attachments:
+            notify.attachments = self.event.attachments
 
         notify.save()
         notify.text_for_filter += f" ({notify.id})"

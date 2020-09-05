@@ -288,6 +288,16 @@ class VkBot(CommonBot, Thread):
         vk_document = self.upload.document_message(document, title=title, peer_id=peer_id)['doc']
         return self._get_attachment_by_id('doc', vk_document['owner_id'], vk_document['id'])
 
+    def upload_audio(self, audio, artist, title):
+        audio = self._prepare_obj_to_upload(audio)
+        try:
+            vk_audio = self.vk_user.upload.audio(audio, artist=artist, title=title)
+        except vk_api.exceptions.ApiError as e:
+            if e.code == 270:
+                raise RuntimeError("Аудиозапись была удалена по просьбе правообладателя")
+            raise RuntimeError("Ошибка загрузки аудиозаписи")
+        return self.get_attachment_by_id('audio', vk_audio['owner_id'], vk_audio['id'])
+
     @staticmethod
     def get_inline_keyboard(command_text, button_text="Ещё", args=None):
         if args is None:
