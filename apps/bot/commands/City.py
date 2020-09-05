@@ -27,10 +27,9 @@ class City(CommonCommand):
                 city = CityModel.objects.filter(synonyms__icontains=city_name).first()
                 if not city:
                     raise RuntimeWarning("Не нашёл такого города. /город добавить (название)")
-                else:
-                    self.event.sender.city = city
-                    self.event.sender.save()
-                    return f"Изменил город на {city.name}"
+                self.event.sender.city = city
+                self.event.sender.save()
+                return f"Изменил город на {city.name}"
         else:
             if self.event.sender.city is not None:
                 return f"Ваш город - {self.event.sender.city}"
