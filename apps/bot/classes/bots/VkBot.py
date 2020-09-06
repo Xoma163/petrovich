@@ -345,6 +345,14 @@ class VkBot(CommonBot, Thread):
     def get_video(self, owner_id, _id):
         return self.vk_user.vk.video.get(videos=f'{owner_id}_{_id}')
 
+    def set_chat_title(self, chat_id, title):
+        self.vk.messages.editChat(chat_id=chat_id, title=title)
+
+    def set_chat_title_if_not_equals(self, chat_id, title):
+        if title != self.vk.messages.getConversationsById(peer_ids=2000000000 + chat_id)['items'][0]['chat_settings'][
+            'title']:
+            self.set_chat_title(chat_id, title)
+
 
 class MyVkBotLongPoll(VkBotLongPoll):
 
