@@ -21,7 +21,7 @@ class Command(BaseCommand):
 
     def __init__(self):
         super().__init__()
-        self.chat_id = 2
+        self.chat_id = 20
         self.default_title = '2508'
 
         with open(BASE_DIR + '/static/schedules/schedule.json') as json_file:
