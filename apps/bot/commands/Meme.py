@@ -2,7 +2,7 @@ from apps.bot.classes.Consts import Role
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import get_attachments_from_attachments_or_fwd, tanimoto
 from apps.service.models import Meme as MemeModel
-from petrovich.settings import VK_URL
+from petrovich.settings import VK_URL, env
 
 IMAGE_EXTS = ['jpg', 'jpeg', 'png']
 
@@ -89,7 +89,7 @@ class Meme(CommonCommand):
             meme_to_send['msg'] = "Запрос на подтверждение мема:\n" \
                                   f"{new_meme_obj.author}\n" \
                                   f"{new_meme_obj.name} ({new_meme_obj.id})"
-            self.bot.parse_and_send_msgs(self.bot.get_group_id(self.test_chat), meme_to_send)
+            self.bot.parse_and_send_msgs(self.bot.get_group_id(env.str("VK_TEST_CHAT_ID")), meme_to_send)
             return "Добавил. Воспользоваться мемом можно после проверки модераторами."
 
     def menu_refresh(self):
@@ -321,6 +321,8 @@ class Meme(CommonCommand):
         if len(memes) == 0:
             raise RuntimeWarning("Не нашёл :(")
         elif len(memes) == 1:
+            return memes.first()
+        elif not approved:
             return memes.first()
         else:
             filters_str = " ".join(filter_list)
