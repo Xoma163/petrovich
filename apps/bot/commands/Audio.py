@@ -11,7 +11,7 @@ class Audio(CommonCommand):
         detail_help_text = "Аудио [количество=5] - присылает рандомные треки \n" \
                            "Аудио (Прикреплённые аудио/Пересланное сообщение с аудио/Пересланное сообщение с постом " \
                            "в котором аудио) - сохраняет аудио в базу"
-        super().__init__(names, help_text, detail_help_text, int_args=[0], platforms=['vk'])
+        super().__init__(names, help_text, detail_help_text, int_args=[0], platforms=['vk'], enabled=False)
 
     def start(self):
         audios_att = get_attachments_from_attachments_or_fwd(self.event, ['audio', 'wall'])

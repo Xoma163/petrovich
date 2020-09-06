@@ -30,7 +30,7 @@ class Settings(CommonCommand):
                 self.event.chat.need_reaction = value
                 self.event.chat.save()
                 return "Сохранил настройку"
-            if arg0 in ['майнкрафт', 'майн', 'minecraft', 'mine']:
+            elif arg0 in ['майнкрафт', 'майн', 'minecraft', 'mine']:
                 self.check_sender(Role.TRUSTED)
 
                 group_minecraft_notify = Group.objects.get(name=Role.MINECRAFT_NOTIFY.name)
