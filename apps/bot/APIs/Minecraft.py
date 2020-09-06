@@ -29,8 +29,8 @@ class MinecraftAPI:
     @staticmethod
     def send_rcon(command):
         try:
-            with MCRcon(env.str("MINECRAFT_1_16_1_IP"),
-                        env.str("MINECRAFT_1_16_1_RCON_PASSWORD")) as mcr:
+            with MCRcon(env.str("MINECRAFT_1_12_2_IP"),
+                        env.str("MINECRAFT_1_12_2_RCON_PASSWORD")) as mcr:
                 resp = mcr.command(command)
                 if resp:
                     return resp
@@ -41,7 +41,7 @@ class MinecraftAPI:
 
     @staticmethod
     def check_amazon_server_status():
-        url = env.str("MINECRAFT_1_16_1_STATUS_URL")
+        url = env.str("MINECRAFT_1_12_2_STATUS_URL")
         response = requests.get(url).json()
         return response['Name'] == 'running'
 
@@ -56,7 +56,7 @@ class MinecraftAPI:
 
     @staticmethod
     def _start_amazon():
-        url = env.str("MINECRAFT_1_16_1_START_URL")
+        url = env.str("MINECRAFT_1_12_2_START_URL")
         requests.post(url)
 
     def start(self, send_notify=True):
@@ -82,7 +82,7 @@ class MinecraftAPI:
                 break
             time.sleep(5)
 
-        url = env.str("MINECRAFT_1_16_1_STOP_URL")
+        url = env.str("MINECRAFT_1_12_2_STOP_URL")
         requests.post(url)
         Service.objects.filter(name=f'stop_minecraft_{self.version}').delete()
         return True
@@ -173,7 +173,7 @@ def get_minecraft_version_by_args(args):
 
 
 servers_minecraft = [
-    MinecraftAPI("1.16.1", env.str("MINECRAFT_1_16_1_IP"), 25565, amazon=True),
+    MinecraftAPI("1.12.2", env.str("MINECRAFT_1_12_2_IP"), env.str("MINECRAFT_1_12_2_PORT"), amazon=True),
     MinecraftAPI("1.12.2", MAIN_DOMAIN, 25565),
     MinecraftAPI("1.15.1", MAIN_DOMAIN, 25566),
 ]
