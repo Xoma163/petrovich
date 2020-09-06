@@ -267,12 +267,17 @@ class CommonBot:
 
         return user.first()
 
-    def get_chat_by_name(self, args):
+    def get_chat_by_name(self, args, filter_platform=True):
         if not args:
             raise RuntimeWarning("Отсутствуют аргументы")
         if isinstance(args, str):
             args = [args]
-        chats = self.chat_model
+
+        if filter_platform:
+            chats = self.chat_model
+        else:
+            chats = Chat.objects.all()
+
         for arg in args:
             chats = chats.filter(name__icontains=arg)
 

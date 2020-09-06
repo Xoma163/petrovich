@@ -1,4 +1,5 @@
 from apps.bot.classes.Consts import Role
+from apps.bot.classes.bots.CommonBot import get_bot_by_platform
 from apps.bot.classes.common.CommonCommand import CommonCommand
 
 
@@ -17,10 +18,8 @@ class Control(CommonCommand):
             chat = self.bot.get_group_id(msg_chat_id)
         except RuntimeError:
             msg_chat_name = self.event.args[0]
-            chat = self.bot.get_chat_by_name(msg_chat_name)
+            chat = self.bot.get_chat_by_name(msg_chat_name, False)
         msg = self.event.original_args.split(' ', 1)[1]
-        if self.event.platform == 'vk':
-            self.bot.send_message(chat.chat_id, msg)
-        elif self.event.platform == 'tg':
-            self.bot.send_message(f'-{chat.chat_id}', msg)
+        bot = get_bot_by_platform(chat.platform)()
+        bot.send_message(chat.chat_id, msg)
         return "Отправил"
