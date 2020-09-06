@@ -11,7 +11,7 @@ from apps.bot.classes.bots.VkBot import VkBot
 from apps.bot.classes.common.CommonMethods import remove_tz
 from apps.bot.models import Users
 from apps.service.models import Service
-from petrovich.settings import env, BASE_DIR, MAIN_DOMAIN
+from petrovich.settings import env, BASE_DIR
 
 
 class MinecraftAPI:
@@ -43,7 +43,7 @@ class MinecraftAPI:
     def check_amazon_server_status():
         url = env.str("MINECRAFT_1_12_2_STATUS_URL")
         response = requests.get(url).json()
-        return response['Name'] == 'running'
+        return response['InstanceState']['Name'] == 'running'
 
     def _prepare_message(self, action):
         translator = {'start': 'Стартуем', 'stop': "Финишируем"}
@@ -57,7 +57,13 @@ class MinecraftAPI:
     @staticmethod
     def _start_amazon():
         url = env.str("MINECRAFT_1_12_2_START_URL")
-        requests.post(url)
+        url_status = env.str("MINECRAFT_1_12_2_STATUS_URL")
+        response = requests.get(url_status).json()
+        if response['InstanceState']['Name'] == 'stopped':
+            requests.post(url)
+        else:
+            raise RuntimeWarning(
+                f"Сервер сейчас имеет состояние {response['InstanceState']['Name']}, не могу запустить")
 
     def start(self, send_notify=True):
         if self.amazon:
@@ -153,11 +159,12 @@ class MinecraftAPI:
             Service.objects.filter(name=f'stop_minecraft_{self.version}').delete()
 
 
+# ToDo: чё за херня с серверами этими и снизу
 def get_minecraft_version_by_args(args):
     if args is None:
         args = "1.16"
     minecraft_versions = [
-        {'names': ['1.16.1', "1.16"], "delay": 30, "amazon": True},
+        {'names': ['1.12.2', "1.12"], "delay": 30, "amazon": True},
         {'names': ['1.12.2', "1.12"], "delay": 90, "amazon": False},
         {'names': ['1.15.1', "1.15"], "delay": 90, "amazon": False}
     ]
@@ -174,6 +181,6 @@ def get_minecraft_version_by_args(args):
 
 servers_minecraft = [
     MinecraftAPI("1.12.2", env.str("MINECRAFT_1_12_2_IP"), env.str("MINECRAFT_1_12_2_PORT"), amazon=True),
-    MinecraftAPI("1.12.2", MAIN_DOMAIN, 25565),
-    MinecraftAPI("1.15.1", MAIN_DOMAIN, 25566),
+    # MinecraftAPI("1.12.2", MAIN_DOMAIN, 25565),
+    # MinecraftAPI("1.15.1", MAIN_DOMAIN, 25566),
 ]
