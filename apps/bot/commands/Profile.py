@@ -18,9 +18,16 @@ class Profile(CommonCommand):
 
     def start(self):
         if not self.event.args:
-            msg = f"Город - {self.event.sender.city}\n" \
-                  f"Дата рождения - {self.event.sender.birthday.strftime('%d.%m.%Y')}\n" \
-                  f"Никнейм - {self.event.sender.nickname_real}\n" \
+            _city = self.event.sender.city or "Не установлено"
+            _bd = self.event.sender.birthday
+            if _bd:
+                _bd = _bd.strftime('%d.%m.%Y')
+            else:
+                _bd = "Не установлено"
+            _nickname = self.event.sender.nickname_real or "Не установлено"
+            msg = f"Город - {_city}\n" \
+                  f"Дата рождения - {_bd}\n" \
+                  f"Никнейм - {_nickname}\n" \
                   f"Пол - {self.event.sender.get_gender_display()}"
             return msg
         else:
