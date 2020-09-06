@@ -7,11 +7,11 @@ from mcrcon import MCRcon
 
 from apps.bot.classes.Consts import Role
 from apps.bot.classes.DoTheLinuxComand import do_the_linux_command
-from apps.bot.classes.bots.VkBot import VkBot
+from apps.bot.classes.bots.CommonBot import get_bot_by_platform
 from apps.bot.classes.common.CommonMethods import remove_tz
 from apps.bot.models import Users
 from apps.service.models import Service
-from petrovich.settings import env, BASE_DIR
+from petrovich.settings import env, BASE_DIR, MAIN_DOMAIN
 
 
 class MinecraftAPI:
@@ -21,7 +21,6 @@ class MinecraftAPI:
         self.ip = ip
         self.port = port
         self.amazon = amazon
-        self.bot = bot or VkBot()
         self.event = event
 
         self.server_info = None
@@ -120,9 +119,9 @@ class MinecraftAPI:
         users_notify = Users.objects.filter(groups__name=Role.MINECRAFT_NOTIFY.name)
         if self.event:
             users_notify = users_notify.exclude(id=self.event.sender.id)
-        users_chat_id_notify = [user.user_id for user in users_notify]
-
-        self.bot.parse_and_send_msgs_thread(users_chat_id_notify, message)
+        for user in users_notify:
+            bot = get_bot_by_platform(user.platform)()
+            bot.parse_and_send_msgs_thread(user.user_id, message)
 
     def stop_if_need(self):
         self.get_server_info()
@@ -134,8 +133,9 @@ class MinecraftAPI:
             if created:
                 message = f"Если никто не зайдёт на сервак по майну {self.version}, то через полчаса я его остановлю"
                 users_notify = Users.objects.filter(groups__name=Role.MINECRAFT_NOTIFY.name)
-                users_chat_id_notify = [user.user_id for user in users_notify]
-                self.bot.parse_and_send_msgs_thread(users_chat_id_notify, message)
+                for user in users_notify:
+                    bot = get_bot_by_platform(user.platform)()
+                    bot.parse_and_send_msgs_thread(user.user_id, message)
 
             # Если событие уже было создано, значит пора отрубать
             else:
@@ -149,8 +149,9 @@ class MinecraftAPI:
 
                     message = f"Вырубаю майн {self.version}"
                     users_notify = Users.objects.filter(groups__name=Role.MINECRAFT_NOTIFY.name)
-                    users_chat_id_notify = [user.user_id for user in users_notify]
-                    self.bot.parse_and_send_msgs_thread(users_chat_id_notify, message)
+                    for user in users_notify:
+                        bot = get_bot_by_platform(user.platform)()
+                        bot.parse_and_send_msgs_thread(user.user_id, message)
                 else:
                     obj.delete()
 
@@ -160,12 +161,19 @@ class MinecraftAPI:
 
 
 # ToDo: чё за херня с серверами этими и снизу
+servers_minecraft = [
+    MinecraftAPI("1.12.2", env.str("MINECRAFT_1_12_2_IP"), env.str("MINECRAFT_1_12_2_PORT"), amazon=True),
+    # MinecraftAPI("1.12.2", MAIN_DOMAIN, 25565),
+    MinecraftAPI("1.15.1", MAIN_DOMAIN, 25566),
+]
+
+
 def get_minecraft_version_by_args(args):
     if args is None:
-        args = "1.16"
+        args = "1.12.2"
     minecraft_versions = [
         {'names': ['1.12.2', "1.12"], "delay": 30, "amazon": True},
-        {'names': ['1.12.2', "1.12"], "delay": 90, "amazon": False},
+        # {'names': ['1.12.2', "1.12"], "delay": 90, "amazon": False},
         {'names': ['1.15.1', "1.15"], "delay": 90, "amazon": False}
     ]
     minecraft_server = None
@@ -177,10 +185,3 @@ def get_minecraft_version_by_args(args):
                 minecraft_server = minecraft_version
                 break
     return minecraft_server
-
-
-servers_minecraft = [
-    MinecraftAPI("1.12.2", env.str("MINECRAFT_1_12_2_IP"), env.str("MINECRAFT_1_12_2_PORT"), amazon=True),
-    # MinecraftAPI("1.12.2", MAIN_DOMAIN, 25565),
-    # MinecraftAPI("1.15.1", MAIN_DOMAIN, 25566),
-]
