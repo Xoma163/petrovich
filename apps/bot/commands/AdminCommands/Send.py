@@ -11,14 +11,8 @@ class Control(CommonCommand):
         super().__init__(names, help_text, detail_help_text, access=Role.ADMIN, args=2)
 
     def start(self):
-        try:
-            self.int_args = [0]
-            self.parse_int()
-            msg_chat_id = self.event.args[0]
-            chat = self.bot.get_group_id(msg_chat_id)
-        except RuntimeError:
-            msg_chat_name = self.event.args[0]
-            chat = self.bot.get_chat_by_name(msg_chat_name, False)
+        msg_chat_name = self.event.args[0]
+        chat = self.bot.get_chat_by_name(msg_chat_name, False)
         msg = self.event.original_args.split(' ', 1)[1]
         bot = get_bot_by_platform(chat.platform)()
         bot.send_message(chat.chat_id, msg)
