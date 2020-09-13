@@ -35,6 +35,8 @@ class Logger(models.Model):
         return self.msg
 
     class Meta:
+        verbose_name = "Лог"
+        verbose_name_plural = "Логи"
         ordering = ('-create_datetime',)
 
 
