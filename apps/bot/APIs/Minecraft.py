@@ -118,7 +118,9 @@ class MinecraftAPI:
     def send_notify(self, message):
         users_notify = Users.objects.filter(groups__name=Role.MINECRAFT_NOTIFY.name)
         if self.event:
-            users_notify = users_notify.exclude(id=self.event.sender.id)
+            # users_notify = users_notify.exclude(id=self.event.sender.id)
+            users_in_chat = self.event.chat.users_set.all()
+            users_notify = users_notify.exclude(pk__in=users_in_chat)
         for user in users_notify:
             bot = get_bot_by_platform(user.platform)()
             bot.parse_and_send_msgs_thread(user.user_id, message)
@@ -162,7 +164,8 @@ class MinecraftAPI:
 
 # ToDo: чё за херня с серверами этими и снизу
 servers_minecraft = [
-    MinecraftAPI("1.12.2", env.str("MINECRAFT_1_12_2_IP"), env.str("MINECRAFT_1_12_2_PORT"), amazon=True),
+    # MinecraftAPI("1.12.2", env.str("MINECRAFT_1_12_2_IP"), env.str("MINECRAFT_1_12_2_PORT"), amazon=True),
+    MinecraftAPI("1.12.2", MAIN_DOMAIN, 25565),
     # MinecraftAPI("1.12.2", MAIN_DOMAIN, 25565),
     MinecraftAPI("1.15.1", MAIN_DOMAIN, 25566),
 ]
@@ -172,7 +175,8 @@ def get_minecraft_version_by_args(args):
     if args is None:
         args = "1.12.2"
     minecraft_versions = [
-        {'names': ['1.12.2', "1.12"], "delay": 30, "amazon": True},
+        # {'names': ['1.12.2', "1.12"], "delay": 30, "amazon": True},
+        {'names': ['1.12.2', "1.12"], "delay": 60, "amazon": False},
         # {'names': ['1.12.2', "1.12"], "delay": 90, "amazon": False},
         {'names': ['1.15.1', "1.15"], "delay": 90, "amazon": False}
     ]
