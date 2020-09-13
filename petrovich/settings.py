@@ -46,7 +46,8 @@ INSTALLED_APPS = [
     'apps.birds',
     'apps.service',
     'apps.games',
-    'apps.db_logger'
+    'apps.db_logger',
+    'apps.timetable'
 ]
 
 MIDDLEWARE = [

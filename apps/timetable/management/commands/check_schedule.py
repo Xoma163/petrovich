@@ -42,20 +42,20 @@ class Command(BaseCommand):
     #          schedule = json.load(json_file)
     #      # now = datetime.datetime.now()
     #      now = datetime.datetime(2020, 9, 7, 11, 21, 0)
-    #      now_weeknumber = str((now.isocalendar()[1]) % 2 + 1)
+    #      now_week_number = str((now.isocalendar()[1]) % 2 + 1)
     #      now_weekday = str(now.weekday() + 1)
     #
     #      # Проверяем есть ли сегодня пары
-    #      if now_weeknumber not in schedule:
+    #      if now_week_number not in schedule:
     #          self.change_title_on_default()
     #          return
-    #      if now_weekday not in schedule[now_weeknumber]:
+    #      if now_weekday not in schedule[now_week_number]:
     #          self.change_title_on_default()
     #          return
     #
     #      # Узнаём какая пара первая, а какая последняя
     #      for i in range(len(timetable)):
-    #          if str(i + 1) in schedule[now_weeknumber][now_weekday]:
+    #          if str(i + 1) in schedule[now_week_number][now_weekday]:
     #              if self.first_discipline is None:
     #                  self.first_discipline = str(i + 1)
     #              self.last_discipline = str(i + 1)
@@ -86,20 +86,20 @@ class Command(BaseCommand):
     #      if int(current_discipline) < int(self.first_discipline):
     #          vk_title = "2508|{} {} {}({})".format(
     #              timetable[self.first_discipline]['START'],
-    #              schedule[now_weeknumber][now_weekday][self.first_discipline]['cabinet'],
-    #              schedule[now_weeknumber][now_weekday][self.first_discipline]['teacher'],
-    #              schedule[now_weeknumber][now_weekday][self.first_discipline]['type'],
+    #              schedule[now_week_number][now_weekday][self.first_discipline]['cabinet'],
+    #              schedule[now_week_number][now_weekday][self.first_discipline]['teacher'],
+    #              schedule[now_week_number][now_weekday][self.first_discipline]['type'],
     #          )
     #          bot.set_chat_title_if_not_equals(self.chat_id, vk_title)
     #          return
     #      # Текущая пара
     #      elif int(self.first_discipline) <= int(current_discipline) <= int(self.last_discipline):
-    #          if current_discipline in schedule[now_weeknumber][now_weekday]:
+    #          if current_discipline in schedule[now_week_number][now_weekday]:
     #              vk_title = "2508|{} {} {}({})".format(
     #                  timetable[current_discipline]['START'],
-    #                  schedule[now_weeknumber][now_weekday][current_discipline]['cabinet'],
-    #                  schedule[now_weeknumber][now_weekday][current_discipline]['teacher'],
-    #                  schedule[now_weeknumber][now_weekday][current_discipline]['type'])
+    #                  schedule[now_week_number][now_weekday][current_discipline]['cabinet'],
+    #                  schedule[now_week_number][now_weekday][current_discipline]['teacher'],
+    #                  schedule[now_week_number][now_weekday][current_discipline]['type'])
     #              bot.set_chat_title_if_not_equals(self.chat_id, vk_title)
     #              return
     #      # После пар
