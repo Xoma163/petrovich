@@ -161,7 +161,10 @@ class Meme(CommonCommand):
 
     def menu_conference(self):
         self.check_args(3)
-        chat = self.bot.get_one_chat_with_user(self.event.args[1], self.event.sender.user_id)
+        if self.event.sender.check_role(Role.ADMIN):
+            chat = self.bot.get_chat_by_name(self.event.args[1])
+        else:
+            chat = self.bot.get_one_chat_with_user(self.event.args[1], self.event.sender.user_id)
         if self.event.chat == chat:
             raise RuntimeWarning("Зачем мне отправлять мем в эту же конфу?")
         if self.event.args[-1].lower() in ['рандом', 'р']:
