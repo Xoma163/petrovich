@@ -1,6 +1,7 @@
 from django.contrib import admin
 
 from apps.timetable import models
+from apps.timetable.forms import LessonForm
 
 
 @admin.register(models.Group)
@@ -25,4 +26,5 @@ class DisciplineAdmin(admin.ModelAdmin):
 
 @admin.register(models.Lesson)
 class LessonAdmin(admin.ModelAdmin):
-    pass
+    form = LessonForm
+    list_filter = ('group', 'day_of_week', 'lesson_number', 'lesson_type', 'discipline', 'teacher', 'cabinet',)

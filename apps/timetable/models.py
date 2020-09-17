@@ -1,3 +1,4 @@
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
 
 # Create your models here.
@@ -65,8 +66,8 @@ class Discipline(models.Model):
         return self.name
 
     class Meta:
-        verbose_name = "Дисциплина"
-        verbose_name_plural = "Дисциплины"
+        verbose_name = "Предмет"
+        verbose_name_plural = "Предметы"
         ordering = ['name']
 
 
@@ -95,35 +96,53 @@ class Lesson(models.Model):
     LESSON_TYPE_PRACTICE = "2"
     LESSON_TYPE_LABORATORY_WORK = "3"
     LESSON_TYPE_OTHER = "4"
+    LESSON_TYPE_COURSEWORK = "5"
 
     LESSONS_TYPES = (
         (LESSON_TYPE_LECTURE, "Лекция"),
         (LESSON_TYPE_PRACTICE, "Практика"),
         (LESSON_TYPE_LABORATORY_WORK, "Лабораторная работа"),
+        (LESSON_TYPE_COURSEWORK, "Курсовая"),
         (LESSON_TYPE_OTHER, "Другое"),
     )
-    WEEK_NUMBER_1 = "1"
-    WEEK_NUMBER_2 = "2"
-    WEEK_NUMBER_3 = "3"
-    WEEK_NUMBER_4 = "4"
 
-    WEEK_NUMBERS = (
-        (WEEK_NUMBER_1, "Лекция"),
-        (WEEK_NUMBER_2, "Практика"),
-        (WEEK_NUMBER_3, "Лабораторная работа"),
-        (WEEK_NUMBER_4, "Другое"),
+    WEEK_NUMBERS = [(str(x), str(x)) for x in range(1, 21)]
+
+    DAY_OF_WEEK_1 = "1"
+    DAY_OF_WEEK_2 = "2"
+    DAY_OF_WEEK_3 = "3"
+    DAY_OF_WEEK_4 = "4"
+    DAY_OF_WEEK_5 = "5"
+    DAY_OF_WEEK_6 = "6"
+    DAY_OF_WEEK_7 = "7"
+
+    DAY_OF_WEEKS = (
+        (DAY_OF_WEEK_1, "Понедельник"),
+        (DAY_OF_WEEK_2, "Вторник"),
+        (DAY_OF_WEEK_3, "Среда"),
+        (DAY_OF_WEEK_4, "Четверг"),
+        (DAY_OF_WEEK_5, "Пятница"),
+        (DAY_OF_WEEK_6, "Суббота"),
+        (DAY_OF_WEEK_7, "Воскресенье"),
     )
 
     group = models.ForeignKey(Group, models.SET_NULL, verbose_name="Группа", null=True)
     lesson_number = models.CharField("Номер пары", choices=LESSONS_NUMBERS, max_length=2)
+    discipline = models.ForeignKey(Discipline, models.SET_NULL, null=True, verbose_name="Предмет")
     teacher = models.ForeignKey(Teacher, models.SET_NULL, verbose_name="Преподаватель", null=True)
     lesson_type = models.CharField("Тип пары", choices=LESSONS_TYPES, max_length=2)
     cabinet = models.ForeignKey(Cabinet, on_delete=models.SET_NULL, verbose_name="Кабинет", null=True)
-    week_number = models.CharField("Номер недели", choices=WEEK_NUMBERS, max_length=2)
+    week_number = ArrayField(models.CharField("Номер недели", choices=WEEK_NUMBERS, max_length=2, help_text=""),
+                             default=list, verbose_name="Номер недели", help_text="")
+
+    day_of_week = models.CharField("День недели", choices=DAY_OF_WEEKS, max_length=2, help_text="",
+                                   default=DAY_OF_WEEK_1)
 
     def __str__(self):
-        return f"{self.group} {self.lesson_number} {self.teacher} {self.lesson_type} {self.cabinet}"
+        return f"{self.group} {self.get_day_of_week_display()} {self.discipline.short_name} {self.lesson_number} {self.teacher} " \
+               f"{self.get_lesson_type_display()} {self.cabinet}"
 
     class Meta:
         verbose_name = "Пара"
         verbose_name_plural = "Пары"
+        ordering = ['day_of_week', 'lesson_number']
