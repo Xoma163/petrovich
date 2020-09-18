@@ -24,6 +24,8 @@ class Command(BaseCommand):
         super().__init__()
         self.bot = VkBot()
         self.now = datetime.datetime.now()
+        # self.now = datetime.datetime(2020, 9, 18, 9, 40)
+
         iso_calendar = self.now.isocalendar()
 
         self.now_week_number = None
@@ -33,7 +35,6 @@ class Command(BaseCommand):
         self.default_title = None
         self.schedule = None
         self.schedule_today = None
-        # self.now = datetime.datetime(2020, 9, 18, 13, 30)
 
     def find_first_lesson_number(self):
         first_lesson = self.schedule_today.order_by('lesson_number').first()
@@ -54,17 +55,20 @@ class Command(BaseCommand):
         dt = dt + datetime.timedelta(minutes=BEFORE_MIN)
 
         for i, lesson_number in enumerate(timetable):
+
             start = timetable[lesson_number]['start'].split(':')
             start_dt = dt.replace(hour=int(start[0]), minute=int(start[1]))
             end = timetable[lesson_number]['end'].split(':')
             end_dt = dt.replace(hour=int(end[0]), minute=int(end[1]))
+            if i == 0 and dt < start_dt:
+                return -1
             if start_dt <= dt <= end_dt:
                 return int(lesson_number)
         return None
 
     def prepare_title_for_lesson(self, lesson):
         if lesson:
-            return f"{self.default_title}|{lesson.get_lesson_number_display()[3:8]} {lesson.cabinet} {lesson.teacher} ({lesson.discipline})"
+            return f"{self.default_title}|{lesson.get_lesson_number_display().split('-')[0][3:]} {lesson.cabinet} {lesson.teacher} ({lesson.discipline})"
         else:
             return self.default_title
 
@@ -88,22 +92,21 @@ class Command(BaseCommand):
             first_lesson_number = self.find_first_lesson_number()
             last_lesson_number = self.find_last_lesson_number()
 
-            display_lesson_number = None
-            if not lesson_number and first_lesson_number:
-                display_lesson_number = first_lesson_number
+            if not lesson_number:
+                display_lesson_number = None
             else:
-                if lesson_number < first_lesson_number:
+                if first_lesson_number and lesson_number < first_lesson_number:
                     display_lesson_number = first_lesson_number
-                elif first_lesson_number <= lesson_number <= last_lesson_number:
+                elif first_lesson_number and last_lesson_number and first_lesson_number <= lesson_number <= last_lesson_number:
                     display_lesson_number = lesson_number
-                elif lesson_number > last_lesson_number:
+                elif last_lesson_number and lesson_number > last_lesson_number:
                     display_lesson_number = None
                 else:
-                    print('wtf')
+                    display_lesson_number = None
 
             display_lesson_number = str(display_lesson_number)
 
             lesson = self.schedule_today.filter(lesson_number=display_lesson_number).first()
             new_title = self.prepare_title_for_lesson(lesson)
 
-            self.set_title(new_title)
+            self.set_title(str(new_title))
