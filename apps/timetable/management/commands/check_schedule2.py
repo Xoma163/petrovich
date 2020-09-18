@@ -25,12 +25,14 @@ class Command(BaseCommand):
         self.bot = VkBot()
         self.now = datetime.datetime.now()
         iso_calendar = self.now.isocalendar()
-        self.now_week_number = str(self.now.isocalendar()[1] - 35)
+
+        self.now_week_number = None
         self.now_weekday = str(iso_calendar[2])
 
         self.chat_id = None
         self.default_title = None
         self.schedule = None
+        self.schedule_today = None
         # self.now = datetime.datetime(2020, 9, 18, 13, 30)
 
     def find_first_lesson_number(self):
@@ -73,6 +75,9 @@ class Command(BaseCommand):
 
         groups = Group.objects.all()
         for group in groups:
+            first_pair_week_number = group.first_lesson_day.isocalendar()[1]
+            self.now_week_number = str(self.now.isocalendar()[1] - first_pair_week_number + 1)
+
             self.chat_id = group.conference.chat_id
             self.default_title = group.number
             self.schedule = Lesson.objects.filter(group=group)

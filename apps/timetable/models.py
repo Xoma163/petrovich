@@ -1,3 +1,4 @@
+import django
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 
@@ -9,6 +10,9 @@ class Group(models.Model):
     number = models.PositiveIntegerField("Номер группы", help_text="4 цифры")
     title = models.CharField("Название группы", help_text="прост так", blank=True, max_length=100)
     conference = models.ForeignKey(Chat, on_delete=models.SET_NULL, null=True, verbose_name="Конфа")
+    first_lesson_day = models.DateField("Дата первой даты",
+                                        help_text="Это поле нужно чтобы точно узнавать когда начинается первая неделя",
+                                        default=django.utils.timezone.now)
 
     def __str__(self):
         return f"{self.number}"
