@@ -25,31 +25,25 @@ class Command(BaseCommand):
         self.bot = VkBot()
         self.now = datetime.datetime.now()
         iso_calendar = self.now.isocalendar()
-        self.now_week_number = str((self.now.isocalendar()[1]) % 2 + 1)
+        self.now_week_number = str(self.now.isocalendar()[1] - 35)
         self.now_weekday = str(iso_calendar[2])
 
         self.chat_id = None
         self.default_title = None
         self.schedule = None
-        # self.now = datetime.datetime(2020, 9, 7, 18, 50, 1)
+        # self.now = datetime.datetime(2020, 9, 18, 13, 30)
 
     def find_first_lesson_number(self):
-        lessons = self.schedule.get(self.now_week_number).get(self.now_weekday)
-        if lessons:
-            try:
-                return int(list(lessons)[0])
-            except:
-                return None
+        first_lesson = self.schedule_today.order_by('lesson_number').first()
+        if first_lesson:
+            return int(first_lesson.lesson_number)
         else:
             return None
 
     def find_last_lesson_number(self):
-        lessons = self.schedule.get(self.now_week_number).get(self.now_weekday)
-        if lessons:
-            try:
-                return int(list(lessons)[-1])
-            except:
-                return None
+        last_lesson = self.schedule_today.order_by('-lesson_number').first()
+        if last_lesson:
+            return int(last_lesson.lesson_number)
         else:
             return None
 
@@ -68,7 +62,7 @@ class Command(BaseCommand):
 
     def prepare_title_for_lesson(self, lesson):
         if lesson:
-            return f"{self.default_title}|{timetable[lesson['number']]['start']} {lesson['cabinet']} {lesson['teacher']} ({lesson['type']})"
+            return f"{self.default_title}|{lesson.get_lesson_number_display()[3:8]} {lesson.cabinet} {lesson.teacher} ({lesson.discipline})"
         else:
             return self.default_title
 
@@ -82,6 +76,8 @@ class Command(BaseCommand):
             self.chat_id = group.conference.chat_id
             self.default_title = group.number
             self.schedule = Lesson.objects.filter(group=group)
+            self.schedule_today = self.schedule.filter(week_number__contains=[self.now_week_number],
+                                                       day_of_week=self.now_weekday)
 
             lesson_number = self.get_lesson_number(self.now)
             first_lesson_number = self.find_first_lesson_number()
@@ -102,11 +98,7 @@ class Command(BaseCommand):
 
             display_lesson_number = str(display_lesson_number)
 
-            lesson = self.schedule.get(self.now_week_number, {}).get(self.now_weekday, {}).get(display_lesson_number)
-            if lesson:
-                lesson['number'] = display_lesson_number
-            else:
-                lesson = None
+            lesson = self.schedule_today.filter(lesson_number=display_lesson_number).first()
             new_title = self.prepare_title_for_lesson(lesson)
 
             self.set_title(new_title)

@@ -63,7 +63,7 @@ class Discipline(models.Model):
         super(Discipline, self).save(*args, **kwargs)
 
     def __str__(self):
-        return self.name
+        return self.short_name or self.name
 
     class Meta:
         verbose_name = "Предмет"

@@ -349,9 +349,9 @@ class VkBot(CommonBot, Thread):
         self.vk.messages.editChat(chat_id=chat_id, title=title)
 
     def set_chat_title_if_not_equals(self, chat_id, title):
-        if title != self.vk.messages.getConversationsById(peer_ids=2000000000 + chat_id)['items'][0]['chat_settings'][
+        if title != self.vk.messages.getConversationsById(peer_ids=chat_id)['items'][0]['chat_settings'][
             'title']:
-            self.set_chat_title(chat_id, title)
+            self.set_chat_title(int(chat_id) - 2000000000, title)
 
 
 class MyVkBotLongPoll(VkBotLongPoll):
