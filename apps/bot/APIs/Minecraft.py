@@ -119,8 +119,9 @@ class MinecraftAPI:
         users_notify = Users.objects.filter(groups__name=Role.MINECRAFT_NOTIFY.name)
         if self.event:
             # users_notify = users_notify.exclude(id=self.event.sender.id)
-            users_in_chat = self.event.chat.users_set.all()
-            users_notify = users_notify.exclude(pk__in=users_in_chat)
+            if self.event.chat:
+                users_in_chat = self.event.chat.users_set.all()
+                users_notify = users_notify.exclude(pk__in=users_in_chat)
         for user in users_notify:
             bot = get_bot_by_platform(user.platform)()
             bot.parse_and_send_msgs_thread(user.user_id, message)
