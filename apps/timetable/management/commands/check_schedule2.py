@@ -68,7 +68,7 @@ class Command(BaseCommand):
 
     def prepare_title_for_lesson(self, lesson):
         if lesson:
-            return f"{self.default_title}|{lesson.get_lesson_number_display().split('-')[0][3:]} {lesson.cabinet} {lesson.teacher} ({lesson.discipline})"
+            return f"{self.default_title}|{lesson.get_lesson_number_display().split('-')[0][3:]} {lesson.cabinet} {lesson.teacher} ({lesson.discipline}) {lesson.get_lesson_type_display()}"
         else:
             return self.default_title
 

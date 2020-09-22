@@ -103,9 +103,9 @@ class Lesson(models.Model):
     LESSON_TYPE_COURSEWORK = "5"
 
     LESSONS_TYPES = (
-        (LESSON_TYPE_LECTURE, "Лекция"),
-        (LESSON_TYPE_PRACTICE, "Практика"),
-        (LESSON_TYPE_LABORATORY_WORK, "Лабораторная работа"),
+        (LESSON_TYPE_LECTURE, "🍏 Лекция"),
+        (LESSON_TYPE_PRACTICE, "🍎 Практика"),
+        (LESSON_TYPE_LABORATORY_WORK, "🍋 Лабораторная работа"),
         (LESSON_TYPE_COURSEWORK, "Курсовая"),
         (LESSON_TYPE_OTHER, "Другое"),
     )
