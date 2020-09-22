@@ -24,7 +24,8 @@ class Calc(CommonCommand):
             expression = self.event.original_args
         expression = expression \
             .lower() \
-            .replace(' ', '')  # \
+            .replace(' ', '') \
+            .replace(',', '.')
         # .replace('k', '000') \
         # .replace('к', '000') \
         # .replace('m', "000000") \
