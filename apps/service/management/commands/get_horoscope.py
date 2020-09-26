@@ -8,7 +8,7 @@ MEMES_COUNT = 12
 class Command(BaseCommand):
 
     def handle(self, *args, **options):
-        random_memes = Meme.objects.order_by('?')[:MEMES_COUNT]
+        random_memes = Meme.objects.exclude(type='audio').order_by('?')[:MEMES_COUNT]
         if len(random_memes) != MEMES_COUNT:
             return
         Horoscope.objects.all().delete()
