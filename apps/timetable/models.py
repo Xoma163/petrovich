@@ -146,6 +146,9 @@ class Lesson(models.Model):
         return f"{self.group} {self.get_day_of_week_display()} {self.discipline.short_name} {self.lesson_number} {self.teacher} " \
                f"{self.get_lesson_type_display()} {self.cabinet}"
 
+    def get_formatted(self):
+        return f"{self.get_lesson_number_display().split('-')[0][3:]} {self.cabinet} {self.teacher} ({self.discipline}) {self.get_lesson_type_display()}\n"
+
     class Meta:
         verbose_name = "Пара"
         verbose_name_plural = "Пары"

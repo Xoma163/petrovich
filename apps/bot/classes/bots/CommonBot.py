@@ -224,7 +224,7 @@ class CommonBot:
             return f"{date_arr[2]}-{date_arr[1]}-{date_arr[0]}"
 
     @staticmethod
-    def add_group_to_user(user, chat):
+    def add_chat_to_user(user, chat):
         chats = user.chats
         if chat not in chats.all():
             chats.add(chat)

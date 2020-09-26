@@ -22,6 +22,7 @@ from apps.bot.classes.bots.VkUser import VkUser
 from apps.bot.classes.events.VkEvent import VkEvent
 from apps.bot.commands.City import add_city_to_db
 from apps.bot.models import Users, Chat, Bot
+from apps.timetable.models import Group as ScheduleGroup
 from petrovich.settings import env
 
 
@@ -94,6 +95,16 @@ class VkBot(CommonBot, Thread):
             vk_chat = Chat(chat_id=chat_id, platform=self.name)
             vk_chat.save()
         return vk_chat
+
+    @staticmethod
+    def add_extra_group_to_user(user, chat):
+        group = ScheduleGroup.objects.filter(conference=chat).first()
+        if group:
+            groups = user.groups
+            group_student = Group.objects.get(name=Role.STUDENT.name)
+            if group_student not in groups.all():
+                user.groups.add(group_student)
+                user.save()
 
     def get_bot_by_id(self, bot_id):
         if bot_id > 0:
@@ -197,7 +208,8 @@ class VkBot(CommonBot, Thread):
                     if vk_event['chat_id']:
                         vk_event['chat'] = self.get_chat_by_id(int(vk_event['peer_id']))
                         if vk_event['sender'] and vk_event['chat']:
-                            self.add_group_to_user(vk_event['sender'], vk_event['chat'])
+                            self.add_chat_to_user(vk_event['sender'], vk_event['chat'])
+                            self.add_extra_group_to_user(vk_event['sender'], vk_event['chat'])
                     else:
                         vk_event['chat'] = None
 

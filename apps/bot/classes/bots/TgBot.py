@@ -267,7 +267,7 @@ class TgBot(CommonBot, Thread):
                 if tg_event['chat_id']:
                     tg_event['chat'] = self.get_chat_by_id(int(tg_event['chat_id']))
                     if tg_event['sender'] and tg_event['chat']:
-                        self.add_group_to_user(tg_event['sender'], tg_event['chat'])
+                        self.add_chat_to_user(tg_event['sender'], tg_event['chat'])
                 else:
                     tg_event['chat'] = None
 

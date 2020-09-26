@@ -18,7 +18,7 @@ class Actions(CommonCommand):
                 for _id in self.event.action['member_ids']:
                     if _id > 0:
                         user = self.bot.get_user_by_id(_id)
-                        self.bot.add_group_to_user(user, self.event.chat)
+                        self.bot.add_chat_to_user(user, self.event.chat)
                     else:
                         if self.event.platform == 'vk':
                             bot_group_id = -env.int('VK_BOT_GROUP_ID')
