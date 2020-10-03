@@ -61,6 +61,12 @@ class Meme(CommonCommand):
             raise RuntimeWarning("Не нашёл вложений в сообщении или пересланном сообщении")
         attachment = attachments[0]
 
+        if self.event.platform == 'tg':
+            # ToDo:
+            raise RuntimeWarning('В телеграмме пока не поддерживается добавление мемов')
+            if attachment['type'] != 'photo':
+                raise RuntimeWarning('В телеграмме поддерживается добавление только картинок')
+
         for i, _ in enumerate(self.event.args):
             self.event.args[i] = self.event.args[i].lower()
 

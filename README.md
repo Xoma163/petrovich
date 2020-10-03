@@ -2,7 +2,7 @@
 
 [![VK Bot](readme/vk.png)](https://vk.com/igor_petrovich_ksta)
 [![Telegram Bot](readme/tg.png)](https://t.me/igor_petrovich_ksta_bot)
-[![Website](static/favicon_64.png)](https://xoma163.xyz)
+[![Website](static/favicon_64.png)](https://andrewsha.net)
 
 ## VkBot Petrovich
 

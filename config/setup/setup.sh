@@ -7,7 +7,7 @@ python3.7 -m venv venv
 set -e
 source ./venv/bin/activate
 pip install wheel
-pip install --upgrade --user travis pip setuptools wheel virtualenv
+pip install --upgrade pip setuptools wheel virtualenv
 pip install -r requirements.txt
 
 # rename abs paths

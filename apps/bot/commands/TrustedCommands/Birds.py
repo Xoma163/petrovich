@@ -38,7 +38,7 @@ class Birds(CommonCommand):
                 return str(e)
             attachment = self.bot.upload_document(document, self.event.peer_id, "Синички")
             attachments.append(attachment)
-        attachments.append('https://birds.xoma163.xyz')
+        attachments.append('https://birds.andrewsha.net')
         if len(attachments) == 2 or self.event.platform == 'vk ':
             return {
                 'attachments': attachments,

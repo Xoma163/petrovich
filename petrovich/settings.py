@@ -15,10 +15,10 @@ SECRET_KEY = env.str('SECRET_KEY')
 DEBUG = env.bool('DEBUG')
 
 MAIN_PROTOCOL = 'https'
-MAIN_DOMAIN = "xoma163.xyz"
+MAIN_DOMAIN = "andrewsha.net"
 MAIN_SITE = f'{MAIN_PROTOCOL}://{MAIN_DOMAIN}'
 DOMAINS_IPS = ['192.168.1.10', '85.113.60.5']
-DOMAINS = ['xoma163.xyz', 'xoma163.site']
+DOMAINS = [MAIN_DOMAIN]
 SUBDOMAINS = [None, 'api', 'www', 'birds']
 SUBDOMAINS_DOMAINS = []
 for subdomain in SUBDOMAINS:
@@ -32,23 +32,30 @@ ALLOWED_HOSTS = DOMAINS_IPS + SUBDOMAINS_DOMAINS
 
 # Application definition
 
-INSTALLED_APPS = [
+DJANGO_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+]
 
+VENDORS_APPS = [
     'django_json_widget',
+]
 
+PROJECT_APPS = [
     'apps.bot',
     'apps.birds',
     'apps.service',
     'apps.games',
     'apps.db_logger',
-    'apps.timetable'
+    'apps.timetable',
+    'apps.web',
 ]
+
+INSTALLED_APPS = DJANGO_APPS + VENDORS_APPS + PROJECT_APPS
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

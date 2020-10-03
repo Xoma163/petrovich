@@ -49,7 +49,7 @@ class Age(CommonCommand):
         help_text = "Возраст - оценить возраст людей на фотографии"
         detail_help_text = "Возраст (Изображения/Пересылаемое сообщение с изображением) - оценивает возраст людей на " \
                            "фотографии"
-        super().__init__(names, help_text, detail_help_text, platforms=['vk'], attachments=['photo'])
+        super().__init__(names, help_text, detail_help_text, platforms=['vk', 'tg'], attachments=['photo'])
 
     def start(self):
         image = get_attachments_from_attachments_or_fwd(self.event, 'photo')[0]

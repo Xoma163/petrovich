@@ -2,9 +2,9 @@
 
 ### 0. Клонирование проекта
 
-`cd /var/www && git clone https://github.com/Xoma163/xoma163site.git`  
+`cd /var/www && git clone https://github.com/Xoma163/petrovich.git`  
 
-`cd xoma163site`
+`cd petrovich`
 
 ### 1. Подготовка группы в ВК
 ToDo
