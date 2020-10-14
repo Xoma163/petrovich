@@ -147,7 +147,7 @@ class Lesson(models.Model):
                f"{self.get_lesson_type_display()} {self.cabinet}"
 
     def get_formatted(self):
-        return f"{self.get_lesson_number_display().split('-')[0][3:]} {self.cabinet} {self.teacher} ({self.discipline}) {self.get_lesson_type_display()}\n"
+        return f"{self.get_lesson_number_display().split('-')[0][3:]} {self.cabinet} {self.teacher} ({self.discipline}) {self.get_lesson_type_display()}"
 
     class Meta:
         verbose_name = "Пара"
