@@ -83,7 +83,7 @@ class Command(BaseCommand):
             self.now_week_number = str(self.now.isocalendar()[1] - first_pair_week_number + 1)
 
             self.chat_id = group.conference.chat_id
-            self.default_title = group.number
+            self.default_title = group.title or group.number
             self.schedule = Lesson.objects.filter(group=group)
             self.schedule_today = self.schedule.filter(week_number__contains=[self.now_week_number],
                                                        day_of_week=self.now_weekday)

@@ -8,7 +8,8 @@ from apps.bot.models import Chat
 
 class Group(models.Model):
     number = models.PositiveIntegerField("Номер группы", help_text="4 цифры")
-    title = models.CharField("Название группы", help_text="прост так", blank=True, max_length=100)
+    title = models.CharField("Название группы", help_text="Бот будет менять заголовок конфы на это название группы",
+                             blank=True, max_length=100)
     conference = models.ForeignKey(Chat, on_delete=models.SET_NULL, null=True, verbose_name="Конфа")
     first_lesson_day = models.DateField("Дата первой даты",
                                         help_text="Это поле нужно чтобы точно узнавать когда начинается первая неделя",
@@ -130,6 +131,15 @@ class Lesson(models.Model):
         (DAY_OF_WEEK_7, "Воскресенье"),
     )
 
+    SUBGROUP_ALL = "0"
+    SUBGROUP_1 = "1"
+    SUBGROUP_2 = "2"
+    SUBGROUPS = (
+        (SUBGROUP_ALL, "Все"),
+        (SUBGROUP_1, "1"),
+        (SUBGROUP_2, "2"),
+    )
+
     group = models.ForeignKey(Group, models.SET_NULL, verbose_name="Группа", null=True)
     lesson_number = models.CharField("Номер пары", choices=LESSONS_NUMBERS, max_length=2)
     discipline = models.ForeignKey(Discipline, models.SET_NULL, null=True, verbose_name="Предмет")
@@ -141,15 +151,22 @@ class Lesson(models.Model):
 
     day_of_week = models.CharField("День недели", choices=DAY_OF_WEEKS, max_length=2, help_text="",
                                    default=DAY_OF_WEEK_1)
+    subgroup = models.CharField("Подгруппа", choices=SUBGROUPS, max_length=2, help_text="", default=SUBGROUP_ALL)
 
     def __str__(self):
-        return f"{self.group} {self.get_day_of_week_display()} {self.discipline.short_name} {self.lesson_number} {self.teacher} " \
+        return f"{self.group}{self.get_subgroup_str()}{self.get_day_of_week_display()} {self.discipline.short_name} {self.lesson_number} {self.teacher} " \
                f"{self.get_lesson_type_display()} {self.cabinet}"
 
+    def get_subgroup_str(self):
+        if self.subgroup != self.SUBGROUP_ALL:
+            return f" {self.subgroup} подгруппа "
+        else:
+            return " "
+
     def get_formatted(self):
-        return f"{self.get_lesson_number_display().split('-')[0][3:]} {self.cabinet} {self.teacher} ({self.discipline}) {self.get_lesson_type_display()}"
+        return f"{self.get_lesson_number_display().split('-')[0][3:]}{self.get_subgroup_str()}{self.cabinet} {self.teacher} ({self.discipline}) {self.get_lesson_type_display()}"
 
     class Meta:
         verbose_name = "Пара"
         verbose_name_plural = "Пары"
-        ordering = ['day_of_week', 'lesson_number']
+        ordering = ['day_of_week', 'lesson_number', 'subgroup']

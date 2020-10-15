@@ -15,10 +15,10 @@ class TimeTable(CommonCommand):
         super().__init__(names, help_text, detail_help_text, platforms=['vk'], conversation=True, access=Role.STUDENT)
 
     def start(self):
-        # group = Group.objects.filter(conference=self.event.chat).first()
-        # if not group:
-        #     return "Этой группы нет в базе"
-        group = Group.objects.first()
+        group = Group.objects.filter(conference=self.event.chat).first()
+        if not group:
+            return "Этой группы нет в базе"
+        # group = Group.objects.first()
 
         if self.event.args and self.event.args[0] in WEEK_TRANSLATOR:
             week_day = WEEK_TRANSLATOR[self.event.args[0]]
@@ -58,7 +58,7 @@ class TimeTable(CommonCommand):
             lessons_str += "Нет пар в этот день"
             return lessons_str
         for lesson in lessons:
-            lessons_str += lesson.get_formatted()
+            lessons_str += f"{lesson.get_formatted()}\n"
         return lessons_str
 
     @staticmethod
