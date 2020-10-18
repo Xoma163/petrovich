@@ -361,10 +361,15 @@ class VkBot(CommonBot, Thread):
         self.vk.messages.editChat(chat_id=chat_id, title=title)
 
     def set_chat_title_if_not_equals(self, chat_id, title):
-        if title != self.vk.messages.getConversationsById(peer_ids=chat_id)['items'][0]['chat_settings'][
-            'title']:
+        if title != self.vk.messages.getConversationsById(peer_ids=chat_id)['items'][0]['chat_settings']['title']:
             self.set_chat_title(int(chat_id) - 2000000000, title)
 
+    def get_conference_users(self, peer_id):
+        try:
+            return self.vk.messages.getConversationMembers(peer_id=peer_id, group_id=self.group_id, lang='ru')[
+                'profiles']
+        except:
+            raise RuntimeWarning("У бота нет админских прав для получения списка пользователей в конференции")
 
 class MyVkBotLongPoll(VkBotLongPoll):
 
