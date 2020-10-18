@@ -35,5 +35,4 @@ class Command(BaseCommand):
                     vk_bot.send_message(chat.chat_id, f"На ваш счет зачислено 100 000 бонусных очков.")
 
     def add_arguments(self, parser):
-        parser.add_argument('chat_id', nargs='+', type=str,
-                            help='chat_id')
+        parser.add_argument('chat_id', nargs='+', type=str, help='chat_id')
