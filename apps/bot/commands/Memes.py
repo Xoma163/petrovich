@@ -31,11 +31,7 @@ class Memes(CommonCommand):
                 page = self.event.args[0]
             else:
                 page = 1
-
-            if self.event.platform == 'tg':
-                memes = MemeModel.objects.filter(type='photo')
-            else:
-                memes = MemeModel.objects.all()
+            memes = MemeModel.objects.filter(approved=True)
 
             p = Paginator(memes, 20)
 
