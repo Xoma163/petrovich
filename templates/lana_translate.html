@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ЧТОБЫ ЗАВТРАК БЫЛ У МЕНЯ НА СТОЛЕ ДО ОБЕДА</title>
+  <script type="text/javascript" src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+
+</head>
+<body>
+<label for="input_data">
+  Входные данные
+</label>
+<br>
+<textarea id="input_data" rows="10" cols="200"></textarea>
+<br>
+<label for="output_data">
+  Выходные данные
+</label>
+<br>
+<textarea id="output_data" rows="10" cols="200"></textarea>
+</body>
+
+<footer>
+  <script>
+    $(document).ready(function () {
+      const cyrillicPattern = /[а-яА-ЯЁё]/;
+
+      $('#input_data').on('input', (event) => {
+        let input_text = $('#input_data').val();
+        console.log(input_text);
+        let output_text = "";
+        for (let i = 0; i < input_text.length; i++)
+          if (cyrillicPattern.test(input_text[i])) {
+            output_text += input_text[i].toLowerCase();
+          } else {
+            output_text += input_text[i];
+          }
+        $('#output_data').val(output_text);
+      });
+
+    });
+  </script>
+</footer>
+</html>
