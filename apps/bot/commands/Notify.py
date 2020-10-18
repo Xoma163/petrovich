@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 import dateutil
 from dateutil import parser
 
-from apps.bot.classes.Consts import WEEK_TRANSLATOR, Role
+from apps.bot.classes.Consts import WEEK_TRANSLATOR, Role, DELTA_WEEKDAY
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import localize_datetime, normalize_datetime, remove_tz
 from apps.service.models import Notify as NotifyModel
@@ -12,12 +12,9 @@ from apps.service.models import Notify as NotifyModel
 # Возвращает datetime, кол-во аргументов использованных для получения даты, была ли передана точная дата и время
 def get_time(arg1, arg2, timezone=None):
     exact_datetime_flag = True
-    if arg1 == "завтра":
+    if arg1 in DELTA_WEEKDAY:
         exact_datetime_flag = False
-        arg1 = (datetime.today().date() + timedelta(days=1)).strftime("%d.%m.%Y")
-    if arg1 == "послезавтра":
-        exact_datetime_flag = False
-        arg1 = (datetime.today().date() + timedelta(days=2)).strftime("%d.%m.%Y")
+        arg1 = (datetime.today().date() + timedelta(days=DELTA_WEEKDAY[arg1])).strftime("%d.%m.%Y")
 
     if arg1 in WEEK_TRANSLATOR:
         exact_datetime_flag = False

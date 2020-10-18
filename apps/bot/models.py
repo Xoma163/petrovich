@@ -29,7 +29,6 @@ class Chat(Platform):
     class Meta:
         verbose_name = "Чат"
         verbose_name_plural = "Чаты"
-        ordering = ["chat_id"]
 
     def __str__(self):
         return str(self.name)
