@@ -108,5 +108,7 @@ class Command(BaseCommand):
 
             lesson = self.schedule_today.filter(lesson_number=display_lesson_number).first()
             new_title = self.prepare_title_for_lesson(lesson)
-
-            self.set_title(str(new_title))
+            try:
+                self.set_title(str(new_title))
+            except:
+                pass
