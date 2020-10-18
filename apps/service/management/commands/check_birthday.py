@@ -30,7 +30,7 @@ class Command(BaseCommand):
 
                 gamer = Gamer.objects.filter(user=user).first()
                 if gamer:
-                    gamer.roulette_points += 10000
+                    gamer.roulette_points += 100000
                     gamer.save()
                     vk_bot.send_message(chat.chat_id, f"На ваш счет зачислено 10 000 бонусных очков.")
 
