@@ -339,14 +339,12 @@ class VkBot(CommonBot, Thread):
     def upload_video_by_link(self, link, name):
         values = {
             'name': name,
-            'is_private': True,
+            'is_private': False,
             'link': link,
         }
 
         response = self.vk_user.vk.video.save(**values)
-        response2 = requests.post(response['upload_url']).json()
-        print(response2)
-
+        requests.post(response['upload_url'])
         return f"video{response['owner_id']}_{response['video_id']}"
 
     def get_attachment_by_id(self, _type, group_id, _id):
@@ -371,8 +369,8 @@ class VkBot(CommonBot, Thread):
         except:
             raise RuntimeWarning("У бота нет админских прав для получения списка пользователей в конференции")
 
-class MyVkBotLongPoll(VkBotLongPoll):
 
+class MyVkBotLongPoll(VkBotLongPoll):
     def listen(self):
         while True:
             try:
