@@ -3,31 +3,76 @@
 <head>
   <meta charset="UTF-8">
   <title>ЧТОБЫ ЗАВТРАК БЫЛ У МЕНЯ НА СТОЛЕ ДО ОБЕДА</title>
-  <script type="text/javascript" src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+          integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+          crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+          integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+          crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+          integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+          crossorigin="anonymous"></script>
+
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
 </head>
 <body>
-<label for="input_data">
-  Входные данные
-</label>
+<div class="container-fluid">
+  <h2 class="text-center">Перевод в нижний регистр только русских символов</h2>
+  <div class="row">
+    <div class="col-12 col-sm-6">
+      <label for="input_data1" class="text-center w-100">
+        <b>Входные данные</b>
+      </label>
+      <br>
+      <textarea id="input_data1" rows="10" style="width:100%"></textarea>
+    </div>
+    <div class="col-12 col-sm-6">
+      <label for="output_data1" class="text-center w-100">
+        <b>Выходные данные</b>
+      </label>
+      <br>
+      <textarea id="output_data1" rows="10" style="width:100%"></textarea>
+    </div>
+  </div>
+  <h2 class="text-center mt-4">Перевод в нижний регистр только английских символов</h2>
+  <div class="row">
+    <div class="col-12 col-sm-6">
+      <label for="input_data2" class="text-center w-100">
+        <b>Входные данные</b>
+      </label>
+      <br>
+      <textarea id="input_data2" rows="10" style="width:100%"></textarea>
+    </div>
+    <div class="col-12 col-sm-6">
+      <label for="output_data2" class="text-center w-100">
+        <b>Выходные данные</b>
+      </label>
+      <br>
+      <textarea id="output_data2" rows="10" style="width:100%"></textarea>
+    </div>
+  </div>
+  <div class="text-center mt-4">
+    <img src="https://i.gifer.com/1LMW.gif" class="text-center img-fluid">
+  </div>
+
+</div>
+
+
 <br>
-<textarea id="input_data" rows="10" cols="200"></textarea>
 <br>
-<label for="output_data">
-  Выходные данные
-</label>
-<br>
-<textarea id="output_data" rows="10" cols="200"></textarea>
+
 </body>
 
 <footer>
   <script>
     $(document).ready(function () {
       const cyrillicPattern = /[а-яА-ЯЁё]/;
+      const latinPattern = /[a-zA-Z]/;
 
-      $('#input_data').on('input', (event) => {
-        let input_text = $('#input_data').val();
-        console.log(input_text);
+      $('#input_data1').on('input', (event) => {
+        let input_text = $('#input_data1').val();
         let output_text = "";
         for (let i = 0; i < input_text.length; i++)
           if (cyrillicPattern.test(input_text[i])) {
@@ -35,7 +80,19 @@
           } else {
             output_text += input_text[i];
           }
-        $('#output_data').val(output_text);
+        $('#output_data1').val(output_text);
+      });
+
+      $('#input_data2').on('input', (event) => {
+        let input_text = $('#input_data2').val();
+        let output_text = "";
+        for (let i = 0; i < input_text.length; i++)
+          if (latinPattern.test(input_text[i])) {
+            output_text += input_text[i].toLowerCase();
+          } else {
+            output_text += input_text[i];
+          }
+        $('#output_data2').val(output_text);
       });
 
     });
