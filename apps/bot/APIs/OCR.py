@@ -4,7 +4,6 @@ import requests
 from petrovich.settings import env
 
 
-# ToDo: url or content
 class OCRApi:
     def __init__(self):
         self.url = 'https://api.ocr.space/parse/image'
@@ -16,10 +15,9 @@ class OCRApi:
             'apikey': self.api_key,
             'language': language,
         }
-        response = requests.post('https://api.ocr.space/parse/image',
-                                 data=payload,
-                                 ).json()
-        return response
+        return requests.post('https://api.ocr.space/parse/image',
+                             data=payload,
+                             ).json()
 
     def get_recognize_by_bytes(self, file, language):
         payload = {
@@ -27,11 +25,10 @@ class OCRApi:
             'apikey': self.api_key,
             'language': language,
         }
-        response = requests.post('https://api.ocr.space/parse/image',
-                                 files={'filename.jpg': file},
-                                 data=payload,
-                                 ).json()
-        return response
+        return requests.post('https://api.ocr.space/parse/image',
+                             files={'filename.jpg': file},
+                             data=payload,
+                             ).json()
 
     def recognize(self, url_or_bytes, lang):
         if isinstance(url_or_bytes, str):
@@ -41,7 +38,7 @@ class OCRApi:
 
         if 'OCRExitCode' in response:
             if response['OCRExitCode'] == 99:
-                raise RuntimeWarning("Неправильный язык")
+                raise RuntimeError("Ошибка")
         if 'ParsedResults' not in response:
             raise RuntimeWarning("Ничего не распознал")
         text_list = [x['ParsedText'].strip() for x in response['ParsedResults']]

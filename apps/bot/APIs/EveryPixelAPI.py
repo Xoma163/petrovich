@@ -3,7 +3,6 @@ import requests
 from petrovich.settings import env
 
 
-# ToDo: url or content
 class EveryPixelAPI:
     def __init__(self):
         self.image_quality_URL = 'https://api.everypixel.com/v1/quality_ugc'
