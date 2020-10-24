@@ -337,7 +337,7 @@ class CommonCommand:
         if self.event.sender.city:
             return True
 
-        error = "Не указан город в профиле. /город (название) - устанавливает город пользователю"
+        error = "Не указан город в профиле. /профиль город (название) - устанавливает город пользователю"
         raise RuntimeWarning(error)
 
     def handle_menu(self, menu, arg):

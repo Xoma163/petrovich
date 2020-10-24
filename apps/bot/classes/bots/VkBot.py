@@ -20,7 +20,7 @@ from apps.bot.classes.Consts import Role
 from apps.bot.classes.bots.CommonBot import CommonBot
 from apps.bot.classes.bots.VkUser import VkUser
 from apps.bot.classes.events.VkEvent import VkEvent
-from apps.bot.commands.City import add_city_to_db
+from apps.bot.commands.Profile import add_city_to_db
 from apps.bot.models import Users, Chat, Bot
 from apps.timetable.models import Group as ScheduleGroup
 from petrovich.settings import env
