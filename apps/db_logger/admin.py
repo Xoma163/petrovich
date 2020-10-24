@@ -7,6 +7,7 @@ from django.db import models
 from django.forms import Textarea
 from django.utils.html import format_html
 
+from apps.db_logger.actions import set_debug, set_info, set_warning, set_error
 from apps.db_logger.config import DJANGO_DB_LOGGER_ADMIN_LIST_PER_PAGE
 from apps.db_logger.models import MovementLog, Logger
 
@@ -23,6 +24,7 @@ class LoggerAdmin(admin.ModelAdmin):
                    ('chat', admin.RelatedOnlyFieldListFilter),
                    'logger_name',)
     list_per_page = DJANGO_DB_LOGGER_ADMIN_LIST_PER_PAGE
+    actions = [set_debug, set_info, set_warning, set_error]
 
     @staticmethod
     def colored_level(instance):
