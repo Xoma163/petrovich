@@ -25,7 +25,7 @@ class Covid19API:
             response = self.do_the_request(url, timeout=10)
             time.sleep(1)
         except requests.exceptions.ReadTimeout:
-            raise RuntimeError("Проблемы с API. Слишком долго ждал")
+            raise RuntimeWarning("Проблемы с API. Слишком долго ждал")
         if not response:
             raise RuntimeError(f"Проблемы с API. {response.status_code}")
         response = response.json()
@@ -57,7 +57,7 @@ class Covid19API:
         try:
             response = self.do_the_request(url, timeout=10)
         except requests.exceptions.ReadTimeout:
-            raise RuntimeError("Проблемы с API. Слишком долго ждал")
+            raise RuntimeWarning("Проблемы с API. Слишком долго ждал")
         if not response:
             raise RuntimeError(f"Проблемы с API. {response.status_code}")
         response = response.json()

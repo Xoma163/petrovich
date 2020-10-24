@@ -142,7 +142,7 @@ class CommonCommand:
             if self.event.chat.admin == self.event.sender:
                 return True
         error = f"Команда доступна только для пользователей с уровнем прав {role.value}"
-        raise RuntimeError(error)
+        raise RuntimeWarning(error)
 
     def check_args(self, args=None):
         """
@@ -158,7 +158,7 @@ class CommonCommand:
             else:
                 error = "Передано недостаточно аргументов"
                 error += f"\n\n{get_help_for_command(self)}"
-                raise RuntimeError(error)
+                raise RuntimeWarning(error)
 
         error = "Для работы команды требуются аргументы"
         error += f"\n\n{get_help_for_command(self)}"
@@ -180,12 +180,12 @@ class CommonCommand:
                     return True
                 else:
                     error = f"Аргумент не может принимать значение {arg}"
-                    raise RuntimeError(error)
+                    raise RuntimeWarning(error)
             else:
                 return True
         else:
             error = f"Значение может быть в диапазоне [{_min};{_max}]"
-            raise RuntimeError(error)
+            raise RuntimeWarning(error)
 
     @staticmethod
     def _transform_k(arg):
@@ -223,7 +223,7 @@ class CommonCommand:
                     self.event.args[checked_arg_index] = int(self.event.args[checked_arg_index])
                 except ValueError:
                     error = "Аргумент должен быть целочисленным"
-                    raise RuntimeError(error)
+                    raise RuntimeWarning(error)
         return True
 
     def parse_float(self):
@@ -242,7 +242,7 @@ class CommonCommand:
                     self.event.args[checked_arg_index] = float(self.event.args[checked_arg_index])
                 except ValueError:
                     error = "Аргумент должен быть с плавающей запятой"
-                    raise RuntimeError(error)
+                    raise RuntimeWarning(error)
         return True
 
     def check_pm(self):
@@ -254,7 +254,7 @@ class CommonCommand:
             return True
 
         error = "Команда работает только в ЛС"
-        raise RuntimeError(error)
+        raise RuntimeWarning(error)
 
     def check_conversation(self):
         """
@@ -265,7 +265,7 @@ class CommonCommand:
             return True
 
         error = "Команда работает только в беседах"
-        raise RuntimeError(error)
+        raise RuntimeWarning(error)
 
     def check_fwd(self):
         """
@@ -276,7 +276,7 @@ class CommonCommand:
             return True
 
         error = "Перешлите сообщения"
-        raise RuntimeError(error)
+        raise RuntimeWarning(error)
 
     @staticmethod
     def check_command_time(name, seconds):
@@ -293,7 +293,7 @@ class CommonCommand:
         delta_time = datetime.utcnow() - remove_tz(update_datetime)
         if delta_time.seconds < seconds and delta_time.days == 0:
             error = f"Нельзя часто вызывать данную команду. Осталось {seconds - delta_time.seconds} секунд"
-            raise RuntimeError(error)
+            raise RuntimeWarning(error)
         entity.name = name
         entity.save()
         return True
@@ -305,7 +305,7 @@ class CommonCommand:
         """
         if self.event.platform not in self.platforms:
             error = f"Команда недоступна для {self.event.platform.upper()}"
-            raise RuntimeError(error)
+            raise RuntimeWarning(error)
         return True
 
     def check_attachments(self):
@@ -324,7 +324,7 @@ class CommonCommand:
 
         allowed_types = ' '.join([ATTACHMENT_TRANSLATOR[_type] for _type in self.attachments])
         error = f"Для работы команды требуются вложения: {allowed_types}"
-        raise RuntimeError(error)
+        raise RuntimeWarning(error)
 
     def check_city(self, city=None):
         """
@@ -338,7 +338,7 @@ class CommonCommand:
             return True
 
         error = "Не указан город в профиле. /город (название) - устанавливает город пользователю"
-        raise RuntimeError(error)
+        raise RuntimeWarning(error)
 
     def handle_menu(self, menu, arg):
         """

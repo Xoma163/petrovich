@@ -306,7 +306,7 @@ class VkBot(CommonBot, Thread):
             vk_audio = self.vk_user.upload.audio(audio, artist=artist, title=title)
         except vk_api.exceptions.ApiError as e:
             if e.code == 270:
-                raise RuntimeError("Аудиозапись была удалена по просьбе правообладателя")
+                raise RuntimeWarning("Аудиозапись была удалена по просьбе правообладателя")
             raise RuntimeError("Ошибка загрузки аудиозаписи")
         return self.get_attachment_by_id('audio', vk_audio['owner_id'], vk_audio['id'])
 

@@ -44,6 +44,9 @@ class VkEvent(Event):
                     new_attachment['title'] = attachment_type['title']
                     new_attachment['ext'] = attachment_type['ext']
                     new_attachment['download_url'] = attachment_type['url']
+                    new_attachment['private_download_url'] = None
+                    new_attachment['content'] = None
+
                 elif attachment['type'] == 'wall':
                     if 'attachments' in attachment_type:
                         new_attachment['attachments'] = self.parse_attachments(attachment_type['attachments'])

@@ -82,7 +82,7 @@ A : Любая команда должна содержать метод \_\_ini
 
 #### Формат attachments
 
--   `{'photo':{'download_url':'...','size':{'width':'...','height'...'}}}`
+-   `{'photo':{'download_url':'...', 'private_download_url':'...','content':'...', 'size':{'width':'...','height'...'}}}`
 -   `{'video':{'url':'...','title':'...'}}`
 -   `{'audio':{'owner_id':'...', 'id':'...', 'url':'...', 'artist':'...', 'title':'...', 'duration':'...', 'download_url':'...' }}`
 -   `{'doc':{'title':'...', 'ext':'...', 'download_url':'...'}}`

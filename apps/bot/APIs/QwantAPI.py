@@ -21,7 +21,7 @@ class QwantAPI:
             }
         )
         if r.status_code == 429:
-            raise RuntimeError("Сегодняшний лимит исчерпан")
+            raise RuntimeWarning("Сегодняшний лимит исчерпан")
 
         response = r.json().get('data').get('result').get('items')
         urls = [r.get('media') for r in response]

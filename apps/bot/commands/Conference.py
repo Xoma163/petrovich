@@ -26,7 +26,7 @@ class Conference(CommonCommand):
                 self.event.chat.name = self.event.original_args
                 self.event.chat.save()
                 return f"Поменял название беседы на {self.event.original_args}"
-            except RuntimeError as e:
+            except RuntimeWarning as e:
                 if self.event.chat.admin is None:
                     msg = "Так как администратора конфы не было, то теперь вы стали администратором конфы!"
                     self.event.chat.admin = self.event.sender

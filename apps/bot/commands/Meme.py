@@ -106,7 +106,7 @@ class Meme(CommonCommand):
             try:
                 self.parse_int()
                 _id = self.event.args[1]
-            except RuntimeError:
+            except RuntimeWarning:
                 pass
         attachments = get_attachments_from_attachments_or_fwd(self.event, ['audio', 'video', 'photo', 'doc'])
         if len(attachments) == 0:
@@ -153,7 +153,7 @@ class Meme(CommonCommand):
                 else:
                     msg = f'Мем с названием "{meme.name}" удалён поскольку он не ' \
                           f'соответствует правилам или был удалён автором.'
-            except RuntimeError:
+            except RuntimeWarning:
                 meme = self.get_meme(self.event.args[1:])
                 msg = f'Мем с названием "{meme.name}" удалён поскольку он не ' \
                       f'соответствует правилам или был удалён автором.'
@@ -273,7 +273,7 @@ class Meme(CommonCommand):
             try:
                 self.parse_int()
                 _id = self.event.args[1]
-            except RuntimeError:
+            except RuntimeWarning:
                 pass
         meme = self.get_meme(self.event.args[1:], _id=_id)
         return f"Название: {meme.name}\n" \
@@ -394,7 +394,7 @@ def prepare_meme_to_send(bot, event, meme, print_name=False, send_keyboard=False
             msg['attachments'] = [meme.link.replace(VK_URL, '')]
             owner_id, _id = msg['attachments'][0].replace('video', '').split('_')
             if bot.get_video(owner_id, _id)['count'] == 0:
-                raise RuntimeError("Мем был удалён, перезалейте плиз")
+                raise RuntimeWarning("Мем был удалён, перезалейте плиз")
 
         elif meme.type == 'audio':
             msg['attachments'] = [meme.link.replace(VK_URL, '')]

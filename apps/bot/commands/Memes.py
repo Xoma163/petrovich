@@ -55,7 +55,7 @@ class Memes(CommonCommand):
             msg_footer = f'----{p.per_page * (page - 1) + 1}/{on_last_page}----'
             msg = f"{msg_header}\n\n{msg_body}\n\n{msg_footer}"
             return msg
-        except RuntimeError:
+        except RuntimeWarning:
             memes = MemeModel.objects
             for arg in self.event.args:
                 memes = memes.filter(name__icontains=arg)

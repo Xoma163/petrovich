@@ -3,13 +3,18 @@ from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import get_attachments_from_attachments_or_fwd
 
 
-def draw_on_images(image_url, faces):
+def draw_on_images(image, faces):
     import requests
     import numpy as np
     import cv2
 
-    resp = requests.get(image_url, stream=True).raw
-    _image = np.asarray(bytearray(resp.read()), dtype="uint8")
+    if isinstance(image, str):
+        resp = requests.get(image, stream=True).raw
+        data = bytearray(resp.read())
+    else:
+        data = bytearray(image)
+
+    _image = np.asarray(data, dtype="uint8")
     _image = cv2.imdecode(_image, cv2.IMREAD_COLOR)
 
     # B G R
@@ -53,11 +58,12 @@ class Age(CommonCommand):
 
     def start(self):
         image = get_attachments_from_attachments_or_fwd(self.event, 'photo')[0]
-        everypixel_api = EveryPixelAPI(image['download_url'])
-        faces = everypixel_api.get_faces_on_photo()
+        everypixel_api = EveryPixelAPI()
+        image = image['download_url'] or image['content']
+        faces = everypixel_api.get_faces_on_photo(image)
 
         if len(faces) == 0:
             raise RuntimeWarning("Не нашёл лиц на фото")
-        file_path = draw_on_images(image['download_url'], faces)
+        file_path = draw_on_images(image, faces)
         attachments = self.bot.upload_photos(file_path)
         return {"attachments": attachments}

@@ -20,9 +20,9 @@ class Birds(CommonCommand):
         attachments = []
         try:
             image = camera_handler.get_img()
-        except RuntimeError as e:
+        except RuntimeWarning as e:
             print(e)
-            raise RuntimeWarning("какая-то дичь с синичками. Зовите разраба")
+            raise RuntimeError("какая-то дичь с синичками. Зовите разраба")
         attachment = self.bot.upload_photos(image)[0]
         attachments.append(attachment)
 

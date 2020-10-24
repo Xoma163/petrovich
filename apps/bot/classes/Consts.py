@@ -18,6 +18,12 @@ class Role(Enum):
         return value in cls._value2member_map_
 
 
+class Platform(Enum):
+    VK = 'vk'
+    TG = 'tg'
+    API = 'api'
+
+
 WEEK_TRANSLATOR = {
     'понедельник': 1, 'пн': 1,
     'вторник': 2, 'вт': 2,

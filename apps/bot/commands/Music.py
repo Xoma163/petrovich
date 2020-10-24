@@ -86,7 +86,7 @@ class Music(CommonCommand):
 
         try:
             audio_attachment = self.bot.upload_audio(o, artist, title)
-        except RuntimeError as e:
+        except Exception as e:
             msg = f"{str(e)}\n\nСсылка на скачивание: {audio_link}"
             return msg
 

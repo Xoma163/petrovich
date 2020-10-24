@@ -246,7 +246,7 @@ class Codenames(CommonCommand):
             self.parse_int()
             count = self.event.args[1]
             word = self.event.args[2]
-        except RuntimeError:
+        except RuntimeWarning:
             self.int_args = [2]
             self.parse_int()
             word = self.event.args[1]

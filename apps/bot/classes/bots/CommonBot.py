@@ -92,17 +92,16 @@ class CommonBot:
                 msg = str(e)
                 log_runtime_warning = {'result': msg}
                 self.logger.warning(log_runtime_warning)
-
                 if send:
                     self.parse_and_send_msgs(event.peer_id, msg)
                 return msg
             except RuntimeError as e:
-                exception = str(e)
-                log_runtime_error = {'exception': exception, 'result': exception}
+                msg = str(e)
+                log_runtime_error = {'exception': msg, 'result': msg}
                 self.logger.error(log_runtime_error)
                 if send:
-                    self.parse_and_send_msgs(event.peer_id, exception)
-                return exception
+                    self.parse_and_send_msgs(event.peer_id, msg)
+                return msg
             except Exception as e:
                 msg = "Непредвиденная ошибка. Сообщите разработчику в группе или команда /баг"
                 tb = traceback.format_exc()

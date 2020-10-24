@@ -16,17 +16,19 @@ from apps.bot.classes.events.TgEvent import TgEvent
 from apps.bot.models import Users, Chat, Bot
 from petrovich.settings import env
 
+API_TELEGRAM_URL = 'api.telegram.org'
+
 
 class TgRequests:
     def __init__(self, token):
         self.token = token
 
-    def get(self, url, params=None, **kwargs):
-        url = f'https://api.telegram.org/bot{self.token}/{url}'
+    def get(self, method_name, params=None, **kwargs):
+        url = f'https://{API_TELEGRAM_URL}/bot{self.token}/{method_name}'
         return requests.get(url, params, **kwargs)
 
-    def post(self, url, params=None, **kwargs):
-        url = f'https://api.telegram.org/bot{self.token}/{url}'
+    def post(self, method_name, params=None, **kwargs):
+        url = f'https://{API_TELEGRAM_URL}/bot{self.token}/{method_name}'
         return requests.post(url, params, **kwargs)
 
 
@@ -150,6 +152,40 @@ class TgBot(CommonBot, Thread):
         prepared_message = {'chat_id': peer_id, 'text': msg, 'parse_mode': 'HTML', 'reply_markup': keyboard}
         return self.requests.get('sendMessage', params=prepared_message)
 
+    # ToDo: в TgEvent
+    def _setup_event_attachments(self, event):
+        attachments = []
+        if 'media_group_id' in event:
+            # ToDo: для 2+ вложений, но зачем?
+            pass
+        if 'photo' in event['message']:
+            # ToDo: ебучая телега шлёт хуй пойми как картинки
+            photo = event['message']['photo'][-1]
+            new_photo = {
+                'id': photo['file_id'],
+                'tg_url': '',
+                'content': '',
+                'private_download_url': '',
+                'download_url': None,
+                'size': {
+                    'width': photo['width'],
+                    'height': photo['height'],
+                },
+                'type': 'photo'
+            }
+            file_path = self.requests.get('getFile', params={'file_id': new_photo['id']}).json()['result'][
+                'file_path']
+            new_photo['private_download_url'] = f'https://{API_TELEGRAM_URL}/file/bot{self.token}/{file_path}'
+
+            response = requests.get(new_photo['private_download_url'])
+            new_photo['content'] = response.content
+            attachments.append(new_photo)
+        if 'voice' in event['message']:
+            for audio_message in event['message']['voice']:
+                attachments.append(audio_message)
+                attachments[-1]['type'] = 'audio_message'
+        return attachments
+
     def _setup_event(self, event):
         if 'callback_query' in event:
             event = event['callback_query']
@@ -219,30 +255,7 @@ class TgBot(CommonBot, Thread):
 
             if event['message']['reply_to_message']['from']['is_bot']:
                 tg_event['fwd'][0]['from_id'] *= -1
-        if 'photo' in event['message']:
-            tg_event['message']['attachments'].append(event['message']['photo'][-1])
-            tg_event['message']['attachments'][-1]['type'] = 'photo'
-        if 'voice' in event['message']:
-            tg_event['message']['attachments'].append(event['message']['photo'][-1])
-            tg_event['message']['attachments'][-1]['type'] = 'audio_message'
-
-            # if tg_event['message']['attachments']:
-            #     try:
-            #         response = self.requests.get('getFile',
-            #                                      params={
-            #                                          'file_id': tg_event['message']['attachments'][-1]['file_id']}).json()
-            #         if 'result' in response:
-            #             file_path = response['result'].get('file_path', None)
-            #             if file_path:
-            #                 file = requests.get(f'https://api.telegram.org/file/bot{self.token}/{file_path}')
-            #                 tg_event['message']['attachments'] = {
-            #                     'type': 'photo',
-            #                     'url': f'https://api.telegram.org/file/bot{self.token}/{file_path}',
-            #                     'bytes': file.content
-            #                 }
-            #                 pass
-            #     except:
-            #         tg_event['message']['attachments'] = []
+        tg_event['message']['attachments'] = self._setup_event_attachments(event)
         return tg_event
 
     def listen(self):

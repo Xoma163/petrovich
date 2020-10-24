@@ -59,7 +59,7 @@ class Notifies(CommonCommand):
             try:
                 self.check_sender(Role.CONFERENCE_ADMIN)
                 notifies = Notify.objects.filter(chat=self.event.chat).order_by("date")
-            except RuntimeError:
+            except RuntimeWarning:
                 notifies = notifies.filter(chat=self.event.chat)
         filter_list = self.event.args[1:]
         for _filter in filter_list:
