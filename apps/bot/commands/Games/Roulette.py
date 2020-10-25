@@ -125,15 +125,13 @@ class Roulette(CommonCommand):
     def menu_bonus(self):
         datetime_now = localize_datetime(datetime.datetime.utcnow(), DEFAULT_TIME_ZONE)
         datetime_last = localize_datetime(remove_tz(self.gamer.roulette_points_today), DEFAULT_TIME_ZONE)
-        if self.gamer.roulette_points > 10000:
-            raise RuntimeWarning("Тебе хватит и так")
         if (datetime_now.date() - datetime_last.date()).days > 0:
             self.gamer.roulette_points += 500
             self.gamer.roulette_points_today = datetime_now
             self.gamer.save()
             return "Выдал пособие по безработице"
         else:
-            raise RuntimeWarning("Приходи завтра")
+            raise RuntimeWarning("Ты уже получил бонус. Приходи завтра")
 
     def menu_transfer(self):
         self.check_conversation()
