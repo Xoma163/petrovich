@@ -361,7 +361,12 @@ class Meme(CommonCommand):
     def get_similar_memes_names(memes):
         total_memes_count = len(memes)
         memes = memes[:10]
-        meme_names = [meme.name for meme in memes]
+        meme_names = []
+        for meme in memes:
+            if len(meme.name) < 50:
+                meme_names.append(meme.name)
+            else:
+                meme_names.append(meme.name[:50] + "...")
         meme_names_str = ";\n".join(meme_names)
 
         msg = f"Нашёл сразу {total_memes_count}, уточните:\n\n" \
