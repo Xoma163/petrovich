@@ -53,6 +53,7 @@ class Discipline(models.Model):
     short_name = models.CharField("Название сокращённое",
                                   help_text="Сокращенное название (если оставить пустым, то сгенерируется автоматически)",
                                   blank=True, max_length=50)
+    bbb_link = models.TextField("Ссылка bbb", blank=True, help_text="Бот будет слать этот текст когда наступит пара")
 
     def save(self, *args, **kwargs):
         if not self.short_name:
