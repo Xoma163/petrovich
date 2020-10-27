@@ -58,7 +58,7 @@ class Event:
         return msg_dict
 
     def parse_attachments(self, attachments):
-        pass
+        raise NotImplementedError
 
     def __init__(self, event):
         mentions = env.list('VK_BOT_MENTIONS')

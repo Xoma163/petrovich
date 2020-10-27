@@ -37,17 +37,17 @@ class Command(BaseCommand):
 
                         try:
                             teacher = lesson.find('div', {'class': 'schedule__teacher'}).text.strip()
-                        except:
+                        except Exception:
                             teacher = ""
 
                         try:
                             discipline = lesson.find('div', {'class': 'schedule__discipline'}).text.strip()
-                        except:
+                        except Exception:
                             discipline = ""
 
                         try:
                             cabinet = lesson.find('div', {'class': 'schedule__place'}).text.strip()
-                        except:
+                        except Exception:
                             cabinet = ""
 
                         if lesson.find('div', {'class': 'lesson-border-type-1'}):

@@ -48,7 +48,7 @@ class Command(BaseCommand):
                     word_type = 'good'
 
                 records = worksheet.get_all_records()
-                for j, record in enumerate(records):
+                for record in records:
                     record['type'] = word_type
                     if 'id' in record:
                         del record['id']

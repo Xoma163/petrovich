@@ -55,17 +55,14 @@ class Meme(CommonCommand):
 
     # MENU #
     def menu_add(self):
+        if self.event.platform == 'tg':
+            raise RuntimeWarning('В телеграмме не поддерживается добавление мемов')
+
         self.check_args(2)
         attachments = get_attachments_from_attachments_or_fwd(self.event, ['audio', 'video', 'photo', 'doc'])
         if len(attachments) == 0:
             raise RuntimeWarning("Не нашёл вложений в сообщении или пересланном сообщении")
         attachment = attachments[0]
-
-        if self.event.platform == 'tg':
-            # ToDo:
-            raise RuntimeWarning('В телеграмме пока не поддерживается добавление мемов')
-            if attachment['type'] != 'photo':
-                raise RuntimeWarning('В телеграмме поддерживается добавление только картинок')
 
         for i, _ in enumerate(self.event.args):
             self.event.args[i] = self.event.args[i].lower()

@@ -118,4 +118,3 @@ class Command(BaseCommand):
 
             except Exception as e:
                 print(e)
-                pass

@@ -34,7 +34,7 @@ def add_phrase_before(recipient, word, field_name):
     elif field_name[1] == 'm':
         return f"{recipient}, вы {word}"
     else:
-        raise RuntimeWarning(f"Ошибка определения числа и рода")
+        raise RuntimeWarning("Ошибка определения числа и рода")
 
 
 def get_praise_or_scold(bot, event, _type):

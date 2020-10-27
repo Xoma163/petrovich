@@ -117,7 +117,7 @@ class CommonCommand:
         Обработка самой команды
         :return: result (см. документацию)
         """
-        raise NotImplemented()
+        raise NotImplementedError
 
     def check_sender(self, role):
         """
