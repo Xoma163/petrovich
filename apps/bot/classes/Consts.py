@@ -9,6 +9,7 @@ class Role(Enum):
     TERRARIA = "террария"
     STUDENT = "студент"
     MINECRAFT_NOTIFY = "уведомления майна"
+    HOME = "дом"
     USER = "пользователь"
     BANNED = "забанен"
     TRUSTED = "доверенный"
