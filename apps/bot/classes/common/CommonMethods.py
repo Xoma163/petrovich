@@ -180,3 +180,27 @@ def draw_text_on_image(text):
     img_byte_arr = io.BytesIO()
     img.save(img_byte_arr, format='PNG')
     return img_byte_arr
+
+
+def get_role_by_str(role_str):
+    who = None
+    if role_str in ['администрация', 'администратор', 'админы', 'админ', 'главный', 'власть', 'господин']:
+        who = Role.ADMIN
+    elif role_str in ['moderators', 'moderator' 'модераторы', 'модератор', 'модеры', 'модер']:
+        who = Role.MODERATOR
+    elif role_str in ['студент']:
+        who = Role.TERRARIA
+    elif role_str in ['майнкрафт уведомления', 'майн уведомления']:
+        who = Role.MINECRAFT_NOTIFY
+    elif role_str in ['майнкрафт', 'майн']:
+        who = Role.MINECRAFT
+    elif role_str in ['террария']:
+        who = Role.TERRARIA
+    elif role_str in ['забанен', 'бан']:
+        who = Role.BANNED
+    elif role_str in ['доверенный', 'проверенный']:
+        who = Role.TRUSTED
+    elif role_str in ['дом', 'домашний', 'дома']:
+        who = Role.HOME
+
+    return who
