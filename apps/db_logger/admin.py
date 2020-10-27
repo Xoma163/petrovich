@@ -18,7 +18,7 @@ class LoggerAdmin(admin.ModelAdmin):
         models.TextField: {'widget': Textarea(attrs={'rows': 15, 'cols': 150})},
     }
 
-    list_display = ('create_datetime_format', 'logger_name', 'colored_level', 'sender', 'chat', 'user_msg', 'exception')
+    list_display = ('create_datetime', 'logger_name', 'colored_level', 'sender', 'chat', 'user_msg', 'exception')
     list_filter = ('level',
                    ('sender', admin.RelatedOnlyFieldListFilter),
                    ('chat', admin.RelatedOnlyFieldListFilter),
@@ -43,11 +43,6 @@ class LoggerAdmin(admin.ModelAdmin):
     def traceback(instance):
         return format_html('<pre><code>{content}</code></pre>', content=instance.trace if instance.trace else '')
 
-    @staticmethod
-    def create_datetime_format(instance):
-        return instance.create_datetime.strftime('%d.%m.%Y %X')
-
-    create_datetime_format.short_description = "Дата создания"
 
 
 @admin.register(MovementLog)

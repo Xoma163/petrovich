@@ -56,7 +56,7 @@ class Memes(CommonCommand):
             msg = f"{msg_header}\n\n{msg_body}\n\n{msg_footer}"
             return msg
         except RuntimeWarning:
-            memes = MemeModel.objects
+            memes = MemeModel.objects.filter(approved=True)
             for arg in self.event.args:
                 memes = memes.filter(name__icontains=arg)
             if len(memes) == 0:
