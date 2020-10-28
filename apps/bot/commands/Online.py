@@ -8,7 +8,7 @@ class Online(CommonCommand):
         super().__init__(names, help_text, conversation=True, platforms=['vk'])
 
     def start(self):
-        users = self.bot.get_conference_users(self.event.chat.chat_id)
+        users = sorted(self.bot.get_conference_users(self.event.chat.chat_id), key=lambda x: x['first_name'])
         online_users_name = []
         for user in users:
             if user['online']:
