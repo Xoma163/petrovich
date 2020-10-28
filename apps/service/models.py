@@ -141,6 +141,13 @@ class Meme(models.Model):
     uses = models.PositiveIntegerField("Использований", default=0)
     approved = models.BooleanField("Разрешённый", default=False)
 
+    def get_info(self):
+        return f"Название: {self.name}\n" \
+               f"ID: {self.pk}\n" \
+               f"Автор: {self.author}\n" \
+               f"Ссылка: {self.link}\n" \
+               f"Использований: {self.uses}\n"
+
     class Meta:
         verbose_name = "мем"
         verbose_name_plural = "мемы"

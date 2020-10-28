@@ -273,11 +273,7 @@ class Meme(CommonCommand):
             except RuntimeWarning:
                 pass
         meme = self.get_meme(self.event.args[1:], _id=_id)
-        return f"Название: {meme.name}\n" \
-               f"ID: {meme.pk}\n" \
-               f"Автор: {meme.author}\n" \
-               f"Ссылка: {meme.link}\n" \
-               f"Использований: {meme.uses}\n"
+        return meme.get_info()
 
     def menu_default(self):
         memes = self.get_meme(self.event.args, use_tanimoto=True)
@@ -396,7 +392,11 @@ def prepare_meme_to_send(bot, event, meme, print_name=False, send_keyboard=False
             msg['attachments'] = [meme.link.replace(VK_URL, '')]
             owner_id, _id = msg['attachments'][0].replace('video', '').split('_')
             if bot.get_video(owner_id, _id)['count'] == 0:
-                raise RuntimeWarning("Мем был удалён, перезалейте плиз")
+                error = "Мем был удалён, перезалейте плиз"
+                meme_info = meme.get_info()
+                message_to_test_chat = f"{error}\n\n{meme_info}"
+                bot.parse_and_send_msgs(bot.test_chat.peer_id, message_to_test_chat)
+                raise RuntimeWarning(error)
 
         elif meme.type == 'audio':
             msg['attachments'] = [meme.link.replace(VK_URL, '')]
