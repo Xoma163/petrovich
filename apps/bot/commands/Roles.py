@@ -9,12 +9,12 @@ def get_roles(user):
     return active_roles
 
 
-class Permissions(CommonCommand):
+class Roles(CommonCommand):
     def __init__(self):
-        names = ["права"]
-        help_text = "Права - присылает список ваших прав"
-        detail_help_text = "Права - присылает ваши права\n" \
-                           "Права [N] - права пользователя в беседе. N - имя, фамилия, логин/id, никнейм"
+        names = ["роли"]
+        help_text = "Роли - присылает список ваших ролей"
+        detail_help_text = "Роли - присылает ваши роли\n" \
+                           "Роли [N] - роли пользователя в беседе. N - имя, фамилия, логин/id, никнейм"
 
         super().__init__(names, help_text, detail_help_text)
 
