@@ -361,6 +361,8 @@ class VkBot(CommonBot, Thread):
     def set_chat_title_if_not_equals(self, chat_id, title):
         if title != self.vk.messages.getConversationsById(peer_ids=chat_id)['items'][0]['chat_settings']['title']:
             self.set_chat_title(int(chat_id) - 2000000000, title)
+            return True
+        return False
 
     def get_conference_users(self, peer_id):
         try:

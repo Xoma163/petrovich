@@ -95,6 +95,7 @@ class Command(BaseCommand):
             first_lesson_number = self.find_first_lesson_number()
             last_lesson_number = self.find_last_lesson_number()
 
+            send_bbb_link = False
             if not lesson_number:
                 display_lesson_number = None
             else:
@@ -102,6 +103,7 @@ class Command(BaseCommand):
                     display_lesson_number = first_lesson_number
                 elif first_lesson_number and last_lesson_number and first_lesson_number <= lesson_number <= last_lesson_number:
                     display_lesson_number = lesson_number
+                    send_bbb_link = True
                 elif last_lesson_number and lesson_number > last_lesson_number:
                     display_lesson_number = None
                 else:
@@ -113,7 +115,7 @@ class Command(BaseCommand):
             new_title = self.prepare_title_for_lesson(lesson)
             try:
                 self.set_title(str(new_title))
-                if lesson and lesson.discipline.bbb_link:
+                if send_bbb_link and lesson and lesson.discipline.bbb_link:
                     self.send_bbb_link(lesson.discipline.bbb_link)
 
             except Exception as e:
