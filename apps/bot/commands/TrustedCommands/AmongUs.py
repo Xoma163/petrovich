@@ -14,6 +14,5 @@ class AmongUs(CommonCommand):
                              "@ma_maksim\n" \
                              "@eatm0re\n" \
                              "@mstop\n" \
-                             "@e.korsakov\n" \
-                             "@red_phenyk\n"
+                             "@e.korsakov\n"
         return user_notifications
