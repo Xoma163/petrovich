@@ -2,7 +2,7 @@ from apps.bot.classes.Consts import Role
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import get_attachments_from_attachments_or_fwd, tanimoto
 from apps.service.models import Meme as MemeModel
-from petrovich.settings import VK_URL, env
+from petrovich.settings import VK_URL
 
 IMAGE_EXTS = ['jpg', 'jpeg', 'png']
 
@@ -92,7 +92,7 @@ class Meme(CommonCommand):
             meme_to_send['msg'] = "Запрос на подтверждение мема:\n" \
                                   f"{new_meme_obj.author}\n" \
                                   f"{new_meme_obj.name} ({new_meme_obj.id})"
-            self.bot.parse_and_send_msgs(self.bot.get_group_id(env.str("VK_TEST_CHAT_ID")), meme_to_send)
+            self.bot.parse_and_send_msgs(self.bot.test_chat.chat_id, meme_to_send)
             return "Добавил. Воспользоваться мемом можно после проверки модераторами."
 
     def menu_refresh(self):
@@ -133,7 +133,7 @@ class Meme(CommonCommand):
             meme_to_send['msg'] = "Запрос на обновление мема:\n" \
                                   f"{meme.author}\n" \
                                   f"{meme.name} ({meme.id})"
-            self.bot.parse_and_send_msgs(self.bot.test_chat.peer_id, meme_to_send)
+            self.bot.parse_and_send_msgs(self.bot.test_chat.chat_id, meme_to_send)
             return "Обновил. Воспользоваться мемом можно после проверки модераторами."
 
     def menu_delete(self):
@@ -395,7 +395,7 @@ def prepare_meme_to_send(bot, event, meme, print_name=False, send_keyboard=False
                 error = "Мем был удалён, перезалейте плиз"
                 meme_info = meme.get_info()
                 message_to_test_chat = f"{error}\n\n{meme_info}"
-                bot.parse_and_send_msgs(bot.test_chat.peer_id, message_to_test_chat)
+                bot.parse_and_send_msgs(bot.test_chat.chat_id, message_to_test_chat)
                 raise RuntimeWarning(error)
 
         elif meme.type == 'audio':

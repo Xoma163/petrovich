@@ -41,7 +41,7 @@ class VkBot(CommonBot, Thread):
         self.vk_user = VkUser()
 
         self.logger = logging.getLogger(self.name)
-        self.test_chat = Chat.objects.get(pk=env.str("VK_TEST_CHAT_ID"))
+        self.test_chat = Chat.objects.get(chat_id=env.str("VK_TEST_CHAT_ID"))
 
     def set_activity(self, peer_id, activity='typing'):
         if activity not in ['typing', 'audiomessage']:
