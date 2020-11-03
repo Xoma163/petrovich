@@ -16,7 +16,7 @@ class YesNo(CommonCommand):
         names = ["вопрос", "?"]
         help_text = "...? - вернёт да или нет"
         detail_help_text = "...? - вернёт да или нет. Для вызова команды просто в конце нужно написать знак вопроса"
-        super().__init__(names, help_text, detail_help_text, priority=80)
+        super().__init__(names, help_text, detail_help_text, priority=-90)
 
     def accept(self, event):
         if (event.msg and event.msg[-1] == '?') or event.command in self.names:
@@ -70,10 +70,11 @@ class YesNo(CommonCommand):
                 return messages
 
         random_events = [["Да", "Ага", "Канеш", "Само собой", "Абсолютно"],
-                         ["Нет", "Неа", "Ни за что", "Невозможно", "NO"],
+                         ["Нет", "Неа", "Ни за что", "Нуу... нет", "NO"],
                          ["Ну тут даже я хз", "ДА НЕ ЗНАЮ Я", "Хз", "Спроси у другого бота", "Да нет наверное"]]
         probability_events1 = [47, 47, 6]
         probability_events2 = [40, 15, 15, 15, 15]
-        selected_event = random_event(random_events, probability_events1)
-        selected_event2 = random_event(selected_event, probability_events2)
+        seed = self.event.msg
+        selected_event = random_event(random_events, probability_events1, seed=seed)
+        selected_event2 = random_event(selected_event, probability_events2, seed=seed)
         return selected_event2
