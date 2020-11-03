@@ -13,15 +13,22 @@ class Demotivator(CommonCommand):
     def __init__(self):
         names = ["демотиватор"]
         help_text = "Демотиватор - создаёт демотиватор"
-        detail_help_text = "Счётчик (Изображения/Пересылаемое сообщение с изображением) (большой текст)[;маленький текст] - создаёт демотиватор. Разделитель текста ;\n"
+        detail_help_text = "Демотиватор (Изображения/Пересылаемое сообщение с изображением) (большой текст)[;маленький текст] - создаёт демотиватор. \n" \
+                           "Разделитель текста ;"
         super().__init__(names, help_text, detail_help_text, args=1, attachments=['photo'])
 
     def start(self):
-        texts = self.event.original_args.split(';')
-        photo = get_attachments_from_attachments_or_fwd(self.event, 'photo')[0]
+        image = get_attachments_from_attachments_or_fwd(self.event, 'photo')[0]
 
-        response = requests.get(photo['download_url'])
-        base_image = Image.open(BytesIO(response.content))
+        texts = list(map(str.strip, self.event.original_args.split(';')))
+        if not texts[0]:
+            return "Первая фраза обязательно должна быть"
+
+        if image.get('content', None):
+            base_image = Image.open(BytesIO(image['content']))
+        else:
+            response = requests.get(image)
+            base_image = Image.open(BytesIO(response.content))
 
         db = DemotivatorBuilder(base_image, *texts)
         demotivator = db.get_demotivator()
