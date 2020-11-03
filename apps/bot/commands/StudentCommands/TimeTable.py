@@ -19,7 +19,8 @@ class TimeTable(CommonCommand):
         if not group:
             return "Этой группы нет в базе"
         # group = Group.objects.first()
-        arg0 = self.event.args[0].lower()
+        if self.event.args:
+            arg0 = self.event.args[0].lower()
         if self.event.args and arg0 in WEEK_TRANSLATOR:
             week_day = WEEK_TRANSLATOR[self.event.args[0]]
             week_number = None
