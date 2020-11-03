@@ -1,9 +1,10 @@
 import io
 import os
+# Вероятность события в процентах
+import random
 import re
 
 import pytz
-# Вероятность события в процентах
 from PIL import Image, ImageDraw, ImageFont
 
 from apps.bot.classes.Consts import Role
@@ -23,22 +24,28 @@ def random_probability(probability):
 
 
 # Возвращает случайное событие с указанными весами этих событий
-def random_event(events, weights=None):
-    import random
+def random_event(events, weights=None, seed=None):
+    if seed:
+        random.seed(seed)
     if weights is None:
-        return random.choice(events)
-    return random.choices(events, weights=weights)[0]
+        random_choice = random.choice(events)
+        random.seed()
+        return random_choice
+    random_choice = random.choices(events, weights=weights)[0]
+    random.seed()
+    return random_choice
 
 
 # Возвращает рандомное число в заданном диапазоне. Если передан seed, то по seed
 def get_random_int(val1, val2=None, seed=None):
-    import random
     if not val2:
         val2 = val1
         val1 = 0
     if seed:
         random.seed(seed)
-    return random.randint(val1, val2)
+    random_int = random.randint(val1, val2)
+    random.seed()
+    return random_int
 
 
 # Есть ли кириллица
