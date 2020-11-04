@@ -1,4 +1,4 @@
-from apps.bot.classes.Consts import Role
+from apps.bot.classes.Consts import Role, Platform
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.management.commands.start import camera_handler
 
@@ -13,7 +13,7 @@ class Birds(CommonCommand):
                     {'text': 'Синички 100', 'color': 'blue', 'row': 2, 'col': 3}]
 
         super().__init__(names, help_text, detail_help_text, keyboard, int_args=[0], access=Role.TRUSTED,
-                         platforms=['vk', 'tg'])
+                         platforms=[Platform.VK, Platform.TG])
 
     def start(self):
         self.bot.set_activity(self.event.peer_id)

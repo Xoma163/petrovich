@@ -165,10 +165,7 @@ class MinecraftAPI:
 
 # ToDo: чё за херня с серверами этими и снизу
 servers_minecraft = [
-    # MinecraftAPI("1.12.2", env.str("MINECRAFT_1_12_2_IP"), env.str("MINECRAFT_1_12_2_PORT"), amazon=True),
     MinecraftAPI("1.12.2", MAIN_DOMAIN, 25565),
-    # MinecraftAPI("1.12.2", MAIN_DOMAIN, 25565),
-    # MinecraftAPI("1.15.1", MAIN_DOMAIN, 25566),
 ]
 
 

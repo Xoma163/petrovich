@@ -2,7 +2,7 @@ import logging
 import threading
 import traceback
 
-from apps.bot.classes.Consts import Role
+from apps.bot.classes.Consts import Role, Platform
 from apps.bot.classes.common.CommonMethods import tanimoto
 from apps.bot.classes.events.Event import Event
 from apps.bot.models import Users, Chat, Bot
@@ -10,17 +10,17 @@ from apps.service.views import append_command_to_statistics
 
 
 class CommonBot:
-    def __init__(self, name):
-        self.name = name
+    def __init__(self, platform):
+        self.platform = platform
         self.mentions = []
         self.BOT_CAN_WORK = True
         self.DEBUG = False
         self.DEVELOP_DEBUG = False
-        self.user_model = Users.objects.filter(platform=self.name)
-        self.chat_model = Chat.objects.filter(platform=self.name)
-        self.bot_model = Bot.objects.filter(platform=self.name)
+        self.user_model = Users.objects.filter(platform=platform)
+        self.chat_model = Chat.objects.filter(platform=platform)
+        self.bot_model = Bot.objects.filter(platform=platform)
 
-        self.logger = logging.getLogger(self.name)
+        self.logger = logging.getLogger(platform.value)
 
     def get_user_by_id(self, user_id):
         raise NotImplementedError
@@ -334,7 +334,7 @@ def get_bot_by_platform(platform):
     from apps.bot.classes.bots.TgBot import TgBot
 
     platforms = {
-        'vk': VkBot,
-        'tg': TgBot
+        Platform.VK: VkBot,
+        Platform.TG: TgBot
     }
     return platforms[platform]

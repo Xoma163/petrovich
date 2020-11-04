@@ -1,6 +1,6 @@
 import datetime
 
-from apps.bot.classes.Consts import WEEK_TRANSLATOR, WEEK_TRANSLATOR_REVERT, Role, DELTA_WEEKDAY
+from apps.bot.classes.Consts import WEEK_TRANSLATOR, WEEK_TRANSLATOR_REVERT, Role, DELTA_WEEKDAY, Platform
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.timetable.models import Group, Lesson
 
@@ -12,7 +12,8 @@ class TimeTable(CommonCommand):
         detail_help_text = "Расписание [номер недели=текущая]- присылает расписание на текущую неделю\n" \
                            "Расписание (день недели) [номер недели=текущая] - присылает расписание на день. " \
                            "Если указать номер недели, то на конкретную неделю"
-        super().__init__(names, help_text, detail_help_text, platforms=['vk'], conversation=True, access=Role.STUDENT)
+        super().__init__(names, help_text, detail_help_text, platforms=[Platform.VK], conversation=True,
+                         access=Role.STUDENT)
 
     def start(self):
         group = Group.objects.filter(conference=self.event.chat).first()

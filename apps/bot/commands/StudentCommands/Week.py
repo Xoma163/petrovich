@@ -1,5 +1,6 @@
 import datetime
 
+from apps.bot.classes.Consts import Platform
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.timetable.models import Group
 
@@ -8,7 +9,7 @@ class TimeTable(CommonCommand):
     def __init__(self):
         names = ["неделя"]
         help_text = "Неделя - присылает номер недели в зависимости от группы"
-        super().__init__(names, help_text, platforms=['vk'], conversation=True)
+        super().__init__(names, help_text, platforms=[Platform.VK], conversation=True)
 
     def start(self):
         group = Group.objects.filter(conference=self.event.chat).first()

@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from apps.bot.classes.Consts import Role, ATTACHMENT_TRANSLATOR
+from apps.bot.classes.Consts import Role, ATTACHMENT_TRANSLATOR, Platform
 from apps.bot.classes.common.CommonMethods import get_help_for_command, remove_tz
 from apps.service.models import Service
 from petrovich.settings import env
@@ -55,7 +55,7 @@ class CommonCommand:
         self.args = args
         self.int_args = int_args
         self.float_args = float_args
-        self.platforms = platforms or ['vk', 'tg', 'api']
+        self.platforms = platforms or [Platform.VK, Platform.TG, Platform.API]
         self.attachments = attachments
         self.enabled = enabled
         self.priority = priority
@@ -127,10 +127,10 @@ class CommonCommand:
         """
         if self.event.sender.check_role(role):
             if role == Role.ADMIN:
-                if self.event.platform == 'vk':
+                if self.event.platform == Platform.VK:
                     if self.event.sender.user_id == env.str("VK_ADMIN_ID"):
                         return True
-                elif self.event.platform == 'tg':
+                elif self.event.platform == Platform.TG:
                     if self.event.sender.user_id == env.str("TG_ADMIN_ID"):
                         return True
                 else:

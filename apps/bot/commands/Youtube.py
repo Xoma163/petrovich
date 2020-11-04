@@ -2,11 +2,12 @@ import requests
 from bs4 import BeautifulSoup
 
 from apps.bot.APIs.YoutubeInfo import YoutubeInfo
-from apps.bot.classes.Consts import Role
+from apps.bot.classes.Consts import Role, Platform
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.service.models import YoutubeSubscribe
 
 MAX_USER_SUBS_COUNT = 3
+
 
 # ToDo: menu
 class YouTube(CommonCommand):
@@ -26,7 +27,7 @@ class YouTube(CommonCommand):
             "Чтобы узнать название канала, нужно перейти на канал и скопировать содержимое после " \
             "https://www.youtube.com/user/********** или https://www.youtube.com/**********\n\n" \
             "Проверка новых видео проходит каждый час"
-        super().__init__(names, help_text, detail_help_text, args=1, platforms=['vk', 'tg'])
+        super().__init__(names, help_text, detail_help_text, args=1, platforms=[Platform.VK, Platform.TG])
 
     def start(self):
         action = self.event.args[0].lower()

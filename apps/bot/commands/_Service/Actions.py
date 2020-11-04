@@ -1,3 +1,4 @@
+from apps.bot.classes.Consts import Platform
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from petrovich.settings import env
 
@@ -20,9 +21,9 @@ class Actions(CommonCommand):
                         user = self.bot.get_user_by_id(_id)
                         self.bot.add_chat_to_user(user, self.event.chat)
                     else:
-                        if self.event.platform == 'vk':
+                        if self.event.platform == Platform.VK:
                             bot_group_id = -env.int('VK_BOT_GROUP_ID')
-                        elif self.event.platform == 'tg':
+                        elif self.event.platform == Platform.TG:
                             bot_group_id = -env.int('TG_BOT_GROUP_ID')
                         if _id == bot_group_id:
                             if self.event.chat.admin is None:

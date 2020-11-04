@@ -1,5 +1,6 @@
 import time
 
+from apps.bot.classes.Consts import Platform
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import random_event, random_probability
 
@@ -9,7 +10,7 @@ class Apologize(CommonCommand):
     def __init__(self):
         names = ["извинись", "извиняйся", "извинитесь"]
 
-        super().__init__(names, platforms=['vk', 'tg'])
+        super().__init__(names, platforms=[Platform.VK, Platform.TG])
 
     def start(self):
         phrases = ["Извини", "Нет", "Сам извинись", "за что?", "КАВО", "Ты уверен?"]

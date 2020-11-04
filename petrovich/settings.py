@@ -3,6 +3,8 @@ import os
 import environ
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+from apps.bot.classes.Consts import Platform
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 env = environ.Env()
 env.read_env(os.path.join(BASE_DIR, 'secrets/.env'))
@@ -176,12 +178,12 @@ LOGGING = {
         },
     },
     'loggers': {
-        'vk': {
+        Platform.VK.value: {
             'handlers': ['file-debug', 'file-warn', 'console-warn', 'db_log'],
             'level': 'DEBUG',
             'propagate': True,
         },
-        'tg': {
+        Platform.TG.value: {
             'handlers': ['file-debug', 'file-warn', 'console-warn', 'db_log'],
             'level': 'DEBUG',
             'propagate': True,

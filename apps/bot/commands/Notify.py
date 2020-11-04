@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 import dateutil
 from dateutil import parser
 
-from apps.bot.classes.Consts import WEEK_TRANSLATOR, Role, DELTA_WEEKDAY
+from apps.bot.classes.Consts import WEEK_TRANSLATOR, Role, DELTA_WEEKDAY, Platform
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import localize_datetime, normalize_datetime, remove_tz
 from apps.service.models import Notify as NotifyModel
@@ -47,7 +47,7 @@ class Notify(CommonCommand):
         help_text = "Напомни - напоминает о чём-либо"
         detail_help_text = "Напомни (дата/дата и время/день недели) (сообщение/команда) [Прикреплённые вложения] - добавляет напоминание\n" \
                            "Максимум можно добавить 5 напоминаний"
-        super().__init__(names, help_text, detail_help_text, args=2, platforms=['vk', 'tg'], city=True)
+        super().__init__(names, help_text, detail_help_text, args=2, platforms=[Platform.VK, Platform.TG], city=True)
 
     def start(self):
         if not self.event.sender.check_role(Role.TRUSTED) and \
@@ -88,8 +88,9 @@ class Notify(CommonCommand):
                              author=self.event.sender,
                              chat=self.event.chat,
                              text_for_filter=notify_datetime.strftime("%d.%m.%Y %H:%M") + " " + text)
-        if self.event.attachments:
-            notify.attachments = self.event.attachments
+        if self.event.platform == Platform.VK:
+            if self.event.attachments:
+                notify.attachments = self.event.attachments
         notify.save()
         notify.text_for_filter += f" ({notify.id})"
         notify.save()

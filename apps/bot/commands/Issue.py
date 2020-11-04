@@ -1,3 +1,4 @@
+from apps.bot.classes.Consts import Platform
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.service.models import Issue as IssueModel
 
@@ -7,7 +8,7 @@ class Issue(CommonCommand):
         names = ["баг", "ошибка", "ишю", "ишью"]
         help_text = "Баг - добавляет проблему Петровича, которую нужно решить"
         detail_help_text = "Баг (текст/пересланные сообщения) - добавляет проблему Петровича, которую нужно решить"
-        super().__init__(names, help_text, detail_help_text, platforms=['vk', 'tg'])
+        super().__init__(names, help_text, detail_help_text, platforms=[Platform.VK, Platform.TG])
 
     def start(self):
         msgs = self.event.fwd

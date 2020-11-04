@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from apps.bot.classes.Consts import Platform
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.commands.Meme import prepare_meme_to_send
 from apps.service.models import Horoscope as HoroscopeModel
@@ -12,7 +13,7 @@ class Horoscope(CommonCommand):
         detail_help_text = "Гороскоп [знак зодиака = по др в профиле] - пришлёт мемный гороскоп на день для знака зодиака\n" \
                            "Гороскоп все - пришлёт мемный гороскоп для всех знаков зодиака\n" \
                            "Гороскоп инфо (знак зодиака) - пришлёт информацию о мемасе в гороскопе по знаку зодиака"
-        super().__init__(names, help_text, detail_help_text, platforms=['vk', 'tg'])
+        super().__init__(names, help_text, detail_help_text, platforms=[Platform.VK, Platform.TG])
 
         self.zodiac_signs = ZodiacSigns([
             ZodiacSign("водолей", ['♒', "♒️"], "21.01"),

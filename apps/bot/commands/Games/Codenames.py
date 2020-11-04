@@ -2,7 +2,7 @@ import json
 import random
 from threading import Lock
 
-from apps.bot.classes.Consts import Role
+from apps.bot.classes.Consts import Role, Platform
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.games.models import CodenamesUser, CodenamesSession, Gamer
 from petrovich.settings import STATIC_ROOT
@@ -137,7 +137,7 @@ class Codenames(CommonCommand):
                            "слов умещается больше, но всё равно некоторые урезаются. Для того, чтобы этого избежать " \
                            "можно поправить стили контакта, чтобы они не урезали почти половину полезного места. Для " \
                            "этого я сделал отдельную инструкцию, которую можно получить по команде /кн фиксклавы"
-        super().__init__(names, help_text, detail_help_text, platforms=['vk'], args=1)
+        super().__init__(names, help_text, detail_help_text, platforms=[Platform.VK], args=1)
 
     def init_var(self):
 

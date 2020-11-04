@@ -1,4 +1,4 @@
-from apps.bot.classes.Consts import Role
+from apps.bot.classes.Consts import Role, Platform
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import get_attachments_from_attachments_or_fwd
 from apps.service.models import Cat as CatModel
@@ -14,7 +14,7 @@ class Cat(CommonCommand):
                            "Кот (Изображения/Пересылаемое сообщение с изображениями) - добавляет кота в базу\n\n" \
                            "Для админа:\n" \
                            "Кот аватар - присылает нового кота для аватарки, которого ещё не было"
-        super().__init__(names, help_text, detail_help_text, platforms=['vk', 'tg'])
+        super().__init__(names, help_text, detail_help_text, platforms=[Platform.VK, Platform.TG])
 
     def add_cat(self, cat_image):
         cat = CatModel(author=self.event.sender)

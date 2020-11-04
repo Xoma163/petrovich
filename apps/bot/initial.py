@@ -2,6 +2,7 @@ import importlib
 import os
 import pkgutil
 
+from apps.bot.classes.Consts import Platform
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from petrovich.settings import BASE_DIR
 
@@ -53,11 +54,10 @@ def generate_help_text():
                 print(f"Warn: Ошибка в генерации help_text. Ключ {text_for} не найден")
 
     groups_with_games = GROUPS + ["games"]
-    help_text_generated = {group: "" for group in groups_with_games}
-    api_help_text_generated = {group: "" for group in groups_with_games}
-
-    help_text_list = {group: [] for group in groups_with_games}
-    api_help_text_list = {group: [] for group in groups_with_games}
+    help_text_generated = {platform: {group: "" for group in groups_with_games} for platform in list(Platform)}
+    help_text_list = {platform: {group: [] for group in groups_with_games} for platform in list(Platform)}
+    # help_text_list = {group: [] for group in groups_with_games}
+    # api_help_text_list = {group: [] for group in groups_with_games}
     for command in COMMANDS:
         if command.help_text:
             help_text = command.help_text
@@ -70,17 +70,15 @@ def generate_help_text():
             if isinstance(help_text, list):
                 for text in help_text:
                     if command.enabled:
-                        append_to_list(help_text_list)
-                        if 'api' in command.platforms:
-                            append_to_list(api_help_text_list)
+                        for platform in command.platforms:
+                            append_to_list(help_text_list[platform])
 
-    for group in groups_with_games:
-        help_text_list[group].sort()
-        help_text_generated[group] = "\n".join(help_text_list[group])
+    for platform in list(Platform):
+        for group in groups_with_games:
+            help_text_list[platform][group].sort()
+            help_text_generated[platform][group] = "\n".join(help_text_list[platform][group])
 
-        api_help_text_list[group].sort()
-        api_help_text_generated[group] = "\n".join(api_help_text_list[group])
-    return help_text_generated, api_help_text_generated
+    return help_text_generated
 
 
 def generate_keyboard():
@@ -155,7 +153,7 @@ GROUPS = generate_groups()
 
 KEYBOARDS = generate_keyboard()
 
-HELP_TEXT, API_HELP_TEXT = generate_help_text()
+HELP_TEXT = generate_help_text()
 
 EMPTY_KEYBOARD = {
     "one_time": False,

@@ -1,3 +1,4 @@
+from apps.bot.classes.Consts import Platform
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import get_role_by_str
 
@@ -10,7 +11,8 @@ class Who(CommonCommand):
                            "Доступные роли: админ, админ конфы, доверенный, модератор, студент, майнкрафт, майнкрафт " \
                            "уведомления, террария, дом, забанен. \n" \
                            "Чтобы узнать свои права существует команда /права"
-        super().__init__(names, help_text, detail_help_text, conversation=True, args=1, platforms=['vk', 'tg'])
+        super().__init__(names, help_text, detail_help_text, conversation=True, args=1,
+                         platforms=[Platform.VK, Platform.TG])
 
     def start(self):
         arg = self.event.original_args.lower()

@@ -3,6 +3,7 @@ from threading import Lock
 
 from django.db.models import Q
 
+from apps.bot.classes.Consts import Platform
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.games.models import TicTacToeSession, Gamer
 
@@ -40,7 +41,7 @@ class TicTacToe(CommonCommand):
         help_text = "Крестики - крестики-нолики"
         detail_help_text = "Крестики - крестики-нолики. Игра проходит в лс и управляется с клавиатуры\n" \
                            "Крестики [строка [столбец]] - ход в это место (если не работает клавиатура)"
-        super().__init__(names, help_text, detail_help_text, int_args=[0, 1], platforms=['vk'])
+        super().__init__(names, help_text, detail_help_text, int_args=[0, 1], platforms=[Platform.VK])
 
     def start(self):
         with lock:

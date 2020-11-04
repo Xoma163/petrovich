@@ -3,6 +3,7 @@ from threading import Lock
 
 from django.db.models import Min
 
+from apps.bot.classes.Consts import Platform
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import localize_datetime, remove_tz
 from apps.games.models import PetrovichGames, PetrovichUser
@@ -18,7 +19,7 @@ class Petrovich(CommonCommand):
         detail_help_text = "Петрович - мини-игра, определяющая кто Петрович дня\n" \
                            "Петрович рег - регистрация в игре\n" \
                            "Петрович дерег - дерегистрация в игре"
-        super().__init__(names, help_text, detail_help_text, conversation=True, platforms=['vk', 'tg'])
+        super().__init__(names, help_text, detail_help_text, conversation=True, platforms=[Platform.VK, Platform.TG])
 
     def start(self):
         if self.event.args:

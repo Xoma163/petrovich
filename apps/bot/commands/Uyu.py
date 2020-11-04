@@ -1,3 +1,4 @@
+from apps.bot.classes.Consts import Platform
 from apps.bot.classes.common.CommonCommand import CommonCommand
 
 
@@ -6,7 +7,7 @@ class Uyu(CommonCommand):
         names = ["уъу", "ъуъ"]
         help_text = "Уъу - Добавляет слово в текст (уъуфикация)"
         detail_help_text = "Уъу (Пересланные сообщения) [новое слово=бля] - добавляет слово в текст (уъуфикация)"
-        super().__init__(names, help_text, detail_help_text, platforms=['vk', 'tg'])
+        super().__init__(names, help_text, detail_help_text, platforms=[Platform.VK, Platform.TG])
 
     def start(self):
         add_word = "бля"

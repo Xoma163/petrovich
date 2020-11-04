@@ -1,4 +1,4 @@
-from apps.bot.classes.Consts import Role
+from apps.bot.classes.Consts import Role, Platform
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import get_attachments_from_attachments_or_fwd, tanimoto
 from apps.service.models import Meme as MemeModel
@@ -11,7 +11,6 @@ def check_name_exists(name):
     return MemeModel.objects.filter(name=name).exists()
 
 
-# ToDo: TG вложения
 # noinspection PyUnresolvedReferences,PyUnresolvedReferences
 class Meme(CommonCommand):
     def __init__(self):
@@ -33,7 +32,7 @@ class Meme(CommonCommand):
                            "Мем удалить (id) [причина] - удаляет мем\n" \
                            "Мем инфо (id/название) - присылает информацию по мему"
 
-        super().__init__(names, help_text, detail_help_text, args=1, platforms=['vk', 'tg'])
+        super().__init__(names, help_text, detail_help_text, args=1, platforms=[Platform.VK, Platform.TG])
 
     def start(self):
         arg0 = self.event.args[0].lower()
@@ -55,7 +54,7 @@ class Meme(CommonCommand):
 
     # MENU #
     def menu_add(self):
-        if self.event.platform == 'tg':
+        if self.event.platform == Platform.TG:
             raise RuntimeWarning('В телеграмме не поддерживается добавление мемов')
 
         self.check_args(2)
@@ -304,7 +303,7 @@ class Meme(CommonCommand):
             if filter_list is None:
                 filter_list = []
             memes = memes.filter(approved=approved)
-            if self.event.platform == 'tg':
+            if self.event.platform == Platform.TG:
                 memes = memes.exclude(type='audio')
             if filter_list:
                 filter_list = list(map(lambda x: x.lower(), filter_list))
@@ -382,12 +381,12 @@ def get_tanimoto_memes(memes, query):
 def prepare_meme_to_send(bot, event, meme, print_name=False, send_keyboard=False, name=None):
     msg = {}
 
-    if event.platform == 'tg':
+    if event.platform == Platform.TG:
         if meme.type == 'photo':
             msg['attachments'] = bot.upload_photos(meme.link)
         else:
             msg['msg'] = meme.link
-    elif event.platform == 'vk':
+    elif event.platform == Platform.VK:
         if meme.type == 'video':
             msg['attachments'] = [meme.link.replace(VK_URL, '')]
             owner_id, _id = msg['attachments'][0].replace('video', '').split('_')

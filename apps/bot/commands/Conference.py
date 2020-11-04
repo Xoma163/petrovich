@@ -1,4 +1,4 @@
-from apps.bot.classes.Consts import Role
+from apps.bot.classes.Consts import Role, Platform
 from apps.bot.classes.common.CommonCommand import CommonCommand
 
 
@@ -6,7 +6,7 @@ class Conference(CommonCommand):
     def __init__(self):
         names = ["конфа", "конференция", "беседа"]
         help_text = "Конфа - назвать конфу"
-        super().__init__(names, help_text, conversation=True, priority=90, platforms=['vk', 'tg'])
+        super().__init__(names, help_text, conversation=True, priority=90, platforms=[Platform.VK, Platform.TG])
 
     def accept(self, event):
         if event.chat and (event.chat.name is None or event.chat.name == "") or event.command in self.names:

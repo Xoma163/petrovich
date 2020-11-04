@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from apps.bot.classes.Consts import Role
+from apps.bot.classes.Consts import Role, Platform
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import localize_datetime, normalize_datetime, remove_tz
 from apps.service.models import Notify as NotifyModel
@@ -20,7 +20,7 @@ class NotifyRepeat(CommonCommand):
         help_text = "Напоминай - напоминает о чём-либо постояно"
         detail_help_text = "Напоминай (время) (сообщение/команда) [Прикреплённые вложения] - напоминает о чём-то каждый день в заданное время\n" \
                            "Максимум можно добавить 5 напоминаний"
-        super().__init__(names, help_text, detail_help_text, args=2, platforms=['vk', 'tg'], city=True)
+        super().__init__(names, help_text, detail_help_text, args=2, platforms=[Platform.VK, Platform.TG], city=True)
 
     def start(self):
         if not self.event.sender.check_role(Role.TRUSTED) and \
@@ -58,8 +58,9 @@ class NotifyRepeat(CommonCommand):
                              chat=self.event.chat,
                              repeat=True,
                              text_for_filter=notify_datetime.strftime("%H:%M") + " " + text)
-        if self.event.attachments:
-            notify.attachments = self.event.attachments
+        if self.event.platform == Platform.VK:
+            if self.event.attachments:
+                notify.attachments = self.event.attachments
 
         notify.save()
         notify.text_for_filter += f" ({notify.id})"

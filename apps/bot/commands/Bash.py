@@ -19,8 +19,5 @@ class Bash(CommonCommand):
             self.check_number_arg_range(quotes_count, 1, MAX_QUOTES)
         bash_api = BashAPI(quotes_count)
         msg = bash_api.parse()
-        if self.event.platform == 'api':
-            return msg
-        else:
-            return {"msg": msg,
-                    "keyboard": self.bot.get_inline_keyboard(self.names[0], args={"quotes_count": quotes_count})}
+        return {"msg": msg,
+                "keyboard": self.bot.get_inline_keyboard(self.names[0], args={"quotes_count": quotes_count})}

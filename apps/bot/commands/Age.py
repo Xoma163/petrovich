@@ -1,4 +1,5 @@
 from apps.bot.APIs.EveryPixelAPI import EveryPixelAPI
+from apps.bot.classes.Consts import Platform
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import get_attachments_from_attachments_or_fwd
 
@@ -47,14 +48,14 @@ def draw_on_images(image, faces):
     return _bytes
 
 
-# ToDo: TG вложения
 class Age(CommonCommand):
     def __init__(self):
         names = ["возраст"]
         help_text = "Возраст - оценить возраст людей на фотографии"
         detail_help_text = "Возраст (Изображения/Пересылаемое сообщение с изображением) - оценивает возраст людей на " \
                            "фотографии"
-        super().__init__(names, help_text, detail_help_text, platforms=['vk', 'tg'], attachments=['photo'])
+        super().__init__(names, help_text, detail_help_text, platforms=[Platform.VK, Platform.TG],
+                         attachments=['photo'])
 
     def start(self):
         image = get_attachments_from_attachments_or_fwd(self.event, 'photo')[0]
@@ -64,6 +65,6 @@ class Age(CommonCommand):
 
         if len(faces) == 0:
             raise RuntimeWarning("Не нашёл лиц на фото")
-        file_path = draw_on_images(image, faces)
-        attachments = self.bot.upload_photos(file_path)
+        file_bytes = draw_on_images(image, faces)
+        attachments = self.bot.upload_photos(file_bytes)
         return {"attachments": attachments}

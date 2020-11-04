@@ -1,11 +1,11 @@
 from datetime import datetime
 
+from apps.bot.classes.Consts import Platform
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import normalize_datetime, get_attachments_for_upload, localize_datetime
 from apps.service.models import LaterMessage, LaterMessageSession
 
 
-# ToDo: TG вложения
 class Later(CommonCommand):
     def __init__(self):
         names = ["потом", "позже"]
@@ -15,7 +15,7 @@ class Later(CommonCommand):
                            "Потом 1 (Пересланные сообщения) - добавляет сообщения и вложения из пересланных сообщений " \
                            "ПО ОДНОМУ чтобы посмотреть потом\n" \
                            "Потом - присылает последние сохранённые сообщения и удалет их из базы"
-        super().__init__(names, help_text, detail_help_text, platforms=['vk', 'tg'])
+        super().__init__(names, help_text, detail_help_text, platforms=[Platform.VK])
 
     def _append_message_to_lms(self, fwd, lms):
         lm = LaterMessage(

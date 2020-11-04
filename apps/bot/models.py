@@ -3,16 +3,23 @@ import random
 from django.contrib.auth.models import Group
 from django.db import models
 
-
 # Create your models here.
+from apps.bot.classes.Consts import Platform as PlatformEnum
+
 
 class Platform(models.Model):
-    PLATFORM_TG = 'tg'
-    PLATFORM_VK = 'vk'
     PLATFORM_CHOICES = (
-        (PLATFORM_TG, 'Telegram'),
-        (PLATFORM_VK, 'Vk'))
-    platform = models.CharField('Тип платформы', max_length=3, choices=PLATFORM_CHOICES)
+        (PlatformEnum.TG, 'Telegram'),
+        (PlatformEnum.VK, 'Vk'),
+        (PlatformEnum.API, 'API')
+    )
+    platform = models.CharField('Тип платформы', max_length=20, choices=PLATFORM_CHOICES)
+
+    def platform_display(self):
+        return self.platform.replace("Platform.", "")
+        # return PlatformEnum[self.platform.replace("Platform.", "")].name
+
+    platform_display.short_description = "Платформа"
 
     class Meta:
         abstract = True

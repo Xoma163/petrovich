@@ -1,3 +1,4 @@
+from apps.bot.classes.Consts import Platform
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import get_attachments_from_attachments_or_fwd
 
@@ -6,7 +7,7 @@ class Saved(CommonCommand):
     def __init__(self):
         names = ["сохраненка", "перешли", "сохраненные"]
         help_text = "Сохранёнка (фотографии) - пересылает фотографии, чтобы их можно было сохранить в вк в сохранёнки"
-        super().__init__(names, help_text, platforms=['vk'], enabled=False)
+        super().__init__(names, help_text, platforms=[Platform.VK], enabled=False)
 
     def start(self):
         attachments = get_attachments_from_attachments_or_fwd(self.event, 'photo')

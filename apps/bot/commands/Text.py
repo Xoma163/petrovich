@@ -1,16 +1,17 @@
 from apps.bot.APIs.OCR import OCRApi
+from apps.bot.classes.Consts import Platform
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import get_attachments_from_attachments_or_fwd
 
 
-# ToDo: TG вложения
 class Text(CommonCommand):
     def __init__(self):
         names = ["текст"]
         help_text = "Текст - распознаёт текст на изображении"
         detail_help_text = "Текст (Изображения/Пересылаемое сообщение с изображением) [язык=rus] - распознаёт текст на изображении\n" \
                            'Язык нужно указывать в 3 символа. Пример - "eng", "rus", "fre", "ger" и так далее'
-        super().__init__(names, help_text, detail_help_text, platforms=['vk', 'tg'], attachments=['photo'])
+        super().__init__(names, help_text, detail_help_text, platforms=[Platform.VK, Platform.TG],
+                         attachments=['photo'])
 
     def start(self):
         lang = "rus"

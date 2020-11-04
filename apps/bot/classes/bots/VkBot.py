@@ -1,6 +1,5 @@
 import io
 import json
-import logging
 import os
 import threading
 import traceback
@@ -16,7 +15,7 @@ from vk_api import VkUpload, VkApi
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 from vk_api.utils import get_random_id
 
-from apps.bot.classes.Consts import Role
+from apps.bot.classes.Consts import Role, Platform
 from apps.bot.classes.bots.CommonBot import CommonBot
 from apps.bot.classes.bots.VkUser import VkUser
 from apps.bot.classes.events.VkEvent import VkEvent
@@ -29,7 +28,7 @@ from petrovich.settings import env
 class VkBot(CommonBot, Thread):
     def __init__(self):
         Thread.__init__(self)
-        CommonBot.__init__(self, 'vk')
+        CommonBot.__init__(self, Platform.VK)
 
         self.token = env.str('VK_BOT_TOKEN')
         self.group_id = env.str('VK_BOT_GROUP_ID')
@@ -40,7 +39,6 @@ class VkBot(CommonBot, Thread):
 
         self.vk_user = VkUser()
 
-        self.logger = logging.getLogger(self.name)
         self.test_chat = Chat.objects.get(chat_id=env.str("VK_TEST_CHAT_ID"))
 
     def set_activity(self, peer_id, activity='typing'):
@@ -59,7 +57,7 @@ class VkBot(CommonBot, Thread):
             vk_user.user_id = user_id
             vk_user.name = user['first_name']
             vk_user.surname = user['last_name']
-            vk_user.platform = self.name
+            vk_user.platform = self.platform
 
             if 'sex' in user:
                 vk_user.gender = user['sex']
@@ -92,7 +90,7 @@ class VkBot(CommonBot, Thread):
         if len(vk_chat) > 0:
             vk_chat = vk_chat.first()
         else:
-            vk_chat = Chat(chat_id=chat_id, platform=self.name)
+            vk_chat = Chat(chat_id=chat_id, platform=self.platform)
             vk_chat.save()
         return vk_chat
 
@@ -119,7 +117,7 @@ class VkBot(CommonBot, Thread):
             bot = Bot()
             bot.bot_id = bot_id
             bot.name = vk_bot['name']
-            bot.platform = self.name
+            bot.platform = self.platform
             bot.save()
 
         return bot
@@ -155,7 +153,7 @@ class VkBot(CommonBot, Thread):
 
     def _setup_event(self, event):
         vk_event = {
-            'platform': self.name,
+            'platform': self.platform,
             'from_user': event.from_user,
             'chat_id': event.chat_id,
             'user_id': event.message.from_id,

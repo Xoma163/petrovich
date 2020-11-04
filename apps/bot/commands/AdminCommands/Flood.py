@@ -1,4 +1,4 @@
-from apps.bot.classes.Consts import Role
+from apps.bot.classes.Consts import Role, Platform
 from apps.bot.classes.common.CommonCommand import CommonCommand
 
 
@@ -8,7 +8,7 @@ class Flood(CommonCommand):
         help_text = "Флуд - флудит"
         detail_help_text = "Флуд (N) - флудит N сообщений"
         super().__init__(names, help_text, detail_help_text, access=Role.ADMIN, args=1, int_args=[0],
-                         platforms=['vk', 'tg'])
+                         platforms=[Platform.VK, Platform.TG])
 
     def start(self):
         msg = "ыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыы"

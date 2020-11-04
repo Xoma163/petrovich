@@ -10,7 +10,7 @@ from urllib.parse import urlparse
 import requests
 from django.contrib.auth.models import Group
 
-from apps.bot.classes.Consts import Role
+from apps.bot.classes.Consts import Role, Platform
 from apps.bot.classes.bots.CommonBot import CommonBot
 from apps.bot.classes.events.TgEvent import TgEvent
 from apps.bot.models import Users, Chat, Bot
@@ -35,7 +35,7 @@ class TgRequests:
 class TgBot(CommonBot, Thread):
     def __init__(self):
         Thread.__init__(self)
-        CommonBot.__init__(self, 'tg')
+        CommonBot.__init__(self, Platform.TG)
 
         self.token = env.str("TG_TOKEN")
         self.requests = TgRequests(self.token)
@@ -53,7 +53,7 @@ class TgBot(CommonBot, Thread):
             _user.name = user.get('first_name', None)
             _user.surname = user.get('last_name', None)
             _user.nickname = user.get('username', None)
-            _user.platform = self.name
+            _user.platform = self.platform
             _user.save()
             group_user = Group.objects.get(name=Role.USER.name)
             _user.groups.add(group_user)
@@ -79,7 +79,7 @@ class TgBot(CommonBot, Thread):
             # Если пользователь из fwd
             tg_user = Users()
             tg_user.user_id = user_id
-            tg_user.platform = self.name
+            tg_user.platform = self.platform
 
             tg_user.save()
 
@@ -95,7 +95,7 @@ class TgBot(CommonBot, Thread):
         if len(tg_chat) > 0:
             tg_chat = tg_chat.first()
         else:
-            tg_chat = Chat(chat_id=chat_id, platform=self.name)
+            tg_chat = Chat(chat_id=chat_id, platform=self.platform)
             tg_chat.save()
         return tg_chat
 
@@ -107,7 +107,7 @@ class TgBot(CommonBot, Thread):
             bot = bot.first()
         else:
             # Прозрачная регистрация
-            bot = Bot(bot_id=bot_id, platform=self.name)
+            bot = Bot(bot_id=bot_id, platform=self.platform)
             bot.save()
 
         return bot
@@ -152,7 +152,6 @@ class TgBot(CommonBot, Thread):
         prepared_message = {'chat_id': peer_id, 'text': msg, 'parse_mode': 'HTML', 'reply_markup': keyboard}
         return self.requests.get('sendMessage', params=prepared_message)
 
-    # ToDo: в TgEvent
     def _setup_event_attachments(self, event):
         attachments = []
         if 'media_group_id' in event:
@@ -191,7 +190,7 @@ class TgBot(CommonBot, Thread):
             event = event['callback_query']
             event['message']['from'] = event['from']
         tg_event = {
-            'platform': self.name,
+            'platform': self.platform,
             'user_id': event['message']['from']['id'],
             'chat_id': None,
             'peer_id': event['message']['chat']['id'],

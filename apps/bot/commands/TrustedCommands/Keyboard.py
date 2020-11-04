@@ -1,4 +1,4 @@
-from apps.bot.classes.Consts import Role
+from apps.bot.classes.Consts import Role, Platform
 from apps.bot.classes.common.CommonCommand import CommonCommand
 
 
@@ -7,7 +7,7 @@ class Keyboard(CommonCommand):
         names = ["клава", "клавиатура"]
         help_text = "Клава - показать клавиатуру"
         # ToDo: access trusted это временное решение. Нужно будет пересмотреть политику клавиатур
-        super().__init__(names, help_text, platforms=['vk', 'tg'], access=Role.TRUSTED, enabled=False)
+        super().__init__(names, help_text, platforms=[Platform.VK, Platform.TG], access=Role.TRUSTED, enabled=False)
 
     def start(self):
         return {"keyboard": get_keyboard(self.event.sender)}

@@ -1,4 +1,4 @@
-from apps.bot.classes.Consts import Role
+from apps.bot.classes.Consts import Role, Platform
 from apps.bot.classes.DoTheLinuxComand import do_the_linux_command
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import draw_text_on_image
@@ -76,7 +76,7 @@ class Logs(CommonCommand):
                            "Макс 5 записей"
         keyboard = {'for': Role.MODERATOR, 'text': 'Логи', 'color': 'blue', 'row': 1, 'col': 1}
         super().__init__(names, help_text, detail_help_text, access=Role.MODERATOR, keyboard=keyboard,
-                         platforms=['vk', 'tg'])
+                         platforms=[Platform.VK, Platform.TG])
 
     def start(self):
         arg0 = None

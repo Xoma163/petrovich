@@ -1,4 +1,4 @@
-from apps.bot.classes.Consts import Role
+from apps.bot.classes.Consts import Role, Platform
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import localize_datetime, remove_tz
 from apps.service.models import Notify
@@ -34,7 +34,7 @@ class Notifies(CommonCommand):
                            "Напоминания конфа - выводит все напоминания по конфе\n" \
                            "Напоминания (имя, фамилия, логин/id, никнейм) - напоминания пользователя по конфе\n" \
                            "Админ конфы может удалять напоминания остальных участников"
-        super().__init__(names, help_text, detail_help_text, platforms=['vk', 'tg'], city=True)
+        super().__init__(names, help_text, detail_help_text, platforms=[Platform.VK, Platform.TG], city=True)
 
     def start(self):
         self.user_timezone = self.event.sender.city.timezone.name

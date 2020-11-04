@@ -120,13 +120,8 @@ class DemotivatorBuilder:
             self._draw_texts_lines(self.text2, demotivator_draw, pos_y)
 
     def get_demotivator(self):
-
         self._draw_lines()
         self._draw_texts()
-
-        # ToDo: comment
-        # self.demotivator.save("test.jpg", quality=100)
-
         return self.demotivator
 
 

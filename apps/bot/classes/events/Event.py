@@ -1,6 +1,7 @@
 import json
 import re
 
+from apps.bot.classes.Consts import Platform
 from petrovich.settings import env
 
 
@@ -109,7 +110,7 @@ def get_event_by_platform(platform):
     from apps.bot.classes.events.TgEvent import TgEvent
     from apps.bot.classes.events.VkEvent import VkEvent
     platforms = {
-        'vk': VkEvent,
-        'tg': TgEvent
+        Platform.VK: VkEvent,
+        Platform.TG: TgEvent
     }
     return platforms[platform]

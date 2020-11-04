@@ -2,6 +2,7 @@ from django.contrib import admin
 # Register your models here.
 from django.utils.html import format_html
 
+from apps.bot.classes.Consts import Platform
 from apps.bot.models import Users, Chat, Bot, APIUser, APITempUser
 
 
@@ -31,7 +32,7 @@ class UserAdmin(admin.ModelAdmin):
 
     @staticmethod
     def show_vk_url(obj):
-        if obj.platform == 'vk':
+        if obj.platform == Platform.VK:
             return format_html(f"<a href='https://vk.com/id{obj.user_id}'>Вк</a>")
         else:
             return format_html("")
@@ -43,7 +44,7 @@ admin.site.register(Users, UserAdmin)
 
 
 class ChatAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'admin', 'need_reaction', 'platform',)
+    list_display = ('id', 'name', 'admin', 'need_reaction', 'platform_display',)
     list_filter = ('platform',)
 
 

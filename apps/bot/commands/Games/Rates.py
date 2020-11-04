@@ -1,6 +1,6 @@
 from threading import Lock
 
-from apps.bot.classes.Consts import Role
+from apps.bot.classes.Consts import Role, Platform
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import get_random_int
 from apps.games.models import Rate as RateModel
@@ -15,7 +15,7 @@ class Rates(CommonCommand):
         detail_help_text = "Ставки - играет ставки.\n\n" \
                            "Ставки f - играет независимо от количества игроков. Только для админов конфы"
 
-        super().__init__(names, help_text, detail_help_text, conversation=True, platforms=['vk', 'tg'])
+        super().__init__(names, help_text, detail_help_text, conversation=True, platforms=[Platform.VK, Platform.TG])
 
     def start(self):
         with lock:

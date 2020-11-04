@@ -1,5 +1,6 @@
 from django.core.paginator import Paginator
 
+from apps.bot.classes.Consts import Platform
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import localize_datetime, remove_tz
 from apps.service.models import QuoteBook
@@ -22,7 +23,7 @@ class Quotes(CommonCommand):
                            "1) N - номер страницы;\n" \
                            "2) N - фраза для поиска;\n" \
                            "3) N - фраза для поиска M - номер страницы"
-        super().__init__(names, help_text, detail_help_text, platforms=['vk', 'tg'], enabled=False)
+        super().__init__(names, help_text, detail_help_text, platforms=[Platform.VK, Platform.TG], enabled=False)
 
     def start(self):
         text_filter = None
@@ -73,7 +74,7 @@ class Quotes(CommonCommand):
         for i, obj_on_page in enumerate(objs_on_page):
             dt = localize_datetime(remove_tz(obj_on_page.date), str(time_zone)).strftime('%d.%m.%Y %H:%M:%S')
 
-            if self.event.platform == 'api':
+            if self.event.platform == Platform.API:
                 msg += f"Цитата #{i + 1}\n" \
                        f"{obj_on_page.text}\n" \
                        f"(c) {dt}\n"

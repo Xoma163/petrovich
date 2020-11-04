@@ -4,6 +4,7 @@ import requests
 import speech_recognition as sr
 from pydub import AudioSegment
 
+from apps.bot.classes.Consts import Platform
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import get_attachments_from_attachments_or_fwd
 from apps.bot.classes.events.Event import Event
@@ -45,7 +46,7 @@ class VoiceRecognition(CommonCommand):
         detail_help_text = "Распознай (Пересланное сообщение с голосовым сообщением) - распознаёт голосовое " \
                            "сообщение\n" \
                            "Если дан доступ к переписке, то распознает автоматически"
-        super().__init__(names, help_text, detail_help_text, platforms=['vk'], attachments=['audio_message'],
+        super().__init__(names, help_text, detail_help_text, platforms=[Platform.VK], attachments=['audio_message'],
                          priority=-100)
 
     def accept(self, event):
