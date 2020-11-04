@@ -1,13 +1,10 @@
 from django.contrib import admin
-# Register your models here.
-from django.utils.html import format_html
 
-from apps.bot.classes.Consts import Platform
 from apps.bot.models import Users, Chat, Bot, APIUser, APITempUser
 
 
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('user_id', 'show_vk_url', 'name', 'surname', 'nickname', 'nickname_real', 'gender', 'birthday',
+    list_display = ('user_id', 'show_url', 'name', 'surname', 'nickname', 'nickname_real', 'gender', 'birthday',
                     'city')
     list_display_links = ('user_id',)
     fieldsets = (
@@ -24,20 +21,12 @@ class UserAdmin(admin.ModelAdmin):
         }),
     )
 
-    list_filter = ('platform', 'gender',
+    list_filter = ('platform',
+                   'gender',
                    ('city', admin.RelatedOnlyFieldListFilter),
                    ('groups', admin.RelatedOnlyFieldListFilter),
                    'chats__name',)
     search_fields = ['name', 'surname', 'nickname', 'nickname_real', 'id']
-
-    @staticmethod
-    def show_vk_url(obj):
-        if obj.platform == Platform.VK:
-            return format_html(f"<a href='https://vk.com/id{obj.user_id}'>Вк</a>")
-        else:
-            return format_html("")
-
-    show_vk_url.short_description = "Ссылка ВК"
 
 
 admin.site.register(Users, UserAdmin)
@@ -52,7 +41,7 @@ admin.site.register(Chat, ChatAdmin)
 
 
 class BotAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'platform',)
+    list_display = ('id', 'name', 'platform_display',)
     list_filter = ('platform',)
 
 

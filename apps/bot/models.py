@@ -2,8 +2,9 @@ import random
 
 from django.contrib.auth.models import Group
 from django.db import models
-
 # Create your models here.
+from django.utils.html import format_html
+
 from apps.bot.classes.Consts import Platform as PlatformEnum
 
 
@@ -75,6 +76,16 @@ class Users(Platform):
     def get_list_of_role_names(self):
         groups = self.groups.all().values()
         return [group['name'] for group in groups]
+
+    def show_url(self):
+        if self.platform == str(PlatformEnum.VK):
+            return format_html(f"<a href='https://vk.com/id{self.user_id}'>Вк</a>")
+        elif self.platform == str(PlatformEnum.TG):
+            return format_html(f"<a href='https://t.me/{self.nickname}'>Тг</a>")
+        else:
+            return ""
+
+    show_url.short_description = "Ссылка"
 
     class Meta:
         verbose_name = "Пользователь"
