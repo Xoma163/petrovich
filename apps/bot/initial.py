@@ -29,10 +29,6 @@ def generate_commands():
     return _commands
 
 
-def get_commands():
-    return COMMANDS
-
-
 def generate_groups():
     from django.contrib.auth.models import Group
 
@@ -141,19 +137,11 @@ import_all_commands()
 
 COMMANDS = generate_commands()
 
-# underscore_symbol = "̲"
-# for command in COMMANDS:
-#     if command.help_text:
-#         find_dash = command.help_text.find('-') - 1
-#         underscore_help_text = underscore_symbol.join(list(command.help_text[:find_dash]))
-#         other_help_text = command.help_text[find_dash:]
-#         command.help_text = underscore_symbol + underscore_help_text + other_help_text
-
 GROUPS = generate_groups()
 
 KEYBOARDS = generate_keyboard()
 
-HELP_TEXT = generate_help_text()
+HELP_TEXTS = generate_help_text()
 
 EMPTY_KEYBOARD = {
     "one_time": False,

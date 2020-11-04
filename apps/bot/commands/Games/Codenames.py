@@ -527,7 +527,7 @@ class Codenames(CommonCommand):
         self.players.delete()
 
     def get_info(self):
-        def get_commands():
+        def get_teams():
             def get_command_msg(command_name, command_players):
                 team_msg = f"{translator[command_name].capitalize()}:\n"
                 for _player in command_players:
@@ -548,7 +548,7 @@ class Codenames(CommonCommand):
 
         commands_colors = ['blue', 'red']
 
-        commands = get_commands()
+        commands = get_teams()
 
         board = self.session.board
         words_left = self.get_team_words(board)

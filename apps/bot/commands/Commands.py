@@ -12,9 +12,9 @@ class Commands(CommonCommand):
         super().__init__(names, help_text, detail_help_text)
 
     def start(self):
-        from apps.bot.initial import HELP_TEXT
+        from apps.bot.initial import HELP_TEXTS
 
-        help_texts = HELP_TEXT[self.event.platform]
+        help_texts = HELP_TEXTS[self.event.platform]
         ordered_roles = [
             {"role": Role.USER, "text": "общие команды"},
             {"role": Role.ADMIN, "text": "команды для администраторов"},

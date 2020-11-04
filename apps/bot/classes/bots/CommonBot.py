@@ -76,9 +76,9 @@ class CommonBot:
         log_event = event
         self.logger.debug(log_event)
 
-        from apps.bot.initial import get_commands
-        commands = get_commands()
-        for command in commands:
+        from apps.bot.initial import COMMANDS
+
+        for command in COMMANDS:
             try:
                 if command.accept(event):
                     result = command.__class__().check_and_start(self, event)
@@ -116,10 +116,10 @@ class CommonBot:
 
         if event.chat and not event.chat.need_reaction:
             return None
-        similar_command = commands[0].names[0]
+        similar_command = COMMANDS[0].names[0]
         tanimoto_max = 0
         user_groups = event.sender.get_list_of_role_names()
-        for command in commands:
+        for command in COMMANDS:
             # Выдача пользователю только тех команд, которые ему доступны
             command_access = command.access
             if isinstance(command_access, str):

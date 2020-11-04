@@ -127,10 +127,8 @@ def get_attachments_from_attachments_or_fwd(vk_event, _type=None, from_first_fwd
 
 # Ищет команду по имени
 def find_command_by_name(command_name):
-    from apps.bot.initial import get_commands
-    commands = get_commands()
-
-    for command in commands:
+    from apps.bot.initial import COMMANDS
+    for command in COMMANDS:
         if command.names and command_name in command.names:
             return command
     return None
