@@ -24,11 +24,14 @@ class Demotivator(CommonCommand):
         if not texts[0]:
             return "Первая фраза обязательно должна быть"
 
-        if image.get('content', None):
-            base_image = Image.open(BytesIO(image['content']))
-        else:
-            response = requests.get(image)
+        image = image['private_download_url'] or image['content']
+        if 'content' in image:
+            response = requests.get(image['content'])
             base_image = Image.open(BytesIO(response.content))
+        elif 'private_download_url' in image:
+            base_image = Image.open(BytesIO(image['private_download_url']))
+        else:
+            raise RuntimeWarning("Нет картинки в сообщении")
 
         db = DemotivatorBuilder(base_image, *texts)
         demotivator = db.get_demotivator()
