@@ -1,10 +1,15 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Синички</title>
+  <link rel="icon" type="image/png" href="{% static "favicon_256.png" %}"/>
 </head>
 <body>
-<img src="http://andrewsha.net:20000/mjpg/video.mjpg" style="max-width:100%;" alt="Синички">
+<div class="content" style="text-align: center">
+  <img src="https://cam.andrewsha.net/mjpg/video.mjpg" style="max-width:100%;" alt="Синички">
+</div>
 </body>
 </html>

@@ -14,24 +14,36 @@ pip install -r requirements.txt
 old_path="/var/www/petrovich/"
 sed -i "s#$old_path#$PWD/#g" ./config/petrovich.service
 sed -i "s#$old_path#$PWD/#g" ./config/petrovich_site.service
-sed -i "s#$old_path#$PWD/#g" ./config/petrovich_nginx.conf
+sed -i "s#$old_path#$PWD/#g" ./config/nginx/petrovich_nginx.conf
+sed -i "s#$old_path#$PWD/#g" ./config/nginx/conf/petrovich-default-locations.conf
 
 #amazon config
 cp ./config/amazon/config ~/.aws/config
 cp ./config/amazon/creditionals ~/.aws/creditionals
 
 # systemd
-rm /etc/systemd/system/petrovich.service || echo $
-rm /etc/systemd/system/petrovich_site.service || echo $
+sudo rm /etc/systemd/system/petrovich.service || echo $
+sudo rm /etc/systemd/system/petrovich_site.service || echo $
 sudo ln -s "$PWD/config/petrovich.service" /etc/systemd/system/ || echo $
 sudo ln -s "$PWD/config/petrovich_site.service" /etc/systemd/system/ || echo $
 sudo systemctl daemon-reload
 
 # web
-rm /etc/nginx/sites-available/petrovich_nginx.conf || echo $
-rm /etc/nginx/sites-enabled/petrovich_nginx.conf || echo $
-sudo ln -s "$PWD/config/petrovich_nginx.conf" /etc/nginx/sites-available/ || echo $
-sudo ln -s "$PWD/config/petrovich_nginx.conf" /etc/nginx/sites-enabled/ || echo $
+sudo rm /etc/nginx/sites-available/petrovich_nginx.conf || echo $
+sudo rm /etc/nginx/sites-enabled/petrovich_nginx.conf || echo $
+sudo rm /etc/nginx/conf/petrovich-default-config.conf || echo $
+sudo rm /etc/nginx/conf/petrovich-default-locations.conf || echo $
+sudo rm /etc/nginx/conf/petrovich-main-domain-ssl.conf || echo $
+sudo rm /etc/nginx/conf/petrovich-subdomains-ssl.conf || echo $
+sudo ln -s "$PWD/config/nginx/petrovich_nginx.conf" /etc/nginx/sites-available/ || echo $
+sudo ln -s "$PWD/config/nginx/petrovich_nginx.conf" /etc/nginx/sites-enabled/ || echo $
+sudo ln -s "$PWD/config/nginx/conf/petrovich-default-config.conf" /etc/nginx/conf/ || echo $
+sudo ln -s "$PWD/config/nginx/conf/petrovich-default-locations.conf" /etc/nginx/conf/ || echo $
+sudo ln -s "$PWD/config/nginx/conf/petrovich-main-domain-ssl.conf" /etc/nginx/conf/ || echo $
+sudo ln -s "$PWD/config/nginx/conf/petrovich-subdomains-ssl.conf" /etc/nginx/conf/ || echo $
+
+sudo mkdir /etc/nginx/conf || echo $
+
 sudo systemctl restart nginx
 
 # migrations
