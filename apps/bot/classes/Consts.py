@@ -24,6 +24,10 @@ class Platform(Enum):
     TG = 'tg'
     API = 'api'
 
+    @classmethod
+    def choices(cls):
+        return tuple((i.name, i.value) for i in cls)
+
 
 # PLATFORMS = [x.value for x in list(Platform)]
 

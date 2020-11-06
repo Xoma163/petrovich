@@ -94,7 +94,7 @@ def where_is_me(request):
     log.msg = msg
     log.save()
     for recipient in recipients:
-        bot = get_bot_by_platform(recipient.platform)()
+        bot = get_bot_by_platform(recipient.get_platform_enum())()
         bot.parse_and_send_msgs(recipient.user_id, msg)
     log.success = True
     return json_response({'status': 'success'})

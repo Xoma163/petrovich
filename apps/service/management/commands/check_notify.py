@@ -35,11 +35,11 @@ class Command(BaseCommand):
                 if flag:
                     attachments = []
                     if notify.chat:
-                        bot = get_bot_by_platform(notify.chat.platform)()
-                        event_model = get_event_by_platform(notify.chat.platform)
+                        platform = notify.chat.get_platform_enum()
                     else:
-                        bot = get_bot_by_platform(notify.author.platform)()
-                        event_model = get_event_by_platform(notify.author.platform)
+                        platform = notify.author.get_platform_enum()
+                    bot = get_bot_by_platform(platform)()
+                    event_model = get_event_by_platform(platform)
 
                     if notify.attachments and notify.attachments != "null":
                         notify_attachments = notify.attachments

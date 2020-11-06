@@ -16,9 +16,9 @@ class CommonBot:
         self.BOT_CAN_WORK = True
         self.DEBUG = False
         self.DEVELOP_DEBUG = False
-        self.user_model = Users.objects.filter(platform=platform)
-        self.chat_model = Chat.objects.filter(platform=platform)
-        self.bot_model = Bot.objects.filter(platform=platform)
+        self.user_model = Users.objects.filter(platform=self.platform.value)
+        self.chat_model = Chat.objects.filter(platform=self.platform.value)
+        self.bot_model = Bot.objects.filter(platform=self.platform.value)
 
         self.logger = logging.getLogger(platform.value)
 

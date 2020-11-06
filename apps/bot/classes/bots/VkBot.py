@@ -57,7 +57,7 @@ class VkBot(CommonBot, Thread):
             vk_user.user_id = user_id
             vk_user.name = user['first_name']
             vk_user.surname = user['last_name']
-            vk_user.platform = self.platform
+            vk_user.platform = self.platform.value
 
             if 'sex' in user:
                 vk_user.gender = user['sex']
@@ -90,7 +90,7 @@ class VkBot(CommonBot, Thread):
         if len(vk_chat) > 0:
             vk_chat = vk_chat.first()
         else:
-            vk_chat = Chat(chat_id=chat_id, platform=self.platform)
+            vk_chat = Chat(chat_id=chat_id, platform=self.platform.value)
             vk_chat.save()
         return vk_chat
 
@@ -117,7 +117,7 @@ class VkBot(CommonBot, Thread):
             bot = Bot()
             bot.bot_id = bot_id
             bot.name = vk_bot['name']
-            bot.platform = self.platform
+            bot.platform = self.platform.value
             bot.save()
 
         return bot

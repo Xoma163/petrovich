@@ -19,10 +19,10 @@ class Command(BaseCommand):
             youtube_data = youtube_info.get_youtube_channel_info()
             if youtube_data['last_video']['date'] > yt_sub.date:
                 if yt_sub.chat:
-                    bot = get_bot_by_platform(yt_sub.chat.platform)()
+                    bot = get_bot_by_platform(yt_sub.chat.get_platform_enum())()
                     peer_id = yt_sub.chat.chat_id
                 else:
-                    bot = get_bot_by_platform(yt_sub.author.platform)()
+                    bot = get_bot_by_platform(yt_sub.author.get_platform_enum())()
                     peer_id = yt_sub.author.user_id
                 msg = f"Новое видео на канале {yt_sub.title}\n" \
                       f"{youtube_data['last_video']['title']}\n" \

@@ -123,7 +123,7 @@ class MinecraftAPI:
                 users_in_chat = self.event.chat.users_set.all()
                 users_notify = users_notify.exclude(pk__in=users_in_chat)
         for user in users_notify:
-            bot = get_bot_by_platform(user.platform)()
+            bot = get_bot_by_platform(user.get_platform_enum())()
             bot.parse_and_send_msgs_thread(user.user_id, message)
 
     def stop_if_need(self):
@@ -137,7 +137,7 @@ class MinecraftAPI:
                 message = f"Если никто не зайдёт на сервак по майну {self.version}, то через полчаса я его остановлю"
                 users_notify = Users.objects.filter(groups__name=Role.MINECRAFT_NOTIFY.name)
                 for user in users_notify:
-                    bot = get_bot_by_platform(user.platform)()
+                    bot = get_bot_by_platform(user.get_platform_enum())()
                     bot.parse_and_send_msgs_thread(user.user_id, message)
 
             # Если событие уже было создано, значит пора отрубать
@@ -153,7 +153,7 @@ class MinecraftAPI:
                     message = f"Вырубаю майн {self.version}"
                     users_notify = Users.objects.filter(groups__name=Role.MINECRAFT_NOTIFY.name)
                     for user in users_notify:
-                        bot = get_bot_by_platform(user.platform)()
+                        bot = get_bot_by_platform(user.get_platform_enum())()
                         bot.parse_and_send_msgs_thread(user.user_id, message)
                 else:
                     obj.delete()
