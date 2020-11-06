@@ -13,7 +13,6 @@
 -   [API (временно не работает)](./readme/api.md) 
 -   [Установка](./readme/setup.md)
 
-
 ## Отдельная благодарность
 
-[![JetBrains](readme/jetbrains.png)]( https://www.jetbrains.com/?from=petrovich)
+[![JetBrains](readme/jetbrains.png)](https://www.jetbrains.com/?from=petrovich)
