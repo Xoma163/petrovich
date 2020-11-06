@@ -59,7 +59,7 @@ class Horoscope(CommonCommand):
                 if not horoscope:
                     raise RuntimeWarning("На сегодня ещё нет гороскопа")
                 meme = horoscope.memes.all()[zodiac_sign_index]
-                return f"{zodiac_sign.name.capitalize()}\nНазвание мема - {meme.name}"
+                return f"{zodiac_sign.name.capitalize()}\n{meme.get_info()}"
             # Гороскоп для знака зодиака в аргументах
             zodiac_sign_name = self.event.args[0].lower()
             zodiac_sign = self.zodiac_signs.get_zodiac_sign_by_sign_or_name(zodiac_sign_name)

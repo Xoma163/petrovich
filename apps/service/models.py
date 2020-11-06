@@ -143,6 +143,7 @@ class Meme(models.Model):
 
     def get_info(self):
         return f"Название: {self.name}\n" \
+               f"Тип: {self.get_type_display()}\n" \
                f"ID: {self.pk}\n" \
                f"Автор: {self.author}\n" \
                f"Ссылка: {self.link}\n" \
