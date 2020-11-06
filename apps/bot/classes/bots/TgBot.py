@@ -53,7 +53,7 @@ class TgBot(CommonBot, Thread):
             _user.name = user.get('first_name', None)
             _user.surname = user.get('last_name', None)
             _user.nickname = user.get('username', None)
-            _user.platform = self.platform.value
+            _user.platform = self.platform.name
             _user.save()
             group_user = Group.objects.get(name=Role.USER.name)
             _user.groups.add(group_user)
@@ -79,7 +79,7 @@ class TgBot(CommonBot, Thread):
             # Если пользователь из fwd
             tg_user = Users()
             tg_user.user_id = user_id
-            tg_user.platform = self.platform.value
+            tg_user.platform = self.platform.name
 
             tg_user.save()
 
@@ -95,7 +95,7 @@ class TgBot(CommonBot, Thread):
         if len(tg_chat) > 0:
             tg_chat = tg_chat.first()
         else:
-            tg_chat = Chat(chat_id=chat_id, platform=self.platform.value)
+            tg_chat = Chat(chat_id=chat_id, platform=self.platform.name)
             tg_chat.save()
         return tg_chat
 
@@ -107,7 +107,7 @@ class TgBot(CommonBot, Thread):
             bot = bot.first()
         else:
             # Прозрачная регистрация
-            bot = Bot(bot_id=bot_id, platform=self.platform.value)
+            bot = Bot(bot_id=bot_id, platform=self.platform.name)
             bot.save()
 
         return bot

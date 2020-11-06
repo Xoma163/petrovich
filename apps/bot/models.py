@@ -11,7 +11,7 @@ class Platform(models.Model):
     platform = models.CharField('Тип платформы', max_length=20, choices=PlatformEnum.choices())
 
     def get_platform_enum(self):
-        return [x for x in PlatformEnum if x.value == self.platform][0]
+        return [x for x in PlatformEnum if x.name == self.platform][0]
 
     class Meta:
         abstract = True
@@ -69,9 +69,9 @@ class Users(Platform):
         return [group['name'] for group in groups]
 
     def show_url(self):
-        if self.platform == str(PlatformEnum.VK):
+        if self.platform == PlatformEnum.VK.name:
             return format_html(f"<a href='https://vk.com/id{self.user_id}'>Вк</a>")
-        elif self.platform == str(PlatformEnum.TG):
+        elif self.platform == PlatformEnum.TG.name:
             return format_html(f"<a href='https://t.me/{self.nickname}'>Тг</a>")
         else:
             return ""
