@@ -18,39 +18,58 @@ class Settings(CommonCommand):
 
     def start(self):
         if self.event.args:
-            self.check_args(2)
-            if self.event.args[1].lower() in ON_OFF_TRANSLATOR:
-                value = ON_OFF_TRANSLATOR[self.event.args[1]]
-            else:
-                raise RuntimeWarning("Не понял, включить или выключить?")
             arg0 = self.event.args[0].lower()
-            if arg0 in ['реагировать', 'реагируй', 'реагирование']:
-                self.check_conversation()
-                self.check_sender(Role.CONFERENCE_ADMIN)
-                self.event.chat.need_reaction = value
-                self.event.chat.save()
-                return "Сохранил настройку"
-            elif arg0 in ['майнкрафт', 'майн', 'minecraft', 'mine']:
-                self.check_sender(Role.TRUSTED)
-
-                group_minecraft_notify = Group.objects.get(name=Role.MINECRAFT_NOTIFY.name)
-                if value:
-                    self.event.sender.groups.add(group_minecraft_notify)
-                    self.event.sender.save()
-                    return "Подписал на рассылку о сервере майна"
-                else:
-                    self.event.sender.groups.remove(group_minecraft_notify)
-                    self.event.sender.save()
-                    return "Отписал от рассылки о сервере майна"
-            else:
-                raise RuntimeWarning("Не знаю такой настройки")
         else:
-            msg = "Настройки:\n"
-            if self.event.chat:
-                reaction = self.event.chat.need_reaction
-                msg += f"Реагировать на неправильные команды - {TRUE_FALSE_TRANSLATOR[reaction]}\n"
+            arg0 = None
 
-            if self.event.sender.check_role(Role.TRUSTED):
-                minecraft_notify = self.event.sender.check_role(Role.MINECRAFT_NOTIFY)
-                msg += f"Уведомления по майну - {TRUE_FALSE_TRANSLATOR[minecraft_notify]}\n"
-            return msg
+        menu = [
+            [['реагировать', 'реагируй', 'реагирование'], self.menu_reaction],
+            [['майнкрафт', 'майн', 'minecraft', 'mine'], self.menu_minecraft_notify],
+            [['default'], self.menu_default],
+        ]
+        method = self.handle_menu(menu, arg0)
+        return method()
+
+    @staticmethod
+    def get_on_or_off(arg):
+        if arg in ON_OFF_TRANSLATOR:
+            return ON_OFF_TRANSLATOR[arg]
+        else:
+            raise RuntimeWarning("Не понял, включить или выключить?")
+
+    def menu_reaction(self):
+        self.check_args(2)
+        value = self.get_on_or_off(self.event.args[1].lower())
+
+        self.check_conversation()
+        self.check_sender(Role.CONFERENCE_ADMIN)
+        self.event.chat.need_reaction = value
+        self.event.chat.save()
+        return "Сохранил настройку"
+
+    def menu_minecraft_notify(self):
+        self.check_args(2)
+        self.check_sender(Role.TRUSTED)
+
+        value = self.get_on_or_off(self.event.args[1].lower())
+
+        group_minecraft_notify = Group.objects.get(name=Role.MINECRAFT_NOTIFY.name)
+        if value:
+            self.event.sender.groups.add(group_minecraft_notify)
+            self.event.sender.save()
+            return "Подписал на рассылку о сервере майна"
+        else:
+            self.event.sender.groups.remove(group_minecraft_notify)
+            self.event.sender.save()
+            return "Отписал от рассылки о сервере майна"
+
+    def menu_default(self):
+        msg = "Настройки:\n"
+        if self.event.chat:
+            reaction = self.event.chat.need_reaction
+            msg += f"Реагировать на неправильные команды - {TRUE_FALSE_TRANSLATOR[reaction]}\n"
+
+        if self.event.sender.check_role(Role.TRUSTED):
+            minecraft_notify = self.event.sender.check_role(Role.MINECRAFT_NOTIFY)
+            msg += f"Уведомления по майну - {TRUE_FALSE_TRANSLATOR[minecraft_notify]}\n"
+        return msg
