@@ -104,7 +104,7 @@ class DemotivatorBuilder:
     def _draw_texts_lines(self, text_obj, drawing, pos_y):
         max_text_height = max([drawing.textsize(line, font=text_obj.font)[1] for line in text_obj.lines])
         for line in text_obj.lines:
-            text_width, text_height = drawing.textsize(line, font=text_obj.font)
+            text_width, _ = drawing.textsize(line, font=text_obj.font)
             pos_x = int((self.available_text_width - text_width + self.BLACK_OUTER_FRAME[0]) / 2)
             drawing.text((pos_x, pos_y), line, font=text_obj.font)
             pos_y += max_text_height + text_obj.padding
