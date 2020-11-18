@@ -22,7 +22,7 @@ class Weather(CommonCommand):
             changes = True
             del self.event.args[-1]
         if self.event.args:
-            city = City.objects.filter(synonyms__icontains=self.event.args[0]).first()
+            city = City.objects.filter(synonyms__icontains=self.event.original_args).first()
             if not city:
                 raise RuntimeWarning("Не нашёл такой город")
         else:

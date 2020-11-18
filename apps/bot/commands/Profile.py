@@ -99,6 +99,7 @@ def add_city_to_db(city_name):
     city_info = yandexgeo_api.get_city_info_by_name(city_name)
     if not city_info:
         raise RuntimeWarning("Не смог найти координаты для города")
+    city_info['name'] = city_info['name'].replace('ё', 'е')
     city = City.objects.filter(name=city_info['name'])
     if len(city) != 0:
         raise RuntimeWarning("Такой город уже есть")

@@ -42,12 +42,13 @@ class YandexWeatherAPI:
             'forecast': []}
 
         # Проставление part_name для времени сейчас
-        index = list(DAY_TRANSLATOR.keys()).index(response['forecast']['parts'][0]['part_name'])
+        index = list(DAY_TRANSLATOR.keys()).index(list(response['forecast']['parts'].keys())[0])
         weather['now']['part_name'] = list(DAY_TRANSLATOR.keys())[index - 1]
 
-        for x in response['forecast']['parts']:
+        for part in response['forecast']['parts']:
+            x = response['forecast']['parts'][part]
             weather['forecast'].append({
-                'part_name': x['part_name'],
+                'part_name': part,
                 'temp_min': x['temp_min'],
                 'temp_max': x['temp_max'],
                 'temp_feels_like': x['feels_like'],
