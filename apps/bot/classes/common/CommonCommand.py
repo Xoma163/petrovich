@@ -304,7 +304,7 @@ class CommonCommand:
         :return: bool
         """
         if self.event.platform not in self.platforms:
-            error = f"Команда недоступна для {self.event.platform.upper()}"
+            error = f"Команда недоступна для {self.event.platform.value.upper()}"
             raise RuntimeWarning(error)
         return True
 

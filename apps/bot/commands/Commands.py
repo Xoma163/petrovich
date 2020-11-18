@@ -21,7 +21,7 @@ class Commands(CommonCommand):
             {"role": Role.MODERATOR, "text": "команды для модераторов"},
             {"role": Role.MINECRAFT, "text": "команды для игроков майнкрафта"},
             {"role": Role.TRUSTED, "text": "команды для доверенных пользователей"},
-            {"role": Role.STUDENT, "text": "команды для группы 6221"},
+            {"role": Role.STUDENT, "text": "команды для студентов"},
             {"role": Role.MINECRAFT_NOTIFY, "text": "команды для уведомлённых майнкрафтеров"},
             {"role": Role.TERRARIA, "text": "команды для игроков террарии"},
             {"role": Role.HOME, "text": "команды для домашних пользователей"},
