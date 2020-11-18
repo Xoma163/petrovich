@@ -15,9 +15,9 @@ class Start(CommonCommand):
                            "Сервис - бот/синички/майнкрафт/террария\n" \
                            "Если майнкрафт, то может быть указана версия, 1.12.2 или 1.15.1"
 
-        keyboard = [{'for': Role.ADMIN, 'text': 'Старт', 'color': 'green', 'row': 1, 'col': 1},
-                    {'for': Role.ADMIN, 'text': 'Старт синички', 'color': 'green', 'row': 1, 'col': 3}]
-        super().__init__(names, help_text, detail_help_text, keyboard=keyboard, access=Role.TRUSTED)
+        # keyboard = [{'for': Role.ADMIN, 'text': 'Старт', 'color': 'green', 'row': 1, 'col': 1},
+        #             {'for': Role.ADMIN, 'text': 'Старт синички', 'color': 'green', 'row': 1, 'col': 3}]
+        super().__init__(names, help_text, detail_help_text, access=Role.TRUSTED)
 
     def start(self):
         if self.event.args:

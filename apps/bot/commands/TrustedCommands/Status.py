@@ -10,7 +10,7 @@ class Status(CommonCommand):
         names = ["статус"]
         help_text = "Статус - статус серверов по играм"
         # keyboard = {'for': Role.MINECRAFT, 'text': 'Статус', 'color': 'green', 'row': 1, 'col': 1}
-        super().__init__(names, help_text, access=Role.TRUSTED)
+        super().__init__(names, help_text, access=Role.MINECRAFT)
 
     def start(self):
         minecraft_result = ""
