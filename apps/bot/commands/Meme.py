@@ -20,7 +20,7 @@ class Meme(CommonCommand):
                            "Мем р - присылает рандомный мем\n" \
                            "Мем добавить (название) (Вложение/Пересланное сообщение с вложением) - добавляет мем. \n" \
                            "Мем обновить (название) (Вложение/Пересланное сообщение с вложением) - обновляет созданный вами мем. \n" \
-                           "Можно добавлять картинки/гифки/аудио/видео\n" \
+                           "Можно добавлять картинки/аудио/видео\n" \
                            "Мем удалить (название) - удаляет созданный вами мем\n" \
                            "Мем конфа (название конфы) (название/рандом) - отправляет мем в конфу\n\n" \
                            "Для модераторов:\n" \
@@ -58,7 +58,7 @@ class Meme(CommonCommand):
             raise RuntimeWarning('В телеграмме не поддерживается добавление мемов')
 
         self.check_args(2)
-        attachments = get_attachments_from_attachments_or_fwd(self.event, ['audio', 'video', 'photo', 'doc'])
+        attachments = get_attachments_from_attachments_or_fwd(self.event, ['audio', 'video', 'photo'])
         if len(attachments) == 0:
             raise RuntimeWarning("Не нашёл вложений в сообщении или пересланном сообщении")
         attachment = attachments[0]
@@ -78,7 +78,7 @@ class Meme(CommonCommand):
 
         if attachment['type'] == 'video' or attachment['type'] == 'audio':
             new_meme['link'] = attachment['url']
-        elif attachment['type'] == 'photo' or attachment['type'] == 'doc':
+        elif attachment['type'] == 'photo':  # or attachment['type'] == 'doc':
             new_meme['link'] = attachment['download_url']
         else:
             raise RuntimeError("Невозможно")
@@ -104,13 +104,13 @@ class Meme(CommonCommand):
                 _id = self.event.args[1]
             except RuntimeWarning:
                 pass
-        attachments = get_attachments_from_attachments_or_fwd(self.event, ['audio', 'video', 'photo', 'doc'])
+        attachments = get_attachments_from_attachments_or_fwd(self.event, ['audio', 'video', 'photo'])
         if len(attachments) == 0:
             raise RuntimeWarning("Не нашёл вложений в сообщении или пересланном сообщении")
         attachment = attachments[0]
         if attachment['type'] == 'video' or attachment['type'] == 'audio':
             new_meme_link = attachment['url']
-        elif attachment['type'] == 'photo' or attachment['type'] == 'doc':
+        elif attachment['type'] == 'photo':  # or attachment['type'] == 'doc':
             new_meme_link = attachment['download_url']
         else:
             raise RuntimeError("Невозможно")
@@ -389,6 +389,7 @@ def prepare_meme_to_send(bot, event, meme, print_name=False, send_keyboard=False
     elif event.platform == Platform.VK:
         if meme.type == 'video':
             msg['attachments'] = [meme.link.replace(VK_URL, '')]
+            # Проверяем не удалено ли видео
             owner_id, _id = msg['attachments'][0].replace('video', '').split('_')
             if bot.get_video(owner_id, _id)['count'] == 0:
                 error = "Мем был удалён, перезалейте плиз"
@@ -401,8 +402,8 @@ def prepare_meme_to_send(bot, event, meme, print_name=False, send_keyboard=False
             msg['attachments'] = [meme.link.replace(VK_URL, '')]
         elif meme.type == 'photo':
             msg['attachments'] = bot.upload_photos(meme.link)
-        elif meme.type == 'doc':
-            msg['attachments'] = bot.upload_document(meme.link, event.peer_id)
+        # elif meme.type == 'doc':
+        #     msg['attachments'] = bot.upload_document(meme.link, event.peer_id)
         else:
             raise RuntimeError("У мема нет типа. Тыкай разраба")
 
