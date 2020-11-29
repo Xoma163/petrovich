@@ -12,11 +12,11 @@ class Start(CommonCommand):
         names = ["старт"]
         help_text = "Старт - возобновляет работу бота или модуля"
         detail_help_text = "Старт [сервис=бот [версия=1.15.1]] - стартует сервис\n" \
-                           "Сервис - бот/синички/майнкрафт/террария\n" \
+                           "Сервис - бот/камера/майнкрафт/террария\n" \
                            "Если майнкрафт, то может быть указана версия, 1.12.2 или 1.15.1"
 
         # keyboard = [{'for': Role.ADMIN, 'text': 'Старт', 'color': 'green', 'row': 1, 'col': 1},
-        #             {'for': Role.ADMIN, 'text': 'Старт синички', 'color': 'green', 'row': 1, 'col': 3}]
+        #             {'for': Role.ADMIN, 'text': 'Старт камера', 'color': 'green', 'row': 1, 'col': 3}]
         super().__init__(names, help_text, detail_help_text, access=Role.TRUSTED)
 
     def start(self):
@@ -26,7 +26,7 @@ class Start(CommonCommand):
             arg0 = None
 
         menu = [
-            [["синички"], self.menu_birds],
+            [["камера"], self.menu_birds],
             [["майн", "майнкрафт", "mine", "minecraft"], self.menu_minecraft],
             [['террария', 'terraria'], self.menu_terraria],
             [['бот', 'bot'], self.menu_bot],
@@ -39,9 +39,9 @@ class Start(CommonCommand):
         self.check_sender(Role.ADMIN)
         if not cameraHandler.is_active():
             cameraHandler.resume()
-            return "Стартуем синичек!"
+            return "Стартуем камеру!"
         else:
-            return "Синички уже стартовали"
+            return "Камера уже стартовала"
 
     def menu_minecraft(self):
         self.check_sender(Role.MINECRAFT)

@@ -12,11 +12,11 @@ class Stop(CommonCommand):
         names = ["стоп"]
         help_text = "Стоп - останавливает работу бота или модуля"
         detail_help_text = "Стоп [сервис=бот [версия=1.15.1]] - останавливает сервис\n" \
-                           "Сервис - бот/синички/майнкрафт/террария\n" \
+                           "Сервис - бот/камера/майнкрафт/террария\n" \
                            "Если майнкрафт, то может быть указана версия, 1.12.2 или 1.15.1"
 
         # keyboard = [{'for': Role.ADMIN, 'text': 'Стоп', 'color': 'red', 'row': 1, 'col': 2},
-        #             {'for': Role.ADMIN, 'text': 'Стоп синички', 'color': 'red', 'row': 1, 'col': 4}]
+        #             {'for': Role.ADMIN, 'text': 'Стоп камера', 'color': 'red', 'row': 1, 'col': 4}]
         super().__init__(names, help_text, detail_help_text, access=Role.TRUSTED)
 
     def start(self):
@@ -26,7 +26,7 @@ class Stop(CommonCommand):
             arg0 = None
 
         menu = [
-            [["синички"], self.menu_birds],
+            [["камера"], self.menu_birds],
             [["майн", "майнкрафт", "mine", "minecraft"], self.menu_minecraft],
             [['террария', 'terraria'], self.menu_terraria],
             [['бот', 'bot'], self.menu_bot],
@@ -39,9 +39,9 @@ class Stop(CommonCommand):
         self.check_sender(Role.ADMIN)
         if cameraHandler.is_active():
             cameraHandler.terminate()
-            return "Финишируем синичек"
+            return "Финишируем камеру"
         else:
-            return "Синички уже финишировали"
+            return "Камера уже финишировала"
 
     def menu_minecraft(self):
         self.check_sender(Role.MINECRAFT)

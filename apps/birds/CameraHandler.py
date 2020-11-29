@@ -24,9 +24,11 @@ class CameraHandler(threading.Thread):
         self.gif = None
         self.SCALED_WIDTH = 720
 
+        self.url = "http://192.168.1.12/mjpg/video.mjpg"
+
     def run(self):
         self._init_my_lists()
-        capture = cv2.VideoCapture("http://192.168.1.44/mjpg/video.mjpg")
+        capture = cv2.VideoCapture(self.url)
 
         time1 = time.time()
         # ToDo: возможно если я отрублю камеру, всё сломается
@@ -53,7 +55,7 @@ class CameraHandler(threading.Thread):
                     else:
                         print('ret=False')
                         time.sleep(10)
-                        capture = cv2.VideoCapture("http://192.168.1.44/mjpg/video.mjpg")
+                        capture = cv2.VideoCapture(self.url)
                 except Exception as e:
                     print("EXCEPTION IN CAMERAHANDLER" + str(e))
                     self.wait()

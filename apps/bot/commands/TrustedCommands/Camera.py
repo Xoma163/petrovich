@@ -1,0 +1,48 @@
+from apps.bot.classes.Consts import Role, Platform
+from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.management.commands.start import camera_handler
+
+
+class Birds(CommonCommand):
+    def __init__(self):
+        names = ["с", "c", "камера"]
+        help_text = "Камера - ссылка и гифка с камеры"
+        detail_help_text = "Камера [кол-во кадров=20] - ссылка и гифка с камеры. Максимум 200 кадров"
+
+        super().__init__(names, help_text, detail_help_text, int_args=[0], access=Role.TRUSTED,
+                         platforms=[Platform.VK, Platform.TG])
+
+    def start(self):
+        self.bot.set_activity(self.event.peer_id)
+        attachments = []
+        try:
+            image = camera_handler.get_img()
+        except RuntimeWarning as e:
+            print(e)
+            raise RuntimeError("какая-то дичь с камерой. Зовите разраба")
+        attachment = self.bot.upload_photos(image)[0]
+        attachments.append(attachment)
+
+        frames = 20
+        if self.event.args:
+            frames = self.event.args[0]
+            self.check_number_arg_range(frames, 0, camera_handler.MAX_FRAMES)
+
+        if frames != 0:
+            try:
+                document = camera_handler.get_gif(frames)
+            except RuntimeError as e:
+                return str(e)
+            attachment = self.bot.upload_document(document, self.event.peer_id, "Камера")
+            attachments.append(attachment)
+        attachments.append('https://birds.andrewsha.net')
+        if len(attachments) == 2 or self.event.platform == Platform.VK:
+            return {
+                'attachments': attachments,
+                "keyboard": self.bot.get_inline_keyboard(self.names[0], args={"frames": frames}),
+                'dont_parse_links': True
+            }
+        else:
+            self.bot.send_message(self.event.peer_id, attachments=[attachments[0]])
+            self.bot.send_message(self.event.peer_id, attachments=[attachments[1]])
+            return None

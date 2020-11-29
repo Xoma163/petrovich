@@ -1,12 +1,12 @@
 from django.core.management import BaseCommand
 
-# from apps.birds.CameraHandler import CameraHandler
+from apps.birds.CameraHandler import CameraHandler
 from apps.bot.classes.bots.TgBot import TgBot
 from apps.bot.classes.bots.VkBot import VkBot
 
 vk_bot = VkBot()
 tg_bot = TgBot()
-# camera_handler = CameraHandler()
+camera_handler = CameraHandler()
 
 
 def start_vk(debug=False):
@@ -21,9 +21,9 @@ def start_tg(debug=False):
     print('start tg')
 
 
-# def start_camera():
-#     camera_handler.start()
-#     print('start camera')
+def start_camera():
+    camera_handler.start()
+    print('start camera')
 
 
 class Command(BaseCommand):
@@ -39,5 +39,5 @@ class Command(BaseCommand):
 
         start_vk(debug)
         start_tg(debug)
-        # if not debug:
-        #     start_camera()
+        if not debug:
+            start_camera()
