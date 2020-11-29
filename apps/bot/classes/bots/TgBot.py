@@ -296,7 +296,10 @@ class TgBot(CommonBot, Thread):
         # url
         if isinstance(file_like_object, str) and urlparse(file_like_object).hostname:
             if allowed_exts_url:
-                if file_like_object.split('.')[-1].lower() not in allowed_exts_url:
+                extension = file_like_object.split('.')[-1].lower()
+                is_default_extension = extension not in allowed_exts_url
+                is_vk_image = any(extension.startswith(x) for x in allowed_exts_url)
+                if is_default_extension and not is_vk_image:
                     raise RuntimeWarning(f"Загрузка по URL доступна только для {' '.join(allowed_exts_url)}")
             return file_like_object
         if isinstance(file_like_object, bytes):
