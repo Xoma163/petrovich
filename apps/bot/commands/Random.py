@@ -19,6 +19,7 @@ class Random(CommonCommand):
             else:
                 int1 = 1
                 int2 = self.event.args[0]
+                self.check_number_arg_range(int2, 2)
         else:
             int1 = 0
             int2 = 1

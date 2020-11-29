@@ -165,7 +165,7 @@ class CommonCommand:
         raise RuntimeWarning(error)
 
     @staticmethod
-    def check_number_arg_range(arg, _min, _max, banned_list=None):
+    def check_number_arg_range(arg, _min=-float('inf'), _max=float('inf'), banned_list=None):
         """
         Проверка на вхождение числа в диапазон и исключение его из заданного списка
         :param arg: число
