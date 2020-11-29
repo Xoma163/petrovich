@@ -24,6 +24,7 @@ class CommonCommand:
     enabled: Включена ли команда
     priority: Приоритет обработки команды
     city: Должно ли сообщение обрабатываться только с заданным городом у пользователя
+    suggest_for_similar: предлагать ли команду в выдаче похожих команд при ошибке пользователя в вводе
     """
 
     def __init__(self,
@@ -43,6 +44,7 @@ class CommonCommand:
                  enabled: bool = True,
                  priority: int = 0,
                  city: bool = False,
+                 suggest_for_similar: bool = True,
                  ):
         self.names = names
         self.help_text = help_text
@@ -60,6 +62,7 @@ class CommonCommand:
         self.enabled = enabled
         self.priority = priority
         self.city = city
+        self.suggest_for_similar = suggest_for_similar
 
         self.bot = None
         self.event = None

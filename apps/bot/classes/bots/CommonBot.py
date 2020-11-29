@@ -127,6 +127,10 @@ class CommonBot:
             if command_access.name not in user_groups:
                 continue
 
+            # Выдача только тех команд, у которых стоит флаг выдачи
+            if not command.suggest_for_similar:
+                continue
+
             for name in command.names:
                 if name:
                     tanimoto_current = tanimoto(event.command, name)
