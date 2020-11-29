@@ -20,7 +20,7 @@ class CommonBot:
         self.chat_model = Chat.objects.filter(platform=self.platform.name)
         self.bot_model = Bot.objects.filter(platform=self.platform.name)
 
-        self.logger = logging.getLogger(platform.name)
+        self.logger = logging.getLogger(platform.value)
 
     def get_user_by_id(self, user_id):
         raise NotImplementedError
