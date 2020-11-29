@@ -109,7 +109,9 @@ class MinecraftAPI:
         if not self.server_info['online']:
             result = f"Майн {self.version} - остановлен ⛔"
         else:
-            players = " ".join(player['name'] for player in self.server_info['players'])
+            players_list = [x['name'] for x in self.server_info['players']]
+            players_list.sort(key=str.lower)
+            players = ", ".join(players_list)
             result = f"Майн {self.server_info['version']} - запущен ✅ ({self.server_info['player_count']}/{self.server_info['player_max']}) - {self.ip}:{self.port}\n"
             if len(players) > 0:
                 result += f"Игроки: {players}"
