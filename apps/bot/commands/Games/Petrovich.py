@@ -1,9 +1,10 @@
 import datetime
 from threading import Lock
 
+from django.contrib.auth.models import Group
 from django.db.models import Min
 
-from apps.bot.classes.Consts import Platform
+from apps.bot.classes.Consts import Platform, Role
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import localize_datetime, remove_tz
 from apps.games.models import PetrovichGames, PetrovichUser
@@ -76,8 +77,9 @@ class Petrovich(CommonCommand):
                     else:
                         winner_gender = "Петрович"
                     return f"{winner_gender} дня - {winner_today.user}"
-
-            winner = PetrovichUser.objects.filter(chat=self.event.chat, active=True).order_by("?").first()
+            group_banned = Group.objects.get(name=Role.BANNED.name)
+            winner = PetrovichUser.objects.filter(chat=self.event.chat, active=True).exclude(
+                user__groups=group_banned).order_by("?").first()
             if winner:
                 winner = winner.user
             else:
