@@ -6,7 +6,8 @@ class GayAnswer(CommonCommand):
         names = ["пидора"]
         super().__init__(names)
 
+    def accept(self, event):
+        return event.msg == 'пидора ответ'
+
     def start(self):
-        if self.event.args and self.event.args[0].lower() == "ответ":
-            return "Шлюхи аргумент"
-        return None
+        return "Шлюхи аргумент"
