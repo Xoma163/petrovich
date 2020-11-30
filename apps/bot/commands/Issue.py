@@ -1,3 +1,4 @@
+from apps.bot.APIs.GithubAPI import GithubAPI
 from apps.bot.classes.Consts import Platform
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.service.models import Issue as IssueModel
@@ -18,6 +19,7 @@ class Issue(CommonCommand):
 
             msgs = [{'text': self.event.original_args, 'from_id': int(self.event.sender.user_id)}]
         issue_text = ""
+        text = ""
         for msg in msgs:
             text = msg['text']
             if msg['from_id'] > 0:
@@ -33,4 +35,17 @@ class Issue(CommonCommand):
             author=self.event.sender,
             text=issue_text)
         issue.save()
-        return "Сохранено"
+
+        github_api = GithubAPI()
+        title = f"Ишю от пользователя {self.event.sender}"
+        body = f"{issue_text}\n\n" \
+               f"Данное ишю сгенерировано автоматически"
+
+        response = github_api.create_issue(title, body)
+        result = {
+            'msg': f"Сохранено\n"
+                   f"Отслеживать созданное ишю можно по этой ссылке:\n"
+                   f"{response['html_url']}",
+            'attachments': [response['html_url']]
+        }
+        return result
