@@ -3,11 +3,11 @@ from apps.bot.classes.common.CommonCommand import CommonCommand
 from .Sensors import get_item, get_data_for_items
 
 DEVICES = [
-    {'name': "Лампы", 'table': "Item0001", 'topic': 'cmnd/tasmota_50E93E/POWER', 'type': bool},
-    {'name': "Обогреватель", 'table': "Item0003", 'topic': 'cmnd/tasmota_5C048E/POWER', 'type': bool},
-    {'name': "Обогреватель в ногах", 'table': "Item0002", 'topic': 'cmnd/tasmota_152F6A/POWER', 'type': bool},
-    {'name': "Обогреватель на кухне", 'table': "Item0005", 'topic': 'cmnd/tasmota_C1E41A/POWER', 'type': bool},
-    {'name': "Лента", 'table': "Item0020", 'type': bool},
+    # {'name': "Лампы", 'table': "Item0001", 'topic': 'cmnd/tasmota_50E93E/POWER', 'type': bool},
+    # {'name': "Обогреватель", 'table': "Item0003", 'topic': 'cmnd/tasmota_5C048E/POWER', 'type': bool},
+    # {'name': "Обогреватель в ногах", 'table': "Item0002", 'topic': 'cmnd/tasmota_152F6A/POWER', 'type': bool},
+    # {'name': "Обогреватель на кухне", 'table': "Item0005", 'topic': 'cmnd/tasmota_C1E41A/POWER', 'type': bool},
+    # {'name': "Лента", 'table': "Item0020", 'type': bool},
 ]
 
 
