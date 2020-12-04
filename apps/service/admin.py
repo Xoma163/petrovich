@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.postgres import fields
 from django_json_widget.widgets import JSONEditorWidget
 
-from apps.service.models import Statistic, Issue, Service, Counter, Cat, Meme, Notify, City, AudioList, LaterMessage, \
+from apps.service.models import Statistic, Service, Counter, Cat, Meme, Notify, City, LaterMessage, \
     Donations, TimeZone, LaterMessageSession, YoutubeSubscribe, WakeOnLanUserData, Horoscope, QuoteBook, Words, TaxiInfo
 
 
@@ -10,11 +10,6 @@ from apps.service.models import Statistic, Issue, Service, Counter, Cat, Meme, N
 class StatisticsAdmin(admin.ModelAdmin):
     list_display = ('command', 'count_queries',)
     ordering = ('-count_queries',)
-
-
-@admin.register(Issue)
-class IssueAdmin(admin.ModelAdmin):
-    list_display = ('author', 'text',)
 
 
 @admin.register(Service)
@@ -59,11 +54,6 @@ class CityAdmin(admin.ModelAdmin):
 @admin.register(TimeZone)
 class TimeZoneAdmin(admin.ModelAdmin):
     list_display = ('name',)
-
-
-@admin.register(AudioList)
-class AudioListAdmin(admin.ModelAdmin):
-    list_display = ('author', 'name', 'attachment')
 
 
 @admin.register(Donations)

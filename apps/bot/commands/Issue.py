@@ -1,7 +1,6 @@
 from apps.bot.APIs.GithubAPI import GithubAPI
 from apps.bot.classes.Consts import Platform
 from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.service.models import Issue as IssueModel
 
 
 class Issue(CommonCommand):
@@ -18,8 +17,8 @@ class Issue(CommonCommand):
                 raise RuntimeWarning("Требуется аргументы или пересылаемые сообщения")
 
             msgs = [{'text': self.event.original_args, 'from_id': int(self.event.sender.user_id)}]
+
         issue_text = ""
-        text = ""
         for msg in msgs:
             text = msg['text']
             if msg['from_id'] > 0:
@@ -30,11 +29,6 @@ class Issue(CommonCommand):
                 fwd_user_id = int(msg['from_id'])
                 username = str(self.bot.get_bot_by_id(fwd_user_id))
             issue_text += f"{username}:\n{text}\n\n"
-
-        issue = IssueModel(
-            author=self.event.sender,
-            text=issue_text)
-        issue.save()
 
         github_api = GithubAPI()
         title = f"Ишю от пользователя {self.event.sender}"

@@ -52,18 +52,6 @@ class Statistic(models.Model):
         return str(self.command)
 
 
-class Issue(models.Model):
-    author = models.ForeignKey(Users, models.SET_NULL, verbose_name="Автор", null=True)
-    text = models.TextField('Фича')
-
-    class Meta:
-        verbose_name = "ишю"
-        verbose_name_plural = "Ишюс"
-
-    def __str__(self):
-        return str(self.text)
-
-
 class Service(models.Model):
     name = models.CharField(primary_key=True, verbose_name="Имя", max_length=50)
     value = models.CharField("Значение", max_length=5000, default="", null=True)
@@ -198,20 +186,6 @@ class Notify(models.Model):
 
     def __str__(self):
         return str(self.text)
-
-
-class AudioList(models.Model):
-    author = models.ForeignKey(Users, models.CASCADE, verbose_name="Автор", null=True)
-    name = models.CharField("Название", max_length=300)
-    attachment = models.CharField("Вложение", max_length=100, default="", null=True, blank=True)
-
-    class Meta:
-        verbose_name = "аудиозапись"
-        verbose_name_plural = "аудиозаписи"
-        ordering = ["name"]
-
-    def __str__(self):
-        return str(self.name)
 
 
 class LaterMessage(models.Model):
