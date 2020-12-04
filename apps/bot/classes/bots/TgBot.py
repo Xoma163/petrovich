@@ -378,7 +378,7 @@ class MyTgBotLongPoll:
                 self.last_update_id = result[-1]['update_id'] + 1
 
     def check(self):
-        result = self.request.get('getUpdates', {'offset': self.last_update_id, 'timeout': 30})
+        result = self.request.get('getUpdates', {'offset': self.last_update_id, 'timeout': 30}, timeout=35)
         if result.status_code != 200:
             return []
         result = result.json()['result']
@@ -387,7 +387,9 @@ class MyTgBotLongPoll:
     def listen(self):
         while True:
             try:
+                print('try for')
                 for event in self.check():
+                    print('event')
                     yield event
                     self.last_update_id = event['update_id'] + 1
                 time.sleep(0.5)
