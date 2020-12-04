@@ -14,6 +14,7 @@ class Group(models.Model):
     first_lesson_day = models.DateField("Дата первой даты",
                                         help_text="Это поле нужно чтобы точно узнавать когда начинается первая неделя",
                                         default=django.utils.timezone.now)
+    active = models.BooleanField("Обновлять расписание?", default=True)
 
     def __str__(self):
         return f"{self.number}"

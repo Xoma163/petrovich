@@ -80,7 +80,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
 
-        groups = Group.objects.all()
+        groups = Group.objects.filter(active=True)
         for group in groups:
             first_pair_week_number = group.first_lesson_day.isocalendar()[1]
             self.now_week_number = str(self.now.isocalendar()[1] - first_pair_week_number + 1)
