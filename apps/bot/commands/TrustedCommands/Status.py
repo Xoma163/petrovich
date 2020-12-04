@@ -1,4 +1,6 @@
-from apps.bot.APIs.Minecraft import servers_minecraft
+from apps.bot.APIs.Agario import agario_servers
+from apps.bot.APIs.Minecraft import minecraft_servers
+from apps.bot.APIs.Terraria import terraria_servers
 from apps.bot.classes.Consts import Role
 from apps.bot.classes.DoTheLinuxComand import do_the_linux_command
 from apps.bot.classes.common.CommonCommand import CommonCommand
@@ -14,15 +16,24 @@ class Status(CommonCommand):
 
     def start(self):
         minecraft_result = ""
-        for server in servers_minecraft:
+        for server in minecraft_servers:
             server.get_server_info()
             result = server.parse_server_info()
             minecraft_result += f"{result}\n\n"
 
-        terraria = get_terraria_server_info("7777")
+        terraria_result = ""
+        for server in terraria_servers:
+            result = server.get_server_info()
+            terraria_result += f"{result}\n\n"
+
+        agario_result = ""
+        for server in agario_servers:
+            result = server.get_server_info()
+            agario_result += f"{result}\n\n"
 
         total_str = f"{minecraft_result}" \
-                    f"{terraria}"
+                    f"{terraria_result}" \
+                    f"{agario_result}"
 
         return total_str
 

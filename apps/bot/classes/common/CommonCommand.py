@@ -281,25 +281,6 @@ class CommonCommand:
         error = "Перешлите сообщения"
         raise RuntimeWarning(error)
 
-    @staticmethod
-    def check_command_time(name, seconds):
-        """
-        Проверка на то, прошло ли время с последнего выполнения команды и можно ли выполнять команду
-        :param name: название команды
-        :param seconds: количество времени, после которого разрешается повторно выполнить команду
-        :return: bool
-        """
-        entity, created = Service.objects.get_or_create(name=name)
-        if created:
-            return True
-        update_datetime = entity.update_datetime
-        delta_time = datetime.utcnow() - remove_tz(update_datetime)
-        if delta_time.seconds < seconds and delta_time.days == 0:
-            error = f"Нельзя часто вызывать данную команду. Осталось {seconds - delta_time.seconds} секунд"
-            raise RuntimeWarning(error)
-        entity.name = name
-        entity.save()
-        return True
 
     def check_platforms(self):
         """

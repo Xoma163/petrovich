@@ -9,7 +9,7 @@ from mcrcon import MCRcon
 from apps.bot.classes.Consts import Role
 from apps.bot.classes.DoTheLinuxComand import do_the_linux_command
 from apps.bot.classes.bots.CommonBot import get_bot_by_platform
-from apps.bot.classes.common.CommonMethods import remove_tz
+from apps.bot.classes.common.CommonMethods import remove_tz, check_command_time
 from apps.bot.models import Users
 from apps.service.models import Service
 from petrovich.settings import env, BASE_DIR
@@ -30,6 +30,9 @@ class MinecraftAPI:
 
     def get_version(self):
         return self.names[0]
+
+    def _get_service_name(self):
+        return f'minecraft_{self.get_version()}'
 
     @staticmethod
     def send_rcon(command):
@@ -57,7 +60,7 @@ class MinecraftAPI:
                f"\nИнициатор - {self.event.sender}"
 
     def _start_local(self):
-        do_the_linux_command(f'sudo systemctl start minecraft_{self.get_version()}')
+        do_the_linux_command(f'sudo systemctl start {self._get_service_name()}')
 
     # ToDo: hardcode
     @staticmethod
@@ -72,6 +75,8 @@ class MinecraftAPI:
                 f"Сервер сейчас имеет состояние {response['InstanceState']['Name']}, не могу запустить")
 
     def start(self, send_notify=True):
+        check_command_time(f'{self._get_service_name()}', self.delay)
+
         if self.amazon:
             self._start_amazon()
         else:
@@ -82,7 +87,7 @@ class MinecraftAPI:
             self.send_notify_thread(message)
 
     def _stop_local(self):
-        do_the_linux_command(f'sudo systemctl stop minecraft_{self.get_version()}')
+        do_the_linux_command(f'sudo systemctl stop {self._get_service_name()}')
 
     def _stop_amazon(self):
         if not self.check_amazon_server_status():
@@ -96,10 +101,12 @@ class MinecraftAPI:
 
         url = env.str("MINECRAFT_1_12_2_STOP_URL")
         requests.post(url)
-        Service.objects.filter(name=f'stop_minecraft_{self.get_version()}').delete()
+        Service.objects.filter(name=f'stop_{self._get_service_name()}').delete()
         return True
 
     def stop(self, send_notify=True):
+        check_command_time(f'{self._get_service_name()}', self.delay)
+
         if self.amazon:
             self._stop_amazon()
         else:
@@ -148,7 +155,7 @@ class MinecraftAPI:
         self.get_server_info()
         # Если сервак онлайн и нет игроков
         if self.server_info['online'] and not self.server_info['players']:
-            obj, created = Service.objects.get_or_create(name=f'stop_minecraft_{self.get_version()}')
+            obj, created = Service.objects.get_or_create(name=f'stop_{self._get_service_name()}')
 
             # Создание событие. Уведомление, что мы скоро всё отрубим
             if created:
@@ -164,7 +171,7 @@ class MinecraftAPI:
                 delta_seconds = (datetime.utcnow() - remove_tz(update_datetime)).seconds
                 if delta_seconds <= 1800 + 100:
                     obj.delete()
-                    Service.objects.get_or_create(name=f"minecraft_{self.get_version()}")
+                    Service.objects.get_or_create(name=f"{self._get_service_name()}")
 
                     self.stop(send_notify=False)
 
@@ -178,11 +185,10 @@ class MinecraftAPI:
 
         # Эта ветка нужна, чтобы вручную вырубленные серверы не провоцировали при последующем старте отключение в 0/30 минут
         else:
-            Service.objects.filter(name=f'stop_minecraft_{self.get_version()}').delete()
+            Service.objects.filter(name=f'stop_{self._get_service_name()}').delete()
 
 
-# ToDo: чё за херня с серверами этими и снизу
-servers_minecraft = [
+minecraft_servers = [
     MinecraftAPI(
         **{
             'ip': None,
@@ -195,15 +201,10 @@ servers_minecraft = [
 ]
 
 
-def get_minecraft_version_by_args(args):
-    if args is None:
-        args = servers_minecraft[0].get_version()
-    minecraft_server = None
-    if len(args) == 1:
-        minecraft_server = servers_minecraft[0]
-    else:
-        for minecraft_version in servers_minecraft:
-            if args in minecraft_version.names:
-                minecraft_server = minecraft_version
-                break
-    return minecraft_server
+def get_minecraft_version_by_args(version):
+    if version is None:
+        return minecraft_servers[0]
+    for minecraft_server in minecraft_servers:
+        if version in minecraft_server.names:
+            return minecraft_server
+    raise RuntimeWarning("Я не знаю такой версии")
