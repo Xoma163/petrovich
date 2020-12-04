@@ -75,7 +75,7 @@ class MinecraftAPI:
                 f"Сервер сейчас имеет состояние {response['InstanceState']['Name']}, не могу запустить")
 
     def start(self, send_notify=True):
-        check_command_time(f'{self._get_service_name()}', self.delay)
+        check_command_time(self._get_service_name(), self.delay)
 
         if self.amazon:
             self._start_amazon()
@@ -105,7 +105,7 @@ class MinecraftAPI:
         return True
 
     def stop(self, send_notify=True):
-        check_command_time(f'{self._get_service_name()}', self.delay)
+        check_command_time(self._get_service_name(), self.delay)
 
         if self.amazon:
             self._stop_amazon()
@@ -171,7 +171,7 @@ class MinecraftAPI:
                 delta_seconds = (datetime.utcnow() - remove_tz(update_datetime)).seconds
                 if delta_seconds <= 1800 + 100:
                     obj.delete()
-                    Service.objects.get_or_create(name=f"{self._get_service_name()}")
+                    Service.objects.get_or_create(self._get_service_name())
 
                     self.stop(send_notify=False)
 

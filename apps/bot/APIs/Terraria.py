@@ -10,7 +10,7 @@ class TerrariaAPI:
 
     @staticmethod
     def _get_service_name():
-        return f"terraria"
+        return "terraria"
 
     def get_url(self):
         return f"{MAIN_DOMAIN}:{self.port}"
