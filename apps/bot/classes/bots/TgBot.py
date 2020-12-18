@@ -387,9 +387,7 @@ class MyTgBotLongPoll:
     def listen(self):
         while True:
             try:
-                print('try for')
                 for event in self.check():
-                    print('event')
                     yield event
                     self.last_update_id = event['update_id'] + 1
                 time.sleep(0.5)
