@@ -216,9 +216,10 @@ class Codenames(CommonCommand):
         return {'attachments': attachment}
 
     def menu_dereg(self):
-
         self.check_conversation()
         check_not_session(self.session)
+        if not self.player:
+            return "Вы не зарегистрированы"
         self.player.delete()
         return "Дерегнул. Сейчас зарегистрированы:\n" \
                f"{get_str_players(self.players)}\n"
