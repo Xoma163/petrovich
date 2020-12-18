@@ -211,6 +211,7 @@ class Meme(CommonCommand):
 
     def menu_reject(self):
         self.check_sender(Role.MODERATOR)
+        self.check_args(2)
         self.int_args = [1]
         self.parse_int()
         non_approved_meme = self.get_meme(_id=self.event.args[1])
