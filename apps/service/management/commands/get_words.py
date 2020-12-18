@@ -62,7 +62,7 @@ class Command(BaseCommand):
             time2 = time.time()
 
             msg += f"\n" \
-                   f"Время выполнения - {time2 - time1}\n" \
+                   f"Время выполнения - {round(time2 - time1, 2)}\n" \
                    f"Добавлено слов - {created_words}"
             return msg
         except Exception as e:
