@@ -18,7 +18,9 @@ def auto_str(cls):
 class Event:
 
     @staticmethod
-    def delete_slash_and_mentions(msg, mentions):
+    def delete_slash_and_mentions(msg):
+        mentions = env.list('VK_BOT_MENTIONS')
+
         # Обрезаем палку
         if len(msg) > 0:
             if msg[0] == '/':
@@ -62,9 +64,11 @@ class Event:
         raise NotImplementedError
 
     def __init__(self, event):
-        mentions = env.list('VK_BOT_MENTIONS')
+
         if 'message' in event:
-            text = self.delete_slash_and_mentions(event['message'].get('text'), mentions)
+            raw_msg = event['message'].get('text')
+            text = self.delete_slash_and_mentions(raw_msg)
+            self.mentioned = raw_msg != text
             parsed = self.parse_msg(text)
             self.msg = parsed.get('msg')
             self.command = parsed.get('command')

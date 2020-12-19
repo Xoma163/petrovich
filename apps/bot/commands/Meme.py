@@ -32,15 +32,18 @@ class Meme(CommonCommand):
                            "Мем удалить (id/название) [причина] - удаляет мем\n" \
                            "Мем инфо (id/название) - присылает информацию по мему"
 
-        super().__init__(names, help_text, detail_help_text, args=1, platforms=[Platform.VK, Platform.TG])
+        super().__init__(names, help_text, detail_help_text, args=1, platforms=[Platform.VK, Platform.TG], priority=70)
 
     def accept(self, event):
-        if event.chat and MemeModel.objects.filter(name=event.msg.lower()).exists():
+        if event.mentioned:
+            return super().accept(event)
+        
+        if event.chat and check_name_exists(event.msg.lower()):
             if not event.chat.need_meme:
                 raise PSkip()
             event.args = event.msg.lower().split(' ')
             return True
-        return super().accept(event)
+        return False
 
     def start(self):
         arg0 = self.event.args[0].lower()
