@@ -1,8 +1,7 @@
-from datetime import datetime
-
 from apps.bot.classes.Consts import Role, ATTACHMENT_TRANSLATOR, Platform
-from apps.bot.classes.common.CommonMethods import get_help_for_command, remove_tz
-from apps.service.models import Service
+from apps.bot.classes.bots.CommonBot import CommonBot
+from apps.bot.classes.common.CommonMethods import get_help_for_command
+from apps.bot.classes.events.Event import Event
 from petrovich.settings import env
 
 
@@ -67,7 +66,7 @@ class CommonCommand:
         self.bot = None
         self.event = None
 
-    def accept(self, event):
+    def accept(self, event: Event):
         """
         Метод, определяющий на что среагирует команда. По умолчанию ищет команду в названиях
         :param event: событие
@@ -78,7 +77,7 @@ class CommonCommand:
 
         return False
 
-    def check_and_start(self, bot, event):
+    def check_and_start(self, bot: CommonBot, event: Event):
         """
         Выполнение всех проверок и старт команды
         :param bot: сущность Bot
@@ -122,7 +121,7 @@ class CommonCommand:
         """
         raise NotImplementedError
 
-    def check_sender(self, role):
+    def check_sender(self, role: Role):
         """
         Проверка на роль отправителя
         :param role: требуемая роль
@@ -147,7 +146,7 @@ class CommonCommand:
         error = f"Команда доступна только для пользователей с уровнем прав {role.value}"
         raise RuntimeWarning(error)
 
-    def check_args(self, args=None):
+    def check_args(self, args: int = None):
         """
         Проверка на кол-во переданных аргументов
         :param args: количество требуемых аргументов
@@ -168,7 +167,7 @@ class CommonCommand:
         raise RuntimeWarning(error)
 
     @staticmethod
-    def check_number_arg_range(arg, _min=-float('inf'), _max=float('inf'), banned_list=None):
+    def check_number_arg_range(arg, _min=-float('inf'), _max=float('inf'), banned_list: list = None):
         """
         Проверка на вхождение числа в диапазон и исключение его из заданного списка
         :param arg: число
@@ -191,7 +190,7 @@ class CommonCommand:
             raise RuntimeWarning(error)
 
     @staticmethod
-    def _transform_k(arg):
+    def _transform_k(arg: str):
         """
         Перевод из строки с К в число. Пример: 1.3к = 1300
         :param arg: текстовое число с К
@@ -281,7 +280,6 @@ class CommonCommand:
         error = "Перешлите сообщения"
         raise RuntimeWarning(error)
 
-
     def check_platforms(self):
         """
         Проверка на вид платформы
@@ -324,7 +322,7 @@ class CommonCommand:
         error = "Не указан город в профиле. /профиль город (название) - устанавливает город пользователю"
         raise RuntimeWarning(error)
 
-    def handle_menu(self, menu, arg):
+    def handle_menu(self, menu: list, arg: str):
         """
         Вызов 'подпрограмм' основной команды по присланному аргументу
         :param menu: [[[keys1],[method1]],[[keys2],[method2]]]

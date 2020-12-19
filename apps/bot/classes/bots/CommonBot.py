@@ -333,7 +333,7 @@ class CommonBot:
             return gamers.first()
 
 
-def get_bot_by_platform(platform):
+def get_bot_by_platform(platform: Platform):
     from apps.bot.classes.bots.VkBot import VkBot
     from apps.bot.classes.bots.TgBot import TgBot
 
