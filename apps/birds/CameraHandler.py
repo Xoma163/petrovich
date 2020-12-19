@@ -57,7 +57,7 @@ class CameraHandler(threading.Thread):
                         time.sleep(10)
                         capture = cv2.VideoCapture(self.url)
                 except Exception as e:
-                    print("EXCEPTION IN CAMERAHANDLER" + str(e))
+                    print("EXCEPTION IN CAMERA HANDLER" + str(e))
                     self.wait()
             else:
                 self.wait()

@@ -15,26 +15,9 @@ class Command(BaseCommand):
         super().__init__()
 
     @staticmethod
-    def print_time_delivery_by_time_graphic(weekdays, friday, weekends):
-        weekdays = []
-        friday = []
-        weekends = []
+    def print_time_delivery_by_time_graphic():
         fig, ax = plt.subplots(1)
         fig.autofmt_xdate()
-        # for day in grouped_taxi_infos:
-        #     data = grouped_taxi_infos[day]
-        #
-        #     x_data = [
-        #         localize_datetime(remove_tz(x.created), 'Europe/Samara').replace(day=1, month=1, year=1900) + timedelta(
-        #             hours=4) for x in data]
-        #     y_data = []
-        #     last_good_data = 0
-        #     for y in data:
-        #         if y.data.get('time', None):
-        #             last_good_data = y.data.get('time')
-        #         y_data.append(last_good_data / 60)
-        #
-        #     plt.plot(x_data, y_data, label=day)
 
         plt.xlabel('Время')
         plt.ylabel('Время, мин.')
@@ -108,7 +91,5 @@ class Command(BaseCommand):
         taxi_info_weekend = taxi_infos.filter(created__week_day__in=[1, 7])
         taxi_info_weekend = self.get_grouped_taxi_infos(taxi_info_weekend)
 
-        # self.print_time_delivery_by_time_graphic(taxi_info_weekday, taxi_info_friday, taxi_info_weekend)
         self.print_price_by_time_graphic(taxi_info_weekday, taxi_info_friday, taxi_info_weekend)
-        # self.print_avg_time_delivery_by_time_graphic(grouped_taxi_infos)
-        # self.print_avg_price_by_time_graphic(grouped_taxi_infos)
+

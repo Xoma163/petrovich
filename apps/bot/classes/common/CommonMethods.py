@@ -57,18 +57,18 @@ def has_cyrillic(text):
 
 
 # Убирает временную зону у datetime
-def remove_tz(datetime):
-    return datetime.replace(tzinfo=None)
+def remove_tz(dt):
+    return dt.replace(tzinfo=None)
 
 
-def localize_datetime(datetime, tz):
+def localize_datetime(dt, tz):
     tz_obj = pytz.timezone(tz)
-    return pytz.utc.localize(datetime, is_dst=None).astimezone(tz_obj)
+    return pytz.utc.localize(dt, is_dst=None).astimezone(tz_obj)
 
 
-def normalize_datetime(datetime, tz):
+def normalize_datetime(dt, tz):
     tz_obj = pytz.timezone(tz)
-    localized_time = tz_obj.localize(datetime, is_dst=None)
+    localized_time = tz_obj.localize(dt, is_dst=None)
 
     tz_utc = pytz.timezone("UTC")
     return pytz.utc.normalize(localized_time, is_dst=None).astimezone(tz_utc)  # .replace(tzinfo=None)

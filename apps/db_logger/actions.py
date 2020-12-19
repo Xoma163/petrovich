@@ -1,7 +1,7 @@
 import logging
 
 
-def set_debug(modeladmin, request, queryset):
+def set_debug(model_admin, request, queryset):
     for entity in queryset:
         entity.level = logging.DEBUG
         entity.save()
@@ -10,7 +10,7 @@ def set_debug(modeladmin, request, queryset):
 set_debug.short_description = "Установить DEBUG"
 
 
-def set_info(modeladmin, request, queryset):
+def set_info(model_admin, request, queryset):
     for entity in queryset:
         entity.level = logging.INFO
         entity.save()
@@ -19,7 +19,7 @@ def set_info(modeladmin, request, queryset):
 set_info.short_description = "Установить INFO"
 
 
-def set_warning(modeladmin, request, queryset):
+def set_warning(model_admin, request, queryset):
     for entity in queryset:
         entity.level = logging.WARNING
         entity.save()
@@ -28,7 +28,7 @@ def set_warning(modeladmin, request, queryset):
 set_warning.short_description = "Установить WARNING"
 
 
-def set_error(modeladmin, request, queryset):
+def set_error(model_admin, request, queryset):
     for entity in queryset:
         entity.level = logging.ERROR
         entity.save()

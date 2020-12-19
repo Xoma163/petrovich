@@ -141,7 +141,6 @@ class Codenames(CommonCommand):
         super().__init__(names, help_text, detail_help_text, platforms=[Platform.VK], args=1)
 
     def init_var(self):
-
         if self.event.from_chat:
             self.session = CodenamesSession.objects.filter(chat=self.event.chat).first()
             self.players = CodenamesUser.objects.filter(chat=self.event.chat)

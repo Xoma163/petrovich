@@ -1,4 +1,5 @@
 from apps.bot.classes.Consts import Platform
+from apps.bot.classes.Exceptions import PError
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from petrovich.settings import env
 
@@ -25,6 +26,8 @@ class Actions(CommonCommand):
                             bot_group_id = -env.int('VK_BOT_GROUP_ID')
                         elif self.event.platform == Platform.TG:
                             bot_group_id = -env.int('TG_BOT_GROUP_ID')
+                        else:
+                            raise PError("Неизвестный клиент")
                         if _id == bot_group_id:
                             if self.event.chat.admin is None:
                                 self.event.chat.admin = self.event.sender

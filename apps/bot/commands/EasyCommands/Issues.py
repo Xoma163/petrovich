@@ -1,4 +1,3 @@
-from apps.bot.classes.Consts import Role
 from apps.bot.classes.common.CommonCommand import CommonCommand
 
 

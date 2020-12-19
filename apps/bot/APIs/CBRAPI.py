@@ -9,9 +9,9 @@ class CBRAPI:
 
     def do(self):
         response = requests.get(self.URL, stream=True)
-        elems = BeautifulSoup(response.content, 'xml').find('ValCurs').find_all("Valute")
+        elements = BeautifulSoup(response.content, 'xml').find('ValCurs').find_all("Valute")
 
-        for elem in elems:
+        for elem in elements:
             for _filter in self.filters:
                 if elem.find("CharCode").text == _filter:
                     self.filters[_filter]['name'] = elem.find('Name').text.lower()

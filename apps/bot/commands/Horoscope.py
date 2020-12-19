@@ -71,8 +71,8 @@ class Horoscope(CommonCommand):
             zodiac_sign = self.zodiac_signs.find_zodiac_sign_by_date(self.event.sender.birthday)
             return self.get_horoscope_by_zodiac_sign(zodiac_sign)
         else:
-            raise PWarning("Не указана дата рождения в профиле, не могу прислать гороскоп((. \n" \
-                                 "Укажи знак зодиака в аргументе: /гороскоп дева")
+            raise PWarning("Не указана дата рождения в профиле, не могу прислать гороскоп((. \n"
+                           "Укажи знак зодиака в аргументе: /гороскоп дева")
 
     def get_horoscope_by_zodiac_sign(self, zodiac_sign):
         horoscope = HoroscopeModel.objects.first()
