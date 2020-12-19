@@ -5,6 +5,7 @@ from apps.bot.classes.common.CommonCommand import CommonCommand
 from petrovich.settings import env
 from .Devices import DEVICES
 from .Sensors import get_items, get_room_and_item_by_args
+from ...classes.Exceptions import PWarning
 
 TRUE_FALSE_TRANSLATOR_ON_OFF = {
     True: 'ON',
@@ -23,7 +24,7 @@ class Sensors(CommonCommand):
     @staticmethod
     def set_device_state(device, state):
         if 'topic' not in device:
-            raise RuntimeWarning("Этим устройством невозможно управлять")
+            raise PWarning("Этим устройством невозможно управлять")
         client = mqtt.Client("petrovich")
         client.username_pw_set(username=env.str('MQTT_USER'), password=env.str('MQTT_PASSWORD'))
         client.connect(env.str('MQTT_SERVER'))
@@ -33,15 +34,15 @@ class Sensors(CommonCommand):
     def start(self):
         state = ON_OFF_TRANSLATOR.get(self.event.args[-1], None)
         if state is None:
-            raise RuntimeWarning("Не знаю такого состояния")
+            raise PWarning("Не знаю такого состояния")
 
         room_name, item_name = get_room_and_item_by_args(self.event.args[:-1])
         items = get_items(DEVICES, room_name, item_name)
         if len(items) > 1:
-            raise RuntimeWarning("Под поиск подходит 2 и более устройств")
+            raise PWarning("Под поиск подходит 2 и более устройств")
         item = items[0]['items']
         if len(item)>1:
-            raise RuntimeWarning("Под поиск подходит 2 и более устройств")
+            raise PWarning("Под поиск подходит 2 и более устройств")
         item = item[0]
         self.set_device_state(item, TRUE_FALSE_TRANSLATOR_ON_OFF[state])
         if state:

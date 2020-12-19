@@ -1,6 +1,7 @@
 import datetime
 
 from apps.bot.classes.Consts import Role
+from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import localize_datetime, remove_tz
 from apps.db_logger.models import MovementLog
@@ -29,8 +30,8 @@ class Where(CommonCommand):
                                          date__day=today.day,
                                          author=user).first()
         if user is None:
-            raise RuntimeWarning("Такого пользователя нет")
+            raise PWarning("Такого пользователя нет")
         if log is None:
-            raise RuntimeWarning("Информации пока ещё нет")
+            raise PWarning("Информации пока ещё нет")
         localized_date = localize_datetime(remove_tz(log.date), timezone).strftime("%H:%M:%S")
         return f"{localized_date}\n{log.msg}"

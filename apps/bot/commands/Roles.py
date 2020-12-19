@@ -1,4 +1,5 @@
 from apps.bot.classes.Consts import Role
+from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.common.CommonCommand import CommonCommand
 
 
@@ -24,14 +25,14 @@ class Roles(CommonCommand):
             self.check_conversation()
             try:
                 user = self.bot.get_user_by_name(self.event.args, self.event.chat)
-            except RuntimeWarning as e:
+            except PWarning as e:
                 return str(e)
         else:
             user = self.event.sender
 
         roles = get_roles(user)
         if len(roles) == 0:
-            raise RuntimeWarning("Нет прав")
+            raise PWarning("Нет прав")
 
         result = "\n".join(roles)
 

@@ -1,4 +1,5 @@
 from apps.bot.classes.Consts import Platform
+from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.common.CommonCommand import CommonCommand
 
 
@@ -24,7 +25,7 @@ class Uyu(CommonCommand):
 
         new_msg = new_msg.strip()
         if not new_msg:
-            raise RuntimeWarning("Нет текста в сообщении или пересланных сообщениях")
+            raise PWarning("Нет текста в сообщении или пересланных сообщениях")
 
         symbols_first_priority = ['...']
         symbols_left = ['.', ',', '?', '!', ':']

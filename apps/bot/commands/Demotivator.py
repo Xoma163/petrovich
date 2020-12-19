@@ -5,6 +5,7 @@ import requests
 from PIL import Image
 
 from apps.bot.classes.Demotivator import DemotivatorBuilder
+from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import get_attachments_from_attachments_or_fwd
 
@@ -30,7 +31,7 @@ class Demotivator(CommonCommand):
             response = requests.get(image['private_download_url'])
             base_image = Image.open(BytesIO(response.content))
         else:
-            raise RuntimeWarning("Нет картинки в сообщении")
+            raise PWarning("Нет картинки в сообщении")
 
         db = DemotivatorBuilder(base_image, *texts)
         demotivator = db.get_demotivator()

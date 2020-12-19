@@ -3,6 +3,7 @@ import random
 from threading import Lock
 
 from apps.bot.classes.Consts import Role, Platform
+from apps.bot.classes.Exceptions import PWarning, PError
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.games.models import CodenamesUser, CodenamesSession, Gamer
 from petrovich.settings import STATIC_ROOT
@@ -70,32 +71,32 @@ translator_role = {
 def check_player_captain(player):
     if player.role == 'captain':
         return True
-    raise RuntimeWarning("Загадывать может только капитан")
+    raise PWarning("Загадывать может только капитан")
 
 
 def check_next_step(session, step_name):
     if session.next_step == step_name:
         return True
 
-    raise RuntimeWarning("Сейчас не ваш ход")
+    raise PWarning("Сейчас не ваш ход")
 
 
 def check_player(player):
     if player:
         return True
-    raise RuntimeWarning("Вы не игрок")
+    raise PWarning("Вы не игрок")
 
 
 def check_session(session):
     if session:
         return True
-    raise RuntimeWarning("Игра ещё не началась")
+    raise PWarning("Игра ещё не началась")
 
 
 def check_not_session(session):
     if not session:
         return True
-    raise RuntimeWarning("Игра уже началась")
+    raise PWarning("Игра уже началась")
 
 
 def get_another_command(command):
@@ -183,9 +184,9 @@ class Codenames(CommonCommand):
 
         self.check_conversation()
         if len(CodenamesUser.objects.filter(chat=self.event.chat, user=self.event.sender)) > 0:
-            raise RuntimeWarning('Ты уже зарегистрирован')
+            raise PWarning('Ты уже зарегистрирован')
         if len(CodenamesUser.objects.filter(user=self.event.sender)) > 0:
-            raise RuntimeWarning('Нельзя участвовать сразу в двух играх')
+            raise PWarning('Нельзя участвовать сразу в двух играх')
 
         role_preference = None
         if len(self.event.args) >= 2:
@@ -194,7 +195,7 @@ class Codenames(CommonCommand):
             elif self.event.args[1].lower() in ["игрок"]:
                 role_preference = "player"
             else:
-                raise RuntimeWarning("Не знаю такой роли для регистрации")
+                raise PWarning("Не знаю такой роли для регистрации")
 
         codenames_user = CodenamesUser(user=self.event.sender,
                                        chat=self.event.chat,
@@ -241,13 +242,13 @@ class Codenames(CommonCommand):
         command = self.player.command
         check_next_step(self.session, command + "_wait")
         if len(self.event.args) < 3:
-            raise RuntimeWarning("Недостаточно аргументов")
+            raise PWarning("Недостаточно аргументов")
         self.int_args = [1]
         try:
             self.parse_int()
             count = self.event.args[1]
             word = self.event.args[2]
-        except RuntimeWarning:
+        except PWarning:
             self.int_args = [2]
             self.parse_int()
             word = self.event.args[1]
@@ -256,7 +257,7 @@ class Codenames(CommonCommand):
         if count > 9:
             count = 9
         elif count < 1:
-            raise RuntimeWarning("Число загадываемых слов не может быть меньше 1")
+            raise PWarning("Число загадываемых слов не может быть меньше 1")
 
         self.do_the_riddle(command, count, word)
         return 'Отправил в конфу'
@@ -266,13 +267,13 @@ class Codenames(CommonCommand):
         check_session(self.session)
         check_player(self.player)
         if self.player.role == 'captain':
-            raise RuntimeWarning("Капитан не может угадывать")
+            raise PWarning("Капитан не может угадывать")
         check_next_step(self.session, self.player.command)
         if self.event.payload:
             if self.event.payload['args']['action'] in ['слово']:
                 return self.select_word(self.event.payload['args']['row'],
                                         self.event.payload['args']['col'])
-            raise RuntimeError("Внутренняя ошибка. Неизвестный action в payload")
+            raise PError("Внутренняя ошибка. Неизвестный action в payload")
         elif self.event.args[0].lower() in ['слово']:
             self.check_args(2)
             word = self.event.args[1].capitalize()
@@ -288,7 +289,7 @@ class Codenames(CommonCommand):
                         find_row = i
                         find_col = j
                         if elem['state'] == 'open':
-                            raise RuntimeWarning("Слово уже открыто")
+                            raise PWarning("Слово уже открыто")
                         break
             self.select_word(find_row, find_col)
             return
@@ -321,7 +322,7 @@ class Codenames(CommonCommand):
     def menu_delete(self):
         self.check_sender(Role.CONFERENCE_ADMIN)
         if self.session is None:
-            raise RuntimeWarning("Нечего удалять")
+            raise PWarning("Нечего удалять")
         else:
             self.session.delete()
             return "Удалил"
@@ -384,7 +385,7 @@ class Codenames(CommonCommand):
             captains = preference_captain.order_by('?')[:2]
 
         if len(captains) < 2:
-            raise RuntimeWarning("Недостаточно игроков на роль капитана")
+            raise PWarning("Недостаточно игроков на роль капитана")
 
         for captain in captains:
             captain.role = 'captain'
@@ -427,7 +428,7 @@ class Codenames(CommonCommand):
     def select_word(self, row, col):
         board = self.session.board
         if board[row][col]['state'] == 'open':
-            raise RuntimeWarning("Слово уже открыто")
+            raise PWarning("Слово уже открыто")
 
         command = self.player.command
         another_command = get_another_command(command)

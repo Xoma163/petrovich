@@ -2,6 +2,8 @@ import time
 
 import requests
 
+from apps.bot.classes.Exceptions import PWarning, PError
+
 
 class Covid19API:
 
@@ -25,9 +27,9 @@ class Covid19API:
             response = self.do_the_request(url, timeout=10)
             time.sleep(1)
         except requests.exceptions.ReadTimeout:
-            raise RuntimeWarning("Проблемы с API. Слишком долго ждал")
+            raise PWarning("Проблемы с API. Слишком долго ждал")
         if not response:
-            raise RuntimeError(f"Проблемы с API. {response.status_code}")
+            raise PError(f"Проблемы с API. {response.status_code}")
         response = response.json()
 
         # Суммирование сгрупированных данных
@@ -57,9 +59,9 @@ class Covid19API:
         try:
             response = self.do_the_request(url, timeout=10)
         except requests.exceptions.ReadTimeout:
-            raise RuntimeWarning("Проблемы с API. Слишком долго ждал")
+            raise PWarning("Проблемы с API. Слишком долго ждал")
         if not response:
-            raise RuntimeError(f"Проблемы с API. {response.status_code}")
+            raise PError(f"Проблемы с API. {response.status_code}")
         response = response.json()
 
         if self.country_name is None:

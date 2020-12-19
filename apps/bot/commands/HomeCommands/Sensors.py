@@ -1,6 +1,7 @@
 import psycopg2
 
 from apps.bot.classes.Consts import Role, TRUE_FALSE_TRANSLATOR, ON_OFF_TRANSLATOR
+from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from petrovich.settings import env
 
@@ -102,7 +103,7 @@ def get_items(rooms, room_name=None, item_name=None):
     if room_name:
         rooms_name = [x['name'] for x in SENSORS]
         if room_name.capitalize() not in rooms_name:
-            raise RuntimeWarning("Не нашел такой комнаты")
+            raise PWarning("Не нашел такой комнаты")
     result = []
     if item_name:
         for room in rooms:
@@ -115,5 +116,5 @@ def get_items(rooms, room_name=None, item_name=None):
             if len(result_room['items']) > 0:
                 result.append(result_room)
     if len(result) == 0:
-        raise RuntimeWarning("Не нашёл такого устройства/датчика")
+        raise PWarning("Не нашёл такого устройства/датчика")
     return result

@@ -1,4 +1,5 @@
 from apps.bot.classes.Consts import Platform
+from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import has_cyrillic
 
@@ -32,7 +33,7 @@ class Fix(CommonCommand):
                 if msg['text']:
                     msgs += f"{fix_layout(msg['text'], has_cyrillic(msg['text']))}\n"
             if not msgs:
-                raise RuntimeWarning("Нет текста в сообщении или пересланных сообщениях")
+                raise PWarning("Нет текста в сообщении или пересланных сообщениях")
         else:
-            raise RuntimeWarning("Перешлите сообщение или укажите текст в аргументах команды")
+            raise PWarning("Перешлите сообщение или укажите текст в аргументах команды")
         return msgs

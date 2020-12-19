@@ -5,6 +5,7 @@ from django.contrib.auth.models import Group
 from django.db.models import Min
 
 from apps.bot.classes.Consts import Platform, Role
+from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import localize_datetime, remove_tz
 from apps.games.models import PetrovichGames, PetrovichUser
@@ -83,7 +84,7 @@ class Petrovich(CommonCommand):
             if winner:
                 winner = winner.user
             else:
-                raise RuntimeWarning("Нет участников игры. Зарегистрируйтесь! /петрович рег")
+                raise PWarning("Нет участников игры. Зарегистрируйтесь! /петрович рег")
 
             PetrovichGames.objects.filter(chat=self.event.chat).delete()
             PetrovichGames(user=winner, chat=self.event.chat).save()

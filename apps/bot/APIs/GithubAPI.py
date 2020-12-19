@@ -2,6 +2,7 @@ import json
 
 import requests
 
+from apps.bot.classes.Exceptions import PError
 from petrovich.settings import env
 
 REPO_OWNER = 'Xoma163'
@@ -30,5 +31,5 @@ class GithubAPI:
 
         r = requests.post(url, json.dumps(issue), headers=headers)
         if r.status_code != 201:
-            raise RuntimeError("Не удалось создать issue на github")
+            raise PError("Не удалось создать issue на github")
         return r.json()

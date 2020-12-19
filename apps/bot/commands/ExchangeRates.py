@@ -1,4 +1,5 @@
 from apps.bot.APIs.CBRAPI import CBRAPI
+from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.common.CommonCommand import CommonCommand
 
 
@@ -40,7 +41,7 @@ class ExchangeRates(CommonCommand):
                         msg = "Перевод в рубли:\n"
                         msg += f"{total_value} руб."
                         return msg
-                raise RuntimeWarning("Пока не знаю как переводить из этой валюты")
+                raise PWarning("Пока не знаю как переводить из этой валюты")
 
         else:
             msg = "Курс валют:\n"

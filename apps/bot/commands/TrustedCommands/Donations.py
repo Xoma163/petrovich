@@ -1,4 +1,5 @@
 from apps.bot.classes.Consts import Role
+from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.service.models import Donations as DonationsModel
 
@@ -12,7 +13,7 @@ class Donations(CommonCommand):
     def start(self):
         donations = DonationsModel.objects.all()
         if len(donations) == 0:
-            raise RuntimeWarning("Нема :(")
+            raise PWarning("Нема :(")
         msg = ""
         total = {}
         for donation in donations:

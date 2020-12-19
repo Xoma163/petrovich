@@ -1,4 +1,5 @@
 from apps.bot.classes.Consts import Role, Platform
+from apps.bot.classes.Exceptions import PWarning, PError
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.management.commands.start import camera_handler
 
@@ -17,9 +18,9 @@ class Birds(CommonCommand):
         attachments = []
         try:
             image = camera_handler.get_img()
-        except RuntimeWarning as e:
+        except PWarning as e:
             print(e)
-            raise RuntimeError("какая-то дичь с камерой. Зовите разраба")
+            raise PError("какая-то дичь с камерой. Зовите разраба")
         attachment = self.bot.upload_photos(image)[0]
         attachments.append(attachment)
 
@@ -31,7 +32,7 @@ class Birds(CommonCommand):
         if frames != 0:
             try:
                 document = camera_handler.get_gif(frames)
-            except RuntimeError as e:
+            except PError as e:
                 return str(e)
             attachment = self.bot.upload_document(document, self.event.peer_id, "Камера")
             attachments.append(attachment)

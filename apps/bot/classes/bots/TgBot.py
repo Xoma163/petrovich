@@ -11,6 +11,7 @@ import requests
 from django.contrib.auth.models import Group
 
 from apps.bot.classes.Consts import Role, Platform
+from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.bots.CommonBot import CommonBot
 from apps.bot.classes.events.TgEvent import TgEvent
 from apps.bot.models import Users, Chat, Bot
@@ -45,7 +46,7 @@ class TgBot(CommonBot, Thread):
 
     def set_activity(self, peer_id, activity='typing'):
         if activity not in ['typing', 'audiomessage']:
-            raise RuntimeWarning("Не знаю такого типа активности")
+            raise PWarning("Не знаю такого типа активности")
         self.requests.get('sendChatAction', {'chat_id': peer_id, 'action': activity})
 
     def register_user(self, user):
@@ -300,7 +301,7 @@ class TgBot(CommonBot, Thread):
                 is_default_extension = extension not in allowed_exts_url
                 is_vk_image = any(extension.startswith(x) for x in allowed_exts_url)
                 if is_default_extension and not is_vk_image:
-                    raise RuntimeWarning(f"Загрузка по URL доступна только для {' '.join(allowed_exts_url)}")
+                    raise PWarning(f"Загрузка по URL доступна только для {' '.join(allowed_exts_url)}")
             return file_like_object
         if isinstance(file_like_object, bytes):
             return file_like_object

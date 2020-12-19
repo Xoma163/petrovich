@@ -5,6 +5,7 @@ import youtube_dl
 from pydub import AudioSegment
 
 from apps.bot.classes.Consts import Platform
+from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.common.CommonCommand import CommonCommand
 
 
@@ -43,17 +44,17 @@ class Music(CommonCommand):
         try:
             video_info = ydl.extract_info(url, download=False)
         except youtube_dl.utils.DownloadError:
-            raise RuntimeWarning("Не смог найти видео по этой ссылке")
+            raise PWarning("Не смог найти видео по этой ссылке")
         audio_urls = []
         if video_info['duration'] > 600:
-            raise RuntimeWarning("Нельзя грузить музяку > 10 минут")
+            raise PWarning("Нельзя грузить музяку > 10 минут")
         if 'formats' in video_info:
             for _format in video_info['formats']:
                 if _format['ext'] == 'm4a':
                     audio_urls.append(_format)
 
         if len(audio_urls) == 0:
-            raise RuntimeWarning("Чёт проблемки, напишите разрабу и пришлите ссылку на видео")
+            raise PWarning("Чёт проблемки, напишите разрабу и пришлите ссылку на видео")
         max_asr_i = 0
         max_asr = audio_urls[0]['asr']
         for i, audio_url in enumerate(audio_urls):
@@ -77,7 +78,7 @@ class Music(CommonCommand):
 
         response = requests.get(audio_link)
         if response.status_code == 403:
-            raise RuntimeWarning("Нет доступа к ссылке, не могу скачать((\n"
+            raise PWarning("Нет доступа к ссылке, не могу скачать((\n"
                                  "Пока сам не понял как решить эту проблему, думаю над этим")
         i = io.BytesIO(response.content)
         i.seek(0)

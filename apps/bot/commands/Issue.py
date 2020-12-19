@@ -1,5 +1,6 @@
 from apps.bot.APIs.GithubAPI import GithubAPI
 from apps.bot.classes.Consts import Platform
+from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.common.CommonCommand import CommonCommand
 
 
@@ -14,7 +15,7 @@ class Issue(CommonCommand):
         msgs = self.event.fwd
         if not msgs:
             if not self.event.original_args:
-                raise RuntimeWarning("Требуется аргументы или пересылаемые сообщения")
+                raise PWarning("Требуется аргументы или пересылаемые сообщения")
 
             msgs = [{'text': self.event.original_args, 'from_id': int(self.event.sender.user_id)}]
 

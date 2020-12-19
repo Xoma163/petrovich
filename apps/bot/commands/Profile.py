@@ -2,6 +2,7 @@ from datetime import datetime
 
 from apps.bot.APIs.TimezoneDBAPI import TimezoneDBAPI
 from apps.bot.APIs.YandexGeoAPI import YandexGeoAPI
+from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.service.models import City, TimeZone
 
@@ -46,7 +47,7 @@ class Profile(CommonCommand):
             city_name = " ".join(self.event.args[1:])
             city = City.objects.filter(synonyms__icontains=city_name).first()
             if not city:
-                raise RuntimeWarning("Не нашёл такого города. /профиль город добавить (название)")
+                raise PWarning("Не нашёл такого города. /профиль город добавить (название)")
             self.event.sender.city = city
             self.event.sender.save()
             return f"Изменил город на {self.event.sender.city.name}"
@@ -98,16 +99,16 @@ def add_city_to_db(city_name):
     yandexgeo_api = YandexGeoAPI()
     city_info = yandexgeo_api.get_city_info_by_name(city_name)
     if not city_info:
-        raise RuntimeWarning("Не смог найти координаты для города")
+        raise PWarning("Не смог найти координаты для города")
     city_info['name'] = city_info['name'].replace('ё', 'е')
     city = City.objects.filter(name=city_info['name'])
     if len(city) != 0:
-        raise RuntimeWarning("Такой город уже есть")
+        raise PWarning("Такой город уже есть")
     city_info['synonyms'] = city_info['name'].lower()
     timezonedb_api = TimezoneDBAPI()
     timezone_name = timezonedb_api.get_timezone_by_coordinates(city_info['lat'], city_info['lon'])
     if not timezone_name:
-        raise RuntimeWarning("Не смог найти таймзону для города")
+        raise PWarning("Не смог найти таймзону для города")
     timezone_obj, _ = TimeZone.objects.get_or_create(name=timezone_name)
 
     city_info['timezone'] = timezone_obj

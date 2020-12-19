@@ -1,4 +1,5 @@
 from apps.bot.classes.Consts import BAD_ANSWERS
+from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import random_event
 from apps.service.models import Words
@@ -21,9 +22,9 @@ def get_from_db(field_name, _type):
     try:
         word = getattr(Words.objects.filter(**my_field).order_by('?').first(), field_name).lower()
     except AttributeError:
-        raise RuntimeWarning("Нет такого слова :(")
+        raise PWarning("Нет такого слова :(")
     except Exception as e:
-        raise RuntimeWarning("Нет такого слова :(\n"
+        raise PWarning("Нет такого слова :(\n"
                              f"Ошибка - {str(e)}")
     return word
 
@@ -34,7 +35,7 @@ def add_phrase_before(recipient, word, field_name):
     elif field_name[1] == 'm':
         return f"{recipient}, вы {word}"
     else:
-        raise RuntimeWarning("Ошибка определения числа и рода")
+        raise PWarning("Ошибка определения числа и рода")
 
 
 def get_praise_or_scold(bot, event, _type):
@@ -48,7 +49,7 @@ def get_praise_or_scold(bot, event, _type):
                 translator_key = 'ж1'
             else:
                 translator_key = 'м1'
-        except RuntimeWarning:
+        except PWarning:
             translator_key = 'м1'
     if event.args:
         recipient = " ".join(event.args)

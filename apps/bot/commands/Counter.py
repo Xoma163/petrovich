@@ -1,3 +1,4 @@
+from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.service.models import Counter as CounterModel
 
@@ -13,7 +14,7 @@ class Counter(CommonCommand):
     def start(self):
         name = self.event.original_args.capitalize()
         if len(name) >= 50:
-            raise RuntimeWarning("Длина названия счётчика не может превышать 50")
+            raise PWarning("Длина названия счётчика не может превышать 50")
         counter, _ = CounterModel.objects.update_or_create(
             name=name, chat=self.event.chat,
             defaults={

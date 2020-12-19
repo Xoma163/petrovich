@@ -1,4 +1,5 @@
 from apps.bot.classes.DoTheLinuxComand import do_the_linux_command, is_systemd_service_active
+from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.common.CommonMethods import check_command_time
 from petrovich.settings import MAIN_DOMAIN
 
@@ -47,4 +48,4 @@ def get_terraria_server_by_version(version):
     for terraria_server in terraria_servers:
         if version == str(terraria_server.version):
             return terraria_server
-    raise RuntimeWarning("Я не знаю такой версии")
+    raise PWarning("Я не знаю такой версии")

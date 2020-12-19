@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from apps.bot.classes.Consts import Platform
+from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.commands.Meme import prepare_meme_to_send
 from apps.service.models import Horoscope as HoroscopeModel
@@ -36,7 +37,7 @@ class Horoscope(CommonCommand):
             if self.event.args[0] in "все":
                 horoscope = HoroscopeModel.objects.first()
                 if not horoscope:
-                    raise RuntimeWarning("На сегодня ещё нет гороскопа")
+                    raise PWarning("На сегодня ещё нет гороскопа")
                 for i, zodiac_sign in enumerate(self.zodiac_signs.get_zodiac_signs()):
                     meme = horoscope.memes.all()[i]
                     prepared_meme = prepare_meme_to_send(self.bot, self.event, meme)
@@ -54,10 +55,10 @@ class Horoscope(CommonCommand):
                     zodiac_sign = self.zodiac_signs.get_zodiac_sign_by_sign_or_name(zodiac_sign_name)
                     zodiac_sign_index = self.zodiac_signs.get_zodiac_sign_index(zodiac_sign)
                 except:
-                    raise RuntimeWarning("Не знаю такого знака зодиака")
+                    raise PWarning("Не знаю такого знака зодиака")
                 horoscope = HoroscopeModel.objects.first()
                 if not horoscope:
-                    raise RuntimeWarning("На сегодня ещё нет гороскопа")
+                    raise PWarning("На сегодня ещё нет гороскопа")
                 meme = horoscope.memes.all()[zodiac_sign_index]
                 return f"{zodiac_sign.name.capitalize()}\n{meme.get_info()}"
             # Гороскоп для знака зодиака в аргументах
@@ -70,13 +71,13 @@ class Horoscope(CommonCommand):
             zodiac_sign = self.zodiac_signs.find_zodiac_sign_by_date(self.event.sender.birthday)
             return self.get_horoscope_by_zodiac_sign(zodiac_sign)
         else:
-            raise RuntimeWarning("Не указана дата рождения в профиле, не могу прислать гороскоп((. \n" \
+            raise PWarning("Не указана дата рождения в профиле, не могу прислать гороскоп((. \n" \
                                  "Укажи знак зодиака в аргументе: /гороскоп дева")
 
     def get_horoscope_by_zodiac_sign(self, zodiac_sign):
         horoscope = HoroscopeModel.objects.first()
         if not horoscope:
-            raise RuntimeWarning("На сегодня ещё нет гороскопа")
+            raise PWarning("На сегодня ещё нет гороскопа")
         zodiac_sign_index = self.zodiac_signs.get_zodiac_sign_index(zodiac_sign)
         zodiac_sign_name = zodiac_sign.name.capitalize()
         meme = horoscope.memes.all()[zodiac_sign_index]
@@ -122,7 +123,7 @@ class ZodiacSigns:
         for zodiac_sign in self.signs:
             if zodiac_sign.is_contains_name_or_sign(text):
                 return zodiac_sign
-        raise RuntimeWarning("Не знаю такого знака зодиака")
+        raise PWarning("Не знаю такого знака зодиака")
 
     def get_zodiac_signs(self):
         return self.signs

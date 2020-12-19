@@ -1,5 +1,6 @@
 import requests
 
+from apps.bot.classes.Exceptions import PWarning, PError
 from petrovich.settings import env
 
 
@@ -31,7 +32,7 @@ class EveryPixelAPI:
             response = self.get_image_quality_by_file(url_or_bytes)
 
         if response['status'] != 'ok':
-            raise RuntimeError("Ошибка")
+            raise PError("Ошибка")
         return f"{round(response['quality']['score'] * 100, 2)}%"
 
     def get_faces_on_photo_by_url(self, url):
@@ -56,8 +57,8 @@ class EveryPixelAPI:
 
         if response['status'] == 'error':
             if response['message'] == 'ratelimit exceeded 100 requests per 86400 seconds':
-                raise RuntimeWarning("Сегодняшний лимит исчерпан")
-            raise RuntimeError("Ошибка получения возраста на изображении")
+                raise PWarning("Сегодняшний лимит исчерпан")
+            raise PError("Ошибка получения возраста на изображении")
         if response['status'] != "ok":
-            raise RuntimeError("Ошибка. Статус не ок((")
+            raise PError("Ошибка. Статус не ок((")
         return response['faces']

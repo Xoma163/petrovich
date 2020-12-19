@@ -3,6 +3,8 @@ from datetime import datetime
 import requests
 from bs4 import BeautifulSoup
 
+from apps.bot.classes.Exceptions import PWarning
+
 
 class YoutubeInfo:
     def __init__(self, channel_id):
@@ -12,7 +14,7 @@ class YoutubeInfo:
     def get_youtube_channel_info(self):
         response = requests.get(self.url)
         if response.status_code != 200:
-            raise RuntimeWarning("Не нашёл такого канала")
+            raise PWarning("Не нашёл такого канала")
         bsop = BeautifulSoup(response.content, 'html.parser')
         last_video = bsop.find_all('entry')[0]
         youtube_info = {

@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from apps.bot.classes.Consts import Platform
+from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import normalize_datetime, get_attachments_for_upload, localize_datetime
 from apps.service.models import LaterMessage, LaterMessageSession
@@ -46,7 +47,7 @@ class Later(CommonCommand):
                         self._append_message_to_lms(fwd, lms)
                         lms.save()
                 else:
-                    raise RuntimeWarning("Не понял аргумента")
+                    raise PWarning("Не понял аргумента")
             else:
                 lms = LaterMessageSession()
                 lms.date = localize_datetime(datetime.utcnow(), "UTC")
@@ -59,7 +60,7 @@ class Later(CommonCommand):
         else:
             lms = LaterMessageSession.objects.filter(author=self.event.sender).order_by('date').first()
             if not lms:
-                raise RuntimeWarning("Ничего не нашёл :(")
+                raise PWarning("Ничего не нашёл :(")
             else:
                 author = None
                 msgs = []

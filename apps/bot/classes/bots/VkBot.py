@@ -16,6 +16,7 @@ from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 from vk_api.utils import get_random_id
 
 from apps.bot.classes.Consts import Role, Platform
+from apps.bot.classes.Exceptions import PWarning, PError
 from apps.bot.classes.bots.CommonBot import CommonBot
 from apps.bot.classes.bots.VkUser import VkUser
 from apps.bot.classes.events.VkEvent import VkEvent
@@ -43,7 +44,7 @@ class VkBot(CommonBot, Thread):
 
     def set_activity(self, peer_id, activity='typing'):
         if activity not in ['typing', 'audiomessage']:
-            raise RuntimeWarning("Не знаю такого типа активности")
+            raise PWarning("Не знаю такого типа активности")
         self.vk.messages.setActivity(type=activity, peer_id=peer_id, group_id=self.group_id)
 
     def get_user_by_id(self, user_id):
@@ -236,13 +237,13 @@ class VkBot(CommonBot, Thread):
                 is_default_extension = extension not in allowed_exts_url
                 is_vk_image = any(extension.startswith(x) for x in allowed_exts_url)
                 if is_default_extension and not is_vk_image:
-                    raise RuntimeWarning(f"Загрузка по URL доступна только для {' '.join(allowed_exts_url)}")
+                    raise PWarning(f"Загрузка по URL доступна только для {' '.join(allowed_exts_url)}")
             try:
                 response = requests.get(file_like_object, stream=True, timeout=3)
             except SSLError:
-                raise RuntimeWarning("SSLError")
+                raise PWarning("SSLError")
             except requests.exceptions.ConnectionError:
-                raise RuntimeWarning("ConnectionError")
+                raise PWarning("ConnectionError")
             obj = response.raw
         # path
         else:
@@ -263,7 +264,7 @@ class VkBot(CommonBot, Thread):
         for image in images:
             try:
                 image = self._prepare_obj_to_upload(image, ['jpg', 'jpeg', 'png'])
-            except RuntimeWarning:
+            except PWarning:
                 continue
             except ReadTimeout:
                 continue
@@ -307,8 +308,8 @@ class VkBot(CommonBot, Thread):
             vk_audio = self.vk_user.upload.audio(audio, artist=artist, title=title)
         except vk_api.exceptions.ApiError as e:
             if e.code == 270:
-                raise RuntimeWarning("Аудиозапись была удалена по просьбе правообладателя")
-            raise RuntimeError("Ошибка загрузки аудиозаписи")
+                raise PWarning("Аудиозапись была удалена по просьбе правообладателя")
+            raise PError("Ошибка загрузки аудиозаписи")
         return self.get_attachment_by_id('audio', vk_audio['owner_id'], vk_audio['id'])
 
     @staticmethod
@@ -370,7 +371,7 @@ class VkBot(CommonBot, Thread):
             return self.vk.messages.getConversationMembers(peer_id=peer_id, group_id=self.group_id, lang='ru')[
                 'profiles']
         except:
-            raise RuntimeWarning("У бота нет админских прав для получения списка пользователей в конференции")
+            raise PWarning("У бота нет админских прав для получения списка пользователей в конференции")
 
 
 class MyVkBotLongPoll(VkBotLongPoll):

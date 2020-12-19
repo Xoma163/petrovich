@@ -1,5 +1,6 @@
 import requests
 
+from apps.bot.classes.Exceptions import PWarning
 from petrovich.settings import env
 
 
@@ -16,5 +17,5 @@ class YandexTranslateAPI:
         }
         response = requests.get(self.url, params).json()
         if response['code'] != 200:
-            raise RuntimeWarning(f"Ошибка:\n{response}")
+            raise PWarning(f"Ошибка:\n{response}")
         return response['text'][0]

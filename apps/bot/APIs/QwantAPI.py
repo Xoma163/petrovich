@@ -1,5 +1,7 @@
 import requests
 
+from apps.bot.classes.Exceptions import PWarning, PError
+
 
 class QwantAPI:
     def __init__(self, ):
@@ -21,10 +23,10 @@ class QwantAPI:
             }
         )
         if r.status_code == 429:
-            raise RuntimeWarning("Сегодняшний лимит исчерпан")
+            raise PWarning("Сегодняшний лимит исчерпан")
         r_json = r.json()
         if r_json['status'] == 'error':
-            raise RuntimeError("Ошибка API")
+            raise PError("Ошибка API")
         response = r.json().get('data').get('result').get('items')
         urls = [r.get('media') for r in response]
         return urls

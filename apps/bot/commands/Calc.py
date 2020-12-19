@@ -1,3 +1,4 @@
+from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.common.CommonCommand import CommonCommand
 
 MAX_OPERATIONS = 20
@@ -37,14 +38,14 @@ class Calc(CommonCommand):
         for operation in operations:
             operations_count += expression.count(operation)
         if operations_count > MAX_OPERATIONS:
-            raise RuntimeWarning("Слишком много операций, процессор перегреется((")
+            raise PWarning("Слишком много операций, процессор перегреется((")
 
         try:
             root = build_subtree(expression, compiled_grammars)
         except ZeroDivisionError:
-            raise RuntimeWarning("Деление на 0")
+            raise PWarning("Деление на 0")
         if root is None:
-            raise RuntimeWarning("Не смог распарсить выражение")
+            raise PWarning("Не смог распарсить выражение")
         else:
             try:
                 if isinstance(root.value, float) and root.value == int(root.value):

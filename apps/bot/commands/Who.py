@@ -1,4 +1,5 @@
 from apps.bot.classes.Consts import Platform
+from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import get_role_by_str
 
@@ -23,10 +24,10 @@ class Who(CommonCommand):
         elif arg in ['пидор']:
             return "ты"
         elif not role:
-            raise RuntimeWarning("Не знаю такой роли")
+            raise PWarning("Не знаю такой роли")
         users = self.get_users(self.event.chat, role)
         if len(users) == 0:
-            raise RuntimeWarning("Нет людей с данной ролью")
+            raise PWarning("Нет людей с данной ролью")
         users_list = [str(user) for user in users]
         result = "\n".join(users_list)
         return str(result)

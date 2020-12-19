@@ -4,6 +4,7 @@ from datetime import datetime
 import requests
 
 from apps.bot.classes.Consts import DAY_TRANSLATOR
+from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.common.CommonMethods import remove_tz
 from apps.service.models import Service
 from petrovich.settings import env
@@ -26,7 +27,7 @@ class YandexWeatherAPI:
         response = requests.get(self.url, params, headers=headers).json()
         if 'status' in response:
             if response['status'] == 403:
-                raise RuntimeWarning("На сегодня я исчерпал все запросы к Yandex Weather :(")
+                raise PWarning("На сегодня я исчерпал все запросы к Yandex Weather :(")
 
         fact = response['fact']
         weather = {

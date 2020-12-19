@@ -2,6 +2,7 @@ import json
 
 from apps.bot.APIs.YandexWeatherAPI import YandexWeatherAPI
 from apps.bot.classes.Consts import WEATHER_TRANSLATOR, DAY_TRANSLATOR
+from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.service.models import City, Service
 
@@ -24,7 +25,7 @@ class Weather(CommonCommand):
         if self.event.args:
             city = City.objects.filter(synonyms__icontains=self.event.original_args).first()
             if not city:
-                raise RuntimeWarning("Не нашёл такой город")
+                raise PWarning("Не нашёл такой город")
         else:
             city = self.event.sender.city
         self.check_city(city)
@@ -40,7 +41,7 @@ class Weather(CommonCommand):
     def weather_changes(self, city):
         entity_yesterday = Service.objects.filter(name=f'weatherchange_yesterday_{city.name}')
         if not entity_yesterday.exists():
-            raise RuntimeWarning("Не нашёл вчерашней погоды для этого города.")
+            raise PWarning("Не нашёл вчерашней погоды для этого города.")
         yandexweather_api = YandexWeatherAPI(city)
 
         weather_yesterday = json.loads(entity_yesterday.first().value)

@@ -1,4 +1,5 @@
 from apps.bot.classes.Consts import Role, Platform
+from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import localize_datetime, remove_tz
 from apps.service.models import Notify
@@ -6,7 +7,7 @@ from apps.service.models import Notify
 
 def get_notifies_from_object(notifies_obj, timezone, print_username=False):
     if len(notifies_obj) == 0:
-        raise RuntimeWarning("Нет напоминаний")
+        raise PWarning("Нет напоминаний")
     result = ""
 
     for notify in notifies_obj:
@@ -59,19 +60,19 @@ class Notifies(CommonCommand):
             try:
                 self.check_sender(Role.CONFERENCE_ADMIN)
                 notifies = Notify.objects.filter(chat=self.event.chat).order_by("date")
-            except RuntimeWarning:
+            except PWarning:
                 notifies = notifies.filter(chat=self.event.chat)
         filter_list = self.event.args[1:]
         for _filter in filter_list:
             notifies = notifies.filter(text_for_filter__icontains=_filter)
 
         if len(notifies) == 0:
-            raise RuntimeWarning("Не нашёл напоминаний по такому тексту")
+            raise PWarning("Не нашёл напоминаний по такому тексту")
         if len(notifies) > 1:
             notifies10 = notifies[:10]
             notifies_texts = [str(notify.author) + " " + notify.text_for_filter for notify in notifies10]
             notifies_texts_str = "\n".join(notifies_texts)
-            raise RuntimeWarning(f"Нашёл сразу несколько. Уточните:\n"
+            raise PWarning(f"Нашёл сразу несколько. Уточните:\n"
                                  f"{notifies_texts_str}")
 
         notifies.delete()

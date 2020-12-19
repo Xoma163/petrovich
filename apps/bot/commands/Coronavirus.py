@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from apps.bot.APIs.Covid19API import Covid19API
 from apps.bot.APIs.amazon.AmazonTranslateAPI import AmazonTranslateAPI
 from apps.bot.classes.Consts import Platform
+from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import has_cyrillic
 
@@ -51,7 +52,7 @@ class Coronavirus(CommonCommand):
         covid19_api = Covid19API(country_transliterate)
         result = covid19_api.get_by_country()
         if not result:
-            raise RuntimeWarning("Не нашёл такой страны")
+            raise PWarning("Не нашёл такой страны")
         msg = f"{country.capitalize()}\n\n{result}"
         if detail in ["Gist", "Graphic"]:
             self.platforms = [Platform.VK, Platform.TG]

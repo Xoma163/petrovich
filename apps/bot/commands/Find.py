@@ -1,5 +1,6 @@
 from apps.bot.APIs.QwantAPI import QwantAPI
 from apps.bot.classes.Consts import Platform
+from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.common.CommonCommand import CommonCommand
 
 
@@ -21,8 +22,8 @@ class Find(CommonCommand):
         urls = qwant_api.get_urls(query)
 
         if len(urls) == 0:
-            raise RuntimeWarning("Ничего не нашёл")
+            raise PWarning("Ничего не нашёл")
         attachments = self.bot.upload_photos(urls, count)
         if len(attachments) == 0:
-            raise RuntimeWarning("Ничего не нашёл 2")
+            raise PWarning("Ничего не нашёл 2")
         return {'msg': f'Результаты по запросу "{query}"', 'attachments': attachments}

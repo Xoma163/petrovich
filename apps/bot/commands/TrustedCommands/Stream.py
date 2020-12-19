@@ -1,6 +1,7 @@
 from urllib.parse import urlparse
 
 from apps.bot.classes.Consts import Role
+from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.service.models import Service
 
@@ -18,13 +19,13 @@ class Stream(CommonCommand):
             stream, _ = Service.objects.get_or_create(name="stream")
             stream_link = stream.value
             if len(stream_link) < 5:
-                raise RuntimeWarning("Стрим пока не идёт")
+                raise PWarning("Стрим пока не идёт")
             else:
                 return {'msg': stream_link, 'attachments': [stream_link]}
         else:
             self.check_sender(Role.MODERATOR)
 
             if len(self.event.args[0]) >= 5 and not urlparse(self.event.args[0]).hostname:
-                raise RuntimeWarning("Пришлите ссылку")
+                raise PWarning("Пришлите ссылку")
             Service.objects.update_or_create(name="stream", defaults={'value': self.event.args[0]})
             return "Ссылка изменена на " + self.event.args[0]

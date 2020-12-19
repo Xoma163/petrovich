@@ -4,6 +4,7 @@ import dateutil
 from dateutil import parser
 
 from apps.bot.classes.Consts import WEEK_TRANSLATOR, Role, DELTA_WEEKDAY, Platform
+from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import localize_datetime, normalize_datetime, remove_tz
 from apps.service.models import Notify as NotifyModel
@@ -52,7 +53,7 @@ class Notify(CommonCommand):
     def start(self):
         if not self.event.sender.check_role(Role.TRUSTED) and \
                 len(NotifyModel.objects.filter(author=self.event.sender)) >= 5:
-            raise RuntimeWarning("Нельзя добавлять более 5 напоминаний")
+            raise PWarning("Нельзя добавлять более 5 напоминаний")
         timezone = self.event.sender.city.timezone.name
 
         date, args_count, exact_time_flag = get_time(self.event.args[0], self.event.args[1],
@@ -60,16 +61,16 @@ class Notify(CommonCommand):
         if args_count == 2:
             self.check_args(3)
         if not date:
-            raise RuntimeWarning("Не смог распарсить дату")
+            raise PWarning("Не смог распарсить дату")
         date = normalize_datetime(date, timezone)
         datetime_now = localize_datetime(datetime.utcnow(), "UTC")
 
         if (date - datetime_now).seconds < 60:
-            raise RuntimeWarning("Нельзя добавлять напоминание на ближайшую минуту")
+            raise PWarning("Нельзя добавлять напоминание на ближайшую минуту")
         if not exact_time_flag and ((date - datetime_now).days < 0 or (datetime_now - date).seconds < 0):
             date = date + timedelta(days=1)
         if (date - datetime_now).days < 0 or (datetime_now - date).seconds < 0:
-            raise RuntimeWarning("Нельзя указывать дату в прошлом")
+            raise PWarning("Нельзя указывать дату в прошлом")
 
         text = self.event.original_args.split(' ', args_count)[args_count]
         if text[0] == '/':

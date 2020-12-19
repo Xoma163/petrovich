@@ -2,6 +2,7 @@ from django.contrib.auth.models import Group
 
 # ToDo: menu
 from apps.bot.classes.Consts import ON_OFF_TRANSLATOR, Role, TRUE_FALSE_TRANSLATOR
+from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.common.CommonCommand import CommonCommand
 
 
@@ -37,7 +38,7 @@ class Settings(CommonCommand):
         if arg in ON_OFF_TRANSLATOR:
             return ON_OFF_TRANSLATOR[arg]
         else:
-            raise RuntimeWarning("Не понял, включить или выключить?")
+            raise PWarning("Не понял, включить или выключить?")
 
     def menu_reaction(self):
         self.check_sender(Role.CONFERENCE_ADMIN)

@@ -5,6 +5,7 @@ import gspread
 from django.core.management.base import BaseCommand
 from oauth2client.service_account import ServiceAccountCredentials
 
+from apps.bot.classes.Exceptions import PWarning
 from apps.service.models import Words
 from petrovich.settings import BASE_DIR
 
@@ -66,5 +67,5 @@ class Command(BaseCommand):
                    f"Добавлено слов - {created_words}"
             return msg
         except Exception as e:
-            raise RuntimeWarning("Ошибка при обновлении слов\n"
+            raise PWarning("Ошибка при обновлении слов\n"
                                  f"{str(e)}")

@@ -1,5 +1,6 @@
 import wikipedia
 
+from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.bots.VkBot import VkBot
 from apps.bot.classes.common.CommonCommand import CommonCommand
 
@@ -44,7 +45,7 @@ class Wikipedia(CommonCommand):
             options = set(e.options)
             msg = "Нашел сразу несколько. Уточните\n"
             msg += "\n".join([x for x in options])
-            raise RuntimeWarning(msg)
+            raise PWarning(msg)
         except wikipedia.PageError:
             msg = "Не нашёл такой страницы\n"
             search = wikipedia.search(self.event.original_args)

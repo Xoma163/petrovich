@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 
 from apps.bot.APIs.YoutubeInfo import YoutubeInfo
 from apps.bot.classes.Consts import Role, Platform
+from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.service.models import YoutubeSubscribe
 
@@ -49,7 +50,7 @@ class YouTube(CommonCommand):
                 existed_sub = YoutubeSubscribe.objects.filter(chat__isnull=True,
                                                               channel_id=channel_id)
             if existed_sub.exists():
-                raise RuntimeWarning(f"Ты уже и так подписан на канал {existed_sub.first().title}")
+                raise PWarning(f"Ты уже и так подписан на канал {existed_sub.first().title}")
 
             user_subs_count = YoutubeSubscribe.objects.filter(author=self.event.sender).count()
 
@@ -80,7 +81,7 @@ class YouTube(CommonCommand):
             self.check_conversation()
             return self.get_subs(conversation=True)
         else:
-            raise RuntimeWarning("Не понял команды (добавить/удалить/подписки)")
+            raise PWarning("Не понял команды (добавить/удалить/подписки)")
 
     def get_sub(self, filters, for_delete=False):
         if self.event.chat:
@@ -97,7 +98,7 @@ class YouTube(CommonCommand):
 
         yt_subs_count = yt_subs.count()
         if yt_subs_count == 0:
-            raise RuntimeWarning("Не нашёл :(")
+            raise PWarning("Не нашёл :(")
         elif yt_subs_count == 1:
             return yt_subs.first()
         else:
@@ -113,7 +114,7 @@ class YouTube(CommonCommand):
                   f"{yt_subs_titles_str}" + '.'
             if yt_subs_count > 10:
                 msg += "\n..."
-            raise RuntimeWarning(msg)
+            raise PWarning(msg)
 
     def get_subs(self, conversation=False):
         if conversation:
@@ -123,7 +124,7 @@ class YouTube(CommonCommand):
             if self.event.chat:
                 yt_subs = yt_subs.filter(chat=self.event.chat)
         if yt_subs.count() == 0:
-            raise RuntimeWarning("Нет активных подписок")
+            raise PWarning("Нет активных подписок")
 
         yt_subs_titles_str = ""
         for yt_sub in yt_subs:

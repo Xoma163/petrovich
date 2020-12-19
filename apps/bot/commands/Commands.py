@@ -1,4 +1,5 @@
 from apps.bot.classes.Consts import Role
+from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import get_role_by_str
 
@@ -30,7 +31,7 @@ class Commands(CommonCommand):
         if self.event.args:
             role = get_role_by_str(self.event.original_args.lower())
             if not role:
-                raise RuntimeWarning("Не знаю такой роли")
+                raise PWarning("Не знаю такой роли")
             for ordered_role in ordered_roles:
                 if ordered_role['role'] == role:
                     result = self.get_str_for_role(help_texts, ordered_role)

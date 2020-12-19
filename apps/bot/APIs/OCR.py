@@ -1,6 +1,7 @@
 import requests
 
 # https://ocr.space/OCRAPI
+from apps.bot.classes.Exceptions import PError, PWarning
 from petrovich.settings import env
 
 
@@ -38,9 +39,9 @@ class OCRApi:
 
         if 'OCRExitCode' in response:
             if response['OCRExitCode'] == 99:
-                raise RuntimeError("Ошибка")
+                raise PError("Ошибка")
         if 'ParsedResults' not in response:
-            raise RuntimeWarning("Ничего не распознал")
+            raise PWarning("Ничего не распознал")
         text_list = [x['ParsedText'].strip() for x in response['ParsedResults']]
         texts = "\n".join(text_list)
         return texts

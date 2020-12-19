@@ -1,4 +1,5 @@
 from apps.bot.classes.Consts import Platform
+from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import get_random_int
 
@@ -19,7 +20,7 @@ class Waifu(CommonCommand):
                 self.parse_int()
                 waifu_number = self.event.args[0]
                 self.check_number_arg_range(waifu_number, 0, waifus_count)
-            except RuntimeWarning:
+            except PWarning:
                 seed = self.event.original_args
                 waifu_number = get_random_int(waifus_count, seed=seed)
         else:

@@ -1,5 +1,5 @@
 from apps.bot.classes.Consts import Role, Platform
-from apps.bot.classes.Exceptions import PSkip
+from apps.bot.classes.Exceptions import PSkip, PWarning, PError
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import get_attachments_from_attachments_or_fwd, tanimoto
 from apps.service.models import Meme as MemeModel
@@ -63,12 +63,12 @@ class Meme(CommonCommand):
     # MENU #
     def menu_add(self):
         if self.event.platform == Platform.TG:
-            raise RuntimeWarning('В телеграмме не поддерживается добавление мемов')
+            raise PWarning('В телеграмме не поддерживается добавление мемов')
 
         self.check_args(2)
         attachments = get_attachments_from_attachments_or_fwd(self.event, ['audio', 'video', 'photo'])
         if len(attachments) == 0:
-            raise RuntimeWarning("Не нашёл вложений в сообщении или пересланном сообщении")
+            raise PWarning("Не нашёл вложений в сообщении или пересланном сообщении")
         attachment = attachments[0]
 
         for i, _ in enumerate(self.event.args):
@@ -82,14 +82,14 @@ class Meme(CommonCommand):
         }
 
         if MemeModel.objects.filter(name=new_meme['name']).exists():
-            raise RuntimeWarning("Мем с таким названием уже есть в базе")
+            raise PWarning("Мем с таким названием уже есть в базе")
 
         if attachment['type'] == 'video' or attachment['type'] == 'audio':
             new_meme['link'] = attachment['url']
         elif attachment['type'] == 'photo':  # or attachment['type'] == 'doc':
             new_meme['link'] = attachment['download_url']
         else:
-            raise RuntimeError("Невозможно")
+            raise PError("Невозможно")
 
         new_meme_obj = MemeModel.objects.create(**new_meme)
         if new_meme['approved']:
@@ -110,18 +110,18 @@ class Meme(CommonCommand):
             try:
                 self.parse_int()
                 _id = self.event.args[1]
-            except RuntimeWarning:
+            except PWarning:
                 pass
         attachments = get_attachments_from_attachments_or_fwd(self.event, ['audio', 'video', 'photo'])
         if len(attachments) == 0:
-            raise RuntimeWarning("Не нашёл вложений в сообщении или пересланном сообщении")
+            raise PWarning("Не нашёл вложений в сообщении или пересланном сообщении")
         attachment = attachments[0]
         if attachment['type'] == 'video' or attachment['type'] == 'audio':
             new_meme_link = attachment['url']
         elif attachment['type'] == 'photo':  # or attachment['type'] == 'doc':
             new_meme_link = attachment['download_url']
         else:
-            raise RuntimeError("Невозможно")
+            raise PError("Невозможно")
 
         if self.event.sender.check_role(Role.MODERATOR) or self.event.sender.check_role(Role.TRUSTED):
             meme = self.get_meme(self.event.args[1:], _id=_id)
@@ -157,7 +157,7 @@ class Meme(CommonCommand):
                 else:
                     msg = f'Мем с названием "{meme.name}" удалён поскольку он не ' \
                           f'соответствует правилам или был удалён автором.'
-            except RuntimeWarning:
+            except PWarning:
                 meme = self.get_meme(self.event.args[1:])
                 msg = f'Мем с названием "{meme.name}" удалён поскольку он не ' \
                       f'соответствует правилам или был удалён автором.'
@@ -176,7 +176,7 @@ class Meme(CommonCommand):
         else:
             chat = self.bot.get_one_chat_with_user(self.event.args[1], self.event.sender.user_id)
         if self.event.chat == chat:
-            raise RuntimeWarning("Зачем мне отправлять мем в эту же конфу?")
+            raise PWarning("Зачем мне отправлять мем в эту же конфу?")
         if self.event.args[-1].lower() in ['рандом', 'р']:
             meme = self.get_random_meme()
         else:
@@ -194,8 +194,8 @@ class Meme(CommonCommand):
         if len(self.event.args) == 1:
             try:
                 meme = self.get_meme(approved=False)
-            except RuntimeWarning:
-                raise RuntimeWarning("Не нашёл мемов для подтверждения")
+            except PWarning:
+                raise PWarning("Не нашёл мемов для подтверждения")
             meme_to_send = self.prepare_meme_to_send(meme)
             meme_to_send['msg'] = f"{meme.author}\n" \
                                   f"{meme.name} ({meme.id})"
@@ -206,9 +206,9 @@ class Meme(CommonCommand):
             non_approved_meme = self.get_meme(_id=self.event.args[1])
 
             if not non_approved_meme:
-                raise RuntimeWarning("Не нашёл мема с таким id")
+                raise PWarning("Не нашёл мема с таким id")
             if non_approved_meme.approved:
-                raise RuntimeWarning("Мем уже подтверждён")
+                raise PWarning("Мем уже подтверждён")
             if len(self.event.args) > 2:
                 new_name = " ".join(self.event.args[2:])
                 non_approved_meme.name = new_name
@@ -228,9 +228,9 @@ class Meme(CommonCommand):
         self.parse_int()
         non_approved_meme = self.get_meme(_id=self.event.args[1])
         if not non_approved_meme:
-            raise RuntimeWarning("Не нашёл мема с таким id")
+            raise PWarning("Не нашёл мема с таким id")
         if non_approved_meme.approved:
-            raise RuntimeWarning("Мем уже подтверждён")
+            raise PWarning("Мем уже подтверждён")
 
         reason = None
         if len(self.event.args) > 2:
@@ -250,13 +250,13 @@ class Meme(CommonCommand):
         self.parse_int()
         renamed_meme = self.get_meme(_id=self.event.args[1])
         if not renamed_meme:
-            raise RuntimeWarning("Не нашёл мема с таким id")
+            raise PWarning("Не нашёл мема с таким id")
 
         new_name = None
         if len(self.event.args) > 2:
             new_name = " ".join(self.event.args[2:])
         if MemeModel.objects.filter(name=new_name).exists():
-            raise RuntimeWarning("Мем с таким названием уже есть")
+            raise PWarning("Мем с таким названием уже есть")
         user_msg = f'Мем с названием "{renamed_meme.name}" переименован.\n' \
                    f'Новое название - "{new_name}"'
         if renamed_meme.author != self.event.sender:
@@ -281,7 +281,7 @@ class Meme(CommonCommand):
             try:
                 self.parse_int()
                 _id = self.event.args[1]
-            except RuntimeWarning:
+            except PWarning:
                 pass
         meme = self.get_meme(self.event.args[1:], _id=_id)
         return meme.get_info()
@@ -332,7 +332,7 @@ class Meme(CommonCommand):
             memes = memes.filter(author=filter_user)
 
         if len(memes) == 0:
-            raise RuntimeWarning("Не нашёл :(")
+            raise PWarning("Не нашёл :(")
         elif len(memes) == 1:
             return memes.first()
         elif not approved:
@@ -346,7 +346,7 @@ class Meme(CommonCommand):
                     return meme
             if not use_tanimoto:
                 msg = self.get_similar_memes_names(memes)
-                raise RuntimeWarning(msg)
+                raise PWarning(msg)
             else:
                 filters_str = " ".join(filter_list)
                 return get_tanimoto_memes(memes, filters_str)
@@ -408,7 +408,7 @@ def prepare_meme_to_send(bot, event, meme, print_name=False, send_keyboard=False
                 meme_info = meme.get_info()
                 message_to_test_chat = f"{error}\n\n{meme_info}"
                 bot.parse_and_send_msgs(bot.test_chat.chat_id, message_to_test_chat)
-                raise RuntimeWarning(error)
+                raise PWarning(error)
 
         elif meme.type == 'audio':
             msg['attachments'] = [meme.link.replace(VK_URL, '')]
@@ -417,7 +417,7 @@ def prepare_meme_to_send(bot, event, meme, print_name=False, send_keyboard=False
         # elif meme.type == 'doc':
         #     msg['attachments'] = bot.upload_document(meme.link, event.peer_id)
         else:
-            raise RuntimeError("У мема нет типа. Тыкай разраба")
+            raise PError("У мема нет типа. Тыкай разраба")
 
     if print_name:
         if msg.get('msg', None):

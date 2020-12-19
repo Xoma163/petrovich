@@ -1,4 +1,5 @@
 from apps.bot.classes.Consts import Role, ATTACHMENT_TRANSLATOR, Platform
+from apps.bot.classes.Exceptions import PWarning, PError
 from apps.bot.classes.bots.CommonBot import CommonBot
 from apps.bot.classes.common.CommonMethods import get_help_for_command
 from apps.bot.classes.events.Event import Event
@@ -137,14 +138,14 @@ class CommonCommand:
                         return True
                 else:
                     print("Попытка доступа под админом не с моего id O_o")
-                    raise RuntimeError("Э ты чё, ты не админ. Где мой админ???")
+                    raise PError("Э ты чё, ты не админ. Где мой админ???")
             else:
                 return True
         if role == Role.CONFERENCE_ADMIN:
             if self.event.chat.admin == self.event.sender:
                 return True
         error = f"Команда доступна только для пользователей с уровнем прав {role.value}"
-        raise RuntimeWarning(error)
+        raise PWarning(error)
 
     def check_args(self, args: int = None):
         """
@@ -160,11 +161,11 @@ class CommonCommand:
             else:
                 error = "Передано недостаточно аргументов"
                 error += f"\n\n{get_help_for_command(self)}"
-                raise RuntimeWarning(error)
+                raise PWarning(error)
 
         error = "Для работы команды требуются аргументы"
         error += f"\n\n{get_help_for_command(self)}"
-        raise RuntimeWarning(error)
+        raise PWarning(error)
 
     @staticmethod
     def check_number_arg_range(arg, _min=-float('inf'), _max=float('inf'), banned_list: list = None):
@@ -182,12 +183,12 @@ class CommonCommand:
                     return True
                 else:
                     error = f"Аргумент не может принимать значение {arg}"
-                    raise RuntimeWarning(error)
+                    raise PWarning(error)
             else:
                 return True
         else:
             error = f"Значение может быть в диапазоне [{_min};{_max}]"
-            raise RuntimeWarning(error)
+            raise PWarning(error)
 
     @staticmethod
     def _transform_k(arg: str):
@@ -225,7 +226,7 @@ class CommonCommand:
                     self.event.args[checked_arg_index] = int(self.event.args[checked_arg_index])
                 except ValueError:
                     error = "Аргумент должен быть целочисленным"
-                    raise RuntimeWarning(error)
+                    raise PWarning(error)
         return True
 
     def parse_float(self):
@@ -244,7 +245,7 @@ class CommonCommand:
                     self.event.args[checked_arg_index] = float(self.event.args[checked_arg_index])
                 except ValueError:
                     error = "Аргумент должен быть с плавающей запятой"
-                    raise RuntimeWarning(error)
+                    raise PWarning(error)
         return True
 
     def check_pm(self):
@@ -256,7 +257,7 @@ class CommonCommand:
             return True
 
         error = "Команда работает только в ЛС"
-        raise RuntimeWarning(error)
+        raise PWarning(error)
 
     def check_conversation(self):
         """
@@ -267,7 +268,7 @@ class CommonCommand:
             return True
 
         error = "Команда работает только в беседах"
-        raise RuntimeWarning(error)
+        raise PWarning(error)
 
     def check_fwd(self):
         """
@@ -278,7 +279,7 @@ class CommonCommand:
             return True
 
         error = "Перешлите сообщения"
-        raise RuntimeWarning(error)
+        raise PWarning(error)
 
     def check_platforms(self):
         """
@@ -287,7 +288,7 @@ class CommonCommand:
         """
         if self.event.platform not in self.platforms:
             error = f"Команда недоступна для {self.event.platform.value.upper()}"
-            raise RuntimeWarning(error)
+            raise PWarning(error)
         return True
 
     def check_attachments(self):
@@ -306,7 +307,7 @@ class CommonCommand:
 
         allowed_types = ' '.join([ATTACHMENT_TRANSLATOR[_type] for _type in self.attachments])
         error = f"Для работы команды требуются вложения: {allowed_types}"
-        raise RuntimeWarning(error)
+        raise PWarning(error)
 
     def check_city(self, city=None):
         """
@@ -320,7 +321,7 @@ class CommonCommand:
             return True
 
         error = "Не указан город в профиле. /профиль город (название) - устанавливает город пользователю"
-        raise RuntimeWarning(error)
+        raise PWarning(error)
 
     def handle_menu(self, menu: list, arg: str):
         """
@@ -337,4 +338,4 @@ class CommonCommand:
                 default_item = item[1]
         if default_item:
             return default_item
-        raise RuntimeWarning(f"{self.detail_help_text}")
+        raise PWarning(f"{self.detail_help_text}")

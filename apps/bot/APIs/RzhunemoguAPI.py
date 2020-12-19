@@ -1,5 +1,7 @@
 import requests
 
+from apps.bot.classes.Exceptions import PWarning
+
 
 class RzhunemoguAPI:
     def __init__(self):
@@ -12,7 +14,7 @@ class RzhunemoguAPI:
         response = requests.get(self.URL, params, timeout=10)
 
         if response.status_code != 200:
-            raise RuntimeWarning("Чёто не работает. Пинайте этого лентяя")
+            raise PWarning("Чёто не работает. Пинайте этого лентяя")
 
         # Потому что от апи ответ гавённый и не jsonится
         return response.text.replace('{"content":"', '').replace('"}', '')

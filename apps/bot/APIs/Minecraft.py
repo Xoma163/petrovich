@@ -8,6 +8,7 @@ from mcrcon import MCRcon
 
 from apps.bot.classes.Consts import Role
 from apps.bot.classes.DoTheLinuxComand import do_the_linux_command
+from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.bots.CommonBot import get_bot_by_platform
 from apps.bot.classes.common.CommonMethods import remove_tz, check_command_time
 from apps.bot.models import Users
@@ -71,7 +72,7 @@ class MinecraftAPI:
         if response['InstanceState']['Name'] == 'stopped':
             requests.post(url)
         else:
-            raise RuntimeWarning(
+            raise PWarning(
                 f"Сервер сейчас имеет состояние {response['InstanceState']['Name']}, не могу запустить")
 
     def start(self, send_notify=True):
@@ -207,4 +208,4 @@ def get_minecraft_version_by_args(version):
     for minecraft_server in minecraft_servers:
         if version in minecraft_server.names:
             return minecraft_server
-    raise RuntimeWarning("Я не знаю такой версии")
+    raise PWarning("Я не знаю такой версии")

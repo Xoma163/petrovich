@@ -1,4 +1,5 @@
 from apps.bot.classes.DoTheLinuxComand import do_the_linux_command, is_systemd_service_active
+from apps.bot.classes.Exceptions import PWarning
 
 
 class AgarioAPI:
@@ -50,5 +51,5 @@ def get_agario_version_by_args(version):
     for agario_server in agario_servers:
         if version == str(agario_server.version):
             return agario_server
-    raise RuntimeWarning("Я не знаю такой версии")
+    raise PWarning("Я не знаю такой версии")
 

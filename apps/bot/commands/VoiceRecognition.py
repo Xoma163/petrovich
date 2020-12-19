@@ -5,6 +5,7 @@ import speech_recognition as sr
 from pydub import AudioSegment
 
 from apps.bot.classes.Consts import Platform
+from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import get_attachments_from_attachments_or_fwd
 from apps.bot.classes.events.Event import Event
@@ -76,7 +77,7 @@ class VoiceRecognition(CommonCommand):
             msg = r.recognize_google(audio, language='ru_RU')
             return msg
         except sr.UnknownValueError:
-            raise RuntimeWarning("Ничего не понял((")
+            raise PWarning("Ничего не понял((")
         except sr.RequestError as e:
             print(str(e))
-            raise RuntimeWarning("Проблема с форматом")
+            raise PWarning("Проблема с форматом")

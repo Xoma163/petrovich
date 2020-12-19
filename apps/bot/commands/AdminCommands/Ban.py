@@ -1,6 +1,7 @@
 from django.contrib.auth.models import Group
 
 from apps.bot.classes.Consts import Role
+from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.common.CommonCommand import CommonCommand
 
 
@@ -15,7 +16,7 @@ class Ban(CommonCommand):
         user = self.bot.get_user_by_name(self.event.args, self.event.chat)
 
         if user.check_role(Role.ADMIN):
-            raise RuntimeWarning("Нельзя банить админа")
+            raise PWarning("Нельзя банить админа")
         group_banned = Group.objects.get(name=Role.BANNED.name)
         user.groups.add(group_banned)
         user.save()

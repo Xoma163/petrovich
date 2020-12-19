@@ -3,7 +3,7 @@ import threading
 import traceback
 
 from apps.bot.classes.Consts import Role, Platform
-from apps.bot.classes.Exceptions import PSkip
+from apps.bot.classes.Exceptions import PSkip, PWarning, PError
 from apps.bot.classes.common.CommonMethods import tanimoto
 from apps.bot.classes.events.Event import Event
 from apps.bot.models import Users, Chat, Bot
@@ -92,14 +92,14 @@ class CommonBot:
                     return result
             except PSkip:
                 return
-            except RuntimeWarning as e:
+            except PWarning as e:
                 msg = str(e)
                 log_runtime_warning = {'result': msg}
                 self.logger.warning(log_runtime_warning)
                 if send:
                     self.parse_and_send_msgs(event.peer_id, msg)
                 return msg
-            except RuntimeError as e:
+            except PError as e:
                 msg = str(e)
                 log_runtime_error = {'exception': msg, 'result': msg}
                 self.logger.error(log_runtime_error)
@@ -250,7 +250,7 @@ class CommonBot:
 
     def get_user_by_name(self, args, filter_chat=None):
         if not args:
-            raise RuntimeWarning("Отсутствуют аргументы")
+            raise PWarning("Отсутствуют аргументы")
         if isinstance(args, str):
             args = [args]
         users = self.user_model
@@ -270,16 +270,16 @@ class CommonBot:
                             user = users.filter(user_id=args[0])
 
         if len(user) > 1:
-            raise RuntimeWarning("2 и более пользователей подходит под поиск")
+            raise PWarning("2 и более пользователей подходит под поиск")
 
         if len(user) == 0:
-            raise RuntimeWarning("Пользователь не найден. Возможно опечатка или он мне ещё ни разу не писал")
+            raise PWarning("Пользователь не найден. Возможно опечатка или он мне ещё ни разу не писал")
 
         return user.first()
 
     def get_chat_by_name(self, args, filter_platform=True):
         if not args:
-            raise RuntimeWarning("Отсутствуют аргументы")
+            raise PWarning("Отсутствуют аргументы")
         if isinstance(args, str):
             args = [args]
 
@@ -292,10 +292,10 @@ class CommonBot:
             chats = chats.filter(name__icontains=arg)
 
         if len(chats) > 1:
-            raise RuntimeWarning("2 и более чатов подходит под поиск")
+            raise PWarning("2 и более чатов подходит под поиск")
 
         if len(chats) == 0:
-            raise RuntimeWarning("Чат не найден")
+            raise PWarning("Чат не найден")
         return chats.first()
 
     def upload_document(self, document, peer_id=None, title='Документ'):
@@ -307,7 +307,7 @@ class CommonBot:
     def get_one_chat_with_user(self, chat_name, user_id):
         chats = self.chat_model.filter(name__icontains=chat_name)
         if len(chats) == 0:
-            raise RuntimeWarning("Не нашёл такого чата")
+            raise PWarning("Не нашёл такого чата")
 
         chats_with_user = []
         for chat in chats:
@@ -316,10 +316,10 @@ class CommonBot:
                 chats_with_user.append(chat)
 
         if len(chats_with_user) == 0:
-            raise RuntimeWarning("Не нашёл доступного чата с пользователем в этом чате")
+            raise PWarning("Не нашёл доступного чата с пользователем в этом чате")
         elif len(chats_with_user) > 1:
             chats_str = '\n'.join(chats_with_user)
-            raise RuntimeWarning("Нашёл несколько чатов. Уточните какой:\n"
+            raise PWarning("Нашёл несколько чатов. Уточните какой:\n"
                                  f"{chats_str}")
 
         elif len(chats_with_user) == 1:
@@ -335,7 +335,7 @@ class CommonBot:
             gamer.save()
             return gamer
         elif len(gamers) > 1:
-            raise RuntimeWarning("Два и более игрока подходит под поиск")
+            raise PWarning("Два и более игрока подходит под поиск")
         else:
             return gamers.first()
 

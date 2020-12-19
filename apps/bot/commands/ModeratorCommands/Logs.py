@@ -1,5 +1,6 @@
 from apps.bot.classes.Consts import Role, Platform
 from apps.bot.classes.DoTheLinuxComand import do_the_linux_command
+from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import draw_text_on_image
 from apps.db_logger.models import Logger
@@ -111,7 +112,7 @@ class Logs(CommonCommand):
         count = self.get_count(1, 5)
         logs = Logger.objects.filter(traceback__isnull=False)[:count]
         if not logs:
-            raise RuntimeWarning("Не нашёл логов с ошибками")
+            raise PWarning("Не нашёл логов с ошибками")
         msg = ""
         for log in logs:
             msg += f"{log.create_datetime.strftime('%d.%m.%Y %H:%M:%S')}\n\n" \

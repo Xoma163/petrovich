@@ -1,6 +1,7 @@
 from django.core.paginator import Paginator
 
 from apps.bot.classes.Consts import Role
+from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.commands.Meme import get_tanimoto_memes
 from apps.service.models import Meme as MemeModel
@@ -55,12 +56,12 @@ class Memes(CommonCommand):
             msg_footer = f'----{p.per_page * (page - 1) + 1}/{on_last_page}----'
             msg = f"{msg_header}\n\n{msg_body}\n\n{msg_footer}"
             return msg
-        except RuntimeWarning:
+        except PWarning:
             memes = MemeModel.objects.filter(approved=True)
             for arg in self.event.args:
                 memes = memes.filter(name__icontains=arg)
             if len(memes) == 0:
-                raise RuntimeWarning("Не нашёл мемов по заданному запросу")
+                raise PWarning("Не нашёл мемов по заданному запросу")
             memes = get_tanimoto_memes(memes, self.event.original_args)
             memes_sliced = memes[:20]
             meme_names = get_memes_names(memes_sliced, self.event.sender)

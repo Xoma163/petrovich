@@ -1,4 +1,5 @@
 from apps.bot.classes.Consts import Platform
+from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.common.CommonCommand import CommonCommand
 
 
@@ -19,5 +20,5 @@ class ShortLinks(CommonCommand):
         try:
             short_link = self.bot.get_short_link(long_link)
         except Exception:
-            raise RuntimeWarning("Неверный формат ссылки")
+            raise PWarning("Неверный формат ссылки")
         return short_link

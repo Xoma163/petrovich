@@ -1,3 +1,4 @@
+from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.models import APITempUser, APIUser
 
@@ -15,7 +16,7 @@ class APIChat(CommonCommand):
 
     def start(self):
         if self.event.sender.user_id == "ANONYMOUS":
-            raise RuntimeWarning("Анонимный пользователь не может иметь привязанных чатов")
+            raise PWarning("Анонимный пользователь не может иметь привязанных чатов")
 
         if self.event.args[0] == 'привязать':
             self.check_args(2)
@@ -41,18 +42,18 @@ class APIChat(CommonCommand):
                                                           user=self.event.sender,
                                                           chat__isnull=False).first()
             if not yandex_temp_user:
-                raise RuntimeWarning("Не нашёл привязок. Привяжите /чат привязать {название конфы}")
+                raise PWarning("Не нашёл привязок. Привяжите /чат привязать {название конфы}")
             if yandex_temp_user.tries <= 0:
-                raise RuntimeWarning("Вы превысили максимальное число попыток")
+                raise PWarning("Вы превысили максимальное число попыток")
 
             if yandex_temp_user.code != code:
                 yandex_temp_user.tries -= 1
                 yandex_temp_user.save()
-                raise RuntimeWarning(f"Неверный код. Осталось попыток - {yandex_temp_user.tries}")
+                raise PWarning(f"Неверный код. Осталось попыток - {yandex_temp_user.tries}")
 
             yandex_users = APIUser.objects.filter(user=yandex_temp_user.user)
             if len(yandex_users) == 0:
-                raise RuntimeWarning("Не нашёл пользователя APIUser, оч странная хрень. Напишите разрабу")
+                raise PWarning("Не нашёл пользователя APIUser, оч странная хрень. Напишите разрабу")
             for yandex_user in yandex_users:
                 yandex_user.chat = yandex_temp_user.chat
                 yandex_user.save()
@@ -61,10 +62,10 @@ class APIChat(CommonCommand):
         elif self.event.args[0] == 'отвязать':
             yandex_users = APIUser.objects.filter(user=self.event.sender)
             if len(yandex_users) == 0:
-                raise RuntimeWarning("Не нашёл пользователя APIUser, оч странная хрень. Напишите разрабу")
+                raise PWarning("Не нашёл пользователя APIUser, оч странная хрень. Напишите разрабу")
             for yandex_user in yandex_users:
                 yandex_user.chat = None
                 yandex_user.save()
             return "Успешно отвязал"
         else:
-            raise RuntimeWarning("Не понял. Доступно: Чат привязать/код/отвязать.")
+            raise PWarning("Не понял. Доступно: Чат привязать/код/отвязать.")

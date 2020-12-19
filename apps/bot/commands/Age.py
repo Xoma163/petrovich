@@ -1,5 +1,6 @@
 from apps.bot.APIs.EveryPixelAPI import EveryPixelAPI
 from apps.bot.classes.Consts import Platform
+from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import get_attachments_from_attachments_or_fwd
 
@@ -65,7 +66,7 @@ class Age(CommonCommand):
         faces = everypixel_api.get_faces_on_photo(image)
 
         if len(faces) == 0:
-            raise RuntimeWarning("Не нашёл лиц на фото")
+            raise PWarning("Не нашёл лиц на фото")
         file_bytes = draw_on_images(image, faces)
         attachments = self.bot.upload_photos(file_bytes)
         return {"attachments": attachments}

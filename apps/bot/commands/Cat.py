@@ -1,4 +1,5 @@
 from apps.bot.classes.Consts import Role, Platform
+from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import get_attachments_from_attachments_or_fwd
 from apps.service.models import Cat as CatModel
@@ -27,7 +28,7 @@ class Cat(CommonCommand):
             self.check_sender(Role.ADMIN)
             cat = CatModel.objects.filter(to_send=True).order_by('?').first()
             if not cat:
-                raise RuntimeWarning("Нет котов")
+                raise PWarning("Нет котов")
             cat.to_send = False
             cat.save()
             attachments = self.bot.upload_photos(cat.image.path)
@@ -38,7 +39,7 @@ class Cat(CommonCommand):
         if len(images) == 0:
             cat = CatModel.objects.filter().order_by('?').first()
             if not cat:
-                raise RuntimeWarning("Нет котов")
+                raise PWarning("Нет котов")
             attachments = self.bot.upload_photos(cat.image.path)
 
             return {
