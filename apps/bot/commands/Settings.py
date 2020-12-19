@@ -57,6 +57,7 @@ class Settings(CommonCommand):
         self.check_conversation()
         self.event.chat.need_meme = value
         self.event.chat.save()
+        return "Сохранил настройку"
 
     def menu_minecraft_notify(self):
         self.check_sender(Role.TRUSTED)
@@ -78,7 +79,9 @@ class Settings(CommonCommand):
         msg = "Настройки:\n"
         if self.event.chat:
             reaction = self.event.chat.need_reaction
+            need_meme = self.event.chat.need_meme
             msg += f"Реагировать на неправильные команды - {TRUE_FALSE_TRANSLATOR[reaction]}\n"
+            msg += f"Присылать мемы по точным названиям - {TRUE_FALSE_TRANSLATOR[need_meme]}\n"
 
         if self.event.sender.check_role(Role.TRUSTED):
             minecraft_notify = self.event.sender.check_role(Role.MINECRAFT_NOTIFY)

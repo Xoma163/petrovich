@@ -1,4 +1,5 @@
 from apps.bot.classes.Consts import Role, Platform
+from apps.bot.classes.Exceptions import PSkip
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import get_attachments_from_attachments_or_fwd, tanimoto
 from apps.service.models import Meme as MemeModel
@@ -34,7 +35,9 @@ class Meme(CommonCommand):
         super().__init__(names, help_text, detail_help_text, args=1, platforms=[Platform.VK, Platform.TG])
 
     def accept(self, event):
-        if MemeModel.objects.filter(name=event.msg.lower()).exists():
+        if event.chat and MemeModel.objects.filter(name=event.msg.lower()).exists():
+            if not event.chat.need_meme:
+                raise PSkip()
             event.args = event.msg.lower().split(' ')
             return True
         return super().accept(event)

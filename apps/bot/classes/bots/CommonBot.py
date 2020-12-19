@@ -3,6 +3,7 @@ import threading
 import traceback
 
 from apps.bot.classes.Consts import Role, Platform
+from apps.bot.classes.Exceptions import PSkip
 from apps.bot.classes.common.CommonMethods import tanimoto
 from apps.bot.classes.events.Event import Event
 from apps.bot.models import Users, Chat, Bot
@@ -89,6 +90,8 @@ class CommonBot:
                     log_result = {'result': result}
                     self.logger.debug(log_result)
                     return result
+            except PSkip:
+                return
             except RuntimeWarning as e:
                 msg = str(e)
                 log_runtime_warning = {'result': msg}
