@@ -25,11 +25,10 @@ class Meme(CommonCommand):
                            "Мем конфа (название конфы) (название/рандом) - отправляет мем в конфу\n\n" \
                            "Для модераторов:\n" \
                            "Мем подтвердить - присылает мем на подтверждение\n" \
-                           "Мем подтвердить (id) - подтверждает мем\n" \
+                           "Мем подтвердить (id/название) - подтверждает мем\n" \
                            "Мем отклонить (id) [причина] - отклоняет мем\n" \
-                           "Мем переименовать (id/название) (новое название) - переименовывает мем\n" \
-                           "Мем удалить (название) - удаляет мем\n" \
-                           "Мем удалить (id) [причина] - удаляет мем\n" \
+                           "Мем переименовать (id) (новое название) - переименовывает мем\n" \
+                           "Мем удалить (id/название) [причина] - удаляет мем\n" \
                            "Мем инфо (id/название) - присылает информацию по мему"
 
         super().__init__(names, help_text, detail_help_text, args=1, platforms=[Platform.VK, Platform.TG])
@@ -193,9 +192,12 @@ class Meme(CommonCommand):
                                   f"{meme.name} ({meme.id})"
             return meme_to_send
         else:
-            self.int_args = [1]
-            self.parse_int()
-            non_approved_meme = self.get_meme(_id=self.event.args[1])
+            try:
+                self.int_args = [1]
+                self.parse_int()
+                non_approved_meme = self.get_meme(_id=self.event.args[1])
+            except RuntimeWarning:
+                non_approved_meme = self.get_meme(self.event.args[1:], approved=False)
             if not non_approved_meme:
                 raise RuntimeWarning("Не нашёл мема с таким id")
             if non_approved_meme.approved:
@@ -262,7 +264,6 @@ class Meme(CommonCommand):
         return self.prepare_meme_to_send(meme, True)
 
     def menu_info(self):
-
         self.check_args(2)
         _id = None
         if len(self.event.args) == 2:
