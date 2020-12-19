@@ -19,9 +19,9 @@ class YesNo(CommonCommand):
         super().__init__(names, help_text, detail_help_text, priority=80)
 
     def accept(self, event):
-        if (event.msg and event.msg[-1] == '?') or event.command in self.names:
+        if event.msg and event.msg[-1] == '?':
             return True
-        return False
+        return super().accept(event)
 
     def start(self):
         if self.event.msg.lower() in ['идиот?', 'ты идиот?']:

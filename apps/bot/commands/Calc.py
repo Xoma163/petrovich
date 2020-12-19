@@ -12,9 +12,9 @@ class Calc(CommonCommand):
         super().__init__(names, help_text, detail_help_text)
 
     def accept(self, event):
-        if (event.msg and event.msg[0] == '=') or event.command in self.names:
+        if event.msg and event.msg[0] == '=':
             return True
-        return False
+        return super().accept(event)
 
     def start(self):
         if self.event.msg[0] == '=':

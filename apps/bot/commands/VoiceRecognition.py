@@ -52,10 +52,7 @@ class VoiceRecognition(CommonCommand):
     def accept(self, event):
         if have_audio_message(event):
             return True
-        if event.command in self.names:
-            return True
-
-        return False
+        return super().accept(event)
 
     def start(self):
         audio_messages = get_attachments_from_attachments_or_fwd(self.event, 'audio_message')

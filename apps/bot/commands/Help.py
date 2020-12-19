@@ -9,12 +9,10 @@ class Help(CommonCommand):
         super().__init__(names, help_text)
 
     def accept(self, event):
-        if event.command in self.names:
-            return True
         # Самая первая кнопка клавы у бота
         if event.payload and event.payload['command'] == 'start':
             return True
-        return False
+        return super().accept(event)
 
     def start(self):
         if self.event.args:

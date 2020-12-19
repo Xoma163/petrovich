@@ -9,10 +9,9 @@ class Conference(CommonCommand):
         super().__init__(names, help_text, conversation=True, priority=90, platforms=[Platform.VK, Platform.TG])
 
     def accept(self, event):
-        if event.chat and (event.chat.name is None or event.chat.name == "") or event.command in self.names:
+        if event.chat and (event.chat.name is None or event.chat.name == ""):
             return True
-
-        return False
+        return super().accept(event)
 
     def start(self):
         if self.event.command not in self.names:

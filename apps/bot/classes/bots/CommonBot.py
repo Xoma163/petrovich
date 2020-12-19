@@ -6,6 +6,7 @@ from apps.bot.classes.Consts import Role, Platform
 from apps.bot.classes.common.CommonMethods import tanimoto
 from apps.bot.classes.events.Event import Event
 from apps.bot.models import Users, Chat, Bot
+from apps.service.models import Meme
 from apps.service.views import append_command_to_statistics
 
 
@@ -190,6 +191,9 @@ class CommonBot:
             return True
         message_is_command = message[0] == '/'
         if message_is_command:
+            return True
+        message_is_exact_meme_name = Meme.objects.filter(name=message.lower()).exists()
+        if message_is_exact_meme_name:
             return True
         for mention in self.mentions:
             if message.find(mention) != -1:
