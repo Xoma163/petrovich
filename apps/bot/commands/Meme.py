@@ -25,7 +25,7 @@ class Meme(CommonCommand):
                            "Мем конфа (название конфы) (название/рандом) - отправляет мем в конфу\n\n" \
                            "Для модераторов:\n" \
                            "Мем подтвердить - присылает мем на подтверждение\n" \
-                           "Мем подтвердить (id/название) - подтверждает мем\n" \
+                           "Мем подтвердить (id/название) [новое название] - подтверждает мем\n" \
                            "Мем отклонить (id) [причина] - отклоняет мем\n" \
                            "Мем переименовать (id) (новое название) - переименовывает мем\n" \
                            "Мем удалить (id/название) [причина] - удаляет мем\n" \
@@ -192,16 +192,17 @@ class Meme(CommonCommand):
                                   f"{meme.name} ({meme.id})"
             return meme_to_send
         else:
-            try:
-                self.int_args = [1]
-                self.parse_int()
-                non_approved_meme = self.get_meme(_id=self.event.args[1])
-            except RuntimeWarning:
-                non_approved_meme = self.get_meme(self.event.args[1:], approved=False)
+            self.int_args = [1]
+            self.parse_int()
+            non_approved_meme = self.get_meme(_id=self.event.args[1])
+
             if not non_approved_meme:
                 raise RuntimeWarning("Не нашёл мема с таким id")
             if non_approved_meme.approved:
                 raise RuntimeWarning("Мем уже подтверждён")
+            if len(self.event.args) > 2:
+                new_name = " ".join(self.event.args[2:])
+                non_approved_meme.name = new_name
 
             user_msg = f'Мем с названием "{non_approved_meme.name}" подтверждён.'
             self.bot.send_message(non_approved_meme.author.user_id, user_msg)
