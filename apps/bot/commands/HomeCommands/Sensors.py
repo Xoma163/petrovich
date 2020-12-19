@@ -34,7 +34,8 @@ class Sensors(CommonCommand):
     def __init__(self):
         names = ["датчики"]
         help_text = "Датчики - значение датчиков и состояние устройств в доме"
-        detail_help_text = "Датчики [комната = все] [датчик = все] - датчики из дома\n" \
+        detail_help_text = "Датчики - значение датчиков и состояние устройств в доме" \
+                           "Датчики [комната = все] [датчик = все] - датчики из дома\n" \
                            "Датчики (комната) - датчики в комнате\n" \
                            "Датчики (название датчика) - датчики по фильтру\n"
 
@@ -115,6 +116,11 @@ def get_items(rooms, room_name=None, item_name=None):
                     result_room['items'].append(item)
             if len(result_room['items']) > 0:
                 result.append(result_room)
+    else:
+        for room in rooms:
+            if room['name'].lower() == room_name.lower():
+                return [room]
+        raise PWarning("Не нашел такой комнаты")
     if len(result) == 0:
         raise PWarning("Не нашёл такого устройства/датчика")
     return result
