@@ -16,7 +16,8 @@ class Sensors(CommonCommand):
     def __init__(self):
         names = ["устройство"]
         help_text = "Устройство - включает или выключает устройства в доме"
-        detail_help_text = "Устройство [комната = все] (устройство) (вкл/выкл) - включает или выключает устройство в доме"
+        detail_help_text = "Устройство [комната = все] (устройство) (вкл/выкл) - управляет устройством в доме\n"
+
         super().__init__(names, help_text, detail_help_text, access=Role.HOME, args=2)
 
     @staticmethod

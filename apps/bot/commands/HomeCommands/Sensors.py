@@ -33,7 +33,10 @@ class Sensors(CommonCommand):
     def __init__(self):
         names = ["датчики"]
         help_text = "Датчики - значение датчиков и состояние устройств в доме"
-        detail_help_text = "Датчики [комната = все] [датчик = все] - датчики из дома"
+        detail_help_text = "Датчики [комната = все] [датчик = все] - датчики из дома\n" \
+                           "Датчики (комната) - датчики в комнате\n" \
+                           "Датчики (название датчика) - датчики по фильтру\n"
+
         super().__init__(names, help_text, detail_help_text, access=Role.HOME)
 
     def start(self):
