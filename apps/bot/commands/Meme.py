@@ -33,6 +33,12 @@ class Meme(CommonCommand):
 
         super().__init__(names, help_text, detail_help_text, args=1, platforms=[Platform.VK, Platform.TG])
 
+    def accept(self, event):
+        if MemeModel.objects.filter(name=event.msg.lower()).exists():
+            event.args = event.msg.lower().split(' ')
+            return True
+        return super().accept(event)
+
     def start(self):
         arg0 = self.event.args[0].lower()
         menu = [

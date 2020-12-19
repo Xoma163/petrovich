@@ -23,6 +23,7 @@ class Chat(Platform):
     chat_id = models.CharField('ID чата', max_length=20, default="")
     name = models.CharField('Название', max_length=40, default="", blank=True)
     need_reaction = models.BooleanField('Реагировать', default=True)
+    need_meme = models.BooleanField('Слать мемы', default=False)
     admin = models.ForeignKey('Users', models.SET_NULL, verbose_name='Админ', blank=True, null=True)
 
     class Meta:
