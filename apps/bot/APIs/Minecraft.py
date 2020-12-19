@@ -12,7 +12,7 @@ from apps.bot.classes.bots.CommonBot import get_bot_by_platform
 from apps.bot.classes.common.CommonMethods import remove_tz, check_command_time
 from apps.bot.models import Users
 from apps.service.models import Service
-from petrovich.settings import env, BASE_DIR
+from petrovich.settings import env, BASE_DIR, MAIN_DOMAIN
 
 
 class MinecraftAPI:
@@ -191,7 +191,7 @@ class MinecraftAPI:
 minecraft_servers = [
     MinecraftAPI(
         **{
-            'ip': None,
+            'ip': MAIN_DOMAIN,
             'port': 25565,
             'amazon': False,
             'event': None,
