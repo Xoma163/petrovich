@@ -61,10 +61,10 @@ class Command(BaseCommand):
 
                     # Если отложенная команда
                     if notify.text.startswith('/'):
-                        msg = notify.text[1:]
+                        # msg = notify.text[1:]
                         event = {
                             'message': {
-                                'text': msg
+                                'text': notify.text
                             },
                             'sender': notify.author,
                             'platform': platform

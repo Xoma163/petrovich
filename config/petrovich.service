@@ -1,5 +1,5 @@
 [Unit]
-Description=petrobich bot
+Description=petrovich bot
 
 [Service]
 User=server

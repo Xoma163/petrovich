@@ -35,9 +35,9 @@ class Meme(CommonCommand):
         super().__init__(names, help_text, detail_help_text, args=1, platforms=[Platform.VK, Platform.TG], priority=70)
 
     def accept(self, event):
-        if event.mentioned:
+        if event.mentioned or event.from_user:
             return super().accept(event)
-        
+
         if event.chat and check_name_exists(event.msg.lower()):
             if not event.chat.need_meme:
                 raise PSkip()
