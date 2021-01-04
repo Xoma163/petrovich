@@ -2,13 +2,13 @@ import os
 
 from PIL import Image, ImageDraw, ImageFont
 
-from petrovich.settings import STATIC_ROOT
+from petrovich.settings import STATIC_DIR
 
 
 class DemotivatorText:
     def __init__(self, text, font_size, color, padding, margin, available_width):
         self.text = text
-        font_path = os.path.join(STATIC_ROOT, 'fonts/TimesNewRoman.ttf')
+        font_path = os.path.join(STATIC_DIR, 'fonts/TimesNewRoman.ttf')
         self.font = ImageFont.truetype(font_path, font_size)
         self.color = color
         self.padding = padding

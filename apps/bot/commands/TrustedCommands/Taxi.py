@@ -1,6 +1,6 @@
 from apps.bot.classes.Consts import Role
 from apps.bot.classes.common.CommonCommand import CommonCommand
-from petrovich.settings import STATIC_ROOT
+from petrovich.settings import STATIC_DIR
 
 
 class Taxi(CommonCommand):
@@ -10,5 +10,5 @@ class Taxi(CommonCommand):
         super().__init__(names, help_text, access=Role.TRUSTED)
 
     def start(self):
-        attachments = self.bot.upload_photos(f"{STATIC_ROOT}/bot/img/taxi.png")
+        attachments = self.bot.upload_photos(f"{STATIC_DIR}/bot/img/taxi.png")
         return {'attachments': attachments}

@@ -46,6 +46,7 @@ DJANGO_APPS = [
 VENDORS_APPS = [
     'django_hosts',
     'django_json_widget',
+    'webpack_loader',
 ]
 
 PROJECT_APPS = [
@@ -127,12 +128,15 @@ USE_L10N = True
 USE_TZ = True
 
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATIC_DIR = 'static'
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, STATIC_DIR)
+]
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-CORS_ORIGIN_ALLOW_ALL = True
+# CORS_ORIGIN_ALLOW_ALL = True
 VK_URL = "https://vk.com/"
 
 # Logging
@@ -195,3 +199,16 @@ CORS_ORIGIN_ALLOW_ALL = True
 VK_URL = "https://vk.com/"
 
 AMAZON_REGION = "eu-north-1"
+
+WEBPACK_DEV_SERVER = DEBUG
+
+WEBPACK_LOADER = {
+    'DEFAULT': {
+        'CACHE': not DEBUG,
+        'BUNDLE_DIR_NAME': '/',  # must end with slash
+        'STATS_FILE': str(os.path.join(BASE_DIR, 'frontend/webpack-stats.json')),
+        'POLL_INTERVAL': 0.1,
+        'TIMEOUT': None,
+        'IGNORE': ['.+\.hot-update.js', '.+\.map'],
+    }
+}

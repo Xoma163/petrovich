@@ -6,7 +6,7 @@ from apps.bot.classes.Consts import Role, Platform
 from apps.bot.classes.Exceptions import PWarning, PError
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.games.models import CodenamesUser, CodenamesSession, Gamer
-from petrovich.settings import STATIC_ROOT
+from petrovich.settings import STATIC_DIR
 
 lock = Lock()
 
@@ -343,7 +343,7 @@ class Codenames(CommonCommand):
               "4) Сохраняем\n" \
               "5) Обновляем страницу с перезагрузкой кэша (Ctrl+F5)\n" \
               "6) Ура! Теперь клава будет нормально выводиться у всех ботов"
-        attachment = self.bot.upload_photos(f"{STATIC_ROOT}/bot/img/fix_keyboard.jpg")
+        attachment = self.bot.upload_photos(f"{STATIC_DIR}/bot/img/fix_keyboard.jpg")
         return {'msg': msg, 'attachments': attachment}
 
     # END MENU
