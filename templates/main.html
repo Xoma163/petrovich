@@ -18,6 +18,9 @@
 <body>
 {% block body %}
   Приветы!
+  <div id="app">
+    {{ message }}
+  </div>
 {% endblock %}
 <footer>
   {% render_bundle 'app' 'js' %}

@@ -1,2 +1,14 @@
 import '../scss/main.scss';
-console.log('hello, world!');
+import 'jquery';
+import Vue from "vue";
+
+$(() => {
+  new Vue({
+    delimiters: ["[[", "]]"],
+    el: '#app',
+    data: {
+      message: 'Hello Vue!'
+    }
+  })
+
+})

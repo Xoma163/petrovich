@@ -24,7 +24,7 @@ module.exports = {
     rules: [
       {
         test: /\.vue$/,
-        loader: 'vue-loader',
+        loader: 'vue-loader'
       },
       {
         test: /\.js$/,
@@ -76,7 +76,11 @@ module.exports = {
 
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
-
+    new webpack.ProvidePlugin({
+      $: 'jquery',
+      jQuery: 'jquery',
+      'window.jQuery': 'jquery'
+    }),
     new BundleTracker({
       filename: 'webpack-stats.json',
     }),
@@ -90,8 +94,8 @@ module.exports = {
 
   resolve: {
     alias: {
-      vue$: 'vue/dist/vue.esm.js',
+      'vue$': 'vue/dist/vue.esm.js'
     },
-    modules: [path.resolve(__dirname, 'node_modules'), 'node_modules']
+    extensions: ['*', '.js', '.vue', '.json']
   },
 }
