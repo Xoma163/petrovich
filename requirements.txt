@@ -29,7 +29,7 @@ httplib2==0.18.1
 idna==2.10
 jmespath==0.10.0
 kiwisolver==1.2.0
-lxml==4.5.2
+lxml==4.6.2
 matplotlib==3.2.2
 mcrcon==0.6.0
 mcstatus==3.1.1
