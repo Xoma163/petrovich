@@ -1,5 +1,4 @@
 import json
-
 from django.core import serializers
 from django.http import JsonResponse
 from django.shortcuts import render
@@ -7,7 +6,7 @@ from django.shortcuts import render
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 
-from apps.web.models import CalculatorSession
+from apps.web.models import CalculatorSession, CalculatorProduct
 from apps.web.serializers import serialize
 
 
@@ -34,7 +33,9 @@ class CalculatorSessionDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
+        # context_data['object_json'] = serialize('json', [context_data['object']])
         context_data['object_json'] = serialize(context_data['object'])
+        context_data['uom_list'] = json.dumps([{'label':x.label, 'value':x.value} for x in CalculatorProduct.UnitOfMeasurement])
         return context_data
 
 

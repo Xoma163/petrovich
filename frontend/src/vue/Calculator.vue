@@ -1,15 +1,16 @@
 <template>
-  <main class="container" v-if="session">
+  <main class="container-fluid" v-if="session">
     <h1>{{ session.name }}</h1>
-    Компонент
-
-    <CalculatorProduct
-        v-for="product in session.products"
-        :key="product.id"
-        :product="product"
-    >
-
-    </CalculatorProduct>
+    <div class="item">
+      <CalculatorProduct
+          v-for="product in session.products"
+          :key="product.id"
+          :product="product"
+          :uomList="uomList"
+          :users="session.users"
+      >
+      </CalculatorProduct>
+    </div>
   </main>
 </template>
 
@@ -25,7 +26,8 @@ export default {
   props: {},
   data() {
     return {
-      'session': undefined,
+      session: undefined,
+      uomList: undefined,
     }
   },
 
@@ -34,6 +36,7 @@ export default {
     const $elem = $('#calculator-data');
     this.session = $elem.data('session');
 
+    this.uomList = $elem.data('uom-list');
   },
 }
 </script>

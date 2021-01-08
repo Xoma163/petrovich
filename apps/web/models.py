@@ -30,7 +30,7 @@ class CalculatorProduct(models.Model):
         verbose_name='Единица измерения',
     )
     is_bought = models.BooleanField("Куплено", default=False)
-    bought_by = models.ForeignKey(CalculatorUser, on_delete=models.SET_NULL, null=True, name="Кем куплено", blank=True)
+    bought_by = models.ForeignKey(CalculatorUser, on_delete=models.SET_NULL, null=True, verbose_name="Кем куплено", blank=True)
     price = models.DecimalField("Цена", max_digits=10, decimal_places=2)
 
     class Meta:
