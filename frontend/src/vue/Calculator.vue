@@ -1,5 +1,5 @@
 <template>
-  <main class="container-fluid" v-if="session">
+  <main class="container-fluid" id="calculator" v-if="session">
     <h1>{{ session.name }}</h1>
     <div class="item">
       <CalculatorProduct

@@ -14,8 +14,8 @@
         </template>
       </select>
     </div>
-    <div class="is-bought vertical-center">
-      <input type="checkbox" v-model="product.is_bought" class="form-control">
+    <div class="price">
+      <input type="number" v-model="product.price" class="form-control no-arrows">
     </div>
     <div class="user">
       <select v-model="product.bought_by.id" class="form-control">
@@ -25,8 +25,8 @@
         </template>
       </select>
     </div>
-    <div class="price">
-      <input type="number" v-model="product.price" class="form-control no-arrows">
+    <div class="is-bought vertical-center">
+      <input type="checkbox" v-model="product.is_bought" class="form-control no-focus no-select">
     </div>
     <div class="delete text-center vertical-center">x</div>
   </div>

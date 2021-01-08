@@ -11,55 +11,107 @@ body {
   justify-content: center;
 }
 
-.calculator-product {
-  display: flex;
+#calculator {
+  .calculator-product {
+    display: flex;
 
+    > * {
+      flex-grow: 1;
+      flex-basis: 0;
+      margin: 0 5px;
+    }
 
-  > * {
-    flex-grow: 1;
-    flex-basis: 0;
-    margin: 0 5px;
+    .name {
+      flex-grow: 5;
+    }
+
+    .count {
+      flex: 0 0 62px;
+    }
+
+    .uom {
+      flex: 0 0 70px;
+    }
+
+    .is-bought {
+      flex: 0 0 20px;
+    }
+
+    .user {
+      flex-grow: 3;
+    }
+
+    .price {
+      flex: 0 0 85px;
+    }
+
+    .delete {
+      flex: 0 0 20px;
+      background-color: red;
+      color: white;
+      height: 20px;
+      margin: auto 0;
+      border-radius: 5px;
+    }
+
   }
+
 
   @media only screen and (max-width: 768px) {
-    > * {
+    .calculator-product {
+      > * {
+        padding: 0;
+        margin: 0 2px;
+      }
+
+      .form-control {
+        padding: 0
+      }
+
+      .count {
+        flex: 0 0 40px;
+      }
+
+      .uom {
+        flex: 0 0 45px;
+      }
+
+      .price {
+        flex: 0 0 58px;
+      }
+    }
+  }
+
+
+  @media only screen and (max-width: 576px) {
+
+    &.container-fluid {
       padding: 0;
     }
+    .calculator-product {
+      font-size: 10px;
 
-    .form-control {
-      padding: 0
+
+      & > * {
+        input, select {
+          font-size: 10px;
+        }
+      }
+
+      .count {
+        flex: 0 0 26px;
+      }
+
+      .uom {
+        flex: 0 0 37px;
+      }
+
+      .price {
+        flex: 0 0 25px;
+      }
     }
   }
-
-  .name {
-    flex-grow: 5;
-  }
-
-  .count {
-    flex: 0 0 62px;
-  }
-
-  .uom {
-    flex: 0 0 105px;
-  }
-
-  .is-bought {
-    flex: 0 0 20px;
-  }
-
-  .user {
-    flex-grow: 3;
-  }
-
-  .price {
-    flex: 0 0 85px;
-  }
-
-  .delete {
-    flex: 0 0 20px;
-  }
 }
-
 
 .no-arrows {
   /* Chrome, Safari, Edge, Opera */
@@ -72,5 +124,23 @@ body {
   /* Firefox */
   &[type=number] {
     -moz-appearance: textfield;
+  }
+}
+
+.no-select {
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Old versions of Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none;
+  /* Non-prefixed version, currently
+                                   supported by Chrome, Edge, Opera and Firefox */
+}
+
+.no-focus {
+  &:focus {
+    outline: none;
+    box-shadow: none;
   }
 }
