@@ -16,6 +16,8 @@ Django==3.0.8
 django-environ==0.4.5
 django-hosts==4.0
 django-json-widget==1.0.1
+django-webpack-loader==0.7.0
+djangorestframework==3.12.2
 dnspython==1.15.0
 dnspython3==1.15.0
 docutils==0.15.2

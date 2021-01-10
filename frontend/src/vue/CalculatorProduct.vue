@@ -8,7 +8,7 @@
     </div>
     <div class="uom">
       <select v-model="product.uom" class="form-control">
-        <option selected value="null">---</option>
+        <option selected :value="null">---</option>
         <template v-for="uom in uomList">
           <option :value="uom.value">{{ uom.label }}</option>
         </template>
@@ -18,8 +18,8 @@
       <input type="number" v-model="product.price" class="form-control no-arrows">
     </div>
     <div class="user">
-      <select v-model="product.bought_by.id" class="form-control">
-        <option selected value="null">---</option>
+      <select v-model="product.bought_by" class="form-control">
+        <option selected :value="null">---</option>
         <template v-for="user in users">
           <option :value="user.id">{{ user.name }}</option>
         </template>
@@ -28,11 +28,13 @@
     <div class="is-bought vertical-center">
       <input type="checkbox" v-model="product.is_bought" class="form-control no-focus no-select">
     </div>
-    <div class="delete text-center vertical-center">x</div>
+    <div class="delete text-center vertical-center cursor-pointer" v-on:click="deleteProduct"><span>x</span></div>
   </div>
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
   name: "CalculatorItem",
   props: {
@@ -44,13 +46,24 @@ export default {
 
     },
     users: {
-      type: Object,
+      type: Array,
+    }
+  },
+
+  methods: {
+    deleteProduct: function () {
+      axios.defaults.xsrfCookieName = 'csrftoken';
+      axios.defaults.xsrfHeaderName = "X-CSRFTOKEN";
+      axios.delete(`/calculator_session/api/calculator_product/${this.product.id}/`);
+      this.$emit('delete-product', this);
     }
   },
   watch: {
     product: {
       handler(val) {
-        val.bought_by.name = this.users[val.bought_by.id].name;
+        axios.defaults.xsrfCookieName = 'csrftoken';
+        axios.defaults.xsrfHeaderName = "X-CSRFTOKEN";
+        axios.put(`/calculator_session/api/calculator_product/${this.product.id}/`, this.product)
       },
       deep: true,
     }
