@@ -28,7 +28,8 @@
     <div class="is-bought vertical-center">
       <input type="checkbox" v-model="product.is_bought" class="form-control no-focus no-select">
     </div>
-    <div class="delete text-center vertical-center cursor-pointer" v-on:click="deleteProduct"><span>x</span></div>
+    <div class="delete text-center vertical-center cursor-pointer btn-danger" v-on:click="deleteProduct"><span>x</span>
+    </div>
   </div>
 </template>
 
@@ -36,7 +37,7 @@
 import axios from "axios";
 
 export default {
-  name: "CalculatorItem",
+  name: "CalculatorProduct",
   props: {
     product: {
       type: Object,
@@ -52,8 +53,6 @@ export default {
 
   methods: {
     deleteProduct: function () {
-      axios.defaults.xsrfCookieName = 'csrftoken';
-      axios.defaults.xsrfHeaderName = "X-CSRFTOKEN";
       axios.delete(`/calculator_session/api/calculator_product/${this.product.id}/`);
       this.$emit('delete-product', this);
     }
@@ -61,8 +60,6 @@ export default {
   watch: {
     product: {
       handler(val) {
-        axios.defaults.xsrfCookieName = 'csrftoken';
-        axios.defaults.xsrfHeaderName = "X-CSRFTOKEN";
         axios.put(`/calculator_session/api/calculator_product/${this.product.id}/`, this.product)
       },
       deep: true,

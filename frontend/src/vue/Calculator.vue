@@ -12,25 +12,36 @@
       >
       </CalculatorProduct>
     </div>
-    <a v-on:click="addProduct" class="cursor-pointer">Добавить</a>
-    <a v-on:click="calculate" class="cursor-pointer">Расчитать</a>
-    <div class="result" data-fancybox style="display:none">
+    <div class="buttons flex-end">
+      <a v-on:click="users" class="cursor-pointer btn btn-secondary">Пользователи</a>
+      <a v-on:click="addProduct" class="cursor-pointer btn btn-success">Добавить</a>
+      <a v-on:click="calculate" class="cursor-pointer btn btn-primary">Расчитать</a>
+    </div>
+    <div class="result fancybox">
       <div v-for="transaction in result.transactions">
         <span>{{ transaction.from }}</span>
-        <span>&#9;&#9;→&#9;&#9;</span>
+        <span class="strelochka">&#9;&#9;→&#9;&#9;</span>
         <span>{{ transaction.to }}</span>
         <span>&#9;<b>{{ transaction.money }}</b></span>
         <span>&#9;{{ result.currency }}.</span>
       </div>
-      <div></div>
+      <br>
       <div>Общий чек: <b>{{ result.total_money }}</b> {{ result.currency }}.</div>
       <div>Средний чек: <b>{{ result.avg_money }}</b> {{ result.currency }}.</div>
+    </div>
+    <div class="users fancybox">
+      <CalculatorUsers
+          :users="session.users"
+          :session_id="session.id"
+          @delete-user="deleteUser"
+      ></CalculatorUsers>
     </div>
   </main>
 </template>
 
 
 <script>
+import CalculatorUsers from './CalculatorUsers.vue';
 import CalculatorProduct from './CalculatorProduct.vue';
 import axios from "axios";
 import 'notifyjs-browser';
@@ -39,6 +50,7 @@ export default {
   name: "Calculator",
   components: {
     CalculatorProduct,
+    CalculatorUsers,
   },
   props: {},
   data() {
@@ -50,6 +62,9 @@ export default {
   },
 
   methods: {
+    users: function () {
+      $.fancybox.open($('.users'));
+    },
     addProduct: function () {
       const data = {
         name: "",
@@ -57,12 +72,23 @@ export default {
         price: 0,
         calculatorsession: this.session.id,
       }
-      axios.defaults.xsrfCookieName = 'csrftoken';
-      axios.defaults.xsrfHeaderName = "X-CSRFTOKEN";
       axios.post("/calculator_session/api/calculator_product/", data)
           .then(response => {
             this.session.products.push(response.data)
           });
+    },
+    deleteUser: function (user) {
+      for (let i = 0; i < this.session.users.length; i += 1) {
+        if (this.session.users[i].id === user.id) {
+          this.session.users.splice(i, 1);
+          break;
+        }
+      }
+      for (let i = 0; i < this.session.products.length; i += 1) {
+        if (this.session.products[i].bought_by === user.id) {
+          this.session.products[i].bought_by = null;
+        }
+      }
     },
     deleteProduct: function (product) {
       for (let i = 0; i < this.session.products.length; i += 1) {

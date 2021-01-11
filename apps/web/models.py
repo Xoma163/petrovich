@@ -2,7 +2,7 @@ from django.db import models
 
 
 class CalculatorUser(models.Model):
-    name = models.CharField("Имя", max_length=127)
+    name = models.CharField("Имя", max_length=127,blank=True)
 
     class Meta:
         verbose_name = "пользователь"
@@ -66,8 +66,8 @@ class CalculatorSession(models.Model):
         result_list = {
             'transactions': [],
             'currency': 'руб',
-            'total_money': total_money,
-            'avg_money': avg_money
+            'total_money': round(total_money, 2),
+            'avg_money': round(avg_money, 2)
         }
 
         first_user = list(users)[0]
@@ -75,9 +75,11 @@ class CalculatorSession(models.Model):
             if i == 0:
                 continue
             if users[user]['debt'] > 0:
-                result_list['transactions'].append({'from': user, 'to': first_user, 'money': users[user]['debt']})
+                result_list['transactions'].append(
+                    {'from': user, 'to': first_user, 'money': users[user]['debt']})
             else:
-                result_list['transactions'].append({'from': first_user, 'to': user, 'money': -users[user]['debt']})
+                result_list['transactions'].append(
+                    {'from': first_user, 'to': user, 'money': -users[user]['debt']})
 
         return result_list
 

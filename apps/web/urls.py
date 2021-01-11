@@ -2,13 +2,14 @@ from django.urls import path, include
 from rest_framework import routers
 
 from . import views
-from .views import CalculatorProductViewSet, CalculatorSessionViewSet, calculate
+from .views import CalculatorProductViewSet, CalculatorSessionViewSet, calculate, CalculatorUserViewSet
 
 app_name = 'web'
 
 router = routers.DefaultRouter()
-router.register(r'calculator_product', CalculatorProductViewSet, basename='calculator_product')
 router.register(r'calculator_session', CalculatorSessionViewSet, basename='calculator_session')
+router.register(r'calculator_product', CalculatorProductViewSet, basename='calculator_product')
+router.register(r'calculator_user', CalculatorUserViewSet, basename='calculator_user')
 
 urlpatterns = [
     path('', views.main_page),

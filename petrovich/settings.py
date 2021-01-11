@@ -214,3 +214,7 @@ WEBPACK_LOADER = {
         'IGNORE': ['.+\.hot-update.js', '.+\.map'],
     }
 }
+
+REST_FRAMEWORK = {
+    'COERCE_DECIMAL_TO_STRING': False
+}

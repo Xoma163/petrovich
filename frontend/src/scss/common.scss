@@ -1,0 +1,46 @@
+.vertical-center {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.flex-end {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.no-arrows {
+  /* Chrome, Safari, Edge, Opera */
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  /* Firefox */
+  &[type=number] {
+    -moz-appearance: textfield;
+  }
+}
+
+.no-select {
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Old versions of Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none;
+  /* Non-prefixed version, currently
+                                   supported by Chrome, Edge, Opera and Firefox */
+}
+
+.no-focus {
+  &:focus {
+    outline: none;
+    box-shadow: none;
+  }
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}

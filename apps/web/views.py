@@ -1,4 +1,3 @@
-from django.core import serializers
 from django.http import JsonResponse
 from django.shortcuts import render
 # Create your views here.
@@ -6,9 +5,9 @@ from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 from rest_framework.viewsets import ModelViewSet
 
-from apps.web.models import CalculatorSession, CalculatorProduct
+from apps.web.models import CalculatorSession, CalculatorProduct, CalculatorUser
 from apps.web.serializers import CalculatorProductSerializer, \
-    CalculatorSessionSerializer, CalculatorSessionViewSerializer
+    CalculatorSessionSerializer, CalculatorSessionViewSerializer, CalculatorUserSerializer
 
 
 def main_page(request):
@@ -28,10 +27,9 @@ class CalculatorSessionDetailView(DetailView):
     model = CalculatorSession
 
 
-def get_calculator_session(request, pk):
-    session = CalculatorSession.objects.get(pk=pk)
-    session_json = serializers.serialize('json', [session])
-    return JsonResponse({'session': session_json})
+class CalculatorUserViewSet(ModelViewSet):
+    queryset = CalculatorUser.objects.all()
+    serializer_class = CalculatorUserSerializer
 
 
 class CalculatorProductViewSet(ModelViewSet):
