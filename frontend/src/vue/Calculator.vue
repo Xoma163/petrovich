@@ -1,7 +1,7 @@
 <template>
   <main class="container-fluid" id="calculator" v-if="session">
     <h1>{{ session.name }}</h1>
-    <div class="calculator-product header">
+    <div class="calculator-product header" v-if="session.products.length>0">
       <div class="is-bought vertical-center"></div>
       <div class="name">Название</div>
       <div class="count">Кол-во</div>
@@ -13,7 +13,7 @@
 
     <div class="item">
       <CalculatorProduct
-          v-for="product in sortedItems"
+          v-for="product in session.products"
           :key="product.id"
           :product="product"
           :uomList="session.uom_list"
