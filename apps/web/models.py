@@ -2,7 +2,7 @@ from django.db import models
 
 
 class CalculatorUser(models.Model):
-    name = models.CharField("Имя", max_length=127,blank=True)
+    name = models.CharField("Имя", max_length=127, blank=True)
 
     class Meta:
         verbose_name = "пользователь"
@@ -77,7 +77,7 @@ class CalculatorSession(models.Model):
             if users[user]['debt'] > 0:
                 result_list['transactions'].append(
                     {'from': user, 'to': first_user, 'money': users[user]['debt']})
-            else:
+            elif users[user]['debt'] < 0:
                 result_list['transactions'].append(
                     {'from': first_user, 'to': user, 'money': -users[user]['debt']})
 

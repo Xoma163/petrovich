@@ -3,7 +3,7 @@ from rest_framework import serializers
 from apps.web.models import CalculatorProduct, CalculatorUser, CalculatorSession
 
 
-class CalculatorSessionMixin():
+class CalculatorUserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         instance = super().create(validated_data)
         if 'calculatorsession' in self.initial_data:
@@ -11,14 +11,19 @@ class CalculatorSessionMixin():
             session.users.add(instance)
         return instance
 
-
-class CalculatorUserSerializer(CalculatorSessionMixin, serializers.ModelSerializer):
     class Meta:
         model = CalculatorUser
         fields = "__all__"
 
 
-class CalculatorProductSerializer(CalculatorSessionMixin, serializers.ModelSerializer, ):
+class CalculatorProductSerializer(serializers.ModelSerializer):
+    def create(self, validated_data):
+        instance = super().create(validated_data)
+        if 'calculatorsession' in self.initial_data:
+            session = CalculatorSession.objects.get(pk=self.initial_data['calculatorsession'])
+            session.products.add(instance)
+        return instance
+
     class Meta:
         model = CalculatorProduct
         fields = '__all__'

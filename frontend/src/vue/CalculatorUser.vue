@@ -1,7 +1,7 @@
 <template>
   <main class="mb-2 calculator-user">
     <input class="form-control" v-model="user.name">
-    <div class="delete text-center vertical-center cursor-pointer btn-danger" v-on:click="deleteUser">
+    <div class="delete text-center vertical-center cursor-pointer btn-danger" @click="deleteUser">
       <span>x</span>
     </div>
   </main>

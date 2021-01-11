@@ -1,5 +1,8 @@
 <template>
   <div class="mb-2 calculator-product">
+    <div class="is-bought vertical-center">
+      <input type="checkbox" v-model="product.is_bought" class="form-control no-focus no-select">
+    </div>
     <div class="name">
       <input type="text" class="form-control" v-model="product.name">
     </div>
@@ -25,10 +28,7 @@
         </template>
       </select>
     </div>
-    <div class="is-bought vertical-center">
-      <input type="checkbox" v-model="product.is_bought" class="form-control no-focus no-select">
-    </div>
-    <div class="delete text-center vertical-center cursor-pointer btn-danger" v-on:click="deleteProduct"><span>x</span>
+    <div class="delete text-center vertical-center cursor-pointer btn-danger" @click="deleteProduct"><span>x</span>
     </div>
   </div>
 </template>

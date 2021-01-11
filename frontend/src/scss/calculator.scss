@@ -7,6 +7,7 @@
       flex-grow: 1;
       flex-basis: 0;
       margin: 0 5px;
+      white-space: nowrap;
     }
 
     .name {
@@ -54,6 +55,10 @@
 
   @media only screen and (max-width: 768px) {
     .calculator-product {
+      &.header {
+        font-size: 13px;
+      }
+
       > * {
         padding: 0;
         margin: 0 2px;
@@ -75,15 +80,24 @@
         flex: 0 0 58px;
       }
     }
+
+    .buttons {
+      & > * {
+        font-size: 13px;
+      }
+    }
   }
 
 
   @media only screen and (max-width: 576px) {
-
     &.container-fluid {
       padding: 0;
     }
     .calculator-product {
+      &.header {
+        font-size: 10px;
+      }
+
       font-size: 10px;
 
 

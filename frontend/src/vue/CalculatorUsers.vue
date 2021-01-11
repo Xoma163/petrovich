@@ -7,7 +7,7 @@
       ></CalculatorUser>
     </div>
     <div class="flex-end">
-      <div class="add-user btn btn-primary" v-on:click="addUser">Добавить</div>
+      <div class="add-user btn btn-primary" @click="addUser">Добавить</div>
     </div>
   </main>
 </template>
