@@ -1,6 +1,7 @@
 from django.http import JsonResponse
 from django.shortcuts import render
 # Create your views here.
+from django.views.generic import TemplateView
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 from rest_framework.viewsets import ModelViewSet
@@ -12,11 +13,15 @@ from apps.web.serializers import CalculatorProductSerializer, \
 
 def main_page(request):
     context = {}
-    return render(request, 'base.html', context)
+    return render(request, 'web/index.html', context)
 
 
 def lana_translate(request):
     return render(request, 'lana_translate.html')
+
+
+class DeliveryCalculatorTemplateView(TemplateView):
+    template_name = "web/delivery_calculator.html"
 
 
 class CalculatorSessionListView(ListView):

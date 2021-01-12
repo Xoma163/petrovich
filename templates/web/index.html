@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block body %}
+  <div class="container-fluid">
+    <div>
+      Приветики!
+    </div>
+    {% if request.user.is_authenticated %}
+      <div>
+        <a href="{% url 'web:calculator_sessions' %}">Калькулятор жромбы</a>
+      </div>
+      <div>
+        <a href="{% url 'web:delivery_calculator' %}">Калькулятор деливери</a>
+      </div>
+    {% endif %}
+  </div>
+{% endblock %}

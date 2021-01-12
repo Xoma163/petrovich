@@ -1,6 +1,6 @@
 <template>
   <main class="container-fluid" id="calculator" v-if="session">
-    <h1>{{ session.name }}</h1>
+    <h3>{{ session.name }}</h3>
     <div class="calculator-product header" v-if="session.products.length>0">
       <div class="is-bought vertical-center"></div>
       <div class="name">Название</div>
@@ -62,7 +62,6 @@ export default {
     CalculatorProduct,
     CalculatorUsers,
   },
-  props: {},
   data() {
     return {
       session: undefined,
