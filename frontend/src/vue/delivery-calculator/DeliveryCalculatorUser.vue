@@ -48,7 +48,9 @@ export default {
     totalPrice: function () {
       const discount = this.discount ? this.discount : 0
       const deliveryCost = this.deliveryCost ? this.deliveryCost : 0
-      return Math.round(this.price * (100 - discount) / 100 + this.price / this.sumPrice * deliveryCost, 2);
+      // Стоимость заказа с учётом скидки + пропорциональная цена за доставку
+      const res = this.price * ((1 - discount / 100) + deliveryCost / this.sumPrice)
+      return Math.round(res * 100) / 100;
     }
   }
 }
