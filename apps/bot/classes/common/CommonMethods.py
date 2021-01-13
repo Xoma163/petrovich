@@ -10,13 +10,15 @@ from PIL import Image, ImageDraw, ImageFont
 
 from apps.bot.classes.Consts import Role
 from apps.bot.classes.Exceptions import PWarning
+from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.service.models import Service
 from petrovich.settings import STATIC_DIR
 
 
-# ToDo: documentation
-
-def random_probability(probability):
+def random_probability(probability) -> bool:
+    """
+    Возвращает True с заданной вероятностью
+    """
     if 1 > probability > 99:
         raise PWarning("Вероятность события должна быть от 1 до 99")
     rand_int = get_random_int(1, 100)
@@ -26,8 +28,10 @@ def random_probability(probability):
         return False
 
 
-# Возвращает случайное событие с указанными весами этих событий
 def random_event(events, weights=None, seed=None):
+    """
+    Возвращает случайное событие с заданными вероятностями
+    """
     if seed:
         random.seed(seed)
     if weights is None:
@@ -39,8 +43,10 @@ def random_event(events, weights=None, seed=None):
     return random_choice
 
 
-# Возвращает рандомное число в заданном диапазоне. Если передан seed, то по seed
-def get_random_int(val1, val2=None, seed=None):
+def get_random_int(val1, val2=None, seed=None) -> int:
+    """
+    Возвращает рандомное число в заданном диапазоне. Если передан seed, то по seed
+    """
     if not val2:
         val2 = val1
         val1 = 0
@@ -51,22 +57,32 @@ def get_random_int(val1, val2=None, seed=None):
     return random_int
 
 
-# Есть ли кириллица
-def has_cyrillic(text):
+def has_cyrillic(text) -> bool:
+    """
+    Проверяет есть ли кириллица в тексте
+    """
     return bool(re.search('[а-яА-Я]', text))
 
 
-# Убирает временную зону у datetime
 def remove_tz(dt):
+    """
+    Убирает временную зону у datetime
+    """
     return dt.replace(tzinfo=None)
 
 
 def localize_datetime(dt, tz):
+    """
+    Локализация datetime
+    """
     tz_obj = pytz.timezone(tz)
     return pytz.utc.localize(dt, is_dst=None).astimezone(tz_obj)
 
 
 def normalize_datetime(dt, tz):
+    """
+    Нормализация datetime
+    """
     tz_obj = pytz.timezone(tz)
     localized_time = tz_obj.localize(dt, is_dst=None)
 
@@ -74,9 +90,12 @@ def normalize_datetime(dt, tz):
     return pytz.utc.normalize(localized_time, is_dst=None).astimezone(tz_utc)  # .replace(tzinfo=None)
 
 
-# Склоняет существительное после числительного
-# number - число, titles - 3 склонения.
 def decl_of_num(number, titles):
+    """
+    Склоняет существительное после числительного
+    number: число
+    titles: 3 склонения
+    """
     cases = [2, 0, 1, 1, 1, 2]
     if 4 < number % 100 < 20:
         return titles[2]
@@ -86,9 +105,11 @@ def decl_of_num(number, titles):
         return titles[cases[5]]
 
 
-# Получает вложения и загружает необходимые на сервер, на которых нет прав
-# Прикрепляет только фото, видео, аудио и документы.
 def get_attachments_for_upload(vk_bot, attachments):
+    """
+    Получает вложения и загружает необходимые на сервер, на которых нет прав
+    Прикрепляет только фото, видео, аудио и документы.
+    """
     uploaded_attachments = []
     for attachment in attachments:
         # Фото
@@ -101,8 +122,10 @@ def get_attachments_for_upload(vk_bot, attachments):
     return uploaded_attachments
 
 
-# Получает все вложения из сообщения и пересланного сообщения
 def get_attachments_from_attachments_or_fwd(vk_event, _type=None, from_first_fwd=True):
+    """
+    Получает все вложения из сообщения и пересланного сообщения
+    """
     attachments = []
 
     if _type is None:
@@ -128,17 +151,21 @@ def get_attachments_from_attachments_or_fwd(vk_event, _type=None, from_first_fwd
     return attachments
 
 
-# Ищет команду по имени
-def find_command_by_name(command_name):
+def find_command_by_name(command_name) -> CommonCommand:
+    """
+    Ищет команду по имени
+    """
     from apps.bot.initial import COMMANDS
     for command in COMMANDS:
         if command.names and command_name in command.names:
             return command
-    return None
+    raise PWarning("Я не знаю такой команды")
 
 
-# Получает detail_help_text для команды
-def get_help_for_command(command):
+def get_help_for_command(command) -> str:
+    """
+    Получает detail_help_text для команды
+    """
     result = ""
     if len(command.names) > 1:
         result += f"Названия команды: {', '.join(command.names)}\n"
@@ -153,8 +180,10 @@ def get_help_for_command(command):
     return result
 
 
-# Коэффициент Танимото. Степерь схожести двух строк
-def tanimoto(s1, s2):
+def tanimoto(s1, s2) -> float:
+    """
+    Коэффициент Танимото. Степерь схожести двух строк
+    """
     a, b, c = len(s1), len(s2), 0.0
     for sym in s1:
         if sym in s2:
@@ -163,6 +192,9 @@ def tanimoto(s1, s2):
 
 
 def get_image_size_by_text(txt, font):
+    """
+    Вычисление размеро текста если оно будет изображение
+    """
     img = Image.new('RGB', (1, 1))
     draw = ImageDraw.Draw(img)
     return draw.textsize(txt, font)
@@ -170,6 +202,7 @@ def get_image_size_by_text(txt, font):
 
 def draw_text_on_image(text):
     """
+    Рисование текста на изображении
     :return: bytearray Image
     """
     fontsize = 16
@@ -191,6 +224,9 @@ def draw_text_on_image(text):
 
 
 def get_role_by_str(role_str):
+    """
+    Получение роли по названию
+    """
     who = None
     if role_str in ['администрация', 'администратор', 'админы', 'админ', 'главный', 'власть', 'господин']:
         who = Role.ADMIN

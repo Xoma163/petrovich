@@ -18,11 +18,8 @@ class Help(CommonCommand):
     def start(self):
         if self.event.args:
             command = find_command_by_name(self.event.args[0].lower())
-            if not command:
-                raise PWarning("Я не знаю такой команды")
-            else:
-                self.check_sender(command.access)
-                return get_help_for_command(command)
+            self.check_sender(command.access)
+            return get_help_for_command(command)
         text = "/помощь (название команды) - помощь по конкретной команде\n" \
                "/документация - документация по боту. Самый подробный мануал по всему в одном месте\n" \
                "/команды - список всех команд с кратким описанием\n" \
