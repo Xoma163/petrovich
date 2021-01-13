@@ -45,11 +45,21 @@ class TgBot(CommonBot, Thread):
         # self.test_chat = Chat.objects.get(pk=env.str("TG_TEST_CHAT_ID"))
 
     def set_activity(self, peer_id, activity='typing'):
+        """
+        Метод позволяет указать пользователю, что бот набирает сообщение или записывает голосовое
+        Используется при длительном выполнении команд, чтобы был фидбек пользователю, что его запрос принят
+        """
         if activity not in ['typing', 'audiomessage']:
             raise PWarning("Не знаю такого типа активности")
         self.requests.get('sendChatAction', {'chat_id': peer_id, 'action': activity})
 
-    def register_user(self, user):
+    def register_user(self, user) -> Users:
+        """
+        Регистрация пользователя если его нет в БД
+        Почти аналог get_user_by_id в VkBot, только у ТГ нет метода для получения данных о пользователе,
+        поэтому метод немного другой
+        """
+
         def set_fields(_user):
             _user.name = user.get('first_name', None)
             _user.surname = user.get('last_name', None)
@@ -72,7 +82,10 @@ class TgBot(CommonBot, Thread):
             set_fields(tg_user)
         return tg_user
 
-    def get_user_by_id(self, user_id):
+    def get_user_by_id(self, user_id) -> Users:
+        """
+        Возвращает пользователя по его id
+        """
         tg_user = self.user_model.filter(user_id=user_id)
         if len(tg_user) > 0:
             tg_user = tg_user.first()
@@ -90,6 +103,9 @@ class TgBot(CommonBot, Thread):
         return tg_user
 
     def get_chat_by_id(self, chat_id):
+        """
+        Возвращает чат по его id
+        """
         if chat_id > 0:
             chat_id *= -1
         tg_chat = self.chat_model.filter(chat_id=chat_id)
@@ -101,6 +117,9 @@ class TgBot(CommonBot, Thread):
         return tg_chat
 
     def get_bot_by_id(self, bot_id):
+        """
+        Получение бота по его id
+        """
         if bot_id > 0:
             bot_id = -bot_id
         bot = self.bot_model.filter(bot_id=bot_id)
@@ -113,14 +132,21 @@ class TgBot(CommonBot, Thread):
 
         return bot
 
-    # URL Only. Bytes not supported
     def _send_media_group(self, peer_id, msg, attachments, keyboard):
+        """
+        Отправка множества картинок одним сообщением
+        attachments: url only
+        """
         media = []
         for attachment in attachments:
             media.append({'type': attachment['type'], 'media': attachment['attachment'], 'caption': msg})
         self.requests.get('sendMediaGroup', {'chat_id': peer_id, 'media': json.dumps(media), 'reply_markup': keyboard})
 
     def _send_photo(self, peer_id, msg, photo, keyboard):
+        """
+        Отправка картинки
+        photo: url или байты
+        """
         if isinstance(photo, str) and urlparse(photo).hostname:
             self.requests.get('sendPhoto',
                               {'chat_id': peer_id, 'caption': msg, 'photo': photo, 'reply_markup': keyboard})
@@ -129,6 +155,10 @@ class TgBot(CommonBot, Thread):
                               files={'photo': photo})
 
     def _send_video(self, peer_id, msg, video, keyboard):
+        """
+        Отправка видео
+        video: url или байты
+        """
         if isinstance(video, str) and urlparse(video).hostname:
             self.requests.get('sendVideo',
                               params={'chat_id': peer_id, 'caption': msg, 'reply_markup': keyboard, 'video': video})
@@ -136,7 +166,14 @@ class TgBot(CommonBot, Thread):
             self.requests.get('sendVideo', params={'chat_id': peer_id, 'caption': msg, 'reply_markup': keyboard},
                               files={'video': video})
 
-    def send_message(self, peer_id, msg='', attachments=None, keyboard=None, dont_parse_links=False, **kwargs):
+    def send_message(self, peer_id, msg='', attachments=None, keyboard=None, **kwargs):
+        """
+        Отправка сообщения
+        peer_id: в какой чат/какому пользователю
+        msg: сообщение
+        attachments: список вложений
+        keyboard: клавиатура
+        """
         if keyboard:
             keyboard = json.dumps(keyboard)
         if attachments:
@@ -154,6 +191,9 @@ class TgBot(CommonBot, Thread):
         return self.requests.get('sendMessage', params=prepared_message)
 
     def _setup_event_attachments(self, event):
+        """
+        Проставляет вложения для события
+        """
         attachments = []
         if 'media_group_id' in event:
             # ToDo: для 2+ вложений, но зачем?
@@ -186,7 +226,10 @@ class TgBot(CommonBot, Thread):
                 attachments[-1]['type'] = 'audio_message'
         return attachments
 
-    def _setup_event(self, event):
+    def _setup_event_before(self, event):
+        """
+        Подготовка события перед проверкой на то, нужен ли ответ
+        """
         if 'callback_query' in event:
             event = event['callback_query']
             event['message']['from'] = event['from']
@@ -201,7 +244,8 @@ class TgBot(CommonBot, Thread):
                 # 'payload': event.message.payload,
                 'attachments': [],
                 'action': None,
-                'payload': event.get('data', None)
+                'payload': event.get('data', None),
+                'fwd': event['message'].get('forward_from', None)
             },
             'fwd': None,
 
@@ -258,35 +302,49 @@ class TgBot(CommonBot, Thread):
         tg_event['message']['attachments'] = self._setup_event_attachments(event)
         return tg_event
 
+    def need_a_response(self, tg_event):
+        """
+        Нужен ли ответ пользователю
+        """
+        # Игнорим forward
+        if tg_event['message']['fwd']:
+            return False
+
+        if not self.need_a_response_common(tg_event):
+            return False
+
+        # Узнаём пользователя
+        if tg_event['user_id'] < 0:
+            self.send_message(tg_event['peer_id'], "Боты не могут общаться с Петровичем :(")
+            return False
+
+    def _setup_event_after(self, tg_event, event):
+        """
+        Подготовка события после проверки на то, нужен ли ответ
+        Нужно это для того, чтобы не тратить ресурсы на обработку если она не будет востребована
+        """
+        tg_event['sender'] = self.register_user(event.get('callback_query', event)['message']['from'])
+        if tg_event['chat_id']:
+            tg_event['chat'] = self.get_chat_by_id(int(tg_event['chat_id']))
+            if tg_event['sender'] and tg_event['chat']:
+                self.add_chat_to_user(tg_event['sender'], tg_event['chat'])
+        else:
+            tg_event['chat'] = None
+        return tg_event
+
     def listen(self):
+        """
+        Получение новых событий и их обработка
+        """
         for event in self.longpoll.listen():
             try:
-                tg_event = self._setup_event(event)
-
-                # Игнорим forward
-                if event.get('message') and event['message'].get('forward_from'):
+                tg_event = self._setup_event_before(event)
+                if not self.need_a_response(tg_event):
                     continue
-
-                if not self.need_a_response_common(tg_event):
-                    continue
-
-                # Узнаём пользователя
-                if tg_event['user_id'] > 0:
-                    tg_event['sender'] = self.register_user(event.get('callback_query', event)['message']['from'])
-                else:
-                    self.send_message(tg_event['peer_id'], "Боты не могут общаться с Петровичем :(")
-                    continue
-
-                if tg_event['chat_id']:
-                    tg_event['chat'] = self.get_chat_by_id(int(tg_event['chat_id']))
-                    if tg_event['sender'] and tg_event['chat']:
-                        self.add_chat_to_user(tg_event['sender'], tg_event['chat'])
-                else:
-                    tg_event['chat'] = None
+                tg_event = self._setup_event_after(tg_event, event)
 
                 tg_event_object = TgEvent(tg_event)
-                thread = threading.Thread(target=self.menu, args=(tg_event_object,))
-                thread.start()
+                threading.Thread(target=self.menu, args=(tg_event_object,)).start()
             except Exception as e:
                 print(str(e))
                 tb = traceback.format_exc()
@@ -294,6 +352,10 @@ class TgBot(CommonBot, Thread):
 
     @staticmethod
     def _prepare_obj_to_upload(file_like_object, allowed_exts_url=None):
+        """
+        Подготовка объектов(в основном картинок) для загрузки.
+        То есть метод позволяет преобразовывать почти из любого формата в необходимый для VK
+        """
         # url
         if isinstance(file_like_object, str) and urlparse(file_like_object).hostname:
             if allowed_exts_url:
@@ -316,6 +378,11 @@ class TgBot(CommonBot, Thread):
         return None
 
     def upload_photos(self, images, max_count=10):
+        """
+        Загрузка фотографий на сервер ВК.
+        images: список изображений в любом формате (ссылки, байты, файлы)
+        При невозможности загрузки одной из картинки просто пропускает её
+        """
         if not isinstance(images, list):
             images = [images]
         images_list = []
@@ -330,10 +397,17 @@ class TgBot(CommonBot, Thread):
         return images_list
 
     def upload_document(self, document, peer_id=None, title='Документ'):
+        """
+        Загрузка документа на сервер ТГ.
+        """
         return {'type': 'video', 'attachment': self._prepare_obj_to_upload(document)}
 
     @staticmethod
     def get_inline_keyboard(command_text, button_text="Ещё", args=None):
+        """
+        Получение инлайн-клавиатуры с одной кнопкой
+        В основном используется для команд, где нужно запускать много команд и лень набирать заново
+        """
         if args is None:
             args = {}
         return {
@@ -347,16 +421,25 @@ class TgBot(CommonBot, Thread):
 
     @staticmethod
     def get_group_id(_id):
+        """
+        Получение group_id по короткому id
+        """
         return _id
 
     @staticmethod
     def get_mention(user, name=None):
+        """
+        Получение меншона пользователя
+        """
         if user.nickname:
             return f"@{user.nickname}"
         elif user.name:
             return user.name
 
     def upload_video_by_link(self, link, name):
+        """
+        Загрузка видео по ссылке со стороннего ресурса
+        """
         return None
 
 
@@ -372,6 +455,9 @@ class MyTgBotLongPoll:
         self._get_last_update_id()
 
     def _get_last_update_id(self):
+        """
+        Запоминание последнего обработанного собщения
+        """
         result = self.request.get('getUpdates')
         if result.status_code == 200:
             result = result.json()['result']
@@ -379,6 +465,9 @@ class MyTgBotLongPoll:
                 self.last_update_id = result[-1]['update_id'] + 1
 
     def check(self):
+        """
+        Проверка на новое сообщение
+        """
         result = self.request.get('getUpdates', {'offset': self.last_update_id, 'timeout': 30}, timeout=35)
         if result.status_code != 200:
             return []

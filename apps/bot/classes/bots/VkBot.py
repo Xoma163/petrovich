@@ -148,7 +148,6 @@ class VkBot(CommonBot, Thread):
         attachments: список вложений
         keyboard: клавиатура
         dont_parse_links: не преобразовывать ссылки
-
         """
         if attachments is None:
             attachments = []
@@ -203,6 +202,9 @@ class VkBot(CommonBot, Thread):
         return vk_event
 
     def need_a_response(self, vk_event):
+        """
+        Нужен ли ответ пользователю
+        """
         # Develop debug в одной конфе
         if self.DEVELOP_DEBUG:
             from_test_chat = vk_event['chat_id'] == self.test_chat.id
@@ -257,8 +259,7 @@ class VkBot(CommonBot, Thread):
                         continue
                     vk_event = self._setup_event_after(vk_event, event)
                     vk_event_object = VkEvent(vk_event)
-                    thread = threading.Thread(target=self.menu, args=(vk_event_object,))
-                    thread.start()
+                    threading.Thread(target=self.menu, args=(vk_event_object,)).start()
             except Exception as e:
                 print(str(e))
                 tb = traceback.format_exc()

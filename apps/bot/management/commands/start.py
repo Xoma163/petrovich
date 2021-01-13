@@ -43,4 +43,4 @@ class Command(BaseCommand):
             start_camera()
 
     def add_arguments(self, parser):
-        parser.add_argument('debug', type=bool, help='debug mode')
+        parser.add_argument('debug', type=bool, nargs='?', help='debug mode', default=False)
