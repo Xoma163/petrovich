@@ -38,10 +38,10 @@ class Meme(CommonCommand):
         if event.mentioned or event.from_user:
             return super().accept(event)
 
-        if event.chat and check_name_exists(event.msg.lower()):
+        if event.chat and check_name_exists(event.msg_clear.lower()):
             if not event.chat.need_meme:
                 raise PSkip()
-            event.args = event.msg.lower().split(' ')
+            event.args = event.msg_clear.lower().split(' ')
             return True
         return False
 

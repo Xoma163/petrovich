@@ -195,7 +195,7 @@ class CommonBot:
         message_is_command = message[0] == '/'
         if message_is_command:
             return True
-        message_is_exact_meme_name = Meme.objects.filter(name=message.lower()).exists()
+        message_is_exact_meme_name = Meme.objects.filter(name__unaccent=message.lower()).exists()
         if message_is_exact_meme_name:
             return True
         for mention in self.mentions:

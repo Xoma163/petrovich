@@ -71,6 +71,7 @@ class Event:
             self.mentioned = raw_msg != text
             parsed = self.parse_msg(text)
             self.msg = parsed.get('msg')
+            self.msg_clear = parsed.get('msg_clear')
             self.command = parsed.get('command')
             self.args = parsed.get('args')
             self.original_args = parsed.get('original_args')
