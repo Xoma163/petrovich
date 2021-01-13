@@ -10,7 +10,6 @@ from PIL import Image, ImageDraw, ImageFont
 
 from apps.bot.classes.Consts import Role
 from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.service.models import Service
 from petrovich.settings import STATIC_DIR
 
@@ -151,7 +150,7 @@ def get_attachments_from_attachments_or_fwd(vk_event, _type=None, from_first_fwd
     return attachments
 
 
-def find_command_by_name(command_name) -> CommonCommand:
+def find_command_by_name(command_name):
     """
     Ищет команду по имени
     """

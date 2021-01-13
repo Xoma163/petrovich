@@ -422,7 +422,7 @@ class TgBot(CommonBot):
         """
         Получение group_id по короткому id
         """
-        return _id
+        return str(_id)
 
     @staticmethod
     def get_mention(user, name=None):

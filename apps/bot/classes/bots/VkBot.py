@@ -205,7 +205,7 @@ class VkBot(CommonBot):
         """
         # Develop debug в одной конфе
         if self.DEVELOP_DEBUG:
-            from_test_chat = vk_event['chat_id'] == self.test_chat.id
+            from_test_chat = self.get_group_id(vk_event['chat_id']) == self.test_chat.chat_id
             from_me = str(vk_event['user_id']) == env.str('VK_ADMIN_ID')
             if not from_test_chat or not from_me:
                 return False
@@ -386,11 +386,11 @@ class VkBot(CommonBot):
             ]]}
 
     @staticmethod
-    def get_group_id(_id):
+    def get_group_id(_id) -> str:
         """
         Получение group_id по короткому id
         """
-        return 2000000000 + int(_id)
+        return str(2000000000 + int(_id))
 
     @staticmethod
     def get_mention(user: Users, name=None):

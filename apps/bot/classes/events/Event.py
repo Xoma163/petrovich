@@ -39,25 +39,25 @@ class Event:
         Парсинг сообщения на разные части
 
         msg - оригинальное сообщение
-        msg_clear - сообщение без лишних пробелов, запятых и с заменённой ё на е
+        clear_msg - сообщение без лишних пробелов, запятых и с заменённой ё на е
         command - команда
         args - список аргументов
         original_args - строка аргументов (без ключей)
         params - оригинальное сообщение без команды (с аргументами и ключами)
 
         """
-        msg_clear = re.sub(" +", " ", msg)
-        msg_clear = re.sub(",+", ",", msg_clear)
-        msg_clear = msg_clear.strip().strip(',').strip().strip(' ').strip().replace('ё', 'е')
+        clear_msg = re.sub(" +", " ", msg)
+        clear_msg = re.sub(",+", ",", clear_msg)
+        clear_msg = clear_msg.strip().strip(',').strip().strip(' ').strip().replace('ё', 'е')
 
         msg_dict = {'msg': msg,
-                    'msg_clear': msg_clear,
+                    'clear_msg': clear_msg,
                     'command': None,
                     'args': None,
                     'original_args': None,
                     }
 
-        command_arg = msg_clear.split(' ', 1)
+        command_arg = clear_msg.split(' ', 1)
         msg_dict['command'] = command_arg[0].lower()
         if len(command_arg) > 1:
             if len(command_arg[1]) > 0:
@@ -82,7 +82,7 @@ class Event:
             self.mentioned = raw_msg != text
             parsed = self.parse_msg(text)
             self.msg = parsed.get('msg')
-            self.msg_clear = parsed.get('msg_clear')
+            self.clear_msg = parsed.get('clear_msg')
             self.command = parsed.get('command')
             self.args = parsed.get('args')
             self.original_args = parsed.get('original_args')

@@ -40,8 +40,13 @@ class Horoscope(CommonCommand):
                     raise PWarning("На сегодня ещё нет гороскопа")
                 for i, zodiac_sign in enumerate(self.zodiac_signs.get_zodiac_signs()):
                     meme = horoscope.memes.all()[i]
-                    prepared_meme = prepare_meme_to_send(self.bot, self.event, meme)
                     zodiac_sign_name = zodiac_sign.name.capitalize()
+                    try:
+                        prepared_meme = prepare_meme_to_send(self.bot, self.event, meme)
+                    except PWarning as e:
+                        error_msg = f"{zodiac_sign_name}\n{str(e)}"
+                        self.bot.parse_and_send_msgs_thread(self.event.peer_id, error_msg)
+                        continue
                     if prepared_meme.get('msg', None):
                         prepared_meme['msg'] += f"{zodiac_sign_name}\n{prepared_meme['msg']}"
                     else:
