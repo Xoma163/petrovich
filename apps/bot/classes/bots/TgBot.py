@@ -4,7 +4,6 @@ import threading
 import time
 import traceback
 from io import BytesIO
-from threading import Thread
 from urllib.parse import urlparse
 
 import requests
@@ -33,9 +32,8 @@ class TgRequests:
         return requests.post(url, params, **kwargs)
 
 
-class TgBot(CommonBot, Thread):
+class TgBot(CommonBot):
     def __init__(self):
-        Thread.__init__(self)
         CommonBot.__init__(self, Platform.TG)
 
         self.token = env.str("TG_TOKEN")
@@ -102,7 +100,7 @@ class TgBot(CommonBot, Thread):
             tg_user.save()
         return tg_user
 
-    def get_chat_by_id(self, chat_id):
+    def get_chat_by_id(self, chat_id) -> Chat:
         """
         Возвращает чат по его id
         """
@@ -116,7 +114,7 @@ class TgBot(CommonBot, Thread):
             tg_chat.save()
         return tg_chat
 
-    def get_bot_by_id(self, bot_id):
+    def get_bot_by_id(self, bot_id) -> Bot:
         """
         Получение бота по его id
         """
@@ -166,7 +164,7 @@ class TgBot(CommonBot, Thread):
             self.requests.get('sendVideo', params={'chat_id': peer_id, 'caption': msg, 'reply_markup': keyboard},
                               files={'video': video})
 
-    def send_message(self, peer_id, msg='', attachments=None, keyboard=None, **kwargs):
+    def send_message(self, peer_id, msg='', attachments=None, keyboard=None, dont_parse_links=False, **kwargs):
         """
         Отправка сообщения
         peer_id: в какой чат/какому пользователю

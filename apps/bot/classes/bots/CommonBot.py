@@ -1,18 +1,21 @@
 import logging
-import threading
 import traceback
+from threading import Thread
 
 from apps.bot.classes.Consts import Role, Platform
 from apps.bot.classes.Exceptions import PSkip, PWarning, PError
 from apps.bot.classes.common.CommonMethods import tanimoto
 from apps.bot.classes.events.Event import Event
 from apps.bot.models import Users, Chat, Bot
+from apps.games.models import Gamer
 from apps.service.models import Meme
 from apps.service.views import append_command_to_statistics
 
 
-class CommonBot:
+class CommonBot(Thread):
     def __init__(self, platform):
+        Thread.__init__(self)
+
         self.platform = platform
         self.mentions = []
         self.BOT_CAN_WORK = True
@@ -24,22 +27,73 @@ class CommonBot:
 
         self.logger = logging.getLogger(platform.value)
 
-    def get_user_by_id(self, user_id):
+    def get_user_by_id(self, user_id) -> Users:
+        """
+        Возвращает пользователя по его id
+        """
         raise NotImplementedError
 
-    def get_chat_by_id(self, chat_id):
+    def get_chat_by_id(self, chat_id) -> Chat:
+        """
+        Возвращает чат по его id
+        """
         raise NotImplementedError
 
-    def get_bot_by_id(self, bot_id):
+    def get_bot_by_id(self, bot_id) -> Bot:
+        """
+        Получение бота по его id
+        """
         raise NotImplementedError
 
     def run(self):
+        """
+        Thread запуск основного тела команды
+        """
         self.listen()
 
     def listen(self):
+        """
+        Получение новых событий и их обработка
+        """
         raise NotImplementedError
 
+    @staticmethod
+    def _get_similar_command(event, commands):
+        """
+        Получение похожей команды по неправильно введённой
+        """
+        similar_command = commands[0].names[0]
+        tanimoto_max = 0
+        user_groups = event.sender.get_list_of_role_names()
+        for command in commands:
+            # Выдача пользователю только тех команд, которые ему доступны
+            command_access = command.access
+            if isinstance(command_access, str):
+                command_access = [command_access]
+            if command_access.name not in user_groups:
+                continue
+
+            # Выдача только тех команд, у которых стоит флаг выдачи
+            if not command.suggest_for_similar:
+                continue
+
+            for name in command.names:
+                if name:
+                    tanimoto_current = tanimoto(event.command, name)
+                    if tanimoto_current > tanimoto_max:
+                        tanimoto_max = tanimoto_current
+                        similar_command = name
+
+        msg = f"Я не понял команды \"{event.command}\"\n"
+        if tanimoto_max != 0:
+            msg += f"Возможно вы имели в виду команду \"{similar_command}\""
+        return msg
+
     def menu(self, event, send=True):
+        """
+        Выбор команды и отправка данных о сообщении ей
+        Проверки на запущенность бота, забаненных юзеров
+        """
         # Проверяем не остановлен ли бот, если так, то проверяем вводимая команда = старт?
         if not self.can_bot_working():
             if not event.sender.check_role(Role.ADMIN):
@@ -58,21 +112,6 @@ class CommonBot:
         group = event.sender.groups.filter(name=Role.BANNED.name)
         if len(group) > 0:
             return
-
-        if self.DEBUG and send:
-            if hasattr(event, 'payload') and event.payload:
-                debug_message = \
-                    f"msg = {event.msg}\n" \
-                    f"command = {event.command}\n" \
-                    f"args = {event.args}\n" \
-                    f"payload = {event.payload}\n"
-            else:
-                debug_message = \
-                    f"msg = {event.msg}\n" \
-                    f"command = {event.command}\n" \
-                    f"args = {event.args}\n" \
-                    f"original_args = {event.original_args}\n"
-            self.send_message(event.peer_id, debug_message)
 
         log_event = event
         self.logger.debug(log_event)
@@ -119,41 +158,28 @@ class CommonBot:
 
         if event.chat and not event.chat.need_reaction:
             return None
-        similar_command = COMMANDS[0].names[0]
-        tanimoto_max = 0
-        user_groups = event.sender.get_list_of_role_names()
-        for command in COMMANDS:
-            # Выдача пользователю только тех команд, которые ему доступны
-            command_access = command.access
-            if isinstance(command_access, str):
-                command_access = [command_access]
-            if command_access.name not in user_groups:
-                continue
-
-            # Выдача только тех команд, у которых стоит флаг выдачи
-            if not command.suggest_for_similar:
-                continue
-
-            for name in command.names:
-                if name:
-                    tanimoto_current = tanimoto(event.command, name)
-                    if tanimoto_current > tanimoto_max:
-                        tanimoto_max = tanimoto_current
-                        similar_command = name
-
-        msg = f"Я не понял команды \"{event.command}\"\n"
-        if tanimoto_max != 0:
-            msg += f"Возможно вы имели в виду команду \"{similar_command}\""
-        self.logger_result = {'result': msg}
-        self.logger.debug(self.logger_result)
+        similar_command = self._get_similar_command(event, COMMANDS)
+        self.logger.debug({'result': similar_command})
         if send:
-            self.send_message(event.peer_id, msg)
-        return msg
+            self.send_message(event.peer_id, similar_command)
+        return similar_command
 
     def send_message(self, peer_id, msg="ᅠ", attachments=None, keyboard=None, dont_parse_links=False, **kwargs):
+        """
+        Отправка сообщения
+        peer_id: в какой чат/какому пользователю
+        msg: сообщение
+        attachments: список вложений
+        keyboard: клавиатура
+        dont_parse_links: не преобразовывать ссылки
+        """
         raise NotImplementedError
 
     def parse_and_send_msgs(self, peer_id, result):
+        """
+        Преобразование 1 из 4х типов сообщения в единый стандарт
+        [{...},{...}]
+        """
         if isinstance(result, str) or isinstance(result, int) or isinstance(result, float):
             result = {'msg': result}
         if isinstance(result, dict):
@@ -167,13 +193,20 @@ class CommonBot:
 
     # Отправляет сообщения юзерам в разных потоках
     def parse_and_send_msgs_thread(self, chat_ids, message):
+        """
+        Преобразование сообщения и отправка в отдельном потоке для каждого чата
+        """
         if not isinstance(chat_ids, list):
             chat_ids = [chat_ids]
         for chat_id in chat_ids:
-            thread = threading.Thread(target=self.parse_and_send_msgs, args=(chat_id, message,))
+            thread = Thread(target=self.parse_and_send_msgs, args=(chat_id, message,))
             thread.start()
 
-    def need_a_response_common(self, event):
+    def need_a_response_common(self, event) -> bool:
+        """
+        Нужен ли ответ пользователю
+        Правила ответа
+        """
         message = event['message']['text']
 
         have_payload = 'message' in event and 'payload' in event['message'] and event['message']['payload']
@@ -203,7 +236,10 @@ class CommonBot:
         return False
 
     @staticmethod
-    def have_audio_message(event):
+    def have_audio_message(event) -> bool:
+        """
+        Есть ли аудиосообщение в сообщении
+        """
         if isinstance(event, Event):
             all_attachments = event.attachments or []
             if event.fwd:
@@ -225,7 +261,10 @@ class CommonBot:
         return False
 
     @staticmethod
-    def parse_date(date):
+    def parse_date(date) -> str:
+        """
+        Парсинг даты
+        """
         date_arr = date.split('.')
         if len(date_arr) == 2:
             return f"1970-{date_arr[1]}-{date_arr[0]}"
@@ -234,20 +273,33 @@ class CommonBot:
 
     @staticmethod
     def add_chat_to_user(user, chat):
+        """
+        Добавление чата пользователю
+        """
         chats = user.chats
         if chat not in chats.all():
             chats.add(chat)
 
     @staticmethod
-    def remove_group_from_user(user, chat):
+    def remove_chat_from_user(user, chat):
+        """
+        Удаление чата пользователю
+        """
         chats = user.chats
         if chat in chats.all():
             chats.remove(chat)
 
-    def can_bot_working(self):
+    def can_bot_working(self) -> bool:
+        """
+        Запущен ли бот
+        """
         return self.BOT_CAN_WORK
 
-    def get_user_by_name(self, args, filter_chat=None):
+    # ToDo: очень говнокод
+    def get_user_by_name(self, args, filter_chat=None) -> Users:
+        """
+        Получение пользователя по имени/фамилии/имени и фамилии/никнейма/ид
+        """
         if not args:
             raise PWarning("Отсутствуют аргументы")
         if isinstance(args, str):
@@ -276,7 +328,10 @@ class CommonBot:
 
         return user.first()
 
-    def get_chat_by_name(self, args, filter_platform=True):
+    def get_chat_by_name(self, args, filter_platform=True) -> Chat:
+        """
+        Получение чата по названию
+        """
         if not args:
             raise PWarning("Отсутствуют аргументы")
         if isinstance(args, str):
@@ -297,13 +352,22 @@ class CommonBot:
             raise PWarning("Чат не найден")
         return chats.first()
 
-    def upload_document(self, document, peer_id=None, title='Документ'):
+    def upload_photos(self, images, max_count=10):
+        """
+        Загрузка фотографий
+        """
         raise NotImplementedError
 
-    def upload_photos(self, images, max_count=10):
+    def upload_document(self, document, peer_id=None, title='Документ'):
+        """
+        Загрузка документа
+        """
         raise NotImplementedError
 
     def get_one_chat_with_user(self, chat_name, user_id):
+        """
+        Получение чата по названию, в котором есть пользователь
+        """
         chats = self.chat_model.filter(name__icontains=chat_name)
         if len(chats) == 0:
             raise PWarning("Не нашёл такого чата")
@@ -319,14 +383,16 @@ class CommonBot:
         elif len(chats_with_user) > 1:
             chats_str = '\n'.join(chats_with_user)
             raise PWarning("Нашёл несколько чатов. Уточните какой:\n"
-                                 f"{chats_str}")
+                           f"{chats_str}")
 
         elif len(chats_with_user) == 1:
             return chats_with_user[0]
 
     @staticmethod
-    def get_gamer_by_user(user):
-        from apps.games.models import Gamer
+    def get_gamer_by_user(user) -> Gamer:
+        """
+        Получение игрока по модели пользователя
+        """
 
         gamers = Gamer.objects.filter(user=user)
         if len(gamers) == 0:
@@ -340,6 +406,9 @@ class CommonBot:
 
 
 def get_bot_by_platform(platform: Platform):
+    """
+    Получение бота по платформе
+    """
     from apps.bot.classes.bots.VkBot import VkBot
     from apps.bot.classes.bots.TgBot import TgBot
 

@@ -43,7 +43,7 @@ class Actions(CommonCommand):
             elif self.event.action['type'] == 'chat_kick_user':
                 if self.event.action['member_id'] > 0:
                     user = self.bot.get_user_by_id(self.event.action['member_id'])
-                    self.bot.remove_group_from_user(user, self.event.chat)
+                    self.bot.remove_chat_from_user(user, self.event.chat)
             # По изменению чата конфы
             # elif self.event.action['type'] == 'chat_title_update':
             #     self.event.chat.name = self.event.action['text']

@@ -3,7 +3,6 @@ import json
 import os
 import threading
 import traceback
-from threading import Thread
 from urllib.parse import urlparse
 
 import requests
@@ -26,9 +25,8 @@ from apps.timetable.models import Group as ScheduleGroup
 from petrovich.settings import env
 
 
-class VkBot(CommonBot, Thread):
+class VkBot(CommonBot):
     def __init__(self):
-        Thread.__init__(self)
         CommonBot.__init__(self, Platform.VK)
 
         self.token = env.str('VK_BOT_TOKEN')
