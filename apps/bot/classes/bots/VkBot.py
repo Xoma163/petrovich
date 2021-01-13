@@ -43,11 +43,18 @@ class VkBot(CommonBot, Thread):
         self.test_chat = Chat.objects.get(chat_id=env.str("VK_TEST_CHAT_ID"))
 
     def set_activity(self, peer_id, activity='typing'):
+        """
+        Метод позволяет указать пользователю, что бот набирает сообщение или записывает голосовое
+        Используется при длительном выполнении команд, чтобы был фидбек пользователю, что его запрос принят
+        """
         if activity not in ['typing', 'audiomessage']:
             raise PWarning("Не знаю такого типа активности")
         self.vk.messages.setActivity(type=activity, peer_id=peer_id, group_id=self.group_id)
 
-    def get_user_by_id(self, user_id):
+    def get_user_by_id(self, user_id) -> Users:
+        """
+        Возвращает пользователя по его id
+        """
         vk_user = self.user_model.filter(user_id=user_id)
         if len(vk_user) > 0:
             vk_user = vk_user.first()
@@ -86,7 +93,10 @@ class VkBot(CommonBot, Thread):
             vk_user.save()
         return vk_user
 
-    def get_chat_by_id(self, chat_id):
+    def get_chat_by_id(self, chat_id) -> Chat:
+        """
+        Возвращает чат по его id
+        """
         vk_chat = self.chat_model.filter(chat_id=chat_id)
         if len(vk_chat) > 0:
             vk_chat = vk_chat.first()
@@ -95,17 +105,10 @@ class VkBot(CommonBot, Thread):
             vk_chat.save()
         return vk_chat
 
-    @staticmethod
-    def add_extra_group_to_user(user, chat):
-        group = ScheduleGroup.objects.filter(conference=chat).first()
-        if group:
-            groups = user.groups
-            group_student = Group.objects.get(name=Role.STUDENT.name)
-            if group_student not in groups.all():
-                user.groups.add(group_student)
-                user.save()
-
-    def get_bot_by_id(self, bot_id):
+    def get_bot_by_id(self, bot_id) -> Bot:
+        """
+        Получение бота по его id
+        """
         if bot_id > 0:
             bot_id = -bot_id
         bot = self.bot_model.filter(bot_id=bot_id)
@@ -123,7 +126,30 @@ class VkBot(CommonBot, Thread):
 
         return bot
 
-    def send_message(self, peer_id, msg="ᅠ", attachments=None, keyboard=None, dont_parse_links=False, **kwargs):
+    @staticmethod
+    def add_extra_group_to_user(user, chat):
+        """
+        Добавляет дополнительные группы пользователям из уникальных чатов
+        """
+        group = ScheduleGroup.objects.filter(conference=chat).first()
+        if group:
+            groups = user.groups
+            group_student = Group.objects.get(name=Role.STUDENT.name)
+            if group_student not in groups.all():
+                user.groups.add(group_student)
+                user.save()
+
+    def send_message(self, peer_id: str, msg: str = "ᅠ", attachments=None, keyboard=None,
+                     dont_parse_links: bool = False, **kwargs):
+        """
+        Отправка сообщения
+        peer_id: в какой чат/какому пользователю
+        msg: сообщение
+        attachments: список вложений
+        keyboard: клавиатура
+        dont_parse_links: не преобразовывать ссылки
+
+        """
         if attachments is None:
             attachments = []
         if isinstance(attachments, str):
@@ -152,7 +178,10 @@ class VkBot(CommonBot, Thread):
                 print("Ошибка отправки сообщения\n"
                       f"{e}")
 
-    def _setup_event(self, event):
+    def _setup_event_before(self, event):
+        """
+        Подготовка события перед проверкой на то, нужен ли ответ
+        """
         vk_event = {
             'platform': self.platform,
             'from_user': event.from_user,
@@ -173,45 +202,60 @@ class VkBot(CommonBot, Thread):
             vk_event['message']['action']['member_ids'] = [vk_event['message']['action'].pop('member_id')]
         return vk_event
 
+    def need_a_response(self, vk_event):
+        # Develop debug в одной конфе
+        if self.DEVELOP_DEBUG:
+            from_test_chat = vk_event['chat_id'] == self.test_chat.id
+            from_me = str(vk_event['user_id']) == env.str('VK_ADMIN_ID')
+            if not from_test_chat or not from_me:
+                return False
+
+        # Сообщение либо мне в лс, либо упоминание меня, либо есть аудиосообщение, либо есть экшн
+        if not self.need_a_response_common(vk_event):
+            return False
+
+        # Проверка на бота
+        if vk_event['user_id'] < 0:
+            self.send_message(vk_event['peer_id'], "Боты не могут общаться с Петровичем :(")
+            return False
+        return True
+
+    def _setup_event_after(self, vk_event, event):
+        """
+        Подготовка события после проверки на то, нужен ли ответ
+        Нужно это для того, чтобы не тратить ресурсы на обработку если она не будет востребована
+        """
+        # Обработка вложенных сообщений в event['fwd']. reply и fwd для вк это разные вещи.
+        if event.message.reply_message:
+            vk_event['fwd'] = [event.message.reply_message]
+        elif len(event.message.fwd_messages) != 0:
+            vk_event['fwd'] = event.message.fwd_messages
+
+        # Узнаём пользователя
+        vk_event['sender'] = self.get_user_by_id(vk_event['user_id'])
+
+        # Узнаём конфу
+        if vk_event['chat_id']:
+            vk_event['chat'] = self.get_chat_by_id(int(vk_event['peer_id']))
+            if vk_event['sender'] and vk_event['chat']:
+                self.add_chat_to_user(vk_event['sender'], vk_event['chat'])
+                self.add_extra_group_to_user(vk_event['sender'], vk_event['chat'])
+        else:
+            vk_event['chat'] = None
+        return vk_event
+
     def listen(self):
+        """
+        Получение новых событий и их обработка
+        """
         for event in self.longpoll.listen():
             try:
                 # Если пришло новое сообщение
                 if event.type == VkBotEventType.MESSAGE_NEW:
-                    vk_event = self._setup_event(event)
-
-                    if self.DEVELOP_DEBUG:
-                        from_test_chat = vk_event['chat_id'] == self.test_chat.id
-                        from_me = str(vk_event['user_id']) == env.str('VK_ADMIN_ID')
-                        if not from_test_chat or not from_me:
-                            continue
-
-                    # Сообщение либо мне в лс, либо упоминание меня, либо есть аудиосообщение, либо есть экшн
+                    vk_event = self._setup_event_before(event)
                     if not self.need_a_response(vk_event):
                         continue
-
-                    # Обработка вложенных сообщений в event['fwd']. reply и fwd для вк это разные вещи.
-                    if event.message.reply_message:
-                        vk_event['fwd'] = [event.message.reply_message]
-                    elif len(event.message.fwd_messages) != 0:
-                        vk_event['fwd'] = event.message.fwd_messages
-
-                    # Узнаём пользователя
-                    if vk_event['user_id'] > 0:
-                        vk_event['sender'] = self.get_user_by_id(vk_event['user_id'])
-                    else:
-                        self.send_message(vk_event['peer_id'], "Боты не могут общаться с Петровичем :(")
-                        continue
-
-                    # Узнаём конфу
-                    if vk_event['chat_id']:
-                        vk_event['chat'] = self.get_chat_by_id(int(vk_event['peer_id']))
-                        if vk_event['sender'] and vk_event['chat']:
-                            self.add_chat_to_user(vk_event['sender'], vk_event['chat'])
-                            self.add_extra_group_to_user(vk_event['sender'], vk_event['chat'])
-                    else:
-                        vk_event['chat'] = None
-
+                    vk_event = self._setup_event_after(vk_event, event)
                     vk_event_object = VkEvent(vk_event)
                     thread = threading.Thread(target=self.menu, args=(vk_event_object,))
                     thread.start()
@@ -222,6 +266,10 @@ class VkBot(CommonBot, Thread):
 
     @staticmethod
     def _prepare_obj_to_upload(file_like_object, allowed_exts_url=None):
+        """
+        Подготовка объектов(в основном картинок) для загрузки.
+        То есть метод позволяет преобразовывать почти из любого формата в необходимый для VK
+        """
         # bytes array
         if isinstance(file_like_object, bytes):
             obj = io.BytesIO(file_like_object)
@@ -250,12 +298,12 @@ class VkBot(CommonBot, Thread):
             obj = file_like_object
         return obj
 
-    def _get_attachment_by_id(self, _type, group_id, _id):
-        if group_id is None:
-            group_id = f'-{self.group_id}'
-        return f"{_type}{group_id}_{_id}"
-
     def upload_photos(self, images, max_count=10):
+        """
+        Загрузка фотографий на сервер ВК.
+        images: список изображений в любом формате (ссылки, байты, файлы)
+        При невозможности загрузки одной из картинки просто пропускает её
+        """
         if not isinstance(images, list):
             images = [images]
 
@@ -292,17 +340,23 @@ class VkBot(CommonBot, Thread):
         try:
             vk_photos = self.upload.photo_messages(images_to_load)
             for vk_photo in vk_photos:
-                attachments.append(self._get_attachment_by_id('photo', vk_photo['owner_id'], vk_photo['id']))
+                attachments.append(self.get_attachment_by_id('photo', vk_photo['owner_id'], vk_photo['id']))
         except vk_api.exceptions.ApiError as e:
             print(e)
         return attachments
 
     def upload_document(self, document, peer_id=None, title='Документ'):
+        """
+        Загрузка документа на сервер ВК.
+        """
         document = self._prepare_obj_to_upload(document)
         vk_document = self.upload.document_message(document, title=title, peer_id=peer_id)['doc']
-        return self._get_attachment_by_id('doc', vk_document['owner_id'], vk_document['id'])
+        return self.get_attachment_by_id('doc', vk_document['owner_id'], vk_document['id'])
 
     def upload_audio(self, audio, artist, title):
+        """
+        Загрузка аудиофайла на сервер ВК.
+        """
         audio = self._prepare_obj_to_upload(audio)
         try:
             vk_audio = self.vk_user.upload.audio(audio, artist=artist, title=title)
@@ -314,31 +368,43 @@ class VkBot(CommonBot, Thread):
 
     @staticmethod
     def get_inline_keyboard(command_text, button_text="Ещё", args=None):
+        """
+        Получение инлайн-клавиатуры с одной кнопкой
+        В основном используется для команд, где нужно запускать много команд и лень набирать заново
+        """
         if args is None:
             args = {}
         return {
             'inline': True,
-            'buttons': [[
-                {
-                    'action': {
-                        'type': 'text',
-                        'label': button_text,
-                        "payload": json.dumps({"command": command_text, "args": args}, ensure_ascii=False)
-                    },
-                    'color': 'primary',
-                }
+            'buttons': [[{
+                'action': {
+                    'type': 'text',
+                    'label': button_text,
+                    "payload": json.dumps({"command": command_text, "args": args}, ensure_ascii=False)
+                },
+                'color': 'primary',
+            }
             ]]}
 
     @staticmethod
     def get_group_id(_id):
+        """
+        Получение group_id по короткому id
+        """
         return 2000000000 + int(_id)
 
     @staticmethod
-    def get_mention(user, name=None):
+    def get_mention(user: Users, name=None):
+        """
+        Получение меншона пользователя
+        """
         name = name or str(user)
         return f"[id{user.user_id}|{name}]"
 
     def upload_video_by_link(self, link, name):
+        """
+        Загрузка видео по ссылке со стороннего ресурса
+        """
         values = {
             'name': name,
             'is_private': False,
@@ -350,23 +416,38 @@ class VkBot(CommonBot, Thread):
         return f"video{response['owner_id']}_{response['video_id']}"
 
     def get_attachment_by_id(self, _type, group_id, _id):
+        """
+        Получение ссылки для вложения
+        """
         if group_id is None:
             group_id = f'-{self.group_id}'
         return f"{_type}{group_id}_{_id}"
 
     def get_video(self, owner_id, _id):
+        """
+        Получение данных о видео
+        """
         return self.vk_user.vk.video.get(videos=f'{owner_id}_{_id}')
 
     def set_chat_title(self, chat_id, title):
+        """
+        Изменение названия конфы
+        """
         self.vk.messages.editChat(chat_id=chat_id, title=title)
 
     def set_chat_title_if_not_equals(self, chat_id, title):
+        """
+        Изменение названия конфы если оно не равно предыдущему, иначе будет дубликат изменения
+        """
         if title != self.vk.messages.getConversationsById(peer_ids=chat_id)['items'][0]['chat_settings']['title']:
             self.set_chat_title(int(chat_id) - 2000000000, title)
             return True
         return False
 
     def get_conference_users(self, peer_id):
+        """
+        Получения списка пользователей конфы
+        """
         try:
             return self.vk.messages.getConversationMembers(peer_id=peer_id, group_id=self.group_id, lang='ru')[
                 'profiles']

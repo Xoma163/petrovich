@@ -40,7 +40,6 @@ class CommonBot:
         raise NotImplementedError
 
     def menu(self, event, send=True):
-
         # Проверяем не остановлен ли бот, если так, то проверяем вводимая команда = старт?
         if not self.can_bot_working():
             if not event.sender.check_role(Role.ADMIN):
@@ -174,7 +173,7 @@ class CommonBot:
             thread = threading.Thread(target=self.parse_and_send_msgs, args=(chat_id, message,))
             thread.start()
 
-    def need_a_response(self, event):
+    def need_a_response_common(self, event):
         message = event['message']['text']
 
         have_payload = 'message' in event and 'payload' in event['message'] and event['message']['payload']

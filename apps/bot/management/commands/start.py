@@ -41,3 +41,6 @@ class Command(BaseCommand):
         start_tg(debug)
         if not debug:
             start_camera()
+
+    def add_arguments(self, parser):
+        parser.add_argument('debug', type=bool, help='debug mode')

@@ -267,7 +267,7 @@ class TgBot(CommonBot, Thread):
                 if event.get('message') and event['message'].get('forward_from'):
                     continue
 
-                if not self.need_a_response(tg_event):
+                if not self.need_a_response_common(tg_event):
                     continue
 
                 # Узнаём пользователя
