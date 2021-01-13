@@ -5,6 +5,9 @@ from petrovich.settings import VK_URL
 @auto_str
 class VkEvent(Event):
     def parse_attachments(self, attachments):
+        """
+        Распаршивание вложений
+        """
         new_attachments = []
 
         if attachments:

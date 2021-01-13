@@ -13,13 +13,13 @@ class Calc(CommonCommand):
         super().__init__(names, help_text, detail_help_text)
 
     def accept(self, event):
-        if event.msg and event.msg[0] == '=':
+        if event.clear_msg and event.clear_msg[0] == '=':
             return True
         return super().accept(event)
 
     def start(self):
-        if self.event.msg[0] == '=':
-            expression = self.event.msg[1:]
+        if self.event.clear_msg[0] == '=':
+            expression = self.event.clear_msg[1:]
         else:
             self.check_args(1)
             expression = self.event.original_args

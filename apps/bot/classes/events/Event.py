@@ -19,6 +19,9 @@ class Event:
 
     @staticmethod
     def delete_slash_and_mentions(msg):
+        """
+        Удаление слеша перед началом команды и всех оповещений бота
+        """
         mentions = env.list('VK_BOT_MENTIONS')
 
         # Обрезаем палку
@@ -33,7 +36,10 @@ class Event:
     def parse_msg(msg):
         # Сообщение, команда, аргументы, аргументы строкой, ключи
         """
+        Парсинг сообщения на разные части
+
         msg - оригинальное сообщение
+        msg_clear - сообщение без лишних пробелов, запятых и с заменённой ё на е
         command - команда
         args - список аргументов
         original_args - строка аргументов (без ключей)
@@ -61,10 +67,15 @@ class Event:
         return msg_dict
 
     def parse_attachments(self, attachments):
+        """
+        Распаршивание вложений
+        """
         raise NotImplementedError
 
     def __init__(self, event):
-
+        """
+        Преобразование собранных данных с ботов
+        """
         if 'message' in event:
             raw_msg = event['message'].get('text')
             text = self.delete_slash_and_mentions(raw_msg)
