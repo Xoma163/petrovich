@@ -72,7 +72,7 @@ class VkBot(CommonBot):
             if 'city' in user:
                 from apps.service.models import City
                 city_name = user['city']['title']
-                city = City.objects.filter(name=city_name)
+                city = City.objects.filter(name__icontains=city_name)
                 if len(city) > 0:
                     city = city.first()
                 else:

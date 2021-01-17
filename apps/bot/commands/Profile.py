@@ -103,7 +103,8 @@ def add_city_to_db(city_name):
     city_info['name'] = city_info['name'].replace('ё', 'е')
     city = City.objects.filter(name=city_info['name'])
     if len(city) != 0:
-        raise PWarning("Такой город уже есть")
+        return city.first()
+        # raise PWarning("Такой город уже есть")
     city_info['synonyms'] = city_info['name'].lower()
     timezonedb_api = TimezoneDBAPI()
     timezone_name = timezonedb_api.get_timezone_by_coordinates(city_info['lat'], city_info['lon'])

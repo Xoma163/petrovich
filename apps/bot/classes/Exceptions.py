@@ -1,10 +1,10 @@
-class PSkip(BaseException):
+class PSkip(Exception):
     pass
 
 
-class PWarning(BaseException):
+class PWarning(Exception):
     pass
 
 
-class PError(BaseException):
+class PError(Exception):
     pass
