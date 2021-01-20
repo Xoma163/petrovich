@@ -84,6 +84,11 @@ class Meme(CommonCommand):
             'approved': self.event.sender.check_role(Role.MODERATOR) or self.event.sender.check_role(Role.TRUSTED)
         }
 
+        ban_list = ['добавить', 'обновить', 'удалить', 'конфа', 'рандом', 'р', 'подтвердить', 'принять', '+',
+                    'отклонить', 'отменить', '-', 'переименовать', 'правка', 'id', 'ид', 'инфо']
+        if new_meme['name'] in ban_list:
+            raise PWarning("Мем с таким названием нельзя создать")
+        
         if MemeModel.objects.filter(name=new_meme['name']).exists():
             raise PWarning("Мем с таким названием уже есть в базе")
 
