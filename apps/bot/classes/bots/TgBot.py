@@ -315,6 +315,7 @@ class TgBot(CommonBot):
         if tg_event['user_id'] < 0:
             self.send_message(tg_event['peer_id'], "Боты не могут общаться с Петровичем :(")
             return False
+        return True
 
     def _setup_event_after(self, tg_event, event):
         """
