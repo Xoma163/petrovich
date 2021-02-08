@@ -1,4 +1,3 @@
-from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import find_command_by_name, get_help_for_command
 
@@ -7,7 +6,8 @@ class Help(CommonCommand):
     def __init__(self):
         names = ["помощь", "хелп", "ман", "команды", "помоги", "памаги", "спаси", "хелб", "манул", "help", "start"]
         help_text = "Помощь - помощь по командам и боту"
-        super().__init__(names, help_text)
+        detail_help_text = "Очень смешно"
+        super().__init__(names, help_text, detail_help_text)
 
     def accept(self, event):
         # Самая первая кнопка клавы у бота
