@@ -148,10 +148,11 @@ class Codenames(CommonCommand):
             self.players_captains = self.players.filter(role='captain')
         elif self.event.from_user:
             self.player = CodenamesUser.objects.filter(user=self.event.sender).first()
-            chat = self.player.chat
-            self.session = CodenamesSession.objects.filter(chat=chat).first()
-            self.players = CodenamesUser.objects.filter(chat=chat)
-            self.players_captains = self.players.filter(role='captain')
+            if self.player:
+                chat = self.player.chat
+                self.session = CodenamesSession.objects.filter(chat=chat).first()
+                self.players = CodenamesUser.objects.filter(chat=chat)
+                self.players_captains = self.players.filter(role='captain')
 
     def start(self):
         with lock:

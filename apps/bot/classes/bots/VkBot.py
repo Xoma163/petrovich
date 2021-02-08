@@ -204,7 +204,7 @@ class VkBot(CommonBot):
         Нужен ли ответ пользователю
         """
         # Develop debug в одной конфе
-        if self.DEVELOP_DEBUG:
+        if self.DEVELOP_DEBUG and vk_event['chat_id']:
             from_test_chat = self.get_group_id(vk_event['chat_id']) == self.test_chat.chat_id
             from_me = str(vk_event['user_id']) == env.str('VK_ADMIN_ID')
             if not from_test_chat or not from_me:
