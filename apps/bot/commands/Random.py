@@ -3,13 +3,12 @@ from apps.bot.classes.common.CommonMethods import get_random_int
 
 
 class Random(CommonCommand):
-    def __init__(self):
-        names = ["рандом", "ранд", 'р', 'p']
-        help_text = "Рандом - рандомное число в заданном диапазоне"
-        detail_help_text = "Рандом - рандомное число в диапазоне[0:1]\n" \
-                           "Рандом N - рандомное число в заданном диапазоне[1:N]\n" \
-                           "Рандом N,M - рандомное число в заданном диапазоне[N:M]\n"
-        super().__init__(names, help_text, detail_help_text, int_args=[0, 1])
+    names = ["рандом", "ранд", 'р', 'p']
+    help_text = "Рандом - рандомное число в заданном диапазоне"
+    detail_help_text = "Рандом - рандомное число в диапазоне[0:1]\n" \
+                       "Рандом N - рандомное число в заданном диапазоне[1:N]\n" \
+                       "Рандом N,M - рандомное число в заданном диапазоне[N:M]\n"
+    int_args = [0, 1]
 
     def start(self):
         if self.event.args:

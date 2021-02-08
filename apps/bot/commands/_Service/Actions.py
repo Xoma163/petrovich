@@ -5,8 +5,8 @@ from petrovich.settings import env
 
 
 class Actions(CommonCommand):
-    def __init__(self):
-        super().__init__([None], priority=100)
+    names = None
+    priority = 100
 
     def accept(self, event):
         if event.action:

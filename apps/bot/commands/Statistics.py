@@ -7,12 +7,11 @@ from apps.service.models import Meme
 
 
 class Statistics(CommonCommand):
-    def __init__(self):
-        names = ["стата", "статистика"]
-        help_text = "Стата - статистика по победителям игр или по кол-ву созданных мемов"
-        detail_help_text = "Стата [модуль=все] - статистика по победителям игр или по кол-ву созданных мемов. Модули:\n" \
-                           "петрович, ставки, крестики, рулетка, коднеймс, мемы"
-        super().__init__(names, help_text, detail_help_text, conversation=True)
+    names = ["стата", "статистика"]
+    help_text = "Стата - статистика по победителям игр или по кол-ву созданных мемов"
+    detail_help_text = "Стата [модуль=все] - статистика по победителям игр или по кол-ву созданных мемов. Модули:\n" \
+                       "петрович, ставки, крестики, рулетка, коднеймс, мемы"
+    conversation = True
 
     def start(self):
         if not self.event.args:

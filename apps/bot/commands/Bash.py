@@ -5,11 +5,10 @@ MAX_QUOTES = 20
 
 
 class Bash(CommonCommand):
-    def __init__(self):
-        names = ["баш"]
-        help_text = "Баш - рандомная цитата с баша"
-        detail_help_text = "Баш [количество=5] - рандомная цитата с баша. Максимум 20 цитат"
-        super().__init__(names, help_text, detail_help_text, int_args=[0])
+    names = ["баш"]
+    help_text = "Баш - рандомная цитата с баша"
+    detail_help_text = "Баш [количество=5] - рандомная цитата с баша. Максимум 20 цитат"
+    int_args = [0]
 
     def start(self):
         quotes_count = 5

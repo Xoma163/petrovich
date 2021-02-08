@@ -3,10 +3,8 @@ from petrovich.settings import STATIC_DIR
 
 
 class Donate(CommonCommand):
-    def __init__(self):
-        names = ["донат"]
-        help_text = "Донат - ссылка на донат"
-        super().__init__(names, help_text)
+    names = ["донат"]
+    help_text = "Донат - ссылка на донат"
 
     def start(self):
         url = 'https://www.donationalerts.com/r/xoma163'

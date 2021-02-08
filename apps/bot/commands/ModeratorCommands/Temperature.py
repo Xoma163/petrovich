@@ -4,10 +4,9 @@ from apps.bot.classes.common.CommonCommand import CommonCommand
 
 
 class Temperature(CommonCommand):
-    def __init__(self):
-        names = ["температура", "темп", "t"]
-        help_text = "Температура - температуры сервера"
-        super().__init__(names, help_text, access=Role.MODERATOR)
+    names = ["температура", "темп", "t"]
+    help_text = "Температура - температуры сервера"
+    access = Role.MODERATOR
 
     def start(self):
         command = "sensors"

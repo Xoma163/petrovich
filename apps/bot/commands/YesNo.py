@@ -12,11 +12,10 @@ def get_bad_words():
 
 
 class YesNo(CommonCommand):
-    def __init__(self):
-        names = ["вопрос", "?"]
-        help_text = "...? - вернёт да или нет"
-        detail_help_text = "...? - вернёт да или нет. Для вызова команды просто в конце нужно написать знак вопроса"
-        super().__init__(names, help_text, detail_help_text, priority=80)
+    names = ["вопрос", "?"]
+    help_text = "...? - вернёт да или нет"
+    detail_help_text = "...? - вернёт да или нет. Для вызова команды просто в конце нужно написать знак вопроса"
+    priority = 80
 
     def accept(self, event):
         if event.clear_msg and event.clear_msg[-1] == '?':

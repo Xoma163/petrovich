@@ -2,9 +2,7 @@ from apps.bot.classes.common.CommonCommand import CommonCommand
 
 
 class StartLada(CommonCommand):
-    def __init__(self):
-        names = ["завести", "заведи"]
-        super().__init__(names)
+    names = ["завести", "заведи"]
 
     def start(self):
         if self.event.args:

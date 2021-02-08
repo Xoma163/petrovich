@@ -16,14 +16,14 @@ def check_int_arg(arg):
 
 # ToDo: Deprecated
 class Quotes(CommonCommand):
-    def __init__(self):
-        names = ["цитаты"]
-        help_text = "Цитаты - просмотр сохранённых цитат"
-        detail_help_text = "Цитаты [N[,M]] - просмотр сохранённых цитат. Возможные комбинации: \n" \
-                           "1) N - номер страницы;\n" \
-                           "2) N - фраза для поиска;\n" \
-                           "3) N - фраза для поиска M - номер страницы"
-        super().__init__(names, help_text, detail_help_text, platforms=[Platform.VK, Platform.TG], enabled=False)
+    names = ["цитаты"]
+    help_text = "Цитаты - просмотр сохранённых цитат"
+    detail_help_text = "Цитаты [N[,M]] - просмотр сохранённых цитат. Возможные комбинации: \n" \
+                       "1) N - номер страницы;\n" \
+                       "2) N - фраза для поиска;\n" \
+                       "3) N - фраза для поиска M - номер страницы"
+    platforms = [Platform.VK, Platform.TG]
+    enabled = False
 
     def start(self):
         text_filter = None

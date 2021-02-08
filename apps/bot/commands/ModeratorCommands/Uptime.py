@@ -4,10 +4,9 @@ from apps.bot.classes.common.CommonCommand import CommonCommand
 
 
 class Uptime(CommonCommand):
-    def __init__(self):
-        names = ["аптайм", "uptime"]
-        help_text = "Аптайм - аптайм сервера"
-        super().__init__(names, help_text, access=Role.MODERATOR)
+    names = ["аптайм", "uptime"]
+    help_text = "Аптайм - аптайм сервера"
+    access = Role.MODERATOR
 
     def start(self):
         command = "uptime"

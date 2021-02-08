@@ -5,11 +5,11 @@ from apps.bot.classes.common.CommonCommand import CommonCommand
 
 
 class DeBan(CommonCommand):
-    def __init__(self):
-        names = ["разбан", "дебан"]
-        help_text = "Разбан - разбан пользователя"
-        detail_help_text = "Разбан (N) - разбан пользователя, где N - имя, фамилия, логин/id, никнейм"
-        super().__init__(names, help_text, detail_help_text, access=Role.ADMIN, args=1)
+    names = ["разбан", "дебан"]
+    help_text = "Разбан - разбан пользователя"
+    detail_help_text = "Разбан (N) - разбан пользователя, где N - имя, фамилия, логин/id, никнейм"
+    access = Role.ADMIN
+    args = 1
 
     def start(self):
         user = self.bot.get_user_by_name(self.event.args, self.event.chat)

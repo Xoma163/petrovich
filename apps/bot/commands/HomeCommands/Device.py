@@ -14,12 +14,11 @@ TRUE_FALSE_TRANSLATOR_ON_OFF = {
 
 
 class Sensors(CommonCommand):
-    def __init__(self):
-        names = ["устройство"]
-        help_text = "Устройство - включает или выключает устройства в доме"
-        detail_help_text = "Устройство [комната = все] (устройство) (вкл/выкл) - управляет устройством в доме\n"
-
-        super().__init__(names, help_text, detail_help_text, access=Role.HOME, args=2)
+    names = ["устройство"]
+    help_text = "Устройство - включает или выключает устройства в доме"
+    detail_help_text = "Устройство [комната = все] (устройство) (вкл/выкл) - управляет устройством в доме\n"
+    access = Role.HOME
+    args = 2
 
     @staticmethod
     def set_device_state(device, state):
@@ -41,7 +40,7 @@ class Sensors(CommonCommand):
         if len(items) > 1:
             raise PWarning("Под поиск подходит 2 и более устройств")
         item = items[0]['items']
-        if len(item)>1:
+        if len(item) > 1:
             raise PWarning("Под поиск подходит 2 и более устройств")
         item = item[0]
         self.set_device_state(item, TRUE_FALSE_TRANSLATOR_ON_OFF[state])

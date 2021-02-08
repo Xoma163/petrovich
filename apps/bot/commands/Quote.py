@@ -7,12 +7,12 @@ from apps.service.models import QuoteBook
 
 # ToDo: Deprecated
 class Quote(CommonCommand):
-    def __init__(self):
-        names = ["цитата", "(c)", "(с)"]
-        help_text = "Цитата - сохраняет в цитатник сообщения"
-        detail_help_text = "Цитата (Пересылаемые сообщение) - сохраняет в цитатник сообщения"
-        super().__init__(names, help_text, detail_help_text, fwd=True, platforms=[Platform.VK, Platform.TG],
-                         enabled=False)
+    names = ["цитата", "(c)", "(с)"]
+    help_text = "Цитата - сохраняет в цитатник сообщения"
+    detail_help_text = "Цитата (Пересылаемые сообщение) - сохраняет в цитатник сообщения"
+    fwd = True
+    platforms = [Platform.VK, Platform.TG]
+    enabled = False
 
     def start(self):
         msgs = self.event.fwd

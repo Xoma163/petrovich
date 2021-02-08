@@ -7,15 +7,14 @@ from petrovich.settings import MAIN_SITE
 
 
 class Cat(CommonCommand):
-    def __init__(self):
-        names = ["кот"]
-        help_text = "Кот - присылает рандомного всратого кота"
-        detail_help_text = "Кот - присылает рандомного всратого кота\n\n" \
-                           "Для доверенных:\n" \
-                           "Кот (Изображения/Пересылаемое сообщение с изображениями) - добавляет кота в базу\n\n" \
-                           "Для админа:\n" \
-                           "Кот аватар - присылает нового кота для аватарки, которого ещё не было"
-        super().__init__(names, help_text, detail_help_text, platforms=[Platform.VK, Platform.TG])
+    names = ["кот"]
+    help_text = "Кот - присылает рандомного всратого кота"
+    detail_help_text = "Кот - присылает рандомного всратого кота\n\n" \
+                       "Для доверенных:\n" \
+                       "Кот (Изображения/Пересылаемое сообщение с изображениями) - добавляет кота в базу\n\n" \
+                       "Для админа:\n" \
+                       "Кот аватар - присылает нового кота для аватарки, которого ещё не было"
+    platforms = [Platform.VK, Platform.TG]
 
     def add_cat(self, cat_image):
         cat = CatModel(author=self.event.sender)

@@ -10,12 +10,11 @@ from apps.bot.classes.common.CommonMethods import check_command_time
 
 
 class Find(CommonCommand):
-    def __init__(self):
-        names = ["поиск", "найди", "найти", "ищи", "искать"]
-        help_text = "Поиск  - ищет информацию по картинкам"
-        detail_help_text = "Поиск (запрос) - ищет информацию по картинкам"
-
-        super().__init__(names, help_text, detail_help_text, args=1, platforms=[Platform.VK, Platform.TG])
+    names = ["поиск", "найди", "найти", "ищи", "искать"]
+    help_text = "Поиск  - ищет информацию по картинкам"
+    detail_help_text = "Поиск (запрос) - ищет информацию по картинкам"
+    args = 1
+    platforms = [Platform.VK, Platform.TG]
 
     def start(self):
         # В связи с тем, что парсим страницы

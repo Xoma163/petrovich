@@ -9,11 +9,11 @@ from petrovich.settings import TIME_ZONE
 
 
 class Where(CommonCommand):
-    def __init__(self):
-        names = ["где"]
-        help_text = "Где - информация о чекточках"
-        detail_help_text = "Где (N) - информация о чекточках, где N - имя, фамилия, логин/id, никнейм"
-        super().__init__(names, help_text, detail_help_text, args=1, access=Role.TRUSTED)
+    names = ["где"]
+    help_text = "Где - информация о чекточках"
+    detail_help_text = "Где (N) - информация о чекточках, где N - имя, фамилия, логин/id, никнейм"
+    args = 1
+    access = Role.TRUSTED
 
     def start(self):
 

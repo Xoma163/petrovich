@@ -5,12 +5,10 @@ from apps.bot.classes.common.CommonMethods import get_role_by_str
 
 
 class Commands(CommonCommand):
-    def __init__(self):
-        names = ["команды"]
-        help_text = "Команды - список всех команд"
-        detail_help_text = "Команды - список всех команд\n" \
-                           "Команды (название роли) - список команд для роли"
-        super().__init__(names, help_text, detail_help_text)
+    names = ["команды"]
+    help_text = "Команды - список всех команд"
+    detail_help_text = "Команды - список всех команд\n" \
+                       "Команды (название роли) - список команд для роли"
 
     def start(self):
         from apps.bot.initial import HELP_TEXTS

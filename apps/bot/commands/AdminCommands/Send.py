@@ -4,11 +4,10 @@ from apps.bot.classes.common.CommonCommand import CommonCommand
 
 
 class Control(CommonCommand):
-    def __init__(self):
-        names = ["отправить", "сообщение", "отправь"]
-        help_text = "Отправить - отправление сообщение в любую конфу"
-        detail_help_text = "Отправить (id чата/название чата) (сообщение)"
-        super().__init__(names, help_text, detail_help_text, access=Role.ADMIN, args=2)
+    names = ["отправить", "сообщение", "отправь"]
+    help_text = "Отправить - отправление сообщение в любую конфу"
+    detail_help_text = "Отправить (id чата/название чата) (сообщение)"
+    access = Role.ADMIN
 
     def start(self):
         msg_chat_name = self.event.args[0]

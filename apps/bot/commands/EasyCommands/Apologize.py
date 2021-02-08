@@ -7,10 +7,8 @@ from apps.bot.classes.common.CommonMethods import random_event, random_probabili
 
 # By E.Korsakov
 class Apologize(CommonCommand):
-    def __init__(self):
-        names = ["извинись", "извиняйся", "извинитесь"]
-
-        super().__init__(names, platforms=[Platform.VK, Platform.TG])
+    names = ["извинись", "извиняйся", "извинитесь"]
+    platforms = [Platform.VK, Platform.TG]
 
     def start(self):
         phrases = ["Извини", "Нет", "Сам извинись", "за что?", "КАВО", "Ты уверен?"]

@@ -8,14 +8,13 @@ from apps.service.models import City, Service
 
 
 class Weather(CommonCommand):
-    def __init__(self):
-        names = ["погода"]
-        help_text = "Погода - прогноз погоды"
-        detail_help_text = "Погода [город=из профиля] - прогноз погоды\n" \
-                           "Погода [город=из профиля] изм/изменения - изменения погоды по сравнению со вчерашним днём. " \
-                           "Работает не для всех городов"
-        keyboard = {'text': 'Погода', 'color': 'blue', 'row': 1, 'col': 1}
-        super().__init__(names, help_text, detail_help_text, keyboard=keyboard)
+    names = ["погода"]
+    help_text = "Погода - прогноз погоды"
+    detail_help_text = \
+        "Погода [город=из профиля] - прогноз погоды\n" \
+        "Погода [город=из профиля] изм/изменения - изменения погоды по сравнению со вчерашним днём. " \
+        "Работает не для всех городов"
+    keyboard = {'text': 'Погода', 'color': 'blue', 'row': 1, 'col': 1}
 
     def start(self):
         changes = False

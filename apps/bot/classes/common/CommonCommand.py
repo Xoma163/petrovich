@@ -7,65 +7,33 @@ from petrovich.settings import env
 
 
 class CommonCommand:
-    """
-    names: Имена команды,
-    help_text: Текст в /команды,
-    detail_help_text: Текст в детальной помощи по команде /помощь (название команды),
-    keyboard: Клавиатура для команды /клава
-    access: Необходимые права для выполнения команды
-    pm: Должно ли сообщение обрабатываться только в лс
-    conversation: Должно ли сообщение обрабатываться только в конфе
-    fwd: Должно ли сообщение обрабатываться только с пересланными сообщениями
-    args: Должно ли сообщение обрабатываться только с заданным количеством аргументов
-    int_args: Список аргументов, которые должны быть целым числом
-    float_args: Список аргументов, которые должны быть числом
-    platforms: Список платформ, которые могут обрабатывать команду
-    attachments: Должно ли сообщение обрабатываться только с вложениями
-    enabled: Включена ли команда
-    priority: Приоритет обработки команды
-    city: Должно ли сообщение обрабатываться только с заданным городом у пользователя
-    suggest_for_similar: предлагать ли команду в выдаче похожих команд при ошибке пользователя в вводе
-    """
+    names: list or str = None  # Имена команды,
+    help_text: str = None  # Текст в /команды
+    detail_help_text: str = None  # Текст в детальной помощи по команде /помощь (название команды)
+    keyboard = None  # Клавиатура для команды /клава
+    access: Role = Role.USER  # Необходимые права для выполнения команды
+    pm: bool = False  # Должно ли сообщение обрабатываться только в лс
+    conversation: bool = False  # Должно ли сообщение обрабатываться только в конфе
+    fwd: bool = False  # Должно ли сообщение обрабатываться только с пересланными сообщениями
+    args: int = None  # Должно ли сообщение обрабатываться только с заданным количеством аргументов
+    int_args: list = None  # Список аргументов, которые должны быть целым числом
+    float_args: list = None  # Список аргументов, которые должны быть числом
+    platforms: list or Platform = [Platform.VK, Platform.TG,
+                                   Platform.API]  # Список платформ, которые могут обрабатывать команду
+    attachments: list = []  # Должно ли сообщение обрабатываться только с вложениями
+    enabled: bool = True  # Включена ли команда
+    priority: int = 0  # Приоритет обработки команды
+    city: bool = False  # Должно ли сообщение обрабатываться только с заданным городом у пользователя
+    suggest_for_similar: bool = True  # предлагать ли команду в выдаче похожих команд при ошибке пользователя в вводе
 
-    def __init__(self,
-                 names: list,
-                 help_text: str = None,
-                 detail_help_text: str = None,
-                 keyboard=None,
-                 access: Role = None,
-                 pm: bool = False,
-                 conversation: bool = False,
-                 fwd: bool = False,
-                 args: int = None,
-                 int_args: list = None,
-                 float_args: list = None,
-                 platforms: list = None,
-                 attachments: list = False,
-                 enabled: bool = True,
-                 priority: int = 0,
-                 city: bool = False,
-                 suggest_for_similar: bool = True,
-                 ):
-        self.names = names
-        self.help_text = help_text
-        self.detail_help_text = detail_help_text
-        self.keyboard = keyboard
-        self.access = access or Role.USER
-        self.pm = pm
-        self.conversation = conversation
-        self.fwd = fwd
-        self.args = args
-        self.int_args = int_args
-        self.float_args = float_args
-        self.platforms = platforms or [Platform.VK, Platform.TG, Platform.API]
-        self.attachments = attachments
-        self.enabled = enabled
-        self.priority = priority
-        self.city = city
-        self.suggest_for_similar = suggest_for_similar
-
+    def __init__(self):
         self.bot = None
         self.event = None
+
+        if not isinstance(self.names, list):
+            self.names = [self.names]
+        if not isinstance(self.platforms, list):
+            self.platforms = [self.platforms]
 
     def accept(self, event: Event):
         """

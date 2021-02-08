@@ -10,12 +10,12 @@ lock = Lock()
 
 
 class Rate(CommonCommand):
-    def __init__(self):
-        names = ["ставка"]
-        help_text = "Ставка - игра, определяющая, кто ближе угадал загаданное число"
-        detail_help_text = "Ставка [ставка=рандом] - делает ставку"
-        super().__init__(names, help_text, detail_help_text, int_args=[0], conversation=True,
-                         platforms=[Platform.VK, Platform.TG])
+    names = ["ставка"]
+    help_text = "Ставка - игра, определяющая, кто ближе угадал загаданное число"
+    detail_help_text = "Ставка [ставка=рандом] - делает ставку"
+    int_args = [0]
+    conversation = True
+    platforms = [Platform.VK, Platform.TG]
 
     def start(self):
         with lock:
@@ -36,8 +36,8 @@ class Rate(CommonCommand):
 
             if len(existed_rate) > 0:
                 raise PWarning(f"Ставка уже поставлена\n"
-                                     f"Игроки {len(rates_gamers)}/{min_gamers}:\n"
-                                     f"{rate_gamer_str}")
+                               f"Игроки {len(rates_gamers)}/{min_gamers}:\n"
+                               f"{rate_gamer_str}")
             if self.event.args:
                 random = False
                 arg = self.event.args[0]

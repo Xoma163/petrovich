@@ -4,12 +4,11 @@ from apps.bot.classes.common.CommonCommand import CommonCommand
 
 
 class Restart(CommonCommand):
-    def __init__(self):
-        names = ["рестарт", "ребут"]
-        help_text = "Рестарт - перезагружает бота или веб на сервере, либо сам сервер"
-        detail_help_text = "Рестарт [сервис=бот] - перезагружает сервис\n" \
-                           "Сервис - бот/веб/сервер"
-        super().__init__(names, help_text, detail_help_text, access=Role.ADMIN)
+    names = ["рестарт", "ребут"]
+    help_text = "Рестарт - перезагружает бота или веб на сервере, либо сам сервер"
+    detail_help_text = "Рестарт [сервис=бот] - перезагружает сервис\n" \
+                       "Сервис - бот/веб/сервер"
+    access = Role.ADMIN
 
     def start(self):
         if self.event.args:

@@ -24,12 +24,12 @@ class NothingLogger(object):
 
 
 class Music(CommonCommand):
-    def __init__(self):
-        names = ["музыка"]
-        help_text = "Музыка - скачивает аудиодорожку из YouTube и присылает её в виде аудио"
-        detail_help_text = "Музыка (ссылка на видео youtube) - скачивает аудиодорожку из YouTube и присылает её в " \
-                           "виде аудио. Продолжительность видео максимум 10 минут"
-        super().__init__(names, help_text, detail_help_text, args=1, platforms=[Platform.VK])
+    names = ["музыка"]
+    help_text = "Музыка - скачивает аудиодорожку из YouTube и присылает её в виде аудио"
+    detail_help_text = "Музыка (ссылка на видео youtube) - скачивает аудиодорожку из YouTube и присылает её в " \
+                       "виде аудио. Продолжительность видео максимум 10 минут"
+    args = 1
+    platforms = [Platform.VK]
 
     def start(self):
         self.bot.set_activity(self.event.peer_id, 'audiomessage')
@@ -79,7 +79,7 @@ class Music(CommonCommand):
         response = requests.get(audio_link)
         if response.status_code == 403:
             raise PWarning("Нет доступа к ссылке, не могу скачать((\n"
-                                 "Пока сам не понял как решить эту проблему, думаю над этим")
+                           "Пока сам не понял как решить эту проблему, думаю над этим")
         i = io.BytesIO(response.content)
         i.seek(0)
         o = io.BytesIO()

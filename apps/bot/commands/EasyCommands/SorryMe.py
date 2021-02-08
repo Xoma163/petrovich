@@ -2,9 +2,7 @@ from apps.bot.classes.common.CommonCommand import CommonCommand
 
 
 class SorryMe(CommonCommand):
-    def __init__(self):
-        names = ['извиниться']
-        super().__init__(names)
+    names = ['извиниться']
 
     def start(self):
         return f"{self.event.sender} извиняется перед всеми"

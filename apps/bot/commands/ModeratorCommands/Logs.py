@@ -68,16 +68,15 @@ def get_bot_logs(command):
 
 
 class Logs(CommonCommand):
-    def __init__(self):
-        names = ["логи", "лог"]
-        help_text = "Логи - логи бота или сервера"
-        detail_help_text = "Логи [сервис=бот] [кол-во строк=50] - логи. \n" \
-                           "Сервис - бот/сервер. Макс 1000 строк.\n" \
-                           "Логи бд [кол-во записей = 1] - последний лог с трейсбеком.\n" \
-                           "Макс 5 записей"
-        keyboard = {'for': Role.MODERATOR, 'text': 'Логи', 'color': 'blue', 'row': 1, 'col': 1}
-        super().__init__(names, help_text, detail_help_text, access=Role.MODERATOR, keyboard=keyboard,
-                         platforms=[Platform.VK, Platform.TG])
+    names = ["логи", "лог"]
+    help_text = "Логи - логи бота или сервера"
+    detail_help_text = "Логи [сервис=бот] [кол-во строк=50] - логи. \n" \
+                       "Сервис - бот/сервер. Макс 1000 строк.\n" \
+                       "Логи бд [кол-во записей = 1] - последний лог с трейсбеком.\n" \
+                       "Макс 5 записей"
+    keyboard = {'for': Role.MODERATOR, 'text': 'Логи', 'color': 'blue', 'row': 1, 'col': 1}
+    access = Role.MODERATOR
+    platforms = [Platform.VK, Platform.TG]
 
     def start(self):
         arg0 = None

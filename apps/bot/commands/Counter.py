@@ -5,11 +5,11 @@ from apps.service.models import Counter as CounterModel
 
 # ToDo: Deprecated
 class Counter(CommonCommand):
-    def __init__(self):
-        names = ["счётчик", "счетчик", "счёт", "счет"]
-        help_text = "Счётчик - счётчик события"
-        detail_help_text = "Счётчик (событие) - счётчик события. Инкремент"
-        super().__init__(names, help_text, detail_help_text, args=1, enabled=False)
+    names = ["счётчик", "счетчик", "счёт", "счет"]
+    help_text = "Счётчик - счётчик события"
+    detail_help_text = "Счётчик (событие) - счётчик события. Инкремент"
+    enabled = False
+    args = 1
 
     def start(self):
         name = self.event.original_args.capitalize()

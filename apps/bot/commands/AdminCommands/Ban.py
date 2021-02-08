@@ -6,11 +6,11 @@ from apps.bot.classes.common.CommonCommand import CommonCommand
 
 
 class Ban(CommonCommand):
-    def __init__(self):
-        names = ["бан"]
-        help_text = "Бан - бан пользователя"
-        detail_help_text = "Бан (N) - бан пользователя, где N - имя, фамилия, логин/id, никнейм"
-        super().__init__(names, help_text, detail_help_text, access=Role.ADMIN, args=1)
+    names = ["бан"]
+    help_text = "Бан - бан пользователя"
+    detail_help_text = "Бан (N) - бан пользователя, где N - имя, фамилия, логин/id, никнейм"
+    access = Role.ADMIN
+    args = 1
 
     def start(self):
         user = self.bot.get_user_by_name(self.event.args, self.event.chat)

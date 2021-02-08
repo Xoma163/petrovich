@@ -9,17 +9,13 @@ cameraHandler = CameraHandler()
 
 
 class Start(CommonCommand):
-    def __init__(self):
-        names = ["старт"]
-        help_text = "Старт - возобновляет работу бота или модуля"
-        detail_help_text = "Старт [сервис=бот [версия]] - стартует сервис\n" \
-                           "Сервис - бот/камера/майнкрафт/террария\n" \
-                           "Если майнкрафт, то может быть указана версия, 1.12.2\n" \
-                           "Если агарио, то может быть указана версия, 1, 2, 3\n"
-
-        # keyboard = [{'for': Role.ADMIN, 'text': 'Старт', 'color': 'green', 'row': 1, 'col': 1},
-        #             {'for': Role.ADMIN, 'text': 'Старт камера', 'color': 'green', 'row': 1, 'col': 3}]
-        super().__init__(names, help_text, detail_help_text, access=Role.TRUSTED)
+    names = ["старт"]
+    help_text = "Старт - возобновляет работу бота или модуля"
+    detail_help_text = "Старт [сервис=бот [версия]] - стартует сервис\n" \
+                       "Сервис - бот/камера/майнкрафт/террария\n" \
+                       "Если майнкрафт, то может быть указана версия, 1.12.2\n" \
+                       "Если агарио, то может быть указана версия, 1, 2, 3\n"
+    access = Role.TRUSTED
 
     def start(self):
         if self.event.args:

@@ -15,13 +15,13 @@ lock = Lock()
 
 
 class Petrovich(CommonCommand):
-    def __init__(self):
-        names = ["петрович", 'петровна']
-        help_text = "Петрович - мини-игра, определяющая кто Петрович Дня"
-        detail_help_text = "Петрович - мини-игра, определяющая кто Петрович дня\n" \
-                           "Петрович рег - регистрация в игре\n" \
-                           "Петрович дерег - дерегистрация в игре"
-        super().__init__(names, help_text, detail_help_text, conversation=True, platforms=[Platform.VK, Platform.TG])
+    names = ["петрович", 'петровна']
+    help_text = "Петрович - мини-игра, определяющая кто Петрович Дня"
+    detail_help_text = "Петрович - мини-игра, определяющая кто Петрович дня\n" \
+                       "Петрович рег - регистрация в игре\n" \
+                       "Петрович дерег - дерегистрация в игре"
+    conversation = True
+    platforms = [Platform.VK, Platform.TG]
 
     def start(self):
         if self.event.args:

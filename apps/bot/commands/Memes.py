@@ -16,13 +16,10 @@ def get_memes_names(memes, sender):
 
 
 class Memes(CommonCommand):
-    def __init__(self):
-        names = ["мемы"]
-        help_text = "Мемы - список мемов"
-        detail_help_text = "Мемы [страница=1] - присылает список мемов на странице\n" \
-                           "Мемы (поисковая фраза) - присылает список мемов, подходящих поисковому запросу\n\n"
-
-        super().__init__(names, help_text, detail_help_text)
+    names = ["мемы"]
+    help_text = "Мемы - список мемов"
+    detail_help_text = "Мемы [страница=1] - присылает список мемов на странице\n" \
+                       "Мемы (поисковая фраза) - присылает список мемов, подходящих поисковому запросу\n\n"
 
     def start(self):
         try:

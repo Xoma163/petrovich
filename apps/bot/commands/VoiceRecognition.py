@@ -41,14 +41,14 @@ def have_audio_message(event):
 
 # ToDo: TG вложения
 class VoiceRecognition(CommonCommand):
-    def __init__(self):
-        names = ["распознай", "голос", "голосовое"]
-        help_text = "Распознай - распознаёт голосовое сообщение"
-        detail_help_text = "Распознай (Пересланное сообщение с голосовым сообщением) - распознаёт голосовое " \
-                           "сообщение\n" \
-                           "Если дан доступ к переписке, то распознает автоматически"
-        super().__init__(names, help_text, detail_help_text, platforms=[Platform.VK], attachments=['audio_message'],
-                         priority=-100)
+    names = ["распознай", "голос", "голосовое"]
+    help_text = "Распознай - распознаёт голосовое сообщение"
+    detail_help_text = "Распознай (Пересланное сообщение с голосовым сообщением) - распознаёт голосовое " \
+                       "сообщение\n" \
+                       "Если дан доступ к переписке, то распознает автоматически"
+    platforms = [Platform.VK]
+    attachments = ['audio_message']
+    priority = -100
 
     def accept(self, event):
         if have_audio_message(event):

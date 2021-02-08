@@ -11,12 +11,12 @@ from apps.bot.classes.common.CommonMethods import get_attachments_from_attachmen
 
 
 class Demotivator(CommonCommand):
-    def __init__(self):
-        names = ["демотиватор"]
-        help_text = "Демотиватор - создаёт демотиватор"
-        detail_help_text = "Демотиватор (Изображения/Пересылаемое сообщение с изображением) (большой текст)[;маленький текст] - создаёт демотиватор. \n" \
-                           "Разделитель текста ;"
-        super().__init__(names, help_text, detail_help_text, args=1, attachments=['photo'])
+    names = ["демотиватор"]
+    help_text = "Демотиватор - создаёт демотиватор"
+    detail_help_text = "Демотиватор (Изображения/Пересылаемое сообщение с изображением) (большой текст)[;маленький текст] - создаёт демотиватор. \n" \
+                       "Разделитель текста ;"
+    args = 1
+    attachments = ['photo']
 
     def start(self):
         image = get_attachments_from_attachments_or_fwd(self.event, 'photo')[0]

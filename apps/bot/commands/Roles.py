@@ -11,13 +11,10 @@ def get_roles(user):
 
 
 class Roles(CommonCommand):
-    def __init__(self):
-        names = ["роли"]
-        help_text = "Роли - присылает список ваших ролей"
-        detail_help_text = "Роли - присылает ваши роли\n" \
-                           "Роли [N] - роли пользователя в беседе. N - имя, фамилия, логин/id, никнейм"
-
-        super().__init__(names, help_text, detail_help_text)
+    names = ["роли"]
+    help_text = "Роли - присылает список ваших ролей"
+    detail_help_text = "Роли - присылает ваши роли\n" \
+                       "Роли [N] - роли пользователя в беседе. N - имя, фамилия, логин/id, никнейм"
 
     def start(self):
 

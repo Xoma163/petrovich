@@ -5,13 +5,12 @@ from apps.bot.management.commands.start import camera_handler
 
 
 class Birds(CommonCommand):
-    def __init__(self):
-        names = ["с", "c", "камера"]
-        help_text = "Камера - ссылка и гифка с камеры"
-        detail_help_text = "Камера [кол-во кадров=20] - ссылка и гифка с камеры. Максимум 200 кадров"
-
-        super().__init__(names, help_text, detail_help_text, int_args=[0], access=Role.TRUSTED,
-                         platforms=[Platform.VK, Platform.TG])
+    names = ["с", "c", "камера"]
+    help_text = "Камера - ссылка и гифка с камеры"
+    detail_help_text = "Камера [кол-во кадров=20] - ссылка и гифка с камеры. Максимум 200 кадров"
+    int_args = [0]
+    access = Role.TRUSTED
+    platforms = [Platform.VK, Platform.TG]
 
     def start(self):
         self.bot.set_activity(self.event.peer_id)

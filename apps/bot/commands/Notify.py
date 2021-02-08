@@ -43,12 +43,14 @@ def get_time(arg1, arg2, timezone=None):
 
 # ToDo: TG вложения
 class Notify(CommonCommand):
-    def __init__(self):
-        names = ["напомни", "напомнить", "оповещение", "оповести"]
-        help_text = "Напомни - напоминает о чём-либо"
-        detail_help_text = "Напомни (дата/дата и время/день недели) (сообщение/команда) [Прикреплённые вложения] - добавляет напоминание\n" \
-                           "Максимум можно добавить 5 напоминаний"
-        super().__init__(names, help_text, detail_help_text, args=2, platforms=[Platform.VK, Platform.TG], city=True)
+    names = ["напомни", "напомнить", "оповещение", "оповести"]
+    help_text = "Напомни - напоминает о чём-либо"
+    detail_help_text = \
+        "Напомни (дата/дата и время/день недели) (сообщение/команда) [Прикреплённые вложения] - добавляет напоминание\n" \
+        "Максимум можно добавить 5 напоминаний"
+    args = 2
+    platforms = [Platform.VK, Platform.TG]
+    city = True
 
     def start(self):
         if not self.event.sender.check_role(Role.TRUSTED) and \

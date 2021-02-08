@@ -7,12 +7,11 @@ from apps.service.models import Service
 
 
 class Stream(CommonCommand):
-    def __init__(self):
-        names = ["стрим", "поток"]
-        help_text = "Стрим - ссылка на стрим"
-        detail_help_text = "Стрим - ссылка на стрим\n" \
-                           "Стрим [новая ссылка] - меняет ссылку на стрим. Требуются права модератора"
-        super().__init__(names, help_text, detail_help_text, access=Role.TRUSTED)
+    names = ["стрим", "поток"]
+    help_text = "Стрим - ссылка на стрим"
+    detail_help_text = "Стрим - ссылка на стрим\n" \
+                       "Стрим [новая ссылка] - меняет ссылку на стрим. Требуются права модератора"
+    access = Role.TRUSTED
 
     def start(self):
         if self.event.args is None:

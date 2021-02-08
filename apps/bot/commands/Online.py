@@ -3,10 +3,10 @@ from apps.bot.classes.common.CommonCommand import CommonCommand
 
 
 class Online(CommonCommand):
-    def __init__(self):
-        names = ["онлайн"]
-        help_text = "Онлайн - присылает список пользователей онлайн в конфе"
-        super().__init__(names, help_text, conversation=True, platforms=[Platform.VK])
+    names = ["онлайн"]
+    help_text = "Онлайн - присылает список пользователей онлайн в конфе"
+    conversation = True
+    platforms = [Platform.VK]
 
     def start(self):
         users = sorted(self.bot.get_conference_users(self.event.chat.chat_id), key=lambda x: x['first_name'])

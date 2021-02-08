@@ -51,13 +51,12 @@ def draw_on_images(image, faces):
 
 
 class Age(CommonCommand):
-    def __init__(self):
-        names = ["возраст"]
-        help_text = "Возраст - оценить возраст людей на фотографии"
-        detail_help_text = "Возраст (Изображения/Пересылаемое сообщение с изображением) - оценивает возраст людей на " \
-                           "фотографии"
-        super().__init__(names, help_text, detail_help_text, platforms=[Platform.VK, Platform.TG],
-                         attachments=['photo'])
+    names = ["возраст"]
+    help_text = "Возраст - оценить возраст людей на фотографии"
+    detail_help_text = "Возраст (Изображения/Пересылаемое сообщение с изображением) - оценивает возраст людей на " \
+                       "фотографии"
+    platforms = [Platform.VK, Platform.TG]
+    attachments = ['photo']
 
     def start(self):
         image = get_attachments_from_attachments_or_fwd(self.event, 'photo')[0]

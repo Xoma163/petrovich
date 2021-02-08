@@ -6,14 +6,14 @@ from apps.timetable.models import Group, Lesson
 
 
 class TimeTable(CommonCommand):
-    def __init__(self):
-        names = ["расписание", "расп"]
-        help_text = "Расписание - присылает расписание в конфах с расписанием"
-        detail_help_text = "Расписание [номер недели=текущая]- присылает расписание на текущую неделю\n" \
-                           "Расписание (день недели) [номер недели=текущая] - присылает расписание на день. " \
-                           "Если указать номер недели, то на конкретную неделю"
-        super().__init__(names, help_text, detail_help_text, platforms=[Platform.VK], conversation=True,
-                         access=Role.STUDENT)
+    names = ["расписание", "расп"]
+    help_text = "Расписание - присылает расписание в конфах с расписанием"
+    detail_help_text = "Расписание [номер недели=текущая]- присылает расписание на текущую неделю\n" \
+                       "Расписание (день недели) [номер недели=текущая] - присылает расписание на день. " \
+                       "Если указать номер недели, то на конкретную неделю"
+    platforms = Platform.VK
+    conversation = True
+    access = Role.STUDENT
 
     def start(self):
         group = Group.objects.filter(conference=self.event.chat).first()
