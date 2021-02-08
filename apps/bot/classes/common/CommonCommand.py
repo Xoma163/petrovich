@@ -101,12 +101,15 @@ class CommonCommand:
                 if self.event.platform == Platform.VK:
                     if self.event.sender.user_id == env.str("VK_ADMIN_ID"):
                         return True
+                    else:
+                        print("Попытка доступа под админом не с моего id O_o")
+                        raise PError("Э ты чё, ты не админ. Где мой админ???")
                 elif self.event.platform == Platform.TG:
                     if self.event.sender.user_id == env.str("TG_ADMIN_ID"):
                         return True
-                else:
-                    print("Попытка доступа под админом не с моего id O_o")
-                    raise PError("Э ты чё, ты не админ. Где мой админ???")
+                    else:
+                        print("Попытка доступа под админом не с моего id O_o")
+                        raise PError("Э ты чё, ты не админ. Где мой админ???")
             else:
                 return True
         if role == Role.CONFERENCE_ADMIN:
