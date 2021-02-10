@@ -1,6 +1,5 @@
 from django.contrib.auth.models import Group
 
-# ToDo: menu
 from apps.bot.classes.Consts import ON_OFF_TRANSLATOR, Role, TRUE_FALSE_TRANSLATOR
 from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.common.CommonCommand import CommonCommand

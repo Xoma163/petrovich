@@ -5,7 +5,6 @@ from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import get_attachments_from_attachments_or_fwd
 
 
-# ToDo: remake in Pillow
 def draw_on_images(image, faces):
     import requests
     import numpy as np

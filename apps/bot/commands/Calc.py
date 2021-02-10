@@ -30,7 +30,6 @@ class Calc(CommonCommand):
         # .replace('m', "000000") \
         # .replace('м', "000000")
 
-        # ToDo: пофиксить баг с низкой скоростью подсчёта
         operations = ['-', '+', '*', '/', '^']
         operations_count = 0
         for operation in operations:

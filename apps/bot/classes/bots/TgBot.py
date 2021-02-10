@@ -194,7 +194,6 @@ class TgBot(CommonBot):
         """
         attachments = []
         if 'media_group_id' in event:
-            # ToDo: для 2+ вложений, но зачем?
             pass
         if 'photo' in event['message']:
             # ToDo: ебучая телега шлёт хуй пойми как картинки

@@ -78,7 +78,6 @@ class Counter(models.Model):
         return self.name
 
 
-# ToDo: переделать на requests
 def get_image_from_url(url):
     if url:
         ext = url.split('.')[-1].split('?')[0]

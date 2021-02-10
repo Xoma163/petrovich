@@ -44,7 +44,6 @@ def get_another_position(author, where):
     return msg
 
 
-# ToDo собрать в одно место все проверки
 def where_is_me(request):
     log = MovementLog()
 

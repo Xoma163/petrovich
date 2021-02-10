@@ -75,7 +75,7 @@ class TicTacToe(CommonCommand):
                 if waiting_session:
                     # То стартуем игру
                     self.start_game(waiting_session)
-                    return
+                    return f"Начинаем игру против {waiting_session.user1}"
                 # Никаких свободных сессий нет - создаём новую
                 else:
                     TicTacToeSession(user1=sender).save()

@@ -5,6 +5,7 @@ from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import get_random_int
 from apps.games.models import Rate as RateModel
+from petrovich.settings import STATIC_DIR
 
 lock = Lock()
 
@@ -57,8 +58,8 @@ class Rates(CommonCommand):
 
             if self.event.command == "казино":
                 attachments = []
-                photo = self.bot.get_attachment_by_id('photo', None, 457241180)
-                attachments.append(photo)
+                attachment = self.bot.upload_photos(f"{STATIC_DIR}/bot/img/rate.jpg")
+                attachments.append(attachment)
                 if len(winners) == 1:
                     msg = {'msg': f"Выпавшее число - {rnd}\nПобедитель этого казино:\n{winners_str}",
                            'attachments': attachments}
