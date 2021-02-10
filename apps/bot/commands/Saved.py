@@ -14,6 +14,6 @@ class Saved(CommonCommand):
         attachments = get_attachments_from_attachments_or_fwd(self.event, 'photo')
         if len(attachments) == 0:
             raise PWarning("Не нашёл в сообщении фотографий")
-        attachments_url = [attachment['download_url'] for attachment in attachments]
+        attachments_url = [attachment['private_download_url'] for attachment in attachments]
         attachments = self.bot.upload_photos(attachments_url)
         return {'attachments': attachments}

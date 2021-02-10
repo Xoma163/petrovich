@@ -238,15 +238,14 @@ class TgBot(CommonBot):
             'message': {
                 'id': event['message']['message_id'],
                 'text': event['message'].get('text', None) or event['message'].get('caption', None) or "",
-                # 'payload': event.message.payload,
                 'attachments': [],
                 'action': None,
                 'payload': event.get('data', None),
                 'fwd': event['message'].get('forward_from', None)
             },
             'fwd': None,
-
         }
+
 
         if 'new_chat_members' in event['message']:
             tg_event['message']['action'] = {
@@ -297,6 +296,11 @@ class TgBot(CommonBot):
             if event['message']['reply_to_message']['from']['is_bot']:
                 tg_event['fwd'][0]['from_id'] *= -1
         tg_event['message']['attachments'] = self._setup_event_attachments(event)
+
+        if tg_event['message']['payload']:
+            tg_event['message']['text'] = ""
+            tg_event['message']['attachments'] = None
+
         return tg_event
 
     def need_a_response(self, tg_event):

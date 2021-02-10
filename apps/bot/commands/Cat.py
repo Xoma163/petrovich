@@ -18,7 +18,7 @@ class Cat(CommonCommand):
 
     def add_cat(self, cat_image):
         cat = CatModel(author=self.event.sender)
-        cat.save_remote_image(cat_image['download_url'])
+        cat.save_remote_image(cat_image['private_download_url'])
         cat.save()
         return MAIN_SITE + cat.image.url
 

@@ -60,7 +60,7 @@ class Age(CommonCommand):
     def start(self):
         image = get_attachments_from_attachments_or_fwd(self.event, 'photo')[0]
         everypixel_api = EveryPixelAPI()
-        image = image['download_url'] or image['content']
+        image = image['private_download_url'] or image['content']
         faces = everypixel_api.get_faces_on_photo(image)
 
         if len(faces) == 0:

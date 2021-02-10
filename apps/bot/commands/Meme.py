@@ -96,7 +96,7 @@ class Meme(CommonCommand):
         if attachment['type'] == 'video' or attachment['type'] == 'audio':
             new_meme['link'] = attachment['url']
         elif attachment['type'] == 'photo':  # or attachment['type'] == 'doc':
-            new_meme['link'] = attachment['download_url']
+            new_meme['link'] = attachment['private_download_url']
         else:
             raise PError("Невозможно")
 
@@ -128,7 +128,7 @@ class Meme(CommonCommand):
         if attachment['type'] == 'video' or attachment['type'] == 'audio':
             new_meme_link = attachment['url']
         elif attachment['type'] == 'photo':  # or attachment['type'] == 'doc':
-            new_meme_link = attachment['download_url']
+            new_meme_link = attachment['private_download_url']
         else:
             raise PError("Невозможно")
 

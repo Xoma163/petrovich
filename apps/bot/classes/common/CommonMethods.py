@@ -113,7 +113,7 @@ def get_attachments_for_upload(vk_bot, attachments):
     for attachment in attachments:
         # Фото
         if attachment['type'] == 'photo':
-            new_attachment = vk_bot.upload_photos(attachment['download_url'])
+            new_attachment = vk_bot.upload_photos(attachment['private_download_url'])
             uploaded_attachments.append(new_attachment[0])
         # Видео, аудио, документы
         elif 'vk_url' in attachment:
