@@ -36,11 +36,18 @@
         ></DeliveryCalculatorUser>
       </div>
     </div>
+
     <div class="buttons flex-end">
       <a class="cursor-pointer btn btn-success"
          @click="addUser"
 
       >Добавить</a>
+    </div>
+    <div class="total" v-if="sumPrice!==0">
+      <div> Общая сумма заказа - {{ sumPrice }}</div>
+      <div v-if="discount !==0"> Общая сумма заказа со скидкой - {{ sumPriceDiscount }}</div>
+      <div v-if="deliveryCost!==0"> Общая сумма заказа с доставкой - {{ sumPriceDelivery }}</div>
+      <div v-if="deliveryCost!==0 && discount !==0"> Общая сумма заказа со скидкой и с доставкой - {{ sumPriceDiscountDelivery}}</div>
     </div>
   </main>
 </template>
@@ -68,7 +75,6 @@ export default {
       this.id += 1;
     },
     deleteUser: function (user) {
-      console.log(user.id)
       for (let i = 0; i < this.users.length; i += 1) {
         if (this.users[i].id === user.id) {
           this.users.splice(i, 1);
@@ -77,7 +83,6 @@ export default {
       }
     },
     updatePrice: function (user) {
-      console.log('updatePrice')
       for (let i = 0; i < this.users.length; i += 1) {
         if (this.users[i].id === user.id) {
           this.users[i].price = user.price;
@@ -94,7 +99,17 @@ export default {
         sum += this.users[i].price;
       }
       return sum;
-    }
+    },
+    sumPriceDiscount: function () {
+      return Math.round(this.sumPrice * (100 - this.discount) / 100 * 100) / 100
+    },
+    sumPriceDelivery: function () {
+      return this.sumPrice + this.deliveryCost
+    },
+    sumPriceDiscountDelivery: function () {
+      return Math.round((this.sumPrice * (100 - this.discount) / 100 + this.deliveryCost) * 100) / 100
+    },
+
   },
   watch: {
     discount: function (val) {
