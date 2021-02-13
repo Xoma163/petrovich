@@ -11,7 +11,6 @@ from apps.bot.models import Users, Chat, Bot
 class YandexBot(CommonBot):
     def __init__(self):
         CommonBot.__init__(self, Platform.YANDEX)
-        pass
 
     def set_activity(self, peer_id, activity='typing'):
         """
