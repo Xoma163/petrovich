@@ -249,19 +249,22 @@ class VkBot(CommonBot):
         Получение новых событий и их обработка
         """
         for event in self.longpoll.listen():
-            try:
-                # Если пришло новое сообщение
-                if event.type == VkBotEventType.MESSAGE_NEW:
-                    vk_event = self._setup_event_before(event)
-                    if not self.need_a_response(vk_event):
-                        continue
-                    vk_event = self._setup_event_after(vk_event, event)
-                    vk_event_object = VkEvent(vk_event)
-                    threading.Thread(target=self.menu, args=(vk_event_object,)).start()
-            except Exception as e:
-                print(str(e))
-                tb = traceback.format_exc()
-                print(tb)
+            self.parse(event)
+
+    def parse(self, event):
+        try:
+            # Если пришло новое сообщение
+            if event.type == VkBotEventType.MESSAGE_NEW:
+                vk_event = self._setup_event_before(event)
+                if not self.need_a_response(vk_event):
+                    return
+                vk_event = self._setup_event_after(vk_event, event)
+                vk_event_object = VkEvent(vk_event)
+                threading.Thread(target=self.menu, args=(vk_event_object,)).start()
+        except Exception as e:
+            print(str(e))
+            tb = traceback.format_exc()
+            print(tb)
 
     @staticmethod
     def _prepare_obj_to_upload(file_like_object, allowed_exts_url=None):

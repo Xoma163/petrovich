@@ -55,7 +55,8 @@ class CommonBot(Thread):
         """
         Получение новых событий и их обработка
         """
-        raise NotImplementedError
+        pass
+        # raise NotImplementedError
 
     @staticmethod
     def _get_similar_command(event, commands):
@@ -175,13 +176,15 @@ class CommonBot(Thread):
         """
         raise NotImplementedError
 
-    def parse_and_send_msgs(self, peer_id, result):
+    @staticmethod
+    def parse_command_result(result):
         """
         Преобразование 1 из 4х типов сообщения в единый стандарт
         [{...},{...}]
         """
+        msgs = []
         if isinstance(result, str) or isinstance(result, int) or isinstance(result, float):
-            result = {'msg': result}
+            result = {'msg': str(result)}
         if isinstance(result, dict):
             result = [result]
         if isinstance(result, list):
@@ -189,7 +192,16 @@ class CommonBot(Thread):
                 if isinstance(msg, str):
                     msg = {'msg': msg}
                 if isinstance(msg, dict):
-                    self.send_message(peer_id, **msg)
+                    msgs.append(msg)
+        return msgs
+
+    def parse_and_send_msgs(self, peer_id, result):
+        """
+        Отправка сообщения от команды. Принимает любой формат
+        """
+        msgs = self.parse_command_result(result)
+        for msg in msgs:
+            self.send_message(peer_id, **msg)
 
     # Отправляет сообщения юзерам в разных потоках
     def parse_and_send_msgs_thread(self, chat_ids, message):

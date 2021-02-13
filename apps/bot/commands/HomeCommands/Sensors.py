@@ -17,7 +17,7 @@ SENSORS = [
         {'name': "Влажность", 'table': "Item0015", 'unit': '%', 'type': int},
         {'name': "Давление", 'table': "Item0009", 'unit': "мм. рт.ст.", 'type': int},
     ]},
-    {'name': "Гостинная", 'items': [
+    {'name': "Гостиная", 'items': [
         {'name': "Температура", 'table': "Item0022", 'unit': '°C', 'accuracy': 1, 'type': float},
         {'name': "Влажность", 'table': "Item0023", 'unit': '%', 'type': int},
         {'name': "Давление", 'table': "Item0024", 'unit': "мм. рт.ст.", 'type': int},

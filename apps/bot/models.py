@@ -44,7 +44,7 @@ class Users(Platform):
         (GENDER_NONE, 'не указан'))
 
     id = models.AutoField(primary_key=True)
-    user_id = models.CharField('ID пользователя', max_length=20)
+    user_id = models.CharField('ID пользователя', max_length=127)
     name = models.CharField('Имя', max_length=40, blank=True, null=True)
     surname = models.CharField('Фамилия', max_length=40, blank=True, null=True)
     nickname = models.CharField("Никнейм", max_length=40, blank=True, null=True)

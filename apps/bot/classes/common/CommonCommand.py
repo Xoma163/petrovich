@@ -18,8 +18,7 @@ class CommonCommand:
     args: int = None  # Должно ли сообщение обрабатываться только с заданным количеством аргументов
     int_args: list = None  # Список аргументов, которые должны быть целым числом
     float_args: list = None  # Список аргументов, которые должны быть числом
-    platforms: list or Platform = [Platform.VK, Platform.TG,
-                                   Platform.API]  # Список платформ, которые могут обрабатывать команду
+    platforms: list or Platform = [Platform.VK, Platform.TG,  Platform.API, Platform.YANDEX]  # Список платформ, которые могут обрабатывать команду
     attachments: list = []  # Должно ли сообщение обрабатываться только с вложениями
     enabled: bool = True  # Включена ли команда
     priority: int = 0  # Приоритет обработки команды

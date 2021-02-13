@@ -23,6 +23,7 @@ class Platform(Enum):
     VK = 'vk'
     TG = 'tg'
     API = 'api'
+    YANDEX = 'yandex'
 
     @classmethod
     def choices(cls):

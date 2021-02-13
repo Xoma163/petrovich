@@ -246,7 +246,6 @@ class TgBot(CommonBot):
             'fwd': None,
         }
 
-
         if 'new_chat_members' in event['message']:
             tg_event['message']['action'] = {
                 'type': 'chat_invite_user',
@@ -339,18 +338,21 @@ class TgBot(CommonBot):
         Получение новых событий и их обработка
         """
         for event in self.longpoll.listen():
-            try:
-                tg_event = self._setup_event_before(event)
-                if not self.need_a_response(tg_event):
-                    continue
-                tg_event = self._setup_event_after(tg_event, event)
+            self.parse_event(event)
 
-                tg_event_object = TgEvent(tg_event)
-                threading.Thread(target=self.menu, args=(tg_event_object,)).start()
-            except Exception as e:
-                print(str(e))
-                tb = traceback.format_exc()
-                print(tb)
+    def parse_event(self, event):
+        try:
+            tg_event = self._setup_event_before(event)
+            if not self.need_a_response(tg_event):
+                return
+            tg_event = self._setup_event_after(tg_event, event)
+
+            tg_event_object = TgEvent(tg_event)
+            threading.Thread(target=self.menu, args=(tg_event_object,)).start()
+        except Exception as e:
+            print(str(e))
+            tb = traceback.format_exc()
+            print(tb)
 
     @staticmethod
     def _prepare_obj_to_upload(file_like_object, allowed_exts_url=None):

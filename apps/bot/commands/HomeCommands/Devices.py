@@ -8,7 +8,7 @@ DEVICES = [
         # {'name': "Лампы", 'table': "Item0001", 'topic': 'cmnd/tasmota_50E93E/POWER', 'type': bool},
 
     ]},
-    {'name': "Гостинная", 'items': [
+    {'name': "Гостиная", 'items': [
         {'name': "Лента", 'table': "Item0020", 'type': bool},
         # {'name': "Обогреватель", 'table': "Item0002", 'topic': 'cmnd/tasmota_152F6A/POWER', 'type': bool},
 
