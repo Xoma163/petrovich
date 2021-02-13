@@ -22,7 +22,8 @@ def start_tg(debug=False):
 
 
 def start_camera():
-    camera_handler.start()
+    pass
+    # camera_handler.start()
     print('start camera')
 
 
