@@ -13,6 +13,8 @@ WIDTH = 620
 BACKGROUND_COLOR = "#F5F5F5"
 
 
+# Design by M.Marchukov and M.Marchukova
+# https://www.figma.com/file/yOqhSHOtYX76GcEJ3yB4oH/Bot?node-id=33%3A15
 class Quote(CommonCommand):
     names = ["цитата", "(c)", "(с)"]
     help_text = "Цитата - сохраняет в цитатник сообщения"
@@ -37,7 +39,10 @@ class Quote(CommonCommand):
         pil_image = self.build_quote_image(msgs)
         bytes_io = BytesIO()
         pil_image.save(bytes_io, format='PNG')
-        attachments = self.bot.upload_photos(bytes_io)
+        if pil_image.height > 2000:
+            attachments = self.bot.upload_document(bytes_io, self.event.peer_id, "Сохры")
+        else:
+            attachments = self.bot.upload_photos(bytes_io)
         return {"attachments": attachments}
 
     def get_centered_rounded_image(self, image: Image, max_size=80):

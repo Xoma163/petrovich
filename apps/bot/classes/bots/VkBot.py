@@ -49,7 +49,6 @@ class VkBot(CommonBot):
             raise PWarning("Не знаю такого типа активности")
         self.vk.messages.setActivity(type=activity, peer_id=peer_id, group_id=self.group_id)
 
-
     def get_user_by_id(self, user_id) -> Users:
         """
         Возвращает пользователя по его id
@@ -126,6 +125,13 @@ class VkBot(CommonBot):
             bot.save()
 
         return bot
+
+    def get_conversation_messages(self, peer_id, conversation_message_id):
+        response = self.vk.messages.getByConversationMessageId(
+            peer_id=peer_id,
+            conversation_message_ids=[conversation_message_id]
+        )
+        return response['items'][0]
 
     @staticmethod
     def add_extra_group_to_user(user, chat):
@@ -228,11 +234,17 @@ class VkBot(CommonBot):
         Подготовка события после проверки на то, нужен ли ответ
         Нужно это для того, чтобы не тратить ресурсы на обработку если она не будет востребована
         """
+        # Если сообщение пришло обрезанным, то восполняем всю инфу
+        if event.message['conversation_message_id'] and 'is_cropped' in event.message and event.message['is_cropped']:
+            message = self.get_conversation_messages(event.message['peer_id'], event.message['conversation_message_id'])
+        else:
+            message = event.message
+
         # Обработка вложенных сообщений в event['fwd']. reply и fwd для вк это разные вещи.
-        if event.message.reply_message:
-            vk_event['fwd'] = [event.message.reply_message]
-        elif len(event.message.fwd_messages) != 0:
-            vk_event['fwd'] = event.message.fwd_messages
+        if message.get('reply_message'):
+            vk_event['fwd'] = [message['reply_message']]
+        elif len(message.get('fwd_messages')) != 0:
+            vk_event['fwd'] = message['fwd_messages']
 
         # Узнаём пользователя
         vk_event['sender'] = self.get_user_by_id(vk_event['user_id'])
@@ -245,6 +257,8 @@ class VkBot(CommonBot):
                 self.add_extra_group_to_user(vk_event['sender'], vk_event['chat'])
         else:
             vk_event['chat'] = None
+
+
         return vk_event
 
     def listen(self):
