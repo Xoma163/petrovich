@@ -20,7 +20,7 @@ class Joke(CommonCommand):
                        "15 — Цитаты (18+)\n" \
                        "16 — Тосты (18+)\n" \
                        "18 — Статусы (18+)\n"
-    int_args=[0]
+    int_args = [0]
 
     def start(self):
         if self.event.args is None:

@@ -18,7 +18,8 @@ class CommonCommand:
     args: int = None  # Должно ли сообщение обрабатываться только с заданным количеством аргументов
     int_args: list = None  # Список аргументов, которые должны быть целым числом
     float_args: list = None  # Список аргументов, которые должны быть числом
-    platforms: list or Platform = [Platform.VK, Platform.TG,  Platform.API, Platform.YANDEX]  # Список платформ, которые могут обрабатывать команду
+    platforms: list or Platform = list(Platform)  # Список платформ, которые могут обрабатывать команду
+    excluded_platforms: list = []  # Список исключённых платформ.
     attachments: list = []  # Должно ли сообщение обрабатываться только с вложениями
     enabled: bool = True  # Включена ли команда
     priority: int = 0  # Приоритет обработки команды
@@ -256,6 +257,9 @@ class CommonCommand:
         Проверка на вид платформы
         :return: bool
         """
+        if self.event.platform in self.event.excluded_platforms:
+            error = f"Команда недоступна для {self.event.platform.value.upper()}"
+            raise PWarning(error)
         if self.event.platform not in self.platforms:
             error = f"Команда недоступна для {self.event.platform.value.upper()}"
             raise PWarning(error)

@@ -9,7 +9,7 @@ class ShortLinks(CommonCommand):
     detail_help_text = "Сс (ссылка) - сокращение ссылки\n" \
                        "Сс (Пересылаемое сообщение) - сокращение ссылки"
     args = 1
-    platforms = [Platform.VK]
+    # platforms = [Platform.VK]
 
     def start(self):
         msgs = self.event.fwd

@@ -7,7 +7,7 @@ class Uyu(CommonCommand):
     names = ["уъу", "ъуъ"]
     help_text = "Уъу - Добавляет слово в текст (уъуфикация)"
     detail_help_text = "Уъу (Пересланные сообщения) [новое слово=бля] - добавляет слово в текст (уъуфикация)"
-    platforms = [Platform.VK, Platform.TG]
+    excluded_platforms = [Platform.YANDEX]
 
     def start(self):
         add_word = "бля"

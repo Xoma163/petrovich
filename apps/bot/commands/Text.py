@@ -9,7 +9,6 @@ class Text(CommonCommand):
     help_text = "Текст - распознаёт текст на изображении"
     detail_help_text = "Текст (Изображения/Пересылаемое сообщение с изображением) [язык=rus] - распознаёт текст на изображении\n" \
                        'Язык нужно указывать в 3 символа. Пример - "eng", "rus", "fre", "ger" и так далее'
-    platforms = [Platform.VK, Platform.TG]
     attachments = ['photo']
 
     def start(self):

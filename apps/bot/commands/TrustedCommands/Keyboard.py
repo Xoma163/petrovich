@@ -5,7 +5,7 @@ from apps.bot.classes.common.CommonCommand import CommonCommand
 class Keyboard(CommonCommand):
     names = ["клава", "клавиатура"]
     help_text = "Клава - показать клавиатуру"
-    platforms = [Platform.VK, Platform.TG]
+    platforms = Platform.VK
     access = Role.TRUSTED
     enabled = False
 
