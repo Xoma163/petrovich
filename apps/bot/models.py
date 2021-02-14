@@ -1,6 +1,9 @@
 import random
+from tempfile import NamedTemporaryFile
 
+import requests
 from django.contrib.auth.models import Group
+from django.core.files import File
 from django.db import models
 from django.utils.html import format_html
 
@@ -61,6 +64,17 @@ class Users(Platform):
     imei = models.CharField('IMEI', max_length=20, null=True, blank=True)
     send_notify_to = models.ManyToManyField('self', verbose_name="Отправлять уведомления", blank=True)
 
+    avatar = models.ImageField('Аватар', blank=True, upload_to="bot/users/avatar/")
+
+    def set_avatar(self, url):
+        ext = url.split('.')[-1].split('?')[0]
+        image = NamedTemporaryFile()
+        content = requests.get(url).content
+        image.write(content)
+        image.flush()
+
+        self.avatar.save(f"avatar_{str(self)}.{ext}", File(image))
+
     def check_role(self, role):
         group = self.groups.filter(name=role.name)
         return group.exists()
@@ -97,6 +111,7 @@ class Bot(Platform):
     id = models.AutoField(primary_key=True)
     bot_id = models.CharField('ID бота', max_length=20)
     name = models.CharField('Имя', max_length=40)
+    avatar = models.ImageField('Аватар', blank=True, upload_to="bot/bot/avatar/")
 
     class Meta:
         verbose_name = "Бот"
@@ -109,33 +124,16 @@ class Bot(Platform):
         else:
             return f"Неопознанный бот #{self.id}"
 
+    def set_avatar(self, url):
+        ext = url.split('.')[-1].split('?')[0]
+        image = NamedTemporaryFile()
+        content = requests.get(url).content
+        image.write(content)
+        image.flush()
 
-class APIUser(models.Model):
-    user = models.ForeignKey(Users, models.CASCADE, verbose_name="Юзер", null=True, blank=True)
-    chat = models.ForeignKey(Chat, models.CASCADE, verbose_name="Вк чат", null=True, blank=True)
-
-    class Meta:
-        verbose_name = "API Пользователь"
-        verbose_name_plural = "API Пользователи"
-
-    def __str__(self):
-        return str(self.user)
+        self.avatar.save(f"avatar_{str(self)}.{ext}", File(image))
 
 
 def random_digits():
     digits_count = 6
     return str(random.randint(10 ** (digits_count - 1), 10 ** digits_count - 1))
-
-
-class APITempUser(models.Model):
-    user = models.ForeignKey(Users, models.CASCADE, verbose_name="Пользователь", null=True, blank=True)
-    chat = models.ForeignKey(Chat, models.CASCADE, verbose_name="Чат", null=True, blank=True)
-    code = models.CharField("Код подтверждения", default=random_digits, max_length=6)
-    tries = models.IntegerField("Кол-во попыток", default=5)
-
-    class Meta:
-        verbose_name = "API Временный пользователь"
-        verbose_name_plural = "API Временные пользователи"
-
-    def __str__(self):
-        return str(self.user)

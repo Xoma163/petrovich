@@ -257,7 +257,7 @@ class CommonCommand:
         Проверка на вид платформы
         :return: bool
         """
-        if self.event.platform in self.event.excluded_platforms:
+        if self.event.platform in self.excluded_platforms:
             error = f"Команда недоступна для {self.event.platform.value.upper()}"
             raise PWarning(error)
         if self.event.platform not in self.platforms:

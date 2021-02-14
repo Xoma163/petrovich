@@ -22,12 +22,10 @@ class Issue(CommonCommand):
         for msg in msgs:
             text = msg['text']
             if msg['from_id'] > 0:
-                fwd_user_id = int(msg['from_id'])
-                fwd_user = self.bot.get_user_by_id(fwd_user_id)
+                fwd_user = self.bot.get_user_by_id(msg['from_id'])
                 username = str(fwd_user)
             else:
-                fwd_user_id = int(msg['from_id'])
-                username = str(self.bot.get_bot_by_id(fwd_user_id))
+                username = str(self.bot.get_bot_by_id(msg['from_id']))
             issue_text += f"{username}:\n{text}\n\n"
 
         github_api = GithubAPI()

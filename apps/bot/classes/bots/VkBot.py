@@ -49,6 +49,7 @@ class VkBot(CommonBot):
             raise PWarning("Не знаю такого типа активности")
         self.vk.messages.setActivity(type=activity, peer_id=peer_id, group_id=self.group_id)
 
+
     def get_user_by_id(self, user_id) -> Users:
         """
         Возвращает пользователя по его id
@@ -58,12 +59,13 @@ class VkBot(CommonBot):
             vk_user = vk_user.first()
         else:
             # Прозрачная регистрация
-            user = self.vk.users.get(user_id=user_id, lang='ru', fields='sex, bdate, city, screen_name')[0]
+            user = self.vk.users.get(user_id=user_id, lang='ru', fields='sex, bdate, city, screen_name, photo_max')[0]
             vk_user = Users()
             vk_user.user_id = user_id
             vk_user.name = user['first_name']
             vk_user.surname = user['last_name']
             vk_user.platform = self.platform.name
+            vk_user.set_avatar(user['photo_max'])
 
             if 'sex' in user:
                 vk_user.gender = user['sex']
@@ -120,6 +122,7 @@ class VkBot(CommonBot):
             bot.bot_id = bot_id
             bot.name = vk_bot['name']
             bot.platform = self.platform.name
+            bot.set_avatar(vk_bot['photo_200'])
             bot.save()
 
         return bot
@@ -204,11 +207,11 @@ class VkBot(CommonBot):
         Нужен ли ответ пользователю
         """
         # Develop debug в одной конфе
-        if self.DEVELOP_DEBUG and vk_event['chat_id']:
-            from_test_chat = self.get_group_id(vk_event['chat_id']) == self.test_chat.chat_id
-            from_me = str(vk_event['user_id']) == env.str('VK_ADMIN_ID')
-            if not from_test_chat or not from_me:
-                return False
+        # if self.DEVELOP_DEBUG and vk_event['chat_id']:
+        #     from_test_chat = self.get_group_id(vk_event['chat_id']) == self.test_chat.chat_id
+        #     from_me = str(vk_event['user_id']) == env.str('VK_ADMIN_ID')
+        #     if not from_test_chat or not from_me:
+        #         return False
 
         # Сообщение либо мне в лс, либо упоминание меня, либо есть аудиосообщение, либо есть экшн
         if not self.need_a_response_common(vk_event):

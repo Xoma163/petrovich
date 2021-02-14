@@ -73,7 +73,7 @@ class Petrovich(CommonCommand):
                 datetime_now = localize_datetime(datetime.datetime.utcnow(), DEFAULT_TIME_ZONE)
                 datetime_last = localize_datetime(remove_tz(winner_today.date), DEFAULT_TIME_ZONE)
                 if (datetime_now.date() - datetime_last.date()).days <= 0:
-                    if winner_today.user.gender == '1':
+                    if winner_today.user.gender and winner_today.user.gender == '1':
                         winner_gender = "Петровна"
                     else:
                         winner_gender = "Петрович"
@@ -91,7 +91,7 @@ class Petrovich(CommonCommand):
             winner_petrovich = PetrovichUser.objects.filter(user=winner, chat=self.event.chat).first()
             winner_petrovich.wins += 1
             winner_petrovich.save()
-            if winner_petrovich.user.gender == '1':
+            if winner_petrovich.user.gender and winner_petrovich.user.gender == '1':
                 winner_gender = "Наша сегодняшняя Петровна дня"
             else:
                 winner_gender = "Наш сегодняшний Петрович дня"

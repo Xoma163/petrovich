@@ -192,7 +192,7 @@ def tanimoto(s1, s2) -> float:
 
 def get_image_size_by_text(txt, font):
     """
-    Вычисление размеро текста если оно будет изображение
+    Вычисление размеро текста если оно будет изображением
     """
     img = Image.new('RGB', (1, 1))
     draw = ImageDraw.Draw(img)
