@@ -172,29 +172,26 @@ class Quote(CommonCommand):
 
         msg_lines = textwrap.wrap(msg['text'], width=int(max_text_width / 7.5))
         total_msg_lines_height = sum([font_message.getsize(msg_line)[1] for msg_line in msg_lines])
-        total_message_real_height = username_height + text_margin_top + total_msg_lines_height + msg_photo_height + msg_photo_margin
-        total_message_height = max(total_message_real_height, avatar_size[0])
-        total_height = total_message_height + margin_top + margin_bottom
+        total_height = username_height + text_margin_top + total_msg_lines_height + msg_photo_height
+        total_height = max(total_height,avatar_size[1]) + margin_top + margin_bottom + msg_photo_margin
 
         img = Image.new('RGB', (WIDTH, total_height), BACKGROUND_COLOR)
         avatar_image = Image.open(avatar)
         avatar_image = self.get_centered_rounded_image(avatar_image)
 
-        avatar_start_pos = (margin_left, (total_message_height - avatar_size[0]) // 2 + margin_top)
+        avatar_start_pos = (margin_left, margin_top)
 
         img.paste(avatar_image, avatar_start_pos)
 
         d = ImageDraw.Draw(img)
-        d.text((username_start_pos[0], username_start_pos[1] + (total_message_height - total_message_real_height) // 2),
-               username, fill=text_color, font=font_username)
+        d.text((username_start_pos[0], username_start_pos[1]), username, fill=text_color, font=font_username)
         # d.line((msg_start_pos, msg_start_pos[0] + max_text_width, msg_start_pos[1]), fill=text_color, width=2)
         offset_y = 0
         for line in msg_lines:
-            d.text((msg_start_pos[0], msg_start_pos[1] + offset_y + (total_message_height - total_message_real_height) // 2),
-                   line, fill=text_color, font=font_message)
+            d.text((msg_start_pos[0], msg_start_pos[1] + offset_y), line, fill=text_color, font=font_message)
             offset_y += font_message.getsize(line)[1]
-        msg_photo_pos = (msg_start_pos[0], msg_start_pos[1]+offset_y + msg_photo_margin)
         if msg_photo:
+            msg_photo_pos = (msg_start_pos[0], msg_start_pos[1] + offset_y + msg_photo_margin)
             img.paste(msg_photo, msg_photo_pos)
         return img
 
