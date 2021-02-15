@@ -13,7 +13,7 @@ OUTPUT_FILE=${BACKUP_DIR}/${FILE}
 
 # do the database backup (dump)
 # use this command for a database server on localhost. add other options if need be.
-pg_dump $1 -F p -f "${OUTPUT_FILE}"
+pg_dump "$1" -F p -f "${OUTPUT_FILE}"
 
 # gzip the mysql database dump file
 gzip "$OUTPUT_FILE"

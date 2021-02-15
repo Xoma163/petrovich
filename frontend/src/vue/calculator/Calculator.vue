@@ -66,15 +66,15 @@ export default {
     return {
       session: undefined,
       result: "",
-    }
+    };
   },
 
   methods: {
-    users: function () {
+    users() {
       $.fancybox.open($(".users"), { touch: false });
     },
 
-    addProduct: function () {
+    addProduct() {
       const data = {
         name: "",
         count: 0,
@@ -86,7 +86,7 @@ export default {
             this.session.products.push(response.data);
           });
     },
-    deleteUser: function (user) {
+    deleteUser(user) {
       for (let i = 0; i < this.session.users.length; i += 1) {
         if (this.session.users[i].id === user.id) {
           this.session.users.splice(i, 1);
@@ -99,7 +99,7 @@ export default {
         }
       }
     },
-    deleteProduct: function (product) {
+    deleteProduct(product) {
       for (let i = 0; i < this.session.products.length; i += 1) {
         if (this.session.products[i].id === product.product.id) {
           this.session.products.splice(i, 1);
@@ -107,7 +107,7 @@ export default {
         }
       }
     },
-    calculate: function () {
+    calculate() {
       const users = $(".user select");
       for (let i = 0; i < users.length; i += 1) {
         if (!users[i].value) {
@@ -121,7 +121,7 @@ export default {
           .then((response) => {
             this.result = response.data.data;
             $.fancybox.open($(".result"), { touch: false });
-          })
+          });
     }
   },
   mounted() {

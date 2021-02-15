@@ -40,20 +40,20 @@ export default {
     };
   },
   methods: {
-    deleteUser: function () {
+    deleteUser() {
       this.$emit("delete-user", this);
     },
-    getPrice: function () {
+    getPrice() {
       return this.price;
     }
   },
   watch: {
-    price: function () {
+    price() {
       this.$emit("update-price", this);
     }
   },
   computed: {
-    totalPrice: function () {
+    totalPrice() {
       const discount = this.discount ? this.discount : 0;
       const deliveryCost = this.deliveryCost ? this.deliveryCost : 0;
       // Стоимость заказа с учётом скидки + пропорциональная цена за доставку
@@ -61,7 +61,7 @@ export default {
       return Math.round(res * 100) / 100;
     }
   }
-}
+};
 </script>
 
 <style scoped>

@@ -70,11 +70,11 @@ export default {
     };
   },
   methods: {
-    addUser: function () {
+    addUser() {
       this.users.push({ id: this.id, price: 0 });
       this.id += 1;
     },
-    deleteUser: function (user) {
+    deleteUser(user) {
       for (let i = 0; i < this.users.length; i += 1) {
         if (this.users[i].id === user.id) {
           this.users.splice(i, 1);
@@ -82,7 +82,7 @@ export default {
         }
       }
     },
-    updatePrice: function (user) {
+    updatePrice(user) {
       for (let i = 0; i < this.users.length; i += 1) {
         if (this.users[i].id === user.id) {
           this.users[i].price = user.price;
@@ -93,26 +93,26 @@ export default {
 
   },
   computed: {
-    sumPrice: function () {
+    sumPrice() {
       let sum = 0;
       for (let i = 0; i < this.users.length; i++) {
         sum += this.users[i].price;
       }
       return sum;
     },
-    sumPriceDiscount: function () {
+    sumPriceDiscount() {
       return Math.round(this.sumPrice * (100 - this.discount) / 100 * 100) / 100;
     },
-    sumPriceDelivery: function () {
+    sumPriceDelivery() {
       return this.sumPrice + this.deliveryCost;
     },
-    sumPriceDiscountDelivery: function () {
+    sumPriceDiscountDelivery() {
       return Math.round((this.sumPrice * (100 - this.discount) / 100 + this.deliveryCost) * 100) / 100;
     },
 
   },
   watch: {
-    discount: function (val) {
+    discount(val) {
       if (val > 100) {
         this.discount = 100;
       }
@@ -121,7 +121,7 @@ export default {
       }
     },
   }
-}
+};
 </script>
 
 <style scoped>
