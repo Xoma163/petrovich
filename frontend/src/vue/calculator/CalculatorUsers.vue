@@ -44,7 +44,7 @@ export default {
       type: Number
     }
   },
-}
+};
 </script>
 
 <style scoped>

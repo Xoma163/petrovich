@@ -80,7 +80,7 @@ export default {
         count: 0,
         price: 0,
         calculatorsession: this.session.id,
-      }
+      };
       axios.post("/calculator_session/api/calculator_product/", data)
           .then((response) => {
             this.session.products.push(response.data);
