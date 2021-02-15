@@ -37,27 +37,27 @@ export default {
     return {
       name: "",
       price: 0,
-    }
+    };
   },
   methods: {
     deleteUser: function () {
-      this.$emit("delete-user", this)
+      this.$emit("delete-user", this);
     },
     getPrice: function () {
-      return this.price
+      return this.price;
     }
   },
   watch: {
     price: function () {
-      this.$emit("update-price", this)
+      this.$emit("update-price", this);
     }
   },
   computed: {
     totalPrice: function () {
-      const discount = this.discount ? this.discount : 0
-      const deliveryCost = this.deliveryCost ? this.deliveryCost : 0
+      const discount = this.discount ? this.discount : 0;
+      const deliveryCost = this.deliveryCost ? this.deliveryCost : 0;
       // Стоимость заказа с учётом скидки + пропорциональная цена за доставку
-      const res = this.price * ((1 - discount / 100) + deliveryCost / this.sumPrice)
+      const res = this.price * ((1 - discount / 100) + deliveryCost / this.sumPrice);
       return Math.round(res * 100) / 100;
     }
   }

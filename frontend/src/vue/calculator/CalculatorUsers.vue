@@ -25,22 +25,22 @@ export default {
     addUser: function () {
       const data = {
         name: "",
-        calculatorsession: this.session_id,
+        calculatorsession: this.sessionId,
       }
       axios.post("/calculator_session/api/calculator_user/", data)
           .then((response) => {
-            this.users.push(response.data)
+            this.users.push(response.data);
           });
     },
     deleteUser: function (user) {
-      this.$emit("delete-user", user)
+      this.$emit("delete-user", user);
     },
   },
   props: {
     users: {
       type: Array,
     },
-    session_id: {
+    sessionId: {
       type: Number
     }
   },

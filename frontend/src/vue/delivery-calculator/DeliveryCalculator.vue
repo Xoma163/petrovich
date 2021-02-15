@@ -67,11 +67,11 @@ export default {
       users: [],
       deliveryCost: 0,
       discount: 0,
-    }
+    };
   },
   methods: {
     addUser: function () {
-      this.users.push({ id: this.id, price: 0 })
+      this.users.push({ id: this.id, price: 0 });
       this.id += 1;
     },
     deleteUser: function (user) {
@@ -101,13 +101,13 @@ export default {
       return sum;
     },
     sumPriceDiscount: function () {
-      return Math.round(this.sumPrice * (100 - this.discount) / 100 * 100) / 100
+      return Math.round(this.sumPrice * (100 - this.discount) / 100 * 100) / 100;
     },
     sumPriceDelivery: function () {
-      return this.sumPrice + this.deliveryCost
+      return this.sumPrice + this.deliveryCost;
     },
     sumPriceDiscountDelivery: function () {
-      return Math.round((this.sumPrice * (100 - this.discount) / 100 + this.deliveryCost) * 100) / 100
+      return Math.round((this.sumPrice * (100 - this.discount) / 100 + this.deliveryCost) * 100) / 100;
     },
 
   },

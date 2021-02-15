@@ -1,11 +1,11 @@
 const path = require("path");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const BundleTracker = require("webpack-bundle-tracker");
-const VueLoaderPlugin = require("vue-loader/lib/plugin")
+const VueLoaderPlugin = require("vue-loader/lib/plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const webpack = require("webpack");
 
-require("dotenv").config({ path: "../secrets/.env" })
+require("dotenv").config({ path: "../secrets/.env" });
 
 module.exports = {
   entry: {
@@ -98,4 +98,4 @@ module.exports = {
     },
     extensions: ["*", ".js", ".vue", ".json"]
   },
-}
+};

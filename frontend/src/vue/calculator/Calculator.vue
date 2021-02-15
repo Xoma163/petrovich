@@ -42,7 +42,7 @@
     <div class="users fancybox">
       <CalculatorUsers
           :users="session.users"
-          :session_id="session.id"
+          :sessionId="session.id"
           @delete-user="deleteUser"
       ></CalculatorUsers>
     </div>
@@ -65,7 +65,6 @@ export default {
   data() {
     return {
       session: undefined,
-      uomList: undefined,
       result: "",
     }
   },
@@ -120,7 +119,7 @@ export default {
       const sessionId = window.location.pathname.split("/").slice(-1)[0];
       axios.get(`/calculator_session/api/calculator_session/${sessionId}/calculate/`)
           .then((response) => {
-            this.result = response.data.data
+            this.result = response.data.data;
             $.fancybox.open($(".result"), { touch: false });
           })
     }
@@ -129,8 +128,8 @@ export default {
     const sessionId = window.location.pathname.split("/").slice(-1)[0];
     axios.get(`/calculator_session/api/calculator_session/${sessionId}/`)
         .then((response) => {
-          this.session = response.data
-        })
+          this.session = response.data;
+        });
   },
 }
 </script>

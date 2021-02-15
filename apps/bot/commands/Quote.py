@@ -18,8 +18,8 @@ BACKGROUND_COLOR = "#F5F5F5"
 # https://www.figma.com/file/yOqhSHOtYX76GcEJ3yB4oH/Bot?node-id=33%3A15
 class Quote(CommonCommand):
     names = ["цитата", "(c)", "(с)"]
-    help_text = "Цитата - сохраняет в цитатник сообщения"
-    detail_help_text = "Цитата (Пересылаемые сообщение) - сохраняет в цитатник сообщения"
+    help_text = "Цитата - генерирует картинку с цитатой"
+    detail_help_text = "Цитата (Пересылаемые сообщение) - генерирует картинку с цитатой"
     fwd = True
     platforms = [Platform.VK]
 

@@ -7,7 +7,7 @@
   </main>
 </template>
 <script>
-import axios from "axios"
+import axios from "axios";
 
 export default {
   name: "CalculatorUser",
@@ -25,12 +25,12 @@ export default {
   watch: {
     user: {
       handler(val) {
-        axios.put(`/calculator_session/api/calculator_user/${this.user.id}/`, this.user)
+        axios.put(`/calculator_session/api/calculator_user/${this.user.id}/`, this.user);
       },
       deep: true,
     }
   },
-}
+};
 </script>
 
 
