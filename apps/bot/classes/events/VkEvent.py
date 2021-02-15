@@ -4,6 +4,16 @@ from petrovich.settings import VK_URL
 
 @auto_str
 class VkEvent(Event):
+
+    def get_max_size_image(self, attachment_type):
+        max_size_image = attachment_type['sizes'][0]
+        max_size_width = max_size_image['width']
+        for size in attachment_type['sizes']:
+            if size['width'] > max_size_width:
+                max_size_image = size
+                max_size_width = size['width']
+        return max_size_image
+
     def parse_attachments(self, attachments):
         """
         Распаршивание вложений
@@ -26,17 +36,13 @@ class VkEvent(Event):
                         'vk_url'] = f"{attachment['type']}{attachment_type['owner_id']}_{attachment_type['id']}"
                     new_attachment['url'] = f"{VK_URL}{new_attachment['vk_url']}"
                 if attachment['type'] == 'photo':
-                    max_size_image = attachment_type['sizes'][0]
-                    max_size_width = max_size_image['width']
-                    for size in attachment_type['sizes']:
-                        if size['width'] > max_size_width:
-                            max_size_image = size
-                            max_size_width = size['width']
-                        new_attachment['download_url'] = max_size_image['url']
-                        new_attachment['private_download_url'] = max_size_image['url']
-                        new_attachment['size'] = {
-                            'width': max_size_image['width'],
-                            'height': max_size_image['height']}
+                    max_size_image = self.get_max_size_image(attachment_type)
+                    new_attachment['download_url'] = max_size_image['url']
+                    new_attachment['private_download_url'] = max_size_image['url']
+                    new_attachment['size'] = {
+                        'width': max_size_image['width'],
+                        'height': max_size_image['height']
+                    }
                 elif attachment['type'] == 'video':
                     new_attachment['title'] = attachment_type['title']
                 elif attachment['type'] == 'audio':

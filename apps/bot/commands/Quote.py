@@ -2,6 +2,7 @@ import os
 import textwrap
 from io import BytesIO
 
+import requests
 from PIL import ImageFont, Image, ImageDraw, ImageFilter
 
 from apps.bot.classes.Consts import Platform
@@ -25,7 +26,7 @@ class Quote(CommonCommand):
     def start(self):
         msgs = []
         for msg in self.event.fwd:
-            text = msg['text']
+            message = {'text': msg['text']}
             if msg['from_id'] > 0:
                 quote_user = self.bot.get_user_by_id(msg['from_id'])
                 username = str(quote_user)
@@ -34,8 +35,12 @@ class Quote(CommonCommand):
                 quote_bot = self.bot.get_bot_by_id(msg['from_id'])
                 username = str(quote_bot)
                 avatar = quote_bot.avatar
-
-            msgs.append({'username': username, 'text': text, 'avatar': avatar})
+            if msg.get('attachments'):
+                photo = msg['attachments'][0].get('photo')
+                if photo:
+                    max_photo = self.event.get_max_size_image(photo)
+                    message['photo'] = max_photo['url']
+            msgs.append({'username': username, 'message': message, 'avatar': avatar})
         pil_image = self.build_quote_image(msgs)
         bytes_io = BytesIO()
         pil_image.save(bytes_io, format='PNG')
@@ -68,6 +73,16 @@ class Quote(CommonCommand):
 
         img_round.thumbnail((max_size, max_size), Image.ANTIALIAS)
         return img_round
+
+    @staticmethod
+    def get_message_photo(image: Image, max_size=290):
+        w, h = image.size
+        if w < max_size:
+            return image
+        k = w / max_size
+        new_size = (max_size, h // k)
+        image.thumbnail(new_size, Image.ANTIALIAS)
+        return image
 
     @staticmethod
     def _image_concatenation(images: list):
@@ -122,7 +137,7 @@ class Quote(CommonCommand):
         return img
 
     def _get_body(self, msgs):
-        images = [self._get_body_item(msg['username'], msg['text'], msg['avatar']) for msg in msgs]
+        images = [self._get_body_item(msg['username'], msg['message'], msg['avatar']) for msg in msgs]
         return self._image_concatenation(images)
 
     def _get_body_item(self, username, msg, avatar=None):
@@ -146,29 +161,41 @@ class Quote(CommonCommand):
         _, username_height = get_image_size_by_text(username, font_username)
         msg_start_pos = (username_start_pos[0], username_start_pos[1] + username_height + text_margin_top)
 
-        msg_lines = textwrap.wrap(msg, width=int(max_text_width / 7.5))
-        total_message_height = sum([font_message.getsize(msg_line)[1] for msg_line in msg_lines])
-        total_text_real_height = username_height + text_margin_top + total_message_height
-        total_text_height = max(total_text_real_height, avatar_size[0])
-        total_height = total_text_height + margin_top + margin_bottom
+        msg_photo = None
+        msg_photo_height = 0
+        msg_photo_margin = 0
+        if msg.get('photo'):
+            image = Image.open(requests.get(msg['photo'], stream=True).raw)
+            msg_photo = self.get_message_photo(image)
+            msg_photo_height = msg_photo.height
+            msg_photo_margin = 10
+
+        msg_lines = textwrap.wrap(msg['text'], width=int(max_text_width / 7.5))
+        total_msg_lines_height = sum([font_message.getsize(msg_line)[1] for msg_line in msg_lines])
+        total_message_real_height = username_height + text_margin_top + total_msg_lines_height + msg_photo_height + msg_photo_margin
+        total_message_height = max(total_message_real_height, avatar_size[0])
+        total_height = total_message_height + margin_top + margin_bottom
 
         img = Image.new('RGB', (WIDTH, total_height), BACKGROUND_COLOR)
         avatar_image = Image.open(avatar)
         avatar_image = self.get_centered_rounded_image(avatar_image)
 
-        avatar_start_pos = (margin_left, (total_text_height - avatar_size[0]) // 2 + margin_top)
+        avatar_start_pos = (margin_left, (total_message_height - avatar_size[0]) // 2 + margin_top)
 
         img.paste(avatar_image, avatar_start_pos)
 
         d = ImageDraw.Draw(img)
-        d.text((username_start_pos[0], username_start_pos[1] + (total_text_height - total_text_real_height) // 2),
+        d.text((username_start_pos[0], username_start_pos[1] + (total_message_height - total_message_real_height) // 2),
                username, fill=text_color, font=font_username)
         # d.line((msg_start_pos, msg_start_pos[0] + max_text_width, msg_start_pos[1]), fill=text_color, width=2)
         offset_y = 0
         for line in msg_lines:
-            d.text((msg_start_pos[0], msg_start_pos[1] + offset_y + (total_text_height - total_text_real_height) // 2),
+            d.text((msg_start_pos[0], msg_start_pos[1] + offset_y + (total_message_height - total_message_real_height) // 2),
                    line, fill=text_color, font=font_message)
             offset_y += font_message.getsize(line)[1]
+        msg_photo_pos = (msg_start_pos[0], msg_start_pos[1]+offset_y + msg_photo_margin)
+        if msg_photo:
+            img.paste(msg_photo, msg_photo_pos)
         return img
 
     def build_quote_image(self, msgs):
