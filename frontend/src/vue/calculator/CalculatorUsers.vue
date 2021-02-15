@@ -28,7 +28,7 @@ export default {
         calculatorsession: this.session_id,
       }
       axios.post("/calculator_session/api/calculator_user/", data)
-          .then(response => {
+          .then((response) => {
             this.users.push(response.data)
           });
     },

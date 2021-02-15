@@ -83,8 +83,8 @@ export default {
         calculatorsession: this.session.id,
       }
       axios.post("/calculator_session/api/calculator_product/", data)
-          .then(response => {
-            this.session.products.push(response.data)
+          .then((response) => {
+            this.session.products.push(response.data);
           });
     },
     deleteUser: function (user) {
@@ -119,7 +119,7 @@ export default {
 
       const sessionId = window.location.pathname.split("/").slice(-1)[0];
       axios.get(`/calculator_session/api/calculator_session/${sessionId}/calculate/`)
-          .then(response => {
+          .then((response) => {
             this.result = response.data.data
             $.fancybox.open($(".result"), { touch: false });
           })
@@ -128,7 +128,7 @@ export default {
   mounted() {
     const sessionId = window.location.pathname.split("/").slice(-1)[0];
     axios.get(`/calculator_session/api/calculator_session/${sessionId}/`)
-        .then(response => {
+        .then((response) => {
           this.session = response.data
         })
   },

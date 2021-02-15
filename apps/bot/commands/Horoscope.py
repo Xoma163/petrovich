@@ -1,6 +1,5 @@
 from datetime import datetime
 
-from apps.bot.classes.Consts import Platform
 from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.commands.Meme import prepare_meme_to_send

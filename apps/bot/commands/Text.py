@@ -1,5 +1,4 @@
 from apps.bot.APIs.OCR import OCRApi
-from apps.bot.classes.Consts import Platform
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import get_attachments_from_attachments_or_fwd
 

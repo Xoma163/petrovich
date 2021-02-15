@@ -60,12 +60,12 @@ export default {
   watch: {
     product: {
       handler(val) {
-        axios.put(`/calculator_session/api/calculator_product/${this.product.id}/`, this.product)
+        axios.put(`/calculator_session/api/calculator_product/${this.product.id}/`, this.product);
       },
       deep: true,
     }
   }
-}
+};
 </script>
 
 <style scoped>

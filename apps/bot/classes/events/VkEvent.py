@@ -5,7 +5,8 @@ from petrovich.settings import VK_URL
 @auto_str
 class VkEvent(Event):
 
-    def get_max_size_image(self, attachment_type):
+    @staticmethod
+    def get_max_size_image(attachment_type):
         max_size_image = attachment_type['sizes'][0]
         max_size_width = max_size_image['width']
         for size in attachment_type['sizes']:

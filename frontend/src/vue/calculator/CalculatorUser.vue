@@ -19,7 +19,7 @@ export default {
   methods: {
     deleteUser: function () {
       axios.delete(`/calculator_session/api/calculator_user/${this.user.id}/`);
-      this.$emit("delete-user",this.user)
+      this.$emit("delete-user", this.user);
     }
   },
   watch: {

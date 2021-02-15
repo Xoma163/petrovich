@@ -56,7 +56,7 @@ class Discipline(models.Model):
                                   blank=True, max_length=50)
     bbb_link = models.TextField("Ссылка bbb", blank=True, help_text="Бот будет слать этот текст когда наступит пара")
 
-    def save(self, **kwargs):
+    def save(self, *args, **kwargs):
         if not self.short_name:
             name_list = self.name.split(' ')
             short_name = ""
@@ -67,7 +67,7 @@ class Discipline(models.Model):
                     short_name += word[0].upper()
             self.short_name = short_name
 
-        super(Discipline, self).save(**kwargs)
+        super(Discipline, self).save(*args, **kwargs)
 
     def __str__(self):
         return self.short_name or self.name
