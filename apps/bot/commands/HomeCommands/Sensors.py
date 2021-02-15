@@ -80,7 +80,7 @@ def get_data_for_items(rooms):
                 result += f"{item['name']} - {value}{item['unit']}\n"
             else:
                 result += f"{item['name']} - {value}\n"
-        result += f"\n"
+        result += "\n"
     return result
 
 

@@ -1,6 +1,6 @@
 import Vue from "vue";
-import calculator from '../vue/calculator/Calculator'
-import deliveryCalculator from '../vue/delivery-calculator/DeliveryCalculator'
+import calculator from "../vue/calculator/Calculator"
+import deliveryCalculator from "../vue/delivery-calculator/DeliveryCalculator"
 
 
 function renderVue(selector, component) {
@@ -14,6 +14,6 @@ function renderVue(selector, component) {
 }
 
 $(() => {
-  renderVue('#calculator', calculator);
-  renderVue('#delivery-calculator', deliveryCalculator);
+  renderVue("#calculator", calculator);
+  renderVue("#delivery-calculator", deliveryCalculator);
 });

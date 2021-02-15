@@ -51,10 +51,10 @@
 
 
 <script>
-import CalculatorUsers from './CalculatorUsers.vue';
-import CalculatorProduct from './CalculatorProduct.vue';
+import CalculatorUsers from "./CalculatorUsers.vue";
+import CalculatorProduct from "./CalculatorProduct.vue";
 import axios from "axios";
-import 'notifyjs-browser';
+import "notifyjs-browser";
 
 export default {
   name: "Calculator",
@@ -72,7 +72,7 @@ export default {
 
   methods: {
     users: function () {
-      $.fancybox.open($('.users'), { touch: false });
+      $.fancybox.open($(".users"), { touch: false });
     },
 
     addProduct: function () {
@@ -109,7 +109,7 @@ export default {
       }
     },
     calculate: function () {
-      const users = $('.user select');
+      const users = $(".user select");
       for (let i = 0; i < users.length; i += 1) {
         if (!users[i].value) {
           $.notify("Заполните всех людей, которые покупали продукты", "warn");
@@ -121,7 +121,7 @@ export default {
       axios.get(`/calculator_session/api/calculator_session/${sessionId}/calculate/`)
           .then(response => {
             this.result = response.data.data
-            $.fancybox.open($('.result'), { touch: false });
+            $.fancybox.open($(".result"), { touch: false });
           })
     }
   },

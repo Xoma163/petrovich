@@ -1,15 +1,15 @@
 /* eslint-disable import/no-extraneous-dependencies */
-const { merge } = require('webpack-merge');
+const { merge } = require("webpack-merge");
 
-const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
-const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
+const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
 
-const TerserPlugin = require('terser-webpack-plugin')
+const TerserPlugin = require("terser-webpack-plugin")
 
-const common = require('./webpack.common');
+const common = require("./webpack.common");
 
 module.exports = merge(common, {
-  stats: 'errors-warnings',
+  stats: "errors-warnings",
   optimization: {
     minimizer: [
       new TerserPlugin({
@@ -23,7 +23,7 @@ module.exports = merge(common, {
   },
   plugins: [
     new BundleAnalyzerPlugin({
-      analyzerMode: 'static',
+      analyzerMode: "static",
       openAnalyzer: false,
     }),
   ],

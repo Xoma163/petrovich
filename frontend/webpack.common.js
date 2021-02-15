@@ -1,39 +1,39 @@
-const path = require('path');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const BundleTracker = require('webpack-bundle-tracker');
-const VueLoaderPlugin = require('vue-loader/lib/plugin')
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
-const webpack = require('webpack');
+const path = require("path");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const BundleTracker = require("webpack-bundle-tracker");
+const VueLoaderPlugin = require("vue-loader/lib/plugin")
+const { CleanWebpackPlugin } = require("clean-webpack-plugin");
+const webpack = require("webpack");
 
-require('dotenv').config({ path: '../secrets/.env' })
+require("dotenv").config({ path: "../secrets/.env" })
 
 module.exports = {
   entry: {
-    app: path.join(__dirname, './src/js/index.js'),
+    app: path.join(__dirname, "./src/js/index.js"),
   },
 
   output: {
-    path: path.join(__dirname, '../static/dist/'),
-    filename: 'js/[name]-[fullhash].js',
-    publicPath: '/static/dist/',
+    path: path.join(__dirname, "../static/dist/"),
+    filename: "js/[name]-[fullhash].js",
+    publicPath: "/static/dist/",
   },
 
-  devtool: 'source-map',
+  devtool: "source-map",
 
   module: {
     rules: [
       {
         test: /\.vue$/,
-        loader: 'vue-loader'
+        loader: "vue-loader"
       },
       {
         test: /\.js$/,
         exclude: /node_modules/,
         use: [{
-          loader: 'babel-loader',
+          loader: "babel-loader",
           options: {
-            presets: ['@babel/preset-env'],
-            plugins: ['@babel/plugin-syntax-dynamic-import'],
+            presets: ["@babel/preset-env"],
+            plugins: ["@babel/plugin-syntax-dynamic-import"],
           },
         }],
       },
@@ -45,13 +45,13 @@ module.exports = {
           },
 
           {
-            loader: 'css-loader',
+            loader: "css-loader",
             options: {
               sourceMap: true,
             },
           },
           {
-            loader: 'postcss-loader',
+            loader: "postcss-loader",
             options: {
               sourceMap: true,
               postcssOptions: {
@@ -77,25 +77,25 @@ module.exports = {
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
     new webpack.ProvidePlugin({
-      $: 'jquery',
-      jQuery: 'jquery',
-      'window.jQuery': 'jquery'
+      $: "jquery",
+      jQuery: "jquery",
+      "window.jQuery": "jquery"
     }),
     new BundleTracker({
-      filename: 'webpack-stats.json',
+      filename: "webpack-stats.json",
     }),
     new VueLoaderPlugin(),
     new CleanWebpackPlugin(),
     new MiniCssExtractPlugin({
-      filename: 'css/[name]-[fullhash].css',
-      chunkFilename: 'css/[id].css',
+      filename: "css/[name]-[fullhash].css",
+      chunkFilename: "css/[id].css",
     }),
   ],
 
   resolve: {
     alias: {
-      'vue$': 'vue/dist/vue.esm.js'
+      "vue$": "vue/dist/vue.esm.js"
     },
-    extensions: ['*', '.js', '.vue', '.json']
+    extensions: ["*", ".js", ".vue", ".json"]
   },
 }

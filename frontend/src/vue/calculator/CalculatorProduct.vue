@@ -54,7 +54,7 @@ export default {
   methods: {
     deleteProduct: function () {
       axios.delete(`/calculator_session/api/calculator_product/${this.product.id}/`);
-      this.$emit('delete-product', this);
+      this.$emit("delete-product", this);
     }
   },
   watch: {

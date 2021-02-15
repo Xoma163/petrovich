@@ -53,7 +53,7 @@
 </template>
 
 <script>
-import DeliveryCalculatorUser from './DeliveryCalculatorUser.vue';
+import DeliveryCalculatorUser from "./DeliveryCalculatorUser.vue";
 
 export default {
 

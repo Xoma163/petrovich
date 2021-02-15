@@ -13,7 +13,7 @@
 </template>
 
 <script>
-import CalculatorUser from './CalculatorUser.vue';
+import CalculatorUser from "./CalculatorUser.vue";
 import axios from "axios";
 
 export default {
@@ -33,7 +33,7 @@ export default {
           });
     },
     deleteUser: function (user) {
-      this.$emit('delete-user', user)
+      this.$emit("delete-user", user)
     },
   },
   props: {

@@ -1,3 +1,3 @@
-import './modules';
+import "./modules";
 
-import './vueImports';
+import "./vueImports";
