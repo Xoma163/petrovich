@@ -25,6 +25,7 @@ class Quote(CommonCommand):
 
     def start(self):
         msgs = []
+        next_append = False
         for msg in self.event.fwd:
             message = {'text': msg['text']}
             if msg['from_id'] > 0:
@@ -40,7 +41,21 @@ class Quote(CommonCommand):
                 if photo:
                     max_photo = self.event.get_max_size_image(photo)
                     message['photo'] = max_photo['url']
-            msgs.append({'username': username, 'message': message, 'avatar': avatar})
+
+            # stack messages from one user
+            if msgs and msgs[-1]['username'] == username:
+                if next_append:
+                    msgs.append({'username': username, 'message': message, 'avatar': avatar})
+                    next_append = 'photo' in message
+                elif 'photo' in message:
+                    msgs[-1]['message']['photo'] = message['photo']
+                    msgs[-1]['message']['text'] += f"▲ ▲{message['text']}"
+                    next_append = True
+                else:
+                    msgs[-1]['message']['text'] += f"▲ ▲{message['text']}"
+            else:
+                msgs.append({'username': username, 'message': message, 'avatar': avatar})
+
         pil_image = self.build_quote_image(msgs)
         bytes_io = BytesIO()
         pil_image.save(bytes_io, format='PNG')
@@ -170,10 +185,17 @@ class Quote(CommonCommand):
             msg_photo_height = msg_photo.height
             msg_photo_margin = 10
 
-        msg_lines = textwrap.wrap(msg['text'], width=int(max_text_width / 7.5))
+        # stack messages from one user aka dancing with ▲
+        _msg_lines = [textwrap.wrap(x, width=int(max_text_width / 7.5)) for x in msg['text'].split("▲")]
+        msg_lines = []
+        for line in _msg_lines:
+            if len(line) > 0:
+                msg_lines += line
+            else:
+                msg_lines += [" "]
         total_msg_lines_height = sum([font_message.getsize(msg_line)[1] for msg_line in msg_lines])
         total_height = username_height + text_margin_top + total_msg_lines_height + msg_photo_height
-        total_height = max(total_height,avatar_size[1]) + margin_top + margin_bottom + msg_photo_margin
+        total_height = max(total_height, avatar_size[1]) + margin_top + margin_bottom + msg_photo_margin
 
         img = Image.new('RGB', (WIDTH, total_height), BACKGROUND_COLOR)
         avatar_image = Image.open(avatar)
