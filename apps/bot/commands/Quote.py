@@ -24,6 +24,8 @@ class Quote(CommonCommand):
     platforms = [Platform.VK]
 
     def start(self):
+        self.bot.set_activity(self.event.peer_id)
+
         msgs = []
         next_append = False
         for msg in self.event.fwd:
