@@ -56,7 +56,10 @@ class Quote(CommonCommand):
                 else:
                     msgs[-1]['message']['text'] += f"▲ ▲{message['text']}"
             else:
+                next_append = False
                 msgs.append({'username': username, 'message': message, 'avatar': avatar})
+                if 'photo' in message:
+                    next_append = True
 
         pil_image = self.build_quote_image(msgs)
         bytes_io = BytesIO()
