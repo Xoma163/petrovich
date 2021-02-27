@@ -49,7 +49,7 @@ class VkBot(CommonBot):
             raise PWarning("Не знаю такого типа активности")
         self.vk.messages.setActivity(type=activity, peer_id=peer_id, group_id=self.group_id)
 
-    def get_user_info(self,user_id):
+    def get_user_info(self, user_id):
         return self.vk.users.get(user_id=user_id, lang='ru', fields='sex, bdate, city, screen_name, photo_max')[0]
 
     def get_user_by_id(self, user_id) -> Users:
@@ -253,6 +253,13 @@ class VkBot(CommonBot):
             vk_event['fwd'] = [message['reply_message']]
         elif len(message.get('fwd_messages')) != 0:
             vk_event['fwd'] = message['fwd_messages']
+
+        if vk_event['fwd']:
+            for _msg in vk_event['fwd']:
+                if 'reply_message' in _msg:
+                    _msg['fwd'] = _msg['reply_message']
+                elif 'fwd_messages' in _msg:
+                    _msg['fwd'] = _msg['fwd_messages']
 
         # Узнаём пользователя
         vk_event['sender'] = self.get_user_by_id(vk_event['user_id'])

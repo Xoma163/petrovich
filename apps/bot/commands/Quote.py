@@ -26,9 +26,21 @@ class Quote(CommonCommand):
     def start(self):
         self.bot.set_activity(self.event.peer_id)
 
+        msgs = self.parse_fwd(self.event.fwd)
+
+        pil_image = self.build_quote_image(msgs)
+        bytes_io = BytesIO()
+        pil_image.save(bytes_io, format='PNG')
+        if pil_image.height > 2000:
+            attachments = self.bot.upload_document(bytes_io, self.event.peer_id, "Сохры")
+        else:
+            attachments = self.bot.upload_photos(bytes_io)
+        return {"attachments": attachments}
+
+    def parse_fwd(self, fwd_messages):
         msgs = []
         next_append = False
-        for msg in self.event.fwd:
+        for msg in fwd_messages:
             message = {'text': msg['text']}
             if msg['from_id'] > 0:
                 quote_user = self.bot.get_user_by_id(msg['from_id'])
@@ -66,14 +78,11 @@ class Quote(CommonCommand):
                 if 'photo' in message:
                     next_append = True
 
-        pil_image = self.build_quote_image(msgs)
-        bytes_io = BytesIO()
-        pil_image.save(bytes_io, format='PNG')
-        if pil_image.height > 2000:
-            attachments = self.bot.upload_document(bytes_io, self.event.peer_id, "Сохры")
-        else:
-            attachments = self.bot.upload_photos(bytes_io)
-        return {"attachments": attachments}
+            if msg.get('fwd'):
+                msgs[-1]['fwd'] = self.parse_fwd(msg['fwd'])
+                next_append = True
+
+        return msgs
 
     def get_centered_rounded_image(self, image: Image, max_size=80):
         w, h = image.size
@@ -161,11 +170,12 @@ class Quote(CommonCommand):
                width=2)
         return img
 
-    def _get_body(self, msgs):
-        images = [self._get_body_item(msg['username'], msg['message'], msg['avatar']) for msg in msgs]
+    def _get_body(self, msgs, this_body_is_fwd=False):
+        images = [self._get_body_item(msg['username'], msg['message'], msg['avatar'], msg.get('fwd'), this_body_is_fwd)
+                  for msg in msgs]
         return self._image_concatenation(images)
 
-    def _get_body_item(self, username, msg, avatar=None):
+    def _get_body_item(self, username, msg, avatar=None, fwd=None, this_item_is_fwd=False):
         margin_top = 10
         margin_bottom = 15
         margin_left = 110
@@ -177,6 +187,10 @@ class Quote(CommonCommand):
         name_font_size = 21
         message_font_size = 16
 
+        if this_item_is_fwd:
+            margin_left = 0
+            max_text_width = 215
+
         username_start_pos = (margin_left + avatar_size[0] + text_margin_left, margin_top)
         font_username = ImageFont.truetype(os.path.join(STATIC_DIR, 'fonts/Roboto-Regular.ttf'), name_font_size,
                                            encoding="unic")
@@ -186,32 +200,41 @@ class Quote(CommonCommand):
         _, username_height = get_image_size_by_text(username, font_username)
         msg_start_pos = (username_start_pos[0], username_start_pos[1] + username_height + text_margin_top)
 
+        fwd_photo = None
+        fwd_height = 0
+        fwd_margin = 0
+
         msg_photo = None
         msg_photo_height = 0
         msg_photo_margin = 0
+
+        if fwd:
+            fwd_photo = self._get_body(fwd, True)
+            fwd_height = fwd_photo.height
+            fwd_margin = 20
         if msg.get('photo'):
             image = Image.open(requests.get(msg['photo'], stream=True).raw).convert('RGBA')
             composite = Image.new("RGBA", image.size, (255, 255, 255, 0))
             composite.paste(image)
 
-            msg_photo = self.get_message_photo(composite)
+            msg_photo = self.get_message_photo(composite, max_text_width)
             msg_photo_height = msg_photo.height
-            msg_photo_margin = 10
+            msg_photo_margin = 20
 
         # stack messages from one user aka dancing with ▲
         _msg_lines = [textwrap.wrap(x, width=int(max_text_width / 7.5)) for x in msg['text'].split("▲")]
         msg_lines = []
-        if len(_msg_lines) == 1 and not _msg_lines[0]:
-            pass
-        else:
-            for line in _msg_lines:
-                if len(line) > 0:
-                    msg_lines += line
-                else:
-                    msg_lines += [" "]
+        if len(_msg_lines) > 0:
+            while not _msg_lines[-1]:
+                del _msg_lines[-1]
+        for line in _msg_lines:
+            if len(line) > 0:
+                msg_lines += line
+            else:
+                msg_lines += [" "]
         total_msg_lines_height = sum([font_message.getsize(msg_line)[1] for msg_line in msg_lines])
-        total_height = username_height + text_margin_top + total_msg_lines_height + msg_photo_height
-        total_height = max(total_height, avatar_size[1]) + margin_top + margin_bottom + msg_photo_margin
+        total_height = username_height + text_margin_top + total_msg_lines_height + msg_photo_height + fwd_height
+        total_height = max(total_height, avatar_size[1]) + margin_top + margin_bottom + msg_photo_margin + fwd_margin
 
         img = Image.new('RGB', (WIDTH, total_height), BACKGROUND_COLOR)
         avatar_image = Image.open(avatar)
@@ -228,10 +251,22 @@ class Quote(CommonCommand):
         for line in msg_lines:
             d.text((msg_start_pos[0], msg_start_pos[1] + offset_y), line, fill=text_color, font=font_message)
             offset_y += font_message.getsize(line)[1]
+
+        msg_photo_pos = None
         if msg_photo:
             msg_photo_pos = (msg_start_pos[0], msg_start_pos[1] + offset_y + msg_photo_margin)
             # Третий параметр: https://stackoverflow.com/questions/5324647/how-to-merge-a-transparent-png-image-with-another-image-using-pil
-            img.paste(msg_photo, msg_photo_pos, msg_photo)
+            try:
+                img.paste(msg_photo, msg_photo_pos, msg_photo)
+            except:
+                img.paste(msg_photo, msg_photo_pos)
+        if fwd_photo:
+            if msg_photo_pos:
+                msg_fwd_pos = (msg_photo_pos[0], msg_photo_pos[1] + msg_photo.height + fwd_margin)
+            else:
+                msg_fwd_pos = (msg_start_pos[0], msg_start_pos[1] + offset_y + msg_photo_margin)
+
+            img.paste(fwd_photo, msg_fwd_pos)
         return img
 
     def build_quote_image(self, msgs):
