@@ -48,7 +48,7 @@ class Event:
         """
         clear_msg = re.sub(" +", " ", msg)
         clear_msg = re.sub(",+", ",", clear_msg)
-        clear_msg = clear_msg.strip().strip(',').strip().strip(' ').strip().replace('ё', 'е')
+        clear_msg = clear_msg.strip().strip(',').strip().strip(' ').strip().replace('ё', 'е').replace('Ё', 'Е')
 
         msg_dict = {'msg': msg,
                     'clear_msg': clear_msg,
