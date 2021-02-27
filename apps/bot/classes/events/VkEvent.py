@@ -15,6 +15,22 @@ class VkEvent(Event):
                 max_size_width = size['width']
         return max_size_image
 
+    @staticmethod
+    def get_max_size_sticker(stickers):
+        max_size_sticker = stickers[0]
+        max_width_sticker = max_size_sticker['width']
+        for sticker in stickers:
+            if sticker['width'] > max_width_sticker:
+                max_size_sticker = sticker
+                max_width_sticker = sticker['width']
+        return max_size_sticker
+
+    @staticmethod
+    def get_sticker_128(stickers):
+        for sticker in stickers:
+            if sticker['width'] == 128:
+                return sticker
+
     def parse_attachments(self, attachments):
         """
         Распаршивание вложений

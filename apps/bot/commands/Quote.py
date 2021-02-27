@@ -44,6 +44,11 @@ class Quote(CommonCommand):
                     max_photo = self.event.get_max_size_image(photo)
                     message['photo'] = max_photo['url']
 
+                sticker = msg['attachments'][0].get('sticker')
+                if sticker:
+                    image = self.event.get_sticker_128(sticker['images'])
+                    message['photo'] = image['url']
+
             # stack messages from one user
             if msgs and msgs[-1]['username'] == username:
                 if next_append:
@@ -185,8 +190,11 @@ class Quote(CommonCommand):
         msg_photo_height = 0
         msg_photo_margin = 0
         if msg.get('photo'):
-            image = Image.open(requests.get(msg['photo'], stream=True).raw)
-            msg_photo = self.get_message_photo(image)
+            image = Image.open(requests.get(msg['photo'], stream=True).raw).convert('RGBA')
+            composite = Image.new("RGBA", image.size, (255, 255, 255, 0))
+            composite.paste(image)
+
+            msg_photo = self.get_message_photo(composite)
             msg_photo_height = msg_photo.height
             msg_photo_margin = 10
 
@@ -219,7 +227,8 @@ class Quote(CommonCommand):
             offset_y += font_message.getsize(line)[1]
         if msg_photo:
             msg_photo_pos = (msg_start_pos[0], msg_start_pos[1] + offset_y + msg_photo_margin)
-            img.paste(msg_photo, msg_photo_pos)
+            # Третий параметр: https://stackoverflow.com/questions/5324647/how-to-merge-a-transparent-png-image-with-another-image-using-pil
+            img.paste(msg_photo, msg_photo_pos, msg_photo)
         return img
 
     def build_quote_image(self, msgs):
