@@ -201,11 +201,14 @@ class Quote(CommonCommand):
         # stack messages from one user aka dancing with ▲
         _msg_lines = [textwrap.wrap(x, width=int(max_text_width / 7.5)) for x in msg['text'].split("▲")]
         msg_lines = []
-        for line in _msg_lines:
-            if len(line) > 0:
-                msg_lines += line
-            else:
-                msg_lines += [" "]
+        if len(_msg_lines) == 1 and not _msg_lines[0]:
+            pass
+        else:
+            for line in _msg_lines:
+                if len(line) > 0:
+                    msg_lines += line
+                else:
+                    msg_lines += [" "]
         total_msg_lines_height = sum([font_message.getsize(msg_line)[1] for msg_line in msg_lines])
         total_height = username_height + text_margin_top + total_msg_lines_height + msg_photo_height
         total_height = max(total_height, avatar_size[1]) + margin_top + margin_bottom + msg_photo_margin
