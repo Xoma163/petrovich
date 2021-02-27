@@ -2,8 +2,10 @@ from datetime import datetime
 
 from apps.bot.APIs.TimezoneDBAPI import TimezoneDBAPI
 from apps.bot.APIs.YandexGeoAPI import YandexGeoAPI
+from apps.bot.classes.Consts import Platform
 from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.common.CommonMethods import get_attachments_from_attachments_or_fwd
 from apps.service.models import City, TimeZone
 
 
@@ -30,6 +32,7 @@ class Profile(CommonCommand):
             [["др"], self.menu_bd],
             [['ник', 'никнейм'], self.menu_nickname],
             [['пол'], self.menu_gender],
+            [['аватар'], self.menu_avatar],
             [['default'], self.menu_default],
         ]
         method = self.handle_menu(menu, arg0)
@@ -79,18 +82,33 @@ class Profile(CommonCommand):
         self.event.sender.save()
         return f"Изменил пол на {self.event.sender.get_gender_display()}"
 
+    def menu_avatar(self):
+        images = get_attachments_from_attachments_or_fwd(self.event, 'photo')
+        if len(images) > 0:
+            self.event.sender.set_avatar(images[0]['private_download_url'])
+        else:
+            if self.event.platform != Platform.VK:
+                raise PWarning("Обновление аватара по пользователю доступно только для ВК")
+            self.bot.update_avatar(self.event.sender.user_id)
+        return "Изменил аватарку"
+
     def menu_default(self):
-        _city = self.event.sender.city or "Не установлено"
-        _bd = self.event.sender.birthday
+        user = self.event.sender
+        _city = user.city or "Не установлено"
+        _bd = user.birthday
         if _bd:
             _bd = _bd.strftime('%d.%m.%Y')
         else:
             _bd = "Не установлено"
-        _nickname = self.event.sender.nickname_real or "Не установлено"
-        msg = f"Город - {_city}\n" \
-              f"Дата рождения - {_bd}\n" \
-              f"Никнейм - {_nickname}\n" \
-              f"Пол - {self.event.sender.get_gender_display()}"
+        _nickname = user.nickname_real or "Не установлено"
+        msg = {
+            'msg': f"Город - {_city}\n"
+                   f"Дата рождения - {_bd}\n"
+                   f"Никнейм - {_nickname}\n"
+                   f"Пол - {user.get_gender_display()}"
+        }
+        if user.avatar:
+            msg['attachments'] = self.bot.upload_photos(user.avatar.path)
         return msg
 
 

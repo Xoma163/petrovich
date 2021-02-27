@@ -49,6 +49,9 @@ class VkBot(CommonBot):
             raise PWarning("Не знаю такого типа активности")
         self.vk.messages.setActivity(type=activity, peer_id=peer_id, group_id=self.group_id)
 
+    def get_user_info(self,user_id):
+        return self.vk.users.get(user_id=user_id, lang='ru', fields='sex, bdate, city, screen_name, photo_max')[0]
+
     def get_user_by_id(self, user_id) -> Users:
         """
         Возвращает пользователя по его id
@@ -58,7 +61,7 @@ class VkBot(CommonBot):
             vk_user = vk_user.first()
         else:
             # Прозрачная регистрация
-            user = self.vk.users.get(user_id=user_id, lang='ru', fields='sex, bdate, city, screen_name, photo_max')[0]
+            user = self.get_user_info(user_id)
             vk_user = Users()
             vk_user.user_id = user_id
             vk_user.name = user['first_name']
@@ -91,6 +94,11 @@ class VkBot(CommonBot):
             vk_user.groups.add(group_user)
             vk_user.save()
         return vk_user
+
+    def update_avatar(self, user_id):
+        user = self.get_user_by_id(user_id)
+        user_info = self.get_user_info(user_id)
+        user.set_avatar(user_info['photo_max'])
 
     def get_chat_by_id(self, chat_id) -> Chat:
         """
@@ -257,7 +265,6 @@ class VkBot(CommonBot):
                 self.add_extra_group_to_user(vk_event['sender'], vk_event['chat'])
         else:
             vk_event['chat'] = None
-
 
         return vk_event
 
