@@ -1,3 +1,5 @@
+import io
+
 from apps.bot.classes.Consts import Role, Platform
 from apps.bot.classes.DoTheLinuxComand import do_the_linux_command
 from apps.bot.classes.Exceptions import PWarning
@@ -89,23 +91,28 @@ class Logs(CommonCommand):
             [['default'], self.get_bot_logs]
         ]
         method = self.handle_menu(menu, arg0)
-        return method()
+        image = method()
+
+        img_byte_arr = io.BytesIO()
+        image.save(img_byte_arr, format='PNG')
+        if image.height > 1500:
+            return {'attachments': self.bot.upload_document(img_byte_arr)}
+        else:
+            return {'attachments': self.bot.upload_photos(img_byte_arr)}
 
     def get_web_logs(self):
         count = self.get_count(50, 1000)
         command = f"systemctl status petrovich_site -n{count}"
         res = get_server_logs(command)
         img = draw_text_on_image(res)
-        att = self.bot.upload_photos(img)
-        return {'attachments': att}
+        return img
 
     def get_bot_logs(self):
         count = self.get_count(50, 1000)
         command = f"systemctl status petrovich -n{count}"
         res = get_bot_logs(command)
         img = draw_text_on_image(res)
-        att = self.bot.upload_photos(img)
-        return {'attachments': att}
+        return img
 
     def get_db_logs(self):
         count = self.get_count(1, 5)
@@ -119,8 +126,7 @@ class Logs(CommonCommand):
                    f"{log.traceback}\n\n" \
                    f"---------------------------------------------------------------------------------------------------------\n\n"
         img = draw_text_on_image(msg)
-        att = self.bot.upload_photos(img)
-        return {'attachments': att}
+        return img
 
     def get_count(self, default, max_count):
         if self.event.args:

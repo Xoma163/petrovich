@@ -31,7 +31,7 @@ class Quote(CommonCommand):
         pil_image = self.build_quote_image(msgs)
         bytes_io = BytesIO()
         pil_image.save(bytes_io, format='PNG')
-        if pil_image.height > 2000:
+        if pil_image.height > 1500:
             attachments = self.bot.upload_document(bytes_io, self.event.peer_id, "Сохры")
         else:
             attachments = self.bot.upload_photos(bytes_io)
@@ -224,15 +224,18 @@ class Quote(CommonCommand):
         # stack messages from one user aka dancing with ▲
         _msg_lines = [textwrap.wrap(x, width=int(max_text_width / 7.5)) for x in msg['text'].split("▲")]
         msg_lines = []
-        if len(_msg_lines) > 0:
-            while not _msg_lines[-1]:
-                del _msg_lines[-1]
+        while len(_msg_lines) > 0 and not _msg_lines[-1] :
+            del _msg_lines[-1]
         for line in _msg_lines:
             if len(line) > 0:
                 msg_lines += line
             else:
                 msg_lines += [" "]
         total_msg_lines_height = sum([font_message.getsize(msg_line)[1] for msg_line in msg_lines])
+        if not total_msg_lines_height:
+            msg_photo_margin = 0
+            if not msg_photo:
+                fwd_margin = 0
         total_height = username_height + text_margin_top + total_msg_lines_height + msg_photo_height + fwd_height
         total_height = max(total_height, avatar_size[1]) + margin_top + margin_bottom + msg_photo_margin + fwd_margin
 

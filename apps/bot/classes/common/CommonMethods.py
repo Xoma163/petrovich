@@ -217,9 +217,9 @@ def draw_text_on_image(text):
     d = ImageDraw.Draw(img)
     d.text((10, 10), text, fill=text_color, font=font)
 
-    img_byte_arr = io.BytesIO()
-    img.save(img_byte_arr, format='PNG')
-    return img_byte_arr
+    # img_byte_arr = io.BytesIO()
+    # img.save(img_byte_arr, format='PNG')
+    return img
 
 
 def get_role_by_str(role_str):
