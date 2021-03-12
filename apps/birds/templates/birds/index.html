@@ -9,7 +9,15 @@
 </head>
 <body>
 <div class="content" style="text-align: center">
-  <img src="https://cam.andrewsha.net/mjpg/video.mjpg" style="max-width:100%;" alt="Камера">
+  {#  <img src="https://cam.andrewsha.net/mjpg/video.mjpg" style="max-width:100%;" alt="Камера">#}
+  <video id="test_video" controls autoplay>
+    <source src="rtsp://admin:admin@andrewsha.net:20000/stream_0">
+  </video>
+  <video src="rtsp://admin:admin@andrewsha.net:20000/stream_0" controls>
+    Your browser does not support the VIDEO tag and/or RTP streams.
+</video>
+
+  {#  <img src="rtsp://admin:admin@andrewsha.net:20000/stream_0" style="max-width:100%;" alt="Камера">#}
 </div>
 </body>
 </html>

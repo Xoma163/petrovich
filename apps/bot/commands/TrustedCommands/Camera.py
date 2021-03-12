@@ -11,7 +11,7 @@ class Birds(CommonCommand):
     int_args = [0]
     access = Role.TRUSTED
     platforms = [Platform.VK, Platform.TG]
-    enabled = False
+
 
     def start(self):
         self.bot.set_activity(self.event.peer_id)

@@ -24,7 +24,8 @@ class CameraHandler(threading.Thread):
         self.gif = None
         self.SCALED_WIDTH = 720
 
-        self.url = "http://192.168.1.12/mjpg/video.mjpg"
+        # self.url = "http://192.168.1.12/mjpg/video.mjpg"
+        self.url = "rtsp://admin:admin@192.168.1.14:6554/stream_0"
 
     def run(self):
         self._init_my_lists()
