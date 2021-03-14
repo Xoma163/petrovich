@@ -16,7 +16,7 @@ class CameraHandler(threading.Thread):
         self.time_on_frame = MaxSizeList(self.MAX_FRAMES)
         self.time_on_frame.init_0()
 
-    def __init__(self, max_frames=200):
+    def __init__(self, max_frames=2000):
         super().__init__()
         self.MAX_FRAMES = max_frames
         self._MAX_WIDTH = 1600
@@ -33,12 +33,15 @@ class CameraHandler(threading.Thread):
 
         time1 = time.time()
         # ToDo: возможно если я отрублю камеру, всё сломается
+        fps_queue = MaxSizeList(40)
         while capture.isOpened():
             while self._running:
                 try:
                     delta_time = time.time() - time1
                     self.time_on_frame.push(delta_time * 1000)  # мс
-                    fps = round(1 / delta_time, 1)
+                    fps = 1 / delta_time
+                    fps_queue.push(fps)
+                    fps = round(sum(fps_queue.ls) / len(fps_queue.ls))
                     time1 = time.time()
 
                     ret, frame = capture.read()
