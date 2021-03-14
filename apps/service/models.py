@@ -154,7 +154,10 @@ class Meme(models.Model):
     def preview_link(self):
         if self.link:
             from django.utils.safestring import mark_safe
-            return mark_safe(u'<a href="{0}">{0}</a>'.format(self.link))
+            cropped_link = self.link
+            if len(cropped_link) > 100:
+                cropped_link = f"{self.link[:98]}..."
+            return mark_safe(u'<a href="{0}">{1}</a>'.format(self.link, cropped_link))
         else:
             return '(Нет изображения)'
 
