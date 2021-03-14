@@ -57,9 +57,7 @@ class Rates(CommonCommand):
                 gamer.save()
 
             if self.event.command == "казино":
-                attachments = []
-                attachment = self.bot.upload_photos(f"{STATIC_DIR}/bot/img/rate.jpg")
-                attachments.append(attachment)
+                attachments = self.bot.upload_photos(f"{STATIC_DIR}/bot/img/rate.jpg")
                 if len(winners) == 1:
                     msg = {'msg': f"Выпавшее число - {rnd}\nПобедитель этого казино:\n{winners_str}",
                            'attachments': attachments}
