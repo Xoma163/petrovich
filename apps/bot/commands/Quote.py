@@ -41,7 +41,8 @@ class Quote(CommonCommand):
         msgs = []
         next_append = False
         for msg in fwd_messages:
-            message = {'text': msg['text']}
+            message = {'text': msg['text'].replace('\n', '▲ ▲')}
+
             if msg['from_id'] > 0:
                 quote_user = self.bot.get_user_by_id(msg['from_id'])
                 username = str(quote_user)
@@ -224,7 +225,7 @@ class Quote(CommonCommand):
         # stack messages from one user aka dancing with ▲
         _msg_lines = [textwrap.wrap(x, width=int(max_text_width / 7.5)) for x in msg['text'].split("▲")]
         msg_lines = []
-        while len(_msg_lines) > 0 and not _msg_lines[-1] :
+        while len(_msg_lines) > 0 and not _msg_lines[-1]:
             del _msg_lines[-1]
         for line in _msg_lines:
             if len(line) > 0:
