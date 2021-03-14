@@ -10,6 +10,7 @@ class Settings(CommonCommand):
     help_text = "Настройки - устанавливает некоторые настройки пользователя/чата"
     detail_help_text = \
         "Настройки (настройка) (вкл/выкл) - устанавливает некоторые настройки пользователя/чата\n" \
+        "Настройки упоминание (вкл/выкл) - определяет будет ли бот триггериться на команды без упоминания в конфе(требуются админские права) \n" \
         "Настройки реагировать (вкл/выкл) - определяет, будет ли бот реагировать на неправильные команды в конфе. " \
         "Это сделано для того, чтобы в конфе с несколькими ботами не было ложных срабатываний\n\n" \
         "Настройки мемы (вкл/выкл) - определяет, будет ли бот присылать мем если прислано его точное название без / (боту требуется доступ к переписке). " \
@@ -24,6 +25,7 @@ class Settings(CommonCommand):
 
         menu = [
             [['реагировать', 'реагируй', 'реагирование'], self.menu_reaction],
+            [['упоминание', 'упоминания','триггериться'], self.menu_mentioning],
             [['майнкрафт', 'майн', 'minecraft', 'mine'], self.menu_minecraft_notify],
             [['мемы'], self.menu_memes],
             [['default'], self.menu_default],
@@ -45,6 +47,16 @@ class Settings(CommonCommand):
 
         self.check_conversation()
         self.event.chat.need_reaction = value
+        self.event.chat.save()
+        return "Сохранил настройку"
+
+    def menu_mentioning(self):
+        self.check_sender(Role.CONFERENCE_ADMIN)
+        self.check_args(2)
+        value = self.get_on_or_off(self.event.args[1].lower())
+
+        self.check_conversation()
+        self.event.chat.mentioning = value
         self.event.chat.save()
         return "Сохранил настройку"
 
@@ -79,8 +91,10 @@ class Settings(CommonCommand):
         if self.event.chat:
             reaction = self.event.chat.need_reaction
             need_meme = self.event.chat.need_meme
+            mentioning = self.event.chat.mentioning
             msg += f"Реагировать на неправильные команды - {TRUE_FALSE_TRANSLATOR[reaction]}\n"
             msg += f"Присылать мемы по точным названиям - {TRUE_FALSE_TRANSLATOR[need_meme]}\n"
+            msg += f"Триггериться на команды без упоминания - {TRUE_FALSE_TRANSLATOR[mentioning]}\n"
 
         if self.event.sender.check_role(Role.TRUSTED):
             minecraft_notify = self.event.sender.check_role(Role.MINECRAFT_NOTIFY)

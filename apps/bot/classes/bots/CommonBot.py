@@ -159,6 +159,8 @@ class CommonBot(Thread):
 
         if event.chat and not event.chat.need_reaction:
             return None
+        if event.chat and event.chat.mentioning:
+            return None
         similar_command = self._get_similar_command(event, COMMANDS)
         self.logger.debug({'result': similar_command})
         if send:
@@ -245,6 +247,12 @@ class CommonBot(Thread):
         for mention in self.mentions:
             if message.find(mention) != -1:
                 return True
+        try:
+            chat = Chat.objects.get(chat_id=event['peer_id'])
+            if chat.mentioning:
+                return True
+        except:
+            pass
         return False
 
     @staticmethod
