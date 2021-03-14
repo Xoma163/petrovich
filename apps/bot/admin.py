@@ -4,9 +4,9 @@ from apps.bot.models import Users, Chat, Bot
 
 
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('user_id', 'show_url', 'name', 'surname', 'nickname', 'nickname_real', 'gender', 'birthday',
-                    'city', 'avatar')
-    list_display_links = ('user_id',)
+    list_display = (
+    'show_user_id', 'show_url', 'name', 'surname', 'nickname', 'nickname_real', 'gender', 'birthday', 'city')
+    list_display_links = ('show_user_id',)
     fieldsets = (
         ('Информация о пользователе', {
             'fields': (

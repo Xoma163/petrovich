@@ -85,13 +85,21 @@ class Users(Platform):
 
     def show_url(self):
         if self.platform == PlatformEnum.VK.name:
-            return format_html(f"<a href='https://vk.com/id{self.user_id}'>Вк</a>")
+            return format_html(f"<a href='https://vk.com/id{self.user_id}'>{self.platform}</a>")
         elif self.platform == PlatformEnum.TG.name:
-            return format_html(f"<a href='https://t.me/{self.nickname}'>Тг</a>")
+            return format_html(f"<a href='https://t.me/{self.nickname}'>{self.platform}</a>")
         else:
-            return ""
+            return self.platform
 
     show_url.short_description = "Ссылка"
+
+    def show_user_id(self):
+        if self.platform == PlatformEnum.VK.name or self.platform == PlatformEnum.TG.name:
+            return self.user_id
+        else:
+            return self.user_id[:8] + "..."
+
+    show_user_id.short_description = "user id"
 
     class Meta:
         verbose_name = "Пользователь"
