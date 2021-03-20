@@ -41,7 +41,7 @@ class Quote(CommonCommand):
         msgs = []
         next_append = False
         for msg in fwd_messages:
-            message = {'text': msg['text'].replace('\n', '▲ ▲')}
+            message = {'text': msg['text'].replace('\n', '▲ ▲') if isinstance(msg['text'], str) else msg['text']}
 
             if msg['from_id'] > 0:
                 quote_user = self.bot.get_user_by_id(msg['from_id'])
