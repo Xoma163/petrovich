@@ -13,7 +13,7 @@ module.exports = {
   },
 
   output: {
-    path: path.join(__dirname, "../static/dist/"),
+    path: path.join(__dirname, "../staticfiles/dist/"),
     filename: "js/[name]-[fullhash].js",
     publicPath: "/static/dist/",
   },

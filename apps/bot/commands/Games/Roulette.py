@@ -8,7 +8,7 @@ from apps.bot.classes.common.CommonMethods import random_event, localize_datetim
     get_random_int
 from apps.games.models import RouletteRate, Gamer
 # Кратно 12
-from petrovich.settings import DEFAULT_TIME_ZONE, STATIC_DIR
+from petrovich.settings import DEFAULT_TIME_ZONE, STATIC_ROOT
 
 MAX_NUMBERS = 36
 
@@ -115,8 +115,8 @@ class Roulette(CommonCommand):
 
     def menu_picture(self):
         photos = random_event(
-            [f"{STATIC_DIR}/bot/img/roulette_game.jpg",
-             f"{STATIC_DIR}/bot/img/roulette.jpg"],
+            [f"{STATIC_ROOT}/bot/img/roulette_game.jpg",
+             f"{STATIC_ROOT}/bot/img/roulette.jpg"],
             [90, 10])
         attachments = self.bot.upload_photos(photos)
         return {'attachments': attachments}

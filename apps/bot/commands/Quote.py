@@ -8,7 +8,7 @@ from PIL import ImageFont, Image, ImageDraw, ImageFilter
 from apps.bot.classes.Consts import Platform
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import get_image_size_by_text
-from petrovich.settings import STATIC_DIR
+from petrovich.settings import STATIC_ROOT
 
 WIDTH = 620
 BACKGROUND_COLOR = "#F5F5F5"
@@ -141,7 +141,7 @@ class Quote(CommonCommand):
         line_width = 216
         text_color = "#333333"
         text = "Сохры"
-        font = ImageFont.truetype(os.path.join(STATIC_DIR, 'fonts/Alegreya-Regular.ttf'), fontsize, encoding="unic")
+        font = ImageFont.truetype(os.path.join(STATIC_ROOT, 'fonts/Alegreya-Regular.ttf'), fontsize, encoding="unic")
         width, height = get_image_size_by_text(text, font)
         img = Image.new('RGB', (WIDTH, margin_top * 2 + 2), BACKGROUND_COLOR)
         d = ImageDraw.Draw(img)
@@ -160,7 +160,7 @@ class Quote(CommonCommand):
         line_width_2 = 77
         text_color = "#333333"
         text = "© Петрович"
-        font = ImageFont.truetype(os.path.join(STATIC_DIR, 'fonts/Alegreya-Regular.ttf'), fontsize, encoding="unic")
+        font = ImageFont.truetype(os.path.join(STATIC_ROOT, 'fonts/Alegreya-Regular.ttf'), fontsize, encoding="unic")
         width, height = get_image_size_by_text(text, font)
         img = Image.new('RGB', (WIDTH, margin_top * 2 + 2), BACKGROUND_COLOR)
         d = ImageDraw.Draw(img)
@@ -193,9 +193,9 @@ class Quote(CommonCommand):
             max_text_width = 215
 
         username_start_pos = (margin_left + avatar_size[0] + text_margin_left, margin_top)
-        font_username = ImageFont.truetype(os.path.join(STATIC_DIR, 'fonts/Roboto-Regular.ttf'), name_font_size,
+        font_username = ImageFont.truetype(os.path.join(STATIC_ROOT, 'fonts/Roboto-Regular.ttf'), name_font_size,
                                            encoding="unic")
-        font_message = ImageFont.truetype(os.path.join(STATIC_DIR, 'fonts/Roboto-Regular.ttf'), message_font_size,
+        font_message = ImageFont.truetype(os.path.join(STATIC_ROOT, 'fonts/Roboto-Regular.ttf'), message_font_size,
                                           encoding="unic")
 
         _, username_height = get_image_size_by_text(username, font_username)

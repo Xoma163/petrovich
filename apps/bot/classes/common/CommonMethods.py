@@ -11,7 +11,7 @@ from PIL import Image, ImageDraw, ImageFont
 from apps.bot.classes.Consts import Role
 from apps.bot.classes.Exceptions import PWarning
 from apps.service.models import Service
-from petrovich.settings import STATIC_DIR
+from petrovich.settings import STATIC_ROOT
 
 
 def random_probability(probability) -> bool:
@@ -209,7 +209,7 @@ def draw_text_on_image(text):
     text_color = "black"
     background_color = "white"
 
-    font = ImageFont.truetype(os.path.join(STATIC_DIR, 'fonts/consolas.ttf'), fontsize, encoding="unic")
+    font = ImageFont.truetype(os.path.join(STATIC_ROOT, 'fonts/consolas.ttf'), fontsize, encoding="unic")
     width, height = get_image_size_by_text(text, font)
     width += 10
     height += 10
