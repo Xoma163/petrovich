@@ -95,10 +95,10 @@ class Logs(CommonCommand):
 
         img_byte_arr = io.BytesIO()
         image.save(img_byte_arr, format='PNG')
-        if image.height > 1500:
-            return {'attachments': self.bot.upload_document(img_byte_arr)}
-        else:
-            return {'attachments': self.bot.upload_photos(img_byte_arr)}
+        # if image.height > 1500:
+        return {'msg': 'test', 'attachments': self.bot.upload_document(img_byte_arr,peer_id=self.event.peer_id)}
+        # else:
+        #     return {'attachments': self.bot.upload_photos(img_byte_arr)}
 
     def get_web_logs(self):
         count = self.get_count(50, 1000)
@@ -121,6 +121,7 @@ class Logs(CommonCommand):
             raise PWarning("Не нашёл логов с ошибками")
         msg = ""
         for log in logs:
+            # ToDo: +4h
             msg += f"{log.create_datetime.strftime('%d.%m.%Y %H:%M:%S')}\n\n" \
                    f"{log.exception}\n\n" \
                    f"{log.traceback}\n\n" \
