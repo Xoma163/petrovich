@@ -96,7 +96,7 @@ class Logs(CommonCommand):
         img_byte_arr = io.BytesIO()
         image.save(img_byte_arr, format='PNG')
         # if image.height > 1500:
-        return {'msg': 'test', 'attachments': self.bot.upload_document(img_byte_arr,peer_id=self.event.peer_id)}
+        return {'attachments': self.bot.upload_document(img_byte_arr,peer_id=self.event.peer_id)}
         # else:
         #     return {'attachments': self.bot.upload_photos(img_byte_arr)}
 
