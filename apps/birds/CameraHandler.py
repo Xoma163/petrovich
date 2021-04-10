@@ -19,7 +19,7 @@ cv2_logger.addHandler(handler)
 class CameraHandler(threading.Thread):
     MAX_WIDTH = 1920
     MAX_HEIGHT = 1080
-    SCALED_WIDTH = 720
+    SCALED_WIDTH = 510
     SCALED_COEFF = SCALED_WIDTH / MAX_WIDTH
     SCALED_HEIGHT = int(MAX_HEIGHT * SCALED_COEFF)
 
@@ -58,7 +58,8 @@ class CameraHandler(threading.Thread):
 
                     ret, frame = capture.read()
                     if ret:
-                        frame = cv2.resize(frame, (0, 0), fx=self.SCALED_COEFF, fy=self.SCALED_COEFF)
+                        frame = cv2.resize(frame, (0, 0), fx=self.SCALED_COEFF, fy=self.SCALED_COEFF,
+                                           interpolation=cv2.INTER_AREA)
                         frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
                         frame = self.draw_text_on_image(
                             frame, datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S"), (10, 20))
@@ -148,7 +149,7 @@ class MaxSizeList(object):
         frame = np.zeros((h, w, 3), np.uint8)
         self.ls = [frame for _ in range(self.max_length)]
 
-    def init_values(self,value):
+    def init_values(self, value):
         self.ls = [value for _ in range(self.max_length)]
 
     def push(self, st):
