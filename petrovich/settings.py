@@ -1,11 +1,11 @@
 import os
 
-import environ
-
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 from apps.bot.classes.Consts import Platform
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+import environ
+
 env = environ.Env()
 env.read_env(os.path.join(BASE_DIR, 'secrets/.env'))
 # Quick-start development settings - unsuitable for production
@@ -82,7 +82,7 @@ ROOT_URLCONF = 'petrovich.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'DIRS': [os.path.join(BASE_DIR, 'templates'), 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
