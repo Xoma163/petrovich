@@ -1,4 +1,5 @@
 import datetime
+import logging
 import os
 import threading
 import time
@@ -8,32 +9,43 @@ import cv2
 import numpy as np
 from PIL import Image
 
+cv2_logger = logging.getLogger('cv2')
+cv2_logger.setLevel(logging.DEBUG)
+handler = logging.StreamHandler()
+handler.setLevel(logging.DEBUG)
+cv2_logger.addHandler(handler)
+
 
 class CameraHandler(threading.Thread):
+    MAX_WIDTH = 1920
+    MAX_HEIGHT = 1080
+    SCALED_WIDTH = 720
+    SCALED_COEFF = SCALED_WIDTH / MAX_WIDTH
+    SCALED_HEIGHT = int(MAX_HEIGHT * SCALED_COEFF)
+
     def _init_my_lists(self):
         self.images = MaxSizeList(self.MAX_FRAMES)
-        self.images.init_frames()
+        self.images.init_frames(self.SCALED_WIDTH, self.SCALED_HEIGHT)
         self.time_on_frame = MaxSizeList(self.MAX_FRAMES)
-        self.time_on_frame.init_0()
+        self.time_on_frame.init_values(0)
 
-    def __init__(self, max_frames=2000):
+    def __init__(self, max_frames=500):
         super().__init__()
         self.MAX_FRAMES = max_frames
-        self._MAX_WIDTH = 1600
+
         self._running = True
         self.gif = None
-        self.SCALED_WIDTH = 720
 
         # self.url = "http://192.168.1.12/mjpg/video.mjpg"
-        self.url = "rtsp://admin:admin@192.168.1.14:6554/stream_0"
+        self.url = "rtsp://192.168.1.15:554/user=admin&password=&channel=1&stream=0.sdp"
 
     def run(self):
         self._init_my_lists()
         capture = cv2.VideoCapture(self.url)
 
         time1 = time.time()
-        # ToDo: возможно если я отрублю камеру, всё сломается
         fps_queue = MaxSizeList(40)
+        fps_queue.init_values(25)
         while capture.isOpened():
             while self._running:
                 try:
@@ -46,18 +58,13 @@ class CameraHandler(threading.Thread):
 
                     ret, frame = capture.read()
                     if ret:
-                        frame = cv2.resize(frame, (0, 0), fx=self.SCALED_WIDTH / self._MAX_WIDTH,
-                                           fy=self.SCALED_WIDTH / self._MAX_WIDTH)
-
+                        frame = cv2.resize(frame, (0, 0), fx=self.SCALED_COEFF, fy=self.SCALED_COEFF)
                         frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-
-                        frame = self.draw_text_on_image(frame, datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S"),
-                                                        (10, 20))
+                        frame = self.draw_text_on_image(
+                            frame, datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S"), (10, 20))
                         frame = self.draw_text_on_image(frame, str(fps) + " FPS", (frame.shape[1] - 80, 20))
                         self.images.push(frame)
-
                     else:
-                        print('ret=False')
                         time.sleep(10)
                         capture = cv2.VideoCapture(self.url)
                 except Exception as e:
@@ -98,17 +105,18 @@ class CameraHandler(threading.Thread):
             pil_images.append(pil_image)
 
         gif = BytesIO()
-        pil_images[0].save(gif,
-                           format="GIF",
-                           save_all=True,
-                           append_images=pil_images[1:],
-                           loop=0,
-                           )
+        pil_images[0].save(
+            gif,
+            format="GIF",
+            save_all=True,
+            append_images=pil_images[1:],
+            loop=0,
+        )
         return gif
 
     def get_img(self):
         if not self._running:
-            self.images.init_frames()
+            self.images.init_frames(self.SCALED_WIDTH, self.SCALED_HEIGHT)
             self.time_on_frame.init_0()
             self.resume()
             while self.time_on_frame.get_last() == 0:
@@ -136,12 +144,12 @@ class MaxSizeList(object):
         self.max_length = max_length
         self.ls = []
 
-    def init_frames(self):
-        frame = np.zeros((100, 100, 3), np.uint8)
+    def init_frames(self, w, h):
+        frame = np.zeros((h, w, 3), np.uint8)
         self.ls = [frame for _ in range(self.max_length)]
 
-    def init_0(self):
-        self.ls = [0 for _ in range(self.max_length)]
+    def init_values(self,value):
+        self.ls = [value for _ in range(self.max_length)]
 
     def push(self, st):
         if len(self.ls) == self.max_length:
