@@ -381,6 +381,12 @@ class CommonBot(Thread):
         """
         raise NotImplementedError
 
+    def upload_animation(self, animation, peer_id=None, title='Документ'):
+        """
+        Загрузка анимации (GIF)
+        """
+        raise NotImplementedError
+
     def upload_document(self, document, peer_id=None, title='Документ'):
         """
         Загрузка документа
