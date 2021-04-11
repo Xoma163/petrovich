@@ -66,6 +66,14 @@ class Horoscope(CommonCommand):
                     raise PWarning("На сегодня ещё нет гороскопа")
                 meme = horoscope.memes.all()[zodiac_sign_index]
                 return f"{zodiac_sign.name.capitalize()}\n{meme.get_info()}"
+            elif self.event.args[0] in "конфа":
+                self.check_conversation()
+                chat_users = self.event.chat.users.all()
+                all_zodiac_signs = set(self.zodiac_signs.find_zodiac_sign_by_date(x.birthday) for x in chat_users if x.birthday)
+                messages = []
+                for zodiac_sign in all_zodiac_signs:
+                    messages.append(self.get_horoscope_by_zodiac_sign(zodiac_sign))
+                return messages
             # Гороскоп для знака зодиака в аргументах
             zodiac_sign_name = self.event.args[0].lower()
             zodiac_sign = self.zodiac_signs.get_zodiac_sign_by_sign_or_name(zodiac_sign_name)

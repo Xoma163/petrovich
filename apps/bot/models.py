@@ -61,7 +61,7 @@ class Users(Platform):
 
     groups = models.ManyToManyField(Group, verbose_name="Группы")
 
-    chats = models.ManyToManyField(Chat, verbose_name="Чаты", blank=True)
+    chats = models.ManyToManyField(Chat, verbose_name="Чаты", blank=True, related_name="users")
 
     imei = models.CharField('IMEI', max_length=20, null=True, blank=True)
     send_notify_to = models.ManyToManyField('self', verbose_name="Отправлять уведомления", blank=True)
