@@ -286,3 +286,19 @@ def transform_k(arg: str):
         arg = float(arg)
         arg *= 10 ** (3 * count_k)
     return arg
+
+
+def replace_similar_letters(text):
+    similar_letters = {
+        'c': 'с',
+        'e': 'е',
+        'y': 'у',
+        'o': 'о',
+        'p': 'р',
+        'k': 'к',
+        'x': 'х',
+        'n': 'п',
+    }
+    for letter in similar_letters:
+        text = text.replace(letter, similar_letters[letter])
+    return text
