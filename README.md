@@ -2,16 +2,13 @@
 
 [![VK Bot](readme/vk.png)](https://vk.com/igor_petrovich_ksta)
 [![Telegram Bot](readme/tg.png)](https://t.me/igor_petrovich_ksta_bot)
-[![Website](static/favicon_64.png)](https://andrewsha.net)
+[![Website](staticfiles/favicon_64.png)](https://andrewsha.net)
 
 ## VkBot Petrovich
 
 Этот проект бот ВКонтакте, созданный в первую очередь для личных целей, но так вышло, что и для развлечения.
 
--   [Документация](https://vk.com/@igor_petrovich_ksta-instrukciya-po-ispolzovaniu) 
--   [FAQ](./readme/faq.md)
--   [API (временно не работает)](./readme/api.md) 
--   [Установка](./readme/setup.md)
+##[Вики](https://github.com/Xoma163/petrovich/wiki) 
 
 ## Отдельная благодарность
 
