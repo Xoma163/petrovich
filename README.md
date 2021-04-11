@@ -4,11 +4,10 @@
 [![Telegram Bot](readme/tg.png)](https://t.me/igor_petrovich_ksta_bot)
 [![Website](staticfiles/favicon_64.png)](https://andrewsha.net)
 
-## VkBot Petrovich
+## Petrovich
 
-Этот проект бот ВКонтакте, созданный в первую очередь для личных целей, но так вышло, что и для развлечения.
-
-## [Вики](https://github.com/Xoma163/petrovich/wiki) 
+## [Вики](https://github.com/Xoma163/petrovich/wiki/1.-Документация-по-использованию-бота) 
+Основная информация по проекту для пользователей и разработчиков находится в вики
 
 ## Отдельная благодарность
 
