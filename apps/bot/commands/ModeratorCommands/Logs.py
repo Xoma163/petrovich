@@ -1,12 +1,14 @@
 import io
 
+import pytz
+
 from apps.bot.classes.Consts import Role, Platform
 from apps.bot.classes.DoTheLinuxComand import do_the_linux_command
 from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import draw_text_on_image
 from apps.db_logger.models import Logger
-from petrovich.settings import BASE_DIR
+from petrovich.settings import BASE_DIR, DEFAULT_TIME_ZONE
 
 
 def remove_rows_if_find_word(old_str, word):
@@ -122,8 +124,12 @@ class Logs(CommonCommand):
             raise PWarning("Не нашёл логов с ошибками")
         msg = ""
         for log in logs:
-            # ToDo: +4h
-            msg += f"{log.create_datetime.strftime('%d.%m.%Y %H:%M:%S')}\n\n" \
+            if self.event.sender.city:
+                tz = self.event.sender.city.timezone.name
+            else:
+                tz = DEFAULT_TIME_ZONE
+
+            msg += f"{log.create_datetime.astimezone(pytz.timezone(tz)).strftime('%d.%m.%Y %H:%M:%S')}\n\n" \
                    f"{log.exception}\n\n" \
                    f"{log.traceback}\n\n" \
                    f"---------------------------------------------------------------------------------------------------------\n\n"

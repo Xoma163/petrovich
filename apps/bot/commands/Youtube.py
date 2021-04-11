@@ -10,7 +10,6 @@ from apps.service.models import YoutubeSubscribe
 MAX_USER_SUBS_COUNT = 3
 
 
-# ToDo: menu
 class YouTube(CommonCommand):
     name = "ютуб"
     help_text = "создаёт подписку на ютуб канал"
@@ -28,57 +27,67 @@ class YouTube(CommonCommand):
     platforms = [Platform.VK, Platform.TG]
 
     def start(self):
-        action = self.event.args[0].lower()
-        if action in ['добавить', 'подписаться', 'подписка']:
-            self.check_args(2)
-            channel_id = self.event.args[1]
-            try:
-                url = f'https://youtube.com/user/{channel_id}'
-                response = requests.get(url)
-                bsop = BeautifulSoup(response.content, 'html.parser')
-                channel_id = bsop.find_all('link', {'rel': 'canonical'})[0].attrs['href'].split('/')[-1]
-            except Exception:
-                pass
+        arg0 = self.event.args[0].lower()
+        menu = [
+            [['добавить', 'подписаться', 'подписка'], self.menu_add],
+            [['удалить', 'отписаться', 'отписка'], self.menu_delete],
+            [['подписки'], self.menu_subs],
+            [['конфа'], self.menu_conference],
+        ]
+        method = self.handle_menu(menu, arg0)
+        return method()
 
-            if self.event.chat:
-                existed_sub = YoutubeSubscribe.objects.filter(chat=self.event.chat,
-                                                              channel_id=channel_id)
-            else:
-                existed_sub = YoutubeSubscribe.objects.filter(chat__isnull=True,
-                                                              channel_id=channel_id)
-            if existed_sub.exists():
-                raise PWarning(f"Ты уже и так подписан на канал {existed_sub.first().title}")
+    def menu_add(self):
+        self.check_args(2)
+        channel_id = self.event.args[1]
+        try:
+            url = f'https://youtube.com/user/{channel_id}'
+            response = requests.get(url)
+            bsop = BeautifulSoup(response.content, 'html.parser')
+            channel_id = bsop.find_all('link', {'rel': 'canonical'})[0].attrs['href'].split('/')[-1]
+        except Exception:
+            pass
 
-            user_subs_count = YoutubeSubscribe.objects.filter(author=self.event.sender).count()
-
-            # Ограничение 3 подписки для нетрастед
-            if not self.event.sender.check_role(Role.TRUSTED) and user_subs_count >= MAX_USER_SUBS_COUNT:
-                return f"Максимальное число подписок - {MAX_USER_SUBS_COUNT}"
-            youtube_info = YoutubeInfo(channel_id)
-            youtube_data = youtube_info.get_youtube_channel_info()
-            yt_sub = YoutubeSubscribe(
-                author=self.event.sender,
-                chat=self.event.chat,
-                channel_id=channel_id,
-                title=youtube_data['title'],
-                date=youtube_data['last_video']['date']
-            )
-            yt_sub.save()
-            return f'Подписал на канал {youtube_data["title"]}'
-        elif action in ['удалить', 'отписаться', 'отписка']:
-            self.check_args(2)
-            channel_filter = self.event.args[1:]
-            yt_sub = self.get_sub(channel_filter, True)
-            yt_sub_title = yt_sub.title
-            yt_sub.delete()
-            return f"Удалил подписку на канал {yt_sub_title}"
-        elif action in ['подписки']:
-            return self.get_subs()
-        elif action in ['конфа']:
-            self.check_conversation()
-            return self.get_subs(conversation=True)
+        if self.event.chat:
+            existed_sub = YoutubeSubscribe.objects.filter(chat=self.event.chat,
+                                                          channel_id=channel_id)
         else:
-            raise PWarning("Не понял команды (добавить/удалить/подписки)")
+            existed_sub = YoutubeSubscribe.objects.filter(chat__isnull=True,
+                                                          channel_id=channel_id)
+        if existed_sub.exists():
+            raise PWarning(f"Ты уже и так подписан на канал {existed_sub.first().title}")
+
+        user_subs_count = YoutubeSubscribe.objects.filter(author=self.event.sender).count()
+
+        # Ограничение 3 подписки для нетрастед
+        if not self.event.sender.check_role(Role.TRUSTED) and user_subs_count >= MAX_USER_SUBS_COUNT:
+            return f"Максимальное число подписок - {MAX_USER_SUBS_COUNT}"
+        youtube_info = YoutubeInfo(channel_id)
+        youtube_data = youtube_info.get_youtube_channel_info()
+        yt_sub = YoutubeSubscribe(
+            author=self.event.sender,
+            chat=self.event.chat,
+            channel_id=channel_id,
+            title=youtube_data['title'],
+            date=youtube_data['last_video']['date']
+        )
+        yt_sub.save()
+        return f'Подписал на канал {youtube_data["title"]}'
+
+    def menu_delete(self):
+        self.check_args(2)
+        channel_filter = self.event.args[1:]
+        yt_sub = self.get_sub(channel_filter, True)
+        yt_sub_title = yt_sub.title
+        yt_sub.delete()
+        return f"Удалил подписку на канал {yt_sub_title}"
+
+    def menu_subs(self):
+        return self.get_subs()
+
+    def menu_conference(self):
+        self.check_conversation()
+        return self.get_subs(conversation=True)
 
     def get_sub(self, filters, for_delete=False):
         if self.event.chat:

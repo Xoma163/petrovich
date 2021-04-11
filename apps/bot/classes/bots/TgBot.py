@@ -196,7 +196,7 @@ class TgBot(CommonBot):
         if 'media_group_id' in event:
             pass
         if 'photo' in event['message']:
-            # ToDo: ебучая телега шлёт хуй пойми как картинки
+            # ебучая телега шлёт хуй пойми как картинки
             photo = event['message']['photo'][-1]
             new_photo = {
                 'id': photo['file_id'],

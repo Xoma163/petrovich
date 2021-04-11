@@ -89,7 +89,7 @@ class YandexBot(CommonBot):
             'fwd': None
         }
 
-        # ToDo: Как только мы заходим в навык, message['text'] = ''. Здороваемся с пользователем
+        # Как только мы заходим в навык, message['text'] = ''. Здороваемся с пользователем
         if not yandex_event['message']['text']:
             yandex_event['message']['text'] = "привет"
         return yandex_event

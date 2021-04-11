@@ -2,7 +2,6 @@ from apps.bot.classes.Consts import Platform
 from apps.bot.classes.common.CommonCommand import CommonCommand
 
 
-# ToDo: TG игровая конфа
 class GameConference(CommonCommand):
     name = "игровая"
     names = ["ставошная"]
