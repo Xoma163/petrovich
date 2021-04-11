@@ -423,8 +423,6 @@ def prepare_meme_to_send(bot, event, meme, print_name=False, send_keyboard=False
             msg['attachments'] = [meme.link.replace(VK_URL, '')]
         elif meme.type == 'photo':
             msg['attachments'] = bot.upload_photos(meme.link)
-        # elif meme.type == 'doc':
-        #     msg['attachments'] = bot.upload_document(meme.link, event.peer_id)
         else:
             raise PError("У мема нет типа. Тыкай разраба")
 

@@ -152,6 +152,18 @@ class TgBot(CommonBot):
             self.requests.get('sendPhoto', {'chat_id': peer_id, 'caption': msg, 'reply_markup': keyboard},
                               files={'photo': photo})
 
+    def _send_document(self, peer_id, msg, document, keyboard):
+        """
+        Отправка документа
+        document: url или байты
+        """
+        if isinstance(document, str) and urlparse(document).hostname:
+            self.requests.get('sendDocument',
+                              {'chat_id': peer_id, 'caption': msg, 'document': document, 'reply_markup': keyboard})
+        else:
+            self.requests.get('sendDocument', {'chat_id': peer_id, 'caption': msg, 'reply_markup': keyboard},
+                              files={'document': document})
+
     def _send_video(self, peer_id, msg, video, keyboard):
         """
         Отправка видео
@@ -175,6 +187,8 @@ class TgBot(CommonBot):
         if keyboard:
             keyboard = json.dumps(keyboard)
         if attachments:
+            if not isinstance(attachments, list):
+                attachments = [attachments]
             # Убираем все ссылки, потому что телега в них не умеет похоже
             attachments = list(filter(lambda x: not (isinstance(x, str) and urlparse(x).hostname), attachments))
             attachments = list(filter(lambda x: x, attachments))
@@ -185,6 +199,10 @@ class TgBot(CommonBot):
                     return self._send_video(peer_id, msg, attachments[0]['attachment'], keyboard)
                 elif attachments[0]['type'] == 'photo':
                     return self._send_photo(peer_id, msg, attachments[0]['attachment'], keyboard)
+                elif attachments[0]['type'] == 'document':
+                    return self._send_document(peer_id, msg, attachments[0]['attachment'], keyboard)
+                elif attachments[0]['type'] == 'animation':
+                    return self._send_animation(peer_id, msg, attachments[0]['attachment'], keyboard)
         prepared_message = {'chat_id': peer_id, 'text': msg, 'parse_mode': 'HTML', 'reply_markup': keyboard}
         return self.requests.get('sendMessage', params=prepared_message)
 
@@ -383,7 +401,7 @@ class TgBot(CommonBot):
 
     def upload_photos(self, images, max_count=10):
         """
-        Загрузка фотографий на сервер ВК.
+        Загрузка фотографий на сервер ТГ.
         images: список изображений в любом формате (ссылки, байты, файлы)
         При невозможности загрузки одной из картинки просто пропускает её
         """
@@ -400,11 +418,14 @@ class TgBot(CommonBot):
                 break
         return images_list
 
+    def upload_animation(self, animation, peer_id=None, title='Документ'):
+        return {'type': 'video', 'attachment': self._prepare_obj_to_upload(animation)}
+
     def upload_document(self, document, peer_id=None, title='Документ'):
         """
         Загрузка документа на сервер ТГ.
         """
-        return {'type': 'video', 'attachment': self._prepare_obj_to_upload(document)}
+        return {'type': 'document', 'attachment': self._prepare_obj_to_upload(document)}
 
     @staticmethod
     def get_inline_keyboard(command_text, button_text="Ещё", args=None):

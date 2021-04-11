@@ -145,36 +145,32 @@ class YandexBot(CommonBot):
     @staticmethod
     def _prepare_obj_to_upload(file_like_object, allowed_exts_url=None):
         """
-        Подготовка объектов(в основном картинок) для загрузки.
-        То есть метод позволяет преобразовывать почти из любого формата в необходимый для VK
         """
         pass
 
     def upload_photos(self, images, max_count=10):
         """
-        Загрузка фотографий на сервер ВК.
-        images: список изображений в любом формате (ссылки, байты, файлы)
-        При невозможности загрузки одной из картинки просто пропускает её
+        """
+        pass
+
+    def upload_animation(self, animation, peer_id=None, title='Документ'):
+        """
         """
         pass
 
     def upload_document(self, document, peer_id=None, title='Документ'):
         """
-        Загрузка документа на сервер ВК.
         """
         pass
 
     def upload_audio(self, audio, artist, title):
         """
-        Загрузка аудиофайла на сервер ВК.
         """
         pass
 
     @staticmethod
     def get_inline_keyboard(command_text, button_text="Ещё", args=None):
         """
-        Получение инлайн-клавиатуры с одной кнопкой
-        В основном используется для команд, где нужно запускать много команд и лень набирать заново
         """
         pass
 

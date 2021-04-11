@@ -4,7 +4,7 @@ from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.management.commands.start import camera_handler
 
 
-class Birds(CommonCommand):
+class Camera(CommonCommand):
     name = "камера"
     names = ["с", "c"]
     help_text = "ссылка и гифка с камеры"
@@ -12,7 +12,6 @@ class Birds(CommonCommand):
     int_args = [0]
     access = Role.TRUSTED
     platforms = [Platform.VK, Platform.TG]
-
 
     def start(self):
         self.bot.set_activity(self.event.peer_id)
@@ -35,7 +34,7 @@ class Birds(CommonCommand):
                 document = camera_handler.get_gif(frames)
             except PError as e:
                 return str(e)
-            attachment = self.bot.upload_document(document, self.event.peer_id, "Камера")
+            attachment = self.bot.upload_animation(document, self.event.peer_id, "Камера")
             attachments.append(attachment)
         attachments.append('https://birds.andrewsha.net')
         if len(attachments) == 2 or self.event.platform == Platform.VK:

@@ -378,6 +378,9 @@ class VkBot(CommonBot):
             print(e)
         return attachments
 
+    def upload_animation(self, animation, peer_id=None, title='Документ'):
+        return self.upload_document(animation, peer_id, title)
+
     def upload_document(self, document, peer_id=None, title='Документ'):
         """
         Загрузка документа на сервер ВК.
