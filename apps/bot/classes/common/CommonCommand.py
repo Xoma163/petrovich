@@ -1,17 +1,22 @@
 from apps.bot.classes.Consts import Role, ATTACHMENT_TRANSLATOR, Platform
 from apps.bot.classes.Exceptions import PWarning, PError
 from apps.bot.classes.bots.CommonBot import CommonBot
-from apps.bot.classes.common.CommonMethods import get_help_texts_for_command
+from apps.bot.classes.common.CommonMethods import get_help_texts_for_command, transform_k
 from apps.bot.classes.events.Event import Event
 from petrovich.settings import env
 
 
 class CommonCommand:
+    # Основные поля команды
     name: str = None  # Имя команды,
     names: list = []  # Вспопогательные имена команды,
     help_text: str = None  # Текст в /команды
     help_texts: list = []  # Текст в детальной помощи по команде /помощь (название команды)
+    enabled: bool = True  # Включена ли команда
+    suggest_for_similar: bool = True  # предлагать ли команду в выдаче похожих команд при ошибке пользователя в вводе
+    priority: int = 0  # Приоритет обработки команды
 
+    # Проверки
     access: Role = Role.USER  # Необходимые права для выполнения команды
     pm: bool = False  # Должно ли сообщение обрабатываться только в лс
     conversation: bool = False  # Должно ли сообщение обрабатываться только в конфе
@@ -22,10 +27,7 @@ class CommonCommand:
     platforms: list or Platform = list(Platform)  # Список платформ, которые могут обрабатывать команду ToDo: list only
     excluded_platforms: list = []  # Список исключённых платформ.
     attachments: list = []  # Должно ли сообщение обрабатываться только с вложениями
-    enabled: bool = True  # Включена ли команда
-    priority: int = 0  # Приоритет обработки команды
     city: bool = False  # Должно ли сообщение обрабатываться только с заданным городом у пользователя
-    suggest_for_similar: bool = True  # предлагать ли команду в выдаче похожих команд при ошибке пользователя в вводе
 
     def __init__(self):
         self.bot = None
@@ -33,8 +35,14 @@ class CommonCommand:
 
         if not isinstance(self.platforms, list):
             self.platforms = [self.platforms]
+
+        # Дополнительные поля
         if self.name:
-            self.all_names = [self.name] + self.names
+            self.full_names = [self.name] + self.names
+            if self.help_text:
+                self.full_help_text = f"{self.name.capitalize()} - {self.help_text}"
+            if self.help_texts:
+                self.full_help_texts = "\n".join([f"{self.name.capitalize()} {x}" for x in self.help_texts])
 
     def accept(self, event: Event):
         """
@@ -42,7 +50,7 @@ class CommonCommand:
         :param event: событие
         :return: bool
         """
-        if event.command in self.all_names:
+        if event.command in self.full_names:
             return True
 
         return False
@@ -62,9 +70,7 @@ class CommonCommand:
     def checks(self):
         """
         Проверки
-        :return:
         """
-        # Если команда не для api
         self.check_platforms()
         self.check_sender(self.access)
         if self.pm:
@@ -162,26 +168,6 @@ class CommonCommand:
             error = f"Значение может быть в диапазоне [{_min};{_max}]"
             raise PWarning(error)
 
-    @staticmethod
-    def _transform_k(arg: str):
-        """
-        Перевод из строки с К в число. Пример: 1.3к = 1300
-        :param arg: текстовое число с К
-        :return: int
-        """
-        arg = arg.lower()
-        count_m = arg.count('m') + arg.count('м')
-        count_k = arg.count('k') + arg.count('к') + count_m * 2
-        if count_k > 0:
-            arg = arg \
-                .replace('k', '') \
-                .replace('к', '') \
-                .replace('м', '') \
-                .replace('m', '')
-            arg = float(arg)
-            arg *= 10 ** (3 * count_k)
-        return arg
-
     def parse_int(self):
         """
         Парсинг аргументов в int из заданного диапазона индексов(self.int_args)
@@ -194,7 +180,7 @@ class CommonCommand:
                 if isinstance(self.event.args[checked_arg_index], int):
                     continue
                 try:
-                    self.event.args[checked_arg_index] = self._transform_k(self.event.args[checked_arg_index])
+                    self.event.args[checked_arg_index] = transform_k(self.event.args[checked_arg_index])
                     self.event.args[checked_arg_index] = int(self.event.args[checked_arg_index])
                 except ValueError:
                     error = "Аргумент должен быть целочисленным"
@@ -213,7 +199,7 @@ class CommonCommand:
                 if isinstance(self.event.args[checked_arg_index], float):
                     continue
                 try:
-                    self.event.args[checked_arg_index] = self._transform_k(self.event.args[checked_arg_index])
+                    self.event.args[checked_arg_index] = transform_k(self.event.args[checked_arg_index])
                     self.event.args[checked_arg_index] = float(self.event.args[checked_arg_index])
                 except ValueError:
                     error = "Аргумент должен быть с плавающей запятой"

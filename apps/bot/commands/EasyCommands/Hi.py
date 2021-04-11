@@ -8,4 +8,4 @@ class Hi(CommonCommand):
              "куку", "здаров", "здарова", "хеей", "хало", "hi", "hello", 'салам']
 
     def start(self):
-        return random_event(self.all_names)
+        return random_event(self.full_names)

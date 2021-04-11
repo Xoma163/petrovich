@@ -18,7 +18,7 @@ class Conference(CommonCommand):
         return super().accept(event)
 
     def start(self):
-        if self.event.command not in self.all_names:
+        if self.event.command not in self.full_names:
             raise PWarning("Не задано имя конфы, задайте его командой /конфа (название конфы)")
         if self.event.args:
             try:

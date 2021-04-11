@@ -74,6 +74,7 @@ def generate_help_text():
 
     return help_text_generated
 
+
 import_all_commands()
 
 COMMANDS = generate_commands()
@@ -87,4 +88,27 @@ EMPTY_KEYBOARD = {
     "buttons": []
 }
 
-# doc_commands = sorted([x for x in COMMANDS if x.access == Role.USER and x.names[0] and x.suggest_for_similar], key=lambda y: y.names[0])
+def get_text_for_documentation(commands):
+    nl = '\n'
+    left_quote_new = '\['
+    right_quote_new = '\]'
+
+    doc_commands = sorted(
+        [x for x in commands if x.access == Role.USER and x.name and x.suggest_for_similar and x.help_text],
+        key=lambda y: y.name)
+    documentation = []
+    for doc_command in doc_commands:
+        command_text = f"**/{doc_command.name.capitalize()}** - {doc_command.help_text}\n"
+        if doc_command.help_texts:
+            command_text = command_text + "<br>\n" + "<br>\n".join(
+                [
+                    f"**/{doc_command.name.capitalize()}** "
+                    f"{x.replace(nl, '<br>').replace('[', left_quote_new).replace(']', right_quote_new)}{nl}"
+                    for x in doc_command.help_texts
+                ]
+            )
+        documentation.append(command_text)
+    return "\n".join(documentation)
+
+
+# text_for_documentation = get_text_for_documentation(COMMANDS)

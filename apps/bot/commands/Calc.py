@@ -9,7 +9,7 @@ class Calc(CommonCommand):
     name = "="
     names = ["калькулятор", "кальк", "к"]
     help_text = "считает простые выражения"
-    help_texts = "(выражение) - калькулятор выражений. Умеет работать с + - * / ^ ( )"
+    help_texts = ["(выражение) - калькулятор выражений. Умеет работать с + - * / ^ ( )"]
 
     def accept(self, event):
         if event.clear_msg and event.clear_msg[0] == '=':

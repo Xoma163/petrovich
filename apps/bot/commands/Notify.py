@@ -83,7 +83,7 @@ class Notify(CommonCommand):
             else:
                 command = text[1:]
             from apps.bot.commands.NotifyRepeat import NotifyRepeat
-            if command in self.all_names or command in NotifyRepeat().all_names:
+            if command in self.full_names or command in NotifyRepeat().full_names:
                 text = f"/обосрать {self.event.sender.name}"
         notify_datetime = localize_datetime(remove_tz(date), timezone)
 

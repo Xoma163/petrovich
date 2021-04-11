@@ -1,4 +1,3 @@
-import io
 import os
 # Вероятность события в процентах
 import random
@@ -166,14 +165,14 @@ def get_help_texts_for_command(command) -> str:
     Получает help_texts для команды
     """
     result = ""
-    if len(command.all_names)>1:
-        result += f"Названия команды: {', '.join(command.all_names)}\n"
+    if len(command.full_names) > 1:
+        result += f"Названия команды: {', '.join(command.full_names)}\n"
     if command.access != Role.USER:
         result += f"Необходимый уровень прав - {command.access.value}\n"
     if result:
         result += '\n'
     if command.help_texts:
-        result += "\n".join([f"{command.name.capitalize()} {x}" for x in command.help_texts])
+        result += command.full_help_texts
     else:
         result += "У данной команды нет подробного описания"
     return result
@@ -267,3 +266,23 @@ def check_command_time(name, seconds):
     entity.name = name
     entity.save()
     return True
+
+
+def transform_k(arg: str):
+    """
+    Перевод из строки с К в число. Пример: 1.3к = 1300
+    :param arg: текстовое число с К
+    :return: int
+    """
+    arg = arg.lower()
+    count_m = arg.count('m') + arg.count('м')
+    count_k = arg.count('k') + arg.count('к') + count_m * 2
+    if count_k > 0:
+        arg = arg \
+            .replace('k', '') \
+            .replace('к', '') \
+            .replace('м', '') \
+            .replace('m', '')
+        arg = float(arg)
+        arg *= 10 ** (3 * count_k)
+    return arg

@@ -14,7 +14,7 @@ def get_bad_words():
 class YesNo(CommonCommand):
     name = "?"
     help_text = "вернёт да или нет"
-    help_texts = "- вернёт да или нет. Для вызова команды просто в конце нужно написать знак вопроса"
+    help_texts = ["- вернёт да или нет. Для вызова команды просто в конце нужно написать знак вопроса"]
     priority = 80
 
     def accept(self, event):
