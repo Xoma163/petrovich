@@ -63,10 +63,13 @@ class CommonBot(Thread):
         """
         Получение похожей команды по неправильно введённой
         """
-        similar_command = commands[0].names[0]
+        similar_command = None
         tanimoto_max = 0
         user_groups = event.sender.get_list_of_role_names()
         for command in commands:
+            if not command.full_names:
+                continue
+
             # Выдача пользователю только тех команд, которые ему доступны
             command_access = command.access
             if isinstance(command_access, str):
@@ -78,7 +81,7 @@ class CommonBot(Thread):
             if not command.suggest_for_similar:
                 continue
 
-            for name in command.names:
+            for name in command.full_names:
                 if name:
                     tanimoto_current = tanimoto(event.command, name)
                     if tanimoto_current > tanimoto_max:
@@ -86,7 +89,7 @@ class CommonBot(Thread):
                         similar_command = name
 
         msg = f"Я не понял команды \"{event.command}\"\n"
-        if tanimoto_max != 0:
+        if similar_command and tanimoto_max != 0:
             msg += f"Возможно вы имели в виду команду \"{similar_command}\""
         return msg
 

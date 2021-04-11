@@ -37,6 +37,10 @@ class CommonCommand:
             self.platforms = [self.platforms]
 
         # Дополнительные поля
+        self.full_names = None
+        self.full_help_text = None
+        self.full_help_texts = None
+
         if self.name:
             self.full_names = [self.name] + self.names
             if self.help_text:
