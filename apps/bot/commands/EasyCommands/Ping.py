@@ -2,7 +2,7 @@ from apps.bot.classes.common.CommonCommand import CommonCommand
 
 
 class Ping(CommonCommand):
-    names = ["пинг"]
+    name = "пинг"
 
     def start(self):
         return "Понг"

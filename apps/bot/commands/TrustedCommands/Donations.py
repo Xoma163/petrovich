@@ -5,8 +5,8 @@ from apps.service.models import Donations as DonationsModel
 
 
 class Donations(CommonCommand):
-    names = ["донаты"]
-    help_text = "Донаты - список всех донатов"
+    name = "донаты"
+    help_text = "список всех донатов"
     access = Role.TRUSTED
 
     def start(self):

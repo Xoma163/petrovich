@@ -5,9 +5,9 @@ from apps.bot.classes.common.CommonCommand import CommonCommand
 
 
 class DeBan(CommonCommand):
-    names = ["разбан", "дебан"]
-    help_text = "Разбан - разбан пользователя"
-    detail_help_text = "Разбан (N) - разбан пользователя, где N - имя, фамилия, логин/id, никнейм"
+    name = "разбан"
+    help_text = "разбан пользователя"
+    help_texts = ["(N) - разбан пользователя, где N - имя, фамилия, логин/id, никнейм"]
     access = Role.ADMIN
     args = 1
     excluded_platforms = [Platform.API, Platform.YANDEX]

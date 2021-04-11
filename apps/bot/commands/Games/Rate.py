@@ -10,9 +10,9 @@ lock = Lock()
 
 
 class Rate(CommonCommand):
-    names = ["ставка"]
-    help_text = "Ставка - игра, определяющая, кто ближе угадал загаданное число"
-    detail_help_text = "Ставка [ставка=рандом] - делает ставку"
+    name = "ставка"
+    help_text = "игра, определяющая, кто ближе угадал загаданное число"
+    help_texts = ["[ставка=рандом] - делает ставку"]
     int_args = [0]
     conversation = True
     platforms = [Platform.VK, Platform.TG]

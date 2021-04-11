@@ -4,8 +4,8 @@ from apps.service.management.commands.get_words import Command
 
 
 class Words(CommonCommand):
-    names = ["слова"]
-    help_text = "Слова - принудительно затягивает слова с Google Drive"
+    name = "слова"
+    help_text = "принудительно затягивает слова с Google Drive"
     access = Role.MODERATOR
 
     def start(self):

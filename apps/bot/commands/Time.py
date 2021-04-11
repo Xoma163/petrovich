@@ -6,9 +6,11 @@ from apps.service.models import City
 
 
 class Time(CommonCommand):
-    names = ["время"]
-    help_text = "Время - текущее время в городе"
-    detail_help_text = "Время [город=из профиля] - текущее время в городе"
+    name = "время"
+    help_text = "текущее время в городе"
+    help_texts = [
+        "[город=из профиля] - текущее время в городе"
+    ]
 
     def start(self):
         if self.event.args:

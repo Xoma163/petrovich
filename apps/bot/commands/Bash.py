@@ -5,9 +5,9 @@ MAX_QUOTES = 20
 
 
 class Bash(CommonCommand):
-    names = ["баш"]
-    help_text = "Баш - рандомная цитата с баша"
-    detail_help_text = "Баш [количество=5] - рандомная цитата с баша. Максимум 20 цитат"
+    name = "баш"
+    help_text = "рандомная цитата с баша"
+    help_texts = "[количество=5] - рандомная цитата с баша. Максимум 20 цитат"
     int_args = [0]
 
     def start(self):
@@ -19,4 +19,4 @@ class Bash(CommonCommand):
         bash_api = BashAPI(quotes_count)
         msg = bash_api.parse()
         return {"msg": msg,
-                "keyboard": self.bot.get_inline_keyboard(self.names[0], args={"quotes_count": quotes_count})}
+                "keyboard": self.bot.get_inline_keyboard(self.name, args={"quotes_count": quotes_count})}

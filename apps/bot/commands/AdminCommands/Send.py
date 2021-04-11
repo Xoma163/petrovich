@@ -3,10 +3,11 @@ from apps.bot.classes.bots.CommonBot import get_bot_by_platform
 from apps.bot.classes.common.CommonCommand import CommonCommand
 
 
-class Control(CommonCommand):
-    names = ["отправить", "сообщение", "отправь"]
-    help_text = "Отправить - отправление сообщение в любую конфу"
-    detail_help_text = "Отправить (id чата/название чата) (сообщение)"
+class Send(CommonCommand):
+    name = "отправь"
+    names = ["отправить", "сообщение"]
+    help_text = "отправляет сообщение в любую конфу"
+    help_texts = ["(id чата/название чата) (сообщение)"]
     access = Role.ADMIN
 
     def start(self):

@@ -4,8 +4,10 @@ from apps.bot.classes.common.CommonCommand import CommonCommand
 
 
 class Conference(CommonCommand):
-    names = ["конфа", "конференция", "беседа"]
-    help_text = "Конфа - назвать конфу"
+    name = "конфа"
+    names = ["конференция", "беседа"]
+    help_text = "назвать конфу"
+    help_texts = ["(название конфы) - называет конфу"]
     conversation = True
     priority = 90
     platforms = [Platform.VK, Platform.TG]
@@ -16,7 +18,7 @@ class Conference(CommonCommand):
         return super().accept(event)
 
     def start(self):
-        if self.event.command not in self.names:
+        if self.event.command not in self.all_names:
             raise PWarning("Не задано имя конфы, задайте его командой /конфа (название конфы)")
         if self.event.args:
             try:

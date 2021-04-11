@@ -70,12 +70,13 @@ def get_bot_logs(command):
 
 
 class Logs(CommonCommand):
-    names = ["логи", "лог"]
-    help_text = "Логи - логи бота или сервера"
-    detail_help_text = "Логи [сервис=бот] [кол-во строк=50] - логи. \n" \
-                       "Сервис - бот/сервер. Макс 1000 строк.\n" \
-                       "Логи бд [кол-во записей = 1] - последний лог с трейсбеком.\n" \
-                       "Макс 5 записей"
+    name = "логи"
+    names = ["лог"]
+    help_text = "логи бота или сервера"
+    help_texts = [
+        "[сервис=бот] [кол-во строк=50] - логи. Сервис - бот/сервер. Макс 1000 строк.",
+        "бд [кол-во записей = 1] - последний лог с трейсбеком. Макс 5 записей",
+    ]
     keyboard = {'for': Role.MODERATOR, 'text': 'Логи', 'color': 'blue', 'row': 1, 'col': 1}
     access = Role.MODERATOR
     platforms = [Platform.VK, Platform.TG]
@@ -96,7 +97,7 @@ class Logs(CommonCommand):
         img_byte_arr = io.BytesIO()
         image.save(img_byte_arr, format='PNG')
         # if image.height > 1500:
-        return {'attachments': self.bot.upload_document(img_byte_arr,peer_id=self.event.peer_id)}
+        return {'attachments': self.bot.upload_document(img_byte_arr, peer_id=self.event.peer_id)}
         # else:
         #     return {'attachments': self.bot.upload_photos(img_byte_arr)}
 

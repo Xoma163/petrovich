@@ -4,9 +4,10 @@ from apps.bot.classes.common.CommonCommand import CommonCommand
 
 
 class Linux(CommonCommand):
-    names = ["линукс", "linux", "консоль", "терминал"]
-    help_text = "Линукс - запускает любую команду на сервере"
-    detail_help_text = "Линукс (команда) - запускает любую команду на сервере с уровнем прав server"
+    name = "линукс"
+    names = ["linux", "консоль", "терминал"]
+    help_text = "запускает любую команду на сервере"
+    help_texts = ["(команда) - запускает любую команду на сервере с уровнем прав server"]
     access = Role.ADMIN
     args = 1
 

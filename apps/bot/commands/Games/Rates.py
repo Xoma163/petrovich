@@ -11,10 +11,13 @@ lock = Lock()
 
 
 class Rates(CommonCommand):
-    names = ["ставки", "казино"]
-    help_text = "Ставки - играет ставки"
-    detail_help_text = "Ставки - играет ставки.\n\n" \
-                       "Ставки f - играет независимо от количества игроков. Только для админов конфы"
+    name = 'ставки'
+    names = ["казино"]
+    help_text = "играет ставки"
+    help_texts = [
+        "- играет ставки."
+        "f - играет независимо от количества игроков. Только для админов конфы"
+    ]
     conversation = True
     platforms = [Platform.VK, Platform.TG]
 

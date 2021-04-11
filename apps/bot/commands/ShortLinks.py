@@ -3,10 +3,13 @@ from apps.bot.classes.common.CommonCommand import CommonCommand
 
 
 class ShortLinks(CommonCommand):
-    names = ["сс", "cc"]
-    help_text = "Сс - сокращение ссылки"
-    detail_help_text = "Сс (ссылка) - сокращение ссылки\n" \
-                       "Сс (Пересылаемое сообщение) - сокращение ссылки"
+    name = "сс"
+    names = ['cc']
+    help_text = "сокращение ссылки"
+    help_texts = [
+        "(ссылка) - сокращение ссылки",
+        "(Пересылаемое сообщение) - сокращение ссылки"
+    ]
     args = 1
 
     def start(self):

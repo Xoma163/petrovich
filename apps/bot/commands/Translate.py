@@ -5,10 +5,12 @@ from apps.bot.classes.common.CommonMethods import has_cyrillic
 
 
 class Translate(CommonCommand):
-    names = ["перевод", "переведи"]
-    help_text = "Перевод - автоматический переводчик"
-    detail_help_text = "Перевод (Текст/Пересылаемые сообщения) - в зависимости от текста переводит на нужный " \
-                       "язык(английский или русский)"
+    name = "перевод"
+    names = ["переведи"]
+    help_text = "автоматический переводчик"
+    help_texts = [
+        "(Текст/Пересылаемые сообщения) - в зависимости от текста переводит на нужный язык(английский или русский)"
+    ]
 
     def start(self):
         fwd = self.event.fwd

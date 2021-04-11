@@ -5,7 +5,8 @@ from apps.bot.classes.common.CommonMethods import get_attachments_from_attachmen
 
 
 class Saved(CommonCommand):
-    names = ["сохраненка", "перешли", "сохраненные"]
+    name = "сохраненка"
+    names = ["перешли", "сохраненные"]
     help_text = "Сохранёнка (фотографии) - пересылает фотографии, чтобы их можно было сохранить в вк в сохранёнки"
     platforms = [Platform.VK]
     enabled = False

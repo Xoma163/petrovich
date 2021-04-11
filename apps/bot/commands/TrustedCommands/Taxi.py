@@ -4,8 +4,8 @@ from petrovich.settings import STATIC_ROOT
 
 
 class Taxi(CommonCommand):
-    names = ["такси"]
-    help_text = "Такси - график отношения цены ко времени"
+    name = "такси"
+    help_text = "график отношения цены ко времени"
     access = Role.TRUSTED
 
     def start(self):

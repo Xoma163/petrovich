@@ -4,8 +4,9 @@ from apps.bot.classes.common.CommonCommand import CommonCommand
 
 
 class Temperature(CommonCommand):
-    names = ["температура", "темп", "t"]
-    help_text = "Температура - температуры сервера"
+    name = "температура"
+    names = ['темп', 't', 'т']
+    help_text = "температуры сервера"
     access = Role.MODERATOR
 
     def start(self):

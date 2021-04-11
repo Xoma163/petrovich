@@ -3,8 +3,9 @@ from apps.bot.classes.common.CommonCommand import CommonCommand
 
 
 class Discord(CommonCommand):
-    names = ["дискорд", "диск"]
-    help_text = "Дискорд - ссылка на канал в дискорде"
+    name = "дискорд"
+    names = ["диск"]
+    help_text = "ссылка на канал в дискорде"
     access = Role.TRUSTED
 
     def start(self):

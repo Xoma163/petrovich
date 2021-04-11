@@ -3,8 +3,9 @@ from apps.bot.classes.common.CommonCommand import CommonCommand
 
 
 class Git(CommonCommand):
-    names = ["гит", "гитхаб"]
-    help_text = "Гит - ссылка на гитхаб"
+    name = "гит"
+    names = ["гитхаб"]
+    help_text = "ссылка на гитхаб"
     access = Role.TRUSTED
 
 

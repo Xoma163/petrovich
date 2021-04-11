@@ -2,7 +2,7 @@ from apps.bot.classes.common.CommonCommand import CommonCommand
 
 
 class Shit(CommonCommand):
-    names = ["дерьмо"]
+    name = "дерьмо"
     suggest_for_similar = False
 
     def start(self):

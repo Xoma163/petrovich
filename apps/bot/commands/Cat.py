@@ -7,13 +7,13 @@ from petrovich.settings import MAIN_SITE
 
 
 class Cat(CommonCommand):
-    names = ["кот"]
-    help_text = "Кот - присылает рандомного всратого кота"
-    detail_help_text = "Кот - присылает рандомного всратого кота\n\n" \
-                       "Для доверенных:\n" \
-                       "Кот (Изображения/Пересылаемое сообщение с изображениями) - добавляет кота в базу\n\n" \
-                       "Для админа:\n" \
-                       "Кот аватар - присылает нового кота для аватарки, которого ещё не было"
+    name = "кот"
+    help_text = "присылает рандомного всратого кота"
+    help_texts = [
+        "- присылает рандомного всратого кота",
+        "(Изображения/Пересылаемое сообщение с изображениями) - добавляет кота в базу (для доверенных)",
+        "аватар - присылает нового кота для аватарки, которого ещё не было (для админа)"
+    ]
     platforms = [Platform.VK, Platform.TG]
 
     def add_cat(self, cat_image):
@@ -43,7 +43,7 @@ class Cat(CommonCommand):
 
             return {
                 'attachments': attachments,
-                "keyboard": self.bot.get_inline_keyboard(self.names[0])
+                "keyboard": self.bot.get_inline_keyboard(self.name)
             }
         else:
             self.check_sender(Role.TRUSTED)

@@ -10,9 +10,10 @@ from apps.bot.classes.common.CommonMethods import check_command_time
 
 
 class Find(CommonCommand):
-    names = ["поиск", "найди", "найти", "ищи", "искать"]
-    help_text = "Поиск  - ищет информацию по картинкам"
-    detail_help_text = "Поиск (запрос) - ищет информацию по картинкам"
+    name = "найди"
+    names = ["поиск", "найти", "ищи", "искать"]
+    help_text = "ищет информацию по картинкам"
+    help_texts = ["(запрос) - ищет информацию по картинкам"]
     args = 1
     platforms = [Platform.VK, Platform.TG]
 

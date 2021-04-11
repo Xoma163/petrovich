@@ -5,9 +5,10 @@ from apps.bot.classes.common.CommonCommand import CommonCommand
 
 
 class Issue(CommonCommand):
-    names = ["баг", "ошибка", "ишю", "ишью"]
-    help_text = "Баг - добавляет проблему Петровича, которую нужно решить"
-    detail_help_text = "Баг (текст/пересланные сообщения) - добавляет проблему Петровича, которую нужно решить"
+    name = "баг"
+    names = ["ошибка", "ишю", "ишью"]
+    help_text = "добавляет проблему Петровича, которую нужно решить"
+    help_texts = ["(текст/пересланные сообщения) - добавляет проблему Петровича, которую нужно решить"]
     platforms = [Platform.VK, Platform.TG]
 
     def start(self):

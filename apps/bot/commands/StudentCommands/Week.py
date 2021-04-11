@@ -6,8 +6,8 @@ from apps.timetable.models import Group
 
 
 class TimeTable(CommonCommand):
-    names = ["неделя"]
-    help_text = "Неделя - присылает номер недели в зависимости от группы"
+    name = "неделя"
+    help_text = "присылает номер недели в зависимости от группы"
     platforms = Platform.VK
     conversation = True
 

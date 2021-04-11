@@ -1,11 +1,11 @@
 from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import find_command_by_name, get_help_for_command
+from apps.bot.classes.common.CommonMethods import find_command_by_name, get_help_texts_for_command
 
 
 class Help(CommonCommand):
-    names = ["помощь", "хелп", "ман", "команды", "помоги", "памаги", "спаси", "хелб", "манул", "help", "start"]
-    help_text = "Помощь - помощь по командам и боту"
-    detail_help_text = "Очень смешно"
+    name = "помощь"
+    names = ["хелп", "ман", "помоги", "памаги", "спаси", "хелб", "манул", "help", "start"]
+    help_text = "помощь по командам и боту"
 
     def accept(self, event):
         # Самая первая кнопка клавы у бота
@@ -17,7 +17,7 @@ class Help(CommonCommand):
         if self.event.args:
             command = find_command_by_name(self.event.args[0].lower())
             self.check_sender(command.access)
-            return get_help_for_command(command)
+            return get_help_texts_for_command(command)
         text = "/помощь (название команды) - помощь по конкретной команде\n" \
                "/документация - документация по боту. Самый подробный мануал по всему в одном месте\n" \
                "/команды - список всех команд с кратким описанием\n" \

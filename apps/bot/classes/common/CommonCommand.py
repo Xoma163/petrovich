@@ -1,16 +1,17 @@
 from apps.bot.classes.Consts import Role, ATTACHMENT_TRANSLATOR, Platform
 from apps.bot.classes.Exceptions import PWarning, PError
 from apps.bot.classes.bots.CommonBot import CommonBot
-from apps.bot.classes.common.CommonMethods import get_help_for_command
+from apps.bot.classes.common.CommonMethods import get_help_texts_for_command
 from apps.bot.classes.events.Event import Event
 from petrovich.settings import env
 
 
 class CommonCommand:
-    names: list or str = None  # Имена команды,
+    name: str = None  # Имя команды,
+    names: list = []  # Вспопогательные имена команды,
     help_text: str = None  # Текст в /команды
-    detail_help_text: str = None  # Текст в детальной помощи по команде /помощь (название команды)
-    keyboard = None  # Клавиатура для команды /клава
+    help_texts: list = []  # Текст в детальной помощи по команде /помощь (название команды)
+
     access: Role = Role.USER  # Необходимые права для выполнения команды
     pm: bool = False  # Должно ли сообщение обрабатываться только в лс
     conversation: bool = False  # Должно ли сообщение обрабатываться только в конфе
@@ -18,7 +19,7 @@ class CommonCommand:
     args: int = None  # Должно ли сообщение обрабатываться только с заданным количеством аргументов
     int_args: list = None  # Список аргументов, которые должны быть целым числом
     float_args: list = None  # Список аргументов, которые должны быть числом
-    platforms: list or Platform = list(Platform)  # Список платформ, которые могут обрабатывать команду
+    platforms: list or Platform = list(Platform)  # Список платформ, которые могут обрабатывать команду ToDo: list only
     excluded_platforms: list = []  # Список исключённых платформ.
     attachments: list = []  # Должно ли сообщение обрабатываться только с вложениями
     enabled: bool = True  # Включена ли команда
@@ -30,10 +31,10 @@ class CommonCommand:
         self.bot = None
         self.event = None
 
-        if not isinstance(self.names, list):
-            self.names = [self.names]
         if not isinstance(self.platforms, list):
             self.platforms = [self.platforms]
+        if self.name:
+            self.all_names = [self.name] + self.names
 
     def accept(self, event: Event):
         """
@@ -41,7 +42,7 @@ class CommonCommand:
         :param event: событие
         :return: bool
         """
-        if event.command in self.names:
+        if event.command in self.all_names:
             return True
 
         return False
@@ -131,11 +132,11 @@ class CommonCommand:
                 return True
             else:
                 error = "Передано недостаточно аргументов"
-                error += f"\n\n{get_help_for_command(self)}"
+                error += f"\n\n{get_help_texts_for_command(self)}"
                 raise PWarning(error)
 
         error = "Для работы команды требуются аргументы"
-        error += f"\n\n{get_help_for_command(self)}"
+        error += f"\n\n{get_help_texts_for_command(self)}"
         raise PWarning(error)
 
     @staticmethod
@@ -312,4 +313,4 @@ class CommonCommand:
                 default_item = item[1]
         if default_item:
             return default_item
-        raise PWarning(f"{self.detail_help_text}")
+        raise PWarning(f"{self.help_texts}")

@@ -16,10 +16,11 @@ def get_time(time):
 
 
 class NotifyRepeat(CommonCommand):
-    names = ["напоминай", "оповещай"]
-    help_text = "Напоминай - напоминает о чём-либо постояно"
-    detail_help_text = "Напоминай (время) (сообщение/команда) [Прикреплённые вложения] - напоминает о чём-то каждый день в заданное время\n" \
-                       "Максимум можно добавить 5 напоминаний"
+    name = "напоминай"
+    help_text = "напоминает о чём-либо постояно"
+    help_texts = [
+        "(время) (сообщение/команда) [Прикреплённые вложения] - напоминает о чём-то каждый день в заданное время. Максимум можно добавить 5 напоминаний"
+    ]
     args = 2
     platforms = [Platform.VK, Platform.TG]
     city = True
@@ -50,7 +51,7 @@ class NotifyRepeat(CommonCommand):
             else:
                 command = text[1:]
             from apps.bot.commands.Notify import Notify
-            if command in self.names or command in Notify().names:
+            if command in self.all_names or command in Notify().all_names:
                 text = f"/обосрать {self.event.sender.name}"
         notify_datetime = localize_datetime(remove_tz(date), timezone)
 

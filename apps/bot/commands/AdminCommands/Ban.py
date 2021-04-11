@@ -6,9 +6,9 @@ from apps.bot.classes.common.CommonCommand import CommonCommand
 
 
 class Ban(CommonCommand):
-    names = ["бан"]
-    help_text = "Бан - бан пользователя"
-    detail_help_text = "Бан (N) - бан пользователя, где N - имя, фамилия, логин/id, никнейм"
+    name = "бан"
+    help_text = "бан пользователя"
+    help_texts = ["(N) - бан пользователя, где N - имя, фамилия, логин/id, никнейм"]
     access = Role.ADMIN
     args = 1
     excluded_platforms = [Platform.API, Platform.YANDEX]

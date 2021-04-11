@@ -4,7 +4,8 @@ from apps.bot.commands.Praise import get_praise_or_scold_self
 
 
 class ScoldSelf(CommonCommand):
-    names = ["обосраться", "обосрись", "поругаться", "поругайся"]
+    name = "обосраться"
+    names = ["обосрись", "поругаться", "поругайся"]
     platforms = [Platform.VK, Platform.TG, Platform.API]
 
     def start(self):

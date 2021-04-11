@@ -2,7 +2,7 @@ from apps.bot.classes.common.CommonCommand import CommonCommand
 
 
 class GayAnswer(CommonCommand):
-    names = ["пидора"]
+    name = "пидора"
     suggest_for_similar = False
 
     def accept(self, event):

@@ -4,10 +4,12 @@ from apps.bot.classes.common.CommonCommand import CommonCommand
 
 
 class ExchangeRates(CommonCommand):
-    names = ["курс"]
-    help_text = "Курс - курс валют"
-    detail_help_text = "Курс - курс валют\n" \
-                       "Курс [количество=1] (валюта) - перевод в другие валюты конкретное количество валюты"
+    name = "курс"
+    help_text = "курс валют"
+    help_texts = [
+        "- курс валют",
+        "[количество=1] (валюта) - перевод в другие валюты конкретное количество валюты"
+    ]
 
     def start(self):
         filters_list = ["USD", "EUR", "NOK", "JPY", "GBP", "KZT", "UAH"]

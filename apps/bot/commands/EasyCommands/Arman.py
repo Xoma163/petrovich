@@ -2,7 +2,7 @@ from apps.bot.classes.common.CommonCommand import CommonCommand
 
 
 class Nail(CommonCommand):
-    names = ["арман", "розенков"]
+    name = "арман"
     suggest_for_similar = False
 
     def start(self):

@@ -156,24 +156,24 @@ def find_command_by_name(command_name):
     """
     from apps.bot.initial import COMMANDS
     for command in COMMANDS:
-        if command.names and command_name in command.names:
+        if command_name == command.name or (command.names and command_name in command.names):
             return command
     raise PWarning("Я не знаю такой команды")
 
 
-def get_help_for_command(command) -> str:
+def get_help_texts_for_command(command) -> str:
     """
-    Получает detail_help_text для команды
+    Получает help_texts для команды
     """
     result = ""
-    if len(command.names) > 1:
-        result += f"Названия команды: {', '.join(command.names)}\n"
+    if len(command.all_names)>1:
+        result += f"Названия команды: {', '.join(command.all_names)}\n"
     if command.access != Role.USER:
         result += f"Необходимый уровень прав - {command.access.value}\n"
     if result:
         result += '\n'
-    if command.detail_help_text:
-        result += command.detail_help_text
+    if command.help_texts:
+        result += "\n".join([f"{command.name.capitalize()} {x}" for x in command.help_texts])
     else:
         result += "У данной команды нет подробного описания"
     return result

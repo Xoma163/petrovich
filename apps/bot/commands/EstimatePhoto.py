@@ -5,9 +5,10 @@ from apps.bot.classes.common.CommonMethods import get_attachments_from_attachmen
 
 
 class EstimatePhoto(CommonCommand):
-    names = ["оцени", "оценить"]
-    help_text = "Оцени - оценить качество фотографии"
-    detail_help_text = "Оцени (Изображение/Пересылаемое сообщение с изображением) - оценивает качество изображения"
+    name = "оцени"
+    names = ["оценить"]
+    help_text = "оценить качество фотографии"
+    help_texts = ["(Изображение/Пересылаемое сообщение с изображением) - оценивает качество изображения"]
     platforms = [Platform.VK, Platform.TG]
     attachments = ['photo']
 

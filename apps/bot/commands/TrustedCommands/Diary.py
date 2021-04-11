@@ -3,8 +3,8 @@ from apps.bot.classes.common.CommonCommand import CommonCommand
 
 
 class Diary(CommonCommand):
-    names = "ежедневник"
-    help_text = "Ежедневник - ссылка на ежедневник"
+    name = "ежедневник"
+    help_text = "ссылка на ежедневник"
     access = Role.TRUSTED
     suggest_for_similar = False
 

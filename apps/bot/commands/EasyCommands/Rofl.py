@@ -3,7 +3,7 @@ from apps.bot.classes.common.CommonMethods import random_event
 
 
 class Rofl(CommonCommand):
-    names = ["орнуть"]
+    name = "орнуть"
 
     def start(self):
         return random_event(

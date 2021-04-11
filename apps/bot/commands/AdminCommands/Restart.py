@@ -4,10 +4,10 @@ from apps.bot.classes.common.CommonCommand import CommonCommand
 
 
 class Restart(CommonCommand):
-    names = ["рестарт", "ребут"]
-    help_text = "Рестарт - перезагружает бота или веб на сервере, либо сам сервер"
-    detail_help_text = "Рестарт [сервис=бот] - перезагружает сервис\n" \
-                       "Сервис - бот/веб/сервер"
+    name = "рестарт"
+    names = ["ребут"]
+    help_text = "перезагружает бота или веб на сервере, либо сам сервер"
+    help_texts = ["[сервис=бот] - перезагружает сервис\nСервис - бот/веб/сервер"]
     access = Role.ADMIN
 
     def start(self):

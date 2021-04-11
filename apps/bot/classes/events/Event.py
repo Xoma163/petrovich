@@ -50,12 +50,13 @@ class Event:
         clear_msg = re.sub(",+", ",", clear_msg)
         clear_msg = clear_msg.strip().strip(',').strip().strip(' ').strip().replace('ё', 'е').replace('Ё', 'Е')
 
-        msg_dict = {'msg': msg,
-                    'clear_msg': clear_msg,
-                    'command': None,
-                    'args': None,
-                    'original_args': None,
-                    }
+        msg_dict = {
+            'msg': msg,
+            'clear_msg': clear_msg,
+            'command': None,
+            'args': None,
+            'original_args': None,
+        }
 
         command_arg = clear_msg.split(' ', 1)
         msg_dict['command'] = command_arg[0].lower()

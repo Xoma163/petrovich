@@ -4,8 +4,9 @@ from apps.bot.classes.common.CommonCommand import CommonCommand
 
 # ToDo: TG игровая конфа
 class GameConference(CommonCommand):
-    names = ["игровая", "ставошная"]
-    help_text = "Игровая - ссылка-приглашение в игровую конфу"
+    name = "игровая"
+    names = ["ставошная"]
+    help_text = "ссылка-приглашение в игровую конфу"
     platforms = [Platform.VK]
 
     def start(self):

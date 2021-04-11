@@ -7,10 +7,12 @@ from apps.service.models import Service
 
 
 class Stream(CommonCommand):
-    names = ["стрим", "поток"]
-    help_text = "Стрим - ссылка на стрим"
-    detail_help_text = "Стрим - ссылка на стрим\n" \
-                       "Стрим [новая ссылка] - меняет ссылку на стрим. Требуются права модератора"
+    name = "стрим"
+    help_text = "ссылка на стрим"
+    help_texts = [
+        "- ссылка на стрим"
+        "[новая ссылка] - меняет ссылку на стрим. Требуются права модератора"
+    ]
     access = Role.TRUSTED
 
     def start(self):

@@ -9,9 +9,11 @@ from petrovich.settings import TIME_ZONE
 
 
 class Where(CommonCommand):
-    names = ["где"]
-    help_text = "Где - информация о чекточках"
-    detail_help_text = "Где (N) - информация о чекточках, где N - имя, фамилия, логин/id, никнейм"
+    name = "где"
+    help_text = "информация о чекточках"
+    help_texts = [
+        "(N) - информация о чекточках, где N - имя, фамилия, логин/id, никнейм"
+    ]
     args = 1
     access = Role.TRUSTED
 

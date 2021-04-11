@@ -43,11 +43,12 @@ def get_time(arg1, arg2, timezone=None):
 
 # ToDo: TG вложения
 class Notify(CommonCommand):
-    names = ["напомни", "напомнить", "оповещение", "оповести"]
-    help_text = "Напомни - напоминает о чём-либо"
-    detail_help_text = \
-        "Напомни (дата/дата и время/день недели) (сообщение/команда) [Прикреплённые вложения] - добавляет напоминание\n" \
-        "Максимум можно добавить 5 напоминаний"
+    name = 'напомни'
+    names = ["напомнить"]
+    help_text = "напоминает о чём-либо"
+    help_texts = [
+        "(дата/дата и время/день недели) (сообщение/команда) [Прикреплённые вложения] - добавляет напоминание. Максимум можно добавить 5 напоминаний"
+    ]
     args = 2
     platforms = [Platform.VK, Platform.TG]
     city = True
@@ -82,7 +83,7 @@ class Notify(CommonCommand):
             else:
                 command = text[1:]
             from apps.bot.commands.NotifyRepeat import NotifyRepeat
-            if command in self.names or command in NotifyRepeat().names:
+            if command in self.all_names or command in NotifyRepeat().all_names:
                 text = f"/обосрать {self.event.sender.name}"
         notify_datetime = localize_datetime(remove_tz(date), timezone)
 

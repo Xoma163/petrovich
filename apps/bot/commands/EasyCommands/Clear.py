@@ -3,7 +3,8 @@ from apps.bot.classes.common.CommonMethods import random_event
 
 
 class Clear(CommonCommand):
-    names = ["ясно", "ммм"]
+    name = "ясно"
+    names = ["ммм"]
     suggest_for_similar = False
 
     def start(self):

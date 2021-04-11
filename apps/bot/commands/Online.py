@@ -3,8 +3,8 @@ from apps.bot.classes.common.CommonCommand import CommonCommand
 
 
 class Online(CommonCommand):
-    names = ["онлайн"]
-    help_text = "Онлайн - присылает список пользователей онлайн в конфе"
+    name = "онлайн"
+    help_text = "присылает список пользователей онлайн в конфе"
     conversation = True
     platforms = [Platform.VK]
 

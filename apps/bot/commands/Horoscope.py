@@ -7,11 +7,14 @@ from apps.service.models import Horoscope as HoroscopeModel
 
 
 class Horoscope(CommonCommand):
-    names = ["гороскоп"]
-    help_text = "Гороскоп - мемный гороскоп"
-    detail_help_text = "Гороскоп [знак зодиака = по др в профиле] - пришлёт мемный гороскоп на день для знака зодиака\n" \
-                       "Гороскоп все - пришлёт мемный гороскоп для всех знаков зодиака\n" \
-                       "Гороскоп инфо (знак зодиака) - пришлёт информацию о мемасе в гороскопе по знаку зодиака"
+    name = "гороскоп"
+    help_text = "мемный гороскоп"
+    help_texts = [
+        "[знак зодиака = по др в профиле] - пришлёт мемный гороскоп на день для знака зодиака",
+        "все - пришлёт мемный гороскоп для всех знаков зодиака",
+        "инфо (знак зодиака) - пришлёт информацию о мемасе в гороскопе по знаку зодиака",
+        "конфа - пришлёт гороскоп для всех участников конфы"
+    ]
 
     def __init__(self):
         super().__init__()
@@ -69,7 +72,8 @@ class Horoscope(CommonCommand):
             elif self.event.args[0] in "конфа":
                 self.check_conversation()
                 chat_users = self.event.chat.users.all()
-                all_zodiac_signs = set(self.zodiac_signs.find_zodiac_sign_by_date(x.birthday) for x in chat_users if x.birthday)
+                all_zodiac_signs = set(
+                    self.zodiac_signs.find_zodiac_sign_by_date(x.birthday) for x in chat_users if x.birthday)
                 messages = []
                 for zodiac_sign in all_zodiac_signs:
                     messages.append(self.get_horoscope_by_zodiac_sign(zodiac_sign))

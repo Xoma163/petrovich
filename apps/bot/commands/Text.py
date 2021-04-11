@@ -4,10 +4,12 @@ from apps.bot.classes.common.CommonMethods import get_attachments_from_attachmen
 
 
 class Text(CommonCommand):
-    names = ["текст"]
-    help_text = "Текст - распознаёт текст на изображении"
-    detail_help_text = "Текст (Изображения/Пересылаемое сообщение с изображением) [язык=rus] - распознаёт текст на изображении\n" \
-                       'Язык нужно указывать в 3 символа. Пример - "eng", "rus", "fre", "ger" и так далее'
+    name = "текст"
+    help_text = "распознаёт текст на изображении"
+    help_texts = [
+        "Текст (Изображения/Пересылаемое сообщение с изображением) [язык=rus] - распознаёт текст на изображении\n"
+        'Язык нужно указывать в 3 символа. Пример - "eng", "rus", "fre", "ger" и так далее'
+    ]
     attachments = ['photo']
 
     def start(self):

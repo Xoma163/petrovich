@@ -5,9 +5,10 @@ from apps.bot.management.commands.start import camera_handler
 
 
 class Birds(CommonCommand):
-    names = ["с", "c", "камера"]
-    help_text = "Камера - ссылка и гифка с камеры"
-    detail_help_text = "Камера [кол-во кадров=20] - ссылка и гифка с камеры. Максимум 200 кадров"
+    name = "камера"
+    names = ["с", "c"]
+    help_text = "ссылка и гифка с камеры"
+    help_texts = ["[кол-во кадров=20] - ссылка и гифка с камеры. Максимум 200 кадров"]
     int_args = [0]
     access = Role.TRUSTED
     platforms = [Platform.VK, Platform.TG]
@@ -40,7 +41,7 @@ class Birds(CommonCommand):
         if len(attachments) == 2 or self.event.platform == Platform.VK:
             return {
                 'attachments': attachments,
-                "keyboard": self.bot.get_inline_keyboard(self.names[0], args={"frames": frames}),
+                "keyboard": self.bot.get_inline_keyboard(self.name, args={"frames": frames}),
                 'dont_parse_links': True
             }
         else:

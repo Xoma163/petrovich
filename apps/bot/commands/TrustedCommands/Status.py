@@ -8,8 +8,8 @@ from petrovich.settings import MAIN_DOMAIN
 
 
 class Status(CommonCommand):
-    names = ["статус"]
-    help_text = "Статус - статус серверов по играм"
+    name = "статус"
+    help_text = "статус серверов по играм"
     access = Role.MINECRAFT
 
     def start(self):

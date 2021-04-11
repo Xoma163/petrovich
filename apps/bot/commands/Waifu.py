@@ -5,10 +5,12 @@ from apps.bot.classes.common.CommonMethods import get_random_int
 
 
 class Waifu(CommonCommand):
-    names = ["вайфу"]
-    help_text = "Вайфу - присылает несуществующую вайфу"
-    detail_help_text = "Вайфу [номер=рандом] - присылает несуществующую вайфу по номеру (0-100000)\n" \
-                       "Вайфу (слово) - присылает несуществующую вайфу вычисляя её номер"
+    name = "вайфу"
+    help_text = "присылает несуществующую вайфу"
+    help_texts = [
+        "[номер=рандом] - присылает несуществующую вайфу по номеру (0-100000)",
+        "(слово) - присылает несуществующую вайфу вычисляя её номер"
+    ]
     platforms = [Platform.VK, Platform.TG]
 
     def start(self):
@@ -28,7 +30,7 @@ class Waifu(CommonCommand):
         attachment = self.bot.upload_photos(url)
 
         if self.event.args:
-            keyboard = self.bot.get_inline_keyboard(self.names[0], "Следующая", args={"waifu_number": waifu_number + 1})
+            keyboard = self.bot.get_inline_keyboard(self.name, "Следующая", args={"waifu_number": waifu_number + 1})
         else:
-            keyboard = self.bot.get_inline_keyboard(self.names[0])
+            keyboard = self.bot.get_inline_keyboard(self.name)
         return {"msg": waifu_number, "attachments": attachment, "keyboard": keyboard}
