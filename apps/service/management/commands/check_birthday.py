@@ -26,7 +26,8 @@ class Command(BaseCommand):
                                          birthday__month=today.month)
 
             for user in users:
-                vk_bot.send_message(chat.chat_id, f"С Днём рождения, {vk_bot.get_mention(user)}!")
+                if user.celebrate_bday:
+                    vk_bot.send_message(chat.chat_id, f"С Днём рождения, {vk_bot.get_mention(user)}!")
 
                 gamer = Gamer.objects.filter(user=user).first()
                 if gamer:

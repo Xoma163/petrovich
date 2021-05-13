@@ -14,7 +14,8 @@ class Settings(CommonCommand):
         "упоминание (вкл/выкл) - определяет будет ли бот триггериться на команды без упоминания в конфе(требуются админские права)",
         "реагировать (вкл/выкл) - определяет, будет ли бот реагировать на неправильные команды в конфе. Это сделано для того, чтобы в конфе с несколькими ботами не было ложных срабатываний",
         "мемы (вкл/выкл) - определяет, будет ли бот присылать мем если прислано его точное название без / (боту требуется доступ к переписке)",
-        "майнкрафт (вкл/выкл) - определяет, будет ли бот присылать информацию о серверах майна. (для доверенных)"
+        "майнкрафт (вкл/выкл) - определяет, будет ли бот присылать информацию о серверах майна. (для доверенных)",
+        "др (вкл/выкл) - определяет, будет ли бот поздравлять с Днём рождения"
     ]
 
     def start(self):
@@ -27,7 +28,8 @@ class Settings(CommonCommand):
             [['реагировать', 'реагируй', 'реагирование'], self.menu_reaction],
             [['упоминание', 'упоминания', 'триггериться'], self.menu_mentioning],
             [['майнкрафт', 'майн', 'minecraft', 'mine'], self.menu_minecraft_notify],
-            [['мемы'], self.menu_memes],
+            [['мемы', 'мем'], self.menu_memes],
+            [['др', 'днюха'], self.menu_bd],
             [['default'], self.menu_default],
         ]
         method = self.handle_menu(menu, arg0)
@@ -70,6 +72,13 @@ class Settings(CommonCommand):
         self.event.chat.save()
         return "Сохранил настройку"
 
+    def menu_bd(self):
+        self.check_args(2)
+        value = self.get_on_or_off(self.event.args[1].lower())
+        self.event.sender.celebrate_bday = value
+        self.event.sender.save()
+        return "Сохранил настройку"
+
     def menu_minecraft_notify(self):
         self.check_sender(Role.TRUSTED)
         self.check_args(2)
@@ -88,6 +97,7 @@ class Settings(CommonCommand):
 
     def menu_default(self):
         msg = "Настройки:\n"
+
         if self.event.chat:
             reaction = self.event.chat.need_reaction
             need_meme = self.event.chat.need_meme
@@ -99,4 +109,6 @@ class Settings(CommonCommand):
         if self.event.sender.check_role(Role.TRUSTED):
             minecraft_notify = self.event.sender.check_role(Role.MINECRAFT_NOTIFY)
             msg += f"Уведомления по майну - {TRUE_FALSE_TRANSLATOR[minecraft_notify]}\n"
+        celebrate_bday = self.event.sender.celebrate_bday
+        msg += f"Поздравлять с днём рождения - {TRUE_FALSE_TRANSLATOR[celebrate_bday]}"
         return msg
