@@ -157,7 +157,7 @@ class Meme(models.Model):
             cropped_link = self.link
             if len(cropped_link) > 100:
                 cropped_link = f"{self.link[:98]}..."
-            return mark_safe(u'<a href="{0}">{1}</a>'.format(self.link, cropped_link))
+            return mark_safe(u'<a href="{0}">Тык</a>'.format(self.link, cropped_link))
         else:
             return '(Нет изображения)'
 
