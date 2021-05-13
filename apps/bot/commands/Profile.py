@@ -116,10 +116,13 @@ class Profile(CommonCommand):
         user = self.event.sender
         _city = user.city or "Не установлено"
         _bd = user.birthday
-        if _bd:
-            _bd = _bd.strftime('%d.%m.%Y')
+        if user.celebrate_bday:
+            if _bd:
+                _bd = _bd.strftime('%d.%m.%Y')
+            else:
+                _bd = "Не установлено"
         else:
-            _bd = "Не установлено"
+            _bd = "Скрыто"
         _nickname = user.nickname_real or "Не установлено"
         _name = user.name or "Не установлено"
         _surname = user.surname or "Не установлено"
