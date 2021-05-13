@@ -17,7 +17,9 @@ class Profile(CommonCommand):
         "город (название города) - устанавливает новый город",
         "город добавить (название города) - добавляет новый город в базу",
         "др (дата) - устанавливает новый др",
-        "нейм (никнейм) - устанавливает новый никнейм",
+        "имя (имя) - устанавливает новое имя",
+        "фамилия (фамилия) - устанавливает новую фамилию",
+        "никнейм (никнейм) - устанавливает новый никнейм",
         "пол (мужской/женский) - устанавливает новый пол",
         "аватар - обновляет аватар из ВК",
         "аватар (изображение) - обновляет аватар из вложения",
@@ -33,6 +35,8 @@ class Profile(CommonCommand):
             [["город"], self.menu_city],
             [["др"], self.menu_bd],
             [['ник', 'никнейм'], self.menu_nickname],
+            [['имя'], self.menu_name],
+            [['фамилия'], self.menu_surname],
             [['пол'], self.menu_gender],
             [['аватар'], self.menu_avatar],
             [['default'], self.menu_default],
@@ -71,6 +75,20 @@ class Profile(CommonCommand):
         self.event.sender.save()
         return f"Изменил никнейм на {self.event.sender.nickname_real}"
 
+    def menu_name(self):
+        self.check_args(2)
+        name = " ".join(self.event.args[1:])
+        self.event.sender.name = name
+        self.event.sender.save()
+        return f"Изменил имя на {self.event.sender.name}"
+
+    def menu_surname(self):
+        self.check_args(2)
+        surname = " ".join(self.event.args[1:])
+        self.event.sender.surname = surname
+        self.event.sender.save()
+        return f"Изменил фамилию на {self.event.sender.surname}"
+
     def menu_gender(self):
         self.check_args(2)
         gender = self.event.args[1]
@@ -103,8 +121,12 @@ class Profile(CommonCommand):
         else:
             _bd = "Не установлено"
         _nickname = user.nickname_real or "Не установлено"
+        _name = user.name or "Не установлено"
+        _surname = user.surname or "Не установлено"
         msg = {
             'msg': f"Город - {_city}\n"
+                   f"Имя - {_name}\n"
+                   f"Фамилия - {_surname}\n"
                    f"Дата рождения - {_bd}\n"
                    f"Никнейм - {_nickname}\n"
                    f"Пол - {user.get_gender_display()}"
