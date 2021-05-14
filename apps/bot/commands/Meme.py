@@ -36,8 +36,7 @@ class Meme(CommonCommand):
     priority = 70
 
     def accept(self, event):
-        # ToDo: by platform or by payload(!)
-        if event.mentioned or event.from_user:# or event.command:
+        if event.mentioned or event.from_user or event.payload['command'] == 'мем':
             return super().accept(event)
 
         if event.chat and check_name_exists(event.clear_msg.lower()):
