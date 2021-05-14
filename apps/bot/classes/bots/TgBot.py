@@ -458,8 +458,7 @@ class TgBot(CommonBot):
         """
         if user.nickname:
             return f"@{user.nickname}"
-        elif user.name:
-            return user.name
+        return str(user)
 
     def upload_video_by_link(self, link, name):
         """
