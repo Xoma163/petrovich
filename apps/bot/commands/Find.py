@@ -31,7 +31,7 @@ class Find(CommonCommand):
             cookies={
                 'yp': '1929040280.sp.family%3A2#1613420360.szm.1%3A1920x1080%3A1920x969#1612901961.nps.7769161127%3Aclose'
             }).content
-        bs4 = BeautifulSoup(content)
+        bs4 = BeautifulSoup(content,'html.parser')
         urls = [json.loads(x.attrs['data-bem'])['serp-item']['img_href'] for x in bs4.select('.serp-item')]
 
         # qwant_api = QwantAPI()

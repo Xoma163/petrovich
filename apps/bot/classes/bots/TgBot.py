@@ -206,6 +206,17 @@ class TgBot(CommonBot):
         prepared_message = {'chat_id': peer_id, 'text': msg, 'parse_mode': 'HTML', 'reply_markup': keyboard}
         return self.requests.get('sendMessage', params=prepared_message)
 
+    def _set_image_private_download_url(self, image_attachment):
+
+        file_path = self.requests.get('getFile', params={'file_id': image_attachment['id']}).json()['result'][
+            'file_path']
+        image_attachment['private_download_url'] = f'https://{API_TELEGRAM_URL}/file/bot{self.token}/{file_path}'
+
+    @staticmethod
+    def _set_image_content(image_attachment):
+        response = requests.get(image_attachment['private_download_url'])
+        image_attachment['content'] = response.content
+
     def _setup_event_attachments(self, event):
         """
         Проставляет вложения для события
@@ -228,12 +239,9 @@ class TgBot(CommonBot):
                 },
                 'type': 'photo'
             }
-            file_path = self.requests.get('getFile', params={'file_id': new_photo['id']}).json()['result'][
-                'file_path']
-            new_photo['private_download_url'] = f'https://{API_TELEGRAM_URL}/file/bot{self.token}/{file_path}'
+            self._set_image_private_download_url(new_photo)
+            self._set_image_content(new_photo)
 
-            response = requests.get(new_photo['private_download_url'])
-            new_photo['content'] = response.content
             attachments.append(new_photo)
         if 'voice' in event['message']:
             for audio_message in event['message']['voice']:
@@ -306,6 +314,9 @@ class TgBot(CommonBot):
             if 'photo' in event['message']['reply_to_message']:
                 tg_event['fwd'][0]['attachments'].append(event['message']['reply_to_message']['photo'][-1])
                 tg_event['fwd'][0]['attachments'][-1]['type'] = 'photo'
+                tg_event['fwd'][0]['attachments'][-1]['id'] = tg_event['fwd'][0]['attachments'][-1]['file_id']
+                self._set_image_private_download_url(tg_event['fwd'][0]['attachments'][-1])
+                self._set_image_content(tg_event['fwd'][0]['attachments'][-1])
             if 'voice' in event['message']['reply_to_message']:
                 tg_event['fwd'][0]['attachments'].append(event['message']['reply_to_message']['photo'][-1])
                 tg_event['fwd'][0]['attachments'][-1]['type'] = 'audio_message'

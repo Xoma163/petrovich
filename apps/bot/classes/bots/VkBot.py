@@ -331,12 +331,7 @@ class VkBot(CommonBot):
             obj = file_like_object
         return obj
 
-    def upload_photos(self, images, max_count=10):
-        """
-        Загрузка фотографий на сервер ВК.
-        images: список изображений в любом формате (ссылки, байты, файлы)
-        При невозможности загрузки одной из картинки просто пропускает её
-        """
+    def _upload_photos(self, images, max_count=10):
         if not isinstance(images, list):
             images = [images]
 
@@ -370,6 +365,15 @@ class VkBot(CommonBot):
 
             if len(images_to_load) >= max_count:
                 break
+        return attachments, images_to_load
+
+    def upload_photos(self, images, max_count=10):
+        """
+        Загрузка фотографий на сервер ВК.
+        images: список изображений в любом формате (ссылки, байты, файлы)
+        При невозможности загрузки одной из картинки просто пропускает её
+        """
+        attachments, images_to_load = self._upload_photos(images, max_count)
         try:
             vk_photos = self.upload.photo_messages(images_to_load)
             for vk_photo in vk_photos:
@@ -377,6 +381,14 @@ class VkBot(CommonBot):
         except vk_api.exceptions.ApiError as e:
             print(e)
         return attachments
+
+    def upload_photo_and_get_absolute_url(self, image):
+        attachments, images_to_load = self._upload_photos([image], 1)
+        try:
+            vk_photo = self.upload.photo_messages(images_to_load)[0]
+        except vk_api.exceptions.ApiError as e:
+            print(e)
+        return vk_photo['sizes'][-1]['url']
 
     def upload_animation(self, animation, peer_id=None, title='Документ'):
         return self.upload_document(animation, peer_id, title)
@@ -500,3 +512,8 @@ class MyVkBotLongPoll(VkBotLongPoll):
             except Exception as e:
                 error = {'exception': f'Longpoll Error (VK): {str(e)}'}
                 print(error)
+
+
+def upload_image_to_vk_server(image):
+    vk_bot = VkBot()
+    return vk_bot.upload_photo_and_get_absolute_url(image)

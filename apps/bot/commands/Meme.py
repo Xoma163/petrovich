@@ -1,5 +1,6 @@
 from apps.bot.classes.Consts import Role, Platform
 from apps.bot.classes.Exceptions import PSkip, PWarning, PError
+from apps.bot.classes.bots.VkBot import upload_image_to_vk_server
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import get_attachments_from_attachments_or_fwd, tanimoto
 from apps.service.models import Meme as MemeModel
@@ -36,7 +37,7 @@ class Meme(CommonCommand):
     priority = 70
 
     def accept(self, event):
-        if event.mentioned or event.from_user or (event.payload and event.payload.get('command',None) == 'мем'):
+        if event.mentioned or event.from_user or (event.payload and event.payload.get('command', None) == 'мем'):
             return super().accept(event)
 
         if event.chat and check_name_exists(event.clear_msg.lower()):
@@ -66,14 +67,15 @@ class Meme(CommonCommand):
 
     # MENU #
     def menu_add(self):
-        if self.event.platform == Platform.TG:
-            raise PWarning('В телеграмме не поддерживается добавление мемов')
 
         self.check_args(2)
         attachments = get_attachments_from_attachments_or_fwd(self.event, ['audio', 'video', 'photo'])
         if len(attachments) == 0:
             raise PWarning("Не нашёл вложений в сообщении или пересланном сообщении")
         attachment = attachments[0]
+
+        if self.event.platform != Platform.VK and attachment['type'] != 'photo':
+            raise PWarning('В данной платформе поддерживается добавление только картинок-мемов')
 
         for i, _ in enumerate(self.event.args):
             self.event.args[i] = self.event.args[i].lower()
@@ -96,7 +98,10 @@ class Meme(CommonCommand):
         if attachment['type'] == 'video' or attachment['type'] == 'audio':
             new_meme['link'] = attachment['url']
         elif attachment['type'] == 'photo':  # or attachment['type'] == 'doc':
-            new_meme['link'] = attachment['private_download_url']
+            if self.event.platform != Platform.VK:
+                new_meme['link'] = upload_image_to_vk_server(attachment['private_download_url'])
+            else:
+                new_meme['link'] = attachment['private_download_url']
         else:
             raise PError("Невозможно")
 
