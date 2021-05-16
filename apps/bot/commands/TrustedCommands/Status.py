@@ -16,7 +16,7 @@ class Status(CommonCommand):
         minecraft_result = ""
         for server in minecraft_servers:
             server.get_server_info()
-            result = server.parse_server_info()
+            result = server.get_server_info_str()
             minecraft_result += f"{result}\n\n"
 
         terraria_result = ""
