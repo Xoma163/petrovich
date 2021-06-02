@@ -63,7 +63,7 @@ SpeechRecognition==3.8.1
 sqlparse==0.4.1
 transliterate==1.10.2
 uritemplate==3.0.1
-urllib3==1.26.4
+urllib3==1.26.5
 uWSGI==2.0.19.1
 virtualenv==20.4.3
 vk-api==11.9.1
