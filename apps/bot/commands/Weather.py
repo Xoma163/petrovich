@@ -1,7 +1,7 @@
 import json
 
 from apps.bot.APIs.YandexWeatherAPI import YandexWeatherAPI
-from apps.bot.classes.Consts import WEATHER_TRANSLATOR, DAY_TRANSLATOR
+from apps.bot.classes.Consts import WEATHER_TRANSLATOR, DAY_TRANSLATOR, WEATHER_WIND_DIRECTION_TRANSLATOR
 from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.service.models import City, Service
@@ -124,8 +124,8 @@ def get_weather_str(city, weather_data):
     now = \
         f"Погода в г. {city.name} сейчас:\n" \
         f"{WEATHER_TRANSLATOR[weather_data['now']['condition']]}\n" \
-        f"Температура {weather_data['now']['temp']}°С(ощущается как {weather_data['now']['temp_feels_like']}°С)\n" \
-        f"Ветер {weather_data['now']['wind_speed']}м/c(порывы до {weather_data['now']['wind_gust']}м/c)\n" \
+        f"Температура {weather_data['now']['temp']}°С (ощущается как {weather_data['now']['temp_feels_like']}°С)\n" \
+        f"Ветер {WEATHER_WIND_DIRECTION_TRANSLATOR[weather_data['now']['wind_dir']]} {weather_data['now']['wind_speed']}м/c (порывы до {weather_data['now']['wind_gust']}м/c)\n" \
         f"Давление {weather_data['now']['pressure']}мм.рт.ст., влажность {weather_data['now']['humidity']}%"
 
     forecast = ""
@@ -141,8 +141,8 @@ def get_weather_str(city, weather_data):
             forecast += f"Температура {x['temp_max']}°С"
 
         forecast += \
-            f"(ощущается как {x['temp_feels_like']}°С)\n" \
-            f"Ветер {x['wind_speed']}м/c(порывы до {x['wind_gust']}м/c)\n" \
+            f" (ощущается как {x['temp_feels_like']}°С)\n" \
+            f"Ветер {WEATHER_WIND_DIRECTION_TRANSLATOR[weather_data['now']['wind_dir']]} {x['wind_speed']}м/c (порывы до {x['wind_gust']}м/c)\n" \
             f"Давление {x['pressure']} мм.рт.ст., влажность {x['humidity']}%\n"
         if x['prec_mm'] != 0:
             forecast += \
