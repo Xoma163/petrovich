@@ -145,7 +145,7 @@ class MinecraftAPI:
         players_list_pos = response_lines[2].find('[')
         if players_list_pos != -1:
             players_list = response_lines[2][players_list_pos:].replace("[\'", '').replace('\']', '').split(',')
-            server_info['players'] = [{'name':x[:x.find(' ')]} for x in players_list]
+            server_info['players'] = [{'name': x[:x.find(' ')]} for x in players_list]
         return server_info
 
     def get_server_info(self):
@@ -193,7 +193,7 @@ class MinecraftAPI:
             if self.event:
                 users_notify = users_notify.exclude(id=self.event.sender.id)
                 if self.event.chat:
-                    users_in_chat = self.event.chat.users_set.all()
+                    users_in_chat = self.event.chat.users.all()
                     users_notify = users_notify.exclude(pk__in=users_in_chat)
             for user in users_notify:
                 bot = get_bot_by_platform(user.get_platform_enum())()
@@ -243,21 +243,21 @@ minecraft_servers = [
     MinecraftAPI(
         **{
             'ip': MAIN_DOMAIN,
+            'port': 25566,
+            'amazon': False,
+            'event': None,
+            'delay': 60,
+            'names': ['1.16.5', "1.16"]
+        }),
+    MinecraftAPI(
+        **{
+            'ip': MAIN_DOMAIN,
             'port': 25565,
             'amazon': False,
             'event': None,
             'delay': 60,
             'names': ['1.12.2', "1.12"]
         }),
-    MinecraftAPI(
-        **{
-            'ip': MAIN_DOMAIN,
-            'port': 25566,
-            'amazon': False,
-            'event': None,
-            'delay': 60,
-            'names': ['1.16.5', "1.16"]
-        })
 ]
 
 

@@ -35,7 +35,7 @@ kiwisolver==1.3.1
 lxml==4.6.3
 matplotlib==3.3.4
 mcrcon==0.6.0
-mcstatus==5.1.1
+mcstatus==5.2.0
 numpy==1.20.1
 oauth2client==4.1.3
 oauthlib==3.1.0

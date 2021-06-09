@@ -403,7 +403,7 @@ class CommonBot(Thread):
 
         chats_with_user = []
         for chat in chats:
-            user_contains = chat.users_set.filter(user_id=user_id)
+            user_contains = chat.users.filter(user_id=user_id)
             if user_contains:
                 chats_with_user.append(chat)
 

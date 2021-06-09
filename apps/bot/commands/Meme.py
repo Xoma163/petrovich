@@ -99,7 +99,7 @@ class Meme(CommonCommand):
             new_meme['link'] = attachment['url']
         elif attachment['type'] == 'photo':  # or attachment['type'] == 'doc':
             if self.event.platform != Platform.VK:
-                new_meme['link'] = upload_image_to_vk_server(attachment['private_download_url'])
+                new_meme['link'] = upload_image_to_vk_server(attachment['content'])
             else:
                 new_meme['link'] = attachment['private_download_url']
         else:
