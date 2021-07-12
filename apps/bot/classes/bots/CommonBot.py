@@ -4,7 +4,6 @@ from threading import Thread
 
 from apps.bot.classes.Consts import Role, Platform
 from apps.bot.classes.Exceptions import PSkip, PWarning, PError
-from apps.bot.classes.bots.YandexBot import YandexBot
 from apps.bot.classes.common.CommonMethods import tanimoto
 from apps.bot.classes.events.Event import Event
 from apps.bot.models import Users, Chat, Bot
@@ -441,6 +440,7 @@ def get_bot_by_platform(platform: Platform):
     """
     from apps.bot.classes.bots.VkBot import VkBot
     from apps.bot.classes.bots.TgBot import TgBot
+    from apps.bot.classes.bots.YandexBot import YandexBot
 
     platforms = {
         Platform.VK: VkBot,
