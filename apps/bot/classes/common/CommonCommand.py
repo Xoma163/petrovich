@@ -303,4 +303,5 @@ class CommonCommand:
                 default_item = item[1]
         if default_item:
             return default_item
-        raise PWarning(f"{self.help_texts}")
+        # raise PWarning(f"{self.help_texts}")
+        raise PWarning(get_help_texts_for_command(self))
