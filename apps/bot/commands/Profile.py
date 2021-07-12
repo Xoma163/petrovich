@@ -92,9 +92,9 @@ class Profile(CommonCommand):
     def menu_gender(self):
         self.check_args(2)
         gender = self.event.args[1]
-        if gender == 'мужской':
+        if gender in ['мужской', 'м', 'муж']:
             gender_code = self.event.sender.GENDER_MALE
-        elif gender == 'женский':
+        elif gender in ['женский', 'ж', 'жен']:
             gender_code = self.event.sender.GENDER_FEMALE
         else:
             gender_code = self.event.sender.GENDER_NONE
