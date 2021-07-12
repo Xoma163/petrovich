@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 
 from apps.bot.APIs.YoutubeInfo import YoutubeInfo
 from apps.bot.classes.Consts import Role, Platform
-from apps.bot.classes.Exceptions import PWarning
+from apps.bot.classes.Exceptions import PWarning, PError
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.service.models import YoutubeSubscribe
 
@@ -14,13 +14,13 @@ class YouTube(CommonCommand):
     name = "ютуб"
     help_text = "создаёт подписку на ютуб канал"
     help_texts = [
-        "добавить (id/название канала) - создаёт подписку на канал. Бот пришлёт тебе новое видео с канала",
+        "добавить (ссылка на канал) - создаёт подписку на канал. Бот пришлёт тебе новое видео с канала",
         f"удалить (название канала) - удаляет вашу подписку на канал (если в конфе, то только по конфе, в лс только по лс). Максимум подписок - {MAX_USER_SUBS_COUNT} шт. Админ конфы может удалять подписки в конфе",
         "подписки - пришлёт ваши активные подписки (если в конфе, то только подписки по конфе)",
         "конфа - пришлёт активные подписки по конфе\n",
 
-        "Чтобы узнать id канала нужно перейти на канал и скопировать содержимое после https://www.youtube.com/channel/{id}\n",
-        "Чтобы узнать название канала, нужно перейти на канал и скопировать содержимое после https://www.youtube.com/user/{name} или https://www.youtube.com/{name}\n",
+        # "Чтобы узнать id канала нужно перейти на канал и скопировать содержимое после https://www.youtube.com/channel/{id}\n",
+        # "Чтобы узнать название канала, нужно перейти на канал и скопировать содержимое после https://www.youtube.com/user/{name} или https://www.youtube.com/{name}\n",
         "Проверка новых видео проходит каждый час"
     ]
     args = 1
@@ -39,14 +39,13 @@ class YouTube(CommonCommand):
 
     def menu_add(self):
         self.check_args(2)
-        channel_id = self.event.args[1]
+        channel_url = self.event.args[1]
         try:
-            url = f'https://youtube.com/user/{channel_id}'
-            response = requests.get(url)
+            response = requests.get(channel_url)
             bsop = BeautifulSoup(response.content, 'html.parser')
             channel_id = bsop.find_all('link', {'rel': 'canonical'})[0].attrs['href'].split('/')[-1]
-        except Exception:
-            pass
+        except:
+            return PWarning("Некорректная ссылка на ютуб канал")
 
         if self.event.chat:
             existed_sub = YoutubeSubscribe.objects.filter(chat=self.event.chat,
