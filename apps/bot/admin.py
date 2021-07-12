@@ -33,7 +33,7 @@ admin.site.register(Users, UserAdmin)
 
 
 class ChatAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'admin', 'need_reaction', 'platform',)
+    list_display = ('id', 'name', 'admin', 'need_reaction', 'platform','is_banned')
     list_filter = ('platform',)
 
 

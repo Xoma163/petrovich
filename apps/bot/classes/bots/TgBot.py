@@ -328,7 +328,10 @@ class TgBot(CommonBot):
         if tg_event['message']['payload']:
             tg_event['message']['text'] = ""
             tg_event['message']['attachments'] = None
-
+        if tg_event['chat_id']:
+            tg_event['chat'] = self.get_chat_by_id(int(tg_event['chat_id']))
+        else:
+            tg_event['chat'] = None
         return tg_event
 
     def need_a_response(self, tg_event):
@@ -354,10 +357,8 @@ class TgBot(CommonBot):
         Нужно это для того, чтобы не тратить ресурсы на обработку если она не будет востребована
         """
         tg_event['sender'] = self.register_user(event.get('callback_query', event)['message']['from'])
-        if tg_event['chat_id']:
-            tg_event['chat'] = self.get_chat_by_id(int(tg_event['chat_id']))
-            if tg_event['sender'] and tg_event['chat']:
-                self.add_chat_to_user(tg_event['sender'], tg_event['chat'])
+        if tg_event['sender'] and tg_event['chat']:
+            self.add_chat_to_user(tg_event['sender'], tg_event['chat'])
         else:
             tg_event['chat'] = None
         return tg_event

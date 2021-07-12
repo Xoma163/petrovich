@@ -214,6 +214,14 @@ class VkBot(CommonBot):
         if (vk_event['message'].get('action', None)
                 and vk_event['message']['action']['type'] in ['chat_invite_user', 'chat_invite_user_by_link']):
             vk_event['message']['action']['member_ids'] = [vk_event['message']['action'].pop('member_id')]
+
+
+        # Узнаём конфу
+        if vk_event['chat_id']:
+            vk_event['chat'] = self.get_chat_by_id(int(vk_event['peer_id']))
+        else:
+            vk_event['chat'] = None
+
         return vk_event
 
     def need_a_response(self, vk_event):
@@ -264,14 +272,9 @@ class VkBot(CommonBot):
         # Узнаём пользователя
         vk_event['sender'] = self.get_user_by_id(vk_event['user_id'])
 
-        # Узнаём конфу
-        if vk_event['chat_id']:
-            vk_event['chat'] = self.get_chat_by_id(int(vk_event['peer_id']))
-            if vk_event['sender'] and vk_event['chat']:
-                self.add_chat_to_user(vk_event['sender'], vk_event['chat'])
-                self.add_extra_group_to_user(vk_event['sender'], vk_event['chat'])
-        else:
-            vk_event['chat'] = None
+        if vk_event['sender'] and vk_event['chat']:
+            self.add_chat_to_user(vk_event['sender'], vk_event['chat'])
+            self.add_extra_group_to_user(vk_event['sender'], vk_event['chat'])
 
         return vk_event
 
@@ -287,6 +290,7 @@ class VkBot(CommonBot):
             # Если пришло новое сообщение
             if event.type == VkBotEventType.MESSAGE_NEW:
                 vk_event = self._setup_event_before(event)
+
                 if not self.need_a_response(vk_event):
                     return
                 vk_event = self._setup_event_after(vk_event, event)
