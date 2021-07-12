@@ -18,7 +18,7 @@ from petrovich.settings import env, BASE_DIR, MAIN_DOMAIN
 
 class MinecraftAPI:
 
-    def __init__(self, ip, port=25565, amazon=False, event=None, delay=None, names=None):
+    def __init__(self, ip, port=25565, amazon=False, event=None, delay=None, names=None, map_url=None):
         self.ip = ip
         self.port = port
         self.amazon = amazon
@@ -26,6 +26,7 @@ class MinecraftAPI:
 
         self.delay = delay
         self.names = names
+        self.map_url = map_url
 
         self.server_info = None
 
@@ -179,7 +180,8 @@ class MinecraftAPI:
                 players_list.sort(key=str.lower)
                 players_str = ", ".join(players_list)
                 result += f"Игроки: {players_str}"
-
+            if self.map_url:
+                result += f"Карта - {self.map_url}"
         return result
 
     def send_notify_thread(self, message):
@@ -247,7 +249,8 @@ minecraft_servers = [
             'amazon': False,
             'event': None,
             'delay': 60,
-            'names': ['1.16.5', "1.16"]
+            'names': ['1.16.5', "1.16"],
+            'map_url': "https://map.andrewsha.net"
         }),
     MinecraftAPI(
         **{
