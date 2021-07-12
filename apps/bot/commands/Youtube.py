@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 
 from apps.bot.APIs.YoutubeInfo import YoutubeInfo
 from apps.bot.classes.Consts import Role, Platform
-from apps.bot.classes.Exceptions import PWarning, PError
+from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.service.models import YoutubeSubscribe
 
