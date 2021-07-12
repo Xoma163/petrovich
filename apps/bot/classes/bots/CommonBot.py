@@ -226,6 +226,13 @@ class CommonBot(Thread):
         """
         message = event['message']['text']
 
+        try:
+            chat = Chat.objects.get(chat_id=event['peer_id'])
+            if chat.banned:
+                return False
+        except:
+            chat = None
+
         have_payload = 'message' in event and 'payload' in event['message'] and event['message']['payload']
         if have_payload:
             return True
@@ -250,12 +257,8 @@ class CommonBot(Thread):
         for mention in self.mentions:
             if message.find(mention) != -1:
                 return True
-        try:
-            chat = Chat.objects.get(chat_id=event['peer_id'])
-            if chat.mentioning:
-                return True
-        except:
-            pass
+        if chat and chat.mentioning:
+            return True
         return False
 
     @staticmethod
