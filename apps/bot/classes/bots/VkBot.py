@@ -38,7 +38,6 @@ class VkBot(CommonBot):
 
         self.vk_user = VkUser()
 
-        self.test_chat = Chat.objects.get(chat_id=env.str("VK_TEST_CHAT_ID"))
 
     def set_activity(self, peer_id, activity='typing'):
         """
@@ -215,7 +214,6 @@ class VkBot(CommonBot):
                 and vk_event['message']['action']['type'] in ['chat_invite_user', 'chat_invite_user_by_link']):
             vk_event['message']['action']['member_ids'] = [vk_event['message']['action'].pop('member_id')]
 
-
         # Узнаём конфу
         if vk_event['chat_id']:
             vk_event['chat'] = self.get_chat_by_id(int(vk_event['peer_id']))
@@ -228,14 +226,11 @@ class VkBot(CommonBot):
         """
         Нужен ли ответ пользователю
         """
-        # Develop debug в одной конфе
-        # if self.DEVELOP_DEBUG and vk_event['chat_id']:
-        #     from_test_chat = self.get_group_id(vk_event['chat_id']) == self.test_chat.chat_id
-        #     from_me = str(vk_event['user_id']) == env.str('VK_ADMIN_ID')
-        #     if not from_test_chat or not from_me:
-        #         return False
-
         # Сообщение либо мне в лс, либо упоминание меня, либо есть аудиосообщение, либо есть экшн
+
+        if vk_event['chat'] and vk_event['chat'].is_banned:
+            self.remove_self_from_chat(vk_event['chat_id'])
+
         if not self.need_a_response_common(vk_event):
             return False
 
@@ -505,6 +500,12 @@ class VkBot(CommonBot):
                 'profiles']
         except:
             raise PWarning("У бота нет админских прав для получения списка пользователей в конференции")
+
+    def remove_self_from_chat(self, chat_id):
+        """
+        Удаление бота (себя) из чата
+        """
+        self.vk.messages.removeChatUser(chat_id=chat_id, member_id=f"-{self.group_id}")
 
 
 class MyVkBotLongPoll(VkBotLongPoll):

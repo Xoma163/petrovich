@@ -447,3 +447,8 @@ def get_bot_by_platform(platform: Platform):
         Platform.YANDEX: YandexBot
     }
     return platforms[platform]
+
+
+def get_moderator_bot_class():
+    from apps.bot.classes.bots.TgBot import TgBot
+    return TgBot()

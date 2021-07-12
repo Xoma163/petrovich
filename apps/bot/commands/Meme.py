@@ -1,6 +1,7 @@
 from apps.bot.classes.Consts import Role, Platform
 from apps.bot.classes.Exceptions import PSkip, PWarning, PError
 from apps.bot.classes.bots.VkBot import upload_image_to_vk_server
+from apps.bot.classes.bots.CommonBot import get_moderator_bot_class
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import get_attachments_from_attachments_or_fwd, tanimoto
 from apps.service.models import Meme as MemeModel
@@ -113,7 +114,10 @@ class Meme(CommonCommand):
             meme_to_send['msg'] = "Запрос на подтверждение мема:\n" \
                                   f"{new_meme_obj.author}\n" \
                                   f"{new_meme_obj.name} ({new_meme_obj.id})"
-            self.bot.parse_and_send_msgs(self.bot.test_chat.chat_id, meme_to_send)
+
+            # Отправка сообщения в модераторную
+            m_bot = get_moderator_bot_class()
+            m_bot.parse_and_send_msgs(self.bot.test_chat.chat_id, meme_to_send)
             return "Добавил. Воспользоваться мемом можно после проверки модераторами."
 
     def menu_refresh(self):
