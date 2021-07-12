@@ -1,7 +1,9 @@
+from urllib.parse import urlparse
+
 from apps.bot.classes.Consts import Role, Platform
 from apps.bot.classes.Exceptions import PSkip, PWarning, PError
-from apps.bot.classes.bots.VkBot import upload_image_to_vk_server
 from apps.bot.classes.bots.CommonBot import get_moderator_bot_class
+from apps.bot.classes.bots.VkBot import upload_image_to_vk_server
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import get_attachments_from_attachments_or_fwd, tanimoto
 from apps.service.models import Meme as MemeModel
@@ -22,6 +24,7 @@ class Meme(CommonCommand):
         "(название) - присылает нужный мем. Можно использовать * вместо символов поиска. Например /мем ж*па",
         "р - присылает рандомный мем",
         "добавить (название) (Вложение/Пересланное сообщение с вложением) - добавляет мем. ",
+        "добавить (ютую ссылка) (название) - добавляет мем с ютуба. ",
         "обновить (название) (Вложение/Пересланное сообщение с вложением) - обновляет созданный вами мем. Можно добавлять картинки/аудио/видео",
         "удалить (название) - удаляет созданный вами мем",
         "конфа (название конфы) (название/рандом) - отправляет мем в конфу\n",
@@ -72,17 +75,32 @@ class Meme(CommonCommand):
         self.check_args(2)
         attachments = get_attachments_from_attachments_or_fwd(self.event, ['audio', 'video', 'photo'])
         if len(attachments) == 0:
-            raise PWarning("Не нашёл вложений в сообщении или пересланном сообщении")
-        attachment = attachments[0]
+            url = self.event.original_args.split(' ')[1]
+            parsed_url = urlparse(url)
+            if not parsed_url.hostname:
+                raise PWarning(
+                    "Не нашёл вложений в сообщении или пересланном сообщении. Не нашёл ссылку на youtube видео")
 
-        if self.event.platform != Platform.VK and attachment['type'] != 'photo':
-            raise PWarning('В данной платформе поддерживается добавление только картинок-мемов')
+            if parsed_url.hostname.replace('www.', '').lower() not in ['youtu.be', 'youtube.com']:
+                raise PWarning("Это ссылка не на ютуб видео")
+
+            attachment = {
+                'type': 'link',
+                'url': url,
+            }
+            meme_name = " ".join(self.event.args[2:])
+        else:
+            meme_name = " ".join(self.event.args[1:])
+            attachment = attachments[0]
+
+        if self.event.platform != Platform.VK and attachment['type'] not in ['photo', 'link']:
+            raise PWarning('В данной платформе поддерживается добавление только картинок-мемов/ютуб ссылок')
 
         for i, _ in enumerate(self.event.args):
             self.event.args[i] = self.event.args[i].lower()
 
         new_meme = {
-            'name': " ".join(self.event.args[1:]),
+            'name': meme_name,
             'type': attachment['type'],
             'author': self.event.sender,
             'approved': self.event.sender.check_role(Role.MODERATOR) or self.event.sender.check_role(Role.TRUSTED)
@@ -96,7 +114,7 @@ class Meme(CommonCommand):
         if MemeModel.objects.filter(name=new_meme['name']).exists():
             raise PWarning("Мем с таким названием уже есть в базе")
 
-        if attachment['type'] == 'video' or attachment['type'] == 'audio':
+        if attachment['type'] in ['video', 'audio', 'link']:
             new_meme['link'] = attachment['url']
         elif attachment['type'] == 'photo':  # or attachment['type'] == 'doc':
             if self.event.platform != Platform.VK:
@@ -416,6 +434,8 @@ def prepare_meme_to_send(bot, event, meme, print_name=False, send_keyboard=False
             msg['attachments'] = bot.upload_photos(meme.link)
         else:
             msg['msg'] = meme.link
+        if meme.type == 'link':
+            msg['attachments'] = meme.link
     elif event.platform == Platform.VK:
         if meme.type == 'video':
             msg['attachments'] = [meme.link.replace(VK_URL, '')]
@@ -427,11 +447,13 @@ def prepare_meme_to_send(bot, event, meme, print_name=False, send_keyboard=False
                 message_to_test_chat = f"{error}\n\n{meme_info}"
                 bot.parse_and_send_msgs(bot.test_chat.chat_id, message_to_test_chat)
                 raise PWarning(error)
-
+        elif meme.type == 'link':
+            msg['msg'] = meme.link
         elif meme.type == 'audio':
             msg['attachments'] = [meme.link.replace(VK_URL, '')]
         elif meme.type == 'photo':
             msg['attachments'] = bot.upload_photos(meme.link)
+
         else:
             raise PError("У мема нет типа. Тыкай разраба")
 
