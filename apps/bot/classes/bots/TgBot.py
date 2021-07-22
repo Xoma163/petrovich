@@ -258,6 +258,7 @@ class TgBot(CommonBot):
             event['message']['from'] = event['from']
         tg_event = {
             'platform': self.platform,
+            # ToDo key message error when message is edited
             'user_id': event['message']['from']['id'],
             'chat_id': None,
             'peer_id': event['message']['chat']['id'],
