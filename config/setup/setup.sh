@@ -24,8 +24,8 @@ cp ./config/amazon/creditionals ~/.aws/creditionals
 # systemd
 sudo rm /etc/systemd/system/petrovich.service || echo $
 sudo rm /etc/systemd/system/petrovich_site.service || echo $
-sudo ln -s "$PWD/config/petrovich.service" /etc/systemd/system/ || echo $
-sudo ln -s "$PWD/config/petrovich_site.service" /etc/systemd/system/ || echo $
+sudo ln -s "$PWD/config/systemd/petrovich.service" /etc/systemd/system/ || echo $
+sudo ln -s "$PWD/config/systemd/petrovich_site.service" /etc/systemd/system/ || echo $
 sudo systemctl daemon-reload
 
 # web
