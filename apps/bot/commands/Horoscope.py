@@ -51,7 +51,7 @@ class Horoscope(CommonCommand):
                         self.bot.parse_and_send_msgs_thread(self.event.peer_id, error_msg)
                         continue
                     if prepared_meme.get('msg', None):
-                        prepared_meme['msg'] += f"{zodiac_sign_name}\n{prepared_meme['msg']}"
+                        prepared_meme['msg'] = f"{zodiac_sign_name}\n{prepared_meme['msg']}"
                     else:
                         prepared_meme['msg'] = zodiac_sign_name
                     self.bot.parse_and_send_msgs_thread(self.event.peer_id, prepared_meme)
