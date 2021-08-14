@@ -26,6 +26,7 @@ class Meme(CommonCommand):
         "добавить (название) (Вложение/Пересланное сообщение с вложением) - добавляет мем. ",
         "добавить (ютую ссылка) (название) - добавляет мем с ютуба. ",
         "обновить (название) (Вложение/Пересланное сообщение с вложением) - обновляет созданный вами мем. Можно добавлять картинки/аудио/видео",
+        "обновить (название) (ссылка на youtube) - обновляет созданный вами мем.",
         "удалить (название) - удаляет созданный вами мем",
         "конфа (название конфы) (название/рандом) - отправляет мем в конфу\n",
 
@@ -69,6 +70,14 @@ class Meme(CommonCommand):
         method = self.handle_menu(menu, arg0)
         return method()
 
+    def _check_youtube_url(self, url):
+        parsed_url = urlparse(url)
+        if not parsed_url.hostname:
+            raise PWarning("Не нашёл вложений в сообщении или пересланном сообщении. Не нашёл ссылку на youtube видео")
+
+        if parsed_url.hostname.replace('www.', '').lower() not in ['youtu.be', 'youtube.com']:
+            raise PWarning("Это ссылка не на ютуб видео")
+
     # MENU #
     def menu_add(self):
 
@@ -76,13 +85,7 @@ class Meme(CommonCommand):
         attachments = get_attachments_from_attachments_or_fwd(self.event, ['audio', 'video', 'photo'])
         if len(attachments) == 0:
             url = self.event.original_args.split(' ')[1]
-            parsed_url = urlparse(url)
-            if not parsed_url.hostname:
-                raise PWarning(
-                    "Не нашёл вложений в сообщении или пересланном сообщении. Не нашёл ссылку на youtube видео")
-
-            if parsed_url.hostname.replace('www.', '').lower() not in ['youtu.be', 'youtube.com']:
-                raise PWarning("Это ссылка не на ютуб видео")
+            self._check_youtube_url(url)
 
             attachment = {
                 'type': 'link',
@@ -148,25 +151,38 @@ class Meme(CommonCommand):
                 _id = self.event.args[1]
             except PWarning:
                 pass
+        meme_name = self.event.args[1:]
+
         attachments = get_attachments_from_attachments_or_fwd(self.event, ['audio', 'video', 'photo'])
         if len(attachments) == 0:
-            raise PWarning("Не нашёл вложений в сообщении или пересланном сообщении")
+            if len(self.event.args) > 2:
+                url = self.event.args[-1]
+                try:
+                    self._check_youtube_url(url)
+                    attachments = [{'type': 'link', 'url': url}]
+                    meme_name = self.event.args[1:-1]
+                except:
+                    raise PWarning("Не нашёл вложений в сообщении или пересланном сообщении\n"
+                                   "Не нашёл ссылки на ютуб")
+
         attachment = attachments[0]
         if attachment['type'] == 'video' or attachment['type'] == 'audio':
             new_meme_link = attachment['url']
         elif attachment['type'] == 'photo':  # or attachment['type'] == 'doc':
             new_meme_link = attachment['private_download_url']
+        elif attachment['type'] == 'link':
+            new_meme_link = attachment['url']
         else:
             raise PError("Невозможно")
 
         if self.event.sender.check_role(Role.MODERATOR) or self.event.sender.check_role(Role.TRUSTED):
-            meme = self.get_meme(self.event.args[1:], _id=_id)
+            meme = self.get_meme(meme_name, _id=_id)
             meme.link = new_meme_link
             meme.type = attachment['type']
             meme.save()
             return f'Обновил мем "{meme.name}"'
         else:
-            meme = self.get_meme(self.event.args[1:], self.event.sender, _id=_id)
+            meme = self.get_meme(meme_name, self.event.sender, _id=_id)
             meme.link = new_meme_link
             meme.approved = False
             meme.type = attachment['type']

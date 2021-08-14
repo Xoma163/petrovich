@@ -119,6 +119,7 @@ class Meme(models.Model):
         ('video', 'Видео'),
         ('audio', 'Аудио'),
         ('doc', 'Документ'),
+        ('link', 'Ссылка'),
     ]
 
     name = models.CharField("Название", max_length=1000, default="")
