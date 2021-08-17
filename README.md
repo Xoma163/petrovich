@@ -1,4 +1,5 @@
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/902a018f7e0c4e5d9a823e974a972742)](https://app.codacy.com/manual/Xoma163/petrovich?utm_source=github.com&utm_medium=referral&utm_content=Xoma163/petrovich&utm_campaign=Badge_Grade_Settings)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/df0f0b4230d845139d793f34bf93b875)](https://www.codacy.com/gh/Xoma163/petrovich/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Xoma163/petrovich&amp;utm_campaign=Badge_Grade)
+
 
 [![VK Bot](readme/vk.png)](https://vk.com/igor_petrovich_ksta)
 [![Telegram Bot](readme/tg.png)](https://t.me/igor_petrovich_ksta_bot)
