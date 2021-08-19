@@ -7,7 +7,10 @@ from apps.games.models import Rate, Gamer, PetrovichUser, PetrovichGames, Roulet
 
 @admin.register(Gamer)
 class GamerAdmin(admin.ModelAdmin):
-    list_display = ('user', 'points')
+    search_fields = ('user',)
+    list_display = ('user', 'points', 'roulette_points')
+    list_editable = ('points', 'roulette_points')
+    list_filter = ('user__platform',)
 
 
 @admin.register(Rate)
