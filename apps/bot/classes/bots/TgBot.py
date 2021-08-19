@@ -372,6 +372,9 @@ class TgBot(CommonBot):
             self.parse_event(event)
 
     def parse_event(self, event):
+        # ToDo: check
+        if 'message' not in event:
+            return
         try:
             tg_event = self._setup_event_before(event)
             if not self.need_a_response(tg_event):
