@@ -57,6 +57,7 @@ class Calc(CommonCommand):
                 else:
                     return "-∞"
 
+    @staticmethod
     def replace_consts(self, expression):
         pi = '3.1415926535'
         expression = expression.replace('pi', pi).replace('пи', pi)
