@@ -8,7 +8,7 @@ ACCURACY = 15
 class Calc(CommonCommand):
     name = "="
     names = ["калькулятор", "кальк", "к"]
-    help_text = "считает простые выражения"
+    help_text = "калькулятор"
     help_texts = ["(выражение) - калькулятор выражений. Умеет работать с + - * / ^ ( )"]
 
     def accept(self, event):
