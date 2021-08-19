@@ -51,13 +51,6 @@ class APIBot(CommonBot):
         """
         pass
 
-    @staticmethod
-    def add_extra_group_to_user(user, chat):
-        """
-        Добавляет дополнительные группы пользователям из уникальных чатов
-        """
-        pass
-
     def send_message(self, peer_id: str, msg: str = "ᅠ", attachments=None, keyboard=None,
                      dont_parse_links: bool = False, **kwargs):
         """

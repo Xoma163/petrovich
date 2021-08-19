@@ -58,7 +58,6 @@ PROJECT_APPS = [
     'apps.service',
     'apps.games',
     'apps.db_logger',
-    'apps.timetable',
     'apps.web',
 ]
 
