@@ -16,9 +16,6 @@ class UserAdmin(admin.ModelAdmin):
             'fields': ('groups', 'chats', 'platform'),
         }),
 
-        ('Отправка уведомлений', {
-            'fields': ('imei', 'send_notify_to'),
-        }),
     )
 
     list_filter = ('platform',
