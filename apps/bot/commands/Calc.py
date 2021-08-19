@@ -26,6 +26,7 @@ class Calc(CommonCommand):
             .lower() \
             .replace(' ', '') \
             .replace(',', '.')
+        expression = self.replace_consts(expression)
         # .replace('k', '000') \
         # .replace('к', '000') \
         # .replace('m', "000000") \
@@ -55,6 +56,11 @@ class Calc(CommonCommand):
                     return "∞"
                 else:
                     return "-∞"
+
+    def replace_consts(self, expression):
+        pi = '3.1415926535'
+        expression = expression.replace('pi', pi).replace('пи', pi)
+        return expression
 
 
 # By E.Dubovitsky and A.Popova
