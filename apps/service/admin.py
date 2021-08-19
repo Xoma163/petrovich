@@ -2,8 +2,8 @@ from django.contrib import admin
 from django.contrib.postgres import fields
 from django_json_widget.widgets import JSONEditorWidget
 
-from apps.service.models import Statistic, Service, Counter, Cat, Meme, Notify, City, LaterMessage, \
-    Donations, TimeZone, LaterMessageSession, YoutubeSubscribe, WakeOnLanUserData, Horoscope, QuoteBook, Words, TaxiInfo
+from apps.service.models import Statistic, Service, Counter, Cat, Meme, Notify, City, \
+    Donations, TimeZone, YoutubeSubscribe, WakeOnLanUserData, Horoscope, QuoteBook, Words, TaxiInfo
 
 
 @admin.register(Statistic)
@@ -59,22 +59,6 @@ class TimeZoneAdmin(admin.ModelAdmin):
 @admin.register(Donations)
 class DonationsAdmin(admin.ModelAdmin):
     list_display = ('username', 'amount', 'currency', 'message', 'date')
-
-
-@admin.register(LaterMessage)
-class LaterMessageAdmin(admin.ModelAdmin):
-    list_display = ('message_author', 'message_bot', 'text', 'date', 'attachments')
-    list_filter = (('message_author', admin.RelatedOnlyFieldListFilter),
-                   ('message_bot', admin.RelatedOnlyFieldListFilter))
-    formfield_overrides = {
-        fields.JSONField: {'widget': JSONEditorWidget},
-    }
-
-
-@admin.register(LaterMessageSession)
-class LaterMessageSessionAdmin(admin.ModelAdmin):
-    list_display = ('author', 'date')
-    list_filter = (('author', admin.RelatedOnlyFieldListFilter),)
 
 
 @admin.register(YoutubeSubscribe)

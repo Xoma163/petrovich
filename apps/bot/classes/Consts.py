@@ -7,7 +7,6 @@ class Role(Enum):
     MODERATOR = "модератор"
     MINECRAFT = "майнкрафт"
     TERRARIA = "террария"
-    STUDENT = "студент"
     MINECRAFT_NOTIFY = "уведомления майна"
     HOME = "дом"
     USER = "пользователь"

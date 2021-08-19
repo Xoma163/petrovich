@@ -38,29 +38,3 @@ class Logger(models.Model):
         verbose_name = "Лог"
         verbose_name_plural = "Логи"
         ordering = ('-create_datetime',)
-
-
-class MovementLog(models.Model):
-    EVENTS_CHOICES = (('home', 'дома'),
-                      ('work', 'работа'),
-                      ('university', 'университет'),
-                      ('somewhere', 'где-то'))
-    date = models.DateTimeField("Дата", auto_now_add=True, blank=True)
-    imei = models.CharField('IMEI', max_length=20, null=True)
-    author = models.ForeignKey(Users, models.SET_NULL, verbose_name="Автор", null=True)
-    event = models.CharField('Событие', choices=EVENTS_CHOICES, max_length=20, null=True)
-    msg = models.CharField('Сообщение', max_length=2000)
-    success = models.BooleanField('Отправлено', default=False)
-
-    @classmethod
-    def create(cls, imei, author, event, msg, success):
-        log = cls(imei=imei, author=author, event=event, msg=msg, success=success)
-        return log
-
-    class Meta:
-        verbose_name = "Событие"
-        verbose_name_plural = "Журнал событий"
-        ordering = ["-date"]
-
-    def __str__(self):
-        return str(self.id)

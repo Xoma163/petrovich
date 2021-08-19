@@ -64,8 +64,6 @@ class Users(Platform):
 
     chats = models.ManyToManyField(Chat, verbose_name="Чаты", blank=True, related_name="users")
 
-    imei = models.CharField('IMEI', max_length=20, null=True, blank=True)
-    send_notify_to = models.ManyToManyField('self', verbose_name="Отправлять уведомления", blank=True)
     celebrate_bday = models.BooleanField('Поздравлять с Днём рождения', default=True)
 
     avatar = models.ImageField('Аватар', blank=True, upload_to="bot/users/avatar/")

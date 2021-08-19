@@ -190,38 +190,6 @@ class Notify(models.Model):
     def __str__(self):
         return str(self.text)
 
-
-class LaterMessage(models.Model):
-    message_author = models.ForeignKey(Users, models.CASCADE, "message_author_%(class)ss",
-                                       verbose_name="Автор сообщения", null=True, blank=True)
-    message_bot = models.ForeignKey(Bot, models.SET_NULL, verbose_name="Автор сообщения(бот)", null=True, blank=True)
-    text = models.CharField("Текст", max_length=300, blank=True)
-    date = models.DateTimeField("Дата сообщения")
-    attachments = JSONField("Вложения", blank=True, default=dict)
-
-    class Meta:
-        verbose_name = "Потом сообщение"
-        verbose_name_plural = "Потом сообщения"
-        ordering = ['-date']
-
-    def __str__(self):
-        return f"{self.id}"
-
-
-class LaterMessageSession(models.Model):
-    author = models.ForeignKey(Users, models.CASCADE, verbose_name="Автор", null=True)
-    later_messages = models.ManyToManyField(LaterMessage, verbose_name="Сообщения")
-    date = models.DateTimeField("Дата сообщения")
-
-    class Meta:
-        verbose_name = "Потом сообщение (сессия)"
-        verbose_name_plural = "Потом сообщения (сессия)"
-        ordering = ['-date']
-
-    def __str__(self):
-        return f"{self.pk}"
-
-
 class Donations(models.Model):
     username = models.CharField("Имя", max_length=100, blank=True)
     amount = models.CharField("Количество", max_length=10, blank=True)

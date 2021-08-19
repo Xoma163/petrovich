@@ -230,8 +230,6 @@ def get_role_by_str(role_str):
         who = Role.ADMIN
     elif role_str in ['moderators', 'moderator' 'модераторы', 'модератор', 'модеры', 'модер']:
         who = Role.MODERATOR
-    elif role_str in ['студент']:
-        who = Role.TERRARIA
     elif role_str in ['майнкрафт уведомления', 'майн уведомления']:
         who = Role.MINECRAFT_NOTIFY
     elif role_str in ['майнкрафт', 'майн']:
