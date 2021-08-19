@@ -120,10 +120,10 @@ class Meme(CommonCommand):
         if attachment['type'] in ['video', 'audio', 'link']:
             new_meme['link'] = attachment['url']
         elif attachment['type'] == 'photo':  # or attachment['type'] == 'doc':
-            if self.event.platform != Platform.VK:
-                new_meme['link'] = upload_image_to_vk_server(attachment['content'])
+            if self.event.platform == Platform.VK:
+                new_meme['link'] = attachment['download_url']
             else:
-                new_meme['link'] = attachment['private_download_url']
+                new_meme['link'] = upload_image_to_vk_server(attachment['content'])
         else:
             raise PError("Невозможно")
 
@@ -169,7 +169,11 @@ class Meme(CommonCommand):
         if attachment['type'] == 'video' or attachment['type'] == 'audio':
             new_meme_link = attachment['url']
         elif attachment['type'] == 'photo':  # or attachment['type'] == 'doc':
-            new_meme_link = attachment['private_download_url']
+            if self.event.platform == Platform.VK:
+                new_meme_link = attachment['download_url']
+            else:
+                new_meme_link = upload_image_to_vk_server(attachment['content'])
+
         elif attachment['type'] == 'link':
             new_meme_link = attachment['url']
         else:
