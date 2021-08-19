@@ -384,10 +384,11 @@ class VkBot(CommonBot):
     def upload_photo_and_get_absolute_url(self, image):
         attachments, images_to_load = self._upload_photos([image], 1)
         try:
-            vk_photo = self.upload.photo_messages(images_to_load)[0]
+            vk_photos = self.upload.photo_messages(images_to_load)
+            vk_photo_max_size = VkEvent.get_max_size_image(vk_photos[0])
         except vk_api.exceptions.ApiError as e:
             print(e)
-        return vk_photo['sizes'][-1]['url']
+        return vk_photo_max_size['url']
 
     def upload_animation(self, animation, peer_id=None, title='Документ'):
         return self.upload_document(animation, peer_id, title)
