@@ -2,13 +2,12 @@ from django.contrib import admin
 from django.contrib.postgres import fields
 from django_json_widget.widgets import JSONEditorWidget
 
-from apps.games.models import Rate, Gamer, PetrovichUser, PetrovichGames, TicTacToeSession, CodenamesUser, \
-    CodenamesSession, RouletteRate
+from apps.games.models import Rate, Gamer, PetrovichUser, PetrovichGames, RouletteRate
 
 
 @admin.register(Gamer)
 class GamerAdmin(admin.ModelAdmin):
-    list_display = ('user', 'points', 'tic_tac_toe_points', 'codenames_points', 'roulette_points')
+    list_display = ('user', 'points')
 
 
 @admin.register(Rate)
@@ -27,28 +26,6 @@ class PetrovichUserAdmin(admin.ModelAdmin):
 class PetrovichGamesAdmin(admin.ModelAdmin):
     list_display = ('user', 'date', 'chat',)
     list_filter = (('user', admin.RelatedOnlyFieldListFilter), ('chat', admin.RelatedOnlyFieldListFilter),)
-
-
-@admin.register(TicTacToeSession)
-class TicTacToeSessionAdmin(admin.ModelAdmin):
-    list_display = ('user1', 'user2', 'board',)
-    formfield_overrides = {
-        fields.JSONField: {'widget': JSONEditorWidget},
-    }
-
-
-@admin.register(CodenamesUser)
-class CodenamesUserAdmin(admin.ModelAdmin):
-    list_display = ('user', 'chat', 'command', 'role', 'role_preference')
-    list_filter = (('user', admin.RelatedOnlyFieldListFilter), ('chat', admin.RelatedOnlyFieldListFilter),)
-
-
-@admin.register(CodenamesSession)
-class CodenamesSessionAdmin(admin.ModelAdmin):
-    list_display = ('chat', 'next_step', 'board')
-    formfield_overrides = {
-        fields.JSONField: {'widget': JSONEditorWidget},
-    }
 
 
 @admin.register(RouletteRate)

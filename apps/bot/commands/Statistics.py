@@ -12,7 +12,7 @@ class Statistics(CommonCommand):
     help_text = "статистика по победителям игр или по кол-ву созданных мемов"
     help_texts = [
         "[модуль=все] - статистика по победителям игр или по кол-ву созданных мемов.\n"
-        "Модули: петрович, ставки, крестики, рулетка, коднеймс, мемы"
+        "Модули: петрович, ставки, рулетка, мемы"
     ]
     conversation = True
 
@@ -24,8 +24,6 @@ class Statistics(CommonCommand):
             menu = [
                 [['петрович'], self.menu_petrovich],
                 [['ставки'], self.menu_rates],
-                [['крестики'], self.menu_tic_tac_toe],
-                [['коднеймс'], self.menu_codenames],
                 [['рулетка'], self.menu_roulettes],
                 [['мемы'], self.menu_memes]
             ]
@@ -49,21 +47,7 @@ class Statistics(CommonCommand):
             msg += f"{gamer} - {gamer.points}\n"
         return msg
 
-    def menu_tic_tac_toe(self):
-        gamers = Gamer.objects.filter(user__chats=self.event.chat).exclude(tic_tac_toe_points=0).order_by(
-            '-tic_tac_toe_points')
-        msg = "Победители крестиков-ноликов:\n"
-        for gamer in gamers:
-            msg += f"{gamer} - {gamer.tic_tac_toe_points}\n"
-        return msg
 
-    def menu_codenames(self):
-        gamers = Gamer.objects.filter(user__chats=self.event.chat).exclude(codenames_points=0).order_by(
-            '-codenames_points')
-        msg = "Победители коднеймса:\n"
-        for gamer in gamers:
-            msg += f"{gamer} - {gamer.codenames_points}\n"
-        return msg
 
     def menu_roulettes(self):
         gamers = Gamer.objects.filter(user__chats=self.event.chat).exclude(roulette_points=0).order_by(
@@ -88,8 +72,6 @@ class Statistics(CommonCommand):
         methods = [
             self.menu_petrovich,
             self.menu_rates,
-            self.menu_tic_tac_toe,
-            self.menu_codenames,
             self.menu_roulettes,
             self.menu_memes
         ]
