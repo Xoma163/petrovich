@@ -2,7 +2,7 @@ import os
 from tempfile import NamedTemporaryFile
 from urllib.request import urlopen
 
-from django.contrib.postgres.fields import JSONField
+from django.db.models import JSONField
 from django.core.files import File
 from django.db import models
 from django.db.models.signals import pre_delete
