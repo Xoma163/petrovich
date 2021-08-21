@@ -75,7 +75,7 @@ class Petrovich(CommonCommand):
             if winner_today:
                 datetime_now = localize_datetime(datetime.datetime.utcnow(), DEFAULT_TIME_ZONE)
                 datetime_last = localize_datetime(remove_tz(winner_today.date), DEFAULT_TIME_ZONE)
-                if (datetime_now - datetime_last).seconds/60/60 < 8:
+                if (datetime_now.date() - datetime_last.date()).days <= 0:
                     if winner_today.user.gender and winner_today.user.gender == '1':
                         winner_gender = "Петровна"
                     else:
