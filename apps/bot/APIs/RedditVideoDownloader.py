@@ -15,7 +15,8 @@ class RedditVideoSaver:
         self.audio_filename = None # Уточняется в процессе
         self.output_filename = f"/tmp/output_{self.timestamp}.mp4"
 
-    def check_valid_url(self, post_url):
+    @staticmethod
+    def check_valid_url(post_url):
         hostname = urlparse(post_url).hostname
         if hostname in ["www.reddit.com"]:
             return True
@@ -69,15 +70,11 @@ class RedditVideoSaver:
 
     def get_download_video_and_audio(self, video_url, audio_url):
         os.system(f"curl -o {self.video_filename} {video_url}")
-        if audio_url:
-            os.system(f"curl -o {self.audio_filename} {audio_url}")
+        os.system(f"curl -o {self.audio_filename} {audio_url}")
 
     def mux_video_and_audio(self):
         try:
-            if self.audio_filename:
-                os.system(f"ffmpeg -i {self.video_filename} -i {self.audio_filename} -c:v copy -c:a aac -strict experimental {self.output_filename}")
-            else:
-                os.system(f"ffmpeg -i {self.video_filename} -c:v copy -c:a aac -strict experimental {self.output_filename}")
+            os.system(f"ffmpeg -i {self.video_filename} -i {self.audio_filename} -c:v copy -c:a aac -strict experimental {self.output_filename}")
         finally:
             self.delete_video_audio_files()
 
@@ -102,6 +99,10 @@ class RedditVideoSaver:
         """
         self.check_valid_url(post_url)
         video_url, audio_url = self.get_reddit_video_audio_urls(post_url)
+        # Нет нужды делать временные файлы для джоина видео и аудио, если аудио нет, то просто кидаем видео и всё
+        if not audio_url:
+            return video_url
+            # return requests.get(video_url).content
         self.get_download_video_and_audio(video_url, audio_url)
         self.mux_video_and_audio()
         return self.get_video_bytes()
