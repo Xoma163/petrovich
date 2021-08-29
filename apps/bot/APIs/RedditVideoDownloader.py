@@ -3,16 +3,17 @@ import os
 from urllib.parse import urlparse
 
 import requests
+from bs4 import BeautifulSoup
 
 from apps.bot.classes.Exceptions import PWarning
 
 
 class RedditVideoSaver:
     def __init__(self):
-        timestamp = datetime.datetime.now().timestamp()
-        self.video_filename = f"/tmp/video_{timestamp}.mp4"
-        self.audio_filename = f"/tmp/audio_{timestamp}.wav"
-        self.output_filename = f"/tmp/output_{timestamp}.mp4"
+        self.timestamp = datetime.datetime.now().timestamp()
+        self.video_filename = f"/tmp/video_{self.timestamp}.mp4"
+        self.audio_filename = f"/tmp/audio_{self.timestamp}.wav"
+        self.output_filename = f"/tmp/output_{self.timestamp}.mp4"
 
     def check_valid_url(self, post_url):
         hostname = urlparse(post_url).hostname
@@ -20,11 +21,30 @@ class RedditVideoSaver:
             return True
         raise PWarning("Невалидная ссылка на редит")
 
+    def parse_mpd_audio_filename(self, url):
+        """
+        Достаём имя файла на сервере реддита. Если его нет, то по умолчанию это "audio"
+        Если нашли имя файла, то также проставляем формат файла
+        """
+        xml = requests.get(url).content
+        bs4 = BeautifulSoup(xml, 'html.parser')
+        try:
+            audio_filename = bs4.find("adaptationset", {'contenttype': 'audio'}).find('representation').find(
+                'baseurl').text
+            audio_format = audio_filename.split('.')[-1]
+            self.audio_filename = f"audio_{self.timestamp}.{audio_format}"
+            return audio_filename
+        except:
+            return "audio"
+
     def get_reddit_video_audio_urls(self, post_url):
+        """
+        Получаем ссылки видео и аудио
+        """
         # use UA headers to prevent 429 error
         headers = {
             'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.106 Safari/537.36 OPR/38.0.2220.41',
-            'From': 'me@andrewsha.net'
+            'From': 'testyouremail@domain.com'
         }
         url = post_url + ".json"
         data = requests.get(url, headers=headers).json()
@@ -35,7 +55,8 @@ class RedditVideoSaver:
             media_data = data["media"]
 
         video_url = media_data["reddit_video"]["fallback_url"]
-        audio_url = video_url.split("DASH_")[0] + "audio"
+        audio_filename = self.parse_mpd_audio_filename(media_data['reddit_video']['dash_url'])
+        audio_url = video_url.split("DASH_")[0] + audio_filename
 
         return video_url, audio_url
 
@@ -57,7 +78,7 @@ class RedditVideoSaver:
     def delete_output_file(self):
         os.system(f"rm {self.output_filename}")
 
-    def get_video_bytes(self):
+    def get_video_bytes(self) -> bytes:
         try:
             with open(self.output_filename, 'rb') as file:
                 file_bytes = file.read()
@@ -65,7 +86,10 @@ class RedditVideoSaver:
             self.delete_output_file()
         return file_bytes
 
-    def get_video_from_post(self, post_url):
+    def get_video_from_post(self, post_url) -> bytes:
+        """
+        Получаем видео с аудио
+        """
         self.check_valid_url(post_url)
         video_url, audio_url = self.get_reddit_video_audio_urls(post_url)
         self.get_download_video_and_audio(video_url, audio_url)
