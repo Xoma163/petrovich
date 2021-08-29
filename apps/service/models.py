@@ -2,9 +2,9 @@ import os
 from tempfile import NamedTemporaryFile
 from urllib.request import urlopen
 
-from django.db.models import JSONField
 from django.core.files import File
 from django.db import models
+from django.db.models import JSONField
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 
@@ -38,18 +38,6 @@ class City(models.Model):
 
     def __str__(self):
         return str(self.name)
-
-
-class Statistic(models.Model):
-    command = models.CharField('Команда', max_length=20)
-    count_queries = models.IntegerField('Количество запросов', default=0)
-
-    class Meta:
-        verbose_name = "статистику"
-        verbose_name_plural = "Статистика"
-
-    def __str__(self):
-        return str(self.command)
 
 
 class Service(models.Model):
@@ -189,6 +177,7 @@ class Notify(models.Model):
 
     def __str__(self):
         return str(self.text)
+
 
 class Donations(models.Model):
     username = models.CharField("Имя", max_length=100, blank=True)

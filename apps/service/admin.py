@@ -2,14 +2,8 @@ from django.contrib import admin
 from django.contrib.postgres import fields
 from django_json_widget.widgets import JSONEditorWidget
 
-from apps.service.models import Statistic, Service, Counter, Cat, Meme, Notify, City, \
+from apps.service.models import Service, Counter, Cat, Meme, Notify, City, \
     Donations, TimeZone, YoutubeSubscribe, WakeOnLanUserData, Horoscope, QuoteBook, Words, TaxiInfo
-
-
-@admin.register(Statistic)
-class StatisticsAdmin(admin.ModelAdmin):
-    list_display = ('command', 'count_queries',)
-    ordering = ('-count_queries',)
 
 
 @admin.register(Service)

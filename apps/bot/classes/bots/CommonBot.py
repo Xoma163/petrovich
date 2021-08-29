@@ -128,7 +128,6 @@ class CommonBot(Thread):
                     result = command.__class__().check_and_start(self, event)
                     if send:
                         self.parse_and_send_msgs(event.peer_id, result)
-                    append_command_to_statistics(event.command)
                     log_result = {'result': result}
                     self.logger.debug(log_result)
                     return result
