@@ -1,6 +1,7 @@
 import logging
 import traceback
 from threading import Thread
+from urllib.parse import urlparse
 
 from apps.bot.classes.Consts import Role, Platform
 from apps.bot.classes.Exceptions import PSkip, PWarning, PError
@@ -9,7 +10,6 @@ from apps.bot.classes.events.Event import Event
 from apps.bot.models import Users, Chat, Bot
 from apps.games.models import Gamer
 from apps.service.models import Meme
-from apps.service.views import append_command_to_statistics
 
 
 class CommonBot(Thread):
@@ -224,7 +224,9 @@ class CommonBot(Thread):
         Правила ответа
         """
         message = event['message']['text']
-
+        fwd_message = None
+        if event.get('fwd'):
+            fwd_message = event['fwd'][0]['text']
         if event['chat'] and event['chat'].is_banned:
             return False
 
@@ -248,6 +250,13 @@ class CommonBot(Thread):
             return True
         message_is_exact_meme_name = Meme.objects.filter(name__unaccent=message.lower()).exists()
         if message_is_exact_meme_name:
+            return True
+        from apps.bot.commands.Reddit import REDDIT_URLS
+        available_reddit_links = REDDIT_URLS
+        message_is_reddit_link = urlparse(message).hostname in available_reddit_links or \
+                                 (fwd_message and urlparse(fwd_message) in available_reddit_links)
+
+        if message_is_reddit_link:
             return True
         for mention in self.mentions:
             if message.find(mention) != -1:

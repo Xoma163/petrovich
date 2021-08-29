@@ -1,6 +1,5 @@
 import datetime
 import os
-from urllib.parse import urlparse
 
 import requests
 from bs4 import BeautifulSoup
@@ -12,15 +11,8 @@ class RedditVideoSaver:
     def __init__(self):
         self.timestamp = datetime.datetime.now().timestamp()
         self.video_filename = f"/tmp/video_{self.timestamp}.mp4"
-        self.audio_filename = None # Уточняется в процессе
+        self.audio_filename = None  # Уточняется в процессе
         self.output_filename = f"/tmp/output_{self.timestamp}.mp4"
-
-    @staticmethod
-    def check_valid_url(post_url):
-        hostname = urlparse(post_url).hostname
-        if hostname in ["www.reddit.com"]:
-            return True
-        raise PWarning("Невалидная ссылка на редит")
 
     def set_audio_filename(self, filename):
         audio_format = filename.split('.')[-1]
@@ -70,8 +62,8 @@ class RedditVideoSaver:
         #         # ToDo: ya hz
         #         raise PWarning("фыв")
         # else:
-        if media_data['type'] == 'gfycat.com':
-            video_url = media_data['oembed']['thumbnail_url'].replace('size_restricted.gif','mobile.mp4')
+        if media_data.get('type') == 'gfycat.com':
+            video_url = media_data['oembed']['thumbnail_url'].replace('size_restricted.gif', 'mobile.mp4')
         else:
             video_url = media_data["reddit_video"]["fallback_url"]
             audio_filename = self.parse_mpd_audio_filename(media_data['reddit_video']['dash_url'])
@@ -83,12 +75,13 @@ class RedditVideoSaver:
         return video_url, audio_url
 
     def get_download_video_and_audio(self, video_url, audio_url):
-        os.system(f"curl -o {self.video_filename} {video_url}")
-        os.system(f"curl -o {self.audio_filename} {audio_url}")
+        os.system(f"curl -o {self.video_filename} {video_url} >/dev/null 2>&1")
+        os.system(f"curl -o {self.audio_filename} {audio_url} >/dev/null 2>&1")
 
     def mux_video_and_audio(self):
         try:
-            os.system(f"ffmpeg -i {self.video_filename} -i {self.audio_filename} -c:v copy -c:a aac -strict experimental {self.output_filename}")
+            os.system(
+                f"ffmpeg -i {self.video_filename} -i {self.audio_filename} -c:v copy -c:a aac -strict experimental {self.output_filename} >/dev/null 2>&1")
         finally:
             self.delete_video_audio_files()
 
@@ -111,7 +104,6 @@ class RedditVideoSaver:
         """
         Получаем видео с аудио
         """
-        self.check_valid_url(post_url)
         video_url, audio_url = self.get_reddit_video_audio_urls(post_url)
         # Нет нужды делать временные файлы для джоина видео и аудио, если аудио нет, то просто кидаем видео и всё
         if not audio_url:
