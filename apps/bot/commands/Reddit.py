@@ -36,11 +36,19 @@ class Reddit(CommonCommand):
             url = self.event.command
 
         if urlparse(url).hostname not in REDDIT_URLS:
-            raise PWarning("Не reddit ссылка в аргументах")
+            raise PWarning("Не reddit ссылка")
 
         rvs = RedditVideoSaver()
-        self.bot.set_activity(self.event.peer_id,'typing')
-        video = rvs.get_video_from_post(url)
+        self.bot.set_activity(self.event.peer_id, 'typing')
+        if self.event.command not in self.full_names:
+            try:
+                video = rvs.get_video_from_post(url)
+            except:
+                return
+        else:
+            video = rvs.get_video_from_post(url)
+
+
         attachments = [self.bot.upload_video(video)]
         return {
             'attachments': attachments
