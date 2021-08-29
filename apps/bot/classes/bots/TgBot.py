@@ -176,6 +176,18 @@ class TgBot(CommonBot):
             self.requests.get('sendVideo', params={'chat_id': peer_id, 'caption': msg, 'reply_markup': keyboard},
                               files={'video': video})
 
+    # def _send_animation(self, peer_id, msg, animation, keyboard):
+    #     """
+    #     Отправка видео
+    #     video: url или байты
+    #     """
+    #     if isinstance(animation, str) and urlparse(animation).hostname:
+    #         self.requests.get('sendAnimation',
+    #                           params={'chat_id': peer_id, 'caption': msg, 'reply_markup': keyboard, 'animation': animation})
+    #     else:
+    #         self.requests.get('sendAnimation', params={'chat_id': peer_id, 'caption': msg, 'reply_markup': keyboard},
+    #                           files={'animation': animation})
+
     def send_message(self, peer_id, msg='', attachments=None, keyboard=None, dont_parse_links=False, **kwargs):
         """
         Отправка сообщения
@@ -434,8 +446,8 @@ class TgBot(CommonBot):
                 break
         return images_list
 
-    def upload_animation(self, animation, peer_id=None, title='Документ'):
-        return {'type': 'video', 'attachment': self._prepare_obj_to_upload(animation)}
+    # def upload_animation(self, animation, peer_id=None, title='Документ'):
+    #     return {'type': 'animation', 'attachment': self._prepare_obj_to_upload(animation)}
 
     def upload_video(self, video, peer_id=None, title="Видео"):
         return {'type': 'video', 'attachment': self._prepare_obj_to_upload(video)}

@@ -56,11 +56,25 @@ class RedditVideoSaver:
         data = data[0]["data"]["children"][0]["data"]
         media_data = data["media"]
         if not media_data:
-            data = data['crosspost_parent_list'][0]
-            media_data = data["media"]
-
-        video_url = media_data["reddit_video"]["fallback_url"]
-        audio_filename = self.parse_mpd_audio_filename(media_data['reddit_video']['dash_url'])
+            if 'crosspost_parent_list' in data:
+                data = data['crosspost_parent_list'][0]
+                media_data = data["media"]
+        if not media_data:
+            raise PWarning("Нет видео в посте")
+        audio_filename = None
+        # ToDo: gifs ?
+        # if not media_data:
+        #     if data['url'].endswith('.gifv'):
+        #         video_url = data['url'][:-1]
+        #     else:
+        #         # ToDo: ya hz
+        #         raise PWarning("фыв")
+        # else:
+        if media_data['type'] == 'gfycat.com':
+            video_url = media_data['oembed']['thumbnail_url'].replace('size_restricted.gif','mobile.mp4')
+        else:
+            video_url = media_data["reddit_video"]["fallback_url"]
+            audio_filename = self.parse_mpd_audio_filename(media_data['reddit_video']['dash_url'])
 
         audio_url = None
         if audio_filename:
