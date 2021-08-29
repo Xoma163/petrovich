@@ -437,6 +437,9 @@ class TgBot(CommonBot):
     def upload_animation(self, animation, peer_id=None, title='Документ'):
         return {'type': 'video', 'attachment': self._prepare_obj_to_upload(animation)}
 
+    def upload_video(self, video, peer_id=None, title="Видео"):
+        return {'type': 'video', 'attachment': self._prepare_obj_to_upload(video)}
+
     def upload_document(self, document, peer_id=None, title='Документ'):
         """
         Загрузка документа на сервер ТГ.

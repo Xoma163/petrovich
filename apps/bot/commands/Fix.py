@@ -19,11 +19,6 @@ def fix_layout(s):
             new_s += letter
     return new_s
 
-    # if not reverse:
-    #     return u''.join([_trans_table.get(c, c) for c in s])
-    # else:
-    #     return u''.join([_trans_table_reverse.get(c, c) for c in s])
-
 
 class Fix(CommonCommand):
     name = "фикс"
@@ -34,17 +29,16 @@ class Fix(CommonCommand):
         "(текст) - исправляет раскладку текста"
     ]
     platforms = [Platform.VK, Platform.TG]
+    args_or_fwd = 1
 
     def start(self):
         if self.event.args:
-            msgs = fix_layout(self.event.original_args)  # , has_cyrillic(self.event.original_args))
-        elif self.event.fwd:
+            msgs = fix_layout(self.event.original_args)
+        else:
             msgs = ""
             for msg in self.event.fwd:
                 if msg['text']:
-                    msgs += f"{fix_layout(msg['text'])}"  # , has_cyrillic(msg['text']))}\n"
+                    msgs += f"{fix_layout(msg['text'])}"
             if not msgs:
                 raise PWarning("Нет текста в сообщении или пересланных сообщениях")
-        else:
-            raise PWarning("Перешлите сообщение или укажите текст в аргументах команды")
         return msgs

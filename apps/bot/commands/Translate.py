@@ -11,13 +11,11 @@ class Translate(CommonCommand):
     help_texts = [
         "(Текст/Пересылаемые сообщения) - в зависимости от текста переводит на нужный язык(английский или русский)"
     ]
+    args_or_fwd = 1
 
     def start(self):
         fwd = self.event.fwd
         if not fwd:
-            if not self.event.original_args:
-                raise PWarning("Требуется аргументы или пересылаемые сообщения")
-
             text = self.event.original_args
         else:
             text = ""

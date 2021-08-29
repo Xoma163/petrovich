@@ -10,13 +10,11 @@ class Issue(CommonCommand):
     help_text = "добавляет проблему Петровича, которую нужно решить"
     help_texts = ["(текст/пересланные сообщения) - добавляет проблему Петровича, которую нужно решить"]
     platforms = [Platform.VK, Platform.TG]
+    args_or_fwd = 1
 
     def start(self):
         msgs = self.event.fwd
         if not msgs:
-            if not self.event.original_args:
-                raise PWarning("Требуется аргументы или пересылаемые сообщения")
-
             msgs = [{'text': self.event.original_args, 'from_id': int(self.event.sender.user_id)}]
 
         issue_text = ""

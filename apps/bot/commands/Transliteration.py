@@ -17,13 +17,11 @@ class Transliteration(CommonCommand):
     name = "транслит"
     help_text = "автоматическая транслитерация"
     help_texts = ["(Текст/Пересланные сообщения) - в зависимости от фразы транслитит на нужный язык(английский или русский)"]
+    args_or_fwd = 1
 
     def start(self):
         msgs = self.event.fwd
         if not msgs:
-            if not self.event.original_args:
-                raise PWarning("Требуется аргументы или пересылаемые сообщения")
-
             msgs = [{'text': self.event.original_args, 'from_id': int(self.event.sender.user_id)}]
         translite_text = ""
         for msg in msgs:

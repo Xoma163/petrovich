@@ -22,6 +22,7 @@ class CommonCommand:
     conversation: bool = False  # Должно ли сообщение обрабатываться только в конфе
     fwd: bool = False  # Должно ли сообщение обрабатываться только с пересланными сообщениями
     args: int = None  # Должно ли сообщение обрабатываться только с заданным количеством аргументов
+    args_or_fwd: int = None  # Должно ли сообщение обрабатываться только с пересланными сообщениями или аргументами
     int_args: list = None  # Список аргументов, которые должны быть целым числом
     float_args: list = None  # Список аргументов, которые должны быть числом
     platforms: list or Platform = list(Platform)  # Список платформ, которые могут обрабатывать команду ToDo: list only
@@ -85,6 +86,8 @@ class CommonCommand:
             self.check_fwd()
         if self.args:
             self.check_args()
+        if self.args_or_fwd:
+            self.check_args_or_fwd()
         if self.int_args:
             self.parse_int()
         if self.float_args:
@@ -146,6 +149,26 @@ class CommonCommand:
                 raise PWarning(error)
 
         error = "Для работы команды требуются аргументы"
+        error += f"\n\n{get_help_texts_for_command(self)}"
+        raise PWarning(error)
+
+    def check_args_or_fwd(self, args: int = None):
+        if args is None:
+            args = self.args_or_fwd
+        try:
+            check_args = self.check_args(args)
+        except:
+            check_args = False
+
+        try:
+            check_fwd = self.check_fwd()
+        except:
+            check_fwd = False
+
+        if check_args or check_fwd:
+            return True
+
+        error = "Для работы команды требуются аргументы или пересылаемые сообщения"
         error += f"\n\n{get_help_texts_for_command(self)}"
         raise PWarning(error)
 
