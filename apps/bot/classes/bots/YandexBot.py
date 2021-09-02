@@ -70,6 +70,7 @@ class YandexBot(CommonBot):
         yandex_event = {
             'platform': self.platform,
             'from_user': True,
+            'chat': None,
             'chat_id': None,
             'user_id': event['session']['user']['user_id'],
             'peer_id': None,
