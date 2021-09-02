@@ -224,12 +224,8 @@ class CommonBot(Thread):
         Правила ответа
         """
         message = event['message']['text']
-        fwd_message = None
-        if event.get('fwd'):
-            fwd_message = event['fwd'][0]['text']
         if event['chat'] and event['chat'].is_banned:
             return False
-
         have_payload = 'message' in event and 'payload' in event['message'] and event['message']['payload']
         if have_payload:
             return True
@@ -251,6 +247,26 @@ class CommonBot(Thread):
         message_is_exact_meme_name = Meme.objects.filter(name__unaccent=message.lower()).exists()
         if message_is_exact_meme_name:
             return True
+
+        need_reaction_for_fwd = self.need_reaction_for_fwd(event)
+        if need_reaction_for_fwd:
+            return need_reaction_for_fwd
+
+        for mention in self.mentions:
+            if message.find(mention) != -1:
+                return True
+        if event['chat'] and event['chat'].mentioning:
+            return True
+        return False
+
+    def need_reaction_for_fwd(self, event):
+        message = event['message']['text']
+
+        fwd_message = None
+        if event.get('fwd'):
+            fwd_message = event['fwd'][0]['text']
+
+
         from apps.bot.commands.Reddit import REDDIT_URLS
         message_is_reddit_link = urlparse(message).hostname in REDDIT_URLS or \
                                  (fwd_message and urlparse(fwd_message) in REDDIT_URLS)
@@ -259,14 +275,9 @@ class CommonBot(Thread):
         from apps.bot.commands.TikTok import TIKTOK_URLS
         message_is_tiktok_link = urlparse(message).hostname in TIKTOK_URLS or \
                                  (fwd_message and urlparse(fwd_message) in TIKTOK_URLS)
+
         if message_is_tiktok_link:
             return True
-        for mention in self.mentions:
-            if message.find(mention) != -1:
-                return True
-        if event['chat'] and event['chat'].mentioning:
-            return True
-        return False
 
     @staticmethod
     def have_audio_message(event) -> bool:

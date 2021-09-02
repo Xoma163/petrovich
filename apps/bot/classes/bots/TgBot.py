@@ -354,9 +354,10 @@ class TgBot(CommonBot):
         if not self.need_a_response_common(tg_event):
             return False
 
-        # Игнорим forward
-        if tg_event['message']['fwd']:
-            return False
+        if not self.need_reaction_for_fwd(tg_event):
+            # Игнорим forward
+            if tg_event['message']['fwd']:
+                return False
 
         # Узнаём пользователя
         if tg_event['user_id'] < 0:
