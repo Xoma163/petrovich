@@ -252,11 +252,14 @@ class CommonBot(Thread):
         if message_is_exact_meme_name:
             return True
         from apps.bot.commands.Reddit import REDDIT_URLS
-        available_reddit_links = REDDIT_URLS
-        message_is_reddit_link = urlparse(message).hostname in available_reddit_links or \
-                                 (fwd_message and urlparse(fwd_message) in available_reddit_links)
-
+        message_is_reddit_link = urlparse(message).hostname in REDDIT_URLS or \
+                                 (fwd_message and urlparse(fwd_message) in REDDIT_URLS)
         if message_is_reddit_link:
+            return True
+        from apps.bot.commands.TikTok import TIKTOK_URLS
+        message_is_tiktok_link = urlparse(message).hostname in TIKTOK_URLS or \
+                                 (fwd_message and urlparse(fwd_message) in TIKTOK_URLS)
+        if message_is_tiktok_link:
             return True
         for mention in self.mentions:
             if message.find(mention) != -1:

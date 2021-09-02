@@ -351,11 +351,11 @@ class TgBot(CommonBot):
         """
         Нужен ли ответ пользователю
         """
-        # Игнорим forward
-        if tg_event['message']['fwd']:
+        if not self.need_a_response_common(tg_event):
             return False
 
-        if not self.need_a_response_common(tg_event):
+        # Игнорим forward
+        if tg_event['message']['fwd']:
             return False
 
         # Узнаём пользователя
