@@ -233,32 +233,43 @@ class TgBot(CommonBot):
         """
         Проставляет вложения для события
         """
+
+        def _add_photo(_photo):
+            _new_photo = {
+                'id': _photo['file_id'],
+                'tg_url': '',
+                'content': '',
+                'private_download_url': '',
+                'download_url': None,
+                'size': {},
+                'type': 'photo'
+            }
+            if 'width' in _photo and 'height' in _photo:
+                _new_photo['width'] = _photo['width']
+                _new_photo['height'] = _photo['height']
+            self._set_image_private_download_url(_new_photo)
+            self._set_image_content(_new_photo)
+            return _new_photo
+
         attachments = []
         if 'media_group_id' in event:
             pass
         if 'photo' in event['message']:
             # ебучая телега шлёт хуй пойми как картинки
             photo = event['message']['photo'][-1]
-            new_photo = {
-                'id': photo['file_id'],
-                'tg_url': '',
-                'content': '',
-                'private_download_url': '',
-                'download_url': None,
-                'size': {
-                    'width': photo['width'],
-                    'height': photo['height'],
-                },
-                'type': 'photo'
-            }
-            self._set_image_private_download_url(new_photo)
-            self._set_image_content(new_photo)
+            new_photo = _add_photo(photo)
+            attachments.append(new_photo)
 
             attachments.append(new_photo)
         if 'voice' in event['message']:
             for audio_message in event['message']['voice']:
                 attachments.append(audio_message)
                 attachments[-1]['type'] = 'audio_message'
+        if 'document' in event['message']:
+            if event['message']['document']['mime_type'] in ['image/png', 'image/jpg', 'image/jpeg']:
+                photo = event['message']['document']
+                new_photo = _add_photo(photo)
+                attachments.append(new_photo)
         return attachments
 
     def _setup_event_before(self, event):
