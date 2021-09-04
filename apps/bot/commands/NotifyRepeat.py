@@ -99,4 +99,4 @@ class NotifyRepeat(CommonCommand):
         if date:
             return f'Следующее выполнение - {str(notify_datetime.strftime("%d.%m.%Y %H:%M"))}'
         else:
-            return f'Добавил напоминание'
+            return 'Добавил напоминание'
