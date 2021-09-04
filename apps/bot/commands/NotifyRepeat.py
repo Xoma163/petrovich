@@ -1,5 +1,7 @@
 from datetime import datetime, timedelta
 
+from crontab import CronTab
+
 from apps.bot.classes.Consts import Role, Platform
 from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.common.CommonCommand import CommonCommand
@@ -15,11 +17,18 @@ def get_time(time):
         return None
 
 
+def get_crontab(crontab_args):
+    crontab_entry = " ".join(crontab_args[:5])
+    CronTab(crontab_entry)
+    return crontab_entry
+
+
 class NotifyRepeat(CommonCommand):
     name = "напоминай"
     help_text = "напоминает о чём-либо постояно"
     help_texts = [
         "(время) (сообщение/команда) [Прикреплённые вложения] - напоминает о чём-то каждый день в заданное время. Максимум можно добавить 5 напоминаний"
+        "(crontab) (сообщение/команда) [Прикреплённые вложения] - напоминает о чём-то с помощью crontab. Максимум можно добавить 5 напоминаний"
     ]
     args = 2
     platforms = [Platform.VK, Platform.TG]
@@ -31,19 +40,25 @@ class NotifyRepeat(CommonCommand):
             raise PWarning("Нельзя добавлять более 5 напоминаний")
         timezone = self.event.sender.city.timezone.name
 
-        date = get_time(self.event.args[0])
-        if not date:
-            raise PWarning("Не смог распарсить дату")
-        date = normalize_datetime(date, timezone)
-        datetime_now = localize_datetime(datetime.utcnow(), "UTC")
+        crontab = None
+        date = None
+        try:
+            crontab = get_crontab(self.event.args)
+            text = self.event.original_args.split(' ', 5)[-1]
+        except:
+            date = get_time(self.event.args[0])
+            if not date:
+                raise PWarning("Не смог распарсить дату")
+            date = normalize_datetime(date, timezone)
+            datetime_now = localize_datetime(datetime.utcnow(), "UTC")
 
-        if (date - datetime_now).seconds < 60:
-            raise PWarning("Нельзя добавлять напоминание на ближайшую минуту")
+            if (date - datetime_now).seconds < 60:
+                raise PWarning("Нельзя добавлять напоминание на ближайшую минуту")
 
-        if (date - datetime_now).days < 0 or (datetime_now - date).seconds < 0:
-            date = date + timedelta(days=1)
+            if (date - datetime_now).days < 0 or (datetime_now - date).seconds < 0:
+                date = date + timedelta(days=1)
 
-        text = self.event.original_args.split(' ', 1)[1]
+            text = self.event.original_args.split(' ', 1)[1]
         if text[0] == '/':
             first_space = text.find(' ')
             if first_space > 0:
@@ -53,14 +68,27 @@ class NotifyRepeat(CommonCommand):
             from apps.bot.commands.Notify import Notify
             if command in self.full_names or command in Notify().full_names:
                 text = f"/обосрать {self.event.sender.name}"
-        notify_datetime = localize_datetime(remove_tz(date), timezone)
+        if date:
+            notify_datetime = localize_datetime(remove_tz(date), timezone)
 
-        notify = NotifyModel(date=date,
-                             text=text,
-                             author=self.event.sender,
-                             chat=self.event.chat,
-                             repeat=True,
-                             text_for_filter=notify_datetime.strftime("%H:%M") + " " + text)
+        if crontab:
+            notify = NotifyModel(
+                crontab=crontab,
+                text=text,
+                author=self.event.sender,
+                chat=self.event.chat,
+                repeat=True,
+                text_for_filter=f'{crontab} {text}'
+            )
+        else:
+            notify = NotifyModel(
+                date=date,
+                text=text,
+                author=self.event.sender,
+                chat=self.event.chat,
+                repeat=True,
+                text_for_filter=f'{notify_datetime.strftime("%H:%M")} {text}'
+            )
         if self.event.platform == Platform.VK:
             if self.event.attachments:
                 notify.attachments = self.event.attachments
@@ -68,5 +96,7 @@ class NotifyRepeat(CommonCommand):
         notify.save()
         notify.text_for_filter += f" ({notify.id})"
         notify.save()
-
-        return f'Следующее выполнение - {str(notify_datetime.strftime("%d.%m.%Y %H:%M"))}'
+        if date:
+            return f'Следующее выполнение - {str(notify_datetime.strftime("%d.%m.%Y %H:%M"))}'
+        else:
+            return f'Добавил напоминание'

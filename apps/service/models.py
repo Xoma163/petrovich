@@ -162,7 +162,8 @@ def log_deleted_question(sender, instance, using, **kwargs):
 
 
 class Notify(models.Model):
-    date = models.DateTimeField("Дата напоминания")
+    date = models.DateTimeField("Дата напоминания", null=True, blank=True)
+    crontab = models.CharField("Crontab", max_length=100, null=True, blank=True)
     text = models.CharField("Текст/команда", max_length=1000, default="")
     text_for_filter = models.CharField("Текст для поиска", max_length=1000, default="")
     chat = models.ForeignKey(Chat, models.CASCADE, verbose_name='Чат', null=True, blank=True)

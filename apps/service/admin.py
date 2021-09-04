@@ -32,8 +32,8 @@ class MemeAdmin(admin.ModelAdmin):
 
 @admin.register(Notify)
 class NotifyAdmin(admin.ModelAdmin):
-    list_display = ('id', 'date', 'text', 'author', 'chat', 'repeat')
-    search_fields = ['date', 'text', 'text_for_filter']
+    list_display = ('id', 'date', 'crontab', 'text', 'author', 'chat', 'repeat')
+    search_fields = ['date', 'crontab', 'text', 'text_for_filter']
     list_filter = (('author', admin.RelatedOnlyFieldListFilter), ('chat', admin.RelatedOnlyFieldListFilter), 'repeat',)
     formfield_overrides = {
         fields.JSONField: {'widget': JSONEditorWidget},
