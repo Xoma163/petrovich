@@ -24,7 +24,7 @@ class Meme(CommonCommand):
         "(название) - присылает нужный мем. Можно использовать * вместо символов поиска. Например /мем ж*па",
         "р - присылает рандомный мем",
         "добавить (название) (Вложение/Пересланное сообщение с вложением) - добавляет мем. ",
-        "добавить (ютую ссылка) (название) - добавляет мем с ютуба. ",
+        "добавить (ссылка на youtube/coub) (название) - добавляет мем с youtube/coub. ",
         "обновить (название) (Вложение/Пересланное сообщение с вложением) - обновляет созданный вами мем. Можно добавлять картинки/аудио/видео",
         "обновить (название) (ссылка на youtube/coub) - обновляет созданный вами мем.",
         "удалить (название) - удаляет созданный вами мем",
@@ -70,13 +70,13 @@ class Meme(CommonCommand):
         method = self.handle_menu(menu, arg0)
         return method()
 
-    def _check_youtube_url(self, url):
+    def _check_allowed_url(self, url):
         parsed_url = urlparse(url)
         if not parsed_url.hostname:
             raise PWarning("Не нашёл вложений в сообщении или пересланном сообщении. Не нашёл ссылку на youtube видео")
 
-        if parsed_url.hostname.replace('www.', '').lower() not in ['youtu.be', 'youtube.com']:
-            raise PWarning("Это ссылка не на ютуб видео")
+        if parsed_url.hostname.replace('www.', '').lower() not in ['youtu.be', 'youtube.com','coub.com']:
+            raise PWarning("Это ссылка не на youtube/coub видео")
 
     # MENU #
     def menu_add(self):
@@ -85,7 +85,7 @@ class Meme(CommonCommand):
         attachments = get_attachments_from_attachments_or_fwd(self.event, ['audio', 'video', 'photo'])
         if len(attachments) == 0:
             url = self.event.original_args.split(' ')[1]
-            self._check_youtube_url(url)
+            self._check_allowed_url(url)
 
             attachment = {
                 'type': 'link',
@@ -97,7 +97,7 @@ class Meme(CommonCommand):
             attachment = attachments[0]
 
         if self.event.platform != Platform.VK and attachment['type'] not in ['photo', 'link']:
-            raise PWarning('В данной платформе поддерживается добавление только картинок-мемов/ютуб ссылок')
+            raise PWarning('В данной платформе поддерживается добавление только картинок-мемов и youtube/coub ссылок')
 
         for i, _ in enumerate(self.event.args):
             self.event.args[i] = self.event.args[i].lower()
@@ -158,12 +158,12 @@ class Meme(CommonCommand):
             if len(self.event.args) > 2:
                 url = self.event.args[-1]
                 try:
-                    self._check_youtube_url(url)
+                    self._check_allowed_url(url)
                     attachments = [{'type': 'link', 'url': url}]
                     meme_name = self.event.args[1:-1]
                 except:
                     raise PWarning("Не нашёл вложений в сообщении или пересланном сообщении\n"
-                                   "Не нашёл ссылки на ютуб")
+                                   "Не нашёл ссылки на youtube/coub")
 
         attachment = attachments[0]
         if attachment['type'] == 'video' or attachment['type'] == 'audio':
