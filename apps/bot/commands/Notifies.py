@@ -11,14 +11,20 @@ def get_notifies_from_object(notifies_obj, timezone, print_username=False):
     result = ""
 
     for notify in notifies_obj:
-        notify_datetime = localize_datetime(remove_tz(notify.date), timezone)
+        if notify.date:
+            notify_datetime = localize_datetime(remove_tz(notify.date), timezone)
+        else:
+            notify_datetime = notify.crontab
 
         if print_username:
             result += f"{notify.author}\n"
         if notify.repeat:
-            result += f"{str(notify_datetime.strftime('%H:%M'))} - Постоянное"
+            if notify.crontab:
+                result += f"{notify_datetime} - Постоянное"
+            else:
+                result += f"{str(notify_datetime.strftime('%H:%M'))} - Постоянное"
         else:
-            result += f"{str(notify_datetime.strftime('%d.%m.%Y %H:%M'))}"
+            result += f"{str(notify_datetime.strftime('%d.%m.%Y %H:%M'))} - Постоянное"
         if notify.chat:
             result += f" (Конфа - {notify.chat.name})"
         result += f"\n{notify.text}\n\n"
