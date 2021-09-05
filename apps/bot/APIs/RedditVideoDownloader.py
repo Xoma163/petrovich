@@ -1,5 +1,6 @@
 import datetime
 import os
+from urllib.parse import urlparse
 
 import requests
 from bs4 import BeautifulSoup
@@ -104,6 +105,8 @@ class RedditVideoSaver:
         """
         Получаем видео с аудио
         """
+        parsed_url = urlparse(post_url)
+        post_url = f"{parsed_url.scheme}://{parsed_url.hostname}{parsed_url.path}"
         video_url, audio_url = self.get_reddit_video_audio_urls(post_url)
         # Нет нужды делать временные файлы для джоина видео и аудио, если аудио нет, то просто кидаем видео и всё
         if not audio_url:
