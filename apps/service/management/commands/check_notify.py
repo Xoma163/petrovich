@@ -25,6 +25,7 @@ class Command(BaseCommand):
                 if notify.author.check_role(Role.BANNED):
                     continue
 
+                timezone_error = False
                 if notify.repeat:
                     if notify.crontab:
                         try:
