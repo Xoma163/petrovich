@@ -29,7 +29,8 @@ def get_notifies_from_object(notifies_obj, timezone, print_username=False):
             result += f" (Конфа - {notify.chat.name})"
         result += f"\n{notify.text}\n\n"
 
-    return result
+    result_without_mentions = result.replace('@', '@_')
+    return result_without_mentions
 
 
 class Notifies(CommonCommand):
