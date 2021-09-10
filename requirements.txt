@@ -60,7 +60,7 @@ s3transfer==0.3.6
 six==1.15.0
 soupsieve==2.2.1
 SpeechRecognition==3.8.1
-sqlparse==0.4.1
+sqlparse==0.4.2
 transliterate==1.10.2
 uritemplate==3.0.1
 urllib3==1.26.5
