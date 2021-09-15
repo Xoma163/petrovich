@@ -1,14 +1,10 @@
 import io
 
-import pytz
-
 from apps.bot.classes.Consts import Role, Platform
 from apps.bot.classes.DoTheLinuxComand import do_the_linux_command
-from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.classes.common.CommonMethods import draw_text_on_image
-from apps.db_logger.models import Logger
-from petrovich.settings import BASE_DIR, DEFAULT_TIME_ZONE
+from petrovich.settings import BASE_DIR
 
 
 def remove_rows_if_find_word(old_str, word):
@@ -76,8 +72,7 @@ class Logs(CommonCommand):
     names = ["лог"]
     help_text = "логи бота или сервера"
     help_texts = [
-        "[сервис=бот] [кол-во строк=50] - логи. Сервис - бот/сервер. Макс 1000 строк.",
-        "бд [кол-во записей = 1] - последний лог с трейсбеком. Макс 5 записей",
+        "[сервис=бот] [кол-во строк=50] - логи. Сервис - бот/сервер. Макс 1000 строк."
     ]
     keyboard = {'for': Role.MODERATOR, 'text': 'Логи', 'color': 'blue', 'row': 1, 'col': 1}
     access = Role.MODERATOR
@@ -90,7 +85,6 @@ class Logs(CommonCommand):
         menu = [
             [['веб', 'web', 'сайт', 'site'], self.get_web_logs],
             [['бот', 'bot'], self.get_bot_logs],
-            [['бд'], self.get_db_logs],
             [['default'], self.get_bot_logs]
         ]
         method = self.handle_menu(menu, arg0)
@@ -115,25 +109,6 @@ class Logs(CommonCommand):
         command = f"systemctl status petrovich -n{count}"
         res = get_bot_logs(command)
         img = draw_text_on_image(res)
-        return img
-
-    def get_db_logs(self):
-        count = self.get_count(1, 5)
-        logs = Logger.objects.filter(traceback__isnull=False)[:count]
-        if not logs:
-            raise PWarning("Не нашёл логов с ошибками")
-        msg = ""
-        for log in logs:
-            if self.event.sender.city:
-                tz = self.event.sender.city.timezone.name
-            else:
-                tz = DEFAULT_TIME_ZONE
-
-            msg += f"{log.create_datetime.astimezone(pytz.timezone(tz)).strftime('%d.%m.%Y %H:%M:%S')}\n\n" \
-                   f"{log.exception}\n\n" \
-                   f"{log.traceback}\n\n" \
-                   f"---------------------------------------------------------------------------------------------------------\n\n"
-        img = draw_text_on_image(msg)
         return img
 
     def get_count(self, default, max_count):

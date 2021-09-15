@@ -57,7 +57,6 @@ PROJECT_APPS = [
     'apps.birds',
     'apps.service',
     'apps.games',
-    'apps.db_logger',
     'apps.web',
 ]
 
@@ -178,19 +177,15 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'commands-console',
         },
-        'db_log': {
-            'level': 'DEBUG',
-            'class': 'apps.db_logger.db_log_handler.DatabaseLogHandler'
-        },
     },
     'loggers': {
         Platform.VK.value: {
-            'handlers': ['file-debug', 'file-warn', 'console-warn', 'db_log'],
+            'handlers': ['file-debug', 'file-warn', 'console-warn'],
             'level': 'DEBUG',
             'propagate': True,
         },
         Platform.TG.value: {
-            'handlers': ['file-debug', 'file-warn', 'console-warn', 'db_log'],
+            'handlers': ['file-debug', 'file-warn', 'console-warn'],
             'level': 'DEBUG',
             'propagate': True,
         },
