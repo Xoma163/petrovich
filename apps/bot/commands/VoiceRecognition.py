@@ -48,7 +48,7 @@ class VoiceRecognition(CommonCommand):
         "Распознай (Пересланное сообщение с голосовым сообщением) - распознаёт голосовое сообщение\n"
         "Если дан доступ к переписке, то распознает автоматически"
     ]
-    platforms = [Platform.VK]
+    platforms = [Platform.VK, Platform.TG]
     attachments = ['audio_message']
     priority = -100
 
@@ -63,12 +63,19 @@ class VoiceRecognition(CommonCommand):
 
         audio_message = audio_messages[0]
 
-        response = requests.get(audio_message['download_url'], stream=True)
+        download_url = audio_message.get('private_download_url', 'download_url')
+        response = requests.get(download_url, stream=True)
         i = io.BytesIO(response.content)
         i.seek(0)
         o = io.BytesIO()
         o.name = "recognition.wav"
-        AudioSegment.from_file(i, 'mp3').export(o, format='wav')
+        try:
+            input_file_format = download_url.split('.')[-1]
+            if input_file_format == 'oga':
+                input_file_format = 'ogg'
+        except:
+            input_file_format = 'mp3'
+        AudioSegment.from_file(i, input_file_format).export(o, format='wav')
         o.seek(0)
 
         r = sr.Recognizer()
