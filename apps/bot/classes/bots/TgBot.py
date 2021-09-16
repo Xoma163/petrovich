@@ -49,6 +49,8 @@ class TgBot(CommonBot):
         """
         if activity not in ['typing', 'audiomessage']:
             raise PWarning("Не знаю такого типа активности")
+        if activity == 'audiomessage':
+            activity = 'record_audio'
         self.requests.get('sendChatAction', {'chat_id': peer_id, 'action': activity})
 
     def register_user(self, user) -> Users:
