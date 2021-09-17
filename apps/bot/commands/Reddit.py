@@ -7,14 +7,13 @@ from apps.bot.classes.common.CommonCommand import CommonCommand
 
 REDDIT_URLS = ["www.reddit.com"]
 
+
 class Reddit(CommonCommand):
     name = "реддит"
     names = ["reddit"]
     help_text = "присылает видео с реддита"
     help_texts = ["(ссылка на реддит с видео) - присылает видео из поста с реддита"]
     platforms = [Platform.TG]
-
-
 
     def accept(self, event):
         if urlparse(event.command).hostname in REDDIT_URLS:
@@ -47,7 +46,6 @@ class Reddit(CommonCommand):
                 return
         else:
             video = rvs.get_video_from_post(url)
-
 
         attachments = [self.bot.upload_video(video)]
         return {

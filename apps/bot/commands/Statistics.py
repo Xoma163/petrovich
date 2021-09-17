@@ -47,8 +47,6 @@ class Statistics(CommonCommand):
             msg += f"{gamer} - {gamer.points}\n"
         return msg
 
-
-
     def menu_roulettes(self):
         gamers = Gamer.objects.filter(user__chats=self.event.chat).exclude(roulette_points=0).order_by(
             '-roulette_points')

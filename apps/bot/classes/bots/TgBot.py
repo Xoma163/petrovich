@@ -221,7 +221,8 @@ class TgBot(CommonBot):
         return self.requests.get('sendMessage', params=prepared_message)
 
     def _set_image_private_download_url(self, image_attachment):
-        file_path = self.requests.get('getFile', params={'file_id': image_attachment['id']}).json()['result']['file_path']
+        file_path = self.requests.get('getFile', params={'file_id': image_attachment['id']}).json()['result'][
+            'file_path']
         image_attachment['private_download_url'] = f'https://{API_TELEGRAM_URL}/file/bot{self.token}/{file_path}'
 
     @staticmethod
@@ -264,7 +265,8 @@ class TgBot(CommonBot):
         if 'voice' in event['message']:
             attachments.append(event['message']['voice'])
             attachments[-1]['type'] = 'audio_message'
-            file_path = self.requests.get('getFile', params={'file_id': attachments[-1]['file_id']}).json()['result']['file_path']
+            file_path = self.requests.get('getFile', params={'file_id': attachments[-1]['file_id']}).json()['result'][
+                'file_path']
             attachments[-1]['private_download_url'] = f'https://{API_TELEGRAM_URL}/file/bot{self.token}/{file_path}'
         if 'document' in event['message']:
             if event['message']['document']['mime_type'] in ['image/png', 'image/jpg', 'image/jpeg']:
@@ -347,7 +349,8 @@ class TgBot(CommonBot):
                 atts.append(event['message']['reply_to_message']['voice'])
 
                 atts[-1]['type'] = 'audio_message'
-                file_path = self.requests.get('getFile', params={'file_id': atts[-1]['file_id']}).json()['result']['file_path']
+                file_path = self.requests.get('getFile', params={'file_id': atts[-1]['file_id']}).json()['result'][
+                    'file_path']
                 atts[-1]['private_download_url'] = f'https://{API_TELEGRAM_URL}/file/bot{self.token}/{file_path}'
             if event['message']['reply_to_message']['from']['is_bot']:
                 tg_event['fwd'][0]['from_id'] *= -1

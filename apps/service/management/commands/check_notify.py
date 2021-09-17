@@ -37,7 +37,7 @@ class Command(BaseCommand):
                         localized_datetime = localize_datetime(remove_tz(datetime_now), timezone)
 
                         entry = CronTab(notify.crontab)
-                        prev_seconds_delta = - entry.previous(localized_datetime,default_utc=True)
+                        prev_seconds_delta = - entry.previous(localized_datetime, default_utc=True)
                         flag = prev_seconds_delta <= 60
                     else:
                         datetime1 = datetime.combine(date.min, remove_tz(notify.date).time())
@@ -70,8 +70,8 @@ class Command(BaseCommand):
                                   f"{bot.get_mention(notify.author)}:\n" \
                                   f"{notify.text}"
                         if timezone_error:
-                            message+="\n\nВАЖНО! Ваша таймзона слетела. " \
-                                     "Проставьте город в профиле, чтобы напоминания по crontab приходили в корректное время"
+                            message += "\n\nВАЖНО! Ваша таймзона слетела. " \
+                                       "Проставьте город в профиле, чтобы напоминания по crontab приходили в корректное время"
                     result_msg = {'msg': message, 'attachments': attachments}
                     if notify.chat:
                         bot.parse_and_send_msgs_thread(notify.chat.chat_id, result_msg)

@@ -1,5 +1,5 @@
-from django.db.models import JSONField
 from django.db import models
+from django.db.models import JSONField
 
 from apps.bot.models import Users, Chat
 

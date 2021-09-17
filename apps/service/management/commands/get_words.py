@@ -68,4 +68,4 @@ class Command(BaseCommand):
             return msg
         except Exception as e:
             raise PWarning("Ошибка при обновлении слов\n"
-                                 f"{str(e)}")
+                           f"{str(e)}")

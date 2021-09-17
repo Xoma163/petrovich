@@ -266,7 +266,6 @@ class CommonBot(Thread):
         if event.get('fwd'):
             fwd_message = event['fwd'][0]['text']
 
-
         from apps.bot.commands.Reddit import REDDIT_URLS
         message_is_reddit_link = urlparse(message).hostname in REDDIT_URLS or \
                                  (fwd_message and urlparse(fwd_message) in REDDIT_URLS)

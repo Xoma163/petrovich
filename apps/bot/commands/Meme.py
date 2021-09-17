@@ -75,7 +75,7 @@ class Meme(CommonCommand):
         if not parsed_url.hostname:
             raise PWarning("Не нашёл вложений в сообщении или пересланном сообщении. Не нашёл ссылку на youtube видео")
 
-        if parsed_url.hostname.replace('www.', '').lower() not in ['youtu.be', 'youtube.com','coub.com']:
+        if parsed_url.hostname.replace('www.', '').lower() not in ['youtu.be', 'youtube.com', 'coub.com']:
             raise PWarning("Это ссылка не на youtube/coub видео")
 
     # MENU #

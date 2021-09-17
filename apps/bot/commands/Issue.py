@@ -1,6 +1,5 @@
 from apps.bot.APIs.GithubAPI import GithubAPI
 from apps.bot.classes.Consts import Platform
-from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.common.CommonCommand import CommonCommand
 
 

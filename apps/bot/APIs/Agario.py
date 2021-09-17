@@ -52,4 +52,3 @@ def get_agario_version_by_args(version):
         if version == str(agario_server.version):
             return agario_server
     raise PWarning("Я не знаю такой версии")
-

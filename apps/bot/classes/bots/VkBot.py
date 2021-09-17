@@ -37,7 +37,6 @@ class VkBot(CommonBot):
 
         self.vk_user = VkUser()
 
-
     def set_activity(self, peer_id, activity='typing'):
         """
         Метод позволяет указать пользователю, что бот набирает сообщение или записывает голосовое
@@ -138,7 +137,6 @@ class VkBot(CommonBot):
             conversation_message_ids=[conversation_message_id]
         )
         return response['items'][0]
-
 
     def send_message(self, peer_id: str, msg: str = "ᅠ", attachments=None, keyboard=None,
                      dont_parse_links: bool = False, **kwargs):

@@ -7,6 +7,7 @@ from apps.bot.classes.bots.CommonBot import CommonBot
 from apps.bot.classes.events.APIEvent import APIEvent
 from apps.bot.models import Users, Chat, Bot
 
+
 # ToDo:
 class APIBot(CommonBot):
     def __init__(self):
