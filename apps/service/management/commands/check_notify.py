@@ -101,13 +101,14 @@ class Command(BaseCommand):
 
                         event_object = event_model(event)
                         bot.menu(event_object, send=True)
-                    if notify.repeat and not notify.crontab:
-                        # Для постоянных уведомлений дата должа быть на завтрашний день обязательно.
-                        # Это важно для сортировки
-                        new_datetime = datetime.combine(datetime_now.date(), notify.date.time()) + timedelta(days=1)
-                        new_datetime = localize_datetime(remove_tz(new_datetime), notify.author.city.timezone.name)
-                        notify.date = new_datetime
-                        notify.save()
+                    if notify.repeat:
+                        if notify.date:
+                            # Для постоянных уведомлений дата должа быть на завтрашний день обязательно.
+                            # Это важно для сортировки
+                            new_datetime = datetime.combine(datetime_now.date(), notify.date.time()) + timedelta(days=1)
+                            new_datetime = localize_datetime(remove_tz(new_datetime), notify.author.city.timezone.name)
+                            notify.date = new_datetime
+                            notify.save()
                     else:
                         notify.delete()
             except Exception as e:
