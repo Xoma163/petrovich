@@ -11,22 +11,84 @@ TRUE_FALSE_TRANSLATOR_ON_OFF = {
 }
 
 SENSORS = [
-    {'name': "Спальня", 'items': [
-        {'name': "Углекислый газ", 'table': "Item0008", 'unit': 'ppm', 'type': int},
-        {'name': "Температура", 'table': "Item0021", 'unit': '°C', 'accuracy': 1, 'type': float},
-        {'name': "Влажность", 'table': "Item0015", 'unit': '%', 'type': int},
-        {'name': "Давление", 'table': "Item0009", 'unit': "мм. рт.ст.", 'type': int},
-    ]},
-    {'name': "Гостиная", 'items': [
-        {'name': "Температура", 'table': "Item0022", 'unit': '°C', 'accuracy': 1, 'type': float},
-        {'name': "Влажность", 'table': "Item0023", 'unit': '%', 'type': int},
-        {'name': "Давление", 'table': "Item0024", 'unit': "мм. рт.ст.", 'type': int},
-    ]},
-    {'name': "Кухня", 'items': [
-        {'name': "Температура", 'table': "Item0025", 'unit': '°C', 'accuracy': 1, 'type': float},
-        {'name': "Влажность", 'table': "Item0026", 'unit': '%', 'type': int},
-        {'name': "Давление", 'table': "Item0027", 'unit': "мм. рт.ст.", 'type': int},
-    ]}
+    {
+        'name': "Гостиная",
+        'items': [
+            {
+                'name': "Углекислый газ",
+                'table': "Item0008",
+                'unit': 'ppm',
+                'type': int
+            },
+            {
+                'name': "Температура",
+                'table': "Item0021",
+                'unit': '°C',
+                'accuracy': 1,
+                'type': float
+            },
+            {
+                'name': "Влажность",
+                'table': "Item0015",
+                'unit': '%',
+                'type': int
+            },
+            {
+                'name': "Давление",
+                'table': "Item0009",
+                'unit': "мм. рт.ст.",
+                'type': int
+            },
+        ]
+    },
+    {
+        'name': "Спальня",
+        'items': [
+            {
+                'name': "Температура",
+                'table': "Item0022",
+                'unit': '°C',
+                'accuracy': 1,
+                'type': float
+            },
+            {
+                'name': "Влажность",
+                'table': "Item0023",
+                'unit': '%',
+                'type': int
+            },
+            {
+                'name': "Давление",
+                'table': "Item0024",
+                'unit': "мм. рт.ст.",
+                'type': int
+            },
+        ]
+    },
+    {
+        'name': "Кухня",
+        'items': [
+            {
+                'name': "Температура",
+                'table': "Item0025",
+                'unit': '°C',
+                'accuracy': 1,
+                'type': float
+            },
+            {
+                'name': "Влажность",
+                'table': "Item0026",
+                'unit': '%',
+                'type': int
+            },
+            {
+                'name': "Давление",
+                'table': "Item0027",
+                'unit': "мм. рт.ст.",
+                'type': int
+            },
+        ]
+    }
 ]
 
 
@@ -110,7 +172,10 @@ def get_items(rooms, room_name=None, item_name=None):
         for room in rooms:
             if room_name and room_name.lower() != room['name'].lower():
                 continue
-            result_room = {'name': room['name'], 'items': []}
+            result_room = {
+                'name': room['name'],
+                'items': []
+            }
             for item in room['items']:
                 if item_name.lower() in item['name'].lower():
                     result_room['items'].append(item)
