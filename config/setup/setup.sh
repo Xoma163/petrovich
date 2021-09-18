@@ -33,6 +33,7 @@ sudo rm /etc/nginx/sites-available/petrovich_nginx.conf || echo $
 sudo rm /etc/nginx/sites-enabled/petrovich_nginx.conf || echo $
 sudo rm /etc/nginx/conf/petrovich-default-config.conf || echo $
 sudo rm /etc/nginx/conf/petrovich-default-locations.conf || echo $
+sudo rm /etc/nginx/conf/andrewsha-ssl.conf || echo $
 sudo ln -s "$PWD/config/nginx/petrovich_nginx.conf" /etc/nginx/sites-available/ || echo $
 sudo ln -s "$PWD/config/nginx/petrovich_nginx.conf" /etc/nginx/sites-enabled/ || echo $
 sudo ln -s "$PWD/config/nginx/conf/petrovich-default-config.conf" /etc/nginx/conf/ || echo $
