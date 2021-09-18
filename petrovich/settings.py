@@ -46,7 +46,6 @@ DJANGO_APPS = [
 
 VENDORS_APPS = [
     'django_hosts',
-    'django_json_widget',
     'webpack_loader',
     'rest_framework',
 
