@@ -12,8 +12,8 @@ pip install -r requirements.txt
 
 # rename abs paths
 old_path="/var/www/petrovich/"
-sed -i "s#$old_path#$PWD/#g" ./config/petrovich.service
-sed -i "s#$old_path#$PWD/#g" ./config/petrovich_site.service
+sed -i "s#$old_path#$PWD/#g" ./config/systemd/petrovich.service
+sed -i "s#$old_path#$PWD/#g" ./config/systemd/petrovich_site.service
 sed -i "s#$old_path#$PWD/#g" ./config/nginx/petrovich_nginx.conf
 sed -i "s#$old_path#$PWD/#g" ./config/nginx/conf/petrovich-default-locations.conf
 
