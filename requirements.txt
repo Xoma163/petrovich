@@ -10,7 +10,6 @@ idna==3.2
 numpy==1.21.2
 opencv-python==4.5.3.56
 Pillow==8.3.2
-pkg_resources==0.0.0
 psycopg2==2.9.1
 pytz==2021.1
 requests==2.26.0
