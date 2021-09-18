@@ -19,7 +19,7 @@ sed -i "s#$old_path#$PWD/#g" ./config/nginx/conf/petrovich-default-locations.con
 
 #amazon config
 cp ./config/amazon/config ~/.aws/config
-cp ./config/amazon/creditionals ~/.aws/creditionals
+cp ./secrets/amazon/credentials ~/.aws/credentials
 
 # systemd
 sudo rm /etc/systemd/system/petrovich.service || echo $
