@@ -1,9 +1,9 @@
 #!/bin/bash
 # install python, python-venv and project requirements
 sudo apt -y update
-sudo apt install -y python3.7 python3.7-venv python3-venv python3.7-dev python3-wheel postgresql libpq-dev ffmpeg nginx build-essential python-opencv awscli
+sudo apt install -y python3.8 python3.8-venv python3-venv python3.8-dev python3-wheel postgresql libpq-dev ffmpeg nginx build-essential python3-opencv awscli
 
-python3.7 -m venv venv
+python3.8 -m venv venv
 set -e
 source ./venv/bin/activate
 pip install wheel
