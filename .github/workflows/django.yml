@@ -39,4 +39,5 @@ jobs:
         username: ${{ secrets.SSH_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: ${{ secrets.SSH_PORT }}
-        script: whoami
+        script: |
+          ./${{ secrets.SSH_PRODUCTION_FOLDER }}update_production.sh
