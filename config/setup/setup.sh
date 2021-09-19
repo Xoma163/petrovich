@@ -28,12 +28,12 @@ sudo rm /etc/nginx/conf/petrovich-default-config.conf || echo $
 sudo rm /etc/nginx/conf/petrovich-default-locations.conf || echo $
 sudo rm /etc/nginx/conf/andrewsha-ssl.conf || echo $
 
-cp config/nginx/andrewsha-ssl_example.conf config/nginx/andrewsha-ssl.conf
-cp config/nginx/petrovich-default-config_example.conf config/nginx/petrovich-default-config.conf
-cp config/nginx/petrovich-default-locations_example.conf config/nginx/petrovich-default-locations.conf
+cp config/nginx/conf/andrewsha-ssl_example.conf config/nginx/conf/andrewsha-ssl.conf
+cp config/nginx/conf/petrovich-default-config_example.conf config/nginx/conf/petrovich-default-config.conf
+cp config/nginx/conf/petrovich-default-locations_example.conf config/nginx/conf/petrovich-default-locations.conf
 cp config/nginx/petrovich_nginx_example.conf config/nginx/petrovich_nginx.conf
-cp config/nginx/petrovich_example.service config/nginx/petrovich.service
-cp config/nginx/petrovich_site_example.service config/nginx/petrovich_site.service
+cp config/systemd/petrovich_example.service config/systemd/petrovich.service
+cp config/systemd/petrovich_site_example.service config/systemd/petrovich_site.service
 
 # rename abs paths
 old_path="/var/www/andrewsha/petrovich/"
