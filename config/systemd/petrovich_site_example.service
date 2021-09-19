@@ -1,0 +1,15 @@
+[Unit]
+Description=petrovich website
+
+[Service]
+User=server
+Restart=always
+RestartSec=5
+Nice=1
+SuccessExitStatus=0 1
+WorkingDirectory=/var/www/andrewsha/petrovich/
+ExecStart=/var/www/andrewsha/petrovich/venv/bin/uwsgi --ini config/uwsgi/uwsgi.ini
+ExecStop=/var/www/andrewsha/petrovich/venv/bin/uwsgi --stop config/petrovich.pid
+
+[Install]
+WantedBy=multi-user.target

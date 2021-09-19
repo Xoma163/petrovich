@@ -133,3 +133,13 @@ secrets/
 
 .clocignore
 cloc.exe
+
+static/
+node_modules/
+
+config/nginx/andrewsha-ssl.conf
+config/nginx/petrovich-default-config.conf
+config/nginx/petrovich-default-locations.conf
+config/nginx/petrovich_nginx.conf
+config/nginx/petrovich.service
+config/nginx/petrovich_site.service

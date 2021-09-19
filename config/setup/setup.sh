@@ -10,13 +10,6 @@ pip install wheel
 pip install --upgrade pip setuptools wheel virtualenv
 pip install -r requirements.txt
 
-# rename abs paths
-old_path="/var/www/petrovich/"
-sed -i "s#$old_path#$PWD/#g" ./config/systemd/petrovich.service
-sed -i "s#$old_path#$PWD/#g" ./config/systemd/petrovich_site.service
-sed -i "s#$old_path#$PWD/#g" ./config/nginx/petrovich_nginx.conf
-sed -i "s#$old_path#$PWD/#g" ./config/nginx/conf/petrovich-default-locations.conf
-
 #amazon config
 cp ./config/amazon/config ~/.aws/config
 cp ./secrets/amazon/credentials ~/.aws/credentials
@@ -34,6 +27,21 @@ sudo rm /etc/nginx/sites-enabled/petrovich_nginx.conf || echo $
 sudo rm /etc/nginx/conf/petrovich-default-config.conf || echo $
 sudo rm /etc/nginx/conf/petrovich-default-locations.conf || echo $
 sudo rm /etc/nginx/conf/andrewsha-ssl.conf || echo $
+
+cp config/nginx/andrewsha-ssl.conf config/nginx/andrewsha-ssl_example.conf
+cp config/nginx/petrovich-default-config.conf config/nginx/petrovich-default-config_example.conf
+cp config/nginx/petrovich-default-locations.conf config/nginx/petrovich-default-locations_example.conf
+cp config/nginx/petrovich_nginx.conf config/nginx/petrovich_nginx_example.conf
+cp config/nginx/petrovich.service config/nginx/petrovich_example.service
+cp config/nginx/petrovich_site.service config/nginx/petrovich_site_example.service
+
+# rename abs paths
+old_path="/var/www/andrewsha/petrovich/"
+sed -i "s#$old_path#$PWD/#g" ./config/systemd/petrovich.service
+sed -i "s#$old_path#$PWD/#g" ./config/systemd/petrovich_site.service
+sed -i "s#$old_path#$PWD/#g" ./config/nginx/petrovich_nginx.conf
+sed -i "s#$old_path#$PWD/#g" ./config/nginx/conf/petrovich-default-locations.conf
+
 sudo ln -s "$PWD/config/nginx/petrovich_nginx.conf" /etc/nginx/sites-available/ || echo $
 sudo ln -s "$PWD/config/nginx/petrovich_nginx.conf" /etc/nginx/sites-enabled/ || echo $
 sudo ln -s "$PWD/config/nginx/conf/petrovich-default-config.conf" /etc/nginx/conf/ || echo $
