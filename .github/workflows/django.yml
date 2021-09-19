@@ -18,6 +18,9 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
+    - env:
+        # randomly generated. Not production key
+        SECRET_KEY: d7e72d9c61c4774bc5024bdd1434b1b322c62404d01ebc968b
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
