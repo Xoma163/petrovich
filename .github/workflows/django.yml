@@ -32,3 +32,12 @@ jobs:
 
       run: |
         python manage.py test
+    - name: deploy
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.SSH_IP }}
+        username: ${{ secrets.USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        port: ${{ secrets.SSH_PORT }}
+        script: |
+          ./${{ secrets.SSH_PRODUCTION_FOLDER }}/update_production.sh
