@@ -137,12 +137,12 @@ cloc.exe
 static/
 node_modules/
 
-config/nginx/andrewsha-ssl.conf
-config/nginx/petrovich-default-config.conf
-config/nginx/petrovich-default-locations.conf
+config/nginx/conf/andrewsha-ssl.conf
+config/nginx/conf/petrovich-default-config.conf
+config/nginx/conf/petrovich-default-locations.conf
 config/nginx/petrovich_nginx.conf
-config/nginx/petrovich.service
-config/nginx/petrovich_site.service
+config/systemd/petrovich.service
+config/systemd/petrovich_site.service
 
 # pid
 config/petrovich.pid
