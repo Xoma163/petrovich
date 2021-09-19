@@ -143,3 +143,6 @@ config/nginx/petrovich-default-locations.conf
 config/nginx/petrovich_nginx.conf
 config/nginx/petrovich.service
 config/nginx/petrovich_site.service
+
+# pid
+config/petrovich.pid
