@@ -40,4 +40,5 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: ${{ secrets.SSH_PORT }}
         script: |
-          ${{ secrets.SSH_PRODUCTION_FOLDER }}update_production.sh
+          cd ${{ secrets.SSH_PRODUCTION_FOLDER }}
+          ./update_production.sh
