@@ -45,8 +45,12 @@ jobs:
 
     - name: Send telegram message
       uses: appleboy/telegram-action@master
+      env:
+        COMMITS_MESSAGES: ""
+      run:
+        for commit in ${{ github.event.commits }}; do {{ echo commit.message }}; done
       with:
         to: ${{ secrets.TG_PETROVICH_CHAT }}
         token: ${{ secrets.TG_PETROVICH_TOKEN }}
         message: |
-          ${{ github.event.commits }}
+          test
