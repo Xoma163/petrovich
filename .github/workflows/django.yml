@@ -48,4 +48,5 @@ jobs:
         token: ${{ secrets.TG_PETROVICH_TOKEN }}
         message: |
           Сервер обновлён. Список коммитов:
+
            ${{join(github.event.commits.*.message, "\n") }}
