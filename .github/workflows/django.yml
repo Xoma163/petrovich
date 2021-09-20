@@ -47,4 +47,5 @@ jobs:
         to: ${{ secrets.TG_PETROVICH_CHAT }}
         token: ${{ secrets.TG_PETROVICH_TOKEN }}
         message: |
-         ${{join(github.event.commits.*.message, ', ') }}
+          Сервер обновлён. Список коммитов:
+          ${{join(github.event.commits.*.message, '\n') }}
