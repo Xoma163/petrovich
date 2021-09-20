@@ -26,11 +26,11 @@ class Calc(CommonCommand):
             .lower() \
             .replace(' ', '') \
             .replace(',', '.')
-        expression = self.replace_consts(expression)
-        # .replace('k', '000') \
-        # .replace('к', '000') \
-        # .replace('m', "000000") \
-        # .replace('м', "000000")
+        expression = self.replace_consts(expression) \
+            .replace('k', '000') \
+            .replace('к', '000') \
+            .replace('m', "000000") \
+            .replace('м', "000000")
 
         operations = ['-', '+', '*', '/', '^']
         operations_count = 0
