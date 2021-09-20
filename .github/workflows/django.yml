@@ -8,13 +8,13 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-20.04
     strategy:
       max-parallel: 4
       matrix:
         python-version: [3.8]
-
+    env:
+      commit_messages: ${{join(github.event.commits.\*.message, ', ') }}
     steps:
     - uses: actions/checkout@v2
 #    - name: Set up Python ${{ matrix.python-version }}
@@ -49,4 +49,4 @@ jobs:
         to: ${{ secrets.TG_PETROVICH_CHAT }}
         token: ${{ secrets.TG_PETROVICH_TOKEN }}
         message: |
-          ${{ github.event.head_commit.message }}
+          ${{ commit_messages }}
