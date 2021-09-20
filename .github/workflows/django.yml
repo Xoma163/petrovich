@@ -53,4 +53,4 @@ jobs:
         to: ${{ secrets.TG_PETROVICH_CHAT }}
         token: ${{ secrets.TG_PETROVICH_TOKEN }}
         message: |
-          test
+          test 2
