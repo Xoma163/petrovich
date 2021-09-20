@@ -49,4 +49,4 @@ jobs:
         to: ${{ secrets.TG_PETROVICH_CHAT }}
         token: ${{ secrets.TG_PETROVICH_TOKEN }}
         message: |
-          ${{ github.event.commits}}
+          ${{ github.event.commits }}
