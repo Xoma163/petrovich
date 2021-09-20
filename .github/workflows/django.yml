@@ -14,9 +14,12 @@ jobs:
       matrix:
         python-version: [3.8]
     env:
-      commit_messages: ${{join(github.event.commits.\*.message, ' , ') }}
+      commit_messages: ""
     steps:
     - uses: actions/checkout@v2
+    - name: define_variables
+      run:
+        commit_messages=join(${{ github.event.commits.\*.message }}, ', ')
 #    - name: Set up Python ${{ matrix.python-version }}
 #      uses: actions/setup-python@v2
 #      with:
