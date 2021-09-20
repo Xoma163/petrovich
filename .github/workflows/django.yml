@@ -17,9 +17,6 @@ jobs:
       commits: ""
     steps:
     - uses: actions/checkout@v2
-    - name: define_variables
-      run:
-        commits=${{join(github.event.commits.*.message, ', ') }}
       #    - name: Set up Python ${{ matrix.python-version }}
 #      uses: actions/setup-python@v2
 #      with:
@@ -52,4 +49,4 @@ jobs:
         to: ${{ secrets.TG_PETROVICH_CHAT }}
         token: ${{ secrets.TG_PETROVICH_TOKEN }}
         message: |
-          ${{ commits }}
+         ${{join(github.event.commits.*.message, ', ') }}
