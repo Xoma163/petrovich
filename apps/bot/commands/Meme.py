@@ -151,7 +151,7 @@ class Meme(CommonCommand):
                 _id = self.event.args[1]
             except PWarning:
                 pass
-        meme_name = self.event.args[1:].lower()
+        meme_name = " ".join(self.event.args[1:]).lower()
 
         attachments = get_attachments_from_attachments_or_fwd(self.event, ['audio', 'video', 'photo'])
         if len(attachments) == 0:
