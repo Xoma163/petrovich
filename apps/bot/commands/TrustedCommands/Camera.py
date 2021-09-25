@@ -8,7 +8,7 @@ class Camera(CommonCommand):
     name = "камера"
     names = ["с", "c"]
     help_text = "ссылка и гифка с камеры"
-    help_texts = ["[кол-во кадров=20] - ссылка и гифка с камеры. Максимум 200 кадров"]
+    help_texts = ["[кол-во кадров=100] - ссылка и гифка с камеры. Максимум 1000 кадров"]
     int_args = [0]
     access = Role.TRUSTED
     platforms = [Platform.VK, Platform.TG]
@@ -24,7 +24,7 @@ class Camera(CommonCommand):
         attachment = self.bot.upload_photos(image)[0]
         attachments.append(attachment)
 
-        frames = 20
+        frames = 100
         if self.event.args:
             frames = self.event.args[0]
             self.check_number_arg_range(frames, 0, camera_handler.MAX_FRAMES)

@@ -17,9 +17,9 @@ cv2_logger.addHandler(handler)
 
 
 class CameraHandler(threading.Thread):
-    MAX_WIDTH = 1920
-    MAX_HEIGHT = 1080
-    SCALED_WIDTH = 510
+    MAX_WIDTH = 640
+    MAX_HEIGHT = 360
+    SCALED_WIDTH = 640
     SCALED_COEFF = SCALED_WIDTH / MAX_WIDTH
     SCALED_HEIGHT = int(MAX_HEIGHT * SCALED_COEFF)
 
@@ -29,7 +29,7 @@ class CameraHandler(threading.Thread):
         self.time_on_frame = MaxSizeList(self.MAX_FRAMES)
         self.time_on_frame.init_values(0)
 
-    def __init__(self, max_frames=500):
+    def __init__(self, max_frames=1000):
         super().__init__()
         self.MAX_FRAMES = max_frames
 
@@ -37,7 +37,7 @@ class CameraHandler(threading.Thread):
         self.gif = None
 
         # self.url = "http://192.168.1.12/mjpg/video.mjpg"
-        self.url = "rtsp://192.168.1.15:554/user=admin&password=&channel=1&stream=0.sdp"
+        self.url = "rtsp://192.168.1.15:554/user=admin&password=&channel=0&stream=1.sdp"
 
     def run(self):
         self._init_my_lists()
@@ -87,7 +87,7 @@ class CameraHandler(threading.Thread):
     def wait():
         time.sleep(1)
 
-    def get_gif(self, frames=20):
+    def get_gif(self, frames):
         if not self._running:
             self.resume()
             while self.time_on_frame.get_list_size(frames)[0] == 0:
@@ -118,7 +118,7 @@ class CameraHandler(threading.Thread):
     def get_img(self):
         if not self._running:
             self.images.init_frames(self.SCALED_WIDTH, self.SCALED_HEIGHT)
-            self.time_on_frame.init_0()
+            self.time_on_frame.init_values(0)
             self.resume()
             while self.time_on_frame.get_last() == 0:
                 self.wait()
