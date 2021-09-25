@@ -33,7 +33,7 @@ class Quote(CommonCommand):
         bytes_io = BytesIO()
         pil_image.save(bytes_io, format='PNG')
         if pil_image.height > 1500:
-            attachments = self.bot.upload_document(bytes_io, self.event.peer_id, "Сохры")
+            attachments = self.bot.upload_document(bytes_io, self.event.peer_id, "Сохры", filename="quote.png")
         else:
             attachments = self.bot.upload_photos(bytes_io)
         return {"attachments": attachments}

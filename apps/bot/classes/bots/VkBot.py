@@ -374,10 +374,10 @@ class VkBot(CommonBot):
             print(e)
         return vk_photo_max_size['url']
 
-    def upload_animation(self, animation, peer_id=None, title='Документ'):
-        return self.upload_document(animation, peer_id, title)
+    def upload_animation(self, animation, peer_id=None, title='Документ', filename=None):
+        return self.upload_document(animation, peer_id, title, filename)
 
-    def upload_document(self, document, peer_id=None, title='Документ'):
+    def upload_document(self, document, peer_id=None, title='Документ', filename=None):
         """
         Загрузка документа на сервер ВК.
         """

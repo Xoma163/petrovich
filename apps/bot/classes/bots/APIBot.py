@@ -148,7 +148,7 @@ class APIBot(CommonBot):
         """
         pass
 
-    def upload_document(self, document, peer_id=None, title='Документ'):
+    def upload_document(self, document, peer_id=None, title='Документ', filename=None):
         """
         Загрузка документа на сервер ВК.
         """
@@ -182,7 +182,7 @@ class APIBot(CommonBot):
         """
         pass
 
-    def upload_video_by_link(self, link, name):
+    def upload_video_by_link(self, link, name, filename=None):
         """
         Загрузка видео по ссылке со стороннего ресурса
         """

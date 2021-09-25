@@ -4,6 +4,7 @@ import threading
 import time
 import traceback
 from io import BytesIO
+from tempfile import NamedTemporaryFile
 from urllib.parse import urlparse
 
 import requests
@@ -412,7 +413,7 @@ class TgBot(CommonBot):
             print(tb)
 
     @staticmethod
-    def _prepare_obj_to_upload(file_like_object, allowed_exts_url=None):
+    def _prepare_obj_to_upload(file_like_object, allowed_exts_url=None, filename=None):
         """
         Подготовка объектов(в основном картинок) для загрузки.
         То есть метод позволяет преобразовывать почти из любого формата в необходимый для VK
@@ -427,6 +428,12 @@ class TgBot(CommonBot):
                     raise PWarning(f"Загрузка по URL доступна только для {' '.join(allowed_exts_url)}")
             return file_like_object
         if isinstance(file_like_object, bytes):
+            if filename:
+                tmp = NamedTemporaryFile()
+                tmp.write(file_like_object)
+                tmp.name = filename
+                tmp.seek(0)
+                return tmp
             return file_like_object
         # path
         if isinstance(file_like_object, str) and os.path.exists(file_like_object):
@@ -435,6 +442,13 @@ class TgBot(CommonBot):
                 return file_like_object
         if isinstance(file_like_object, BytesIO):
             file_like_object.seek(0)
+            _bytes = file_like_object.read()
+            if filename:
+                tmp = NamedTemporaryFile()
+                tmp.write(_bytes)
+                tmp.name = filename
+                tmp.seek(0)
+                return tmp
             return file_like_object.read()
         return None
 
@@ -457,17 +471,17 @@ class TgBot(CommonBot):
                 break
         return images_list
 
-    def upload_animation(self, animation, peer_id=None, title='Документ'):
-        return self.upload_video(animation, peer_id, title)
+    def upload_animation(self, animation, peer_id=None, title='Документ', filename=None):
+        return self.upload_video(animation, peer_id, title, filename)
 
-    def upload_video(self, video, peer_id=None, title="Видео"):
-        return {'type': 'video', 'attachment': self._prepare_obj_to_upload(video)}
+    def upload_video(self, video, peer_id=None, title="Видео", filename=None):
+        return {'type': 'video', 'attachment': self._prepare_obj_to_upload(video, filename=filename)}
 
-    def upload_document(self, document, peer_id=None, title='Документ'):
+    def upload_document(self, document, peer_id=None, title='Документ', filename=None):
         """
         Загрузка документа на сервер ТГ.
         """
-        return {'type': 'document', 'attachment': self._prepare_obj_to_upload(document)}
+        return {'type': 'document', 'attachment': self._prepare_obj_to_upload(document, filename=filename)}
 
     @staticmethod
     def get_inline_keyboard(command_text, button_text="Ещё", args=None):

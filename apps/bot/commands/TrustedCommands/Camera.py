@@ -34,7 +34,7 @@ class Camera(CommonCommand):
                 document = camera_handler.get_gif(frames)
             except PError as e:
                 return str(e)
-            attachment = self.bot.upload_animation(document, self.event.peer_id, "Камера")
+            attachment = self.bot.upload_animation(document, self.event.peer_id, "Камера", filename="camera.gif",)
             attachments.append(attachment)
         attachments.append('https://birds.andrewsha.net')
         if len(attachments) == 2 or self.event.platform == Platform.VK:
