@@ -231,6 +231,8 @@ class CommonBot(Thread):
             return True
         have_audio_message = self.have_audio_message(event)
         if have_audio_message:
+            if event['chat']:
+                return event['chat'].recognize_voice
             return True
         have_action = event['message']['action'] is not None
         if have_action:
