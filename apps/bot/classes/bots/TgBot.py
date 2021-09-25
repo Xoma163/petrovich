@@ -404,7 +404,7 @@ class TgBot(CommonBot):
 
     def parse_event(self, event):
         # ToDo: check
-        if 'message' not in event:
+        if 'message' not in event and 'callback_query' not in event:
             return
         try:
             tg_event = self._setup_event_before(event)
