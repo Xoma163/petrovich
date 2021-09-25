@@ -12,6 +12,7 @@ from django.contrib.auth.models import Group
 from apps.bot.classes.Consts import Role, Platform
 from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.bots.CommonBot import CommonBot
+from apps.bot.classes.common.CommonMethods import get_thumbnail_for_image
 from apps.bot.classes.events.TgEvent import TgEvent
 from apps.bot.models import Users, Chat, Bot
 from petrovich.settings import env
@@ -163,8 +164,13 @@ class TgBot(CommonBot):
             self.requests.get('sendDocument',
                               {'chat_id': peer_id, 'caption': msg, 'document': document, 'reply_markup': keyboard})
         else:
+            files = {'document': document}
+            try:
+                files['thumb'] = get_thumbnail_for_image(document, size=320)
+            except:
+                pass
             self.requests.get('sendDocument', {'chat_id': peer_id, 'caption': msg, 'reply_markup': keyboard},
-                              files={'document': document})
+                              files=files)
 
     def _send_video(self, peer_id, msg, video, keyboard):
         """
@@ -203,8 +209,6 @@ class TgBot(CommonBot):
                     return self._send_photo(peer_id, msg, attachments[0]['attachment'], keyboard)
                 elif attachments[0]['type'] == 'document':
                     return self._send_document(peer_id, msg, attachments[0]['attachment'], keyboard)
-                elif attachments[0]['type'] == 'animation':
-                    return self._send_animation(peer_id, msg, attachments[0]['attachment'], keyboard)
         prepared_message = {'chat_id': peer_id, 'text': msg, 'parse_mode': 'HTML', 'reply_markup': keyboard}
         return self.requests.get('sendMessage', params=prepared_message)
 
