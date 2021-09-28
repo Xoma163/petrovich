@@ -5,6 +5,9 @@ from apps.bot.classes.common.CommonCommand import CommonCommand
 class All(CommonCommand):
     name = "all"
     help_text = "присылает меншон по всем участникам конфы"
+    help_texts = [
+        "(текст) - присылает меншон по всем участникам конфы с текстом в начале"
+    ]
     platforms = [Platform.TG]
     conversation = True
 
