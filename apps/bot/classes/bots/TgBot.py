@@ -423,7 +423,7 @@ class TgBot(CommonBot):
             if allowed_exts_url:
                 extension = file_like_object.split('.')[-1].lower()
                 is_default_extension = extension not in allowed_exts_url
-                is_vk_image = any(extension.startswith(x) for x in allowed_exts_url)
+                is_vk_image = 'userapi.com' in urlparse(file_like_object).hostname
                 if is_default_extension and not is_vk_image:
                     raise PWarning(f"Загрузка по URL доступна только для {' '.join(allowed_exts_url)}")
             return file_like_object
