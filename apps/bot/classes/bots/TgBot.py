@@ -522,6 +522,9 @@ class TgBot(CommonBot):
         """
         return None
 
+    def delete_message(self, chat_id, message_id):
+        self.requests.get('deleteMessage', params={'chat_id': chat_id, 'message_id': message_id})
+
 
 class MyTgBotLongPoll:
     def __init__(self, token, request=None):

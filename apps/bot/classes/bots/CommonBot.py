@@ -415,6 +415,12 @@ class CommonBot(Thread):
         """
         raise NotImplementedError
 
+    def delete_message(self, chat_id, message_id):
+        """
+        Удаление сообщения
+        """
+        raise NotImplementedError
+
     def get_one_chat_with_user(self, chat_name, user_id):
         """
         Получение чата по названию, в котором есть пользователь

@@ -187,7 +187,7 @@ class VkBot(CommonBot):
             'user_id': event.message.from_id,
             'peer_id': event.message.peer_id,
             'message': {
-                # 'id': event.message.id,
+                'id': event.message.id,
                 'text': event.message.text,
                 'payload': event.message.payload,
                 'attachments': event.message.attachments,
@@ -492,6 +492,9 @@ class VkBot(CommonBot):
         """
         self.vk.messages.removeChatUser(chat_id=chat_id, member_id=f"-{self.group_id}")
 
+    # Todo:
+    def delete_message(self, chat_id, message_id):
+        pass
 
 class MyVkBotLongPoll(VkBotLongPoll):
     def listen(self):
