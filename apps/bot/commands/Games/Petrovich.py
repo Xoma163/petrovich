@@ -72,8 +72,7 @@ class Petrovich(CommonCommand):
     def menu_play(self):
         with lock:
             datetime_now = localize_datetime(datetime.datetime.utcnow(), DEFAULT_TIME_ZONE)
-            if datetime_now.hour < 12:
-                raise PWarning("Петрович дня, а не ночи. Приходи днём")
+
             winner_today = PetrovichGames.objects.filter(chat=self.event.chat).last()
             if winner_today:
                 datetime_last = localize_datetime(remove_tz(winner_today.date), DEFAULT_TIME_ZONE)
@@ -83,6 +82,10 @@ class Petrovich(CommonCommand):
                     else:
                         winner_gender = "Петрович"
                     return f"{winner_gender} дня - {winner_today.user}"
+
+            if datetime_now.hour < 12:
+                raise PWarning("Петрович дня, а не ночи. Приходи днём")
+
             group_banned = Group.objects.get(name=Role.BANNED.name)
             winner = PetrovichUser.objects.filter(chat=self.event.chat, active=True).exclude(
                 user__groups=group_banned).order_by("?").first()
