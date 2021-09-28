@@ -10,7 +10,11 @@ class All(CommonCommand):
 
     def start(self):
         conversation_users = self.event.chat.users.all()
-        msg = ""
+        if self.event.args:
+            msg = f"{self.event.original_args}\n\n"
+        else:
+            msg = ""
+
         for user in conversation_users:
             msg += f"{self.bot.get_mention(user)}\n"
         return msg
