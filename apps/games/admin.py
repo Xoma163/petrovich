@@ -1,5 +1,4 @@
 from django.contrib import admin
-from django.contrib.postgres import fields
 
 from apps.games.models import Rate, Gamer, PetrovichUser, PetrovichGames, RouletteRate
 

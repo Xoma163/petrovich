@@ -131,7 +131,7 @@ export default {
           this.session = response.data;
         });
   },
-}
+};
 </script>
 
 <style scoped>

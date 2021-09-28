@@ -1,3 +1,4 @@
+#!/bin/bash
 git checkout master
 git reset HEAD --hard
 git clean -fd
