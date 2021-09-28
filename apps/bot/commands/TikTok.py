@@ -54,11 +54,10 @@ class TikTok(CommonCommand):
                 return
         else:
             video = self.get_video_and_title_by_url(url)
-
-        attachments = [self.bot.upload_video(video)]
-        return {
-            'attachments': attachments
-        }
+            attachments = [self.bot.upload_video(video)]
+            return {
+                'attachments': attachments
+            }
 
     def get_video_and_title_by_url(self, url):
         headers = {
