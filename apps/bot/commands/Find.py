@@ -1,4 +1,5 @@
 import json
+from urllib.parse import urlparse
 
 import requests
 from bs4 import BeautifulSoup
@@ -37,6 +38,9 @@ class Find(CommonCommand):
         # qwant_api = QwantAPI()
         # urls = qwant_api.get_urls(query)
         #
+        for i, url in enumerate(urls):
+            parsed_url = urlparse(url)
+            urls[i] = f"{parsed_url.scheme}://{parsed_url.hostname}{parsed_url.path}"
         if len(urls) == 0:
             raise PWarning("Ничего не нашёл")
         attachments = self.bot.upload_photos(urls, count)
