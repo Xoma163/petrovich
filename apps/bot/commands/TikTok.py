@@ -50,7 +50,7 @@ class TikTok(CommonCommand):
                       f"От пользователя {self.event.sender}\n" \
                       f"{url}"
                 return {'msg': msg, 'attachments': attachments}
-            except Exception as e:
+            except Exception:
                 return
         else:
             video = self.get_video_and_title_by_url(url)
@@ -59,7 +59,8 @@ class TikTok(CommonCommand):
                 'attachments': attachments
             }
 
-    def get_video_and_title_by_url(self, url):
+    @staticmethod
+    def get_video_and_title_by_url(url):
         headers = {
             'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
         }
