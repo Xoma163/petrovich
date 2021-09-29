@@ -35,5 +35,5 @@ class RouletteRateAdmin(admin.ModelAdmin):
 
 
 @admin.register(BullsAndCowsSession)
-class RouletteRateAdmin(admin.ModelAdmin):
+class BullsAndCowsSessionAdmin(admin.ModelAdmin):
     list_display = ('author', 'chat', 'number', 'steps',)
