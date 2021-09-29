@@ -1,5 +1,6 @@
 import logging
 import traceback
+from copy import deepcopy
 from threading import Thread
 from urllib.parse import urlparse
 
@@ -116,9 +117,12 @@ class CommonBot(Thread):
         group = event.sender.groups.filter(name=Role.BANNED.name)
         if len(group) > 0:
             return
-
-        log_event = event
-        self.logger.debug(log_event)
+        copy_event = deepcopy(event)
+        if copy_event.attachments:
+            for att in copy_event.attachments:
+                if 'content' in att:
+                    att['content'] = "*****"
+        self.logger.debug(copy_event)
 
         from apps.bot.initial import COMMANDS
 
@@ -136,7 +140,7 @@ class CommonBot(Thread):
                         if atts:
                             for att in atts:
                                 if isinstance(att['attachment'], bytes):
-                                    del att['attachment']
+                                    att['attachment'] = "*****"
 
                     self.logger.debug(log_result)
                     return result
