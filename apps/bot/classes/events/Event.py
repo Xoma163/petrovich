@@ -79,11 +79,11 @@ class Event:
         """
         if 'message' in event:
             raw_msg = event['message'].get('text')
+            self.msg_id = event['message'].get('id')
             text = self.delete_slash_and_mentions(raw_msg)
             self.mentioned = raw_msg != text
             parsed = self.parse_msg(text)
             self.msg = parsed.get('msg')
-            self.msg_id = event['message']['id']
             self.clear_msg = parsed.get('clear_msg')
             self.command = parsed.get('command')
             self.args = parsed.get('args')
