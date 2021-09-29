@@ -253,8 +253,6 @@ class TgBot(CommonBot):
             photo = event['message']['photo'][-1]
             new_photo = _add_photo(photo)
             attachments.append(new_photo)
-
-            attachments.append(new_photo)
         if 'voice' in event['message']:
             attachments.append(event['message']['voice'])
             attachments[-1]['type'] = 'audio_message'
