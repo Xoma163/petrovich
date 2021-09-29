@@ -83,8 +83,8 @@ class Petrovich(CommonCommand):
                         winner_gender = "Петрович"
                     return f"{winner_gender} дня - {winner_today.user}"
 
-            if datetime_now.hour < 12:
-                raise PWarning("Петрович дня, а не ночи. Приходи днём")
+            if datetime_now.hour < 8:
+                raise PWarning("Петрович дня, а не ночи. Приходи после 8 по мск")
 
             group_banned = Group.objects.get(name=Role.BANNED.name)
             winner = PetrovichUser.objects.filter(chat=self.event.chat, active=True).exclude(
