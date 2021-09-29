@@ -122,6 +122,12 @@ class CommonBot(Thread):
             for att in copy_event.attachments:
                 if 'content' in att:
                     att['content'] = "*****"
+        if copy_event.fwd:
+            for fwd in copy_event.fwd:
+                for att in fwd['attachments']:
+                    if 'content' in att:
+                        att['content'] = "*****"
+
         self.logger.debug(copy_event)
 
         from apps.bot.initial import COMMANDS
@@ -139,7 +145,7 @@ class CommonBot(Thread):
                         atts = msg.get('attachments')
                         if atts:
                             for att in atts:
-                                if isinstance(att['attachment'], bytes):
+                                if isinstance(att, dict) and isinstance(att['attachment'], bytes):
                                     att['attachment'] = "*****"
 
                     self.logger.debug(log_result)
