@@ -27,7 +27,7 @@ class BullsAndCows(CommonCommand):
     def start(self):
         with lock:
             if self.event.chat:
-                session = BullsAndCowsSession.objects.get(chat=self.event.chat).first()
+                session = BullsAndCowsSession.objects.filter(chat=self.event.chat).first()
             else:
                 session = BullsAndCowsSession.objects.filter(author=self.event.sender).first()
 
@@ -44,7 +44,6 @@ class BullsAndCows(CommonCommand):
                 else:
                     new_obj['author'] = self.event.sender
                 BullsAndCowsSession.objects.create(**new_obj)
-                print(new_obj['number'])
                 return "Я создал, погнали!"
             else:
 
