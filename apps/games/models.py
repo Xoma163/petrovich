@@ -82,3 +82,10 @@ class RouletteRate(models.Model):
 
     def __str__(self):
         return str(self.id)
+
+
+class BullsAndCowsSession(models.Model):
+    author = models.ForeignKey(Users, models.CASCADE, verbose_name="Пользователь", null=True)
+    chat = models.ForeignKey(Chat, models.CASCADE, verbose_name="Чат", null=True)
+    number = models.PositiveIntegerField("Загаданное число")
+    steps = models.PositiveIntegerField("Количество попыток", default=1)

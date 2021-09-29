@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from apps.games.models import Rate, Gamer, PetrovichUser, PetrovichGames, RouletteRate
+from apps.games.models import Rate, Gamer, PetrovichUser, PetrovichGames, RouletteRate, BullsAndCowsSession
 
 
 @admin.register(Gamer)
@@ -32,3 +32,8 @@ class PetrovichGamesAdmin(admin.ModelAdmin):
 @admin.register(RouletteRate)
 class RouletteRateAdmin(admin.ModelAdmin):
     list_display = ('gamer', 'chat', 'rate_on', 'rate',)
+
+
+@admin.register(BullsAndCowsSession)
+class RouletteRateAdmin(admin.ModelAdmin):
+    list_display = ('author', 'chat', 'number', 'steps',)
