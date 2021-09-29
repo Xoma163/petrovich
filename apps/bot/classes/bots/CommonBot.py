@@ -127,8 +127,17 @@ class CommonBot(Thread):
                 if command.accept(event):
                     result = command.__class__().check_and_start(self, event)
                     if send:
-                        self.parse_and_send_msgs(event.peer_id, result)
+                        result = self.parse_and_send_msgs(event.peer_id, result)
+                    else:
+                        result = self.parse_command_result(result)
                     log_result = {'result': result}
+                    for msg in log_result['result']:
+                        atts = msg.get('attachments')
+                        if atts:
+                            for att in atts:
+                                if isinstance(att['attachment'], bytes):
+                                    del att['attachment']
+
                     self.logger.debug(log_result)
                     return result
             except PSkip:
@@ -206,6 +215,7 @@ class CommonBot(Thread):
         msgs = self.parse_command_result(result)
         for msg in msgs:
             self.send_message(peer_id, **msg)
+        return msgs
 
     # Отправляет сообщения юзерам в разных потоках
     def parse_and_send_msgs_thread(self, chat_ids, message):
