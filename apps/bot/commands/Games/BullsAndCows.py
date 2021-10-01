@@ -14,7 +14,7 @@ DIGITS_IN_GAME = 4
 
 class BullsAndCows(CommonCommand):
     name = "бк"
-    names = ["бик", "быкиикоровы"]
+    names = ["бик", "быкиикоровы", "быки", "коровы"]
     help_text = "быки и коровы. Игра, где нужно угадать загаданное число."
     help_texts = [
         "- создаёт новую игру",
