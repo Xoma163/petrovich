@@ -30,7 +30,6 @@ class BullsAndCows(CommonCommand):
                 session = BullsAndCowsSession.objects.filter(chat=self.event.chat).first()
             else:
                 session = BullsAndCowsSession.objects.filter(author=self.event.sender).first()
-
             if not self.event.args:
                 if session:
                     return f"Игра уже создана, присылай мне число из {DIGITS_IN_GAME} цифр"
@@ -73,6 +72,8 @@ class BullsAndCows(CommonCommand):
                 bulls = 0
                 cows = 0
                 correct_number_str = str(session.number)
+                # Добиваем нулями если число начинается с нулей
+                correct_number_str = "0" * (DIGITS_IN_GAME - len(correct_number_str)) + correct_number_str
                 for i in range(len(arg0)):
                     if arg0[i] == correct_number_str[i]:
                         bulls += 1
