@@ -1,4 +1,5 @@
 class Attachment:
+
     def __init__(self, att_type):
         self.type = att_type
         self.download_url = None

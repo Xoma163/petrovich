@@ -1,10 +1,11 @@
 import logging
+import traceback
 from threading import Thread
 
-import traceback
-
-from apps.bot.classes2.Exceptions import PWarning, PError
 from apps.bot.classes.common.CommonMethods import tanimoto
+from apps.bot.classes2.Exceptions import PWarning, PError
+from apps.bot.classes2.messages.ResponseMessage import ResponseMessage
+from apps.bot.classes2.messages.ResponseMessageItem import ResponseMessageItem
 from apps.bot.models import Users, Chat, Bot as BotModel
 
 
@@ -32,14 +33,34 @@ class Bot(Thread):
         """
         pass
 
-    def handle_message_wrap(self, event, send=True):
-        message = self.handle_message(event)
-        if send and message:
-            self.parse_and_send_msgs(event.peer_id, message)
-        return message
+    def handle_event(self, event, send=True):
+        try:
+            event.setup_event(self)
+            if not event.need_a_response():
+                return
+            message = self.route(event)
+            rm = ResponseMessage(message, event.peer_id)
+            if send and message:
+                self.send_response_message(rm)
+            return rm
+        except Exception as e:
+            print(str(e))
+            tb = traceback.format_exc()
+            print(tb)
 
-    # ToDo: проверка на забаненых куда-нибудь там в need_response
-    def handle_message(self, event):
+    def send_response_message(self, rm: ResponseMessage):
+        for msg in rm.messages:
+            self.send_message(msg)
+
+    def parse_and_send_msgs(self, peer_id, msgs):
+        """
+        Отправка сообщения от команды. Принимает любой формат
+        """
+        rm = ResponseMessage(msgs, peer_id)
+        self.send_response_message(rm)
+        return msgs
+
+    def route(self, event):
         """
         Выбор команды и отправка данных о сообщении ей
         """
@@ -57,7 +78,7 @@ class Bot(Thread):
                 getattr(self.logger, e.level)({'result': msg})
                 return msg
             except Exception as e:
-                msg = "Непредвиденная ошибка. Сообщите разработчику в группе или команда /баг"
+                msg = "Непредвиденная ошибка. Сообщите разработчику. Команда /баг"
                 tb = traceback.format_exc()
                 log_exception = {
                     'exception': str(e),
@@ -67,7 +88,7 @@ class Bot(Thread):
                 return msg
 
         if event.chat and not event.chat.need_reaction:
-            return None
+            return
 
         similar_command = self.get_similar_command(event, COMMANDS)
         self.logger.debug({'result': similar_command})
@@ -107,3 +128,20 @@ class Bot(Thread):
         if similar_command and tanimoto_max != 0:
             msg += f"Возможно вы имели в виду команду \"{similar_command}\""
         return msg
+
+    def get_chat_by_id(self, chat_id) -> Chat:
+        """
+        Возвращает чат по его id
+        """
+        if chat_id > 0:
+            chat_id *= -1
+        tg_chat = self.chat_model.filter(chat_id=chat_id)
+        if len(tg_chat) > 0:
+            tg_chat = tg_chat.first()
+        else:
+            tg_chat = Chat(chat_id=chat_id, platform=self.platform.name)
+            tg_chat.save()
+        return tg_chat
+
+    def send_message(self, rm: ResponseMessageItem):
+        raise NotImplementedError
