@@ -42,12 +42,16 @@ class Reddit(CommonCommand):
         if self.event.command not in self.full_names:
             try:
                 video = rvs.get_video_from_post(url)
+                self.bot.delete_message(self.event.peer_id, self.event.msg_id)
+                attachments = [self.bot.upload_video(video)]
+                msg = f"{rvs.title}\n" \
+                      f"От пользователя {self.event.sender}\n" \
+                      f"{url}"
+                return {'msg':msg,'attachments': attachments}
             except:
                 return
         else:
             video = rvs.get_video_from_post(url)
 
-        attachments = [self.bot.upload_video(video)]
-        return {
-            'attachments': attachments
-        }
+            attachments = [self.bot.upload_video(video)]
+            return {'attachments': attachments}

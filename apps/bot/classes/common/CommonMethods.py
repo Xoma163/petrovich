@@ -1,8 +1,10 @@
+import io
 import os
 # Вероятность события в процентах
 import random
 import re
 from datetime import datetime
+from io import BytesIO
 
 import pytz
 from PIL import Image, ImageDraw, ImageFont
@@ -300,3 +302,15 @@ def replace_similar_letters(text):
     for letter in similar_letters:
         text = text.replace(letter, similar_letters[letter])
     return text
+
+
+def get_thumbnail_for_image(image, size) -> bytes:
+    """
+    Получение thumbnail для изображения
+    """
+    _image = Image.open(BytesIO(image))
+    _image.thumbnail((size, size))
+    thumb_byte_arr = io.BytesIO()
+    _image.save(thumb_byte_arr, format="PNG")
+    thumb_byte_arr.seek(0)
+    return thumb_byte_arr.read()

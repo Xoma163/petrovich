@@ -4,6 +4,7 @@ import threading
 import time
 import traceback
 from io import BytesIO
+from tempfile import NamedTemporaryFile
 from urllib.parse import urlparse
 
 import requests
@@ -12,6 +13,7 @@ from django.contrib.auth.models import Group
 from apps.bot.classes.Consts import Role, Platform
 from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.bots.CommonBot import CommonBot
+from apps.bot.classes.common.CommonMethods import get_thumbnail_for_image
 from apps.bot.classes.events.TgEvent import TgEvent
 from apps.bot.models import Users, Chat, Bot
 from petrovich.settings import env
@@ -163,8 +165,13 @@ class TgBot(CommonBot):
             self.requests.get('sendDocument',
                               {'chat_id': peer_id, 'caption': msg, 'document': document, 'reply_markup': keyboard})
         else:
+            files = {'document': document}
+            try:
+                files['thumb'] = get_thumbnail_for_image(document, size=320)
+            except:
+                pass
             self.requests.get('sendDocument', {'chat_id': peer_id, 'caption': msg, 'reply_markup': keyboard},
-                              files={'document': document})
+                              files=files)
 
     def _send_video(self, peer_id, msg, video, keyboard):
         """
@@ -177,18 +184,6 @@ class TgBot(CommonBot):
         else:
             self.requests.get('sendVideo', params={'chat_id': peer_id, 'caption': msg, 'reply_markup': keyboard},
                               files={'video': video})
-
-    # def _send_animation(self, peer_id, msg, animation, keyboard):
-    #     """
-    #     Отправка видео
-    #     video: url или байты
-    #     """
-    #     if isinstance(animation, str) and urlparse(animation).hostname:
-    #         self.requests.get('sendAnimation',
-    #                           params={'chat_id': peer_id, 'caption': msg, 'reply_markup': keyboard, 'animation': animation})
-    #     else:
-    #         self.requests.get('sendAnimation', params={'chat_id': peer_id, 'caption': msg, 'reply_markup': keyboard},
-    #                           files={'animation': animation})
 
     def send_message(self, peer_id, msg='', attachments=None, keyboard=None, dont_parse_links=False, **kwargs):
         """
@@ -215,8 +210,6 @@ class TgBot(CommonBot):
                     return self._send_photo(peer_id, msg, attachments[0]['attachment'], keyboard)
                 elif attachments[0]['type'] == 'document':
                     return self._send_document(peer_id, msg, attachments[0]['attachment'], keyboard)
-                # elif attachments[0]['type'] == 'animation':
-                #     return self._send_animation(peer_id, msg, attachments[0]['attachment'], keyboard)
         prepared_message = {'chat_id': peer_id, 'text': msg, 'parse_mode': 'HTML', 'reply_markup': keyboard}
         return self.requests.get('sendMessage', params=prepared_message)
 
@@ -259,8 +252,6 @@ class TgBot(CommonBot):
             # ебучая телега шлёт хуй пойми как картинки
             photo = event['message']['photo'][-1]
             new_photo = _add_photo(photo)
-            attachments.append(new_photo)
-
             attachments.append(new_photo)
         if 'voice' in event['message']:
             attachments.append(event['message']['voice'])
@@ -404,7 +395,7 @@ class TgBot(CommonBot):
 
     def parse_event(self, event):
         # ToDo: check
-        if 'message' not in event:
+        if 'message' not in event and 'callback_query' not in event:
             return
         try:
             tg_event = self._setup_event_before(event)
@@ -420,7 +411,7 @@ class TgBot(CommonBot):
             print(tb)
 
     @staticmethod
-    def _prepare_obj_to_upload(file_like_object, allowed_exts_url=None):
+    def _prepare_obj_to_upload(file_like_object, allowed_exts_url=None, filename=None):
         """
         Подготовка объектов(в основном картинок) для загрузки.
         То есть метод позволяет преобразовывать почти из любого формата в необходимый для VK
@@ -430,11 +421,17 @@ class TgBot(CommonBot):
             if allowed_exts_url:
                 extension = file_like_object.split('.')[-1].lower()
                 is_default_extension = extension not in allowed_exts_url
-                is_vk_image = any(extension.startswith(x) for x in allowed_exts_url)
+                is_vk_image = 'userapi.com' in urlparse(file_like_object).hostname
                 if is_default_extension and not is_vk_image:
                     raise PWarning(f"Загрузка по URL доступна только для {' '.join(allowed_exts_url)}")
             return file_like_object
         if isinstance(file_like_object, bytes):
+            if filename:
+                tmp = NamedTemporaryFile()
+                tmp.write(file_like_object)
+                tmp.name = filename
+                tmp.seek(0)
+                return tmp
             return file_like_object
         # path
         if isinstance(file_like_object, str) and os.path.exists(file_like_object):
@@ -443,6 +440,13 @@ class TgBot(CommonBot):
                 return file_like_object
         if isinstance(file_like_object, BytesIO):
             file_like_object.seek(0)
+            _bytes = file_like_object.read()
+            if filename:
+                tmp = NamedTemporaryFile()
+                tmp.write(_bytes)
+                tmp.name = filename
+                tmp.seek(0)
+                return tmp
             return file_like_object.read()
         return None
 
@@ -465,17 +469,17 @@ class TgBot(CommonBot):
                 break
         return images_list
 
-    # def upload_animation(self, animation, peer_id=None, title='Документ'):
-    #     return {'type': 'animation', 'attachment': self._prepare_obj_to_upload(animation)}
+    def upload_animation(self, animation, peer_id=None, title='Документ', filename=None):
+        return self.upload_video(animation, peer_id, title, filename)
 
-    def upload_video(self, video, peer_id=None, title="Видео"):
-        return {'type': 'video', 'attachment': self._prepare_obj_to_upload(video)}
+    def upload_video(self, video, peer_id=None, title="Видео", filename=None):
+        return {'type': 'video', 'attachment': self._prepare_obj_to_upload(video, filename=filename)}
 
-    def upload_document(self, document, peer_id=None, title='Документ'):
+    def upload_document(self, document, peer_id=None, title='Документ', filename=None):
         """
         Загрузка документа на сервер ТГ.
         """
-        return {'type': 'document', 'attachment': self._prepare_obj_to_upload(document)}
+        return {'type': 'document', 'attachment': self._prepare_obj_to_upload(document, filename=filename)}
 
     @staticmethod
     def get_inline_keyboard(command_text, button_text="Ещё", args=None):
@@ -515,6 +519,9 @@ class TgBot(CommonBot):
         Загрузка видео по ссылке со стороннего ресурса
         """
         return None
+
+    def delete_message(self, chat_id, message_id):
+        self.requests.get('deleteMessage', params={'chat_id': chat_id, 'message_id': message_id})
 
 
 class MyTgBotLongPoll:

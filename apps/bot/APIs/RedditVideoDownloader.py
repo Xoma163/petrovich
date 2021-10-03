@@ -14,6 +14,7 @@ class RedditVideoSaver:
         self.video_filename = f"/tmp/video_{self.timestamp}.mp4"
         self.audio_filename = None  # Уточняется в процессе
         self.output_filename = f"/tmp/output_{self.timestamp}.mp4"
+        self.title = None
 
     def set_audio_filename(self, filename):
         audio_format = filename.split('.')[-1]
@@ -47,6 +48,7 @@ class RedditVideoSaver:
         url = post_url + ".json"
         data = requests.get(url, headers=headers).json()
         data = data[0]["data"]["children"][0]["data"]
+        self.title = data['title']
         media_data = data["media"]
         if not media_data:
             if 'crosspost_parent_list' in data:

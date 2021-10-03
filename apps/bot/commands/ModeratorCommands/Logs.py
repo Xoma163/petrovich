@@ -92,10 +92,7 @@ class Logs(CommonCommand):
 
         img_byte_arr = io.BytesIO()
         image.save(img_byte_arr, format='PNG')
-        # if image.height > 1500:
-        return {'attachments': self.bot.upload_document(img_byte_arr, peer_id=self.event.peer_id)}
-        # else:
-        #     return {'attachments': self.bot.upload_photos(img_byte_arr)}
+        return {'attachments': self.bot.upload_document(img_byte_arr, peer_id=self.event.peer_id, filename='logs.png')}
 
     def get_web_logs(self):
         count = self.get_count(50, 1000)

@@ -46,7 +46,6 @@ DJANGO_APPS = [
 
 VENDORS_APPS = [
     'django_hosts',
-    'django_json_widget',
     'webpack_loader',
     'rest_framework',
 
@@ -98,7 +97,7 @@ WSGI_APPLICATION = 'petrovich.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
-DATABASES = {'default': env.db('DATABASE_URL')}
+DATABASES = {'default': env.db('DATABASE_URL', default='postgres:///petrovich')}
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators

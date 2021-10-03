@@ -1,5 +1,6 @@
 import logging
 import traceback
+from copy import deepcopy
 from threading import Thread
 from urllib.parse import urlparse
 
@@ -116,9 +117,18 @@ class CommonBot(Thread):
         group = event.sender.groups.filter(name=Role.BANNED.name)
         if len(group) > 0:
             return
+        copy_event = deepcopy(event)
+        if copy_event.attachments:
+            for att in copy_event.attachments:
+                if 'content' in att:
+                    att['content'] = "*****"
+        if copy_event.fwd:
+            for fwd in copy_event.fwd:
+                for att in fwd['attachments']:
+                    if 'content' in att:
+                        att['content'] = "*****"
 
-        log_event = event
-        self.logger.debug(log_event)
+        self.logger.debug(copy_event)
 
         from apps.bot.initial import COMMANDS
 
@@ -127,8 +137,17 @@ class CommonBot(Thread):
                 if command.accept(event):
                     result = command.__class__().check_and_start(self, event)
                     if send:
-                        self.parse_and_send_msgs(event.peer_id, result)
+                        result = self.parse_and_send_msgs(event.peer_id, result)
+                    else:
+                        result = self.parse_command_result(result)
                     log_result = {'result': result}
+                    for msg in log_result['result']:
+                        atts = msg.get('attachments')
+                        if atts:
+                            for att in atts:
+                                if isinstance(att, dict) and isinstance(att['attachment'], bytes):
+                                    att['attachment'] = "*****"
+
                     self.logger.debug(log_result)
                     return result
             except PSkip:
@@ -206,6 +225,7 @@ class CommonBot(Thread):
         msgs = self.parse_command_result(result)
         for msg in msgs:
             self.send_message(peer_id, **msg)
+        return msgs
 
     # Отправляет сообщения юзерам в разных потоках
     def parse_and_send_msgs_thread(self, chat_ids, message):
@@ -231,6 +251,8 @@ class CommonBot(Thread):
             return True
         have_audio_message = self.have_audio_message(event)
         if have_audio_message:
+            if event['chat']:
+                return event['chat'].recognize_voice
             return True
         have_action = event['message']['action'] is not None
         if have_action:
@@ -401,15 +423,21 @@ class CommonBot(Thread):
         """
         raise NotImplementedError
 
-    def upload_animation(self, animation, peer_id=None, title='Документ'):
+    def upload_animation(self, animation, peer_id=None, title='Документ', filename=None):
         """
         Загрузка анимации (GIF)
         """
         raise NotImplementedError
 
-    def upload_document(self, document, peer_id=None, title='Документ'):
+    def upload_document(self, document, peer_id=None, title='Документ', filename=None):
         """
         Загрузка документа
+        """
+        raise NotImplementedError
+
+    def delete_message(self, chat_id, message_id):
+        """
+        Удаление сообщения
         """
         raise NotImplementedError
 

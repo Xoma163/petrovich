@@ -19,9 +19,9 @@ class Petrovich(CommonCommand):
     names = ['петровна']
     help_text = "мини-игра, определяющая кто Петрович Дня"
     help_texts = [
-        f"- мини-игра, определяющая кто Петрович дня",
-        f"рег - регистрация в игре",
-        f"дерег - дерегистрация в игре"
+        "- мини-игра, определяющая кто Петрович дня",
+        "рег - регистрация в игре",
+        "дерег - дерегистрация в игре"
     ]
     conversation = True
     platforms = [Platform.VK, Platform.TG]
@@ -71,9 +71,10 @@ class Petrovich(CommonCommand):
 
     def menu_play(self):
         with lock:
+            datetime_now = localize_datetime(datetime.datetime.utcnow(), DEFAULT_TIME_ZONE)
+
             winner_today = PetrovichGames.objects.filter(chat=self.event.chat).last()
             if winner_today:
-                datetime_now = localize_datetime(datetime.datetime.utcnow(), DEFAULT_TIME_ZONE)
                 datetime_last = localize_datetime(remove_tz(winner_today.date), DEFAULT_TIME_ZONE)
                 if (datetime_now.date() - datetime_last.date()).days <= 0:
                     if winner_today.user.gender and winner_today.user.gender == '1':
@@ -81,6 +82,7 @@ class Petrovich(CommonCommand):
                     else:
                         winner_gender = "Петрович"
                     return f"{winner_gender} дня - {winner_today.user}"
+
             group_banned = Group.objects.get(name=Role.BANNED.name)
             winner = PetrovichUser.objects.filter(chat=self.event.chat, active=True).exclude(
                 user__groups=group_banned).order_by("?").first()

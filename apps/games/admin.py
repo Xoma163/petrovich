@@ -1,8 +1,6 @@
 from django.contrib import admin
-from django.contrib.postgres import fields
-from django_json_widget.widgets import JSONEditorWidget
 
-from apps.games.models import Rate, Gamer, PetrovichUser, PetrovichGames, RouletteRate
+from apps.games.models import Rate, Gamer, PetrovichUser, PetrovichGames, RouletteRate, BullsAndCowsSession
 
 
 @admin.register(Gamer)
@@ -34,6 +32,8 @@ class PetrovichGamesAdmin(admin.ModelAdmin):
 @admin.register(RouletteRate)
 class RouletteRateAdmin(admin.ModelAdmin):
     list_display = ('gamer', 'chat', 'rate_on', 'rate',)
-    formfield_overrides = {
-        fields.JSONField: {'widget': JSONEditorWidget},
-    }
+
+
+@admin.register(BullsAndCowsSession)
+class BullsAndCowsSessionAdmin(admin.ModelAdmin):
+    list_display = ('author', 'chat', 'number', 'steps',)

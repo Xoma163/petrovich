@@ -144,14 +144,12 @@ class Meme(CommonCommand):
     def menu_refresh(self):
         self.check_args(2)
         _id = None
-        if len(self.event.args) == 2:
-            self.int_args = [1]
+        if 2 <= len(self.event.args) <= 3:
             try:
-                self.parse_int()
-                _id = self.event.args[1]
+                _id = int(self.event.args[1])
             except PWarning:
                 pass
-        meme_name = self.event.args[1:].lower()
+        meme_name = " ".join(self.event.args[1:]).lower()
 
         attachments = get_attachments_from_attachments_or_fwd(self.event, ['audio', 'video', 'photo'])
         if len(attachments) == 0:

@@ -6,7 +6,7 @@ from django.core.management.base import BaseCommand
 from apps.bot.APIs.TimezoneDBAPI import TimezoneDBAPI
 from apps.bot.APIs.YandexGeoAPI import YandexGeoAPI
 from apps.bot.classes.Consts import Role
-from apps.bot.models import Users, APIUser
+from apps.bot.models import Users
 from apps.service.models import City, TimeZone
 
 
@@ -32,11 +32,11 @@ class Command(BaseCommand):
         anon_user.groups.add(group_user)
         anon_user.save()
 
-        api_anonymous_user = {
-            'user': anon_user,
-            'chat': None
-        }
-        APIUser.objects.update_or_create(user__id=api_anonymous_user['user'].id, defaults=api_anonymous_user)
+        # api_anonymous_user = {
+        #     'user': anon_user,
+        #     'chat': None
+        # }
+        # APIUser.objects.update_or_create(user__id=api_anonymous_user['user'].id, defaults=api_anonymous_user)
 
     @staticmethod
     def init_cities_offline():

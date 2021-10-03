@@ -5,8 +5,8 @@ Description=petrovich bot
 User=server
 Type=simple
 SuccessExitStatus=0 1
-WorkingDirectory=/var/www/petrovich/
-ExecStart=/var/www/petrovich/venv/bin/python -u manage.py start
+WorkingDirectory=/var/www/andrewsha/petrovich/
+ExecStart=/var/www/andrewsha/petrovich/venv/bin/python -u manage.py start
 
 [Install]
 WantedBy=multi-user.target

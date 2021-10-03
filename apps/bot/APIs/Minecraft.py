@@ -1,9 +1,9 @@
 import json
+import threading
 import time
 from datetime import datetime
 
 import requests
-from future.backports.test.ssl_servers import threading
 from mcrcon import MCRcon
 
 from apps.bot.classes.Consts import Role

@@ -8,7 +8,7 @@ from apps.bot.classes.Consts import Platform
 from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.common.CommonCommand import CommonCommand
 
-TIKTOK_URLS = ["www.tiktok.com", 'vm.tiktok.com']
+TIKTOK_URLS = ["www.tiktok.com", 'vm.tiktok.com', 'm.tiktok.com']
 
 
 class TikTok(CommonCommand):
@@ -43,21 +43,27 @@ class TikTok(CommonCommand):
         self.bot.set_activity(self.event.peer_id, 'typing')
         if self.event.command not in self.full_names:
             try:
-                video = self.get_video_by_url(url)
-            except:
+                video, title = self.get_video_and_title_by_url(url)
+                self.bot.delete_message(self.event.peer_id, self.event.msg_id)
+                attachments = [self.bot.upload_video(video)]
+                msg = f"{title}\n" \
+                      f"От пользователя {self.event.sender}\n" \
+                      f"{url}"
+                return {'msg': msg, 'attachments': attachments}
+            except Exception:
                 return
         else:
-            video = self.get_video_by_url(url)
+            video = self.get_video_and_title_by_url(url)
+            attachments = [self.bot.upload_video(video)]
+            return {
+                'attachments': attachments
+            }
 
-        attachments = [self.bot.upload_video(video)]
-        return {
-            'attachments': attachments
-        }
-
-    def get_video_by_url(self, url):
-        print(url)
+    @staticmethod
+    def get_video_and_title_by_url(url):
         headers = {
-            'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"}
+            'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+        }
 
         s = requests.Session()
         r = s.get(url, headers=headers)
@@ -65,10 +71,10 @@ class TikTok(CommonCommand):
         bs4 = BeautifulSoup(r.content, 'html.parser')
         video_data = json.loads(bs4.find(id='__NEXT_DATA__').contents[0])
 
-        video_url = video_data['props']['pageProps']['itemInfo']['itemStruct']['video']['downloadAddr']
-
+        item_struct = video_data['props']['pageProps']['itemInfo']['itemStruct']
+        video_url = item_struct['video']['downloadAddr']
+        title = item_struct['desc']
         headers['Referer'] = video_data['props']['pageProps']['seoProps']['metaParams']['canonicalHref']
-        # return video_url
         r = s.get(video_url, headers=headers)
         s.close()
-        return r.content
+        return r.content, title

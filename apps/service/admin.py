@@ -1,9 +1,7 @@
 from django.contrib import admin
-from django.contrib.postgres import fields
-from django_json_widget.widgets import JSONEditorWidget
 
 from apps.service.models import Service, Counter, Cat, Meme, Notify, City, \
-    Donations, TimeZone, YoutubeSubscribe, WakeOnLanUserData, Horoscope, QuoteBook, Words, TaxiInfo
+    Donations, TimeZone, YoutubeSubscribe, WakeOnLanUserData, Horoscope, QuoteBook, Words
 
 
 @admin.register(Service)
@@ -35,9 +33,6 @@ class NotifyAdmin(admin.ModelAdmin):
     list_display = ('id', 'date', 'crontab', 'text', 'author', 'chat', 'repeat')
     search_fields = ['date', 'crontab', 'text', 'text_for_filter']
     list_filter = (('author', admin.RelatedOnlyFieldListFilter), ('chat', admin.RelatedOnlyFieldListFilter), 'repeat',)
-    formfield_overrides = {
-        fields.JSONField: {'widget': JSONEditorWidget},
-    }
 
 
 @admin.register(City)
@@ -84,14 +79,3 @@ class WordsAdmin(admin.ModelAdmin):
     list_display = ('id', 'm1', 'f1', 'n1', 'mm', 'fm', 'type')
     list_filter = ('type',)
     search_fields = ['id', 'm1', 'f1', 'n1', 'mm', 'fm', 'type']
-
-
-class JsonAdmin(admin.ModelAdmin):
-    formfield_overrides = {
-        fields.JSONField: {'widget': JSONEditorWidget},
-    }
-
-
-@admin.register(TaxiInfo)
-class TaxiInfoAdmin(JsonAdmin):
-    pass

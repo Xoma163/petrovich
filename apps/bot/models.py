@@ -30,6 +30,7 @@ class Chat(Platform):
     need_reaction = models.BooleanField('Реагировать на неверные команды в конфе', default=True)
     mentioning = models.BooleanField('Работа без упоминания в конфе', default=False)
     need_meme = models.BooleanField('Слать мемы по точному названию', default=False)
+    recognize_voice = models.BooleanField('Распозновать голосовые автоматически', default=True)
     is_banned = models.BooleanField('Забанен', default=False)
 
     class Meta:

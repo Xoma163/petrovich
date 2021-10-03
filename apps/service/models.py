@@ -8,7 +8,7 @@ from django.db.models import JSONField
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 
-from apps.bot.models import Chat, Users, Bot
+from apps.bot.models import Chat, Users
 from petrovich.settings import MEDIA_ROOT
 
 
@@ -143,10 +143,7 @@ class Meme(models.Model):
     def preview_link(self):
         if self.link:
             from django.utils.safestring import mark_safe
-            cropped_link = self.link
-            if len(cropped_link) > 100:
-                cropped_link = f"{self.link[:98]}..."
-            return mark_safe(u'<a href="{0}">Тык</a>'.format(self.link, cropped_link))
+            return mark_safe(u'<a href="{0}">Тык</a>'.format(self.link))
         else:
             return '(Нет изображения)'
 
