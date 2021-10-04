@@ -22,17 +22,17 @@ class Nostalgia(CommonCommand):
         msgs_count = 20
         start_pos = random.randint(0, len(data) - msgs_count)
         msgs = data[start_pos:start_pos + msgs_count]
-        msgs = self.prepare_msgs_for_quote_generator(msgs)
+        msgs_parsed = self.prepare_msgs_for_quote_generator(msgs)
 
         qg = QuotesGenerator()
-        pil_image = qg.build(msgs, title="Ностальгия")
+        pil_image = qg.build(msgs_parsed, title="Ностальгия")
         bytes_io = BytesIO()
         pil_image.save(bytes_io, format='PNG')
         if pil_image.height > 1500:
             attachments = self.bot.upload_document(bytes_io, self.event.peer_id, "Ностальгия", filename="nostalgia.png")
         else:
             attachments = self.bot.upload_photos(bytes_io)
-        return {"attachments": attachments}
+        return {"msg": msgs[0]['datetime'], "attachments": attachments}
 
     def prepare_msgs_for_quote_generator(self, msgs):
         new_msgs = []
@@ -45,7 +45,7 @@ class Nostalgia(CommonCommand):
                 if att['type'] in ["Видеозапись", "Файл", "Ссылка"]:
                     message['text'] += f'\n{att["link"]}'
                 if msg['fwd']:
-                    message['text'] += '\n(Пересланные сообщения)'
+                    message['text'] += '\n(Пересланные сообщения)\n'
 
             if msg['author'] not in users_avatars:
                 name, surname = msg['author'].split(' ', 1)
