@@ -46,6 +46,9 @@ class VkBot(CommonBot):
             raise PWarning("Не знаю такого типа активности")
         self.vk.messages.setActivity(type=activity, peer_id=peer_id, group_id=self.group_id)
 
+    def get_bot_info(self, bot_id):
+        return self.vk.groups.getById(group_id=bot_id)[0]
+
     def get_user_info(self, user_id):
         return self.vk.users.get(user_id=user_id, lang='ru', fields='sex, bdate, city, screen_name, photo_max')[0]
 
@@ -92,10 +95,15 @@ class VkBot(CommonBot):
             vk_user.save()
         return vk_user
 
-    def update_avatar(self, user_id):
+    def update_user_avatar(self, user_id):
         user = self.get_user_by_id(user_id)
         user_info = self.get_user_info(user_id)
         user.set_avatar(user_info['photo_max'])
+
+    def update_bot_avatar(self, bot_id):
+        bot = self.get_bot_by_id(bot_id)
+        bot_info = self.get_bot_info(bot_id)
+        bot.set_avatar(bot_info['photo_200'])
 
     def get_chat_by_id(self, chat_id) -> Chat:
         """
@@ -120,7 +128,7 @@ class VkBot(CommonBot):
             bot = bot.first()
         else:
             # Прозрачная регистрация
-            vk_bot = self.vk.groups.getById(group_id=bot_id)[0]
+            vk_bot = self.get_bot_info(bot_id)
 
             bot = Bot()
             bot.bot_id = bot_id
@@ -495,6 +503,7 @@ class VkBot(CommonBot):
     # Todo:
     def delete_message(self, chat_id, message_id):
         pass
+
 
 class MyVkBotLongPoll(VkBotLongPoll):
     def listen(self):
