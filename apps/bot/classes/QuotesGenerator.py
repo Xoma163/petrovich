@@ -61,13 +61,13 @@ class QuotesGenerator:
             dy += image.height
         return dst
 
-    def _get_header(self):
+    def _get_header(self, title):
         fontsize = 12
         margin_left = 70
         margin_top = 40
-        line_width = 216
+        line_width = 200
         text_color = "#333333"
-        text = "Сохры"
+        text = title
         font = ImageFont.truetype(os.path.join(STATIC_ROOT, 'fonts/Alegreya-Regular.ttf'), fontsize, encoding="unic")
         width, height = get_image_size_by_text(text, font)
         img = Image.new('RGB', (self.WIDTH, margin_top * 2 + 2), self.BACKGROUND_COLOR)
@@ -171,12 +171,13 @@ class QuotesGenerator:
         total_height = max(total_height, avatar_size[1]) + margin_top + margin_bottom + msg_photo_margin + fwd_margin
 
         img = Image.new('RGB', (self.WIDTH, total_height), self.BACKGROUND_COLOR)
-        avatar_image = Image.open(avatar)
-        avatar_image = self.get_centered_rounded_image(avatar_image)
+        if avatar:
+            avatar_image = Image.open(avatar)
+            avatar_image = self.get_centered_rounded_image(avatar_image)
 
-        avatar_start_pos = (margin_left, margin_top)
+            avatar_start_pos = (margin_left, margin_top)
 
-        img.paste(avatar_image, avatar_start_pos)
+            img.paste(avatar_image, avatar_start_pos)
 
         d = ImageDraw.Draw(img)
         d.text((username_start_pos[0], username_start_pos[1]), username, fill=text_color, font=font_username)
@@ -203,8 +204,8 @@ class QuotesGenerator:
             img.paste(fwd_photo, msg_fwd_pos)
         return img
 
-    def build(self, msgs):
-        image_header = self._get_header()
+    def build(self, msgs, title):
+        image_header = self._get_header(title)
         image_body = self._get_body(msgs)
         image_footer = self._get_footer()
         return self._image_concatenation([image_header, image_body, image_footer])

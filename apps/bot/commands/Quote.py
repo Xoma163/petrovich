@@ -21,7 +21,7 @@ class Quote(CommonCommand):
         msgs = self.parse_fwd(self.event.fwd)
 
         qg = QuotesGenerator()
-        pil_image = qg.build(msgs)
+        pil_image = qg.build(msgs, "Сохры")
         bytes_io = BytesIO()
         pil_image.save(bytes_io, format='PNG')
         if pil_image.height > 1500:
