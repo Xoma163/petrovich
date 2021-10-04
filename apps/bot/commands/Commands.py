@@ -25,6 +25,7 @@ class Commands(CommonCommand):
             {"role": Role.MINECRAFT_NOTIFY, "text": "команды для уведомлённых майнкрафтеров"},
             {"role": Role.TERRARIA, "text": "команды для игроков террарии"},
             {"role": Role.HOME, "text": "команды для домашних пользователей"},
+            {"role": Role.MRAZ, "text": "команды для мразей"},
         ]
 
         if self.event.args:

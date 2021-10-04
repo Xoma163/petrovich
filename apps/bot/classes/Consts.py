@@ -12,6 +12,7 @@ class Role(Enum):
     USER = "пользователь"
     BANNED = "забанен"
     TRUSTED = "доверенный"
+    MRAZ = "мразь"
 
     @classmethod
     def has_value(cls, value):

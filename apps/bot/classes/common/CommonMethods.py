@@ -244,6 +244,8 @@ def get_role_by_str(role_str):
         who = Role.TRUSTED
     elif role_str in ['дом', 'домашний', 'дома']:
         who = Role.HOME
+    elif role_str in ['мразь', 'мразота', 'мрази']:
+        who = Role.MRAZ
 
     return who
 
