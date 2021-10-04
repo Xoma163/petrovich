@@ -8,11 +8,11 @@ from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.models import Users
 
 
-class Quote(CommonCommand):
+class Nostalgia(CommonCommand):
     name = "ностальгия"
     names = ["ностальжи", "(с)"]
     help_text = "генерирует картинку с сообщениями из конфы беседки мразей"
-    access = [Role.MRAZ]
+    access = Role.MRAZ
 
     def start(self):
         with open('secrets/mrazi_chats/mrazi1.json', 'r') as file:
