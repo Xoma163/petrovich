@@ -15,15 +15,15 @@ class Nostalgia(CommonCommand):
     names = ["ностальжи", "(с)"]
     help_text = "генерирует картинку с сообщениями из конфы беседки мразей"
     help_texts = [
-        "- присылает 20 случайных сообщений",
-        "(N,M=20) - присылает сообщения с позиции N до M. Максимальная разница между N и M - 200",
+        "- присылает 10 случайных сообщений",
+        "(N,M=10) - присылает сообщения с позиции N до M. Максимальная разница между N и M - 200",
         "(до) - присылает несколько сообщений до",
         "(после) - присылает несколыько сообщений после",
         "(вложения) - присылает вложения со скриншота"
     ]
     access = Role.MRAZ
 
-    DEFAULT_MSGS_COUNT = 20
+    DEFAULT_MSGS_COUNT = 10
 
     def start(self):
         if self.event.args:
@@ -91,6 +91,8 @@ class Nostalgia(CommonCommand):
 
         if index_from > index_to:
             index_from, index_to = index_to, index_from
+            if index_from < 1:
+                index_from = 1
 
         if index_to - index_from > 200:
             raise PWarning("Ну давай не надо больше 200 сообщений... Проц перегреется")
