@@ -447,7 +447,7 @@ class TgBot(CommonBot):
                 tmp.name = filename
                 tmp.seek(0)
                 return tmp
-            return file_like_object.read()
+            return _bytes
         return None
 
     def upload_photos(self, images, max_count=10):

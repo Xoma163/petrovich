@@ -3,25 +3,107 @@ import random
 from io import BytesIO
 
 from apps.bot.classes.Consts import Platform, Role
+from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.QuotesGenerator import QuotesGenerator
 from apps.bot.classes.common.CommonCommand import CommonCommand
 from apps.bot.models import Users
+from apps.service.models import Service
 
 
 class Nostalgia(CommonCommand):
     name = "ностальгия"
     names = ["ностальжи", "(с)"]
     help_text = "генерирует картинку с сообщениями из конфы беседки мразей"
+    help_texts = [
+        "(N,M=20) - присылает сообщения с позиции N до M. Максимальная разница между N и M - 200"
+        "(до) - присылает несколько сообщений до"
+        "(после) - присылает несколько сообщений после"
+        "(вложения) - присылает вложения со скриншота"
+    ]
     access = Role.MRAZ
 
+    DEFAULT_MSGS_COUNT = 20
+
     def start(self):
+        if self.event.args:
+            arg0 = self.event.args[0].lower()
+        else:
+            arg0 = None
+
+        if self.event.args:
+            if len(self.event.args) == 2:
+                self.int_args = [0, 1]
+                try:
+                    self.parse_int()
+                    return self.menu_range(self.event.args[0], self.event.args[1])
+                except PWarning:
+                    pass
+            else:
+                self.int_args = [0]
+                try:
+                    self.parse_int()
+                    return self.menu_range(self.event.args[0])
+                except PWarning:
+                    pass
+
+        menu = [
+            [["до"], self.menu_before],
+            [["после"], self.menu_after],
+            [['вложения'], self.menu_attachments],
+            [['default'], self.menu_range]
+        ]
+        method = self.handle_menu(menu, arg0)
+        return method()
+
+    def menu_before(self):
+        index_from, _ = Service.objects.get_or_create(name='mrazi_chats_index_from')
+        index_to, _ = Service.objects.get_or_create(name='mrazi_chats_index_to')
+        diff = int(index_to.value) - int(index_from.value) + 1
+        return self.menu_range(int(index_to.value) - diff, int(index_from.value) - diff)
+
+    def menu_after(self):
+        index_from, _ = Service.objects.get_or_create(name='mrazi_chats_index_from')
+        index_to, _ = Service.objects.get_or_create(name='mrazi_chats_index_to')
+        diff = int(index_to.value) - int(index_from.value) + 1
+        return self.menu_range(int(index_to.value) + diff, int(index_from.value) + diff)
+
+    def menu_attachments(self):
+        pass
+
+    def menu_range(self, index_from: int = None, index_to: int = None):
         with open('secrets/mrazi_chats/mrazi1.json', 'r') as file:
             content = file.read()
         data = json.loads(content)
 
-        msgs_count = 20
-        start_pos = random.randint(0, len(data) - msgs_count)
-        msgs = data[start_pos:start_pos + msgs_count]
+        if index_from is None:
+            index_from = random.randint(0, len(data) - self.DEFAULT_MSGS_COUNT)
+
+        if index_from < 1:
+            index_from = 1
+
+        if index_to is None:
+            index_to = index_from + self.DEFAULT_MSGS_COUNT
+
+        if index_from > index_to:
+            index_from, index_to = index_to, index_from
+
+        if index_to - index_from > 200:
+            raise PWarning("Ну давай не надо больше 200 сообщений... Проц перегреется")
+
+        if index_to > len(data):
+            diff = index_to - index_from
+            index_to = len(data) - 1
+            index_from = index_to - diff
+
+        index_from_obj = Service.objects.get(name='mrazi_chats_index_from')
+        index_from_obj.value = index_from
+        index_from_obj.save()
+
+        index_to_obj = Service.objects.get(name='mrazi_chats_index_to')
+        index_to_obj.value = index_to
+        index_to_obj.save()
+
+        msgs = data[index_from - 1:index_to]
         msgs_parsed = self.prepare_msgs_for_quote_generator(msgs)
 
         qg = QuotesGenerator()
@@ -32,9 +114,12 @@ class Nostalgia(CommonCommand):
             attachments = self.bot.upload_document(bytes_io, self.event.peer_id, "Ностальгия", filename="nostalgia.png")
         else:
             attachments = self.bot.upload_photos(bytes_io)
-        return {"msg": msgs[0]['datetime'], "attachments": attachments}
+        msg = f"{msgs[0]['datetime']}\n" \
+              f"{index_from} - {index_to}"
+        return {"msg": msg, "attachments": attachments}
 
-    def prepare_msgs_for_quote_generator(self, msgs):
+    @staticmethod
+    def prepare_msgs_for_quote_generator(msgs):
         new_msgs = []
         users_avatars = {}
         for msg in msgs:
@@ -42,8 +127,10 @@ class Nostalgia(CommonCommand):
             for att in msg['attachments']:
                 if att['type'] == "Фотография":
                     message['photo'] = att['link']
-                if att['type'] in ["Видеозапись", "Файл", "Ссылка"]:
+                elif att['type'] in ["Видеозапись", "Файл", "Ссылка"]:
                     message['text'] += f'\n{att["link"]}'
+                else:
+                    message['text'] += f"{att['type']}\n"
                 if msg['fwd']:
                     message['text'] += '\n(Пересланные сообщения)\n'
 

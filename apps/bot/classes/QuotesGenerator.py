@@ -144,13 +144,17 @@ class QuotesGenerator:
             fwd_height = fwd_photo.height
             fwd_margin = 20
         if msg.get('photo'):
-            image = Image.open(requests.get(msg['photo'], stream=True).raw).convert('RGBA')
-            composite = Image.new("RGBA", image.size, (255, 255, 255, 0))
-            composite.paste(image)
+            try:
+                image = Image.open(requests.get(msg['photo'], stream=True).raw).convert('RGBA')
+            except:
+                image = None
+            if image:
+                composite = Image.new("RGBA", image.size, (255, 255, 255, 0))
+                composite.paste(image)
 
-            msg_photo = self.get_message_photo(composite, max_text_width)
-            msg_photo_height = msg_photo.height
-            msg_photo_margin = 20
+                msg_photo = self.get_message_photo(composite, max_text_width)
+                msg_photo_height = msg_photo.height
+                msg_photo_margin = 20
 
         # stack messages from one user aka dancing with ▲
         _msg_lines = [textwrap.wrap(x, width=int(max_text_width / 7.5)) for x in msg['text'].split("▲")]
