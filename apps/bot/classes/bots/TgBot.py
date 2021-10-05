@@ -482,20 +482,23 @@ class TgBot(CommonBot):
         return {'type': 'document', 'attachment': self._prepare_obj_to_upload(document, filename=filename)}
 
     @staticmethod
-    def get_inline_keyboard(command_text, button_text="Ещё", args=None):
+    def get_inline_keyboard(buttons: list):
         """
         Получение инлайн-клавиатуры с одной кнопкой
         В основном используется для команд, где нужно запускать много команд и лень набирать заново
         """
-        if args is None:
-            args = {}
+
+        def get_one_button(button_item):
+            return [{
+                'text': button_item['button_text'],
+                'callback_data': json.dumps({'command': button_item['command'], "args": button_item['args']}, ensure_ascii=False)
+            }]
+
+        for i, button in enumerate(buttons):
+            if buttons[i]['args'] is None:
+                buttons[i]['args'] = {}
         return {
-            'inline_keyboard': [[
-                {
-                    'text': button_text,
-                    'callback_data': json.dumps({'command': command_text, "args": args}, ensure_ascii=False)
-                }
-            ]]
+            'inline_keyboard': [get_one_button(b) for b in buttons]
         }
 
     @staticmethod

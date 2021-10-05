@@ -103,7 +103,7 @@ class Nostalgia(CommonCommand):
         self._set_indexes_to_db(index_from, index_to)
 
         msgs = data[index_from - 1:index_to]
-        msgs_parsed = self.prepare_msgs_for_quote_generator(msgs)
+        msgs_parsed, has_att_link = self.prepare_msgs_for_quote_generator(msgs)
 
         qg = QuotesGenerator()
         pil_image = qg.build(msgs_parsed, title="Ностальгия")
@@ -115,7 +115,17 @@ class Nostalgia(CommonCommand):
             attachments = self.bot.upload_photos(bytes_io)
         msg = f"{msgs[0]['datetime']}\n" \
               f"{index_from} - {index_to}"
-        return {"msg": msg, "attachments": attachments}
+        buttons = [{'command': self.name, 'button_text': "Ещё", 'args': None}]
+        if index_from != 1:
+            buttons.append({'command': self.name, 'button_text': "До", 'args': "до"})
+        if index_to != len(data) - 1:
+            buttons.append({'command': self.name, 'button_text': "После", 'args': "после"})
+        if has_att_link:
+            buttons.append({'command': self.name, 'button_text': "Вложения", 'args': "вложения"})
+
+        keyboard = self.bot.get_inline_keyboard(buttons)
+
+        return {"msg": msg, "attachments": attachments, "keyboard": keyboard}
 
     @staticmethod
     def _load_file() -> list:
@@ -125,6 +135,7 @@ class Nostalgia(CommonCommand):
 
     @staticmethod
     def prepare_msgs_for_quote_generator(msgs):
+        has_att_link = False
         new_msgs = []
         users_avatars = {}
         for msg in msgs:
@@ -132,8 +143,10 @@ class Nostalgia(CommonCommand):
             for att in msg['attachments']:
                 if att['type'] == "Фотография":
                     message['photo'] = att['link']
+                    has_att_link = True
                 elif att['type'] in ["Видеозапись", "Файл", "Ссылка"]:
                     message['text'] += f'\n{att["link"]}'
+                    has_att_link = True
                 else:
                     message['text'] += f"{att['type']}\n"
                 if msg['fwd']:
@@ -148,7 +161,7 @@ class Nostalgia(CommonCommand):
 
             new_msg = {'username': msg['author'], 'message': message, 'avatar': avatar}
             new_msgs.append(new_msg)
-        return new_msgs
+        return new_msgs, has_att_link
 
     @staticmethod
     def _get_indexes_from_db():

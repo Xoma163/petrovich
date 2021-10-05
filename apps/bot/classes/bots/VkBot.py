@@ -407,24 +407,32 @@ class VkBot(CommonBot):
         return self.get_attachment_by_id('audio', vk_audio['owner_id'], vk_audio['id'])
 
     @staticmethod
-    def get_inline_keyboard(command_text, button_text="Ещё", args=None):
+    def get_inline_keyboard(buttons: list):
+
         """
+        param buttons: [(button_name, args), ...]
         Получение инлайн-клавиатуры с одной кнопкой
         В основном используется для команд, где нужно запускать много команд и лень набирать заново
         """
-        if args is None:
-            args = {}
-        return {
-            'inline': True,
-            'buttons': [[{
+
+        def get_one_button(button_item):
+            return [{
                 'action': {
                     'type': 'text',
-                    'label': button_text,
-                    "payload": json.dumps({"command": command_text, "args": args}, ensure_ascii=False)
+                    'label': button_item['button_text'],
+                    "payload": json.dumps({"command": button_item['command'], "args": button_item['args']}, ensure_ascii=False)
                 },
                 'color': 'primary',
-            }
-            ]]}
+            }]
+
+        for i, button in enumerate(buttons):
+            if buttons[i]['args'] is None:
+                buttons[i]['args'] = {}
+
+        return {
+            'inline': True,
+            'buttons': [get_one_button(b) for b in buttons]
+        }
 
     @staticmethod
     def get_group_id(_id) -> str:
