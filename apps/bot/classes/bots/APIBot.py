@@ -161,7 +161,7 @@ class APIBot(CommonBot):
         pass
 
     @staticmethod
-    def get_inline_keyboard(command_text, button_text="Ещё", args=None):
+    def get_inline_keyboard(buttons: list)
         """
         Получение инлайн-клавиатуры с одной кнопкой
         В основном используется для команд, где нужно запускать много команд и лень набирать заново

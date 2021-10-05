@@ -40,7 +40,8 @@ class Camera(CommonCommand):
         if len(attachments) == 2 or self.event.platform == Platform.VK:
             return {
                 'attachments': attachments,
-                "keyboard": self.bot.get_inline_keyboard(self.name, args={"frames": frames}),
+
+                "keyboard": self.bot.get_inline_keyboard([{'command': self.name, 'button_text': "Ещё", 'args': {"frames": frames}}]),
                 'dont_parse_links': True
             }
         else:

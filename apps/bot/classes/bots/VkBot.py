@@ -426,7 +426,7 @@ class VkBot(CommonBot):
             }]
 
         for i, button in enumerate(buttons):
-            if buttons[i]['args'] is None:
+            if 'args' not in buttons[i] or buttons[i]['args'] is None:
                 buttons[i]['args'] = {}
 
         return {

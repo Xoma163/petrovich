@@ -66,7 +66,7 @@ class BullsAndCows(CommonCommand):
                     decl = decl_of_num(session.steps, ['попытку', 'попытки', 'попыток'])
                     msg = f"Отгадали всего за {session.steps} {decl}!"
                     session.delete()
-                    keyboard = self.bot.get_inline_keyboard(self.name, "Ещё")
+                    keyboard = self.bot.get_inline_keyboard([{'command': self.name, 'button_text': "Ещё"}])
                     return {"msg": msg, "keyboard": keyboard}
 
                 bulls = 0

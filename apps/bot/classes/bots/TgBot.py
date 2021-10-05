@@ -495,7 +495,7 @@ class TgBot(CommonBot):
             }]
 
         for i, button in enumerate(buttons):
-            if buttons[i]['args'] is None:
+            if 'args' not in buttons[i] or buttons[i]['args'] is None:
                 buttons[i]['args'] = {}
         return {
             'inline_keyboard': [get_one_button(b) for b in buttons]

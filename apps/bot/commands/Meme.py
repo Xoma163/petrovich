@@ -412,7 +412,8 @@ class Meme(CommonCommand):
     def prepare_meme_to_send(self, meme, print_name=False, send_keyboard=False):
         prepared_meme = prepare_meme_to_send(self.bot, self.event, meme, print_name, send_keyboard, self.name)
         if send_keyboard:
-            prepared_meme['keyboard'] = self.bot.get_inline_keyboard(self.name, args={"random": "р"})
+
+            prepared_meme['keyboard'] = self.bot.get_inline_keyboard([{'command': self.name, 'button_text': "Ещё", 'args':{"random": "р"}}])
         return prepared_meme
 
     @staticmethod
