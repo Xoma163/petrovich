@@ -15,9 +15,10 @@ class Nostalgia(CommonCommand):
     names = ["ностальжи", "(с)"]
     help_text = "генерирует картинку с сообщениями из конфы беседки мразей"
     help_texts = [
+        "- присылает 20 случайных сообщений"
         "(N,M=20) - присылает сообщения с позиции N до M. Максимальная разница между N и M - 200"
         "(до) - присылает несколько сообщений до"
-        "(после) - присылает несколько сообщений после"
+        "(после) - присылает несколыько сообщений после"
         "(вложения) - присылает вложения со скриншота"
     ]
     access = Role.MRAZ
@@ -56,24 +57,28 @@ class Nostalgia(CommonCommand):
         return method()
 
     def menu_before(self):
-        index_from, _ = Service.objects.get_or_create(name='mrazi_chats_index_from')
-        index_to, _ = Service.objects.get_or_create(name='mrazi_chats_index_to')
-        diff = int(index_to.value) - int(index_from.value) + 1
-        return self.menu_range(int(index_to.value) - diff, int(index_from.value) - diff)
+        index_from, index_to = self._get_indexes_from_db()
+        diff = index_to - index_from + 1
+        return self.menu_range(index_to - diff, index_from - diff)
 
     def menu_after(self):
-        index_from, _ = Service.objects.get_or_create(name='mrazi_chats_index_from')
-        index_to, _ = Service.objects.get_or_create(name='mrazi_chats_index_to')
-        diff = int(index_to.value) - int(index_from.value) + 1
-        return self.menu_range(int(index_to.value) + diff, int(index_from.value) + diff)
+        index_from, index_to = self._get_indexes_from_db()
+        diff = index_to - index_from + 1
+        return self.menu_range(index_to + diff, index_from + diff)
 
     def menu_attachments(self):
-        pass
+        data = self._load_file()
+        index_from, index_to = self._get_indexes_from_db()
+        msgs = data[index_from - 1: index_to]
+        all_atts = []
+        for msg in msgs:
+            for att in msg['attachments']:
+                if 'link' in att:
+                    all_atts.append(att['link'])
+        return "\n".join(all_atts)
 
     def menu_range(self, index_from: int = None, index_to: int = None):
-        with open('secrets/mrazi_chats/mrazi1.json', 'r') as file:
-            content = file.read()
-        data = json.loads(content)
+        data = self._load_file()
 
         if index_from is None:
             index_from = random.randint(0, len(data) - self.DEFAULT_MSGS_COUNT)
@@ -95,13 +100,7 @@ class Nostalgia(CommonCommand):
             index_to = len(data) - 1
             index_from = index_to - diff
 
-        index_from_obj = Service.objects.get(name='mrazi_chats_index_from')
-        index_from_obj.value = index_from
-        index_from_obj.save()
-
-        index_to_obj = Service.objects.get(name='mrazi_chats_index_to')
-        index_to_obj.value = index_to
-        index_to_obj.save()
+        self._set_indexes_to_db(index_from, index_to)
 
         msgs = data[index_from - 1:index_to]
         msgs_parsed = self.prepare_msgs_for_quote_generator(msgs)
@@ -117,6 +116,12 @@ class Nostalgia(CommonCommand):
         msg = f"{msgs[0]['datetime']}\n" \
               f"{index_from} - {index_to}"
         return {"msg": msg, "attachments": attachments}
+
+    @staticmethod
+    def _load_file() -> list:
+        with open('secrets/mrazi_chats/mrazi1.json', 'r') as file:
+            content = file.read()
+        return json.loads(content)
 
     @staticmethod
     def prepare_msgs_for_quote_generator(msgs):
@@ -144,3 +149,19 @@ class Nostalgia(CommonCommand):
             new_msg = {'username': msg['author'], 'message': message, 'avatar': avatar}
             new_msgs.append(new_msg)
         return new_msgs
+
+    @staticmethod
+    def _get_indexes_from_db():
+        index_from, _ = Service.objects.get_or_create(name='mrazi_chats_index_from')
+        index_to, _ = Service.objects.get_or_create(name='mrazi_chats_index_to')
+        return int(index_from.value), int(index_to.value)
+
+    @staticmethod
+    def _set_indexes_to_db(index_from, index_to):
+        index_from_obj = Service.objects.get(name='mrazi_chats_index_from')
+        index_from_obj.value = index_from
+        index_from_obj.save()
+
+        index_to_obj = Service.objects.get(name='mrazi_chats_index_to')
+        index_to_obj.value = index_to
+        index_to_obj.save()
