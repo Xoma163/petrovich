@@ -120,9 +120,9 @@ class Nostalgia(CommonCommand):
         buttons = [{'command': self.name, 'button_text': "Ещё", 'args': None}]
         diff = index_to - index_from + 1
         if index_from != 1:
-            buttons.append({'command': self.name, 'button_text': "До", 'args': [index_from-diff, index_to-diff]})
+            buttons.append({'command': self.name, 'button_text': "До", 'args': [index_from - diff, index_to - diff]})
         if index_to != len(data) - 1:
-            buttons.append({'command': self.name, 'button_text': "После", 'args': [index_from+diff, index_to+diff]})
+            buttons.append({'command': self.name, 'button_text': "После", 'args': [index_from + diff, index_to + diff]})
         if has_att_link:
             buttons.append({'command': self.name, 'button_text': "Вложения", 'args': "вложения"})
 
@@ -147,14 +147,13 @@ class Nostalgia(CommonCommand):
                 if att['type'] == "Фотография":
                     message['photo'] = att['link']
                     has_att_link = True
-                elif att['type'] in ["Видеозапись", "Файл", "Ссылка"]:
+                elif att['type'] in ["Видеозапись", "Файл", "Ссылка", "Голосовое сообщение"]:
                     message['text'] += f'\n{att["link"]}'
                     has_att_link = True
-                else:
-                    message['text'] += f"{att['type']}\n"
-                if msg['fwd']:
-                    message['text'] += '\n(Пересланные сообщения)\n'
-
+                message['text'] += f"\n({att['type']})\n"
+            if msg['fwd']:
+                message['text'] += '\n(Пересланные сообщения)\n'
+            message['text'] = message['text'].strip()
             if msg['author'] not in users_avatars:
                 name, surname = msg['author'].split(' ', 1)
                 vk_user = Users.objects.filter(name=name, surname=surname, platform=Platform.VK.name).first()
