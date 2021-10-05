@@ -27,7 +27,7 @@ class Nostalgia(CommonCommand):
 
     def start(self):
         if self.event.args:
-            arg0 = self.event.args[0].lower()
+            arg0 = str(self.event.args[0]).lower()
         else:
             arg0 = None
 
@@ -118,10 +118,11 @@ class Nostalgia(CommonCommand):
         msg = f"{msgs[0]['datetime']}\n" \
               f"{index_from} - {index_to}"
         buttons = [{'command': self.name, 'button_text': "Ещё", 'args': None}]
+        diff = index_to - index_from + 1
         if index_from != 1:
-            buttons.append({'command': self.name, 'button_text': "До", 'args': "до"})
+            buttons.append({'command': self.name, 'button_text': "До", 'args': [index_from-diff, index_to-diff]})
         if index_to != len(data) - 1:
-            buttons.append({'command': self.name, 'button_text': "После", 'args': "после"})
+            buttons.append({'command': self.name, 'button_text': "После", 'args': [index_from+diff, index_to+diff]})
         if has_att_link:
             buttons.append({'command': self.name, 'button_text': "Вложения", 'args': "вложения"})
 
