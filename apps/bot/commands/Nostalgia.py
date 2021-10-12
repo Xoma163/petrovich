@@ -6,6 +6,7 @@ from apps.bot.classes.Consts import Platform, Role
 from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.QuotesGenerator import QuotesGenerator
 from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.common.CommonMethods import get_urls_from_text
 from apps.bot.models import Users
 from apps.service.models import Service
 
@@ -75,6 +76,8 @@ class Nostalgia(CommonCommand):
             for att in msg['attachments']:
                 if 'link' in att:
                     all_atts.append(att['link'])
+            all_atts += get_urls_from_text(msg['text'])
+
         return "\n".join(all_atts)
 
     def menu_range(self, index_from: int = None, index_to: int = None):
@@ -143,6 +146,8 @@ class Nostalgia(CommonCommand):
         users_avatars = {}
         for msg in msgs:
             message = {'text': msg['text']}
+            if get_urls_from_text(msg['text']):
+                has_att_link = True
             for att in msg['attachments']:
                 if att['type'] == "Фотография":
                     message['photo'] = att['link']

@@ -316,3 +316,11 @@ def get_thumbnail_for_image(image, size) -> bytes:
     _image.save(thumb_byte_arr, format="PNG")
     thumb_byte_arr.seek(0)
     return thumb_byte_arr.read()
+
+
+def get_urls_from_text(text) -> list:
+    """
+    Поиск ссылок в тексте.
+    Возвращает список найденных ссылок
+    """
+    return re.findall("(?P<url>https?://[^\s]+)", text)
