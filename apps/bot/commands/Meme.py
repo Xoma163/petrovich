@@ -80,7 +80,6 @@ class Meme(CommonCommand):
 
     # MENU #
     def menu_add(self):
-
         self.check_args(2)
         attachments = get_attachments_from_attachments_or_fwd(self.event, ['audio', 'video', 'photo'])
         if len(attachments) == 0:
@@ -91,9 +90,9 @@ class Meme(CommonCommand):
                 'type': 'link',
                 'url': url,
             }
-            meme_name = " ".join(self.event.args[2:])
+            meme_name = " ".join(self.event.args[2:]).lower()
         else:
-            meme_name = " ".join(self.event.args[1:])
+            meme_name = " ".join(self.event.args[1:]).lower()
             attachment = attachments[0]
 
         if self.event.platform != Platform.VK and attachment['type'] not in ['photo', 'link']:
