@@ -89,7 +89,7 @@ class Nostalgia(CommonCommand):
         return self.menu_range()
 
     def menu_search(self):
-        MAX_PER_PAGE = 9
+        MAX_PER_PAGE = 10
         data = self._load_file()
 
         try:
@@ -111,17 +111,17 @@ class Nostalgia(CommonCommand):
         if len(searched_indexes) == 0:
             return f'Ничего не нашёл по запросу "{search_query}"'
         total_pages = (len(searched_indexes) - 1) // MAX_PER_PAGE + 1
-        if (page - 1) * MAX_PER_PAGE > len(searched_indexes):
+        if page * MAX_PER_PAGE > len(searched_indexes):
             page = total_pages
         first_item = (page - 1) * MAX_PER_PAGE
         last_item = min((page * MAX_PER_PAGE, len(searched_indexes)))
         buttons = []
         for i in range(first_item, last_item):
             index = searched_indexes[i]
-            buttons.append({'command': self.name, 'button_text': data[index]['text'], 'args': [index + 1]})
-        if not last_item == len(searched_indexes):
-            buttons.append(
-                {'command': self.name, 'button_text': f"Далее (Страница {page + 1})", 'args': [search_query, page + 1]})
+            author = data[index]['author'].split(' ')[0]
+            buttons.append({'command': self.name, 'button_text': f"{author}: {data[index]['text']}", 'args': [index + 1]})
+        # if not last_item == len(searched_indexes):
+        #     buttons.append({'command': self.name, 'button_text': f"Далее (Страница {page + 1})", 'args': [search_query, page + 1]})
 
         keyboard = self.bot.get_inline_keyboard(buttons)
 
