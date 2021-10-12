@@ -324,3 +324,9 @@ def get_urls_from_text(text) -> list:
     Возвращает список найденных ссылок
     """
     return re.findall("(?P<url>https?://[^\s]+)", text)
+
+
+def get_chunks(lst, n):
+    """Yield successive n-sized chunks from lst."""
+    for i in range(0, len(lst), n):
+        yield lst[i:i + n]

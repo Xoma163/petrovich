@@ -13,7 +13,7 @@ from django.contrib.auth.models import Group
 from apps.bot.classes.Consts import Role, Platform
 from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.bots.CommonBot import CommonBot
-from apps.bot.classes.common.CommonMethods import get_thumbnail_for_image
+from apps.bot.classes.common.CommonMethods import get_thumbnail_for_image, get_chunks
 from apps.bot.classes.events.TgEvent import TgEvent
 from apps.bot.models import Users, Chat, Bot
 from petrovich.settings import env
@@ -482,26 +482,27 @@ class TgBot(CommonBot):
         return {'type': 'document', 'attachment': self._prepare_obj_to_upload(document, filename=filename)}
 
     @staticmethod
-    def get_inline_keyboard(buttons: list, cols=0):
+    def get_inline_keyboard(buttons: list, cols=1):
         """
         Получение инлайн-клавиатуры с одной кнопкой
         В основном используется для команд, где нужно запускать много команд и лень набирать заново
         """
 
-        def get_one_button(button_item):
+        def get_buttons(_buttons):
             return [{
                 'text': button_item['button_text'],
                 'callback_data': json.dumps({
                     'command': button_item['command'],
                     "args": button_item.get('args'),
                 }, ensure_ascii=False)
-            }]
+            } for button_item in _buttons]
 
         for i, button in enumerate(buttons):
             if 'args' not in buttons[i] or buttons[i]['args'] is None:
                 buttons[i]['args'] = {}
+        buttons_chunks = get_chunks(buttons, cols)
         return {
-            'inline_keyboard': [get_one_button(b) for b in buttons]
+            'inline_keyboard': [get_buttons(chunk) for chunk in buttons_chunks]
         }
 
     @staticmethod

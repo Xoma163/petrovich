@@ -18,6 +18,7 @@ from apps.bot.classes.Consts import Role, Platform
 from apps.bot.classes.Exceptions import PWarning, PError
 from apps.bot.classes.bots.CommonBot import CommonBot
 from apps.bot.classes.bots.VkUser import VkUser
+from apps.bot.classes.common.CommonMethods import get_chunks
 from apps.bot.classes.events.VkEvent import VkEvent
 from apps.bot.commands.Profile import add_city_to_db
 from apps.bot.models import Users, Chat, Bot
@@ -407,7 +408,7 @@ class VkBot(CommonBot):
         return self.get_attachment_by_id('audio', vk_audio['owner_id'], vk_audio['id'])
 
     @staticmethod
-    def get_inline_keyboard(buttons: list):
+    def get_inline_keyboard(buttons: list, cols=1):
 
         """
         param buttons: [(button_name, args), ...]
@@ -415,7 +416,7 @@ class VkBot(CommonBot):
         В основном используется для команд, где нужно запускать много команд и лень набирать заново
         """
 
-        def get_one_button(button_item):
+        def get_buttons(_buttons):
             return [{
                 'action': {
                     'type': 'text',
@@ -426,15 +427,15 @@ class VkBot(CommonBot):
                     }, ensure_ascii=False)
                 },
                 'color': 'primary',
-            }]
+            } for button_item in _buttons]
 
         for i, button in enumerate(buttons):
             if 'args' not in buttons[i] or buttons[i]['args'] is None:
                 buttons[i]['args'] = {}
-
+        buttons_chunks = get_chunks(buttons, cols)
         return {
             'inline': True,
-            'buttons': [get_one_button(b) for b in buttons]
+            'buttons': [get_buttons(chunk) for chunk in buttons_chunks]
         }
 
     @staticmethod
