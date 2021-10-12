@@ -21,6 +21,8 @@ class Nostalgia(CommonCommand):
         "(до) - присылает несколько сообщений до",
         "(после) - присылает несколыько сообщений после",
         "(вложения) - присылает вложения со скриншота"
+        "(фраза) - ищет фразу по переписке"
+        "поиск (фраза) [N=1] - ищет фразу по переписке. N - номер страницы"
     ]
     access = Role.MRAZ
 
@@ -52,7 +54,8 @@ class Nostalgia(CommonCommand):
             [["до"], self.menu_before],
             [["после"], self.menu_after],
             [['вложения'], self.menu_attachments],
-            [['default'], self.menu_range]
+            [['поиск'], self.menu_search],
+            [['default'], self.menu_default]
         ]
         method = self.handle_menu(menu, arg0)
         return method()
@@ -79,6 +82,50 @@ class Nostalgia(CommonCommand):
             all_atts += get_urls_from_text(msg['text'])
 
         return "\n".join(all_atts)
+
+    def menu_default(self):
+        if self.event.args:
+            return self.menu_search()
+        return self.menu_range()
+
+    def menu_search(self):
+        MAX_PER_PAGE = 9
+        data = self._load_file()
+
+        try:
+            page = int(self.event.args[-1])
+            if page < 1:
+                page = 1
+            search_list = self.event.args[:-1]
+        except ValueError:
+            page = 1
+            search_list = self.event.args
+
+        search_query = " ".join(search_list)
+
+        search_list = list(map(lambda x: x.lower(), search_list))
+        searched_indexes = []
+        for i, item in enumerate(data):
+            if all(y in item['text'].lower() for y in search_list):
+                searched_indexes.append(i)
+        if len(searched_indexes) == 0:
+            return f'Ничего не нашёл по запросу "{search_query}"'
+        total_pages = (len(searched_indexes) - 1) // MAX_PER_PAGE + 1
+        if (page - 1) * MAX_PER_PAGE > len(searched_indexes):
+            page = total_pages
+        first_item = (page - 1) * MAX_PER_PAGE
+        last_item = min((page * MAX_PER_PAGE, len(searched_indexes)))
+        buttons = []
+        for i in range(first_item, last_item):
+            index = searched_indexes[i]
+            buttons.append({'command': self.name, 'button_text': data[index]['text'], 'args': [index + 1]})
+        if not last_item == len(searched_indexes):
+            buttons.append(
+                {'command': self.name, 'button_text': f"Далее (Страница {page + 1})", 'args': [search_query, page + 1]})
+
+        keyboard = self.bot.get_inline_keyboard(buttons)
+
+        return {"msg": f"Результаты по запросу {search_query}.\n\nСтраница {page}/{total_pages}", "keyboard": keyboard}
 
     def menu_range(self, index_from: int = None, index_to: int = None):
         data = self._load_file()

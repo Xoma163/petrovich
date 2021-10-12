@@ -420,7 +420,10 @@ class VkBot(CommonBot):
                 'action': {
                     'type': 'text',
                     'label': button_item['button_text'],
-                    "payload": json.dumps({"command": button_item['command'], "args": button_item['args']}, ensure_ascii=False)
+                    "payload": json.dumps({
+                        "command": button_item['command'],
+                        "args": button_item.get('args'),
+                    }, ensure_ascii=False)
                 },
                 'color': 'primary',
             }]
