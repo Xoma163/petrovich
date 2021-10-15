@@ -13,15 +13,16 @@ from apps.bot.classes.common.CommonCommand import CommonCommand
 YOUTUBE_URLS = ['www.youtube.com', 'youtube.com', "www.youtu.be", "youtu.be"]
 REDDIT_URLS = ["www.reddit.com"]
 TIKTOK_URLS = ["www.tiktok.com", 'vm.tiktok.com', 'm.tiktok.com']
+INSTAGRAM_URLS = ['www.instagram.com', 'instagram.com']
 
-MEDIA_URLS = YOUTUBE_URLS + REDDIT_URLS + TIKTOK_URLS
+MEDIA_URLS = YOUTUBE_URLS + REDDIT_URLS + TIKTOK_URLS + INSTAGRAM_URLS
 
 
 class Media(CommonCommand):
     name = "медиа"
-    help_text = "скачивает видео из Reddit/TikTok/YouTube и присылает его"
+    help_text = "скачивает видео из Reddit/TikTok/YouTube/Instagram и присылает его"
     help_texts = [
-        "(ссылка на видео) - скачивает видео из Reddit/TikTok/YouTube и присылает его"
+        "(ссылка на видео) - скачивает видео из Reddit/TikTok/YouTube/Instagram и присылает его"
     ]
     platforms = [Platform.TG]
 
@@ -37,7 +38,8 @@ class Media(CommonCommand):
         MEDIA_TRANSLATOR = {
             'youtube': self.get_youtube_video_info,
             'tiktok': self.get_tiktok_video_info,
-            'reddit': self.get_reddit_video_info
+            'reddit': self.get_reddit_video_info,
+            'instagram': self.get_instagram_video_info
         }
 
         if self.event.command in self.full_names:
@@ -58,9 +60,11 @@ class Media(CommonCommand):
             media_link_is_from = 'tiktok'
         if urlparse(url).hostname in REDDIT_URLS:
             media_link_is_from = 'reddit'
+        if urlparse(url).hostname in INSTAGRAM_URLS:
+            media_link_is_from = 'instagram'
 
         if not media_link_is_from:
-            raise PWarning("Не youtube/tiktok/reddit ссылка")
+            raise PWarning("Не youtube/tiktok/reddit/instagram ссылка")
 
         self.bot.set_activity(self.event.peer_id, 'upload_video')
         video, title = MEDIA_TRANSLATOR[media_link_is_from](url)
@@ -69,9 +73,12 @@ class Media(CommonCommand):
 
         if self.event.command not in self.full_names:
             self.bot.delete_message(self.event.peer_id, self.event.msg_id)
-            msg = f"{title}\n" \
-                  f"От пользователя {self.event.sender}\n" \
-                  f"{url}"
+
+            msg = ""
+            if title:
+                msg = f"{title}\n"
+            msg += f"От пользователя {self.event.sender}\n" \
+                   f"{url}"
             return {'msg': msg, 'attachments': attachments}
         else:
             return {'attachments': attachments}
@@ -129,6 +136,16 @@ class Media(CommonCommand):
         rvs = RedditVideoSaver()
         video = rvs.get_video_from_post(url)
         return video, rvs.title
+
+    @staticmethod
+    def get_instagram_video_info(url):
+        content = requests.get(url).content
+        bs4 = BeautifulSoup(content)
+        content_type = bs4.find('meta', attrs={'name': 'medium'}).attrs['content']
+        if content_type != 'video':
+            raise PWarning("Ссылка на инстаграм не является видео")
+        video_url = bs4.find('meta', attrs={'property': 'og:video'}).attrs['content']
+        return video_url, ""
 
 
 class NothingLogger(object):
