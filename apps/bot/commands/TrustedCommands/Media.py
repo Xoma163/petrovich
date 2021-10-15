@@ -139,8 +139,8 @@ class Media(CommonCommand):
 
     @staticmethod
     def get_instagram_video_info(url):
-        content = requests.get(url).content
-        bs4 = BeautifulSoup(content)
+        r = requests.get(url)
+        bs4 = BeautifulSoup(r.content, 'html.parser')
         content_type = bs4.find('meta', attrs={'name': 'medium'}).attrs['content']
         if content_type != 'video':
             raise PWarning("Ссылка на инстаграм не является видео")
