@@ -1,12 +1,12 @@
 import requests
 from django.core.management.base import BaseCommand
 
-from apps.bot.classes.bots.VkBot import VkBot
+from apps.bot.classes.bots.TgBot import TgBot
 from apps.bot.models import Chat
 from apps.service.models import Service, Donations
 from petrovich.settings import env
 
-vk_bot = VkBot()
+tg_bot = TgBot()
 
 
 class Command(BaseCommand):
@@ -38,15 +38,15 @@ class Command(BaseCommand):
                 new_donation.save()
                 result_str += f"{donation['username']} - {donation['amount']} {donation['currency']}:\n" \
                               f"{donation['message']}\n\n"
-            chat_ids = options['chat_id'][0].split(',')
-            for chat_id in chat_ids:
-                chat = Chat.objects.filter(chat_id=vk_bot.get_group_id(chat_id))
+            chat_pks = options['chat_id'][0].split(',')
+            for chat_pk in chat_pks:
+                chat = Chat.objects.filter(pk=chat_pk)
 
                 if not chat:
-                    print(f"Чата с id = {chat_id} не существует")
+                    print(f"Чата с id = {chat_pk} не существует")
                     break
                 chat = chat.first()
-                vk_bot.send_message(chat.chat_id, result_str)
+                tg_bot.send_message(chat.chat_id, result_str)
 
     def add_arguments(self, parser):
         parser.add_argument('chat_id', nargs='+', type=str,
