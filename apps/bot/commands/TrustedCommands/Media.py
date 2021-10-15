@@ -1,13 +1,20 @@
+import json
 from urllib.parse import urlparse
 
 import requests
 import youtube_dl
+from bs4 import BeautifulSoup
 
+from apps.bot.APIs.RedditVideoDownloader import RedditVideoSaver
 from apps.bot.classes.Consts import Platform
 from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.common.CommonCommand import CommonCommand
 
 YOUTUBE_URLS = ['www.youtube.com', 'youtube.com', "www.youtu.be", "youtu.be"]
+REDDIT_URLS = ["www.reddit.com"]
+TIKTOK_URLS = ["www.tiktok.com", 'vm.tiktok.com', 'm.tiktok.com']
+
+MEDIA_URLS = YOUTUBE_URLS + REDDIT_URLS + TIKTOK_URLS
 
 
 class Media(CommonCommand):
@@ -19,15 +26,19 @@ class Media(CommonCommand):
     platforms = [Platform.TG]
 
     def accept(self, event):
-        if urlparse(event.command).hostname in YOUTUBE_URLS:
+        if urlparse(event.command).hostname in MEDIA_URLS:
             return True
         if event.fwd:
-            if urlparse(event.fwd[0]['text']).hostname in YOUTUBE_URLS:
+            if urlparse(event.fwd[0]['text']).hostname in MEDIA_URLS:
                 return True
         return super().accept(event)
 
     def start(self):
-        self.bot.set_activity(self.event.peer_id, 'upload_video')
+        MEDIA_TRANSLATOR = {
+            'youtube': self.get_youtube_video_info,
+            'tiktok': self.get_tiktok_video_info,
+            'reddit': self.get_reddit_video_info
+        }
 
         if self.event.command in self.full_names:
             if self.event.args:
@@ -39,28 +50,34 @@ class Media(CommonCommand):
         else:
             url = self.event.clear_msg
 
-        if urlparse(url).hostname not in YOUTUBE_URLS:
-            raise PWarning("Не youtube ссылка")
+        media_link_is_from = None
+
+        if urlparse(url).hostname in YOUTUBE_URLS:
+            media_link_is_from = 'youtube'
+        if urlparse(url).hostname in TIKTOK_URLS:
+            media_link_is_from = 'tiktok'
+        if urlparse(url).hostname in REDDIT_URLS:
+            media_link_is_from = 'reddit'
+
+        if not media_link_is_from:
+            raise PWarning("Не youtube/tiktok/reddit ссылка")
+
+        self.bot.set_activity(self.event.peer_id, 'upload_video')
+        video, title = MEDIA_TRANSLATOR[media_link_is_from](url)
+        self.bot.set_activity(self.event.peer_id, 'upload_video')
+        attachments = [self.bot.upload_video(video)]
 
         if self.event.command not in self.full_names:
-            try:
-                video, title = self.get_youtube_video_info(url)
-                self.bot.delete_message(self.event.peer_id, self.event.msg_id)
-                attachments = [self.bot.upload_video(video)]
-                msg = f"{title}\n" \
-                      f"От пользователя {self.event.sender}\n" \
-                      f"{url}"
-                return {'msg': msg, 'attachments': attachments}
-            except Exception:
-                return
+            self.bot.delete_message(self.event.peer_id, self.event.msg_id)
+            msg = f"{title}\n" \
+                  f"От пользователя {self.event.sender}\n" \
+                  f"{url}"
+            return {'msg': msg, 'attachments': attachments}
         else:
-            video, _ = self.get_youtube_video_info(url)
-            attachments = [self.bot.upload_video(video)]
-            return {
-                'attachments': attachments
-            }
+            return {'attachments': attachments}
 
-    def get_youtube_video_info(self, url):
+    @staticmethod
+    def get_youtube_video_info(url):
         ydl_params = {
             'outtmpl': '%(id)s%(ext)s',
             'logger': NothingLogger()
@@ -86,6 +103,32 @@ class Media(CommonCommand):
         url = max_quality_video['url']
         video_content = requests.get(url).content
         return video_content, video_info['title']
+
+    @staticmethod
+    def get_tiktok_video_info(url):
+        headers = {
+            'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+        }
+
+        s = requests.Session()
+        r = s.get(url, headers=headers)
+        # ToDo: just regexp
+        bs4 = BeautifulSoup(r.content, 'html.parser')
+        video_data = json.loads(bs4.find(id='__NEXT_DATA__').contents[0])
+
+        item_struct = video_data['props']['pageProps']['itemInfo']['itemStruct']
+        video_url = item_struct['video']['downloadAddr']
+        title = item_struct['desc']
+        headers['Referer'] = video_data['props']['pageProps']['seoProps']['metaParams']['canonicalHref']
+        r = s.get(video_url, headers=headers)
+        s.close()
+        return r.content, title
+
+    @staticmethod
+    def get_reddit_video_info(url):
+        rvs = RedditVideoSaver()
+        video = rvs.get_video_from_post(url)
+        return video, rvs.title
 
 
 class NothingLogger(object):
