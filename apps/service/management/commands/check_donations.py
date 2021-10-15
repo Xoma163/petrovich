@@ -40,12 +40,7 @@ class Command(BaseCommand):
                               f"{donation['message']}\n\n"
             chat_pks = options['chat_id'][0].split(',')
             for chat_pk in chat_pks:
-                chat = Chat.objects.filter(pk=chat_pk)
-
-                if not chat:
-                    print(f"Чата с id = {chat_pk} не существует")
-                    break
-                chat = chat.first()
+                chat = Chat.objects.get(pk=chat_pk)
                 tg_bot.send_message(chat.chat_id, result_str)
 
     def add_arguments(self, parser):
