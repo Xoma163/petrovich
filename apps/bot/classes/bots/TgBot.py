@@ -49,7 +49,7 @@ class TgBot(CommonBot):
         Метод позволяет указать пользователю, что бот набирает сообщение или записывает голосовое
         Используется при длительном выполнении команд, чтобы был фидбек пользователю, что его запрос принят
         """
-        if activity not in ['typing', 'audiomessage']:
+        if activity not in ['typing', 'audiomessage', 'upload_video']:
             raise PWarning("Не знаю такого типа активности")
         if activity == 'audiomessage':
             activity = 'record_audio'

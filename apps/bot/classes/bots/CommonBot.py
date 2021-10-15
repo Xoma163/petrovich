@@ -296,9 +296,14 @@ class CommonBot(Thread):
         from apps.bot.commands.TikTok import TIKTOK_URLS
         message_is_tiktok_link = urlparse(message).hostname in TIKTOK_URLS or \
                                  (fwd_message and urlparse(fwd_message) in TIKTOK_URLS)
-
         if message_is_tiktok_link:
             return True
+        from apps.bot.commands.TrustedCommands.Media import YOUTUBE_URLS
+        message_is_youtube_link = urlparse(message).hostname in YOUTUBE_URLS or \
+                                 (fwd_message and urlparse(fwd_message) in YOUTUBE_URLS)
+        if message_is_youtube_link:
+            return True
+
 
     @staticmethod
     def have_audio_message(event) -> bool:
