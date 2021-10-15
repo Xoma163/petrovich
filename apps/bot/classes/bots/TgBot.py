@@ -210,7 +210,8 @@ class TgBot(CommonBot):
                     return self._send_photo(peer_id, msg, attachments[0]['attachment'], keyboard)
                 elif attachments[0]['type'] == 'document':
                     return self._send_document(peer_id, msg, attachments[0]['attachment'], keyboard)
-        prepared_message = {'chat_id': peer_id, 'text': msg, 'parse_mode': 'HTML', 'reply_markup': keyboard}
+        prepared_message = {'chat_id': peer_id, 'text': msg, 'reply_markup': keyboard}
+        prepared_message.update(kwargs)
         return self.requests.get('sendMessage', params=prepared_message)
 
     def _set_image_private_download_url(self, image_attachment):
