@@ -1,7 +1,6 @@
 from django.contrib.auth.models import Group
 
 from apps.bot.classes.Consts import Role
-from apps.bot.classes2.bots.Bot import Bot
 from apps.bot.classes2.events.Event import Event
 from apps.bot.classes2.messages.Message import Message
 from apps.bot.classes2.messages.attachments.PhotoAttachment import PhotoAttachment
@@ -10,42 +9,37 @@ from apps.bot.models import Users
 
 
 class TgEvent(Event):
-    def setup_event(self, bot: Bot):
-        self.platform = bot.platform
-        # if 'message' not in self.raw and 'callback_query' not in self.raw:
-        #     return
-        message = self.raw['message']
+
+    def setup_event(self, is_fwd=False):
+        if self.raw.get('forward_from'):
+            return
+
+        if is_fwd:
+            message = self.raw
+        else:
+            edited_message = self.raw.get('edited_message')
+            if edited_message:
+                message = edited_message
+            else:
+                message = self.raw.get('message')
+        if not message:
+            return
 
         self.peer_id = str(message['chat']['id'])
 
-        if self.raw['message']['chat']['id'] != self.raw['message']['from']['id']:
-            self.chat = bot.get_chat_by_id(-int(-self.raw['message']['chat']['id']))
+        if message['chat']['id'] != message['from']['id']:
+            self.chat = self.bot.get_chat_by_id(message['chat']['id'])
             self.is_from_chat = True
         else:
             self.is_from_user = True
         if message['from']['is_bot']:
             self.is_from_bot = True
 
-        photo = message.get('photo')
-        voice = message.get('voice')
-        document = message.get('document')
-        message_text = None
-        if voice:
-            self.setup_voice(voice, bot)
-        elif photo:
-            self.setup_photo(photo[-1], bot)
-            message_text = message.get('caption')
-        elif document:
-            if document['mime_type'] in ['image/png', 'image/jpg', 'image/jpeg']:
-                self.setup_photo(document, bot)
-                message_text = message.get('caption')
-        else:
-            message_text = message.get('text')
-        self.message = Message(message_text, message['message_id']) if message_text else None
+        self.setup_attachments(message)
+        self.setup_fwd(message.get('reply_to_message'))
+        self.sender = self.register_user(message['from'])
 
-        self.sender = self.register_user(message['from'], bot)
-
-    def register_user(self, user, bot) -> Users:
+    def register_user(self, user) -> Users:
         """
         Регистрация пользователя если его нет в БД
         Почти аналог get_user_by_id в VkBot, только у ТГ нет метода для получения данных о пользователе,
@@ -62,7 +56,7 @@ class TgEvent(Event):
             _user.groups.add(group_user)
             _user.save()
 
-        tg_user = bot.user_model.filter(user_id=user['id'])
+        tg_user = self.bot.user_model.filter(user_id=user['id'])
         if tg_user.count() > 0:
             tg_user = tg_user.first()
 
@@ -74,12 +68,36 @@ class TgEvent(Event):
             set_fields(tg_user)
         return tg_user
 
-    def setup_photo(self, photo_event, bot):
+    def setup_attachments(self, message):
+        photo = message.get('photo')
+        voice = message.get('voice')
+        document = message.get('document')
+        message_text = None
+        if voice:
+            self.setup_voice(voice)
+        elif photo:
+            self.setup_photo(photo[-1])
+            message_text = message.get('caption')
+        elif document:
+            if document['mime_type'] in ['image/png', 'image/jpg', 'image/jpeg']:
+                self.setup_photo(document)
+                message_text = message.get('caption')
+        else:
+            message_text = message.get('text')
+        self.message = Message(message_text, message['message_id']) if message_text else None
+
+    def setup_fwd(self, fwd):
+        if fwd:
+            fwd_event = TgEvent(fwd, self.bot)
+            fwd_event.setup_event(is_fwd=True)
+            self.fwd = [fwd_event]
+
+    def setup_photo(self, photo_event):
         tg_photo = PhotoAttachment()
-        tg_photo.parse_tg_photo(photo_event, bot)
+        tg_photo.parse_tg_photo(photo_event, self.bot)
         self.attachments.append(tg_photo)
 
-    def setup_voice(self, voice_event, bot):
+    def setup_voice(self, voice_event):
         tg_voice = VoiceAttachment()
-        tg_voice.parse_tg_voice(voice_event, bot)
+        tg_voice.parse_tg_voice(voice_event, self.bot)
         self.attachments.append(tg_voice)

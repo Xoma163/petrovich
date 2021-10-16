@@ -27,7 +27,7 @@ class TgBot(Bot):
         Получение новых событий и их обработка
         """
         for raw_event in self.longpoll.listen():
-            tg_event = TgEvent(raw_event)
+            tg_event = TgEvent(raw_event, self)
             threading.Thread(target=self.handle_event, args=(tg_event,)).start()
 
     def send_message(self, rm: ResponseMessageItem):

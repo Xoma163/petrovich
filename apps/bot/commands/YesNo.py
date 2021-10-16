@@ -20,7 +20,7 @@ class YesNo(CommonCommand):
         return super().accept(event)
 
     def start(self):
-        clear = replace_similar_letters(self.event.clear)
+        clear = replace_similar_letters(self.event.message.clear)
         if clear.lower() in ['идиот?', 'ты идиот?']:
             return "Мне потанцевать нельзя?"
         elif clear.lower() in ['да?']:

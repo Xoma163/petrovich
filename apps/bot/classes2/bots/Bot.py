@@ -35,7 +35,7 @@ class Bot(Thread):
 
     def handle_event(self, event, send=True):
         try:
-            event.setup_event(self)
+            event.setup_event()
             if not event.need_a_response():
                 return
             message = self.route(event)

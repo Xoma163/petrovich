@@ -1,6 +1,5 @@
 from apps.bot.classes.Consts import Role, ATTACHMENT_TRANSLATOR, Platform
 from apps.bot.classes.Exceptions import PWarning, PError
-from apps.bot.classes.bots.CommonBot import CommonBot
 from apps.bot.classes.common.CommonMethods import get_help_texts_for_command, transform_k
 from apps.bot.classes.events.Event import Event
 from petrovich.settings import env
@@ -60,13 +59,13 @@ class CommonCommand:
 
         return False
 
-    def check_and_start(self, bot: CommonBot, event: Event):
+    def check_and_start(self, event: Event):
         """
         Выполнение всех проверок и старт команды
         :param bot: сущность Bot
         :param event: сущность Event
         """
-        self.bot = bot
+        self.bot = event.bot
         self.event = event
 
         self.checks()

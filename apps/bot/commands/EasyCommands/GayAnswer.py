@@ -6,7 +6,7 @@ class GayAnswer(CommonCommand):
     suggest_for_similar = False
 
     def accept(self, event):
-        return event.message.clear == 'пидора ответ'
+        return event.clear_msg == 'пидора ответ'
 
     def start(self):
         return "Шлюхи аргумент"
