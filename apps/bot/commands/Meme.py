@@ -80,7 +80,6 @@ class Meme(CommonCommand):
 
     # MENU #
     def menu_add(self):
-
         self.check_args(2)
         attachments = get_attachments_from_attachments_or_fwd(self.event, ['audio', 'video', 'photo'])
         if len(attachments) == 0:
@@ -91,9 +90,9 @@ class Meme(CommonCommand):
                 'type': 'link',
                 'url': url,
             }
-            meme_name = " ".join(self.event.args[2:])
+            meme_name = " ".join(self.event.args[2:]).lower()
         else:
-            meme_name = " ".join(self.event.args[1:])
+            meme_name = " ".join(self.event.args[1:]).lower()
             attachment = attachments[0]
 
         if self.event.platform != Platform.VK and attachment['type'] not in ['photo', 'link']:
@@ -412,7 +411,8 @@ class Meme(CommonCommand):
     def prepare_meme_to_send(self, meme, print_name=False, send_keyboard=False):
         prepared_meme = prepare_meme_to_send(self.bot, self.event, meme, print_name, send_keyboard, self.name)
         if send_keyboard:
-            prepared_meme['keyboard'] = self.bot.get_inline_keyboard(self.name, args={"random": "р"})
+
+            prepared_meme['keyboard'] = self.bot.get_inline_keyboard([{'command': self.name, 'button_text': "Ещё", 'args':{"random": "р"}}])
         return prepared_meme
 
     @staticmethod

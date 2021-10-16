@@ -7,7 +7,7 @@ from apps.bot.APIs.TimezoneDBAPI import TimezoneDBAPI
 from apps.bot.APIs.YandexGeoAPI import YandexGeoAPI
 from apps.bot.classes.Consts import Role
 from apps.bot.models import Users
-from apps.service.models import City, TimeZone
+from apps.service.models import City, TimeZone, Service
 
 
 class Command(BaseCommand):
@@ -421,6 +421,11 @@ class Command(BaseCommand):
             City.objects.update_or_create(name=city_info['name'], defaults=city_info)
             print(f'add/update {city_info["name"]}')
 
+    @staticmethod
+    def init_services_db():
+        Service.objects.get_or_create(name='mrazi_chats_index_from', defaults={'value': 0})
+        Service.objects.get_or_create(name='mrazi_chats_index_to', defaults={'value': 20})
+
     def handle(self, *args, **options):
         self.init_groups()
         print('done init groups')
@@ -431,5 +436,9 @@ class Command(BaseCommand):
         self.init_cities_offline()
         # self.init_cities_online()
         print('done init cities')
+
+        self.init_services_db()
+        # self.init_cities_online()
+        print('done init services_db')
 
         print("done all")

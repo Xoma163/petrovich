@@ -13,7 +13,7 @@ from django.contrib.auth.models import Group
 from apps.bot.classes.Consts import Role, Platform
 from apps.bot.classes.Exceptions import PWarning
 from apps.bot.classes.bots.CommonBot import CommonBot
-from apps.bot.classes.common.CommonMethods import get_thumbnail_for_image
+from apps.bot.classes.common.CommonMethods import get_thumbnail_for_image, get_chunks
 from apps.bot.classes.events.TgEvent import TgEvent
 from apps.bot.models import Users, Chat, Bot
 from petrovich.settings import env
@@ -49,7 +49,7 @@ class TgBot(CommonBot):
         Метод позволяет указать пользователю, что бот набирает сообщение или записывает голосовое
         Используется при длительном выполнении команд, чтобы был фидбек пользователю, что его запрос принят
         """
-        if activity not in ['typing', 'audiomessage']:
+        if activity not in ['typing', 'audiomessage', 'upload_video']:
             raise PWarning("Не знаю такого типа активности")
         if activity == 'audiomessage':
             activity = 'record_audio'
@@ -210,7 +210,8 @@ class TgBot(CommonBot):
                     return self._send_photo(peer_id, msg, attachments[0]['attachment'], keyboard)
                 elif attachments[0]['type'] == 'document':
                     return self._send_document(peer_id, msg, attachments[0]['attachment'], keyboard)
-        prepared_message = {'chat_id': peer_id, 'text': msg, 'parse_mode': 'HTML', 'reply_markup': keyboard}
+        prepared_message = {'chat_id': peer_id, 'text': msg, 'reply_markup': keyboard}
+        prepared_message.update(kwargs)
         return self.requests.get('sendMessage', params=prepared_message)
 
     def _set_image_private_download_url(self, image_attachment):
@@ -447,7 +448,7 @@ class TgBot(CommonBot):
                 tmp.name = filename
                 tmp.seek(0)
                 return tmp
-            return file_like_object.read()
+            return _bytes
         return None
 
     def upload_photos(self, images, max_count=10):
@@ -482,20 +483,27 @@ class TgBot(CommonBot):
         return {'type': 'document', 'attachment': self._prepare_obj_to_upload(document, filename=filename)}
 
     @staticmethod
-    def get_inline_keyboard(command_text, button_text="Ещё", args=None):
+    def get_inline_keyboard(buttons: list, cols=1):
         """
         Получение инлайн-клавиатуры с одной кнопкой
         В основном используется для команд, где нужно запускать много команд и лень набирать заново
         """
-        if args is None:
-            args = {}
+
+        def get_buttons(_buttons):
+            return [{
+                'text': button_item['button_text'],
+                'callback_data': json.dumps({
+                    'command': button_item['command'],
+                    "args": button_item.get('args'),
+                }, ensure_ascii=False)
+            } for button_item in _buttons]
+
+        for i, button in enumerate(buttons):
+            if 'args' not in buttons[i] or buttons[i]['args'] is None:
+                buttons[i]['args'] = {}
+        buttons_chunks = get_chunks(buttons, cols)
         return {
-            'inline_keyboard': [[
-                {
-                    'text': button_text,
-                    'callback_data': json.dumps({'command': command_text, "args": args}, ensure_ascii=False)
-                }
-            ]]
+            'inline_keyboard': [get_buttons(chunk) for chunk in buttons_chunks]
         }
 
     @staticmethod

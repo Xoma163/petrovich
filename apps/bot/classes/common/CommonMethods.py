@@ -244,6 +244,8 @@ def get_role_by_str(role_str):
         who = Role.TRUSTED
     elif role_str in ['дом', 'домашний', 'дома']:
         who = Role.HOME
+    elif role_str in ['мразь', 'мразота', 'мрази']:
+        who = Role.MRAZ
 
     return who
 
@@ -314,3 +316,17 @@ def get_thumbnail_for_image(image, size) -> bytes:
     _image.save(thumb_byte_arr, format="PNG")
     thumb_byte_arr.seek(0)
     return thumb_byte_arr.read()
+
+
+def get_urls_from_text(text) -> list:
+    """
+    Поиск ссылок в тексте.
+    Возвращает список найденных ссылок
+    """
+    return re.findall("(?P<url>https?://[^\s]+)", text)
+
+
+def get_chunks(lst, n):
+    """Yield successive n-sized chunks from lst."""
+    for i in range(0, len(lst), n):
+        yield lst[i:i + n]

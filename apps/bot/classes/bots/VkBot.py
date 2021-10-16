@@ -18,6 +18,7 @@ from apps.bot.classes.Consts import Role, Platform
 from apps.bot.classes.Exceptions import PWarning, PError
 from apps.bot.classes.bots.CommonBot import CommonBot
 from apps.bot.classes.bots.VkUser import VkUser
+from apps.bot.classes.common.CommonMethods import get_chunks
 from apps.bot.classes.events.VkEvent import VkEvent
 from apps.bot.commands.Profile import add_city_to_db
 from apps.bot.models import Users, Chat, Bot
@@ -45,6 +46,9 @@ class VkBot(CommonBot):
         if activity not in ['typing', 'audiomessage']:
             raise PWarning("Не знаю такого типа активности")
         self.vk.messages.setActivity(type=activity, peer_id=peer_id, group_id=self.group_id)
+
+    def get_bot_info(self, bot_id):
+        return self.vk.groups.getById(group_id=bot_id)[0]
 
     def get_user_info(self, user_id):
         return self.vk.users.get(user_id=user_id, lang='ru', fields='sex, bdate, city, screen_name, photo_max')[0]
@@ -92,10 +96,15 @@ class VkBot(CommonBot):
             vk_user.save()
         return vk_user
 
-    def update_avatar(self, user_id):
+    def update_user_avatar(self, user_id):
         user = self.get_user_by_id(user_id)
         user_info = self.get_user_info(user_id)
         user.set_avatar(user_info['photo_max'])
+
+    def update_bot_avatar(self, bot_id):
+        bot = self.get_bot_by_id(bot_id)
+        bot_info = self.get_bot_info(bot_id)
+        bot.set_avatar(bot_info['photo_200'])
 
     def get_chat_by_id(self, chat_id) -> Chat:
         """
@@ -120,7 +129,7 @@ class VkBot(CommonBot):
             bot = bot.first()
         else:
             # Прозрачная регистрация
-            vk_bot = self.vk.groups.getById(group_id=bot_id)[0]
+            vk_bot = self.get_bot_info(bot_id)
 
             bot = Bot()
             bot.bot_id = bot_id
@@ -399,24 +408,35 @@ class VkBot(CommonBot):
         return self.get_attachment_by_id('audio', vk_audio['owner_id'], vk_audio['id'])
 
     @staticmethod
-    def get_inline_keyboard(command_text, button_text="Ещё", args=None):
+    def get_inline_keyboard(buttons: list, cols=1):
+
         """
+        param buttons: [(button_name, args), ...]
         Получение инлайн-клавиатуры с одной кнопкой
         В основном используется для команд, где нужно запускать много команд и лень набирать заново
         """
-        if args is None:
-            args = {}
-        return {
-            'inline': True,
-            'buttons': [[{
+
+        def get_buttons(_buttons):
+            return [{
                 'action': {
                     'type': 'text',
-                    'label': button_text,
-                    "payload": json.dumps({"command": command_text, "args": args}, ensure_ascii=False)
+                    'label': button_item['button_text'],
+                    "payload": json.dumps({
+                        "command": button_item['command'],
+                        "args": button_item.get('args'),
+                    }, ensure_ascii=False)
                 },
                 'color': 'primary',
-            }
-            ]]}
+            } for button_item in _buttons]
+
+        for i, button in enumerate(buttons):
+            if 'args' not in buttons[i] or buttons[i]['args'] is None:
+                buttons[i]['args'] = {}
+        buttons_chunks = get_chunks(buttons, cols)
+        return {
+            'inline': True,
+            'buttons': [get_buttons(chunk) for chunk in buttons_chunks]
+        }
 
     @staticmethod
     def get_group_id(_id) -> str:
@@ -495,6 +515,7 @@ class VkBot(CommonBot):
     # Todo:
     def delete_message(self, chat_id, message_id):
         pass
+
 
 class MyVkBotLongPoll(VkBotLongPoll):
     def listen(self):

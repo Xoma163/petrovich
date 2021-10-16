@@ -109,7 +109,7 @@ class Profile(CommonCommand):
         else:
             if self.event.platform != Platform.VK:
                 raise PWarning("Обновление аватара по пользователю доступно только для ВК")
-            self.bot.update_avatar(self.event.sender.user_id)
+            self.bot.update_user_avatar(self.event.sender.user_id)
         return "Изменил аватарку"
 
     def menu_default(self):

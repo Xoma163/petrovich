@@ -11,7 +11,7 @@ class Advice(CommonCommand):
         try:
             fga = FuckingGreatAdviceAPI()
             advice = fga.get_advice()
-            keyboard = self.bot.get_inline_keyboard(self.name, "Ещё")
+            keyboard = self.bot.get_inline_keyboard([{'command': self.name, 'button_text': "Ещё"}])
             return {"msg": advice, "keyboard": keyboard}
 
         except:

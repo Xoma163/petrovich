@@ -104,6 +104,8 @@ class Event:
                         self.args = [arg for arg in self.payload['args'].values()]
                     elif isinstance(self.payload['args'], list):
                         self.args = self.payload['args']
+                    else:
+                        self.args = [self.payload['args']]
                     self.original_args = " ".join([str(arg) for arg in self.args])
 
         self.sender = event.get('sender')

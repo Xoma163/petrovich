@@ -37,7 +37,8 @@ class Command(BaseCommand):
         else:
             debug = False
 
-        start_vk(debug)
+        if not debug:
+            start_vk(debug)
         start_tg(debug)
         if not debug:
             start_camera()

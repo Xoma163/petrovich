@@ -20,5 +20,7 @@ class Bash(CommonCommand):
         msg = bash_api.parse()
         return {
             "msg": msg,
-            "keyboard": self.bot.get_inline_keyboard(self.name, args={"quotes_count": quotes_count})
+
+
+            "keyboard": self.bot.get_inline_keyboard([{'command': self.name, 'button_text': "Ещё", 'args':{"quotes_count": quotes_count}}])
         }

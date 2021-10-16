@@ -43,7 +43,7 @@ class Cat(CommonCommand):
 
             return {
                 'attachments': attachments,
-                "keyboard": self.bot.get_inline_keyboard(self.name)
+                "keyboard": self.bot.get_inline_keyboard([{'command': self.name, 'button_text': "Ещё"}])
             }
         else:
             self.check_sender(Role.TRUSTED)

@@ -135,6 +135,7 @@ secrets/
 cloc.exe
 
 static/
+media/
 node_modules/
 
 config/nginx/conf/andrewsha-ssl.conf

@@ -30,7 +30,8 @@ class Waifu(CommonCommand):
         attachment = self.bot.upload_photos(url)
 
         if self.event.args:
-            keyboard = self.bot.get_inline_keyboard(self.name, "Следующая", args={"waifu_number": waifu_number + 1})
+
+            keyboard = self.bot.get_inline_keyboard([{'command': self.name, 'button_text': "Следующая", 'args': {"waifu_number": waifu_number + 1}}])
         else:
-            keyboard = self.bot.get_inline_keyboard(self.name)
+            keyboard = self.bot.get_inline_keyboard([{'command': self.name, 'button_text': "Ещё"}])
         return {"msg": waifu_number, "attachments": attachment, "keyboard": keyboard}
