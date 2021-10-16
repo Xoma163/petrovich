@@ -19,9 +19,6 @@ class CommonBot(Thread):
 
         self.platform = platform
         self.mentions = []
-        self.BOT_CAN_WORK = True
-        self.DEBUG = False
-        self.DEVELOP_DEBUG = False
         self.user_model = Users.objects.filter(platform=self.platform.name)
         self.chat_model = Chat.objects.filter(platform=self.platform.name)
         self.bot_model = Bot.objects.filter(platform=self.platform.name)
@@ -46,241 +43,6 @@ class CommonBot(Thread):
         """
         raise NotImplementedError
 
-    def run(self):
-        """
-        Thread запуск основного тела команды
-        """
-        self.listen()
-
-    def listen(self):
-        """
-        Получение новых событий и их обработка
-        """
-        pass
-        # raise NotImplementedError
-
-    @staticmethod
-    def _get_similar_command(event, commands):
-        """
-        Получение похожей команды по неправильно введённой
-        """
-        similar_command = None
-        tanimoto_max = 0
-        user_groups = event.sender.get_list_of_role_names()
-        for command in commands:
-            if not command.full_names:
-                continue
-
-            # Выдача пользователю только тех команд, которые ему доступны
-            command_access = command.access
-            if isinstance(command_access, str):
-                command_access = [command_access]
-            if command_access.name not in user_groups:
-                continue
-
-            # Выдача только тех команд, у которых стоит флаг выдачи
-            if not command.suggest_for_similar:
-                continue
-
-            for name in command.full_names:
-                if name:
-                    tanimoto_current = tanimoto(event.command, name)
-                    if tanimoto_current > tanimoto_max:
-                        tanimoto_max = tanimoto_current
-                        similar_command = name
-
-        msg = f"Я не понял команды \"{event.command}\"\n"
-        if similar_command and tanimoto_max != 0:
-            msg += f"Возможно вы имели в виду команду \"{similar_command}\""
-        return msg
-
-    def menu(self, event, send=True):
-        """
-        Выбор команды и отправка данных о сообщении ей
-        Проверки на запущенность бота, забаненных юзеров
-        """
-        # Проверяем не остановлен ли бот, если так, то проверяем вводимая команда = старт?
-        if not self.can_bot_working():
-            if not event.sender.check_role(Role.ADMIN):
-                return
-
-            if event.command in ['старт']:
-                self.BOT_CAN_WORK = True
-                # cameraHandler.resume()
-                msg = "Стартуем!"
-                self.send_message(event.peer_id, msg)
-                log_result = {'result': msg}
-                self.logger.debug(log_result)
-                return msg
-            return
-
-        group = event.sender.groups.filter(name=Role.BANNED.name)
-        if len(group) > 0:
-            return
-        copy_event = deepcopy(event)
-        if copy_event.attachments:
-            for att in copy_event.attachments:
-                if 'content' in att:
-                    att['content'] = "*****"
-        if copy_event.fwd:
-            for fwd in copy_event.fwd:
-                for att in fwd['attachments']:
-                    if 'content' in att:
-                        att['content'] = "*****"
-
-        self.logger.debug(copy_event)
-
-        from apps.bot.initial import COMMANDS
-
-        for command in COMMANDS:
-            try:
-                if command.accept(event):
-                    result = command.__class__().check_and_start(self, event)
-                    if send:
-                        result = self.parse_and_send_msgs(event.peer_id, result)
-                    else:
-                        result = self.parse_command_result(result)
-                    log_result = {'result': result}
-                    for msg in log_result['result']:
-                        atts = msg.get('attachments')
-                        if atts:
-                            for att in atts:
-                                if isinstance(att, dict) and isinstance(att['attachment'], bytes):
-                                    att['attachment'] = "*****"
-
-                    self.logger.debug(log_result)
-                    return result
-            except PSkip:
-                return
-            except PWarning as e:
-                msg = str(e)
-                log_runtime_warning = {'result': msg}
-                self.logger.warning(log_runtime_warning)
-                if send:
-                    self.parse_and_send_msgs(event.peer_id, msg)
-                return msg
-            except PError as e:
-                msg = str(e)
-                log_runtime_error = {'exception': msg, 'result': msg}
-                self.logger.error(log_runtime_error)
-                if send:
-                    self.parse_and_send_msgs(event.peer_id, msg)
-                return msg
-            except Exception as e:
-                msg = "Непредвиденная ошибка. Сообщите разработчику в группе или команда /баг"
-                tb = traceback.format_exc()
-                log_exception = {
-                    'exception': str(e),
-                    'result': msg
-                }
-                self.logger.error(log_exception, exc_info=tb)
-                if send:
-                    self.parse_and_send_msgs(event.peer_id, msg)
-                return msg
-
-        if event.chat and not event.chat.need_reaction:
-            return None
-        if event.chat and event.chat.mentioning:
-            return None
-        similar_command = self._get_similar_command(event, COMMANDS)
-        self.logger.debug({'result': similar_command})
-        if send:
-            self.send_message(event.peer_id, similar_command)
-        return similar_command
-
-    def send_message(self, peer_id, msg="ᅠ", attachments=None, keyboard=None, dont_parse_links=False, **kwargs):
-        """
-        Отправка сообщения
-        peer_id: в какой чат/какому пользователю
-        msg: сообщение
-        attachments: список вложений
-        keyboard: клавиатура
-        dont_parse_links: не преобразовывать ссылки
-        """
-        raise NotImplementedError
-
-    @staticmethod
-    def parse_command_result(result):
-        """
-        Преобразование 1 из 4х типов сообщения в единый стандарт
-        [{...},{...}]
-        """
-        msgs = []
-        if isinstance(result, str) or isinstance(result, int) or isinstance(result, float):
-            result = {'msg': str(result)}
-        if isinstance(result, dict):
-            result = [result]
-        if isinstance(result, list):
-            for msg in result:
-                if isinstance(msg, str):
-                    msg = {'msg': msg}
-                if isinstance(msg, dict):
-                    msgs.append(msg)
-        return msgs
-
-    def parse_and_send_msgs(self, peer_id, result):
-        """
-        Отправка сообщения от команды. Принимает любой формат
-        """
-        msgs = self.parse_command_result(result)
-        for msg in msgs:
-            self.send_message(peer_id, **msg)
-        return msgs
-
-    # Отправляет сообщения юзерам в разных потоках
-    def parse_and_send_msgs_thread(self, chat_ids, message):
-        """
-        Преобразование сообщения и отправка в отдельном потоке для каждого чата
-        """
-        if not isinstance(chat_ids, list):
-            chat_ids = [chat_ids]
-        for chat_id in chat_ids:
-            thread = Thread(target=self.parse_and_send_msgs, args=(chat_id, message,))
-            thread.start()
-
-    def need_a_response_common(self, event) -> bool:
-        """
-        Нужен ли ответ пользователю
-        Правила ответа
-        """
-        message = event['message']['text']
-        if event['chat'] and event['chat'].is_banned:
-            return False
-        have_payload = 'message' in event and 'payload' in event['message'] and event['message']['payload']
-        if have_payload:
-            return True
-        have_audio_message = self.have_audio_message(event)
-        if have_audio_message:
-            if event['chat']:
-                return event['chat'].recognize_voice
-            return True
-        have_action = event['message']['action'] is not None
-        if have_action:
-            return True
-        empty_message = len(message) == 0
-        if empty_message:
-            return False
-        from_user = event['from_user']
-        if from_user:
-            return True
-        message_is_command = message[0] == '/'
-        if message_is_command:
-            return True
-        message_is_exact_meme_name = Meme.objects.filter(name__unaccent=message.lower()).exists()
-        if message_is_exact_meme_name:
-            return True
-
-        need_reaction_for_fwd = self.need_reaction_for_fwd(event)
-        if need_reaction_for_fwd:
-            return need_reaction_for_fwd
-
-        for mention in self.mentions:
-            if message.find(mention) != -1:
-                return True
-        if event['chat'] and event['chat'].mentioning:
-            return True
-        return False
-
     @staticmethod
     def need_reaction_for_fwd(event):
         message = event['message']['text']
@@ -294,31 +56,6 @@ class CommonBot(Thread):
                                 (fwd_message and urlparse(fwd_message) in MEDIA_URLS)
         if message_is_media_link:
             return True
-
-    @staticmethod
-    def have_audio_message(event) -> bool:
-        """
-        Есть ли аудиосообщение в сообщении
-        """
-        if isinstance(event, Event):
-            all_attachments = event.attachments or []
-            if event.fwd:
-                all_attachments += event.fwd[0]['attachments']
-            if all_attachments:
-                for attachment in all_attachments:
-                    if attachment['type'] == 'audio_message':
-                        return True
-        else:
-            all_attachments = event['message']['attachments'].copy()
-            if event['fwd'] and 'attachments' in event['fwd'][0]:
-                all_attachments += event['fwd'][0]['attachments']
-            if all_attachments:
-                for attachment in all_attachments:
-                    if attachment['type'] == 'audio_message':
-                        # Костыль, чтобы при пересланном сообщении он не выполнял никакие другие команды
-                        # event['message']['text'] = ''
-                        return True
-        return False
 
     @staticmethod
     def parse_date(date) -> str:
@@ -348,12 +85,6 @@ class CommonBot(Thread):
         chats = user.chats
         if chat in chats.all():
             chats.remove(chat)
-
-    def can_bot_working(self) -> bool:
-        """
-        Запущен ли бот
-        """
-        return self.BOT_CAN_WORK
 
     # ToDo: очень говнокод
     def get_user_by_name(self, args, filter_chat=None) -> Users:
@@ -412,23 +143,6 @@ class CommonBot(Thread):
             raise PWarning("Чат не найден")
         return chats.first()
 
-    def upload_photos(self, images, max_count=10):
-        """
-        Загрузка фотографий
-        """
-        raise NotImplementedError
-
-    def upload_animation(self, animation, peer_id=None, title='Документ', filename=None):
-        """
-        Загрузка анимации (GIF)
-        """
-        raise NotImplementedError
-
-    def upload_document(self, document, peer_id=None, title='Документ', filename=None):
-        """
-        Загрузка документа
-        """
-        raise NotImplementedError
 
     def delete_message(self, chat_id, message_id):
         """
@@ -476,23 +190,3 @@ class CommonBot(Thread):
         else:
             return gamers.first()
 
-
-def get_bot_by_platform(platform: Platform):
-    """
-    Получение бота по платформе
-    """
-    from apps.bot.classes_old.bots.VkBot import VkBot
-    from apps.bot.classes_old.bots.TgBot import TgBot
-    from apps.bot.classes_old.bots.YandexBot import YandexBot
-
-    platforms = {
-        Platform.VK: VkBot,
-        Platform.TG: TgBot,
-        Platform.YANDEX: YandexBot
-    }
-    return platforms[platform]
-
-
-def get_moderator_bot_class():
-    from apps.bot.classes_old.bots.TgBot import TgBot
-    return TgBot()

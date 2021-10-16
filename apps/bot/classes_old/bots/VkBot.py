@@ -503,7 +503,7 @@ class VkBot(CommonBot):
         try:
             return self.vk.messages.getConversationMembers(peer_id=peer_id, group_id=self.group_id, lang='ru')[
                 'profiles']
-        except:
+        except Exception:
             raise PWarning("У бота нет админских прав для получения списка пользователей в конференции")
 
     def remove_self_from_chat(self, chat_id):

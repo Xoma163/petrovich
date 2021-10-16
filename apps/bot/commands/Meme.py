@@ -156,7 +156,7 @@ class Meme(Command):
                     self._check_allowed_url(url)
                     attachments = [{'type': 'link', 'url': url}]
                     meme_name = self.event.message.args[1:-1]
-                except:
+                except Exception:
                     raise PWarning("Не нашёл вложений в сообщении или пересланном сообщении\n"
                                    "Не нашёл ссылки на youtube/coub")
 

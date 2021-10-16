@@ -157,12 +157,12 @@ class Command:
             args = self.args_or_fwd
         try:
             check_args = self.check_args(args)
-        except:
+        except Exception:
             check_args = False
 
         try:
             check_fwd = self.check_fwd()
-        except:
+        except Exception:
             check_fwd = False
 
         if check_args or check_fwd:

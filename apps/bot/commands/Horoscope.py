@@ -62,7 +62,7 @@ class Horoscope(Command):
                     zodiac_sign_name = self.event.message.args[1].lower()
                     zodiac_sign = self.zodiac_signs.get_zodiac_sign_by_sign_or_name(zodiac_sign_name)
                     zodiac_sign_index = self.zodiac_signs.get_zodiac_sign_index(zodiac_sign)
-                except:
+                except Exception:
                     raise PWarning("Не знаю такого знака зодиака")
                 horoscope = HoroscopeModel.objects.first()
                 if not horoscope:

@@ -45,7 +45,7 @@ class NotifyRepeat(Command):
         try:
             crontab = get_crontab(self.event.message.args)
             text = self.event.message.args_str.split(' ', 5)[-1]
-        except:
+        except Exception:
             date = get_time(self.event.message.args[0])
             if not date:
                 raise PWarning("Не смог распарсить дату")

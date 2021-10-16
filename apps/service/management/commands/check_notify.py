@@ -31,7 +31,7 @@ class Command(BaseCommand):
                     if notify.crontab:
                         try:
                             timezone = notify.author.city.timezone.name
-                        except:
+                        except Exception:
                             timezone_error = True
                             print("У пользователя слетела таймзона")
                             timezone = DEFAULT_TIME_ZONE

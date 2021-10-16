@@ -44,7 +44,7 @@ class YouTube(Command):
             response = requests.get(channel_url)
             bsop = BeautifulSoup(response.content, 'html.parser')
             channel_id = bsop.find_all('link', {'rel': 'canonical'})[0].attrs['href'].split('/')[-1]
-        except:
+        except Exception:
             return PWarning("Некорректная ссылка на ютуб канал")
 
         if self.event.chat:

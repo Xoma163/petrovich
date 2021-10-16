@@ -45,7 +45,7 @@ class VoiceRecognition(Command):
             input_file_format = download_url.split('.')[-1]
             if input_file_format == 'oga':
                 input_file_format = 'ogg'
-        except:
+        except Exception:
             input_file_format = 'mp3'
         AudioSegment.from_file(i, input_file_format).export(o, format='wav')
         o.seek(0)

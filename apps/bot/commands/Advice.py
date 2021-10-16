@@ -14,5 +14,5 @@ class Advice(Command):
             keyboard = self.bot.get_inline_keyboard([{'command': self.name, 'button_text': "Ещё"}])
             return {"msg": advice, "keyboard": keyboard}
 
-        except:
+        except Exception:
             raise PError("Ошибка API")

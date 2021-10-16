@@ -3,15 +3,17 @@ import threading
 import time
 
 import requests
+from django.contrib.auth.models import Group
 
 from apps.bot.classes.bots.Bot import Bot as CommonBot
 from apps.bot.classes.consts.ActivitiesEnum import ActivitiesEnum, TG_ACTIVITIES
-from apps.bot.classes.consts.Consts import Platform
+from apps.bot.classes.consts.Consts import Platform, Role
 from apps.bot.classes.events.TgEvent import TgEvent
 from apps.bot.classes.messages.ResponseMessage import ResponseMessageItem
 from apps.bot.classes.messages.attachments.DocumentAttachment import DocumentAttachment
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
+from apps.bot.models import Users, Chat, Bot
 from apps.bot.utils.utils import get_thumbnail_for_image, get_chunks
 from petrovich.settings import env
 
@@ -61,7 +63,7 @@ class TgBot(CommonBot):
             files = {'document': document.content}
             try:
                 files['thumb'] = get_thumbnail_for_image(document, size=320)
-            except:
+            except Exception:
                 pass
             return self.requests.get('sendDocument', default_params, files=files)
 
@@ -155,6 +157,68 @@ class TgBot(CommonBot):
         """
         tg_activity = TG_ACTIVITIES[activity]
         self.requests.get('sendChatAction', {'chat_id': peer_id, 'action': tg_activity})
+
+    @staticmethod
+    def get_mention(user, name=None):
+        """
+        Получение меншона пользователя
+        """
+        if user.nickname:
+            return f"@{user.nickname}"
+        return str(user)
+
+    def delete_message(self, chat_id, message_id):
+        self.requests.get('deleteMessage', params={'chat_id': chat_id, 'message_id': message_id})
+
+    def get_user_by_id(self, user_id) -> Users:
+        """
+        Возвращает пользователя по его id
+        """
+        tg_user = self.user_model.filter(user_id=user_id)
+        if len(tg_user) > 0:
+            tg_user = tg_user.first()
+        else:
+            # Если пользователь из fwd
+            tg_user = Users()
+            tg_user.user_id = user_id
+            tg_user.platform = self.platform.name
+
+            tg_user.save()
+
+            group_user = Group.objects.get(name=Role.USER.name)
+            tg_user.groups.add(group_user)
+            tg_user.save()
+        return tg_user
+
+    def get_chat_by_id(self, chat_id) -> Chat:
+        """
+        Возвращает чат по его id
+        """
+        if chat_id > 0:
+            chat_id *= -1
+        tg_chat = self.chat_model.filter(chat_id=chat_id)
+        if len(tg_chat) > 0:
+            tg_chat = tg_chat.first()
+        else:
+            tg_chat = Chat(chat_id=chat_id, platform=self.platform.name)
+            tg_chat.save()
+        return tg_chat
+
+    def get_bot_by_id(self, bot_id) -> Bot:
+        """
+        Получение бота по его id
+        """
+        if bot_id > 0:
+            bot_id = -bot_id
+        bot = self.bot_model.filter(bot_id=bot_id)
+        if len(bot) > 0:
+            bot = bot.first()
+        else:
+            # Прозрачная регистрация
+            bot = Bot(bot_id=bot_id, platform=self.platform.name)
+            bot.save()
+
+        return bot
 
 
 class TgRequests:

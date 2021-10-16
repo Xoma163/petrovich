@@ -146,7 +146,7 @@ class QuotesGenerator:
         if msg.get('photo'):
             try:
                 image = Image.open(requests.get(msg['photo'], stream=True).raw).convert('RGBA')
-            except:
+            except Exception:
                 image = None
             if image:
                 composite = Image.new("RGBA", image.size, (255, 255, 255, 0))
@@ -197,7 +197,7 @@ class QuotesGenerator:
             # Третий параметр: https://stackoverflow.com/questions/5324647/how-to-merge-a-transparent-png-image-with-another-image-using-pil
             try:
                 img.paste(msg_photo, msg_photo_pos, msg_photo)
-            except:
+            except Exception:
                 img.paste(msg_photo, msg_photo_pos)
         if fwd_photo:
             if msg_photo_pos:

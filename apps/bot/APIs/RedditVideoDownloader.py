@@ -31,12 +31,12 @@ class RedditVideoSaver:
             filename = bs4.find("adaptationset", {'contenttype': 'audio'}).find('representation').find('baseurl').text
             self.set_audio_filename(filename)
             return filename
-        except:
+        except Exception:
             try:
                 filename = bs4.find("representation", {'id': 'AUDIO-1'}).find('baseurl').text
                 self.set_audio_filename(filename)
                 return filename
-            except:
+            except Exception:
                 return None
 
     def get_reddit_video_audio_urls(self, post_url):
