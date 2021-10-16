@@ -87,7 +87,7 @@ class Command(BaseCommand):
                     # Если отложенная команда
 
                     if notify.text.startswith('/'):
-                        event = event_model()
+                        event = event_model(bot=bot)
                         event.set_message(notify.text)
                         event.sender = notify.author
                         if notify.chat:
@@ -95,7 +95,7 @@ class Command(BaseCommand):
                             event.chat = notify.chat
                         else:
                             event.peer_id = notify.author.user_id
-                        bot.route(event, send=True)
+                        bot.handle_event(event)
                     if notify.repeat:
                         if notify.date:
                             # Для постоянных уведомлений дата должа быть на завтрашний день обязательно.
