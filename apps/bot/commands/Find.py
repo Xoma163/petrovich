@@ -15,7 +15,7 @@ class Find(CommonCommand):
     def start(self):
         self.bot.set_activity(self.event.peer_id)
 
-        query = self.event.original_args
+        query = self.event.message.args_str
         count = 5
 
         gcs_api = GoogleCustomSearchAPI()

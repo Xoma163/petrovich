@@ -48,10 +48,10 @@ class Notifies(CommonCommand):
     def start(self):
         self.user_timezone = self.event.sender.city.timezone.name
 
-        if not self.event.args:
+        if not self.event.message.args:
             return self.menu_notifications()
         else:
-            arg0 = self.event.args[0].lower()
+            arg0 = self.event.message.args[0].lower()
 
             menu = [
                 [["удалить", "удали"], self.menu_delete],
@@ -70,7 +70,7 @@ class Notifies(CommonCommand):
                 notifies = Notify.objects.filter(chat=self.event.chat).order_by("date")
             except PWarning:
                 notifies = notifies.filter(chat=self.event.chat)
-        filter_list = self.event.args[1:]
+        filter_list = self.event.message.args[1:]
         for _filter in filter_list:
             notifies = notifies.filter(text_for_filter__icontains=_filter)
 
@@ -93,7 +93,7 @@ class Notifies(CommonCommand):
 
     def menu_get_for_user(self):
         self.check_conversation()
-        user = self.bot.get_user_by_name(self.event.original_args, self.event.chat)
+        user = self.bot.get_user_by_name(self.event.message.args_str, self.event.chat)
         notifies = Notify.objects.filter(author=user, chat=self.event.chat)
         return get_notifies_from_object(notifies, self.user_timezone, True)
 

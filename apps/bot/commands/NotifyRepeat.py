@@ -43,10 +43,10 @@ class NotifyRepeat(CommonCommand):
         crontab = None
         date = None
         try:
-            crontab = get_crontab(self.event.args)
-            text = self.event.original_args.split(' ', 5)[-1]
+            crontab = get_crontab(self.event.message.args)
+            text = self.event.message.args_str.split(' ', 5)[-1]
         except:
-            date = get_time(self.event.args[0])
+            date = get_time(self.event.message.args[0])
             if not date:
                 raise PWarning("Не смог распарсить дату")
             date = normalize_datetime(date, timezone)
@@ -58,7 +58,7 @@ class NotifyRepeat(CommonCommand):
             if (date - datetime_now).days < 0 or (datetime_now - date).seconds < 0:
                 date = date + timedelta(days=1)
 
-            text = self.event.original_args.split(' ', 1)[1]
+            text = self.event.message.args_str.split(' ', 1)[1]
         if text[0] == '/':
             first_space = text.find(' ')
             if first_space > 0:

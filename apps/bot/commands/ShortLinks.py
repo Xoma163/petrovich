@@ -17,7 +17,7 @@ class ShortLinks(CommonCommand):
         if msgs:
             long_link = self.event.fwd[0]['text']
         else:
-            long_link = self.event.args[0]
+            long_link = self.event.message.args[0]
         try:
             short_link = self.bot.get_short_link(long_link)
         except Exception:

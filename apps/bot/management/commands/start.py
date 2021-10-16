@@ -1,7 +1,7 @@
 from django.core.management import BaseCommand
 
 from apps.birds.CameraHandler import CameraHandler
-from apps.bot.classes.bots.TgBot import TgBot
+from apps.bot.classes2.bots.TgBot import TgBot
 from apps.bot.classes.bots.VkBot import VkBot
 
 vk_bot = VkBot()

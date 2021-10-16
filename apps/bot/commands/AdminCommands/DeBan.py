@@ -13,7 +13,7 @@ class DeBan(CommonCommand):
     excluded_platforms = [Platform.API, Platform.YANDEX]
 
     def start(self):
-        user = self.bot.get_user_by_name(self.event.args, self.event.chat)
+        user = self.bot.get_user_by_name(self.event.message.args, self.event.chat)
         group_banned = Group.objects.get(name=Role.BANNED.name)
         user.groups.remove(group_banned)
         user.save()

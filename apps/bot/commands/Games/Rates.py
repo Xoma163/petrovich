@@ -28,7 +28,7 @@ class Rates(CommonCommand):
                 min_gamers = 2
 
             gamers = RateModel.objects.filter(chat=self.event.chat).order_by("date")
-            if self.event.args and self.event.args[0] == 'f':
+            if self.event.message.args and self.event.message.args[0] == 'f':
                 self.check_sender(Role.CONFERENCE_ADMIN)
                 if len(gamers) <= 1:
                     raise PWarning("Ну ты ваще обалдел? Хотя бы один игрок-то пусть будет")
@@ -59,7 +59,7 @@ class Rates(CommonCommand):
 
                 gamer.save()
 
-            if self.event.command == "казино":
+            if self.event.message.command == "казино":
                 attachments = self.bot.upload_photos(f"{STATIC_ROOT}/bot/img/rate.jpg")
                 if len(winners) == 1:
                     msg = {'msg': f"Выпавшее число - {rnd}\nПобедитель этого казино:\n{winners_str}",

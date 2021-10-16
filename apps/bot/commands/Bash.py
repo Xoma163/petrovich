@@ -12,9 +12,9 @@ class Bash(CommonCommand):
 
     def start(self):
         quotes_count = 5
-        if self.event.args:
+        if self.event.message.args:
             self.parse_int()
-            quotes_count = self.event.args[0]
+            quotes_count = self.event.message.args[0]
             self.check_number_arg_range(quotes_count, 1, MAX_QUOTES)
         bash_api = BashAPI(quotes_count)
         msg = bash_api.parse()

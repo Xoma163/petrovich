@@ -4,6 +4,8 @@ from apps.bot.classes.Consts import Role
 from apps.bot.classes2.bots.Bot import Bot
 from apps.bot.classes2.events.Event import Event
 from apps.bot.classes2.messages.Message import Message
+from apps.bot.classes2.messages.attachments.PhotoAttachment import PhotoAttachment
+from apps.bot.classes2.messages.attachments.VoiceAttachment import VoiceAttachment
 from apps.bot.models import Users
 
 
@@ -13,8 +15,8 @@ class TgEvent(Event):
         # if 'message' not in self.raw and 'callback_query' not in self.raw:
         #     return
         message = self.raw['message']
-        self.message = Message(message['text'], message['message_id'])
-        self.peer_id = message['chat']['id']
+
+        self.peer_id = str(message['chat']['id'])
 
         if self.raw['message']['chat']['id'] != self.raw['message']['from']['id']:
             self.chat = bot.get_chat_by_id(-int(-self.raw['message']['chat']['id']))
@@ -23,6 +25,23 @@ class TgEvent(Event):
             self.is_from_user = True
         if message['from']['is_bot']:
             self.is_from_bot = True
+
+        photo = message.get('photo')
+        voice = message.get('voice')
+        document = message.get('document')
+        message_text = None
+        if voice:
+            self.setup_voice(voice, bot)
+        elif photo:
+            self.setup_photo(photo[-1], bot)
+            message_text = message.get('caption')
+        elif document:
+            if document['mime_type'] in ['image/png', 'image/jpg', 'image/jpeg']:
+                self.setup_photo(document, bot)
+                message_text = message.get('caption')
+        else:
+            message_text = message.get('text')
+        self.message = Message(message_text, message['message_id']) if message_text else None
 
         self.sender = self.register_user(message['from'], bot)
 
@@ -54,3 +73,13 @@ class TgEvent(Event):
             tg_user.user_id = user['id']
             set_fields(tg_user)
         return tg_user
+
+    def setup_photo(self, photo_event, bot):
+        tg_photo = PhotoAttachment()
+        tg_photo.parse_tg_photo(photo_event, bot)
+        self.attachments.append(tg_photo)
+
+    def setup_voice(self, voice_event, bot):
+        tg_voice = VoiceAttachment()
+        tg_voice.parse_tg_voice(voice_event, bot)
+        self.attachments.append(tg_voice)

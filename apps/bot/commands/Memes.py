@@ -25,10 +25,10 @@ class Memes(CommonCommand):
 
     def start(self):
         try:
-            if self.event.args:
+            if self.event.message.args:
                 self.int_args = [0]
                 self.parse_int()
-                page = self.event.args[0]
+                page = self.event.message.args[0]
             else:
                 page = 1
             memes = MemeModel.objects.filter(approved=True)
@@ -57,11 +57,11 @@ class Memes(CommonCommand):
             return msg
         except PWarning:
             memes = MemeModel.objects.filter(approved=True)
-            for arg in self.event.args:
+            for arg in self.event.message.args:
                 memes = memes.filter(name__icontains=arg)
             if len(memes) == 0:
                 raise PWarning("Не нашёл мемов по заданному запросу")
-            memes = get_tanimoto_memes(memes, self.event.original_args)
+            memes = get_tanimoto_memes(memes, self.event.message.args_str)
             memes_sliced = memes[:20]
             meme_names = get_memes_names(memes_sliced, self.event.sender)
             meme_names_str = ";\n".join(meme_names)

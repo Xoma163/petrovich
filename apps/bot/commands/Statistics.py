@@ -17,10 +17,10 @@ class Statistics(CommonCommand):
     conversation = True
 
     def start(self):
-        if not self.event.args:
+        if not self.event.message.args:
             return self.menu_all()
         else:
-            arg0 = self.event.args[0].lower()
+            arg0 = self.event.message.args[0].lower()
             menu = [
                 [['петрович'], self.menu_petrovich],
                 [['ставки'], self.menu_rates],

@@ -26,10 +26,10 @@ class Joke(CommonCommand):
     int_args = [0]
 
     def start(self):
-        if self.event.args is None:
+        if self.event.message.args is None:
             a_type = 1
         else:
-            a_type = self.event.args[0]
+            a_type = self.event.message.args[0]
             self.check_number_arg_range(a_type, 1, 19, [9, 10, 17, 19])
         rzhunemogu_api = RzhunemoguAPI()
         msg = rzhunemogu_api.get_joke(a_type)

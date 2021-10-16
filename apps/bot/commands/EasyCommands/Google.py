@@ -9,4 +9,4 @@ class Google(CommonCommand):
     args = 1
 
     def start(self):
-        return f"https://www.google.com/search?q={quote(self.event.original_args)}"
+        return f"https://www.google.com/search?q={quote(self.event.message.args_str)}"

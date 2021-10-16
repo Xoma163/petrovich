@@ -27,7 +27,7 @@ class YouTube(CommonCommand):
     platforms = [Platform.VK, Platform.TG]
 
     def start(self):
-        arg0 = self.event.args[0].lower()
+        arg0 = self.event.message.args[0].lower()
         menu = [
             [['добавить', 'подписаться', 'подписка'], self.menu_add],
             [['удалить', 'отписаться', 'отписка'], self.menu_delete],
@@ -39,7 +39,7 @@ class YouTube(CommonCommand):
 
     def menu_add(self):
         self.check_args(2)
-        channel_url = self.event.args[1]
+        channel_url = self.event.message.args[1]
         try:
             response = requests.get(channel_url)
             bsop = BeautifulSoup(response.content, 'html.parser')
@@ -75,7 +75,7 @@ class YouTube(CommonCommand):
 
     def menu_delete(self):
         self.check_args(2)
-        channel_filter = self.event.args[1:]
+        channel_filter = self.event.message.args[1:]
         yt_sub = self.get_sub(channel_filter, True)
         yt_sub_title = yt_sub.title
         yt_sub.delete()

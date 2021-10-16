@@ -29,24 +29,24 @@ class Nostalgia(CommonCommand):
     DEFAULT_MSGS_COUNT = 10
 
     def start(self):
-        if self.event.args:
-            arg0 = str(self.event.args[0]).lower()
+        if self.event.message.args:
+            arg0 = str(self.event.message.args[0]).lower()
         else:
             arg0 = None
 
-        if self.event.args:
-            if len(self.event.args) == 2:
+        if self.event.message.args:
+            if len(self.event.message.args) == 2:
                 self.int_args = [0, 1]
                 try:
                     self.parse_int()
-                    return self.menu_range(self.event.args[0], self.event.args[1])
+                    return self.menu_range(self.event.message.args[0], self.event.message.args[1])
                 except PWarning:
                     pass
             else:
                 self.int_args = [0]
                 try:
                     self.parse_int()
-                    return self.menu_range(self.event.args[0])
+                    return self.menu_range(self.event.message.args[0])
                 except PWarning:
                     pass
 
@@ -84,7 +84,7 @@ class Nostalgia(CommonCommand):
         return "\n".join(all_atts)
 
     def menu_default(self):
-        if self.event.args:
+        if self.event.message.args:
             return self.menu_search()
         return self.menu_range()
 
@@ -93,13 +93,13 @@ class Nostalgia(CommonCommand):
         data = self._load_file()
 
         try:
-            page = int(self.event.args[-1])
+            page = int(self.event.message.args[-1])
             if page < 1:
                 page = 1
-            search_list = self.event.args[:-1]
+            search_list = self.event.message.args[:-1]
         except ValueError:
             page = 1
-            search_list = self.event.args
+            search_list = self.event.message.args
 
         search_query = " ".join(search_list)
 

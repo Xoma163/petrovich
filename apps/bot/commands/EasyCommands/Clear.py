@@ -8,6 +8,6 @@ class Clear(CommonCommand):
     suggest_for_similar = False
 
     def start(self):
-        if self.event.command == 'ммм':
+        if self.event.message.command == 'ммм':
             return random_event(["Данон", "Хуета"])
         return "Хуета"

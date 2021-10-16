@@ -13,6 +13,6 @@ class Flood(CommonCommand):
 
     def start(self):
         msg = "ыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыы"
-        count = self.event.args[0]
+        count = self.event.message.args[0]
         msgs = [{'msg': msg}] * count
         return msgs

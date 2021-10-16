@@ -6,8 +6,8 @@ class StartLada(CommonCommand):
     names = ["завести"]
 
     def start(self):
-        if self.event.args:
-            who = self.event.original_args
+        if self.event.message.args:
+            who = self.event.message.args_str
             return ["уи ви ви ви ви ви ви ви", f'завожу {who}']
 
         return "уи ви ви ви ви ви ви ви"

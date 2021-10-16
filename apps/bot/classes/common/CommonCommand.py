@@ -55,7 +55,7 @@ class CommonCommand:
         :param event: событие
         :return: bool
         """
-        if event.command in self.full_names:
+        if event.message.command in self.full_names:
             return True
 
         return False

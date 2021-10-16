@@ -39,10 +39,8 @@ class Bot(Thread):
             if not event.need_a_response():
                 return
             message = self.route(event)
-            rm = ResponseMessage(message, event.peer_id)
-            if send and message:
-                self.send_response_message(rm)
-            return rm
+            if message:
+                self.parse_and_send_msgs(event.peer_id, message, send)
         except Exception as e:
             print(str(e))
             tb = traceback.format_exc()
@@ -50,15 +48,22 @@ class Bot(Thread):
 
     def send_response_message(self, rm: ResponseMessage):
         for msg in rm.messages:
-            self.send_message(msg)
+            response = self.send_message(msg)
+            if response.status_code != 200:
+                error_msg = "Непредвиденная ошибка. Сообщите разработчику. Команда /баг"
+                self.logger.error({'result': msg})
+                error_rm = ResponseMessage(error_msg, msg.peer_id).messages[0]
+                self.send_message(error_rm)
+                return msg
 
-    def parse_and_send_msgs(self, peer_id, msgs):
+    def parse_and_send_msgs(self, peer_id, msgs, send=True) -> ResponseMessage:
         """
         Отправка сообщения от команды. Принимает любой формат
         """
         rm = ResponseMessage(msgs, peer_id)
-        self.send_response_message(rm)
-        return msgs
+        if send:
+            self.send_response_message(rm)
+        return rm
 
     def route(self, event):
         """
@@ -79,12 +84,11 @@ class Bot(Thread):
                 return msg
             except Exception as e:
                 msg = "Непредвиденная ошибка. Сообщите разработчику. Команда /баг"
-                tb = traceback.format_exc()
                 log_exception = {
                     'exception': str(e),
                     'result': msg
                 }
-                self.logger.error(log_exception, exc_info=tb)
+                self.logger.error(log_exception, exc_info=traceback.format_exc())
                 return msg
 
         if event.chat and not event.chat.need_reaction:
@@ -92,6 +96,7 @@ class Bot(Thread):
 
         similar_command = self.get_similar_command(event, COMMANDS)
         self.logger.debug({'result': similar_command})
+        return similar_command
 
     @staticmethod
     def get_similar_command(event, commands):
@@ -119,12 +124,12 @@ class Bot(Thread):
 
             for name in command.full_names:
                 if name:
-                    tanimoto_current = tanimoto(event.command, name)
+                    tanimoto_current = tanimoto(event.message.command, name)
                     if tanimoto_current > tanimoto_max:
                         tanimoto_max = tanimoto_current
                         similar_command = name
 
-        msg = f"Я не понял команды \"{event.command}\"\n"
+        msg = f"Я не понял команды \"{event.message.command}\"\n"
         if similar_command and tanimoto_max != 0:
             msg += f"Возможно вы имели в виду команду \"{similar_command}\""
         return msg

@@ -14,7 +14,7 @@ class Ban(CommonCommand):
     excluded_platforms = [Platform.API, Platform.YANDEX]
 
     def start(self):
-        user = self.bot.get_user_by_name(self.event.args, self.event.chat)
+        user = self.bot.get_user_by_name(self.event.message.args, self.event.chat)
 
         if user.check_role(Role.ADMIN):
             raise PWarning("Нельзя банить админа")

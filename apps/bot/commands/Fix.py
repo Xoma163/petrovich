@@ -32,8 +32,8 @@ class Fix(CommonCommand):
     args_or_fwd = 1
 
     def start(self):
-        if self.event.args:
-            msgs = fix_layout(self.event.original_args)
+        if self.event.message.args:
+            msgs = fix_layout(self.event.message.args_str)
         else:
             msgs = ""
             for msg in self.event.fwd:

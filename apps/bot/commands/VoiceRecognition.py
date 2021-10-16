@@ -17,6 +17,7 @@ MAX_DURATION = 20
 # Если переслано голосовое с командой - выполняет команду
 # Если переслано голосовое с текстом - распознаёт
 # Если переслано голосовое с неправильной командой - распознаёт
+# ToDo: enable
 def have_audio_message(event):
     if isinstance(event, Event):
         all_attachments = event.attachments or []
@@ -27,7 +28,7 @@ def have_audio_message(event):
                 if attachment['type'] == 'audio_message':
                     return True
     else:
-        all_attachments = event['message']['attachments'].copy()
+        all_attachments = event.attachments.copy()
         if event['fwd']:
             all_attachments += event['fwd'][0]['attachments']
         if all_attachments:
@@ -39,7 +40,6 @@ def have_audio_message(event):
     return False
 
 
-# ToDo: TG вложения
 class VoiceRecognition(CommonCommand):
     name = 'распознай'
     names = ["голос", "голосовое"]
@@ -51,6 +51,7 @@ class VoiceRecognition(CommonCommand):
     platforms = [Platform.VK, Platform.TG]
     attachments = ['audio_message']
     priority = -100
+    enabled = False
 
     def accept(self, event):
         if have_audio_message(event):

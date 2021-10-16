@@ -38,9 +38,9 @@ class Rate(CommonCommand):
                 raise PWarning(f"Ставка уже поставлена\n"
                                f"Игроки {len(rates_gamers)}/{min_gamers}:\n"
                                f"{rate_gamer_str}")
-            if self.event.args:
+            if self.event.message.args:
                 random = False
-                arg = self.event.args[0]
+                arg = self.event.message.args[0]
                 self.check_number_arg_range(arg, 1, 100)
             else:
                 random = True

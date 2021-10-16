@@ -59,7 +59,7 @@ class Notify(CommonCommand):
             raise PWarning("Нельзя добавлять более 5 напоминаний")
         timezone = self.event.sender.city.timezone.name
 
-        date, args_count, exact_time_flag = get_time(self.event.args[0], self.event.args[1],
+        date, args_count, exact_time_flag = get_time(self.event.message.args[0], self.event.message.args[1],
                                                      self.event.sender.city.timezone)
         if args_count == 2:
             self.check_args(3)
@@ -75,7 +75,7 @@ class Notify(CommonCommand):
         if (date - datetime_now).days < 0 or (datetime_now - date).seconds < 0:
             raise PWarning("Нельзя указывать дату в прошлом")
 
-        text = self.event.original_args.split(' ', args_count)[args_count]
+        text = self.event.message.args_str.split(' ', args_count)[args_count]
         if text[0] == '/':
             first_space = text.find(' ')
             if first_space > 0:

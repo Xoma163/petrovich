@@ -16,7 +16,7 @@ class Translate(CommonCommand):
     def start(self):
         fwd = self.event.fwd
         if not fwd:
-            text = self.event.original_args
+            text = self.event.message.args_str
         else:
             text = ""
             for msg in fwd:

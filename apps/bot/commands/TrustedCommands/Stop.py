@@ -20,8 +20,8 @@ class Stop(CommonCommand):
     access = Role.TRUSTED
 
     def start(self):
-        if self.event.args:
-            arg0 = self.event.args[0].lower()
+        if self.event.message.args:
+            arg0 = self.event.message.args[0].lower()
         else:
             arg0 = None
 
@@ -46,7 +46,7 @@ class Stop(CommonCommand):
 
     def menu_minecraft(self):
         self.check_sender(Role.MINECRAFT)
-        version = self.event.args[1] if len(self.event.args) > 1 else None
+        version = self.event.message.args[1] if len(self.event.message.args) > 1 else None
         minecraft_server = get_minecraft_version_by_args(version)
         version = minecraft_server.get_version()
         minecraft_server.event = self.event
@@ -62,7 +62,7 @@ class Stop(CommonCommand):
         return "Финишируем террарию!"
 
     def menu_agario(self):
-        version = self.event.args[1] if len(self.event.args) > 1 else None
+        version = self.event.message.args[1] if len(self.event.message.args) > 1 else None
         agario_server = get_agario_version_by_args(version)
         version = agario_server.version
         agario_server.stop()

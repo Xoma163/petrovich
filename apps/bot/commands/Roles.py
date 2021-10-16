@@ -20,10 +20,10 @@ class Roles(CommonCommand):
 
     def start(self):
 
-        if self.event.args:
+        if self.event.message.args:
             self.check_conversation()
             try:
-                user = self.bot.get_user_by_name(self.event.args, self.event.chat)
+                user = self.bot.get_user_by_name(self.event.message.args, self.event.chat)
             except PWarning as e:
                 return str(e)
         else:

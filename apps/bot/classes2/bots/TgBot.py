@@ -13,6 +13,8 @@ API_TELEGRAM_URL = 'api.telegram.org'
 
 
 class TgBot(Bot):
+    API_TELEGRAM_URL = API_TELEGRAM_URL
+
     def __init__(self):
         Bot.__init__(self, Platform.TG)
 

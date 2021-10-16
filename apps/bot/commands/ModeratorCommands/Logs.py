@@ -80,8 +80,8 @@ class Logs(CommonCommand):
 
     def start(self):
         arg0 = None
-        if self.event.args:
-            arg0 = self.event.args[0].lower()
+        if self.event.message.args:
+            arg0 = self.event.message.args[0].lower()
         menu = [
             [['веб', 'web', 'сайт', 'site'], self.get_web_logs],
             [['бот', 'bot'], self.get_bot_logs],
@@ -109,9 +109,9 @@ class Logs(CommonCommand):
         return img
 
     def get_count(self, default, max_count):
-        if self.event.args:
+        if self.event.message.args:
             try:
-                count = int(self.event.args[-1])
+                count = int(self.event.message.args[-1])
                 return min(count, max_count)
             except ValueError:
                 pass

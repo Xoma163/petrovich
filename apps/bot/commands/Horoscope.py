@@ -35,9 +35,9 @@ class Horoscope(CommonCommand):
         ])
 
     def start(self):
-        if self.event.args:
+        if self.event.message.args:
             # Гороскоп для всех знаков
-            if self.event.args[0] in "все":
+            if self.event.message.args[0] in "все":
                 horoscope = HoroscopeModel.objects.first()
                 if not horoscope:
                     raise PWarning("На сегодня ещё нет гороскопа")
@@ -56,10 +56,10 @@ class Horoscope(CommonCommand):
                         prepared_meme['msg'] = zodiac_sign_name
                     self.bot.parse_and_send_msgs_thread(self.event.peer_id, prepared_meme)
                 return
-            elif self.event.args[0] in "инфо":
+            elif self.event.message.args[0] in "инфо":
                 self.check_args(2)
                 try:
-                    zodiac_sign_name = self.event.args[1].lower()
+                    zodiac_sign_name = self.event.message.args[1].lower()
                     zodiac_sign = self.zodiac_signs.get_zodiac_sign_by_sign_or_name(zodiac_sign_name)
                     zodiac_sign_index = self.zodiac_signs.get_zodiac_sign_index(zodiac_sign)
                 except:
@@ -69,7 +69,7 @@ class Horoscope(CommonCommand):
                     raise PWarning("На сегодня ещё нет гороскопа")
                 meme = horoscope.memes.all()[zodiac_sign_index]
                 return f"{zodiac_sign.name.capitalize()}\n{meme.get_info()}"
-            elif self.event.args[0] in "конфа":
+            elif self.event.message.args[0] in "конфа":
                 self.check_conversation()
                 chat_users = self.event.chat.users.all()
                 all_zodiac_signs = set(
@@ -79,7 +79,7 @@ class Horoscope(CommonCommand):
                     messages.append(self.get_horoscope_by_zodiac_sign(zodiac_sign))
                 return messages
             # Гороскоп для знака зодиака в аргументах
-            zodiac_sign_name = self.event.args[0].lower()
+            zodiac_sign_name = self.event.message.args[0].lower()
             zodiac_sign = self.zodiac_signs.get_zodiac_sign_by_sign_or_name(zodiac_sign_name)
             return self.get_horoscope_by_zodiac_sign(zodiac_sign)
 

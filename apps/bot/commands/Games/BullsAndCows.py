@@ -30,7 +30,7 @@ class BullsAndCows(CommonCommand):
                 session = BullsAndCowsSession.objects.filter(chat=self.event.chat).first()
             else:
                 session = BullsAndCowsSession.objects.filter(author=self.event.sender).first()
-            if not self.event.args:
+            if not self.event.message.args:
                 if session:
                     return f"Игра уже создана, присылай мне число из {DIGITS_IN_GAME} цифр"
                 digits = [str(x) for x in range(10)]
@@ -49,7 +49,7 @@ class BullsAndCows(CommonCommand):
                 if not session:
                     raise PWarning("Нет созданной игры. Начни её - /бк")
 
-                arg0 = self.event.args[0]
+                arg0 = self.event.message.args[0]
                 if arg0 in ['сдаться', 'сдаюсь', 'ойвсё', 'пощади', 'надоело']:
                     session.delete()
                     return "В следующий раз повезёт :("
@@ -62,7 +62,7 @@ class BullsAndCows(CommonCommand):
                 if arg0 != ''.join(sorted(set(arg0), key=arg0.index)):
                     raise PWarning("Цифры должны быть уникальны в числе")
 
-                if self.event.args[0] == session.number:
+                if self.event.message.args[0] == session.number:
                     decl = decl_of_num(session.steps, ['попытку', 'попытки', 'попыток'])
                     msg = f"Отгадали всего за {session.steps} {decl}!"
                     session.delete()

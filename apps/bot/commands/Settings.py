@@ -20,8 +20,8 @@ class Settings(CommonCommand):
     ]
 
     def start(self):
-        if self.event.args:
-            arg0 = self.event.args[0].lower()
+        if self.event.message.args:
+            arg0 = self.event.message.args[0].lower()
         else:
             arg0 = None
 
@@ -47,7 +47,7 @@ class Settings(CommonCommand):
     def menu_reaction(self):
         self.check_sender(Role.CONFERENCE_ADMIN)
         self.check_args(2)
-        value = self.get_on_or_off(self.event.args[1].lower())
+        value = self.get_on_or_off(self.event.message.args[1].lower())
 
         self.check_conversation()
         self.event.chat.need_reaction = value
@@ -57,7 +57,7 @@ class Settings(CommonCommand):
     def menu_mentioning(self):
         self.check_sender(Role.CONFERENCE_ADMIN)
         self.check_args(2)
-        value = self.get_on_or_off(self.event.args[1].lower())
+        value = self.get_on_or_off(self.event.message.args[1].lower())
 
         self.check_conversation()
         self.event.chat.mentioning = value
@@ -68,7 +68,7 @@ class Settings(CommonCommand):
         self.check_sender(Role.CONFERENCE_ADMIN)
         self.check_args(2)
 
-        value = self.get_on_or_off(self.event.args[1].lower())
+        value = self.get_on_or_off(self.event.message.args[1].lower())
         self.check_conversation()
         self.event.chat.need_meme = value
         self.event.chat.save()
@@ -76,7 +76,7 @@ class Settings(CommonCommand):
 
     def menu_bd(self):
         self.check_args(2)
-        value = self.get_on_or_off(self.event.args[1].lower())
+        value = self.get_on_or_off(self.event.message.args[1].lower())
         self.event.sender.celebrate_bday = value
         self.event.sender.save()
         return "Сохранил настройку"
@@ -85,7 +85,7 @@ class Settings(CommonCommand):
         self.check_sender(Role.TRUSTED)
         self.check_args(2)
 
-        value = self.get_on_or_off(self.event.args[1].lower())
+        value = self.get_on_or_off(self.event.message.args[1].lower())
 
         group_minecraft_notify = Group.objects.get(name=Role.MINECRAFT_NOTIFY.name)
         if value:
@@ -99,7 +99,7 @@ class Settings(CommonCommand):
 
     def menu_voice(self):
         self.check_args(2)
-        value = self.get_on_or_off(self.event.args[1].lower())
+        value = self.get_on_or_off(self.event.message.args[1].lower())
         self.event.chat.recognize_voice = value
         self.event.chat.save()
         return "Сохранил настройку"

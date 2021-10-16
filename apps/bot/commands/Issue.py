@@ -14,7 +14,7 @@ class Issue(CommonCommand):
     def start(self):
         msgs = self.event.fwd
         if not msgs:
-            msgs = [{'text': self.event.original_args, 'from_id': int(self.event.sender.user_id)}]
+            msgs = [{'text': self.event.message.args_str, 'from_id': int(self.event.sender.user_id)}]
 
         issue_text = ""
         for msg in msgs:

@@ -28,8 +28,8 @@ class Commands(CommonCommand):
             {"role": Role.MRAZ, "text": "команды для мразей"},
         ]
 
-        if self.event.args:
-            role = get_role_by_str(self.event.original_args.lower())
+        if self.event.message.args:
+            role = get_role_by_str(self.event.message.args_str.lower())
             if not role:
                 raise PWarning("Не знаю такой роли")
             for ordered_role in ordered_roles:

@@ -27,7 +27,7 @@ class Media(CommonCommand):
     platforms = [Platform.TG]
 
     def accept(self, event):
-        if urlparse(event.command).hostname in MEDIA_URLS:
+        if urlparse(event.message.command).hostname in MEDIA_URLS:
             return True
         if event.fwd:
             if urlparse(event.fwd[0]['text']).hostname in MEDIA_URLS:
@@ -42,15 +42,15 @@ class Media(CommonCommand):
             'instagram': self.get_instagram_video_info
         }
 
-        if self.event.command in self.full_names:
-            if self.event.args:
-                url = self.event.args[0]
+        if self.event.message.command in self.full_names:
+            if self.event.message.args:
+                url = self.event.message.args[0]
             elif self.event.fwd:
                 url = self.event.fwd[0]['text']
             else:
                 raise PWarning("Для работы команды требуются аргументы или пересылаемые сообщения")
         else:
-            url = self.event.clear_msg
+            url = self.event.message.clear
 
         media_link_is_from = None
 
@@ -71,7 +71,7 @@ class Media(CommonCommand):
         self.bot.set_activity(self.event.peer_id, 'upload_video')
         attachments = [self.bot.upload_video(video)]
 
-        if self.event.command not in self.full_names:
+        if self.event.message.command not in self.full_names:
             self.bot.delete_message(self.event.peer_id, self.event.msg_id)
 
             msg = ""

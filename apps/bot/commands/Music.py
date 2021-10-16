@@ -34,7 +34,7 @@ class Music(CommonCommand):
 
     def start(self):
         self.bot.set_activity(self.event.peer_id, 'audiomessage')
-        url = self.event.args[0]
+        url = self.event.message.args[0]
         ydl_params = {
             'outtmpl': '%(id)s%(ext)s',
             'logger': NothingLogger()

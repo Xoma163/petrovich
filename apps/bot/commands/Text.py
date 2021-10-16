@@ -14,8 +14,8 @@ class Text(CommonCommand):
 
     def start(self):
         lang = "rus"
-        if self.event.args:
-            lang = self.event.args[0]
+        if self.event.message.args:
+            lang = self.event.message.args[0]
 
         ocr_api = OCRApi()
         image = get_attachments_from_attachments_or_fwd(self.event, 'photo')[0]

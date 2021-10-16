@@ -17,11 +17,11 @@ class Weather(CommonCommand):
 
     def start(self):
         changes = False
-        if self.event.args and self.event.args[-1].find("изм") >= 0:
+        if self.event.message.args and self.event.message.args[-1].find("изм") >= 0:
             changes = True
-            del self.event.args[-1]
-        if self.event.args:
-            city = City.objects.filter(synonyms__icontains=self.event.original_args).first()
+            del self.event.message.args[-1]
+        if self.event.message.args:
+            city = City.objects.filter(synonyms__icontains=self.event.message.args_str).first()
             if not city:
                 raise PWarning("Не нашёл такой город")
         else:

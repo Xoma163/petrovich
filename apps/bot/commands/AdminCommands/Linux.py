@@ -12,4 +12,4 @@ class Linux(CommonCommand):
     args = 1
 
     def start(self):
-        return do_the_linux_command(self.event.original_args)
+        return do_the_linux_command(self.event.message.args_str)

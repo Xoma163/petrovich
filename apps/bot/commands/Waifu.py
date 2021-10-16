@@ -15,21 +15,21 @@ class Waifu(CommonCommand):
 
     def start(self):
         waifus_count = 100000
-        if self.event.args:
+        if self.event.message.args:
             try:
                 self.int_args = [0]
                 self.parse_int()
-                waifu_number = self.event.args[0]
+                waifu_number = self.event.message.args[0]
                 self.check_number_arg_range(waifu_number, 0, waifus_count)
             except PWarning:
-                seed = self.event.original_args
+                seed = self.event.message.args_str
                 waifu_number = get_random_int(waifus_count, seed=seed)
         else:
             waifu_number = get_random_int(waifus_count)
         url = f"https://www.thiswaifudoesnotexist.net/example-{waifu_number}.jpg"
         attachment = self.bot.upload_photos(url)
 
-        if self.event.args:
+        if self.event.message.args:
 
             keyboard = self.bot.get_inline_keyboard([{'command': self.name, 'button_text': "Следующая", 'args': {"waifu_number": waifu_number + 1}}])
         else:

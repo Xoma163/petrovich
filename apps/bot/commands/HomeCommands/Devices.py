@@ -31,8 +31,8 @@ class Sensors(CommonCommand):
     access = Role.HOME
 
     def start(self):
-        if self.event.args:
-            room_name, item_name = get_room_and_item_by_args(self.event.args)
+        if self.event.message.args:
+            room_name, item_name = get_room_and_item_by_args(self.event.message.args)
             items = get_items(DEVICES, room_name, item_name)
         else:
             items = DEVICES

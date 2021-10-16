@@ -21,11 +21,11 @@ class Wikipedia(CommonCommand):
         self.bot.set_activity(self.event.peer_id)
 
         is_random = False
-        if self.event.args[0].lower() in ["рандом", "р"]:
+        if self.event.message.args[0].lower() in ["рандом", "р"]:
             is_random = True
             search_query = wikipedia.random()
         else:
-            search_query = self.event.original_args
+            search_query = self.event.message.args_str
         try:
             page = wikipedia.page(search_query)
             if page.summary != '':
@@ -50,7 +50,7 @@ class Wikipedia(CommonCommand):
             raise PWarning(msg)
         except wikipedia.PageError:
             msg = "Не нашёл такой страницы\n"
-            search = wikipedia.search(self.event.original_args)
+            search = wikipedia.search(self.event.message.args_str)
             if len(search) == 0:
                 msg += "Результат поиска ничего не дал"
             else:

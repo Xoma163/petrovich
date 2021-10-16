@@ -13,8 +13,8 @@ class All(CommonCommand):
 
     def start(self):
         conversation_users = self.event.chat.users.all()
-        if self.event.args:
-            msg = f"{self.event.original_args}\n\n"
+        if self.event.message.args:
+            msg = f"{self.event.message.args_str}\n\n"
         else:
             msg = ""
 

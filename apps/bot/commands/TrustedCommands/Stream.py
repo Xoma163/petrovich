@@ -16,7 +16,7 @@ class Stream(CommonCommand):
     access = Role.TRUSTED
 
     def start(self):
-        if self.event.args is None:
+        if self.event.message.args is None:
             stream, _ = Service.objects.get_or_create(name="stream")
             stream_link = stream.value
             if len(stream_link) < 5:
@@ -26,7 +26,7 @@ class Stream(CommonCommand):
         else:
             self.check_sender(Role.MODERATOR)
 
-            if len(self.event.args[0]) >= 5 and not urlparse(self.event.args[0]).hostname:
+            if len(self.event.message.args[0]) >= 5 and not urlparse(self.event.message.args[0]).hostname:
                 raise PWarning("Пришлите ссылку")
-            Service.objects.update_or_create(name="stream", defaults={'value': self.event.args[0]})
-            return "Ссылка изменена на " + self.event.args[0]
+            Service.objects.update_or_create(name="stream", defaults={'value': self.event.message.args[0]})
+            return "Ссылка изменена на " + self.event.message.args[0]

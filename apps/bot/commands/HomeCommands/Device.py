@@ -31,11 +31,11 @@ class Sensors(CommonCommand):
         client.disconnect()
 
     def start(self):
-        state = ON_OFF_TRANSLATOR.get(self.event.args[-1], None)
+        state = ON_OFF_TRANSLATOR.get(self.event.message.args[-1], None)
         if state is None:
             raise PWarning("Не знаю такого состояния")
 
-        room_name, item_name = get_room_and_item_by_args(self.event.args[:-1])
+        room_name, item_name = get_room_and_item_by_args(self.event.message.args[:-1])
         items = get_items(DEVICES, room_name, item_name)
         if len(items) > 1:
             raise PWarning("Под поиск подходит 2 и более устройств")

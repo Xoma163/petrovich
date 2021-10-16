@@ -42,18 +42,18 @@ class Meme(CommonCommand):
     priority = 70
 
     def accept(self, event):
-        if event.mentioned or event.from_user or (event.payload and event.payload.get('command', None) == 'мем'):
+        if event.is_mentioned or event.is_from_user or (event.payload and event.payload.get('command', None) == 'мем'):
             return super().accept(event)
 
-        if event.chat and check_name_exists(event.clear_msg.lower()):
+        if event.chat and check_name_exists(event.message.clear.lower()):
             if not event.chat.need_meme:
                 raise PSkip()
-            event.args = event.clear_msg.lower().split(' ')
+            event.message.args = event.message.clear.lower().split(' ')
             return True
         return False
 
     def start(self):
-        arg0 = self.event.args[0].lower()
+        arg0 = self.event.message.args[0].lower()
         menu = [
             [['добавить'], self.menu_add],
             [['обновить'], self.menu_refresh],
@@ -83,23 +83,23 @@ class Meme(CommonCommand):
         self.check_args(2)
         attachments = get_attachments_from_attachments_or_fwd(self.event, ['audio', 'video', 'photo'])
         if len(attachments) == 0:
-            url = self.event.original_args.split(' ')[1]
+            url = self.event.message.args_str.split(' ')[1]
             self._check_allowed_url(url)
 
             attachment = {
                 'type': 'link',
                 'url': url,
             }
-            meme_name = " ".join(self.event.args[2:]).lower()
+            meme_name = " ".join(self.event.message.args[2:]).lower()
         else:
-            meme_name = " ".join(self.event.args[1:]).lower()
+            meme_name = " ".join(self.event.message.args[1:]).lower()
             attachment = attachments[0]
 
         if self.event.platform != Platform.VK and attachment['type'] not in ['photo', 'link']:
             raise PWarning('В данной платформе поддерживается добавление только картинок-мемов и youtube/coub ссылок')
 
-        for i, _ in enumerate(self.event.args):
-            self.event.args[i] = self.event.args[i].lower()
+        for i, _ in enumerate(self.event.message.args):
+            self.event.message.args[i] = self.event.message.args[i].lower()
 
         new_meme = {
             'name': meme_name,
@@ -143,21 +143,21 @@ class Meme(CommonCommand):
     def menu_refresh(self):
         self.check_args(2)
         _id = None
-        if 2 <= len(self.event.args) <= 3:
+        if 2 <= len(self.event.message.args) <= 3:
             try:
-                _id = int(self.event.args[1])
+                _id = int(self.event.message.args[1])
             except PWarning:
                 pass
-        meme_name = " ".join(self.event.args[1:]).lower()
+        meme_name = " ".join(self.event.message.args[1:]).lower()
 
         attachments = get_attachments_from_attachments_or_fwd(self.event, ['audio', 'video', 'photo'])
         if len(attachments) == 0:
-            if len(self.event.args) > 2:
-                url = self.event.args[-1]
+            if len(self.event.message.args) > 2:
+                url = self.event.message.args[-1]
                 try:
                     self._check_allowed_url(url)
                     attachments = [{'type': 'link', 'url': url}]
-                    meme_name = self.event.args[1:-1]
+                    meme_name = self.event.message.args[1:-1]
                 except:
                     raise PWarning("Не нашёл вложений в сообщении или пересланном сообщении\n"
                                    "Не нашёл ссылки на youtube/coub")
@@ -202,22 +202,22 @@ class Meme(CommonCommand):
             try:
                 self.int_args = [1]
                 self.parse_int()
-                meme_id = self.event.args[1]
+                meme_id = self.event.message.args[1]
                 meme = MemeModel.objects.filter(id=meme_id).first()
-                reason = " ".join(self.event.args[2:])
+                reason = " ".join(self.event.message.args[2:])
                 if reason:
                     msg = f'Мем с названием "{meme.name}" удалён. Причина: {reason}'
                 else:
                     msg = f'Мем с названием "{meme.name}" удалён поскольку он не ' \
                           f'соответствует правилам или был удалён автором.'
             except PWarning:
-                meme = self.get_meme(self.event.args[1:])
+                meme = self.get_meme(self.event.message.args[1:])
                 msg = f'Мем с названием "{meme.name}" удалён поскольку он не ' \
                       f'соответствует правилам или был удалён автором.'
             if meme.author != self.event.sender:
                 self.bot.send_message(meme.author.user_id, msg)
         else:
-            meme = self.get_meme(self.event.args[1:], self.event.sender)
+            meme = self.get_meme(self.event.message.args[1:], self.event.sender)
         meme_name = meme.name
         meme.delete()
         return f'Удалил мем "{meme_name}"'
@@ -225,15 +225,15 @@ class Meme(CommonCommand):
     def menu_conference(self):
         self.check_args(3)
         if self.event.sender.check_role(Role.ADMIN):
-            chat = self.bot.get_chat_by_name(self.event.args[1])
+            chat = self.bot.get_chat_by_name(self.event.message.args[1])
         else:
-            chat = self.bot.get_one_chat_with_user(self.event.args[1], self.event.sender.user_id)
+            chat = self.bot.get_one_chat_with_user(self.event.message.args[1], self.event.sender.user_id)
         if self.event.chat == chat:
             raise PWarning("Зачем мне отправлять мем в эту же конфу?")
-        if self.event.args[-1].lower() in ['рандом', 'р']:
+        if self.event.message.args[-1].lower() in ['рандом', 'р']:
             meme = self.get_random_meme()
         else:
-            meme = self.get_meme(self.event.args[2:])
+            meme = self.get_meme(self.event.message.args[2:])
         prepared_meme = self.prepare_meme_to_send(meme, print_name=True)
         self.bot.parse_and_send_msgs(chat.chat_id, prepared_meme)
         return "Отправил"
@@ -244,7 +244,7 @@ class Meme(CommonCommand):
 
     def menu_confirm(self):
         self.check_sender(Role.MODERATOR)
-        if len(self.event.args) == 1:
+        if len(self.event.message.args) == 1:
             try:
                 meme = self.get_meme(approved=False)
             except PWarning:
@@ -256,14 +256,14 @@ class Meme(CommonCommand):
         else:
             self.int_args = [1]
             self.parse_int()
-            non_approved_meme = self.get_meme(_id=self.event.args[1])
+            non_approved_meme = self.get_meme(_id=self.event.message.args[1])
 
             if not non_approved_meme:
                 raise PWarning("Не нашёл мема с таким id")
             if non_approved_meme.approved:
                 raise PWarning("Мем уже подтверждён")
-            if len(self.event.args) > 2:
-                new_name = " ".join(self.event.args[2:])
+            if len(self.event.message.args) > 2:
+                new_name = " ".join(self.event.message.args[2:])
                 non_approved_meme.name = new_name
 
             user_msg = f'Мем с названием "{non_approved_meme.name}" подтверждён.'
@@ -279,15 +279,15 @@ class Meme(CommonCommand):
         self.check_args(2)
         self.int_args = [1]
         self.parse_int()
-        non_approved_meme = self.get_meme(_id=self.event.args[1])
+        non_approved_meme = self.get_meme(_id=self.event.message.args[1])
         if not non_approved_meme:
             raise PWarning("Не нашёл мема с таким id")
         if non_approved_meme.approved:
             raise PWarning("Мем уже подтверждён")
 
         reason = None
-        if len(self.event.args) > 2:
-            reason = " ".join(self.event.args[2:])
+        if len(self.event.message.args) > 2:
+            reason = " ".join(self.event.message.args[2:])
         user_msg = f'Мем с названием "{non_approved_meme.name}" отклонён.'
         if reason:
             user_msg += f"\nПричина: {reason}"
@@ -301,13 +301,13 @@ class Meme(CommonCommand):
         self.check_sender(Role.MODERATOR)
         self.int_args = [1]
         self.parse_int()
-        renamed_meme = self.get_meme(_id=self.event.args[1])
+        renamed_meme = self.get_meme(_id=self.event.message.args[1])
         if not renamed_meme:
             raise PWarning("Не нашёл мема с таким id")
 
         new_name = None
-        if len(self.event.args) > 2:
-            new_name = " ".join(self.event.args[2:])
+        if len(self.event.message.args) > 2:
+            new_name = " ".join(self.event.message.args[2:])
         if MemeModel.objects.filter(name=new_name).exists():
             raise PWarning("Мем с таким названием уже есть")
         user_msg = f'Мем с названием "{renamed_meme.name}" переименован.\n' \
@@ -322,25 +322,25 @@ class Meme(CommonCommand):
         self.check_args(2)
         self.int_args = [1]
         self.parse_int()
-        _id = self.event.args[1]
+        _id = self.event.message.args[1]
         meme = self.get_meme(_id=_id)
         return self.prepare_meme_to_send(meme, True)
 
     def menu_info(self):
         self.check_args(2)
         _id = None
-        if len(self.event.args) == 2:
+        if len(self.event.message.args) == 2:
             self.int_args = [1]
             try:
                 self.parse_int()
-                _id = self.event.args[1]
+                _id = self.event.message.args[1]
             except PWarning:
                 pass
-        meme = self.get_meme(self.event.args[1:], _id=_id)
+        meme = self.get_meme(self.event.message.args[1:], _id=_id)
         return meme.get_info()
 
     def menu_default(self):
-        memes = self.get_meme(self.event.args, use_tanimoto=True)
+        memes = self.get_meme(self.event.message.args, use_tanimoto=True)
         if isinstance(memes, list):
             meme = memes[0]
         else:

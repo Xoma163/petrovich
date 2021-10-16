@@ -25,8 +25,8 @@ class Camera(CommonCommand):
         attachments.append(attachment)
 
         frames = 100
-        if self.event.args:
-            frames = self.event.args[0]
+        if self.event.message.args:
+            frames = self.event.message.args[0]
             self.check_number_arg_range(frames, 0, camera_handler.MAX_FRAMES)
 
         if frames != 0:

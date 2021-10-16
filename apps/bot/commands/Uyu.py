@@ -12,8 +12,8 @@ class Uyu(CommonCommand):
 
     def start(self):
         add_word = "бля"
-        if self.event.original_args:
-            add_word = self.event.original_args
+        if self.event.message.args_str:
+            add_word = self.event.message.args_str
 
         msgs = self.event.fwd
         if msgs is None:

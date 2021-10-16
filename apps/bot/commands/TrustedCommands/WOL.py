@@ -19,8 +19,8 @@ class WOL(CommonCommand):
     def start(self):
         wol_data = WakeOnLanUserData.objects.filter(user=self.event.sender)
 
-        if self.event.args:
-            device_name = " ".join(self.event.args)
+        if self.event.message.args:
+            device_name = " ".join(self.event.message.args)
             wol_data = wol_data.filter(name__icontains=device_name)
         if not wol_data:
             raise PWarning("Не нашёл устройства для пробуждения. Напишите админу, чтобы добавить")

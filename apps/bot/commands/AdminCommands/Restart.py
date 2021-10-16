@@ -11,8 +11,8 @@ class Restart(CommonCommand):
     access = Role.ADMIN
 
     def start(self):
-        if self.event.args:
-            arg0 = self.event.args[0].lower()
+        if self.event.message.args:
+            arg0 = self.event.message.args[0].lower()
         else:
             arg0 = None
         menu = [

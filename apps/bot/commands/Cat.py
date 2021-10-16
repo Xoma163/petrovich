@@ -23,7 +23,7 @@ class Cat(CommonCommand):
         return MAIN_SITE + cat.image.url
 
     def start(self):
-        if self.event.args and self.event.args[0].lower() in ['аватар']:
+        if self.event.message.args and self.event.message.args[0].lower() in ['аватар']:
             self.check_sender(Role.ADMIN)
             cat = CatModel.objects.filter(to_send=True).order_by('?').first()
             if not cat:
