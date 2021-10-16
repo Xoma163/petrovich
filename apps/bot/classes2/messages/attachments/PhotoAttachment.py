@@ -11,7 +11,6 @@ class PhotoAttachment(Attachment):
         self.height = None
 
     def parse_tg_photo(self, event_photo, tg_bot):
-
         self.width = event_photo.get('width')
         self.height = event_photo.get('height')
         self.size = event_photo['file_size']
@@ -22,6 +21,3 @@ class PhotoAttachment(Attachment):
     def download_content(self):
         self.content = requests.get(self.private_download_url).content
         return self.content
-
-    def get_max_photo_size(self):
-        pass

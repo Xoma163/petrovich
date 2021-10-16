@@ -51,10 +51,9 @@ class Bot(Thread):
             response = self.send_message(msg)
             if response.status_code != 200:
                 error_msg = "Непредвиденная ошибка. Сообщите разработчику. Команда /баг"
-                self.logger.error({'result': msg})
                 error_rm = ResponseMessage(error_msg, msg.peer_id).messages[0]
+                self.logger.error({'result': error_msg, 'error': response.json()['description']})
                 self.send_message(error_rm)
-                return msg
 
     def parse_and_send_msgs(self, peer_id, msgs, send=True) -> ResponseMessage:
         """
