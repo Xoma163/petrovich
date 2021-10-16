@@ -12,7 +12,7 @@ class Advice(Command):
             fga = FuckingGreatAdviceAPI()
             advice = fga.get_advice()
             keyboard = self.bot.get_inline_keyboard([{'command': self.name, 'button_text': "Ещё"}])
-            return {"msg": advice, "keyboard": keyboard}
+            return {"text": advice, "keyboard": keyboard}
 
         except Exception:
             raise PError("Ошибка API")

@@ -11,6 +11,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 from apps.bot.classes.consts.Consts import Role
 from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.messages.attachments.Attachment import Attachment
 from apps.bot.classes.messages.attachments.DocumentAttachment import DocumentAttachment
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
@@ -109,7 +110,8 @@ def decl_of_num(number, titles):
         return titles[cases[5]]
 
 
-def get_attachments_for_upload(vk_bot, attachments):
+# ToDo:
+def get_attachments_for_upload(bot, attachments):
     """
     Получает вложения и загружает необходимые на сервер, на которых нет прав
     Прикрепляет только фото, видео, аудио и документы.
@@ -117,8 +119,8 @@ def get_attachments_for_upload(vk_bot, attachments):
     uploaded_attachments = []
     for attachment in attachments:
         # Фото
-        if attachment['type'] == 'photo':
-            new_attachment = vk_bot.upload_photos(attachment['private_download_url'])
+        if isinstance(attachment, PhotoAttachment):
+            new_attachment = bot.upload_photos(attachment.get_download_url())
             uploaded_attachments.append(new_attachment[0])
         # Видео, аудио, документы
         elif 'vk_url' in attachment:
@@ -309,11 +311,12 @@ def replace_similar_letters(text):
     return text
 
 
-def get_thumbnail_for_image(image, size) -> bytes:
+def get_thumbnail_for_image(image: Attachment, size) -> bytes:
     """
     Получение thumbnail для изображения
     """
-    _image = Image.open(BytesIO(image))
+    content = image.download_content()
+    _image = Image.open(BytesIO(content))
     _image.thumbnail((size, size))
     thumb_byte_arr = io.BytesIO()
     _image.save(thumb_byte_arr, format="PNG")

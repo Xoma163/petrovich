@@ -4,7 +4,7 @@ from apps.bot.classes.messages.attachments.Attachment import Attachment
 class VoiceAttachment(Attachment):
 
     def __init__(self):
-        super().__init__('voice')
+        super().__init__()
         self.duration = None  # sec
 
     def parse_tg_voice(self, event_voice, tg_bot):

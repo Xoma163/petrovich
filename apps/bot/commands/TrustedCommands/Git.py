@@ -10,4 +10,4 @@ class Git(Command):
 
     def start(self):
         url = 'https://github.com/Xoma163/petrovich/'
-        return {'msg': url, 'attachments': [url]}
+        return {'text': url, 'attachments': [url]}

@@ -127,7 +127,7 @@ class Profile(Command):
         _name = user.name or "Не установлено"
         _surname = user.surname or "Не установлено"
         msg = {
-            'msg': f"Город - {_city}\n"
+            'text': f"Город - {_city}\n"
                    f"Имя - {_name}\n"
                    f"Фамилия - {_surname}\n"
                    f"Дата рождения - {_bd}\n"

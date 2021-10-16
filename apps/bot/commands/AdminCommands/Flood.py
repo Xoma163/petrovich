@@ -12,7 +12,7 @@ class Flood(Command):
     platforms = [Platform.VK, Platform.TG]
 
     def start(self):
-        msg = "ыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыы"
+        text = "ыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыы"
         count = self.event.message.args[0]
-        msgs = [{'msg': msg}] * count
+        msgs = [{'text': text}] * count
         return msgs

@@ -12,12 +12,13 @@ class Stop(Command):
     name = "стоп"
     help_text = "останавливает работу бота или модуля"
     help_texts = [
-        "[сервис=бот [версия]] - останавливает сервис\n"
-        "Сервис - бот/камера/майнкрафт/террария\n"
-        "Если майнкрафт, то может быть указана версия, 1.12.2\n"
+        "(сервис=бот [версия]) - останавливает сервис\n"
+        "Сервис - камера/майнкрафт/террария\n"
+        "Если майнкрафт, то может быть указана версия, 1.16.5\n"
         "Если агарио, то может быть указана версия, 1, 2, 3\n"
     ]
     access = Role.TRUSTED
+    args = 1
 
     def start(self):
         if self.event.message.args:
@@ -29,9 +30,7 @@ class Stop(Command):
             [["камера"], self.menu_camera],
             [["майн", "майнкрафт", "mine", "minecraft"], self.menu_minecraft],
             [['террария', 'terraria'], self.menu_terraria],
-            [['агарио', 'agario'], self.menu_agario],
-            [['бот', 'bot'], self.menu_bot],
-            [['default'], self.menu_bot]
+            [['агарио', 'agario'], self.menu_agario]
         ]
         method = self.handle_menu(menu, arg0)
         return method()
@@ -67,9 +66,3 @@ class Stop(Command):
         version = agario_server.version
         agario_server.stop()
         return f"Финишируем агарию {version}!"
-
-    def menu_bot(self):
-        self.check_sender(Role.ADMIN)
-        self.bot.BOT_CAN_WORK = False
-        cameraHandler.terminate()
-        return "Финишируем"

@@ -10,4 +10,4 @@ class Donate(Command):
         url = 'https://www.donationalerts.com/r/xoma163'
         attachments = self.bot.upload_photos(f"{STATIC_ROOT}/bot/img/donate.jpg")
         attachments.append(url)
-        return {'msg': url, 'attachments': attachments}
+        return {'text': url, 'attachments': attachments}

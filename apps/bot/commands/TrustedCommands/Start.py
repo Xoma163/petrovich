@@ -12,9 +12,9 @@ class Start(Command):
     name = "старт"
     help_text = "возобновляет работу бота или модуля"
     help_texts = [
-        "[сервис=бот [версия]] - стартует сервис\n"
-        "Сервис - бот/камера/майнкрафт/террария\n"
-        "Если майнкрафт, то может быть указана версия, 1.12.2\n"
+        "(сервис=бот [версия]) - стартует сервис\n"
+        "Сервис - камера/майнкрафт/террария\n"
+        "Если майнкрафт, то может быть указана версия, 1.16.5\n"
         "Если агарио, то может быть указана версия, 1, 2, 3\n"
     ]
     access = Role.TRUSTED
@@ -29,9 +29,7 @@ class Start(Command):
             [["камера"], self.menu_camera],
             [["майн", "майнкрафт", "mine", "minecraft"], self.menu_minecraft],
             [['террария', 'terraria'], self.menu_terraria],
-            [['агарио', 'agario'], self.menu_agario],
-            [['бот', 'bot'], self.menu_bot],
-            [['default'], self.menu_bot]
+            [['агарио', 'agario'], self.menu_agario]
         ]
         method = self.handle_menu(menu, arg0)
         return method()
@@ -67,9 +65,3 @@ class Start(Command):
         version = agario_server.version
         agario_server.start()
         return f"Стартуем агарию {version}!"
-
-    def menu_bot(self):
-        self.check_sender(Role.ADMIN)
-        self.bot.BOT_CAN_WORK = True
-        cameraHandler.resume()
-        return "Стартуем!"

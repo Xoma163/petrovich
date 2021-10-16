@@ -5,6 +5,8 @@ from apps.bot.classes.consts.Consts import Role, TRUE_FALSE_TRANSLATOR, ON_OFF_T
 from apps.bot.classes.consts.Exceptions import PWarning
 from petrovich.settings import env
 
+# ToDo: Openhab3 api
+
 TRUE_FALSE_TRANSLATOR_ON_OFF = {
     True: 'ON',
     False: 'OFF'
@@ -61,6 +63,12 @@ SENSORS = [
                 'name': "Давление",
                 'table': "Item0024",
                 'unit': "мм. рт.ст.",
+                'type': int
+            },
+            {
+                'name': "Углекислый газ",
+                'table': "???",
+                'unit': 'ppm',
                 'type': int
             },
         ]

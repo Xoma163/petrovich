@@ -22,7 +22,7 @@ class Stream(Command):
             if len(stream_link) < 5:
                 raise PWarning("Стрим пока не идёт")
             else:
-                return {'msg': stream_link, 'attachments': [stream_link]}
+                return {'text': stream_link, 'attachments': [stream_link]}
         else:
             self.check_sender(Role.MODERATOR)
 

@@ -10,4 +10,4 @@ class Discord(Command):
 
     def start(self):
         url = 'https://discord.gg/kYGSNzv'
-        return {'msg': url, 'attachments': [url]}
+        return {'text': url, 'attachments': [url]}

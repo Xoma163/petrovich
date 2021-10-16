@@ -38,7 +38,7 @@ class BullsAndCows(Command):
                 new_obj = {
                     'number': "".join(digits[:DIGITS_IN_GAME])
                 }
-                if self.event.from_chat:
+                if self.event.is_from_chat:
                     new_obj['chat'] = self.event.chat
                 else:
                     new_obj['author'] = self.event.sender
@@ -51,8 +51,10 @@ class BullsAndCows(Command):
 
                 arg0 = self.event.message.args[0]
                 if arg0 in ['сдаться', 'сдаюсь', 'ойвсё', 'пощади', 'надоело']:
+                    correct_number_str = str(session.number)
+                    correct_number_str = "0" * (DIGITS_IN_GAME - len(correct_number_str)) + correct_number_str
                     session.delete()
-                    return "В следующий раз повезёт :("
+                    return f"В следующий раз повезёт :(\nЗагаданное число - {correct_number_str}"
 
                 if len(arg0) != DIGITS_IN_GAME:
                     raise PWarning(f"В отгадываемом числе должно быть {DIGITS_IN_GAME} цифр")
@@ -67,7 +69,7 @@ class BullsAndCows(Command):
                     msg = f"Отгадали всего за {session.steps} {decl}!"
                     session.delete()
                     keyboard = self.bot.get_inline_keyboard([{'command': self.name, 'button_text': "Ещё"}])
-                    return {"msg": msg, "keyboard": keyboard}
+                    return {"text": msg, "keyboard": keyboard}
 
                 bulls = 0
                 cows = 0

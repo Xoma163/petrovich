@@ -43,7 +43,7 @@ class Camera(Command):
                 'attachments': attachments,
 
                 "keyboard": self.bot.get_inline_keyboard(
-                    [{'command': self.name, 'button_text': "Ещё", 'args': {"frames": frames}}]),
+                    [{'command': self.name, 'button_text': "Ещё", 'args': [frames]}]),
                 'dont_parse_links': True
             }
         else:

@@ -187,7 +187,7 @@ class Roulette(Command):
             return "ммм"
 
     def menu_rates(self):
-        if self.event.from_chat:
+        if self.event.is_from_chat:
             rrs = RouletteRate.objects.filter(chat=self.event.chat)
         else:
             rrs = RouletteRate.objects.filter(chat__isnull=True, gamer=self.gamer)
@@ -243,7 +243,7 @@ class Roulette(Command):
 
     def menu_play(self):
         with lock:
-            if self.event.from_chat:
+            if self.event.is_from_chat:
                 rrs = RouletteRate.objects.filter(chat=self.event.chat)
             else:
                 rrs = RouletteRate.objects.filter(chat__isnull=True, gamer=self.gamer)

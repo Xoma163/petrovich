@@ -32,7 +32,7 @@ class Waifu(Command):
         if self.event.message.args:
 
             keyboard = self.bot.get_inline_keyboard(
-                [{'command': self.name, 'button_text': "Следующая", 'args': {"waifu_number": waifu_number + 1}}])
+                [{'command': self.name, 'button_text': "Следующая", 'args': [waifu_number+1]}])
         else:
             keyboard = self.bot.get_inline_keyboard([{'command': self.name, 'button_text': "Ещё"}])
-        return {"msg": waifu_number, "attachments": attachment, "keyboard": keyboard}
+        return {"text": waifu_number, "attachments": attachment, "keyboard": keyboard}

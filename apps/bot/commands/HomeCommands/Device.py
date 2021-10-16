@@ -7,6 +7,8 @@ from petrovich.settings import env
 from .Devices import DEVICES
 from .Sensors import get_items, get_room_and_item_by_args
 
+# ToDo: Openhab3 api
+
 TRUE_FALSE_TRANSLATOR_ON_OFF = {
     True: 'ON',
     False: 'OFF'

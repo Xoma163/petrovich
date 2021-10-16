@@ -1,3 +1,5 @@
+from urllib.parse import urlparse
+
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.messages.Message import Message
 from apps.bot.classes.messages.attachments.VoiceAttachment import VoiceAttachment
@@ -5,7 +7,10 @@ from apps.bot.models import Users, Chat
 
 
 class Event:
-    def __init__(self, raw_event, bot):
+    # None тк иногда требуется вручную создать инстанс Event
+    def __init__(self, raw_event=None, bot=None):
+        if not raw_event:
+            raw_event = {}
         self.raw = raw_event  # json
         self.bot = bot
 
@@ -43,12 +48,34 @@ class Event:
             return True
         if self.message is None:
             return False
+        if self.is_from_user:
+            return True
+        if self.payload:
+            return True
+
+        need_a_response_extra = self.need_a_response_extra()
+        if need_a_response_extra:
+            return True
 
         if self.is_from_chat and not self.message.has_command_symbols:
             return False
-        if self.is_from_user:
-            return True
         return True
+
+    def need_a_response_extra(self):
+        from apps.service.models import Meme
+        from apps.bot.commands.TrustedCommands.Media import MEDIA_URLS
+
+        message_is_exact_meme_name = Meme.objects.filter(name__unaccent=self.message.clear.lower()).exists()
+        if message_is_exact_meme_name:
+            return True
+
+        if self.chat and self.chat.mentioning:
+            return True
+
+        message_is_media_link = urlparse(self.message.clear).hostname in MEDIA_URLS or \
+                                (self.fwd and self.fwd[0].message.clear and urlparse(self.fwd[0].message.clear) in MEDIA_URLS)
+        if message_is_media_link:
+            return True
 
     @property
     def has_voice_message(self):

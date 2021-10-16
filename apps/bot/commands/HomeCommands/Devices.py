@@ -2,6 +2,8 @@ from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Role
 from .Sensors import get_data_for_items, get_items, get_room_and_item_by_args
 
+# ToDo: Openhab3 api
+
 DEVICES = [
     # {'name': "Обогреватель", 'table': "Item0003", 'topic': 'cmnd/tasmota_5C048E/POWER', 'type': bool},
     {'name': "Спальня", 'items': [

@@ -62,10 +62,10 @@ class Rates(Command):
             if self.event.message.command == "казино":
                 attachments = self.bot.upload_photos(f"{STATIC_ROOT}/bot/img/rate.jpg")
                 if len(winners) == 1:
-                    msg = {'msg': f"Выпавшее число - {rnd}\nПобедитель этого казино:\n{winners_str}",
+                    msg = {'text': f"Выпавшее число - {rnd}\nПобедитель этого казино:\n{winners_str}",
                            'attachments': attachments}
                 else:
-                    msg = {'msg': f"Выпавшее число - {rnd}\nПобедители этого казино:\n{winners_str}",
+                    msg = {'text': f"Выпавшее число - {rnd}\nПобедители этого казино:\n{winners_str}",
                            'attachments': attachments}
             else:
                 if len(winners) == 1:

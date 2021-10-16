@@ -50,10 +50,10 @@ class Horoscope(Command):
                         error_msg = f"{zodiac_sign_name}\n{str(e)}"
                         self.bot.parse_and_send_msgs_thread(self.event.peer_id, error_msg)
                         continue
-                    if prepared_meme.get('msg', None):
-                        prepared_meme['msg'] = f"{zodiac_sign_name}\n{prepared_meme['msg']}"
+                    if prepared_meme.get('text', None):
+                        prepared_meme['text'] = f"{zodiac_sign_name}\n{prepared_meme['text']}"
                     else:
-                        prepared_meme['msg'] = zodiac_sign_name
+                        prepared_meme['text'] = zodiac_sign_name
                     self.bot.parse_and_send_msgs_thread(self.event.peer_id, prepared_meme)
                 return
             elif self.event.message.args[0] in "инфо":
@@ -99,10 +99,10 @@ class Horoscope(Command):
         zodiac_sign_name = zodiac_sign.name.capitalize()
         meme = horoscope.memes.all()[zodiac_sign_index]
         prepared_meme = prepare_meme_to_send(self.bot, self.event, meme)
-        if prepared_meme.get('msg', None):
-            prepared_meme['msg'] = f"{zodiac_sign_name}\n{prepared_meme['msg']}"
+        if prepared_meme.get('text', None):
+            prepared_meme['text'] = f"{zodiac_sign_name}\n{prepared_meme['text']}"
         else:
-            prepared_meme['msg'] = zodiac_sign_name
+            prepared_meme['text'] = zodiac_sign_name
         prepared_meme['keyboard'] = self.bot.get_inline_keyboard(
             [{'command': self.name, 'button_text': self.name.capitalize()}])
         return prepared_meme

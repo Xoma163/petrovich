@@ -18,7 +18,8 @@ class Words(Command):
     def start(self):
         return self.get_words()
 
-    def get_words(self):
+    @staticmethod
+    def get_words():
         scopes = ['https://spreadsheets.google.com/feeds',
                   'https://www.googleapis.com/auth/drive']
 
@@ -29,7 +30,6 @@ class Words(Command):
 
         time1 = time.time()
         created_words = 0
-        msg = ""
         WordsModel.objects.all().delete()
         try:
             for i, worksheet in enumerate(worksheets):
@@ -52,9 +52,8 @@ class Words(Command):
                     created_words += 1
             time2 = time.time()
 
-            msg += f"\n" \
-                   f"Время выполнения - {round(time2 - time1, 2)}\n" \
-                   f"Добавлено слов - {created_words}"
+            msg = f"Время выполнения - {round(time2 - time1, 2)}\n" \
+                  f"Добавлено слов - {created_words}"
             return msg
         except Exception as e:
             raise PWarning("Ошибка при обновлении слов\n"

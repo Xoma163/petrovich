@@ -57,7 +57,8 @@ class Command:
         """
         if event.message and event.message.command in self.full_names:
             return True
-
+        if event.payload and event.payload['command'] in self.full_names:
+            return True
         return False
 
     def check_and_start(self, bot: Bot, event: Event):
@@ -140,8 +141,8 @@ class Command:
         """
         if args is None:
             args = self.args
-        if self.event.args:
-            if len(self.event.args) >= args:
+        if self.event.message.args:
+            if len(self.event.message.args) >= args:
                 return True
             else:
                 error = "Передано недостаточно аргументов"
@@ -200,15 +201,15 @@ class Command:
         Парсинг аргументов в int из заданного диапазона индексов(self.int_args)
         :return: bool
         """
-        if not self.event.args:
+        if not self.event.message.args:
             return True
         for checked_arg_index in self.int_args:
-            if len(self.event.args) - 1 >= checked_arg_index:
-                if isinstance(self.event.args[checked_arg_index], int):
+            if len(self.event.message.args) - 1 >= checked_arg_index:
+                if isinstance(self.event.message.args[checked_arg_index], int):
                     continue
                 try:
-                    self.event.args[checked_arg_index] = transform_k(self.event.args[checked_arg_index])
-                    self.event.args[checked_arg_index] = int(self.event.args[checked_arg_index])
+                    self.event.message.args[checked_arg_index] = transform_k(self.event.message.args[checked_arg_index])
+                    self.event.message.args[checked_arg_index] = int(self.event.message.args[checked_arg_index])
                 except ValueError:
                     error = "Аргумент должен быть целочисленным"
                     raise PWarning(error)
@@ -219,15 +220,15 @@ class Command:
         Парсинг аргументов в float из заданного диапазона индексов(self.float_args)
         :return: bool
         """
-        if not self.event.args:
+        if not self.event.message.args:
             return True
         for checked_arg_index in self.float_args:
-            if len(self.event.args) - 1 >= checked_arg_index:
-                if isinstance(self.event.args[checked_arg_index], float):
+            if len(self.event.message.args) - 1 >= checked_arg_index:
+                if isinstance(self.event.message.args[checked_arg_index], float):
                     continue
                 try:
-                    self.event.args[checked_arg_index] = transform_k(self.event.args[checked_arg_index])
-                    self.event.args[checked_arg_index] = float(self.event.args[checked_arg_index])
+                    self.event.message.args[checked_arg_index] = transform_k(self.event.message.args[checked_arg_index])
+                    self.event.message.args[checked_arg_index] = float(self.event.message.args[checked_arg_index])
                 except ValueError:
                     error = "Аргумент должен быть с плавающей запятой"
                     raise PWarning(error)
@@ -238,7 +239,7 @@ class Command:
         Проверка на сообщение из ЛС
         :return: bool
         """
-        if self.event.from_user:
+        if self.event.is_from_user:
             return True
 
         error = "Команда работает только в ЛС"
@@ -249,7 +250,7 @@ class Command:
         Проверка на сообщение из чата
         :return: bool
         """
-        if self.event.from_chat:
+        if self.event.is_from_chat:
             return True
 
         error = "Команда работает только в беседах"

@@ -29,12 +29,12 @@ class Restart(Command):
         do_the_linux_command('sudo systemctl restart petrovich')
         return 'Рестартим бота'
 
-    @staticmethod
-    def menu_web():
+    def menu_web(self):
+        self.bot.parse_and_send_msgs_thread(self.event.peer_id, 'Рестартим веб')
         do_the_linux_command('sudo systemctl restart petrovich_site')
         return 'Рестартим веб'
 
-    @staticmethod
-    def menu_server():
+    def menu_server(self):
+        self.bot.parse_and_send_msgs_thread(self.event.peer_id, 'Рестартим сервер')
         do_the_linux_command('sudo systemctl reboot -i')
         return 'Рестартим сервер'

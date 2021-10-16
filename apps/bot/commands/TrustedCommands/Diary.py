@@ -10,4 +10,4 @@ class Diary(Command):
 
     def start(self):
         url = 'https://diary.andrewsha.net/'
-        return {'msg': url, 'attachments': [url]}
+        return {'text': url, 'attachments': [url]}

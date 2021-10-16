@@ -3,10 +3,11 @@ import traceback
 from threading import Thread
 
 from apps.bot.classes.consts.Consts import Platform
-from apps.bot.classes.consts.Exceptions import PWarning, PError
+from apps.bot.classes.consts.Exceptions import PWarning, PError, PSkip
 from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
 from apps.bot.models import Users, Chat, Bot as BotModel
 from apps.bot.utils.utils import tanimoto
+from apps.games.models import Gamer
 
 
 class Bot(Thread):
@@ -64,6 +65,9 @@ class Bot(Thread):
             self.send_response_message(rm)
         return rm
 
+    def parse_and_send_msgs_thread(self, peer_id, msgs):
+        Thread(target=self.parse_and_send_msgs, args=(peer_id, msgs)).start()
+
     def route(self, event):
         """
         Выбор команды и отправка данных о сообщении ей
@@ -81,6 +85,9 @@ class Bot(Thread):
                 msg = str(e)
                 getattr(self.logger, e.level)({'result': msg})
                 return msg
+            # ToDo: check
+            except PSkip:
+                return
             except Exception as e:
                 msg = "Непредвиденная ошибка. Сообщите разработчику. Команда /баг"
                 log_exception = {
@@ -149,6 +156,22 @@ class Bot(Thread):
 
     def send_message(self, rm: ResponseMessageItem):
         raise NotImplementedError
+
+    @staticmethod
+    def get_gamer_by_user(user) -> Gamer:
+        """
+        Получение игрока по модели пользователя
+        """
+
+        gamers = Gamer.objects.filter(user=user)
+        if len(gamers) == 0:
+            gamer = Gamer(user=user)
+            gamer.save()
+            return gamer
+        elif len(gamers) > 1:
+            raise PWarning("Два и более игрока подходит под поиск")
+        else:
+            return gamers.first()
 
 
 def get_bot_by_platform(platform: Platform):

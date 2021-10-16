@@ -60,6 +60,7 @@ class Command(BaseCommand):
 
                     if notify.attachments and notify.attachments != "null":
                         notify_attachments = notify.attachments
+                        # ToDo:
                         attachments = get_attachments_for_upload(bot, notify_attachments)
                     if notify.date:
                         notify_datetime = localize_datetime(remove_tz(notify.date), notify.author.city.timezone.name)
@@ -73,7 +74,7 @@ class Command(BaseCommand):
                         if timezone_error:
                             message += "\n\nВАЖНО! Ваша таймзона слетела. " \
                                        "Проставьте город в профиле, чтобы напоминания по crontab приходили в корректное время"
-                    result_msg = {'msg': message, 'attachments': attachments}
+                    result_msg = {'text': message, 'attachments': attachments}
                     if notify.chat:
                         bot.parse_and_send_msgs_thread(notify.chat.chat_id, result_msg)
                     # Раскоментить если отправлять в лс пользователю, что это его напоминание
@@ -84,24 +85,17 @@ class Command(BaseCommand):
                             bot.parse_and_send_msgs_thread(notify.author.user_id, result_msg)
 
                     # Если отложенная команда
-                    if notify.text.startswith('/'):
-                        # msg = notify.text[1:]
-                        event = {
-                            'message': {
-                                'text': notify.text
-                            },
-                            'sender': notify.author,
-                            'platform': platform
-                        }
-                        if notify.chat:
-                            event['chat'] = notify.chat
-                            event['peer_id'] = notify.chat.chat_id
-                        else:
-                            event['chat'] = None
-                            event['peer_id'] = notify.author.user_id
 
-                        event_object = event_model(event)
-                        bot.menu(event_object, send=True)
+                    if notify.text.startswith('/'):
+                        event = event_model()
+                        event.set_message(notify.text)
+                        event.sender = notify.author
+                        if notify.chat:
+                            event.peer_id = notify.chat.chat_id
+                            event.chat = notify.chat
+                        else:
+                            event.peer_id = notify.author.user_id
+                        bot.route(event, send=True)
                     if notify.repeat:
                         if notify.date:
                             # Для постоянных уведомлений дата должа быть на завтрашний день обязательно.

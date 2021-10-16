@@ -1,3 +1,5 @@
+import json
+
 from django.contrib.auth.models import Group
 
 from apps.bot.classes.consts.Consts import Role
@@ -18,7 +20,12 @@ class TgEvent(Event):
             message = self.raw
         else:
             edited_message = self.raw.get('edited_message')
-            if edited_message:
+            callback_query = self.raw.get('callback_query')
+            if callback_query:
+                message = callback_query['message']
+                message['from'] = callback_query['from']
+                message['payload'] = callback_query['data']
+            elif edited_message:
                 message = edited_message
             else:
                 message = self.raw.get('message')
@@ -35,8 +42,13 @@ class TgEvent(Event):
         if message['from']['is_bot']:
             self.is_from_bot = True
 
-        self.setup_attachments(message)
-        self.setup_fwd(message.get('reply_to_message'))
+        payload = message.get('payload')
+        if payload:
+            self.setup_payload(payload)
+        else:
+            # Нет нужды парсить вложения и fwd если это просто нажатие на кнопку
+            self.setup_attachments(message)
+            self.setup_fwd(message.get('reply_to_message'))
         self.sender = self.register_user(message['from'])
 
     def register_user(self, user) -> Users:
@@ -84,7 +96,10 @@ class TgEvent(Event):
                 message_text = message.get('caption')
         else:
             message_text = message.get('text')
-        self.message = Message(message_text, message['message_id']) if message_text else None
+        self.set_message(message_text, message.get('message_id'))
+
+    def set_message(self, text, _id=None):
+        self.message = Message(text, _id) if text else None
 
     def setup_fwd(self, fwd):
         if fwd:
@@ -101,3 +116,8 @@ class TgEvent(Event):
         tg_voice = VoiceAttachment()
         tg_voice.parse_tg_voice(voice_event, self.bot)
         self.attachments.append(tg_voice)
+
+    def setup_payload(self, payload):
+        self.payload = json.loads(payload)
+        self.message = Message()
+        self.message.parse_from_payload(self.payload)

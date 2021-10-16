@@ -8,6 +8,7 @@ from apps.bot.utils.utils import get_attachments_from_attachments_or_fwd, tanimo
 from apps.service.models import Meme as MemeModel
 from petrovich.settings import VK_URL
 
+
 def check_name_exists(name):
     return MemeModel.objects.filter(name=name).exists()
 
@@ -38,15 +39,12 @@ class Meme(Command):
     priority = 70
 
     def accept(self, event):
-        if event.is_mentioned or event.is_from_user or (event.payload and event.payload.get('command', None) == 'мем'):
-            return super().accept(event)
-
         if event.chat and event.message and check_name_exists(event.message.clear.lower()):
             if not event.chat.need_meme:
                 raise PSkip()
             event.message.args = event.message.clear.lower().split(' ')
             return True
-        return False
+        return super().accept(event)
 
     def start(self):
         arg0 = self.event.message.args[0].lower()
@@ -129,9 +127,9 @@ class Meme(Command):
             return "Добавил"
         else:
             meme_to_send = self.prepare_meme_to_send(new_meme_obj)
-            meme_to_send['msg'] = "Запрос на подтверждение мема:\n" \
-                                  f"{new_meme_obj.author}\n" \
-                                  f"{new_meme_obj.name} ({new_meme_obj.id})"
+            meme_to_send['text'] = "Запрос на подтверждение мема:\n" \
+                                   f"{new_meme_obj.author}\n" \
+                                   f"{new_meme_obj.name} ({new_meme_obj.id})"
 
             # Отправка сообщения в модераторную
             m_bot = get_moderator_bot_class()
@@ -188,9 +186,9 @@ class Meme(Command):
             meme.save()
 
             meme_to_send = self.prepare_meme_to_send(meme)
-            meme_to_send['msg'] = "Запрос на обновление мема:\n" \
-                                  f"{meme.author}\n" \
-                                  f"{meme.name} ({meme.id})"
+            meme_to_send['text'] = "Запрос на обновление мема:\n" \
+                                   f"{meme.author}\n" \
+                                   f"{meme.name} ({meme.id})"
             self.bot.parse_and_send_msgs(self.bot.test_chat.chat_id, meme_to_send)
             return "Обновил. Воспользоваться мемом можно после проверки модераторами."
 
@@ -248,8 +246,8 @@ class Meme(Command):
             except PWarning:
                 raise PWarning("Не нашёл мемов для подтверждения")
             meme_to_send = self.prepare_meme_to_send(meme)
-            meme_to_send['msg'] = f"{meme.author}\n" \
-                                  f"{meme.name} ({meme.id})"
+            meme_to_send['text'] = f"{meme.author}\n" \
+                                   f"{meme.name} ({meme.id})"
             return meme_to_send
         else:
             self.int_args = [1]
@@ -410,7 +408,7 @@ class Meme(Command):
         prepared_meme = prepare_meme_to_send(self.bot, self.event, meme, print_name, send_keyboard, self.name)
         if send_keyboard:
             prepared_meme['keyboard'] = self.bot.get_inline_keyboard(
-                [{'command': self.name, 'button_text': "Ещё", 'args': {"random": "р"}}])
+                [{'command': self.name, 'button_text': "Ещё", 'args': ["р"]}])
         return prepared_meme
 
     @staticmethod
@@ -449,7 +447,7 @@ def prepare_meme_to_send(bot, event, meme, print_name=False, send_keyboard=False
         if meme.type == 'photo':
             msg['attachments'] = bot.upload_photos(meme.link)
         else:
-            msg['msg'] = meme.link
+            msg['text'] = meme.link
         if meme.type == 'link':
             msg['attachments'] = meme.link
     elif event.platform == Platform.VK:
@@ -464,7 +462,7 @@ def prepare_meme_to_send(bot, event, meme, print_name=False, send_keyboard=False
                 bot.parse_and_send_msgs(bot.test_chat.chat_id, message_to_test_chat)
                 raise PWarning(error)
         elif meme.type == 'link':
-            msg['msg'] = meme.link
+            msg['text'] = meme.link
         elif meme.type == 'audio':
             msg['attachments'] = [meme.link.replace(VK_URL, '')]
         elif meme.type == 'photo':
@@ -474,6 +472,6 @@ def prepare_meme_to_send(bot, event, meme, print_name=False, send_keyboard=False
             raise PError("У мема нет типа. Тыкай разраба")
 
     if print_name:
-        if msg.get('msg', None):
-            msg['msg'] += f"\n{meme.name}"
+        if msg.get('text', None):
+            msg['text'] += f"\n{meme.name}"
     return msg

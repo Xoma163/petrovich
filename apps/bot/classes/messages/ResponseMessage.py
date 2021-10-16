@@ -20,5 +20,7 @@ class ResponseMessageItem:
             self.peer_id = peer_id
             self.text = msg.get('text', None)
             self.attachments = msg.get('attachments', None)
-            self.keyboard = msg.get('keyboard', None)
+            if not isinstance(self.attachments, list):
+                self.attachments = [self.attachments]
+            self.keyboard = msg.get('keyboard', {})
             self.dont_parse_links = msg.get('dont_parse_links', False)

@@ -73,14 +73,14 @@ class Media(Command):
         attachments = [self.bot.upload_video(video)]
 
         if self.event.message.command not in self.full_names:
-            self.bot.delete_message(self.event.peer_id, self.event.msg_id)
+            self.bot.delete_message(self.event.peer_id, self.event.message.id)
 
-            msg = ""
+            text = ""
             if title:
-                msg = f"{title}\n"
-            msg += f"От пользователя {self.event.sender}\n" \
-                   f"{url}"
-            return {'msg': msg, 'attachments': attachments}
+                text = f"{title}\n"
+            text += f"От пользователя {self.event.sender}\n" \
+                    f"{url}"
+            return {'text': text, 'attachments': attachments}
         else:
             return {'attachments': attachments}
 

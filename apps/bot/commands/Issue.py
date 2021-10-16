@@ -33,7 +33,7 @@ class Issue(Command):
 
         response = github_api.create_issue(title, body)
         result = {
-            'msg': f"Сохранено\n"
+            'text': f"Сохранено\n"
                    f"Отслеживать созданное ишю можно по этой ссылке:\n"
                    f"{response['html_url']}",
             'attachments': [response['html_url']]

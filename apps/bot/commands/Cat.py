@@ -31,7 +31,7 @@ class Cat(Command):
             cat.to_send = False
             cat.save()
             attachments = self.bot.upload_photos(cat.image.path)
-            return {'msg': "Держи нового кота на аватарку", 'attachments': attachments}
+            return {'text': "Держи нового кота на аватарку", 'attachments': attachments}
 
         images = get_attachments_from_attachments_or_fwd(self.event, 'photo')
 

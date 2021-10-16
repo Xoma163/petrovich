@@ -3,13 +3,14 @@ from io import BytesIO
 from tempfile import NamedTemporaryFile
 from urllib.parse import urlparse
 
+import requests
+
 from apps.bot.classes.consts.Exceptions import PWarning
 
 
 class Attachment:
 
-    def __init__(self, att_type):
-        self.type = att_type
+    def __init__(self):
         self.public_download_url = None
         self.private_download_url = None
         self.content = None
@@ -40,7 +41,8 @@ class Attachment:
                 tmp.name = filename
                 tmp.seek(0)
                 self.content = tmp
-            self.content = file_like_object
+            else:
+                self.content = file_like_object
         # path
         elif isinstance(file_like_object, str) and os.path.exists(file_like_object):
             with open(file_like_object, 'rb') as file:
@@ -55,10 +57,16 @@ class Attachment:
                 tmp.name = filename
                 tmp.seek(0)
                 self.content = tmp
-            self.content = _bytes
+            else:
+                self.content = _bytes
 
-    def parse_response(self, attachment, allowed_exts=None, filename=None):
-        self.prepare_obj(attachment, allowed_exts)
+    def parse_response(self, attachment, allowed_exts_url=None, filename=None):
+        self.prepare_obj(attachment, allowed_exts_url=allowed_exts_url, filename=filename)
 
     def get_download_url(self):
         return self.public_download_url if self.public_download_url else self.private_download_url
+
+    def download_content(self):
+        if not self.content:
+            self.content = requests.get(self.get_download_url()).content
+        return self.content

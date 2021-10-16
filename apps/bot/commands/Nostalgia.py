@@ -126,7 +126,7 @@ class Nostalgia(Command):
 
         keyboard = self.bot.get_inline_keyboard(buttons)
 
-        return {"msg": f"Результаты по запросу {search_query}.\n\nСтраница {page}/{total_pages}", "keyboard": keyboard}
+        return {"text": f"Результаты по запросу {search_query}.\n\nСтраница {page}/{total_pages}", "keyboard": keyboard}
 
     def menu_range(self, index_from: int = None, index_to: int = None):
         data = self._load_file()
@@ -179,7 +179,7 @@ class Nostalgia(Command):
 
         keyboard = self.bot.get_inline_keyboard(buttons)
 
-        return {"msg": msg, "attachments": attachments, "keyboard": keyboard}
+        return {"text": msg, "attachments": attachments, "keyboard": keyboard}
 
     @staticmethod
     def _load_file() -> list:
