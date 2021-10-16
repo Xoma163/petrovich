@@ -8,9 +8,6 @@ from apps.bot.utils.utils import get_attachments_from_attachments_or_fwd, tanimo
 from apps.service.models import Meme as MemeModel
 from petrovich.settings import VK_URL
 
-IMAGE_EXTS = ['jpg', 'jpeg', 'png']
-
-
 def check_name_exists(name):
     return MemeModel.objects.filter(name=name).exists()
 

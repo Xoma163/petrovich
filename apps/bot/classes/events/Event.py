@@ -29,7 +29,7 @@ class Event:
 
         self.force_need_a_response: bool = False
 
-    def setup_event(self):
+    def setup_event(self, is_fwd=False):
         raise NotImplementedError
 
     # ToDo: проверка на забаненых

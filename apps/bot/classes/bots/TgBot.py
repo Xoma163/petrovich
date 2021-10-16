@@ -91,7 +91,8 @@ class TgBot(CommonBot):
         params['text'] = params.pop('caption')
         return self.requests.get('sendMessage', params)
 
-    def upload_photos(self, images, max_count=10):
+    @staticmethod
+    def upload_photos(images, max_count=10):
         """
         Загрузка фотографий на сервер ТГ.
         images: список изображений в любом формате (ссылки, байты, файлы)
@@ -111,7 +112,8 @@ class TgBot(CommonBot):
                 break
         return attachments
 
-    def upload_video(self, video, peer_id=None, title="Видео", filename=None):
+    @staticmethod
+    def upload_video(video, peer_id=None, title="Видео", filename=None):
         va = VideoAttachment()
         va.parse_response(video, filename=filename)
         return va

@@ -10,7 +10,7 @@ from urllib.parse import urlparse
 import requests
 from django.contrib.auth.models import Group
 
-from apps.bot.classes.bots.Bot import Bot
+from apps.bot.classes.bots.Bot import Bot as CommonBot
 from apps.bot.classes.consts.Consts import Role, Platform
 from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.classes.events.TgEvent import TgEvent
@@ -34,9 +34,9 @@ class TgRequests:
         return requests.post(url, params, **kwargs)
 
 
-class TgBot(Bot):
+class TgBot(CommonBot):
     def __init__(self):
-        Bot.__init__(self, Platform.TG)
+        CommonBot.__init__(self, Platform.TG)
 
         self.token = env.str("TG_TOKEN")
         self.requests = TgRequests(self.token)
