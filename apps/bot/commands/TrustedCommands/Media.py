@@ -30,9 +30,8 @@ class Media(Command):
     def accept(self, event):
         if event.message and urlparse(event.message.command).hostname in MEDIA_URLS:
             return True
-        if event.fwd:
-            if urlparse(event.fwd[0]['text']).hostname in MEDIA_URLS:
-                return True
+        if event.fwd and event.fwd[0].message and urlparse(event.fwd[0].message.clear).hostname in MEDIA_URLS:
+            return True
         return super().accept(event)
 
     def start(self):
@@ -120,7 +119,6 @@ class Media(Command):
 
         s = requests.Session()
         r = s.get(url, headers=headers)
-        # ToDo: just regexp
         bs4 = BeautifulSoup(r.content, 'html.parser')
         video_data = json.loads(bs4.find(id='__NEXT_DATA__').contents[0])
 

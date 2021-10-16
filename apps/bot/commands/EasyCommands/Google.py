@@ -6,6 +6,7 @@ from apps.bot.classes.Command import Command
 class Google(Command):
     name = "гугл"
     help_text = "формирует ссылку в гугл"
+    help_texts = ["(текст) - формирует ссылку в гугл"]
     args = 1
 
     def start(self):

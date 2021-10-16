@@ -30,8 +30,6 @@ class Platform(Enum):
         return tuple((i.name, i.value) for i in cls)
 
 
-# PLATFORMS = [x.value for x in list(Platform)]
-
 WEEK_TRANSLATOR = {
     'понедельник': 1, 'пн': 1,
     'вторник': 2, 'вт': 2,

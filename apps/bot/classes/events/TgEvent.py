@@ -8,8 +8,10 @@ from apps.bot.classes.messages.Message import Message
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 from apps.bot.classes.messages.attachments.VoiceAttachment import VoiceAttachment
 from apps.bot.models import Users
+from apps.bot.utils.utils import auto_str
 
 
+@auto_str
 class TgEvent(Event):
 
     def setup_event(self, is_fwd=False):
@@ -32,7 +34,7 @@ class TgEvent(Event):
         if not message:
             return
 
-        self.peer_id = str(message['chat']['id'])
+        self.peer_id = message['chat']['id']
 
         if message['chat']['id'] != message['from']['id']:
             self.chat = self.bot.get_chat_by_id(message['chat']['id'])

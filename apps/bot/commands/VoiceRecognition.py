@@ -31,7 +31,7 @@ class VoiceRecognition(Command):
 
     def start(self):
         audio_messages = get_attachments_from_attachments_or_fwd(self.event, VoiceAttachment)
-        self.bot.set_activity(self.event.peer_id, ActivitiesEnum.RECORD_AUDIO)
+        self.bot.set_activity(self.event.peer_id, ActivitiesEnum.TYPING)
 
         audio_message = audio_messages[0]
 

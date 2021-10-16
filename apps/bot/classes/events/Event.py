@@ -1,6 +1,6 @@
 from urllib.parse import urlparse
 
-from apps.bot.classes.consts.Consts import Platform
+from apps.bot.classes.consts.Consts import Platform, Role
 from apps.bot.classes.messages.Message import Message
 from apps.bot.classes.messages.attachments.VoiceAttachment import VoiceAttachment
 from apps.bot.models import Users, Chat
@@ -22,7 +22,7 @@ class Event:
 
         self.sender: Users = None
         self.chat: Chat = None
-        self.peer_id: str = None
+        self.peer_id: int = None
         self.platform: Platform = bot.platform
 
         self.payload: dict = {}
@@ -39,6 +39,9 @@ class Event:
 
     # ToDo: проверка на забаненых
     def need_a_response(self):
+        if self.sender.check_role(Role.BANNED):
+            return False
+
         if self.force_need_a_response:
             return True
 
@@ -73,7 +76,7 @@ class Event:
             return True
 
         message_is_media_link = urlparse(self.message.clear).hostname in MEDIA_URLS or \
-                                (self.fwd and self.fwd[0].message.clear and urlparse(self.fwd[0].message.clear) in MEDIA_URLS)
+            (self.fwd and self.fwd[0].message and self.fwd[0].message.clear and urlparse(self.fwd[0].message.clear) in MEDIA_URLS)
         if message_is_media_link:
             return True
 
@@ -83,3 +86,13 @@ class Event:
             if isinstance(att, VoiceAttachment):
                 return True
         return False
+
+
+def get_event_by_platform(platform):
+    from apps.bot.classes.events.TgEvent import TgEvent
+    from apps.bot.classes_old.events.VkEvent import VkEvent
+    platforms = {
+        Platform.VK: VkEvent,
+        Platform.TG: TgEvent
+    }
+    return platforms[platform]

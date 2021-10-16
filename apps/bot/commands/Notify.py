@@ -41,7 +41,6 @@ def get_time(arg1, arg2, timezone=None):
             return None, None, None
 
 
-# ToDo: TG вложения
 class Notify(Command):
     name = 'напомни'
     names = ["напомнить"]

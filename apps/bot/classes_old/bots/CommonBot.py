@@ -86,62 +86,6 @@ class CommonBot(Thread):
         if chat in chats.all():
             chats.remove(chat)
 
-    # ToDo: очень говнокод
-    def get_user_by_name(self, args, filter_chat=None) -> Users:
-        """
-        Получение пользователя по имени/фамилии/имени и фамилии/никнейма/ид
-        """
-        if not args:
-            raise PWarning("Отсутствуют аргументы")
-        if isinstance(args, str):
-            args = [args]
-        users = self.user_model
-        if filter_chat:
-            users = users.filter(chats=filter_chat)
-        if len(args) >= 2:
-            user = users.filter(name=args[0].capitalize(), surname=args[1].capitalize())
-        else:
-            user = users.filter(nickname_real=args[0].capitalize())
-            if len(user) == 0:
-                user = users.filter(name=args[0].capitalize())
-                if len(user) == 0:
-                    user = users.filter(surname=args[0].capitalize())
-                    if len(user) == 0:
-                        user = users.filter(nickname=args[0])
-                        if len(user) == 0:
-                            user = users.filter(user_id=args[0])
-
-        if len(user) > 1:
-            raise PWarning("2 и более пользователей подходит под поиск")
-
-        if len(user) == 0:
-            raise PWarning("Пользователь не найден. Возможно опечатка или он мне ещё ни разу не писал")
-
-        return user.first()
-
-    def get_chat_by_name(self, args, filter_platform=True) -> Chat:
-        """
-        Получение чата по названию
-        """
-        if not args:
-            raise PWarning("Отсутствуют аргументы")
-        if isinstance(args, str):
-            args = [args]
-
-        if filter_platform:
-            chats = self.chat_model
-        else:
-            chats = Chat.objects.all()
-
-        for arg in args:
-            chats = chats.filter(name__icontains=arg)
-
-        if len(chats) > 1:
-            raise PWarning("2 и более чатов подходит под поиск")
-
-        if len(chats) == 0:
-            raise PWarning("Чат не найден")
-        return chats.first()
 
 
     def delete_message(self, chat_id, message_id):

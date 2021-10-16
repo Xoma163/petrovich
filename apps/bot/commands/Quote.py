@@ -5,6 +5,7 @@ from apps.bot.classes.Command import Command
 # https://www.figma.com/file/yOqhSHOtYX76GcEJ3yB4oH/Bot?node-id=33%3A15
 from apps.bot.classes.consts.ActivitiesEnum import ActivitiesEnum
 from apps.bot.classes.consts.Consts import Platform
+from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 from apps.bot.utils.QuotesGenerator import QuotesGenerator
 
 
@@ -14,7 +15,7 @@ class Quote(Command):
     help_text = "генерирует картинку с цитатой"
     help_texts = ["(Пересылаемые сообщение) - генерирует картинку с цитатой"]
     fwd = True
-    platforms = [Platform.VK]
+    platforms = [Platform.VK, Platform.TG]
 
     def start(self):
         self.bot.set_activity(self.event.peer_id, ActivitiesEnum.UPLOAD_PHOTO)
@@ -35,32 +36,34 @@ class Quote(Command):
         msgs = []
         next_append = False
         for msg in fwd_messages:
-            message = {'text': msg['text'].replace('\n', '▲ ▲') if isinstance(msg['text'], str) else msg['text']}
+            message = {'text':msg.message.raw.replace('\n', '▲ ▲') if isinstance(msg.message.raw, str) else msg['text']}
 
-            if msg['from_id'] > 0:
-                quote_user = self.bot.get_user_by_id(msg['from_id'])
+            if msg.peer_id > 0:
+                quote_user = self.bot.get_user_by_id(msg.sender.user_id)
                 username = str(quote_user)
                 avatar = quote_user.avatar
-                if not avatar:
-                    self.bot.update_user_avatar(msg['from_id'])
+                if not avatar and self.event.platform == Platform.VK:
+                    self.bot.update_user_avatar(msg.sender.user_id)
             else:
-                quote_bot = self.bot.get_bot_by_id(msg['from_id'])
+                # ToDo: check this
+                quote_bot = self.bot.get_bot_by_id(msg.sender.user_id)
                 username = str(quote_bot)
                 avatar = quote_bot.avatar
-                if not avatar:
-                    self.bot.update_bot_avatar(msg['from_id'])
-            if msg.get('attachments'):
-                photo = msg['attachments'][0].get('photo')
-                if photo:
-                    max_photo = self.event.get_max_size_image(photo)
-                    message['photo'] = max_photo['url']
+                if not avatar and self.event.platform == Platform.VK:
+                    self.bot.update_bot_avatar(msg.sender.user_id)
+            if msg.attachments:
+                photo = msg.attachments[0]
+                if isinstance(photo, PhotoAttachment):
+                    message['photo'] = photo.get_download_url()
 
+                # ToDo: check this
                 sticker = msg['attachments'][0].get('sticker')
                 if sticker:
                     image = self.event.get_sticker_128(sticker['images'])
                     message['photo'] = image['url']
 
             # stack messages from one user
+            # ToDo: check this
             if msgs and msgs[-1]['username'] == username:
                 if next_append:
                     msgs.append({'username': username, 'message': message, 'avatar': avatar})
@@ -77,7 +80,7 @@ class Quote(Command):
                 if 'photo' in message:
                     next_append = True
 
-            if msg.get('fwd'):
+            if msg.fwd:
                 fwd = msg['fwd'] if isinstance(msg['fwd'], list) else [msg['fwd']]
                 msgs[-1]['fwd'] = self.parse_fwd(fwd)
                 next_append = True

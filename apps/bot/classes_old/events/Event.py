@@ -126,11 +126,3 @@ class Event:
         self.yandex = event.get('yandex', None)
 
 
-def get_event_by_platform(platform):
-    from apps.bot.classes.events.TgEvent import TgEvent
-    from apps.bot.classes_old.events.VkEvent import VkEvent
-    platforms = {
-        Platform.VK: VkEvent,
-        Platform.TG: TgEvent
-    }
-    return platforms[platform]

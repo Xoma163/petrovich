@@ -6,8 +6,7 @@ from django.core.management.base import BaseCommand
 
 from apps.bot.classes.bots.Bot import get_bot_by_platform
 from apps.bot.classes.consts.Consts import Role
-# ToDo:
-from apps.bot.classes_old.events.Event import get_event_by_platform
+from apps.bot.classes.events.Event import get_event_by_platform
 from apps.service.models import Notify
 from petrovich.settings import DEFAULT_TIME_ZONE
 
@@ -60,7 +59,6 @@ class Command(BaseCommand):
 
                     if notify.attachments and notify.attachments != "null":
                         notify_attachments = notify.attachments
-                        # ToDo:
                         attachments = get_attachments_for_upload(bot, notify_attachments)
                     if notify.date:
                         notify_datetime = localize_datetime(remove_tz(notify.date), notify.author.city.timezone.name)

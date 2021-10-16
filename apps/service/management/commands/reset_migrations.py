@@ -45,11 +45,11 @@ class Command(BaseCommand):
         self.stdout.write("Reseting APP %s" % apps)
         for app in apps:
             self.delete_django_migrations_db_app(app)
-            # ToDo: uncomment on local. Comment on production
+            # uncomment on local. Comment on production
             self.delete_migrations_files_app(app)
             self.stdout.write("APP (%s) deleted with success" % app)
 
-        # ToDo: uncomment on local. Comment on production
+        # uncomment on local. Comment on production
         for app in apps:
             call_command('makemigrations', app)
 

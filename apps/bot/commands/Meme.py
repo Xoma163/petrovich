@@ -52,7 +52,6 @@ class Meme(Command):
             [['добавить'], self.menu_add],
             [['обновить'], self.menu_refresh],
             [['удалить'], self.menu_delete],
-            [['конфа'], self.menu_conference],
             [['рандом', 'р'], self.menu_random],
             [['подтвердить', 'принять', '+'], self.menu_confirm],
             [['отклонить', 'отменить', '-'], self.menu_reject],
@@ -217,22 +216,6 @@ class Meme(Command):
         meme_name = meme.name
         meme.delete()
         return f'Удалил мем "{meme_name}"'
-
-    def menu_conference(self):
-        self.check_args(3)
-        if self.event.sender.check_role(Role.ADMIN):
-            chat = self.bot.get_chat_by_name(self.event.message.args[1])
-        else:
-            chat = self.bot.get_one_chat_with_user(self.event.message.args[1], self.event.sender.user_id)
-        if self.event.chat == chat:
-            raise PWarning("Зачем мне отправлять мем в эту же конфу?")
-        if self.event.message.args[-1].lower() in ['рандом', 'р']:
-            meme = self.get_random_meme()
-        else:
-            meme = self.get_meme(self.event.message.args[2:])
-        prepared_meme = self.prepare_meme_to_send(meme, print_name=True)
-        self.bot.parse_and_send_msgs(chat.chat_id, prepared_meme)
-        return "Отправил"
 
     def menu_random(self):
         meme = self.get_random_meme()
