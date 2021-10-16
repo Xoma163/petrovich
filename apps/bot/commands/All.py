@@ -1,8 +1,8 @@
-from apps.bot.classes.Consts import Platform
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.consts.Consts import Platform
+from apps.bot.classes.Command import Command
 
 
-class All(CommonCommand):
+class All(Command):
     name = "all"
     help_text = "присылает меншон по всем участникам конфы"
     help_texts = [

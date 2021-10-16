@@ -1,9 +1,9 @@
-from apps.bot.classes.Consts import Role
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.consts.Consts import Role
+from apps.bot.classes.Command import Command
 from petrovich.settings import STATIC_ROOT
 
 
-class Taxi(CommonCommand):
+class Taxi(Command):
     name = "такси"
     help_text = "график отношения цены ко времени"
     access = Role.TRUSTED

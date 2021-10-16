@@ -1,8 +1,8 @@
-from apps.bot.classes.Consts import Role, Platform
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.consts.Consts import Role, Platform
+from apps.bot.classes.Command import Command
 
 
-class Flood(CommonCommand):
+class Flood(Command):
     name = "флуд"
     help_text = "флудит"
     help_texts = ["(N) - флудит N сообщений"]

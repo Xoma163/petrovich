@@ -1,16 +1,17 @@
 from apps.bot.APIs.EveryPixelAPI import EveryPixelAPI
-from apps.bot.classes.Consts import Platform
-from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import get_attachments_from_attachments_or_fwd
+from apps.bot.classes.consts.Consts import Platform
+from apps.bot.classes.Command import Command
+from apps.bot.utils.utils import get_attachments_from_attachments_or_fwd
+from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 
 
-class EstimatePhoto(CommonCommand):
+class EstimatePhoto(Command):
     name = "оцени"
     names = ["оценить"]
     help_text = "оценить качество фотографии"
     help_texts = ["(Изображение/Пересылаемое сообщение с изображением) - оценивает качество изображения"]
     platforms = [Platform.VK, Platform.TG]
-    attachments = ['photo']
+    attachments = [PhotoAttachment]
 
     def start(self):
         image = get_attachments_from_attachments_or_fwd(self.event, 'photo')[0]

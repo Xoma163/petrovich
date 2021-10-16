@@ -1,9 +1,9 @@
-from apps.bot.classes.Consts import Platform
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.consts.Consts import Platform
+from apps.bot.classes.Command import Command
 from apps.bot.commands.Praise import get_praise_or_scold_self
 
 
-class ScoldSelf(CommonCommand):
+class ScoldSelf(Command):
     name = "обосраться"
     names = ["обосрись", "поругаться", "поругайся"]
     platforms = [Platform.VK, Platform.TG, Platform.API]

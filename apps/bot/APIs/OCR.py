@@ -1,7 +1,7 @@
 import requests
 
 # https://ocr.space/OCRAPI
-from apps.bot.classes.Exceptions import PError, PWarning
+from apps.bot.classes.consts.Exceptions import PError, PWarning
 from petrovich.settings import env
 
 

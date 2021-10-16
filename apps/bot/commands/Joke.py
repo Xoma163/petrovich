@@ -1,8 +1,8 @@
 from apps.bot.APIs.RzhunemoguAPI import RzhunemoguAPI
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.Command import Command
 
 
-class Joke(CommonCommand):
+class Joke(Command):
     name = "анекдот"
     names = ["анек", "а", "a"]
     help_text = "присылает случайный анекдот"

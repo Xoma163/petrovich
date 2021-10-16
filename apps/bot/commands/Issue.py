@@ -1,9 +1,9 @@
 from apps.bot.APIs.GithubAPI import GithubAPI
-from apps.bot.classes.Consts import Platform
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.consts.Consts import Platform
+from apps.bot.classes.Command import Command
 
 
-class Issue(CommonCommand):
+class Issue(Command):
     name = "баг"
     names = ["ошибка", "ишю", "ишью"]
     help_text = "добавляет проблему Петровича, которую нужно решить"

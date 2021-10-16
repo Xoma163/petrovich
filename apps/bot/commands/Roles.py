@@ -1,6 +1,6 @@
-from apps.bot.classes.Consts import Role
-from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.consts.Consts import Role
+from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.Command import Command
 
 
 def get_roles(user):
@@ -10,7 +10,7 @@ def get_roles(user):
     return active_roles
 
 
-class Roles(CommonCommand):
+class Roles(Command):
     name = "роли"
     help_text = "присылает список ваших ролей"
     help_texts = [

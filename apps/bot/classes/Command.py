@@ -1,11 +1,12 @@
-from apps.bot.classes.Consts import Role, ATTACHMENT_TRANSLATOR, Platform
-from apps.bot.classes.Exceptions import PWarning, PError
-from apps.bot.classes.common.CommonMethods import get_help_texts_for_command, transform_k
+from apps.bot.classes.consts.Consts import Role, ATTACHMENT_TRANSLATOR, Platform
+from apps.bot.utils.utils import get_help_texts_for_command, transform_k
+from apps.bot.classes.consts.Exceptions import PWarning, PError
+from apps.bot.classes.bots.Bot import Bot
 from apps.bot.classes.events.Event import Event
 from petrovich.settings import env
 
 
-class CommonCommand:
+class Command:
     # Основные поля команды
     name: str = None  # Имя команды,
     names: list = []  # Вспопогательные имена команды,
@@ -54,18 +55,18 @@ class CommonCommand:
         :param event: событие
         :return: bool
         """
-        if event.message.command in self.full_names:
+        if event.message and event.message.command in self.full_names:
             return True
 
         return False
 
-    def check_and_start(self, event: Event):
+    def check_and_start(self, bot: Bot, event: Event):
         """
         Выполнение всех проверок и старт команды
         :param bot: сущность Bot
         :param event: сущность Event
         """
-        self.bot = event.bot
+        self.bot = bot
         self.event = event
 
         self.checks()
@@ -285,7 +286,7 @@ class CommonCommand:
         """
         if self.event.attachments:
             for att in self.event.attachments:
-                if att['type'] in self.attachments:
+                if type(att) in self.attachments:
                     return True
         if self.event.fwd and self.event.fwd[0]['attachments']:
             for att in self.event.fwd[0]['attachments']:

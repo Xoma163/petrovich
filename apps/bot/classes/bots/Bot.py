@@ -2,11 +2,11 @@ import logging
 import traceback
 from threading import Thread
 
-from apps.bot.classes.common.CommonMethods import tanimoto
-from apps.bot.classes2.Exceptions import PWarning, PError
-from apps.bot.classes2.messages.ResponseMessage import ResponseMessage
-from apps.bot.classes2.messages.ResponseMessageItem import ResponseMessageItem
+from apps.bot.classes.consts.Consts import Platform
+from apps.bot.classes.consts.Exceptions import PWarning, PError
+from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
 from apps.bot.models import Users, Chat, Bot as BotModel
+from apps.bot.utils.utils import tanimoto
 
 
 class Bot(Thread):
@@ -149,3 +149,30 @@ class Bot(Thread):
 
     def send_message(self, rm: ResponseMessageItem):
         raise NotImplementedError
+
+
+def get_bot_by_platform(platform: Platform):
+    """
+    Получение бота по платформе
+    """
+    # from apps.bot.classes.bots.VkBot import VkBot
+    from apps.bot.classes.bots.TgBot import TgBot
+    # from apps.bot.classes.bots.YandexBot import YandexBot
+
+    platforms = {
+        # Platform.VK: VkBot,
+        Platform.TG: TgBot,
+        # Platform.YANDEX: YandexBot
+    }
+    return platforms[platform]
+
+
+def get_moderator_bot_class():
+    from apps.bot.classes.bots.TgBot import TgBot
+    return TgBot()
+
+def upload_image_to_vk_server(image):
+    pass
+    # ToDo
+    # vk_bot = VkBot()
+    # return vk_bot.upload_photo_and_get_absolute_url(image)

@@ -4,9 +4,9 @@ from copy import deepcopy
 from threading import Thread
 from urllib.parse import urlparse
 
-from apps.bot.classes.Consts import Role, Platform
-from apps.bot.classes.Exceptions import PSkip, PWarning, PError
-from apps.bot.classes.common.CommonMethods import tanimoto
+from apps.bot.classes.consts.Consts import Role, Platform
+from apps.bot.classes.consts.Exceptions import PSkip, PWarning, PError
+from apps.bot.utils.utils import tanimoto
 from apps.bot.classes.events.Event import Event
 from apps.bot.models import Users, Chat, Bot
 from apps.games.models import Gamer
@@ -281,7 +281,8 @@ class CommonBot(Thread):
             return True
         return False
 
-    def need_reaction_for_fwd(self, event):
+    @staticmethod
+    def need_reaction_for_fwd(event):
         message = event['message']['text']
 
         fwd_message = None
@@ -480,9 +481,9 @@ def get_bot_by_platform(platform: Platform):
     """
     Получение бота по платформе
     """
-    from apps.bot.classes.bots.VkBot import VkBot
-    from apps.bot.classes.bots.TgBot import TgBot
-    from apps.bot.classes.bots.YandexBot import YandexBot
+    from apps.bot.classes_old.bots.VkBot import VkBot
+    from apps.bot.classes_old.bots.TgBot import TgBot
+    from apps.bot.classes_old.bots.YandexBot import YandexBot
 
     platforms = {
         Platform.VK: VkBot,
@@ -493,5 +494,5 @@ def get_bot_by_platform(platform: Platform):
 
 
 def get_moderator_bot_class():
-    from apps.bot.classes.bots.TgBot import TgBot
+    from apps.bot.classes_old.bots.TgBot import TgBot
     return TgBot()

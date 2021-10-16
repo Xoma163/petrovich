@@ -1,8 +1,8 @@
-from apps.bot.classes.Consts import Role
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.consts.Consts import Role
+from apps.bot.classes.Command import Command
 
 
-class Discord(CommonCommand):
+class Discord(Command):
     name = "дискорд"
     names = ["диск"]
     help_text = "ссылка на канал в дискорде"

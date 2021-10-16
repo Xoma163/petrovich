@@ -3,7 +3,7 @@ from datetime import datetime
 import requests
 from bs4 import BeautifulSoup
 
-from apps.bot.classes.Exceptions import PWarning
+from apps.bot.classes.consts.Exceptions import PWarning
 
 
 class YoutubeInfo:

@@ -1,10 +1,10 @@
 import random
 from threading import Lock
 
-from apps.bot.classes.Consts import Platform
-from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import decl_of_num
+from apps.bot.classes.consts.Consts import Platform
+from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.Command import Command
+from apps.bot.utils.utils import decl_of_num
 from apps.games.models import BullsAndCowsSession
 
 lock = Lock()
@@ -12,7 +12,7 @@ lock = Lock()
 DIGITS_IN_GAME = 4
 
 
-class BullsAndCows(CommonCommand):
+class BullsAndCows(Command):
     name = "бк"
     names = ["бик", "быкиикоровы", "быки", "коровы"]
     help_text = "быки и коровы. Игра, где нужно угадать загаданное число."

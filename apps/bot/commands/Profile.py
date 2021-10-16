@@ -2,14 +2,14 @@ from datetime import datetime
 
 from apps.bot.APIs.TimezoneDBAPI import TimezoneDBAPI
 from apps.bot.APIs.YandexGeoAPI import YandexGeoAPI
-from apps.bot.classes.Consts import Platform
-from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import get_attachments_from_attachments_or_fwd
+from apps.bot.classes.consts.Consts import Platform
+from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.Command import Command
+from apps.bot.utils.utils import get_attachments_from_attachments_or_fwd
 from apps.service.models import City, TimeZone
 
 
-class Profile(CommonCommand):
+class Profile(Command):
     name = "профиль"
     help_text = "позволяет управлять вашим профилем"
     help_texts = [

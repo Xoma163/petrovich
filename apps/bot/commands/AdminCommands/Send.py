@@ -1,9 +1,9 @@
-from apps.bot.classes.Consts import Role
-from apps.bot.classes.bots.CommonBot import get_bot_by_platform
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.consts.Consts import Role
+from apps.bot.classes.bots.Bot import get_bot_by_platform
+from apps.bot.classes.Command import Command
 
 
-class Send(CommonCommand):
+class Send(Command):
     name = "отправь"
     names = ["отправить", "сообщение"]
     help_text = "отправляет сообщение в любую конфу"

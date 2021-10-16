@@ -1,7 +1,7 @@
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.Command import Command
 
 
-class Issues(CommonCommand):
+class Issues(Command):
     name = "баги"
     names = ["ишюс", "ишьюс", "иши"]
     help_text = "список проблем"

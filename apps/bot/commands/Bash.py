@@ -1,10 +1,10 @@
 from apps.bot.APIs.BashAPI import BashAPI
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.Command import Command
 
 MAX_QUOTES = 20
 
 
-class Bash(CommonCommand):
+class Bash(Command):
     name = "баш"
     help_text = "рандомная цитата с баша"
     help_texts = ["[количество=5] - рандомная цитата с баша. Максимум 20 цитат"]

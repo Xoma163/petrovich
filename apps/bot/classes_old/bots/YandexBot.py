@@ -2,22 +2,15 @@ import traceback
 
 from django.contrib.auth.models import Group
 
-from apps.bot.classes.Consts import Platform, Role
-from apps.bot.classes.bots.CommonBot import CommonBot
-from apps.bot.classes.events.YandexEvent import YandexEvent
+from apps.bot.classes_old.bots.CommonBot import CommonBot
+from apps.bot.classes_old.events.YandexEvent import YandexEvent
+from apps.bot.classes.consts.Consts import Platform, Role
 from apps.bot.models import Users, Chat, Bot
 
 
 class YandexBot(CommonBot):
     def __init__(self):
         CommonBot.__init__(self, Platform.YANDEX)
-
-    def set_activity(self, peer_id, activity='typing'):
-        """
-        Метод позволяет указать пользователю, что бот набирает сообщение или записывает голосовое
-        Используется при длительном выполнении команд, чтобы был фидбек пользователю, что его запрос принят
-        """
-        pass
 
     def get_user_by_id(self, user_id) -> Users:
         """

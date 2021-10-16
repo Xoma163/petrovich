@@ -1,13 +1,14 @@
 from io import BytesIO
 
-from apps.bot.classes.Consts import Platform
-from apps.bot.classes.QuotesGenerator import QuotesGenerator
-from apps.bot.classes.common.CommonCommand import CommonCommand
-
-
+from apps.bot.classes.Command import Command
 # Design by M.Marchukov and M.Marchukova
 # https://www.figma.com/file/yOqhSHOtYX76GcEJ3yB4oH/Bot?node-id=33%3A15
-class Quote(CommonCommand):
+from apps.bot.classes.consts.ActivitiesEnum import ActivitiesEnum
+from apps.bot.classes.consts.Consts import Platform
+from apps.bot.utils.QuotesGenerator import QuotesGenerator
+
+
+class Quote(Command):
     name = "цитата"
     names = ["(c)", "(с)"]
     help_text = "генерирует картинку с цитатой"
@@ -16,7 +17,7 @@ class Quote(CommonCommand):
     platforms = [Platform.VK]
 
     def start(self):
-        self.bot.set_activity(self.event.peer_id)
+        self.bot.set_activity(self.event.peer_id, ActivitiesEnum.UPLOAD_PHOTO)
 
         msgs = self.parse_fwd(self.event.fwd)
 

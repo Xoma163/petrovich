@@ -1,7 +1,7 @@
-from apps.bot.classes.Consts import BAD_ANSWERS
-from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import random_event
+from apps.bot.classes.consts.Consts import BAD_ANSWERS
+from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.Command import Command
+from apps.bot.utils.utils import random_event
 from apps.service.models import Words
 
 gender_translator = {
@@ -81,7 +81,7 @@ def get_praise_or_scold_self(event, _type):
     return msg
 
 
-class Praise(CommonCommand):
+class Praise(Command):
     name = 'похвалить'
     names = ["похвали", "хвалить"]
     help_text = " рандомная похвала"

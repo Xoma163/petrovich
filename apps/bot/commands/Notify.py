@@ -3,10 +3,10 @@ from datetime import datetime, timedelta
 import dateutil
 from dateutil import parser
 
-from apps.bot.classes.Consts import WEEK_TRANSLATOR, Role, DELTA_WEEKDAY, Platform
-from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import localize_datetime, normalize_datetime, remove_tz
+from apps.bot.classes.consts.Consts import WEEK_TRANSLATOR, Role, DELTA_WEEKDAY, Platform
+from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.Command import Command
+from apps.bot.utils.utils import localize_datetime, normalize_datetime, remove_tz
 from apps.service.models import Notify as NotifyModel
 
 
@@ -42,7 +42,7 @@ def get_time(arg1, arg2, timezone=None):
 
 
 # ToDo: TG вложения
-class Notify(CommonCommand):
+class Notify(Command):
     name = 'напомни'
     names = ["напомнить"]
     help_text = "напоминает о чём-либо"

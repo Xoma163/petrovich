@@ -1,11 +1,11 @@
 from django.contrib.auth.models import Group
 
-from apps.bot.classes.Consts import ON_OFF_TRANSLATOR, Role, TRUE_FALSE_TRANSLATOR
-from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.consts.Consts import ON_OFF_TRANSLATOR, Role, TRUE_FALSE_TRANSLATOR
+from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.Command import Command
 
 
-class Settings(CommonCommand):
+class Settings(Command):
     name = "настройки"
     names = ["настройка"]
     help_text = "устанавливает некоторые настройки пользователя/чата"

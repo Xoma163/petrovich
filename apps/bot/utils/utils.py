@@ -9,8 +9,12 @@ from io import BytesIO
 import pytz
 from PIL import Image, ImageDraw, ImageFont
 
-from apps.bot.classes.Consts import Role
-from apps.bot.classes.Exceptions import PWarning
+from apps.bot.classes.consts.Consts import Role
+from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.messages.attachments.DocumentAttachment import DocumentAttachment
+from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
+from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
+from apps.bot.classes.messages.attachments.VoiceAttachment import VoiceAttachment
 from apps.service.models import Service
 from petrovich.settings import STATIC_ROOT
 
@@ -122,30 +126,29 @@ def get_attachments_for_upload(vk_bot, attachments):
     return uploaded_attachments
 
 
-def get_attachments_from_attachments_or_fwd(vk_event, _type=None, from_first_fwd=True):
+def get_attachments_from_attachments_or_fwd(event, _type=None, from_first_fwd=True):
     """
     Получает все вложения из сообщения и пересланного сообщения
     """
     attachments = []
 
     if _type is None:
-        _type = ['audio', 'video', 'photo', 'doc']
-    if _type is str:
+        _type = [VoiceAttachment, VideoAttachment, PhotoAttachment, DocumentAttachment]
+    if not isinstance(_type, list):
         _type = [_type]
-    if vk_event.attachments:
-        for att in vk_event.attachments:
-            if att['type'] in _type:
+    if event.attachments:
+        for att in event.attachments:
+            if type(att) in _type:
                 attachments.append(att)
-    if vk_event.fwd:
+    if event.fwd:
         if from_first_fwd:
-            msgs = [vk_event.fwd[0]]
+            msgs = [event.fwd[0]]
         else:
-            msgs = vk_event.fwd
+            msgs = event.fwd
         for msg in msgs:
-            if msg['attachments']:
-                fwd_attachments = vk_event.parse_attachments(msg['attachments'])
-                for att in fwd_attachments:
-                    if att['type'] in _type:
+            if msg.attachments:
+                for att in msg.attachments:
+                    if type(att) in _type:
                         attachments.append(att)
 
     return attachments

@@ -5,7 +5,7 @@ import gspread
 from django.core.management.base import BaseCommand
 from oauth2client.service_account import ServiceAccountCredentials
 
-from apps.bot.classes.Exceptions import PWarning
+from apps.bot.classes.consts.Exceptions import PWarning
 from apps.service.models import Words
 from petrovich.settings import BASE_DIR
 

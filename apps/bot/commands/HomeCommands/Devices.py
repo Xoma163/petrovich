@@ -1,5 +1,5 @@
-from apps.bot.classes.Consts import Role
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.consts.Consts import Role
+from apps.bot.classes.Command import Command
 from .Sensors import get_data_for_items, get_items, get_room_and_item_by_args
 
 DEVICES = [
@@ -19,7 +19,7 @@ DEVICES = [
 ]
 
 
-class Sensors(CommonCommand):
+class Sensors(Command):
     name = "устройства"
     help_text = "значение датчиков и состояние устройств в доме"
     help_texts = [

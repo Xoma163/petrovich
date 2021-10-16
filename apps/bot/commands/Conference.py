@@ -1,9 +1,9 @@
-from apps.bot.classes.Consts import Role, Platform
-from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.consts.Consts import Role, Platform
+from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.Command import Command
 
 
-class Conference(CommonCommand):
+class Conference(Command):
     name = "конфа"
     names = ["конференция", "беседа"]
     help_text = "назвать конфу"

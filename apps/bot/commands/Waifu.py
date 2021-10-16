@@ -1,10 +1,10 @@
-from apps.bot.classes.Consts import Platform
-from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import get_random_int
+from apps.bot.classes.consts.Consts import Platform
+from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.Command import Command
+from apps.bot.utils.utils import get_random_int
 
 
-class Waifu(CommonCommand):
+class Waifu(Command):
     name = "вайфу"
     help_text = "присылает несуществующую вайфу"
     help_texts = [

@@ -1,9 +1,9 @@
 from apps.bot.APIs.CBRAPI import CBRAPI
-from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.Command import Command
 
 
-class ExchangeRates(CommonCommand):
+class ExchangeRates(Command):
     name = "курс"
     help_text = "курс валют"
     help_texts = [

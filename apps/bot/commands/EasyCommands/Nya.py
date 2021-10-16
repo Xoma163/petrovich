@@ -1,7 +1,7 @@
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.Command import Command
 
 
-class Nya(CommonCommand):
+class Nya(Command):
     name = "ня"
     suggest_for_similar = False
 

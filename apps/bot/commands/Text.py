@@ -1,16 +1,17 @@
 from apps.bot.APIs.OCR import OCRApi
-from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import get_attachments_from_attachments_or_fwd
+from apps.bot.classes.Command import Command
+from apps.bot.utils.utils import get_attachments_from_attachments_or_fwd
+from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 
 
-class Text(CommonCommand):
+class Text(Command):
     name = "текст"
     help_text = "распознаёт текст на изображении"
     help_texts = [
         "Текст (Изображения/Пересылаемое сообщение с изображением) [язык=rus] - распознаёт текст на изображении\n"
         'Язык нужно указывать в 3 символа. Пример - "eng", "rus", "fre", "ger" и так далее'
     ]
-    attachments = ['photo']
+    attachments = [PhotoAttachment]
 
     def start(self):
         lang = "rus"

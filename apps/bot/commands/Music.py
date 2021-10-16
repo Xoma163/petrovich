@@ -4,9 +4,10 @@ import requests
 import youtube_dl
 from pydub import AudioSegment
 
-from apps.bot.classes.Consts import Platform
-from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.consts.Consts import Platform
+from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.ActivitiesEnum import ActivitiesEnum
 
 
 class NothingLogger(object):
@@ -23,7 +24,7 @@ class NothingLogger(object):
         print(msg)
 
 
-class Music(CommonCommand):
+class Music(Command):
     name = "музыка"
     help_text = "скачивает аудиодорожку из YouTube и присылает её в виде аудио"
     help_texts = [
@@ -33,7 +34,7 @@ class Music(CommonCommand):
     platforms = [Platform.VK]
 
     def start(self):
-        self.bot.set_activity(self.event.peer_id, 'audiomessage')
+        self.bot.set_activity(self.event.peer_id, ActivitiesEnum.RECORD_AUDIO)
         url = self.event.message.args[0]
         ydl_params = {
             'outtmpl': '%(id)s%(ext)s',

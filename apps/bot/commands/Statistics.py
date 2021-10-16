@@ -1,12 +1,12 @@
 from django.db.models import Count
 
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.Command import Command
 from apps.games.models import Gamer
 from apps.games.models import PetrovichUser
 from apps.service.models import Meme
 
 
-class Statistics(CommonCommand):
+class Statistics(Command):
     name = "статистика"
     names = ["стата"]
     help_text = "статистика по победителям игр или по кол-ву созданных мемов"

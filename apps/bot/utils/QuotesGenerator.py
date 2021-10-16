@@ -4,7 +4,7 @@ import textwrap
 import requests
 from PIL import ImageFont, Image, ImageDraw, ImageFilter
 
-from apps.bot.classes.common.CommonMethods import get_image_size_by_text
+from apps.bot.utils.utils import get_image_size_by_text
 from petrovich.settings import STATIC_ROOT
 
 

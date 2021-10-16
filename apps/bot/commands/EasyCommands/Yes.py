@@ -1,7 +1,7 @@
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.Command import Command
 
 
-class Yes(CommonCommand):
+class Yes(Command):
     name = "Да"
     suggest_for_similar = False
 

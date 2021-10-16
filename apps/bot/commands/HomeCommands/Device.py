@@ -1,11 +1,11 @@
 import paho.mqtt.client as mqtt
 
-from apps.bot.classes.Consts import Role, ON_OFF_TRANSLATOR
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.Consts import Role, ON_OFF_TRANSLATOR
+from apps.bot.classes.consts.Exceptions import PWarning
 from petrovich.settings import env
 from .Devices import DEVICES
 from .Sensors import get_items, get_room_and_item_by_args
-from ...classes.Exceptions import PWarning
 
 TRUE_FALSE_TRANSLATOR_ON_OFF = {
     True: 'ON',
@@ -13,7 +13,7 @@ TRUE_FALSE_TRANSLATOR_ON_OFF = {
 }
 
 
-class Sensors(CommonCommand):
+class Sensors(Command):
     name = "устройство"
     help_text = "включает или выключает устройства в доме"
     help_texts = ["[комната = все] (устройство) (вкл/выкл) - управляет устройством в доме"]

@@ -1,3 +1,15 @@
+class ResponseMessage:
+    def __init__(self, msgs, peer_id):
+        self.messages = []
+
+        if isinstance(msgs, list):
+            for item in msgs:
+                rmi = ResponseMessageItem(item, peer_id)
+                self.messages.append(rmi)
+        else:
+            self.messages = [ResponseMessageItem(msgs, peer_id)]
+
+
 class ResponseMessageItem:
 
     def __init__(self, msg, peer_id):

@@ -1,16 +1,16 @@
 from threading import Lock
 
-from apps.bot.classes.Consts import Role, Platform
-from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import get_random_int
+from apps.bot.classes.consts.Consts import Role, Platform
+from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.Command import Command
+from apps.bot.utils.utils import get_random_int
 from apps.games.models import Rate as RateModel
 from petrovich.settings import STATIC_ROOT
 
 lock = Lock()
 
 
-class Rates(CommonCommand):
+class Rates(Command):
     name = 'ставки'
     names = ["казино"]
     help_text = "играет ставки"

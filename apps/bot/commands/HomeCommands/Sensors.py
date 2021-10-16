@@ -1,8 +1,8 @@
 import psycopg2
 
-from apps.bot.classes.Consts import Role, TRUE_FALSE_TRANSLATOR, ON_OFF_TRANSLATOR
-from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.consts.Consts import Role, TRUE_FALSE_TRANSLATOR, ON_OFF_TRANSLATOR
+from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.Command import Command
 from petrovich.settings import env
 
 TRUE_FALSE_TRANSLATOR_ON_OFF = {
@@ -92,7 +92,7 @@ SENSORS = [
 ]
 
 
-class Sensors(CommonCommand):
+class Sensors(Command):
     name = "датчики"
     help_text = "значение датчиков и состояние устройств в доме"
     help_texts = [

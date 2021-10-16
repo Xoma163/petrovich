@@ -1,10 +1,10 @@
-from apps.bot.classes.Consts import Platform
-from apps.bot.classes.Exceptions import PError
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.Consts import Platform
+from apps.bot.classes.consts.Exceptions import PError
 from petrovich.settings import env
 
 
-class Actions(CommonCommand):
+class Actions(Command):
     names = None
     priority = 100
 

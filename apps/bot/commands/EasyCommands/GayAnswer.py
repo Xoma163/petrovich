@@ -1,12 +1,12 @@
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.Command import Command
 
 
-class GayAnswer(CommonCommand):
+class GayAnswer(Command):
     name = "пидора"
     suggest_for_similar = False
 
     def accept(self, event):
-        return event.message.clear == 'пидора ответ'
+        return event.message and event.message.clear == 'пидора ответ'
 
     def start(self):
         return "Шлюхи аргумент"

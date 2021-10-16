@@ -1,4 +1,4 @@
-from apps.bot.classes2.messages.attachments.Attachment import Attachment
+from apps.bot.classes.messages.attachments.Attachment import Attachment
 
 
 class VoiceAttachment(Attachment):

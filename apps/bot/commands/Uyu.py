@@ -1,9 +1,9 @@
-from apps.bot.classes.Consts import Platform
-from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.consts.Consts import Platform
+from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.Command import Command
 
 
-class Uyu(CommonCommand):
+class Uyu(Command):
     name = "уъу"
     names = ["ъуъ"]
     help_text = "Добавляет слово в текст (уъуфикация)"

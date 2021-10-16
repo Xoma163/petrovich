@@ -4,9 +4,10 @@ from datetime import datetime, timedelta, date
 from crontab import CronTab
 from django.core.management.base import BaseCommand
 
-from apps.bot.classes.Consts import Role
-from apps.bot.classes.bots.CommonBot import get_bot_by_platform
-from apps.bot.classes.events.Event import get_event_by_platform
+from apps.bot.classes.consts.Consts import Role
+from apps.bot.classes.bots.Bot import get_bot_by_platform
+# ToDo:
+from apps.bot.classes_old.events.Event import get_event_by_platform
 from apps.service.models import Notify
 from petrovich.settings import DEFAULT_TIME_ZONE
 
@@ -14,8 +15,8 @@ from petrovich.settings import DEFAULT_TIME_ZONE
 class Command(BaseCommand):
 
     def handle(self, *args, **options):
-        from apps.bot.classes.common.CommonMethods import remove_tz, localize_datetime
-        from apps.bot.classes.common.CommonMethods import get_attachments_for_upload
+        from apps.bot.utils.utils import remove_tz, localize_datetime
+        from apps.bot.utils.utils import get_attachments_for_upload
 
         notifies = Notify.objects.all()
 

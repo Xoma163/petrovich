@@ -2,15 +2,15 @@ import requests
 from bs4 import BeautifulSoup
 
 from apps.bot.APIs.YoutubeInfo import YoutubeInfo
-from apps.bot.classes.Consts import Role, Platform
-from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.consts.Consts import Role, Platform
+from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.Command import Command
 from apps.service.models import YoutubeSubscribe
 
 MAX_USER_SUBS_COUNT = 3
 
 
-class YouTube(CommonCommand):
+class YouTube(Command):
     name = "ютуб"
     help_text = "создаёт подписку на ютуб канал"
     help_texts = [

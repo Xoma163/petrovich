@@ -1,10 +1,10 @@
 import datetime
 from threading import Lock
 
-from apps.bot.classes.Consts import Role
-from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import random_event, localize_datetime, remove_tz, decl_of_num, \
+from apps.bot.classes.consts.Consts import Role
+from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.Command import Command
+from apps.bot.utils.utils import random_event, localize_datetime, remove_tz, decl_of_num, \
     get_random_int
 from apps.games.models import RouletteRate, Gamer
 # Кратно 12
@@ -66,7 +66,7 @@ def generate_translator():
 TRANSLATOR = generate_translator()
 
 
-class Roulette(CommonCommand):
+class Roulette(Command):
     name = "рулетка"
     help_text = "игра рулетка"
     help_texts = [

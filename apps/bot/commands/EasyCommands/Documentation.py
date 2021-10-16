@@ -1,7 +1,7 @@
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.Command import Command
 
 
-class Documentation(CommonCommand):
+class Documentation(Command):
     name = "документация"
     names = ["дока"]
     help_text = "ссылка на документацию"

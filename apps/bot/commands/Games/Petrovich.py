@@ -4,17 +4,17 @@ from threading import Lock
 from django.contrib.auth.models import Group
 from django.db.models import Min
 
-from apps.bot.classes.Consts import Platform, Role
-from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import localize_datetime, remove_tz
+from apps.bot.classes.consts.Consts import Platform, Role
+from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.Command import Command
+from apps.bot.utils.utils import localize_datetime, remove_tz
 from apps.games.models import PetrovichGames, PetrovichUser
 from petrovich.settings import DEFAULT_TIME_ZONE
 
 lock = Lock()
 
 
-class Petrovich(CommonCommand):
+class Petrovich(Command):
     name = "петрович"
     names = ['петровна']
     help_text = "мини-игра, определяющая кто Петрович Дня"

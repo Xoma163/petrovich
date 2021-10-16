@@ -1,10 +1,10 @@
 from django.contrib.auth.models import Group
 
-from apps.bot.classes.Consts import Role, Platform
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.consts.Consts import Role, Platform
+from apps.bot.classes.Command import Command
 
 
-class DeBan(CommonCommand):
+class DeBan(Command):
     name = "разбан"
     help_text = "разбан пользователя"
     help_texts = ["(N) - разбан пользователя, где N - имя, фамилия, логин/id, никнейм"]

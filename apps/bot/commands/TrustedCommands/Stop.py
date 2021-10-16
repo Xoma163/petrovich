@@ -2,13 +2,13 @@ from apps.birds.CameraHandler import CameraHandler
 from apps.bot.APIs.Agario import get_agario_version_by_args
 from apps.bot.APIs.Minecraft import get_minecraft_version_by_args
 from apps.bot.APIs.Terraria import terraria_servers
-from apps.bot.classes.Consts import Role
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.consts.Consts import Role
+from apps.bot.classes.Command import Command
 
 cameraHandler = CameraHandler()
 
 
-class Stop(CommonCommand):
+class Stop(Command):
     name = "стоп"
     help_text = "останавливает работу бота или модуля"
     help_texts = [

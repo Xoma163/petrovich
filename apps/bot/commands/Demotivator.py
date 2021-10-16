@@ -4,13 +4,14 @@ from io import BytesIO
 import requests
 from PIL import Image
 
-from apps.bot.classes.Demotivator import DemotivatorBuilder
-from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import get_attachments_from_attachments_or_fwd
+from apps.bot.utils.Demotivator import DemotivatorBuilder
+from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.Command import Command
+from apps.bot.utils.utils import get_attachments_from_attachments_or_fwd
+from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 
 
-class Demotivator(CommonCommand):
+class Demotivator(Command):
     name = "демотиватор"
     help_text = "создаёт демотиватор"
     help_texts = [
@@ -18,7 +19,7 @@ class Demotivator(CommonCommand):
         "Разделитель текста ;"
     ]
     args = 1
-    attachments = ['photo']
+    attachments = [PhotoAttachment]
 
     def start(self):
         image = get_attachments_from_attachments_or_fwd(self.event, 'photo')[0]

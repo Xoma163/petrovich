@@ -1,12 +1,12 @@
 from wakeonlan import send_magic_packet
 
-from apps.bot.classes.Consts import Role
-from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.consts.Consts import Role
+from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.Command import Command
 from apps.service.models import WakeOnLanUserData
 
 
-class WOL(CommonCommand):
+class WOL(Command):
     name = "пробуди"
     names = ["разбуди", 'wol', 'wakeonlan', 'разбудить', 'пробудить']
     help_text = "пробуждает ваше устройство"

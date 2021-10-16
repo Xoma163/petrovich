@@ -1,9 +1,9 @@
-from apps.bot.classes.Consts import Role
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.consts.Consts import Role
+from apps.bot.classes.Command import Command
 from apps.service.management.commands.get_words import Command
 
 
-class Words(CommonCommand):
+class Words(Command):
     name = "слова"
     help_text = "принудительно затягивает слова с Google Drive"
     access = Role.MODERATOR

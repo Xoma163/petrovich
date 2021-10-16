@@ -1,9 +1,9 @@
-from apps.bot.classes.Consts import Platform
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.consts.Consts import Platform
+from apps.bot.classes.Command import Command
 
 
 # ToDo: TG клавы
-class KeyboardHide(CommonCommand):
+class KeyboardHide(Command):
     name = "скрыть"
     help_text = "Скрыть - убирает клавиатуру"
 

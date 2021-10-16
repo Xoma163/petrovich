@@ -1,7 +1,7 @@
-from apps.bot.classes.Consts import Role, Platform
-from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import localize_datetime, remove_tz
+from apps.bot.classes.consts.Consts import Role, Platform
+from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.Command import Command
+from apps.bot.utils.utils import localize_datetime, remove_tz
 from apps.service.models import Notify
 
 
@@ -33,7 +33,7 @@ def get_notifies_from_object(notifies_obj, timezone, print_username=False):
     return result_without_mentions
 
 
-class Notifies(CommonCommand):
+class Notifies(Command):
     name = "напоминания"
     help_text = "список напоминаний"
     help_texts = [

@@ -1,12 +1,12 @@
 from datetime import datetime
 
-from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.Command import Command
 from apps.bot.commands.Meme import prepare_meme_to_send
 from apps.service.models import Horoscope as HoroscopeModel
 
 
-class Horoscope(CommonCommand):
+class Horoscope(Command):
     name = "гороскоп"
     help_text = "мемный гороскоп"
     help_texts = [

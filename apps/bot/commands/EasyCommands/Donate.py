@@ -1,8 +1,8 @@
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.Command import Command
 from petrovich.settings import STATIC_ROOT
 
 
-class Donate(CommonCommand):
+class Donate(Command):
     name = "донат"
     help_text = "ссылка на донат"
 

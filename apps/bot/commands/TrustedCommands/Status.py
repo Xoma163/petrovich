@@ -1,13 +1,13 @@
 from apps.bot.APIs.Agario import agario_servers
 from apps.bot.APIs.Minecraft import minecraft_servers
 from apps.bot.APIs.Terraria import terraria_servers
-from apps.bot.classes.Consts import Role
-from apps.bot.classes.DoTheLinuxComand import do_the_linux_command
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.consts.Consts import Role
+from apps.bot.utils.DoTheLinuxComand import do_the_linux_command
+from apps.bot.classes.Command import Command
 from petrovich.settings import MAIN_DOMAIN
 
 
-class Status(CommonCommand):
+class Status(Command):
     name = "статус"
     help_text = "статус серверов по играм"
     access = Role.MINECRAFT

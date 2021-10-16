@@ -1,9 +1,9 @@
 from urllib.parse import quote
 
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.Command import Command
 
 
-class Google(CommonCommand):
+class Google(Command):
     name = "гугл"
     help_text = "формирует ссылку в гугл"
     args = 1

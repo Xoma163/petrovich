@@ -5,7 +5,7 @@ from django.core.management.base import BaseCommand
 
 from apps.bot.APIs.TimezoneDBAPI import TimezoneDBAPI
 from apps.bot.APIs.YandexGeoAPI import YandexGeoAPI
-from apps.bot.classes.Consts import Role
+from apps.bot.classes.consts.Consts import Role
 from apps.bot.models import Users
 from apps.service.models import City, TimeZone, Service
 

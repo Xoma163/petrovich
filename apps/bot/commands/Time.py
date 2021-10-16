@@ -1,11 +1,11 @@
 import datetime
 
-from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import localize_datetime
+from apps.bot.classes.Command import Command
+from apps.bot.utils.utils import localize_datetime
 from apps.service.models import City
 
 
-class Time(CommonCommand):
+class Time(Command):
     name = "время"
     help_text = "текущее время в городе"
     help_texts = [

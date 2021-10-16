@@ -1,8 +1,8 @@
-from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import get_random_int
+from apps.bot.classes.Command import Command
+from apps.bot.utils.utils import get_random_int
 
 
-class Random(CommonCommand):
+class Random(Command):
     name = "рандом"
     names = ["ранд", 'р', 'p']
     help_text = "рандомное число в заданном диапазоне"

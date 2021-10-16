@@ -1,7 +1,7 @@
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.Command import Command
 
 
-class Sho(CommonCommand):
+class Sho(Command):
     name = "шо"
     names = ["шоты", "тышо"]
     suggest_for_similar = False

@@ -1,12 +1,12 @@
-from apps.bot.classes.Consts import Role, Platform
-from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import get_attachments_from_attachments_or_fwd
+from apps.bot.classes.consts.Consts import Role, Platform
+from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.Command import Command
+from apps.bot.utils.utils import get_attachments_from_attachments_or_fwd
 from apps.service.models import Cat as CatModel
 from petrovich.settings import MAIN_SITE
 
 
-class Cat(CommonCommand):
+class Cat(Command):
     name = "кот"
     help_text = "присылает рандомного всратого кота"
     help_texts = [

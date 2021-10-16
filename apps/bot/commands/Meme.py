@@ -1,11 +1,10 @@
 from urllib.parse import urlparse
 
-from apps.bot.classes.Consts import Role, Platform
-from apps.bot.classes.Exceptions import PSkip, PWarning, PError
-from apps.bot.classes.bots.CommonBot import get_moderator_bot_class
-from apps.bot.classes.bots.VkBot import upload_image_to_vk_server
-from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import get_attachments_from_attachments_or_fwd, tanimoto
+from apps.bot.classes.Command import Command
+from apps.bot.classes.bots.Bot import get_moderator_bot_class, upload_image_to_vk_server
+from apps.bot.classes.consts.Consts import Role, Platform
+from apps.bot.classes.consts.Exceptions import PSkip, PWarning, PError
+from apps.bot.utils.utils import get_attachments_from_attachments_or_fwd, tanimoto
 from apps.service.models import Meme as MemeModel
 from petrovich.settings import VK_URL
 
@@ -17,7 +16,7 @@ def check_name_exists(name):
 
 
 # noinspection PyUnresolvedReferences,PyUnresolvedReferences
-class Meme(CommonCommand):
+class Meme(Command):
     name = "мем"
     help_text = "присылает нужный мем"
     help_texts = [
@@ -45,7 +44,7 @@ class Meme(CommonCommand):
         if event.is_mentioned or event.is_from_user or (event.payload and event.payload.get('command', None) == 'мем'):
             return super().accept(event)
 
-        if event.chat and check_name_exists(event.message.clear.lower()):
+        if event.chat and event.message and check_name_exists(event.message.clear.lower()):
             if not event.chat.need_meme:
                 raise PSkip()
             event.message.args = event.message.clear.lower().split(' ')
@@ -70,7 +69,8 @@ class Meme(CommonCommand):
         method = self.handle_menu(menu, arg0)
         return method()
 
-    def _check_allowed_url(self, url):
+    @staticmethod
+    def _check_allowed_url(url):
         parsed_url = urlparse(url)
         if not parsed_url.hostname:
             raise PWarning("Не нашёл вложений в сообщении или пересланном сообщении. Не нашёл ссылку на youtube видео")
@@ -412,8 +412,8 @@ class Meme(CommonCommand):
     def prepare_meme_to_send(self, meme, print_name=False, send_keyboard=False):
         prepared_meme = prepare_meme_to_send(self.bot, self.event, meme, print_name, send_keyboard, self.name)
         if send_keyboard:
-
-            prepared_meme['keyboard'] = self.bot.get_inline_keyboard([{'command': self.name, 'button_text': "Ещё", 'args':{"random": "р"}}])
+            prepared_meme['keyboard'] = self.bot.get_inline_keyboard(
+                [{'command': self.name, 'button_text': "Ещё", 'args': {"random": "р"}}])
         return prepared_meme
 
     @staticmethod

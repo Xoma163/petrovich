@@ -1,8 +1,8 @@
-from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import find_command_by_name, get_help_texts_for_command
+from apps.bot.classes.Command import Command
+from apps.bot.utils.utils import find_command_by_name, get_help_texts_for_command
 
 
-class Help(CommonCommand):
+class Help(Command):
     name = "помощь"
     names = ["хелп", "ман", "помоги", "памаги", "спаси", "хелб", "манул", "help", "start"]
     help_text = "помощь по командам и боту"

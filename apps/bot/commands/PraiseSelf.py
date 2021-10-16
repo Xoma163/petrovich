@@ -1,8 +1,8 @@
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.Command import Command
 from apps.bot.commands.Praise import get_praise_or_scold_self
 
 
-class PraiseSelf(CommonCommand):
+class PraiseSelf(Command):
     name = "похвалиться"
     names = ["похвались", "хвалиться"]
 

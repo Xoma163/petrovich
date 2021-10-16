@@ -1,9 +1,9 @@
 from apps.bot.APIs.FuckingGreatAdviceAPI import FuckingGreatAdviceAPI
-from apps.bot.classes.Exceptions import PError
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.consts.Exceptions import PError
+from apps.bot.classes.Command import Command
 
 
-class Advice(CommonCommand):
+class Advice(Command):
     name = "совет"
     help_text = "даёт случайный совет"
 

@@ -1,10 +1,11 @@
-from apps.bot.classes.Consts import Role, Platform
-from apps.bot.classes.Exceptions import PWarning, PError
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.consts.Consts import Role, Platform
+from apps.bot.classes.consts.Exceptions import PWarning, PError
+from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.ActivitiesEnum import ActivitiesEnum
 from apps.bot.management.commands.start import camera_handler
 
 
-class Camera(CommonCommand):
+class Camera(Command):
     name = "камера"
     names = ["с", "c"]
     help_text = "ссылка и гифка с камеры"
@@ -14,7 +15,7 @@ class Camera(CommonCommand):
     platforms = [Platform.VK, Platform.TG]
 
     def start(self):
-        self.bot.set_activity(self.event.peer_id)
+        self.bot.set_activity(self.event.peer_id, ActivitiesEnum.UPLOAD_VIDEO)
         attachments = []
         try:
             image = camera_handler.get_img()
@@ -34,14 +35,15 @@ class Camera(CommonCommand):
                 document = camera_handler.get_gif(frames)
             except PError as e:
                 return str(e)
-            attachment = self.bot.upload_animation(document, self.event.peer_id, "Камера", filename="camera.gif",)
+            attachment = self.bot.upload_animation(document, self.event.peer_id, "Камера", filename="camera.gif", )
             attachments.append(attachment)
         attachments.append('https://birds.andrewsha.net')
         if len(attachments) == 2 or self.event.platform == Platform.VK:
             return {
                 'attachments': attachments,
 
-                "keyboard": self.bot.get_inline_keyboard([{'command': self.name, 'button_text': "Ещё", 'args': {"frames": frames}}]),
+                "keyboard": self.bot.get_inline_keyboard(
+                    [{'command': self.name, 'button_text': "Ещё", 'args': {"frames": frames}}]),
                 'dont_parse_links': True
             }
         else:

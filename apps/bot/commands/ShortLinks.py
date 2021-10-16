@@ -1,8 +1,8 @@
-from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.Command import Command
 
 
-class ShortLinks(CommonCommand):
+class ShortLinks(Command):
     name = "сс"
     names = ['cc']
     help_text = "сокращение ссылки"

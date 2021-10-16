@@ -3,7 +3,7 @@ from io import BytesIO
 from tempfile import NamedTemporaryFile
 from urllib.parse import urlparse
 
-from apps.bot.classes.Exceptions import PWarning
+from apps.bot.classes.consts.Exceptions import PWarning
 
 
 class Attachment:
@@ -59,3 +59,6 @@ class Attachment:
 
     def parse_response(self, attachment, allowed_exts=None, filename=None):
         self.prepare_obj(attachment, allowed_exts)
+
+    def get_download_url(self):
+        return self.public_download_url if self.public_download_url else self.private_download_url

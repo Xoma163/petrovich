@@ -6,9 +6,10 @@ import youtube_dl
 from bs4 import BeautifulSoup
 
 from apps.bot.APIs.RedditVideoDownloader import RedditVideoSaver
-from apps.bot.classes.Consts import Platform
-from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.consts.Consts import Platform
+from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.ActivitiesEnum import ActivitiesEnum
 
 YOUTUBE_URLS = ['www.youtube.com', 'youtube.com', "www.youtu.be", "youtu.be"]
 REDDIT_URLS = ["www.reddit.com"]
@@ -18,7 +19,7 @@ INSTAGRAM_URLS = ['www.instagram.com', 'instagram.com']
 MEDIA_URLS = YOUTUBE_URLS + REDDIT_URLS + TIKTOK_URLS + INSTAGRAM_URLS
 
 
-class Media(CommonCommand):
+class Media(Command):
     name = "медиа"
     help_text = "скачивает видео из Reddit/TikTok/YouTube/Instagram и присылает его"
     help_texts = [
@@ -27,7 +28,7 @@ class Media(CommonCommand):
     platforms = [Platform.TG]
 
     def accept(self, event):
-        if urlparse(event.message.command).hostname in MEDIA_URLS:
+        if event.message and urlparse(event.message.command).hostname in MEDIA_URLS:
             return True
         if event.fwd:
             if urlparse(event.fwd[0]['text']).hostname in MEDIA_URLS:
@@ -66,9 +67,9 @@ class Media(CommonCommand):
         if not media_link_is_from:
             raise PWarning("Не youtube/tiktok/reddit/instagram ссылка")
 
-        self.bot.set_activity(self.event.peer_id, 'upload_video')
+        self.bot.set_activity(self.event.peer_id, ActivitiesEnum.UPLOAD_VIDEO)
         video, title = MEDIA_TRANSLATOR[media_link_is_from](url)
-        self.bot.set_activity(self.event.peer_id, 'upload_video')
+        self.bot.set_activity(self.event.peer_id, ActivitiesEnum.UPLOAD_VIDEO)
         attachments = [self.bot.upload_video(video)]
 
         if self.event.message.command not in self.full_names:

@@ -1,12 +1,12 @@
 from urllib.parse import urlparse
 
-from apps.bot.classes.Consts import Role
-from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.consts.Consts import Role
+from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.Command import Command
 from apps.service.models import Service
 
 
-class Stream(CommonCommand):
+class Stream(Command):
     name = "стрим"
     help_text = "ссылка на стрим"
     help_texts = [

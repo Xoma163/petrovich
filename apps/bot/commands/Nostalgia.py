@@ -2,16 +2,16 @@ import json
 import random
 from io import BytesIO
 
-from apps.bot.classes.Consts import Platform, Role
-from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.QuotesGenerator import QuotesGenerator
-from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import get_urls_from_text
+from apps.bot.classes.consts.Consts import Platform, Role
+from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.Command import Command
+from apps.bot.utils.QuotesGenerator import QuotesGenerator
+from apps.bot.utils.utils import get_urls_from_text
 from apps.bot.models import Users
 from apps.service.models import Service
 
 
-class Nostalgia(CommonCommand):
+class Nostalgia(Command):
     name = "ностальгия"
     names = ["ностальжи", "(с)"]
     help_text = "генерирует картинку с сообщениями из конфы беседки мразей"

@@ -1,4 +1,4 @@
-from apps.bot.classes.events.Event import Event, auto_str
+from apps.bot.classes_old.events.Event import Event, auto_str
 from petrovich.settings import VK_URL
 
 

@@ -1,18 +1,18 @@
-from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.Command import Command
 
 MAX_OPERATIONS = 20
 ACCURACY = 15
 
 
-class Calc(CommonCommand):
+class Calc(Command):
     name = "="
     names = ["калькулятор", "кальк", "к"]
     help_text = "калькулятор"
     help_texts = ["(выражение) - калькулятор выражений. Умеет работать с + - * / ^ ( )"]
 
     def accept(self, event):
-        if event.message.clear and event.message.clear[0] == '=':
+        if event.message and event.message.clear[0] == '=':
             return True
         return super().accept(event)
 

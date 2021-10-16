@@ -1,7 +1,7 @@
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.Command import Command
 
 
-class SorryMe(CommonCommand):
+class SorryMe(Command):
     name = 'извиниться'
 
     def start(self):

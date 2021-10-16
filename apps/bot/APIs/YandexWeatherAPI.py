@@ -3,9 +3,9 @@ from datetime import datetime
 
 import requests
 
-from apps.bot.classes.Consts import DAY_TRANSLATOR
-from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.common.CommonMethods import remove_tz
+from apps.bot.classes.consts.Consts import DAY_TRANSLATOR
+from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.utils.utils import remove_tz
 from apps.service.models import Service
 from petrovich.settings import env
 

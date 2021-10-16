@@ -1,8 +1,8 @@
 from django.core.paginator import Paginator
 
-from apps.bot.classes.Consts import Role
-from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.consts.Consts import Role
+from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.Command import Command
 from apps.bot.commands.Meme import get_tanimoto_memes
 from apps.service.models import Meme as MemeModel
 
@@ -15,7 +15,7 @@ def get_memes_names(memes, sender):
     return meme_names
 
 
-class Memes(CommonCommand):
+class Memes(Command):
     name = "мемы"
     help_text = "список мемов"
     help_texts = [

@@ -1,11 +1,11 @@
 from django.contrib.auth.models import Group
 
-from apps.bot.classes.Consts import Role, Platform
-from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.consts.Consts import Role, Platform
+from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.Command import Command
 
 
-class Ban(CommonCommand):
+class Ban(Command):
     name = "бан"
     help_text = "бан пользователя"
     help_texts = ["(N) - бан пользователя, где N - имя, фамилия, логин/id, никнейм"]

@@ -1,9 +1,9 @@
-from apps.bot.classes.Consts import Role
-from apps.bot.classes.DoTheLinuxComand import do_the_linux_command
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.consts.Consts import Role
+from apps.bot.utils.DoTheLinuxComand import do_the_linux_command
+from apps.bot.classes.Command import Command
 
 
-class Uptime(CommonCommand):
+class Uptime(Command):
     name = 'аптайм'
     names = ["uptime"]
     help_text = "аптайм сервера"

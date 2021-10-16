@@ -1,7 +1,7 @@
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.Command import Command
 
 
-class StartLada(CommonCommand):
+class StartLada(Command):
     name = "заведи"
     names = ["завести"]
 

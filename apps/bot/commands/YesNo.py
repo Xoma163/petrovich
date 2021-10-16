@@ -1,6 +1,6 @@
-from apps.bot.classes.Consts import BAD_ANSWERS
-from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import get_random_int, random_event, replace_similar_letters
+from apps.bot.classes.consts.Consts import BAD_ANSWERS
+from apps.bot.classes.Command import Command
+from apps.bot.utils.utils import get_random_int, random_event, replace_similar_letters
 
 
 def get_bad_words():
@@ -8,14 +8,14 @@ def get_bad_words():
             'моча', 'залупа', 'гей', 'дурак', 'говно', 'жопа', 'ублюдок', 'мудак', 'сука']
 
 
-class YesNo(CommonCommand):
+class YesNo(Command):
     name = "?"
     help_text = "вернёт да или нет"
     help_texts = ["- вернёт да или нет. Для вызова команды просто в конце нужно написать знак вопроса"]
     priority = 80
 
     def accept(self, event):
-        if event.message.clear and event.message.clear[-1] == self.name:
+        if event.message and event.message.clear and event.message.clear[-1] == self.name:
             return True
         return super().accept(event)
 

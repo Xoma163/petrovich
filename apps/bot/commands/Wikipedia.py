@@ -1,13 +1,13 @@
 import wikipedia
 
-from apps.bot.classes.Exceptions import PWarning
+from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.classes.bots.VkBot import VkBot
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.Command import Command
 
 wikipedia.set_lang("ru")
 
 
-class Wikipedia(CommonCommand):
+class Wikipedia(Command):
     name = "вики"
     names = ["википедия"]
     help_text = "поиск информации в википедии"

@@ -2,10 +2,10 @@ from datetime import datetime, timedelta
 
 from crontab import CronTab
 
-from apps.bot.classes.Consts import Role, Platform
-from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import localize_datetime, normalize_datetime, remove_tz
+from apps.bot.classes.consts.Consts import Role, Platform
+from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.Command import Command
+from apps.bot.utils.utils import localize_datetime, normalize_datetime, remove_tz
 from apps.service.models import Notify as NotifyModel
 
 
@@ -23,7 +23,7 @@ def get_crontab(crontab_args):
     return crontab_entry
 
 
-class NotifyRepeat(CommonCommand):
+class NotifyRepeat(Command):
     name = "напоминай"
     help_text = "напоминает о чём-либо постояно"
     help_texts = [

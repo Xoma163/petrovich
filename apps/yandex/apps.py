@@ -2,4 +2,4 @@ from django.apps import AppConfig
 
 
 class YandexConfig(AppConfig):
-    name = 'yandex'
+    name = 'apps.yandex'

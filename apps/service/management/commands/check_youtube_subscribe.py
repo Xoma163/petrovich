@@ -3,7 +3,7 @@ import time
 from django.core.management import BaseCommand
 
 from apps.bot.APIs.YoutubeInfo import YoutubeInfo
-from apps.bot.classes.bots.CommonBot import get_bot_by_platform
+from apps.bot.classes.bots.Bot import get_bot_by_platform
 from apps.service.models import YoutubeSubscribe
 
 
