@@ -1,5 +1,5 @@
-from apps.bot.utils.DoTheLinuxComand import do_the_linux_command, is_systemd_service_active
 from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.utils.DoTheLinuxComand import do_the_linux_command, is_systemd_service_active
 from apps.bot.utils.utils import check_command_time
 from petrovich.settings import MAIN_DOMAIN
 

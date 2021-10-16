@@ -138,7 +138,7 @@ class TgBot(CommonBot):
                 }, ensure_ascii=False)
             } for button_item in _buttons]
 
-        for i, button in enumerate(buttons):
+        for i, _ in enumerate(buttons):
             if 'args' not in buttons[i] or buttons[i]['args'] is None:
                 buttons[i]['args'] = {}
         buttons_chunks = get_chunks(buttons, cols)

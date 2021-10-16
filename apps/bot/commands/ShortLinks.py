@@ -1,5 +1,5 @@
-from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.Exceptions import PWarning
 
 
 class ShortLinks(Command):

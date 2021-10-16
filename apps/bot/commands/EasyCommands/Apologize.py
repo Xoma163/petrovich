@@ -1,7 +1,7 @@
 import time
 
-from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.Consts import Platform
 from apps.bot.utils.utils import random_event, random_probability
 
 

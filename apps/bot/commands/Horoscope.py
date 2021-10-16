@@ -1,7 +1,7 @@
 from datetime import datetime
 
-from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.commands.Meme import prepare_meme_to_send
 from apps.service.models import Horoscope as HoroscopeModel
 
@@ -103,7 +103,8 @@ class Horoscope(Command):
             prepared_meme['msg'] = f"{zodiac_sign_name}\n{prepared_meme['msg']}"
         else:
             prepared_meme['msg'] = zodiac_sign_name
-        prepared_meme['keyboard'] = self.bot.get_inline_keyboard([{'command': self.name, 'button_text': self.name.capitalize()}])
+        prepared_meme['keyboard'] = self.bot.get_inline_keyboard(
+            [{'command': self.name, 'button_text': self.name.capitalize()}])
         return prepared_meme
 
 

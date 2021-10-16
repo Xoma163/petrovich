@@ -1,5 +1,5 @@
-from apps.bot.classes.consts.Consts import BAD_ANSWERS
 from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.Consts import BAD_ANSWERS
 from apps.bot.utils.utils import get_random_int, random_event, replace_similar_letters
 
 

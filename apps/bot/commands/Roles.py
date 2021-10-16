@@ -1,6 +1,6 @@
+from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Role
 from apps.bot.classes.consts.Exceptions import PWarning
-from apps.bot.classes.Command import Command
 
 
 def get_roles(user):

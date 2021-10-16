@@ -1,8 +1,8 @@
 from django.contrib.auth.models import Group
 
+from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Role, Platform
 from apps.bot.classes.consts.Exceptions import PWarning
-from apps.bot.classes.Command import Command
 
 
 class Ban(Command):

@@ -1,5 +1,5 @@
-from apps.bot.classes.consts.Consts import Role
 from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.Consts import Role
 from .Sensors import get_data_for_items, get_items, get_room_and_item_by_args
 
 DEVICES = [

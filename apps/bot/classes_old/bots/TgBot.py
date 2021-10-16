@@ -10,12 +10,12 @@ from urllib.parse import urlparse
 import requests
 from django.contrib.auth.models import Group
 
+from apps.bot.classes.bots.Bot import Bot
 from apps.bot.classes.consts.Consts import Role, Platform
 from apps.bot.classes.consts.Exceptions import PWarning
-from apps.bot.classes.bots.Bot import Bot
-from apps.bot.utils.utils import get_thumbnail_for_image, get_chunks
 from apps.bot.classes.events.TgEvent import TgEvent
 from apps.bot.models import Users, Chat, Bot
+from apps.bot.utils.utils import get_thumbnail_for_image, get_chunks
 from petrovich.settings import env
 
 API_TELEGRAM_URL = 'api.telegram.org'
@@ -498,7 +498,7 @@ class TgBot(Bot):
                 }, ensure_ascii=False)
             } for button_item in _buttons]
 
-        for i, button in enumerate(buttons):
+        for i, _ in enumerate(buttons):
             if 'args' not in buttons[i] or buttons[i]['args'] is None:
                 buttons[i]['args'] = {}
         buttons_chunks = get_chunks(buttons, cols)

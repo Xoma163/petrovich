@@ -1,8 +1,8 @@
 from django.core.paginator import Paginator
 
+from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Role
 from apps.bot.classes.consts.Exceptions import PWarning
-from apps.bot.classes.Command import Command
 from apps.bot.commands.Meme import get_tanimoto_memes
 from apps.service.models import Meme as MemeModel
 

@@ -21,6 +21,6 @@ class Bash(Command):
         return {
             "msg": msg,
 
-
-            "keyboard": self.bot.get_inline_keyboard([{'command': self.name, 'button_text': "Ещё", 'args':{"quotes_count": quotes_count}}])
+            "keyboard": self.bot.get_inline_keyboard(
+                [{'command': self.name, 'button_text': "Ещё", 'args': {"quotes_count": quotes_count}}])
         }

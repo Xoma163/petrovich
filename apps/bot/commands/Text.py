@@ -1,7 +1,7 @@
 from apps.bot.APIs.OCR import OCRApi
 from apps.bot.classes.Command import Command
-from apps.bot.utils.utils import get_attachments_from_attachments_or_fwd
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
+from apps.bot.utils.utils import get_attachments_from_attachments_or_fwd
 
 
 class Text(Command):

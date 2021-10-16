@@ -2,8 +2,8 @@ from apps.birds.CameraHandler import CameraHandler
 from apps.bot.APIs.Agario import get_agario_version_by_args
 from apps.bot.APIs.Minecraft import get_minecraft_version_by_args
 from apps.bot.APIs.Terraria import terraria_servers
-from apps.bot.classes.consts.Consts import Role
 from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.Consts import Role
 
 cameraHandler = CameraHandler()
 

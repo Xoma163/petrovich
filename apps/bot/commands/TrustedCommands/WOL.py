@@ -1,8 +1,8 @@
 from wakeonlan import send_magic_packet
 
+from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Role
 from apps.bot.classes.consts.Exceptions import PWarning
-from apps.bot.classes.Command import Command
 from apps.service.models import WakeOnLanUserData
 
 

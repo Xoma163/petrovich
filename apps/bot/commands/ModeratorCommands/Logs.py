@@ -1,8 +1,8 @@
 import io
 
+from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Role, Platform
 from apps.bot.utils.DoTheLinuxComand import do_the_linux_command
-from apps.bot.classes.Command import Command
 from apps.bot.utils.utils import draw_text_on_image
 from petrovich.settings import BASE_DIR
 

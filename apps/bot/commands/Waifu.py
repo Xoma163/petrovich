@@ -1,6 +1,6 @@
+from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning
-from apps.bot.classes.Command import Command
 from apps.bot.utils.utils import get_random_int
 
 
@@ -31,7 +31,8 @@ class Waifu(Command):
 
         if self.event.message.args:
 
-            keyboard = self.bot.get_inline_keyboard([{'command': self.name, 'button_text': "Следующая", 'args': {"waifu_number": waifu_number + 1}}])
+            keyboard = self.bot.get_inline_keyboard(
+                [{'command': self.name, 'button_text': "Следующая", 'args': {"waifu_number": waifu_number + 1}}])
         else:
             keyboard = self.bot.get_inline_keyboard([{'command': self.name, 'button_text': "Ещё"}])
         return {"msg": waifu_number, "attachments": attachment, "keyboard": keyboard}

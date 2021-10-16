@@ -1,8 +1,8 @@
 from apps.bot.APIs.EveryPixelAPI import EveryPixelAPI
-from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.Command import Command
-from apps.bot.utils.utils import get_attachments_from_attachments_or_fwd
+from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
+from apps.bot.utils.utils import get_attachments_from_attachments_or_fwd
 
 
 class EstimatePhoto(Command):

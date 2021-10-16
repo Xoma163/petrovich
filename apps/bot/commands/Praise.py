@@ -1,6 +1,6 @@
+from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import BAD_ANSWERS
 from apps.bot.classes.consts.Exceptions import PWarning
-from apps.bot.classes.Command import Command
 from apps.bot.utils.utils import random_event
 from apps.service.models import Words
 

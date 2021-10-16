@@ -1,5 +1,5 @@
-from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.Consts import Platform
 
 
 # ToDo: TG клавы

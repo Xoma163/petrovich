@@ -1,8 +1,8 @@
 import wikipedia
 
-from apps.bot.classes.consts.Exceptions import PWarning
-from apps.bot.classes.bots.VkBot import VkBot
 from apps.bot.classes.Command import Command
+from apps.bot.classes.bots.VkBot import VkBot
+from apps.bot.classes.consts.Exceptions import PWarning
 
 wikipedia.set_lang("ru")
 
@@ -41,7 +41,8 @@ class Wikipedia(Command):
                     if len(attachments) > 1:
                         self.bot.parse_and_send_msgs(self.event.peer_id, {'msg': msg, 'attachments': attachments})
             if is_random:
-                output['keyboard'] = self.bot.get_inline_keyboard([{'command': self.name, 'button_text': "Ещё", 'args': {"random": "р"}}])
+                output['keyboard'] = self.bot.get_inline_keyboard(
+                    [{'command': self.name, 'button_text': "Ещё", 'args': {"random": "р"}}])
             return output
         except wikipedia.DisambiguationError as e:
             options = set(e.options)

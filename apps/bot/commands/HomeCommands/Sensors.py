@@ -1,8 +1,8 @@
 import psycopg2
 
+from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Role, TRUE_FALSE_TRANSLATOR, ON_OFF_TRANSLATOR
 from apps.bot.classes.consts.Exceptions import PWarning
-from apps.bot.classes.Command import Command
 from petrovich.settings import env
 
 TRUE_FALSE_TRANSLATOR_ON_OFF = {

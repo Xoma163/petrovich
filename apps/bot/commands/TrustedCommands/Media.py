@@ -6,10 +6,10 @@ import youtube_dl
 from bs4 import BeautifulSoup
 
 from apps.bot.APIs.RedditVideoDownloader import RedditVideoSaver
-from apps.bot.classes.consts.Consts import Platform
-from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.ActivitiesEnum import ActivitiesEnum
+from apps.bot.classes.consts.Consts import Platform
+from apps.bot.classes.consts.Exceptions import PWarning
 
 YOUTUBE_URLS = ['www.youtube.com', 'youtube.com', "www.youtu.be", "youtu.be"]
 REDDIT_URLS = ["www.reddit.com"]

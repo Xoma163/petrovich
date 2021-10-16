@@ -2,12 +2,12 @@ import json
 import random
 from io import BytesIO
 
+from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Platform, Role
 from apps.bot.classes.consts.Exceptions import PWarning
-from apps.bot.classes.Command import Command
+from apps.bot.models import Users
 from apps.bot.utils.QuotesGenerator import QuotesGenerator
 from apps.bot.utils.utils import get_urls_from_text
-from apps.bot.models import Users
 from apps.service.models import Service
 
 
@@ -119,7 +119,8 @@ class Nostalgia(Command):
         for i in range(first_item, last_item):
             index = searched_indexes[i]
             author = data[index]['author'].split(' ')[0]
-            buttons.append({'command': self.name, 'button_text': f"{author}: {data[index]['text']}", 'args': [index + 1]})
+            buttons.append(
+                {'command': self.name, 'button_text': f"{author}: {data[index]['text']}", 'args': [index + 1]})
         # if not last_item == len(searched_indexes):
         #     buttons.append({'command': self.name, 'button_text': f"Далее (Страница {page + 1})", 'args': [search_query, page + 1]})
 

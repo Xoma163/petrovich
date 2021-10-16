@@ -1,5 +1,5 @@
-from apps.bot.classes.consts.Consts import Role
 from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.Consts import Role
 from apps.service.management.commands.get_words import Command
 
 

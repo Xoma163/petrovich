@@ -1,8 +1,8 @@
 from threading import Lock
 
+from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning
-from apps.bot.classes.Command import Command
 from apps.bot.utils.utils import random_event
 from apps.games.models import Rate as RateModel
 

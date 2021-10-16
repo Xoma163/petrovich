@@ -1,6 +1,6 @@
 from apps.bot.APIs.CBRAPI import CBRAPI
-from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.Exceptions import PWarning
 
 
 class ExchangeRates(Command):

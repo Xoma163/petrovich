@@ -2,9 +2,9 @@ from datetime import datetime, timedelta
 
 from crontab import CronTab
 
+from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Role, Platform
 from apps.bot.classes.consts.Exceptions import PWarning
-from apps.bot.classes.Command import Command
 from apps.bot.utils.utils import localize_datetime, normalize_datetime, remove_tz
 from apps.service.models import Notify as NotifyModel
 

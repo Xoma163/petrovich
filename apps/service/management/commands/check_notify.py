@@ -4,8 +4,8 @@ from datetime import datetime, timedelta, date
 from crontab import CronTab
 from django.core.management.base import BaseCommand
 
-from apps.bot.classes.consts.Consts import Role
 from apps.bot.classes.bots.Bot import get_bot_by_platform
+from apps.bot.classes.consts.Consts import Role
 # ToDo:
 from apps.bot.classes_old.events.Event import get_event_by_platform
 from apps.service.models import Notify

@@ -171,6 +171,7 @@ def get_moderator_bot_class():
     from apps.bot.classes.bots.TgBot import TgBot
     return TgBot()
 
+
 def upload_image_to_vk_server(image):
     pass
     # ToDo

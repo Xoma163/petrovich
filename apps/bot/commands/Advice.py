@@ -1,6 +1,6 @@
 from apps.bot.APIs.FuckingGreatAdviceAPI import FuckingGreatAdviceAPI
-from apps.bot.classes.consts.Exceptions import PError
 from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.Exceptions import PError
 
 
 class Advice(Command):

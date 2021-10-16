@@ -2,9 +2,9 @@ from datetime import datetime
 
 from apps.bot.APIs.TimezoneDBAPI import TimezoneDBAPI
 from apps.bot.APIs.YandexGeoAPI import YandexGeoAPI
+from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning
-from apps.bot.classes.Command import Command
 from apps.bot.utils.utils import get_attachments_from_attachments_or_fwd
 from apps.service.models import City, TimeZone
 

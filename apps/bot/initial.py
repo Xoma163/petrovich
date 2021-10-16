@@ -2,9 +2,8 @@ import importlib
 import os
 import pkgutil
 
-from apps.bot.classes.consts.Consts import Platform, Role
-
 from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.Consts import Platform, Role
 from petrovich.settings import BASE_DIR
 
 

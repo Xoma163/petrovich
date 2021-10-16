@@ -1,6 +1,6 @@
+from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Role
 from apps.bot.utils.DoTheLinuxComand import do_the_linux_command
-from apps.bot.classes.Command import Command
 
 
 class Linux(Command):

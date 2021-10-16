@@ -6,9 +6,9 @@ from urllib.parse import urlparse
 
 from apps.bot.classes.consts.Consts import Role, Platform
 from apps.bot.classes.consts.Exceptions import PSkip, PWarning, PError
-from apps.bot.utils.utils import tanimoto
 from apps.bot.classes.events.Event import Event
 from apps.bot.models import Users, Chat, Bot
+from apps.bot.utils.utils import tanimoto
 from apps.games.models import Gamer
 from apps.service.models import Meme
 

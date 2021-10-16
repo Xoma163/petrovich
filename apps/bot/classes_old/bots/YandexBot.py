@@ -2,9 +2,9 @@ import traceback
 
 from django.contrib.auth.models import Group
 
+from apps.bot.classes.consts.Consts import Platform, Role
 from apps.bot.classes_old.bots.CommonBot import CommonBot
 from apps.bot.classes_old.events.YandexEvent import YandexEvent
-from apps.bot.classes.consts.Consts import Platform, Role
 from apps.bot.models import Users, Chat, Bot
 
 

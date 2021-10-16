@@ -1,6 +1,6 @@
-from apps.bot.classes.consts.Consts import Role
-from apps.bot.classes.bots.Bot import get_bot_by_platform
 from apps.bot.classes.Command import Command
+from apps.bot.classes.bots.Bot import get_bot_by_platform
+from apps.bot.classes.consts.Consts import Role
 
 
 class Send(Command):

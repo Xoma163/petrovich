@@ -1,8 +1,8 @@
 from threading import Lock
 
+from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Role, Platform
 from apps.bot.classes.consts.Exceptions import PWarning
-from apps.bot.classes.Command import Command
 from apps.bot.utils.utils import get_random_int
 from apps.games.models import Rate as RateModel
 from petrovich.settings import STATIC_ROOT

@@ -1,5 +1,5 @@
-from apps.bot.classes.consts.Consts import Role, Platform
 from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.Consts import Role, Platform
 
 
 class Flood(Command):

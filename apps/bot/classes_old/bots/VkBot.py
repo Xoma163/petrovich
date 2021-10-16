@@ -14,14 +14,14 @@ from vk_api import VkUpload, VkApi
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 from vk_api.utils import get_random_id
 
+from apps.bot.classes.bots.Bot import Bot as CommonBot
 from apps.bot.classes.consts.Consts import Role, Platform
 from apps.bot.classes.consts.Exceptions import PWarning, PError
-from apps.bot.classes.bots.Bot import Bot as CommonBot
 from apps.bot.classes_old.bots.VkUser import VkUser
-from apps.bot.utils.utils import get_chunks
 from apps.bot.classes_old.events.VkEvent import VkEvent
 from apps.bot.commands.Profile import add_city_to_db
 from apps.bot.models import Users, Chat, Bot
+from apps.bot.utils.utils import get_chunks
 from petrovich.settings import env
 
 
@@ -429,7 +429,7 @@ class VkBot(CommonBot):
                 'color': 'primary',
             } for button_item in _buttons]
 
-        for i, button in enumerate(buttons):
+        for i, _ in enumerate(buttons):
             if 'args' not in buttons[i] or buttons[i]['args'] is None:
                 buttons[i]['args'] = {}
         buttons_chunks = get_chunks(buttons, cols)

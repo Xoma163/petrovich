@@ -1,7 +1,7 @@
-from apps.bot.classes.consts.Consts import Role, Platform
-from apps.bot.classes.consts.Exceptions import PWarning, PError
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.ActivitiesEnum import ActivitiesEnum
+from apps.bot.classes.consts.Consts import Role, Platform
+from apps.bot.classes.consts.Exceptions import PWarning, PError
 from apps.bot.management.commands.start import camera_handler
 
 

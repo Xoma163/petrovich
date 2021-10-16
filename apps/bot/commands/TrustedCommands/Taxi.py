@@ -1,5 +1,5 @@
-from apps.bot.classes.consts.Consts import Role
 from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.Consts import Role
 from petrovich.settings import STATIC_ROOT
 
 

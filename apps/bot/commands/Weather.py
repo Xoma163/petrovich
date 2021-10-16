@@ -1,9 +1,9 @@
 import json
 
 from apps.bot.APIs.YandexWeatherAPI import YandexWeatherAPI
+from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import WEATHER_TRANSLATOR, DAY_TRANSLATOR, WEATHER_WIND_DIRECTION_TRANSLATOR
 from apps.bot.classes.consts.Exceptions import PWarning
-from apps.bot.classes.Command import Command
 from apps.service.models import City, Service
 
 

@@ -4,9 +4,9 @@ from threading import Lock
 from django.contrib.auth.models import Group
 from django.db.models import Min
 
+from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Platform, Role
 from apps.bot.classes.consts.Exceptions import PWarning
-from apps.bot.classes.Command import Command
 from apps.bot.utils.utils import localize_datetime, remove_tz
 from apps.games.models import PetrovichGames, PetrovichUser
 from petrovich.settings import DEFAULT_TIME_ZONE

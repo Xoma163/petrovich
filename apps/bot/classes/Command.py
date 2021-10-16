@@ -1,8 +1,8 @@
-from apps.bot.classes.consts.Consts import Role, ATTACHMENT_TRANSLATOR, Platform
-from apps.bot.utils.utils import get_help_texts_for_command, transform_k
-from apps.bot.classes.consts.Exceptions import PWarning, PError
 from apps.bot.classes.bots.Bot import Bot
+from apps.bot.classes.consts.Consts import Role, ATTACHMENT_TRANSLATOR, Platform
+from apps.bot.classes.consts.Exceptions import PWarning, PError
 from apps.bot.classes.events.Event import Event
+from apps.bot.utils.utils import get_help_texts_for_command, transform_k
 from petrovich.settings import env
 
 

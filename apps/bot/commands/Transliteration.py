@@ -1,7 +1,7 @@
 import transliterate
 
-from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.utils.utils import has_cyrillic
 
 
