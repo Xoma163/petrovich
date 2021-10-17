@@ -7,13 +7,14 @@ secrets
 logs
 media
 static
+staticfiles
+secrets
 venv
 __pycache__
 
-apps/birds/migrations
-apps/bot/migrations
-apps/db_loger/migrations
-apps/games/migrations
-apps/service/migrations
-apps/web/migrations
 frontend/node_modules
+
+*/migrations/*
+
+*/package.json
+*/package-lock.json
