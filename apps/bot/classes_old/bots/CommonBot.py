@@ -68,25 +68,6 @@ class CommonBot(Thread):
         else:
             return f"{date_arr[2]}-{date_arr[1]}-{date_arr[0]}"
 
-    @staticmethod
-    def add_chat_to_user(user, chat):
-        """
-        Добавление чата пользователю
-        """
-        chats = user.chats
-        if chat not in chats.all():
-            chats.add(chat)
-
-    @staticmethod
-    def remove_chat_from_user(user, chat):
-        """
-        Удаление чата пользователю
-        """
-        chats = user.chats
-        if chat in chats.all():
-            chats.remove(chat)
-
-
 
     def delete_message(self, chat_id, message_id):
         """

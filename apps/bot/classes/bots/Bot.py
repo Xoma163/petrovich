@@ -203,6 +203,24 @@ class Bot(Thread):
 
         return user.first()
 
+    @staticmethod
+    def add_chat_to_user(user, chat):
+        """
+        Добавление чата пользователю
+        """
+        chats = user.chats
+        if chat not in chats.all():
+            chats.add(chat)
+
+    @staticmethod
+    def remove_chat_from_user(user, chat):
+        """
+        Удаление чата пользователю
+        """
+        chats = user.chats
+        if chat in chats.all():
+            chats.remove(chat)
+
 
 def get_bot_by_platform(platform: Platform):
     """

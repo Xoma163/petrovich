@@ -44,6 +44,7 @@ class TgEvent(Event):
         if message['from']['is_bot']:
             self.is_from_bot = True
 
+        self.setup_actions(message)
         payload = message.get('payload')
         if payload:
             self.setup_payload(payload)
@@ -123,3 +124,11 @@ class TgEvent(Event):
         self.payload = json.loads(payload)
         self.message = Message()
         self.message.parse_from_payload(self.payload)
+
+    def setup_actions(self, message):
+        new_chat_members = message.get('new_chat_members')
+        if new_chat_members:
+            self.action = {'new_chat_members': new_chat_members}
+        left_chat_member = message.get('left_chat_member')
+        if left_chat_member:
+            self.action = {'left_chat_member': [left_chat_member]}

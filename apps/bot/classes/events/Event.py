@@ -39,6 +39,9 @@ class Event:
 
     # ToDo: проверка на забаненых
     def need_a_response(self):
+        if self.action:
+            return True
+
         if self.sender.check_role(Role.BANNED):
             return False
 
@@ -76,7 +79,8 @@ class Event:
             return True
 
         message_is_media_link = urlparse(self.message.clear).hostname in MEDIA_URLS or \
-            (self.fwd and self.fwd[0].message and self.fwd[0].message.clear and urlparse(self.fwd[0].message.clear) in MEDIA_URLS)
+                                (self.fwd and self.fwd[0].message and self.fwd[0].message.clear and urlparse(
+                                    self.fwd[0].message.clear) in MEDIA_URLS)
         if message_is_media_link:
             return True
 
