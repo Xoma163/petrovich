@@ -41,6 +41,7 @@ class Meme(Command):
         if event.chat and event.message and MemeModel.objects.filter(name=event.message.raw.lower()).exists():
             if not event.chat.need_meme:
                 raise PSkip()
+            event.message.args = event.message.raw.lower().split(' ')
             return True
         return super().accept(event)
 
