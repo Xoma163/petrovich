@@ -88,11 +88,15 @@ class Command(BaseCommand):
                         event = event_model(bot=bot)
                         event.set_message(notify.text)
                         event.sender = notify.author
+                        event.is_from_user = True
                         if notify.chat:
                             event.peer_id = notify.chat.chat_id
                             event.chat = notify.chat
+                            event.is_from_chat = True
                         else:
                             event.peer_id = notify.author.user_id
+                            event.is_from_pm = True
+
                         bot.handle_event(event)
                     if notify.repeat:
                         if notify.date:
