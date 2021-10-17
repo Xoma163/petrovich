@@ -131,7 +131,6 @@ dmypy.json
 secrets/
 .idea/
 
-.clocignore
 cloc.exe
 
 static/
