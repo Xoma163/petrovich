@@ -41,7 +41,7 @@ def add_phrase_before(recipient, word, field_name):
 def get_praise_or_scold(bot, event, _type):
     if event.message.args_str and event.message.args[-1].replace('-', '') in gender_translator:
         translator_key = event.message.args[-1].replace('-', '')
-        del event.message.args[-1]
+        args_case = event.message.args_case[:-1]
     else:
         try:
             user = bot.get_user_by_name(event.message.args_str, event.chat)
@@ -51,8 +51,10 @@ def get_praise_or_scold(bot, event, _type):
                 translator_key = 'м1'
         except PWarning:
             translator_key = 'м1'
+        args_case = event.message.args_case
+
     if event.message.args:
-        recipient = " ".join(event.message.args_case)
+        recipient = " ".join(args_case)
 
         if "петрович" in recipient.lower():
             if _type == 'bad':
