@@ -1,13 +1,9 @@
 import json
 
-from django.contrib.auth.models import Group
-
-from apps.bot.classes.consts.Consts import Role
 from apps.bot.classes.events.Event import Event
 from apps.bot.classes.messages.Message import Message
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 from apps.bot.classes.messages.attachments.VoiceAttachment import VoiceAttachment
-from apps.bot.models import Users
 
 
 class TgEvent(Event):
@@ -44,7 +40,13 @@ class TgEvent(Event):
         if message['from']['is_bot']:
             self.is_from_bot = True
         else:
-            self.sender = self.register_user(message['from'])
+            # self.sender = self.register_user(message['from'])
+            defaults = {
+                'name': message['from'].get('first_name'),
+                'surname': message['from'].get('last_name'),
+                'nickname': message['from'].get('username'),
+            }
+            self.sender = self.bot.get_user_by_id(message['from']['id'], defaults)
             self.is_from_user = True
 
         self.setup_action(message)
@@ -58,35 +60,6 @@ class TgEvent(Event):
 
         if self.sender and self.chat:
             self.bot.add_chat_to_user(self.sender, self.chat)
-
-    def register_user(self, user) -> Users:
-        """
-        Регистрация пользователя если его нет в БД
-        Почти аналог get_user_by_id в VkBot, только у ТГ нет метода для получения данных о пользователе,
-        поэтому метод немного другой
-        """
-
-        def set_fields(_user):
-            _user.name = user.get('first_name', None)
-            _user.surname = user.get('last_name', None)
-            _user.nickname = user.get('username', None)
-            _user.platform = self.platform.name
-            _user.save()
-            group_user = Group.objects.get(name=Role.USER.name)
-            _user.groups.add(group_user)
-            _user.save()
-
-        tg_user = self.bot.user_model.filter(user_id=user['id'])
-        if tg_user.count() > 0:
-            tg_user = tg_user.first()
-
-            if tg_user.name is None:
-                set_fields(tg_user)
-        else:
-            tg_user = Users()
-            tg_user.user_id = user['id']
-            set_fields(tg_user)
-        return tg_user
 
     def setup_action(self, message):
         new_chat_members = message.get('new_chat_members')

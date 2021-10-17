@@ -159,16 +159,21 @@ class Bot(Thread):
 
     # USERS GROUPS BOTS
 
-    def get_user_by_id(self, user_id: int) -> Users:
+    def get_user_by_id(self, user_id: int, _defaults: dict = None) -> Users:
         """
         Возвращает пользователя по его id
         """
+        if not _defaults:
+            _defaults = {}
+        defaults = {'platform': self.platform.name}
+        defaults.update(_defaults)
+
         user, created = self.user_model.get_or_create(
             user_id=user_id,
             platform=self.platform.name,
-            defaults={'user_id': user_id, 'platform': self.platform.name}
+            defaults=defaults
         )
-        if created:
+        if created or user.name is None:
             group_user = Group.objects.get(name=Role.USER.name)
             user.groups.add(group_user)
             user.save()
@@ -212,8 +217,7 @@ class Bot(Thread):
         Возвращает чат по его id
         """
         chat, _ = self.chat_model.get_or_create(
-            chat_id=chat_id, platform=self.platform.name,
-            defaults={'chat_id': chat_id, 'platform': self.platform.name}
+            chat_id=chat_id, platform=self.platform.name
         )
         return chat
 
@@ -224,8 +228,7 @@ class Bot(Thread):
         if bot_id > 0:
             bot_id = -bot_id
         bot, _ = self.bot_model.get_or_create(
-            bot_id=bot_id, platform=self.platform.name,
-            defaults={'bot_id': bot_id, 'platform': self.platform.name}
+            bot_id=bot_id, platform=self.platform.name
         )
         return bot
 
@@ -234,7 +237,7 @@ class Bot(Thread):
         """
         Получение игрока по модели пользователя
         """
-        gamer, _ = Gamer.objects.get_or_create(user=user, defaults={'user': user})
+        gamer, _ = Gamer.objects.get_or_create(user=user)
         return gamer
 
     @staticmethod

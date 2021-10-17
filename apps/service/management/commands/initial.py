@@ -18,7 +18,7 @@ class Command(BaseCommand):
         for group in groups:
             if group['name'] == "админ конфы":
                 continue
-            Group.objects.update_or_create(name=group['name'], defaults=group)
+            Group.objects.update_or_create(name=group['name'])
 
     @staticmethod
     def init_users():
