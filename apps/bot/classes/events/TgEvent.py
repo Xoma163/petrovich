@@ -13,7 +13,7 @@ from apps.bot.models import Users
 class TgEvent(Event):
 
     def setup_event(self, is_fwd=False):
-        if self.raw.get('forward_from'):
+        if not is_fwd and self.raw.get('forward_from'):
             return
 
         if is_fwd:

@@ -24,6 +24,8 @@ class Who(Command):
             return str(self.event.chat.admin)
         elif arg in ['пидор']:
             return "ты"
+        elif arg in ['петрович']:
+            return "я"
         elif not role:
             raise PWarning("Не знаю такой роли")
         users = self.get_users(self.event.chat, role)
