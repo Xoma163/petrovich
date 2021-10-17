@@ -18,6 +18,7 @@ class Event:
         self.is_from_user: bool = False
         self.is_from_bot: bool = False
         self.is_from_chat: bool = False
+        self.is_from_pm: bool = False
 
         self.sender: Users = None
         self.chat: Chat = None
@@ -54,7 +55,7 @@ class Event:
             return True
         if self.message is None:
             return False
-        if self.is_from_user:
+        if self.is_from_pm:
             return True
         if self.payload:
             return True
@@ -71,7 +72,7 @@ class Event:
         from apps.service.models import Meme
         from apps.bot.commands.TrustedCommands.Media import MEDIA_URLS
 
-        message_is_exact_meme_name = Meme.objects.filter(name__unaccent=self.message.clear.lower()).exists()
+        message_is_exact_meme_name = Meme.objects.filter(name__unaccent=self.message.raw.lower()).exists()
         if message_is_exact_meme_name:
             return True
 
@@ -83,6 +84,7 @@ class Event:
                                     self.fwd[0].message.clear) in MEDIA_URLS)
         if message_is_media_link:
             return True
+        return False
 
     @property
     def has_voice_message(self):

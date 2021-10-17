@@ -13,7 +13,6 @@ from apps.bot.models import Users
 class TgEvent(Event):
 
     def setup_event(self, is_fwd=False):
-        print('setup_event')
         if self.raw.get('forward_from'):
             return
 
@@ -40,7 +39,8 @@ class TgEvent(Event):
             self.chat = self.bot.get_chat_by_id(message['chat']['id'])
             self.is_from_chat = True
         else:
-            self.is_from_user = True
+            self.is_from_pm = True
+
         if message['from']['is_bot']:
             self.is_from_bot = True
         else:
@@ -55,7 +55,6 @@ class TgEvent(Event):
             # Нет нужды парсить вложения и fwd если это просто нажатие на кнопку
             self.setup_attachments(message)
             self.setup_fwd(message.get('reply_to_message'))
-
 
         if self.sender and self.chat:
             self.bot.add_chat_to_user(self.sender, self.chat)

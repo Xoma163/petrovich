@@ -33,6 +33,9 @@ class VkEvent(Event):
             self.from_id = message['from_id']
             self.peer_id = message['peer_id']
 
+        if self.from_id == self.peer_id:
+            self.is_from_pm = True
+
         from_id = message['from_id']
         if from_id > 0:
             self.sender = self.bot.get_user_by_id(from_id)

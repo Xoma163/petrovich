@@ -21,8 +21,8 @@ class Message:
 
         if self.raw[0] in self.COMMAND_SYMBOLS:
             self.has_command_symbols = True
-            self.raw = self.raw[1:]
-        self.clear = self.get_cleared_message(self.raw)
+            raw_str = raw_str[1:]
+        self.clear = self.get_cleared_message(raw_str)
         msg_split = self.clear.split(' ', 1)
 
         self.command = msg_split[0].lower()
