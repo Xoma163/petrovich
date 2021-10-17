@@ -1,4 +1,7 @@
+import json
+
 from apps.bot.classes.events.Event import Event
+from apps.bot.classes.messages.Message import Message
 from apps.bot.classes.messages.attachments.AudioAttachment import AudioAttachment
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
@@ -32,17 +35,22 @@ class VkEvent(Event):
         if chat_id:
             self.chat = self.bot.get_chat_by_id(chat_id)
 
-        self.setup_attachments(message['attachments'])
-        self.setup_fwd(message.get('fwd_messages') or message.get('reply_message', []))
-        self.set_message(message['text'], message['id'])
+        # self.setup_actions(message)
+        payload = message.get('payload')
+        if payload:
+            self.setup_payload(payload)
+        else:
+            self.setup_attachments(message['attachments'])
+            self.setup_fwd(message.get('fwd_messages') or message.get('reply_message', []))
+            self.set_message(message['text'], message['id'])
 
-    def setup_fwd(self, fwd):
-        if not isinstance(fwd, list):
-            fwd = [fwd]
-        for fwd_message in fwd:
-            fwd_event = VkEvent(fwd_message, self.bot)
-            fwd_event.setup_event(is_fwd=True)
-            self.fwd.append(fwd_event)
+    def setup_actions(self, actions):
+        pass
+
+    def setup_payload(self, payload):
+        self.payload = json.loads(payload)
+        self.message = Message()
+        self.message.parse_from_payload(self.payload)
 
     def setup_attachments(self, attachments):
         routing_dict = {
@@ -74,5 +82,13 @@ class VkEvent(Event):
 
     def setup_voice(self, voice):
         vk_voice = VoiceAttachment()
-        vk_voice.parse_vk_voice(vk_voice)
+        vk_voice.parse_vk_voice(voice)
         self.attachments.append(vk_voice)
+
+    def setup_fwd(self, fwd):
+        if not isinstance(fwd, list):
+            fwd = [fwd]
+        for fwd_message in fwd:
+            fwd_event = VkEvent(fwd_message, self.bot)
+            fwd_event.setup_event(is_fwd=True)
+            self.fwd.append(fwd_event)

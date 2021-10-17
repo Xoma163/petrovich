@@ -14,7 +14,7 @@ from apps.bot.classes.events.VkEvent import VkEvent
 from apps.bot.classes.messages.ResponseMessage import ResponseMessageItem, ResponseMessage
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 from apps.bot.utils.utils import get_chunks
-from petrovich.settings import env
+from petrovich.settings import env, VK_URL
 
 
 class VkBot(CommonBot):
@@ -87,7 +87,9 @@ class VkBot(CommonBot):
         parsed_atts = []
         for pa in atts:
             try:
-                pa.url, pa.public_download_url = self.upload_photo_and_urls(pa)
+                url, public_download_url = self.upload_photo_and_urls(pa)
+                pa.url = url.replace(VK_URL, '')
+                pa.public_download_url = public_download_url
                 parsed_atts.append(pa)
             except Exception:
                 continue
@@ -100,7 +102,7 @@ class VkBot(CommonBot):
         """
         image_to_load = image.download_content()
         vk_photo = self.upload.photo_messages(BytesIO(image_to_load))[0]
-        vk_url = f"photo{vk_photo['owner_id']}_{vk_photo['id']}"
+        vk_url = f"{VK_URL}photo{vk_photo['owner_id']}_{vk_photo['id']}"
         vk_max_photo_url = sorted(vk_photo['sizes'], key=lambda x: x['height'])[-1]['url']
         return vk_url, vk_max_photo_url
 

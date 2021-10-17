@@ -440,13 +440,6 @@ def prepare_meme_to_send(bot, event, meme, print_name=False, send_keyboard=False
         if meme.type == 'video':
             msg['attachments'] = [meme.link.replace(VK_URL, '')]
             # Проверяем не удалено ли видео
-            owner_id, _id = msg['attachments'][0].replace('video', '').split('_')
-            if bot.get_video(owner_id, _id)['count'] == 0:
-                error = "Мем был удалён, перезалейте плиз"
-                meme_info = meme.get_info()
-                message_to_test_chat = f"{error}\n\n{meme_info}"
-                bot.parse_and_send_msgs(bot.test_chat.chat_id, message_to_test_chat)
-                raise PWarning(error)
         elif meme.type == 'link':
             msg['text'] = meme.link
         elif meme.type == 'audio':

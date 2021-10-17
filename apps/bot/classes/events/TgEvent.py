@@ -9,6 +9,7 @@ from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachmen
 from apps.bot.classes.messages.attachments.VoiceAttachment import VoiceAttachment
 from apps.bot.models import Users
 
+
 class TgEvent(Event):
 
     def setup_event(self, is_fwd=False):
@@ -80,6 +81,19 @@ class TgEvent(Event):
             set_fields(tg_user)
         return tg_user
 
+    def setup_actions(self, message):
+        new_chat_members = message.get('new_chat_members')
+        if new_chat_members:
+            self.action = {'new_chat_members': new_chat_members}
+        left_chat_member = message.get('left_chat_member')
+        if left_chat_member:
+            self.action = {'left_chat_member': [left_chat_member]}
+
+    def setup_payload(self, payload):
+        self.payload = json.loads(payload)
+        self.message = Message()
+        self.message.parse_from_payload(self.payload)
+
     def setup_attachments(self, message):
         photo = message.get('photo')
         voice = message.get('voice')
@@ -98,12 +112,6 @@ class TgEvent(Event):
             message_text = message.get('text')
         self.set_message(message_text, message.get('message_id'))
 
-    def setup_fwd(self, fwd):
-        if fwd:
-            fwd_event = TgEvent(fwd, self.bot)
-            fwd_event.setup_event(is_fwd=True)
-            self.fwd = [fwd_event]
-
     def setup_photo(self, photo_event):
         tg_photo = PhotoAttachment()
         tg_photo.parse_tg_photo(photo_event, self.bot)
@@ -114,15 +122,8 @@ class TgEvent(Event):
         tg_voice.parse_tg_voice(voice_event, self.bot)
         self.attachments.append(tg_voice)
 
-    def setup_payload(self, payload):
-        self.payload = json.loads(payload)
-        self.message = Message()
-        self.message.parse_from_payload(self.payload)
-
-    def setup_actions(self, message):
-        new_chat_members = message.get('new_chat_members')
-        if new_chat_members:
-            self.action = {'new_chat_members': new_chat_members}
-        left_chat_member = message.get('left_chat_member')
-        if left_chat_member:
-            self.action = {'left_chat_member': [left_chat_member]}
+    def setup_fwd(self, fwd):
+        if fwd:
+            fwd_event = TgEvent(fwd, self.bot)
+            fwd_event.setup_event(is_fwd=True)
+            self.fwd = [fwd_event]
