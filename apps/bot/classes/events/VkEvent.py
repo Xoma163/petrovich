@@ -12,15 +12,6 @@ from apps.bot.classes.messages.attachments.VoiceAttachment import VoiceAttachmen
 class VkEvent(Event):
 
     def setup_event(self, is_fwd=False):
-        # if (vk_event['message'].get('action', None)
-        #         and vk_event['message']['action']['type'] in ['chat_invite_user', 'chat_invite_user_by_link']):
-        #     vk_event['message']['action']['member_ids'] = [vk_event['message']['action'].pop('member_id')]
-
-        # if event.message['conversation_message_id'] and 'is_cropped' in event.message and event.message['is_cropped']:
-        #     message = self.get_conversation_messages(event.message['peer_id'], event.message['conversation_message_id'])
-        # else:
-        #     message = event.message
-
         if is_fwd:
             message = self.raw
             chat_id = None
@@ -52,6 +43,10 @@ class VkEvent(Event):
         if payload:
             self.setup_payload(payload)
         else:
+            is_cropped = message.get('is_cropped')
+            if is_cropped:
+                conversation_message_id = message['conversation_message_id']
+                message = self.bot.get_conversation_messages(self.peer_id, conversation_message_id)
             self.setup_attachments(message['attachments'])
             self.setup_fwd(message.get('fwd_messages') or message.get('reply_message', []))
             self.set_message(message['text'], message['id'])
