@@ -2,6 +2,7 @@ import json
 
 from apps.bot.classes.events.Event import Event
 from apps.bot.classes.messages.Message import Message
+from apps.bot.classes.messages.attachments.StickerAttachment import StickerAttachment
 from apps.bot.classes.messages.attachments.AudioAttachment import AudioAttachment
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
@@ -14,10 +15,12 @@ class VkEvent(Event):
         if is_fwd:
             message = self.raw
             chat_id = None
-            if message['from_id'] > 0:
+            self.peer_id = message['from_id']
+            if self.peer_id > 0:
                 self.is_from_user = True
             else:
                 self.is_from_bot = True
+
         else:
             message = self.raw.message
             chat_id = self.raw.chat_id
@@ -26,7 +29,7 @@ class VkEvent(Event):
             self.is_from_user = self.raw.from_user
             self.is_from_bot = self.raw.from_group
 
-        self.peer_id = message['peer_id']
+            self.peer_id = message['peer_id']
 
         from_id = message['from_id']
         if from_id > 0:
@@ -58,6 +61,7 @@ class VkEvent(Event):
             'video': self.setup_video,
             'audio': self.setup_audio,
             'audio_message': self.setup_voice,
+            'sticker':self.setup_sticker
         }
         for attachment in attachments:
             _type = attachment['type']
@@ -84,6 +88,11 @@ class VkEvent(Event):
         vk_voice = VoiceAttachment()
         vk_voice.parse_vk_voice(voice)
         self.attachments.append(vk_voice)
+
+    def setup_sticker(self, sticker):
+        vk_sticker = StickerAttachment()
+        vk_sticker.parse_vk_sticker(sticker)
+        self.attachments.append(vk_sticker)
 
     def setup_fwd(self, fwd):
         if not isinstance(fwd, list):

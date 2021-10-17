@@ -103,18 +103,7 @@ class TgBot(CommonBot):
         params['text'] = params.pop('caption')
         return self.requests.get('sendMessage', params)
 
-    # ToDo: это общие методы?
-    @staticmethod
-    def upload_video(video, peer_id=None, title="Видео", filename=None):
-        va = VideoAttachment()
-        va.parse_response(video, filename=filename)
-        return va
 
-    @staticmethod
-    def upload_document(document, peer_id=None, title='Документ', filename=None):
-        da = DocumentAttachment()
-        da.parse_response(document, filename=filename)
-        return da
 
     @staticmethod
     def get_inline_keyboard(buttons: list, cols=1):

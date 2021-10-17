@@ -13,6 +13,7 @@ from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.events.VkEvent import VkEvent
 from apps.bot.classes.messages.ResponseMessage import ResponseMessageItem, ResponseMessage
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
+from apps.bot.models import Bot as BotModel
 from apps.bot.utils.utils import get_chunks
 from petrovich.settings import env, VK_URL
 
@@ -106,6 +107,15 @@ class VkBot(CommonBot):
         vk_max_photo_url = sorted(vk_photo['sizes'], key=lambda x: x['height'])[-1]['url']
         return vk_url, vk_max_photo_url
 
+    def upload_document(self, document, peer_id=None, title='Документ', filename=None):
+        """
+        Загрузка документа на сервер ВК.
+        """
+        da = super().upload_document(document, peer_id, title, filename)
+        content = da.download_content()
+        vk_doc = self.upload.document_message(content, title=title, peer_id=peer_id)['doc']
+        return f"doc{vk_doc['owner_id']}{vk_doc['id']}"
+
     def set_activity(self, peer_id, activity: ActivitiesEnum):
         """
         Метод позволяет указать пользователю, что бот набирает сообщение или записывает голосовое
@@ -145,6 +155,32 @@ class VkBot(CommonBot):
             'inline': True,
             'buttons': [get_buttons(chunk) for chunk in buttons_chunks]
         }
+
+    def update_bot_avatar(self, bot_id):
+        """
+        Обновление аватара боту для цитат
+        """
+        bot = self.get_bot_by_id(bot_id)
+        bot_info = self.get_bot_info(bot_id)
+        bot.name = bot_info['name']
+        bot.set_avatar(bot_info['photo_200'])
+
+    def get_bot_by_id(self, bot_id: int) -> BotModel:
+        """
+        Получение бота по его id
+        """
+        try:
+            bot = self.bot_model.get(bot_id=bot_id)
+        except self.bot_model.DoesNotExist:
+            bot = super().get_bot_by_id(bot_id)
+            vk_bot = self.get_bot_info(bot_id)
+            bot.name = vk_bot['name']
+            bot.set_avatar(vk_bot['photo_200'])
+            bot.save()
+        return bot
+
+    def get_bot_info(self, bot_id):
+        return self.vk.groups.getById(group_id=bot_id)[0]
 
 
 class MyVkBotLongPoll(VkBotLongPoll):

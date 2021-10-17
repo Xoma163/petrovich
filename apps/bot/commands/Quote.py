@@ -4,6 +4,7 @@ from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.ActivitiesEnum import ActivitiesEnum
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
+from apps.bot.classes.messages.attachments.StickerAttachment import StickerAttachment
 from apps.bot.utils.QuotesGenerator import QuotesGenerator
 
 
@@ -36,32 +37,31 @@ class Quote(Command):
         msgs = []
         next_append = False
         for msg in fwd_messages:
-            message = {'text': msg.message.raw.replace('\n', '▲ ▲') if isinstance(msg.message.raw, str) else msg[
-                'text']}
+            message = {'text': msg.message.raw.replace('\n', '▲ ▲') if msg.message and isinstance(msg.message.raw,
+                                                                                                  str) else ''}
 
             if msg.peer_id > 0:
-                quote_user = self.bot.get_user_by_id(msg.sender.user_id)
+                quote_user = self.bot.get_user_by_id(msg.peer_id)
                 username = str(quote_user)
                 avatar = quote_user.avatar
                 if not avatar and self.event.platform == Platform.VK:
-                    self.bot.update_user_avatar(msg.sender.user_id)
+                    self.bot.update_user_avatar(msg.peer_id)
             else:
                 # ToDo: check this
-                quote_bot = self.bot.get_bot_by_id(msg.sender.user_id)
+                quote_bot = self.bot.get_bot_by_id(msg.peer_id)
                 username = str(quote_bot)
                 avatar = quote_bot.avatar
                 if not avatar and self.event.platform == Platform.VK:
-                    self.bot.update_bot_avatar(msg.sender.user_id)
+                    self.bot.update_bot_avatar(msg.peer_id)
             if msg.attachments:
                 photo = msg.attachments[0]
                 if isinstance(photo, PhotoAttachment):
                     message['photo'] = photo.get_download_url()
 
                 # ToDo: check this
-                sticker = msg['attachments'][0].get('sticker')
-                if sticker:
-                    image = self.event.get_sticker_128(sticker['images'])
-                    message['photo'] = image['url']
+                sticker = msg.attachments[0]
+                if isinstance(sticker, StickerAttachment):
+                    message['photo'] = sticker.url
 
             # stack messages from one user
             # ToDo: check this
@@ -82,8 +82,7 @@ class Quote(Command):
                     next_append = True
 
             if msg.fwd:
-                fwd = msg['fwd'] if isinstance(msg['fwd'], list) else [msg['fwd']]
-                msgs[-1]['fwd'] = self.parse_fwd(fwd)
+                msgs[-1]['fwd'] = self.parse_fwd(msg.fwd)
                 next_append = True
 
         return msgs

@@ -8,6 +8,7 @@ from apps.bot.classes.consts.Consts import Platform, Role
 from apps.bot.classes.consts.Exceptions import PWarning, PError, PSkip
 from apps.bot.classes.events.Event import Event
 from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
+from apps.bot.classes.messages.attachments.DocumentAttachment import DocumentAttachment
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 from apps.bot.models import Users, Chat, Bot as BotModel
 from apps.bot.utils.utils import tanimoto
@@ -268,6 +269,12 @@ class Bot(Thread):
                 break
         return attachments
 
+    @staticmethod
+    def upload_document(document, peer_id=None, title='Документ', filename=None):
+        da = DocumentAttachment()
+        da.parse_response(document, filename=filename)
+        return da
+
 
 def get_bot_by_platform(platform: Platform):
     """
@@ -290,7 +297,6 @@ def get_moderator_bot_class():
     return TgBot
 
 
-# ToDo: check
 def upload_image_to_vk_server(image):
     vk_bot = get_bot_by_platform(Platform.VK)()
     photos = vk_bot.upload_photos(image, 1)
