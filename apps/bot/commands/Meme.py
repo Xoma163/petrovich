@@ -38,10 +38,10 @@ class Meme(Command):
     priority = 70
 
     def accept(self, event):
-        if event.chat and event.message and MemeModel.objects.filter(name=event.message.raw.lower()).exists():
+        if event.chat and event.message and MemeModel.objects.filter(name=event.message.clear).exists():
             if not event.chat.need_meme:
                 raise PSkip()
-            event.message.args = event.message.raw.lower().split(' ')
+            event.message.args = event.message.clear.split(' ')
             return True
         return super().accept(event)
 
