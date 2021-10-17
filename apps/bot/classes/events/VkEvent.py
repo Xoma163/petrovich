@@ -15,8 +15,9 @@ class VkEvent(Event):
         if is_fwd:
             message = self.raw
             chat_id = None
-            self.peer_id = message['from_id']
-            if self.peer_id > 0:
+            self.peer_id = message['peer_id']
+            self.from_id = message['from_id']
+            if self.from_id > 0:
                 self.is_from_user = True
             else:
                 self.is_from_bot = True
@@ -29,6 +30,7 @@ class VkEvent(Event):
             self.is_from_user = self.raw.from_user
             self.is_from_bot = self.raw.from_group
 
+            self.from_id = message['from_id']
             self.peer_id = message['peer_id']
 
         from_id = message['from_id']

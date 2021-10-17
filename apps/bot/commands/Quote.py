@@ -40,19 +40,18 @@ class Quote(Command):
             message = {'text': msg.message.raw.replace('\n', '▲ ▲') if msg.message and isinstance(msg.message.raw,
                                                                                                   str) else ''}
 
-            if msg.peer_id > 0:
-                quote_user = self.bot.get_user_by_id(msg.peer_id)
-                username = str(quote_user)
-                avatar = quote_user.avatar
+            if msg.is_from_user:
+                username = str(msg.sender)
+                avatar = msg.sender.avatar
                 if not avatar and self.event.platform == Platform.VK:
-                    self.bot.update_user_avatar(msg.peer_id)
+                    self.bot.update_user_avatar(msg.from_id)
             else:
                 # ToDo: check this
-                quote_bot = self.bot.get_bot_by_id(msg.peer_id)
+                quote_bot = self.bot.get_bot_by_id(msg.from_id)
                 username = str(quote_bot)
                 avatar = quote_bot.avatar
                 if not avatar and self.event.platform == Platform.VK:
-                    self.bot.update_bot_avatar(msg.peer_id)
+                    self.bot.update_bot_avatar(msg.from_id)
             if msg.attachments:
                 photo = msg.attachments[0]
                 if isinstance(photo, PhotoAttachment):

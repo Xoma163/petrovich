@@ -33,6 +33,7 @@ class TgEvent(Event):
             return
 
         self.peer_id = message['chat']['id']
+        self.from_id = message['from']['id']
 
         if message['chat']['id'] != message['from']['id']:
             self.chat = self.bot.get_chat_by_id(message['chat']['id'])
@@ -41,6 +42,9 @@ class TgEvent(Event):
             self.is_from_user = True
         if message['from']['is_bot']:
             self.is_from_bot = True
+        else:
+            self.sender = self.register_user(message['from'])
+            self.is_from_user = True
 
         self.setup_action(message)
         payload = message.get('payload')
@@ -50,7 +54,7 @@ class TgEvent(Event):
             # Нет нужды парсить вложения и fwd если это просто нажатие на кнопку
             self.setup_attachments(message)
             self.setup_fwd(message.get('reply_to_message'))
-        self.sender = self.register_user(message['from'])
+
 
         if self.sender and self.chat:
             self.bot.add_chat_to_user(self.sender, self.chat)

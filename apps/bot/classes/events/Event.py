@@ -21,7 +21,8 @@ class Event:
 
         self.sender: Users = None
         self.chat: Chat = None
-        self.peer_id: int = None
+        self.peer_id: int = None  # Куда слать ответ
+        self.from_id: int = None  # От кого пришло сообщение
         self.platform: Platform = bot.platform
 
         self.payload: dict = {}
