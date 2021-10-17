@@ -28,6 +28,8 @@ class TgBot(CommonBot):
         self.requests = TgRequests(self.token)
         self.longpoll = MyTgBotLongPoll(self.token, self.requests)
 
+    # MAIN ROUTING AND MESSAGING
+
     def listen(self):
         """
         Получение новых событий и их обработка
@@ -37,6 +39,9 @@ class TgBot(CommonBot):
             threading.Thread(target=self.handle_event, args=(tg_event,)).start()
 
     def _send_media_group(self, rm: ResponseMessageItem, default_params):
+        """
+        Отправка множества вложений. Ссылки
+        """
         media = []
         for attachment in rm.attachments:
             media.append({'type': attachment.type, 'media': attachment.public_download_url, 'caption': rm.text})
@@ -45,6 +50,9 @@ class TgBot(CommonBot):
         return self.requests.get('sendMediaGroup', default_params)
 
     def _send_photo(self, rm: ResponseMessageItem, default_params):
+        """
+        Отправка фото. Ссылка или файл
+        """
         photo: PhotoAttachment = rm.attachments[0]
         if photo.public_download_url:
             default_params['photo'] = photo.public_download_url
@@ -53,6 +61,9 @@ class TgBot(CommonBot):
             return self.requests.get('sendPhoto', default_params, files={'photo': photo.content})
 
     def _send_document(self, rm: ResponseMessageItem, default_params):
+        """
+        Отправка документа. Ссылка или файл
+        """
         document: DocumentAttachment = rm.attachments[0]
         if document.public_download_url:
             default_params['document'] = document.public_download_url
@@ -66,6 +77,9 @@ class TgBot(CommonBot):
             return self.requests.get('sendDocument', default_params, files=files)
 
     def _send_video(self, rm: ResponseMessageItem, default_params):
+        """
+        Отправка видео. Ссылка или файл
+        """
         video: VideoAttachment = rm.attachments[0]
         if video.public_download_url:
             default_params['video'] = video.public_download_url
@@ -103,11 +117,13 @@ class TgBot(CommonBot):
         params['text'] = params.pop('caption')
         return self.requests.get('sendMessage', params)
 
+    # END  MAIN ROUTING AND MESSAGING
 
-
+    # EXTRA
     @staticmethod
     def get_inline_keyboard(buttons: list, cols=1):
         """
+        param buttons: [(button_name, args), ...]
         Получение инлайн-клавиатуры с одной кнопкой
         В основном используется для команд, где нужно запускать много команд и лень набирать заново
         """
@@ -147,7 +163,12 @@ class TgBot(CommonBot):
         return str(user)
 
     def delete_message(self, chat_id, message_id):
+        """
+        Удаление одного сообщения
+        """
         self.requests.get('deleteMessage', params={'chat_id': chat_id, 'message_id': message_id})
+
+    # END EXTRA
 
 
 class TgRequests:

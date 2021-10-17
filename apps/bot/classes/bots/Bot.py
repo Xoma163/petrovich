@@ -27,6 +27,8 @@ class Bot(Thread):
 
         self.logger = logging.getLogger(platform.value)
 
+    # MAIN ROUTING AND MESSAGING
+
     def run(self):
         """
         Thread запуск основного тела команды
@@ -69,6 +71,18 @@ class Bot(Thread):
         Парсинг сырых сообщений и отправка их в отдельном потоке
         """
         Thread(target=self.parse_and_send_msgs, args=(peer_id, msgs)).start()
+
+    def send_response_message(self, rm: ResponseMessage):
+        """
+        Отправка ResponseMessage сообщения
+        """
+        raise NotImplementedError
+
+    def send_message(self, rm: ResponseMessageItem):
+        """
+        Отправка сообщения
+        """
+        raise NotImplementedError
 
     def route(self, event: Event):
         """
@@ -138,6 +152,10 @@ class Bot(Thread):
         if similar_command and tanimoto_max != 0:
             msg += f"Возможно вы имели в виду команду \"{similar_command}\""
         return msg
+
+    # END MAIN ROUTING AND MESSAGING
+
+    # USERS GROUPS BOTS
 
     def get_user_by_id(self, user_id: int) -> Users:
         """
@@ -237,18 +255,9 @@ class Bot(Thread):
         if chat in chats.all():
             chats.remove(chat)
 
-    def send_response_message(self, rm: ResponseMessage):
-        """
-        Отправка ResponseMessage сообщения
-        """
-        raise NotImplementedError
+    # END USERS GROUPS BOTS
 
-    def send_message(self, rm: ResponseMessageItem):
-        """
-        Отправка сообщения
-        """
-        raise NotImplementedError
-
+    # ATTACHMENTS
     def upload_photos(self, images, max_count=10):
         """
         Загрузка фотографий на сервер ТГ.
@@ -271,9 +280,14 @@ class Bot(Thread):
 
     @staticmethod
     def upload_document(document, peer_id=None, title='Документ', filename=None):
+        """
+        Загрузка документа
+        """
         da = DocumentAttachment()
         da.parse_response(document, filename=filename)
         return da
+
+    # END ATTACHMENTS
 
 
 def get_bot_by_platform(platform: Platform):

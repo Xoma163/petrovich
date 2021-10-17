@@ -26,32 +26,6 @@ from petrovich.settings import env
 
 
 class VkBot(CommonBot):
-    def __init__(self):
-        CommonBot.__init__(self, Platform.VK)
-
-        self.token = env.str('VK_BOT_TOKEN')
-        self.group_id = env.str('VK_BOT_GROUP_ID')
-        vk_session = VkApi(token=self.token, api_version="5.107", config_filename="secrets/vk_bot_config.json")
-        self.longpoll = MyVkBotLongPoll(vk_session, group_id=self.group_id)
-        self.upload = VkUpload(vk_session)
-        self.vk = vk_session.get_api()
-
-        self.vk_user = VkUser()
-
-    def set_activity(self, peer_id, activity='typing'):
-        """
-        Метод позволяет указать пользователю, что бот набирает сообщение или записывает голосовое
-        Используется при длительном выполнении команд, чтобы был фидбек пользователю, что его запрос принят
-        """
-        if activity not in ['typing', 'audiomessage']:
-            raise PWarning("Не знаю такого типа активности")
-        self.vk.messages.setActivity(type=activity, peer_id=peer_id, group_id=self.group_id)
-
-    def get_bot_info(self, bot_id):
-        return self.vk.groups.getById(group_id=bot_id)[0]
-
-    def get_user_info(self, user_id):
-        return self.vk.users.get(user_id=user_id, lang='ru', fields='sex, bdate, city, screen_name, photo_max')[0]
 
     def get_user_by_id(self, user_id) -> Users:
         """
@@ -72,8 +46,6 @@ class VkBot(CommonBot):
 
             if 'sex' in user:
                 vk_user.gender = user['sex']
-            if 'bdate' in user:
-                vk_user.birthday = self.parse_date(user['bdate'])
             if 'city' in user:
                 from apps.service.models import City
                 city_name = user['city']['title']
@@ -101,44 +73,6 @@ class VkBot(CommonBot):
         user_info = self.get_user_info(user_id)
         user.set_avatar(user_info['photo_max'])
 
-    def update_bot_avatar(self, bot_id):
-        bot = self.get_bot_by_id(bot_id)
-        bot_info = self.get_bot_info(bot_id)
-        bot.set_avatar(bot_info['photo_200'])
-
-    def get_chat_by_id(self, chat_id) -> Chat:
-        """
-        Возвращает чат по его id
-        """
-        vk_chat = self.chat_model.filter(chat_id=chat_id)
-        if len(vk_chat) > 0:
-            vk_chat = vk_chat.first()
-        else:
-            vk_chat = Chat(chat_id=chat_id, platform=self.platform.name)
-            vk_chat.save()
-        return vk_chat
-
-    def get_bot_by_id(self, bot_id) -> Bot:
-        """
-        Получение бота по его id
-        """
-        if bot_id > 0:
-            bot_id = -bot_id
-        bot = self.bot_model.filter(bot_id=bot_id)
-        if len(bot) > 0:
-            bot = bot.first()
-        else:
-            # Прозрачная регистрация
-            vk_bot = self.get_bot_info(bot_id)
-
-            bot = Bot()
-            bot.bot_id = bot_id
-            bot.name = vk_bot['name']
-            bot.platform = self.platform.name
-            bot.set_avatar(vk_bot['photo_200'])
-            bot.save()
-
-        return bot
 
     def get_conversation_messages(self, peer_id, conversation_message_id):
         response = self.vk.messages.getByConversationMessageId(
@@ -147,63 +81,7 @@ class VkBot(CommonBot):
         )
         return response['items'][0]
 
-    def send_message(self, peer_id: str, msg: str = "ᅠ", attachments=None, keyboard=None,
-                     dont_parse_links: bool = False, **kwargs):
-        """
-        Отправка сообщения
-        peer_id: в какой чат/какому пользователю
-        msg: сообщение
-        attachments: список вложений
-        keyboard: клавиатура
-        dont_parse_links: не преобразовывать ссылки
-        """
-        if attachments is None:
-            attachments = []
-        if isinstance(attachments, str):
-            attachments = [attachments]
-        if attachments and msg == "ᅠ":
-            msg = ""
-        if keyboard:
-            keyboard = json.dumps(keyboard)
-        msg = str(msg)
-        if len(msg) > 4096:
-            msg = msg[:4092]
-            msg += "\n..."
-        try:
-            self.vk.messages.send(peer_id=peer_id,
-                                  message=msg,
-                                  access_token=self.token,
-                                  random_id=get_random_id(),
-                                  attachment=','.join(attachments),
-                                  keyboard=keyboard,
-                                  dont_parse_links=dont_parse_links
-                                  )
-        except vk_api.exceptions.ApiError as e:
-            if e.code == 901:
-                pass
-            else:
-                print("Ошибка отправки сообщения\n"
-                      f"{e}")
-
     def _setup_event_before(self, event):
-        """
-        Подготовка события перед проверкой на то, нужен ли ответ
-        """
-        vk_event = {
-            'platform': self.platform,
-            'from_user': event.from_user,
-            'chat_id': event.chat_id,
-            'user_id': event.message.from_id,
-            'peer_id': event.message.peer_id,
-            'message': {
-                'id': event.message.id,
-                'text': event.message.text,
-                'payload': event.message.payload,
-                'attachments': event.message.attachments,
-                'action': event.message.action
-            },
-            'fwd': None
-        }
         if (vk_event['message'].get('action', None)
                 and vk_event['message']['action']['type'] in ['chat_invite_user', 'chat_invite_user_by_link']):
             vk_event['message']['action']['member_ids'] = [vk_event['message']['action'].pop('member_id')]
@@ -216,23 +94,6 @@ class VkBot(CommonBot):
 
         return vk_event
 
-    def need_a_response(self, vk_event):
-        """
-        Нужен ли ответ пользователю
-        """
-        # Сообщение либо мне в лс, либо упоминание меня, либо есть аудиосообщение, либо есть экшн
-
-        if vk_event['chat'] and vk_event['chat'].is_banned:
-            self.remove_self_from_chat(vk_event['chat_id'])
-
-        if not self.need_a_response_common(vk_event):
-            return False
-
-        # Проверка на бота
-        if vk_event['user_id'] < 0:
-            self.send_message(vk_event['peer_id'], "Боты не могут общаться с Петровичем :(")
-            return False
-        return True
 
     def _setup_event_after(self, vk_event, event):
         """

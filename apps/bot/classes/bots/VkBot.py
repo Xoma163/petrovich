@@ -13,7 +13,8 @@ from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.events.VkEvent import VkEvent
 from apps.bot.classes.messages.ResponseMessage import ResponseMessageItem, ResponseMessage
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
-from apps.bot.models import Bot as BotModel
+from apps.bot.commands.Profile import add_city_to_db
+from apps.bot.models import Bot as BotModel, Users
 from apps.bot.utils.utils import get_chunks
 from petrovich.settings import env, VK_URL
 
@@ -29,6 +30,8 @@ class VkBot(CommonBot):
         self.longpoll = MyVkBotLongPoll(vk_session, group_id=self.group_id)
         self.upload = VkUpload(vk_session)
         self.vk = vk_session.get_api()
+
+    # MAIN ROUTING AND MESSAGING
 
     def listen(self):
         """
@@ -54,6 +57,9 @@ class VkBot(CommonBot):
                 self.send_message(error_rm)
 
     def send_message(self, rm: ResponseMessageItem):
+        """
+        Отправка сообщения
+        """
         text = str(rm.text)
         if len(text) > 4096:
             text = text[:4092]
@@ -78,6 +84,10 @@ class VkBot(CommonBot):
             # dont_parse_links=dont_parse_links
         )
 
+    # END MAIN ROUTING AND MESSAGING
+
+    # ATTACHMENTS
+
     def upload_photos(self, images, max_count=10):
         """
         Загрузка фотографий на сервер ТГ.
@@ -98,7 +108,7 @@ class VkBot(CommonBot):
 
     def upload_photo_and_urls(self, image: PhotoAttachment):
         """
-        Сохраняет изображение на серверах VK
+        Загрузка изображения на сервер VK
         Возвращает vk_url и public_download_url
         """
         image_to_load = image.download_content()
@@ -116,6 +126,94 @@ class VkBot(CommonBot):
         vk_doc = self.upload.document_message(content, title=title, peer_id=peer_id)['doc']
         return f"doc{vk_doc['owner_id']}{vk_doc['id']}"
 
+    # END ATTACHMENTS
+
+    # USERS GROUPS BOTS
+
+    def get_user_by_id(self, user_id: int) -> Users:
+        """
+        Возвращает пользователя по его id
+        Регистрирует если пользователя нет в БД
+        """
+        try:
+            user = self.user_model.get(bot_id=user_id)
+        except self.user_model.DoesNotExist:
+            vk_user = self.get_user_info(user_id)
+            user = Users()
+            user.user_id = user_id
+            user.name = vk_user['first_name']
+            user.surname = vk_user['last_name']
+            user.platform = self.platform.name
+            user.set_avatar(vk_user['photo_max'])
+
+            if 'sex' in vk_user:
+                user.gender = vk_user['sex']
+            if 'city' in vk_user:
+                from apps.service.models import City
+                city_name = vk_user['city']['title']
+                city = City.objects.filter(name__icontains=city_name)
+                if len(city) > 0:
+                    city = city.first()
+                else:
+                    try:
+                        city = add_city_to_db(city_name)
+                    except Exception:
+                        city = None
+                user.city = city
+            else:
+                user.city = None
+            if 'screen_name' in vk_user:
+                user.nickname = vk_user['screen_name']
+            user.save()
+        return user
+
+    def get_user_info(self, user_id: int):
+        """
+        Получение информации о пользователе
+        """
+        return self.vk.users.get(user_id=user_id, lang='ru', fields='sex, bdate, city, screen_name, photo_max')[0]
+
+    def update_user_avatar(self, user_id: int):
+        """
+        Обновление аватара пользователя
+        """
+        user = self.get_user_by_id(user_id)
+        user_info = self.get_user_info(user_id)
+        user.set_avatar(user_info['photo_max'])
+
+    def get_bot_by_id(self, bot_id: int) -> BotModel:
+        """
+        Получение информации о боте
+        """
+        try:
+            bot = self.bot_model.get(bot_id=bot_id)
+        except self.bot_model.DoesNotExist:
+            bot = super().get_bot_by_id(bot_id)
+            vk_bot = self.get_bot_info(bot_id)
+            bot.name = vk_bot['name']
+            bot.set_avatar(vk_bot['photo_200'])
+            bot.save()
+        return bot
+
+    def get_bot_info(self, bot_id):
+        """
+        Получение информации о боте
+        """
+        return self.vk.groups.getById(group_id=bot_id)[0]
+
+    def update_bot_avatar(self, bot_id):
+        """
+        Обновление аватара бота
+        """
+        bot = self.get_bot_by_id(bot_id)
+        bot_info = self.get_bot_info(bot_id)
+        bot.name = bot_info['name']
+        bot.set_avatar(bot_info['photo_200'])
+
+    # END USERS GROUPS BOTS
+
+    # EXTRA
+
     def set_activity(self, peer_id, activity: ActivitiesEnum):
         """
         Метод позволяет указать пользователю, что бот набирает сообщение или записывает голосовое
@@ -127,7 +225,6 @@ class VkBot(CommonBot):
 
     @staticmethod
     def get_inline_keyboard(buttons: list, cols=1):
-
         """
         param buttons: [(button_name, args), ...]
         Получение инлайн-клавиатуры с одной кнопкой
@@ -156,31 +253,15 @@ class VkBot(CommonBot):
             'buttons': [get_buttons(chunk) for chunk in buttons_chunks]
         }
 
-    def update_bot_avatar(self, bot_id):
+    @staticmethod
+    def get_mention(user: Users, name=None):
         """
-        Обновление аватара боту для цитат
+        Получение меншона пользователя
         """
-        bot = self.get_bot_by_id(bot_id)
-        bot_info = self.get_bot_info(bot_id)
-        bot.name = bot_info['name']
-        bot.set_avatar(bot_info['photo_200'])
+        name = name or str(user)
+        return f"[id{user.user_id}|{name}]"
 
-    def get_bot_by_id(self, bot_id: int) -> BotModel:
-        """
-        Получение бота по его id
-        """
-        try:
-            bot = self.bot_model.get(bot_id=bot_id)
-        except self.bot_model.DoesNotExist:
-            bot = super().get_bot_by_id(bot_id)
-            vk_bot = self.get_bot_info(bot_id)
-            bot.name = vk_bot['name']
-            bot.set_avatar(vk_bot['photo_200'])
-            bot.save()
-        return bot
-
-    def get_bot_info(self, bot_id):
-        return self.vk.groups.getById(group_id=bot_id)[0]
+    # END EXTRA
 
 
 class MyVkBotLongPoll(VkBotLongPoll):
