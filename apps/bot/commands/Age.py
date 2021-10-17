@@ -7,17 +7,12 @@ from apps.bot.utils.utils import get_attachments_from_attachments_or_fwd
 
 
 def draw_on_images(image, faces):
-    import requests
     import numpy as np
     import cv2
 
-    if isinstance(image, str):
-        resp = requests.get(image, stream=True).raw
-        data = bytearray(resp.read())
-    else:
-        data = bytearray(image)
+    data = image.download_content()
 
-    _image = np.asarray(data, dtype="uint8")
+    _image = np.asarray(bytearray(data), dtype="uint8")
     _image = cv2.imdecode(_image, cv2.IMREAD_COLOR)
 
     # B G R
