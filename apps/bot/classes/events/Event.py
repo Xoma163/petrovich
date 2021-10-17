@@ -1,3 +1,4 @@
+import copy
 from urllib.parse import urlparse
 
 from apps.bot.classes.consts.Consts import Platform, Role
@@ -90,6 +91,16 @@ class Event:
             if isinstance(att, VoiceAttachment):
                 return True
         return False
+
+    def to_log(self) -> dict:
+        dict_self = copy.copy(self.__dict__)
+        ignore_fields = ['raw', 'bot']
+        for ignore_field in ignore_fields:
+            del dict_self[ignore_field]
+        dict_self['message'] = dict_self['message'].to_log()
+        dict_self['fwd'] = [x.to_log() for x in dict_self['fwd']]
+        dict_self['attachments'] = [x.to_log() for x in dict_self['attachments']]
+        return dict_self
 
 
 def get_event_by_platform(platform):

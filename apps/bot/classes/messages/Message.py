@@ -1,3 +1,4 @@
+import copy
 import re
 
 from apps.bot.utils.utils import auto_str
@@ -56,3 +57,7 @@ class Message:
             self.raw = self.command
         self.clear = self.get_cleared_message(self.raw)
         self.id = None
+
+    def to_log(self):
+        dict_self = copy.copy(self.__dict__)
+        return dict_self

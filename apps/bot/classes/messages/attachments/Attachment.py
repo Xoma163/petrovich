@@ -1,3 +1,4 @@
+import copy
 import os
 from io import BytesIO
 from tempfile import NamedTemporaryFile
@@ -70,3 +71,10 @@ class Attachment:
         if not self.content:
             self.content = requests.get(self.get_download_url()).content
         return self.content
+
+    def to_log(self):
+        dict_self = copy.copy(self.__dict__)
+        ignore_fields = ['private_download_url', 'content']
+        for ignore_field in ignore_fields:
+            del dict_self[ignore_field]
+        return dict_self

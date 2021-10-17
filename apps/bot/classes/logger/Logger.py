@@ -1,3 +1,0 @@
-# Todo:
-class Logger:
-    pass

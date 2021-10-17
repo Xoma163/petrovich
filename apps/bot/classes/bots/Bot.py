@@ -72,7 +72,7 @@ class Bot(Thread):
         """
         Выбор команды и отправка данных о сообщении ей
         """
-        self.logger.debug(event)
+        self.logger.debug(event.to_log())
 
         from apps.bot.initial import COMMANDS
         for command in COMMANDS:
