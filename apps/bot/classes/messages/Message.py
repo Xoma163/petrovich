@@ -1,10 +1,6 @@
 import copy
 import re
 
-from apps.bot.utils.utils import auto_str
-
-
-@auto_str
 class Message:
     COMMAND_SYMBOLS = ['/', '!']
 

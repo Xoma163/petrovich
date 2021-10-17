@@ -93,6 +93,7 @@ class TgBot(CommonBot):
         params['text'] = params.pop('caption')
         return self.requests.get('sendMessage', params)
 
+    # ToDo: это общие методы?
     @staticmethod
     def upload_photos(images, max_count=10):
         """
@@ -169,56 +170,6 @@ class TgBot(CommonBot):
 
     def delete_message(self, chat_id, message_id):
         self.requests.get('deleteMessage', params={'chat_id': chat_id, 'message_id': message_id})
-
-    def get_user_by_id(self, user_id) -> Users:
-        """
-        Возвращает пользователя по его id
-        """
-        tg_user = self.user_model.filter(user_id=user_id)
-        if len(tg_user) > 0:
-            tg_user = tg_user.first()
-        else:
-            # Если пользователь из fwd
-            tg_user = Users()
-            tg_user.user_id = user_id
-            tg_user.platform = self.platform.name
-
-            tg_user.save()
-
-            group_user = Group.objects.get(name=Role.USER.name)
-            tg_user.groups.add(group_user)
-            tg_user.save()
-        return tg_user
-
-    def get_chat_by_id(self, chat_id) -> Chat:
-        """
-        Возвращает чат по его id
-        """
-        if chat_id > 0:
-            chat_id *= -1
-        tg_chat = self.chat_model.filter(chat_id=chat_id)
-        if len(tg_chat) > 0:
-            tg_chat = tg_chat.first()
-        else:
-            tg_chat = Chat(chat_id=chat_id, platform=self.platform.name)
-            tg_chat.save()
-        return tg_chat
-
-    def get_bot_by_id(self, bot_id) -> Bot:
-        """
-        Получение бота по его id
-        """
-        if bot_id > 0:
-            bot_id = -bot_id
-        bot = self.bot_model.filter(bot_id=bot_id)
-        if len(bot) > 0:
-            bot = bot.first()
-        else:
-            # Прозрачная регистрация
-            bot = Bot(bot_id=bot_id, platform=self.platform.name)
-            bot.save()
-
-        return bot
 
 
 class TgRequests:

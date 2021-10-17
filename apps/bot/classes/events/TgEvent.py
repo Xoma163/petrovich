@@ -8,10 +8,7 @@ from apps.bot.classes.messages.Message import Message
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 from apps.bot.classes.messages.attachments.VoiceAttachment import VoiceAttachment
 from apps.bot.models import Users
-from apps.bot.utils.utils import auto_str
 
-
-@auto_str
 class TgEvent(Event):
 
     def setup_event(self, is_fwd=False):

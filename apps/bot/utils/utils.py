@@ -336,16 +336,3 @@ def get_chunks(lst, n):
     """Yield successive n-sized chunks from lst."""
     for i in range(0, len(lst), n):
         yield lst[i:i + n]
-
-
-def auto_str(cls):
-    """
-    Переводит все поля класса в dict
-    """
-
-    def __str__(self):
-        items_str = ', '.join('%s=%s' % item for item in vars(self).items())
-        return f"{type(self).__name__}({items_str}"
-
-    cls.__str__ = __str__
-    return cls

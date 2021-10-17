@@ -2,10 +2,13 @@ import logging
 import traceback
 from threading import Thread
 
-from apps.bot.classes.consts.Consts import Platform
+from django.contrib.auth.models import Group
+
+from apps.bot.classes.consts.Consts import Platform, Role
 from apps.bot.classes.consts.Exceptions import PWarning, PError, PSkip
+from apps.bot.classes.events.Event import Event
 from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
-from apps.bot.models import Users, Chat, Bot as BotModel
+from apps.bot.models import Users, Chat, Bot as BotModel, Bot
 from apps.bot.utils.utils import tanimoto
 from apps.games.models import Gamer
 
@@ -34,7 +37,10 @@ class Bot(Thread):
         """
         pass
 
-    def handle_event(self, event, send=True):
+    def handle_event(self, event: Event, send=True):
+        """
+        Обработка входящего ивента
+        """
         try:
             event.setup_event()
             if not event.need_a_response():
@@ -48,6 +54,9 @@ class Bot(Thread):
             print(tb)
 
     def send_response_message(self, rm: ResponseMessage):
+        """
+        Отправка ResponseMessage сообщения
+        """
         for msg in rm.messages:
             response = self.send_message(msg)
             if response.status_code != 200:
@@ -56,21 +65,24 @@ class Bot(Thread):
                 self.logger.error({'result': error_msg, 'error': response.json()['description']})
                 self.send_message(error_rm)
 
-    def parse_and_send_msgs(self, peer_id, msgs, send=True) -> ResponseMessage:
+    def parse_and_send_msgs(self, peer_id: int, msgs, send=True) -> ResponseMessage:
         """
-        Отправка сообщения от команды. Принимает любой формат
+        Отправка сообщений. Принимает любой формат
         """
         rm = ResponseMessage(msgs, peer_id)
         if send:
             self.send_response_message(rm)
         return rm
 
-    def parse_and_send_msgs_thread(self, peer_id, msgs):
+    def parse_and_send_msgs_thread(self, peer_id: int, msgs: list):
+        """
+        Парсинг сырых сообщений и отправка их в отдельном потоке
+        """
         Thread(target=self.parse_and_send_msgs, args=(peer_id, msgs)).start()
 
-    def route(self, event):
+    def route(self, event: Event):
         """
-        Выбор команды и отправка данных о сообщении ей
+        Выбор команды
         """
         self.logger.debug(event.to_log())
 
@@ -105,7 +117,7 @@ class Bot(Thread):
         return similar_command
 
     @staticmethod
-    def get_similar_command(event, commands):
+    def get_similar_command(event: Event, commands):
         """
         Получение похожей команды по неправильно введённой
         """
@@ -137,38 +149,20 @@ class Bot(Thread):
             msg += f"Возможно вы имели в виду команду \"{similar_command}\""
         return msg
 
-    def get_chat_by_id(self, chat_id) -> Chat:
+    def get_user_by_id(self, user_id: int) -> Users:
         """
-        Возвращает чат по его id
+        Возвращает пользователя по его id
         """
-        if chat_id > 0:
-            chat_id *= -1
-        tg_chat = self.chat_model.filter(chat_id=chat_id)
-        if len(tg_chat) > 0:
-            tg_chat = tg_chat.first()
-        else:
-            tg_chat = Chat(chat_id=chat_id, platform=self.platform.name)
-            tg_chat.save()
-        return tg_chat
-
-    def send_message(self, rm: ResponseMessageItem):
-        raise NotImplementedError
-
-    @staticmethod
-    def get_gamer_by_user(user) -> Gamer:
-        """
-        Получение игрока по модели пользователя
-        """
-
-        gamers = Gamer.objects.filter(user=user)
-        if len(gamers) == 0:
-            gamer = Gamer(user=user)
-            gamer.save()
-            return gamer
-        elif len(gamers) > 1:
-            raise PWarning("Два и более игрока подходит под поиск")
-        else:
-            return gamers.first()
+        user, created = self.user_model.get_or_create(
+            user_id=user_id,
+            platform=self.platform.name,
+            defaults={'user_id': user_id, 'platform': self.platform.name}
+        )
+        if created:
+            group_user = Group.objects.get(name=Role.USER.name)
+            user.groups.add(group_user)
+            user.save()
+        return user
 
     # ToDo: очень говнокод
     def get_user_by_name(self, args, filter_chat=None) -> Users:
@@ -203,8 +197,40 @@ class Bot(Thread):
 
         return user.first()
 
+    def get_chat_by_id(self, chat_id: int) -> Chat:
+        """
+        Возвращает чат по его id
+        """
+        if chat_id > 0:
+            chat_id *= -1
+        tg_chat, _ = self.chat_model.get_or_create(
+            chat_id=chat_id, platform=self.platform.name,
+            defaults={'chat_id': chat_id, 'platform': self.platform.name}
+        )
+        return tg_chat
+
+    def get_bot_by_id(self, bot_id: int) -> Bot:
+        """
+        Возвращает бота по его id
+        """
+        if bot_id > 0:
+            bot_id = -bot_id
+        bot, _ = self.bot_model.get_or_create(
+            bot_id=bot_id, platform=self.platform.name,
+            defaults={'bot_id': bot_id, 'platform': self.platform.name}
+        )
+        return bot
+
     @staticmethod
-    def add_chat_to_user(user, chat):
+    def get_gamer_by_user(user: Users) -> Gamer:
+        """
+        Получение игрока по модели пользователя
+        """
+        gamer, _ = Gamer.objects.get_or_create(user=user, defaults={'user': user})
+        return gamer
+
+    @staticmethod
+    def add_chat_to_user(user: Users, chat: Chat):
         """
         Добавление чата пользователю
         """
@@ -213,13 +239,19 @@ class Bot(Thread):
             chats.add(chat)
 
     @staticmethod
-    def remove_chat_from_user(user, chat):
+    def remove_chat_from_user(user: Users, chat: Chat):
         """
         Удаление чата пользователю
         """
         chats = user.chats
         if chat in chats.all():
             chats.remove(chat)
+
+    def send_message(self, rm: ResponseMessageItem):
+        """
+        Отправка сообщения
+        """
+        raise NotImplementedError
 
 
 def get_bot_by_platform(platform: Platform):

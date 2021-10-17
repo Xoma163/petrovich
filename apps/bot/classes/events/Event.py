@@ -97,7 +97,7 @@ class Event:
         ignore_fields = ['raw', 'bot']
         for ignore_field in ignore_fields:
             del dict_self[ignore_field]
-        dict_self['message'] = dict_self['message'].to_log()
+        dict_self['message'] = dict_self['message'].to_log() if dict_self['message'] else {}
         dict_self['fwd'] = [x.to_log() for x in dict_self['fwd']]
         dict_self['attachments'] = [x.to_log() for x in dict_self['attachments']]
         return dict_self
