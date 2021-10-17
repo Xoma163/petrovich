@@ -52,6 +52,9 @@ class TgEvent(Event):
             self.setup_fwd(message.get('reply_to_message'))
         self.sender = self.register_user(message['from'])
 
+        if self.sender and self.chat:
+            self.bot.add_chat_to_user(self.sender, self.chat)
+
     def register_user(self, user) -> Users:
         """
         Регистрация пользователя если его нет в БД

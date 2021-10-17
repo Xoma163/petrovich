@@ -2,9 +2,9 @@ import json
 
 from apps.bot.classes.events.Event import Event
 from apps.bot.classes.messages.Message import Message
-from apps.bot.classes.messages.attachments.StickerAttachment import StickerAttachment
 from apps.bot.classes.messages.attachments.AudioAttachment import AudioAttachment
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
+from apps.bot.classes.messages.attachments.StickerAttachment import StickerAttachment
 from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
 from apps.bot.classes.messages.attachments.VoiceAttachment import VoiceAttachment
 
@@ -12,6 +12,15 @@ from apps.bot.classes.messages.attachments.VoiceAttachment import VoiceAttachmen
 class VkEvent(Event):
 
     def setup_event(self, is_fwd=False):
+        # if (vk_event['message'].get('action', None)
+        #         and vk_event['message']['action']['type'] in ['chat_invite_user', 'chat_invite_user_by_link']):
+        #     vk_event['message']['action']['member_ids'] = [vk_event['message']['action'].pop('member_id')]
+
+        # if event.message['conversation_message_id'] and 'is_cropped' in event.message and event.message['is_cropped']:
+        #     message = self.get_conversation_messages(event.message['peer_id'], event.message['conversation_message_id'])
+        # else:
+        #     message = event.message
+
         if is_fwd:
             message = self.raw
             chat_id = None
@@ -47,6 +56,9 @@ class VkEvent(Event):
             self.setup_fwd(message.get('fwd_messages') or message.get('reply_message', []))
             self.set_message(message['text'], message['id'])
 
+        if self.sender and self.chat:
+            self.bot.add_chat_to_user(self.sender, self.chat)
+
     def setup_actions(self, actions):
         pass
 
@@ -61,7 +73,7 @@ class VkEvent(Event):
             'video': self.setup_video,
             'audio': self.setup_audio,
             'audio_message': self.setup_voice,
-            'sticker':self.setup_sticker
+            'sticker': self.setup_sticker
         }
         for attachment in attachments:
             _type = attachment['type']

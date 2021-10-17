@@ -261,6 +261,21 @@ class VkBot(CommonBot):
         name = name or str(user)
         return f"[id{user.user_id}|{name}]"
 
+    def remove_self_from_chat(self, chat_id):
+        """
+        Удаление бота (себя) из чата
+        """
+        self.vk.messages.removeChatUser(chat_id=chat_id, member_id=f"-{self.group_id}")
+
+    def get_conversation_messages(self, peer_id, conversation_message_id):
+        """
+        Получение полного сообщения
+        """
+        response = self.vk.messages.getByConversationMessageId(
+            peer_id=peer_id,
+            conversation_message_ids=[conversation_message_id]
+        )
+        return response['items'][0]
     # END EXTRA
 
 
