@@ -22,6 +22,5 @@ class ShortLinks(Command):
         try:
             bl_api = BitLyAPI()
             return bl_api.get_short_link(long_link)
-        except Exception as e:
+        except Exception:
             raise PWarning("Неверный формат ссылки")
-        return short_link

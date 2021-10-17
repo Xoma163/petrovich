@@ -115,7 +115,7 @@ class Meme(Command):
 
         if type(attachment) in [VideoAttachment, AudioAttachment, LinkAttachment]:
             new_meme['link'] = attachment.url
-        elif type(attachment) == PhotoAttachment:  # or attachment.type == 'doc':
+        elif isinstance(attachment, PhotoAttachment):  # or attachment.type == 'doc':
             if self.event.platform == Platform.VK:
                 new_meme['link'] = attachment.download_url
             else:
@@ -161,7 +161,7 @@ class Meme(Command):
                                    "Не нашёл ссылки на youtube/coub")
 
         attachment = attachments[0]
-        if type(attachment) == VideoAttachment or type(attachment) == AudioAttachment:
+        if type(attachment) in [VideoAttachment, AudioAttachment]:
             new_meme_link = attachment['url']
         elif type(attachment) == PhotoAttachment:  # or attachment.type == 'doc':
             if self.event.platform == Platform.VK:
