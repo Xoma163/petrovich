@@ -47,7 +47,7 @@ class VkEvent(Event):
         if chat_id:
             self.chat = self.bot.get_chat_by_id(chat_id)
 
-        # self.setup_actions(message)
+        self.setup_action(message.get('action'))
         payload = message.get('payload')
         if payload:
             self.setup_payload(payload)
@@ -59,8 +59,23 @@ class VkEvent(Event):
         if self.sender and self.chat:
             self.bot.add_chat_to_user(self.sender, self.chat)
 
-    def setup_actions(self, actions):
-        pass
+    def setup_action(self, action):
+        if not action:
+            return
+        _type = action.get('type', None)
+        body = {
+            'id': action['member_id'] if action['member_id'] > 0 else -action['member_id'],
+            'is_bot': action['member_id'] < 0
+        }
+
+        if _type in ['chat_invite_user', 'chat_invite_user_by_link']:
+            self.action = {
+                'new_chat_members': [body]
+            }
+        elif _type in ['chat_kick_user']:
+            self.action = {
+                'left_chat_member': [body]
+            }
 
     def setup_payload(self, payload):
         self.payload = json.loads(payload)

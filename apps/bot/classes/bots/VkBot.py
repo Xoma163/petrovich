@@ -136,8 +136,8 @@ class VkBot(CommonBot):
         Регистрирует если пользователя нет в БД
         """
         try:
-            user = self.user_model.get(bot_id=user_id)
-        except self.user_model.DoesNotExist:
+            user = self.user_model.get(user_id=user_id)
+        except Users.DoesNotExist:
             vk_user = self.get_user_info(user_id)
             user = Users()
             user.user_id = user_id
@@ -187,7 +187,7 @@ class VkBot(CommonBot):
         """
         try:
             bot = self.bot_model.get(bot_id=bot_id)
-        except self.bot_model.DoesNotExist:
+        except BotModel.DoesNotExist:
             bot = super().get_bot_by_id(bot_id)
             vk_bot = self.get_bot_info(bot_id)
             bot.name = vk_bot['name']

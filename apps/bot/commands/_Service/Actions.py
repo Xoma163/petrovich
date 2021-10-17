@@ -12,11 +12,8 @@ class Actions(Command):
         return bool(event.action)
 
     def start(self):
-        # По приглашению пользователя
         new_chat_members = self.event.action.get('new_chat_members')
-        # 'chat_invite_user', 'chat_invite_user_by_link'
         left_chat_member = self.event.action.get('left_chat_member')
-        # 'chat_kick_user'
         if new_chat_members:
             answer = []
             for member in new_chat_members:
