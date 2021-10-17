@@ -211,13 +211,11 @@ class Bot(Thread):
         """
         Возвращает чат по его id
         """
-        if chat_id > 0:
-            chat_id *= -1
-        tg_chat, _ = self.chat_model.get_or_create(
+        chat, _ = self.chat_model.get_or_create(
             chat_id=chat_id, platform=self.platform.name,
             defaults={'chat_id': chat_id, 'platform': self.platform.name}
         )
-        return tg_chat
+        return chat
 
     def get_bot_by_id(self, bot_id: int) -> BotModel:
         """

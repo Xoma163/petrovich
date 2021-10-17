@@ -41,7 +41,7 @@ class VkEvent(Event):
             self.sender = self.bot.get_user_by_id(from_id)
 
         if chat_id:
-            self.chat = -self.bot.get_chat_by_id(2000000000+chat_id)
+            self.chat = self.bot.get_chat_by_id(2000000000 + chat_id)
 
         self.setup_action(message.get('action'))
         payload = message.get('payload')
