@@ -26,7 +26,7 @@ class Joke(Command):
     int_args = [0]
 
     def start(self):
-        if self.event.message.args is None:
+        if not self.event.message.args:
             a_type = 1
         else:
             a_type = self.event.message.args[0]

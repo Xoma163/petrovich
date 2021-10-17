@@ -16,7 +16,7 @@ class Stream(Command):
     access = Role.TRUSTED
 
     def start(self):
-        if self.event.message.args is None:
+        if not self.event.message.args:
             stream, _ = Service.objects.get_or_create(name="stream")
             stream_link = stream.value
             if len(stream_link) < 5:

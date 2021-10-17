@@ -38,7 +38,7 @@ class Event:
     def setup_event(self, is_fwd=False):
         raise NotImplementedError
 
-    # ToDo: проверка на забаненых
+    # ToDo нужен ли ответ если чат может работать без палок
     def need_a_response(self):
         if self.action:
             return True
@@ -66,13 +66,17 @@ class Event:
 
         if self.is_from_chat and not self.message.has_command_symbols:
             return False
-        return True
+
+        if self.message.has_command_symbols:
+            return True
+
+        return False
 
     def need_a_response_extra(self):
         from apps.service.models import Meme
         from apps.bot.commands.TrustedCommands.Media import MEDIA_URLS
 
-        message_is_exact_meme_name = Meme.objects.filter(name=self.message.clear).exists()
+        message_is_exact_meme_name = Meme.objects.filter(name=self.message.raw.lower()).exists()
         if message_is_exact_meme_name:
             return True
 
