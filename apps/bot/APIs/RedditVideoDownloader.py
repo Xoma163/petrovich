@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 
 from apps.bot.classes.consts.Exceptions import PWarning
 
-
+# ToDo: do the linux command?
 class RedditVideoSaver:
     def __init__(self):
         self.timestamp = datetime.datetime.now().timestamp()
