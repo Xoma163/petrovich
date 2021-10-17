@@ -14,6 +14,7 @@ class Settings(Command):
         "упоминание (вкл/выкл) - определяет будет ли бот триггериться на команды без упоминания в конфе(требуются админские права)",
         "реагировать (вкл/выкл) - определяет, будет ли бот реагировать на неправильные команды в конфе. Это сделано для того, чтобы в конфе с несколькими ботами не было ложных срабатываний",
         "мемы (вкл/выкл) - определяет, будет ли бот присылать мем если прислано его точное название без / (боту требуется доступ к переписке)",
+        "туррет (вкл/выкл) - определяет, будет ли бот иногда ругаться)",
         "голосовые (вкл/выкл) - определяет, будет ли бот автоматически распознавать голосовые",
         "майнкрафт (вкл/выкл) - определяет, будет ли бот присылать информацию о серверах майна. (для доверенных)",
         "др (вкл/выкл) - определяет, будет ли бот поздравлять с Днём рождения и будет ли ДР отображаться в /профиль"
@@ -32,6 +33,7 @@ class Settings(Command):
             [['мемы', 'мем'], self.menu_memes],
             [['др', 'днюха'], self.menu_bd],
             [['голосовые', 'голос', 'голосовухи', 'голосовуха', 'голосовое'], self.menu_voice],
+            [['туррет'], self.menu_turret],
             [['default'], self.menu_default],
         ]
         method = self.handle_menu(menu, arg0)
@@ -104,6 +106,13 @@ class Settings(Command):
         self.event.chat.save()
         return "Сохранил настройку"
 
+    def menu_turret(self):
+        self.check_args(2)
+        value = self.get_on_or_off(self.event.message.args[1].lower())
+        self.event.chat.need_turret = value
+        self.event.chat.save()
+        return "Сохранил настройку"
+
     def menu_default(self):
         msg = "Настройки:\n"
 
@@ -111,9 +120,12 @@ class Settings(Command):
             reaction = self.event.chat.need_reaction
             need_meme = self.event.chat.need_meme
             mentioning = self.event.chat.mentioning
+            turret = self.event.chat.need_turret
+
             msg += f"Реагировать на неправильные команды - {TRUE_FALSE_TRANSLATOR[reaction]}\n"
             msg += f"Присылать мемы по точным названиям - {TRUE_FALSE_TRANSLATOR[need_meme]}\n"
             msg += f"Триггериться на команды без упоминания - {TRUE_FALSE_TRANSLATOR[mentioning]}\n"
+            msg += f"Синдром Туррета - {TRUE_FALSE_TRANSLATOR[turret]}\n"
 
         if self.event.sender.check_role(Role.TRUSTED):
             minecraft_notify = self.event.sender.check_role(Role.MINECRAFT_NOTIFY)

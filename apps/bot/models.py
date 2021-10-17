@@ -32,6 +32,7 @@ class Chat(Platform):
     need_meme = models.BooleanField('Слать мемы по точному названию', default=False)
     recognize_voice = models.BooleanField('Распозновать голосовые автоматически', default=True)
     is_banned = models.BooleanField('Забанен', default=False)
+    need_turret = models.BooleanField('Слать турретные сообщения', default=False)
 
     class Meta:
         verbose_name = "Чат"
