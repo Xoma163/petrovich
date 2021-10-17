@@ -4,16 +4,19 @@ from apps.bot.classes.Command import Command
 from apps.bot.classes.bots.Bot import get_moderator_bot_class, upload_image_to_vk_server
 from apps.bot.classes.consts.Consts import Role, Platform
 from apps.bot.classes.consts.Exceptions import PSkip, PWarning, PError
+from apps.bot.classes.messages.attachments.AudioAttachment import AudioAttachment
+from apps.bot.classes.messages.attachments.LinkAttachment import LinkAttachment
+from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
+from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
 from apps.bot.utils.utils import get_attachments_from_attachments_or_fwd, tanimoto
 from apps.service.models import Meme as MemeModel
 from petrovich.settings import VK_URL
-from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
-from apps.bot.classes.messages.attachments.AudioAttachment import AudioAttachment
-from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
 
 
 def check_name_exists(name):
-    return MemeModel.objects.filter(name=name).exists()
+    return MemeModel.objects.filter(name__unaccent=name).exists()
+
+    # return MemeModel.objects.filter(name=name).exists()
 
 
 # noinspection PyUnresolvedReferences,PyUnresolvedReferences
@@ -50,7 +53,7 @@ class Meme(Command):
         return super().accept(event)
 
     def start(self):
-        arg0 = self.event.message.args[0].lower()
+        arg0 = self.event.message.args[0]
         menu = [
             [['добавить'], self.menu_add],
             [['обновить'], self.menu_refresh],
@@ -79,29 +82,25 @@ class Meme(Command):
 
     def menu_add(self):
         self.check_args(2)
-        attachments = get_attachments_from_attachments_or_fwd(self.event, [AudioAttachment, VideoAttachment, PhotoAttachment])
+        attachments = get_attachments_from_attachments_or_fwd(self.event,
+                                                              [AudioAttachment, VideoAttachment, PhotoAttachment])
         if len(attachments) == 0:
             url = self.event.message.args_str.split(' ')[1]
             self._check_allowed_url(url)
 
-            attachment = {
-                'type': 'link',
-                'url': url,
-            }
-            meme_name = " ".join(self.event.message.args[2:]).lower()
+            attachment = LinkAttachment()
+            attachment.url = url
+            meme_name = " ".join(self.event.message.args[2:])
         else:
-            meme_name = " ".join(self.event.message.args[1:]).lower()
+            meme_name = " ".join(self.event.message.args[1:])
             attachment = attachments[0]
 
-        if self.event.platform != Platform.VK and attachment['type'] not in ['photo', 'link']:
+        if self.event.platform != Platform.VK and type(attachment) not in [PhotoAttachment, LinkAttachment]:
             raise PWarning('В данной платформе поддерживается добавление только картинок-мемов и youtube/coub ссылок')
-
-        for i, _ in enumerate(self.event.message.args):
-            self.event.message.args[i] = self.event.message.args[i].lower()
 
         new_meme = {
             'name': meme_name,
-            'type': attachment['type'],
+            'type': attachment.type,
             'author': self.event.sender,
             'approved': self.event.sender.check_role(Role.MODERATOR) or self.event.sender.check_role(Role.TRUSTED)
         }
@@ -114,13 +113,13 @@ class Meme(Command):
         if MemeModel.objects.filter(name=new_meme['name']).exists():
             raise PWarning("Мем с таким названием уже есть в базе")
 
-        if attachment['type'] in ['video', 'audio', 'link']:
-            new_meme['link'] = attachment['url']
-        elif attachment['type'] == 'photo':  # or attachment['type'] == 'doc':
+        if type(attachment) in [VideoAttachment, AudioAttachment, LinkAttachment]:
+            new_meme['link'] = attachment.url
+        elif type(attachment) == PhotoAttachment:  # or attachment.type == 'doc':
             if self.event.platform == Platform.VK:
-                new_meme['link'] = attachment['download_url']
+                new_meme['link'] = attachment.download_url
             else:
-                new_meme['link'] = upload_image_to_vk_server(attachment['content'])
+                new_meme['link'] = upload_image_to_vk_server(attachment.download_content())
         else:
             raise PError("Невозможно")
 
@@ -146,12 +145,13 @@ class Meme(Command):
                 _id = int(self.event.message.args[1])
             except PWarning:
                 pass
-        meme_name = " ".join(self.event.message.args[1:]).lower()
+        meme_name = self.event.message.raw.split(' ')[2:]
 
-        attachments = get_attachments_from_attachments_or_fwd(self.event, [AudioAttachment, VideoAttachment, PhotoAttachment])
+        attachments = get_attachments_from_attachments_or_fwd(self.event,
+                                                              [AudioAttachment, VideoAttachment, PhotoAttachment])
         if len(attachments) == 0:
             if len(self.event.message.args) > 2:
-                url = self.event.message.args[-1]
+                url = self.event.message.raw.split(' ')[-1]
                 try:
                     self._check_allowed_url(url)
                     attachments = [{'type': 'link', 'url': url}]
@@ -161,13 +161,13 @@ class Meme(Command):
                                    "Не нашёл ссылки на youtube/coub")
 
         attachment = attachments[0]
-        if attachment['type'] == 'video' or attachment['type'] == 'audio':
+        if type(attachment) == VideoAttachment or type(attachment) == AudioAttachment:
             new_meme_link = attachment['url']
-        elif attachment['type'] == 'photo':  # or attachment['type'] == 'doc':
+        elif type(attachment) == PhotoAttachment:  # or attachment.type == 'doc':
             if self.event.platform == Platform.VK:
-                new_meme_link = attachment['download_url']
+                new_meme_link = attachment.download_url
             else:
-                new_meme_link = upload_image_to_vk_server(attachment['content'])
+                new_meme_link = upload_image_to_vk_server(attachment.download_content())
 
         elif attachment['type'] == 'link':
             new_meme_link = attachment['url']
@@ -213,7 +213,7 @@ class Meme(Command):
                 msg = f'Мем с названием "{meme.name}" удалён поскольку он не ' \
                       f'соответствует правилам или был удалён автором.'
             if meme.author != self.event.sender:
-                self.bot.send_message(meme.author.user_id, msg)
+                self.bot.parse_and_send_msgs(meme.author.user_id, msg)
         else:
             meme = self.get_meme(self.event.message.args[1:], self.event.sender)
         meme_name = meme.name
@@ -249,7 +249,7 @@ class Meme(Command):
                 non_approved_meme.name = new_name
 
             user_msg = f'Мем с названием "{non_approved_meme.name}" подтверждён.'
-            self.bot.send_message(non_approved_meme.author.user_id, user_msg)
+            self.bot.parse_and_send_msgs(non_approved_meme.author.user_id, user_msg)
 
             msg = f'Мем "{non_approved_meme.name}" ({non_approved_meme.id}) подтверждён'
             non_approved_meme.approved = True
@@ -273,7 +273,7 @@ class Meme(Command):
         user_msg = f'Мем с названием "{non_approved_meme.name}" отклонён.'
         if reason:
             user_msg += f"\nПричина: {reason}"
-        self.bot.send_message(non_approved_meme.author.user_id, user_msg)
+        self.bot.parse_and_send_msgs(non_approved_meme.author.user_id, user_msg)
 
         msg = f'Мем "{non_approved_meme.name}" ({non_approved_meme.id}) отклонён'
         non_approved_meme.delete()
@@ -295,7 +295,7 @@ class Meme(Command):
         user_msg = f'Мем с названием "{renamed_meme.name}" переименован.\n' \
                    f'Новое название - "{new_name}"'
         if renamed_meme.author != self.event.sender:
-            self.bot.send_message(renamed_meme.author.user_id, user_msg)
+            self.bot.parse_and_send_msgs(renamed_meme.author.user_id, user_msg)
         renamed_meme.name = new_name
         renamed_meme.save()
         return user_msg
@@ -361,7 +361,7 @@ class Meme(Command):
                         memes = memes.filter(name__iregex=regex_filter)
                         flag_regex = True
                     else:
-                        memes = memes.filter(name__icontains=_filter)
+                        memes = memes.filter(name__unaccent=_filter)
 
         if filter_user:
             memes = memes.filter(author=filter_user)

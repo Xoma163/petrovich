@@ -11,7 +11,6 @@ class ResponseMessage:
 
 
 class ResponseMessageItem:
-
     def __init__(self, msg, peer_id):
         if isinstance(msg, str) or isinstance(msg, int) or isinstance(msg, float):
             msg = {'text': str(msg)}

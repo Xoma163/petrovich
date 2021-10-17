@@ -1,11 +1,9 @@
 import io
 from io import BytesIO
 
-import requests
 from PIL import Image
 
 from apps.bot.classes.Command import Command
-from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 from apps.bot.utils.Demotivator import DemotivatorBuilder
 from apps.bot.utils.utils import get_attachments_from_attachments_or_fwd
@@ -28,14 +26,8 @@ class Demotivator(Command):
         if not texts[0]:
             return "Первая фраза обязательно должна быть"
 
-        if 'content' in image:
-            base_image = Image.open(BytesIO(image['content']))
-        elif 'private_download_url' in image:
-            response = requests.get(image.get_download_url())
-            base_image = Image.open(BytesIO(response.content))
-        else:
-            raise PWarning("Нет картинки в сообщении")
-
+        content = image.download_content()
+        base_image = Image.open(BytesIO(content))
         db = DemotivatorBuilder(base_image, *texts)
         demotivator = db.get_demotivator()
         img_byte_arr = io.BytesIO()

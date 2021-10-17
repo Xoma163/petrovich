@@ -35,7 +35,7 @@ class Camera(Command):
                 document = camera_handler.get_gif(frames)
             except PError as e:
                 return str(e)
-            attachment = self.bot.upload_animation(document, self.event.peer_id, "Камера", filename="camera.gif", )
+            attachment = self.bot.upload_video(document, self.event.peer_id, "Камера", filename="camera.gif", )
             attachments.append(attachment)
         attachments.append('https://birds.andrewsha.net')
         if len(attachments) == 2 or self.event.platform == Platform.VK:
@@ -47,6 +47,6 @@ class Camera(Command):
                 'dont_parse_links': True
             }
         else:
-            self.bot.send_message(self.event.peer_id, attachments=[attachments[0]])
-            self.bot.send_message(self.event.peer_id, attachments=[attachments[1]])
+            self.bot.parse_and_send_msgs(self.event.peer_id, {'attachments': [attachments[0]]})
+            self.bot.parse_and_send_msgs(self.event.peer_id, {'attachments': [attachments[1]]})
             return None

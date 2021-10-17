@@ -9,5 +9,4 @@ class Diary(Command):
     suggest_for_similar = False
 
     def start(self):
-        url = 'https://diary.andrewsha.net/'
-        return {'text': url, 'attachments': [url]}
+        return 'https://diary.andrewsha.net/'

@@ -29,7 +29,7 @@ class Commands(Command):
         ]
 
         if self.event.message.args:
-            role = get_role_by_str(self.event.message.args_str.lower())
+            role = get_role_by_str(self.event.message.args_str)
             if not role:
                 raise PWarning("Не знаю такой роли")
             for ordered_role in ordered_roles:

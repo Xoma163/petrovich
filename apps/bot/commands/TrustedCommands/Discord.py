@@ -9,5 +9,4 @@ class Discord(Command):
     access = Role.TRUSTED
 
     def start(self):
-        url = 'https://discord.gg/kYGSNzv'
-        return {'text': url, 'attachments': [url]}
+        return 'https://discord.gg/kYGSNzv'

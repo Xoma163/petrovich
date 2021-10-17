@@ -31,8 +31,8 @@ class Command:
     city: bool = False  # Должно ли сообщение обрабатываться только с заданным городом у пользователя
 
     def __init__(self):
-        self.bot = None
-        self.event = None
+        self.bot: Bot = None
+        self.event: Event = None
 
         if not isinstance(self.platforms, list):
             self.platforms = [self.platforms]
@@ -239,7 +239,7 @@ class Command:
         Проверка на сообщение из ЛС
         :return: bool
         """
-        if self.event.is_from_user:
+        if self.event.is_from_pm:
             return True
 
         error = "Команда работает только в ЛС"

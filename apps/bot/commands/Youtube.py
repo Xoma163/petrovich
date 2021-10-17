@@ -27,7 +27,7 @@ class YouTube(Command):
     platforms = [Platform.VK, Platform.TG]
 
     def start(self):
-        arg0 = self.event.message.args[0].lower()
+        arg0 = self.event.message.args[0]
         menu = [
             [['добавить', 'подписаться', 'подписка'], self.menu_add],
             [['удалить', 'отписаться', 'отписка'], self.menu_delete],
@@ -45,7 +45,7 @@ class YouTube(Command):
             bsop = BeautifulSoup(response.content, 'html.parser')
             channel_id = bsop.find_all('link', {'rel': 'canonical'})[0].attrs['href'].split('/')[-1]
         except Exception:
-            return PWarning("Некорректная ссылка на ютуб канал")
+            raise PWarning("Некорректная ссылка на ютуб канал")
 
         if self.event.chat:
             existed_sub = YoutubeSubscribe.objects.filter(chat=self.event.chat,

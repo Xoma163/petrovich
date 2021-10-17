@@ -4,8 +4,7 @@ from apps.bot.classes.consts.Exceptions import PWarning
 
 
 class RzhunemoguAPI:
-    def __init__(self):
-        self.URL = "http://rzhunemogu.ru/RandJSON.aspx"
+    URL = "http://rzhunemogu.ru/RandJSON.aspx"
 
     def get_joke(self, _type=1):
         params = {

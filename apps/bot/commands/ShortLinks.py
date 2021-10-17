@@ -1,3 +1,4 @@
+from apps.bot.APIs.BitLyAPI import BitLyAPI
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Exceptions import PWarning
 
@@ -19,7 +20,8 @@ class ShortLinks(Command):
         else:
             long_link = self.event.message.args[0]
         try:
-            short_link = self.bot.get_short_link(long_link)
-        except Exception:
+            bl_api = BitLyAPI()
+            return bl_api.get_short_link(long_link)
+        except Exception as e:
             raise PWarning("Неверный формат ссылки")
         return short_link

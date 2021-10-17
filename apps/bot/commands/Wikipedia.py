@@ -22,7 +22,7 @@ class Wikipedia(Command):
         self.bot.set_activity(self.event.peer_id, ActivitiesEnum.TYPING)
 
         is_random = False
-        if self.event.message.args[0].lower() in ["рандом", "р"]:
+        if self.event.message.args[0] in ["рандом", "р"]:
             is_random = True
             search_query = wikipedia.random()
         else:

@@ -23,7 +23,6 @@ class Calc(Command):
             self.check_args(1)
             expression = self.event.message.args_str
         expression = expression \
-            .lower() \
             .replace(' ', '') \
             .replace(',', '.')
         expression = self.replace_consts(expression) \

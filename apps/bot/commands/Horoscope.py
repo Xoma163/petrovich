@@ -59,7 +59,7 @@ class Horoscope(Command):
             elif self.event.message.args[0] in "инфо":
                 self.check_args(2)
                 try:
-                    zodiac_sign_name = self.event.message.args[1].lower()
+                    zodiac_sign_name = self.event.message.args[1]
                     zodiac_sign = self.zodiac_signs.get_zodiac_sign_by_sign_or_name(zodiac_sign_name)
                     zodiac_sign_index = self.zodiac_signs.get_zodiac_sign_index(zodiac_sign)
                 except Exception:
@@ -79,7 +79,7 @@ class Horoscope(Command):
                     messages.append(self.get_horoscope_by_zodiac_sign(zodiac_sign))
                 return messages
             # Гороскоп для знака зодиака в аргументах
-            zodiac_sign_name = self.event.message.args[0].lower()
+            zodiac_sign_name = self.event.message.args[0]
             zodiac_sign = self.zodiac_signs.get_zodiac_sign_by_sign_or_name(zodiac_sign_name)
             return self.get_horoscope_by_zodiac_sign(zodiac_sign)
 

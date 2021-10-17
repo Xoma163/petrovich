@@ -3,9 +3,10 @@ from bs4 import BeautifulSoup, NavigableString
 
 
 class BashAPI:
+    URL = 'http://bash.im/random'
+
     def __init__(self, count):
         self.count = count
-        self.URL = 'http://bash.im/random'
 
     def parse(self):
         r = requests.get(self.URL)

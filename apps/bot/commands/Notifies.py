@@ -51,8 +51,7 @@ class Notifies(Command):
         if not self.event.message.args:
             return self.menu_notifications()
         else:
-            arg0 = self.event.message.args[0].lower()
-
+            arg0 = self.event.message.args[0]
             menu = [
                 [["удалить", "удали"], self.menu_delete],
                 [["конфа", "беседе", "конфы", "беседы"], self.menu_conference],

@@ -20,7 +20,7 @@ class Statistics(Command):
         if not self.event.message.args:
             return self.menu_all()
         else:
-            arg0 = self.event.message.args[0].lower()
+            arg0 = self.event.message.args[0]
             menu = [
                 [['петрович'], self.menu_petrovich],
                 [['ставки'], self.menu_rates],
@@ -75,5 +75,5 @@ class Statistics(Command):
         ]
         msg = ""
         for val in methods:
-            msg += f"{val()}\n\n"
+            msg += f"{val()}\n"
         return msg

@@ -1,6 +1,7 @@
 import copy
 import re
 
+
 class Message:
     COMMAND_SYMBOLS = ['/', '!']
 
@@ -12,6 +13,8 @@ class Message:
         command - команда
         args_str - аргументы строкой
         args - аргументы списком
+        args_case_str - аргументы с учётом регистра строкой
+        args_case - аргументы с учётом регистра списком
         """
         self.has_command_symbols = False
 
@@ -22,32 +25,38 @@ class Message:
         if self.raw[0] in self.COMMAND_SYMBOLS:
             self.has_command_symbols = True
             raw_str = raw_str[1:]
-        self.clear = self.get_cleared_message(raw_str)
-        msg_split = self.clear.split(' ', 1)
 
-        self.command = msg_split[0].lower()
+        cleared_with_case = self.get_cleared_message(raw_str)
+        self.clear = cleared_with_case.lower()
+        msg_split = self.clear.split(' ', 1)
+        msg_case_split = cleared_with_case.split(' ', 1)
+        self.command = msg_split[0]
         self.args_str = None
         self.args = None
+        self.args_case_str = None
+        self.args_case = None
         if len(msg_split) > 1:
             self.args_str = msg_split[1]
             self.args = self.args_str.split(' ')
+            self.args_case_str = msg_case_split[1]
+            self.args_case = self.args_case_str.split(' ')
 
         self.id = _id
 
     @staticmethod
     def get_cleared_message(msg):
-        clear_msg = msg.lower()
-        clear_msg = clear_msg.replace(',', ' ')
+        clear_msg = msg.replace(',', ' ')
         clear_msg = re.sub(" +", " ", clear_msg)
         clear_msg = clear_msg.strip().strip(',').strip().strip(' ').strip()
-        clear_msg = clear_msg.replace('ё', 'е')
+        clear_msg = clear_msg.replace('ё', 'е').replace("Ё", 'Е')
         return clear_msg
 
     def parse_from_payload(self, payload):
         self.command = payload.get('command')
         self.args = payload.get('args')
-        self.args_str = " ".join(self.args)
-        if self.args_str:
+        if self.args:
+            args = [str(x) for x in self.args]
+            self.args_str = " ".join(args)
             self.raw = f"{self.command} {self.args_str}"
         else:
             self.raw = self.command

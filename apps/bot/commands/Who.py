@@ -17,7 +17,7 @@ class Who(Command):
     platforms = [Platform.VK, Platform.TG]
 
     def start(self):
-        arg = self.event.message.args_str.lower()
+        arg = self.event.message.args_str
         role = get_role_by_str(arg)
         if arg in ['админ конфы', 'админ беседы', 'админ конференции', 'админ чата', 'администратор конфы',
                    'администратор беседы', 'администратор конференции', 'администратор чата']:

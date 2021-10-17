@@ -9,5 +9,4 @@ class Git(Command):
     access = Role.TRUSTED
 
     def start(self):
-        url = 'https://github.com/Xoma163/petrovich/'
-        return {'text': url, 'attachments': [url]}
+        return 'https://github.com/Xoma163/petrovich/'

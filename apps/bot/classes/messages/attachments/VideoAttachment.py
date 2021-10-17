@@ -4,7 +4,7 @@ from apps.bot.classes.messages.attachments.Attachment import Attachment
 class VideoAttachment(Attachment):
 
     def __init__(self):
-        super().__init__()
+        super().__init__('video')
         self.duration = None  # sec
 
     def parse_vk_video(self, event_video):

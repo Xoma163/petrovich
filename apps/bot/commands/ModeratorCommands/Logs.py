@@ -81,7 +81,7 @@ class Logs(Command):
     def start(self):
         arg0 = None
         if self.event.message.args:
-            arg0 = self.event.message.args[0].lower()
+            arg0 = self.event.message.args[0]
         menu = [
             [['веб', 'web', 'сайт', 'site'], self.get_web_logs],
             [['бот', 'bot'], self.get_bot_logs],

@@ -6,9 +6,6 @@ from petrovich.settings import env
 class GoogleCustomSearchAPI:
     URL = "https://customsearch.googleapis.com/customsearch/v1?"
 
-    def __init__(self):
-        pass
-
     def get_images_urls(self, query):
         querystring = {
             "key": env.str("GOOGLE_CUSTOM_SEARCH_API_KEY"),

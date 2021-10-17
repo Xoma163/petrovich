@@ -3,9 +3,10 @@ from bs4 import BeautifulSoup
 
 
 class CBRAPI:
+    URL = "https://www.cbr-xml-daily.ru/daily.xml"
+
     def __init__(self, filters_list):
         self.filters = {x: {'name': None, 'value': 0} for x in filters_list}
-        self.URL = "https://www.cbr-xml-daily.ru/daily.xml"
 
     def do(self):
         response = requests.get(self.URL, stream=True)

@@ -4,9 +4,8 @@ from petrovich.settings import env
 
 
 class YandexGeoAPI:
-    def __init__(self):
-        self.url = "https://geocode-maps.yandex.ru/1.x/"
-        self.API_KEY = env.str("YANDEX_GEO_TOKEN")
+    url = "https://geocode-maps.yandex.ru/1.x/"
+    API_KEY = env.str("YANDEX_GEO_TOKEN")
 
     def get_address(self, lat, lon):
         params = {

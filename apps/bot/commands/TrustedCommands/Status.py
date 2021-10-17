@@ -17,7 +17,7 @@ class Status(Command):
         for server in minecraft_servers:
             server.get_server_info()
             result = server.get_server_info_str()
-            minecraft_result += f"{result}\n"
+            minecraft_result += f"{result}\n\n"
 
         terraria_result = ""
         for server in terraria_servers:

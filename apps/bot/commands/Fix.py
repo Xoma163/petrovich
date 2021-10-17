@@ -36,9 +36,9 @@ class Fix(Command):
             msgs = fix_layout(self.event.message.args_str)
         else:
             msgs = ""
-            for msg in self.event.fwd:
-                if msg['text']:
-                    msgs += f"{fix_layout(msg['text'])}"
+            for fwd in self.event.fwd:
+                if fwd.message and fwd.message.clear:
+                    msgs += f"{fix_layout(fwd.message.clear)}"
             if not msgs:
                 raise PWarning("Нет текста в сообщении или пересланных сообщениях")
         return msgs

@@ -21,10 +21,10 @@ class YesNo(Command):
 
     def start(self):
         clear = replace_similar_letters(self.event.message.clear)
-        if clear.lower() in ['идиот?', 'ты идиот?']:
+        if clear in ['идиот?', 'ты идиот?']:
             return "Мне потанцевать нельзя?"
-        elif clear.lower() in ['да?']:
-            return {'attachments': 'video162408856_456239566'}
+        elif clear in ['да?']:
+            return "https://youtu.be/ePddSQQl2kc"
 
         bad_words = get_bad_words()
 

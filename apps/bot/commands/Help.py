@@ -15,7 +15,7 @@ class Help(Command):
 
     def start(self):
         if self.event.message.args:
-            command = find_command_by_name(self.event.message.args[0].lower())
+            command = find_command_by_name(self.event.message.args[0])
             self.check_sender(command.access)
             return get_help_texts_for_command(command)
         text = "/помощь (название команды) - помощь по конкретной команде\n" \

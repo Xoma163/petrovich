@@ -88,7 +88,7 @@ class Roulette(Command):
         self.gamer = self.bot.get_gamer_by_user(self.event.sender)
         if not self.event.message.args:
             return self.menu_play()
-        arg0 = self.event.message.args[0].lower()
+        arg0 = self.event.message.args[0]
 
         menu = [
             [['баланс'], self.menu_balance],
@@ -201,12 +201,12 @@ class Roulette(Command):
         return msg
 
     def menu_rate_on(self):
-        rate_on = self.event.message.args[0].lower()
+        rate_on = self.event.message.args[0]
         # rate_is_int = str_is_int(rate_on)
         if rate_on in TRANSLATOR:  # or rate_is_int:
             self.args = 2
             self.check_args()
-            if self.event.message.args[-1].lower() == 'все':
+            if self.event.message.args[-1] == 'все':
                 rate = self.gamer.roulette_points
             else:
                 self.int_args = [-1]

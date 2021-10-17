@@ -20,8 +20,8 @@ class Translate(Command):
         else:
             text = ""
             for msg in fwd:
-                if msg['text']:
-                    text += f"{msg['text']}\n"
+                if msg.message:
+                    text += f"{msg.message.raw}\n"
 
         if not text:
             raise PWarning("Нет текста в сообщении или пересланных сообщениях")

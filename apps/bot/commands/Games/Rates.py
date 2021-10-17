@@ -30,8 +30,8 @@ class Rates(Command):
             gamers = RateModel.objects.filter(chat=self.event.chat).order_by("date")
             if self.event.message.args and self.event.message.args[0] == 'f':
                 self.check_sender(Role.CONFERENCE_ADMIN)
-                if len(gamers) <= 1:
-                    raise PWarning("Ну ты ваще обалдел? Хотя бы один игрок-то пусть будет")
+                if len(gamers) < 2:
+                    raise PWarning("Ну ты ваще обалдел? Хотя бы два игрока-то пусть будет")
             else:
                 if len(gamers) < min_gamers:
                     raise PWarning(f"Минимальное количество игроков - {min_gamers}")

@@ -11,20 +11,21 @@ from petrovich.settings import env
 
 
 class YandexWeatherAPI:
+    URL = "https://api.weather.yandex.ru/v1/informers"
+    TOKEN = env.str("YANDEX_WEATHER_TOKEN")
+    HEADERS = {'X-Yandex-API-Key': TOKEN}
+
     def __init__(self, city):
-        self.url = "https://api.weather.yandex.ru/v1/informers"
         self.city = city
 
     def send_weather_request(self):
-        token = env.str("YANDEX_WEATHER_TOKEN")
 
         params = {
             'lat': self.city.lat,
             'lon': self.city.lon,
             'lang': 'ru_RU'
         }
-        headers = {'X-Yandex-API-Key': token}
-        response = requests.get(self.url, params, headers=headers).json()
+        response = requests.get(self.URL, params, headers=self.HEADERS).json()
         if 'status' in response:
             if response['status'] == 403:
                 raise PWarning("На сегодня я исчерпал все запросы к Yandex Weather :(")

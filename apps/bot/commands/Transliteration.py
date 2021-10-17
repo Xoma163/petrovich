@@ -21,14 +21,11 @@ class Transliteration(Command):
     args_or_fwd = 1
 
     def start(self):
-        msgs = self.event.fwd
+        msgs = [x.message.raw for x in self.event.fwd if x.message]
         if not msgs:
-            msgs = [{'text': self.event.message.args_str, 'from_id': int(self.event.sender.user_id)}]
-        translite_text = ""
-        for msg in msgs:
-            if msg['text']:
-                text = msg['text']
-                translite_text += f"{text}\n\n"
+            msgs = [self.event.message.args_str]
+
+        translite_text = "\n\n".join(msgs)
 
         if not translite_text:
             raise PWarning("Нет текста в сообщении или пересланных сообщениях")

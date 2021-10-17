@@ -4,12 +4,14 @@ from threading import Thread
 
 from django.contrib.auth.models import Group
 
+from apps.bot.classes.consts.ActivitiesEnum import ActivitiesEnum
 from apps.bot.classes.consts.Consts import Platform, Role
 from apps.bot.classes.consts.Exceptions import PWarning, PError, PSkip
 from apps.bot.classes.events.Event import Event
 from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
 from apps.bot.classes.messages.attachments.DocumentAttachment import DocumentAttachment
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
+from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
 from apps.bot.models import Users, Chat, Bot as BotModel
 from apps.bot.utils.utils import tanimoto
 from apps.games.models import Gamer
@@ -287,7 +289,25 @@ class Bot(Thread):
         da.parse_response(document, filename=filename)
         return da
 
+    @staticmethod
+    def upload_video(document, peer_id=None, title='Документ', filename=None):
+        """
+        Загрузка гифки
+        """
+        va = VideoAttachment()
+        va.parse_response(document, filename=filename)
+        return va
+
     # END ATTACHMENTS
+
+    def set_activity(self, peer_id, activity: ActivitiesEnum):
+        pass
+
+    def get_inline_keyboard(self, buttons: list, cols=1):
+        pass
+
+    def get_mention(self, user, name=None):
+        pass
 
 
 def get_bot_by_platform(platform: Platform):

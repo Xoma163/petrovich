@@ -4,7 +4,7 @@ from apps.bot.classes.messages.attachments.Attachment import Attachment
 class AudioAttachment(Attachment):
 
     def __init__(self):
-        super().__init__()
+        super().__init__('audio')
         self.duration = None
 
     def parse_vk_audio(self, event_audio):

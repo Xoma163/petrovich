@@ -56,7 +56,7 @@ class Weather(Command):
             # Если погода не ясная или не облачная
             clear_weather_statuses = ['clear', 'partly-cloudy', 'cloudy', 'overcast']
             if today_part['condition'] not in clear_weather_statuses:
-                weather_today_str = WEATHER_TRANSLATOR[today_part['condition']].lower()
+                weather_today_str = WEATHER_TRANSLATOR[today_part['condition']]
                 difference_for_part += f"Ожидается {weather_today_str}\n"
 
             if part in parts_yesterday:

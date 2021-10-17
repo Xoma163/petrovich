@@ -4,7 +4,7 @@ from apps.bot.classes.messages.attachments.Attachment import Attachment
 class StickerAttachment(Attachment):
 
     def __init__(self):
-        super().__init__()
+        super().__init__('sticker')
         self.width = None
         self.height = None
 

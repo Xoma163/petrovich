@@ -21,13 +21,13 @@ class ExchangeRates(Command):
             self.check_args(1)
             if len(self.event.message.args) == 1:
                 value = 1
-                currency = self.event.message.args[0].lower()
+                currency = self.event.message.args[0]
             else:
                 self.float_args = [0]
                 self.parse_float()
 
                 value = self.event.message.args[0]
-                currency = self.event.message.args[1].lower()
+                currency = self.event.message.args[1]
             if any(ext in currency for ext in ['rub', "руб"]):
                 msg = "Перевод в другие валюты:\n"
                 for ex_rate in ex_rates:

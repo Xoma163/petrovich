@@ -7,6 +7,5 @@ class Documentation(Command):
     help_text = "ссылка на документацию"
 
     def start(self):
-        # url = 'https://vk.com/@igor_petrovich_ksta-instrukciya-po-ispolzovaniu'
         url = 'https://github.com/Xoma163/petrovich/wiki/1.1-Документация-для-пользователей'
         return {'text': url, 'attachments': [url]}

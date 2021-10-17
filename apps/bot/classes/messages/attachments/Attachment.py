@@ -11,7 +11,8 @@ from apps.bot.classes.consts.Exceptions import PWarning
 
 class Attachment:
 
-    def __init__(self):
+    def __init__(self, _type):
+        self.type = _type
         # Публичная ссылка для скачивания файла
         self.public_download_url = None
         # Приватная ссылка для скачивания файла

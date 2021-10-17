@@ -15,15 +15,11 @@ class Uyu(Command):
         if self.event.message.args_str:
             add_word = self.event.message.args_str
 
-        msgs = self.event.fwd
-        if msgs is None:
+        msgs = [x.message.raw for x in self.event.fwd if x.message]
+        if not msgs:
             return add_word
-        new_msg = ""
-        for msg in msgs:
-            if msg['text']:
-                new_msg += msg['text'] + "\n"
+        new_msg = "\n\n".join(msgs).strip()
 
-        new_msg = new_msg.strip()
         if not new_msg:
             raise PWarning("Нет текста в сообщении или пересланных сообщениях")
 

@@ -21,7 +21,7 @@ class Settings(Command):
 
     def start(self):
         if self.event.message.args:
-            arg0 = self.event.message.args[0].lower()
+            arg0 = self.event.message.args[0]
         else:
             arg0 = None
 
