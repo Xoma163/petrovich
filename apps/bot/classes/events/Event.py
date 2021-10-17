@@ -19,8 +19,6 @@ class Event:
         self.is_from_bot: bool = False
         self.is_from_chat: bool = False
 
-        self.is_mentioned: bool = False
-
         self.sender: Users = None
         self.chat: Chat = None
         self.peer_id: int = None
@@ -91,6 +89,9 @@ class Event:
             if isinstance(att, VoiceAttachment):
                 return True
         return False
+
+    def set_message(self, text, _id=None):
+        self.message = Message(text, _id) if text else None
 
     def to_log(self) -> dict:
         dict_self = copy.copy(self.__dict__)

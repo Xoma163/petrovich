@@ -1,5 +1,11 @@
 from enum import Enum
 
+from apps.bot.classes.messages.attachments.AudioAttachment import AudioAttachment
+from apps.bot.classes.messages.attachments.DocumentAttachment import DocumentAttachment
+from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
+from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
+from apps.bot.classes.messages.attachments.VoiceAttachment import VoiceAttachment
+
 
 class Role(Enum):
     ADMIN = "администратор"
@@ -116,11 +122,11 @@ DAY_TRANSLATOR = {
 }
 
 ATTACHMENT_TRANSLATOR = {
-    'audio': 'аудио',
-    'video': 'видео',
-    'photo': 'фото',
-    'doc': 'документ',
-    'audio_message': 'голосовое'
+    AudioAttachment: 'аудио',
+    VideoAttachment: 'видео',
+    PhotoAttachment: 'фото',
+    DocumentAttachment: 'документ',
+    VoiceAttachment: 'голосовое'
 }
 
 BAD_ANSWERS = [

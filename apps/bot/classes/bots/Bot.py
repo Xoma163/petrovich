@@ -8,7 +8,7 @@ from apps.bot.classes.consts.Consts import Platform, Role
 from apps.bot.classes.consts.Exceptions import PWarning, PError, PSkip
 from apps.bot.classes.events.Event import Event
 from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
-from apps.bot.models import Users, Chat, Bot as BotModel, Bot
+from apps.bot.models import Users, Chat, Bot as BotModel
 from apps.bot.utils.utils import tanimoto
 from apps.games.models import Gamer
 
@@ -52,18 +52,6 @@ class Bot(Thread):
             print(str(e))
             tb = traceback.format_exc()
             print(tb)
-
-    def send_response_message(self, rm: ResponseMessage):
-        """
-        Отправка ResponseMessage сообщения
-        """
-        for msg in rm.messages:
-            response = self.send_message(msg)
-            if response.status_code != 200:
-                error_msg = "Непредвиденная ошибка. Сообщите разработчику. Команда /баг"
-                error_rm = ResponseMessage(error_msg, msg.peer_id).messages[0]
-                self.logger.error({'result': error_msg, 'error': response.json()['description']})
-                self.send_message(error_rm)
 
     def parse_and_send_msgs(self, peer_id: int, msgs, send=True) -> ResponseMessage:
         """
@@ -209,7 +197,7 @@ class Bot(Thread):
         )
         return tg_chat
 
-    def get_bot_by_id(self, bot_id: int) -> Bot:
+    def get_bot_by_id(self, bot_id: int) -> BotModel:
         """
         Возвращает бота по его id
         """
@@ -247,6 +235,12 @@ class Bot(Thread):
         if chat in chats.all():
             chats.remove(chat)
 
+    def send_response_message(self, rm: ResponseMessage):
+        """
+        Отправка ResponseMessage сообщения
+        """
+        raise NotImplementedError
+
     def send_message(self, rm: ResponseMessageItem):
         """
         Отправка сообщения
@@ -258,12 +252,12 @@ def get_bot_by_platform(platform: Platform):
     """
     Получение бота по платформе
     """
-    # from apps.bot.classes.bots.VkBot import VkBot
+    from apps.bot.classes.bots.VkBot import VkBot
     from apps.bot.classes.bots.TgBot import TgBot
     # from apps.bot.classes.bots.YandexBot import YandexBot
 
     platforms = {
-        # Platform.VK: VkBot,
+        Platform.VK: VkBot,
         Platform.TG: TgBot,
         # Platform.YANDEX: YandexBot
     }
@@ -275,8 +269,7 @@ def get_moderator_bot_class():
     return TgBot()
 
 
+# ToDo: check
 def upload_image_to_vk_server(image):
-    pass
-    # ToDo
-    # vk_bot = VkBot()
-    # return vk_bot.upload_photo_and_get_absolute_url(image)
+    vk_bot = get_bot_by_platform(Platform.VK)
+    return vk_bot.upload_photo_and_get_absolute_url(image)

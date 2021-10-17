@@ -60,10 +60,9 @@ class Age(Command):
     attachments = [PhotoAttachment]
 
     def start(self):
-        image = get_attachments_from_attachments_or_fwd(self.event, 'photo')[0]
+        image = get_attachments_from_attachments_or_fwd(self.event, PhotoAttachment)[0]
         everypixel_api = EveryPixelAPI()
-        image = image['private_download_url'] or image['content']
-        faces = everypixel_api.get_faces_on_photo(image)
+        faces = everypixel_api.get_faces_on_photo(image.get_download_url())
 
         if len(faces) == 0:
             raise PWarning("Не нашёл лиц на фото")

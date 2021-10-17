@@ -5,6 +5,7 @@ from apps.bot.APIs.YandexGeoAPI import YandexGeoAPI
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 from apps.bot.utils.utils import get_attachments_from_attachments_or_fwd
 from apps.service.models import City, TimeZone
 
@@ -103,9 +104,9 @@ class Profile(Command):
         return f"Изменил пол на {self.event.sender.get_gender_display()}"
 
     def menu_avatar(self):
-        images = get_attachments_from_attachments_or_fwd(self.event, 'photo')
+        images = get_attachments_from_attachments_or_fwd(self.event, [PhotoAttachment])
         if len(images) > 0:
-            self.event.sender.set_avatar(images[0]['private_download_url'])
+            self.event.sender.set_avatar(images[0].get_download_url())
         else:
             if self.event.platform != Platform.VK:
                 raise PWarning("Обновление аватара по пользователю доступно только для ВК")

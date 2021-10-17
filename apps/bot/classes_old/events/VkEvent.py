@@ -48,8 +48,7 @@ class VkEvent(Event):
                 if 'id' in attachment_type:
                     new_attachment['id'] = attachment_type['id']
                 if attachment['type'] in ['photo', 'video', 'audio', 'doc']:
-                    new_attachment[
-                        'vk_url'] = f"{attachment['type']}{attachment_type['owner_id']}_{attachment_type['id']}"
+                    new_attachment['vk_url'] = f"{attachment['type']}{attachment_type['owner_id']}_{attachment_type['id']}"
                     new_attachment['url'] = f"{VK_URL}{new_attachment['vk_url']}"
                 if attachment['type'] == 'photo':
                     max_size_image = self.get_max_size_image(attachment_type)

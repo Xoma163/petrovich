@@ -14,9 +14,8 @@ class EstimatePhoto(Command):
     attachments = [PhotoAttachment]
 
     def start(self):
-        image = get_attachments_from_attachments_or_fwd(self.event, 'photo')[0]
+        image = get_attachments_from_attachments_or_fwd(self.event, PhotoAttachment)[0]
 
         everypixel_api = EveryPixelAPI()
-        image = image['private_download_url'] or image['content']
-        image_quality = everypixel_api.get_image_quality(image)
+        image_quality = everypixel_api.get_image_quality(image.get_download_url())
         return f"Качество картинки - {image_quality}"

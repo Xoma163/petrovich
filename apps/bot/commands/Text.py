@@ -19,6 +19,6 @@ class Text(Command):
             lang = self.event.message.args[0]
 
         ocr_api = OCRApi()
-        image = get_attachments_from_attachments_or_fwd(self.event, 'photo')[0]
-        image = image['private_download_url'] or image['content']
+        image = get_attachments_from_attachments_or_fwd(self.event, [PhotoAttachment])[0]
+        image = image.get_download_url()
         return ocr_api.recognize(image, lang)

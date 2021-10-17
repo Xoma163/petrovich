@@ -22,7 +22,7 @@ class Demotivator(Command):
     attachments = [PhotoAttachment]
 
     def start(self):
-        image = get_attachments_from_attachments_or_fwd(self.event, 'photo')[0]
+        image = get_attachments_from_attachments_or_fwd(self.event, PhotoAttachment)[0]
 
         texts = list(map(str.strip, self.event.message.args_str.split(';')))
         if not texts[0]:
@@ -31,7 +31,7 @@ class Demotivator(Command):
         if 'content' in image:
             base_image = Image.open(BytesIO(image['content']))
         elif 'private_download_url' in image:
-            response = requests.get(image['private_download_url'])
+            response = requests.get(image.get_download_url())
             base_image = Image.open(BytesIO(response.content))
         else:
             raise PWarning("Нет картинки в сообщении")

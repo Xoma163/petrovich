@@ -1,14 +1,14 @@
 from io import BytesIO
 
 from apps.bot.classes.Command import Command
-# Design by M.Marchukov and M.Marchukova
-# https://www.figma.com/file/yOqhSHOtYX76GcEJ3yB4oH/Bot?node-id=33%3A15
 from apps.bot.classes.consts.ActivitiesEnum import ActivitiesEnum
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 from apps.bot.utils.QuotesGenerator import QuotesGenerator
 
 
+# Design by M.Marchukov and M.Marchukova
+# https://www.figma.com/file/yOqhSHOtYX76GcEJ3yB4oH/Bot?node-id=33%3A15
 class Quote(Command):
     name = "цитата"
     names = ["(c)", "(с)"]
@@ -36,7 +36,8 @@ class Quote(Command):
         msgs = []
         next_append = False
         for msg in fwd_messages:
-            message = {'text':msg.message.raw.replace('\n', '▲ ▲') if isinstance(msg.message.raw, str) else msg['text']}
+            message = {'text': msg.message.raw.replace('\n', '▲ ▲') if isinstance(msg.message.raw, str) else msg[
+                'text']}
 
             if msg.peer_id > 0:
                 quote_user = self.bot.get_user_by_id(msg.sender.user_id)

@@ -15,3 +15,9 @@ class PhotoAttachment(Attachment):
 
         file_id = event_photo['file_id']
         self.set_private_download_url_tg(tg_bot, file_id)
+
+    def parse_vk_photo(self, event_photo):
+        max_size_photo = sorted(event_photo['sizes'], key=lambda x: x['height'])[-1]
+        self.width = max_size_photo['width']
+        self.height = max_size_photo['height']
+        self.public_download_url = max_size_photo['url']

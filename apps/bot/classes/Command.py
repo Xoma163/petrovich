@@ -289,9 +289,9 @@ class Command:
             for att in self.event.attachments:
                 if type(att) in self.attachments:
                     return True
-        if self.event.fwd and self.event.fwd[0]['attachments']:
-            for att in self.event.fwd[0]['attachments']:
-                if att['type'] in self.attachments:
+        if self.event.fwd and self.event.fwd[0].attachments:
+            for att in self.event.fwd[0].attachments:
+                if type(att) in self.attachments:
                     return True
 
         allowed_types = ' '.join([ATTACHMENT_TRANSLATOR[_type] for _type in self.attachments])

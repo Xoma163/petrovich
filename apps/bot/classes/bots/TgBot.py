@@ -3,17 +3,15 @@ import threading
 import time
 
 import requests
-from django.contrib.auth.models import Group
 
 from apps.bot.classes.bots.Bot import Bot as CommonBot
 from apps.bot.classes.consts.ActivitiesEnum import ActivitiesEnum, TG_ACTIVITIES
-from apps.bot.classes.consts.Consts import Platform, Role
+from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.events.TgEvent import TgEvent
-from apps.bot.classes.messages.ResponseMessage import ResponseMessageItem
+from apps.bot.classes.messages.ResponseMessage import ResponseMessageItem, ResponseMessage
 from apps.bot.classes.messages.attachments.DocumentAttachment import DocumentAttachment
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
-from apps.bot.models import Users, Chat, Bot
 from apps.bot.utils.utils import get_thumbnail_for_image, get_chunks
 from petrovich.settings import env
 
@@ -74,6 +72,18 @@ class TgBot(CommonBot):
             return self.requests.get('sendVideo', default_params)
         else:
             return self.requests.get('sendVideo', default_params, files={'video': video.content})
+
+    def send_response_message(self, rm: ResponseMessage):
+        """
+        Отправка ResponseMessage сообщения
+        """
+        for msg in rm.messages:
+            response = self.send_message(msg)
+            if response.status_code != 200:
+                error_msg = "Непредвиденная ошибка. Сообщите разработчику. Команда /баг"
+                error_rm = ResponseMessage(error_msg, msg.peer_id).messages[0]
+                self.logger.error({'result': error_msg, 'error': response.json()['description']})
+                self.send_message(error_rm)
 
     def send_message(self, rm: ResponseMessageItem, **kwargs):
         """

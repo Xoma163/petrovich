@@ -7,6 +7,9 @@ from apps.bot.classes.consts.Exceptions import PSkip, PWarning, PError
 from apps.bot.utils.utils import get_attachments_from_attachments_or_fwd, tanimoto
 from apps.service.models import Meme as MemeModel
 from petrovich.settings import VK_URL
+from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
+from apps.bot.classes.messages.attachments.AudioAttachment import AudioAttachment
+from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
 
 
 def check_name_exists(name):
@@ -76,7 +79,7 @@ class Meme(Command):
 
     def menu_add(self):
         self.check_args(2)
-        attachments = get_attachments_from_attachments_or_fwd(self.event, ['audio', 'video', 'photo'])
+        attachments = get_attachments_from_attachments_or_fwd(self.event, [AudioAttachment, VideoAttachment, PhotoAttachment])
         if len(attachments) == 0:
             url = self.event.message.args_str.split(' ')[1]
             self._check_allowed_url(url)
@@ -145,7 +148,7 @@ class Meme(Command):
                 pass
         meme_name = " ".join(self.event.message.args[1:]).lower()
 
-        attachments = get_attachments_from_attachments_or_fwd(self.event, ['audio', 'video', 'photo'])
+        attachments = get_attachments_from_attachments_or_fwd(self.event, [AudioAttachment, VideoAttachment, PhotoAttachment])
         if len(attachments) == 0:
             if len(self.event.message.args) > 2:
                 url = self.event.message.args[-1]

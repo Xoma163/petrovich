@@ -12,9 +12,15 @@ from apps.bot.classes.consts.Exceptions import PWarning
 class Attachment:
 
     def __init__(self):
+        # Публичная ссылка для скачивания файла
         self.public_download_url = None
+        # Приватная ссылка для скачивания файла
         self.private_download_url = None
+        # vk/youtube links
+        self.url = None
+        # bytes
         self.content = None
+        # len(bytes)
         self.size = None
 
     def set_private_download_url_tg(self, tg_bot, file_id):

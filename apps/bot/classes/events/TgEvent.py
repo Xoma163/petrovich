@@ -98,9 +98,6 @@ class TgEvent(Event):
             message_text = message.get('text')
         self.set_message(message_text, message.get('message_id'))
 
-    def set_message(self, text, _id=None):
-        self.message = Message(text, _id) if text else None
-
     def setup_fwd(self, fwd):
         if fwd:
             fwd_event = TgEvent(fwd, self.bot)

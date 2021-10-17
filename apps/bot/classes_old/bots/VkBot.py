@@ -394,18 +394,6 @@ class VkBot(CommonBot):
         vk_document = self.upload.document_message(document, title=title, peer_id=peer_id)['doc']
         return self.get_attachment_by_id('doc', vk_document['owner_id'], vk_document['id'])
 
-    def upload_audio(self, audio, artist, title):
-        """
-        Загрузка аудиофайла на сервер ВК.
-        """
-        audio = self._prepare_obj_to_upload(audio)
-        try:
-            vk_audio = self.vk_user.upload.audio(audio, artist=artist, title=title)
-        except vk_api.exceptions.ApiError as e:
-            if e.code == 270:
-                raise PWarning("Аудиозапись была удалена по просьбе правообладателя")
-            raise PError("Ошибка загрузки аудиозаписи")
-        return self.get_attachment_by_id('audio', vk_audio['owner_id'], vk_audio['id'])
 
     @staticmethod
     def get_inline_keyboard(buttons: list, cols=1):
@@ -453,20 +441,6 @@ class VkBot(CommonBot):
         name = name or str(user)
         return f"[id{user.user_id}|{name}]"
 
-    def upload_video_by_link(self, link, name):
-        """
-        Загрузка видео по ссылке со стороннего ресурса
-        """
-        values = {
-            'name': name,
-            'is_private': False,
-            'link': link,
-        }
-
-        response = self.vk_user.vk.video.save(**values)
-        requests.post(response['upload_url'])
-        return f"video{response['owner_id']}_{response['video_id']}"
-
     def get_attachment_by_id(self, _type, group_id, _id):
         """
         Получение ссылки для вложения
@@ -475,11 +449,6 @@ class VkBot(CommonBot):
             group_id = f'-{self.group_id}'
         return f"{_type}{group_id}_{_id}"
 
-    def get_video(self, owner_id, _id):
-        """
-        Получение данных о видео
-        """
-        return self.vk_user.vk.video.get(videos=f'{owner_id}_{_id}')
 
     def set_chat_title(self, chat_id, title):
         """
