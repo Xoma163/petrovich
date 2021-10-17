@@ -85,10 +85,6 @@ class Event:
         if message_is_media_link:
             return True
 
-        is_e = self.message.raw = 'ё'
-        if is_e:
-            return True
-
         return False
 
     @property
