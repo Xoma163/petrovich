@@ -76,10 +76,10 @@ class BullsAndCows(Command):
                 correct_number_str = str(session.number)
                 # Добиваем нулями если число начинается с нулей
                 correct_number_str = "0" * (DIGITS_IN_GAME - len(correct_number_str)) + correct_number_str
-                for i in range(len(arg0)):
-                    if arg0[i] == correct_number_str[i]:
+                for i, argi in enumerate(arg0):
+                    if argi == correct_number_str[i]:
                         bulls += 1
-                    elif arg0[i] in correct_number_str:
+                    elif argi in correct_number_str:
                         cows += 1
                 session.steps += 1
                 session.save()
