@@ -1,15 +1,15 @@
 from threading import Lock
 
-from apps.bot.classes.Consts import Platform
-from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import random_event
+from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.Consts import Platform
+from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.utils.utils import random_event
 from apps.games.models import Rate as RateModel
 
 lock = Lock()
 
 
-class Rate(CommonCommand):
+class Rate(Command):
     name = "ставка"
     help_text = "игра, определяющая, кто ближе угадал загаданное число"
     help_texts = ["[ставка=рандом] - делает ставку"]
@@ -38,9 +38,9 @@ class Rate(CommonCommand):
                 raise PWarning(f"Ставка уже поставлена\n"
                                f"Игроки {len(rates_gamers)}/{min_gamers}:\n"
                                f"{rate_gamer_str}")
-            if self.event.args:
+            if self.event.message.args:
                 random = False
-                arg = self.event.args[0]
+                arg = self.event.message.args[0]
                 self.check_number_arg_range(arg, 1, 100)
             else:
                 random = True

@@ -1,8 +1,8 @@
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.Command import Command
 from petrovich.settings import STATIC_ROOT
 
 
-class Donate(CommonCommand):
+class Donate(Command):
     name = "донат"
     help_text = "ссылка на донат"
 
@@ -10,4 +10,4 @@ class Donate(CommonCommand):
         url = 'https://www.donationalerts.com/r/xoma163'
         attachments = self.bot.upload_photos(f"{STATIC_ROOT}/bot/img/donate.jpg")
         attachments.append(url)
-        return {'msg': url, 'attachments': attachments}
+        return {'text': url, 'attachments': attachments}

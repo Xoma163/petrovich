@@ -1,8 +1,9 @@
 from apps.bot.APIs.EveryPixelAPI import EveryPixelAPI
-from apps.bot.classes.Consts import Platform
-from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import get_attachments_from_attachments_or_fwd
+from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.Consts import Platform
+from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
+from apps.bot.utils.utils import get_attachments_from_attachments_or_fwd
 
 
 def draw_on_images(image, faces):
@@ -49,20 +50,19 @@ def draw_on_images(image, faces):
     return _bytes
 
 
-class Age(CommonCommand):
+class Age(Command):
     name = "возраст"
     help_text = "оценивает возраст людей на фотографии"
     help_texts = [
         "(Изображения/Пересылаемое сообщение с изображением) - оценивает возраст людей на фотографии"
     ]
     platforms = [Platform.VK, Platform.TG]
-    attachments = ['photo']
+    attachments = [PhotoAttachment]
 
     def start(self):
-        image = get_attachments_from_attachments_or_fwd(self.event, 'photo')[0]
+        image = get_attachments_from_attachments_or_fwd(self.event, PhotoAttachment)[0]
         everypixel_api = EveryPixelAPI()
-        image = image['private_download_url'] or image['content']
-        faces = everypixel_api.get_faces_on_photo(image)
+        faces = everypixel_api.get_faces_on_photo(image.get_download_url())
 
         if len(faces) == 0:
             raise PWarning("Не нашёл лиц на фото")

@@ -2,8 +2,8 @@ import importlib
 import os
 import pkgutil
 
-from apps.bot.classes.Consts import Platform, Role
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.Consts import Platform, Role
 from petrovich.settings import BASE_DIR
 
 
@@ -20,11 +20,7 @@ def import_all_commands():
 
 
 def generate_commands():
-    _commands = [cls() for cls in CommonCommand.__subclasses__()]
-
-    for command in _commands:
-        if not command.enabled:
-            _commands.remove(command)
+    _commands = [cls() for cls in Command.__subclasses__() if cls.enabled]
     _commands.sort(key=lambda x: x.priority, reverse=True)
     return _commands
 

@@ -1,50 +1,58 @@
-from apps.bot.classes.Consts import Platform
-from apps.bot.classes.Exceptions import PError
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.Consts import Platform
+from apps.bot.classes.consts.Exceptions import PError
 from petrovich.settings import env
 
 
-class Actions(CommonCommand):
+class Actions(Command):
     names = None
     priority = 100
 
     def accept(self, event):
-        if event.action:
-            return True
-        return False
+        return bool(event.action)
 
     def start(self):
-        if self.event.action:
-            # По приглашению пользователя
-            if self.event.action['type'] in ['chat_invite_user', 'chat_invite_user_by_link']:
-                for _id in self.event.action['member_ids']:
-                    if _id > 0:
-                        user = self.bot.get_user_by_id(_id)
-                        self.bot.add_chat_to_user(user, self.event.chat)
-                    else:
-                        if self.event.platform == Platform.VK:
-                            bot_group_id = -env.int('VK_BOT_GROUP_ID')
-                        elif self.event.platform == Platform.TG:
-                            bot_group_id = -env.int('TG_BOT_GROUP_ID')
-                        else:
-                            raise PError("Неизвестный клиент")
-                        if _id == bot_group_id:
-                            if self.event.chat.admin is None:
-                                self.event.chat.admin = self.event.sender
-                                self.event.chat.save()
-                                return f"Администратором конфы является {self.event.sender}\n" \
-                                       f"Задайте имя конфы:\n" \
-                                       "/конфа {Название конфы}"
-                            else:
-                                return "Давненько не виделись!"
-                        else:
-                            self.bot.get_bot_by_id(_id)
-            # По удалению пользователя
-            elif self.event.action['type'] == 'chat_kick_user':
-                if self.event.action['member_id'] > 0:
-                    user = self.bot.get_user_by_id(self.event.action['member_id'])
-                    self.bot.remove_chat_from_user(user, self.event.chat)
-            # По изменению чата конфы
-            # elif self.event.action['type'] == 'chat_title_update':
-            #     self.event.chat.name = self.event.action['text']
-            #     self.event.chat.save()
+        new_chat_members = self.event.action.get('new_chat_members')
+        left_chat_member = self.event.action.get('left_chat_member')
+        if new_chat_members:
+            answer = []
+            for member in new_chat_members:
+                answer.append(self.setup_new_chat_member(member['id'], is_bot=member['is_bot']))
+            return answer[0]
+        elif left_chat_member:
+            for member in left_chat_member:
+                self.setup_left_chat_member(member['id'], is_bot=member['is_bot'])
+
+    def setup_new_chat_member(self, member_id, is_bot):
+        if not is_bot:
+            user = self.bot.get_user_by_id(member_id)
+            self.bot.add_chat_to_user(user, self.event.chat)
+        else:
+            if self.event.platform == Platform.VK:
+                bot_group_id = env.int('VK_BOT_GROUP_ID')
+            elif self.event.platform == Platform.TG:
+                bot_group_id = env.int('TG_BOT_GROUP_ID')
+            else:
+                raise PError("Неизвестный клиент")
+
+            if member_id == bot_group_id:
+                if self.event.chat.admin is None:
+                    self.event.chat.admin = self.event.sender
+                    self.event.chat.save()
+                    return f"Администратором конфы является {self.event.sender}\n" \
+                           f"Задайте имя конфы:\n" \
+                           "/конфа {Название конфы}"
+                else:
+                    return "Давненько не виделись!"
+            else:
+                self.bot.get_bot_by_id(member_id)
+
+    def setup_left_chat_member(self, member_id, is_bot):
+        if not is_bot:
+            user = self.bot.get_user_by_id(member_id)
+            self.bot.remove_chat_from_user(user, self.event.chat)
+
+    # По изменению чата конфы
+    # elif self.event.action['type'] == 'chat_title_update':
+    #     self.event.chat.name = self.event.action['text']
+    #     self.event.chat.save()

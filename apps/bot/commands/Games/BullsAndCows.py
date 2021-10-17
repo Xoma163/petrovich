@@ -1,10 +1,10 @@
 import random
 from threading import Lock
 
-from apps.bot.classes.Consts import Platform
-from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import decl_of_num
+from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.Consts import Platform
+from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.utils.utils import decl_of_num
 from apps.games.models import BullsAndCowsSession
 
 lock = Lock()
@@ -12,7 +12,7 @@ lock = Lock()
 DIGITS_IN_GAME = 4
 
 
-class BullsAndCows(CommonCommand):
+class BullsAndCows(Command):
     name = "бк"
     names = ["бик", "быкиикоровы", "быки", "коровы"]
     help_text = "быки и коровы. Игра, где нужно угадать загаданное число."
@@ -30,7 +30,7 @@ class BullsAndCows(CommonCommand):
                 session = BullsAndCowsSession.objects.filter(chat=self.event.chat).first()
             else:
                 session = BullsAndCowsSession.objects.filter(author=self.event.sender).first()
-            if not self.event.args:
+            if not self.event.message.args:
                 if session:
                     return f"Игра уже создана, присылай мне число из {DIGITS_IN_GAME} цифр"
                 digits = [str(x) for x in range(10)]
@@ -38,7 +38,7 @@ class BullsAndCows(CommonCommand):
                 new_obj = {
                     'number': "".join(digits[:DIGITS_IN_GAME])
                 }
-                if self.event.from_chat:
+                if self.event.is_from_chat:
                     new_obj['chat'] = self.event.chat
                 else:
                     new_obj['author'] = self.event.sender
@@ -49,10 +49,12 @@ class BullsAndCows(CommonCommand):
                 if not session:
                     raise PWarning("Нет созданной игры. Начни её - /бк")
 
-                arg0 = self.event.args[0]
+                arg0 = self.event.message.args[0]
                 if arg0 in ['сдаться', 'сдаюсь', 'ойвсё', 'пощади', 'надоело']:
+                    correct_number_str = str(session.number)
+                    correct_number_str = "0" * (DIGITS_IN_GAME - len(correct_number_str)) + correct_number_str
                     session.delete()
-                    return "В следующий раз повезёт :("
+                    return f"В следующий раз повезёт :(\nЗагаданное число - {correct_number_str}"
 
                 if len(arg0) != DIGITS_IN_GAME:
                     raise PWarning(f"В отгадываемом числе должно быть {DIGITS_IN_GAME} цифр")
@@ -62,22 +64,22 @@ class BullsAndCows(CommonCommand):
                 if arg0 != ''.join(sorted(set(arg0), key=arg0.index)):
                     raise PWarning("Цифры должны быть уникальны в числе")
 
-                if self.event.args[0] == session.number:
+                if self.event.message.args[0] == session.number:
                     decl = decl_of_num(session.steps, ['попытку', 'попытки', 'попыток'])
                     msg = f"Отгадали всего за {session.steps} {decl}!"
                     session.delete()
                     keyboard = self.bot.get_inline_keyboard([{'command': self.name, 'button_text': "Ещё"}])
-                    return {"msg": msg, "keyboard": keyboard}
+                    return {"text": msg, "keyboard": keyboard}
 
                 bulls = 0
                 cows = 0
                 correct_number_str = str(session.number)
                 # Добиваем нулями если число начинается с нулей
                 correct_number_str = "0" * (DIGITS_IN_GAME - len(correct_number_str)) + correct_number_str
-                for i in range(len(arg0)):
-                    if arg0[i] == correct_number_str[i]:
+                for i, argi in enumerate(arg0):
+                    if argi == correct_number_str[i]:
                         bulls += 1
-                    elif arg0[i] in correct_number_str:
+                    elif argi in correct_number_str:
                         cows += 1
                 session.steps += 1
                 session.save()

@@ -1,10 +1,11 @@
 from apps.bot.APIs.GoogleCustomSearchAPI import GoogleCustomSearchAPI
-from apps.bot.classes.Consts import Platform
-from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.ActivitiesEnum import ActivitiesEnum
+from apps.bot.classes.consts.Consts import Platform
+from apps.bot.classes.consts.Exceptions import PWarning
 
 
-class Find(CommonCommand):
+class Find(Command):
     name = "найди"
     names = ["поиск", "найти", "ищи", "искать", "хуизфакинг", "вхуизфакинг"]
     help_text = "ищет информацию по картинкам"
@@ -13,9 +14,9 @@ class Find(CommonCommand):
     platforms = [Platform.VK, Platform.TG]
 
     def start(self):
-        self.bot.set_activity(self.event.peer_id)
+        self.bot.set_activity(self.event.peer_id, ActivitiesEnum.UPLOAD_PHOTO)
 
-        query = self.event.original_args
+        query = self.event.message.args_str
         count = 5
 
         gcs_api = GoogleCustomSearchAPI()

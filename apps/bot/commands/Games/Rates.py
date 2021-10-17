@@ -1,16 +1,16 @@
 from threading import Lock
 
-from apps.bot.classes.Consts import Role, Platform
-from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import get_random_int
+from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.Consts import Role, Platform
+from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.utils.utils import get_random_int
 from apps.games.models import Rate as RateModel
 from petrovich.settings import STATIC_ROOT
 
 lock = Lock()
 
 
-class Rates(CommonCommand):
+class Rates(Command):
     name = 'ставки'
     names = ["казино"]
     help_text = "играет ставки"
@@ -28,7 +28,7 @@ class Rates(CommonCommand):
                 min_gamers = 2
 
             gamers = RateModel.objects.filter(chat=self.event.chat).order_by("date")
-            if self.event.args and self.event.args[0] == 'f':
+            if self.event.message.args and self.event.message.args[0] == 'f':
                 self.check_sender(Role.CONFERENCE_ADMIN)
                 if len(gamers) <= 1:
                     raise PWarning("Ну ты ваще обалдел? Хотя бы один игрок-то пусть будет")
@@ -59,13 +59,13 @@ class Rates(CommonCommand):
 
                 gamer.save()
 
-            if self.event.command == "казино":
+            if self.event.message.command == "казино":
                 attachments = self.bot.upload_photos(f"{STATIC_ROOT}/bot/img/rate.jpg")
                 if len(winners) == 1:
-                    msg = {'msg': f"Выпавшее число - {rnd}\nПобедитель этого казино:\n{winners_str}",
+                    msg = {'text': f"Выпавшее число - {rnd}\nПобедитель этого казино:\n{winners_str}",
                            'attachments': attachments}
                 else:
-                    msg = {'msg': f"Выпавшее число - {rnd}\nПобедители этого казино:\n{winners_str}",
+                    msg = {'text': f"Выпавшее число - {rnd}\nПобедители этого казино:\n{winners_str}",
                            'attachments': attachments}
             else:
                 if len(winners) == 1:

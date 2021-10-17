@@ -1,9 +1,9 @@
 from apps.bot.APIs.CBRAPI import CBRAPI
-from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.Exceptions import PWarning
 
 
-class ExchangeRates(CommonCommand):
+class ExchangeRates(Command):
     name = "курс"
     help_text = "курс валют"
     help_texts = [
@@ -17,17 +17,17 @@ class ExchangeRates(CommonCommand):
         cbr_api = CBRAPI(filters_list)
         ex_rates = cbr_api.do()
 
-        if self.event.args:
+        if self.event.message.args:
             self.check_args(1)
-            if len(self.event.args) == 1:
+            if len(self.event.message.args) == 1:
                 value = 1
-                currency = self.event.args[0].lower()
+                currency = self.event.message.args[0].lower()
             else:
                 self.float_args = [0]
                 self.parse_float()
 
-                value = self.event.args[0]
-                currency = self.event.args[1].lower()
+                value = self.event.message.args[0]
+                currency = self.event.message.args[1].lower()
             if any(ext in currency for ext in ['rub', "руб"]):
                 msg = "Перевод в другие валюты:\n"
                 for ex_rate in ex_rates:

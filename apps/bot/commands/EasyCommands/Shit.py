@@ -1,7 +1,7 @@
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.Command import Command
 
 
-class Shit(CommonCommand):
+class Shit(Command):
     name = "дерьмо"
     suggest_for_similar = False
 

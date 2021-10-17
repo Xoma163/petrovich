@@ -1,13 +1,13 @@
 import json
 
 from apps.bot.APIs.YandexWeatherAPI import YandexWeatherAPI
-from apps.bot.classes.Consts import WEATHER_TRANSLATOR, DAY_TRANSLATOR, WEATHER_WIND_DIRECTION_TRANSLATOR
-from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.Consts import WEATHER_TRANSLATOR, DAY_TRANSLATOR, WEATHER_WIND_DIRECTION_TRANSLATOR
+from apps.bot.classes.consts.Exceptions import PWarning
 from apps.service.models import City, Service
 
 
-class Weather(CommonCommand):
+class Weather(Command):
     name = "погода"
     help_text = "прогноз погоды"
     help_texts = [
@@ -17,11 +17,11 @@ class Weather(CommonCommand):
 
     def start(self):
         changes = False
-        if self.event.args and self.event.args[-1].find("изм") >= 0:
+        if self.event.message.args and self.event.message.args[-1].find("изм") >= 0:
             changes = True
-            del self.event.args[-1]
-        if self.event.args:
-            city = City.objects.filter(synonyms__icontains=self.event.original_args).first()
+            del self.event.message.args[-1]
+        if self.event.message.args:
+            city = City.objects.filter(synonyms__icontains=self.event.message.args_str).first()
             if not city:
                 raise PWarning("Не нашёл такой город")
         else:

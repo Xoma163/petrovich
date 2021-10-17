@@ -1,10 +1,10 @@
-from apps.bot.classes.Consts import Role
-from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import get_role_by_str
+from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.Consts import Role
+from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.utils.utils import get_role_by_str
 
 
-class Commands(CommonCommand):
+class Commands(Command):
     name = "команды"
     help_text = "список всех команд"
     help_texts = [
@@ -28,8 +28,8 @@ class Commands(CommonCommand):
             {"role": Role.MRAZ, "text": "команды для мразей"},
         ]
 
-        if self.event.args:
-            role = get_role_by_str(self.event.original_args.lower())
+        if self.event.message.args:
+            role = get_role_by_str(self.event.message.args_str.lower())
             if not role:
                 raise PWarning("Не знаю такой роли")
             for ordered_role in ordered_roles:

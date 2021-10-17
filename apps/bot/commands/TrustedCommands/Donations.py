@@ -1,10 +1,10 @@
-from apps.bot.classes.Consts import Role
-from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.Consts import Role
+from apps.bot.classes.consts.Exceptions import PWarning
 from apps.service.models import Donations as DonationsModel
 
 
-class Donations(CommonCommand):
+class Donations(Command):
     name = "донаты"
     help_text = "список всех донатов"
     access = Role.TRUSTED

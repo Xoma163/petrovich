@@ -22,13 +22,13 @@ class Command(BaseCommand):
 
             for user in users:
                 if user.celebrate_bday:
-                    tg_bot.send_message(chat.chat_id, f"С Днём рождения, {tg_bot.get_mention(user)}!")
+                    tg_bot.parse_and_send_msgs(chat.chat_id, f"С Днём рождения, {tg_bot.get_mention(user)}!")
 
                 gamer = Gamer.objects.filter(user=user).first()
                 if gamer:
                     gamer.roulette_points += 100000
                     gamer.save()
-                    tg_bot.send_message(chat.chat_id, "На ваш счет зачислено 100 000 бонусных очков.")
+                    tg_bot.parse_and_send_msgs(chat.chat_id, "На ваш счет зачислено 100 000 бонусных очков.")
 
     def add_arguments(self, parser):
         parser.add_argument('chat_id', nargs='+', type=str, help='chat_id')

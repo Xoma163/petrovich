@@ -1,9 +1,9 @@
 import io
 
-from apps.bot.classes.Consts import Role, Platform
-from apps.bot.classes.DoTheLinuxComand import do_the_linux_command
-from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import draw_text_on_image
+from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.Consts import Role, Platform
+from apps.bot.utils.DoTheLinuxComand import do_the_linux_command
+from apps.bot.utils.utils import draw_text_on_image
 from petrovich.settings import BASE_DIR
 
 
@@ -67,7 +67,7 @@ def get_bot_logs(command):
     return output
 
 
-class Logs(CommonCommand):
+class Logs(Command):
     name = "логи"
     names = ["лог"]
     help_text = "логи бота или сервера"
@@ -80,8 +80,8 @@ class Logs(CommonCommand):
 
     def start(self):
         arg0 = None
-        if self.event.args:
-            arg0 = self.event.args[0].lower()
+        if self.event.message.args:
+            arg0 = self.event.message.args[0].lower()
         menu = [
             [['веб', 'web', 'сайт', 'site'], self.get_web_logs],
             [['бот', 'bot'], self.get_bot_logs],
@@ -109,9 +109,9 @@ class Logs(CommonCommand):
         return img
 
     def get_count(self, default, max_count):
-        if self.event.args:
+        if self.event.message.args:
             try:
-                count = int(self.event.args[-1])
+                count = int(self.event.message.args[-1])
                 return min(count, max_count)
             except ValueError:
                 pass

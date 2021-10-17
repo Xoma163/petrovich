@@ -1,9 +1,9 @@
 from apps.bot.APIs.GithubAPI import GithubAPI
-from apps.bot.classes.Consts import Platform
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.Consts import Platform
 
 
-class Issue(CommonCommand):
+class Issue(Command):
     name = "баг"
     names = ["ошибка", "ишю", "ишью"]
     help_text = "добавляет проблему Петровича, которую нужно решить"
@@ -14,7 +14,7 @@ class Issue(CommonCommand):
     def start(self):
         msgs = self.event.fwd
         if not msgs:
-            msgs = [{'text': self.event.original_args, 'from_id': int(self.event.sender.user_id)}]
+            msgs = [{'text': self.event.message.args_str, 'from_id': int(self.event.sender.user_id)}]
 
         issue_text = ""
         for msg in msgs:
@@ -33,7 +33,7 @@ class Issue(CommonCommand):
 
         response = github_api.create_issue(title, body)
         result = {
-            'msg': f"Сохранено\n"
+            'text': f"Сохранено\n"
                    f"Отслеживать созданное ишю можно по этой ссылке:\n"
                    f"{response['html_url']}",
             'attachments': [response['html_url']]

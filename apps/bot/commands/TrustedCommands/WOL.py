@@ -1,12 +1,12 @@
 from wakeonlan import send_magic_packet
 
-from apps.bot.classes.Consts import Role
-from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.Consts import Role
+from apps.bot.classes.consts.Exceptions import PWarning
 from apps.service.models import WakeOnLanUserData
 
 
-class WOL(CommonCommand):
+class WOL(Command):
     name = "пробуди"
     names = ["разбуди", 'wol', 'wakeonlan', 'разбудить', 'пробудить']
     help_text = "пробуждает ваше устройство"
@@ -19,8 +19,8 @@ class WOL(CommonCommand):
     def start(self):
         wol_data = WakeOnLanUserData.objects.filter(user=self.event.sender)
 
-        if self.event.args:
-            device_name = " ".join(self.event.args)
+        if self.event.message.args:
+            device_name = " ".join(self.event.message.args)
             wol_data = wol_data.filter(name__icontains=device_name)
         if not wol_data:
             raise PWarning("Не нашёл устройства для пробуждения. Напишите админу, чтобы добавить")

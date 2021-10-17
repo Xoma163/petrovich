@@ -3,8 +3,8 @@ class PSkip(Exception):
 
 
 class PWarning(Exception):
-    pass
+    level = 'warning'
 
 
 class PError(Exception):
-    pass
+    level = 'error'

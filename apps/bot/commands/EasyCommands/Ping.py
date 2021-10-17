@@ -1,7 +1,7 @@
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.Command import Command
 
 
-class Ping(CommonCommand):
+class Ping(Command):
     name = "пинг"
 
     def start(self):

@@ -1,12 +1,12 @@
-from apps.bot.classes.Consts import Role, ATTACHMENT_TRANSLATOR, Platform
-from apps.bot.classes.Exceptions import PWarning, PError
-from apps.bot.classes.bots.CommonBot import CommonBot
-from apps.bot.classes.common.CommonMethods import get_help_texts_for_command, transform_k
+from apps.bot.classes.bots.Bot import Bot
+from apps.bot.classes.consts.Consts import Role, ATTACHMENT_TRANSLATOR, Platform
+from apps.bot.classes.consts.Exceptions import PWarning, PError
 from apps.bot.classes.events.Event import Event
+from apps.bot.utils.utils import get_help_texts_for_command, transform_k
 from petrovich.settings import env
 
 
-class CommonCommand:
+class Command:
     # Основные поля команды
     name: str = None  # Имя команды,
     names: list = []  # Вспопогательные имена команды,
@@ -55,12 +55,13 @@ class CommonCommand:
         :param event: событие
         :return: bool
         """
-        if event.command in self.full_names:
+        if event.message and event.message.command in self.full_names:
             return True
-
+        if event.payload and event.payload['command'] in self.full_names:
+            return True
         return False
 
-    def check_and_start(self, bot: CommonBot, event: Event):
+    def check_and_start(self, bot: Bot, event: Event):
         """
         Выполнение всех проверок и старт команды
         :param bot: сущность Bot
@@ -140,8 +141,8 @@ class CommonCommand:
         """
         if args is None:
             args = self.args
-        if self.event.args:
-            if len(self.event.args) >= args:
+        if self.event.message.args:
+            if len(self.event.message.args) >= args:
                 return True
             else:
                 error = "Передано недостаточно аргументов"
@@ -157,12 +158,12 @@ class CommonCommand:
             args = self.args_or_fwd
         try:
             check_args = self.check_args(args)
-        except:
+        except Exception:
             check_args = False
 
         try:
             check_fwd = self.check_fwd()
-        except:
+        except Exception:
             check_fwd = False
 
         if check_args or check_fwd:
@@ -200,15 +201,15 @@ class CommonCommand:
         Парсинг аргументов в int из заданного диапазона индексов(self.int_args)
         :return: bool
         """
-        if not self.event.args:
+        if not self.event.message.args:
             return True
         for checked_arg_index in self.int_args:
-            if len(self.event.args) - 1 >= checked_arg_index:
-                if isinstance(self.event.args[checked_arg_index], int):
+            if len(self.event.message.args) - 1 >= checked_arg_index:
+                if isinstance(self.event.message.args[checked_arg_index], int):
                     continue
                 try:
-                    self.event.args[checked_arg_index] = transform_k(self.event.args[checked_arg_index])
-                    self.event.args[checked_arg_index] = int(self.event.args[checked_arg_index])
+                    self.event.message.args[checked_arg_index] = transform_k(self.event.message.args[checked_arg_index])
+                    self.event.message.args[checked_arg_index] = int(self.event.message.args[checked_arg_index])
                 except ValueError:
                     error = "Аргумент должен быть целочисленным"
                     raise PWarning(error)
@@ -219,15 +220,15 @@ class CommonCommand:
         Парсинг аргументов в float из заданного диапазона индексов(self.float_args)
         :return: bool
         """
-        if not self.event.args:
+        if not self.event.message.args:
             return True
         for checked_arg_index in self.float_args:
-            if len(self.event.args) - 1 >= checked_arg_index:
-                if isinstance(self.event.args[checked_arg_index], float):
+            if len(self.event.message.args) - 1 >= checked_arg_index:
+                if isinstance(self.event.message.args[checked_arg_index], float):
                     continue
                 try:
-                    self.event.args[checked_arg_index] = transform_k(self.event.args[checked_arg_index])
-                    self.event.args[checked_arg_index] = float(self.event.args[checked_arg_index])
+                    self.event.message.args[checked_arg_index] = transform_k(self.event.message.args[checked_arg_index])
+                    self.event.message.args[checked_arg_index] = float(self.event.message.args[checked_arg_index])
                 except ValueError:
                     error = "Аргумент должен быть с плавающей запятой"
                     raise PWarning(error)
@@ -238,7 +239,7 @@ class CommonCommand:
         Проверка на сообщение из ЛС
         :return: bool
         """
-        if self.event.from_user:
+        if self.event.is_from_user:
             return True
 
         error = "Команда работает только в ЛС"
@@ -249,7 +250,7 @@ class CommonCommand:
         Проверка на сообщение из чата
         :return: bool
         """
-        if self.event.from_chat:
+        if self.event.is_from_chat:
             return True
 
         error = "Команда работает только в беседах"
@@ -286,11 +287,11 @@ class CommonCommand:
         """
         if self.event.attachments:
             for att in self.event.attachments:
-                if att['type'] in self.attachments:
+                if type(att) in self.attachments:
                     return True
-        if self.event.fwd and self.event.fwd[0]['attachments']:
-            for att in self.event.fwd[0]['attachments']:
-                if att['type'] in self.attachments:
+        if self.event.fwd and self.event.fwd[0].attachments:
+            for att in self.event.fwd[0].attachments:
+                if type(att) in self.attachments:
                     return True
 
         allowed_types = ' '.join([ATTACHMENT_TRANSLATOR[_type] for _type in self.attachments])

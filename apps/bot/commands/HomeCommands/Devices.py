@@ -1,6 +1,8 @@
-from apps.bot.classes.Consts import Role
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.Consts import Role
 from .Sensors import get_data_for_items, get_items, get_room_and_item_by_args
+
+# ToDo: Openhab3 api
 
 DEVICES = [
     # {'name': "Обогреватель", 'table': "Item0003", 'topic': 'cmnd/tasmota_5C048E/POWER', 'type': bool},
@@ -19,7 +21,7 @@ DEVICES = [
 ]
 
 
-class Sensors(CommonCommand):
+class Sensors(Command):
     name = "устройства"
     help_text = "значение датчиков и состояние устройств в доме"
     help_texts = [
@@ -31,8 +33,8 @@ class Sensors(CommonCommand):
     access = Role.HOME
 
     def start(self):
-        if self.event.args:
-            room_name, item_name = get_room_and_item_by_args(self.event.args)
+        if self.event.message.args:
+            room_name, item_name = get_room_and_item_by_args(self.event.message.args)
             items = get_items(DEVICES, room_name, item_name)
         else:
             items = DEVICES

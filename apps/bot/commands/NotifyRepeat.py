@@ -2,10 +2,10 @@ from datetime import datetime, timedelta
 
 from crontab import CronTab
 
-from apps.bot.classes.Consts import Role, Platform
-from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import localize_datetime, normalize_datetime, remove_tz
+from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.Consts import Role, Platform
+from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.utils.utils import localize_datetime, normalize_datetime, remove_tz
 from apps.service.models import Notify as NotifyModel
 
 
@@ -23,7 +23,7 @@ def get_crontab(crontab_args):
     return crontab_entry
 
 
-class NotifyRepeat(CommonCommand):
+class NotifyRepeat(Command):
     name = "напоминай"
     help_text = "напоминает о чём-либо постояно"
     help_texts = [
@@ -43,10 +43,14 @@ class NotifyRepeat(CommonCommand):
         crontab = None
         date = None
         try:
-            crontab = get_crontab(self.event.args)
-            text = self.event.original_args.split(' ', 5)[-1]
-        except:
-            date = get_time(self.event.args[0])
+            crontab = get_crontab(self.event.message.args)
+            args_split = self.event.message.args_str.split(' ', 5)
+            if len(args_split)>5:
+                text = args_split[-1]
+            else:
+                text = ""
+        except Exception:
+            date = get_time(self.event.message.args[0])
             if not date:
                 raise PWarning("Не смог распарсить дату")
             date = normalize_datetime(date, timezone)
@@ -58,7 +62,7 @@ class NotifyRepeat(CommonCommand):
             if (date - datetime_now).days < 0 or (datetime_now - date).seconds < 0:
                 date = date + timedelta(days=1)
 
-            text = self.event.original_args.split(' ', 1)[1]
+            text = self.event.message.args_str.split(' ', 1)[1]
         if text[0] == '/':
             first_space = text.find(' ')
             if first_space > 0:

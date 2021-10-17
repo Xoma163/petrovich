@@ -6,9 +6,10 @@ import youtube_dl
 from bs4 import BeautifulSoup
 
 from apps.bot.APIs.RedditVideoDownloader import RedditVideoSaver
-from apps.bot.classes.Consts import Platform
-from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.ActivitiesEnum import ActivitiesEnum
+from apps.bot.classes.consts.Consts import Platform
+from apps.bot.classes.consts.Exceptions import PWarning
 
 YOUTUBE_URLS = ['www.youtube.com', 'youtube.com', "www.youtu.be", "youtu.be"]
 REDDIT_URLS = ["www.reddit.com"]
@@ -18,7 +19,7 @@ INSTAGRAM_URLS = ['www.instagram.com', 'instagram.com']
 MEDIA_URLS = YOUTUBE_URLS + REDDIT_URLS + TIKTOK_URLS + INSTAGRAM_URLS
 
 
-class Media(CommonCommand):
+class Media(Command):
     name = "медиа"
     help_text = "скачивает видео из Reddit/TikTok/YouTube/Instagram и присылает его"
     help_texts = [
@@ -27,11 +28,10 @@ class Media(CommonCommand):
     platforms = [Platform.TG]
 
     def accept(self, event):
-        if urlparse(event.command).hostname in MEDIA_URLS:
+        if event.message and urlparse(event.message.command).hostname in MEDIA_URLS:
             return True
-        if event.fwd:
-            if urlparse(event.fwd[0]['text']).hostname in MEDIA_URLS:
-                return True
+        if event.fwd and event.fwd[0].message and urlparse(event.fwd[0].message.clear).hostname in MEDIA_URLS:
+            return True
         return super().accept(event)
 
     def start(self):
@@ -42,15 +42,15 @@ class Media(CommonCommand):
             'instagram': self.get_instagram_video_info
         }
 
-        if self.event.command in self.full_names:
-            if self.event.args:
-                url = self.event.args[0]
+        if self.event.message.command in self.full_names:
+            if self.event.message.args:
+                url = self.event.message.args[0]
             elif self.event.fwd:
                 url = self.event.fwd[0]['text']
             else:
                 raise PWarning("Для работы команды требуются аргументы или пересылаемые сообщения")
         else:
-            url = self.event.clear_msg
+            url = self.event.message.clear
 
         media_link_is_from = None
 
@@ -66,20 +66,20 @@ class Media(CommonCommand):
         if not media_link_is_from:
             raise PWarning("Не youtube/tiktok/reddit/instagram ссылка")
 
-        self.bot.set_activity(self.event.peer_id, 'upload_video')
+        self.bot.set_activity(self.event.peer_id, ActivitiesEnum.UPLOAD_VIDEO)
         video, title = MEDIA_TRANSLATOR[media_link_is_from](url)
-        self.bot.set_activity(self.event.peer_id, 'upload_video')
+        self.bot.set_activity(self.event.peer_id, ActivitiesEnum.UPLOAD_VIDEO)
         attachments = [self.bot.upload_video(video)]
 
-        if self.event.command not in self.full_names:
-            self.bot.delete_message(self.event.peer_id, self.event.msg_id)
+        if self.event.message.command not in self.full_names:
+            self.bot.delete_message(self.event.peer_id, self.event.message.id)
 
-            msg = ""
+            text = ""
             if title:
-                msg = f"{title}\n"
-            msg += f"От пользователя {self.event.sender}\n" \
-                   f"{url}"
-            return {'msg': msg, 'attachments': attachments}
+                text = f"{title}\n"
+            text += f"От пользователя {self.event.sender}\n" \
+                    f"{url}"
+            return {'text': text, 'attachments': attachments}
         else:
             return {'attachments': attachments}
 
@@ -119,7 +119,6 @@ class Media(CommonCommand):
 
         s = requests.Session()
         r = s.get(url, headers=headers)
-        # ToDo: just regexp
         bs4 = BeautifulSoup(r.content, 'html.parser')
         video_data = json.loads(bs4.find(id='__NEXT_DATA__').contents[0])
 

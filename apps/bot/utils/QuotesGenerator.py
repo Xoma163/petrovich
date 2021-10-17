@@ -4,7 +4,7 @@ import textwrap
 import requests
 from PIL import ImageFont, Image, ImageDraw, ImageFilter
 
-from apps.bot.classes.common.CommonMethods import get_image_size_by_text
+from apps.bot.utils.utils import get_image_size_by_text
 from petrovich.settings import STATIC_ROOT
 
 
@@ -69,7 +69,7 @@ class QuotesGenerator:
         text_color = "#333333"
         text = title
         font = ImageFont.truetype(os.path.join(STATIC_ROOT, 'fonts/Alegreya-Regular.ttf'), fontsize, encoding="unic")
-        width, height = get_image_size_by_text(text, font)
+        width, _ = get_image_size_by_text(text, font)
         img = Image.new('RGB', (self.WIDTH, margin_top * 2 + 2), self.BACKGROUND_COLOR)
         d = ImageDraw.Draw(img)
         d.text(
@@ -90,7 +90,7 @@ class QuotesGenerator:
         text_color = "#333333"
         text = "© Петрович"
         font = ImageFont.truetype(os.path.join(STATIC_ROOT, 'fonts/Alegreya-Regular.ttf'), fontsize, encoding="unic")
-        width, height = get_image_size_by_text(text, font)
+        width, _ = get_image_size_by_text(text, font)
         img = Image.new('RGB', (self.WIDTH, margin_top * 2 + 2), self.BACKGROUND_COLOR)
         d = ImageDraw.Draw(img)
         d.text((margin_left + line_width_1 + (self.WIDTH - 2 * margin_left - (line_width_1 + line_width_2) - width) / 2,
@@ -146,7 +146,7 @@ class QuotesGenerator:
         if msg.get('photo'):
             try:
                 image = Image.open(requests.get(msg['photo'], stream=True).raw).convert('RGBA')
-            except:
+            except Exception:
                 image = None
             if image:
                 composite = Image.new("RGBA", image.size, (255, 255, 255, 0))
@@ -197,7 +197,7 @@ class QuotesGenerator:
             # Третий параметр: https://stackoverflow.com/questions/5324647/how-to-merge-a-transparent-png-image-with-another-image-using-pil
             try:
                 img.paste(msg_photo, msg_photo_pos, msg_photo)
-            except:
+            except Exception:
                 img.paste(msg_photo, msg_photo_pos)
         if fwd_photo:
             if msg_photo_pos:

@@ -4,8 +4,8 @@ from datetime import datetime, timedelta, date
 from crontab import CronTab
 from django.core.management.base import BaseCommand
 
-from apps.bot.classes.Consts import Role
-from apps.bot.classes.bots.CommonBot import get_bot_by_platform
+from apps.bot.classes.bots.Bot import get_bot_by_platform
+from apps.bot.classes.consts.Consts import Role
 from apps.bot.classes.events.Event import get_event_by_platform
 from apps.service.models import Notify
 from petrovich.settings import DEFAULT_TIME_ZONE
@@ -14,8 +14,8 @@ from petrovich.settings import DEFAULT_TIME_ZONE
 class Command(BaseCommand):
 
     def handle(self, *args, **options):
-        from apps.bot.classes.common.CommonMethods import remove_tz, localize_datetime
-        from apps.bot.classes.common.CommonMethods import get_attachments_for_upload
+        from apps.bot.utils.utils import remove_tz, localize_datetime
+        from apps.bot.utils.utils import get_attachments_for_upload
 
         notifies = Notify.objects.all()
 
@@ -30,7 +30,7 @@ class Command(BaseCommand):
                     if notify.crontab:
                         try:
                             timezone = notify.author.city.timezone.name
-                        except:
+                        except Exception:
                             timezone_error = True
                             print("У пользователя слетела таймзона")
                             timezone = DEFAULT_TIME_ZONE
@@ -72,7 +72,7 @@ class Command(BaseCommand):
                         if timezone_error:
                             message += "\n\nВАЖНО! Ваша таймзона слетела. " \
                                        "Проставьте город в профиле, чтобы напоминания по crontab приходили в корректное время"
-                    result_msg = {'msg': message, 'attachments': attachments}
+                    result_msg = {'text': message, 'attachments': attachments}
                     if notify.chat:
                         bot.parse_and_send_msgs_thread(notify.chat.chat_id, result_msg)
                     # Раскоментить если отправлять в лс пользователю, что это его напоминание
@@ -83,24 +83,17 @@ class Command(BaseCommand):
                             bot.parse_and_send_msgs_thread(notify.author.user_id, result_msg)
 
                     # Если отложенная команда
-                    if notify.text.startswith('/'):
-                        # msg = notify.text[1:]
-                        event = {
-                            'message': {
-                                'text': notify.text
-                            },
-                            'sender': notify.author,
-                            'platform': platform
-                        }
-                        if notify.chat:
-                            event['chat'] = notify.chat
-                            event['peer_id'] = notify.chat.chat_id
-                        else:
-                            event['chat'] = None
-                            event['peer_id'] = notify.author.user_id
 
-                        event_object = event_model(event)
-                        bot.menu(event_object, send=True)
+                    if notify.text.startswith('/'):
+                        event = event_model(bot=bot)
+                        event.set_message(notify.text)
+                        event.sender = notify.author
+                        if notify.chat:
+                            event.peer_id = notify.chat.chat_id
+                            event.chat = notify.chat
+                        else:
+                            event.peer_id = notify.author.user_id
+                        bot.handle_event(event)
                     if notify.repeat:
                         if notify.date:
                             # Для постоянных уведомлений дата должа быть на завтрашний день обязательно.

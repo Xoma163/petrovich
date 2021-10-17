@@ -1,13 +1,13 @@
-from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import random_event
+from apps.bot.classes.Command import Command
+from apps.bot.utils.utils import random_event
 
 
-class Clear(CommonCommand):
+class Clear(Command):
     name = "ясно"
     names = ["ммм"]
     suggest_for_similar = False
 
     def start(self):
-        if self.event.command == 'ммм':
+        if self.event.message.command == 'ммм':
             return random_event(["Данон", "Хуета"])
         return "Хуета"

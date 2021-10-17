@@ -1,129 +1,107 @@
-import json
-import re
+import copy
+from urllib.parse import urlparse
 
-from apps.bot.classes.Consts import Platform
-from petrovich.settings import env
-
-
-def auto_str(cls):
-    def __str__(self):
-        items_str = ', '.join('%s=%s' % item for item in vars(self).items())
-        return f"{type(self).__name__}({items_str}"
-
-    cls.__str__ = __str__
-    return cls
+from apps.bot.classes.consts.Consts import Platform, Role
+from apps.bot.classes.messages.Message import Message
+from apps.bot.classes.messages.attachments.VoiceAttachment import VoiceAttachment
+from apps.bot.models import Users, Chat
 
 
-@auto_str
 class Event:
+    # None тк иногда требуется вручную создать инстанс Event
+    def __init__(self, raw_event=None, bot=None):
+        if not raw_event:
+            raw_event = {}
+        self.raw = raw_event  # json
+        self.bot = bot
 
-    @staticmethod
-    def delete_slash_and_mentions(msg):
-        """
-        Удаление слеша перед началом команды и всех оповещений бота
-        """
-        mentions = env.list('VK_BOT_MENTIONS')
+        self.is_from_user: bool = False
+        self.is_from_bot: bool = False
+        self.is_from_chat: bool = False
 
-        # Обрезаем палку
-        if len(msg) > 0:
-            if msg[0] == '/':
-                msg = msg[1:]
-            for mention in mentions:
-                msg = msg.replace(mention, '')
-        return msg
+        self.sender: Users = None
+        self.chat: Chat = None
+        self.peer_id: int = None
+        self.platform: Platform = bot.platform
 
-    @staticmethod
-    def parse_msg(msg):
-        # Сообщение, команда, аргументы, аргументы строкой, ключи
-        """
-        Парсинг сообщения на разные части
+        self.payload: dict = {}
+        self.action = None
 
-        msg - оригинальное сообщение
-        clear_msg - сообщение без лишних пробелов, запятых и с заменённой ё на е
-        command - команда
-        args - список аргументов
-        original_args - строка аргументов (без ключей)
-        params - оригинальное сообщение без команды (с аргументами и ключами)
+        self.message: Message = None
+        self.fwd: list = []
+        self.attachments: list = []
 
-        """
-        clear_msg = re.sub(" +", " ", msg)
-        clear_msg = re.sub(",+", ",", clear_msg)
-        clear_msg = clear_msg.strip().strip(',').strip().strip(' ').strip().replace('ё', 'е').replace('Ё', 'Е')
+        self.force_need_a_response: bool = False
 
-        msg_dict = {
-            'msg': msg,
-            'clear_msg': clear_msg,
-            'command': None,
-            'args': None,
-            'original_args': None,
-        }
-
-        command_arg = clear_msg.split(' ', 1)
-        msg_dict['command'] = command_arg[0].lower()
-        if len(command_arg) > 1:
-            if len(command_arg[1]) > 0:
-                msg_dict['args'] = command_arg[1].split(' ')
-                msg_dict['original_args'] = command_arg[1].strip()
-
-        return msg_dict
-
-    def parse_attachments(self, attachments):
-        """
-        Распаршивание вложений
-        """
+    def setup_event(self, is_fwd=False):
         raise NotImplementedError
 
-    def __init__(self, event):
-        """
-        Преобразование собранных данных с ботов
-        """
-        if 'message' in event:
-            raw_msg = event['message'].get('text')
-            self.msg_id = event['message'].get('id')
-            text = self.delete_slash_and_mentions(raw_msg)
-            self.mentioned = raw_msg != text
-            parsed = self.parse_msg(text)
-            self.msg = parsed.get('msg')
-            self.clear_msg = parsed.get('clear_msg')
-            self.command = parsed.get('command')
-            self.args = parsed.get('args')
-            self.original_args = parsed.get('original_args')
+    # ToDo: проверка на забаненых
+    def need_a_response(self):
+        if self.action:
+            return True
 
-            self.attachments = self.parse_attachments(event['message'].get('attachments'))
-            self.action = event['message'].get('action')
+        if self.sender.check_role(Role.BANNED):
+            return False
 
-            self.payload = None
-            if 'payload' in event['message'] and event['message']['payload']:
-                self.payload = json.loads(event['message']['payload'])
-                self.msg = None
-                self.command = self.payload['command']
-                self.args = None
-                self.original_args = None
-                if 'args' in self.payload:
-                    if isinstance(self.payload['args'], dict):
-                        self.args = [arg for arg in self.payload['args'].values()]
-                    elif isinstance(self.payload['args'], list):
-                        self.args = self.payload['args']
-                    else:
-                        self.args = [self.payload['args']]
-                    self.original_args = " ".join([str(arg) for arg in self.args])
+        if self.force_need_a_response:
+            return True
 
-        self.sender = event.get('sender')
-        self.chat = event.get('chat')
-        self.peer_id = event.get('peer_id')
+        if self.is_from_bot:
+            return False
+        if self.has_voice_message:
+            return True
+        if self.message is None:
+            return False
+        if self.is_from_user:
+            return True
+        if self.payload:
+            return True
 
-        if self.chat:
-            self.from_chat = True
-            self.from_user = False
-        else:
-            self.from_user = True
-            self.from_chat = False
+        need_a_response_extra = self.need_a_response_extra()
+        if need_a_response_extra:
+            return True
 
-        self.fwd = event.get('fwd', None)
+        if self.is_from_chat and not self.message.has_command_symbols:
+            return False
+        return True
 
-        self.platform = event.get('platform', None)
+    def need_a_response_extra(self):
+        from apps.service.models import Meme
+        from apps.bot.commands.TrustedCommands.Media import MEDIA_URLS
 
-        self.yandex = event.get('yandex', None)
+        message_is_exact_meme_name = Meme.objects.filter(name__unaccent=self.message.clear.lower()).exists()
+        if message_is_exact_meme_name:
+            return True
+
+        if self.chat and self.chat.mentioning:
+            return True
+
+        message_is_media_link = urlparse(self.message.clear).hostname in MEDIA_URLS or \
+                                (self.fwd and self.fwd[0].message and self.fwd[0].message.clear and urlparse(
+                                    self.fwd[0].message.clear) in MEDIA_URLS)
+        if message_is_media_link:
+            return True
+
+    @property
+    def has_voice_message(self):
+        for att in self.attachments:
+            if isinstance(att, VoiceAttachment):
+                return True
+        return False
+
+    def set_message(self, text, _id=None):
+        self.message = Message(text, _id) if text else None
+
+    def to_log(self) -> dict:
+        dict_self = copy.copy(self.__dict__)
+        ignore_fields = ['raw', 'bot']
+        for ignore_field in ignore_fields:
+            del dict_self[ignore_field]
+        dict_self['message'] = dict_self['message'].to_log() if dict_self['message'] else {}
+        dict_self['fwd'] = [x.to_log() for x in dict_self['fwd']]
+        dict_self['attachments'] = [x.to_log() for x in dict_self['attachments']]
+        return dict_self
 
 
 def get_event_by_platform(platform):

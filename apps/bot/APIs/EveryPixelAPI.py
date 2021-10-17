@@ -1,6 +1,6 @@
 import requests
 
-from apps.bot.classes.Exceptions import PWarning, PError
+from apps.bot.classes.consts.Exceptions import PWarning, PError
 from petrovich.settings import env
 
 

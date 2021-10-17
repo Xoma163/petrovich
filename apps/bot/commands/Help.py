@@ -1,8 +1,8 @@
-from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import find_command_by_name, get_help_texts_for_command
+from apps.bot.classes.Command import Command
+from apps.bot.utils.utils import find_command_by_name, get_help_texts_for_command
 
 
-class Help(CommonCommand):
+class Help(Command):
     name = "помощь"
     names = ["хелп", "ман", "помоги", "памаги", "спаси", "хелб", "манул", "help", "start"]
     help_text = "помощь по командам и боту"
@@ -14,8 +14,8 @@ class Help(CommonCommand):
         return super().accept(event)
 
     def start(self):
-        if self.event.args:
-            command = find_command_by_name(self.event.args[0].lower())
+        if self.event.message.args:
+            command = find_command_by_name(self.event.message.args[0].lower())
             self.check_sender(command.access)
             return get_help_texts_for_command(command)
         text = "/помощь (название команды) - помощь по конкретной команде\n" \

@@ -1,8 +1,8 @@
-from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import random_event
+from apps.bot.classes.Command import Command
+from apps.bot.utils.utils import random_event
 
 
-class Rofl(CommonCommand):
+class Rofl(Command):
     name = "орнуть"
 
     def start(self):

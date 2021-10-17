@@ -7,7 +7,7 @@ from django.core.files import File
 from django.db import models
 from django.utils.html import format_html
 
-from apps.bot.classes.Consts import Platform as PlatformEnum
+from apps.bot.classes.consts.Consts import Platform as PlatformEnum
 
 
 class Platform(models.Model):

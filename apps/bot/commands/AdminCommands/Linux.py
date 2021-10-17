@@ -1,9 +1,9 @@
-from apps.bot.classes.Consts import Role
-from apps.bot.classes.DoTheLinuxComand import do_the_linux_command
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.Consts import Role
+from apps.bot.utils.DoTheLinuxComand import do_the_linux_command
 
 
-class Linux(CommonCommand):
+class Linux(Command):
     name = "линукс"
     names = ["linux", "консоль", "терминал"]
     help_text = "запускает любую команду на сервере"
@@ -12,4 +12,4 @@ class Linux(CommonCommand):
     args = 1
 
     def start(self):
-        return do_the_linux_command(self.event.original_args)
+        return do_the_linux_command(self.event.message.args_str)

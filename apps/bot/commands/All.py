@@ -1,8 +1,8 @@
-from apps.bot.classes.Consts import Platform
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.Consts import Platform
 
 
-class All(CommonCommand):
+class All(Command):
     name = "all"
     help_text = "присылает меншон по всем участникам конфы"
     help_texts = [
@@ -13,8 +13,8 @@ class All(CommonCommand):
 
     def start(self):
         conversation_users = self.event.chat.users.all()
-        if self.event.args:
-            msg = f"{self.event.original_args}\n\n"
+        if self.event.message.args:
+            msg = f"{self.event.message.args_str}\n\n"
         else:
             msg = ""
 

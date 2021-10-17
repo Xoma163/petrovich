@@ -2,7 +2,7 @@ import json
 
 import requests
 
-from apps.bot.classes.Exceptions import PError
+from apps.bot.classes.consts.Exceptions import PError
 from petrovich.settings import env
 
 REPO_OWNER = 'Xoma163'

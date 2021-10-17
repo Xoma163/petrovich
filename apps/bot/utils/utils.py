@@ -9,8 +9,13 @@ from io import BytesIO
 import pytz
 from PIL import Image, ImageDraw, ImageFont
 
-from apps.bot.classes.Consts import Role
-from apps.bot.classes.Exceptions import PWarning
+from apps.bot.classes.consts.Consts import Role
+from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.messages.attachments.Attachment import Attachment
+from apps.bot.classes.messages.attachments.DocumentAttachment import DocumentAttachment
+from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
+from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
+from apps.bot.classes.messages.attachments.VoiceAttachment import VoiceAttachment
 from apps.service.models import Service
 from petrovich.settings import STATIC_ROOT
 
@@ -105,7 +110,8 @@ def decl_of_num(number, titles):
         return titles[cases[5]]
 
 
-def get_attachments_for_upload(vk_bot, attachments):
+# ToDo:
+def get_attachments_for_upload(bot, attachments):
     """
     Получает вложения и загружает необходимые на сервер, на которых нет прав
     Прикрепляет только фото, видео, аудио и документы.
@@ -113,8 +119,8 @@ def get_attachments_for_upload(vk_bot, attachments):
     uploaded_attachments = []
     for attachment in attachments:
         # Фото
-        if attachment['type'] == 'photo':
-            new_attachment = vk_bot.upload_photos(attachment['private_download_url'])
+        if isinstance(attachment, PhotoAttachment):
+            new_attachment = bot.upload_photos(attachment.get_download_url())
             uploaded_attachments.append(new_attachment[0])
         # Видео, аудио, документы
         elif 'vk_url' in attachment:
@@ -122,30 +128,29 @@ def get_attachments_for_upload(vk_bot, attachments):
     return uploaded_attachments
 
 
-def get_attachments_from_attachments_or_fwd(vk_event, _type=None, from_first_fwd=True):
+def get_attachments_from_attachments_or_fwd(event, _type=None, from_first_fwd=True):
     """
     Получает все вложения из сообщения и пересланного сообщения
     """
     attachments = []
 
     if _type is None:
-        _type = ['audio', 'video', 'photo', 'doc']
-    if _type is str:
+        _type = [VoiceAttachment, VideoAttachment, PhotoAttachment, DocumentAttachment]
+    if not isinstance(_type, list):
         _type = [_type]
-    if vk_event.attachments:
-        for att in vk_event.attachments:
-            if att['type'] in _type:
+    if event.attachments:
+        for att in event.attachments:
+            if type(att) in _type:
                 attachments.append(att)
-    if vk_event.fwd:
+    if event.fwd:
         if from_first_fwd:
-            msgs = [vk_event.fwd[0]]
+            msgs = [event.fwd[0]]
         else:
-            msgs = vk_event.fwd
+            msgs = event.fwd
         for msg in msgs:
-            if msg['attachments']:
-                fwd_attachments = vk_event.parse_attachments(msg['attachments'])
-                for att in fwd_attachments:
-                    if att['type'] in _type:
+            if msg.attachments:
+                for att in msg.attachments:
+                    if type(att) in _type:
                         attachments.append(att)
 
     return attachments
@@ -306,11 +311,12 @@ def replace_similar_letters(text):
     return text
 
 
-def get_thumbnail_for_image(image, size) -> bytes:
+def get_thumbnail_for_image(image: Attachment, size) -> bytes:
     """
     Получение thumbnail для изображения
     """
-    _image = Image.open(BytesIO(image))
+    content = image.download_content()
+    _image = Image.open(BytesIO(content))
     _image.thumbnail((size, size))
     thumb_byte_arr = io.BytesIO()
     _image.save(thumb_byte_arr, format="PNG")

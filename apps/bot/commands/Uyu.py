@@ -1,9 +1,9 @@
-from apps.bot.classes.Consts import Platform
-from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.Consts import Platform
+from apps.bot.classes.consts.Exceptions import PWarning
 
 
-class Uyu(CommonCommand):
+class Uyu(Command):
     name = "уъу"
     names = ["ъуъ"]
     help_text = "Добавляет слово в текст (уъуфикация)"
@@ -12,8 +12,8 @@ class Uyu(CommonCommand):
 
     def start(self):
         add_word = "бля"
-        if self.event.original_args:
-            add_word = self.event.original_args
+        if self.event.message.args_str:
+            add_word = self.event.message.args_str
 
         msgs = self.event.fwd
         if msgs is None:

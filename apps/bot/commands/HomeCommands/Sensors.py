@@ -1,9 +1,11 @@
 import psycopg2
 
-from apps.bot.classes.Consts import Role, TRUE_FALSE_TRANSLATOR, ON_OFF_TRANSLATOR
-from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.Consts import Role, TRUE_FALSE_TRANSLATOR, ON_OFF_TRANSLATOR
+from apps.bot.classes.consts.Exceptions import PWarning
 from petrovich.settings import env
+
+# ToDo: Openhab3 api
 
 TRUE_FALSE_TRANSLATOR_ON_OFF = {
     True: 'ON',
@@ -63,6 +65,12 @@ SENSORS = [
                 'unit': "мм. рт.ст.",
                 'type': int
             },
+            {
+                'name': "Углекислый газ",
+                'table': "???",
+                'unit': 'ppm',
+                'type': int
+            },
         ]
     },
     {
@@ -92,7 +100,7 @@ SENSORS = [
 ]
 
 
-class Sensors(CommonCommand):
+class Sensors(Command):
     name = "датчики"
     help_text = "значение датчиков и состояние устройств в доме"
     help_texts = [
@@ -104,8 +112,8 @@ class Sensors(CommonCommand):
     access = Role.HOME
 
     def start(self):
-        if self.event.args:
-            room_name, item_name = get_room_and_item_by_args(self.event.args)
+        if self.event.message.args:
+            room_name, item_name = get_room_and_item_by_args(self.event.message.args)
             items = get_items(SENSORS, room_name, item_name)
         else:
             items = SENSORS

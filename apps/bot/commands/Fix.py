@@ -1,6 +1,6 @@
-from apps.bot.classes.Consts import Platform
-from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.Consts import Platform
+from apps.bot.classes.consts.Exceptions import PWarning
 
 _eng_chars = u"~`!@#$%^&qwertyuiop[]asdfghjkl;'zxcvbnm,./QWERTYUIOP{}ASDFGHJKL:\"|ZXCVBNM<>?"
 _rus_chars = u"ёё!\"№;%:?йцукенгшщзхъфывапролджэячсмитьбю.ЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭ/ЯЧСМИТЬБЮ,"
@@ -20,7 +20,7 @@ def fix_layout(s):
     return new_s
 
 
-class Fix(CommonCommand):
+class Fix(Command):
     name = "фикс"
     names = ["раскладка"]
     help_text = "исправляет раскладку текста"
@@ -32,8 +32,8 @@ class Fix(CommonCommand):
     args_or_fwd = 1
 
     def start(self):
-        if self.event.args:
-            msgs = fix_layout(self.event.original_args)
+        if self.event.message.args:
+            msgs = fix_layout(self.event.message.args_str)
         else:
             msgs = ""
             for msg in self.event.fwd:

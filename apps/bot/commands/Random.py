@@ -1,8 +1,8 @@
-from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import get_random_int
+from apps.bot.classes.Command import Command
+from apps.bot.utils.utils import get_random_int
 
 
-class Random(CommonCommand):
+class Random(Command):
     name = "рандом"
     names = ["ранд", 'р', 'p']
     help_text = "рандомное число в заданном диапазоне"
@@ -14,13 +14,13 @@ class Random(CommonCommand):
     int_args = [0, 1]
 
     def start(self):
-        if self.event.args:
-            if len(self.event.args) == 2:
-                int1 = self.event.args[0]
-                int2 = self.event.args[1]
+        if self.event.message.args:
+            if len(self.event.message.args) == 2:
+                int1 = self.event.message.args[0]
+                int2 = self.event.message.args[1]
             else:
                 int1 = 1
-                int2 = self.event.args[0]
+                int2 = self.event.message.args[0]
                 self.check_number_arg_range(int2, 2)
         else:
             int1 = 0

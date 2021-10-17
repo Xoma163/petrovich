@@ -2,16 +2,16 @@ import json
 import random
 from io import BytesIO
 
-from apps.bot.classes.Consts import Platform, Role
-from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.QuotesGenerator import QuotesGenerator
-from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import get_urls_from_text
+from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.Consts import Platform, Role
+from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.models import Users
+from apps.bot.utils.QuotesGenerator import QuotesGenerator
+from apps.bot.utils.utils import get_urls_from_text
 from apps.service.models import Service
 
 
-class Nostalgia(CommonCommand):
+class Nostalgia(Command):
     name = "ностальгия"
     names = ["ностальжи", "(с)"]
     help_text = "генерирует картинку с сообщениями из конфы беседки мразей"
@@ -29,24 +29,24 @@ class Nostalgia(CommonCommand):
     DEFAULT_MSGS_COUNT = 10
 
     def start(self):
-        if self.event.args:
-            arg0 = str(self.event.args[0]).lower()
+        if self.event.message.args:
+            arg0 = str(self.event.message.args[0]).lower()
         else:
             arg0 = None
 
-        if self.event.args:
-            if len(self.event.args) == 2:
+        if self.event.message.args:
+            if len(self.event.message.args) == 2:
                 self.int_args = [0, 1]
                 try:
                     self.parse_int()
-                    return self.menu_range(self.event.args[0], self.event.args[1])
+                    return self.menu_range(self.event.message.args[0], self.event.message.args[1])
                 except PWarning:
                     pass
             else:
                 self.int_args = [0]
                 try:
                     self.parse_int()
-                    return self.menu_range(self.event.args[0])
+                    return self.menu_range(self.event.message.args[0])
                 except PWarning:
                     pass
 
@@ -84,7 +84,7 @@ class Nostalgia(CommonCommand):
         return "\n".join(all_atts)
 
     def menu_default(self):
-        if self.event.args:
+        if self.event.message.args:
             return self.menu_search()
         return self.menu_range()
 
@@ -93,13 +93,13 @@ class Nostalgia(CommonCommand):
         data = self._load_file()
 
         try:
-            page = int(self.event.args[-1])
+            page = int(self.event.message.args[-1])
             if page < 1:
                 page = 1
-            search_list = self.event.args[:-1]
+            search_list = self.event.message.args[:-1]
         except ValueError:
             page = 1
-            search_list = self.event.args
+            search_list = self.event.message.args
 
         search_query = " ".join(search_list)
 
@@ -119,13 +119,14 @@ class Nostalgia(CommonCommand):
         for i in range(first_item, last_item):
             index = searched_indexes[i]
             author = data[index]['author'].split(' ')[0]
-            buttons.append({'command': self.name, 'button_text': f"{author}: {data[index]['text']}", 'args': [index + 1]})
+            buttons.append(
+                {'command': self.name, 'button_text': f"{author}: {data[index]['text']}", 'args': [index + 1]})
         # if not last_item == len(searched_indexes):
         #     buttons.append({'command': self.name, 'button_text': f"Далее (Страница {page + 1})", 'args': [search_query, page + 1]})
 
         keyboard = self.bot.get_inline_keyboard(buttons)
 
-        return {"msg": f"Результаты по запросу {search_query}.\n\nСтраница {page}/{total_pages}", "keyboard": keyboard}
+        return {"text": f"Результаты по запросу {search_query}.\n\nСтраница {page}/{total_pages}", "keyboard": keyboard}
 
     def menu_range(self, index_from: int = None, index_to: int = None):
         data = self._load_file()
@@ -178,7 +179,7 @@ class Nostalgia(CommonCommand):
 
         keyboard = self.bot.get_inline_keyboard(buttons)
 
-        return {"msg": msg, "attachments": attachments, "keyboard": keyboard}
+        return {"text": msg, "attachments": attachments, "keyboard": keyboard}
 
     @staticmethod
     def _load_file() -> list:

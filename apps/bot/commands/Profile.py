@@ -2,14 +2,15 @@ from datetime import datetime
 
 from apps.bot.APIs.TimezoneDBAPI import TimezoneDBAPI
 from apps.bot.APIs.YandexGeoAPI import YandexGeoAPI
-from apps.bot.classes.Consts import Platform
-from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import get_attachments_from_attachments_or_fwd
+from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.Consts import Platform
+from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
+from apps.bot.utils.utils import get_attachments_from_attachments_or_fwd
 from apps.service.models import City, TimeZone
 
 
-class Profile(CommonCommand):
+class Profile(Command):
     name = "профиль"
     help_text = "позволяет управлять вашим профилем"
     help_texts = [
@@ -26,8 +27,8 @@ class Profile(CommonCommand):
     ]
 
     def start(self):
-        if self.event.args:
-            arg0 = self.event.args[0].lower()
+        if self.event.message.args:
+            arg0 = self.event.message.args[0].lower()
         else:
             arg0 = None
 
@@ -46,13 +47,13 @@ class Profile(CommonCommand):
 
     def menu_city(self):
         self.check_args(2)
-        arg1 = self.event.args[1]
+        arg1 = self.event.message.args[1]
         if arg1 == 'добавить':
-            city_name = " ".join(self.event.args[2:])
+            city_name = " ".join(self.event.message.args[2:])
             city = add_city_to_db(city_name)
             return f"Добавил новый город - {city.name}"
         else:
-            city_name = " ".join(self.event.args[1:])
+            city_name = " ".join(self.event.message.args[1:])
             city = City.objects.filter(synonyms__icontains=city_name).first()
             if not city:
                 raise PWarning("Не нашёл такого города. /профиль город добавить (название)")
@@ -62,7 +63,7 @@ class Profile(CommonCommand):
 
     def menu_bd(self):
         self.check_args(2)
-        birthday = self.event.args[1]
+        birthday = self.event.message.args[1]
         date_time_obj = datetime.strptime(birthday, '%d.%m.%Y')
         self.event.sender.birthday = date_time_obj.date()
         self.event.sender.save()
@@ -70,28 +71,28 @@ class Profile(CommonCommand):
 
     def menu_nickname(self):
         self.check_args(2)
-        nickname = " ".join(self.event.args[1:])
+        nickname = " ".join(self.event.message.args[1:])
         self.event.sender.nickname_real = nickname
         self.event.sender.save()
         return f"Изменил никнейм на {self.event.sender.nickname_real}"
 
     def menu_name(self):
         self.check_args(2)
-        name = " ".join(self.event.args[1:])
+        name = " ".join(self.event.message.args[1:])
         self.event.sender.name = name
         self.event.sender.save()
         return f"Изменил имя на {self.event.sender.name}"
 
     def menu_surname(self):
         self.check_args(2)
-        surname = " ".join(self.event.args[1:])
+        surname = " ".join(self.event.message.args[1:])
         self.event.sender.surname = surname
         self.event.sender.save()
         return f"Изменил фамилию на {self.event.sender.surname}"
 
     def menu_gender(self):
         self.check_args(2)
-        gender = self.event.args[1]
+        gender = self.event.message.args[1]
         if gender in ['мужской', 'м', 'муж']:
             gender_code = self.event.sender.GENDER_MALE
         elif gender in ['женский', 'ж', 'жен']:
@@ -103,9 +104,9 @@ class Profile(CommonCommand):
         return f"Изменил пол на {self.event.sender.get_gender_display()}"
 
     def menu_avatar(self):
-        images = get_attachments_from_attachments_or_fwd(self.event, 'photo')
+        images = get_attachments_from_attachments_or_fwd(self.event, [PhotoAttachment])
         if len(images) > 0:
-            self.event.sender.set_avatar(images[0]['private_download_url'])
+            self.event.sender.set_avatar(images[0].get_download_url())
         else:
             if self.event.platform != Platform.VK:
                 raise PWarning("Обновление аватара по пользователю доступно только для ВК")
@@ -127,7 +128,7 @@ class Profile(CommonCommand):
         _name = user.name or "Не установлено"
         _surname = user.surname or "Не установлено"
         msg = {
-            'msg': f"Город - {_city}\n"
+            'text': f"Город - {_city}\n"
                    f"Имя - {_name}\n"
                    f"Фамилия - {_surname}\n"
                    f"Дата рождения - {_bd}\n"

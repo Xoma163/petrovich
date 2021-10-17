@@ -1,10 +1,10 @@
 from apps.bot.APIs.amazon.AmazonTranslateAPI import AmazonTranslateAPI
-from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import has_cyrillic
+from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.utils.utils import has_cyrillic
 
 
-class Translate(CommonCommand):
+class Translate(Command):
     name = "перевод"
     names = ["переведи"]
     help_text = "автоматический переводчик"
@@ -16,7 +16,7 @@ class Translate(CommonCommand):
     def start(self):
         fwd = self.event.fwd
         if not fwd:
-            text = self.event.original_args
+            text = self.event.message.args_str
         else:
             text = ""
             for msg in fwd:

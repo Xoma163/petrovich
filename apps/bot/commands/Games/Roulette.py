@@ -1,10 +1,10 @@
 import datetime
 from threading import Lock
 
-from apps.bot.classes.Consts import Role
-from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import random_event, localize_datetime, remove_tz, decl_of_num, \
+from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.Consts import Role
+from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.utils.utils import random_event, localize_datetime, remove_tz, decl_of_num, \
     get_random_int
 from apps.games.models import RouletteRate, Gamer
 # Кратно 12
@@ -66,7 +66,7 @@ def generate_translator():
 TRANSLATOR = generate_translator()
 
 
-class Roulette(CommonCommand):
+class Roulette(Command):
     name = "рулетка"
     help_text = "игра рулетка"
     help_texts = [
@@ -86,9 +86,9 @@ class Roulette(CommonCommand):
 
     def start(self):
         self.gamer = self.bot.get_gamer_by_user(self.event.sender)
-        if not self.event.args:
+        if not self.event.message.args:
             return self.menu_play()
-        arg0 = self.event.args[0].lower()
+        arg0 = self.event.message.args[0].lower()
 
         menu = [
             [['баланс'], self.menu_balance],
@@ -103,8 +103,8 @@ class Roulette(CommonCommand):
         return method()
 
     def menu_balance(self):
-        if len(self.event.args) > 1:
-            username = " ".join(self.event.args[1:])
+        if len(self.event.message.args) > 1:
+            username = " ".join(self.event.message.args[1:])
             user = self.bot.get_user_by_name(username, self.event.chat)
             user_gamer = Gamer.objects.filter(user=user).first()
             if not user_gamer:
@@ -139,12 +139,12 @@ class Roulette(CommonCommand):
         self.check_args()
         self.parse_int()
 
-        points_transfer = self.event.args[-1]
+        points_transfer = self.event.message.args[-1]
         if points_transfer > self.gamer.roulette_points:
             raise PWarning("Недостаточно очков")
         if points_transfer <= 0:
             raise PWarning("Очков должно быть >0")
-        username = " ".join(self.event.args[1:-1])
+        username = " ".join(self.event.message.args[1:-1])
         user = self.bot.get_user_by_name(username, self.event.chat)
         user_gamer = self.bot.get_gamer_by_user(user)
         if not user_gamer:
@@ -167,9 +167,9 @@ class Roulette(CommonCommand):
         self.check_args()
         self.parse_int()
 
-        points_transfer = self.event.args[-1]
+        points_transfer = self.event.message.args[-1]
 
-        username = " ".join(self.event.args[1:-1])
+        username = " ".join(self.event.message.args[1:-1])
         user = self.bot.get_user_by_name(username, self.event.chat)
         user_gamer = self.bot.get_gamer_by_user(user)
         if not user_gamer:
@@ -187,7 +187,7 @@ class Roulette(CommonCommand):
             return "ммм"
 
     def menu_rates(self):
-        if self.event.from_chat:
+        if self.event.is_from_chat:
             rrs = RouletteRate.objects.filter(chat=self.event.chat)
         else:
             rrs = RouletteRate.objects.filter(chat__isnull=True, gamer=self.gamer)
@@ -201,17 +201,17 @@ class Roulette(CommonCommand):
         return msg
 
     def menu_rate_on(self):
-        rate_on = self.event.args[0].lower()
+        rate_on = self.event.message.args[0].lower()
         # rate_is_int = str_is_int(rate_on)
         if rate_on in TRANSLATOR:  # or rate_is_int:
             self.args = 2
             self.check_args()
-            if self.event.args[-1].lower() == 'все':
+            if self.event.message.args[-1].lower() == 'все':
                 rate = self.gamer.roulette_points
             else:
                 self.int_args = [-1]
                 self.parse_int()
-                rate = self.event.args[-1]
+                rate = self.event.message.args[-1]
             if rate <= 0:
                 raise PWarning("Ставка не может быть ⩽0")
             if rate > self.gamer.roulette_points:
@@ -222,7 +222,7 @@ class Roulette(CommonCommand):
                 self.int_args = [1, 2]
                 self.check_args()
                 self.parse_int()
-                rowcol = self.event.args[1]
+                rowcol = self.event.message.args[1]
                 self.check_number_arg_range(rowcol, 1, 3)
 
                 rate_obj = TRANSLATOR[rate_on][rowcol]
@@ -243,7 +243,7 @@ class Roulette(CommonCommand):
 
     def menu_play(self):
         with lock:
-            if self.event.from_chat:
+            if self.event.is_from_chat:
                 rrs = RouletteRate.objects.filter(chat=self.event.chat)
             else:
                 rrs = RouletteRate.objects.filter(chat__isnull=True, gamer=self.gamer)

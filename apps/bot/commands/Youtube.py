@@ -2,15 +2,15 @@ import requests
 from bs4 import BeautifulSoup
 
 from apps.bot.APIs.YoutubeInfo import YoutubeInfo
-from apps.bot.classes.Consts import Role, Platform
-from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.Consts import Role, Platform
+from apps.bot.classes.consts.Exceptions import PWarning
 from apps.service.models import YoutubeSubscribe
 
 MAX_USER_SUBS_COUNT = 3
 
 
-class YouTube(CommonCommand):
+class YouTube(Command):
     name = "ютуб"
     help_text = "создаёт подписку на ютуб канал"
     help_texts = [
@@ -27,7 +27,7 @@ class YouTube(CommonCommand):
     platforms = [Platform.VK, Platform.TG]
 
     def start(self):
-        arg0 = self.event.args[0].lower()
+        arg0 = self.event.message.args[0].lower()
         menu = [
             [['добавить', 'подписаться', 'подписка'], self.menu_add],
             [['удалить', 'отписаться', 'отписка'], self.menu_delete],
@@ -39,12 +39,12 @@ class YouTube(CommonCommand):
 
     def menu_add(self):
         self.check_args(2)
-        channel_url = self.event.args[1]
+        channel_url = self.event.message.args[1]
         try:
             response = requests.get(channel_url)
             bsop = BeautifulSoup(response.content, 'html.parser')
             channel_id = bsop.find_all('link', {'rel': 'canonical'})[0].attrs['href'].split('/')[-1]
-        except:
+        except Exception:
             return PWarning("Некорректная ссылка на ютуб канал")
 
         if self.event.chat:
@@ -75,7 +75,7 @@ class YouTube(CommonCommand):
 
     def menu_delete(self):
         self.check_args(2)
-        channel_filter = self.event.args[1:]
+        channel_filter = self.event.message.args[1:]
         yt_sub = self.get_sub(channel_filter, True)
         yt_sub_title = yt_sub.title
         yt_sub.delete()

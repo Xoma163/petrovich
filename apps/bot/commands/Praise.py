@@ -1,7 +1,7 @@
-from apps.bot.classes.Consts import BAD_ANSWERS
-from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import random_event
+from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.Consts import BAD_ANSWERS
+from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.utils.utils import random_event
 from apps.service.models import Words
 
 gender_translator = {
@@ -39,20 +39,20 @@ def add_phrase_before(recipient, word, field_name):
 
 
 def get_praise_or_scold(bot, event, _type):
-    if event.original_args and event.args[-1].replace('-', '') in gender_translator:
-        translator_key = event.args[-1].replace('-', '')
-        del event.args[-1]
+    if event.message.args_str and event.message.args[-1].replace('-', '') in gender_translator:
+        translator_key = event.message.args[-1].replace('-', '')
+        del event.message.args[-1]
     else:
         try:
-            user = bot.get_user_by_name(event.original_args, event.chat)
+            user = bot.get_user_by_name(event.message.args_str, event.chat)
             if user.gender == '1':
                 translator_key = 'ж1'
             else:
                 translator_key = 'м1'
         except PWarning:
             translator_key = 'м1'
-    if event.args:
-        recipient = " ".join(event.args)
+    if event.message.args:
+        recipient = " ".join(event.message.args)
 
         if "петрович" in recipient.lower():
             if _type == 'bad':
@@ -81,7 +81,7 @@ def get_praise_or_scold_self(event, _type):
     return msg
 
 
-class Praise(CommonCommand):
+class Praise(Command):
     name = 'похвалить'
     names = ["похвали", "хвалить"]
     help_text = " рандомная похвала"

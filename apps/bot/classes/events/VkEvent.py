@@ -1,101 +1,125 @@
-from apps.bot.classes.events.Event import Event, auto_str
-from petrovich.settings import VK_URL
+import json
+
+from apps.bot.classes.events.Event import Event
+from apps.bot.classes.messages.Message import Message
+from apps.bot.classes.messages.attachments.AudioAttachment import AudioAttachment
+from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
+from apps.bot.classes.messages.attachments.StickerAttachment import StickerAttachment
+from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
+from apps.bot.classes.messages.attachments.VoiceAttachment import VoiceAttachment
 
 
-@auto_str
 class VkEvent(Event):
 
-    @staticmethod
-    def get_max_size_image(attachment_type):
-        max_size_image = attachment_type['sizes'][0]
-        max_size_width = max_size_image['width']
-        for size in attachment_type['sizes']:
-            if size['width'] > max_size_width:
-                max_size_image = size
-                max_size_width = size['width']
-        return max_size_image
+    def setup_event(self, is_fwd=False):
+        if is_fwd:
+            message = self.raw
+            chat_id = None
+            self.peer_id = message['from_id']
+            if self.peer_id > 0:
+                self.is_from_user = True
+            else:
+                self.is_from_bot = True
 
-    @staticmethod
-    def get_max_size_sticker(stickers):
-        max_size_sticker = stickers[0]
-        max_width_sticker = max_size_sticker['width']
-        for sticker in stickers:
-            if sticker['width'] > max_width_sticker:
-                max_size_sticker = sticker
-                max_width_sticker = sticker['width']
-        return max_size_sticker
-
-    @staticmethod
-    def get_sticker_128(stickers):
-        for sticker in stickers:
-            if sticker['width'] == 128:
-                return sticker
-
-    def parse_attachments(self, attachments):
-        """
-        Распаршивание вложений
-        """
-        new_attachments = []
-
-        if attachments:
-            for attachment in attachments:
-                attachment_type = attachment[attachment['type']]
-
-                new_attachment = {
-                    'type': attachment['type']
-                }
-                if 'owner_id' in attachment_type:
-                    new_attachment['owner_id'] = attachment_type['owner_id']
-                if 'id' in attachment_type:
-                    new_attachment['id'] = attachment_type['id']
-                if attachment['type'] in ['photo', 'video', 'audio', 'doc']:
-                    new_attachment[
-                        'vk_url'] = f"{attachment['type']}{attachment_type['owner_id']}_{attachment_type['id']}"
-                    new_attachment['url'] = f"{VK_URL}{new_attachment['vk_url']}"
-                if attachment['type'] == 'photo':
-                    max_size_image = self.get_max_size_image(attachment_type)
-                    new_attachment['download_url'] = max_size_image['url']
-                    new_attachment['private_download_url'] = max_size_image['url']
-                    new_attachment['size'] = {
-                        'width': max_size_image['width'],
-                        'height': max_size_image['height']
-                    }
-                elif attachment['type'] == 'video':
-                    new_attachment['title'] = attachment_type['title']
-                elif attachment['type'] == 'audio':
-                    new_attachment['artist'] = attachment_type['artist']
-                    new_attachment['title'] = attachment_type['title']
-                    new_attachment['duration'] = attachment_type['duration']
-                    new_attachment['download_url'] = attachment_type['url']
-                elif attachment['type'] == 'doc':
-                    new_attachment['title'] = attachment_type['title']
-                    new_attachment['ext'] = attachment_type['ext']
-                    new_attachment['download_url'] = attachment_type['url']
-                    new_attachment['content'] = None
-
-                elif attachment['type'] == 'wall':
-                    if 'attachments' in attachment_type:
-                        new_attachment['attachments'] = self.parse_attachments(attachment_type['attachments'])
-                    elif 'copy_history' in attachment_type and len(
-                            attachment_type['copy_history']) > 0 and 'attachments' in \
-                            attachment_type['copy_history'][0]:
-                        new_attachment['attachments'] = self.parse_attachments(
-                            attachment_type['copy_history'][0]['attachments'])
-                elif attachment['type'] == 'audio_message':
-                    new_attachment['download_url'] = attachment_type['link_mp3']
-                    new_attachment['duration'] = attachment_type['duration']
-                elif attachment['type'] == 'link':
-                    new_attachment['url'] = attachment_type['url']
-                    new_attachment['title'] = attachment_type['title']
-                    new_attachment['description'] = attachment_type['description']
-                    new_attachment['caption'] = attachment_type['caption']
-
-                new_attachments.append(new_attachment)
-
-        if new_attachments and len(new_attachments) > 0:
-            return new_attachments
         else:
-            return None
+            message = self.raw.message
+            chat_id = self.raw.chat_id
 
-    def __init__(self, event):
-        super().__init__(event)
+            self.is_from_chat = self.raw.from_chat
+            self.is_from_user = self.raw.from_user
+            self.is_from_bot = self.raw.from_group
+
+            self.peer_id = message['peer_id']
+
+        from_id = message['from_id']
+        if from_id > 0:
+            self.sender = self.bot.get_user_by_id(from_id)
+
+        if chat_id:
+            self.chat = self.bot.get_chat_by_id(chat_id)
+
+        self.setup_action(message.get('action'))
+        payload = message.get('payload')
+        if payload:
+            self.setup_payload(payload)
+        else:
+            is_cropped = message.get('is_cropped')
+            if is_cropped:
+                conversation_message_id = message['conversation_message_id']
+                message = self.bot.get_conversation_messages(self.peer_id, conversation_message_id)
+            self.setup_attachments(message['attachments'])
+            self.setup_fwd(message.get('fwd_messages') or message.get('reply_message', []))
+            self.set_message(message['text'], message['id'])
+
+        if self.sender and self.chat:
+            self.bot.add_chat_to_user(self.sender, self.chat)
+
+    def setup_action(self, action):
+        if not action:
+            return
+        _type = action.get('type', None)
+        body = {
+            'id': action['member_id'] if action['member_id'] > 0 else -action['member_id'],
+            'is_bot': action['member_id'] < 0
+        }
+
+        if _type in ['chat_invite_user', 'chat_invite_user_by_link']:
+            self.action = {
+                'new_chat_members': [body]
+            }
+        elif _type in ['chat_kick_user']:
+            self.action = {
+                'left_chat_member': [body]
+            }
+
+    def setup_payload(self, payload):
+        self.payload = json.loads(payload)
+        self.message = Message()
+        self.message.parse_from_payload(self.payload)
+
+    def setup_attachments(self, attachments):
+        routing_dict = {
+            'photo': self.setup_photo,
+            'video': self.setup_video,
+            'audio': self.setup_audio,
+            'audio_message': self.setup_voice,
+            'sticker': self.setup_sticker
+        }
+        for attachment in attachments:
+            _type = attachment['type']
+            method = routing_dict.get(_type)
+            if method:
+                method(attachment[_type])
+
+    def setup_photo(self, photo):
+        vk_photo = PhotoAttachment()
+        vk_photo.parse_vk_photo(photo)
+        self.attachments.append(vk_photo)
+
+    def setup_video(self, video):
+        vk_video = VideoAttachment()
+        vk_video.parse_vk_video(video)
+        self.attachments.append(vk_video)
+
+    def setup_audio(self, video):
+        vk_audio = AudioAttachment()
+        vk_audio.parse_vk_audio(video)
+        self.attachments.append(vk_audio)
+
+    def setup_voice(self, voice):
+        vk_voice = VoiceAttachment()
+        vk_voice.parse_vk_voice(voice)
+        self.attachments.append(vk_voice)
+
+    def setup_sticker(self, sticker):
+        vk_sticker = StickerAttachment()
+        vk_sticker.parse_vk_sticker(sticker)
+        self.attachments.append(vk_sticker)
+
+    def setup_fwd(self, fwd):
+        if not isinstance(fwd, list):
+            fwd = [fwd]
+        for fwd_message in fwd:
+            fwd_event = VkEvent(fwd_message, self.bot)
+            fwd_event.setup_event(is_fwd=True)
+            self.fwd.append(fwd_event)

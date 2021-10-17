@@ -3,10 +3,10 @@ from datetime import datetime, timedelta
 import dateutil
 from dateutil import parser
 
-from apps.bot.classes.Consts import WEEK_TRANSLATOR, Role, DELTA_WEEKDAY, Platform
-from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import localize_datetime, normalize_datetime, remove_tz
+from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.Consts import WEEK_TRANSLATOR, Role, DELTA_WEEKDAY, Platform
+from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.utils.utils import localize_datetime, normalize_datetime, remove_tz
 from apps.service.models import Notify as NotifyModel
 
 
@@ -41,8 +41,7 @@ def get_time(arg1, arg2, timezone=None):
             return None, None, None
 
 
-# ToDo: TG вложения
-class Notify(CommonCommand):
+class Notify(Command):
     name = 'напомни'
     names = ["напомнить"]
     help_text = "напоминает о чём-либо"
@@ -59,7 +58,7 @@ class Notify(CommonCommand):
             raise PWarning("Нельзя добавлять более 5 напоминаний")
         timezone = self.event.sender.city.timezone.name
 
-        date, args_count, exact_time_flag = get_time(self.event.args[0], self.event.args[1],
+        date, args_count, exact_time_flag = get_time(self.event.message.args[0], self.event.message.args[1],
                                                      self.event.sender.city.timezone)
         if args_count == 2:
             self.check_args(3)
@@ -75,7 +74,7 @@ class Notify(CommonCommand):
         if (date - datetime_now).days < 0 or (datetime_now - date).seconds < 0:
             raise PWarning("Нельзя указывать дату в прошлом")
 
-        text = self.event.original_args.split(' ', args_count)[args_count]
+        text = self.event.message.args_str.split(' ', args_count)[args_count]
         if text[0] == '/':
             first_space = text.find(' ')
             if first_space > 0:

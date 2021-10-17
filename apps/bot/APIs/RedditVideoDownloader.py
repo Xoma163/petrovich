@@ -5,7 +5,7 @@ from urllib.parse import urlparse
 import requests
 from bs4 import BeautifulSoup
 
-from apps.bot.classes.Exceptions import PWarning
+from apps.bot.classes.consts.Exceptions import PWarning
 
 
 class RedditVideoSaver:
@@ -31,12 +31,12 @@ class RedditVideoSaver:
             filename = bs4.find("adaptationset", {'contenttype': 'audio'}).find('representation').find('baseurl').text
             self.set_audio_filename(filename)
             return filename
-        except:
+        except Exception:
             try:
                 filename = bs4.find("representation", {'id': 'AUDIO-1'}).find('baseurl').text
                 self.set_audio_filename(filename)
                 return filename
-            except:
+            except Exception:
                 return None
 
     def get_reddit_video_audio_urls(self, post_url):

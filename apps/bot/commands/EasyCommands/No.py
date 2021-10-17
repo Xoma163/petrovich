@@ -1,7 +1,7 @@
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.Command import Command
 
 
-class No(CommonCommand):
+class No(Command):
     name = "нет"
     suggest_for_similar = False
 

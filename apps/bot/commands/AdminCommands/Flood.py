@@ -1,8 +1,8 @@
-from apps.bot.classes.Consts import Role, Platform
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.Consts import Role, Platform
 
 
-class Flood(CommonCommand):
+class Flood(Command):
     name = "флуд"
     help_text = "флудит"
     help_texts = ["(N) - флудит N сообщений"]
@@ -12,7 +12,7 @@ class Flood(CommonCommand):
     platforms = [Platform.VK, Platform.TG]
 
     def start(self):
-        msg = "ыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыы"
-        count = self.event.args[0]
-        msgs = [{'msg': msg}] * count
+        text = "ыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыы"
+        count = self.event.message.args[0]
+        msgs = [{'text': text}] * count
         return msgs

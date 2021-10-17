@@ -1,8 +1,8 @@
 import transliterate
 
-from apps.bot.classes.Exceptions import PWarning
-from apps.bot.classes.common.CommonCommand import CommonCommand
-from apps.bot.classes.common.CommonMethods import has_cyrillic
+from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.utils.utils import has_cyrillic
 
 
 def get_en_transliterate(msg):
@@ -13,7 +13,7 @@ def get_ru_transliterate(msg):
     return transliterate.translit(msg, 'ru')
 
 
-class Transliteration(CommonCommand):
+class Transliteration(Command):
     name = "транслит"
     help_text = "автоматическая транслитерация"
     help_texts = [
@@ -23,7 +23,7 @@ class Transliteration(CommonCommand):
     def start(self):
         msgs = self.event.fwd
         if not msgs:
-            msgs = [{'text': self.event.original_args, 'from_id': int(self.event.sender.user_id)}]
+            msgs = [{'text': self.event.message.args_str, 'from_id': int(self.event.sender.user_id)}]
         translite_text = ""
         for msg in msgs:
             if msg['text']:

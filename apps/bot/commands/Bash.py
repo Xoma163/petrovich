@@ -1,10 +1,10 @@
 from apps.bot.APIs.BashAPI import BashAPI
-from apps.bot.classes.common.CommonCommand import CommonCommand
+from apps.bot.classes.Command import Command
 
 MAX_QUOTES = 20
 
 
-class Bash(CommonCommand):
+class Bash(Command):
     name = "баш"
     help_text = "рандомная цитата с баша"
     help_texts = ["[количество=5] - рандомная цитата с баша. Максимум 20 цитат"]
@@ -12,15 +12,14 @@ class Bash(CommonCommand):
 
     def start(self):
         quotes_count = 5
-        if self.event.args:
+        if self.event.message.args:
             self.parse_int()
-            quotes_count = self.event.args[0]
+            quotes_count = self.event.message.args[0]
             self.check_number_arg_range(quotes_count, 1, MAX_QUOTES)
         bash_api = BashAPI(quotes_count)
         msg = bash_api.parse()
         return {
-            "msg": msg,
-
-
-            "keyboard": self.bot.get_inline_keyboard([{'command': self.name, 'button_text': "Ещё", 'args':{"quotes_count": quotes_count}}])
+            "text": msg,
+            "keyboard": self.bot.get_inline_keyboard(
+                [{'command': self.name, 'button_text': "Ещё", 'args': [quotes_count]}])
         }
