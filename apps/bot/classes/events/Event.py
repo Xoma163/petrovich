@@ -84,6 +84,11 @@ class Event:
                                     self.fwd[0].message.clear) in MEDIA_URLS)
         if message_is_media_link:
             return True
+
+        is_e = self.message.raw = 'ё'
+        if is_e:
+            return True
+
         return False
 
     @property
