@@ -105,27 +105,6 @@ class TgBot(CommonBot):
 
     # ToDo: это общие методы?
     @staticmethod
-    def upload_photos(images, max_count=10):
-        """
-        Загрузка фотографий на сервер ТГ.
-        images: список изображений в любом формате (ссылки, байты, файлы)
-        При невозможности загрузки одной из картинки просто пропускает её
-        """
-        if not isinstance(images, list):
-            images = [images]
-        attachments = []
-        for image in images:
-            try:
-                pa = PhotoAttachment()
-                pa.parse_response(image, ['jpg', 'jpeg', 'png'])
-                attachments.append(pa)
-            except Exception:
-                continue
-            if len(attachments) >= max_count:
-                break
-        return attachments
-
-    @staticmethod
     def upload_video(video, peer_id=None, title="Видео", filename=None):
         va = VideoAttachment()
         va.parse_response(video, filename=filename)

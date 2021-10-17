@@ -395,36 +395,6 @@ class VkBot(CommonBot):
         return self.get_attachment_by_id('doc', vk_document['owner_id'], vk_document['id'])
 
 
-    @staticmethod
-    def get_inline_keyboard(buttons: list, cols=1):
-
-        """
-        param buttons: [(button_name, args), ...]
-        Получение инлайн-клавиатуры с одной кнопкой
-        В основном используется для команд, где нужно запускать много команд и лень набирать заново
-        """
-
-        def get_buttons(_buttons):
-            return [{
-                'action': {
-                    'type': 'text',
-                    'label': button_item['button_text'],
-                    "payload": json.dumps({
-                        "command": button_item['command'],
-                        "args": button_item.get('args'),
-                    }, ensure_ascii=False)
-                },
-                'color': 'primary',
-            } for button_item in _buttons]
-
-        for i, _ in enumerate(buttons):
-            if 'args' not in buttons[i] or buttons[i]['args'] is None:
-                buttons[i]['args'] = {}
-        buttons_chunks = get_chunks(buttons, cols)
-        return {
-            'inline': True,
-            'buttons': [get_buttons(chunk) for chunk in buttons_chunks]
-        }
 
     @staticmethod
     def get_group_id(_id) -> str:

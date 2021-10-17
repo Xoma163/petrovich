@@ -8,6 +8,7 @@ from apps.bot.classes.consts.Consts import Platform, Role
 from apps.bot.classes.consts.Exceptions import PWarning, PError, PSkip
 from apps.bot.classes.events.Event import Event
 from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
+from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 from apps.bot.models import Users, Chat, Bot as BotModel
 from apps.bot.utils.utils import tanimoto
 from apps.games.models import Gamer
@@ -247,6 +248,26 @@ class Bot(Thread):
         """
         raise NotImplementedError
 
+    def upload_photos(self, images, max_count=10):
+        """
+        Загрузка фотографий на сервер ТГ.
+        images: список изображений в любом формате (ссылки, байты, файлы)
+        При невозможности загрузки одной из картинки просто пропускает её
+        """
+        if not isinstance(images, list):
+            images = [images]
+        attachments = []
+        for image in images:
+            try:
+                pa = PhotoAttachment()
+                pa.parse_response(image, ['jpg', 'jpeg', 'png'])
+                attachments.append(pa)
+            except Exception:
+                continue
+            if len(attachments) >= max_count:
+                break
+        return attachments
+
 
 def get_bot_by_platform(platform: Platform):
     """
@@ -266,10 +287,11 @@ def get_bot_by_platform(platform: Platform):
 
 def get_moderator_bot_class():
     from apps.bot.classes.bots.TgBot import TgBot
-    return TgBot()
+    return TgBot
 
 
 # ToDo: check
 def upload_image_to_vk_server(image):
-    vk_bot = get_bot_by_platform(Platform.VK)
-    return vk_bot.upload_photo_and_get_absolute_url(image)
+    vk_bot = get_bot_by_platform(Platform.VK)()
+    photos = vk_bot.upload_photos(image, 1)
+    return photos[0].public_download_url

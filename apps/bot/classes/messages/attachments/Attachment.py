@@ -73,7 +73,7 @@ class Attachment:
     def get_download_url(self):
         return self.public_download_url if self.public_download_url else self.private_download_url
 
-    def download_content(self):
+    def download_content(self) -> bytes:
         if not self.content:
             self.content = requests.get(self.get_download_url()).content
         return self.content

@@ -18,7 +18,7 @@ class ResponseMessageItem:
 
         if isinstance(msg, dict):
             self.peer_id = peer_id
-            self.text = msg.get('text', None)
+            self.text = msg.get('text', "")
             self.attachments = msg.get('attachments', [])
             if not isinstance(self.attachments, list):
                 self.attachments = [self.attachments]

@@ -134,7 +134,7 @@ class Meme(Command):
                                    f"{new_meme_obj.name} ({new_meme_obj.id})"
 
             # Отправка сообщения в модераторную
-            m_bot = get_moderator_bot_class()
+            m_bot = get_moderator_bot_class()()
             m_bot.parse_and_send_msgs(self.bot.test_chat.chat_id, meme_to_send)
             return "Добавил. Воспользоваться мемом можно после проверки модераторами."
 
