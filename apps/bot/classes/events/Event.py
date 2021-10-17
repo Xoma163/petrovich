@@ -72,7 +72,7 @@ class Event:
         from apps.service.models import Meme
         from apps.bot.commands.TrustedCommands.Media import MEDIA_URLS
 
-        message_is_exact_meme_name = Meme.objects.filter(name__unaccent=self.message.raw.lower()).exists()
+        message_is_exact_meme_name = Meme.objects.filter(name=self.message.raw.lower()).exists()
         if message_is_exact_meme_name:
             return True
 

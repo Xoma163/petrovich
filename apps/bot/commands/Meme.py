@@ -13,13 +13,6 @@ from apps.service.models import Meme as MemeModel
 from petrovich.settings import VK_URL
 
 
-def check_name_exists(name):
-    return MemeModel.objects.filter(name__unaccent=name).exists()
-
-    # return MemeModel.objects.filter(name=name).exists()
-
-
-# noinspection PyUnresolvedReferences,PyUnresolvedReferences
 class Meme(Command):
     name = "мем"
     help_text = "присылает нужный мем"
@@ -45,10 +38,9 @@ class Meme(Command):
     priority = 70
 
     def accept(self, event):
-        if event.chat and event.message and check_name_exists(event.message.raw.lower()):
+        if event.chat and event.message and MemeModel.objects.filter(name=event.message.raw.lower()).exists():
             if not event.chat.need_meme:
                 raise PSkip()
-            event.message.args = event.message.raw.lower().split(' ')
             return True
         return super().accept(event)
 
@@ -145,13 +137,13 @@ class Meme(Command):
                 _id = int(self.event.message.args[1])
             except PWarning:
                 pass
-        meme_name = self.event.message.raw.split(' ')[2:]
+        meme_name = " ".join(self.event.message.args_case[1:]).lower()
 
         attachments = get_attachments_from_attachments_or_fwd(self.event,
                                                               [AudioAttachment, VideoAttachment, PhotoAttachment])
         if len(attachments) == 0:
             if len(self.event.message.args) > 2:
-                url = self.event.message.raw.split(' ')[-1]
+                url = self.event.message.args_case[-1]
                 try:
                     self._check_allowed_url(url)
                     attachments = [{'type': 'link', 'url': url}]
@@ -361,7 +353,7 @@ class Meme(Command):
                         memes = memes.filter(name__iregex=regex_filter)
                         flag_regex = True
                     else:
-                        memes = memes.filter(name__unaccent=_filter)
+                        memes = memes.filter(name__contains=_filter)
 
         if filter_user:
             memes = memes.filter(author=filter_user)

@@ -30,7 +30,7 @@ class Media(Command):
     def accept(self, event):
         if event.message and urlparse(event.message.command).hostname in MEDIA_URLS:
             return True
-        if event.fwd and event.fwd[0].message and urlparse(event.fwd[0].message.clear).hostname in MEDIA_URLS:
+        if event.fwd and event.fwd[0].message and urlparse(event.fwd[0].message.raw).hostname in MEDIA_URLS:
             return True
         return super().accept(event)
 
@@ -50,7 +50,7 @@ class Media(Command):
             else:
                 raise PWarning("Для работы команды требуются аргументы или пересылаемые сообщения")
         else:
-            url = self.event.message.clear
+            url = self.event.message.raw
 
         media_link_is_from = None
 

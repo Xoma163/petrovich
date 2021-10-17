@@ -8,15 +8,23 @@ class Message:
     def __init__(self, raw_str=None, _id=None):
         """
         raw - исходная строка
-        clear - произведены замены ',' на пробел, переведено в нижний регистр, ё->е
 
+        clear - произведены замены ',' на пробел, переведено в нижний регистр, ё->е
         command - команда
         args_str - аргументы строкой
         args - аргументы списком
-        args_case_str - аргументы с учётом регистра строкой
+
+        clear_case - произведены замены ',' на пробел, ё->е
         args_case - аргументы с учётом регистра списком
+        args_str_case - аргументы с учётом регистра строкой
+
         """
         self.has_command_symbols = False
+
+        self.args_str = ""
+        self.args = []
+        self.args_str_case = ""
+        self.args_case = []
 
         if not raw_str:
             return
@@ -26,20 +34,24 @@ class Message:
             self.has_command_symbols = True
             raw_str = raw_str[1:]
 
-        cleared_with_case = self.get_cleared_message(raw_str)
-        self.clear = cleared_with_case.lower()
+        clear_message = self.get_cleared_message(raw_str)
+
+        # No case
+        self.clear = clear_message.lower()
         msg_split = self.clear.split(' ', 1)
-        msg_case_split = cleared_with_case.split(' ', 1)
         self.command = msg_split[0]
-        self.args_str = None
-        self.args = None
-        self.args_case_str = None
-        self.args_case = None
         if len(msg_split) > 1:
             self.args_str = msg_split[1]
             self.args = self.args_str.split(' ')
-            self.args_case_str = msg_case_split[1]
-            self.args_case = self.args_case_str.split(' ')
+
+        # case
+        self.clear_case = clear_message
+        msg_case_split = clear_message.split(' ', 1)
+        self.args_str_case = None
+        self.args_case = None
+        if len(msg_case_split) > 1:
+            self.args_str_case = msg_case_split[1]
+            self.args_case = self.args_str_case.split(' ')
 
         self.id = _id
 

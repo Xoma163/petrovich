@@ -52,7 +52,7 @@ def get_praise_or_scold(bot, event, _type):
         except PWarning:
             translator_key = 'м1'
     if event.message.args:
-        recipient = " ".join(event.message.raw.split(' ')[1:])
+        recipient = " ".join(event.message.args_case)
 
         if "петрович" in recipient.lower():
             if _type == 'bad':

@@ -39,7 +39,7 @@ class YouTube(Command):
 
     def menu_add(self):
         self.check_args(2)
-        channel_url = self.event.message.args[1]
+        channel_url = self.event.message.args_case[1]
         try:
             response = requests.get(channel_url)
             bsop = BeautifulSoup(response.content, 'html.parser')
