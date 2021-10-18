@@ -21,13 +21,22 @@ class Message:
         """
         self.has_command_symbols = False
 
+        self.raw = ""
+        self.command = ""
+        self.clear = ""
+        self.clear_case = ""
         self.args_str = ""
         self.args = []
         self.args_str_case = ""
         self.args_case = []
+        self.id = _id
 
         if not raw_str:
             return
+
+        self.parse_raw(raw_str)
+
+    def parse_raw(self, raw_str):
         self.raw = raw_str
 
         if self.raw[0] in self.COMMAND_SYMBOLS:
@@ -53,8 +62,6 @@ class Message:
             self.args_str_case = msg_case_split[1]
             self.args_case = self.args_str_case.split(' ')
 
-        self.id = _id
-
     @staticmethod
     def get_cleared_message(msg):
         clear_msg = msg.replace(',', ' ')
@@ -64,16 +71,13 @@ class Message:
         return clear_msg
 
     def parse_from_payload(self, payload):
-        self.command = payload.get('command')
-        self.args = payload.get('args')
-        if self.args:
-            args = [str(x) for x in self.args]
-            self.args_str = " ".join(args)
-            self.raw = f"{self.command} {self.args_str}"
-        else:
-            self.raw = self.command
-        self.clear = self.get_cleared_message(self.raw)
-        self.id = None
+        command = payload.get('command')
+        args = payload.get('args')
+        raw = command
+        if args:
+            args = [str(x) for x in args]
+            raw += f" {' '.join(args)}"
+        self.parse_raw(raw)
 
     def to_log(self):
         dict_self = copy.copy(self.__dict__)
