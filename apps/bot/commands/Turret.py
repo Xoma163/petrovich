@@ -5,9 +5,10 @@ from apps.bot.utils.utils import random_probability, random_event
 
 class Turret(Command):
     conversation = True
+    priority = 85
 
     def accept(self, event):
-        if event.chat and event.chat.need_turret and random_probability(5):
+        if event.chat and event.chat.need_turret and random_probability(10):
             msg = random_event(TURRET_WORDS)
             event.bot.parse_and_send_msgs(event.peer_id, msg)
         return False
