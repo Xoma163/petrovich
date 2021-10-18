@@ -12,7 +12,7 @@ class Issue(Command):
     args = 1
 
     def start(self):
-        text = self.event.message.args_str
+        text = self.event.message.args_str_case
         username = str(self.event.sender)
         issue_text = f"{username}:\n{text}\n\n"
 
