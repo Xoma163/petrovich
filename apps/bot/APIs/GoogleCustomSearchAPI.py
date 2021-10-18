@@ -8,7 +8,7 @@ class GoogleCustomSearchAPI:
 
     def get_images_urls(self, query):
         querystring = {
-            "key": env.str("GOOGLE_CUSTOM_SEARCH_API_KEY"),
+            "key": env.str("GOOGLE_API_KEY"),
             "cx": env.str("GOOGLE_SEARCH_ENGINE_ID"),
             "searchType": "image",
             "safe": "active",
