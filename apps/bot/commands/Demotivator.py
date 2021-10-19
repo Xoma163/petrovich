@@ -22,7 +22,9 @@ class Demotivator(Command):
     def start(self):
         image = get_attachments_from_attachments_or_fwd(self.event, PhotoAttachment)[0]
 
-        texts = list(map(str.strip, self.event.message.args_str.split(';')))
+        text = self.event.message.raw.split(' ', 1)[1]
+
+        texts = list(map(str.strip, text.split(';')))
         if not texts[0]:
             return "Первая фраза обязательно должна быть"
 
