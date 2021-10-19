@@ -36,7 +36,7 @@ class Event:
         self.force_need_a_response: bool = False
 
     def setup_event(self, is_fwd=False):
-        raise NotImplementedError
+        pass
 
     # ToDo нужен ли ответ если чат может работать без палок
     def need_a_response(self):
@@ -110,13 +110,3 @@ class Event:
         dict_self['fwd'] = [x.to_log() for x in dict_self['fwd']]
         dict_self['attachments'] = [x.to_log() for x in dict_self['attachments']]
         return dict_self
-
-
-def get_event_by_platform(platform):
-    from apps.bot.classes.events.TgEvent import TgEvent
-    from apps.bot.classes.events.VkEvent import VkEvent
-    platforms = {
-        Platform.VK: VkEvent,
-        Platform.TG: TgEvent
-    }
-    return platforms[platform]

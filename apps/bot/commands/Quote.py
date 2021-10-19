@@ -46,7 +46,6 @@ class Quote(Command):
                 if not avatar and self.event.platform == Platform.VK:
                     self.bot.update_user_avatar(msg.from_id)
             else:
-                # ToDo: check this
                 quote_bot = self.bot.get_bot_by_id(msg.from_id)
                 username = str(quote_bot)
                 avatar = quote_bot.avatar
@@ -57,13 +56,11 @@ class Quote(Command):
                 if isinstance(photo, PhotoAttachment):
                     message['photo'] = photo.get_download_url()
 
-                # ToDo: check this
                 sticker = msg.attachments[0]
                 if isinstance(sticker, StickerAttachment):
                     message['photo'] = sticker.url
 
             # stack messages from one user
-            # ToDo: check this
             if msgs and msgs[-1]['username'] == username:
                 if next_append:
                     msgs.append({'username': username, 'message': message, 'avatar': avatar})
