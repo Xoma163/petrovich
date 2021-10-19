@@ -6,7 +6,7 @@ from django.core.management.base import BaseCommand
 
 from apps.bot.classes.bots.Bot import get_bot_by_platform
 from apps.bot.classes.consts.Consts import Role
-from apps.bot.classes.events.Event import get_event_by_platform
+from apps.bot.classes.events.Event import Event
 from apps.service.models import Notify
 from petrovich.settings import DEFAULT_TIME_ZONE
 
@@ -55,7 +55,6 @@ class Command(BaseCommand):
                     else:
                         platform = notify.author.get_platform_enum()
                     bot = get_bot_by_platform(platform)()
-                    event_model = get_event_by_platform(platform)
 
                     if notify.attachments and notify.attachments != "null":
                         notify_attachments = notify.attachments
@@ -85,7 +84,7 @@ class Command(BaseCommand):
                     # Если отложенная команда
 
                     if notify.text.startswith('/'):
-                        event = event_model(bot=bot)
+                        event = Event(bot=bot)
                         event.set_message(notify.text)
                         event.sender = notify.author
                         event.is_from_user = True
