@@ -5,6 +5,7 @@ from apps.bot.classes.consts.Consts import Platform, Role
 from apps.bot.classes.messages.Message import Message
 from apps.bot.classes.messages.attachments.VoiceAttachment import VoiceAttachment
 from apps.bot.models import Users, Chat
+from apps.bot.utils.utils import get_urls_from_text
 
 
 class Event:
@@ -53,8 +54,6 @@ class Event:
         if self.force_need_a_response:
             return True
 
-        if self.is_from_pm:
-            return True
         if self.payload:
             return True
 
@@ -64,7 +63,8 @@ class Event:
         need_a_response_extra = self.need_a_response_extra()
         if need_a_response_extra:
             return True
-
+        if self.is_from_pm:
+            return True
         if self.message is None:
             return False
         if self.is_from_chat and not self.message.has_command_symbols:
@@ -76,29 +76,31 @@ class Event:
         return False
 
     def need_a_response_extra(self):
-        from apps.bot.commands.Meme import Meme as MemeCommand
-        from apps.bot.commands.TrustedCommands.Media import Media
-        from apps.bot.commands.TrustedCommands.Media import MEDIA_URLS
-        from apps.bot.commands.VoiceRecognition import VoiceRecognition
-        from apps.service.models import Meme as MemeModel
-
         if self.message:
+            from apps.bot.commands.Meme import Meme as MemeCommand
+            from apps.service.models import Meme as MemeModel
             if self.is_from_chat and self.chat.need_meme:
                 message_is_exact_meme_name = MemeModel.objects.filter(name=self.message.clear).exists()
                 if message_is_exact_meme_name:
                     self.command = MemeCommand
                     return True
 
-            clr_msg = self.message.clear
-            clr_msg_fwd = self.fwd[0].message.clear if self.fwd and self.fwd[0].message and self.fwd[0].message.clear else None
-            message_is_media_link = urlparse(clr_msg).hostname in MEDIA_URLS or urlparse(clr_msg_fwd) in MEDIA_URLS
-            if message_is_media_link:
-                self.command = Media
+            from apps.bot.commands.TrustedCommands.Media import Media
+            from apps.bot.commands.TrustedCommands.Media import MEDIA_URLS
+            all_urls = get_urls_from_text(self.message.clear_case)
+            has_fwd_with_message = self.fwd and self.fwd[0].message and self.fwd[0].message.clear_case
+            if has_fwd_with_message:
+                all_urls += get_urls_from_text(self.fwd[0].message.clear_case)
+            for url in all_urls:
+                message_is_media_link = urlparse(url).hostname in MEDIA_URLS
+                if message_is_media_link:
+                    self.command = Media
+                    return True
+        if self.is_from_chat and self.chat.recognize_voice:
+            if self.has_voice_message:
+                from apps.bot.commands.VoiceRecognition import VoiceRecognition
+                self.command = VoiceRecognition
                 return True
-
-        if self.has_voice_message:
-            self.command = VoiceRecognition
-            return True
 
         return False
 

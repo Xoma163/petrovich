@@ -11,12 +11,12 @@ from apps.bot.classes.consts.ActivitiesEnum import ActivitiesEnum
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning
 
-YOUTUBE_URLS = ['www.youtube.com', 'youtube.com', "www.youtu.be", "youtu.be"]
-REDDIT_URLS = ["www.reddit.com"]
-TIKTOK_URLS = ["www.tiktok.com", 'vm.tiktok.com', 'm.tiktok.com']
-INSTAGRAM_URLS = ['www.instagram.com', 'instagram.com']
+YOUTUBE_URLS = ('www.youtube.com', 'youtube.com', "www.youtu.be", "youtu.be")
+REDDIT_URLS = ("www.reddit.com")
+TIKTOK_URLS = ("www.tiktok.com", 'vm.tiktok.com', 'm.tiktok.com')
+INSTAGRAM_URLS = ('www.instagram.com', 'instagram.com')
 
-MEDIA_URLS = YOUTUBE_URLS + REDDIT_URLS + TIKTOK_URLS + INSTAGRAM_URLS
+MEDIA_URLS = tuple(list(YOUTUBE_URLS) + list(REDDIT_URLS) + list(TIKTOK_URLS) + list(INSTAGRAM_URLS))
 
 
 class Media(Command):
@@ -29,42 +29,51 @@ class Media(Command):
 
     def start(self):
         MEDIA_TRANSLATOR = {
-            'youtube': self.get_youtube_video_info,
-            'tiktok': self.get_tiktok_video_info,
-            'reddit': self.get_reddit_video_info,
-            'instagram': self.get_instagram_video_info
+            YOUTUBE_URLS: self.get_youtube_video_info,
+            TIKTOK_URLS: self.get_tiktok_video_info,
+            REDDIT_URLS: self.get_reddit_video_info,
+            INSTAGRAM_URLS: self.get_instagram_video_info
         }
 
         if self.event.message.command in self.full_names:
             if self.event.message.args:
-                url = self.event.message.args[0]
+                url = self.event.message.args_case[0]
             elif self.event.fwd:
-                url = self.event.fwd[0]['text']
+                url = self.event.fwd[0].message.raw
             else:
                 raise PWarning("Для работы команды требуются аргументы или пересылаемые сообщения")
+            has_command_name = True
         else:
             url = self.event.message.raw
+            has_command_name = False
 
-        media_link_is_from = None
+        hostname = urlparse(url).hostname
+        if not hostname:
+            raise PWarning("Не нашёл ссылки")
+        method = None
+        for k in MEDIA_TRANSLATOR:
+            if hostname in k:
+                method = MEDIA_TRANSLATOR[k]
+                break
 
-        if urlparse(url).hostname in YOUTUBE_URLS:
-            media_link_is_from = 'youtube'
-        if urlparse(url).hostname in TIKTOK_URLS:
-            media_link_is_from = 'tiktok'
-        if urlparse(url).hostname in REDDIT_URLS:
-            media_link_is_from = 'reddit'
-        if urlparse(url).hostname in INSTAGRAM_URLS:
-            media_link_is_from = 'instagram'
-
-        if not media_link_is_from:
+        if not method:
             raise PWarning("Не youtube/tiktok/reddit/instagram ссылка")
 
         self.bot.set_activity(self.event.peer_id, ActivitiesEnum.UPLOAD_VIDEO)
-        video, title = MEDIA_TRANSLATOR[media_link_is_from](url)
+        try:
+            video, title = method(url)
+        except PWarning as e:
+            # Если была вызвана команда или отправлено сообщение в лс
+            if has_command_name or self.event.is_from_pm:
+                raise e
+            else:
+                return
         self.bot.set_activity(self.event.peer_id, ActivitiesEnum.UPLOAD_VIDEO)
         attachments = [self.bot.upload_video(video)]
 
-        if self.event.message.command not in self.full_names:
+        if has_command_name or self.event.is_from_pm:
+            return {'attachments': attachments}
+        else:
             self.bot.delete_message(self.event.peer_id, self.event.message.id)
 
             text = ""
@@ -73,8 +82,6 @@ class Media(Command):
             text += f"От пользователя {self.event.sender}\n" \
                     f"{url}"
             return {'text': text, 'attachments': attachments}
-        else:
-            return {'attachments': attachments}
 
     @staticmethod
     def get_youtube_video_info(url):
