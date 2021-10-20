@@ -121,10 +121,12 @@ class Settings(Command):
             need_meme = self.event.chat.need_meme
             mentioning = self.event.chat.mentioning
             turret = self.event.chat.need_turret
+            recognize_voice = self.event.chat.recognize_voice
 
             msg += f"Реагировать на неправильные команды - {TRUE_FALSE_TRANSLATOR[reaction]}\n"
             msg += f"Присылать мемы по точным названиям - {TRUE_FALSE_TRANSLATOR[need_meme]}\n"
             msg += f"Триггериться на команды без упоминания - {TRUE_FALSE_TRANSLATOR[mentioning]}\n"
+            msg += f"Автоматически распознавать голосовые - {TRUE_FALSE_TRANSLATOR[recognize_voice]}\n"
             msg += f"Синдром Туррета - {TRUE_FALSE_TRANSLATOR[turret]}\n"
 
         if self.event.sender.check_role(Role.TRUSTED):
