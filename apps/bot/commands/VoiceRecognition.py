@@ -24,11 +24,6 @@ class VoiceRecognition(Command):
     attachments = [VoiceAttachment]
     priority = -100
 
-    def accept(self, event):
-        if event.has_voice_message:
-            return True
-        return super().accept(event)
-
     def start(self):
         audio_messages = get_attachments_from_attachments_or_fwd(self.event, VoiceAttachment)
         self.bot.set_activity(self.event.peer_id, ActivitiesEnum.TYPING)

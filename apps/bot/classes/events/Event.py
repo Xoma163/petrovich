@@ -10,6 +10,8 @@ from apps.bot.models import Users, Chat
 class Event:
     # None тк иногда требуется вручную создать инстанс Event
     def __init__(self, raw_event=None, bot=None):
+        from apps.bot.classes.Command import Command
+
         if not raw_event:
             raw_event = {}
         self.raw = raw_event  # json
@@ -34,6 +36,7 @@ class Event:
         self.attachments: list = []
 
         self.force_need_a_response: bool = False
+        self.command: Command = None
 
     def setup_event(self, is_fwd=False):
         pass
@@ -45,25 +48,25 @@ class Event:
 
         if self.sender.check_role(Role.BANNED):
             return False
-
+        if self.is_from_bot:
+            return False
         if self.force_need_a_response:
             return True
 
-        if self.is_from_bot:
-            return False
-        if self.has_voice_message:
-            return True
-        if self.message is None:
-            return False
         if self.is_from_pm:
             return True
         if self.payload:
+            return True
+
+        if self.chat and self.chat.mentioning:
             return True
 
         need_a_response_extra = self.need_a_response_extra()
         if need_a_response_extra:
             return True
 
+        if self.message is None:
+            return False
         if self.is_from_chat and not self.message.has_command_symbols:
             return False
 
@@ -73,20 +76,28 @@ class Event:
         return False
 
     def need_a_response_extra(self):
-        from apps.service.models import Meme
+        from apps.bot.commands.Meme import Meme as MemeCommand
+        from apps.bot.commands.TrustedCommands.Media import Media
         from apps.bot.commands.TrustedCommands.Media import MEDIA_URLS
+        from apps.bot.commands.VoiceRecognition import VoiceRecognition
+        from apps.service.models import Meme as MemeModel
 
-        message_is_exact_meme_name = Meme.objects.filter(name=self.message.clear).exists()
-        if message_is_exact_meme_name:
-            return True
+        if self.message:
+            if self.is_from_chat and self.chat.need_meme:
+                message_is_exact_meme_name = MemeModel.objects.filter(name=self.message.clear).exists()
+                if message_is_exact_meme_name:
+                    self.command = MemeCommand
+                    return True
 
-        if self.chat and self.chat.mentioning:
-            return True
+            clr_msg = self.message.clear
+            clr_msg_fwd = self.fwd[0].message.clear if self.fwd and self.fwd[0].message and self.fwd[0].message.clear else None
+            message_is_media_link = urlparse(clr_msg).hostname in MEDIA_URLS or urlparse(clr_msg_fwd) in MEDIA_URLS
+            if message_is_media_link:
+                self.command = Media
+                return True
 
-        message_is_media_link = urlparse(self.message.clear).hostname in MEDIA_URLS or \
-                                (self.fwd and self.fwd[0].message and self.fwd[0].message.clear and urlparse(
-                                    self.fwd[0].message.clear) in MEDIA_URLS)
-        if message_is_media_link:
+        if self.has_voice_message:
+            self.command = VoiceRecognition
             return True
 
         return False

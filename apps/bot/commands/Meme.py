@@ -38,11 +38,7 @@ class Meme(Command):
     priority = 70
 
     def accept(self, event):
-        if event.chat and event.message \
-                and not event.message.has_command_symbols \
-                and MemeModel.objects.filter(name=event.message.clear).exists():
-            if not event.chat.need_meme:
-                raise PSkip()
+        if event.command:
             event.message.args = event.message.clear.split(' ')
             return True
         return super().accept(event)

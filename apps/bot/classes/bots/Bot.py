@@ -89,11 +89,17 @@ class Bot(Thread):
     def route(self, event: Event):
         """
         Выбор команды
+        Если в Event есть команда, поиск не требуется
         """
         self.logger.debug(event.to_log())
 
-        from apps.bot.initial import COMMANDS
-        for command in COMMANDS:
+        if event.command:
+            commands = [event.command()]
+        else:
+            from apps.bot.initial import COMMANDS
+            commands = COMMANDS
+
+        for command in commands:
             try:
                 if command.accept(event):
                     result = command.__class__().check_and_start(self, event)
@@ -308,6 +314,9 @@ class Bot(Thread):
         pass
 
     def get_mention(self, user, name=None):
+        pass
+
+    def delete_message(self, peer_id, message_id):
         pass
 
 

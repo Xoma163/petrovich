@@ -49,12 +49,17 @@ class Command:
             if self.help_texts:
                 self.full_help_texts = "\n".join([f"{self.name.capitalize()} {x}" for x in self.help_texts])
 
+    def __eq__(self, other):
+        return self.name == other.name
+
     def accept(self, event: Event):
         """
         Метод, определяющий на что среагирует команда. По умолчанию ищет команду в названиях
         :param event: событие
         :return: bool
         """
+        if event.command and event.command == self:
+            return True
         if event.message and event.message.command in self.full_names:
             return True
         if event.payload and event.payload['command'] in self.full_names:

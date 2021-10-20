@@ -27,13 +27,6 @@ class Media(Command):
     ]
     platforms = [Platform.TG]
 
-    def accept(self, event):
-        if event.message and urlparse(event.message.command).hostname in MEDIA_URLS:
-            return True
-        if event.fwd and event.fwd[0].message and urlparse(event.fwd[0].message.raw).hostname in MEDIA_URLS:
-            return True
-        return super().accept(event)
-
     def start(self):
         MEDIA_TRANSLATOR = {
             'youtube': self.get_youtube_video_info,
