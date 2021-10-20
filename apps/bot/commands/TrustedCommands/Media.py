@@ -10,9 +10,10 @@ from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.ActivitiesEnum import ActivitiesEnum
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.utils.utils import get_urls_from_text
 
 YOUTUBE_URLS = ('www.youtube.com', 'youtube.com', "www.youtu.be", "youtu.be")
-REDDIT_URLS = ("www.reddit.com")
+REDDIT_URLS = ("www.reddit.com",)
 TIKTOK_URLS = ("www.tiktok.com", 'vm.tiktok.com', 'm.tiktok.com')
 INSTAGRAM_URLS = ('www.instagram.com', 'instagram.com')
 
@@ -37,23 +38,29 @@ class Media(Command):
 
         if self.event.message.command in self.full_names:
             if self.event.message.args:
-                url = self.event.message.args_case[0]
+                source = self.event.message.args_case[0]
             elif self.event.fwd:
-                url = self.event.fwd[0].message.raw
+                source = self.event.fwd[0].message.raw
             else:
                 raise PWarning("Для работы команды требуются аргументы или пересылаемые сообщения")
             has_command_name = True
         else:
-            url = self.event.message.raw
+            source = self.event.message.raw
             has_command_name = False
 
-        hostname = urlparse(url).hostname
-        if not hostname:
-            raise PWarning("Не нашёл ссылки")
         method = None
-        for k in MEDIA_TRANSLATOR:
-            if hostname in k:
-                method = MEDIA_TRANSLATOR[k]
+        chosen_url = None
+        urls = get_urls_from_text(source)
+        for url in urls:
+            hostname = urlparse(url).hostname
+            if not hostname:
+                raise PWarning("Не нашёл ссылки")
+            for k in MEDIA_TRANSLATOR:
+                if hostname in k:
+                    method = MEDIA_TRANSLATOR[k]
+                    chosen_url = url
+                    break
+            if method:
                 break
 
         if not method:
@@ -61,7 +68,7 @@ class Media(Command):
 
         self.bot.set_activity(self.event.peer_id, ActivitiesEnum.UPLOAD_VIDEO)
         try:
-            video, title = method(url)
+            video, title = method(chosen_url)
         except PWarning as e:
             # Если была вызвана команда или отправлено сообщение в лс
             if has_command_name or self.event.is_from_pm:
@@ -75,12 +82,18 @@ class Media(Command):
             return {'attachments': attachments}
         else:
             self.bot.delete_message(self.event.peer_id, self.event.message.id)
+            chosen_url_pos = source.find(chosen_url)
+            extra_text = source[:chosen_url_pos].strip() + "\n" + source[chosen_url_pos + len(chosen_url):].strip()
+            extra_text = extra_text.strip()
 
             text = ""
             if title:
                 text = f"{title}\n"
             text += f"От пользователя {self.event.sender}\n" \
-                    f"{url}"
+                    f"{chosen_url}"
+            # Костыль, чтобы видосы которые шарятся с мобилы с реддита не дублировали title
+            if extra_text and extra_text != title:
+                text += f"\n{extra_text}"
             return {'text': text, 'attachments': attachments}
 
     @staticmethod
