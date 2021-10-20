@@ -13,9 +13,6 @@ class GithubAPI:
     TOKEN = env.str('GITHUB_TOKEN')
     HEADERS = {"Authorization": f"token {TOKEN}"}
 
-    def __init__(self):
-        pass
-
     def create_issue(self, title, body=None, assignee=None, milestone=None, labels=None):
         """Создание issue."""
         if labels is None:
