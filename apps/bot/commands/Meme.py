@@ -155,13 +155,13 @@ class Meme(Command):
         attachment = attachments[0]
         if type(attachment) in [VideoAttachment, AudioAttachment]:
             new_meme_link = attachment.url
-        elif type(attachment) == PhotoAttachment:  # or attachment.type == 'doc':
+        elif isinstance(attachment, PhotoAttachment):  # or attachment.type == 'doc':
             if self.event.platform == Platform.VK:
                 new_meme_link = attachment.public_download_url
             else:
                 new_meme_link = upload_image_to_vk_server(attachment.download_content())
 
-        elif type(attachment) == LinkAttachment:
+        elif isinstance(attachment, LinkAttachment):
             new_meme_link = attachment.url
         else:
             raise PError("Невозможно")

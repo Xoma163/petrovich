@@ -42,7 +42,6 @@ class Event:
     def setup_event(self, is_fwd=False):
         pass
 
-    # ToDo нужен ли ответ если чат может работать без палок
     def need_a_response(self):
         if self.action:
             return True
