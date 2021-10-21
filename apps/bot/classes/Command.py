@@ -1,9 +1,8 @@
 from apps.bot.classes.bots.Bot import Bot
 from apps.bot.classes.consts.Consts import Role, ATTACHMENT_TRANSLATOR, Platform
-from apps.bot.classes.consts.Exceptions import PWarning, PError
+from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.classes.events.Event import Event
 from apps.bot.utils.utils import get_help_texts_for_command, transform_k
-from petrovich.settings import env
 
 
 class Command:
@@ -117,21 +116,7 @@ class Command:
         :return: bool
         """
         if self.event.sender.check_role(role):
-            if role == Role.ADMIN:
-                if self.event.platform == Platform.VK:
-                    if self.event.sender.user_id == env.str("VK_ADMIN_ID"):
-                        return True
-                    else:
-                        print("Попытка доступа под админом не с моего id O_o")
-                        raise PError("Э ты чё, ты не админ. Где мой админ???")
-                elif self.event.platform == Platform.TG:
-                    if self.event.sender.user_id == env.str("TG_ADMIN_ID"):
-                        return True
-                    else:
-                        print("Попытка доступа под админом не с моего id O_o")
-                        raise PError("Э ты чё, ты не админ. Где мой админ???")
-            else:
-                return True
+            return True
         if role == Role.CONFERENCE_ADMIN:
             if self.event.chat.admin == self.event.sender:
                 return True
@@ -146,7 +131,7 @@ class Command:
         """
         if args is None:
             args = self.args
-        if self.event.message.args:
+        if self.event.message and self.event.message.args:
             if len(self.event.message.args) >= args:
                 return True
             else:

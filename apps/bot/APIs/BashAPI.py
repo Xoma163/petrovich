@@ -20,4 +20,4 @@ class BashAPI:
                 if isinstance(content, NavigableString):
                     text_quotes.append(content.strip())
             bash_quotes.append("\n".join(text_quotes))
-        return "\n——————————————————\n".join(bash_quotes)
+        return f"\n{'-' * 20}\n".join(bash_quotes)

@@ -5,6 +5,7 @@ import random
 import re
 from datetime import datetime
 from io import BytesIO
+from typing import List
 
 import pytz
 from PIL import Image, ImageDraw, ImageFont
@@ -128,7 +129,7 @@ def get_attachments_for_upload(bot, attachments):
     return uploaded_attachments
 
 
-def get_attachments_from_attachments_or_fwd(event, _type=None, from_first_fwd=True):
+def get_attachments_from_attachments_or_fwd(event, _type=None, from_first_fwd=True) -> List[Attachment]:
     """
     Получает все вложения из сообщения и пересланного сообщения
     """

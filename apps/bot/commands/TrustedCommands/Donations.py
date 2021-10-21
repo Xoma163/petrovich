@@ -16,8 +16,11 @@ class Donations(Command):
         msg = ""
         total = {}
         for donation in donations:
-            msg += f"{donation.username} - {donation.amount} {donation.currency}\n" \
-                   f"{donation.message}\n\n"
+            msg += f"{donation.username} - {donation.amount} {donation.currency}\n"
+            if donation.message:
+                msg += f"{donation.message}\n"
+            msg += "\n"
+
             if donation.currency not in total:
                 total[donation.currency] = float(donation.amount)
             else:
@@ -25,6 +28,6 @@ class Donations(Command):
         total_msg = ""
         for key in total:
             total_msg += f"{total[key]} {key}\n"
-        msg += '------------------------------\n' \
+        msg += f'{"-" * 30}\n' \
                f'{total_msg}'
         return msg

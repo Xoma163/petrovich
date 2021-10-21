@@ -15,6 +15,7 @@ from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachmen
 from apps.bot.models import Users, Chat, Bot as BotModel
 from apps.bot.utils.utils import tanimoto
 from apps.games.models import Gamer
+from petrovich.settings import env
 
 
 class Bot(Thread):
@@ -59,7 +60,7 @@ class Bot(Thread):
             tb = traceback.format_exc()
             print(tb)
 
-    def parse_and_send_msgs(self, peer_id: int, msgs, send=True) -> ResponseMessage:
+    def parse_and_send_msgs(self, peer_id, msgs, send=True) -> ResponseMessage:
         """
         Отправка сообщений. Принимает любой формат
         """
@@ -336,9 +337,18 @@ def get_bot_by_platform(platform: Platform):
     return platforms[platform]
 
 
-def get_moderator_bot_class():
-    from apps.bot.classes.bots.TgBot import TgBot
-    return TgBot
+def send_message_to_moderator_chat(msgs):
+    def get_moderator_chat_peer_id():
+        test_chat_id = env.str("TG_MODERATOR_CHAT_PK")
+        return Chat.objects.get(pk=test_chat_id).chat_id
+
+    def get_moderator_bot_class():
+        from apps.bot.classes.bots.TgBot import TgBot
+        return TgBot
+
+    bot = get_moderator_bot_class()()
+    peer_id = get_moderator_chat_peer_id()
+    bot.parse_and_send_msgs(peer_id, msgs)
 
 
 def upload_image_to_vk_server(image):

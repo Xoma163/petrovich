@@ -1,9 +1,9 @@
 from urllib.parse import urlparse
 
 from apps.bot.classes.Command import Command
-from apps.bot.classes.bots.Bot import get_moderator_bot_class, upload_image_to_vk_server
+from apps.bot.classes.bots.Bot import upload_image_to_vk_server, send_message_to_moderator_chat
 from apps.bot.classes.consts.Consts import Role, Platform
-from apps.bot.classes.consts.Exceptions import PSkip, PWarning, PError
+from apps.bot.classes.consts.Exceptions import PWarning, PError
 from apps.bot.classes.messages.attachments.AudioAttachment import AudioAttachment
 from apps.bot.classes.messages.attachments.LinkAttachment import LinkAttachment
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
@@ -108,7 +108,7 @@ class Meme(Command):
             new_meme['link'] = attachment.url
         elif isinstance(attachment, PhotoAttachment):  # or attachment.type == 'doc':
             if self.event.platform == Platform.VK:
-                new_meme['link'] = attachment.download_url
+                new_meme['link'] = attachment.public_download_url
             else:
                 new_meme['link'] = upload_image_to_vk_server(attachment.download_content())
         else:
@@ -124,8 +124,7 @@ class Meme(Command):
                                    f"{new_meme_obj.name} ({new_meme_obj.id})"
 
             # Отправка сообщения в модераторную
-            m_bot = get_moderator_bot_class()()
-            m_bot.parse_and_send_msgs(self.bot.test_chat.chat_id, meme_to_send)
+            send_message_to_moderator_chat(meme_to_send)
             return "Добавил. Воспользоваться мемом можно после проверки модераторами."
 
     def menu_refresh(self):
@@ -134,9 +133,9 @@ class Meme(Command):
         if 2 <= len(self.event.message.args) <= 3:
             try:
                 _id = int(self.event.message.args[1])
-            except PWarning:
+            except ValueError:
                 pass
-        meme_name = " ".join(self.event.message.args_case[1:]).lower()
+        meme_name = self.event.message.args[1:]
 
         attachments = get_attachments_from_attachments_or_fwd(self.event,
                                                               [AudioAttachment, VideoAttachment, PhotoAttachment])
@@ -145,7 +144,9 @@ class Meme(Command):
                 url = self.event.message.args_case[-1]
                 try:
                     self._check_allowed_url(url)
-                    attachments = [{'type': 'link', 'url': url}]
+                    attachment = LinkAttachment()
+                    attachment.url = url
+                    attachments = [attachment]
                     meme_name = self.event.message.args[1:-1]
                 except Exception:
                     raise PWarning("Не нашёл вложений в сообщении или пересланном сообщении\n"
@@ -153,36 +154,38 @@ class Meme(Command):
 
         attachment = attachments[0]
         if type(attachment) in [VideoAttachment, AudioAttachment]:
-            new_meme_link = attachment['url']
+            new_meme_link = attachment.url
         elif type(attachment) == PhotoAttachment:  # or attachment.type == 'doc':
             if self.event.platform == Platform.VK:
-                new_meme_link = attachment.download_url
+                new_meme_link = attachment.public_download_url
             else:
                 new_meme_link = upload_image_to_vk_server(attachment.download_content())
 
-        elif attachment['type'] == 'link':
-            new_meme_link = attachment['url']
+        elif type(attachment) == LinkAttachment:
+            new_meme_link = attachment.url
         else:
             raise PError("Невозможно")
 
         if self.event.sender.check_role(Role.MODERATOR) or self.event.sender.check_role(Role.TRUSTED):
             meme = self.get_meme(meme_name, _id=_id)
             meme.link = new_meme_link
-            meme.type = attachment['type']
+            meme.type = attachment.type
             meme.save()
             return f'Обновил мем "{meme.name}"'
         else:
             meme = self.get_meme(meme_name, self.event.sender, _id=_id)
             meme.link = new_meme_link
             meme.approved = False
-            meme.type = attachment['type']
+            meme.type = attachment.type
             meme.save()
 
             meme_to_send = self.prepare_meme_to_send(meme)
             meme_to_send['text'] = "Запрос на обновление мема:\n" \
                                    f"{meme.author}\n" \
                                    f"{meme.name} ({meme.id})"
-            self.bot.parse_and_send_msgs(self.bot.test_chat.chat_id, meme_to_send)
+
+            send_message_to_moderator_chat(meme_to_send)
+
             return "Обновил. Воспользоваться мемом можно после проверки модераторами."
 
     def menu_delete(self):
@@ -329,7 +332,7 @@ class Meme(Command):
 
     # END MENU #
 
-    def get_meme(self, filter_list=None, filter_user=None, approved=True, _id=None, use_tanimoto=False):
+    def get_meme(self, filter_list=None, filter_user=None, approved=True, _id=None, use_tanimoto=False) -> MemeModel:
         """
         :return: 1 мем. Если передан параметр use_tanimoto, то список мемов отсортированных по коэфф. Танимото
         """
