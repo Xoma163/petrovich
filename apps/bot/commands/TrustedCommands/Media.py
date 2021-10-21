@@ -153,9 +153,12 @@ class Media(Command):
     def get_instagram_video_info(url):
         r = requests.get(url)
         bs4 = BeautifulSoup(r.content, 'html.parser')
-        content_type = bs4.find('meta', attrs={'name': 'medium'}).attrs['content']
+        try:
+            content_type = bs4.find('meta', attrs={'name': 'medium'}).attrs['content']
+        except Exception:
+            raise PWarning("Ссылка на инстаграмм не является видео")
         if content_type != 'video':
-            raise PWarning("Ссылка на инстаграм не является видео")
+            raise PWarning("Ссылка на инстаграмм не является видео")
         video_url = bs4.find('meta', attrs={'property': 'og:video'}).attrs['content']
         return video_url, ""
 
