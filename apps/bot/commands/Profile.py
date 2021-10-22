@@ -15,6 +15,7 @@ class Profile(Command):
     help_text = "позволяет управлять вашим профилем"
     help_texts = [
         "- присылает информацию по вашему профилю",
+        "(имя, фамилия, логин/id, никнейм) - присылает информацию по профилю человека в конфе",
         "город (название города) - устанавливает новый город",
         "город добавить (название города) - добавляет новый город в базу",
         "др (дата) - устанавливает новый др",
@@ -114,7 +115,14 @@ class Profile(Command):
         return "Изменил аватарку"
 
     def menu_default(self):
+        if self.event.message.args:
+            self.check_conversation()
+            user = self.bot.get_user_by_name(self.event.message.args, filter_chat=self.event.chat)
+            return self.get_user_profile(user)
         user = self.event.sender
+        return self.get_user_profile(user)
+
+    def get_user_profile(self, user):
         _city = user.city or "Не установлено"
         _bd = user.birthday
         if user.celebrate_bday:
@@ -129,11 +137,11 @@ class Profile(Command):
         _surname = user.surname or "Не установлено"
         msg = {
             'text': f"Город - {_city}\n"
-                   f"Имя - {_name}\n"
-                   f"Фамилия - {_surname}\n"
-                   f"Дата рождения - {_bd}\n"
-                   f"Никнейм - {_nickname}\n"
-                   f"Пол - {user.get_gender_display()}"
+                    f"Имя - {_name}\n"
+                    f"Фамилия - {_surname}\n"
+                    f"Дата рождения - {_bd}\n"
+                    f"Никнейм - {_nickname}\n"
+                    f"Пол - {user.get_gender_display()}"
         }
         if user.avatar:
             msg['attachments'] = self.bot.upload_photos(user.avatar.path)
