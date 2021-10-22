@@ -79,7 +79,7 @@ class Event:
             from apps.bot.commands.Meme import Meme as MemeCommand
             from apps.service.models import Meme as MemeModel
             if self.is_from_chat and self.chat.need_meme and not self.message.has_command_symbols:
-                message_is_exact_meme_name = MemeModel.objects.filter(name=self.message.clear).exists()
+                message_is_exact_meme_name = MemeModel.objects.filter(name=self.message.clear, approved=True).exists()
                 if message_is_exact_meme_name:
                     self.command = MemeCommand
                     return True
