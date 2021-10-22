@@ -9,8 +9,8 @@ from apps.bot.classes.messages.attachments.VoiceAttachment import VoiceAttachmen
 class TgEvent(Event):
 
     def setup_event(self, is_fwd=False):
-        if not is_fwd and self.raw.get('forward_from'):
-            return
+        if not is_fwd and self.raw.get('message') and self.raw['message'].get('forward_from'):
+            self.force_not_need_a_response = False
 
         if is_fwd:
             message = self.raw
@@ -26,7 +26,7 @@ class TgEvent(Event):
             else:
                 message = self.raw.get('message')
         if not message:
-            return
+            self.force_not_need_a_response = False
 
         self.peer_id = message['chat']['id']
         self.from_id = message['from']['id']

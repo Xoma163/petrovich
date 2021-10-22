@@ -37,12 +37,16 @@ class Event:
         self.attachments: list = []
 
         self.force_need_a_response: bool = False
+        self.force_not_need_a_response: bool = False
         self.command: Command = None
 
     def setup_event(self, is_fwd=False):
         pass
 
     def need_a_response(self):
+        if self.force_not_need_a_response:
+            return False
+
         if self.action:
             return True
 
@@ -88,7 +92,7 @@ class Event:
             from apps.bot.commands.TrustedCommands.Media import MEDIA_URLS
             all_urls = get_urls_from_text(self.message.clear_case)
             has_fwd_with_message = self.fwd and self.fwd[0].message and self.fwd[0].message.clear_case
-            if has_fwd_with_message:
+            if self.is_from_pm and has_fwd_with_message:
                 all_urls += get_urls_from_text(self.fwd[0].message.clear_case)
             for url in all_urls:
                 message_is_media_link = urlparse(url).hostname in MEDIA_URLS
