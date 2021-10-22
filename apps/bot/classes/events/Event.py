@@ -75,7 +75,7 @@ class Event:
         return False
 
     def need_a_response_extra(self):
-        if self.message:
+        if self.message and not self.message.has_command_symbols:
             from apps.bot.commands.Meme import Meme as MemeCommand
             from apps.service.models import Meme as MemeModel
             if self.is_from_chat and self.chat.need_meme and not self.message.has_command_symbols:
@@ -95,11 +95,12 @@ class Event:
                 if message_is_media_link:
                     self.command = Media
                     return True
-        if self.is_from_chat and self.chat.recognize_voice:
-            if self.has_voice_message:
-                from apps.bot.commands.VoiceRecognition import VoiceRecognition
-                self.command = VoiceRecognition
-                return True
+
+        is_chat_auto_voice_recognize = self.is_from_chat and self.chat.recognize_voice
+        if is_chat_auto_voice_recognize and self.has_voice_message:
+            from apps.bot.commands.VoiceRecognition import VoiceRecognition
+            self.command = VoiceRecognition
+            return True
 
         return False
 

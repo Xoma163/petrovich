@@ -76,7 +76,7 @@ class Meme(Command):
         attachments = get_attachments_from_attachments_or_fwd(self.event,
                                                               [AudioAttachment, VideoAttachment, PhotoAttachment])
         if len(attachments) == 0:
-            url = self.event.message.args_str.split(' ')[1]
+            url = self.event.message.args_str_case.split(' ')[1]
             self._check_allowed_url(url)
 
             attachment = LinkAttachment()
