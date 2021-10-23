@@ -48,13 +48,13 @@ class Profile(Command):
 
     def menu_city(self):
         self.check_args(2)
-        arg1 = self.event.message.args[1]
+        arg1 = self.event.message.args_case[1]
         if arg1 == 'добавить':
-            city_name = " ".join(self.event.message.args[2:])
+            city_name = " ".join(self.event.message.args_case[2:])
             city = add_city_to_db(city_name)
             return f"Добавил новый город - {city.name}"
         else:
-            city_name = " ".join(self.event.message.args[1:])
+            city_name = " ".join(self.event.message.args_case[1:])
             city = City.objects.filter(synonyms__icontains=city_name).first()
             if not city:
                 raise PWarning("Не нашёл такого города. /профиль город добавить (название)")
@@ -72,21 +72,21 @@ class Profile(Command):
 
     def menu_nickname(self):
         self.check_args(2)
-        nickname = " ".join(self.event.message.args[1:])
+        nickname = " ".join(self.event.message.args_case[1:])
         self.event.sender.nickname_real = nickname
         self.event.sender.save()
         return f"Изменил никнейм на {self.event.sender.nickname_real}"
 
     def menu_name(self):
         self.check_args(2)
-        name = " ".join(self.event.message.args[1:])
+        name = " ".join(self.event.message.args_case[1:])
         self.event.sender.name = name
         self.event.sender.save()
         return f"Изменил имя на {self.event.sender.name}"
 
     def menu_surname(self):
         self.check_args(2)
-        surname = " ".join(self.event.message.args[1:])
+        surname = " ".join(self.event.message.args_case[1:])
         self.event.sender.surname = surname
         self.event.sender.save()
         return f"Изменил фамилию на {self.event.sender.surname}"
@@ -149,6 +149,7 @@ class Profile(Command):
 
 
 def add_city_to_db(city_name):
+    city_name = city_name.capitalize()
     yandexgeo_api = YandexGeoAPI()
     city_info = yandexgeo_api.get_city_info_by_name(city_name)
     if not city_info:

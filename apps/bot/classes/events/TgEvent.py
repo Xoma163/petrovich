@@ -37,16 +37,17 @@ class TgEvent(Event):
         else:
             self.is_from_pm = True
 
-        if message['from']['is_bot']:
+        _from = message['from']
+        if _from['is_bot']:
             self.is_from_bot = True
         else:
             # self.sender = self.register_user(message['from'])
             defaults = {
-                'name': message['from'].get('first_name'),
-                'surname': message['from'].get('last_name'),
-                'nickname': message['from'].get('username'),
+                'name': _from.get('first_name'),
+                'surname': _from.get('last_name'),
+                'nickname': _from.get('username'),
             }
-            self.sender = self.bot.get_user_by_id(message['from']['id'], defaults)
+            self.sender = self.bot.get_user_by_id(_from['id'], defaults)
             self.is_from_user = True
 
         self.setup_action(message)
