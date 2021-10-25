@@ -1,6 +1,6 @@
 from apps.bot.APIs.Openhab3API import Openhab3API
 from apps.bot.classes.Command import Command
-from apps.bot.classes.consts.Consts import Role, ON_OFF_TRANSLATOR
+from apps.bot.classes.consts.Consts import Role, ON_OFF_TRANSLATOR, TRUE_FALSE_TRANSLATOR
 from apps.bot.classes.consts.Exceptions import PWarning
 
 
@@ -101,7 +101,7 @@ class Home(Command):
                     if sub_item.get("uom"):
                         item_msg += f'{sub_item["label"]} - {sub_item["state"]}{sub_item["uom"]}\n'
                 elif sub_item['type'] == 'Switch':
-                    item_msg += f'{sub_item["label"]} - {sub_item["state"]}\n'
-
+                    state = TRUE_FALSE_TRANSLATOR[ON_OFF_TRANSLATOR[sub_item['state'].lower()]]
+                    item_msg += f'{sub_item["label"]} - {state}\n'
             msgs.append(item_msg)
         return "\n".join(msgs)
