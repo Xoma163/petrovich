@@ -140,7 +140,7 @@ class Media(Command):
             try:
                 video_data = json.loads(bs4.find(id='__NEXT_DATA__').contents[0])
                 break
-            except AttributeError:
+            except (AttributeError, ConnectionError):
                 s = requests.Session()
         if not video_data:
             raise RuntimeError("Ошибка загрузки видео с tiktok")
