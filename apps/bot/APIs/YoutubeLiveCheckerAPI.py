@@ -6,11 +6,10 @@ Accept: application/json
 
 """
 
-import google_auth_oauthlib
 import google_auth_oauthlib.flow
-import googleapiclient
+import googleapiclient.discovery
+
 from google.oauth2.credentials import Credentials
-from googleapiclient.discovery import build
 
 from petrovich.settings import BASE_DIR
 

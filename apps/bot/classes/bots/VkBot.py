@@ -1,6 +1,5 @@
 import json
 import threading
-from io import BytesIO
 
 import vk_api
 from vk_api import VkApi, VkUpload
