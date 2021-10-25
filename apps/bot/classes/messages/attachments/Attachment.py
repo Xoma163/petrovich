@@ -77,6 +77,7 @@ class Attachment:
     def download_content(self) -> bytes:
         if not self.content:
             self.content = requests.get(self.get_download_url()).content
+            self.size = len(self.content)
         return self.content
 
     def to_log(self):
