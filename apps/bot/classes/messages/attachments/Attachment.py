@@ -80,6 +80,9 @@ class Attachment:
             self.size = len(self.content)
         return self.content
 
+    def get_bytes_io_content(self) -> BytesIO:
+        return BytesIO(self.download_content())
+
     def to_log(self):
         dict_self = copy.copy(self.__dict__)
         ignore_fields = ['private_download_url', 'content']

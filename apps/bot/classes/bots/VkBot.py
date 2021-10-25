@@ -110,8 +110,7 @@ class VkBot(CommonBot):
         Загрузка изображения на сервер VK
         Возвращает vk_url и public_download_url
         """
-        image_to_load = image.download_content()
-        vk_photo = self.upload.photo_messages(BytesIO(image_to_load))[0]
+        vk_photo = self.upload.photo_messages(image.get_bytes_io_content())[0]
         vk_url = f"{VK_URL}photo{vk_photo['owner_id']}_{vk_photo['id']}"
         vk_max_photo_url = sorted(vk_photo['sizes'], key=lambda x: x['height'])[-1]['url']
         return vk_url, vk_max_photo_url
@@ -123,13 +122,13 @@ class VkBot(CommonBot):
         da = super().upload_document(document, peer_id, title, filename)
         content = da.download_content()
         vk_doc = self.upload.document_message(content, title=title, peer_id=peer_id)['doc']
-        return f"doc{vk_doc['owner_id']}{vk_doc['id']}"
+        return f"doc{vk_doc['owner_id']}_{vk_doc['id']}"
 
     # END ATTACHMENTS
 
     # USERS GROUPS BOTS
 
-    def get_user_by_id(self, user_id: int) -> Users:
+    def get_user_by_id(self, user_id: int, _defaults: dict = None) -> Users:
         """
         Возвращает пользователя по его id
         Регистрирует если пользователя нет в БД

@@ -93,11 +93,11 @@ class Bot(Thread):
         Если в Event есть команда, поиск не требуется
         """
         self.logger.debug(event.to_log())
+        from apps.bot.initial import COMMANDS
 
         if event.command:
             commands = [event.command()]
         else:
-            from apps.bot.initial import COMMANDS
             commands = COMMANDS
 
         for command in commands:
@@ -311,10 +311,12 @@ class Bot(Thread):
     def set_activity(self, peer_id, activity: ActivitiesEnum):
         pass
 
-    def get_inline_keyboard(self, buttons: list, cols=1):
+    @staticmethod
+    def get_inline_keyboard(buttons: list, cols=1):
         pass
 
-    def get_mention(self, user, name=None):
+    @staticmethod
+    def get_mention(user, name=None):
         pass
 
     def delete_message(self, peer_id, message_id):
