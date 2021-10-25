@@ -134,7 +134,7 @@ class Media(Command):
         tries = 10
         s = requests.Session()
         video_data = None
-        for i in range(tries):
+        for _ in range(tries):
             r = s.get(url, headers=headers)
             bs4 = BeautifulSoup(r.content, 'html.parser')
             try:
