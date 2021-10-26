@@ -134,14 +134,14 @@ class Meme(models.Model):
         return str(self.name)
 
     def preview_image(self):
-        if self.link:
+        if self.link and self.type == 'photo':
             from django.utils.safestring import mark_safe
             return mark_safe(u'<img src="{0}" width="150"/>'.format(self.link))
         else:
             return '(Нет изображения)'
 
     def preview_link(self):
-        if self.link and self.type == 'photo':
+        if self.link:
             from django.utils.safestring import mark_safe
             return mark_safe(u'<a href="{0}">Тык</a>'.format(self.link))
         else:
