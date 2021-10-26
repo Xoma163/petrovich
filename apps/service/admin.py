@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from apps.service.models import Service, Counter, Cat, Meme, Notify, City, \
+from apps.service.models import Service, Counter, Meme, Notify, City, \
     Donations, TimeZone, YoutubeSubscribe, WakeOnLanUserData, Horoscope, QuoteBook, Words
 
 
@@ -13,12 +13,6 @@ class ServiceAdmin(admin.ModelAdmin):
 class CounterAdmin(admin.ModelAdmin):
     list_display = ('name', 'count', 'chat')
     list_filter = (('chat', admin.RelatedOnlyFieldListFilter),)
-
-
-@admin.register(Cat)
-class CatAdmin(admin.ModelAdmin):
-    list_display = ('id', 'image', 'preview', 'author', 'to_send')
-    list_filter = (('author', admin.RelatedOnlyFieldListFilter), 'to_send',)
 
 
 @admin.register(Meme)

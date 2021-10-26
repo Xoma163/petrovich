@@ -1,15 +1,10 @@
-import os
 from tempfile import NamedTemporaryFile
 from urllib.request import urlopen
 
-from django.core.files import File
 from django.db import models
 from django.db.models import JSONField
-from django.db.models.signals import pre_delete
-from django.dispatch import receiver
 
 from apps.bot.models import Chat, Users
-from petrovich.settings import MEDIA_ROOT
 
 
 class TimeZone(models.Model):
@@ -75,32 +70,6 @@ def get_image_from_url(url):
         return ext, img_temp
 
 
-class Cat(models.Model):
-    image = models.ImageField("Изображение", upload_to='service/cats/')
-    author = models.ForeignKey(Users, models.SET_NULL, verbose_name="Автор", null=True)
-    to_send = models.BooleanField("Ещё не было", default=True)
-
-    class Meta:
-        verbose_name = "кот"
-        verbose_name_plural = "коты"
-
-    def __str__(self):
-        return str(self.id)
-
-    def save_remote_image(self, url):
-        if not self.image:
-            ext, image = get_image_from_url(url)
-            self.image.save(f"cat.{ext}", File(image))
-        self.save()
-
-    def preview(self):
-        if self.image:
-            from django.utils.safestring import mark_safe
-            return mark_safe(u'<img src="{0}" width="150"/>'.format(self.image.url))
-        else:
-            return '(Нет изображения)'
-
-
 class Meme(models.Model):
     types = [
         ('photo', 'Фото'),
@@ -146,16 +115,6 @@ class Meme(models.Model):
             return mark_safe(u'<a href="{0}">Тык</a>'.format(self.link))
         else:
             return '(Нет изображения)'
-
-
-@receiver(pre_delete, sender=Cat, dispatch_uid='question_delete_signal')
-def log_deleted_question(sender, instance, using, **kwargs):
-    if instance.image:
-        delete_path = f'{MEDIA_ROOT}/{instance.image}'
-        try:
-            os.remove(delete_path)
-        except FileNotFoundError:
-            print("Warn: Кот удалён, но файл картинки не найден")
 
 
 class Notify(models.Model):
