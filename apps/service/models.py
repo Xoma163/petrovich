@@ -3,6 +3,7 @@ from urllib.request import urlopen
 
 from django.db import models
 from django.db.models import JSONField
+from django.utils.html import format_html
 
 from apps.bot.models import Chat, Users
 
@@ -104,15 +105,14 @@ class Meme(models.Model):
 
     def preview_image(self):
         if self.link and self.type == 'photo':
-            from django.utils.safestring import mark_safe
-            return mark_safe(u'<img src="{0}" width="150"/>'.format(self.link))
+            return format_html('<img src="{src}" width="150"/>', src=self.link)
+
         else:
             return '(Нет изображения)'
 
     def preview_link(self):
         if self.link:
-            from django.utils.safestring import mark_safe
-            return mark_safe(u'<a href="{0}">Тык</a>'.format(self.link))
+            return format_html('<a href="{href}">Тык</a>', href=self.link)
         else:
             return '(Нет изображения)'
 
