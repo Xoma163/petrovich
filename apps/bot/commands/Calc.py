@@ -12,7 +12,7 @@ class Calc(Command):
     help_texts = ["(выражение) - калькулятор выражений. Умеет работать с + - * / ^ ( )"]
 
     def accept(self, event):
-        if event.message and event.message.clear[0] == '=':
+        if event.message and event.message.clear and event.message.clear[0] == '=':
             return True
         return super().accept(event)
 
