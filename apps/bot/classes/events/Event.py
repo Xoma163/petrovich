@@ -60,9 +60,6 @@ class Event:
         if self.payload:
             return True
 
-        if self.chat and self.chat.mentioning:
-            return True
-
         need_a_response_extra = self.need_a_response_extra()
         if need_a_response_extra:
             return True
@@ -73,6 +70,8 @@ class Event:
         if self.is_from_chat and not self.message.has_command_symbols:
             return False
 
+        if self.chat and self.chat.mentioning:
+            return True
         if self.message.has_command_symbols:
             return True
 
