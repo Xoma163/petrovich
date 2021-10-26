@@ -41,9 +41,15 @@ class Event:
         self.command: Command = None
 
     def setup_event(self, is_fwd=False):
+        """
+        Метод по установке ивента у каждого бота. Переопределяется всегда
+        """
         pass
 
     def need_a_response(self):
+        """
+        Проверка, нужен ли пользователю ответ
+        """
         if self.force_not_need_a_response:
             return False
 
@@ -78,6 +84,9 @@ class Event:
         return False
 
     def need_a_response_extra(self):
+        """
+        Проверка, нужен ли пользователю ответ c учётом особенностей команд
+        """
         if self.message and not self.message.has_command_symbols:
             from apps.bot.commands.Meme import Meme as MemeCommand
             from apps.service.models import Meme as MemeModel
@@ -109,15 +118,24 @@ class Event:
 
     @property
     def has_voice_message(self):
+        """
+        Есть ли голосовое сообщение во вложениях
+        """
         for att in self.attachments:
             if isinstance(att, VoiceAttachment):
                 return True
         return False
 
     def set_message(self, text, _id=None):
+        """
+        Проставление сообщения
+        """
         self.message = Message(text, _id) if text else None
 
     def to_log(self) -> dict:
+        """
+        Подготовка ивента к логированию
+        """
         dict_self = copy.copy(self.__dict__)
         ignore_fields = ['raw', 'bot']
         for ignore_field in ignore_fields:
