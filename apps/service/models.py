@@ -1,6 +1,3 @@
-from tempfile import NamedTemporaryFile
-from urllib.request import urlopen
-
 from django.db import models
 from django.db.models import JSONField
 from django.utils.html import format_html
@@ -60,15 +57,6 @@ class Counter(models.Model):
 
     def __str__(self):
         return self.name
-
-
-def get_image_from_url(url):
-    if url:
-        ext = url.split('.')[-1].split('?')[0]
-        img_temp = NamedTemporaryFile()
-        img_temp.write(urlopen(url).read())
-        img_temp.flush()
-        return ext, img_temp
 
 
 class Meme(models.Model):
