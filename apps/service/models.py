@@ -141,7 +141,7 @@ class Meme(models.Model):
             return '(Нет изображения)'
 
     def preview_link(self):
-        if self.link:
+        if self.link and self.type == 'photo':
             from django.utils.safestring import mark_safe
             return mark_safe(u'<a href="{0}">Тык</a>'.format(self.link))
         else:
