@@ -122,7 +122,12 @@ class Bot(Thread):
                 self.logger.error(log_exception, exc_info=traceback.format_exc())
                 return msg
 
+        # Если указана настройка не реагировать на неверные команды, то скипаем
         if event.chat and not event.chat.need_reaction:
+            return
+
+        # Если указана настройка реагировать на команды без слеша, но команду мы не нашли, то скипаем
+        if event.chat and event.chat.mentioning:
             return
 
         similar_command = self.get_similar_command(event, COMMANDS)
