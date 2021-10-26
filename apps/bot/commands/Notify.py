@@ -46,7 +46,7 @@ class Notify(Command):
     names = ["напомнить"]
     help_text = "напоминает о чём-либо"
     help_texts = [
-        "(дата/дата и время/день недели) (сообщение/команда) [Прикреплённые вложения] - добавляет напоминание. Максимум можно добавить 5 напоминаний"
+        "(дата/дата и время/день недели) (сообщение/команда) - добавляет напоминание. Максимум можно добавить 5 напоминаний"
     ]
     args = 2
     platforms = [Platform.VK, Platform.TG]
@@ -91,9 +91,6 @@ class Notify(Command):
                              author=self.event.sender,
                              chat=self.event.chat,
                              text_for_filter=notify_datetime.strftime("%d.%m.%Y %H:%M") + " " + text)
-        if self.event.platform == Platform.VK:
-            if self.event.attachments:
-                notify.attachments = self.event.attachments
         notify.save()
         notify.text_for_filter += f" ({notify.id})"
         notify.save()

@@ -110,7 +110,6 @@ class Bot(Thread):
                 msg = str(e)
                 getattr(self.logger, e.level)({'result': msg})
                 return msg
-            # ToDo: check
             except PSkip:
                 return
             except Exception as e:

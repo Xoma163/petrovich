@@ -15,7 +15,6 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         from apps.bot.utils.utils import remove_tz, localize_datetime
-        from apps.bot.utils.utils import get_attachments_for_upload
 
         notifies = Notify.objects.all()
 
@@ -56,9 +55,6 @@ class Command(BaseCommand):
                         platform = notify.author.get_platform_enum()
                     bot = get_bot_by_platform(platform)()
 
-                    if notify.attachments and notify.attachments != "null":
-                        notify_attachments = notify.attachments
-                        attachments = get_attachments_for_upload(bot, notify_attachments)
                     if notify.date:
                         notify_datetime = localize_datetime(remove_tz(notify.date), notify.author.city.timezone.name)
                         message = f"Напоминалка на {notify_datetime.strftime('%H:%M')}\n" \

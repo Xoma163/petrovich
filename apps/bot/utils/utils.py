@@ -111,24 +111,6 @@ def decl_of_num(number, titles):
         return titles[cases[5]]
 
 
-# ToDo:
-def get_attachments_for_upload(bot, attachments):
-    """
-    Получает вложения и загружает необходимые на сервер, на которых нет прав
-    Прикрепляет только фото, видео, аудио и документы.
-    """
-    uploaded_attachments = []
-    for attachment in attachments:
-        # Фото
-        if isinstance(attachment, PhotoAttachment):
-            new_attachment = bot.upload_photos(attachment.get_download_url())
-            uploaded_attachments.append(new_attachment[0])
-        # Видео, аудио, документы
-        elif 'vk_url' in attachment:
-            uploaded_attachments.append(attachment['vk_url'])
-    return uploaded_attachments
-
-
 def get_attachments_from_attachments_or_fwd(event, _type=None, from_first_fwd=True) -> List[Attachment]:
     """
     Получает все вложения из сообщения и пересланного сообщения

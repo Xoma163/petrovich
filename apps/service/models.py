@@ -166,7 +166,6 @@ class Notify(models.Model):
     chat = models.ForeignKey(Chat, models.CASCADE, verbose_name='Чат', null=True, blank=True)
     author = models.ForeignKey(Users, models.CASCADE, verbose_name="Автор", null=True)
     repeat = models.BooleanField("Повторять", default=False)
-    attachments = JSONField("Вложения", blank=True, default=dict)
 
     class Meta:
         verbose_name = "напоминание"
