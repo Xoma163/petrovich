@@ -71,8 +71,6 @@ class CameraHandler(threading.Thread):
                 except Exception as e:
                     print("EXCEPTION IN CAMERA HANDLER" + str(e))
                     self.wait()
-            else:
-                self.wait()
 
     def terminate(self):
         self._running = False

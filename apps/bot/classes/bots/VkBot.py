@@ -48,13 +48,13 @@ class VkBot(CommonBot):
             try:
                 self.send_message(msg)
             except vk_api.exceptions.ApiError as e:
-                if e.code not in [901]:
+                if e.code not in [901, 917]:
                     error_msg = "Непредвиденная ошибка. Сообщите разработчику. Команда /баг"
                     error_rm = ResponseMessage(error_msg, msg.peer_id).messages[0]
                     self.logger.error({'result': error_msg, 'error': str(e)})
                     self.send_message(error_rm)
 
-    def send_message(self, rm: ResponseMessageItem):
+    def send_message(self, rm: ResponseMessageItem, **kwargs):
         """
         Отправка сообщения
         """

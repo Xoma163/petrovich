@@ -162,11 +162,11 @@ class TgBot(CommonBot):
             return f"@{user.nickname}"
         return str(user)
 
-    def delete_message(self, chat_id, message_id):
+    def delete_message(self, peer_id, message_id):
         """
         Удаление одного сообщения
         """
-        self.requests.get('deleteMessage', params={'chat_id': chat_id, 'message_id': message_id})
+        self.requests.get('deleteMessage', params={'chat_id': peer_id, 'message_id': message_id})
 
     # END EXTRA
 

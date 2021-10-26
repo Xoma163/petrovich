@@ -28,13 +28,16 @@ class Media(Command):
     ]
     platforms = [Platform.TG]
 
-    def start(self):
-        MEDIA_TRANSLATOR = {
+    def __init__(self):
+        super().__init__()
+        self.MEDIA_TRANSLATOR = {
             YOUTUBE_URLS: self.get_youtube_video_info,
             TIKTOK_URLS: self.get_tiktok_video_info,
             REDDIT_URLS: self.get_reddit_video_info,
             INSTAGRAM_URLS: self.get_instagram_video_info
         }
+
+    def start(self):
 
         if self.event.message.command in self.full_names:
             if self.event.message.args:
@@ -48,23 +51,7 @@ class Media(Command):
             source = self.event.message.raw
             has_command_name = False
 
-        method = None
-        chosen_url = None
-        urls = get_urls_from_text(source)
-        for url in urls:
-            hostname = urlparse(url).hostname
-            if not hostname:
-                raise PWarning("Не нашёл ссылки")
-            for k in MEDIA_TRANSLATOR:
-                if hostname in k:
-                    method = MEDIA_TRANSLATOR[k]
-                    chosen_url = url
-                    break
-            if method:
-                break
-
-        if not method:
-            raise PWarning("Не youtube/tiktok/reddit/instagram ссылка")
+        method, chosen_url = self.get_method_and_chosen_url(source)
 
         self.bot.set_activity(self.event.peer_id, ActivitiesEnum.UPLOAD_VIDEO)
         try:
@@ -95,6 +82,20 @@ class Media(Command):
             if extra_text and extra_text != title:
                 text += f"\n{extra_text}"
             return {'text': text, 'attachments': attachments}
+
+    def get_method_and_chosen_url(self, source):
+        method = None
+        urls = get_urls_from_text(source)
+        for url in urls:
+            hostname = urlparse(url).hostname
+            if not hostname:
+                raise PWarning("Не нашёл ссылки")
+            for k in self.MEDIA_TRANSLATOR:
+                if hostname in k:
+                    return self.MEDIA_TRANSLATOR[k], url
+
+        if not method:
+            raise PWarning("Не youtube/tiktok/reddit/instagram ссылка")
 
     @staticmethod
     def get_youtube_video_info(url):

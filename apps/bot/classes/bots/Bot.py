@@ -81,7 +81,7 @@ class Bot(Thread):
         """
         raise NotImplementedError
 
-    def send_message(self, rm: ResponseMessageItem):
+    def send_message(self, rm: ResponseMessageItem, **kwargs):
         """
         Отправка сообщения
         """
