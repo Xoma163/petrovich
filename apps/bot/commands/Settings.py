@@ -28,7 +28,7 @@ class Settings(Command):
 
         menu = [
             [['реагировать', 'реагируй', 'реагирование'], self.menu_reaction],
-            [['упоминание', 'упоминания', 'триггериться'], self.menu_mentioning],
+            [['упоминание', 'упоминания', 'триггериться', 'тригериться'], self.menu_mentioning],
             [['майнкрафт', 'майн', 'minecraft', 'mine'], self.menu_minecraft_notify],
             [['мемы', 'мем'], self.menu_memes],
             [['др', 'днюха'], self.menu_bd],
