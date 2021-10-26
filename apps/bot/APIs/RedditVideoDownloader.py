@@ -1,24 +1,23 @@
 import datetime
-import os
+from tempfile import NamedTemporaryFile
 from urllib.parse import urlparse
 
 import requests
 from bs4 import BeautifulSoup
 
 from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.utils.DoTheLinuxComand import do_the_linux_command
 
-# ToDo: do the linux command?
+
+# ToDo: tempfiles?
 class RedditVideoSaver:
     def __init__(self):
         self.timestamp = datetime.datetime.now().timestamp()
-        self.video_filename = f"/tmp/video_{self.timestamp}.mp4"
-        self.audio_filename = None  # Уточняется в процессе
-        self.output_filename = f"/tmp/output_{self.timestamp}.mp4"
+        self.tmp_video_file = NamedTemporaryFile()
+        self.tmp_audio_file = NamedTemporaryFile()
+        self.tmp_output_file = NamedTemporaryFile()
+        print(self.tmp_output_file.name)
         self.title = None
-
-    def set_audio_filename(self, filename):
-        audio_format = filename.split('.')[-1]
-        self.audio_filename = f"audio_{self.timestamp}.{audio_format}"
 
     def parse_mpd_audio_filename(self, url):
         """
@@ -29,12 +28,10 @@ class RedditVideoSaver:
         bs4 = BeautifulSoup(xml, 'html.parser')
         try:
             filename = bs4.find("adaptationset", {'contenttype': 'audio'}).find('representation').find('baseurl').text
-            self.set_audio_filename(filename)
             return filename
         except Exception:
             try:
                 filename = bs4.find("representation", {'id': 'AUDIO-1'}).find('baseurl').text
-                self.set_audio_filename(filename)
                 return filename
             except Exception:
                 return None
@@ -78,26 +75,27 @@ class RedditVideoSaver:
         return video_url, audio_url
 
     def get_download_video_and_audio(self, video_url, audio_url):
-        os.system(f"curl -o {self.video_filename} {video_url} >/dev/null 2>&1")
-        os.system(f"curl -o {self.audio_filename} {audio_url} >/dev/null 2>&1")
+        do_the_linux_command(f"curl -o {self.tmp_video_file.name} {video_url}")
+        do_the_linux_command(f"curl -o {self.tmp_audio_file.name} {audio_url}")
 
     def mux_video_and_audio(self):
         try:
-            os.system(
-                f"ffmpeg -i {self.video_filename} -i {self.audio_filename} -c:v copy -c:a aac -strict experimental {self.output_filename} >/dev/null 2>&1")
+            do_the_linux_command(
+                f"ffmpeg -i {self.tmp_video_file.name} -i {self.tmp_audio_file.name} -c:v copy -c:a aac -strict experimental -f mp4 -y {self.tmp_output_file.name}")
         finally:
             self.delete_video_audio_files()
 
     def delete_video_audio_files(self):
-        os.system(f"rm {self.video_filename}")
-        os.system(f"rm {self.audio_filename}")
+        self.tmp_video_file.close()
+        self.tmp_audio_file.close()
 
     def delete_output_file(self):
-        os.system(f"rm {self.output_filename}")
+        self.tmp_output_file.close()
 
     def get_video_bytes(self):
         try:
-            with open(self.output_filename, 'rb') as file:
+            print(self.tmp_output_file.name)
+            with open(self.tmp_output_file.name, 'rb') as file:
                 file_bytes = file.read()
         finally:
             self.delete_output_file()
@@ -117,6 +115,3 @@ class RedditVideoSaver:
         self.get_download_video_and_audio(video_url, audio_url)
         self.mux_video_and_audio()
         return self.get_video_bytes()
-
-    def has_video(self):
-        pass

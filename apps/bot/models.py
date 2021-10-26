@@ -79,6 +79,7 @@ class Users(Platform):
         image.flush()
 
         self.avatar.save(f"avatar_{str(self)}.{ext}", File(image))
+        image.close()
 
     def check_role(self, role):
         group = self.groups.filter(name=role.name)
@@ -145,6 +146,7 @@ class Bot(Platform):
         image.flush()
 
         self.avatar.save(f"avatar_{str(self)}.{ext}", File(image))
+        image.close()
 
 
 def random_digits():
