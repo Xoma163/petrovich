@@ -12,7 +12,6 @@ from apps.bot.utils.QuotesGenerator import QuotesGenerator
 # https://www.figma.com/file/yOqhSHOtYX76GcEJ3yB4oH/Bot?node-id=33%3A15
 class Quote(Command):
     name = "цитата"
-    names = ["(c)", "(с)"]
     help_text = "генерирует картинку с цитатой"
     help_texts = ["(Пересылаемые сообщение) - генерирует картинку с цитатой"]
     fwd = True

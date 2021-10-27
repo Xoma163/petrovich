@@ -5,7 +5,7 @@ from apps.bot.utils.DoTheLinuxComand import do_the_linux_command
 
 class Temperature(Command):
     name = "температура"
-    names = ['темп', 't', 'т']
+    names = ['темп']
     help_text = "температуры сервера"
     access = Role.MODERATOR
 

@@ -7,7 +7,6 @@ from apps.bot.management.commands.start import camera_handler
 
 class Camera(Command):
     name = "камера"
-    names = ["с", "c"]
     help_text = "ссылка и гифка с камеры"
     help_texts = ["[кол-во кадров=100] - ссылка и гифка с камеры. Максимум 1000 кадров"]
     int_args = [0]
