@@ -388,7 +388,8 @@ class Meme(Command):
         prepared_meme = prepare_meme_to_send(self.bot, self.event, meme, print_name, send_keyboard, self.name)
         # ToDo: удалить когда не будет БУНДа
         if meme.type == 'video':
-            prepared_meme['text'] = "Ваш мем я нашёл, но я вам его не отдам. Обновите мем на ютуб-ссылку, пожалуйста"
+            prepared_meme['text'] = f"Ваш мем я нашёл, но я вам его не отдам. Обновите мем на ютуб-ссылку, пожалуйста\n" \
+                                    f"id={meme.pk}"
         if send_keyboard:
             prepared_meme['keyboard'] = self.bot.get_inline_keyboard(
                 [{'command': self.name, 'button_text': "Ещё", 'args': ["р"]}])
