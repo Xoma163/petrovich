@@ -16,7 +16,6 @@ class RedditVideoSaver:
         self.tmp_video_file = NamedTemporaryFile()
         self.tmp_audio_file = NamedTemporaryFile()
         self.tmp_output_file = NamedTemporaryFile()
-        print(self.tmp_output_file.name)
         self.title = None
 
     def parse_mpd_audio_filename(self, url):
@@ -94,7 +93,6 @@ class RedditVideoSaver:
 
     def get_video_bytes(self):
         try:
-            print(self.tmp_output_file.name)
             with open(self.tmp_output_file.name, 'rb') as file:
                 file_bytes = file.read()
         finally:

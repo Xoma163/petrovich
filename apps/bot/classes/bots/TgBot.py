@@ -87,6 +87,7 @@ class TgBot(CommonBot):
             return self.requests.get('sendVideo', default_params)
         else:
             if video.size_mb > 40:
+                rm.attachments = []
                 raise PError("Нельзя загружать видео более 40 мб в телеграмм")
             return self.requests.get('sendVideo', default_params, files={'video': video.content})
 
@@ -105,10 +106,9 @@ class TgBot(CommonBot):
                     self.send_message(error_rm)
             # Предвиденная ошибка
             except (PWarning, PError) as e:
-                p_error_msg = str(e)
-                p_error_rm = ResponseMessage(p_error_msg, msg.peer_id).messages[0]
-                getattr(self.logger, e.level)({'result': p_error_msg})
-                self.send_message(p_error_rm)
+                msg.text += f"\n\n{str(e)}"
+                getattr(self.logger, e.level)({'result': msg})
+                self.send_message(msg)
 
     def send_message(self, rm: ResponseMessageItem, **kwargs):
         """
