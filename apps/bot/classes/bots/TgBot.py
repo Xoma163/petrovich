@@ -7,6 +7,7 @@ import requests
 from apps.bot.classes.bots.Bot import Bot as CommonBot
 from apps.bot.classes.consts.ActivitiesEnum import ActivitiesEnum, TG_ACTIVITIES
 from apps.bot.classes.consts.Consts import Platform
+from apps.bot.classes.consts.Exceptions import PError, PWarning
 from apps.bot.classes.events.TgEvent import TgEvent
 from apps.bot.classes.messages.ResponseMessage import ResponseMessageItem, ResponseMessage
 from apps.bot.classes.messages.attachments.DocumentAttachment import DocumentAttachment
@@ -85,6 +86,8 @@ class TgBot(CommonBot):
             default_params['video'] = video.public_download_url
             return self.requests.get('sendVideo', default_params)
         else:
+            if video.size_mb > 40:
+                raise PError("Нельзя загружать видео более 40 мб в телеграмм")
             return self.requests.get('sendVideo', default_params, files={'video': video.content})
 
     def send_response_message(self, rm: ResponseMessage):
@@ -92,12 +95,20 @@ class TgBot(CommonBot):
         Отправка ResponseMessage сообщения
         """
         for msg in rm.messages:
-            response = self.send_message(msg)
-            if response.status_code != 200:
-                error_msg = "Непредвиденная ошибка. Сообщите разработчику. Команда /баг"
-                error_rm = ResponseMessage(error_msg, msg.peer_id).messages[0]
-                self.logger.error({'result': error_msg, 'error': response.json()['description']})
-                self.send_message(error_rm)
+            try:
+                response = self.send_message(msg)
+                # Непредвиденная ошибка
+                if response.status_code != 200:
+                    error_msg = "Непредвиденная ошибка. Сообщите разработчику. Команда /баг"
+                    error_rm = ResponseMessage(error_msg, msg.peer_id).messages[0]
+                    self.logger.error({'result': error_msg, 'error': response.json()['description']})
+                    self.send_message(error_rm)
+            # Предвиденная ошибка
+            except (PWarning, PError) as e:
+                p_error_msg = str(e)
+                p_error_rm = ResponseMessage(p_error_msg, msg.peer_id).messages[0]
+                getattr(self.logger, e.level)({'result': p_error_msg})
+                self.send_message(p_error_rm)
 
     def send_message(self, rm: ResponseMessageItem, **kwargs):
         """

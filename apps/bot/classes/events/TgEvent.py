@@ -9,7 +9,7 @@ from apps.bot.classes.messages.attachments.VoiceAttachment import VoiceAttachmen
 class TgEvent(Event):
 
     def setup_event(self, is_fwd=False):
-        if not is_fwd and self.raw.get('message') and self.raw['message'].get('forward_from'):
+        if not is_fwd and self.raw.get('message', {}).get('forward_from'):
             self.force_not_need_a_response = True
 
         if is_fwd:

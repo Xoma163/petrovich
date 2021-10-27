@@ -21,8 +21,6 @@ class Attachment:
         self.url = None
         # bytes
         self.content = None
-        # len(bytes)
-        self.size = None
 
     def set_private_download_url_tg(self, tg_bot, file_id):
         file_path = tg_bot.requests.get('getFile', params={'file_id': file_id}).json()['result']['file_path']
@@ -77,11 +75,21 @@ class Attachment:
     def download_content(self) -> bytes:
         if not self.content:
             self.content = requests.get(self.get_download_url()).content
-            self.size = len(self.content)
         return self.content
 
     def get_bytes_io_content(self) -> BytesIO:
         return BytesIO(self.download_content())
+
+    @property
+    def size(self):
+        if not self.content:
+            return 0
+        else:
+            return len(self.content)
+
+    @property
+    def size_mb(self):
+        return self.size / 1024 / 1024
 
     def to_log(self):
         dict_self = copy.copy(self.__dict__)
