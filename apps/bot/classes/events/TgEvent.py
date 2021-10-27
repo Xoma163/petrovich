@@ -10,7 +10,7 @@ class TgEvent(Event):
 
     def setup_event(self, is_fwd=False):
         if not is_fwd and self.raw.get('message') and self.raw['message'].get('forward_from'):
-            self.force_not_need_a_response = False
+            self.force_not_need_a_response = True
 
         if is_fwd:
             message = self.raw
@@ -25,8 +25,6 @@ class TgEvent(Event):
                 message = edited_message
             else:
                 message = self.raw.get('message')
-        if not message:
-            self.force_not_need_a_response = False
 
         self.peer_id = message['chat']['id']
         self.from_id = message['from']['id']

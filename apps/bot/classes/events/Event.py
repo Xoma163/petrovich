@@ -69,15 +69,15 @@ class Event:
         need_a_response_extra = self.need_a_response_extra()
         if need_a_response_extra:
             return True
-        if self.is_from_pm:
-            return True
         if self.message is None:
             return False
+        if self.is_from_pm:
+            return True
+        if self.chat and self.chat.mentioning:
+            return True
         if self.is_from_chat and not self.message.has_command_symbols:
             return False
 
-        if self.chat and self.chat.mentioning:
-            return True
         if self.message.has_command_symbols:
             return True
 
