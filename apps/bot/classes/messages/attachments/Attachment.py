@@ -69,7 +69,6 @@ class Attachment:
 
     def parse_response(self, attachment, allowed_exts_url=None, filename=None):
         self.prepare_obj(attachment, allowed_exts_url=allowed_exts_url, filename=filename)
-        self.size = len(self.content)
 
     def get_download_url(self):
         return self.public_download_url if self.public_download_url else self.private_download_url
@@ -83,8 +82,12 @@ class Attachment:
         return BytesIO(self.download_content())
 
     def get_size(self):
-        if self.content:
-            self.size = len(self.content)
+        if not self.size and self.content:
+            try:
+                self.size = len(self.content)
+            except TypeError:
+                self.size = self.content.seek(0, 2)
+                self.content.seek(0)
         return self.size
 
     def get_size_mb(self):
