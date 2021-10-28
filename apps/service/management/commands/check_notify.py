@@ -28,7 +28,7 @@ class Command(BaseCommand):
                     continue
 
                 platform = notify.chat.get_platform_enum() if notify.chat else notify.author.get_platform_enum()
-                bot = get_bot_by_platform(platform)()
+                bot = get_bot_by_platform(platform)
 
                 self.send_notify_message(bot, notify)
                 self.send_command_notify_message(bot, notify)

@@ -340,7 +340,7 @@ def get_bot_by_platform(platform: Platform):
         Platform.TG: TgBot,
         # Platform.YANDEX: YandexBot
     }
-    return platforms[platform]
+    return platforms[platform]()
 
 
 def send_message_to_moderator_chat(msgs):
@@ -358,6 +358,6 @@ def send_message_to_moderator_chat(msgs):
 
 
 def upload_image_to_vk_server(image):
-    vk_bot = get_bot_by_platform(Platform.VK)()
+    vk_bot = get_bot_by_platform(Platform.VK)
     photos = vk_bot.upload_photos(image, 1)
     return photos[0].public_download_url
