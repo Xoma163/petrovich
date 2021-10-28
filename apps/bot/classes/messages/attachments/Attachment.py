@@ -19,6 +19,7 @@ class Attachment:
         self.private_download_url = None
         # vk/youtube links
         self.url = None
+        self.size = 0
         # bytes
         self.content = None
 
@@ -68,6 +69,7 @@ class Attachment:
 
     def parse_response(self, attachment, allowed_exts_url=None, filename=None):
         self.prepare_obj(attachment, allowed_exts_url=allowed_exts_url, filename=filename)
+        self.size = len(self.content)
 
     def get_download_url(self):
         return self.public_download_url if self.public_download_url else self.private_download_url
@@ -80,16 +82,13 @@ class Attachment:
     def get_bytes_io_content(self) -> BytesIO:
         return BytesIO(self.download_content())
 
-    @property
-    def size(self):
-        if not self.content:
-            return 0
-        else:
-            return len(self.content)
+    def get_size(self):
+        if self.content:
+            self.size = len(self.content)
+        return self.size
 
-    @property
-    def size_mb(self):
-        return self.size / 1024 / 1024
+    def get_size_mb(self):
+        return self.get_size() / 1024 / 1024
 
     def to_log(self):
         dict_self = copy.copy(self.__dict__)
