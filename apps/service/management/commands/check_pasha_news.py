@@ -27,7 +27,6 @@ class Command(BaseCommand):
         bs4 = BeautifulSoup(content, "html.parser")
         news = list(bs4.select(".news-list > .row > a"))
 
-        pasha_news_last_id -= 1
         if created:
             last_news_id = news[0].attrs['href'].split('/')[-2]
             pasha_news_last_id_entity.value = last_news_id
