@@ -4,8 +4,6 @@ import pickle
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
 
-from google.oauth2.credentials import Credentials
-
 from petrovich.settings import BASE_DIR
 
 
