@@ -202,7 +202,7 @@ class Meme(Command):
                 else:
                     msg = f'Мем с названием "{meme.name}" удалён поскольку он не ' \
                           f'соответствует правилам или был удалён автором.'
-            except PWarning:
+            except ValueError:
                 meme = self.get_meme(self.event.message.args[1:])
                 msg = f'Мем с названием "{meme.name}" удалён поскольку он не ' \
                       f'соответствует правилам или был удалён автором.'
@@ -294,14 +294,6 @@ class Meme(Command):
         renamed_meme.save()
         return user_msg
 
-    def menu_id(self):
-        self.check_args(2)
-        self.int_args = [1]
-        self.parse_int()
-        _id = self.event.message.args[1]
-        meme = self.get_meme(_id=_id)
-        return self.prepare_meme_to_send(meme, True)
-
     def menu_info(self):
         self.check_args(2)
         _id = None
@@ -310,7 +302,7 @@ class Meme(Command):
             try:
                 self.parse_int()
                 _id = self.event.message.args[1]
-            except PWarning:
+            except ValueError:
                 pass
         meme = self.get_meme(self.event.message.args[1:], _id=_id)
         return meme.get_info()

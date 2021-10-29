@@ -202,7 +202,7 @@ class Command:
                     self.event.message.args[checked_arg_index] = int(self.event.message.args[checked_arg_index])
                 except ValueError:
                     error = "Аргумент должен быть целочисленным"
-                    raise PWarning(error)
+                    raise ValueError(error)
         return True
 
     def parse_float(self):
