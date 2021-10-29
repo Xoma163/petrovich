@@ -1,10 +1,5 @@
-"""
-GET https://youtube.googleapis.com/youtube/v3/liveBroadcasts?broadcastStatus=active&broadcastType=all&key=[YOUR_API_KEY] HTTP/1.1
-
-Authorization: Bearer [YOUR_ACCESS_TOKEN]
-Accept: application/json
-
-"""
+import os
+import pickle
 
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
@@ -16,21 +11,22 @@ from petrovich.settings import BASE_DIR
 
 class YoutubeLiveCheckerAPI:
     SECRET_FILE = f"{BASE_DIR}/secrets/google.json"
+    SECRET_FILE_CREDS = f"{BASE_DIR}/secrets/google_creds.json"
     SCOPES = ["https://www.googleapis.com/auth/youtube.readonly"]
 
     def __init__(self):
         pass
 
     def get_stream_info_if_online(self):
-        flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(self.SECRET_FILE, self.SCOPES)
-        # credentials = flow.run_console(access_type="offline")
-        credentials = Credentials(
-            None,
-            refresh_token=flow.client_config['refresh_token'],
-            token_uri="https://accounts.google.com/o/oauth2/token",
-            client_id=flow.client_config['client_id'],
-            client_secret=flow.client_config['client_secret']
-        )
+
+        if os.path.exists("CREDENTIALS_PICKLE_FILE"):
+            with open("CREDENTIALS_PICKLE_FILE", 'rb') as f:
+                credentials = pickle.load(f)
+        else:
+            flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(self.SECRET_FILE, self.SCOPES)
+            credentials = flow.run_console(access_type="offline", prompt="consent")
+            with open("CREDENTIALS_PICKLE_FILE", 'wb') as f:
+                pickle.dump(credentials, f)
         youtube = googleapiclient.discovery.build("youtube", "v3", credentials=credentials)
 
         request = youtube.liveBroadcasts() \
