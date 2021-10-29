@@ -17,12 +17,15 @@ class TgEvent(Event):
         else:
             edited_message = self.raw.get('edited_message')
             callback_query = self.raw.get('callback_query')
+            my_chat_member = self.raw.get('my_chat_member')
             if callback_query:
                 message = callback_query['message']
                 message['from'] = callback_query['from']
                 message['payload'] = callback_query['data']
             elif edited_message:
                 message = edited_message
+            elif my_chat_member:
+                message = my_chat_member
             else:
                 message = self.raw.get('message')
 

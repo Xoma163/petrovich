@@ -40,14 +40,14 @@ class Nostalgia(Command):
                 try:
                     self.parse_int()
                     return self.menu_range(self.event.message.args[0], self.event.message.args[1])
-                except ValueError:
+                except PWarning:
                     pass
             else:
                 self.int_args = [0]
                 try:
                     self.parse_int()
                     return self.menu_range(self.event.message.args[0])
-                except ValueError:
+                except PWarning:
                     pass
 
         menu = [

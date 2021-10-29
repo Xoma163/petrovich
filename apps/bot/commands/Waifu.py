@@ -21,7 +21,7 @@ class Waifu(Command):
                 self.parse_int()
                 waifu_number = self.event.message.args[0]
                 self.check_number_arg_range(waifu_number, 0, waifus_count)
-            except ValueError:
+            except PWarning:
                 seed = self.event.message.args_str
                 waifu_number = get_random_int(waifus_count, seed=seed)
         else:
