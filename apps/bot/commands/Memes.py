@@ -3,7 +3,7 @@ from django.core.paginator import Paginator
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Role
 from apps.bot.classes.consts.Exceptions import PWarning
-from apps.bot.commands.Meme import get_tanimoto_memes
+from apps.bot.commands.Meme import Meme
 from apps.service.models import Meme as MemeModel
 
 
@@ -61,7 +61,10 @@ class Memes(Command):
                 memes = memes.filter(name__icontains=arg)
             if len(memes) == 0:
                 raise PWarning("Не нашёл мемов по заданному запросу")
-            memes = get_tanimoto_memes(memes, self.event.message.args_str)
+
+            meme_command = Meme(bot=self.bot)
+            memes = meme_command.get_tanimoto_memes(memes, self.event.message.args)
+
             memes_sliced = memes[:20]
             meme_names = get_memes_names(memes_sliced, self.event.sender)
             meme_names_str = ";\n".join(meme_names)

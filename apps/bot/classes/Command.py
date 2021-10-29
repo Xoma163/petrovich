@@ -29,9 +29,9 @@ class Command:
     attachments: list = []  # Должно ли сообщение обрабатываться только с вложениями
     city: bool = False  # Должно ли сообщение обрабатываться только с заданным городом у пользователя
 
-    def __init__(self):
-        self.bot: Bot = None
-        self.event: Event = None
+    def __init__(self, bot: Bot = None, event: Event = None):
+        self.bot: Bot = bot
+        self.event: Event = event
 
         if not isinstance(self.platforms, list):
             self.platforms = [self.platforms]

@@ -69,7 +69,7 @@ class Bot(Thread):
             self.send_response_message(rm)
         return rm
 
-    def parse_and_send_msgs_thread(self, peer_id: int, msgs: list):
+    def parse_and_send_msgs_thread(self, peer_id: int, msgs):
         """
         Парсинг сырых сообщений и отправка их в отдельном потоке
         """

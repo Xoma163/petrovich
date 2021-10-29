@@ -2,7 +2,7 @@ from datetime import datetime
 
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Exceptions import PWarning
-from apps.bot.commands.Meme import prepare_meme_to_send
+from apps.bot.commands.Meme import Meme
 from apps.service.models import Horoscope as HoroscopeModel
 
 
@@ -45,7 +45,8 @@ class Horoscope(Command):
                     meme = horoscope.memes.all()[i]
                     zodiac_sign_name = zodiac_sign.name.capitalize()
                     try:
-                        prepared_meme = prepare_meme_to_send(self.bot, self.event, meme)
+                        meme_command = Meme(bot=self.bot)
+                        prepared_meme = meme_command.prepare_meme_to_send(meme)
                     except PWarning as e:
                         error_msg = f"{zodiac_sign_name}\n{str(e)}"
                         self.bot.parse_and_send_msgs_thread(self.event.peer_id, error_msg)
@@ -98,7 +99,9 @@ class Horoscope(Command):
         zodiac_sign_index = self.zodiac_signs.get_zodiac_sign_index(zodiac_sign)
         zodiac_sign_name = zodiac_sign.name.capitalize()
         meme = horoscope.memes.all()[zodiac_sign_index]
-        prepared_meme = prepare_meme_to_send(self.bot, self.event, meme)
+
+        meme_command = Meme(bot=self.bot)
+        prepared_meme = meme_command.prepare_meme_to_send(meme)
         if prepared_meme.get('text', None):
             prepared_meme['text'] = f"{zodiac_sign_name}\n{prepared_meme['text']}"
         else:

@@ -196,7 +196,7 @@ class Meme(Command):
         return f'Удалил мем "{meme_name}"'
 
     def menu_random(self):
-        meme = self.get_random_meme()
+        meme = MemeModel.objects.filter(approved=True).order_by('?').first()
         return self.prepare_meme_to_send(meme, print_name=True, send_keyboard=True)
 
     def menu_confirm(self):
@@ -281,7 +281,7 @@ class Meme(Command):
             try:
                 meme = self.get_one_meme(memes, self.event.message.args)
             except PWarning:
-                tanimoto_memes = get_tanimoto_memes(memes, " ".join(self.event.message.args))
+                tanimoto_memes = self.get_tanimoto_memes(memes, " ".join(self.event.message.args))
                 meme = tanimoto_memes[0]
                 warning_message = self.get_similar_memes_names(tanimoto_memes)
 
@@ -340,25 +340,54 @@ class Meme(Command):
         meme = self.get_one_meme(memes, filter_list, approved)
         return meme
 
-    @staticmethod
-    def get_tanimoto_memes(memes, filter_list) -> List[MemeModel]:
-        filters_str = " ".join(filter_list)
-        return get_tanimoto_memes(memes, filters_str)
-
-    @staticmethod
-    def get_random_meme():
-        return MemeModel.objects.filter(approved=True).order_by('?').first()
-
     def prepare_meme_to_send(self, meme, print_name=False, send_keyboard=False):
-        prepared_meme = prepare_meme_to_send(self.bot, self.event, meme, print_name, send_keyboard, self.name)
+        msg = {}
+
+        if self.event.platform == Platform.TG:
+            if meme.type == 'photo':
+                msg['attachments'] = self.bot.upload_photos(meme.link)
+            else:
+                msg['text'] = meme.link
+            if meme.type == 'link':
+                msg['attachments'] = meme.link
+        elif self.event.platform == Platform.VK:
+            if meme.type == 'video':
+                msg['attachments'] = [meme.link.replace(VK_URL, '')]
+                # Проверяем не удалено ли видео
+            elif meme.type == 'link':
+                msg['text'] = meme.link
+            elif meme.type == 'audio':
+                msg['attachments'] = [meme.link.replace(VK_URL, '')]
+            elif meme.type == 'photo':
+                msg['attachments'] = self.bot.upload_photos(meme.link)
+
+            else:
+                raise PError("У мема нет типа. Тыкай разраба")
+
+        if print_name:
+            if msg.get('text', None):
+                msg['text'] += f"\n{meme.name}"
+        # return msg
+
         # ToDo: удалить когда не будет БУНДа
         if meme.type == 'video':
-            prepared_meme['text'] = f"Ваш мем я нашёл, но я вам его не отдам. Обновите мем на ютуб-ссылку, пожалуйста\n" \
-                                    f"id={meme.pk}"
+            msg['text'] = f"Ваш мем я нашёл, но я вам его не отдам. Обновите мем на ютуб-ссылку, пожалуйста\n" \
+                          f"id={meme.pk}"
         if send_keyboard:
-            prepared_meme['keyboard'] = self.bot.get_inline_keyboard(
+            msg['keyboard'] = self.bot.get_inline_keyboard(
                 [{'command': self.name, 'button_text': "Ещё", 'args': ["р"]}])
-        return prepared_meme
+        return msg
+
+    @staticmethod
+    def get_tanimoto_memes(memes, filter_list) -> List[MemeModel]:
+        query = " ".join(filter_list)
+        memes_list = []
+        for meme in memes:
+            tanimoto_coefficient = tanimoto(meme.name, query)
+            memes_list.append({'meme': meme, 'tanimoto': tanimoto_coefficient, 'contains_query': query in meme.name})
+        memes_list.sort(key=lambda x: (x['contains_query'], x['tanimoto']), reverse=True)
+        memes_list = [meme['meme'] for meme in memes_list]
+        return memes_list
 
     @staticmethod
     def get_similar_memes_names(memes):
@@ -403,43 +432,3 @@ class Meme(Command):
         else:
             meme_filter['filter_list'] = id_name.split(' ')
         return meme_filter
-
-
-def get_tanimoto_memes(memes, query):
-    memes_list = []
-    for meme in memes:
-        tanimoto_coefficient = tanimoto(meme.name, query)
-        memes_list.append({'meme': meme, 'tanimoto': tanimoto_coefficient, 'contains_query': query in meme.name})
-    memes_list.sort(key=lambda x: (x['contains_query'], x['tanimoto']), reverse=True)
-    memes_list = [meme['meme'] for meme in memes_list]
-    return memes_list
-
-
-def prepare_meme_to_send(bot, event, meme, print_name=False, send_keyboard=False, name=None):
-    msg = {}
-
-    if event.platform == Platform.TG:
-        if meme.type == 'photo':
-            msg['attachments'] = bot.upload_photos(meme.link)
-        else:
-            msg['text'] = meme.link
-        if meme.type == 'link':
-            msg['attachments'] = meme.link
-    elif event.platform == Platform.VK:
-        if meme.type == 'video':
-            msg['attachments'] = [meme.link.replace(VK_URL, '')]
-            # Проверяем не удалено ли видео
-        elif meme.type == 'link':
-            msg['text'] = meme.link
-        elif meme.type == 'audio':
-            msg['attachments'] = [meme.link.replace(VK_URL, '')]
-        elif meme.type == 'photo':
-            msg['attachments'] = bot.upload_photos(meme.link)
-
-        else:
-            raise PError("У мема нет типа. Тыкай разраба")
-
-    if print_name:
-        if msg.get('text', None):
-            msg['text'] += f"\n{meme.name}"
-    return msg
