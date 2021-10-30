@@ -2,6 +2,7 @@ import json
 
 from apps.bot.classes.events.Event import Event
 from apps.bot.classes.messages.Message import Message
+from apps.bot.classes.messages.TgMessage import TgMessage
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 from apps.bot.classes.messages.attachments.VoiceAttachment import VoiceAttachment
 
@@ -92,7 +93,8 @@ class TgEvent(Event):
                 message_text = message.get('caption')
         else:
             message_text = message.get('text')
-        self.set_message(message_text, message.get('message_id'))
+        entities = message.get('entities')
+        self.message = TgMessage(message_text, message.get('message_id'), entities) if message_text else None
 
     def setup_photo(self, photo_event):
         tg_photo = PhotoAttachment()

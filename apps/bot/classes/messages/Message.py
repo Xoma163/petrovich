@@ -20,6 +20,7 @@ class Message:
 
         """
         self.has_command_symbols = False
+        self.has_mention = False
 
         self.raw = ""
         self.command = ""

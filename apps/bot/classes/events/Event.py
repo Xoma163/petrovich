@@ -75,10 +75,10 @@ class Event:
             return True
         if self.chat and self.chat.mentioning:
             return True
-        if self.is_from_chat and not self.message.has_command_symbols:
+        if self.is_from_chat and not (self.message.has_command_symbols or self.message.has_mention):
             return False
 
-        if self.message.has_command_symbols:
+        if self.message.has_command_symbols or self.message.has_mention:
             return True
 
         return False
