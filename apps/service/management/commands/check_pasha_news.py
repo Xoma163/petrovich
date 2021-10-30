@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 from django.core.management.base import BaseCommand
 
 from apps.bot.classes.bots.Bot import get_bot_by_platform
+from apps.bot.classes.consts.Consts import Platform
 from apps.bot.models import Users
 from apps.service.models import Service
 
@@ -35,7 +36,11 @@ class Command(BaseCommand):
         news_to_send = list(filter(lambda x: self.get_news_id(x) > pasha_news_last_id, news))
         msgs = []
         for news in news_to_send:
-            msgs.append(self.parse_news(f"{self.URL}{news.attrs['href']}"))
+            news_content, news_url = self.parse_news(f"{self.URL}{news.attrs['href']}")
+            if pasha.get_platform_enum() == Platform.TG:
+                return {'text': f"{news_content}\n\n[Полная статья]({news_url})", 'parse_mode': 'markdown'}
+            else:
+                return f"{news_content}\n\n{news_url}"
 
         last_news_id = self.get_news_id(news_to_send[0])
         pasha_news_last_id_entity.value = last_news_id
@@ -49,7 +54,7 @@ class Command(BaseCommand):
         content = requests.get(news_url).content
         bs4 = BeautifulSoup(content, "html.parser")
         news_content = bs4.select(".news-detail .col-lg-9")[0].text.strip()
-        return f"{news_content}\n\n{news_url}"
+        return news_content, news_url
 
     @staticmethod
     def get_news_id(x):
