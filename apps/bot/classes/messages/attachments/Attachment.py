@@ -33,8 +33,10 @@ class Attachment:
         То есть метод позволяет преобразовывать почти из любого формата
         """
         # url
-        parsed_url = urlparse(file_like_object)
-        if isinstance(file_like_object, str) and parsed_url.hostname:
+        parsed_url = None
+        if isinstance(file_like_object, str):
+            parsed_url = urlparse(file_like_object)
+        if parsed_url and parsed_url.hostname:
             if allowed_exts_url:
                 extension = parsed_url.path.split('.')[-1].lower()
                 is_default_extension = extension not in allowed_exts_url

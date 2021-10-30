@@ -92,7 +92,7 @@ class Bot(Thread):
         Выбор команды
         Если в Event есть команда, поиск не требуется
         """
-        self.set_activity(event.peer_id, ActivitiesEnum.TYPING)
+        # self.set_activity(event.peer_id, ActivitiesEnum.TYPING)
         self.logger.debug(event.to_log())
         from apps.bot.initial import COMMANDS
 
