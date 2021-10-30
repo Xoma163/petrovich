@@ -31,10 +31,10 @@ class Media(Command):
     def __init__(self):
         super().__init__()
         self.MEDIA_TRANSLATOR = {
-            YOUTUBE_URLS: self.get_youtube_video_info,
-            TIKTOK_URLS: self.get_tiktok_video_info,
-            REDDIT_URLS: self.get_reddit_video_info,
-            INSTAGRAM_URLS: self.get_instagram_video_info
+            YOUTUBE_URLS: self.get_youtube_video,
+            TIKTOK_URLS: self.get_tiktok_video,
+            REDDIT_URLS: self.get_reddit_attachment,
+            INSTAGRAM_URLS: self.get_instagram_attachment,
         }
 
     def start(self):
@@ -53,17 +53,14 @@ class Media(Command):
 
         method, chosen_url = self.get_method_and_chosen_url(source)
 
-        self.bot.set_activity(self.event.peer_id, ActivitiesEnum.UPLOAD_VIDEO)
         try:
-            video, title = method(chosen_url)
+            attachments, title = method(chosen_url)
         except PWarning as e:
             # Если была вызвана команда или отправлено сообщение в лс
             if has_command_name or self.event.is_from_pm:
                 raise e
             else:
                 return
-        self.bot.set_activity(self.event.peer_id, ActivitiesEnum.UPLOAD_VIDEO)
-        attachments = [self.bot.upload_video(video)]
 
         if has_command_name or self.event.is_from_pm:
             return {'attachments': attachments}
@@ -97,8 +94,7 @@ class Media(Command):
         if not method:
             raise PWarning("Не youtube/tiktok/reddit/instagram ссылка")
 
-    @staticmethod
-    def get_youtube_video_info(url):
+    def get_youtube_video(self, url):
         ydl_params = {
             'outtmpl': '%(id)s%(ext)s',
             'logger': NothingLogger()
@@ -123,10 +119,10 @@ class Media(Command):
         max_quality_video = sorted(video_urls, key=lambda x: x['format_note'])[0]
         url = max_quality_video['url']
         video_content = requests.get(url).content
-        return video_content, video_info['title']
+        attachments = [self.bot.upload_video(video_content, peer_id=self.event.peer_id)]
+        return attachments, video_info['title']
 
-    @staticmethod
-    def get_tiktok_video_info(url):
+    def get_tiktok_video(self, url):
         headers = {
             'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
         }
@@ -152,26 +148,31 @@ class Media(Command):
         headers['Referer'] = video_data['props']['pageProps']['seoProps']['metaParams']['canonicalHref']
         r = s.get(video_url, headers=headers)
         s.close()
-        return r.content, title
+        attachments = [self.bot.upload_video(r.content, peer_id=self.event.peer_id)]
+        return attachments, title
 
-    @staticmethod
-    def get_reddit_video_info(url):
+    def get_reddit_attachment(self, url):
         rvs = RedditVideoSaver()
         video = rvs.get_video_from_post(url)
-        return video, rvs.title
+        attachments = [self.bot.upload_video(video, peer_id=self.event.peer_id)]
+        return attachments, rvs.title
 
-    @staticmethod
-    def get_instagram_video_info(url):
+    def get_instagram_attachment(self, url):
         r = requests.get(url)
         bs4 = BeautifulSoup(r.content, 'html.parser')
         try:
             content_type = bs4.find('meta', attrs={'name': 'medium'}).attrs['content']
         except Exception:
-            raise PWarning("Ссылка на инстаграмм не является видео")
-        if content_type != 'video':
-            raise PWarning("Ссылка на инстаграмм не является видео")
-        video_url = bs4.find('meta', attrs={'property': 'og:video'}).attrs['content']
-        return video_url, ""
+            raise PWarning("Ссылка на инстаграмм не является видео/фото")
+
+        if content_type == 'image':
+            photo_url = bs4.find('meta', attrs={'property': 'og:image'}).attrs['content']
+            return self.bot.upload_photos([photo_url], peer_id=self.event.peer_id), ""
+        elif content_type == 'video':
+            video_url = bs4.find('meta', attrs={'property': 'og:video'}).attrs['content']
+            return [self.bot.upload_video(video_url, peer_id=self.event.peer_id)], ""
+        else:
+            raise PWarning("Ссылка на инстаграмм не является видео/фото")
 
 
 class NothingLogger(object):

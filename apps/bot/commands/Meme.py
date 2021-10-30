@@ -345,7 +345,7 @@ class Meme(Command):
 
         if self.event.platform == Platform.TG:
             if meme.type == 'photo':
-                msg['attachments'] = self.bot.upload_photos(meme.link)
+                msg['attachments'] = self.bot.upload_photos(meme.link, peer_id=self.event.peer_id)
             else:
                 msg['text'] = meme.link
             if meme.type == 'link':
@@ -359,7 +359,7 @@ class Meme(Command):
             elif meme.type == 'audio':
                 msg['attachments'] = [meme.link.replace(VK_URL, '')]
             elif meme.type == 'photo':
-                msg['attachments'] = self.bot.upload_photos(meme.link)
+                msg['attachments'] = self.bot.upload_photos(meme.link, peer_id=self.event.peer_id)
 
             else:
                 raise PError("У мема нет типа. Тыкай разраба")

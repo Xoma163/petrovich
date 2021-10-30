@@ -18,8 +18,6 @@ class Quote(Command):
     platforms = [Platform.VK, Platform.TG]
 
     def start(self):
-        self.bot.set_activity(self.event.peer_id, ActivitiesEnum.UPLOAD_PHOTO)
-
         msgs = self.parse_fwd(self.event.fwd)
 
         qg = QuotesGenerator()
@@ -29,7 +27,7 @@ class Quote(Command):
         if pil_image.height > 1500:
             attachments = self.bot.upload_document(bytes_io, self.event.peer_id, "Сохры", filename="quote.png")
         else:
-            attachments = self.bot.upload_photos(bytes_io)
+            attachments = self.bot.upload_photos(bytes_io, peer_id=self.event.peer_id)
         return {"attachments": attachments}
 
     def parse_fwd(self, fwd_messages):

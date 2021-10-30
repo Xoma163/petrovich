@@ -165,7 +165,7 @@ class Nostalgia(Command):
         if pil_image.height > 1500:
             attachments = self.bot.upload_document(bytes_io, self.event.peer_id, "Ностальгия", filename="nostalgia.png")
         else:
-            attachments = self.bot.upload_photos(bytes_io)
+            attachments = self.bot.upload_photos(bytes_io, peer_id=self.event.peer_id)
         msg = f"{msgs[0]['datetime']}\n" \
               f"{index_from} - {index_to}"
         buttons = [{'command': self.name, 'button_text': "Ещё", 'args': None}]

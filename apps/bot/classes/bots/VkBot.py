@@ -86,7 +86,7 @@ class VkBot(CommonBot):
 
     # ATTACHMENTS
 
-    def upload_photos(self, images, max_count=10):
+    def upload_photos(self, images, max_count=10, peer_id=None):
         """
         Загрузка фотографий на сервер ТГ.
         images: список изображений в любом формате (ссылки, байты, файлы)

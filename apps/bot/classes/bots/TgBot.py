@@ -54,6 +54,7 @@ class TgBot(CommonBot):
         """
         Отправка фото. Ссылка или файл
         """
+        self.set_activity(default_params['chat_id'], ActivitiesEnum.UPLOAD_PHOTO)
         photo: PhotoAttachment = rm.attachments[0]
         if photo.public_download_url:
             default_params['photo'] = photo.public_download_url
@@ -65,6 +66,7 @@ class TgBot(CommonBot):
         """
         Отправка документа. Ссылка или файл
         """
+        self.set_activity(default_params['chat_id'], ActivitiesEnum.UPLOAD_DOCUMENT)
         document: DocumentAttachment = rm.attachments[0]
         if document.public_download_url:
             default_params['document'] = document.public_download_url
@@ -81,6 +83,7 @@ class TgBot(CommonBot):
         """
         Отправка видео. Ссылка или файл
         """
+        self.set_activity(default_params['chat_id'], ActivitiesEnum.UPLOAD_VIDEO)
         video: VideoAttachment = rm.attachments[0]
         if video.public_download_url:
             default_params['video'] = video.public_download_url
@@ -90,6 +93,11 @@ class TgBot(CommonBot):
                 rm.attachments = []
                 raise PError("Нельзя загружать видео более 40 мб в телеграмм")
             return self.requests.get('sendVideo', default_params, files={'video': video.content})
+
+    def _send_text(self, default_params):
+        self.set_activity(default_params['chat_id'], ActivitiesEnum.TYPING)
+        default_params['text'] = default_params.pop('caption')
+        return self.requests.get('sendMessage', default_params)
 
     def send_response_message(self, rm: ResponseMessage):
         """
@@ -125,8 +133,7 @@ class TgBot(CommonBot):
                 return self._send_video(rm, params)
             elif isinstance(rm.attachments[0], DocumentAttachment):
                 return self._send_document(rm, params)
-        params['text'] = params.pop('caption')
-        return self.requests.get('sendMessage', params)
+        return self._send_text(params)
 
     # END  MAIN ROUTING AND MESSAGING
 
@@ -162,7 +169,12 @@ class TgBot(CommonBot):
         Используется при длительном выполнении команд, чтобы был фидбек пользователю, что его запрос принят
         """
         tg_activity = TG_ACTIVITIES[activity]
-        self.requests.get('sendChatAction', {'chat_id': peer_id, 'action': tg_activity})
+
+        # no wait for response
+        try:
+            self.requests.get('sendChatAction', {'chat_id': peer_id, 'action': tg_activity}, timeout=0.000001)
+        except requests.exceptions.ReadTimeout:
+            pass
 
     @staticmethod
     def get_mention(user, name=None):

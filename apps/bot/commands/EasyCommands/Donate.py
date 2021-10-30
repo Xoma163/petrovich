@@ -8,5 +8,5 @@ class Donate(Command):
 
     def start(self):
         url = 'https://www.donationalerts.com/r/xoma163'
-        attachments = self.bot.upload_photos(f"{STATIC_ROOT}/bot/img/donate.jpg")
+        attachments = self.bot.upload_photos(f"{STATIC_ROOT}/bot/img/donate.jpg", peer_id=self.event.peer_id)
         return {'text': url, 'attachments': attachments}

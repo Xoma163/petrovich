@@ -14,8 +14,6 @@ class Find(Command):
     platforms = [Platform.VK, Platform.TG]
 
     def start(self):
-        self.bot.set_activity(self.event.peer_id, ActivitiesEnum.UPLOAD_PHOTO)
-
         query = self.event.message.args_str
         count = 5
 
@@ -23,7 +21,7 @@ class Find(Command):
         urls = gcs_api.get_images_urls(query)
         if len(urls) == 0:
             raise PWarning("Ничего не нашёл")
-        attachments = self.bot.upload_photos(urls, count)
+        attachments = self.bot.upload_photos(urls, count, peer_id=self.event.peer_id)
         if len(attachments) == 0:
             raise PWarning("Ничего не нашёл 2")
 

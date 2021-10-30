@@ -14,14 +14,13 @@ class Camera(Command):
     platforms = [Platform.VK, Platform.TG]
 
     def start(self):
-        self.bot.set_activity(self.event.peer_id, ActivitiesEnum.UPLOAD_VIDEO)
         attachments = []
         try:
             image = camera_handler.get_img()
         except PWarning as e:
             print(e)
             raise PError("какая-то дичь с камерой. Зовите разраба")
-        attachment = self.bot.upload_photos(image)[0]
+        attachment = self.bot.upload_photos(image, peer_id=self.event.peer_id)[0]
         attachments.append(attachment)
 
         frames = 100

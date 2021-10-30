@@ -92,6 +92,7 @@ class Bot(Thread):
         Выбор команды
         Если в Event есть команда, поиск не требуется
         """
+        self.set_activity(event.peer_id, ActivitiesEnum.TYPING)
         self.logger.debug(event.to_log())
         from apps.bot.initial import COMMANDS
 
@@ -272,7 +273,7 @@ class Bot(Thread):
     # END USERS GROUPS BOTS
 
     # ATTACHMENTS
-    def upload_photos(self, images, max_count=10):
+    def upload_photos(self, images, max_count=10, peer_id=None):
         """
         Загрузка фотографий на сервер ТГ.
         images: список изображений в любом формате (ссылки, байты, файлы)
@@ -283,6 +284,8 @@ class Bot(Thread):
         attachments = []
         for image in images:
             try:
+                if peer_id:
+                    self.set_activity(peer_id, ActivitiesEnum.UPLOAD_PHOTO)
                 pa = PhotoAttachment()
                 pa.parse_response(image, ['jpg', 'jpeg', 'png'])
                 attachments.append(pa)
@@ -292,20 +295,22 @@ class Bot(Thread):
                 break
         return attachments
 
-    @staticmethod
-    def upload_document(document, peer_id=None, title='Документ', filename=None):
+    def upload_document(self, document, peer_id=None, title='Документ', filename=None):
         """
         Загрузка документа
         """
+        if peer_id:
+            self.set_activity(peer_id, ActivitiesEnum.UPLOAD_DOCUMENT)
         da = DocumentAttachment()
         da.parse_response(document, filename=filename)
         return da
 
-    @staticmethod
-    def upload_video(document, peer_id=None, title='Документ', filename=None):
+    def upload_video(self, document, peer_id=None, title='Документ', filename=None):
         """
         Загрузка гифки
         """
+        if peer_id:
+            self.set_activity(peer_id, ActivitiesEnum.UPLOAD_VIDEO)
         va = VideoAttachment()
         va.parse_response(document, filename=filename)
         return va

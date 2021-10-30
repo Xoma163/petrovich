@@ -9,4 +9,4 @@ class Taxi(Command):
     access = Role.TRUSTED
 
     def start(self):
-        return {'attachments': self.bot.upload_photos(f"{STATIC_ROOT}/bot/img/taxi.png")}
+        return {'attachments': self.bot.upload_photos(f"{STATIC_ROOT}/bot/img/taxi.png", peer_id=self.event.peer_id)}

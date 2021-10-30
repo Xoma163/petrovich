@@ -33,11 +33,12 @@ class Attachment:
         То есть метод позволяет преобразовывать почти из любого формата
         """
         # url
-        if isinstance(file_like_object, str) and urlparse(file_like_object).hostname:
+        parsed_url = urlparse(file_like_object)
+        if isinstance(file_like_object, str) and parsed_url.hostname:
             if allowed_exts_url:
-                extension = file_like_object.split('.')[-1].lower()
+                extension = parsed_url.path.split('.')[-1].lower()
                 is_default_extension = extension not in allowed_exts_url
-                is_vk_image = 'userapi.com' in urlparse(file_like_object).hostname
+                is_vk_image = 'userapi.com' in parsed_url.hostname
                 if is_default_extension and not is_vk_image:
                     raise PWarning(f"Загрузка по URL доступна только для {' '.join(allowed_exts_url)}")
             self.public_download_url = file_like_object

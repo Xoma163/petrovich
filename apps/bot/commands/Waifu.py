@@ -27,7 +27,7 @@ class Waifu(Command):
         else:
             waifu_number = get_random_int(waifus_count)
         url = f"https://www.thiswaifudoesnotexist.net/example-{waifu_number}.jpg"
-        attachment = self.bot.upload_photos(url)
+        attachment = self.bot.upload_photos(url, peer_id=self.event.peer_id)
 
         if self.event.message.args:
 
