@@ -23,23 +23,23 @@ class Conference(Command):
         if self.event.message.args:
             try:
                 self.check_sender(Role.CONFERENCE_ADMIN)
-                same_chats = self.bot.chat_model.filter(name=self.event.message.args_str)
+                same_chats = self.bot.chat_model.filter(name=self.event.message.args_str_case)
                 if len(same_chats) > 0:
                     raise PWarning("Конфа с таким названием уже есть. Придумайте другое")
-                self.event.chat.name = self.event.message.args_str
+                self.event.chat.name = self.event.message.args_str_case
                 self.event.chat.save()
-                return f"Поменял название беседы на {self.event.message.args_str}"
+                return f"Поменял название беседы на {self.event.message.args_str_case}"
             except PWarning as e:
                 if self.event.chat.admin is None:
                     msg = "Так как администратора конфы не было, то теперь вы стали администратором конфы!"
                     self.event.chat.admin = self.event.sender
-                    same_chats = self.bot.chat_model.filter(name=self.event.message.args_str)
+                    same_chats = self.bot.chat_model.filter(name=self.event.message.args_str_case)
                     if len(same_chats) > 0:
                         msg += "\nКонфа с таким названием уже есть. Придумайте другое"
                         return msg
-                    self.event.chat.name = self.event.message.args_str
+                    self.event.chat.name = self.event.message.args_str_case
                     self.event.chat.save()
-                    msg += f"\nПоменял название беседы на {self.event.message.args_str}"
+                    msg += f"\nПоменял название беседы на {self.event.message.args_str_case}"
                     return msg
                 else:
                     return str(e)
