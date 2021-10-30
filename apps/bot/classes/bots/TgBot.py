@@ -137,6 +137,20 @@ class TgBot(CommonBot):
 
     # END  MAIN ROUTING AND MESSAGING
 
+    # USERS GROUPS BOTS
+    def update_user_avatar(self, user_id: int):
+        response = self.requests.get('getUserProfilePhotos', {'user_id': user_id})
+        photos = response.json()['result']['photos']
+        if len(photos) == 0:
+            raise RuntimeWarning("Нет фотографий в профиле")
+        pa = PhotoAttachment()
+        pa.parse_tg_photo(photos[0][-1], self)
+
+        user = self.get_user_by_id(user_id)
+        user.set_avatar(pa.private_download_url)
+
+    # END USERS GROUPS BOTS
+
     # EXTRA
     @staticmethod
     def get_inline_keyboard(buttons: list, cols=1):

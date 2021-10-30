@@ -191,6 +191,12 @@ class Bot(Thread):
             user.save()
         return user
 
+    def update_user_avatar(self, user_id: int):
+        """
+        Обновление аватарки пользователя
+        """
+        pass
+
     # ToDo: очень говнокод
     def get_user_by_name(self, args, filter_chat=None) -> Users:
         """
