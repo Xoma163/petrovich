@@ -1,4 +1,5 @@
 from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.Consts import Platform
 from apps.bot.utils.utils import find_command_by_name, get_help_texts_for_command
 
 
@@ -17,7 +18,10 @@ class Help(Command):
         if self.event.message.args:
             command = find_command_by_name(self.event.message.args[0])
             self.check_sender(command.access)
-            return get_help_texts_for_command(command)
+            help_text = get_help_texts_for_command(command)
+            if self.event.platform == Platform.TG:
+                return f"```\n{help_text}\n```"
+            return help_text
         text = "/помощь (название команды) - помощь по конкретной команде\n" \
                "/документация - документация по боту. Самый подробный мануал по всему в одном месте\n" \
                "/команды - список всех команд с кратким описанием\n" \

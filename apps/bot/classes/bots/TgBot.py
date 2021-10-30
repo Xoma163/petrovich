@@ -132,7 +132,7 @@ class TgBot(CommonBot):
         """
         Отправка сообщения
         """
-        params = {'chat_id': rm.peer_id, 'caption': rm.text, 'reply_markup': json.dumps(rm.keyboard)}
+        params = {'chat_id': rm.peer_id, 'caption': rm.text, 'reply_markup': json.dumps(rm.keyboard),'parse_mode':'markdown'}
         params.update(kwargs)
         if rm.attachments:
             if len(rm.attachments) > 1:
