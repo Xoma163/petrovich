@@ -1,5 +1,5 @@
 from apps.bot.classes.Command import Command
-from apps.bot.classes.consts.Consts import Role
+from apps.bot.classes.consts.Consts import Role, Platform
 
 
 class Discord(Command):
@@ -9,4 +9,8 @@ class Discord(Command):
     access = Role.TRUSTED
 
     def start(self):
-        return 'https://discord.gg/kYGSNzv'
+        url = 'https://discord.gg/kYGSNzv'
+
+        if self.event.platform == Platform.TG:
+            return {'text': f"[Ежедневник]({url})"}
+        return url

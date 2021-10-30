@@ -1,5 +1,5 @@
 from apps.bot.classes.Command import Command
-from apps.bot.classes.consts.Consts import Role
+from apps.bot.classes.consts.Consts import Role, Platform
 
 
 class Diary(Command):
@@ -9,4 +9,8 @@ class Diary(Command):
     suggest_for_similar = False
 
     def start(self):
-        return 'https://diary.andrewsha.net/'
+        url = 'https://diary.andrewsha.net/'
+
+        if self.event.platform == Platform.TG:
+            return {'text': f"[Ежедневник]({url})"}
+        return url

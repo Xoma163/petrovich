@@ -1,5 +1,5 @@
 from apps.bot.classes.Command import Command
-from apps.bot.classes.consts.Consts import Role
+from apps.bot.classes.consts.Consts import Role, Platform
 
 
 class Git(Command):
@@ -9,4 +9,8 @@ class Git(Command):
     access = Role.TRUSTED
 
     def start(self):
-        return 'https://github.com/Xoma163/petrovich/'
+        url = 'https://github.com/Xoma163/petrovich/'
+
+        if self.event.platform == Platform.TG:
+            return {'text': f"[Гитхаб]({url})"}
+        return url

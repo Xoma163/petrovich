@@ -34,7 +34,6 @@ class Camera(Command):
                 return str(e)
             attachment = self.bot.upload_video(document, self.event.peer_id, "Камера", filename="camera.gif", )
             attachments.append(attachment)
-        attachments.append('https://birds.andrewsha.net')
         if len(attachments) == 2 or self.event.platform == Platform.VK:
             return {
                 'attachments': attachments,

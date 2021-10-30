@@ -1,6 +1,7 @@
 from urllib.parse import quote
 
 from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.Consts import Platform
 
 
 class Google(Command):
@@ -10,4 +11,8 @@ class Google(Command):
     args = 1
 
     def start(self):
-        return f"https://www.google.com/search?q={quote(self.event.message.args_str)}"
+        if self.event.platform == Platform.TG:
+            url = f"https://www.google.com/search?q={quote(self.event.message.args_str_case)}"
+            return {'text': f"[Окей Гугл, {self.event.message.args_str_case}]({url})"}
+        return
+
