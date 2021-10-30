@@ -44,8 +44,7 @@ class YandexBot(CommonBot):
         """
         pass
 
-    def send_message(self, peer_id: str, msg: str = "ᅠ", attachments=None, keyboard=None,
-                     dont_parse_links: bool = False, **kwargs):
+    def send_response_message_item(self):
         """
         Отправка сообщения
         peer_id: в какой чат/какому пользователю

@@ -55,20 +55,21 @@ class Bot(Thread):
             if not event.need_a_response():
                 return
             message = self.route(event)
-            if message:
-                self.parse_and_send_msgs(event.peer_id, message, send)
+            if send:
+                self.send_response_message(message)
+        except PSkip:
+            pass
         except Exception as e:
             print(str(e))
             tb = traceback.format_exc()
             print(tb)
 
-    def parse_and_send_msgs(self, peer_id, msgs, send=True) -> ResponseMessage:
+    def parse_and_send_msgs(self, peer_id, msgs) -> ResponseMessage:
         """
         Отправка сообщений. Принимает любой формат
         """
-        rm = ResponseMessage(msgs, peer_id)
-        if send:
-            self.send_response_message(rm)
+        rm = msgs if isinstance(msgs, ResponseMessage) else ResponseMessage(msgs, peer_id)
+        self.send_response_message(rm)
         return rm
 
     def parse_and_send_msgs_thread(self, peer_id: int, msgs):
@@ -83,19 +84,19 @@ class Bot(Thread):
         """
         raise NotImplementedError
 
-    def send_message(self, rm: ResponseMessageItem):
+    def send_response_message_item(self, rm: ResponseMessageItem):
         """
-        Отправка сообщения
+        Отправка ResponseMessageItem сообщения
         """
         raise NotImplementedError
 
-    def route(self, event: Event):
+    def route(self, event: Event) -> ResponseMessage:
         """
         Выбор команды
         Если в Event есть команда, поиск не требуется
         """
         # self.set_activity(event.peer_id, ActivitiesEnum.TYPING)
-        self.logger.debug(event.to_log())
+        self.logger.debug({'event': event.to_log()})
         from apps.bot.initial import COMMANDS
 
         if event.command:
@@ -107,34 +108,32 @@ class Bot(Thread):
             try:
                 if command.accept(event):
                     result = command.__class__().check_and_start(self, event)
-                    self.logger.debug({'result': result})
-                    return result
+                    rm = ResponseMessage(result, event.peer_id)
+                    self.logger.debug({'result': rm.to_log()})
+                    return rm
             except (PWarning, PError) as e:
                 msg = str(e)
-                getattr(self.logger, e.level)({'result': msg})
-                return msg
-            except PSkip:
-                return
+                rm = ResponseMessage(msg, event.peer_id)
+                getattr(self.logger, e.level)({'result': rm})
+                return rm
             except Exception as e:
                 msg = "Непредвиденная ошибка. Сообщите разработчику. Команда /баг"
-                log_exception = {
-                    'exception': str(e),
-                    'result': msg
-                }
-                self.logger.error(log_exception, exc_info=traceback.format_exc())
-                return msg
+                rm = ResponseMessage(msg, event.peer_id)
+                self.logger.error({'exception': str(e), 'result': rm.to_log()}, exc_info=traceback.format_exc())
+                return rm
 
         # Если указана настройка не реагировать на неверные команды, то скипаем
         if event.chat and not event.chat.need_reaction:
-            return
+            raise PSkip()
 
         # Если указана настройка реагировать на команды без слеша, но команду мы не нашли, то скипаем
         if event.chat and event.chat.mentioning:
-            return
+            raise PSkip()
 
         similar_command = self.get_similar_command(event, COMMANDS)
-        self.logger.debug({'result': similar_command})
-        return similar_command
+        rm = ResponseMessage(similar_command, event.peer_id)
+        self.logger.debug({'result': rm.to_log()})
+        return rm
 
     @staticmethod
     def get_similar_command(event: Event, commands):

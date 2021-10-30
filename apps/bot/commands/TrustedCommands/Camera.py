@@ -34,14 +34,13 @@ class Camera(Command):
                 return str(e)
             attachment = self.bot.upload_video(document, self.event.peer_id, "Камера", filename="camera.gif", )
             attachments.append(attachment)
-        if len(attachments) == 2 or self.event.platform == Platform.VK:
+        # if len(attachments) == 2 or self.event.platform == Platform.VK:
             return {
                 'attachments': attachments,
-
                 "keyboard": self.bot.get_inline_keyboard(
                     [{'command': self.name, 'button_text': "Ещё", 'args': [frames]}]),
             }
-        else:
-            self.bot.parse_and_send_msgs(self.event.peer_id, {'attachments': [attachments[0]]})
-            self.bot.parse_and_send_msgs(self.event.peer_id, {'attachments': [attachments[1]]})
-            return None
+        # else:
+        #     self.bot.parse_and_send_msgs(self.event.peer_id, {'attachments': [attachments[0]]})
+        #     self.bot.parse_and_send_msgs(self.event.peer_id, {'attachments': [attachments[1]]})
+        #     return None

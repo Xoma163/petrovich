@@ -12,6 +12,11 @@ class ResponseMessage:
         else:
             self.messages = [ResponseMessageItem(msgs, peer_id)]
 
+    def to_log(self) -> dict:
+        dict_self = copy(self.__dict__)
+        dict_self['messages'] = [x.to_log() for x in dict_self['messages']]
+        return dict_self
+
 
 class ResponseMessageItem:
     def __init__(self, msg, peer_id):
@@ -27,3 +32,8 @@ class ResponseMessageItem:
             self.attachments = [self.attachments]
         self.keyboard = msg_copy.pop('keyboard', {})
         self.kwargs = msg_copy
+
+    def to_log(self) -> dict:
+        dict_self = copy(self.__dict__)
+        dict_self['attachments'] = [x.to_log() for x in dict_self['attachments']]
+        return dict_self

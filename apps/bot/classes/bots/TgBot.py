@@ -115,20 +115,20 @@ class TgBot(CommonBot):
         """
         for msg in rm.messages:
             try:
-                response = self.send_message(msg)
+                response = self.send_response_message_item(msg)
                 # Непредвиденная ошибка
                 if response.status_code != 200:
                     error_msg = "Непредвиденная ошибка. Сообщите разработчику. Команда /баг"
                     error_rm = ResponseMessage(error_msg, msg.peer_id).messages[0]
                     self.logger.error({'result': error_msg, 'error': response.json()['description']})
-                    self.send_message(error_rm)
+                    self.send_response_message_item(error_rm)
             # Предвиденная ошибка
             except (PWarning, PError) as e:
                 msg.text += f"\n\n{str(e)}"
                 getattr(self.logger, e.level)({'result': msg})
-                self.send_message(msg)
+                self.send_response_message_item(msg)
 
-    def send_message(self, rm: ResponseMessageItem):
+    def send_response_message_item(self, rm: ResponseMessageItem):
         """
         Отправка сообщения
         """
@@ -194,11 +194,14 @@ class TgBot(CommonBot):
         """
         tg_activity = TG_ACTIVITIES[activity]
 
-        # ToDo: no wait for response
-        # try:
-        self.requests.get('sendChatAction', {'chat_id': peer_id, 'action': tg_activity})
-        # except (requests.exceptions.ReadTimeout, requests.exceptions.ConnectionError):
-        #     pass
+        # no wait for response
+        threading.Thread(
+            target=self.requests.get,
+            args=(
+                'sendChatAction',
+                {'chat_id': peer_id, 'action': tg_activity}
+            )
+        ).start()
 
     @staticmethod
     def get_mention(user, name=None):
@@ -227,7 +230,7 @@ class TgBot(CommonBot):
         pa = PhotoAttachment()
         pa.public_download_url = url
         rm = ResponseMessage({'attachments': [pa]}, peer_id=photo_uploading_chat.chat_id)
-        response = self.send_message(rm.messages[0])
+        response = self.send_response_message_item(rm.messages[0])
         if response.status_code != 200:
             raise PWarning
         r_json = response.json()
