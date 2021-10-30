@@ -223,7 +223,7 @@ class TgBot(CommonBot):
         Отправлять сообщение в пустую конфу, забирать оттуда file_id и уже потом формировать сообщение
         """
 
-        photo_uploading_chat = self.chat_model.objects.get(pk=env.str("TG_PHOTO_UPLOADING_CHAT"))
+        photo_uploading_chat = self.chat_model.get(pk=env.str("TG_PHOTO_UPLOADING_CHAT"))
         pa = PhotoAttachment()
         pa.public_download_url = url
         rm = ResponseMessage({'attachments': [pa]}, peer_id=photo_uploading_chat.chat_id)
