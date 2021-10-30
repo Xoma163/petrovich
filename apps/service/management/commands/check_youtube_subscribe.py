@@ -29,7 +29,7 @@ class Command(BaseCommand):
                       f"{youtube_data['last_video']['link']}"
 
                 res = {'text': msg, 'attachments': [youtube_data['last_video']['link']]}
-                bot.parse_and_send_msgs(peer_id, res)
+                bot.parse_and_send_msgs(res, peer_id)
                 yt_sub.date = youtube_data['last_video']['date']
                 yt_sub.save()
             time.sleep(2)

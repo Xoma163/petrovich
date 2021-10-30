@@ -76,13 +76,13 @@ class Command(BaseCommand):
                       f"{notify.text}"
         result_msg = {'text': message}
         if notify.chat:
-            bot.parse_and_send_msgs_thread(notify.chat.chat_id, result_msg)
+            bot.parse_and_send_msgs_thread(result_msg, notify.chat.chat_id)
         # Раскоментить если отправлять в лс пользователю, что это его напоминание
         else:
             # Если напоминание в ЛС и это не команда
             # Если надо уведомлять о том, что будет выполнена команда - убираем условие
             if not notify.text.startswith('/'):
-                bot.parse_and_send_msgs_thread(notify.author.user_id, result_msg)
+                bot.parse_and_send_msgs_thread(result_msg, notify.author.user_id)
 
     @staticmethod
     def send_command_notify_message(bot, notify):

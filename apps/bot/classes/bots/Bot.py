@@ -64,7 +64,7 @@ class Bot(Thread):
             tb = traceback.format_exc()
             print(tb)
 
-    def parse_and_send_msgs(self, peer_id, msgs) -> ResponseMessage:
+    def parse_and_send_msgs(self, msgs, peer_id) -> ResponseMessage:
         """
         Отправка сообщений. Принимает любой формат
         """
@@ -72,11 +72,11 @@ class Bot(Thread):
         self.send_response_message(rm)
         return rm
 
-    def parse_and_send_msgs_thread(self, peer_id: int, msgs):
+    def parse_and_send_msgs_thread(self, msgs, peer_id: int):
         """
         Парсинг сырых сообщений и отправка их в отдельном потоке
         """
-        Thread(target=self.parse_and_send_msgs, args=(peer_id, msgs)).start()
+        Thread(target=self.parse_and_send_msgs, args=(msgs, peer_id)).start()
 
     def send_response_message(self, rm: ResponseMessage):
         """
@@ -370,7 +370,7 @@ def send_message_to_moderator_chat(msgs):
 
     bot = get_moderator_bot_class()()
     peer_id = get_moderator_chat_peer_id()
-    return bot.parse_and_send_msgs(peer_id, msgs)
+    return bot.parse_and_send_msgs(msgs, peer_id)
 
 
 def upload_image_to_vk_server(image):

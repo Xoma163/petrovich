@@ -41,6 +41,6 @@ class Camera(Command):
                     [{'command': self.name, 'button_text': "Ещё", 'args': [frames]}]),
             }
         # else:
-        #     self.bot.parse_and_send_msgs(self.event.peer_id, {'attachments': [attachments[0]]})
-        #     self.bot.parse_and_send_msgs(self.event.peer_id, {'attachments': [attachments[1]]})
+        #     self.bot.parse_and_send_msgs({'attachments': [attachments[0]]}, self.event.peer_id)
+        #     self.bot.parse_and_send_msgs({'attachments': [attachments[1]]}, self.event.peer_id)
         #     return None

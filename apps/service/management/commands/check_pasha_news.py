@@ -42,7 +42,7 @@ class Command(BaseCommand):
         pasha_news_last_id_entity.save()
 
         for msg in msgs:
-            bot.parse_and_send_msgs(pasha.user_id, msg)
+            bot.parse_and_send_msgs(msg, pasha.user_id)
 
     @staticmethod
     def parse_news(news_url):

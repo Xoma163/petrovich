@@ -129,8 +129,10 @@ class Meme(Command):
     def menu_refresh(self):
         self.check_args(2)
         try:
+            url = self.event.message.args[-1]
+            self._check_allowed_url(url)
             attachment = LinkAttachment()
-            attachment.url = self._check_allowed_url(self.event.message.args[-1])
+            attachment.url = url
             attachments = [attachment]
             id_name = self.get_id_or_meme_name(self.event.message.args[1:-1])
         except PWarning:
@@ -189,7 +191,7 @@ class Meme(Command):
             msg = f'Мем с названием "{meme.name}" удалён поскольку он не ' \
                   f'соответствует правилам или был удалён автором.'
             bot = get_bot_by_platform(meme.author.get_platform_enum())
-            bot.parse_and_send_msgs(meme.author.user_id, msg)
+            bot.parse_and_send_msgs(msg, meme.author.user_id)
 
         meme_name = meme.name
         meme.delete()
@@ -219,7 +221,7 @@ class Meme(Command):
 
         user_msg = f'Мем с названием "{meme.name}" подтверждён.'
         bot = get_bot_by_platform(meme.author.get_platform_enum())
-        bot.parse_and_send_msgs(meme.author.user_id, user_msg)
+        bot.parse_and_send_msgs(user_msg, meme.author.user_id)
 
         msg = f'Мем "{meme.name}" ({meme.id}) подтверждён'
         meme.approved = True
@@ -235,7 +237,7 @@ class Meme(Command):
 
         msg = f'Мем "{meme.name}" ({meme.id}) отклонён'
         bot = get_bot_by_platform(meme.author.get_platform_enum())
-        bot.parse_and_send_msgs(meme.author.user_id, msg)
+        bot.parse_and_send_msgs(msg, meme.author.user_id)
         meme.delete()
         return msg
 
@@ -261,7 +263,7 @@ class Meme(Command):
 
         if meme.author != self.event.sender:
             bot = get_bot_by_platform(meme.author.get_platform_enum())
-            bot.parse_and_send_msgs(meme.author.user_id, user_msg)
+            bot.parse_and_send_msgs(user_msg, meme.author.user_id)
         return user_msg
 
     def menu_info(self):
@@ -282,6 +284,8 @@ class Meme(Command):
                 meme = self.get_one_meme(memes, self.event.message.args)
             except PWarning:
                 tanimoto_memes = self.get_tanimoto_memes(memes, " ".join(self.event.message.args))
+                if len(tanimoto_memes) == 0:
+                    raise PWarning("Не нашёл :(")
                 meme = tanimoto_memes[0]
                 warning_message = self.get_similar_memes_names(tanimoto_memes)
 
@@ -348,38 +352,31 @@ class Meme(Command):
                 msg['attachments'] = self.bot.upload_photos(meme.link, peer_id=self.event.peer_id)
             else:
                 msg['text'] = meme.link
-            if meme.type == 'link':
-                msg['attachments'] = meme.link
         elif self.event.platform == Platform.VK:
-            if meme.type == 'video':
+            if meme.type in ['video', 'audio']:
                 msg['attachments'] = [meme.link.replace(VK_URL, '')]
-                # Проверяем не удалено ли видео
             elif meme.type == 'link':
                 msg['text'] = meme.link
-            elif meme.type == 'audio':
-                msg['attachments'] = [meme.link.replace(VK_URL, '')]
             elif meme.type == 'photo':
                 msg['attachments'] = self.bot.upload_photos(meme.link, peer_id=self.event.peer_id)
-
             else:
                 raise PError("У мема нет типа. Тыкай разраба")
 
         if print_name:
             if msg.get('text', None):
                 msg['text'] += f"\n{meme.name}"
-        # return msg
 
-        # ToDo: удалить когда не будет БУНДа
+        ############## ToDo: удалить когда не будет БУНДа
         if meme.type == 'video':
             msg['text'] = f"Ваш мем я нашёл, но я вам его не отдам. Обновите мем на ютуб-ссылку, пожалуйста\n" \
                           f"id={meme.pk}"
-            print
-        if send_keyboard:
-            if meme.type == 'video':
+            if send_keyboard:
                 msg['keyboard'] = self.bot.get_inline_keyboard(
                     [{'command': self.name, 'button_text': "Ещё", 'args': ["р"]},
                      {'command': self.name, 'button_text': "Инфо", 'args': ["инфо", meme.pk]}])
-            else:
+        else:
+            ############## ToDo: удалить когда не будет БУНДа
+            if send_keyboard:
                 msg['keyboard'] = self.bot.get_inline_keyboard(
                     [{'command': self.name, 'button_text': "Ещё", 'args': ["р"]}])
         return msg

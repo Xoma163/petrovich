@@ -30,4 +30,4 @@ class Command(BaseCommand):
         for chat_pk in chat_pks:
             chat = Chat.objects.get(pk=chat_pk)
             bot = get_bot_by_platform(chat.get_platform_enum())
-            bot.parse_and_send_msgs(chat.chat_id, msg)
+            bot.parse_and_send_msgs(msg, chat.chat_id)

@@ -41,7 +41,7 @@ class Command(BaseCommand):
             chat_pks = options['chat_id'][0].split(',')
             for chat_pk in chat_pks:
                 chat = Chat.objects.get(pk=chat_pk)
-                tg_bot.parse_and_send_msgs(chat.chat_id, result_str)
+                tg_bot.parse_and_send_msgs(result_str, chat.chat_id)
 
     def add_arguments(self, parser):
         parser.add_argument('chat_id', nargs='+', type=str,

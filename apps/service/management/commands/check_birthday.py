@@ -29,10 +29,11 @@ class Command(BaseCommand):
                     gamer.save()
                     if user.celebrate_bday:
                         tg_bot.parse_and_send_msgs(
-                            chat.chat_id, [
+                            [
                                 f"С Днём рождения, {tg_bot.get_mention(user)}!",
                                 "На ваш счет зачислено 100 000 бонусных очков."
-                            ]
+                            ],
+                            chat.chat_id
                         )
 
     def add_arguments(self, parser):
