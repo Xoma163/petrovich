@@ -4,7 +4,6 @@ from apps.bot.classes.consts.ActivitiesEnum import ActivitiesEnum
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning
 
-
 class Find(Command):
     name = "найди"
     names = ["поиск", "найти", "ищи", "искать", "хуизфакинг", "вхуизфакинг"]
@@ -21,11 +20,20 @@ class Find(Command):
         urls = gcs_api.get_images_urls(query)
         if len(urls) == 0:
             raise PWarning("Ничего не нашёл")
-        attachments = self.bot.upload_photos(urls, count, peer_id=self.event.peer_id)
-        if len(attachments) == 0:
-            raise PWarning("Ничего не нашёл 2")
 
-        msgs = [f'Результаты по запросу "{query}"']
-        for att in attachments:
-            msgs.append({'attachments': [att]})
-        return msgs
+        attachments = []
+        if self.event.platform == Platform.VK:
+            attachments = self.bot.upload_photos(urls, count, peer_id=self.event.peer_id)
+        elif self.event.platform == Platform.TG:
+            for url in urls:
+                self.bot.set_activity(self.event.peer_id, ActivitiesEnum.UPLOAD_PHOTO)
+                try:
+                    attachments.append(self.bot.upload_image_to_tg_server(url))
+                except PWarning:
+                    continue
+                if len(attachments) == count:
+                    break
+
+        if len(attachments) == 0:
+            raise PWarning("Ничего не нашёл")
+        return [f"Результаты по запросу '{query}'", {'attachments': attachments}]
