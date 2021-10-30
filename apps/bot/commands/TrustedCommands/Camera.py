@@ -40,7 +40,6 @@ class Camera(Command):
 
                 "keyboard": self.bot.get_inline_keyboard(
                     [{'command': self.name, 'button_text': "Ещё", 'args': [frames]}]),
-                'dont_parse_links': True
             }
         else:
             self.bot.parse_and_send_msgs(self.event.peer_id, {'attachments': [attachments[0]]})

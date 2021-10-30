@@ -373,9 +373,15 @@ class Meme(Command):
         if meme.type == 'video':
             msg['text'] = f"Ваш мем я нашёл, но я вам его не отдам. Обновите мем на ютуб-ссылку, пожалуйста\n" \
                           f"id={meme.pk}"
+            print
         if send_keyboard:
-            msg['keyboard'] = self.bot.get_inline_keyboard(
-                [{'command': self.name, 'button_text': "Ещё", 'args': ["р"]}])
+            if meme.type == 'video':
+                msg['keyboard'] = self.bot.get_inline_keyboard(
+                    [{'command': self.name, 'button_text': "Ещё", 'args': ["р"]},
+                     {'command': self.name, 'button_text': "Инфо", 'args': ["инфо", meme.pk]}])
+            else:
+                msg['keyboard'] = self.bot.get_inline_keyboard(
+                    [{'command': self.name, 'button_text': "Ещё", 'args': ["р"]}])
         return msg
 
     @staticmethod

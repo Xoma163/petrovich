@@ -54,7 +54,7 @@ class VkBot(CommonBot):
                     self.logger.error({'result': error_msg, 'error': str(e)})
                     self.send_message(error_rm)
 
-    def send_message(self, rm: ResponseMessageItem, **kwargs):
+    def send_message(self, rm: ResponseMessageItem):
         """
         Отправка сообщения
         """
@@ -79,7 +79,6 @@ class VkBot(CommonBot):
             random_id=get_random_id(),
             attachment=','.join(attachments),
             keyboard=json.dumps(rm.keyboard),
-            # dont_parse_links=dont_parse_links
         )
 
     # END MAIN ROUTING AND MESSAGING

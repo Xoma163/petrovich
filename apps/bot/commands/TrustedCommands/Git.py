@@ -12,5 +12,5 @@ class Git(Command):
         url = 'https://github.com/Xoma163/petrovich/'
 
         if self.event.platform == Platform.TG:
-            return {'text': f"[Гитхаб]({url})"}
+            return {'text': f"[Гитхаб]({url})",'parse_mode':'markdown'}
         return url

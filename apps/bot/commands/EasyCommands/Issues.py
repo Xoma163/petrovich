@@ -10,5 +10,5 @@ class Issues(Command):
     def start(self):
         url = "https://github.com/Xoma163/petrovich/issues"
         if self.event.platform == Platform.TG:
-            return {'text': f"[Ишюс]({url})"}
+            return {'text': f"[Ишюс]({url})", 'parse_mode':'markdown'}
         return url

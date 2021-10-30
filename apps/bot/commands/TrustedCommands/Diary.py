@@ -12,5 +12,5 @@ class Diary(Command):
         url = 'https://diary.andrewsha.net/'
 
         if self.event.platform == Platform.TG:
-            return {'text': f"[Ежедневник]({url})"}
+            return {'text': f"[Ежедневник]({url})",'parse_mode':'markdown'}
         return url

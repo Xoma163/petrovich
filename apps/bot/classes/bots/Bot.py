@@ -1,5 +1,6 @@
 import logging
 import traceback
+from threading import Lock
 from threading import Thread
 
 from django.contrib.auth.models import Group
@@ -16,7 +17,7 @@ from apps.bot.models import Users, Chat, Bot as BotModel
 from apps.bot.utils.utils import tanimoto
 from apps.games.models import Gamer
 from petrovich.settings import env
-from threading import Lock
+
 
 class Bot(Thread):
     def __init__(self, platform):
@@ -82,7 +83,7 @@ class Bot(Thread):
         """
         raise NotImplementedError
 
-    def send_message(self, rm: ResponseMessageItem, **kwargs):
+    def send_message(self, rm: ResponseMessageItem):
         """
         Отправка сообщения
         """
@@ -277,7 +278,6 @@ class Bot(Thread):
         Удаление чата пользователю
         """
         with self.lock:
-
             chats = user.chats
             if chat in chats.all():
                 chats.remove(chat)

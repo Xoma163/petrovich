@@ -128,12 +128,12 @@ class TgBot(CommonBot):
                 getattr(self.logger, e.level)({'result': msg})
                 self.send_message(msg)
 
-    def send_message(self, rm: ResponseMessageItem, **kwargs):
+    def send_message(self, rm: ResponseMessageItem):
         """
         Отправка сообщения
         """
-        params = {'chat_id': rm.peer_id, 'caption': rm.text, 'reply_markup': json.dumps(rm.keyboard),'parse_mode':'markdown'}
-        params.update(kwargs)
+        params = {'chat_id': rm.peer_id, 'caption': rm.text, 'reply_markup': json.dumps(rm.keyboard)}
+        params.update(rm.kwargs)
         if rm.attachments:
             if len(rm.attachments) > 1:
                 return self._send_media_group(rm, params)
