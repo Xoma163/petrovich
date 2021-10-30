@@ -215,7 +215,7 @@ class TgBot(CommonBot):
         """
         self.requests.get('deleteMessage', params={'chat_id': peer_id, 'message_id': message_id})
 
-    def _upload_image_to_tg_server(self, url) -> PhotoAttachment:
+    def upload_image_to_tg_server(self, url) -> PhotoAttachment:
         """
         Загрузка изображения на сервера ТГ с костылями
 
