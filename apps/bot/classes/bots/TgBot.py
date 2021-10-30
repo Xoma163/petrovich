@@ -173,7 +173,7 @@ class TgBot(CommonBot):
         # no wait for response
         try:
             self.requests.get('sendChatAction', {'chat_id': peer_id, 'action': tg_activity}, timeout=0.000001)
-        except requests.exceptions.ReadTimeout:
+        except (requests.exceptions.ReadTimeout, requests.exceptions.ConnectionError):
             pass
 
     @staticmethod
