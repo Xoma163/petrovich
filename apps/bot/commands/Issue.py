@@ -22,10 +22,11 @@ class Issue(Command):
                f"Данное ишю сгенерировано автоматически"
 
         response = github_api.create_issue(title, body)
-        result = {
-            'text': f"Сохранено\n"
-                   f"Отслеживать созданное ишю можно по этой ссылке:\n"
-                   f"{response['html_url']}",
-            'attachments': [response['html_url']]
-        }
-        return result
+        if self.event.platform == Platform.TG:
+            return {
+                'text': f"Сохранено\nОтслеживать созданное ишю можно по [этой]({response['html_url']}) ссылке:\n",
+                'parse_mode': 'markdown'
+            }
+        return f"Сохранено\n" \
+               f"Отслеживать созданное ишю можно по этой ссылке:\n" \
+               f"{response['html_url']}"
