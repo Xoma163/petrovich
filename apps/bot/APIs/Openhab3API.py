@@ -1,6 +1,6 @@
 import requests
 
-from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.consts.Exceptions import PWarning, PError
 from petrovich.settings import env
 
 
@@ -55,7 +55,7 @@ class Openhab3API:
         headers.update(self.HEADERS)
         res = requests.post(f"{self.URL}/items/{item['name']}/", data=state, headers=headers)
         if res.status_code != 200:
-            raise RuntimeError("Ошибка")
+            raise PError("Ошибка")
 
     @staticmethod
     def find_item_by_label(items, label):
@@ -64,4 +64,4 @@ class Openhab3API:
             for sub_item in item['sub_items']:
                 if sub_item['label'].lower() == label_lower:
                     return sub_item
-        raise RuntimeWarning(f"Не нашёл устройства с именем {label}")
+        raise PWarning(f"Не нашёл устройства с именем {label}")
