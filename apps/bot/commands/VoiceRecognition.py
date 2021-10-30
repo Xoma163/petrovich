@@ -5,7 +5,6 @@ import speech_recognition as sr
 from pydub import AudioSegment
 
 from apps.bot.classes.Command import Command
-from apps.bot.classes.consts.ActivitiesEnum import ActivitiesEnum
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.classes.messages.attachments.VoiceAttachment import VoiceAttachment

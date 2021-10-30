@@ -7,9 +7,8 @@ from bs4 import BeautifulSoup
 
 from apps.bot.APIs.RedditVideoDownloader import RedditVideoSaver
 from apps.bot.classes.Command import Command
-from apps.bot.classes.consts.ActivitiesEnum import ActivitiesEnum
 from apps.bot.classes.consts.Consts import Platform
-from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.consts.Exceptions import PWarning, PError
 from apps.bot.utils.utils import get_urls_from_text
 
 YOUTUBE_URLS = ('www.youtube.com', 'youtube.com', "www.youtu.be", "youtu.be")
@@ -140,7 +139,7 @@ class Media(Command):
             except (AttributeError, ConnectionError):
                 s = requests.Session()
         if not video_data:
-            raise RuntimeError("Ошибка загрузки видео с tiktok")
+            raise PError("Ошибка загрузки видео с tiktok")
 
         item_struct = video_data['props']['pageProps']['itemInfo']['itemStruct']
         video_url = item_struct['video']['downloadAddr']
