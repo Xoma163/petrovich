@@ -75,10 +75,10 @@ class Event:
             return True
         if self.chat and self.chat.mentioning:
             return True
-        if self.is_from_chat and not (self.message.has_command_symbols or self.message.has_mention):
+        if self.is_from_chat and not self.message.mentioned:
             return False
 
-        if self.message.has_command_symbols or self.message.has_mention:
+        if self.message.mentioned:
             return True
 
         return False
@@ -87,10 +87,10 @@ class Event:
         """
         Проверка, нужен ли пользователю ответ c учётом особенностей команд
         """
-        if self.message and not self.message.has_command_symbols:
+        if self.message and not self.message.mentioned:
             from apps.bot.commands.Meme import Meme as MemeCommand
             from apps.service.models import Meme as MemeModel
-            if self.is_from_chat and self.chat.need_meme and not self.message.has_command_symbols:
+            if self.is_from_chat and self.chat.need_meme and not self.message.mentioned:
                 message_is_exact_meme_name = MemeModel.objects.filter(name=self.message.clear, approved=True).exists()
                 if message_is_exact_meme_name:
                     self.command = MemeCommand

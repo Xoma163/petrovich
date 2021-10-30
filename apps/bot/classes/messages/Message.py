@@ -80,6 +80,10 @@ class Message:
             raw += f" {' '.join(args)}"
         self.parse_raw(raw)
 
+    @property
+    def mentioned(self):
+        return self.has_command_symbols or self.has_mention
+
     def to_log(self):
         dict_self = copy.copy(self.__dict__)
         return dict_self
