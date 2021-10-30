@@ -172,7 +172,7 @@ class TgBot(CommonBot):
 
         # ToDo: no wait for response
         # try:
-        self.requests.get('sendChatAction', {'chat_id': peer_id, 'action': tg_activity}, timeout=0.000001)
+        self.requests.get('sendChatAction', {'chat_id': peer_id, 'action': tg_activity})
         # except (requests.exceptions.ReadTimeout, requests.exceptions.ConnectionError):
         #     pass
 
