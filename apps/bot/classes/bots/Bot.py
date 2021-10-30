@@ -16,7 +16,7 @@ from apps.bot.models import Users, Chat, Bot as BotModel
 from apps.bot.utils.utils import tanimoto
 from apps.games.models import Gamer
 from petrovich.settings import env
-
+from threading import Lock
 
 class Bot(Thread):
     def __init__(self, platform):
@@ -29,6 +29,7 @@ class Bot(Thread):
         self.bot_model = BotModel.objects.filter(platform=self.platform.name)
 
         self.logger = logging.getLogger(platform.value)
+        self.lock = Lock()
 
     # MAIN ROUTING AND MESSAGING
 
@@ -180,15 +181,17 @@ class Bot(Thread):
         defaults = {'platform': self.platform.name}
         defaults.update(_defaults)
 
-        user, created = self.user_model.get_or_create(
-            user_id=user_id,
-            platform=self.platform.name,
-            defaults=defaults
-        )
+        with self.lock:
+            user, created = self.user_model.get_or_create(
+                user_id=user_id,
+                platform=self.platform.name,
+                defaults=defaults
+            )
         if created or user.name is None:
-            group_user = Group.objects.get(name=Role.USER.name)
-            user.groups.add(group_user)
-            user.save()
+            with self.lock:
+                group_user = Group.objects.get(name=Role.USER.name)
+                user.groups.add(group_user)
+                user.save()
         return user
 
     def update_user_avatar(self, user_id: int):
@@ -234,9 +237,10 @@ class Bot(Thread):
         """
         Возвращает чат по его id
         """
-        chat, _ = self.chat_model.get_or_create(
-            chat_id=chat_id, platform=self.platform.name
-        )
+        with self.lock:
+            chat, _ = self.chat_model.get_or_create(
+                chat_id=chat_id, platform=self.platform.name
+            )
         return chat
 
     def get_bot_by_id(self, bot_id: int) -> BotModel:
@@ -245,36 +249,38 @@ class Bot(Thread):
         """
         if bot_id > 0:
             bot_id = -bot_id
-        bot, _ = self.bot_model.get_or_create(
-            bot_id=bot_id, platform=self.platform.name
-        )
+        with self.lock:
+            bot, _ = self.bot_model.get_or_create(
+                bot_id=bot_id, platform=self.platform.name
+            )
         return bot
 
-    @staticmethod
-    def get_gamer_by_user(user: Users) -> Gamer:
+    def get_gamer_by_user(self, user: Users) -> Gamer:
         """
         Получение игрока по модели пользователя
         """
-        gamer, _ = Gamer.objects.get_or_create(user=user)
+        with self.lock:
+            gamer, _ = Gamer.objects.get_or_create(user=user)
         return gamer
 
-    @staticmethod
-    def add_chat_to_user(user: Users, chat: Chat):
+    def add_chat_to_user(self, user: Users, chat: Chat):
         """
         Добавление чата пользователю
         """
-        chats = user.chats
-        if chat not in chats.all():
-            chats.add(chat)
+        with self.lock:
+            chats = user.chats
+            if chat not in chats.all():
+                chats.add(chat)
 
-    @staticmethod
-    def remove_chat_from_user(user: Users, chat: Chat):
+    def remove_chat_from_user(self, user: Users, chat: Chat):
         """
         Удаление чата пользователю
         """
-        chats = user.chats
-        if chat in chats.all():
-            chats.remove(chat)
+        with self.lock:
+
+            chats = user.chats
+            if chat in chats.all():
+                chats.remove(chat)
 
     # END USERS GROUPS BOTS
 
@@ -365,7 +371,7 @@ def send_message_to_moderator_chat(msgs):
 
     bot = get_moderator_bot_class()()
     peer_id = get_moderator_chat_peer_id()
-    bot.parse_and_send_msgs(peer_id, msgs)
+    return bot.parse_and_send_msgs(peer_id, msgs)
 
 
 def upload_image_to_vk_server(image):
