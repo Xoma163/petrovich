@@ -45,7 +45,11 @@ class TgBot(CommonBot):
         """
         media = []
         for attachment in rm.attachments:
-            media.append({'type': attachment.type, 'media': attachment.public_download_url, 'caption': rm.text})
+            if attachment.file_id:
+                media.append({'type': attachment.type, 'media': attachment.file_id, 'caption': rm.text})
+            elif attachment.public_download_url:
+                media.append({'type': attachment.type, 'media': attachment.public_download_url, 'caption': rm.text})
+
         del default_params['caption']
         default_params['media'] = json.dumps(media)
         return self.requests.get('sendMediaGroup', default_params)
@@ -56,10 +60,16 @@ class TgBot(CommonBot):
         """
         self.set_activity(default_params['chat_id'], ActivitiesEnum.UPLOAD_PHOTO)
         photo: PhotoAttachment = rm.attachments[0]
+        if photo.file_id:
+            default_params['photo'] = photo.file_id
+            return self.requests.get('sendPhoto', default_params)
         if photo.public_download_url:
             default_params['photo'] = photo.public_download_url
             return self.requests.get('sendPhoto', default_params)
         else:
+            if photo.get_size_mb() > 5:
+                rm.attachments = []
+                raise PError("Нельзя загружать видео более 40 мб в телеграмм")
             return self.requests.get('sendPhoto', default_params, files={'photo': photo.content})
 
     def _send_document(self, rm: ResponseMessageItem, default_params):
@@ -142,7 +152,7 @@ class TgBot(CommonBot):
         response = self.requests.get('getUserProfilePhotos', {'user_id': user_id})
         photos = response.json()['result']['photos']
         if len(photos) == 0:
-            raise RuntimeWarning("Нет фотографий в профиле")
+            raise PWarning("Нет фотографий в профиле")
         pa = PhotoAttachment()
         pa.parse_tg_photo(photos[0][-1], self)
 
@@ -204,6 +214,27 @@ class TgBot(CommonBot):
         Удаление одного сообщения
         """
         self.requests.get('deleteMessage', params={'chat_id': peer_id, 'message_id': message_id})
+
+    def _upload_image_to_tg_server(self, url) -> PhotoAttachment:
+        """
+        Загрузка изображения на сервера ТГ с костылями
+
+        Без бутылки не разобраться. У телеги нет встроенных методов по тупой загрузке файлов, поэтому приходится
+        Отправлять сообщение в пустую конфу, забирать оттуда file_id и уже потом формировать сообщение
+        """
+
+        photo_uploading_chat = self.chat_model.objects.get(pk=env.str("TG_PHOTO_UPLOADING_CHAT"))
+        pa = PhotoAttachment()
+        pa.public_download_url = url
+        rm = ResponseMessage({'attachments': [pa]}, peer_id=photo_uploading_chat.chat_id)
+        response = self.send_message(rm.messages[0])
+        if response.status_code != 200:
+            raise PWarning
+        r_json = response.json()
+        self.delete_message(photo_uploading_chat.chat_id, r_json['result']['message_id'])
+        uploaded_image = r_json['result']['photo'] if response.status_code == 200 else response
+        pa.file_id = uploaded_image[-1]['file_id']
+        return pa
 
     # END EXTRA
 
