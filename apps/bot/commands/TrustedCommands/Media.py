@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 from apps.bot.APIs.RedditVideoDownloader import RedditVideoSaver
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Platform
-from apps.bot.classes.consts.Exceptions import PWarning, PError
+from apps.bot.classes.consts.Exceptions import PWarning, PError, PSkip
 from apps.bot.utils.utils import get_urls_from_text
 
 YOUTUBE_URLS = ('www.youtube.com', 'youtube.com', "www.youtu.be", "youtu.be")
@@ -59,7 +59,7 @@ class Media(Command):
             if has_command_name or self.event.is_from_pm:
                 raise e
             else:
-                return
+                raise PSkip()
 
         if has_command_name or self.event.is_from_pm:
             return {'attachments': attachments}

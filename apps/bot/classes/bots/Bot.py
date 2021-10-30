@@ -116,6 +116,8 @@ class Bot(Thread):
                 rm = ResponseMessage(msg, event.peer_id)
                 getattr(self.logger, e.level)({'result': rm})
                 return rm
+            except PSkip as e:
+                raise e
             except Exception as e:
                 msg = "Непредвиденная ошибка. Сообщите разработчику. Команда /баг"
                 rm = ResponseMessage(msg, event.peer_id)
