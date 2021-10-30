@@ -170,11 +170,11 @@ class TgBot(CommonBot):
         """
         tg_activity = TG_ACTIVITIES[activity]
 
-        # no wait for response
-        try:
-            self.requests.get('sendChatAction', {'chat_id': peer_id, 'action': tg_activity}, timeout=0.000001)
-        except (requests.exceptions.ReadTimeout, requests.exceptions.ConnectionError):
-            pass
+        # ToDo: no wait for response
+        # try:
+        self.requests.get('sendChatAction', {'chat_id': peer_id, 'action': tg_activity}, timeout=0.000001)
+        # except (requests.exceptions.ReadTimeout, requests.exceptions.ConnectionError):
+        #     pass
 
     @staticmethod
     def get_mention(user, name=None):
