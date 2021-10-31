@@ -88,25 +88,30 @@ class Event:
         Проверка, нужен ли пользователю ответ c учётом особенностей команд
         """
         if self.message and not self.message.mentioned:
-            from apps.bot.commands.Meme import Meme as MemeCommand
-            from apps.service.models import Meme as MemeModel
             if self.is_from_chat and self.chat.need_meme and not self.message.mentioned:
+                from apps.bot.commands.Meme import Meme as MemeCommand
+                from apps.service.models import Meme as MemeModel
                 message_is_exact_meme_name = MemeModel.objects.filter(name=self.message.clear, approved=True).exists()
                 if message_is_exact_meme_name:
                     self.command = MemeCommand
                     return True
 
-            from apps.bot.commands.TrustedCommands.Media import Media
-            from apps.bot.commands.TrustedCommands.Media import MEDIA_URLS
             all_urls = get_urls_from_text(self.message.clear_case)
             has_fwd_with_message = self.fwd and self.fwd[0].message and self.fwd[0].message.clear_case
             if self.is_from_pm and has_fwd_with_message:
                 all_urls += get_urls_from_text(self.fwd[0].message.clear_case)
+            from apps.bot.commands.TrustedCommands.Media import Media
+            from apps.bot.commands.TrustedCommands.Media import MEDIA_URLS
             for url in all_urls:
                 message_is_media_link = urlparse(url).hostname in MEDIA_URLS
                 if message_is_media_link:
                     self.command = Media
                     return True
+
+            if self.is_from_chat and self.message.command == "@all":
+                from apps.bot.commands.All import All
+                self.command = All
+                return True
 
         is_chat_auto_voice_recognize = self.is_from_chat and self.chat.recognize_voice
         if is_chat_auto_voice_recognize and self.has_voice_message:
