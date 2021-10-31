@@ -8,9 +8,13 @@ from apps.bot.utils.utils import get_help_texts_for_command, transform_k
 class Command:
     # Основные поля команды
     name: str = None  # Имя команды,
-    names: list = []  # Вспопогательные имена команды,
+    names: list = []  # Вспопогательные имена команды
+    name_tg: str = None  # Имя команды для списка команд в тг
+
     help_text: str = None  # Текст в /команды
     help_texts: list = []  # Текст в детальной помощи по команде /помощь (название команды)
+    help_text_tg: list = []  # Текст для списка команд в тг
+
     enabled: bool = True  # Включена ли команда
     suggest_for_similar: bool = True  # предлагать ли команду в выдаче похожих команд при ошибке пользователя в вводе
     priority: int = 0  # Приоритет обработки команды
@@ -24,7 +28,7 @@ class Command:
     args_or_fwd: int = None  # Должно ли сообщение обрабатываться только с пересланными сообщениями или аргументами
     int_args: list = None  # Список аргументов, которые должны быть целым числом
     float_args: list = None  # Список аргументов, которые должны быть числом
-    platforms: list or Platform = list(Platform)  # Список платформ, которые могут обрабатывать команду ToDo: list only
+    platforms: list = list(Platform)  # Список платформ, которые могут обрабатывать команду ToDo: list only
     excluded_platforms: list = []  # Список исключённых платформ.
     attachments: list = []  # Должно ли сообщение обрабатываться только с вложениями
     city: bool = False  # Должно ли сообщение обрабатываться только с заданным городом у пользователя
@@ -33,20 +37,19 @@ class Command:
         self.bot: Bot = bot
         self.event: Event = event
 
-        if not isinstance(self.platforms, list):
-            self.platforms = [self.platforms]
-
-        # Дополнительные поля
-        self.full_names = None
-        self.full_help_text = None
-        self.full_help_texts = None
+        self.full_names: str = None  # Полный список имён команды (основное имя, дополнительное, имя в тг)
+        self.full_help_text: str = None  # Сгенерированный хелп текст для команды /команды
+        self.full_help_texts: str = None  # Сгенерированный хелп текст для команды /помощь
+        self.full_help_texts_tg: str = None  # Сгенерированный хелп текст для списка команд в телеграме
 
         if self.name:
-            self.full_names = [self.name] + self.names
+            self.full_names = [self.name] + self.names + [self.name_tg]
             if self.help_text:
                 self.full_help_text = f"{self.name.capitalize()} - {self.help_text}"
             if self.help_texts:
                 self.full_help_texts = "\n".join([f"{self.name.capitalize()} {x}" for x in self.help_texts])
+        if self.name_tg:
+            self.full_help_texts_tg = "\n".join([f"{self.name_tg.lower()} {x}" for x in self.help_text_tg])
 
     def __eq__(self, other):
         return self.name == other.name

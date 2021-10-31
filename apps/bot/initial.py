@@ -2,6 +2,8 @@ import importlib
 import os
 import pkgutil
 
+from django.contrib.auth.models import Group
+
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Platform, Role
 from petrovich.settings import BASE_DIR
@@ -20,17 +22,9 @@ def import_all_commands():
 
 
 def generate_commands():
-    _commands = [cls() for cls in Command.__subclasses__() if cls.enabled]
-    _commands.sort(key=lambda x: x.priority, reverse=True)
-    return _commands
-
-
-def generate_groups():
-    from django.contrib.auth.models import Group
-
-    groups = Group.objects.all().values('name')
-    groups_names = [group['name'] for group in groups]
-    return groups_names
+    commands = [cls() for cls in Command.__subclasses__() if cls.enabled]
+    commands.sort(key=lambda x: x.priority, reverse=True)
+    return commands
 
 
 def generate_help_text():
@@ -45,9 +39,9 @@ def generate_help_text():
             else:
                 print(f"Warn: Ошибка в генерации help_text. Ключ {text_for} не найден")
 
-    groups_with_games = GROUPS + ["games"]
-    help_text_generated = {platform: {group: "" for group in groups_with_games} for platform in list(Platform)}
-    help_text_list = {platform: {group: [] for group in groups_with_games} for platform in list(Platform)}
+    groups = [x['name'] for x in Group.objects.all().values('name')] + ["games"]
+    help_text_generated = {platform: {group: "" for group in groups} for platform in list(Platform)}
+    help_text_list = {platform: {group: [] for group in groups} for platform in list(Platform)}
 
     for command in COMMANDS:
         if command.help_text:
@@ -64,7 +58,7 @@ def generate_help_text():
                             append_to_list(help_text_list[platform])
 
     for platform in list(Platform):
-        for group in groups_with_games:
+        for group in groups:
             help_text_list[platform][group].sort()
             help_text_generated[platform][group] = "\n".join(help_text_list[platform][group])
 
@@ -75,14 +69,7 @@ import_all_commands()
 
 COMMANDS = generate_commands()
 
-GROUPS = generate_groups()
-
 HELP_TEXTS = generate_help_text()
-
-EMPTY_KEYBOARD = {
-    "one_time": False,
-    "buttons": []
-}
 
 
 def get_text_for_documentation(commands):

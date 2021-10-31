@@ -239,6 +239,17 @@ class TgBot(CommonBot):
         pa.file_id = uploaded_image[-1]['file_id']
         return pa
 
+    def update_help_texts(self):
+        """
+        Обновление списка команд в телеграме
+        """
+
+        from apps.bot.initial import COMMANDS
+        commands_with_tg_name = list(filter(lambda x: x.name_tg, COMMANDS))
+        help_texts_tg = [x.full_help_texts_tg.split(' - ') for x in commands_with_tg_name]
+        help_texts_tg = [{'command': x[0], 'description': x[1]} for x in help_texts_tg]
+        self.requests.get('setMyCommands', json={'commands': help_texts_tg})
+
     # END EXTRA
 
 
