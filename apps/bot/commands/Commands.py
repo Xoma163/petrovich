@@ -1,7 +1,7 @@
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Role, Platform
 from apps.bot.classes.consts.Exceptions import PWarning
-from apps.bot.utils.utils import get_role_by_str
+from apps.bot.utils.utils import get_role_by_str, get_tg_formatted_text
 
 
 class Commands(Command):
@@ -47,7 +47,7 @@ class Commands(Command):
         if 'games' in help_texts:
             output += "\n— игры —\n"
             if self.event.platform == Platform.TG:
-                output += f"```\n{help_texts['games']}\n```"
+                output += get_tg_formatted_text(help_texts['games'])
             else:
                 output += help_texts['games']
         output = output.rstrip()
@@ -60,7 +60,7 @@ class Commands(Command):
         if self.event.sender.check_role(role['role']) and help_texts[role['role'].name]:
             result += f"\n— {role['text']} —\n"
             if self.event.platform == Platform.TG:
-                result += f"```\n{help_texts[role['role'].name]}\n```"
+                result += get_tg_formatted_text(help_texts[role['role'].name])
             else:
                 result += help_texts[role['role'].name]
         return result

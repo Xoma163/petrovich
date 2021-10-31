@@ -8,7 +8,7 @@ from apps.bot.classes.consts.Exceptions import PWarning, PError
 from apps.bot.classes.messages.attachments.LinkAttachment import LinkAttachment
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
-from apps.bot.utils.utils import get_attachments_from_attachments_or_fwd, tanimoto
+from apps.bot.utils.utils import get_attachments_from_attachments_or_fwd, tanimoto, get_tg_formatted_text
 from apps.service.models import Meme as MemeModel
 from petrovich.settings import VK_URL
 
@@ -298,6 +298,8 @@ class Meme(Command):
         meme.save()
         prepared_meme = self.prepare_meme_to_send(meme)
         if warning_message:
+            if self.event.platform == Platform.TG:
+                return [prepared_meme, {'text': get_tg_formatted_text(warning_message), 'parse_mode': 'markdown'}]
             return [prepared_meme, warning_message]
         return prepared_meme
 
@@ -397,21 +399,25 @@ class Meme(Command):
         memes_list = [meme['meme'] for meme in memes_list]
         return memes_list
 
-    @staticmethod
-    def get_similar_memes_names(memes):
+    def get_similar_memes_names(self, memes):
+        meme_name_limit = 50
+        meme_count_limit = 10
+        if self.event.platform == Platform.TG:
+            meme_name_limit = 120
+            meme_count_limit = 20
         total_memes_count = len(memes)
-        memes = memes[:10]
+        memes = memes[:meme_count_limit]
         meme_names = []
         for meme in memes:
-            if len(meme.name) < 50:
+            if len(meme.name) < meme_name_limit:
                 meme_names.append(meme.name)
             else:
-                meme_names.append(meme.name[:50] + "...")
+                meme_names.append(meme.name[:meme_name_limit] + "...")
         meme_names_str = ";\n".join(meme_names)
 
         msg = f"Нашёл сразу {total_memes_count}, уточните:\n\n" \
               f"{meme_names_str}" + '.'
-        if total_memes_count > 10:
+        if total_memes_count > meme_count_limit:
             msg += "\n..."
         return msg
 

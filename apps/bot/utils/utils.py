@@ -322,4 +322,14 @@ def get_chunks(lst, n):
 
 
 def get_flat_list(_list: List[List]):
+    """
+    Получение списка размерностью 1 из списка размерностью 2
+    """
     return [item for sublist in _list for item in sublist]
+
+
+def get_tg_formatted_text(text) -> object:
+    """
+    Форматированный текст в телеграмме (markdown)
+    """
+    return f"```\n{text}\n```"

@@ -1,9 +1,10 @@
 from django.core.paginator import Paginator
 
 from apps.bot.classes.Command import Command
-from apps.bot.classes.consts.Consts import Role
+from apps.bot.classes.consts.Consts import Role, Platform
 from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.commands.Meme import Meme
+from apps.bot.utils.utils import get_tg_formatted_text
 from apps.service.models import Meme as MemeModel
 
 
@@ -40,7 +41,7 @@ class Memes(Command):
             if page > p.num_pages:
                 page = p.num_pages
 
-            msg_header = f"Страница {page}/{p.num_pages}"
+            msg_header = f"Страница {page}-{p.num_pages}"
 
             memes_on_page = p.page(page)
             meme_names = get_memes_names(memes_on_page, self.event.sender)
@@ -53,8 +54,9 @@ class Memes(Command):
             else:
                 on_last_page = p.count
             msg_footer = f'----{p.per_page * (page - 1) + 1}/{on_last_page}----'
-            msg = f"{msg_header}\n\n{msg_body}\n\n{msg_footer}"
-            return msg
+            if self.event.platform == Platform.TG:
+                return {'text': f"{msg_header}\n{get_tg_formatted_text(msg_body)}\n{msg_footer}", 'parse_mode': 'markdown'}
+            return f"{msg_header}\n\n{msg_body}\n\n{msg_footer}"
         except PWarning:
             memes = MemeModel.objects.filter(approved=True)
             for arg in self.event.message.args:
@@ -72,4 +74,6 @@ class Memes(Command):
                 meme_names_str += "\n..."
             elif len(memes) > 0:
                 meme_names_str += '.'
+            if self.event.platform == Platform.TG:
+                return {'text': f"{get_tg_formatted_text(meme_names_str)}\nВсего - {len(memes)}", 'parse_mode': 'markdown'}
             return f"{meme_names_str}\n\nВсего - {len(memes)}"
