@@ -8,6 +8,8 @@ from apps.service.models import Service
 
 class Stream(Command):
     name = "стрим"
+    name_tg = "stream"
+
     help_text = "ссылка на стрим"
     help_texts = [
         "- ссылка на стрим"

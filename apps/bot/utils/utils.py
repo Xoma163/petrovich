@@ -319,3 +319,7 @@ def get_chunks(lst, n):
     """Yield successive n-sized chunks from lst."""
     for i in range(0, len(lst), n):
         yield lst[i:i + n]
+
+
+def get_flat_list(_list: List[List]):
+    return [item for sublist in _list for item in sublist]

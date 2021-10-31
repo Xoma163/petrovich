@@ -9,11 +9,13 @@ from apps.service.models import WakeOnLanUserData
 class WOL(Command):
     name = "пробуди"
     names = ["разбуди", 'wol', 'wakeonlan', 'разбудить', 'пробудить']
+
     help_text = "пробуждает ваше устройство"
     help_texts = [
         "- пробуждает ваше устройство"
         "(название) - пробуждает ваше устройство"
     ]
+
     access = Role.TRUSTED
 
     def start(self):

@@ -12,12 +12,14 @@ lock = Lock()
 
 class Rates(Command):
     name = 'ставки'
-    names = ["казино"]
+    name_tg = 'rates'
+
     help_text = "играет ставки"
     help_texts = [
-        "- играет ставки."
+        "- играет ставки",
         "f - играет независимо от количества игроков. Только для админов конфы"
     ]
+
     conversation = True
     platforms = [Platform.VK, Platform.TG]
 

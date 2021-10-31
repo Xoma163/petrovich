@@ -8,6 +8,10 @@ class KeyboardHide(Command):
 
     platforms = [Platform.VK]
 
+    EMPTY_KEYBOARD = {
+        "one_time": False,
+        "buttons": []
+    }
+
     def start(self):
-        from apps.bot.initial import EMPTY_KEYBOARD
-        return {'keyboard': EMPTY_KEYBOARD}
+        return {'keyboard': self.EMPTY_KEYBOARD}

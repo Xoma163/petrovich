@@ -8,6 +8,8 @@ from apps.service.models import Horoscope as HoroscopeModel
 
 class Horoscope(Command):
     name = "гороскоп"
+    name_tg = "horoscope"
+
     help_text = "мемный гороскоп"
     help_texts = [
         "[знак зодиака = по др в профиле] - пришлёт мемный гороскоп на день для знака зодиака",

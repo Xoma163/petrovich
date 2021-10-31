@@ -12,6 +12,7 @@ def get_roles(user):
 
 class Roles(Command):
     name = "роли"
+    name_tg = 'roles'
     help_text = "присылает список ваших ролей"
     help_texts = [
         "- присылает ваши роли",

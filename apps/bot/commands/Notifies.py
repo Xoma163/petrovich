@@ -35,6 +35,7 @@ def get_notifies_from_object(notifies_obj, timezone, print_username=False):
 
 class Notifies(Command):
     name = "напоминания"
+    name_tg = "notifies"
     help_text = "список напоминаний"
     help_texts = [
         "- список напоминаний. Отправляет в лс все напоминания, когда-либо созданные, в группу - только напоминания внутри группы",

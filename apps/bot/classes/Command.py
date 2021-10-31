@@ -13,7 +13,6 @@ class Command:
 
     help_text: str = None  # Текст в /команды
     help_texts: list = []  # Текст в детальной помощи по команде /помощь (название команды)
-    help_text_tg: list = []  # Текст для списка команд в тг
 
     enabled: bool = True  # Включена ли команда
     suggest_for_similar: bool = True  # предлагать ли команду в выдаче похожих команд при ошибке пользователя в вводе
@@ -49,7 +48,7 @@ class Command:
             if self.help_texts:
                 self.full_help_texts = "\n".join([f"{self.name.capitalize()} {x}" for x in self.help_texts])
         if self.name_tg:
-            self.full_help_texts_tg = "\n".join([f"{self.name_tg.lower()} {x}" for x in self.help_text_tg])
+            self.full_help_texts_tg = f"{self.name_tg.lower()} - {self.help_text}"
 
     def __eq__(self, other):
         return self.name == other.name

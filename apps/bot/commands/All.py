@@ -4,8 +4,11 @@ from apps.bot.classes.consts.Consts import Platform
 
 class All(Command):
     name = "all"
+    name_tg = "all"
+
     help_text = "присылает меншон по всем участникам конфы"
     help_texts = [
+        " - присылает меншон по всем участникам конфы",
         "(текст) - присылает меншон по всем участникам конфы с текстом в начале"
     ]
     platforms = [Platform.TG]

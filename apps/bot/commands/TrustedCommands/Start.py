@@ -1,22 +1,18 @@
-from apps.birds.CameraHandler import CameraHandler
-from apps.bot.APIs.Agario import get_agario_version_by_args
 from apps.bot.APIs.Minecraft import get_minecraft_version_by_args
 from apps.bot.APIs.Terraria import get_terraria_server_by_version
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Role
 
-cameraHandler = CameraHandler()
-
 
 class Start(Command):
     name = "старт"
-    help_text = "возобновляет работу бота или модуля"
+
+    help_text = "возобновляет работу сервиса"
     help_texts = [
-        "(сервис=бот [версия]) - стартует сервис\n"
-        "Сервис - камера/майнкрафт/террария\n"
-        "Если майнкрафт, то может быть указана версия, 1.16.5\n"
-        "Если агарио, то может быть указана версия, 1, 2, 3\n"
+        "Сервис - камера/майнкрафт/террария",
+        "Если майнкрафт, то может быть указана версия, 1.16.5"
     ]
+
     access = Role.TRUSTED
 
     def start(self):
@@ -28,16 +24,16 @@ class Start(Command):
         menu = [
             [["камера"], self.menu_camera],
             [["майн", "майнкрафт", "mine", "minecraft"], self.menu_minecraft],
-            [['террария', 'terraria'], self.menu_terraria],
-            [['агарио', 'agario'], self.menu_agario]
+            [['террария', 'terraria'], self.menu_terraria]
         ]
         method = self.handle_menu(menu, arg0)
         return method()
 
     def menu_camera(self):
+        from apps.bot.management.commands.start import camera_handler
         self.check_sender(Role.ADMIN)
-        if not cameraHandler.is_active():
-            cameraHandler.resume()
+        if not camera_handler.is_active():
+            camera_handler.resume()
             return "Стартуем камеру!"
         else:
             return "Камера уже стартовала"
@@ -58,10 +54,3 @@ class Start(Command):
         terraria_server = get_terraria_server_by_version(None)
         terraria_server.start()
         return "Стартуем террарию!"
-
-    def menu_agario(self):
-        version = self.event.message.args[1] if len(self.event.message.args) > 1 else None
-        agario_server = get_agario_version_by_args(version)
-        version = agario_server.version
-        agario_server.start()
-        return f"Стартуем агарию {version}!"

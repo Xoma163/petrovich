@@ -5,12 +5,15 @@ from apps.bot.classes.consts.Consts import Role, Platform
 class Discord(Command):
     name = "дискорд"
     names = ["диск"]
+    name_tg = 'discord'
+
     help_text = "ссылка на канал в дискорде"
+
     access = Role.TRUSTED
 
     def start(self):
         url = 'https://discord.gg/kYGSNzv'
 
         if self.event.platform == Platform.TG:
-            return {'text': f"[Ежедневник]({url})",'parse_mode':'markdown'}
+            return {'text': f"[Ежедневник]({url})", 'parse_mode': 'markdown'}
         return url

@@ -4,7 +4,9 @@ from apps.bot.classes.consts.Consts import Platform
 
 class Issues(Command):
     name = "баги"
+    name_tg = 'issues'
     names = ["ишюс", "ишьюс", "иши"]
+
     help_text = "список проблем"
 
     def start(self):

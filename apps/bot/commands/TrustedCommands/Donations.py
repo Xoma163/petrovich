@@ -6,8 +6,10 @@ from apps.service.models import Donations as DonationsModel
 
 class Donations(Command):
     name = "донаты"
+    name_tg = 'donations'
     help_text = "список всех донатов"
     access = Role.TRUSTED
+
 
     def start(self):
         donations = DonationsModel.objects.all()

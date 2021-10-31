@@ -5,6 +5,8 @@ from apps.bot.classes.Command import Command
 class Joke(Command):
     name = "анекдот"
     names = ["анек", "а", "a"]
+    name_tg = "joke"
+
     help_text = "присылает случайный анекдот"
     help_texts = [
         "[N=1] - присылает случайный анекдот. N=;\n"

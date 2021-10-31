@@ -6,6 +6,7 @@ from apps.bot.commands.Praise import get_praise_or_scold
 class Scold(Command):
     name = "обосрать"
     names = ["обосри", "поругать", "поругай"]
+    name_tg = 'scold'
     help_text = "рандомное оскорбление"
     help_texts = [
         "Обосрать [кто-то] [род+число] - рандомное оскорбление\n"

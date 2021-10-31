@@ -6,8 +6,11 @@ MAX_QUOTES = 20
 
 class Bash(Command):
     name = "баш"
+    name_tg = "bash"
+
     help_text = "рандомная цитата с баша"
     help_texts = ["[количество=5] - рандомная цитата с баша. Максимум 20 цитат"]
+
     int_args = [0]
 
     def start(self):

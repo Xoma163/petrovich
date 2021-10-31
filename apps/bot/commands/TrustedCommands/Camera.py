@@ -6,8 +6,11 @@ from apps.bot.management.commands.start import camera_handler
 
 class Camera(Command):
     name = "камера"
+    name_tg = 'camera'
+
     help_text = "ссылка и гифка с камеры"
     help_texts = ["[кол-во кадров=100] - ссылка и гифка с камеры. Максимум 1000 кадров"]
+
     int_args = [0]
     access = Role.TRUSTED
     platforms = [Platform.VK, Platform.TG]
@@ -34,7 +37,7 @@ class Camera(Command):
                 return str(e)
             attachment = self.bot.upload_video(document, self.event.peer_id, "Камера", filename="camera.gif", )
             attachments.append(attachment)
-        # if len(attachments) == 2 or self.event.platform == Platform.VK:
+            # if len(attachments) == 2 or self.event.platform == Platform.VK:
             return {
                 'attachments': attachments,
                 "keyboard": self.bot.get_inline_keyboard(

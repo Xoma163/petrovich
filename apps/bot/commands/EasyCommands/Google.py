@@ -11,8 +11,7 @@ class Google(Command):
     args = 1
 
     def start(self):
+        url = f"https://www.google.com/search?q={quote(self.event.message.args_str_case)}"
         if self.event.platform == Platform.TG:
-            url = f"https://www.google.com/search?q={quote(self.event.message.args_str_case)}"
-            return {'text': f"[Окей Гугл, {self.event.message.args_str_case}]({url})",'parse_mode':'markdown'}
-        return
-
+            return {'text': f"[Окей Гугл, {self.event.message.args_str_case}]({url})", 'parse_mode': 'markdown'}
+        return url

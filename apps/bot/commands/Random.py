@@ -5,12 +5,15 @@ from apps.bot.utils.utils import get_random_int
 class Random(Command):
     name = "рандом"
     names = ["ранд"]
+    name_tg = 'random'
+
     help_text = "рандомное число в заданном диапазоне"
     help_texts = [
         "- рандомное число в диапазоне[0:1]",
         "N - рандомное число в заданном диапазоне[1:N]",
         "N,M - рандомное число в заданном диапазоне[N:M]"
     ]
+
     int_args = [0, 1]
 
     def start(self):

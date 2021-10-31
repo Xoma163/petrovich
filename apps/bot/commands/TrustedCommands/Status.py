@@ -1,4 +1,3 @@
-from apps.bot.APIs.Agario import agario_servers
 from apps.bot.APIs.Minecraft import minecraft_servers
 from apps.bot.APIs.Terraria import terraria_servers
 from apps.bot.classes.Command import Command
@@ -9,7 +8,10 @@ from petrovich.settings import MAIN_DOMAIN
 
 class Status(Command):
     name = "статус"
+    name_tg = 'status'
+
     help_text = "статус серверов по играм"
+
     access = Role.MINECRAFT
 
     def start(self):
@@ -24,14 +26,8 @@ class Status(Command):
             result = server.get_server_info()
             terraria_result += f"{result}\n\n"
 
-        agario_result = ""
-        for server in agario_servers:
-            result = server.get_server_info()
-            agario_result += f"{result}\n\n"
-
         total_str = f"{minecraft_result}" \
-                    f"{terraria_result}" \
-                    f"{agario_result}"
+                    f"{terraria_result}"
 
         return total_str
 

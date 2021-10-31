@@ -11,8 +11,11 @@ lock = Lock()
 
 class Rate(Command):
     name = "ставка"
+    name_tg = 'rate'
+
     help_text = "игра, определяющая, кто ближе угадал загаданное число"
     help_texts = ["[ставка=рандом] - делает ставку"]
+
     int_args = [0]
     conversation = True
     platforms = [Platform.VK, Platform.TG]

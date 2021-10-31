@@ -17,12 +17,15 @@ lock = Lock()
 class Petrovich(Command):
     name = "петрович"
     names = ['петровна']
+    name_tg = 'petrovich'
+
     help_text = "мини-игра, определяющая кто Петрович Дня"
     help_texts = [
         "- мини-игра, определяющая кто Петрович дня",
         "рег - регистрация в игре",
         "дерег - дерегистрация в игре"
     ]
+
     conversation = True
     platforms = [Platform.VK, Platform.TG]
 

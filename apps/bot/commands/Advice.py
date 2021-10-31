@@ -5,6 +5,8 @@ from apps.bot.classes.consts.Exceptions import PError
 
 class Advice(Command):
     name = "совет"
+    name_tg = "advice"
+
     help_text = "даёт случайный совет"
 
     def start(self):
