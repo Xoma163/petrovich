@@ -1,5 +1,5 @@
 from apps.bot.classes.Command import Command
-from apps.bot.classes.consts.Consts import Role
+from apps.bot.classes.consts.Consts import Role, Platform
 from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.utils.utils import get_role_by_str
 
@@ -44,14 +44,22 @@ class Commands(Command):
         for role in ordered_roles:
             output += self.get_str_for_role(help_texts, role)
         if 'games' in help_texts:
-            output += "\n\n— игры —\n"
-            output += help_texts['games']
+            output += "\n— игры —\n"
+            if self.event.platform == Platform.TG:
+                output += f"```\n{help_texts['games']}\n```"
+            else:
+                output += help_texts['games']
         output = output.rstrip()
+        if self.event.platform == Platform.TG:
+            return {'text': output, "parse_mode": "markdown"}
         return output
 
     def get_str_for_role(self, help_texts, role):
         result = ""
         if self.event.sender.check_role(role['role']) and help_texts[role['role'].name]:
-            result += f"\n\n— {role['text']} —\n"
-            result += help_texts[role['role'].name]
+            result += f"\n— {role['text']} —\n"
+            if self.event.platform == Platform.TG:
+                result += f"```\n{help_texts[role['role'].name]}\n```"
+            else:
+                result += help_texts[role['role'].name]
         return result

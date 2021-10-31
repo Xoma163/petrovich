@@ -20,7 +20,7 @@ class Help(Command):
             self.check_sender(command.access)
             help_text = get_help_texts_for_command(command)
             if self.event.platform == Platform.TG:
-                return f"```\n{help_text}\n```"
+                return {'text': f"```\n{help_text}\n```", "parse_mode": "markdown"}
             return help_text
         text = "/помощь (название команды) - помощь по конкретной команде\n" \
                "/документация - документация по боту. Самый подробный мануал по всему в одном месте\n" \
