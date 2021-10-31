@@ -47,7 +47,7 @@ class Horoscope(Command):
                     meme = horoscope.memes.all()[i]
                     zodiac_sign_name = zodiac_sign.name.capitalize()
                     try:
-                        meme_command = Meme(bot=self.bot)
+                        meme_command = Meme(bot=self.bot, event=self.event)
                         prepared_meme = meme_command.prepare_meme_to_send(meme)
                     except PWarning as e:
                         error_msg = f"{zodiac_sign_name}\n{str(e)}"
@@ -102,7 +102,7 @@ class Horoscope(Command):
         zodiac_sign_name = zodiac_sign.name.capitalize()
         meme = horoscope.memes.all()[zodiac_sign_index]
 
-        meme_command = Meme(bot=self.bot)
+        meme_command = Meme(bot=self.bot, event=self.event)
         prepared_meme = meme_command.prepare_meme_to_send(meme)
         if prepared_meme.get('text', None):
             prepared_meme['text'] = f"{zodiac_sign_name}\n{prepared_meme['text']}"

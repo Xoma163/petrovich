@@ -49,7 +49,7 @@ class Meme(Command):
     def start(self):
         if not self.event.message.args:
             return self.menu_random()
-        
+
         arg0 = self.event.message.args[0]
         menu = [
             [['добавить'], self.menu_add],
