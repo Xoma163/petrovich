@@ -44,7 +44,7 @@ class Start(Command):
         minecraft_server = get_minecraft_version_by_args(version)
         version = minecraft_server.get_version()
         minecraft_server.event = self.event
-        minecraft_server.start
+        minecraft_server.start()
 
         message = f"Стартуем майн {version}"
         return message
@@ -52,5 +52,5 @@ class Start(Command):
     def menu_terraria(self):
         self.check_sender(Role.TERRARIA)
         terraria_server = get_terraria_server_by_version(None)
-        terraria_server.start
+        terraria_server.start()
         return "Стартуем террарию!"
