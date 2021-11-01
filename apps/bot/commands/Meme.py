@@ -84,10 +84,17 @@ class Meme(Command):
 
             attachment = LinkAttachment()
             attachment.url = url
-            meme_name = " ".join(self.event.message.args[2:])
+            meme_name_list = self.event.message.args[2:]
         else:
-            meme_name = " ".join(self.event.message.args[1:])
+            meme_name_list = self.event.message.args[1:]
             attachment = attachments[0]
+
+        try:
+            [int(x) for x in meme_name_list]
+            raise PWarning("Название мема не может состоять только из цифр")
+        except ValueError:
+            pass
+        meme_name = " ".join(meme_name_list)
 
         if self.event.platform != Platform.VK and type(attachment) not in [PhotoAttachment, LinkAttachment]:
             raise PWarning('В данной платформе поддерживается добавление только картинок-мемов и youtube/coub ссылок')
