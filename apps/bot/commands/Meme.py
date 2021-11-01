@@ -55,7 +55,6 @@ class Meme(Command):
             [['добавить'], self.menu_add],
             [['обновить'], self.menu_refresh],
             [['удалить'], self.menu_delete],
-            # [['рандом', 'р'], self.menu_random],
             [['подтвердить', 'принять', '+'], self.menu_confirm],
             [['отклонить', 'отменить', '-'], self.menu_reject],
             [['переименовать', 'правка'], self.menu_rename],
@@ -79,12 +78,12 @@ class Meme(Command):
         self.check_args(2)
         attachments = self.event.get_all_attachments(PhotoAttachment)
         if len(attachments) == 0:
-            url = self.event.message.args_str_case.split(' ')[1]
+            url = self.event.message.args_case[-1]
             self._check_allowed_url(url)
 
             attachment = LinkAttachment()
             attachment.url = url
-            meme_name_list = self.event.message.args[2:]
+            meme_name_list = self.event.message.args[1:-1]
         else:
             meme_name_list = self.event.message.args[1:]
             attachment = attachments[0]
@@ -137,7 +136,7 @@ class Meme(Command):
     def menu_refresh(self):
         self.check_args(2)
         try:
-            url = self.event.message.args[-1]
+            url = self.event.message.args_case[-1]
             self._check_allowed_url(url)
             attachment = LinkAttachment()
             attachment.url = url
