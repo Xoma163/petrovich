@@ -1,7 +1,6 @@
 from apps.bot.APIs.OCR import OCRApi
 from apps.bot.classes.Command import Command
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
-from apps.bot.utils.utils import get_attachments_from_attachments_or_fwd
 
 
 class Text(Command):
@@ -19,6 +18,6 @@ class Text(Command):
             lang = self.event.message.args[0]
 
         ocr_api = OCRApi()
-        image = get_attachments_from_attachments_or_fwd(self.event, [PhotoAttachment])[0]
+        image = self.event.get_all_attachments(self.event, [PhotoAttachment])[0]
         content = image.download_content()
         return ocr_api.recognize(content, lang)

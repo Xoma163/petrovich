@@ -13,10 +13,6 @@ from PIL import Image, ImageDraw, ImageFont
 from apps.bot.classes.consts.Consts import Role
 from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.classes.messages.attachments.Attachment import Attachment
-from apps.bot.classes.messages.attachments.DocumentAttachment import DocumentAttachment
-from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
-from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
-from apps.bot.classes.messages.attachments.VoiceAttachment import VoiceAttachment
 from apps.service.models import Service
 from petrovich.settings import STATIC_ROOT
 
@@ -109,34 +105,6 @@ def decl_of_num(number, titles):
         return titles[cases[number % 10]]
     else:
         return titles[cases[5]]
-
-
-def get_attachments_from_attachments_or_fwd(event, _type=None, from_first_fwd=True) -> List[Attachment]:
-    """
-    Получает все вложения из сообщения и пересланного сообщения
-    """
-    attachments = []
-
-    if _type is None:
-        _type = [VoiceAttachment, VideoAttachment, PhotoAttachment, DocumentAttachment]
-    if not isinstance(_type, list):
-        _type = [_type]
-    if event.attachments:
-        for att in event.attachments:
-            if type(att) in _type:
-                attachments.append(att)
-    if event.fwd:
-        if from_first_fwd:
-            msgs = [event.fwd[0]]
-        else:
-            msgs = event.fwd
-        for msg in msgs:
-            if msg.attachments:
-                for att in msg.attachments:
-                    if type(att) in _type:
-                        attachments.append(att)
-
-    return attachments
 
 
 def find_command_by_name(command_name):

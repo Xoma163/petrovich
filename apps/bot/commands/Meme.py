@@ -8,7 +8,7 @@ from apps.bot.classes.consts.Exceptions import PWarning, PError
 from apps.bot.classes.messages.attachments.LinkAttachment import LinkAttachment
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
-from apps.bot.utils.utils import get_attachments_from_attachments_or_fwd, tanimoto, get_tg_formatted_text
+from apps.bot.utils.utils import tanimoto, get_tg_formatted_text
 from apps.service.models import Meme as MemeModel
 from petrovich.settings import VK_URL
 
@@ -77,7 +77,7 @@ class Meme(Command):
 
     def menu_add(self):
         self.check_args(2)
-        attachments = get_attachments_from_attachments_or_fwd(self.event, [PhotoAttachment])
+        attachments = self.event.get_all_attachments(self.event, [PhotoAttachment])
         if len(attachments) == 0:
             url = self.event.message.args_str_case.split(' ')[1]
             self._check_allowed_url(url)
@@ -141,7 +141,7 @@ class Meme(Command):
             attachments = [attachment]
             id_name = self.get_id_or_meme_name(self.event.message.args[1:-1])
         except PWarning:
-            attachments = get_attachments_from_attachments_or_fwd(self.event, [VideoAttachment, PhotoAttachment])
+            attachments = self.event.get_all_attachments(self.event, [VideoAttachment, PhotoAttachment])
             id_name = self.get_id_or_meme_name(self.event.message.args[1:])
 
         if len(attachments) == 0:
@@ -329,7 +329,8 @@ class Meme(Command):
             memes = memes.filter(author=filter_user)
         return memes
 
-    def get_one_meme(self, memes, filter_list, approved=True) -> MemeModel:
+    @staticmethod
+    def get_one_meme(memes, filter_list, approved=True) -> MemeModel:
         if len(memes) == 0:
             raise PWarning("Не нашёл :(")
         elif len(memes) == 1:

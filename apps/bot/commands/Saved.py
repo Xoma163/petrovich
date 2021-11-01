@@ -2,7 +2,6 @@ from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
-from apps.bot.utils.utils import get_attachments_from_attachments_or_fwd
 
 
 class Saved(Command):
@@ -13,7 +12,7 @@ class Saved(Command):
     enabled = False
 
     def start(self):
-        attachments = get_attachments_from_attachments_or_fwd(self.event, [PhotoAttachment])
+        attachments = self.event.get_all_attachments(self.event, [PhotoAttachment])
         if len(attachments) == 0:
             raise PWarning("Не нашёл в сообщении фотографий")
         attachments_url = [attachment.get_download_url() for attachment in attachments]

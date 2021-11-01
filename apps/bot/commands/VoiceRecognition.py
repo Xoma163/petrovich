@@ -8,7 +8,6 @@ from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.classes.messages.attachments.VoiceAttachment import VoiceAttachment
-from apps.bot.utils.utils import get_attachments_from_attachments_or_fwd
 
 
 class VoiceRecognition(Command):
@@ -24,7 +23,7 @@ class VoiceRecognition(Command):
     priority = -100
 
     def start(self):
-        audio_messages = get_attachments_from_attachments_or_fwd(self.event, VoiceAttachment)
+        audio_messages = self.event.get_all_attachments(self.event, VoiceAttachment)
         audio_message = audio_messages[0]
 
         download_url = audio_message.get_download_url()

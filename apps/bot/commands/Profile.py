@@ -6,7 +6,6 @@ from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
-from apps.bot.utils.utils import get_attachments_from_attachments_or_fwd
 from apps.service.models import City, TimeZone
 
 
@@ -106,7 +105,7 @@ class Profile(Command):
         return f"Изменил пол на {self.event.sender.get_gender_display()}"
 
     def menu_avatar(self):
-        images = get_attachments_from_attachments_or_fwd(self.event, [PhotoAttachment])
+        images = self.event.get_all_attachments(self.event, [PhotoAttachment])
         if len(images) > 0:
             self.event.sender.set_avatar(images[0].get_download_url())
         else:

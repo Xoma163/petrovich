@@ -6,7 +6,6 @@ from PIL import Image
 from apps.bot.classes.Command import Command
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 from apps.bot.utils.Demotivator import DemotivatorBuilder
-from apps.bot.utils.utils import get_attachments_from_attachments_or_fwd
 
 
 class Demotivator(Command):
@@ -20,7 +19,7 @@ class Demotivator(Command):
     attachments = [PhotoAttachment]
 
     def start(self):
-        image = get_attachments_from_attachments_or_fwd(self.event, PhotoAttachment)[0]
+        image = self.event.get_all_attachments(self.event, PhotoAttachment)[0]
 
         text = self.event.message.raw.split(' ', 1)[1]
 

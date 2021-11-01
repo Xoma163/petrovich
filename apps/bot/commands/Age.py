@@ -3,7 +3,6 @@ from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
-from apps.bot.utils.utils import get_attachments_from_attachments_or_fwd
 
 
 def draw_on_images(image, faces):
@@ -55,7 +54,7 @@ class Age(Command):
     attachments = [PhotoAttachment]
 
     def start(self):
-        image = get_attachments_from_attachments_or_fwd(self.event, PhotoAttachment)[0]
+        image = self.event.get_all_attachments(self.event, PhotoAttachment)[0]
         everypixel_api = EveryPixelAPI()
         faces = everypixel_api.get_faces_on_photo(image.get_download_url())
 

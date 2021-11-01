@@ -3,6 +3,9 @@ from urllib.parse import urlparse
 
 from apps.bot.classes.consts.Consts import Platform, Role
 from apps.bot.classes.messages.Message import Message
+from apps.bot.classes.messages.attachments.DocumentAttachment import DocumentAttachment
+from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
+from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
 from apps.bot.classes.messages.attachments.VoiceAttachment import VoiceAttachment
 from apps.bot.models import Users, Chat
 from apps.bot.utils.utils import get_urls_from_text
@@ -136,6 +139,29 @@ class Event:
         Проставление сообщения
         """
         self.message = Message(text, _id) if text else None
+
+    def get_all_attachments(self, _type, from_first_fwd=True):
+        attachments = []
+
+        if _type is None:
+            _type = [VoiceAttachment, VideoAttachment, PhotoAttachment, DocumentAttachment]
+        if not isinstance(_type, list):
+            _type = [_type]
+        if self.attachments:
+            for att in self.attachments:
+                if type(att) in _type:
+                    attachments.append(att)
+        if self.fwd:
+            if from_first_fwd:
+                msgs = [self.fwd[0]]
+            else:
+                msgs = self.fwd
+            for msg in msgs:
+                if msg.attachments:
+                    for att in msg.attachments:
+                        if type(att) in _type:
+                            attachments.append(att)
+        return attachments
 
     def to_log(self) -> dict:
         """
