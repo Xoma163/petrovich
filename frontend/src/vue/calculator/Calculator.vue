@@ -64,7 +64,7 @@ export default {
   },
   data() {
     return {
-      session: undefined,
+      session: null,
       result: "",
     };
   },

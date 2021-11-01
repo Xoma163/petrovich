@@ -50,6 +50,25 @@
 
   .users {
     display: none;
+
+    &.fancybox {
+      .calculator-users {
+        .calculator-user {
+          display: flex;
+
+          .delete {
+            flex: 0 0 20px;
+            height: 20px;
+            margin: auto 0;
+            border-radius: 5px;
+          }
+
+          & > * {
+            margin: 0 5px;
+          }
+        }
+      }
+    }
   }
 
   @media only screen and (max-width: 768px) {
@@ -121,24 +140,6 @@
   }
 }
 
-.users.fancybox {
-  .calculator-users {
-    .calculator-user {
-      display: flex;
-
-      .delete {
-        flex: 0 0 20px;
-        height: 20px;
-        margin: auto 0;
-        border-radius: 5px;
-      }
-
-      & > * {
-        margin: 0 5px;
-      }
-    }
-  }
-}
 
 .result.fancybox {
   display: none;

@@ -6,11 +6,12 @@ import deliveryCalculator from "../vue/delivery-calculator/DeliveryCalculator";
 function renderVue(selector, component) {
   const $app = $(selector);
   if ($app.length) {
-    new Vue({
+    return new Vue({
       el: selector,
       render: (h) => h(component),
-    });
+    })
   }
+  return null
 }
 
 $(() => {
