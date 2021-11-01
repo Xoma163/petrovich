@@ -145,10 +145,7 @@ class Roulette(Command):
         if points_transfer <= 0:
             raise PWarning("Очков должно быть >0")
         username = " ".join(self.event.message.args[1:-1])
-        user = self.bot.get_user_by_name(username, self.event.chat)
-        user_gamer = self.bot.get_gamer_by_user(user)
-        if not user_gamer:
-            raise PWarning("Не нашёл такого игрока")
+        user_gamer = self.get_gamer_by_name(username)
 
         if self.gamer == user_gamer:
             raise PWarning("))")
@@ -170,10 +167,7 @@ class Roulette(Command):
         points_transfer = self.event.message.args[-1]
 
         username = " ".join(self.event.message.args[1:-1])
-        user = self.bot.get_user_by_name(username, self.event.chat)
-        user_gamer = self.bot.get_gamer_by_user(user)
-        if not user_gamer:
-            raise PWarning("Не нашёл такого игрока")
+        user_gamer = self.get_gamer_by_name(username)
 
         user_gamer.roulette_points += points_transfer
         user_gamer.save()
@@ -187,12 +181,7 @@ class Roulette(Command):
             return "ммм"
 
     def menu_rates(self):
-        if self.event.is_from_chat:
-            rrs = RouletteRate.objects.filter(chat=self.event.chat)
-        else:
-            rrs = RouletteRate.objects.filter(chat__isnull=True, gamer=self.gamer)
-        if len(rrs) == 0:
-            raise PWarning("Ставок нет")
+        rrs = self.get_active_rates()
 
         msg = ""
         for rr in rrs:
@@ -222,13 +211,10 @@ class Roulette(Command):
                 self.int_args = [1, 2]
                 self.check_args()
                 self.parse_int()
-                rowcol = self.event.message.args[1]
-                self.check_number_arg_range(rowcol, 1, 3)
+                row_col = self.event.message.args[1]
+                self.check_number_arg_range(row_col, 1, 3)
 
-                rate_obj = TRANSLATOR[rate_on][rowcol]
-
-            # elif rate_is_int:
-            #     rate_obj = {'win_numbers': [int(rate_on)], 'coefficient': MAX_NUMBERS}
+                rate_obj = TRANSLATOR[rate_on][row_col]
             else:
                 rate_obj = TRANSLATOR[rate_on]
             rr = RouletteRate(gamer=self.gamer, chat=self.event.chat, rate_on=rate_obj, rate=rate)
@@ -243,12 +229,7 @@ class Roulette(Command):
 
     def menu_play(self):
         with lock:
-            if self.event.is_from_chat:
-                rrs = RouletteRate.objects.filter(chat=self.event.chat)
-            else:
-                rrs = RouletteRate.objects.filter(chat__isnull=True, gamer=self.gamer)
-            if len(rrs) == 0:
-                raise PWarning("Ставок нет")
+            rrs = self.get_active_rates()
             msg1 = "Ставки сделаны. Ставок больше нет\n"
             roulette_ball = get_random_int(MAX_NUMBERS)
             msg2 = f"Крутим колесо. Выпало - {roulette_ball}\n\n"
@@ -270,3 +251,19 @@ class Roulette(Command):
             msg = msg1 + msg2 + msg3
             rrs.delete()
             return msg
+
+    def get_gamer_by_name(self, username):
+        user = self.bot.get_user_by_name(username, self.event.chat)
+        user_gamer = self.bot.get_gamer_by_user(user)
+        if not user_gamer:
+            raise PWarning("Не нашёл такого игрока")
+        return user_gamer
+
+    def get_active_rates(self):
+        if self.event.is_from_chat:
+            rrs = RouletteRate.objects.filter(chat=self.event.chat)
+        else:
+            rrs = RouletteRate.objects.filter(chat__isnull=True, gamer=self.gamer)
+        if len(rrs) == 0:
+            raise PWarning("Ставок нет")
+        return rrs

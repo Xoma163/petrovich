@@ -72,12 +72,7 @@ class Users(Platform):
     avatar = models.ImageField('Аватар', blank=True, upload_to="bot/users/avatar/")
 
     def set_avatar(self, url):
-        ext = url.split('.')[-1].split('?')[0]
-        image = NamedTemporaryFile()
-        content = requests.get(url).content
-        image.write(content)
-        image.flush()
-
+        ext, image = get_avatar_content(url)
         self.avatar.save(f"avatar_{str(self)}.{ext}", File(image))
         image.close()
 
@@ -139,12 +134,7 @@ class Bot(Platform):
             return f"Неопознанный бот #{self.id}"
 
     def set_avatar(self, url):
-        ext = url.split('.')[-1].split('?')[0]
-        image = NamedTemporaryFile()
-        content = requests.get(url).content
-        image.write(content)
-        image.flush()
-
+        ext, image = get_avatar_content(url)
         self.avatar.save(f"avatar_{str(self)}.{ext}", File(image))
         image.close()
 
@@ -152,3 +142,12 @@ class Bot(Platform):
 def random_digits():
     digits_count = 6
     return str(random.randint(10 ** (digits_count - 1), 10 ** digits_count - 1))
+
+
+def get_avatar_content(url):
+    ext = url.split('.')[-1].split('?')[0]
+    image = NamedTemporaryFile()
+    content = requests.get(url).content
+    image.write(content)
+    image.flush()
+    return ext, image

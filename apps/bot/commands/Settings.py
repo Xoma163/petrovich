@@ -50,34 +50,13 @@ class Settings(Command):
             raise PWarning("Не понял, включить или выключить?")
 
     def menu_reaction(self):
-        self.check_sender(Role.CONFERENCE_ADMIN)
-        self.check_args(2)
-        value = self.get_on_or_off(self.event.message.args[1].lower())
-
-        self.check_conversation()
-        self.event.chat.need_reaction = value
-        self.event.chat.save()
-        return "Сохранил настройку"
+        return self.setup_default_chat_setting('need_reaction')
 
     def menu_mentioning(self):
-        self.check_sender(Role.CONFERENCE_ADMIN)
-        self.check_args(2)
-        value = self.get_on_or_off(self.event.message.args[1].lower())
-
-        self.check_conversation()
-        self.event.chat.mentioning = value
-        self.event.chat.save()
-        return "Сохранил настройку"
+        return self.setup_default_chat_setting('mentioning')
 
     def menu_memes(self):
-        self.check_sender(Role.CONFERENCE_ADMIN)
-        self.check_args(2)
-
-        value = self.get_on_or_off(self.event.message.args[1].lower())
-        self.check_conversation()
-        self.event.chat.need_meme = value
-        self.event.chat.save()
-        return "Сохранил настройку"
+        return self.setup_default_chat_setting('need_meme')
 
     def menu_bd(self):
         self.check_args(2)
@@ -103,14 +82,12 @@ class Settings(Command):
             return "Отписал от рассылки о сервере майна"
 
     def menu_voice(self):
-        self.check_args(2)
-        value = self.get_on_or_off(self.event.message.args[1].lower())
-        self.event.chat.recognize_voice = value
-        self.event.chat.save()
-        return "Сохранил настройку"
+        return self.setup_default_chat_setting('recognize_voice')
 
     def menu_turret(self):
+        self.check_sender(Role.CONFERENCE_ADMIN)
         self.check_args(2)
+
         value = self.get_on_or_off(self.event.message.args[1].lower())
         self.event.chat.need_turret = value
         self.event.chat.save()
@@ -138,3 +115,13 @@ class Settings(Command):
         celebrate_bday = self.event.sender.celebrate_bday
         msg += f"Поздравлять с днём рождения - {TRUE_FALSE_TRANSLATOR[celebrate_bday]}"
         return msg
+
+    def setup_default_chat_setting(self, name):
+        self.check_conversation()
+        self.check_sender(Role.CONFERENCE_ADMIN)
+        self.check_args(2)
+
+        value = self.get_on_or_off(self.event.message.args[1].lower())
+        setattr(self.event.chat, name, value)
+        self.event.chat.save()
+        return "Сохранил настройку"
