@@ -41,7 +41,7 @@ class Memes(Command):
             if page > p.num_pages:
                 page = p.num_pages
 
-            msg_header = f"Страница {page}-{p.num_pages}"
+            msg_header = f"Страница {page}/{p.num_pages}"
 
             memes_on_page = p.page(page)
             meme_names = get_memes_names(memes_on_page, self.event.sender)
@@ -53,7 +53,7 @@ class Memes(Command):
                 on_last_page = p.per_page * page
             else:
                 on_last_page = p.count
-            msg_footer = f'----{p.per_page * (page - 1) + 1}/{on_last_page}----'
+            msg_footer = f'----{p.per_page * (page - 1) + 1}-{on_last_page}----'
             if self.event.platform == Platform.TG:
                 return {'text': f"{msg_header}\n{get_tg_formatted_text(msg_body)}\n{msg_footer}", 'parse_mode': 'markdown'}
             return f"{msg_header}\n\n{msg_body}\n\n{msg_footer}"
