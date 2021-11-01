@@ -1,6 +1,5 @@
 import io
 import os
-# Вероятность события в процентах
 import random
 import re
 from datetime import datetime

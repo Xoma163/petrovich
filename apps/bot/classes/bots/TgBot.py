@@ -13,7 +13,7 @@ from apps.bot.classes.messages.ResponseMessage import ResponseMessageItem, Respo
 from apps.bot.classes.messages.attachments.DocumentAttachment import DocumentAttachment
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
-from apps.bot.utils.utils import get_thumbnail_for_image, get_chunks
+from apps.bot.utils.utils import get_thumbnail_for_image
 from petrovich.settings import env
 
 API_TELEGRAM_URL = 'api.telegram.org'
@@ -162,29 +162,29 @@ class TgBot(CommonBot):
     # END USERS GROUPS BOTS
 
     # EXTRA
+
     @staticmethod
-    def get_inline_keyboard(buttons: list, cols=1):
+    def _get_keyboard_buttons(_buttons):
         """
-        param buttons: [(button_name, args), ...]
-        Получение инлайн-клавиатуры с одной кнопкой
+        Определение структуры кнопок
+        """
+        return [{
+            'text': button_item['button_text'],
+            'callback_data': json.dumps({
+                'command': button_item['command'],
+                "args": button_item.get('args'),
+            }, ensure_ascii=False)
+        } for button_item in _buttons]
+
+    def get_inline_keyboard(self, buttons: list, cols=1):
+        """
+        param buttons: ToDo:
+        Получение инлайн-клавиатуры с кнопками
         В основном используется для команд, где нужно запускать много команд и лень набирать заново
         """
-
-        def get_buttons(_buttons):
-            return [{
-                'text': button_item['button_text'],
-                'callback_data': json.dumps({
-                    'command': button_item['command'],
-                    "args": button_item.get('args'),
-                }, ensure_ascii=False)
-            } for button_item in _buttons]
-
-        for i, _ in enumerate(buttons):
-            if 'args' not in buttons[i] or buttons[i]['args'] is None:
-                buttons[i]['args'] = {}
-        buttons_chunks = get_chunks(buttons, cols)
+        keyboard = super().get_inline_keyboard(buttons)
         return {
-            'inline_keyboard': [get_buttons(chunk) for chunk in buttons_chunks]
+            'inline_keyboard': keyboard
         }
 
     def set_activity(self, peer_id, activity: ActivitiesEnum):

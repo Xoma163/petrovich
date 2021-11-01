@@ -14,7 +14,7 @@ from apps.bot.classes.messages.attachments.DocumentAttachment import DocumentAtt
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
 from apps.bot.models import Users, Chat, Bot as BotModel
-from apps.bot.utils.utils import tanimoto
+from apps.bot.utils.utils import tanimoto, get_chunks
 from apps.games.models import Gamer
 from petrovich.settings import env
 
@@ -330,12 +330,29 @@ class Bot(Thread):
 
     # END ATTACHMENTS
 
+    # EXTRA
     def set_activity(self, peer_id, activity: ActivitiesEnum):
         pass
 
     @staticmethod
-    def get_inline_keyboard(buttons: list, cols=1):
+    def _get_keyboard_buttons(buttons):
+        """
+        Определение структуры кнопок. Переопределяется в каждом боте
+        """
         pass
+
+    def get_inline_keyboard(self, buttons: list, cols=1):
+        """
+        param buttons: ToDo:
+        Получение инлайн-клавиатуры с кнопками
+        В основном используется для команд, где нужно запускать много команд и лень набирать заново
+        """
+        for i, _ in enumerate(buttons):
+            if 'args' not in buttons[i] or buttons[i]['args'] is None:
+                buttons[i]['args'] = {}
+        buttons_chunks = get_chunks(buttons, cols)
+        keyboard = [self._get_keyboard_buttons(chunk) for chunk in buttons_chunks]
+        return keyboard
 
     @staticmethod
     def get_mention(user, name=None):
@@ -343,6 +360,8 @@ class Bot(Thread):
 
     def delete_message(self, peer_id, message_id):
         pass
+
+    # END EXTRA
 
 
 def get_bot_by_platform(platform: Platform):
