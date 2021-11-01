@@ -89,7 +89,7 @@ def normalize_datetime(dt, tz):
     localized_time = tz_obj.localize(dt, is_dst=None)
 
     tz_utc = pytz.timezone("UTC")
-    return pytz.utc.normalize(localized_time, is_dst=None).astimezone(tz_utc)  # .replace(tzinfo=None)
+    return pytz.utc.normalize(localized_time, is_dst=None).astimezone(tz_utc)
 
 
 def decl_of_num(number, titles):
@@ -173,9 +173,6 @@ def draw_text_on_image(text):
     img = Image.new('RGB', (width + 20, height + 20), background_color)
     d = ImageDraw.Draw(img)
     d.text((10, 10), text, fill=text_color, font=font)
-
-    # img_byte_arr = io.BytesIO()
-    # img.save(img_byte_arr, format='PNG')
     return img
 
 
@@ -247,6 +244,9 @@ def transform_k(arg: str):
 
 
 def replace_similar_letters(text):
+    """
+    Замена английский похожих букв на русские
+    """
     similar_letters = {
         'c': 'с',
         'e': 'е',
