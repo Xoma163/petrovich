@@ -89,11 +89,7 @@ class Meme(Command):
             meme_name_list = self.event.message.args[1:]
             attachment = attachments[0]
 
-        try:
-            [int(x) for x in meme_name_list]
-            raise PWarning("Название мема не может состоять только из цифр")
-        except ValueError:
-            pass
+        self.check_meme_name_is_no_digits(meme_name_list)
         meme_name = " ".join(meme_name_list)
 
         if self.event.platform != Platform.VK and type(attachment) not in [PhotoAttachment, LinkAttachment]:
@@ -260,7 +256,10 @@ class Meme(Command):
         self.parse_int()
         meme = self.get_meme(_id=self.event.message.args[1])
 
-        new_name = " ".join(self.event.message.args[2:])
+        new_name_list = self.event.message.args[2:]
+        self.check_meme_name_is_no_digits(new_name_list)
+        new_name = " ".join(new_name_list)
+
         try:
             MemeModel.objects.get(name=new_name)
             raise PWarning("Мем с таким названием уже есть")
@@ -454,3 +453,11 @@ class Meme(Command):
         else:
             meme_filter['filter_list'] = id_name.split(' ')
         return meme_filter
+
+    @staticmethod
+    def check_meme_name_is_no_digits(meme_name_list):
+        try:
+            [int(x) for x in meme_name_list]
+            raise PWarning("Название мема не может состоять только из цифр")
+        except ValueError:
+            pass
