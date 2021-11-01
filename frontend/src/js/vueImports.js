@@ -9,9 +9,9 @@ function renderVue(selector, component) {
     return new Vue({
       el: selector,
       render: (h) => h(component),
-    })
+    });
   }
-  return null
+  return null;
 }
 
 $(() => {

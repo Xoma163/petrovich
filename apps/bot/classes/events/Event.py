@@ -1,4 +1,5 @@
 import copy
+from abc import abstractmethod
 from urllib.parse import urlparse
 
 from apps.bot.classes.consts.Consts import Platform, Role
