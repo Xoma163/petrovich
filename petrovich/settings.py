@@ -159,14 +159,14 @@ LOGGING = {
         }
     },
     'handlers': {
-        'file-debug': {
-            'level': 'DEBUG',
+        'file-warn': {
+            'level': 'WARNING',
             'class': 'logging.FileHandler',
             'filename': DEBUG_FILE,
             'formatter': 'commands',
         },
-        'file-warn': {
-            'level': 'WARNING',
+        'file-error': {
+            'level': 'ERROR',
             'class': 'logging.FileHandler',
             'filename': ERROR_FILE,
             'formatter': 'commands',
@@ -179,12 +179,12 @@ LOGGING = {
     },
     'loggers': {
         Platform.VK.value: {
-            'handlers': ['file-debug', 'file-warn', 'console-warn'],
+            'handlers': ['file-warn', 'file-error', 'console-warn'],
             'level': 'DEBUG',
             'propagate': True,
         },
         Platform.TG.value: {
-            'handlers': ['file-debug', 'file-warn', 'console-warn'],
+            'handlers': ['file-warn', 'file-error', 'console-warn'],
             'level': 'DEBUG',
             'propagate': True,
         },
