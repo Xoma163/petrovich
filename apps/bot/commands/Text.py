@@ -18,6 +18,6 @@ class Text(Command):
             lang = self.event.message.args[0]
 
         ocr_api = OCRApi()
-        image = self.event.get_all_attachments(self.event, [PhotoAttachment])[0]
+        image = self.event.get_all_attachments(PhotoAttachment)[0]
         content = image.download_content()
         return ocr_api.recognize(content, lang)

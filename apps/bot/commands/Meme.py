@@ -68,7 +68,7 @@ class Meme(Command):
     def _check_allowed_url(self, url):
         parsed_url = urlparse(url)
         if not parsed_url.hostname:
-            raise PWarning("Не нашёл вложений в сообщении или пересланном сообщении. Не нашёл ссылку на youtube видео")
+            raise PWarning("Не нашёл ссылку на youtube видео")
 
         if parsed_url.hostname.replace('www.', '').lower() not in self.ALLOWED_URLS:
             raise PWarning("Это ссылка не на youtube/coub видео")
@@ -77,7 +77,7 @@ class Meme(Command):
 
     def menu_add(self):
         self.check_args(2)
-        attachments = self.event.get_all_attachments(self.event, [PhotoAttachment])
+        attachments = self.event.get_all_attachments(PhotoAttachment)
         if len(attachments) == 0:
             url = self.event.message.args_str_case.split(' ')[1]
             self._check_allowed_url(url)
@@ -141,7 +141,7 @@ class Meme(Command):
             attachments = [attachment]
             id_name = self.get_id_or_meme_name(self.event.message.args[1:-1])
         except PWarning:
-            attachments = self.event.get_all_attachments(self.event, [VideoAttachment, PhotoAttachment])
+            attachments = self.event.get_all_attachments([VideoAttachment, PhotoAttachment])
             id_name = self.get_id_or_meme_name(self.event.message.args[1:])
 
         if len(attachments) == 0:
@@ -380,13 +380,13 @@ class Meme(Command):
                           f"id={meme.pk}"
             if send_keyboard:
                 msg['keyboard'] = self.bot.get_inline_keyboard(
-                    [{'command': self.name, 'button_text': "Ещё", 'args': ["р"]},
+                    [{'command': self.name, 'button_text': "Ещё"},
                      {'command': self.name, 'button_text': "Инфо", 'args': ["инфо", meme.pk]}])
         else:
             ############## ToDo: удалить когда не будет БУНДа
             if send_keyboard:
                 msg['keyboard'] = self.bot.get_inline_keyboard(
-                    [{'command': self.name, 'button_text': "Ещё", 'args': ["р"]}])
+                    [{'command': self.name, 'button_text': "Ещё"}])
         return msg
 
     @staticmethod

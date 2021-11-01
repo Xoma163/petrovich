@@ -105,7 +105,7 @@ class Profile(Command):
         return f"Изменил пол на {self.event.sender.get_gender_display()}"
 
     def menu_avatar(self):
-        images = self.event.get_all_attachments(self.event, [PhotoAttachment])
+        images = self.event.get_all_attachments(PhotoAttachment)
         if len(images) > 0:
             self.event.sender.set_avatar(images[0].get_download_url())
         else:

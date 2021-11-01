@@ -19,7 +19,7 @@ class Demotivator(Command):
     attachments = [PhotoAttachment]
 
     def start(self):
-        image = self.event.get_all_attachments(self.event, PhotoAttachment)[0]
+        image = self.event.get_all_attachments(PhotoAttachment)[0]
 
         text = self.event.message.raw.split(' ', 1)[1]
 

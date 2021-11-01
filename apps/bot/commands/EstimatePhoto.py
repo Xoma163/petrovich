@@ -13,7 +13,7 @@ class EstimatePhoto(Command):
     attachments = [PhotoAttachment]
 
     def start(self):
-        image = self.event.get_all_attachments(self.event, PhotoAttachment)[0]
+        image = self.event.get_all_attachments(PhotoAttachment)[0]
 
         everypixel_api = EveryPixelAPI()
         image_quality = everypixel_api.get_image_quality(image.get_download_url())

@@ -23,7 +23,7 @@ class VoiceRecognition(Command):
     priority = -100
 
     def start(self):
-        audio_messages = self.event.get_all_attachments(self.event, VoiceAttachment)
+        audio_messages = self.event.get_all_attachments(VoiceAttachment)
         audio_message = audio_messages[0]
 
         download_url = audio_message.get_download_url()

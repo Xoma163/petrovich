@@ -12,7 +12,7 @@ class Saved(Command):
     enabled = False
 
     def start(self):
-        attachments = self.event.get_all_attachments(self.event, [PhotoAttachment])
+        attachments = self.event.get_all_attachments(PhotoAttachment)
         if len(attachments) == 0:
             raise PWarning("Не нашёл в сообщении фотографий")
         attachments_url = [attachment.get_download_url() for attachment in attachments]
