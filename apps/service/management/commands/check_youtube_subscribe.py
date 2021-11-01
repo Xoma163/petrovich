@@ -36,8 +36,7 @@ class Command(BaseCommand):
                     msg = f"Новое видео на канале {yt_sub.title}\n" \
                           f"{youtube_data['last_video']['title']}\n" \
                           f"{youtube_data['last_video']['link']}"
-                res = {'text': msg}
-                bot.parse_and_send_msgs(res, peer_id)
+                bot.parse_and_send_msgs(msg, peer_id)
                 yt_sub.date = youtube_data['last_video']['date']
                 yt_sub.save()
             time.sleep(2)
