@@ -9,7 +9,22 @@ from apps.bot.classes.messages.attachments.VoiceAttachment import VoiceAttachmen
 
 class TgEvent(Event):
 
+    def __init__(self, raw_event=None, bot=None):
+        super().__init__(raw_event, bot)
+
+        self.inline_mode: bool = False
+        self.inline_data = {
+            'query_id': None,
+            'query': None,
+            'offset': None
+        }
+
     def setup_event(self, is_fwd=False):
+        inline_query = self.raw.get('inline_query')
+        if inline_query:
+            self.setup_inline_query(inline_query)
+            return
+
         if not is_fwd and self.raw.get('message', {}).get('forward_from'):
             self.force_not_need_a_response = True
 
@@ -111,3 +126,21 @@ class TgEvent(Event):
             fwd_event = TgEvent(fwd, self.bot)
             fwd_event.setup_event(is_fwd=True)
             self.fwd = [fwd_event]
+
+    def setup_inline_query(self, inline_query):
+        self.inline_mode = True
+
+        message = Message(inline_query['query'])
+
+        self.inline_data['query'] = inline_query['query']
+        self.inline_data['message'] = message
+        self.inline_data['id'] = inline_query['id']
+        self.inline_data['offset'] = inline_query['offset']
+
+    def need_a_response(self):
+        """
+        Проверка, нужен ли пользователю ответ
+        """
+        if self.inline_mode:
+            return True
+        return super().need_a_response()

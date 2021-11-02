@@ -7,12 +7,13 @@ import requests
 from apps.bot.classes.bots.Bot import Bot as CommonBot
 from apps.bot.classes.consts.ActivitiesEnum import ActivitiesEnum, TG_ACTIVITIES
 from apps.bot.classes.consts.Consts import Platform
-from apps.bot.classes.consts.Exceptions import PError, PWarning
+from apps.bot.classes.consts.Exceptions import PError, PWarning, PSkip
 from apps.bot.classes.events.TgEvent import TgEvent
 from apps.bot.classes.messages.ResponseMessage import ResponseMessageItem, ResponseMessage
 from apps.bot.classes.messages.attachments.DocumentAttachment import DocumentAttachment
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
+from apps.bot.commands.Meme import Meme
 from apps.bot.utils.utils import get_thumbnail_for_image
 from petrovich.settings import env
 
@@ -38,6 +39,27 @@ class TgBot(CommonBot):
         for raw_event in self.longpoll.listen():
             tg_event = TgEvent(raw_event, self)
             threading.Thread(target=self.handle_event, args=(tg_event,)).start()
+
+    def route(self, event: TgEvent) -> ResponseMessage:
+        if event.inline_mode:
+            self.route_inline_mode(event)
+            raise PSkip()
+
+        return super().route(event)
+
+    def route_inline_mode(self, event):
+        data = event.inline_data
+
+        filter_list = event.inline_data['message'].clear.split(' ')
+        meme_cmd = Meme(self, event)
+        inline_query_result = meme_cmd.get_tg_inline_memes(filter_list)
+        params = {
+            'inline_query_id': data['id'],
+            'results': json.dumps(inline_query_result, ensure_ascii=False),
+            # 'cache_time': 0
+        }
+        response = self.requests.get('answerInlineQuery', params)
+        # print(response.json())
 
     def _send_media_group(self, rm: ResponseMessageItem, default_params):
         """

@@ -1,5 +1,7 @@
 from typing import List
-from urllib.parse import urlparse
+from urllib.parse import urlparse, parse_qsl
+
+from django.db.models import Q
 
 from apps.bot.classes.Command import Command
 from apps.bot.classes.bots.Bot import upload_image_to_vk_server, send_message_to_moderator_chat, get_bot_by_platform
@@ -460,3 +462,65 @@ class Meme(Command):
             raise PWarning("Название мема не может состоять только из цифр")
         except ValueError:
             pass
+
+    @staticmethod
+    def _get_inline_qrs(memes):
+        _inline_qr = []
+        for meme in memes:
+            if meme.type == 'photo':
+                qr = {
+                    'id': meme.pk,
+                    'type': meme.type,
+                    'photo_url': meme.link,
+                    'thumb_url': meme.link
+                }
+            elif meme.type == 'link':
+                parsed_url = urlparse(meme.link)
+                video_id = parsed_url.path.strip('/')
+                if parsed_url.query:
+                    query_dict = dict(parse_qsl(parsed_url.query))
+                    v = query_dict.get('v', None)
+                    if v:
+                        video_id = v
+
+                qr = {
+                    'id': meme.pk,
+                    'type': "video",
+                    'video_url': meme.link,
+                    'mime_type': "text/html",
+                    'title': meme.name,
+                    'thumb_url': f"https://img.youtube.com/vi/{video_id}/default.jpg",
+                    'input_message_content': {
+                        'message_text': meme.link
+                    }
+                }
+            else:
+                raise RuntimeError()
+            _inline_qr.append(qr)
+
+        return _inline_qr
+
+    def get_tg_inline_memes(self, filter_list, max_count=10):
+        if filter_list:
+            filtered_memes = self.get_filtered_memes(filter_list)
+        else:
+            filtered_memes = MemeModel.objects.all().order_by('-uses')
+
+        q = Q(approved=True) & (Q(type='link', link__icontains="youtu") | Q(type='photo'))
+        memes = filtered_memes.filter(q)
+
+        all_memes_qr = []
+        try:
+            this_meme = self.get_one_meme(memes, filter_list)
+            this_meme_qr = self._get_inline_qrs([this_meme])
+            all_memes_qr += this_meme_qr
+            memes = memes.exclude(pk=this_meme.pk)
+        except PWarning:
+            pass
+
+        memes = memes[:max_count]
+        memes = self.get_tanimoto_memes(memes, filter_list)
+
+        all_memes_qr += self._get_inline_qrs([x for x in memes if x.type == 'link'])
+        all_memes_qr += self._get_inline_qrs([x for x in memes if x.type == 'photo'])
+        return all_memes_qr
