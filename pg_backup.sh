@@ -7,7 +7,7 @@ BACKUP_DIR=/mnt/NAS/NAS/backup/db
 DAYS_TO_KEEP=31
 FILE_SUFFIX=_pg_backup.sql
 
-FILE=$(date +"%d-%m-%Y_%H-%M")${FILE_SUFFIX}
+FILE=$(date +"%Y-%m-%d_%H-%M")${FILE_SUFFIX}
 OUTPUT_FILE=${BACKUP_DIR}/${FILE}
 
 # do the database backup (dump)
