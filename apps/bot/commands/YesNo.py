@@ -15,7 +15,7 @@ class YesNo(Command):
     priority = 80
 
     def accept(self, event):
-        if event.message and event.message.clear and event.message.clear[-1] == self.name:
+        if event.message and event.message.clear and event.message.clear[-1] == self.name and event.message.mentioned:
             return True
         return super().accept(event)
 

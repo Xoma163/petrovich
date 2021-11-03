@@ -8,9 +8,11 @@ class Turret(Command):
     priority = 85
 
     def accept(self, event):
-        if event.chat and event.chat.need_turret and random_probability(3):
-            msg = random_event(TURRET_WORDS)
-            event.bot.parse_and_send_msgs(msg, event.peer_id)
+        if event.chat and event.chat.need_turret:
+            chance = 0.02 if event.chat.mentioning else 2
+            if random_probability(chance):
+                msg = random_event(TURRET_WORDS)
+                event.bot.parse_and_send_msgs(msg, event.peer_id)
         return False
 
     def start(self):

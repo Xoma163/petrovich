@@ -59,7 +59,10 @@ class TgBot(CommonBot):
             # 'cache_time': 0
         }
         response = self.requests.get('answerInlineQuery', params)
-        # print(response.json())
+        if response.status_code != 200:
+            response_json = response.json()
+            error_msg = "Ошибка в inline_memes"
+            self.logger.error({'result': error_msg, 'error': response_json})
 
     def _send_media_group(self, rm: ResponseMessageItem, default_params):
         """

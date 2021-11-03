@@ -4,7 +4,7 @@ from apps.bot.classes.Command import Command
 
 class Joke(Command):
     name = "анекдот"
-    names = ["анек", "а", "a"]
+    names = ["анек"]
     name_tg = "joke"
 
     help_text = "присылает случайный анекдот"

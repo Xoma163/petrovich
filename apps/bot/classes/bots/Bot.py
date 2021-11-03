@@ -129,7 +129,8 @@ class Bot(Thread):
             raise PSkip()
 
         # Если указана настройка реагировать на команды без слеша, но команду мы не нашли, то скипаем
-        if event.chat and event.chat.mentioning:
+        # Но только в случае если нет явного упоминания нас, тогда точно даём ответ
+        if event.chat and event.chat.mentioning and event.message and not event.message.mentioned:
             raise PSkip()
 
         similar_command = self.get_similar_command(event, COMMANDS)
