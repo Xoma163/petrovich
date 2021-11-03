@@ -159,8 +159,8 @@ LOGGING = {
         }
     },
     'handlers': {
-        'file-warn': {
-            'level': 'WARNING',
+        'file-debug': {
+            'level': 'DEBUG',
             'class': 'logging.FileHandler',
             'filename': DEBUG_FILE,
             'formatter': 'commands',
@@ -171,20 +171,20 @@ LOGGING = {
             'filename': ERROR_FILE,
             'formatter': 'commands',
         },
-        'console-warn': {
-            'level': 'WARNING',
-            'class': 'logging.StreamHandler',
-            'formatter': 'commands-console',
-        },
+        # 'console-warn': {
+        #     'level': 'WARNING',
+        #     'class': 'logging.StreamHandler',
+        #     'formatter': 'commands-console',
+        # },
     },
     'loggers': {
         Platform.VK.value: {
-            'handlers': ['file-warn', 'file-error', 'console-warn'],
+            'handlers': ['file-debug', 'file-error'],
             'level': 'DEBUG',
             'propagate': True,
         },
         Platform.TG.value: {
-            'handlers': ['file-warn', 'file-error', 'console-warn'],
+            'handlers': ['file-debug', 'file-error'],
             'level': 'DEBUG',
             'propagate': True,
         },
