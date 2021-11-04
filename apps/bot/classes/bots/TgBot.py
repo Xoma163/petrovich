@@ -51,6 +51,7 @@ class TgBot(CommonBot):
         data = event.inline_data
 
         filter_list = event.inline_data['message'].clear.split(' ')
+        filter_list = filter_list if filter_list[0] else []
         meme_cmd = Meme(self, event)
         inline_query_result = meme_cmd.get_tg_inline_memes(filter_list)
         params = {

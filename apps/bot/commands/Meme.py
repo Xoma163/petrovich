@@ -478,7 +478,8 @@ class Meme(Command):
                 parsed_url = urlparse(meme.link)
                 video_id = parsed_url.path.strip('/')
                 if parsed_url.query:
-                    query_dict = dict(parse_qsl(parsed_url.query))
+                    # dict cast
+                    query_dict = {x[0]: x[1] for x in parse_qsl(parsed_url.query)}
                     v = query_dict.get('v', None)
                     if v:
                         video_id = v
