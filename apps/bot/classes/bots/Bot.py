@@ -182,7 +182,7 @@ class Bot(Thread):
         """
         if not _defaults:
             _defaults = {}
-        defaults = {'platform': self.platform.name}
+        defaults = {}
         defaults.update(_defaults)
 
         with self.lock:

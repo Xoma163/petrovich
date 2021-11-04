@@ -8,7 +8,7 @@ from apps.bot.models import Users, Chat, Bot as BotModel
 class YandexBot(CommonBot):
 
     def __init__(self):
-        CommonBot.__init__(self, Platform.TG)
+        CommonBot.__init__(self, Platform.YANDEX)
         self.user_model = Users.objects.filter(platform=self.platform.name)
         self.chat_model = Chat.objects.filter(platform=self.platform.name)
         self.bot_model = BotModel.objects.filter(platform=self.platform.name)
