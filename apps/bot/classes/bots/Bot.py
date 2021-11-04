@@ -372,12 +372,12 @@ def get_bot_by_platform(platform: Platform):
     """
     from apps.bot.classes.bots.VkBot import VkBot
     from apps.bot.classes.bots.TgBot import TgBot
-    # from apps.bot.classes.bots.YandexBot import YandexBot
+    from apps.bot.classes.bots.YandexBot import YandexBot
 
     platforms = {
         Platform.VK: VkBot,
         Platform.TG: TgBot,
-        # Platform.YANDEX: YandexBot
+        Platform.YANDEX: YandexBot
     }
     return platforms[platform]()
 

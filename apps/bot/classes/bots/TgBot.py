@@ -8,6 +8,7 @@ from apps.bot.classes.bots.Bot import Bot as CommonBot
 from apps.bot.classes.consts.ActivitiesEnum import ActivitiesEnum, TG_ACTIVITIES
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PError, PWarning, PSkip
+from apps.bot.classes.events.Event import Event
 from apps.bot.classes.events.TgEvent import TgEvent
 from apps.bot.classes.messages.ResponseMessage import ResponseMessageItem, ResponseMessage
 from apps.bot.classes.messages.attachments.DocumentAttachment import DocumentAttachment
@@ -40,8 +41,8 @@ class TgBot(CommonBot):
             tg_event = TgEvent(raw_event, self)
             threading.Thread(target=self.handle_event, args=(tg_event,)).start()
 
-    def route(self, event: TgEvent) -> ResponseMessage:
-        if event.inline_mode:
+    def route(self, event: Event) -> ResponseMessage:
+        if isinstance(event, TgEvent) and event.inline_mode:
             self.route_inline_mode(event)
             raise PSkip()
 
