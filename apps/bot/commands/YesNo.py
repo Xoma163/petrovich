@@ -15,8 +15,11 @@ class YesNo(Command):
     priority = 80
 
     def accept(self, event):
-        if event.message and event.message.clear and event.message.clear[-1] == self.name and event.message.mentioned:
-            return True
+        if event.message and event.message.clear and event.message.clear[-1] == self.name:
+            if event.is_from_chat and event.chat.mentioning:
+                return event.message.mentioned
+            else:
+                return True
         return super().accept(event)
 
     def start(self):
