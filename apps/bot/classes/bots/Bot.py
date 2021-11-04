@@ -24,7 +24,6 @@ class Bot(Thread):
         Thread.__init__(self)
 
         self.platform = platform
-        self.mentions = []
         self.user_model = Users.objects.filter(platform=self.platform.name)
         self.chat_model = Chat.objects.filter(platform=self.platform.name)
         self.bot_model = BotModel.objects.filter(platform=self.platform.name)
@@ -46,7 +45,7 @@ class Bot(Thread):
         """
         pass
 
-    def handle_event(self, event: Event, send=True):
+    def handle_event(self, event: Event, send=True) -> ResponseMessage:
         """
         Обработка входящего ивента
         """
@@ -57,6 +56,7 @@ class Bot(Thread):
             message = self.route(event)
             if send:
                 self.send_response_message(message)
+            return message
         except PSkip:
             pass
         except Exception as e:
@@ -82,13 +82,14 @@ class Bot(Thread):
         """
         Отправка ResponseMessage сообщения
         """
-        raise NotImplementedError
+        pass
+        # raise NotImplementedError
 
     def send_response_message_item(self, rm: ResponseMessageItem):
         """
         Отправка ResponseMessageItem сообщения
         """
-        raise NotImplementedError
+        pass
 
     def route(self, event: Event) -> ResponseMessage:
         """
