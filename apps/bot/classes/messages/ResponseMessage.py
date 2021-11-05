@@ -66,8 +66,7 @@ class ResponseMessageItem:
 
     def set_telegram_markdown(self):
         if self.text:
-            url_checker = "((http|https)\:\/\/)?[a-zA-Z0-9\.\/\?\:@\-_=#]+\.([a-zA-Z]){2,6}([a-zA-Z0-9\.\&\/\?\:@\-_=#])*"
-            p = re.compile(f"\[.*\] ?\({url_checker}\)")
+            p = re.compile(f"\[.*\] ?\((http|https|tg)\:\/\/.*\)")
             test_url = p.search(self.text)
 
             p = re.compile("```[\s\S]*```")
