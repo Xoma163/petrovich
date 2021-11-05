@@ -100,8 +100,20 @@ class Attachment:
         return self.get_size() / 1024 / 1024
 
     def to_log(self) -> dict:
+        """
+        Вывод в логи
+        """
         dict_self = copy.copy(self.__dict__)
         ignore_fields = ['private_download_url', 'content']
         for ignore_field in ignore_fields:
-            dict_self[ignore_field] = '*'*5
+            dict_self[ignore_field] = '*' * 5
+        return dict_self
+
+    def to_dict(self) -> dict:
+        """
+        Вывод в API
+        """
+        dict_self = copy.copy(self.__dict__)
+        if self.private_download_url:
+            dict_self['private_download_url'] = '*' * 5
         return dict_self

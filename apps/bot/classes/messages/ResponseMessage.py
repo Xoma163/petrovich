@@ -13,6 +13,17 @@ class ResponseMessage:
             self.messages = [ResponseMessageItem(msgs, peer_id)]
 
     def to_log(self) -> dict:
+        """
+        Вывод в логи
+        """
+        dict_self = copy(self.__dict__)
+        dict_self['messages'] = [x.to_log() for x in dict_self['messages']]
+        return dict_self
+
+    def to_dict(self) -> dict:
+        """
+        Вывод в API
+        """
         dict_self = copy(self.__dict__)
         dict_self['messages'] = [x.to_log() for x in dict_self['messages']]
         return dict_self
@@ -34,6 +45,17 @@ class ResponseMessageItem:
         self.kwargs = msg_copy
 
     def to_log(self) -> dict:
+        """
+        Вывод в логи
+        """
         dict_self = copy(self.__dict__)
         dict_self['attachments'] = [x.to_log() for x in dict_self['attachments']]
+        return dict_self
+
+    def to_dict(self) -> dict:
+        """
+        Вывод в API
+        """
+        dict_self = copy(self.__dict__)
+        dict_self['attachments'] = [x.to_dict() for x in dict_self['attachments']]
         return dict_self
