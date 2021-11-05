@@ -72,11 +72,17 @@ class Media(Command):
             text = ""
             if title:
                 text = f"{title}\n"
-            text += f"От пользователя {self.event.sender}\n" \
-                    f"{chosen_url}"
+            text += f"От пользователя {self.event.sender}"
+
+            if self.event.platform == Platform.TG:
+                text += f"\n[Сурс]({chosen_url})"
+            else:
+                text += f"\n{chosen_url}"
             # Костыль, чтобы видосы которые шарятся с мобилы с реддита не дублировали title
             if extra_text and extra_text != title:
                 text += f"\n{extra_text}"
+            if self.event.platform == Platform.TG:
+                return {'text': text, 'attachments': attachments, 'parse_mode': "markdown"}
             return {'text': text, 'attachments': attachments}
 
     def get_method_and_chosen_url(self, source):
