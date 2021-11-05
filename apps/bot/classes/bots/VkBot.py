@@ -13,7 +13,7 @@ from apps.bot.classes.events.VkEvent import VkEvent
 from apps.bot.classes.messages.ResponseMessage import ResponseMessageItem, ResponseMessage
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 from apps.bot.commands.Profile import add_city_to_db
-from apps.bot.models import Bot as BotModel, Users
+from apps.bot.models import Bot as BotModel, Profile, User
 from petrovich.settings import env, VK_URL
 
 
@@ -125,24 +125,21 @@ class VkBot(CommonBot):
 
     # USERS GROUPS BOTS
 
-    def get_user_by_id(self, user_id: int, _defaults: dict = None) -> Users:
+    def get_profile_by_user(self, user: User, is_new=False, _defaults: dict = None) -> Profile:
         """
         Возвращает пользователя по его id
         Регистрирует если пользователя нет в БД
         """
-        try:
-            user = self.user_model.get(user_id=user_id)
-        except Users.DoesNotExist:
-            vk_user = self.get_user_info(user_id)
-            user = Users()
-            user.user_id = user_id
-            user.name = vk_user['first_name']
-            user.surname = vk_user['last_name']
-            user.platform = self.platform.name
-            user.set_avatar(vk_user['photo_max'])
+        if not user.profile:
+            vk_user = self.get_user_info(int(user.user_id))
+            profile = Profile()
+            profile.name = vk_user['first_name']
+            profile.surname = vk_user['last_name']
+            profile.platform = self.platform.name
+            profile.set_avatar(vk_user['photo_max'])
 
             if 'sex' in vk_user:
-                user.gender = vk_user['sex']
+                profile.gender = vk_user['sex']
             if 'city' in vk_user:
                 from apps.service.models import City
                 city_name = vk_user['city']['title']
@@ -154,13 +151,17 @@ class VkBot(CommonBot):
                         city = add_city_to_db(city_name)
                     except Exception:
                         city = None
-                user.city = city
+                profile.city = city
             else:
-                user.city = None
+                profile.city = None
             if 'screen_name' in vk_user:
                 user.nickname = vk_user['screen_name']
-            user.save()
-        return user
+            with self.lock:
+                profile.save()
+                user.profile = profile
+                user.save()
+            return super().get_profile_by_user(user, is_new=True)
+        return super().get_profile_by_user(user)
 
     def get_user_info(self, user_id: int):
         """
@@ -168,13 +169,12 @@ class VkBot(CommonBot):
         """
         return self.vk.users.get(user_id=user_id, lang='ru', fields='sex, bdate, city, screen_name, photo_max')[0]
 
-    def update_user_avatar(self, user_id: int):
+    def update_profile_avatar(self, profile: Profile, user_id):
         """
         Обновление аватара пользователя
         """
-        user = self.get_user_by_id(user_id)
         user_info = self.get_user_info(user_id)
-        user.set_avatar(user_info['photo_max'])
+        profile.set_avatar(user_info['photo_max'])
 
     def get_bot_by_id(self, bot_id: int) -> BotModel:
         """
@@ -249,7 +249,7 @@ class VkBot(CommonBot):
         }
 
     @staticmethod
-    def get_mention(user: Users, name=None):
+    def get_mention(user: Profile, name=None):
         """
         Получение меншона пользователя
         """

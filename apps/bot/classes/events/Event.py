@@ -7,7 +7,7 @@ from apps.bot.classes.messages.attachments.DocumentAttachment import DocumentAtt
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
 from apps.bot.classes.messages.attachments.VoiceAttachment import VoiceAttachment
-from apps.bot.models import Users, Chat
+from apps.bot.models import Profile, Chat, User
 from apps.bot.utils.utils import get_urls_from_text
 
 
@@ -26,7 +26,9 @@ class Event:
         self.is_from_chat: bool = False
         self.is_from_pm: bool = False
 
-        self.sender: Users = None
+        self.user: User = None
+        self.sender: Profile = None
+
         self.chat: Chat = None
         self.peer_id: int = None  # Куда слать ответ
         self.from_id: int = None  # От кого пришло сообщение

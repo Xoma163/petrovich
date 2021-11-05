@@ -22,7 +22,7 @@ class Rate(Command):
 
     def start(self):
         with lock:
-            gamer = self.bot.get_gamer_by_user(self.event.sender)
+            gamer = self.bot.get_gamer_by_profile(self.event.sender)
 
             min_gamers = int(len(self.bot.user_model.filter(chats=self.event.chat)) / 2)
             if min_gamers < 2:

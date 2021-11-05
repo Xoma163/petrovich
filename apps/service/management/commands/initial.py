@@ -6,7 +6,6 @@ from django.core.management.base import BaseCommand
 from apps.bot.APIs.TimezoneDBAPI import TimezoneDBAPI
 from apps.bot.APIs.YandexGeoAPI import YandexGeoAPI
 from apps.bot.classes.consts.Consts import Role
-from apps.bot.models import Users
 from apps.service.models import City, TimeZone, Service
 
 
@@ -19,24 +18,6 @@ class Command(BaseCommand):
             if group['name'] == "админ конфы":
                 continue
             Group.objects.update_or_create(name=group['name'])
-
-    @staticmethod
-    def init_users():
-        anonymous_user = {
-            'user_id': 'ANONYMOUS',
-            'name': 'Аноним',
-            'surname': 'Анонимов'
-        }
-        anon_user, _ = Users.objects.update_or_create(user_id=anonymous_user['user_id'], defaults=anonymous_user)
-        group_user = Group.objects.get(name=Role.USER.name)
-        anon_user.groups.add(group_user)
-        anon_user.save()
-
-        # api_anonymous_user = {
-        #     'user': anon_user,
-        #     'chat': None
-        # }
-        # APIUser.objects.update_or_create(user__id=api_anonymous_user['user'].id, defaults=api_anonymous_user)
 
     @staticmethod
     def init_cities_offline():
@@ -429,9 +410,6 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.init_groups()
         print('done init groups')
-
-        self.init_users()
-        print('done init users')
 
         self.init_cities_offline()
         # self.init_cities_online()

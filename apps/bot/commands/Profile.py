@@ -111,13 +111,13 @@ class Profile(Command):
         else:
             if self.event.platform not in [Platform.VK, Platform.TG]:
                 raise PWarning("Обновление аватара по пользователю доступно только для ВК/ТГ")
-            self.bot.update_user_avatar(self.event.sender.user_id)
+            self.bot.update_profile_avatar(self.event.sender, self.event.user.user_id)
         return "Изменил аватарку"
 
     def menu_default(self):
         if self.event.message.args:
             self.check_conversation()
-            user = self.bot.get_user_by_name(self.event.message.args, filter_chat=self.event.chat)
+            user = self.bot.get_profile_by_name(self.event.message.args, filter_chat=self.event.chat)
             return self.get_user_profile(user)
         user = self.event.sender
         return self.get_user_profile(user)

@@ -5,7 +5,7 @@ from io import BytesIO
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Platform, Role
 from apps.bot.classes.consts.Exceptions import PWarning
-from apps.bot.models import Users
+from apps.bot.models import Profile
 from apps.bot.utils.QuotesGenerator import QuotesGenerator
 from apps.bot.utils.utils import get_urls_from_text
 from apps.service.models import Service
@@ -121,8 +121,6 @@ class Nostalgia(Command):
             author = data[index]['author'].split(' ')[0]
             buttons.append(
                 {'command': self.name, 'button_text': f"{author}: {data[index]['text']}", 'args': [index + 1]})
-        # if not last_item == len(searched_indexes):
-        #     buttons.append({'command': self.name, 'button_text': f"Далее (Страница {page + 1})", 'args': [search_query, page + 1]})
 
         keyboard = self.bot.get_inline_keyboard(buttons)
 
@@ -209,7 +207,7 @@ class Nostalgia(Command):
             message['text'] = message['text'].strip()
             if msg['author'] not in users_avatars:
                 name, surname = msg['author'].split(' ', 1)
-                vk_user = Users.objects.filter(name=name, surname=surname, platform=Platform.VK.name).first()
+                vk_user = Profile.objects.filter(name=name, surname=surname, platform=Platform.VK.name).first()
                 if vk_user:
                     users_avatars[msg['author']] = vk_user.avatar
             avatar = users_avatars.get(msg['author'], None)

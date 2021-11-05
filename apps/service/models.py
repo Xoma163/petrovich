@@ -2,7 +2,7 @@ from django.db import models
 from django.db.models import JSONField
 from django.utils.html import format_html
 
-from apps.bot.models import Chat, Users
+from apps.bot.models import Chat, Profile
 
 
 class TimeZone(models.Model):
@@ -70,7 +70,7 @@ class Meme(models.Model):
 
     name = models.CharField("Название", max_length=1000, default="")
     link = models.CharField("Ссылка", max_length=1000, default="", null=True, blank=True)
-    author = models.ForeignKey(Users, models.SET_NULL, verbose_name="Автор", null=True)
+    author = models.ForeignKey(Profile, models.SET_NULL, verbose_name="Автор", null=True)
     type = models.CharField("Тип", max_length=5, choices=types, blank=True)
     uses = models.PositiveIntegerField("Использований", default=0)
     approved = models.BooleanField("Разрешённый", default=False)
@@ -111,7 +111,7 @@ class Notify(models.Model):
     text = models.CharField("Текст/команда", max_length=1000, default="")
     text_for_filter = models.CharField("Текст для поиска", max_length=1000, default="")
     chat = models.ForeignKey(Chat, models.CASCADE, verbose_name='Чат', null=True, blank=True)
-    author = models.ForeignKey(Users, models.CASCADE, verbose_name="Автор", null=True)
+    author = models.ForeignKey(Profile, models.CASCADE, verbose_name="Автор", null=True)
     repeat = models.BooleanField("Повторять", default=False)
 
     class Meta:
@@ -140,7 +140,7 @@ class Donations(models.Model):
 
 
 class YoutubeSubscribe(models.Model):
-    author = models.ForeignKey(Users, models.CASCADE, verbose_name="Автор", null=True)
+    author = models.ForeignKey(Profile, models.CASCADE, verbose_name="Автор", null=True)
     chat = models.ForeignKey(Chat, models.CASCADE, verbose_name='Чат', null=True, blank=True)
 
     channel_id = models.CharField("ID канала", max_length=100)
@@ -168,7 +168,7 @@ class Horoscope(models.Model):
 
 
 class WakeOnLanUserData(models.Model):
-    user = models.ForeignKey(Users, models.CASCADE, verbose_name="Пользователь", null=True)
+    author = models.ForeignKey(Profile, models.CASCADE, verbose_name="Пользователь", null=True)
     name = models.CharField("Название", max_length=100)
     ip = models.CharField("IP", max_length=16)
     port = models.SmallIntegerField("Порт")
@@ -179,13 +179,13 @@ class WakeOnLanUserData(models.Model):
         verbose_name_plural = "WOL устройства"
 
     def __str__(self):
-        return f"{self.user}-{self.name} {self.ip}:{self.port}"
+        return f"{self.author}-{self.name} {self.ip}:{self.port}"
 
 
 class QuoteBook(models.Model):
     text = models.TextField("Текст", max_length=5000)
     date = models.DateTimeField("Дата", auto_now_add=True, blank=True)
-    user = models.ForeignKey(Users, models.CASCADE, verbose_name="Автор", null=True, blank=True)
+    profile = models.ForeignKey(Profile, models.CASCADE, verbose_name="Автор", null=True, blank=True)
     chat = models.ForeignKey(Chat, models.CASCADE, verbose_name="Чат", null=True, blank=True)
 
     class Meta:

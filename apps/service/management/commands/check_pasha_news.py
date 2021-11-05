@@ -4,7 +4,7 @@ from django.core.management.base import BaseCommand
 
 from apps.bot.classes.bots.Bot import get_bot_by_platform
 from apps.bot.classes.consts.Consts import Platform
-from apps.bot.models import Users
+from apps.bot.models import Profile, User
 from apps.service.models import Service
 
 
@@ -16,7 +16,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         chat_id = options['chat_id'][0]
-        pasha = Users.objects.get(user_id=chat_id)
+        pasha = User.objects.get(user_id=chat_id)
         bot = get_bot_by_platform(pasha.get_platform_enum())
 
         pasha_news_last_id_entity, created = Service.objects.get_or_create(

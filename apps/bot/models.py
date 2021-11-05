@@ -18,14 +18,13 @@ class Platform(models.Model):
 
     class Meta:
         abstract = True
-        ordering = ["chat_id"]
 
 
 class Chat(Platform):
     id = models.AutoField(primary_key=True)
     chat_id = models.CharField('ID чата', max_length=20, default="")
     name = models.CharField('Название', max_length=40, default="", blank=True)
-    admin = models.ForeignKey('Users', models.SET_NULL, verbose_name='Админ', blank=True, null=True)
+    admin = models.ForeignKey('Profile', models.SET_NULL, verbose_name='Админ', blank=True, null=True)
 
     need_reaction = models.BooleanField('Реагировать на неверные команды в конфе', default=True)
     # ToDo: not working
@@ -43,7 +42,8 @@ class Chat(Platform):
         return str(self.name)
 
 
-class Users(Platform):
+# ToDo: remove Platform model, remove user_id and id fields
+class Profile(Platform):
     GENDER_FEMALE = '1'
     GENDER_MALE = '2'
     GENDER_NONE = ''
@@ -84,27 +84,9 @@ class Users(Platform):
         groups = self.groups.all().values()
         return [group['name'] for group in groups]
 
-    def show_url(self):
-        if self.platform == PlatformEnum.VK.name:
-            return format_html(f"<a href='https://vk.com/id{self.user_id}'>{self.platform}</a>")
-        elif self.platform == PlatformEnum.TG.name:
-            return format_html(f"<a href='https://t.me/{self.nickname}'>{self.platform}</a>")
-        else:
-            return self.platform
-
-    show_url.short_description = "Ссылка"
-
-    def show_user_id(self):
-        if self.platform == PlatformEnum.VK.name or self.platform == PlatformEnum.TG.name:
-            return self.user_id
-        else:
-            return self.user_id[:8] + "..."
-
-    show_user_id.short_description = "user id"
-
     class Meta:
-        verbose_name = "Пользователь"
-        verbose_name_plural = "Пользователи"
+        verbose_name = "Профиль"
+        verbose_name_plural = "Профили"
         ordering = ["name", "surname"]
 
     def __str__(self):
@@ -114,6 +96,39 @@ class Users(Platform):
             return str(self.name)
         else:
             return "Незарегистрированный пользователь"
+
+
+class User(Platform):
+    user_id = models.CharField('ID пользователя', max_length=127)
+    profile = models.ForeignKey(Profile, verbose_name="Профиль", related_name='user', null=True,
+                                blank=True, on_delete=models.SET_NULL)
+    nickname = models.CharField("Никнейм", max_length=40, blank=True, null=True)
+
+    def show_url(self):
+        if self.get_platform_enum() == PlatformEnum.VK:
+            return format_html(f"<a href='https://vk.com/id{self.user_id}'>{self.platform}</a>")
+        elif self.get_platform_enum() == PlatformEnum.TG:
+            return format_html(f"<a href='https://t.me/{self.nickname}'>{self.platform}</a>")
+        else:
+            return self.platform
+
+    show_url.short_description = "Ссылка"
+
+    def show_user_id(self):
+        if self.get_platform_enum() == PlatformEnum.VK or self.get_platform_enum() == PlatformEnum.TG:
+            return self.user_id
+        else:
+            return self.user_id[:8] + "..."
+
+    show_user_id.short_description = "user id"
+
+    class Meta:
+        verbose_name = "Пользователь"
+        verbose_name_plural = "Пользователи"
+        ordering = ["platform", "user_id"]
+
+    def __str__(self):
+        return str(self.profile)
 
 
 class Bot(Platform):

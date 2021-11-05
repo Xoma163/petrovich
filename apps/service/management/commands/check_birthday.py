@@ -3,7 +3,7 @@ from datetime import datetime
 from django.core.management.base import BaseCommand
 
 from apps.bot.classes.bots.TgBot import TgBot
-from apps.bot.models import Chat, Users
+from apps.bot.models import Chat, Profile
 from apps.games.models import Gamer
 
 tg_bot = TgBot()
@@ -16,21 +16,21 @@ class Command(BaseCommand):
         for chat_pk in chat_pks:
             chat = Chat.objects.get(pk=chat_pk)
             today = datetime.now()
-            users = Users.objects.filter(
+            profiles = Profile.objects.filter(
                 chats=chat,
                 birthday__day=today.day,
                 birthday__month=today.month
             )
 
-            for user in users:
-                gamer = Gamer.objects.filter(user=user).first()
+            for profile in profiles:
+                gamer = Gamer.objects.filter(profile=profile).first()
                 if gamer:
                     gamer.roulette_points += 100000
                     gamer.save()
-                    if user.celebrate_bday:
+                    if profile.celebrate_bday:
                         tg_bot.parse_and_send_msgs(
                             [
-                                f"С Днём рождения, {tg_bot.get_mention(user)}!",
+                                f"С Днём рождения, {tg_bot.get_mention(profile)}!",
                                 "На ваш счет зачислено 100 000 бонусных очков."
                             ],
                             chat.chat_id

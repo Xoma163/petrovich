@@ -38,7 +38,8 @@ class VkEvent(Event):
 
         from_id = message['from_id']
         if from_id > 0:
-            self.sender = self.bot.get_user_by_id(from_id)
+            self.user = self.bot.get_user_by_id(from_id)
+            self.sender = self.bot.get_profile_by_user(self.user)
 
         if chat_id:
             self.chat = self.bot.get_chat_by_id(2000000000 + chat_id)
@@ -57,7 +58,7 @@ class VkEvent(Event):
             self.set_message(message['text'], message['id'])
 
         if self.sender and self.chat:
-            self.bot.add_chat_to_user(self.sender, self.chat)
+            self.bot.add_chat_to_profile(self.sender, self.chat)
 
     def setup_action(self, action):
         if not action:

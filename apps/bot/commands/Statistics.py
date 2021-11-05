@@ -41,14 +41,14 @@ class Statistics(Command):
         return msg
 
     def menu_rates(self):
-        gamers = Gamer.objects.filter(user__chats=self.event.chat).exclude(points=0).order_by('-points')
+        gamers = Gamer.objects.filter(profile__chats=self.event.chat).exclude(points=0).order_by('-points')
         msg = "Победители ставок:\n"
         for gamer in gamers:
             msg += f"{gamer} - {gamer.points}\n"
         return msg
 
     def menu_roulettes(self):
-        gamers = Gamer.objects.filter(user__chats=self.event.chat).exclude(roulette_points=0).order_by(
+        gamers = Gamer.objects.filter(profile__chats=self.event.chat).exclude(roulette_points=0).order_by(
             '-roulette_points')
         msg = "Очки рулетки:\n"
         for gamer in gamers:

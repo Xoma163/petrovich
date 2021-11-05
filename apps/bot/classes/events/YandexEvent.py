@@ -6,7 +6,9 @@ class YandexEvent(Event):
         user_id = self.raw['session']['user']['user_id']
         text = self.raw['request']['command']
 
-        self.sender = self.bot.get_user_by_id(user_id)
+        self.user = self.bot.get_user_by_id(user_id)
+        # ToDo
+        self.sender = None
         self.is_from_user = True
         self.is_from_pm = True
         self.set_message(text)

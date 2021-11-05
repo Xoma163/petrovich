@@ -58,13 +58,13 @@ class TgEvent(Event):
         if _from['is_bot']:
             self.is_from_bot = True
         else:
-            # self.sender = self.register_user(message['from'])
             defaults = {
                 'name': _from.get('first_name'),
                 'surname': _from.get('last_name'),
                 'nickname': _from.get('username'),
             }
-            self.sender = self.bot.get_user_by_id(_from['id'], defaults)
+            self.user = self.bot.get_user_by_id(_from['id'], {'nickname':_from.get('username')})
+            self.sender = self.bot.get_profile_by_user(self.user, _defaults=defaults)
             self.is_from_user = True
 
         self.setup_action(message)
@@ -77,7 +77,7 @@ class TgEvent(Event):
             self.setup_fwd(message.get('reply_to_message'))
 
         if self.sender and self.chat:
-            self.bot.add_chat_to_user(self.sender, self.chat)
+            self.bot.add_chat_to_profile(self.sender, self.chat)
 
     def setup_action(self, message):
         new_chat_members = message.get('new_chat_members')

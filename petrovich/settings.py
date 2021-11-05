@@ -171,11 +171,11 @@ LOGGING = {
             'filename': ERROR_FILE,
             'formatter': 'commands',
         },
-        # 'console-warn': {
-        #     'level': 'WARNING',
-        #     'class': 'logging.StreamHandler',
-        #     'formatter': 'commands-console',
-        # },
+        'console-warn': {
+            'level': 'WARNING',
+            'class': 'logging.StreamHandler',
+            'formatter': 'commands-console',
+        },
     },
     'loggers': {
         Platform.VK.value: {
@@ -190,6 +190,9 @@ LOGGING = {
         },
     },
 }
+if DEBUG:
+    LOGGING['loggers'][Platform.VK.value]['handlers'].append('console-warn')
+    LOGGING['loggers'][Platform.TG.value]['handlers'].append('console-warn')
 
 CORS_ORIGIN_ALLOW_ALL = True
 VK_URL = "https://vk.com/"

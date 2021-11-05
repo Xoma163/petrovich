@@ -25,8 +25,8 @@ class Actions(Command):
 
     def setup_new_chat_member(self, member_id, is_bot):
         if not is_bot:
-            user = self.bot.get_user_by_id(member_id)
-            self.bot.add_chat_to_user(user, self.event.chat)
+            profile = self.bot.get_profile_by_user_id(member_id)
+            self.bot.add_chat_to_profile(profile, self.event.chat)
         else:
             if self.event.platform == Platform.VK:
                 bot_group_id = env.int('VK_BOT_GROUP_ID')
@@ -49,8 +49,8 @@ class Actions(Command):
 
     def setup_left_chat_member(self, member_id, is_bot):
         if not is_bot:
-            user = self.bot.get_user_by_id(member_id)
-            self.bot.remove_chat_from_user(user, self.event.chat)
+            profile = self.bot.get_profile_by_user_id(member_id)
+            self.bot.remove_chat_from_profile(profile, self.event.chat)
 
     # По изменению чата конфы
     # elif self.event.action['type'] == 'chat_title_update':

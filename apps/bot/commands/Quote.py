@@ -40,7 +40,7 @@ class Quote(Command):
                 username = str(msg.sender)
                 avatar = msg.sender.avatar
                 if not avatar and self.event.platform in [Platform.VK, Platform.TG]:
-                    self.bot.update_user_avatar(msg.from_id)
+                    self.bot.update_profile_avatar(self.event.sender, msg.from_id)
             else:
                 quote_bot = self.bot.get_bot_by_id(msg.from_id)
                 username = str(quote_bot)

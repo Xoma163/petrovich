@@ -5,10 +5,10 @@ from apps.games.models import Rate, Gamer, PetrovichUser, PetrovichGames, Roulet
 
 @admin.register(Gamer)
 class GamerAdmin(admin.ModelAdmin):
-    search_fields = ('user',)
-    list_display = ('user', 'points', 'roulette_points')
+    search_fields = ('profile',)
+    list_display = ('profile', 'points', 'roulette_points')
     list_editable = ('points', 'roulette_points')
-    list_filter = ('user__platform',)
+    list_filter = ('profile__platform',)
 
 
 @admin.register(Rate)
@@ -19,14 +19,14 @@ class RateAdmin(admin.ModelAdmin):
 
 @admin.register(PetrovichUser)
 class PetrovichUserAdmin(admin.ModelAdmin):
-    list_display = ('user', 'chat', 'wins', 'active',)
-    list_filter = (('user', admin.RelatedOnlyFieldListFilter), ('chat', admin.RelatedOnlyFieldListFilter),)
+    list_display = ('profile', 'chat', 'wins', 'active',)
+    list_filter = (('profile', admin.RelatedOnlyFieldListFilter), ('chat', admin.RelatedOnlyFieldListFilter),)
 
 
 @admin.register(PetrovichGames)
 class PetrovichGamesAdmin(admin.ModelAdmin):
-    list_display = ('user', 'date', 'chat',)
-    list_filter = (('user', admin.RelatedOnlyFieldListFilter), ('chat', admin.RelatedOnlyFieldListFilter),)
+    list_display = ('profile', 'date', 'chat',)
+    list_filter = (('profile', admin.RelatedOnlyFieldListFilter), ('chat', admin.RelatedOnlyFieldListFilter),)
 
 
 @admin.register(RouletteRate)

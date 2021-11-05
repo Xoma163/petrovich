@@ -1,17 +1,15 @@
 from django.contrib import admin
 
-from apps.bot.models import Users, Chat, Bot
+from apps.bot.models import Profile, Chat, Bot, User
 
 
-@admin.register(Users)
-class UserAdmin(admin.ModelAdmin):
-    list_display = (
-        'show_user_id', 'show_url', 'name', 'surname', 'nickname', 'nickname_real', 'gender', 'birthday', 'city')
-    list_display_links = ('show_user_id',)
+@admin.register(Profile)
+class ProfileAdmin(admin.ModelAdmin):
+    list_display = ('name', 'surname', 'nickname_real', 'gender', 'birthday', 'city')
     fieldsets = (
         ('Информация о пользователе', {
             'fields': (
-                'user_id', 'name', 'surname', 'nickname', 'nickname_real', 'gender', 'birthday', 'city', 'avatar'),
+                'name', 'surname', 'nickname_real', 'gender', 'birthday', 'city', 'avatar'),
         }),
         ('Прочее', {
             'fields': ('groups', 'chats', 'platform'),
@@ -24,7 +22,12 @@ class UserAdmin(admin.ModelAdmin):
                    ('city', admin.RelatedOnlyFieldListFilter),
                    ('groups', admin.RelatedOnlyFieldListFilter),
                    'chats__name',)
-    search_fields = ['name', 'surname', 'nickname', 'nickname_real', 'user_id']
+    search_fields = ['name', 'surname', 'nickname_real']
+
+
+@admin.register(User)
+class UserAdmin(admin.ModelAdmin):
+    list_display = ('show_user_id', 'show_url', 'platform', 'profile', 'nickname')
 
 
 @admin.register(Chat)

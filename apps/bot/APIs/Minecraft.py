@@ -9,7 +9,7 @@ from mcrcon import MCRcon
 from apps.bot.classes.bots.Bot import get_bot_by_platform
 from apps.bot.classes.consts.Consts import Role
 from apps.bot.classes.consts.Exceptions import PWarning
-from apps.bot.models import Users
+from apps.bot.models import Profile
 from apps.bot.utils.DoTheLinuxComand import do_the_linux_command
 from apps.bot.utils.utils import remove_tz, check_command_time
 from apps.service.models import Service
@@ -191,7 +191,7 @@ class MinecraftAPI:
 
         def send_notify():
 
-            users_notify = Users.objects.filter(groups__name=Role.MINECRAFT_NOTIFY.name)
+            users_notify = Profile.objects.filter(groups__name=Role.MINECRAFT_NOTIFY.name)
             if self.event:
                 users_notify = users_notify.exclude(id=self.event.sender.id)
                 if self.event.chat:
@@ -213,7 +213,7 @@ class MinecraftAPI:
             # Создание событие. Уведомление, что мы скоро всё отрубим
             if created:
                 message = f"Если никто не зайдёт на сервак по майну {self.get_version()}, то через полчаса я его остановлю"
-                users_notify = Users.objects.filter(groups__name=Role.MINECRAFT_NOTIFY.name)
+                users_notify = Profile.objects.filter(groups__name=Role.MINECRAFT_NOTIFY.name)
                 for user in users_notify:
                     bot = get_bot_by_platform(user.get_platform_enum())
                     bot.parse_and_send_msgs_thread(message, user.user_id)
@@ -229,7 +229,7 @@ class MinecraftAPI:
                     self.stop(send_notify=False)
 
                     message = f"Вырубаю майн {self.get_version()}"
-                    users_notify = Users.objects.filter(groups__name=Role.MINECRAFT_NOTIFY.name)
+                    users_notify = Profile.objects.filter(groups__name=Role.MINECRAFT_NOTIFY.name)
                     for user in users_notify:
                         bot = get_bot_by_platform(user.get_platform_enum())
                         bot.parse_and_send_msgs_thread(message, user.user_id)

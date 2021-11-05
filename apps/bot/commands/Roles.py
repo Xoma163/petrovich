@@ -24,7 +24,7 @@ class Roles(Command):
         if self.event.message.args:
             self.check_conversation()
             try:
-                user = self.bot.get_user_by_name(self.event.message.args, self.event.chat)
+                user = self.bot.get_profile_by_name(self.event.message.args, self.event.chat)
             except PWarning as e:
                 return str(e)
         else:

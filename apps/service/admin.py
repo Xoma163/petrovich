@@ -52,8 +52,8 @@ class YoutubeSubscribeAdmin(admin.ModelAdmin):
 
 @admin.register(WakeOnLanUserData)
 class WakeOnLanUserDataAdmin(admin.ModelAdmin):
-    list_display = ('name', 'user', 'ip', 'port', 'mac',)
-    list_filter = (('user', admin.RelatedOnlyFieldListFilter),)
+    list_display = ('name', 'author', 'ip', 'port', 'mac',)
+    list_filter = (('profile', admin.RelatedOnlyFieldListFilter),)
 
 
 @admin.register(Horoscope)
@@ -64,8 +64,8 @@ class HoroscopeAdmin(admin.ModelAdmin):
 
 @admin.register(QuoteBook)
 class QuoteBookAdmin(admin.ModelAdmin):
-    list_display = ('chat', 'user', 'date', 'text')
-    list_filter = (('chat', admin.RelatedOnlyFieldListFilter), ('user', admin.RelatedOnlyFieldListFilter),)
+    list_display = ('chat', 'profile', 'date', 'text')
+    list_filter = (('chat', admin.RelatedOnlyFieldListFilter), ('profile', admin.RelatedOnlyFieldListFilter),)
 
 
 @admin.register(Words)

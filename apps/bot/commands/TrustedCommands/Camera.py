@@ -16,7 +16,6 @@ class Camera(Command):
 
     def start(self):
         frames = 100
-        attachments = []
         if self.event.message.args:
             frames = self.event.message.args[0]
             self.check_number_arg_range(frames, 0, camera_handler.MAX_FRAMES)

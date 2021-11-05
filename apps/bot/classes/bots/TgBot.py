@@ -15,6 +15,7 @@ from apps.bot.classes.messages.attachments.DocumentAttachment import DocumentAtt
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
 from apps.bot.commands.Meme import Meme
+from apps.bot.models import Profile
 from apps.bot.utils.utils import get_thumbnail_for_image
 from petrovich.settings import env
 
@@ -175,7 +176,7 @@ class TgBot(CommonBot):
     # END  MAIN ROUTING AND MESSAGING
 
     # USERS GROUPS BOTS
-    def update_user_avatar(self, user_id: int):
+    def update_profile_avatar(self, profile: Profile, user_id):
         response = self.requests.get('getUserProfilePhotos', {'user_id': user_id})
         photos = response.json()['result']['photos']
         if len(photos) == 0:
@@ -183,8 +184,7 @@ class TgBot(CommonBot):
         pa = PhotoAttachment()
         pa.parse_tg_photo(photos[0][-1], self)
 
-        user = self.get_user_by_id(user_id)
-        user.set_avatar(pa.private_download_url)
+        profile.set_avatar(pa.private_download_url)
 
     # END USERS GROUPS BOTS
 

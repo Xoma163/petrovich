@@ -13,7 +13,7 @@ from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseM
 from apps.bot.classes.messages.attachments.DocumentAttachment import DocumentAttachment
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
-from apps.bot.models import Users, Chat, Bot as BotModel
+from apps.bot.models import Profile, Chat, Bot as BotModel, User
 from apps.bot.utils.utils import tanimoto, get_chunks
 from apps.games.models import Gamer
 from petrovich.settings import env
@@ -24,7 +24,7 @@ class Bot(Thread):
         Thread.__init__(self)
 
         self.platform = platform
-        self.user_model = Users.objects.filter(platform=self.platform.name)
+        self.user_model = User.objects.filter(platform=self.platform.name)
         self.chat_model = Chat.objects.filter(platform=self.platform.name)
         self.bot_model = BotModel.objects.filter(platform=self.platform.name)
 
@@ -176,9 +176,9 @@ class Bot(Thread):
 
     # USERS GROUPS BOTS
 
-    def get_user_by_id(self, user_id: int, _defaults: dict = None) -> Users:
+    def get_user_by_id(self, user_id, _defaults: dict = None) -> User:
         """
-        Возвращает пользователя по его id
+        Получение пользователя по его id
         """
         if not _defaults:
             _defaults = {}
@@ -186,26 +186,53 @@ class Bot(Thread):
         defaults.update(_defaults)
 
         with self.lock:
-            user, created = self.user_model.get_or_create(
+            user, _ = self.user_model.get_or_create(
                 user_id=user_id,
                 platform=self.platform.name,
                 defaults=defaults
             )
-        if created or user.name is None:
-            with self.lock:
-                group_user = Group.objects.get(name=Role.USER.name)
-                user.groups.add(group_user)
-                user.save()
         return user
 
-    def update_user_avatar(self, user_id: int):
+    def get_profile_by_user_id(self, user_id):
+        user = self.get_user_by_id(user_id)
+        profile = self.get_profile_by_user(user)
+        return profile
+
+    def get_profile_by_user(self, user: User, is_new=False, _defaults: dict = None) -> Profile:
+        """
+        Возвращает профиль по пользователю
+        """
+        if not _defaults:
+            _defaults = {}
+        defaults = {}
+        defaults.update(_defaults)
+
+        if not user.profile:
+            with self.lock:
+                profile = Profile(**defaults)
+                profile.save()
+                user.profile = profile
+                user.save()
+                is_new = True
+
+        if is_new:
+            with self.lock:
+                user.profile.platform = self.platform.name
+                user.profile.save()
+
+                group_user = Group.objects.get(name=Role.USER.name)
+                user.profile.groups.add(group_user)
+        return user.profile
+
+    def update_profile_avatar(self, profile: Profile, user_id):
         """
         Обновление аватарки пользователя
         """
         pass
 
     # ToDo: очень говнокод
-    def get_user_by_name(self, args, filter_chat=None) -> Users:
+    @staticmethod
+    def get_profile_by_name(args, filter_chat=None) -> Profile:
         """
         Получение пользователя по имени/фамилии/имени и фамилии/никнейма/ид
         """
@@ -213,7 +240,7 @@ class Bot(Thread):
             raise PWarning("Отсутствуют аргументы")
         if isinstance(args, str):
             args = [args]
-        users = self.user_model
+        users = User.objects
         if filter_chat:
             users = users.filter(chats=filter_chat)
         if len(args) >= 2:
@@ -259,29 +286,29 @@ class Bot(Thread):
             )
         return bot
 
-    def get_gamer_by_user(self, user: Users) -> Gamer:
+    def get_gamer_by_profile(self, profile: Profile) -> Gamer:
         """
         Получение игрока по модели пользователя
         """
         with self.lock:
-            gamer, _ = Gamer.objects.get_or_create(user=user)
+            gamer, _ = Gamer.objects.get_or_create(profile=profile)
         return gamer
 
-    def add_chat_to_user(self, user: Users, chat: Chat):
+    def add_chat_to_profile(self, profile: Profile, chat: Chat):
         """
         Добавление чата пользователю
         """
         with self.lock:
-            chats = user.chats
+            chats = profile.chats
             if chat not in chats.all():
                 chats.add(chat)
 
-    def remove_chat_from_user(self, user: Users, chat: Chat):
+    def remove_chat_from_profile(self, profile: Profile, chat: Chat):
         """
         Удаление чата пользователю
         """
         with self.lock:
-            chats = user.chats
+            chats = profile.chats
             if chat in chats.all():
                 chats.remove(chat)
 

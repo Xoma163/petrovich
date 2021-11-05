@@ -85,7 +85,7 @@ class Roulette(Command):
     ]
 
     def start(self):
-        self.gamer = self.bot.get_gamer_by_user(self.event.sender)
+        self.gamer = self.bot.get_gamer_by_profile(self.event.sender)
         if not self.event.message.args:
             return self.menu_play()
         arg0 = self.event.message.args[0]
@@ -105,8 +105,8 @@ class Roulette(Command):
     def menu_balance(self):
         if len(self.event.message.args) > 1:
             username = " ".join(self.event.message.args[1:])
-            user = self.bot.get_user_by_name(username, self.event.chat)
-            user_gamer = Gamer.objects.filter(user=user).first()
+            user = self.bot.get_profile_by_name(username, self.event.chat)
+            user_gamer = Gamer.objects.filter(profile=user).first()
             if not user_gamer:
                 raise PWarning("Не нашёл такого игрока")
             return f"Баланс игрока {user} - {user_gamer.roulette_points}"
@@ -154,7 +154,7 @@ class Roulette(Command):
         self.gamer.save()
         user_gamer.roulette_points += points_transfer
         user_gamer.save()
-        return f"Передал игроку {user_gamer.user} {points_transfer} {decl_of_num(points_transfer, ['очко', 'очка', 'очков'])}"
+        return f"Передал игроку {user_gamer.profile} {points_transfer} {decl_of_num(points_transfer, ['очко', 'очка', 'очков'])}"
 
     def menu_give(self):
         self.check_sender(Role.ADMIN)
@@ -172,10 +172,10 @@ class Roulette(Command):
         user_gamer.roulette_points += points_transfer
         user_gamer.save()
         if points_transfer > 0:
-            return f"Начислил игроку {user_gamer.user} {points_transfer} " \
+            return f"Начислил игроку {user_gamer.profile} {points_transfer} " \
                    f"{decl_of_num(points_transfer, ['очко', 'очка', 'очков'])}"
         elif points_transfer < 0:
-            return f"Забрал у игрока {user_gamer.user} {-points_transfer} " \
+            return f"Забрал у игрока {user_gamer.profile} {-points_transfer} " \
                    f"{decl_of_num(-points_transfer, ['очко', 'очка', 'очков'])}"
         else:
             return "ммм"
@@ -253,8 +253,8 @@ class Roulette(Command):
             return msg
 
     def get_gamer_by_name(self, username):
-        user = self.bot.get_user_by_name(username, self.event.chat)
-        user_gamer = self.bot.get_gamer_by_user(user)
+        user = self.bot.get_profile_by_name(username, self.event.chat)
+        user_gamer = self.bot.get_gamer_by_profile(user)
         if not user_gamer:
             raise PWarning("Не нашёл такого игрока")
         return user_gamer
