@@ -14,7 +14,6 @@ class APIEvent(Event):
         self.set_message(text)
         attachments = self.raw.get('attachments', [])
         self.setup_attachments(attachments)
-        print
 
     def setup_attachments(self, attachments: list):
         for att_type in attachments:
