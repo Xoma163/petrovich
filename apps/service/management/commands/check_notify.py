@@ -43,12 +43,12 @@ class Command(BaseCommand):
 
     def get_flag_by_notify(self, notify):
 
-        if notify.author.check_role(Role.BANNED):
+        if notify.user.profile.check_role(Role.BANNED):
             return False
 
         if notify.repeat:
             if notify.crontab:
-                timezone = notify.author.city.timezone.name
+                timezone = notify.user.profile.city.timezone.name
                 localized_datetime = localize_datetime(remove_tz(self.dt_now), timezone)
 
                 entry = CronTab(notify.crontab)
@@ -66,13 +66,13 @@ class Command(BaseCommand):
     @staticmethod
     def send_notify_message(bot, notify):
         if notify.date:
-            notify_datetime = localize_datetime(remove_tz(notify.date), notify.author.city.timezone.name)
+            notify_datetime = localize_datetime(remove_tz(notify.date), notify.user.profile.city.timezone.name)
             message = f"Напоминалка на {notify_datetime.strftime('%H:%M')}\n" \
-                      f"{bot.get_mention(notify.author)}:\n" \
+                      f"{bot.get_mention(notify.user.profile)}:\n" \
                       f"{notify.text}"
         else:
             message = f"Напоминалка по {notify.crontab}\n" \
-                      f"{bot.get_mention(notify.author)}:\n" \
+                      f"{bot.get_mention(notify.user.profile)}:\n" \
                       f"{notify.text}"
         result_msg = {'text': message}
         if notify.chat:
@@ -91,7 +91,7 @@ class Command(BaseCommand):
         if notify.text.startswith('/'):
             event = Event(bot=bot)
             event.set_message(notify.text)
-            event.sender = notify.author
+            event.sender = notify.user.profile
             event.is_from_user = True
             if notify.chat:
                 event.peer_id = notify.chat.chat_id
@@ -108,6 +108,6 @@ class Command(BaseCommand):
             # Для постоянных уведомлений дата должа быть на завтрашний день обязательно.
             # Это важно для сортировки
             new_datetime = datetime.combine(self.dt_now.date(), notify.date.time()) + timedelta(days=1)
-            new_datetime = localize_datetime(remove_tz(new_datetime), notify.author.city.timezone.name)
+            new_datetime = localize_datetime(remove_tz(new_datetime), notify.user.profile.city.timezone.name)
             notify.date = new_datetime
             notify.save()

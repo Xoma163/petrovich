@@ -24,9 +24,9 @@ class MemeAdmin(admin.ModelAdmin):
 
 @admin.register(Notify)
 class NotifyAdmin(admin.ModelAdmin):
-    list_display = ('id', 'date', 'crontab', 'text', 'author', 'chat', 'repeat')
+    list_display = ('id', 'date', 'crontab', 'text', 'user', 'chat', 'repeat')
     search_fields = ['date', 'crontab', 'text', 'text_for_filter']
-    list_filter = (('author', admin.RelatedOnlyFieldListFilter), ('chat', admin.RelatedOnlyFieldListFilter), 'repeat',)
+    list_filter = (('user', admin.RelatedOnlyFieldListFilter), ('chat', admin.RelatedOnlyFieldListFilter), 'repeat',)
 
 
 @admin.register(City)

@@ -112,13 +112,12 @@ class Notify(models.Model):
     text_for_filter = models.CharField("Текст для поиска", max_length=1000, default="")
     chat = models.ForeignKey(Chat, models.CASCADE, verbose_name='Чат', null=True, blank=True)
     user = models.ForeignKey(User, models.CASCADE, verbose_name="Пользователь", null=True, blank=True)
-    author = models.ForeignKey(Profile, models.CASCADE, verbose_name="Автор", null=True)
     repeat = models.BooleanField("Повторять", default=False)
 
     class Meta:
         verbose_name = "напоминание"
         verbose_name_plural = "напоминания"
-        ordering = ["date"]
+        ordering = ["user"]
 
     def __str__(self):
         return str(self.text)
