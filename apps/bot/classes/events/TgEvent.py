@@ -64,6 +64,7 @@ class TgEvent(Event):
                 'nickname': _from.get('username'),
             }
             self.user = self.bot.get_user_by_id(_from['id'], {'nickname':_from.get('username')})
+            defaults.pop('nickname')
             self.sender = self.bot.get_profile_by_user(self.user, _defaults=defaults)
             self.is_from_user = True
 
