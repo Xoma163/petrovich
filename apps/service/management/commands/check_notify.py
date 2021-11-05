@@ -5,7 +5,7 @@ from crontab import CronTab
 from django.core.management.base import BaseCommand
 
 from apps.bot.classes.bots.Bot import get_bot_by_platform
-from apps.bot.classes.consts.Consts import Role, Platform
+from apps.bot.classes.consts.Consts import Role
 from apps.bot.classes.events.Event import Event
 from apps.bot.utils.utils import remove_tz, localize_datetime
 from apps.service.models import Notify
