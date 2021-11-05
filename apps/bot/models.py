@@ -130,7 +130,7 @@ class User(Platform):
         ordering = ["platform", "user_id"]
 
     def __str__(self):
-        return str(self.profile)
+        return f"{self.profile} ({self.get_platform_enum()})"
 
 
 class Bot(Platform):
