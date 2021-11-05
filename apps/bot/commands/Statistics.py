@@ -1,6 +1,7 @@
 from django.db.models import Count
 
 from apps.bot.classes.Command import Command
+from apps.bot.models import User, Profile
 from apps.games.models import Gamer
 from apps.games.models import PetrovichUser
 from apps.service.models import Meme
@@ -33,7 +34,7 @@ class Statistics(Command):
     def menu_petrovich(self):
         players = PetrovichUser.objects \
             .filter(chat=self.event.chat) \
-            .filter(user__chats=self.event.chat) \
+            .filter(profile__chats=self.event.chat) \
             .order_by('-wins')
         msg = "Наши любимые Петровичи:\n"
         for player in players:
@@ -56,13 +57,13 @@ class Statistics(Command):
         return msg
 
     def menu_memes(self):
-        users = self.bot.user_model.filter(chats=self.event.chat)
+        profiles = Profile.objects.filter(chats=self.event.chat)
 
         result_list = list(
-            Meme.objects.filter(author__in=users).values('author').annotate(total=Count('author')).order_by('-total'))
+            Meme.objects.filter(author__in=profiles).values('author').annotate(total=Count('author')).order_by('-total'))
         msg = "Созданных мемов:\n"
         for result in result_list:
-            msg += f"{users.get(id=result['author'])} - {result['total']}\n"
+            msg += f"{profiles.get(id=result['author'])} - {result['total']}\n"
         return msg
 
     def menu_all(self):
