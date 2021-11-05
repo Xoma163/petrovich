@@ -81,8 +81,6 @@ class Media(Command):
             # Костыль, чтобы видосы которые шарятся с мобилы с реддита не дублировали title
             if extra_text and extra_text != title:
                 text += f"\n{extra_text}"
-            if self.event.platform == Platform.TG:
-                return {'text': text, 'attachments': attachments, 'parse_mode': "markdown"}
             return {'text': text, 'attachments': attachments}
 
     def get_method_and_chosen_url(self, source):

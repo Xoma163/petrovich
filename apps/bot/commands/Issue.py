@@ -1,6 +1,7 @@
 from apps.bot.APIs.GithubAPI import GithubAPI
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Platform
+from apps.bot.utils.utils import get_tg_formatted_url
 
 
 class Issue(Command):
@@ -22,10 +23,9 @@ class Issue(Command):
 
         response = github_api.create_issue(title, body)
         if self.event.platform == Platform.TG:
-            return {
-                'text': f"Сохранено\nОтслеживать созданное ишю можно по [этой]({response['html_url']}) ссылке:\n",
-                'parse_mode': 'markdown'
-            }
-        return f"Сохранено\n" \
-               f"Отслеживать созданное ишю можно по этой ссылке:\n" \
-               f"{response['html_url']}"
+            text = f"Сохранено\nОтслеживать созданное ишю можно по {get_tg_formatted_url('ишю', response['html_url'])} ссылке:\n",
+        else:
+            text = f"Сохранено\n" \
+                   f"Отслеживать созданное ишю можно по этой ссылке:\n" \
+                   f"{response['html_url']}"
+        return text

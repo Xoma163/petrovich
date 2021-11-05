@@ -306,7 +306,7 @@ class Meme(Command):
         prepared_meme = self.prepare_meme_to_send(meme)
         if warning_message:
             if self.event.platform == Platform.TG:
-                return [prepared_meme, {'text': get_tg_formatted_text(warning_message), 'parse_mode': 'markdown'}]
+                return [prepared_meme, get_tg_formatted_text(warning_message)]
             return [prepared_meme, warning_message]
         return prepared_meme
 

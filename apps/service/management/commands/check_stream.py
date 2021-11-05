@@ -4,6 +4,7 @@ from apps.bot.APIs.YoutubeLiveCheckerAPI import YoutubeLiveCheckerAPI
 from apps.bot.classes.bots.Bot import get_bot_by_platform
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.models import Chat
+from apps.bot.utils.utils import get_tg_formatted_url
 from apps.service.models import Service
 
 
@@ -29,8 +30,9 @@ class Command(BaseCommand):
         for chat_pk in chat_pks:
             chat = Chat.objects.get(pk=chat_pk)
             bot = get_bot_by_platform(chat.get_platform_enum())
+            url = stream.value
             if bot.platform == Platform.TG:
-                msg = {'text': f"Ктап подрубил [Стрим]({stream.value})", 'parse_mode': 'markdown'}
+                text = get_tg_formatted_url("стрим", url)
             else:
-                msg = f"Ктап подрубил стрим\n{stream.value}"
-            bot.parse_and_send_msgs(msg, chat.chat_id)
+                text = f"Ктап подрубил стрим\n{url}"
+            bot.parse_and_send_msgs(text, chat.chat_id)

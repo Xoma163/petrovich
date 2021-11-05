@@ -75,9 +75,6 @@ class Command(BaseCommand):
                       f"{bot.get_mention(notify.user.profile)}:\n" \
                       f"{notify.text}"
         result_msg = {'text': message}
-        platform = notify.user.get_platform_enum()
-        if platform == Platform.TG:
-            result_msg['parse_mode'] = "markdown"
 
         if notify.chat:
             bot.parse_and_send_msgs_thread(result_msg, notify.chat.chat_id)

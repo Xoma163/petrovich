@@ -295,8 +295,12 @@ def get_flat_list(_list: List[List]):
     return [item for sublist in _list for item in sublist]
 
 
-def get_tg_formatted_text(text) -> object:
+def get_tg_formatted_text(text) -> str:
     """
     Форматированный текст в телеграмме (markdown)
     """
     return f"```\n{text}\n```"
+
+
+def get_tg_formatted_url(name, url) -> str:
+    return f"[{name}]({url})"

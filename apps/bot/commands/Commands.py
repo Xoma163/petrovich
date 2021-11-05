@@ -51,8 +51,6 @@ class Commands(Command):
             else:
                 output += help_texts['games']
         output = output.rstrip()
-        if self.event.platform == Platform.TG:
-            return {'text': output, "parse_mode": "markdown"}
         return output
 
     def get_str_for_role(self, help_texts, role):

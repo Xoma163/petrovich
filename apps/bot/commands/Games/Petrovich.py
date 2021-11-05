@@ -104,9 +104,7 @@ class Petrovich(Command):
             else:
                 winner_gender = "Наш сегодняшний Петрович дня"
 
-            msg1 = "Такс такс такс, кто тут у нас"
-            msg2 = f"{winner_gender} - {self.bot.get_mention(winner_petrovich.user, str(winner_petrovich.user))}"
-            if self.event.platform == Platform.TG:
-                return [msg1, {'text': msg2, 'parse_mode': "markdown"}]
-            messages = [msg1, msg2]
-            return messages
+            return [
+                "Такс такс такс, кто тут у нас",
+                f"{winner_gender} - {self.bot.get_mention(winner_petrovich.user, str(winner_petrovich.user))}"
+            ]

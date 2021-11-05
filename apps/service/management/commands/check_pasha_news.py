@@ -38,9 +38,10 @@ class Command(BaseCommand):
         for news in news_to_send:
             news_content, news_url = self.parse_news(f"{self.URL}{news.attrs['href']}")
             if pasha.get_platform_enum() == Platform.TG:
-                return {'text': f"{news_content}\n\n[Полная статья]({news_url})", 'parse_mode': 'markdown'}
+                text = f"{news_content}\n\n[Полная статья]({news_url})"
             else:
-                return f"{news_content}\n\n{news_url}"
+                text = f"{news_content}\n\n{news_url}"
+            return text
 
         last_news_id = self.get_news_id(news_to_send[0])
         pasha_news_last_id_entity.value = last_news_id

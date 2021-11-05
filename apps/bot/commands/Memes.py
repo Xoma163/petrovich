@@ -55,8 +55,10 @@ class Memes(Command):
                 on_last_page = p.count
             msg_footer = f'----{p.per_page * (page - 1) + 1}-{on_last_page}----'
             if self.event.platform == Platform.TG:
-                return {'text': f"{msg_header}\n{get_tg_formatted_text(msg_body)}\n{msg_footer}", 'parse_mode': 'markdown'}
-            return f"{msg_header}\n\n{msg_body}\n\n{msg_footer}"
+                text = f"{msg_header}\n{get_tg_formatted_text(msg_body)}\n{msg_footer}"
+            else:
+                text = f"{msg_header}\n\n{msg_body}\n\n{msg_footer}"
+            return text
         except PWarning:
             memes = MemeModel.objects.filter(approved=True)
             for arg in self.event.message.args:
@@ -75,5 +77,7 @@ class Memes(Command):
             elif len(memes) > 0:
                 meme_names_str += '.'
             if self.event.platform == Platform.TG:
-                return {'text': f"{get_tg_formatted_text(meme_names_str)}\nВсего - {len(memes)}", 'parse_mode': 'markdown'}
-            return f"{meme_names_str}\n\nВсего - {len(memes)}"
+                text = f"{get_tg_formatted_text(meme_names_str)}\nВсего - {len(memes)}"
+            else:
+                text = f"{meme_names_str}\n\nВсего - {len(memes)}"
+            return text

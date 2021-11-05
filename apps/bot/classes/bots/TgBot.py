@@ -141,20 +141,21 @@ class TgBot(CommonBot):
         """
         Отправка ResponseMessage сообщения
         """
-        for msg in rm.messages:
+        for rmi in rm.messages:
             try:
-                response = self.send_response_message_item(msg)
+                rmi.set_telegram_markdown()
+                response = self.send_response_message_item(rmi)
                 # Непредвиденная ошибка
                 if response.status_code != 200:
                     error_msg = "Непредвиденная ошибка. Сообщите разработчику. Команда /баг"
-                    error_rm = ResponseMessage(error_msg, msg.peer_id).messages[0]
+                    error_rm = ResponseMessage(error_msg, rmi.peer_id).messages[0]
                     self.logger.error({'result': error_msg, 'error': response.json()['description']})
                     self.send_response_message_item(error_rm)
             # Предвиденная ошибка
             except (PWarning, PError) as e:
-                msg.text += f"\n\n{str(e)}"
-                getattr(self.logger, e.level)({'result': msg})
-                self.send_response_message_item(msg)
+                rmi.text += f"\n\n{str(e)}"
+                getattr(self.logger, e.level)({'result': rmi})
+                self.send_response_message_item(rmi)
 
     def send_response_message_item(self, rm: ResponseMessageItem):
         """

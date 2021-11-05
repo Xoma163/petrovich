@@ -1,3 +1,4 @@
+import re
 from copy import copy
 
 
@@ -62,3 +63,14 @@ class ResponseMessageItem:
         del dict_self['peer_id']
 
         return dict_self
+
+    def set_telegram_markdown(self):
+        if self.text:
+            url_checker = "((http|https)\:\/\/)?[a-zA-Z0-9\.\/\?\:@\-_=#]+\.([a-zA-Z]){2,6}([a-zA-Z0-9\.\&\/\?\:@\-_=#])*"
+            p = re.compile(f"\[.*\] ?\({url_checker}\)")
+            test_url = p.search(self.text)
+
+            p = re.compile("```[\s\S]*```")
+            test_formatting = p.search(self.text)
+            if test_url or test_formatting:
+                self.kwargs = {'parse_mode': "markdown"}

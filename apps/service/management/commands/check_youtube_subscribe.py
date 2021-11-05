@@ -5,6 +5,7 @@ from django.core.management import BaseCommand
 from apps.bot.APIs.YoutubeInfo import YoutubeInfo
 from apps.bot.classes.bots.Bot import get_bot_by_platform
 from apps.bot.classes.consts.Consts import Platform
+from apps.bot.utils.utils import get_tg_formatted_url
 from apps.service.models import YoutubeSubscribe
 
 
@@ -27,16 +28,15 @@ class Command(BaseCommand):
                     peer_id = yt_sub.author.user_id
 
                 if bot.platform == Platform.TG:
-                    msg = {
-                        'text': f"Новое видео на канале {yt_sub.title}\n"
-                                f"[{youtube_data['last_video']['title']}]({youtube_data['last_video']['link']})",
-                        'parse_mode': 'markdown'
-                    }
+
+                    text = f"Новое видео на канале {yt_sub.title}\n" \
+                           f"{get_tg_formatted_url(youtube_data['last_video']['title'], youtube_data['last_video']['link'])}"
                 else:
-                    msg = f"Новое видео на канале {yt_sub.title}\n" \
-                          f"{youtube_data['last_video']['title']}\n" \
-                          f"{youtube_data['last_video']['link']}"
-                bot.parse_and_send_msgs(msg, peer_id)
+                    text = f"Новое видео на канале {yt_sub.title}\n" \
+                           f"{youtube_data['last_video']['title']}\n" \
+                           f"{youtube_data['last_video']['link']}"
+
+                bot.parse_and_send_msgs(text, peer_id)
                 yt_sub.date = youtube_data['last_video']['date']
                 yt_sub.save()
             time.sleep(2)

@@ -2,6 +2,7 @@ from urllib.parse import quote
 
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Platform
+from apps.bot.utils.utils import get_tg_formatted_url
 
 
 class Google(Command):
@@ -13,5 +14,5 @@ class Google(Command):
     def start(self):
         url = f"https://www.google.com/search?q={quote(self.event.message.args_str_case)}"
         if self.event.platform == Platform.TG:
-            return {'text': f"[Окей Гугл, {self.event.message.args_str_case}]({url})", 'parse_mode': 'markdown'}
+            url = get_tg_formatted_url(f"Окей Гугл {self.event.message.args_str_case}", url)
         return url

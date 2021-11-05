@@ -1,5 +1,6 @@
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Platform
+from apps.bot.utils.utils import get_tg_formatted_url
 
 
 class Git(Command):
@@ -13,5 +14,5 @@ class Git(Command):
         url = 'https://github.com/Xoma163/petrovich/'
 
         if self.event.platform == Platform.TG:
-            return {'text': f"[Гитхаб]({url})", 'parse_mode': 'markdown'}
+            url = get_tg_formatted_url("Гитхаб", url)
         return url
