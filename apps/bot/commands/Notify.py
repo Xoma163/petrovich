@@ -54,7 +54,7 @@ class Notify(Command):
 
     def start(self):
         if not self.event.sender.check_role(Role.TRUSTED) and \
-                len(NotifyModel.objects.filter(author=self.event.sender)) >= 5:
+                len(NotifyModel.objects.filter(user=self.event.user)) >= 5:
             raise PWarning("Нельзя добавлять более 5 напоминаний")
         timezone = self.event.sender.city.timezone.name
 
@@ -88,7 +88,7 @@ class Notify(Command):
 
         notify = NotifyModel(date=date,
                              text=text,
-                             author=self.event.sender,
+                             user=self.event.user,
                              chat=self.event.chat,
                              text_for_filter=notify_datetime.strftime("%d.%m.%Y %H:%M") + " " + text)
         notify.save()

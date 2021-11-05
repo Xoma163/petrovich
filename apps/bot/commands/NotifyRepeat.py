@@ -36,7 +36,7 @@ class NotifyRepeat(Command):
 
     def start(self):
         if not self.event.sender.check_role(Role.TRUSTED) and \
-                len(NotifyModel.objects.filter(author=self.event.sender)) >= 5:
+                len(NotifyModel.objects.filter(user=self.event.sender)) >= 5:
             raise PWarning("Нельзя добавлять более 5 напоминаний")
         timezone = self.event.sender.city.timezone.name
 
@@ -79,7 +79,7 @@ class NotifyRepeat(Command):
             notify = NotifyModel(
                 crontab=crontab,
                 text=text,
-                author=self.event.sender,
+                user=self.event.user,
                 chat=self.event.chat,
                 repeat=True,
                 text_for_filter=f'{crontab} {text}'
@@ -88,7 +88,7 @@ class NotifyRepeat(Command):
             notify = NotifyModel(
                 date=date,
                 text=text,
-                author=self.event.sender,
+                user=self.event.user,
                 chat=self.event.chat,
                 repeat=True,
                 text_for_filter=f'{notify_datetime.strftime("%H:%M")} {text}'
