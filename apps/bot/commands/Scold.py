@@ -15,7 +15,7 @@ class Scold(Command):
         "Если в качестве параметра передаётся имя, фамилия, логин/id, никнейм, то род выберется из БД\n"
         "Пример. /обосрать бабушка ж"
     ]
-    platforms = [Platform.VK, Platform.TG, Platform.API]
+    excluded_platforms = [Platform.YANDEX]
 
     def start(self):
         return get_praise_or_scold(self.bot, self.event, 'bad')

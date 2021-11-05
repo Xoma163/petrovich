@@ -10,7 +10,7 @@ class Find(Command):
     help_text = "ищет информацию по картинкам"
     help_texts = ["(запрос) - ищет информацию по картинкам"]
     args = 1
-    platforms = [Platform.VK, Platform.TG]
+    excluded_platforms = [Platform.YANDEX]
 
     def start(self):
         query = self.event.message.args_str
@@ -33,7 +33,9 @@ class Find(Command):
                     continue
                 if len(attachments) == count:
                     break
-
+        else:
+            # ToDo:Check
+            attachments = self.bot.upload_photos(urls, 5)
         if len(attachments) == 0:
             raise PWarning("Ничего не нашёл")
         return [f"Результаты по запросу '{query}'", {'attachments': attachments}]

@@ -21,3 +21,6 @@ class PhotoAttachment(Attachment):
         self.width = max_size_photo['width']
         self.height = max_size_photo['height']
         self.public_download_url = max_size_photo['url']
+
+    def parse_api_photo(self, event_photo):
+        self.public_download_url = event_photo.get('url')

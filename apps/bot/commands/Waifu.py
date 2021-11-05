@@ -13,7 +13,7 @@ class Waifu(Command):
         "[номер=рандом] - присылает несуществующую вайфу по номеру (0-100000)",
         "(слово) - присылает несуществующую вайфу вычисляя её номер"
     ]
-    platforms = [Platform.VK, Platform.TG]
+    excluded_platforms = [Platform.YANDEX]
 
     def start(self):
         waifus_count = 100000

@@ -50,7 +50,7 @@ class Age(Command):
     help_texts = [
         "(Изображения/Пересылаемое сообщение с изображением) - оценивает возраст людей на фотографии"
     ]
-    platforms = [Platform.VK, Platform.TG]
+    excluded_platforms = [Platform.YANDEX]
     attachments = [PhotoAttachment]
 
     def start(self):

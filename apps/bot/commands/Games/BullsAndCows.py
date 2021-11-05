@@ -22,8 +22,6 @@ class BullsAndCows(Command):
         "сдаться - закончить игру",
     ]
 
-    platforms = [Platform.VK, Platform.TG]
-
     def start(self):
         with lock:
             if self.event.chat:

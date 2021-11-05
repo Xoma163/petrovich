@@ -9,7 +9,7 @@ class Flood(Command):
     access = Role.ADMIN
     args = 1
     int_args = [0]
-    platforms = [Platform.VK, Platform.TG]
+    excluded_platforms = [Platform.YANDEX]
 
     def start(self):
         text = "ыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыыы"

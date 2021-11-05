@@ -6,7 +6,7 @@ from apps.bot.commands.Praise import get_praise_or_scold_self
 class ScoldSelf(Command):
     name = "обосраться"
     names = ["обосрись", "поругаться", "поругайся"]
-    platforms = [Platform.VK, Platform.TG, Platform.API]
+    excluded_platforms = [Platform.YANDEX]
 
     def start(self):
         return get_praise_or_scold_self(self.event, 'bad')

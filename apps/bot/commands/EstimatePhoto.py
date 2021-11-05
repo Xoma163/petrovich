@@ -9,7 +9,7 @@ class EstimatePhoto(Command):
     names = ["оценить"]
     help_text = "оценить качество фотографии"
     help_texts = ["(Изображение/Пересылаемое сообщение с изображением) - оценивает качество изображения"]
-    platforms = [Platform.VK, Platform.TG]
+    excluded_platforms = [Platform.YANDEX]
     attachments = [PhotoAttachment]
 
     def start(self):

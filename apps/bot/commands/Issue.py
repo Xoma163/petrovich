@@ -8,7 +8,6 @@ class Issue(Command):
     names = ["ошибка", "ишю", "ишью"]
     help_text = "добавляет проблему Петровича, которую нужно решить"
     help_texts = ["(текст) - добавляет проблему Петровича, которую нужно решить"]
-    platforms = [Platform.VK, Platform.TG]
     args = 1
 
     def start(self):

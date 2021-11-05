@@ -28,7 +28,7 @@ class Fix(Command):
         "(Пересылаемые сообщения) - исправляет раскладку текста",
         "(текст) - исправляет раскладку текста"
     ]
-    platforms = [Platform.VK, Platform.TG]
+    excluded_platforms = [Platform.YANDEX]
     args_or_fwd = 1
 
     def start(self):

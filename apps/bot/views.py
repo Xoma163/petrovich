@@ -8,6 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from apps.bot.classes.bots.APIBot import APIBot
 from apps.bot.classes.bots.YandexBot import YandexBot
 from apps.bot.classes.consts.Exceptions import PError
+from apps.bot.classes.mixins import CSRFExemptMixin
 
 
 @csrf_exempt
@@ -17,22 +18,26 @@ def yandex(request):
     return JsonResponse(response_data, status=200)
 
 
-class APIView(View):
-    def get(self, request, *args, **kwargs):
+class APIView(CSRFExemptMixin, View):
+    def post(self, request, *args, **kwargs):
         authorization = request.headers.get('Authorization')
         if not authorization:
             return JsonResponse({'error': 'no authorization header provided'}, status=500)
         if not authorization.startswith("Bearer "):
             return JsonResponse({'error': 'no bearer token in authorization header'}, status=500)
 
-        text = request.GET.get('text')
+        req = json.loads(request.body)
+        text = req.get('text')
         if not text:
             return JsonResponse({'error': 'no text in query'}, status=500)
 
+        attachments = req.get('attachments')
         query = {
             'text': text,
             'token': authorization.replace("Bearer ", '')
         }
+        if attachments:
+            query['attachments'] = attachments
 
         api_bot = APIBot()
         try:
@@ -45,5 +50,5 @@ class APIView(View):
         if not response:
             return JsonResponse({'wtf': True}, status=500)
 
-        r_json = response.to_dict()
+        r_json = response.to_api()
         return JsonResponse(r_json, status=200)

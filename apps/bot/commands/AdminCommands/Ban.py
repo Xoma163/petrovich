@@ -11,7 +11,6 @@ class Ban(Command):
     help_texts = ["(N) - бан пользователя, где N - имя, фамилия, логин/id, никнейм"]
     access = Role.ADMIN
     args = 1
-    excluded_platforms = [Platform.API, Platform.YANDEX]
 
     def start(self):
         user = self.bot.get_profile_by_name(self.event.message.args, self.event.chat)
