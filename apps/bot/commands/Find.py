@@ -34,7 +34,6 @@ class Find(Command):
                 if len(attachments) == count:
                     break
         else:
-            # ToDo:Check
             attachments = self.bot.upload_photos(urls, 5)
         if len(attachments) == 0:
             raise PWarning("Ничего не нашёл")
