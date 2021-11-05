@@ -7,8 +7,7 @@ class APIEvent(Event):
         text = self.raw['text']
 
         self.user = self.bot.get_user_by_id(user_id)
-        # ToDo
-        self.sender = None
+        self.sender = self.bot.get_profile_by_user(self.user)
         self.is_from_user = True
         self.is_from_pm = True
         self.set_message(text)

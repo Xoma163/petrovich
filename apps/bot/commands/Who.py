@@ -1,6 +1,7 @@
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.models import Profile
 from apps.bot.utils.utils import get_role_by_str
 
 
@@ -37,4 +38,4 @@ class Who(Command):
 
     def get_users(self, chat, role):
         params = {'chats': chat, 'groups__name': role.name}
-        return list(self.bot.user_model.filter(**params))
+        return list(Profile.objects.filter(**params))

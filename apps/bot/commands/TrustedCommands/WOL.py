@@ -19,7 +19,7 @@ class WOL(Command):
     access = Role.TRUSTED
 
     def start(self):
-        wol_data = WakeOnLanUserData.objects.filter(user=self.event.sender)
+        wol_data = WakeOnLanUserData.objects.filter(author=self.event.sender)
 
         if self.event.message.args:
             device_name = " ".join(self.event.message.args)

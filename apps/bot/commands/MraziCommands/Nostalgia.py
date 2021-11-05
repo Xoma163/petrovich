@@ -207,7 +207,7 @@ class Nostalgia(Command):
             message['text'] = message['text'].strip()
             if msg['author'] not in users_avatars:
                 name, surname = msg['author'].split(' ', 1)
-                vk_user = Profile.objects.filter(name=name, surname=surname, platform=Platform.VK.name).first()
+                vk_user = Profile.objects.filter(name=name, surname=surname).first()
                 if vk_user:
                     users_avatars[msg['author']] = vk_user.avatar
             avatar = users_avatars.get(msg['author'], None)

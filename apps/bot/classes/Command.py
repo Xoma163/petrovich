@@ -42,12 +42,13 @@ class Command:
         self.full_help_texts_tg: str = None  # Сгенерированный хелп текст для списка команд в телеграме
 
         if self.name:
-            self.full_names = [self.name] + self.names + [self.name_tg]
+            self.full_names = [self.name] + self.names
             if self.help_text:
                 self.full_help_text = f"{self.name.capitalize()} - {self.help_text}"
             if self.help_texts:
                 self.full_help_texts = "\n".join([f"{self.name.capitalize()} {x}" for x in self.help_texts])
         if self.name_tg:
+            self.full_names.append(self.name_tg)
             self.full_help_texts_tg = f"{self.name_tg.lower()} - {self.help_text}"
 
     def __eq__(self, other):
