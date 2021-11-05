@@ -383,8 +383,7 @@ class Bot(Thread):
         keyboard = [self._get_keyboard_buttons(chunk) for chunk in buttons_chunks]
         return keyboard
 
-    @staticmethod
-    def get_mention(user, name=None):
+    def get_mention(self, user, name=None):
         pass
 
     def delete_message(self, peer_id, message_id):

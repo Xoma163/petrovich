@@ -248,11 +248,11 @@ class VkBot(CommonBot):
             'buttons': keyboard
         }
 
-    @staticmethod
-    def get_mention(user: Profile, name=None):
+    def get_mention(self, profile: Profile, name=None):
         """
         Получение меншона пользователя
         """
+        user = profile.get_user_by_platform(self.platform)
         name = name or str(user)
         return f"[id{user.user_id}|{name}]"
 

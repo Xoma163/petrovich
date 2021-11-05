@@ -27,7 +27,7 @@ class Command(BaseCommand):
                 if not flag:
                     continue
 
-                platform = notify.chat.get_platform_enum() if notify.chat else notify.author.get_platform_enum()
+                platform = notify.chat.get_platform_enum() if notify.chat else notify.user.get_platform_enum()
                 bot = get_bot_by_platform(platform)
 
                 self.send_notify_message(bot, notify)
@@ -82,7 +82,7 @@ class Command(BaseCommand):
             # Если напоминание в ЛС и это не команда
             # Если надо уведомлять о том, что будет выполнена команда - убираем условие
             if not notify.text.startswith('/'):
-                bot.parse_and_send_msgs_thread(result_msg, notify.author.user_id)
+                bot.parse_and_send_msgs_thread(result_msg, notify.user.user_id)
 
     @staticmethod
     def send_command_notify_message(bot, notify):
@@ -98,7 +98,7 @@ class Command(BaseCommand):
                 event.chat = notify.chat
                 event.is_from_chat = True
             else:
-                event.peer_id = notify.author.user_id
+                event.peer_id = notify.user.user_id
                 event.is_from_pm = True
 
             bot.handle_event(event)

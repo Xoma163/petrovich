@@ -230,11 +230,11 @@ class TgBot(CommonBot):
             )
         ).start()
 
-    @staticmethod
-    def get_mention(user, name=None):
+    def get_mention(self, profile, name=None):
         """
         Получение меншона пользователя
         """
+        user = profile.get_user_by_platform(self.platform)
         if user.nickname:
             return f"@{user.nickname}"
         return str(user)

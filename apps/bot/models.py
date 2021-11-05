@@ -83,6 +83,9 @@ class Profile(models.Model):
         groups = self.groups.all().values()
         return [group['name'] for group in groups]
 
+    def get_user_by_platform(self, platform):
+        return self.user.get(platform=platform.name)
+
     class Meta:
         verbose_name = "Профиль"
         verbose_name_plural = "Профили"

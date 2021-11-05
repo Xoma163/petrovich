@@ -2,7 +2,7 @@ from django.db import models
 from django.db.models import JSONField
 from django.utils.html import format_html
 
-from apps.bot.models import Chat, Profile
+from apps.bot.models import Chat, Profile, User
 
 
 class TimeZone(models.Model):
@@ -111,6 +111,7 @@ class Notify(models.Model):
     text = models.CharField("Текст/команда", max_length=1000, default="")
     text_for_filter = models.CharField("Текст для поиска", max_length=1000, default="")
     chat = models.ForeignKey(Chat, models.CASCADE, verbose_name='Чат', null=True, blank=True)
+    user = models.ForeignKey(User, models.CASCADE, verbose_name="Пользователь", null=True, blank=True)
     author = models.ForeignKey(Profile, models.CASCADE, verbose_name="Автор", null=True)
     repeat = models.BooleanField("Повторять", default=False)
 
