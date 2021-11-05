@@ -235,9 +235,10 @@ class TgBot(CommonBot):
         Получение меншона пользователя
         """
         user = profile.get_user_by_platform(self.platform)
-        if user.nickname:
-            return f"@{user.nickname}"
-        return str(user)
+        return f"[{str(profile)}](tg://user?id={user.user_id})"
+        # if user.nickname:
+        #     return f"@{user.nickname}"
+        # return str(user)
 
     def delete_message(self, peer_id, message_id):
         """

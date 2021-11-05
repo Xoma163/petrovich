@@ -23,4 +23,4 @@ class All(Command):
 
         for user in conversation_users:
             msg += f"{self.bot.get_mention(user)}\n"
-        return msg
+        return {'text': msg, 'parse_mode': "markdown"}
