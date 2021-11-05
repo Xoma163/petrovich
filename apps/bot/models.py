@@ -127,7 +127,7 @@ class User(Platform):
     class Meta:
         verbose_name = "Пользователь"
         verbose_name_plural = "Пользователи"
-        ordering = ["platform", "profile__str"]
+        ordering = ["profile__str"]
 
     def __str__(self):
         return f"{self.profile} ({self.platform})"
