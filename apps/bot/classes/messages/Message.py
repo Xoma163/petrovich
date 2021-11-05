@@ -64,7 +64,7 @@ class Message:
             self.args_case = self.args_str_case.split(' ')
 
     @staticmethod
-    def get_cleared_message(msg):
+    def get_cleared_message(msg) -> str:
         clear_msg = msg.replace(',', ' ')
         clear_msg = re.sub(" +", " ", clear_msg)
         clear_msg = clear_msg.strip().strip(',').strip().strip(' ').strip()
@@ -81,9 +81,9 @@ class Message:
         self.parse_raw(raw)
 
     @property
-    def mentioned(self):
+    def mentioned(self) -> bool:
         return self.has_command_symbols or self.has_mention
 
-    def to_log(self):
+    def to_log(self) -> dict:
         dict_self = copy.copy(self.__dict__)
         return dict_self

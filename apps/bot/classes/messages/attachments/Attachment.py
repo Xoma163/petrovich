@@ -99,9 +99,9 @@ class Attachment:
     def get_size_mb(self):
         return self.get_size() / 1024 / 1024
 
-    def to_log(self):
+    def to_log(self) -> dict:
         dict_self = copy.copy(self.__dict__)
         ignore_fields = ['private_download_url', 'content']
         for ignore_field in ignore_fields:
-            del dict_self[ignore_field]
+            dict_self[ignore_field] = '*'*5
         return dict_self
