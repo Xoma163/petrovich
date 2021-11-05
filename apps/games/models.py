@@ -81,11 +81,19 @@ class RouletteRate(models.Model):
         ordering = ["chat"]
 
     def __str__(self):
-        return str(self.id)
+        return str(self.pk)
 
 
 class BullsAndCowsSession(models.Model):
-    author = models.ForeignKey(Profile, models.CASCADE, verbose_name="Пользователь", null=True)
+    profile = models.ForeignKey(Profile, models.CASCADE, verbose_name="Пользователь", null=True)
     chat = models.ForeignKey(Chat, models.CASCADE, verbose_name="Чат", null=True)
     number = models.PositiveIntegerField("Загаданное число")
     steps = models.PositiveIntegerField("Количество попыток", default=1)
+
+    class Meta:
+        verbose_name = 'Сессия "Быки и коровы"'
+        verbose_name_plural = 'Сессии "Быки и коровы"'
+        ordering = ["chat"]
+
+    def __str__(self):
+        return str(self.pk)

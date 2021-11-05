@@ -27,12 +27,15 @@ class ProfileAdmin(admin.ModelAdmin):
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
+    search_fields = ('profile__name', 'profile__surname', 'profile__nickname_real')
     list_display = ('show_user_id', 'show_url', 'platform', 'profile', 'nickname')
+    list_filter = ('platform',)
 
 
 @admin.register(Chat)
 class ChatAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'admin', 'need_reaction', 'platform', 'is_banned')
+    search_fields = ('name',)
+    list_display = ('id', 'name', 'admin', 'platform', 'is_banned')
     list_filter = ('platform',)
 
 

@@ -5,7 +5,7 @@ from apps.games.models import Rate, Gamer, PetrovichUser, PetrovichGames, Roulet
 
 @admin.register(Gamer)
 class GamerAdmin(admin.ModelAdmin):
-    search_fields = ('profile',)
+    search_fields = ('profile__name', 'profile__surname', 'profile__nickname_real')
     list_display = ('profile', 'points', 'roulette_points')
     list_editable = ('points', 'roulette_points')
 
@@ -18,12 +18,14 @@ class RateAdmin(admin.ModelAdmin):
 
 @admin.register(PetrovichUser)
 class PetrovichUserAdmin(admin.ModelAdmin):
+    search_fields = ('profile__name', 'profile__surname', 'profile__nickname_real')
     list_display = ('profile', 'chat', 'wins', 'active',)
     list_filter = (('profile', admin.RelatedOnlyFieldListFilter), ('chat', admin.RelatedOnlyFieldListFilter),)
 
 
 @admin.register(PetrovichGames)
 class PetrovichGamesAdmin(admin.ModelAdmin):
+    search_fields = ('profile__name', 'profile__surname', 'profile__nickname_real')
     list_display = ('profile', 'date', 'chat',)
     list_filter = (('profile', admin.RelatedOnlyFieldListFilter), ('chat', admin.RelatedOnlyFieldListFilter),)
 
@@ -35,4 +37,5 @@ class RouletteRateAdmin(admin.ModelAdmin):
 
 @admin.register(BullsAndCowsSession)
 class BullsAndCowsSessionAdmin(admin.ModelAdmin):
+    search_fields = ('profile__name', 'profile__surname', 'profile__nickname_real')
     list_display = ('author', 'chat', 'number', 'steps',)

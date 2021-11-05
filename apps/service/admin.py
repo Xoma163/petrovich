@@ -18,7 +18,7 @@ class CounterAdmin(admin.ModelAdmin):
 @admin.register(Meme)
 class MemeAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'preview_image', 'preview_link', 'author', 'approved', 'type', 'uses')
-    search_fields = ['name', 'link']
+    search_fields = ('name',)
     list_filter = (('author', admin.RelatedOnlyFieldListFilter), 'type', 'approved')
 
 
@@ -31,11 +31,13 @@ class NotifyAdmin(admin.ModelAdmin):
 
 @admin.register(City)
 class CityAdmin(admin.ModelAdmin):
+    search_fields = ('name',)
     list_display = ('name', 'synonyms', 'timezone', 'lat', 'lon')
 
 
 @admin.register(TimeZone)
 class TimeZoneAdmin(admin.ModelAdmin):
+    search_fields = ('name',)
     list_display = ('name',)
 
 

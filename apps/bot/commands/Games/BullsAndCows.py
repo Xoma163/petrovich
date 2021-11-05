@@ -29,7 +29,7 @@ class BullsAndCows(Command):
             if self.event.chat:
                 session = BullsAndCowsSession.objects.filter(chat=self.event.chat).first()
             else:
-                session = BullsAndCowsSession.objects.filter(author=self.event.sender).first()
+                session = BullsAndCowsSession.objects.filter(profile=self.event.sender).first()
             if not self.event.message.args:
                 if session:
                     return f"Игра уже создана, присылай мне число из {DIGITS_IN_GAME} цифр"
@@ -41,7 +41,7 @@ class BullsAndCows(Command):
                 if self.event.is_from_chat:
                     new_obj['chat'] = self.event.chat
                 else:
-                    new_obj['author'] = self.event.sender
+                    new_obj['profile'] = self.event.sender
                 BullsAndCowsSession.objects.create(**new_obj)
                 return "Я создал, погнали!"
             else:
