@@ -458,7 +458,7 @@ class Meme(Command):
     @staticmethod
     def check_meme_name_is_no_digits(meme_name_list):
         try:
-            [int(x) for x in meme_name_list]
+            _ = [int(x) for x in meme_name_list]
             raise PWarning("Название мема не может состоять только из цифр")
         except ValueError:
             pass

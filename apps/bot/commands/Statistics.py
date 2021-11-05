@@ -1,7 +1,7 @@
 from django.db.models import Count
 
 from apps.bot.classes.Command import Command
-from apps.bot.models import User, Profile
+from apps.bot.models import Profile
 from apps.games.models import Gamer
 from apps.games.models import PetrovichUser
 from apps.service.models import Meme

@@ -3,7 +3,7 @@ import random
 from io import BytesIO
 
 from apps.bot.classes.Command import Command
-from apps.bot.classes.consts.Consts import Platform, Role
+from apps.bot.classes.consts.Consts import Role
 from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.models import Profile
 from apps.bot.utils.QuotesGenerator import QuotesGenerator
