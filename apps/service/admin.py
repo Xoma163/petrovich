@@ -53,7 +53,7 @@ class YoutubeSubscribeAdmin(admin.ModelAdmin):
 @admin.register(WakeOnLanUserData)
 class WakeOnLanUserDataAdmin(admin.ModelAdmin):
     list_display = ('name', 'author', 'ip', 'port', 'mac',)
-    list_filter = (('profile', admin.RelatedOnlyFieldListFilter),)
+    list_filter = (('author', admin.RelatedOnlyFieldListFilter),)
 
 
 @admin.register(Horoscope)
