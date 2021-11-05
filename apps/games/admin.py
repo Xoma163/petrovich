@@ -38,4 +38,4 @@ class RouletteRateAdmin(admin.ModelAdmin):
 @admin.register(BullsAndCowsSession)
 class BullsAndCowsSessionAdmin(admin.ModelAdmin):
     search_fields = ('profile__name', 'profile__surname', 'profile__nickname_real')
-    list_display = ('author', 'chat', 'number', 'steps',)
+    list_display = ('profile', 'chat', 'number', 'steps',)
