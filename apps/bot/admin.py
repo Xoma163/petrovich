@@ -12,7 +12,7 @@ class ProfileAdmin(admin.ModelAdmin):
                 'name', 'surname', 'nickname_real', 'gender', 'birthday', 'city', 'avatar'),
         }),
         ('Прочее', {
-            'fields': ('groups', 'chats', 'platform'),
+            'fields': ('groups', 'chats'),
         }),
 
     )
