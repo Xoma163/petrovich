@@ -14,6 +14,8 @@ class Platform(models.Model):
     platform = models.CharField('Тип платформы', max_length=20, choices=PlatformEnum.choices())
 
     def get_platform_enum(self):
+        if not self.platform:
+            return None
         return [x for x in PlatformEnum if x.name == self.platform][0]
 
     class Meta:
@@ -42,8 +44,7 @@ class Chat(Platform):
         return str(self.name)
 
 
-# ToDo: remove Platform model, remove user_id and id fields
-class Profile(Platform):
+class Profile(models.Model):
     GENDER_FEMALE = '1'
     GENDER_MALE = '2'
     GENDER_NONE = ''
@@ -53,10 +54,8 @@ class Profile(Platform):
         (GENDER_NONE, 'не указан'))
 
     id = models.AutoField(primary_key=True)
-    user_id = models.CharField('ID пользователя', max_length=127)
     name = models.CharField('Имя', max_length=40, blank=True, null=True)
     surname = models.CharField('Фамилия', max_length=40, blank=True, null=True)
-    nickname = models.CharField("Никнейм", max_length=40, blank=True, null=True)
     nickname_real = models.CharField("Прозвище", max_length=40, blank=True)
     gender = models.CharField('Пол', max_length=2, blank=True, choices=GENDER_CHOICES)
     birthday = models.DateField('Дата рождения', null=True, blank=True)

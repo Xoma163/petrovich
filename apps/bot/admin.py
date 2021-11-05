@@ -17,11 +17,11 @@ class ProfileAdmin(admin.ModelAdmin):
 
     )
 
-    list_filter = ('platform',
-                   'gender',
-                   ('city', admin.RelatedOnlyFieldListFilter),
-                   ('groups', admin.RelatedOnlyFieldListFilter),
-                   'chats__name',)
+    list_filter = (
+        'gender',
+        ('city', admin.RelatedOnlyFieldListFilter),
+        ('groups', admin.RelatedOnlyFieldListFilter),
+        'chats__name',)
     search_fields = ['name', 'surname', 'nickname_real']
 
 

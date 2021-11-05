@@ -8,7 +8,6 @@ class GamerAdmin(admin.ModelAdmin):
     search_fields = ('profile',)
     list_display = ('profile', 'points', 'roulette_points')
     list_editable = ('points', 'roulette_points')
-    list_filter = ('profile__platform',)
 
 
 @admin.register(Rate)

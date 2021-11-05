@@ -4,7 +4,7 @@ from django.core.management.base import BaseCommand
 
 from apps.bot.classes.bots.Bot import get_bot_by_platform
 from apps.bot.classes.consts.Consts import Platform
-from apps.bot.models import Profile, User
+from apps.bot.models import User
 from apps.service.models import Service
 
 
