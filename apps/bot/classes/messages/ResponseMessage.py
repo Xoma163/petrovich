@@ -10,7 +10,7 @@ class ResponseMessage:
                 rmi = ResponseMessageItem(item, peer_id)
                 self.messages.append(rmi)
         else:
-            self.messages = [ResponseMessageItem(msgs, peer_id)]
+            self.messages = [ResponseMessageItem(msgs, peer_id)] if msgs else []
 
     def to_log(self) -> dict:
         """
