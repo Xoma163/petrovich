@@ -30,6 +30,9 @@ class ResponseMessage:
 
         return dict_self
 
+    def __str__(self):
+        return "\n".join([str(message) if message else "" for message in self.messages])
+
 
 class ResponseMessageItem:
     def __init__(self, msg, peer_id):
@@ -66,7 +69,7 @@ class ResponseMessageItem:
 
     def set_telegram_markdown(self):
         if self.text:
-            p = re.compile("\[.*\] ?\((http|https|tg)\:\/\/.*\)")
+            p = re.compile(r"\[.*\] ?\((http|https|tg)\:\/\/.*\)")
             if p.search(self.text):
                 self.kwargs = {'parse_mode': "markdown"}
                 return
@@ -75,3 +78,6 @@ class ResponseMessageItem:
             if p.search(self.text):
                 self.kwargs = {'parse_mode': "markdown"}
                 return
+
+    def __str__(self):
+        return self.text if self.text else ""
