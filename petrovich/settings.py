@@ -176,6 +176,11 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'commands-console',
         },
+        'console-debug': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'commands-console',
+        },
     },
     'loggers': {
         Platform.VK.value: {
@@ -191,8 +196,8 @@ LOGGING = {
     },
 }
 if DEBUG:
-    LOGGING['loggers'][Platform.VK.value]['handlers'].append('console-warn')
-    LOGGING['loggers'][Platform.TG.value]['handlers'].append('console-warn')
+    LOGGING['loggers'][Platform.TG.value]['handlers'].append('console-debug')
+    LOGGING['loggers'][Platform.TG.value]['handlers'].append('console-debug')
 
 CORS_ORIGIN_ALLOW_ALL = True
 VK_URL = "https://vk.com/"

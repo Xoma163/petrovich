@@ -27,12 +27,18 @@ class TgBot(CommonBot):
 
     def __init__(self):
         CommonBot.__init__(self, Platform.TG)
-
         self.token = env.str("TG_TOKEN")
         self.requests = TgRequests(self.token)
-        self.longpoll = MyTgBotLongPoll(self.token, self.requests)
+        self.longpoll = MyTgBotLongPoll(self.token)
 
     # MAIN ROUTING AND MESSAGING
+
+    def run(self):
+        """
+        Thread запуск основного тела команды
+        """
+        self.longpoll.set_last_update_id()
+        return super().run()
 
     def listen(self):
         """
@@ -41,6 +47,8 @@ class TgBot(CommonBot):
         for raw_event in self.longpoll.listen():
             tg_event = TgEvent(raw_event, self)
             threading.Thread(target=self.handle_event, args=(tg_event,)).start()
+
+    # _set_last_update_id
 
     def route(self, event: Event) -> ResponseMessage:
         if isinstance(event, TgEvent) and event.inline_mode:
@@ -297,17 +305,12 @@ class TgRequests:
 
 
 class MyTgBotLongPoll:
-    def __init__(self, token, request=None):
+    def __init__(self, token):
         self.token = token
-        if request is None:
-            self.request = TgRequests(token)
-        else:
-            self.request = request
+        self.request = TgRequests(token)
+        self.last_update_id = None
 
-        self.last_update_id = 1
-        self._get_last_update_id()
-
-    def _get_last_update_id(self):
+    def set_last_update_id(self):
         """
         Запоминание последнего обработанного собщения
         """
