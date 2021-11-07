@@ -17,7 +17,7 @@ def get_notifies_from_object(notifies_obj, timezone, print_username=False):
             notify_datetime = notify.crontab
 
         if print_username:
-            result += f"{notify.author}\n"
+            result += f"{notify.user}\n"
         if notify.repeat:
             if notify.crontab:
                 result += f"{notify_datetime} - Постоянное"
@@ -63,7 +63,7 @@ class Notifies(Command):
 
     def menu_delete(self):
         self.check_args(2)
-        notifies = Notify.objects.filter(author=self.event.sender).order_by("date")
+        notifies = Notify.objects.filter(user=self.event.user).order_by("date")
         if self.event.chat:
             try:
                 self.check_sender(Role.CONFERENCE_ADMIN)
@@ -78,7 +78,7 @@ class Notifies(Command):
             raise PWarning("Не нашёл напоминаний по такому тексту")
         if len(notifies) > 1:
             notifies10 = notifies[:10]
-            notifies_texts = [str(notify.author) + " " + notify.text_for_filter for notify in notifies10]
+            notifies_texts = [str(notify.user) + " " + notify.text_for_filter for notify in notifies10]
             notifies_texts_str = "\n".join(notifies_texts)
             raise PWarning(f"Нашёл сразу несколько. Уточните:\n"
                            f"{notifies_texts_str}")
@@ -93,12 +93,13 @@ class Notifies(Command):
 
     def menu_get_for_user(self):
         self.check_conversation()
-        user = self.bot.get_profile_by_name(self.event.message.args_str, self.event.chat)
-        notifies = Notify.objects.filter(author=user, chat=self.event.chat)
+        profile = self.bot.get_profile_by_name(self.event.message.args_str, self.event.chat)
+        user = profile.get_user_by_platform(self.event.platform)
+        notifies = Notify.objects.filter(user=user, chat=self.event.chat)
         return get_notifies_from_object(notifies, self.user_timezone, True)
 
     def menu_notifications(self):
-        notifies = Notify.objects.filter(author=self.event.sender).order_by("date")
+        notifies = Notify.objects.filter(user=self.event.user).order_by("date")
         if self.event.chat:
             notifies = notifies.filter(chat=self.event.chat)
         return get_notifies_from_object(notifies, self.user_timezone)
