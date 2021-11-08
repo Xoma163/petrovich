@@ -240,7 +240,7 @@ class Bot(Thread):
             raise PWarning("Отсутствуют аргументы")
         if isinstance(args, str):
             args = [args]
-        users = User.objects
+        users = Profile.objects
         if filter_chat:
             users = users.filter(chats=filter_chat)
         if len(args) >= 2:
@@ -251,10 +251,6 @@ class Bot(Thread):
                 user = users.filter(name=args[0].capitalize())
                 if len(user) == 0:
                     user = users.filter(surname=args[0].capitalize())
-                    if len(user) == 0:
-                        user = users.filter(nickname=args[0])
-                        if len(user) == 0:
-                            user = users.filter(user_id=args[0])
 
         if len(user) > 1:
             raise PWarning("2 и более пользователей подходит под поиск")
