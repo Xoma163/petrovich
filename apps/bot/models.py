@@ -61,14 +61,13 @@ class Profile(models.Model):
     birthday = models.DateField('Дата рождения', null=True, blank=True)
     # Здесь такой странный ForeignKey потому что проблема импортов
     city = models.ForeignKey('service.City', models.SET_NULL, verbose_name='Город', null=True, blank=True)
+    avatar = models.ImageField('Аватар', blank=True, upload_to="bot/users/avatar/")
 
     groups = models.ManyToManyField(Group, verbose_name="Группы")
-
     chats = models.ManyToManyField(Chat, verbose_name="Чаты", blank=True, related_name="users")
 
     celebrate_bday = models.BooleanField('Поздравлять с Днём рождения', default=True)
-
-    avatar = models.ImageField('Аватар', blank=True, upload_to="bot/users/avatar/")
+    default_platform = models.CharField('Тип платформы по умолчанию', max_length=20, choices=PlatformEnum.choices(), blank=True)
 
     def set_avatar(self, url):
         ext, image = get_avatar_content(url)

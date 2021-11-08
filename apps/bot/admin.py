@@ -14,6 +14,9 @@ class ProfileAdmin(admin.ModelAdmin):
         ('Прочее', {
             'fields': ('groups', 'chats'),
         }),
+        ('Настройки', {
+            'fields': ('celebrate_bday', 'default_platform'),
+        }),
 
     )
 

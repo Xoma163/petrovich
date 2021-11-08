@@ -1,8 +1,9 @@
 from django.contrib.auth.models import Group
 
 from apps.bot.classes.Command import Command
-from apps.bot.classes.consts.Consts import ON_OFF_TRANSLATOR, Role, TRUE_FALSE_TRANSLATOR
+from apps.bot.classes.consts.Consts import ON_OFF_TRANSLATOR, Role, TRUE_FALSE_TRANSLATOR, Platform
 from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.models import User
 
 
 class Settings(Command):
@@ -21,6 +22,7 @@ class Settings(Command):
         "голосовые (вкл/выкл) - определяет, будет ли бот автоматически распознавать голосовые",
         "майнкрафт (вкл/выкл) - определяет, будет ли бот присылать информацию о серверах майна. (для доверенных)",
         "др (вкл/выкл) - определяет, будет ли бот поздравлять с Днём рождения и будет ли ДР отображаться в /профиль"
+        "платформа (вк/vk/тг/tg) - определяет платформу по умолчанию для важных писем от бота. По умолчанию первая платформа с которой вы написали боту"
     ]
 
     def start(self):
@@ -35,6 +37,7 @@ class Settings(Command):
             [['майнкрафт', 'майн', 'minecraft', 'mine'], self.menu_minecraft_notify],
             [['мемы', 'мем'], self.menu_memes],
             [['др', 'днюха'], self.menu_bd],
+            [['платформа'], self.menu_platform],
             [['голосовые', 'голос', 'голосовухи', 'голосовуха', 'голосовое'], self.menu_voice],
             [['туррет'], self.menu_turret],
             [['default'], self.menu_default],
@@ -60,16 +63,36 @@ class Settings(Command):
 
     def menu_bd(self):
         self.check_args(2)
-        value = self.get_on_or_off(self.event.message.args[1].lower())
+        value = self.get_on_or_off(self.event.message.args[1])
         self.event.sender.celebrate_bday = value
         self.event.sender.save()
         return "Сохранил настройку"
+
+    def menu_platform(self):
+        self.check_args(2)
+        value = self.event.message.args[1]
+        if value in ['vk', 'вк', 'вконтакте']:
+            platform = Platform.VK
+        elif value in ['tg', 'тг', 'телеграм', 'телега', 'телеграмм']:
+            platform = Platform.TG
+        else:
+            raise PWarning(f"Я не знаю платформы {self.event.message.args[1]}")
+
+        try:
+            self.event.sender.get_user_by_platform(platform)
+        except User.DoesNotExist:
+            raise PWarning("У вас нет пользователя в этой платформе")
+
+        self.event.sender.default_platform = platform.name
+        self.event.sender.save()
+
+        return f"Поменял платформу на {platform.name}"
 
     def menu_minecraft_notify(self):
         self.check_sender(Role.TRUSTED)
         self.check_args(2)
 
-        value = self.get_on_or_off(self.event.message.args[1].lower())
+        value = self.get_on_or_off(self.event.message.args[1])
 
         group_minecraft_notify = Group.objects.get(name=Role.MINECRAFT_NOTIFY.name)
         if value:
@@ -88,15 +111,16 @@ class Settings(Command):
         self.check_sender(Role.CONFERENCE_ADMIN)
         self.check_args(2)
 
-        value = self.get_on_or_off(self.event.message.args[1].lower())
+        value = self.get_on_or_off(self.event.message.args[1])
         self.event.chat.need_turret = value
         self.event.chat.save()
         return "Сохранил настройку"
 
     def menu_default(self):
-        msg = "Настройки:\n"
-
+        msg = ""
         if self.event.chat:
+            msg = "Настройки чата:\n"
+
             reaction = self.event.chat.need_reaction
             need_meme = self.event.chat.need_meme
             mentioning = self.event.chat.mentioning
@@ -109,11 +133,17 @@ class Settings(Command):
             msg += f"Автоматически распознавать голосовые - {TRUE_FALSE_TRANSLATOR[recognize_voice]}\n"
             msg += f"Синдром Туррета - {TRUE_FALSE_TRANSLATOR[turret]}\n"
 
+            msg += "\n"
+
+        msg += "Настройки пользователя:\n"
+
         if self.event.sender.check_role(Role.TRUSTED):
             minecraft_notify = self.event.sender.check_role(Role.MINECRAFT_NOTIFY)
             msg += f"Уведомления по майну - {TRUE_FALSE_TRANSLATOR[minecraft_notify]}\n"
         celebrate_bday = self.event.sender.celebrate_bday
-        msg += f"Поздравлять с днём рождения - {TRUE_FALSE_TRANSLATOR[celebrate_bday]}"
+        default_platform = self.event.sender.default_platform
+        msg += f"Поздравлять с днём рождения - {TRUE_FALSE_TRANSLATOR[celebrate_bday]}\n"
+        msg += f"Платформа по умолчанию - {default_platform}"
         return msg
 
     def setup_default_chat_setting(self, name):
@@ -121,7 +151,7 @@ class Settings(Command):
         self.check_sender(Role.CONFERENCE_ADMIN)
         self.check_args(2)
 
-        value = self.get_on_or_off(self.event.message.args[1].lower())
+        value = self.get_on_or_off(self.event.message.args[1])
         setattr(self.event.chat, name, value)
         self.event.chat.save()
         return "Сохранил настройку"

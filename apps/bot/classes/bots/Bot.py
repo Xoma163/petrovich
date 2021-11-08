@@ -28,7 +28,7 @@ class Bot(Thread):
         self.chat_model = Chat.objects.filter(platform=self.platform.name)
         self.bot_model = BotModel.objects.filter(platform=self.platform.name)
 
-        self.logger = logging.getLogger(platform.value)
+        self.logger = logging.getLogger(platform.name)
         self.lock = Lock()
 
     # MAIN ROUTING AND MESSAGING
@@ -217,7 +217,7 @@ class Bot(Thread):
 
         if is_new:
             with self.lock:
-                user.profile.platform = self.platform.name
+                user.profile.default_platform = self.platform
                 user.profile.save()
 
                 group_user = Group.objects.get(name=Role.USER.name)

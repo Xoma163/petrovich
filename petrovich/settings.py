@@ -183,12 +183,12 @@ LOGGING = {
         },
     },
     'loggers': {
-        Platform.VK.value: {
+        Platform.VK.name: {
             'handlers': ['file-debug', 'file-error'],
             'level': 'DEBUG',
             'propagate': True,
         },
-        Platform.TG.value: {
+        Platform.TG.name: {
             'handlers': ['file-debug', 'file-error'],
             'level': 'DEBUG',
             'propagate': True,
@@ -196,8 +196,8 @@ LOGGING = {
     },
 }
 if DEBUG:
-    LOGGING['loggers'][Platform.TG.value]['handlers'].append('console-debug')
-    LOGGING['loggers'][Platform.TG.value]['handlers'].append('console-debug')
+    LOGGING['loggers'][Platform.TG.name]['handlers'].append('console-debug')
+    LOGGING['loggers'][Platform.TG.name]['handlers'].append('console-debug')
 
 CORS_ORIGIN_ALLOW_ALL = True
 VK_URL = "https://vk.com/"
