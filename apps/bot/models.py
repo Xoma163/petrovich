@@ -67,7 +67,8 @@ class Profile(models.Model):
     chats = models.ManyToManyField(Chat, verbose_name="Чаты", blank=True, related_name="users")
 
     celebrate_bday = models.BooleanField('Поздравлять с Днём рождения', default=True)
-    default_platform = models.CharField('Тип платформы по умолчанию', max_length=20, choices=PlatformEnum.choices(), blank=True)
+    default_platform = models.CharField('Тип платформы по умолчанию', max_length=20, choices=PlatformEnum.choices(),
+                                        blank=True)
 
     def set_avatar(self, url):
         ext, image = get_avatar_content(url)
@@ -84,6 +85,14 @@ class Profile(models.Model):
 
     def get_user_by_platform(self, platform):
         return self.user.get(platform=platform.name)
+
+    def get_default_platform_enum(self):
+        if not self.default_platform:
+            return None
+        return [x for x in PlatformEnum if x.name == self.default_platform][0]
+
+    def get_user_by_default_platform(self):
+        return self.get_user_by_platform(self.get_default_platform_enum())
 
     class Meta:
         verbose_name = "Профиль"

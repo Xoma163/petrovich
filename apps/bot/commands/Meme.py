@@ -199,8 +199,10 @@ class Meme(Command):
         if self.event.sender.check_role(Role.MODERATOR) and meme.author != self.event.sender:
             msg = f'Мем с названием "{meme.name}" удалён поскольку он не ' \
                   f'соответствует правилам или был удалён автором.'
-            bot = get_bot_by_platform(meme.author.get_platform_enum())
-            bot.parse_and_send_msgs(msg, meme.author.user_id)
+            user_platform = meme.author.get_user_by_default_platform()
+            user = meme.author.get_user_by_platform(user_platform)
+            bot = get_bot_by_platform(user_platform)
+            bot.parse_and_send_msgs(msg, user.user_id)
 
         meme_name = meme.name
         meme.delete()
@@ -229,8 +231,10 @@ class Meme(Command):
             raise PWarning("Мем уже подтверждён")
 
         user_msg = f'Мем с названием "{meme.name}" подтверждён.'
-        bot = get_bot_by_platform(meme.author.get_platform_enum())
-        bot.parse_and_send_msgs(user_msg, meme.author.user_id)
+        user_platform = meme.author.get_user_by_default_platform()
+        user = meme.author.get_user_by_platform(user_platform)
+        bot = get_bot_by_platform(user_platform)
+        bot.parse_and_send_msgs(user_msg, user.user_id)
 
         msg = f'Мем "{meme.name}" ({meme.id}) подтверждён'
         meme.approved = True
@@ -245,8 +249,10 @@ class Meme(Command):
         meme = self.get_meme(**meme_filter)
 
         msg = f'Мем "{meme.name}" ({meme.id}) отклонён'
-        bot = get_bot_by_platform(meme.author.get_platform_enum())
-        bot.parse_and_send_msgs(msg, meme.author.user_id)
+        user_platform = meme.author.get_user_by_default_platform()
+        user = meme.author.get_user_by_platform(user_platform)
+        bot = get_bot_by_platform(user_platform)
+        bot.parse_and_send_msgs(msg, user.user_id)
         meme.delete()
         return msg
 
@@ -274,8 +280,10 @@ class Meme(Command):
         meme.save()
 
         if meme.author != self.event.sender:
-            bot = get_bot_by_platform(meme.author.get_platform_enum())
-            bot.parse_and_send_msgs(user_msg, meme.author.user_id)
+            user_platform = meme.author.get_user_by_default_platform()
+            user = meme.author.get_user_by_platform(user_platform)
+            bot = get_bot_by_platform(user_platform)
+            bot.parse_and_send_msgs(user_msg, user.user_id)
         return user_msg
 
     def menu_info(self):
