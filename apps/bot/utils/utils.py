@@ -302,5 +302,12 @@ def get_tg_formatted_text(text) -> str:
     return f"```\n{text}\n```"
 
 
+def get_tg_formatted_text_line(text) -> str:
+    """
+    Форматированный текст в телеграмме в одну линию (markdown)
+    """
+    return f"`{text}`"
+
+
 def get_tg_formatted_url(name, url) -> str:
     return f"[{name}]({url})"

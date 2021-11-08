@@ -5,9 +5,9 @@ from crontab import CronTab
 from django.core.management.base import BaseCommand
 
 from apps.bot.classes.bots.Bot import get_bot_by_platform
-from apps.bot.classes.consts.Consts import Role
+from apps.bot.classes.consts.Consts import Role, Platform
 from apps.bot.classes.events.Event import Event
-from apps.bot.utils.utils import remove_tz, localize_datetime
+from apps.bot.utils.utils import remove_tz, localize_datetime, get_tg_formatted_text_line
 from apps.service.models import Notify
 
 
@@ -71,19 +71,20 @@ class Command(BaseCommand):
                       f"{bot.get_mention(notify.user.profile)}:\n" \
                       f"{notify.text}"
         else:
-            message = f"Напоминалка по {notify.crontab}\n" \
-                      f"{bot.get_mention(notify.user.profile)}:\n" \
-                      f"{notify.text}"
+            if notify.user.get_platform_enum() == Platform.TG:
+                message = f"Напоминалка по {get_tg_formatted_text_line(notify.crontab)}\n"
+            else:
+                message = f"Напоминалка по {notify.crontab}\n"
+            message += f" {bot.get_mention(notify.user.profile)} \n" \
+                       f"{notify.text}"
+
         result_msg = {'text': message}
 
         if notify.chat:
-            bot.parse_and_send_msgs_thread(result_msg, notify.chat.chat_id)
-        # Раскоментить если отправлять в лс пользователю, что это его напоминание
+            bot.parse_and_send_msgs(result_msg, notify.chat.chat_id)
         else:
-            # Если напоминание в ЛС и это не команда
-            # Если надо уведомлять о том, что будет выполнена команда - убираем условие
             if not notify.text.startswith('/'):
-                bot.parse_and_send_msgs_thread(result_msg, notify.user.user_id)
+                bot.parse_and_send_msgs(result_msg, notify.user.user_id)
 
     @staticmethod
     def send_command_notify_message(bot, notify):

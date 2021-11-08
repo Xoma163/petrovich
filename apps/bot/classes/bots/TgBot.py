@@ -16,7 +16,7 @@ from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachmen
 from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
 from apps.bot.commands.Meme import Meme
 from apps.bot.models import Profile
-from apps.bot.utils.utils import get_thumbnail_for_image
+from apps.bot.utils.utils import get_thumbnail_for_image, get_tg_formatted_url
 from petrovich.settings import env
 
 API_TELEGRAM_URL = 'api.telegram.org'
@@ -244,7 +244,7 @@ class TgBot(CommonBot):
         Получение меншона пользователя
         """
         user = profile.get_user_by_platform(self.platform)
-        return f"[{str(profile)}](tg://user?id={user.user_id})"
+        return get_tg_formatted_url(str(profile), f"tg://user?id={user.user_id}")
         # if user.nickname:
         #     return f"@{user.nickname}"
         # return str(user)
