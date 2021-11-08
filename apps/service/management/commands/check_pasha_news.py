@@ -41,7 +41,7 @@ class Command(BaseCommand):
                 text = f"{news_content}\n\n[Полная статья]({news_url})"
             else:
                 text = f"{news_content}\n\n{news_url}"
-            return text
+            msgs.append(text)
 
         last_news_id = self.get_news_id(news_to_send[0])
         pasha_news_last_id_entity.value = last_news_id
