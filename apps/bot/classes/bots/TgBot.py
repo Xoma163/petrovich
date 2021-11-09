@@ -27,7 +27,7 @@ class TgBot(CommonBot):
 
     def __init__(self):
         CommonBot.__init__(self, Platform.TG)
-        self.token = env.str("TG_TOKEN")
+        self.token = env.str("TG_TOKEN", None)
         self.requests = TgRequests(self.token)
         self.longpoll = MyTgBotLongPoll(self.token)
 
