@@ -26,6 +26,8 @@ jobs:
       - name: Run Tests
         env:
           SECRET_KEY: d7e72d9c61c4774bc5024bdd1434b1b322c62404d01ebc968b
+          TG_TOKEN: ''
+          TG_BOT_LOGIN: ''
           DEBUG: False
         run: |
           python manage.py test
