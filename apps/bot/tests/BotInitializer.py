@@ -23,7 +23,7 @@ class BotInitializer(TestCase):
         city, _ = City.objects.update_or_create(name=city['name'], defaults=city)
 
         all_groups = Group.objects.exclude(name="BANNED")
-
+        # Первый акк админа
         profile = Profile.objects.create(
             name="Вася",
             surname="Пупкин",
@@ -32,17 +32,32 @@ class BotInitializer(TestCase):
             city=city,
         )
         profile.groups.set(all_groups)
-
         chat = Chat.objects.create(
             name="Чат Васька",
             chat_id=2,
             admin=profile
         )
         profile.chats.add(chat)
-
-        user = User.objects.create(
+        User.objects.create(
             user_id=1,
             profile=profile,
+            platform=Platform.TG.name
+        )
+        # Второй обычный юзер
+        profile2 = Profile.objects.create(
+            name="Иван",
+            surname="Иванов",
+            nickname_real="Ванёк",
+            gender='2',
+            city=city,
+        )
+        group_user = Group.objects.get(name="USER")
+        profile2.groups.add(group_user)
+        profile2.chats.add(chat)
+
+        User.objects.create(
+            user_id=2,
+            profile=profile2,
             platform=Platform.TG.name
         )
 
@@ -62,7 +77,7 @@ class BotInitializer(TestCase):
         self.event.set_message(self.cmd.name)
 
     def check_correct_answer(self):
-        self.cmd.check_and_start(self.bot, self.event)
+        return self.cmd.check_and_start(self.bot, self.event)
 
     def check_correct_pwarning(self):
         try:
