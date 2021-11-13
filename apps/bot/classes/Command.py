@@ -2,7 +2,7 @@ from apps.bot.classes.bots.Bot import Bot
 from apps.bot.classes.consts.Consts import Role, ATTACHMENT_TRANSLATOR, Platform
 from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.classes.events.Event import Event
-from apps.bot.utils.utils import get_help_texts_for_command, transform_k
+from apps.bot.utils.utils import get_help_texts_for_command, transform_k, get_tg_formatted_text
 
 
 class Command:
@@ -143,7 +143,10 @@ class Command:
                 raise PWarning(error)
 
         error = "Для работы команды требуются аргументы"
-        error += f"\n\n{get_help_texts_for_command(self)}"
+        if self.event.platform == Platform.TG:
+            error += f"\n\n{get_tg_formatted_text(get_help_texts_for_command(self))}"
+        else:
+            error += f"\n\n{get_help_texts_for_command(self)}"
         raise PWarning(error)
 
     def check_args_or_fwd(self, args: int = None):
