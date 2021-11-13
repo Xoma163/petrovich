@@ -5,6 +5,7 @@ from apps.bot.classes.messages.Message import Message
 from apps.bot.classes.messages.TgMessage import TgMessage
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 from apps.bot.classes.messages.attachments.VoiceAttachment import VoiceAttachment
+from petrovich.settings import env
 
 
 class TgEvent(Event):
@@ -63,7 +64,7 @@ class TgEvent(Event):
                 'surname': _from.get('last_name'),
                 'nickname': _from.get('username'),
             }
-            self.user = self.bot.get_user_by_id(_from['id'], {'nickname':_from.get('username')})
+            self.user = self.bot.get_user_by_id(_from['id'], {'nickname': _from.get('username')})
             defaults.pop('nickname')
             self.sender = self.bot.get_profile_by_user(self.user, _defaults=defaults)
             self.is_from_user = True
@@ -76,6 +77,11 @@ class TgEvent(Event):
             # Нет нужды парсить вложения и fwd если это просто нажатие на кнопку
             self.setup_attachments(message)
             self.setup_fwd(message.get('reply_to_message'))
+
+        via_bot = message.get('via_bot')
+        if via_bot:
+            if via_bot['username'] == env.str("TG_BOT_LOGIN"):
+                self.force_not_need_a_response = True
 
         if self.sender and self.chat:
             self.bot.add_chat_to_profile(self.sender, self.chat)
