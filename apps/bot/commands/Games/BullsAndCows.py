@@ -64,9 +64,10 @@ class BullsAndCows(Command):
                 if self.event.message.args[0] == session.number:
                     decl = decl_of_num(session.steps, ['попытку', 'попытки', 'попыток'])
                     msg = f"Отгадали всего за {session.steps} {decl}!"
+                    msg2 = "Начислил 1000 очков"
                     session.delete()
                     keyboard = self.bot.get_inline_keyboard([{'command': self.name, 'button_text': "Ещё"}])
-                    return {"text": msg, "keyboard": keyboard}
+                    return [{"text": msg, "keyboard": keyboard}, msg2]
 
                 bulls = 0
                 cows = 0
