@@ -1,6 +1,6 @@
 from apps.bot.classes.bots.Bot import Bot
 from apps.bot.classes.consts.Consts import Role, ATTACHMENT_TRANSLATOR, Platform
-from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.consts.Exceptions import PWarning, PSkip
 from apps.bot.classes.events.Event import Event
 from apps.bot.utils.utils import get_help_texts_for_command, transform_k, get_tg_formatted_text
 
@@ -31,6 +31,7 @@ class Command:
     excluded_platforms: list = []  # Список исключённых платформ.
     attachments: list = []  # Должно ли сообщение обрабатываться только с вложениями
     city: bool = False  # Должно ли сообщение обрабатываться только с заданным городом у пользователя
+    mentioned: bool = False  # Должно ли сообщение обрабатываться только с упоминанием бота
 
     def __init__(self, bot: Bot = None, event: Event = None):
         self.bot: Bot = bot
@@ -104,6 +105,8 @@ class Command:
             self.check_attachments()
         if self.city:
             self.check_city()
+        if self.mentioned:
+            self.check_mentioned()
 
     def start(self):
         """
@@ -307,6 +310,16 @@ class Command:
 
         error = "Не указан город в профиле. /профиль город (название) - устанавливает город пользователю"
         raise PWarning(error)
+
+    def check_mentioned(self):
+        """
+        Проверяет на упоминание бота в сообщении
+        :param city: город
+        :return: bool
+        """
+        if not self.event.message.mentioned:
+            raise PSkip()
+        return True
 
     def handle_menu(self, menu: list, arg: str):
         """

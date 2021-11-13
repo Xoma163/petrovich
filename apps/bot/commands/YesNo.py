@@ -13,13 +13,11 @@ class YesNo(Command):
     help_text = "вернёт да или нет"
     help_texts = ["- вернёт да или нет. Для вызова команды просто в конце нужно написать знак вопроса"]
     priority = 80
+    mentioned = True
 
     def accept(self, event):
         if event.message and event.message.clear and event.message.clear[-1] == self.name:
-            if event.is_from_chat and event.chat.mentioning:
-                return event.message.mentioned
-            else:
-                return True
+            return True
         return super().accept(event)
 
     def start(self):

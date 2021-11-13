@@ -16,6 +16,7 @@ class Who(Command):
     conversation = True
     args = 1
     platforms = [Platform.VK, Platform.TG]
+    mentioned = True
 
     def start(self):
         arg = self.event.message.args_str
