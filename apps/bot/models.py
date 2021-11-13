@@ -67,8 +67,11 @@ class Profile(models.Model):
     chats = models.ManyToManyField(Chat, verbose_name="Чаты", blank=True, related_name="users")
 
     celebrate_bday = models.BooleanField('Поздравлять с Днём рождения', default=True)
+    show_birthday_year = models.BooleanField('Показывать год', default=True)
+
     default_platform = models.CharField('Тип платформы по умолчанию', max_length=20, choices=PlatformEnum.choices(),
                                         blank=True)
+
 
     def set_avatar(self, url):
         ext, image = get_avatar_content(url)

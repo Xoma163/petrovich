@@ -65,10 +65,23 @@ class Profile(Command):
     def menu_bd(self):
         self.check_args(2)
         birthday = self.event.message.args[1]
-        date_time_obj = datetime.strptime(birthday, '%d.%m.%Y')
+
+        show_birthday_year = True
+        if birthday.count(".") == 1:
+            birthday += ".1900"
+            show_birthday_year = False
+        try:
+            date_time_obj = datetime.strptime(birthday, '%d.%m.%Y')
+        except ValueError:
+            raise PWarning("Не смог распарсить дату. Формат ДД.ММ.ГГГГ")
+
         self.event.sender.birthday = date_time_obj.date()
+        self.event.sender.show_birthday_year = show_birthday_year
         self.event.sender.save()
-        return f"Изменил дату рождения на {self.event.sender.birthday.strftime('%d.%m.%Y')}"
+
+        new_bday = self.event.sender.birthday.strftime(
+            '%d.%m.%Y') if show_birthday_year else self.event.sender.birthday.strftime('%d.%m')
+        return f"Изменил дату рождения на {new_bday}"
 
     def menu_nickname(self):
         self.check_args(2)
@@ -127,7 +140,10 @@ class Profile(Command):
         _bd = user.birthday
         if user.celebrate_bday:
             if _bd:
-                _bd = _bd.strftime('%d.%m.%Y')
+                if not user.show_birthday_year:
+                    _bd = _bd.strftime('%d.%m')
+                else:
+                    _bd = _bd.strftime('%d.%m.%Y')
             else:
                 _bd = "Не установлено"
         else:
