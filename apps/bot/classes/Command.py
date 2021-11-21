@@ -32,6 +32,7 @@ class Command:
     attachments: list = []  # Должно ли сообщение обрабатываться только с вложениями
     city: bool = False  # Должно ли сообщение обрабатываться только с заданным городом у пользователя
     mentioned: bool = False  # Должно ли сообщение обрабатываться только с упоминанием бота
+    non_mentioned: bool = False  # Должно ли сообщение обрабатываться только без упоминания бота
 
     def __init__(self, bot: Bot = None, event: Event = None):
         self.bot: Bot = bot
@@ -107,6 +108,8 @@ class Command:
             self.check_city()
         if self.mentioned:
             self.check_mentioned()
+        if self.non_mentioned:
+            self.check_non_mentioned()
 
     def start(self):
         """
@@ -319,6 +322,11 @@ class Command:
         """
         if not self.event.message.mentioned:
             raise PSkip()
+        return True
+
+    def check_non_mentioned(self):
+        if self.event.message.mentioned:
+            raise PWarning("Команда работает только без упоминания")
         return True
 
     def handle_menu(self, menu: list, arg: str):

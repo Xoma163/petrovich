@@ -6,6 +6,7 @@ class Clear(Command):
     name = "ясно"
     names = ["ммм"]
     suggest_for_similar = False
+    non_mentioned = True
 
     def start(self):
         if self.event.message.command == 'ммм':

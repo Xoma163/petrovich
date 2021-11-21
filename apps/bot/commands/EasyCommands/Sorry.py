@@ -8,6 +8,8 @@ sorry_phrases = ["лан", "нет", "окей", "ничего страшног�
 class Sorry(Command):
     name = 'сори'
     names = ['прости', 'извини', 'простите', 'извините', 'извиняюсь']
+    suggest_for_similar = False
+    non_mentioned = True
 
     def start(self):
         return random_event(sorry_phrases)

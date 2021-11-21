@@ -11,6 +11,7 @@ class Apologize(Command):
     names = ["извиняйся", "извинитесь"]
     platforms = [Platform.VK, Platform.TG]
     suggest_for_similar = False
+    non_mentioned = True
 
     def start(self):
         phrases = ["Извини", "Нет", "Сам извинись", "за что?", "КАВО", "Ты уверен?"]
