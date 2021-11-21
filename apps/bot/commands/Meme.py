@@ -1,5 +1,5 @@
 from typing import List
-from urllib.parse import urlparse, parse_qsl
+from urllib.parse import urlparse, parse_qsl, quote
 
 from django.db.models import Q
 
@@ -61,6 +61,7 @@ class Meme(Command):
             [['отклонить', 'отменить', '-'], self.menu_reject],
             [['переименовать', 'правка'], self.menu_rename],
             [['инфо'], self.menu_info],
+            [['видео'], self.menu_video],
             [['default'], self.menu_default]
         ]
         method = self.handle_menu(menu, arg0)
@@ -198,7 +199,7 @@ class Meme(Command):
         # Если удаляем мем другого человека, шлём ему сообщением
         if self.event.sender.check_role(Role.MODERATOR) and meme.author != self.event.sender:
             user_msg = f'Мем с названием "{meme.name}" удалён поскольку он не ' \
-                  f'соответствует правилам или был удалён автором.'
+                       f'соответствует правилам или был удалён автором.'
             user = meme.author.get_user_by_default_platform()
             bot = get_bot_by_platform(user.get_platform_enum())
             bot.parse_and_send_msgs(user_msg, user.user_id)
@@ -314,6 +315,16 @@ class Meme(Command):
                 return [prepared_meme, get_tg_formatted_text(warning_message)]
             return [prepared_meme, warning_message]
         return prepared_meme
+
+    def menu_video(self):
+        video = MemeModel.objects.filter(type='video', approved=True).first()
+        if not video:
+            raise PWarning("Видео с вк закончились, ура, товарищи!")
+
+        prepared_video = video.get_info()
+        yt_search_link = 'https://www.youtube.com/results?search_query=' + quote(video.name)
+        prepared_video += f"\n\n{yt_search_link}"
+        return prepared_video
 
     # END MENU #
 

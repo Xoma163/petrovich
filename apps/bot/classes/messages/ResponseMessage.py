@@ -69,12 +69,12 @@ class ResponseMessageItem:
 
     def set_telegram_markdown(self):
         if self.text:
-            p = re.compile(r"\[.*\] ?\((http|https|tg)\:\/\/.*\)")
+            p = re.compile(r"\[.*\] ?\((http|https|tg)\:\/\/.*\)")  # Ссылки
             if p.search(self.text):
                 self.kwargs = {'parse_mode': "markdown"}
                 return
 
-            p = re.compile("```[\s\S]*```")
+            p = re.compile("```[\s\S]*```")  # tg formatting
             if p.search(self.text):
                 self.kwargs = {'parse_mode': "markdown"}
                 return
