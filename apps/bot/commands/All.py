@@ -1,5 +1,6 @@
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Platform
+from apps.bot.classes.consts.Exceptions import PWarning
 
 
 class All(Command):
@@ -15,7 +16,9 @@ class All(Command):
     conversation = True
 
     def start(self):
-        conversation_users = self.event.chat.users.all()
+        conversation_users = self.event.chat.users.all().exclude(pk=self.event.sender.pk)
+        if len(conversation_users) == 0:
+            raise PWarning("В конфе нет людей((")
         if self.event.message.args:
             msg = f"{self.event.message.args_str}\n\n"
         else:
