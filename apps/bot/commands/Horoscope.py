@@ -1,4 +1,5 @@
 from datetime import datetime
+from time import sleep
 
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Exceptions import PWarning
@@ -58,6 +59,7 @@ class Horoscope(Command):
                     else:
                         prepared_meme['text'] = zodiac_sign_name
                     self.bot.parse_and_send_msgs_thread(prepared_meme, self.event.peer_id)
+                    sleep(1)
                 return
             elif self.event.message.args[0] in "инфо":
                 self.check_args(2)
@@ -75,11 +77,20 @@ class Horoscope(Command):
             elif self.event.message.args[0] in "конфа":
                 self.check_conversation()
                 chat_users = self.event.chat.users.all()
-                all_zodiac_signs = set(
-                    self.zodiac_signs.find_zodiac_sign_by_date(x.birthday) for x in chat_users if x.birthday)
+                chat_signs = {}
+                for user in chat_users:
+                    sign = self.zodiac_signs.find_zodiac_sign_by_date(user.birthday)
+                    if sign in chat_signs:
+                        chat_signs[sign].append(str(user))
+                    else:
+                        chat_signs[sign] = [str(user)]
+
                 messages = []
-                for zodiac_sign in all_zodiac_signs:
-                    messages.append(self.get_horoscope_by_zodiac_sign(zodiac_sign))
+                for sign in chat_signs:
+                    message = self.get_horoscope_by_zodiac_sign(sign)
+                    users_sign_str = "\n".join(chat_signs[sign])
+                    message['text'] += f"\n\n{users_sign_str}"
+                    messages.append(message)
                 return messages
             # Гороскоп для знака зодиака в аргументах
             zodiac_sign_name = self.event.message.args[0]
