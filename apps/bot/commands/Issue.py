@@ -10,6 +10,7 @@ class Issue(Command):
     help_text = "добавляет проблему Петровича, которую нужно решить"
     help_texts = ["(текст) - добавляет проблему Петровича, которую нужно решить"]
     args = 1
+    non_mentioned = False
 
     def start(self):
         text = self.event.message.args_str_case
