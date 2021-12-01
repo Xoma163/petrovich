@@ -13,10 +13,6 @@ class YoutubeLiveCheckerAPI:
     SCOPES = ["https://www.googleapis.com/auth/youtube.readonly"]
 
     def __init__(self):
-        pass
-
-    def get_stream_info_if_online(self):
-
         if os.path.exists("CREDENTIALS_PICKLE_FILE"):
             with open("CREDENTIALS_PICKLE_FILE", 'rb') as f:
                 credentials = pickle.load(f)
@@ -25,9 +21,11 @@ class YoutubeLiveCheckerAPI:
             credentials = flow.run_console(access_type="offline", prompt="consent")
             with open("CREDENTIALS_PICKLE_FILE", 'wb') as f:
                 pickle.dump(credentials, f)
-        youtube = googleapiclient.discovery.build("youtube", "v3", credentials=credentials)
 
-        request = youtube.liveBroadcasts() \
+        self.youtube = googleapiclient.discovery.build("youtube", "v3", credentials=credentials)
+
+    def get_stream_info_if_online(self):
+        request = self.youtube.liveBroadcasts() \
             .list(
             broadcastStatus="active",
             broadcastType="all",
