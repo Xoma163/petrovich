@@ -74,7 +74,7 @@ class Notify(Command):
         if (date - datetime_now).days < 0 or (datetime_now - date).seconds < 0:
             raise PWarning("Нельзя указывать дату в прошлом")
 
-        text = self.event.message.args_str.split(' ', args_count)[args_count]
+        text = self.event.message.args_str_case.split(' ', args_count)[args_count]
         if text[0] == '/':
             first_space = text.find(' ')
             if first_space > 0:

@@ -44,7 +44,7 @@ class NotifyRepeat(Command):
         date = None
         try:
             crontab = get_crontab(self.event.message.args)
-            args_split = self.event.message.args_str.split(' ', 5)
+            args_split = self.event.message.args_str_case.split(' ', 5)
             if len(args_split) > 5:
                 text = args_split[-1]
             else:
@@ -62,7 +62,7 @@ class NotifyRepeat(Command):
             if (date - datetime_now).days < 0 or (datetime_now - date).seconds < 0:
                 date = date + timedelta(days=1)
 
-            text = self.event.message.args_str.split(' ', 1)[1]
+            text = self.event.message.args_str_case.split(' ', 1)[1]
         if text[0] == '/':
             first_space = text.find(' ')
             if first_space > 0:
