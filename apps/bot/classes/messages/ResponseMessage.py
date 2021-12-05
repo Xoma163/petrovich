@@ -81,7 +81,7 @@ class ResponseMessageItem:
 
             if self.kwargs.get('parse_mode'):
                 # Врапим ссылки без явного их врапа если у нас уже markdown
-                urls = re.findall("(?P<url>https?://[^\s]+)", self.text)  # Ссылки не в скобках
+                urls = re.findall("[^/(](?P<url>https?://[^\s]+)[^/(]", self.text)  # Ссылки не в скобках
                 for url in urls:
                     self.text = self.text.replace(url, get_tg_formatted_url(url, url))
 
