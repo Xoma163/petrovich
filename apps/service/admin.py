@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from apps.service.models import Service, Counter, Meme, Notify, City, \
-    Donations, TimeZone, YoutubeSubscribe, WakeOnLanUserData, Horoscope, QuoteBook, Words
+    Donations, TimeZone, YoutubeSubscribe, WakeOnLanUserData, Horoscope, QuoteBook, Words, TaxiInfo
 
 
 @admin.register(Service)
@@ -76,6 +76,7 @@ class WordsAdmin(admin.ModelAdmin):
     list_filter = ('type',)
     search_fields = ['id', 'm1', 'f1', 'n1', 'mm', 'fm', 'type']
 
-@admin.register(Words)
+
+@admin.register(TaxiInfo)
 class TaxiInfoAdmin(admin.ModelAdmin):
     pass
