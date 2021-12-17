@@ -75,3 +75,7 @@ class WordsAdmin(admin.ModelAdmin):
     list_display = ('id', 'm1', 'f1', 'n1', 'mm', 'fm', 'type')
     list_filter = ('type',)
     search_fields = ['id', 'm1', 'f1', 'n1', 'mm', 'fm', 'type']
+
+@admin.register(Words)
+class TaxiInfoAdmin(admin.ModelAdmin):
+    pass
