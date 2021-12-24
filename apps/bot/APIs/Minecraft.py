@@ -245,6 +245,16 @@ minecraft_servers = [
     MinecraftAPI(
         **{
             'ip': MAIN_DOMAIN,
+            'port': 25565,
+            'amazon': False,
+            'event': None,
+            'delay': 60,
+            'names': ['1.18.1', "1.18"],
+            # 'map_url': "https://map.andrewsha.net"
+        }),
+    MinecraftAPI(
+        **{
+            'ip': MAIN_DOMAIN,
             'port': 25566,
             'amazon': False,
             'event': None,
@@ -252,15 +262,15 @@ minecraft_servers = [
             'names': ['1.16.5', "1.16"],
             'map_url': "https://map.andrewsha.net"
         }),
-    MinecraftAPI(
-        **{
-            'ip': MAIN_DOMAIN,
-            'port': 25565,
-            'amazon': False,
-            'event': None,
-            'delay': 60,
-            'names': ['1.12.2', "1.12"]
-        }),
+    # MinecraftAPI(
+    #     **{
+    #         'ip': MAIN_DOMAIN,
+    #         'port': 25565,
+    #         'amazon': False,
+    #         'event': None,
+    #         'delay': 60,
+    #         'names': ['1.12.2', "1.12"]
+    #     }),
 ]
 
 
