@@ -179,9 +179,9 @@ class MinecraftAPI:
                 players_list = [x['name'] for x in players]
                 players_list.sort(key=str.lower)
                 players_str = ", ".join(players_list)
-                result += f"Игроки: {players_str}\n"
+                result += f"Игроки: {players_str}"
             if self.map_url:
-                result += f"Карта - {self.map_url}\n"
+                result += f"\nКарта - {self.map_url}"
         return result
 
     def send_notify_thread(self, message):
