@@ -9,7 +9,8 @@ class No(Command):
     non_mentioned = True
 
     def accept(self, event: Event):
-        return event.message and len(event.message.args) == 0
+        if event.message and len(event.message.args) == 0:
+            return super().accept(event)
 
     def start(self):
         return "Пидора ответ"
