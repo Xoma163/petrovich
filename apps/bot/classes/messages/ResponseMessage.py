@@ -70,8 +70,9 @@ class ResponseMessageItem:
         return dict_self
 
     def set_telegram_markdown(self):
+        urls_regexp = r"(http|ftp|https|tg)(:\/\/)([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-])"
         if self.text:
-            p = re.compile(r"\[.*\] ?\((http|https|tg)\:\/\/.*\)")  # Ссылки
+            p = re.compile(urls_regexp)  # Ссылки
             if p.search(self.text):
                 self.kwargs = {'parse_mode': "markdown"}
 
@@ -81,9 +82,26 @@ class ResponseMessageItem:
 
             if self.kwargs.get('parse_mode'):
                 # Врапим ссылки без явного их врапа если у нас уже markdown
-                urls = re.findall("[^/(](?P<url>https?://[^\s]+)[^/(]", self.text)  # Ссылки не в скобках
-                for url in urls:
-                    self.text = self.text.replace(url, get_tg_formatted_url(url, url))
+                url_poss = re.finditer(urls_regexp, self.text)  # Ссылки не в скобках
+                for url_pos in url_poss:
+                    start_pos = url_pos.start()
+                    end_pos = url_pos.end()
+
+                    url = self.text[start_pos:end_pos]
+
+                    # Если ссылка уже враплена, то продолжаем просто дальше
+                    left_symbol = None
+                    right_symbol = None
+                    if start_pos > 0:
+                        left_symbol = self.text[start_pos - 1]
+                    if len(self.text) > end_pos:
+                        right_symbol = self.text[end_pos]
+                    if left_symbol == '(' and right_symbol == ')':
+                        continue
+
+                    self.text = self.text[:start_pos] + get_tg_formatted_url(url, url) + self.text[end_pos:]
+
+                    # self.text = self.text.replace(url, get_tg_formatted_url(url, url))
 
     def __str__(self):
         return self.text if self.text else ""

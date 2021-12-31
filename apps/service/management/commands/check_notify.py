@@ -75,7 +75,7 @@ class Command(BaseCommand):
                 message = f"Напоминалка по {get_tg_formatted_text_line(notify.crontab)}\n"
             else:
                 message = f"Напоминалка по {notify.crontab}\n"
-            message += f" {bot.get_mention(notify.user.profile)} \n" \
+            message += f"{bot.get_mention(notify.user.profile)} \n" \
                        f"{notify.text}"
 
         result_msg = {'text': message}
