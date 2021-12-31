@@ -9,10 +9,11 @@ class HappyNewYear(Command):
     suggest_for_similar = False
 
     def accept(self, event):
-        return event.message and event.message.clear in [
+        hny_phrases = [
             'с новым годом', "с нг", "с наступающим", "с наступающими", "с наступающим новым годом", "с н г", "снг",
             "с праздником", "с наступающими праздниками"
         ]
+        return event.message and any([hny_phrase in event.message.clear for hny_phrase in hny_phrases])
 
     def start(self):
         answers = [
