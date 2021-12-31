@@ -64,8 +64,10 @@ def get_praise_or_scold(bot, event, _type):
             else:
                 msg = "wtf"
         else:
-            word = get_from_db(gender_translator[translator_key], _type)
-            msg = add_phrase_before(recipient, word, gender_translator[translator_key])
+            msg = get_from_db(gender_translator[translator_key], _type)
+            if recipient:
+                msg = add_phrase_before(recipient, msg, gender_translator[translator_key])
+
     else:
         msg = get_from_db(gender_translator[translator_key], _type)
     return msg
