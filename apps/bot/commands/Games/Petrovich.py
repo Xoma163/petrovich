@@ -2,7 +2,6 @@ import datetime
 from threading import Lock
 
 from django.contrib.auth.models import Group
-from django.db.models import Min
 
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Platform, Role
@@ -50,17 +49,9 @@ class Petrovich(Command):
                 p_user.save()
                 return "Возвращаю тебя в строй"
             else:
-                return "Ты уже зарегистрирован :)"
-        min_wins = PetrovichUser.objects.filter(chat=self.event.chat).aggregate(Min('wins'))['wins__min']
+                return "Ты уже зарегистрирован"
 
-        p_user = PetrovichUser(profile=self.event.sender,
-                               chat=self.event.chat,
-                               active=True)
-
-        if min_wins:
-            p_user.wins = min_wins
-        p_user.save()
-
+        PetrovichUser.objects.create(profile=self.event.sender, chat=self.event.chat, active=True)
         return "Регистрация прошла успешно"
 
     def menu_dereg(self):
