@@ -94,17 +94,14 @@ class Petrovich(Command):
             else:
                 raise PWarning("Нет участников игры. Зарегистрируйтесь! /петрович рег")
 
-            PetrovichGames.objects.filter(chat=self.event.chat).delete()
-            PetrovichGames(profile=winner, chat=self.event.chat).save()
-            winner_petrovich = PetrovichUser.objects.filter(profile=winner, chat=self.event.chat).first()
-            winner_petrovich.wins += 1
+            winner_petrovich = PetrovichGames(profile=winner, chat=self.event.chat)
             winner_petrovich.save()
-            if winner_petrovich.profile.gender and winner_petrovich.profile.gender == '1':
+            if winner.gender and winner.gender == '1':
                 winner_gender = "Наша сегодняшняя Петровна дня"
             else:
                 winner_gender = "Наш сегодняшний Петрович дня"
 
             return [
                 "Такс такс такс, кто тут у нас",
-                f"{winner_gender} - {self.bot.get_mention(winner_petrovich.profile, str(winner_petrovich.profile))}"
+                f"{winner_gender} - {self.bot.get_mention(winner, str(winner))}"
             ]

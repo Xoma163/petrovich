@@ -44,6 +44,9 @@ class PetrovichUser(models.Model):
     def wins(self):
         return PetrovichGames.objects.filter(profile=self.profile, chat=self.chat).count()
 
+    def wins_by_year(self, year):
+        return PetrovichGames.objects.filter(profile=self.profile, chat=self.chat, date__year=year).count()
+
     class Meta:
         verbose_name = "Петрович игрок"
         verbose_name_plural = "Петрович игроки"
