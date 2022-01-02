@@ -1,3 +1,4 @@
+import json
 from urllib.parse import urlparse
 
 import requests
@@ -148,16 +149,27 @@ class Media(Command):
     def get_instagram_attachment(self, url):
         r = requests.get(url)
         bs4 = BeautifulSoup(r.content, 'html.parser')
-        try:
-            content_type = bs4.find('meta', attrs={'name': 'medium'}).attrs['content']
-        except Exception:
-            raise PWarning("Ссылка на инстаграмм не является видео/фото")
+        if 'reel' in url:
+            content_type = 'reel'
+        else:
+            try:
+                content_type = bs4.find('meta', attrs={'name': 'medium'}).attrs['content']
+            except Exception:
+                raise PWarning("Ссылка на инстаграмм не является видео/фото")
 
         if content_type == 'image':
             photo_url = bs4.find('meta', attrs={'property': 'og:image'}).attrs['content']
             return self.bot.upload_photos([photo_url], peer_id=self.event.peer_id), ""
         elif content_type == 'video':
             video_url = bs4.find('meta', attrs={'property': 'og:video'}).attrs['content']
+            return [self.bot.upload_video(video_url, peer_id=self.event.peer_id)], ""
+        elif content_type == 'reel':
+            shared_data_text = "window._sharedData = "
+            script_text = ";</script>"
+            pos_start = r.text.find(shared_data_text)+len(shared_data_text)
+            pos_end = r.text.find(script_text, pos_start)
+            reel_data = json.loads(r.text[pos_start:pos_end])
+            video_url = reel_data['entry_data']['PostPage'][0]['graphql']['shortcode_media']['video_url']
             return [self.bot.upload_video(video_url, peer_id=self.event.peer_id)], ""
         else:
             raise PWarning("Ссылка на инстаграмм не является видео/фото")
