@@ -35,12 +35,11 @@ class Statistics(Command):
         players = PetrovichUser.objects \
             .filter(chat=self.event.chat) \
             .filter(profile__chats=self.event.chat)
-        players = sorted(players, key=lambda t: t.wins)
+        players = sorted(players, key=lambda t: t.wins, reverse=True)
 
         msg = "Наши любимые Петровичи:\n"
-        for player in players:
-            msg += "%s - %s\n" % (player, player.wins)
-        return msg
+        players_list_str = "\n".join([f"{player} - {player.wins}" for player in players])
+        return msg + players_list_str
 
     def menu_rates(self):
         gamers = Gamer.objects.filter(profile__chats=self.event.chat).exclude(points=0).order_by('-points')
@@ -61,7 +60,8 @@ class Statistics(Command):
         profiles = Profile.objects.filter(chats=self.event.chat)
 
         result_list = list(
-            Meme.objects.filter(author__in=profiles).values('author').annotate(total=Count('author')).order_by('-total'))
+            Meme.objects.filter(author__in=profiles).values('author').annotate(total=Count('author')).order_by(
+                '-total'))
         msg = "Созданных мемов:\n"
         for result in result_list:
             msg += f"{profiles.get(id=result['author'])} - {result['total']}\n"
