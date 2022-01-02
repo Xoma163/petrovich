@@ -38,11 +38,8 @@ class Rate(models.Model):
 class PetrovichUser(models.Model):
     profile = models.ForeignKey(Profile, models.CASCADE, verbose_name="Пользователь", null=True)
     chat = models.ForeignKey(Chat, models.CASCADE, verbose_name='Чат', null=True, blank=True)
+    wins = models.IntegerField("Побед в Петровиче", default=0)
     active = models.BooleanField("Активность", default=True)
-
-    @property
-    def wins(self):
-        return PetrovichGames.objects.filter(profile=self.profile, chat=self.chat).count()
 
     class Meta:
         verbose_name = "Петрович игрок"
@@ -65,6 +62,7 @@ class PetrovichGames(models.Model):
 
     def __str__(self):
         return str(self.profile)
+
 
 def get_default_board():
     return [['', '', ''], ['', '', ''], ['', '', '']]

@@ -34,9 +34,8 @@ class Statistics(Command):
     def menu_petrovich(self):
         players = PetrovichUser.objects \
             .filter(chat=self.event.chat) \
-            .filter(profile__chats=self.event.chat)
-        players = sorted(players, key=lambda t: t.wins)
-
+            .filter(profile__chats=self.event.chat) \
+            .order_by('-wins')
         msg = "Наши любимые Петровичи:\n"
         for player in players:
             msg += "%s - %s\n" % (player, player.wins)
