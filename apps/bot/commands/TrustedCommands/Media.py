@@ -134,7 +134,7 @@ class Media(Command):
         video_url = bs4.find('meta', attrs={'property': 'og:video'}).attrs['content']
         title = bs4.find('meta', attrs={'property': 'og:title'}).attrs['content']
 
-        video = requests.get(video_url, headers=headers)
+        video = requests.get(video_url, headers=headers).content
 
         attachments = [self.bot.upload_video(video, peer_id=self.event.peer_id)]
         return attachments, title
