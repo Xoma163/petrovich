@@ -14,8 +14,8 @@ class Statistics(Command):
     names = ["стата"]
     help_text = "статистика по победителям игр или по кол-ву созданных мемов"
     help_texts = [
-        "[модуль=все] - статистика по победителям игр или по кол-ву созданных мемов.\nМодули: петрович, ставки, рулетка, мемы\n",
-        "(петрович) [год=текущий] - статистика по победителям петровича.\n"
+        "[модуль=все] - статистика по победителям игр или по кол-ву созданных мемов.\nМодули: петрович, ставки, рулетка, мемы",
+        "(петрович) [год=текущий] - статистика по победителям петровича."
     ]
     conversation = True
 
@@ -47,26 +47,29 @@ class Statistics(Command):
         players = sorted(players, key=lambda t: t.wins_by_year(year), reverse=True)
 
         players_list = [player for player in players if player.wins_by_year(year)]
+        msg = "Наши любимые Петровичи:\n"
         if len(players_list) == 0:
-            return f"Нет статистики за {year} год"
+            return msg + f"Нет статистики за {year} год"
 
         players_list_str = "\n".join([f"{player} - {player.wins_by_year(year)}" for player in players_list])
-        return "Наши любимые Петровичи:\n" + players_list_str
+        return msg + players_list_str
 
     def menu_rates(self):
         gamers = Gamer.objects.filter(profile__chats=self.event.chat).exclude(points=0).order_by('-points')
         msg = "Победители ставок:\n"
-        for gamer in gamers:
-            msg += f"{gamer} - {gamer.points}"
-        return msg
+        if gamers.count() == 0:
+            raise RuntimeWarning(msg + "Нет статистики")
+        gamers_str = "\n".join([f"{gamer} - {gamer.points}" for gamer in gamers])
+        return msg + gamers_str
 
     def menu_roulettes(self):
         gamers = Gamer.objects.filter(profile__chats=self.event.chat).exclude(roulette_points=0).order_by(
             '-roulette_points')
         msg = "Очки рулетки:\n"
-        for gamer in gamers:
-            msg += f"{gamer} - {gamer.roulette_points}"
-        return msg
+        if gamers.count() == 0:
+            raise RuntimeWarning(msg + "Нет статистики")
+        gamers_str = "\n".join([f"{gamer} - {gamer.roulette_points}" for gamer in gamers])
+        return msg + gamers_str
 
     def menu_memes(self):
         profiles = Profile.objects.filter(chats=self.event.chat)
@@ -75,9 +78,10 @@ class Statistics(Command):
             Meme.objects.filter(author__in=profiles).values('author').annotate(total=Count('author')).order_by(
                 '-total'))
         msg = "Созданных мемов:\n"
-        for result in result_list:
-            msg += f"{profiles.get(id=result['author'])} - {result['total']}"
-        return msg
+        if len(result_list) == 0:
+            raise RuntimeWarning(msg + "Нет статистики")
+        result_list_str = "\n".join([f"{profiles.get(id=x['author'])} - {x['total']}" for x in result_list])
+        return msg + result_list_str
 
     def menu_all(self):
 
