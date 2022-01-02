@@ -1,4 +1,3 @@
-import json
 from urllib.parse import urlparse
 
 import requests
@@ -8,7 +7,7 @@ from bs4 import BeautifulSoup
 from apps.bot.APIs.RedditVideoDownloader import RedditVideoSaver
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Platform
-from apps.bot.classes.consts.Exceptions import PWarning, PError, PSkip
+from apps.bot.classes.consts.Exceptions import PWarning, PSkip
 from apps.bot.utils.utils import get_urls_from_text
 
 YOUTUBE_URLS = ('www.youtube.com', 'youtube.com', "www.youtu.be", "youtu.be")
@@ -130,28 +129,14 @@ class Media(Command):
             'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
         }
 
-        # Ебучий тикток отдаёт контект ИНОГДА, поэтому такой костыль с пересозданием сессии
-        tries = 10
-        s = requests.Session()
-        video_data = None
-        for _ in range(tries):
-            r = s.get(url, headers=headers)
-            bs4 = BeautifulSoup(r.content, 'html.parser')
-            try:
-                video_data = json.loads(bs4.find(id='__NEXT_DATA__').contents[0])
-                break
-            except (AttributeError, ConnectionError):
-                s = requests.Session()
-        if not video_data:
-            raise PError("Ошибка загрузки видео с tiktok")
+        content = requests.get(url, headers=headers).content
+        bs4 = BeautifulSoup(content, 'html.parser')
+        video_url = bs4.find('meta', attrs={'property': 'og:video'}).attrs['content']
+        title = bs4.find('meta', attrs={'property': 'og:title'}).attrs['content']
 
-        item_struct = video_data['props']['pageProps']['itemInfo']['itemStruct']
-        video_url = item_struct['video']['downloadAddr']
-        title = item_struct['desc']
-        headers['Referer'] = video_data['props']['pageProps']['seoProps']['metaParams']['canonicalHref']
-        r = s.get(video_url, headers=headers)
-        s.close()
-        attachments = [self.bot.upload_video(r.content, peer_id=self.event.peer_id)]
+        video = requests.get(video_url, headers=headers)
+
+        attachments = [self.bot.upload_video(video, peer_id=self.event.peer_id)]
         return attachments, title
 
     def get_reddit_attachment(self, url):
