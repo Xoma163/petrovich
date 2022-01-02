@@ -166,10 +166,13 @@ class Media(Command):
         elif content_type == 'reel':
             shared_data_text = "window._sharedData = "
             script_text = ";</script>"
-            pos_start = r.text.find(shared_data_text)+len(shared_data_text)
+            pos_start = r.text.find(shared_data_text) + len(shared_data_text)
             pos_end = r.text.find(script_text, pos_start)
             reel_data = json.loads(r.text[pos_start:pos_end])
-            video_url = reel_data['entry_data']['PostPage'][0]['graphql']['shortcode_media']['video_url']
+            entry_data = reel_data['entry_data']
+            if 'LoginAndSignupPage' in entry_data:
+                raise PWarning("Этот reel скачать не получится, требуется авторизация :(")
+            video_url = entry_data['PostPage'][0]['graphql']['shortcode_media']['video_url']
             return [self.bot.upload_video(video_url, peer_id=self.event.peer_id)], ""
         else:
             raise PWarning("Ссылка на инстаграмм не является видео/фото")
