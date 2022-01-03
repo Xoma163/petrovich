@@ -172,14 +172,14 @@ class MinecraftAPI:
             if player_max:
                 player_range = f"({player_count}/{player_max})"
 
-            result = f"Майн {version} - запущен ✅ {player_range} - {self.ip}:{self.port}\n"
+            result = f"Майн {version} - запущен ✅ {player_range} - {self.ip}:{self.port}"
 
             players = self.server_info.get('players', None)
             if players:
                 players_list = [x['name'] for x in players]
                 players_list.sort(key=str.lower)
                 players_str = ", ".join(players_list)
-                result += f"Игроки: {players_str}"
+                result += f"\nИгроки: {players_str}"
             if self.map_url:
                 result += f"\nКарта - {self.map_url}"
         return result
@@ -250,18 +250,17 @@ minecraft_servers = [
             'event': None,
             'delay': 60,
             'names': ['1.18.1', "1.18"],
-            # 'map_url': "https://map.andrewsha.net"
         }),
-    MinecraftAPI(
-        **{
-            'ip': MAIN_DOMAIN,
-            'port': 25566,
-            'amazon': False,
-            'event': None,
-            'delay': 60,
-            'names': ['1.16.5', "1.16"],
-            'map_url': "https://map.andrewsha.net"
-        }),
+    # MinecraftAPI(
+    #     **{
+    #         'ip': MAIN_DOMAIN,
+    #         'port': 25566,
+    #         'amazon': False,
+    #         'event': None,
+    #         'delay': 60,
+    #         'names': ['1.16.5', "1.16"],
+    #         'map_url': "https://map.andrewsha.net"
+    #     }),
     # MinecraftAPI(
     #     **{
     #         'ip': MAIN_DOMAIN,
