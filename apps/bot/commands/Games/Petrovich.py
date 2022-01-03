@@ -67,7 +67,7 @@ class Petrovich(Command):
         with lock:
             datetime_now = localize_datetime(datetime.datetime.utcnow(), DEFAULT_TIME_ZONE)
 
-            winner_today = PetrovichGames.objects.filter(chat=self.event.chat).last()
+            winner_today = PetrovichGames.objects.filter(chat=self.event.chat).first()
             if winner_today:
                 datetime_last = localize_datetime(remove_tz(winner_today.date), DEFAULT_TIME_ZONE)
                 if (datetime_now.date() - datetime_last.date()).days <= 0:
