@@ -31,7 +31,13 @@ class Command(BaseCommand):
         plt.show()
 
     @staticmethod
-    def get_avg_price_data(data):
+    def get_avg_price_data(data, tariff):
+        tariff_map = {
+            'econom': 0,
+            'comfort': 1,
+            'comfortplus': 2
+        }
+        tariff_val = tariff_map[tariff]
         len_data = len(data)
         x_data = [localize_datetime(remove_tz(x.created), 'Europe/Samara').replace(day=1, month=1, year=1900)
                   + datetime.timedelta(hours=4)
@@ -40,17 +46,27 @@ class Command(BaseCommand):
         for key in data:
             for i, item in enumerate(data[key]):
                 try:
-                    y = item.data['options'][1]['price']
+                    y = item.data['options'][tariff_val]['price']
                     y_data[i] += y / len_data
                 except Exception:
                     pass
 
         return x_data, y_data
 
-    def print_price_by_time_graphic(self, weekdays, friday, weekends):
-        weekdays_x, weekdays_y = self.get_avg_price_data(weekdays)
-        friday_x, friday_y = self.get_avg_price_data(friday)
-        weekends_x, weekends_y = self.get_avg_price_data(weekends)
+    def print_price_by_time_graphic(self, weekdays, friday, weekends, tariff):
+        tariff_map = {
+            'econom': "эконом",
+            'comfort': "комфорт",
+            'comfortplus': "комфорт+"
+        }
+
+        weekdays_x, weekdays_y = self.get_avg_price_data(weekdays, tariff)
+        friday_x, friday_y = self.get_avg_price_data(friday, tariff)
+        weekends_x, weekends_y = self.get_avg_price_data(weekends, tariff)
+
+        print(f'avg weekdays price - {round(sum(weekdays_y) / len(weekdays_y) * 100) / 100}р')
+        print(f'avg friday price - {round(sum(friday_y) / len(friday_y) * 100) / 100}р')
+        print(f'avg weekends price - {round(sum(weekends_y) / len(weekends_y) * 100) / 100}р')
         fig, ax = plt.subplots(1)
         fig.autofmt_xdate()
 
@@ -77,7 +93,7 @@ class Command(BaseCommand):
 
         plt.xlabel('Время', fontsize=21)
         plt.ylabel('Цена, руб.', fontsize=21)
-        plt.title('Цена эконом тарифа в зависимости от времени. Маршрут дом-работа', fontsize=21)
+        plt.title(f'Цена {tariff_map[tariff]} тарифа в зависимости от времени. Маршрут дом-работа', fontsize=21)
         plt.legend()
 
         fig.set_figwidth(19.20)
@@ -101,4 +117,6 @@ class Command(BaseCommand):
         taxi_info_weekend = taxi_infos.filter(created__week_day__in=[1, 7])
         taxi_info_weekend = self.get_grouped_taxi_infos(taxi_info_weekend)
 
-        self.print_price_by_time_graphic(taxi_info_weekday, taxi_info_friday, taxi_info_weekend)
+        self.print_price_by_time_graphic(taxi_info_weekday, taxi_info_friday, taxi_info_weekend, tariff='econom')
+        self.print_price_by_time_graphic(taxi_info_weekday, taxi_info_friday, taxi_info_weekend, tariff='comfort')
+        self.print_price_by_time_graphic(taxi_info_weekday, taxi_info_friday, taxi_info_weekend, tariff='comfortplus')
