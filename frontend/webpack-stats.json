@@ -1,1 +1,37 @@
-{"status":"done","chunks":{"app":["css/app-df94f20d01816e17a031.css","js/app-df94f20d01816e17a031.js"]},"publicPath":"/static/dist/","assets":{"css/app-df94f20d01816e17a031.css":{"name":"css/app-df94f20d01816e17a031.css","path":"/home/xoma163/projects/petrovich/staticfiles/dist/css/app-df94f20d01816e17a031.css","publicPath":"/static/dist/css/app-df94f20d01816e17a031.css"},"js/app-df94f20d01816e17a031.js":{"name":"js/app-df94f20d01816e17a031.js","path":"/home/xoma163/projects/petrovich/staticfiles/dist/js/app-df94f20d01816e17a031.js","publicPath":"/static/dist/js/app-df94f20d01816e17a031.js"},"js/app-df94f20d01816e17a031.js.LICENSE.txt":{"name":"js/app-df94f20d01816e17a031.js.LICENSE.txt","path":"/home/xoma163/projects/petrovich/staticfiles/dist/js/app-df94f20d01816e17a031.js.LICENSE.txt","publicPath":"/static/dist/js/app-df94f20d01816e17a031.js.LICENSE.txt"},"css/app-df94f20d01816e17a031.css.map":{"name":"css/app-df94f20d01816e17a031.css.map","path":"/home/xoma163/projects/petrovich/staticfiles/dist/css/app-df94f20d01816e17a031.css.map","publicPath":"/static/dist/css/app-df94f20d01816e17a031.css.map"},"js/app-df94f20d01816e17a031.js.map":{"name":"js/app-df94f20d01816e17a031.js.map","path":"/home/xoma163/projects/petrovich/staticfiles/dist/js/app-df94f20d01816e17a031.js.map","publicPath":"/static/dist/js/app-df94f20d01816e17a031.js.map"}}}
+{
+  "status": "done",
+  "assets": {
+    "css/app-271aee571fd1a970c9bc.css": {
+      "name": "css/app-271aee571fd1a970c9bc.css",
+      "path": "/home/xoma163/projects/petrovich/staticfiles/dist/css/app-271aee571fd1a970c9bc.css",
+      "publicPath": "/static/dist/css/app-271aee571fd1a970c9bc.css"
+    },
+    "js/app-271aee571fd1a970c9bc.js": {
+      "name": "js/app-271aee571fd1a970c9bc.js",
+      "path": "/home/xoma163/projects/petrovich/staticfiles/dist/js/app-271aee571fd1a970c9bc.js",
+      "publicPath": "/static/dist/js/app-271aee571fd1a970c9bc.js"
+    },
+    "js/app-271aee571fd1a970c9bc.js.LICENSE.txt": {
+      "name": "js/app-271aee571fd1a970c9bc.js.LICENSE.txt",
+      "path": "/home/xoma163/projects/petrovich/staticfiles/dist/js/app-271aee571fd1a970c9bc.js.LICENSE.txt",
+      "publicPath": "/static/dist/js/app-271aee571fd1a970c9bc.js.LICENSE.txt"
+    },
+    "css/app-271aee571fd1a970c9bc.css.map": {
+      "name": "css/app-271aee571fd1a970c9bc.css.map",
+      "path": "/home/xoma163/projects/petrovich/staticfiles/dist/css/app-271aee571fd1a970c9bc.css.map",
+      "publicPath": "/static/dist/css/app-271aee571fd1a970c9bc.css.map"
+    },
+    "js/app-271aee571fd1a970c9bc.js.map": {
+      "name": "js/app-271aee571fd1a970c9bc.js.map",
+      "path": "/home/xoma163/projects/petrovich/staticfiles/dist/js/app-271aee571fd1a970c9bc.js.map",
+      "publicPath": "/static/dist/js/app-271aee571fd1a970c9bc.js.map"
+    }
+  },
+  "chunks": {
+    "app": [
+      "css/app-271aee571fd1a970c9bc.css",
+      "js/app-271aee571fd1a970c9bc.js"
+    ]
+  },
+  "publicPath": "/static/dist/"
+}
