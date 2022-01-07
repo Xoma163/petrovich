@@ -317,12 +317,9 @@ class Command:
     def check_mentioned(self):
         """
         Проверяет на упоминание бота в сообщении
-        :param city: город
         :return: bool
         """
-        if not self.event.message.mentioned:
-            raise PSkip()
-        return True
+        return self.event.message.mentioned
 
     def check_non_mentioned(self):
         if self.event.message.mentioned:
