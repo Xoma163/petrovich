@@ -1,11 +1,11 @@
 from django.http import JsonResponse
 from django.shortcuts import render
-# Create your views here.
 from django.views.generic import TemplateView
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 from rest_framework.viewsets import ModelViewSet
 
+from apps.bot.APIs.YoutubeLiveCheckerAPI import YoutubeLiveCheckerAPI
 from apps.web.models import CalculatorSession, CalculatorProduct, CalculatorUser
 from apps.web.serializers import CalculatorProductSerializer, \
     CalculatorSessionSerializer, CalculatorSessionViewSerializer, CalculatorUserSerializer
@@ -22,6 +22,17 @@ def lana_translate(request):
 
 class DeliveryCalculatorTemplateView(TemplateView):
     template_name = "web/delivery_calculator.html"
+
+
+class CameraTemplateView(TemplateView):
+    template_name = "web/camera.html"
+
+    def get_context_data(self, **kwargs):
+        cd = super().get_context_data()
+
+        ylc_api = YoutubeLiveCheckerAPI()
+        cd['youtube_info'] = ylc_api.get_stream_info_if_online()
+        return cd
 
 
 class CalculatorSessionListView(ListView):

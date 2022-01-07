@@ -15,6 +15,7 @@ urlpatterns = [
     path('', views.main_page),
     path('lana_translate/', views.lana_translate),
     path('delivery_calculator/', views.DeliveryCalculatorTemplateView.as_view(), name='delivery_calculator'),
+    path('camera/', views.CameraTemplateView.as_view(), name='camera'),
     path('calculator_session/', views.CalculatorSessionListView.as_view(), name='calculator_sessions'),
     path('calculator_session/<int:pk>', views.CalculatorSessionDetailView.as_view(), name='calculator_session'),
     path('calculator_session/api/calculator_session/<int:pk>/calculate/', calculate),

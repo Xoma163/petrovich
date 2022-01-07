@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block body %}
+  {% if request.user.is_staff %}
+    <div id="camera" class="d-flex justify-content-center">
+      {% if youtube_info %}
+        <iframe width="560"
+                height="315"
+                src="{{ youtube_info.embed_video_url }}"
+                title="YouTube video player"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen
+        >
+        </iframe>
+      {% endif %}
+    </div>
+  {% endif %}
+{% endblock %}
