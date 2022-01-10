@@ -319,7 +319,9 @@ class Command:
         Проверяет на упоминание бота в сообщении
         :return: bool
         """
-        return self.event.message.mentioned
+        if not self.event.message.mentioned:
+            raise PSkip()
+        return True
 
     def check_non_mentioned(self):
         if self.event.message.mentioned:
