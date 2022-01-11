@@ -13,6 +13,7 @@ router.register(r'calculator_user', CalculatorUserViewSet, basename='calculator_
 
 urlpatterns = [
     path('', views.main_page),
+    path('accounts/login/', views.CustomLoginView.as_view(), name="login"),
     path('lana_translate/', views.lana_translate),
     path('delivery_calculator/', views.DeliveryCalculatorTemplateView.as_view(), name='delivery_calculator'),
     path('camera/', views.CameraTemplateView.as_view(), name='camera'),

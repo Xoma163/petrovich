@@ -1,3 +1,5 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.views import LoginView
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.generic import TemplateView
@@ -24,7 +26,7 @@ class DeliveryCalculatorTemplateView(TemplateView):
     template_name = "web/delivery_calculator.html"
 
 
-class CameraTemplateView(TemplateView):
+class CameraTemplateView(LoginRequiredMixin, TemplateView):
     template_name = "web/camera.html"
 
     def get_context_data(self, **kwargs):
@@ -84,3 +86,7 @@ class CalculatorSessionViewSet(ModelViewSet):
 def calculate(request, pk):
     session = CalculatorSession.objects.get(pk=pk)
     return JsonResponse({'data': session.calculate()}, status=200)
+
+
+class CustomLoginView(LoginView):
+    template_name = "web/accounts/login.html"
