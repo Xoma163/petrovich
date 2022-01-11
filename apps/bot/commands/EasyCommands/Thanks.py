@@ -1,4 +1,5 @@
 from apps.bot.classes.Command import Command
+from apps.bot.utils.utils import random_event
 
 
 class Thanks(Command):
@@ -6,4 +7,4 @@ class Thanks(Command):
     names = ["спс", 'ty', 'дякую', 'сяп']
 
     def start(self):
-        return "Всегда пожалуйста :)"
+        return random_event(["Всегда пожалуйста", "На здоровье", "Обращайся", "<3"])

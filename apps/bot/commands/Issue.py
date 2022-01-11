@@ -24,9 +24,8 @@ class Issue(Command):
 
         response = github_api.create_issue(title, body)
         if self.event.platform == Platform.TG:
-            text = f"Сохранено\nОтслеживать созданное ишю можно по {get_tg_formatted_url('ссылке', response['html_url'])}"
+            text = f"Отслеживать созданное ишю можно по {get_tg_formatted_url('ссылке', response['html_url'])}"
         else:
-            text = f"Сохранено\n" \
-                   f"Отслеживать созданное ишю можно по ссылке:\n" \
+            text = f"Отслеживать созданное ишю можно по ссылке:\n" \
                    f"{response['html_url']}"
         return text

@@ -14,10 +14,11 @@ class Apologize(Command):
     non_mentioned = True
 
     def start(self):
-        phrases = ["Извини", "Нет", "Сам извинись", "за что?", "КАВО", "Ты уверен?"]
+        phrases = ["Извини", "Нет", "Сам извинись", "за что?", "КАВО", "Ты уверен?", "а может быть ты извинишься?",
+                   "ок"]
         phrase = random_event(phrases)
         self.bot.parse_and_send_msgs(phrase, self.event.peer_id)
         if phrase == "Извини":
-            if random_probability(25):
+            if random_probability(33):
                 time.sleep(3)
                 self.bot.parse_and_send_msgs("сь", self.event.peer_id)

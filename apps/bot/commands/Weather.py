@@ -125,7 +125,8 @@ def get_weather_str(city, weather_data):
         f"{WEATHER_TRANSLATOR[weather_data['now']['condition']]}\n" \
         f"Температура {weather_data['now']['temp']}°С (ощущается как {weather_data['now']['temp_feels_like']}°С)\n" \
         f"Ветер {WEATHER_WIND_DIRECTION_TRANSLATOR[weather_data['now']['wind_dir']]} {weather_data['now']['wind_speed']}м/c (порывы до {weather_data['now']['wind_gust']}м/c)\n" \
-        f"Давление {weather_data['now']['pressure']}мм.рт.ст., влажность {weather_data['now']['humidity']}%"
+        f"Давление {weather_data['now']['pressure']}мм.рт.ст.\n" \
+        f"Влажность {weather_data['now']['humidity']}%"
 
     forecast = ""
     for x in weather_data['forecast']:
@@ -142,7 +143,8 @@ def get_weather_str(city, weather_data):
         forecast += \
             f" (ощущается как {x['temp_feels_like']}°С)\n" \
             f"Ветер {WEATHER_WIND_DIRECTION_TRANSLATOR[weather_data['now']['wind_dir']]} {x['wind_speed']}м/c (порывы до {x['wind_gust']}м/c)\n" \
-            f"Давление {x['pressure']} мм.рт.ст., влажность {x['humidity']}%\n"
+            f"Давление {x['pressure']} мм.рт.ст.\n" \
+            f"Влажность {x['humidity']}%\n"
         if x['prec_mm'] != 0:
             forecast += \
                 f"Осадки {x['prec_mm']}мм " \

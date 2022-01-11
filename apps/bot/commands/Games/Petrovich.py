@@ -6,7 +6,7 @@ from django.contrib.auth.models import Group
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Platform, Role
 from apps.bot.classes.consts.Exceptions import PWarning
-from apps.bot.utils.utils import localize_datetime, remove_tz
+from apps.bot.utils.utils import localize_datetime, remove_tz, random_event
 from apps.games.models import PetrovichGames, PetrovichUser
 from petrovich.settings import DEFAULT_TIME_ZONE
 
@@ -67,6 +67,11 @@ class Petrovich(Command):
         with lock:
             datetime_now = localize_datetime(datetime.datetime.utcnow(), DEFAULT_TIME_ZONE)
 
+            # Мемчик с Пашей
+            if datetime_now.hour == 0 and datetime_now.minute < 10 and self.event.sender.pk == 79:
+                raise PWarning(random_event(
+                    ["Опять меня вызвал Паша ночью...", "Ни стыда, ни совести", "Подожди остальных", "ААААА"]))
+
             winner_today = PetrovichGames.objects.filter(chat=self.event.chat).first()
             if winner_today:
                 datetime_last = localize_datetime(remove_tz(winner_today.date), DEFAULT_TIME_ZONE)
@@ -92,7 +97,18 @@ class Petrovich(Command):
             else:
                 winner_gender = "Наш сегодняшний Петрович дня"
 
+            first_message = random_event(
+                [
+                    "Такс такс такс, кто тут у нас",
+                    "*барабанная дробь*",
+                    "Вы готовы узнать победителя голодных игр?",
+                    "Ну шо, погнали",
+                    "Вы не поверите...",
+                    "Опять вы в игрульки свои играете да? Ну ладно"
+                ]
+            )
+
             return [
-                "Такс такс такс, кто тут у нас",
+                first_message,
                 f"{winner_gender} - {self.bot.get_mention(winner, str(winner))}"
             ]
