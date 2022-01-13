@@ -41,8 +41,7 @@ class Event:
         self.fwd: list = []
         self.attachments: list = []
 
-        self.force_need_a_response: bool = False
-        self.force_not_need_a_response: bool = False
+        self.force_response: bool = None
         self.command: Command = None
 
     def setup_event(self, is_fwd=False):
@@ -55,20 +54,21 @@ class Event:
         """
         Проверка, нужен ли пользователю ответ
         """
-        if self.force_not_need_a_response:
-            return False
-
-        if self.action:
-            return True
+        if self.force_response is not None:
+            return self.force_response
 
         if self.sender.check_role(Role.BANNED):
             return False
         if self.is_from_bot:
             return False
-        if self.force_need_a_response:
+        if self.action:
+            return True
+        if self.payload:
             return True
 
-        if self.payload:
+        if self.is_from_pm:
+            return True
+        if self.chat and self.chat.mentioning:
             return True
 
         need_a_response_extra = self.need_a_response_extra()
@@ -76,10 +76,7 @@ class Event:
             return True
         if self.message is None:
             return False
-        if self.is_from_pm:
-            return True
-        if self.chat and self.chat.mentioning:
-            return True
+
         if self.is_from_chat and not self.message.mentioned:
             return False
 
