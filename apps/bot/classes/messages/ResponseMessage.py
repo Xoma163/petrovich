@@ -83,6 +83,7 @@ class ResponseMessageItem:
             if self.kwargs.get('parse_mode'):
                 # Врапим ссылки без явного их врапа если у нас уже markdown
                 url_poss = re.finditer(urls_regexp, self.text)  # Ссылки не в скобках
+                url_poss = reversed(list(url_poss)) # Заменяем всё в строке с конца, чтобы были корректные позиции
                 for url_pos in url_poss:
                     start_pos = url_pos.start()
                     end_pos = url_pos.end()
