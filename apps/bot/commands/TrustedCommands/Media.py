@@ -1,4 +1,5 @@
 import json
+import re
 from urllib.parse import urlparse
 
 import requests
@@ -132,7 +133,32 @@ class Media(Command):
 
         content = requests.get(url, headers=headers).content
         bs4 = BeautifulSoup(content, 'html.parser')
-        video_url = bs4.find('meta', attrs={'property': 'og:video'}).attrs['content']
+        try:
+            video_url = bs4.find('meta', attrs={'property': 'og:video'}).attrs['content']
+        except:
+            data_str = bs4.find("script", attrs={"id": "sigi-persisted-data"}).text
+            regexp = re.compile(r"window\['\w*'\]=")
+            keys_positions = re.finditer(regexp, data_str)
+
+            key = -1
+            pos = -1
+            data = {}
+            for x in keys_positions:
+                if pos != -1:
+                    data[key] = json.loads(data_str[pos: x.regs[0][0] - 1])
+                regexp = r"\['\w*'\]"
+                key = re.findall(regexp, data_str[x.regs[0][0]:x.regs[0][1]])[0] \
+                    .replace("[", '') \
+                    .replace("]", "") \
+                    .strip("'") \
+                    .strip('\\')
+                if key != -1:
+                    pos = x.regs[0][1]
+            data[key] = json.loads(data_str[pos: len(data_str)])
+            if not data or "SIGI_STATE" not in data:
+                raise PWarning("Не смог распарсить Тикток видео")
+            video_url = data['SIGI_STATE']['ItemList']['video']['preloadList'][0]['url']
+
         title = bs4.find('meta', attrs={'property': 'og:title'}).attrs['content']
 
         video = requests.get(video_url, headers=headers).content
