@@ -38,7 +38,10 @@ jobs:
           DEBUG: False
           TG_TOKEN: ''
           TG_BOT_LOGIN: ''
-        run: python manage.py test
+        run: |
+          systemctl status postgres
+          systemctl start postgres
+          python manage.py test
 
 
       - name: Deploy on production
