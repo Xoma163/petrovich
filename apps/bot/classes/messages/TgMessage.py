@@ -7,7 +7,7 @@ class TgMessage(Message):
 
     def __init__(self, raw_str=None, _id=None, entities=None):
         self._mention_entities = []
-
+        self.has_mention = False
         text = self.setup_message_with_entities(raw_str, entities)
         # save state before super
         has_mention = self.has_mention
@@ -28,7 +28,7 @@ class TgMessage(Message):
         Находит и заменяет упоминания бота на пустоту
         """
         if not entities:
-            return False, text
+            return text
         bot_commands = list(filter(lambda x: x['type'] in ['bot_command'], entities))
         bot_commands_positions = [(x['offset'], x['length']) for x in bot_commands]
         mentions = list(filter(lambda x: x['type'] in ['mention'], entities))
