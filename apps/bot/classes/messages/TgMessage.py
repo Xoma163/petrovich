@@ -6,11 +6,22 @@ class TgMessage(Message):
     MENTION = env.str('TG_BOT_LOGIN')
 
     def __init__(self, raw_str=None, _id=None, entities=None):
-        has_mention, text = self.setup_message_with_entities(raw_str, entities)
-        super().__init__(text, _id)
+        self._mention_entities = []
 
+        text = self.setup_message_with_entities(raw_str, entities)
+        # save state before super
+        has_mention = self.has_mention
+        super().__init__(text, _id)
         self.has_mention = has_mention
         self.raw = raw_str
+
+    @property
+    def mentioned(self) -> bool:
+        # Исключение меншона - если /command@не_наш_бот
+        if self.has_mention:
+            if self.MENTION not in self._mention_entities:
+                return False
+        return super().mentioned
 
     def setup_message_with_entities(self, text, entities):
         """
@@ -22,12 +33,11 @@ class TgMessage(Message):
         bot_commands_positions = [(x['offset'], x['length']) for x in bot_commands]
         mentions = list(filter(lambda x: x['type'] in ['mention'], entities))
         mentions_positions = [(x['offset']) for x in mentions]
-        has_mention = False
         if bot_commands_positions:
-            has_mention, text = self.parse_bot_command_entities(text, bot_commands_positions)
+            text = self.parse_bot_command_entities(text, bot_commands_positions)
         elif mentions_positions:
-            has_mention, text = self.parse_mentions_entities(text, mentions_positions)
-        return has_mention, text
+            text = self.parse_mentions_entities(text, mentions_positions)
+        return text
 
     def parse_mentions_entities(self, text, mentions_start_positions):
         """
@@ -40,8 +50,8 @@ class TgMessage(Message):
             if first_pos in mentions_start_positions:
                 last_pos = first_pos + len(tg_bot_mention)
                 text = text[:first_pos] + text[last_pos:]
-                return True, text
-        return False, text
+                self.has_mention = True
+        return text
 
     def parse_bot_command_entities(self, text, mentions_positions):
         """
@@ -58,9 +68,13 @@ class TgMessage(Message):
             else:
                 command, mention = bot_command, None
 
-            if mention and mention == self.MENTION.lower():
-                delete_positions.append((start_pos + len(command), end_pos))
+            if mention:
+                self.has_mention = True
+                self._mention_entities.append(mention)
+                if mention == self.MENTION.lower():
+                    delete_positions.append((start_pos + len(command), end_pos))
+
         delete_positions = list(reversed(delete_positions))
         for start_pos, end_pos in delete_positions:
             result_text = result_text[:start_pos] + result_text[end_pos:]
-        return len(delete_positions) > 0, result_text
+        return result_text
