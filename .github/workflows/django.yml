@@ -48,6 +48,7 @@ jobs:
           DEBUG: False
           TG_TOKEN: ''
           TG_BOT_LOGIN: ''
+          DATABASE_URL: 'postgres://postgres:postgres@localhost:5432/postgres'
         run: |
           python manage.py test
       - name: Deploy on production
