@@ -27,7 +27,7 @@ class Command(BaseCommand):
         if not debug:
             self.ya_bot.start()
             self.tg_bot.update_help_texts()
-        self.camera_handler.start()
+        # self.camera_handler.start()
 
     def add_arguments(self, parser):
         parser.add_argument('debug', type=bool, nargs='?', help='debug mode', default=False)
