@@ -41,7 +41,7 @@ jobs:
           TG_BOT_LOGIN: ''
         run: |
           systemctl status postgres
-          systemctl start postgres
+          sudo systemctl start postgres
           python manage.py test
 
 
