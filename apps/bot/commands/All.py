@@ -20,7 +20,7 @@ class All(Command):
         if len(conversation_users) == 0:
             raise PWarning("В конфе нет людей((")
         if self.event.message.args:
-            msg = f"{self.event.message.args_str}\n\n"
+            msg = f"{self.event.message.args_str_case}\n\n"
         else:
             msg = ""
 
