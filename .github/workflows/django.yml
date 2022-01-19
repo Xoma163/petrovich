@@ -38,8 +38,6 @@ jobs:
           DEBUG: False
           TG_TOKEN: ''
           TG_BOT_LOGIN: ''
-          TIMEZONEDB_API_KEY: ''
-          YANDEX_GEO_TOKEN: ''
         run: python manage.py test
 
 

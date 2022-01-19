@@ -319,6 +319,8 @@ class Command:
         Проверяет на упоминание бота в сообщении
         :return: bool
         """
+        if self.event.is_from_user:
+            return True
         if not self.event.message.mentioned:
             raise PSkip()
         return True

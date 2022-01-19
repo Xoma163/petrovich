@@ -3,8 +3,6 @@ from time import sleep
 from django.contrib.auth.models import Group
 from django.core.management.base import BaseCommand
 
-from apps.bot.APIs.TimezoneDBAPI import TimezoneDBAPI
-from apps.bot.APIs.YandexGeoAPI import YandexGeoAPI
 from apps.bot.classes.consts.Consts import Role
 from apps.service.models import City, TimeZone, Service
 
@@ -358,6 +356,9 @@ class Command(BaseCommand):
 
     @staticmethod
     def init_cities_online():
+        from apps.bot.APIs.YandexGeoAPI import YandexGeoAPI
+        from apps.bot.APIs.TimezoneDBAPI import TimezoneDBAPI
+
         timezonedb_api = TimezoneDBAPI()
         yandexgeo_api = YandexGeoAPI()
 
