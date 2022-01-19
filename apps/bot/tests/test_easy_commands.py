@@ -20,11 +20,11 @@ from apps.bot.commands.EasyCommands.Yes import Yes
 from apps.bot.tests.BotInitializer import BotInitializer
 
 
-class CommandByeTestCase(BotInitializer):
-    Command = Bye
-
-    def test_no_args(self):
-        return self.check_correct_answer()
+# class CommandByeTestCase(BotInitializer):
+#     Command = Bye
+#
+#     def test_no_args(self):
+#         return self.check_correct_answer()
 
 
 class CommandClearTestCase(BotInitializer):
@@ -73,11 +73,11 @@ class CommandGoogleTestCase(BotInitializer):
         self.check_correct_answer()
 
 
-class CommandHiTestCase(BotInitializer):
-    Command = Hi
-
-    def test_no_args(self):
-        return self.check_correct_answer()
+# class CommandHiTestCase(BotInitializer):
+#     Command = Hi
+#
+#     def test_no_args(self):
+#         return self.check_correct_answer()
 
 
 class CommandIssuesTestCase(BotInitializer):
