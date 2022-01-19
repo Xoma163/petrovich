@@ -1,3 +1,4 @@
+from apps.bot.classes.consts.Exceptions import PSkip
 from apps.bot.commands.EasyCommands.Bye import Bye
 from apps.bot.commands.EasyCommands.Clear import Clear
 from apps.bot.commands.EasyCommands.Documentation import Documentation
@@ -23,8 +24,16 @@ from apps.bot.tests.BotInitializer import BotInitializer
 class CommandByeTestCase(BotInitializer):
     Command = Bye
 
-    def test_no_args(self):
+    def test_no_args_pm(self):
+        self.event.is_from_pm = True
         return self.check_correct_answer()
+
+    def test_no_args_chat(self):
+        self.event.is_from_chat = True
+        try:
+            return self.check_correct_answer()
+        except PSkip:
+            return True
 
 
 class CommandClearTestCase(BotInitializer):
@@ -76,8 +85,16 @@ class CommandGoogleTestCase(BotInitializer):
 class CommandHiTestCase(BotInitializer):
     Command = Hi
 
-    def test_no_args(self):
+    def test_no_args_pm(self):
+        self.event.is_from_pm = True
         return self.check_correct_answer()
+
+    def test_no_args_chat(self):
+        self.event.is_from_chat = True
+        try:
+            return self.check_correct_answer()
+        except PSkip:
+            return True
 
 
 class CommandIssuesTestCase(BotInitializer):
