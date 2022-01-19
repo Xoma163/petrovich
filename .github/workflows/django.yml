@@ -40,11 +40,7 @@ jobs:
           TG_TOKEN: ''
           TG_BOT_LOGIN: ''
         run: |
-          systemctl status postgres
-          sudo systemctl start postgres
           python manage.py test
-
-
       - name: Deploy on production
         uses: appleboy/ssh-action@master
         with:
