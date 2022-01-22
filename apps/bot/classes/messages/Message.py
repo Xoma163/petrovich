@@ -76,8 +76,11 @@ class Message:
         args = payload.get('args')
         raw = command
         if args:
-            args = [str(x) for x in args]
-            raw += f" {' '.join(args)}"
+            if isinstance(args, str):
+                raw += f" {args}"
+            else:
+                args = [str(x) for x in args]
+                raw += f" {' '.join(args)}"
         self.parse_raw(raw)
 
     @property
