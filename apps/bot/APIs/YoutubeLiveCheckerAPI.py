@@ -1,8 +1,9 @@
 import os
 import pickle
 
-import google_auth_oauthlib.flow
 import googleapiclient.discovery
+from google.auth.transport.requests import Request
+from google_auth_oauthlib.flow import InstalledAppFlow
 
 from petrovich.settings import BASE_DIR
 
@@ -13,15 +14,34 @@ class YoutubeLiveCheckerAPI:
     SCOPES = ["https://www.googleapis.com/auth/youtube.readonly"]
 
     def __init__(self):
-        if os.path.exists(self.CREDENTIALS_PICKLE_FILE):
-            with open(self.CREDENTIALS_PICKLE_FILE, 'rb') as f:
-                credentials = pickle.load(f)
-        else:
-            flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(self.SECRET_FILE, self.SCOPES)
-            credentials = flow.run_console(access_type="offline", prompt="consent")
-            with open(self.CREDENTIALS_PICKLE_FILE, 'wb') as f:
-                pickle.dump(credentials, f)
+        credentials = None
 
+        # youtube_data_token_brand.pickle stores the user's credentials from previously successful logins
+        if os.path.exists(self.CREDENTIALS_PICKLE_FILE):
+            with open(self.CREDENTIALS_PICKLE_FILE, 'rb') as token:
+                credentials = pickle.load(token)
+
+        # If there are no valid credentials available, then either refresh the token or log in.
+        if not credentials or not credentials.valid:
+            if credentials and credentials.expired and credentials.refresh_token:
+                print('Refreshing Access Token...')
+                credentials.refresh(Request())
+            else:
+                print('Fetching New Tokens...')
+                flow = InstalledAppFlow.from_client_secrets_file(
+                    'client_secrets_youtube_data_brand.json',
+                    scopes=[
+                        'https://www.googleapis.com/auth/youtube.readonly'
+                    ]
+                )
+
+                flow.run_local_server(port=8080, prompt='consent', authorization_prompt_message='')
+                credentials = flow.credentials
+
+                # Save the credentials for the next run
+                with open(self.CREDENTIALS_PICKLE_FILE, 'wb') as f:
+                    print('Saving Credentials for Future Use...')
+                    pickle.dump(credentials, f)
         self.youtube = googleapiclient.discovery.build("youtube", "v3", credentials=credentials)
 
     def get_stream_info_if_online(self):
