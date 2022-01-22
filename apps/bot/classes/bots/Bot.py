@@ -2,6 +2,7 @@ import logging
 import traceback
 from threading import Lock
 from threading import Thread
+from typing import List
 
 from django.contrib.auth.models import Group
 
@@ -64,13 +65,12 @@ class Bot(Thread):
             tb = traceback.format_exc()
             print(tb)
 
-    def parse_and_send_msgs(self, msgs, peer_id) -> ResponseMessage:
+    def parse_and_send_msgs(self, msgs, peer_id):
         """
         Отправка сообщений. Принимает любой формат
         """
         rm = msgs if isinstance(msgs, ResponseMessage) else ResponseMessage(msgs, peer_id)
-        self.send_response_message(rm)
-        return rm
+        return self.send_response_message(rm)
 
     def parse_and_send_msgs_thread(self, msgs, peer_id: int):
         """
@@ -78,9 +78,11 @@ class Bot(Thread):
         """
         Thread(target=self.parse_and_send_msgs, args=(msgs, peer_id)).start()
 
-    def send_response_message(self, rm: ResponseMessage):
+    def send_response_message(self, rm: ResponseMessage) -> List[dict]:
         """
         Отправка ResponseMessage сообщения
+        Вовзращает список результатов отправки в формате
+        [{success:bool, response:Response, response_message_item:ResponseMessageItem}]
         """
         pass
         # raise NotImplementedError
@@ -88,6 +90,7 @@ class Bot(Thread):
     def send_response_message_item(self, rm: ResponseMessageItem):
         """
         Отправка ResponseMessageItem сообщения
+        Возвращает Response платформы
         """
         pass
 

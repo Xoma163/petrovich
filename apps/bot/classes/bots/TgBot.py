@@ -145,29 +145,39 @@ class TgBot(CommonBot):
         default_params['text'] = default_params.pop('caption')
         return self.requests.get('sendMessage', default_params)
 
-    def send_response_message(self, rm: ResponseMessage):
+    def send_response_message(self, rm: ResponseMessage) -> list:
         """
         Отправка ResponseMessage сообщения
+        Вовзращает список результатов отправки в формате
+        [{success:bool, response:Response, response_message_item:ResponseMessageItem}]
         """
+        results = []
         for rmi in rm.messages:
             try:
                 rmi.set_telegram_markdown()
                 response = self.send_response_message_item(rmi)
+
                 # Непредвиденная ошибка
                 if response.status_code != 200:
                     error_msg = "Непредвиденная ошибка. Сообщите разработчику. Команда /баг"
                     error_rm = ResponseMessage(error_msg, rmi.peer_id).messages[0]
                     self.logger.error({'result': error_msg, 'error': response.json()['description']})
-                    self.send_response_message_item(error_rm)
+                    response = self.send_response_message_item(error_rm)
+                    results.append({"success": False, "response": response, "response_message_item": error_rm})
+                else:
+                    results.append({"success": True, "response": response, "response_message_item": rmi})
             # Предвиденная ошибка
             except (PWarning, PError) as e:
                 rmi.text += f"\n\n{str(e)}"
                 getattr(self.logger, e.level)({'result': rmi})
-                self.send_response_message_item(rmi)
+                response = self.send_response_message_item(rmi)
+                results.append({"success": True, "response": response, "response_message_item": rmi})
+        return results
 
     def send_response_message_item(self, rm: ResponseMessageItem):
         """
-        Отправка сообщения
+        Отправка ResponseMessageItem сообщения
+        Возвращает Response платформы
         """
         params = {'chat_id': rm.peer_id, 'caption': rm.text, 'reply_markup': json.dumps(rm.keyboard)}
         params.update(rm.kwargs)

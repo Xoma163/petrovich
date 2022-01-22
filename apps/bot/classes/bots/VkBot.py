@@ -42,20 +42,27 @@ class VkBot(CommonBot):
     def send_response_message(self, rm: ResponseMessage):
         """
         Отправка ResponseMessage сообщения
+        Вовзращает список результатов отправки в формате
+        [{success:bool, response:Response, response_message_item:ResponseMessageItem}]
         """
-        for msg in rm.messages:
+        results = []
+        for rmi in rm.messages:
             try:
-                self.send_response_message_item(msg)
+                response = self.send_response_message_item(rmi)
+                results.append({"success": True, "response": response, "response_message_item": rmi})
             except vk_api.exceptions.ApiError as e:
                 if e.code not in [901, 917]:
                     error_msg = "Непредвиденная ошибка. Сообщите разработчику. Команда /баг"
-                    error_rm = ResponseMessage(error_msg, msg.peer_id).messages[0]
+                    error_rm = ResponseMessage(error_msg, rmi.peer_id).messages[0]
                     self.logger.error({'result': error_msg, 'error': str(e)})
-                    self.send_response_message_item(error_rm)
+                    response = self.send_response_message_item(error_rm)
+                    results.append({"success": False, "response": response, "response_message_item": error_rm})
+        return results
 
     def send_response_message_item(self, rm: ResponseMessageItem):
         """
-        Отправка сообщения
+        Отправка ResponseMessageItem сообщения
+        Возвращает Response платформы
         """
         text = str(rm.text)
         if len(text) > 4096:
@@ -71,7 +78,7 @@ class VkBot(CommonBot):
             elif att.public_download_url:
                 attachments.append(att.public_download_url)
 
-        self.vk.messages.send(
+        return self.vk.messages.send(
             peer_id=rm.peer_id,
             message=text,
             access_token=self.token,

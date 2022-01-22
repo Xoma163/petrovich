@@ -65,7 +65,7 @@ class Media(Command):
         if has_command_name or self.event.is_from_pm:
             return {'attachments': attachments}
         else:
-            self.bot.delete_message(self.event.peer_id, self.event.message.id)
+
             chosen_url_pos = source.find(chosen_url)
             extra_text = source[:chosen_url_pos].strip() + "\n" + source[chosen_url_pos + len(chosen_url):].strip()
             extra_text = extra_text.strip()
@@ -82,7 +82,10 @@ class Media(Command):
             # Костыль, чтобы видосы которые шарятся с мобилы с реддита не дублировали title
             if extra_text and extra_text != title:
                 text += f"\n{extra_text}"
-            return {'text': text, 'attachments': attachments}
+
+            res = self.bot.parse_and_send_msgs({'text': text, 'attachments': attachments}, self.event.peer_id)
+            if res[0]['success']:
+                self.bot.delete_message(self.event.peer_id, self.event.message.id)
 
     def get_method_and_chosen_url(self, source):
         method = None
