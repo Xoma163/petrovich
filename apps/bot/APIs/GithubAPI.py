@@ -10,6 +10,7 @@ class GithubAPI:
     REPO_OWNER = 'Xoma163'
     REPO_NAME = 'petrovich'
     ISSUES_URL = f'https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/issues'
+    LABELS_URL = f'https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/labels'
     TOKEN = env.str('GITHUB_TOKEN')
     HEADERS = {"Authorization": f"token {TOKEN}"}
 
@@ -30,3 +31,7 @@ class GithubAPI:
         if r.status_code != 201:
             raise PError("Не удалось создать issue на github")
         return r.json()
+
+    def get_all_labels(self):
+        r = requests.get(self.LABELS_URL, json.dumps({}), headers=self.HEADERS)
+        return [x['name'] for x in r.json()]
