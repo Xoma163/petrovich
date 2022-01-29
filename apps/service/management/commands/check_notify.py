@@ -67,15 +67,17 @@ class Command(BaseCommand):
     def send_notify_message(bot, notify):
         if notify.date:
             notify_datetime = localize_datetime(remove_tz(notify.date), notify.user.profile.city.timezone.name)
+            user_str = f"{bot.get_mention(notify.user.profile)}:" if notify.mention_sender else f"{notify.user.profile}:"
             message = f"Напоминалка на {notify_datetime.strftime('%H:%M')}\n" \
-                      f"{bot.get_mention(notify.user.profile)}:\n" \
+                      f"{user_str}\n" \
                       f"{notify.text}"
         else:
             if notify.user.get_platform_enum() == Platform.TG:
                 message = f"Напоминалка по {get_tg_formatted_text_line(notify.crontab)}\n"
             else:
                 message = f"Напоминалка по {notify.crontab}\n"
-            message += f"{bot.get_mention(notify.user.profile)} \n" \
+            user_str = f"{bot.get_mention(notify.user.profile)}" if notify.mention_sender else f"{notify.user.profile}"
+            message += f"{user_str}\n" \
                        f"{notify.text}"
 
         result_msg = {'text': message}

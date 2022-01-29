@@ -113,6 +113,7 @@ class Notify(models.Model):
     chat = models.ForeignKey(Chat, models.CASCADE, verbose_name='Чат', null=True, blank=True)
     user = models.ForeignKey(User, models.CASCADE, verbose_name="Пользователь", null=True, blank=True)
     repeat = models.BooleanField("Повторять", default=False)
+    mention_sender = models.BooleanField("Упоминать автора", default=True)
 
     class Meta:
         verbose_name = "напоминание"
