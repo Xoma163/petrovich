@@ -1,10 +1,12 @@
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 
+from petrovich.settings import env
+
 
 class SpotifyAPI:
-    CLIENT_ID = "4d3a8a2c5c5949b8978eed0430b6e826"
-    CLIENT_SECRET = "41c67af265da424d9669b5b9f46d5e7e"
+    CLIENT_ID = env.str("SPOTIFY_CLIENT_ID")
+    CLIENT_SECRET = env.str("SPOTIFY_CLIENT_SECRET")
 
     def __init__(self):
         self.sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(
