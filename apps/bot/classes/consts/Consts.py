@@ -146,7 +146,7 @@ DELTA_WEEKDAY = {
     'послезавтра': 2,
 }
 
-TURRET_WORDS = [
+TURETT_WORDS = [
     "Пошёл нахуй",
     "Пидор",
     "Бля",

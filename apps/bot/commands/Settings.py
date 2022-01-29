@@ -18,7 +18,7 @@ class Settings(Command):
         "упоминание (вкл/выкл) - определяет будет ли бот триггериться на команды без упоминания в конфе(требуются админские права)",
         "реагировать (вкл/выкл) - определяет, будет ли бот реагировать на неправильные команды в конфе. Это сделано для того, чтобы в конфе с несколькими ботами не было ложных срабатываний",
         "мемы (вкл/выкл) - определяет, будет ли бот присылать мем если прислано его точное название без / (боту требуется доступ к переписке)",
-        "туррет (вкл/выкл) - определяет, будет ли бот иногда ругаться)",
+        "туретт (вкл/выкл) - определяет, будет ли бот иногда ругаться)",
         "голосовые (вкл/выкл) - определяет, будет ли бот автоматически распознавать голосовые",
         "майнкрафт (вкл/выкл) - определяет, будет ли бот присылать информацию о серверах майна. (для доверенных)",
         "др (вкл/выкл) - определяет, будет ли бот поздравлять с Днём рождения и будет ли ДР отображаться в /профиль"
@@ -39,7 +39,7 @@ class Settings(Command):
             [['др', 'днюха'], self.menu_bd],
             [['платформа'], self.menu_platform],
             [['голосовые', 'голос', 'голосовухи', 'голосовуха', 'голосовое'], self.menu_voice],
-            [['туррет'], self.menu_turret],
+            [['туретт', 'туррет', 'турретт','турет'], self.menu_turett],
             [['default'], self.menu_default],
         ]
         method = self.handle_menu(menu, arg0)
@@ -107,12 +107,12 @@ class Settings(Command):
     def menu_voice(self):
         return self.setup_default_chat_setting('recognize_voice')
 
-    def menu_turret(self):
+    def menu_turett(self):
         self.check_sender(Role.CONFERENCE_ADMIN)
         self.check_args(2)
 
         value = self.get_on_or_off(self.event.message.args[1])
-        self.event.chat.need_turret = value
+        self.event.chat.need_turett = value
         self.event.chat.save()
         return "Сохранил настройку"
 
@@ -124,14 +124,14 @@ class Settings(Command):
             reaction = self.event.chat.need_reaction
             need_meme = self.event.chat.need_meme
             mentioning = self.event.chat.mentioning
-            turret = self.event.chat.need_turret
+            turett = self.event.chat.need_turett
             recognize_voice = self.event.chat.recognize_voice
 
             msg += f"Реагировать на неправильные команды - {TRUE_FALSE_TRANSLATOR[reaction]}\n"
             msg += f"Присылать мемы по точным названиям - {TRUE_FALSE_TRANSLATOR[need_meme]}\n"
             msg += f"Триггериться на команды без упоминания - {TRUE_FALSE_TRANSLATOR[mentioning]}\n"
             msg += f"Автоматически распознавать голосовые - {TRUE_FALSE_TRANSLATOR[recognize_voice]}\n"
-            msg += f"Синдром Туррета - {TRUE_FALSE_TRANSLATOR[turret]}\n"
+            msg += f"Синдром Туретта - {TRUE_FALSE_TRANSLATOR[turett]}\n"
 
             msg += "\n"
 
