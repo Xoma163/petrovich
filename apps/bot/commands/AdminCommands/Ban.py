@@ -13,12 +13,14 @@ class Ban(Command):
     args = 1
 
     def start(self):
-        user = self.bot.get_profile_by_name(self.event.message.args, self.event.chat)
+        profile = self.bot.get_profile_by_name(self.event.message.args, self.event.chat)
 
-        if user.check_role(Role.ADMIN):
+        if profile.check_role(Role.ADMIN):
             raise PWarning("Нельзя банить админа")
         group_banned = Group.objects.get(name=Role.BANNED.name)
-        user.groups.add(group_banned)
-        user.save()
+        profile.groups.add(group_banned)
+        profile.save()
 
+        if profile.gender == profile.GENDER_FEMALE:
+            return "Забанена"
         return "Забанен"

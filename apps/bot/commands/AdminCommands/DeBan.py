@@ -12,8 +12,11 @@ class DeBan(Command):
     args = 1
 
     def start(self):
-        user = self.bot.get_profile_by_name(self.event.message.args, self.event.chat)
+        profile = self.bot.get_profile_by_name(self.event.message.args, self.event.chat)
         group_banned = Group.objects.get(name=Role.BANNED.name)
-        user.groups.remove(group_banned)
-        user.save()
+        profile.groups.remove(group_banned)
+        profile.save()
+
+        if profile.gender == profile.GENDER_FEMALE:
+            return "Разбанена"
         return "Разбанен"
