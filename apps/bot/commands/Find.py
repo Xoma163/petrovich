@@ -1,8 +1,11 @@
 from apps.bot.APIs.GoogleCustomSearchAPI import GoogleCustomSearchAPI
+from apps.bot.APIs.SpotifyAPI import SpotifyAPI
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.ActivitiesEnum import ActivitiesEnum
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.utils.utils import get_tg_formatted_url
+
 
 class Find(Command):
     name = "найди"
@@ -14,6 +17,13 @@ class Find(Command):
 
     def start(self):
         query = self.event.message.args_str
+
+        photo_results = self.get_photo_results(query)
+        music_results = self.get_music_results(query)
+
+        return [f"Результаты по запросу '{query}'", photo_results, music_results]
+
+    def get_photo_results(self, query):
         count = 5
 
         gcs_api = GoogleCustomSearchAPI()
@@ -37,4 +47,14 @@ class Find(Command):
             attachments = self.bot.upload_photos(urls, 5)
         if len(attachments) == 0:
             raise PWarning("Ничего не нашёл")
-        return [f"Результаты по запросу '{query}'", {'attachments': attachments}]
+        return {'attachments': attachments}
+
+    def get_music_results(self, query):
+        spotify_api = SpotifyAPI()
+        musics = spotify_api.search_music(query, limit=5)
+
+        message = []
+        for music_info in musics:
+            music = f"{', '.join(music_info['artists'])} — {music_info['name']}"
+            message.append(get_tg_formatted_url(music, music_info['url']))
+        return {'text': "\n".join(message)}
