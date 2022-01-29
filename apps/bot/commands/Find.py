@@ -56,5 +56,8 @@ class Find(Command):
         message = []
         for music_info in musics:
             music = f"{', '.join(music_info['artists'])} — {music_info['name']}"
-            message.append(get_tg_formatted_url(music, music_info['url']))
+            if self.event.platform == Platform.TG:
+                message.append(get_tg_formatted_url(music, music_info['url']))
+            else:
+                message.append(f"{music} (music_info['url'])")
         return {'text': "\n".join(message)}
