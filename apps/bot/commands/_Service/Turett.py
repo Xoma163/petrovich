@@ -9,7 +9,7 @@ class Turett(Command):
 
     def accept(self, event):
         if event.chat and event.chat.need_turett:
-            chance = 50 if event.chat.mentioning else 2
+            chance = 1 if event.chat.mentioning else 2
             if random_probability(chance):
                 msg = random_event(TURETT_WORDS)
                 event.bot.parse_and_send_msgs(msg, event.peer_id)
