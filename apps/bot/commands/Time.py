@@ -13,11 +13,13 @@ class Time(Command):
     ]
 
     def start(self):
+        city = None
         if self.event.message.args:
             city = City.objects.filter(synonyms__icontains=self.event.message.args[0]).first()
-        else:
+        if not city:
             city = self.event.sender.city
         self.check_city(city)
 
         new_date = localize_datetime(datetime.datetime.utcnow(), city.timezone.name)
-        return new_date.strftime("%d.%m.%Y\n%H:%M:%S")
+        dt_str = new_date.strftime("%d.%m.%Y\n%H:%M:%S")
+        return f"Время в городе {city}\n\n{dt_str}"
