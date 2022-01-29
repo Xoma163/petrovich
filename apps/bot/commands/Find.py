@@ -10,8 +10,8 @@ from apps.bot.utils.utils import get_tg_formatted_url
 class Find(Command):
     name = "найди"
     names = ["поиск", "найти", "ищи", "искать", "хуизфакинг", "вхуизфакинг"]
-    help_text = "ищет информацию по картинкам"
-    help_texts = ["(запрос) - ищет информацию по картинкам"]
+    help_text = "ищет информацию по картинкам в гугле и музыке в спотифае"
+    help_texts = ["(запрос) - ищет информацию по картинкам в гугле и музыке в спотифае"]
     args = 1
     excluded_platforms = [Platform.YANDEX]
 
