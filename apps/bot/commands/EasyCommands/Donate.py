@@ -1,5 +1,6 @@
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Platform
+from apps.bot.utils.utils import get_tg_formatted_url
 from petrovich.settings import STATIC_ROOT
 
 
@@ -12,5 +13,5 @@ class Donate(Command):
         url = 'https://www.donationalerts.com/r/xoma163'
         attachments = self.bot.upload_photos(f"{STATIC_ROOT}/bot/img/donate.jpg", peer_id=self.event.peer_id)
         if self.event.platform == Platform.TG:
-            return {'text': f"[Задонатить]({url})", 'attachments': attachments}
+            return {'text': get_tg_formatted_url("Задонатить", url), 'attachments': attachments}
         return {'text': url, 'attachments': attachments}

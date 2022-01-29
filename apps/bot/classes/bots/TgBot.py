@@ -154,7 +154,7 @@ class TgBot(CommonBot):
         results = []
         for rmi in rm.messages:
             try:
-                rmi.set_telegram_markdown()
+                rmi.set_telegram_html()
                 response = self.send_response_message_item(rmi)
 
                 # Непредвиденная ошибка

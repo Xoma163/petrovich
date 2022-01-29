@@ -10,7 +10,7 @@ from apps.bot.APIs.RedditVideoDownloader import RedditVideoSaver
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning, PSkip
-from apps.bot.utils.utils import get_urls_from_text
+from apps.bot.utils.utils import get_urls_from_text, get_tg_formatted_url
 
 YOUTUBE_URLS = ('www.youtube.com', 'youtube.com', "www.youtu.be", "youtu.be")
 REDDIT_URLS = ("www.reddit.com",)
@@ -76,7 +76,7 @@ class Media(Command):
             text += f"От пользователя {self.event.sender}"
 
             if self.event.platform == Platform.TG:
-                text += f"\n[Сурс]({chosen_url})"
+                text += f'\n{get_tg_formatted_url("Сурс", chosen_url)}'
             else:
                 text += f"\n{chosen_url}"
             # Костыль, чтобы видосы которые шарятся с мобилы с реддита не дублировали title

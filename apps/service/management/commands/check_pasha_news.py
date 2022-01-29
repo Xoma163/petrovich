@@ -5,6 +5,7 @@ from django.core.management.base import BaseCommand
 from apps.bot.classes.bots.Bot import get_bot_by_platform
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.models import User
+from apps.bot.utils.utils import get_tg_formatted_url
 from apps.service.models import Service
 
 
@@ -38,7 +39,7 @@ class Command(BaseCommand):
         for news in news_to_send:
             news_content, news_url = self.parse_news(f"{self.URL}{news.attrs['href']}")
             if pasha.get_platform_enum() == Platform.TG:
-                text = f"{news_content}\n\n[Полная статья]({news_url})"
+                text = f'{news_content}\n\n{get_tg_formatted_url("Полная статья", news_url)}'
             else:
                 text = f"{news_content}\n\n{news_url}"
             msgs.append(text)

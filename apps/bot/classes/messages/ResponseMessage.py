@@ -69,19 +69,19 @@ class ResponseMessageItem:
 
         return dict_self
 
-    def set_telegram_markdown(self):
+    def set_telegram_html(self):
         urls_regexp = r"(http|ftp|https|tg)(:\/\/)([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-])"
         if self.text:
             p = re.compile(urls_regexp)  # Ссылки
             if p.search(self.text):
-                self.kwargs = {'parse_mode': "markdown"}
+                self.kwargs = {'parse_mode': "html"}
 
-            p = re.compile("```[\s\S]*```")  # tg formatting
+            p = re.compile("<pre>[\s\S]*</pre>")  # tg formatting
             if p.search(self.text):
-                self.kwargs = {'parse_mode': "markdown"}
+                self.kwargs = {'parse_mode': "html"}
 
             if self.kwargs.get('parse_mode'):
-                # Врапим ссылки без явного их врапа если у нас уже markdown
+                # Врапим ссылки без явного их врапа если у нас уже html
                 url_poss = re.finditer(urls_regexp, self.text)  # Ссылки не в скобках
                 url_poss = reversed(list(url_poss)) # Заменяем всё в строке с конца, чтобы были корректные позиции
                 for url_pos in url_poss:
@@ -91,13 +91,13 @@ class ResponseMessageItem:
                     url = self.text[start_pos:end_pos]
 
                     # Если ссылка уже враплена, то продолжаем просто дальше
-                    left_symbol = None
-                    right_symbol = None
-                    if start_pos > 0:
-                        left_symbol = self.text[start_pos - 1]
+                    left_part = None
+                    right_part = None
+                    if start_pos >= 9:
+                        left_part = self.text[start_pos - 9:start_pos]
                     if len(self.text) > end_pos:
-                        right_symbol = self.text[end_pos]
-                    if left_symbol == '(' and right_symbol == ')':
+                        right_part = self.text[end_pos:end_pos+2]
+                    if left_part == '<a href="' and right_part == '">':
                         continue
 
                     self.text = self.text[:start_pos] + get_tg_formatted_url(url, url) + self.text[end_pos:]

@@ -297,17 +297,17 @@ def get_flat_list(_list: List[List]):
 
 def get_tg_formatted_text(text) -> str:
     """
-    Форматированный текст в телеграмме (markdown)
+    Форматированный текст в телеграмме (html)
     """
-    return f"```\n{text}\n```"
+    return f"<pre>\n{text}\n</pre>"
 
 
 def get_tg_formatted_text_line(text) -> str:
     """
-    Форматированный текст в телеграмме в одну линию (markdown)
+    Форматированный текст в телеграмме в одну линию (html)
     """
-    return f"`{text}`"
+    return f"<code>{text}</code>"
 
 
 def get_tg_formatted_url(name, url) -> str:
-    return f"[{name}]({url})"
+    return f'<a href="{url}">{name}</a>'
