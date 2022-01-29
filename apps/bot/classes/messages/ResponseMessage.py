@@ -80,10 +80,14 @@ class ResponseMessageItem:
             if p.search(self.text):
                 self.kwargs = {'parse_mode': "html"}
 
+            p = re.compile("<code>[\s\S]*</code>")  # tg formatting
+            if p.search(self.text):
+                self.kwargs = {'parse_mode': "html"}
+
             if self.kwargs.get('parse_mode'):
                 # Врапим ссылки без явного их врапа если у нас уже html
                 url_poss = re.finditer(urls_regexp, self.text)  # Ссылки не в скобках
-                url_poss = reversed(list(url_poss)) # Заменяем всё в строке с конца, чтобы были корректные позиции
+                url_poss = reversed(list(url_poss))  # Заменяем всё в строке с конца, чтобы были корректные позиции
                 for url_pos in url_poss:
                     start_pos = url_pos.start()
                     end_pos = url_pos.end()
@@ -96,7 +100,7 @@ class ResponseMessageItem:
                     if start_pos >= 9:
                         left_part = self.text[start_pos - 9:start_pos]
                     if len(self.text) > end_pos:
-                        right_part = self.text[end_pos:end_pos+2]
+                        right_part = self.text[end_pos:end_pos + 2]
                     if left_part == '<a href="' and right_part == '">':
                         continue
 
