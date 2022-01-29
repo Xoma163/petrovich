@@ -299,7 +299,7 @@ def get_tg_formatted_text(text) -> str:
     """
     Форматированный текст в телеграмме (html)
     """
-    return f"<pre>\n{text}\n</pre>"
+    return f"<pre>{text}</pre>"
 
 
 def get_tg_formatted_text_line(text) -> str:
