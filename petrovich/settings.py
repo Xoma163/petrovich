@@ -207,7 +207,7 @@ LOGGING = {
     },
 }
 if DEBUG:
-    LOGGING['loggers'][Platform.TG.name]['handlers'].append('console-debug')
+    LOGGING['loggers'][Platform.VK.name]['handlers'].append('console-debug')
     LOGGING['loggers'][Platform.TG.name]['handlers'].append('console-debug')
 
 CORS_ORIGIN_ALLOW_ALL = True

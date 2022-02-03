@@ -16,8 +16,10 @@ YOUTUBE_URLS = ('www.youtube.com', 'youtube.com', "www.youtu.be", "youtu.be")
 REDDIT_URLS = ("www.reddit.com",)
 TIKTOK_URLS = ("www.tiktok.com", 'vm.tiktok.com', 'm.tiktok.com')
 INSTAGRAM_URLS = ('www.instagram.com', 'instagram.com')
+TWITTER_URLS = ('www.twitter.com', 'twitter.com')
 
-MEDIA_URLS = tuple(list(YOUTUBE_URLS) + list(REDDIT_URLS) + list(TIKTOK_URLS) + list(INSTAGRAM_URLS))
+MEDIA_URLS = tuple(
+    list(YOUTUBE_URLS) + list(REDDIT_URLS) + list(TIKTOK_URLS) + list(INSTAGRAM_URLS) + list(TWITTER_URLS))
 
 
 class Media(Command):
@@ -35,6 +37,7 @@ class Media(Command):
             TIKTOK_URLS: self.get_tiktok_video,
             REDDIT_URLS: self.get_reddit_attachment,
             INSTAGRAM_URLS: self.get_instagram_attachment,
+            TWITTER_URLS: self.get_twitter_attachment,
         }
 
     def start(self):
@@ -160,7 +163,10 @@ class Media(Command):
             data[key] = json.loads(data_str[pos: len(data_str)])
             if not data or "SIGI_STATE" not in data:
                 raise PWarning("Не смог распарсить Тикток видео")
-            video_url = data['SIGI_STATE']['ItemList']['video']['preloadList'][0]['url']
+            try:
+                video_url = data['SIGI_STATE']['ItemList']['video']['preloadList'][0]['url']
+            except:
+                raise PWarning("Не смог распарсить Тикток видео")
 
         title = bs4.find('meta', attrs={'property': 'og:title'}).attrs['content']
 
@@ -190,7 +196,10 @@ class Media(Command):
             photo_url = bs4.find('meta', attrs={'property': 'og:image'}).attrs['content']
             return self.bot.upload_photos([photo_url], peer_id=self.event.peer_id), ""
         elif content_type == 'video':
-            video_url = bs4.find('meta', attrs={'property': 'og:video'}).attrs['content']
+            try:
+                video_url = bs4.find('meta', attrs={'property': 'og:video'}).attrs['content']
+            except:
+                raise PWarning("Не получилось распарсить видео с инстаграма")
             return [self.bot.upload_video(video_url, peer_id=self.event.peer_id)], ""
         elif content_type == 'reel':
             shared_data_text = "window._sharedData = "
@@ -205,6 +214,26 @@ class Media(Command):
             return [self.bot.upload_video(video_url, peer_id=self.event.peer_id)], ""
         else:
             raise PWarning("Ссылка на инстаграмм не является видео/фото")
+
+    def get_twitter_attachment(self, url):
+        # r = requests.get(url)
+        # bs4 = BeautifulSoup(r.content, 'html.parser')
+
+        ydl_params = {
+            'outtmpl': '%(id)s%(ext)s',
+            'logger': NothingLogger()
+        }
+        ydl = youtube_dl.YoutubeDL(ydl_params)
+        ydl.add_default_info_extractors()
+
+        try:
+            video_info = ydl.extract_info(url, download=False)
+        except youtube_dl.utils.DownloadError:
+            raise PWarning("Не смог найти видео по этой ссылке")
+        video_url = video_info['url']
+        video_content = requests.get(video_url).content
+        attachments = [self.bot.upload_video(video_content, peer_id=self.event.peer_id)]
+        return attachments, video_info['title']
 
 
 class NothingLogger(object):
