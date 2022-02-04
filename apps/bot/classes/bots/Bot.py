@@ -112,19 +112,19 @@ class Bot(Thread):
                 if command.accept(event):
                     result = command.__class__().check_and_start(self, event)
                     rm = ResponseMessage(result, event.peer_id)
-                    self.logger.debug({"result": rm.to_log(), "event": event.to_log()})
+                    self.logger.debug({"message": rm.to_log(), "event": event.to_log()})
                     return rm
             except (PWarning, PError) as e:
                 msg = str(e)
                 rm = ResponseMessage(msg, event.peer_id)
-                getattr(self.logger, e.level)({"result": rm.to_log(), "event": event.to_log()})
+                getattr(self.logger, e.level)({"message": rm.to_log(), "event": event.to_log()})
                 return rm
             except PSkip as e:
                 raise e
             except Exception as e:
                 msg = "Непредвиденная ошибка. Сообщите разработчику. Команда /баг"
                 rm = ResponseMessage(msg, event.peer_id)
-                self.logger.error({"exception": str(e), "result": rm.to_log(), "event": event.to_log()},
+                self.logger.error({"exception": str(e), "message": rm.to_log(), "event": event.to_log()},
                                   exc_info=traceback.format_exc())
                 return rm
 
@@ -139,7 +139,7 @@ class Bot(Thread):
 
         similar_command = self.get_similar_command(event, COMMANDS)
         rm = ResponseMessage(similar_command, event.peer_id)
-        self.logger.debug({"result": rm.to_log(), "event": event.to_log()})
+        self.logger.debug({"message": rm.to_log(), "event": event.to_log()})
         return rm
 
     @staticmethod

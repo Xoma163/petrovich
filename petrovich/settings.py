@@ -108,8 +108,6 @@ WSGI_APPLICATION = 'petrovich.wsgi.application'
 # else:
 DATABASES = {'default': env.db('DATABASE_URL', default='postgres:///petrovich')}
 
-
-
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
 
@@ -167,6 +165,10 @@ LOGGING = {
         },
         'commands-console': {
             'format': '%(levelname)-8s %(message)s',
+        },
+        "json": {
+            "()": "pythonjsonlogger.jsonlogger.JsonFormatter",
+            'format': '%(levelname)-8s %(asctime)-25s %(message)s',
         }
     },
     'handlers': {
@@ -174,13 +176,13 @@ LOGGING = {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
             'filename': DEBUG_FILE,
-            'formatter': 'commands',
+            'formatter': 'json',
         },
         'file-error': {
             'level': 'ERROR',
             'class': 'logging.FileHandler',
             'filename': ERROR_FILE,
-            'formatter': 'commands',
+            'formatter': 'json',
         },
         'console-warn': {
             'level': 'WARNING',

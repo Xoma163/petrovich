@@ -73,7 +73,7 @@ class TgBot(CommonBot):
         if response.status_code != 200:
             response_json = response.json()
             error_msg = "Ошибка в inline_memes"
-            self.logger.error({'result': error_msg, 'error': response_json})
+            self.logger.error({'message': error_msg, 'error': response_json})
 
     def _send_media_group(self, rm: ResponseMessageItem, default_params):
         """
@@ -161,7 +161,7 @@ class TgBot(CommonBot):
                 if response.status_code != 200:
                     error_msg = "Непредвиденная ошибка. Сообщите разработчику. Команда /баг"
                     error_rm = ResponseMessage(error_msg, rmi.peer_id).messages[0]
-                    self.logger.error({'result': error_msg, 'error': response.json()['description']})
+                    self.logger.error({'message': error_msg, 'error': response.json()['description']})
                     response = self.send_response_message_item(error_rm)
                     results.append({"success": False, "response": response, "response_message_item": error_rm})
                 else:
@@ -169,7 +169,7 @@ class TgBot(CommonBot):
             # Предвиденная ошибка
             except (PWarning, PError) as e:
                 rmi.text += f"\n\n{str(e)}"
-                getattr(self.logger, e.level)({'result': rmi})
+                getattr(self.logger, e.level)({'message': rmi})
                 response = self.send_response_message_item(rmi)
                 results.append({"success": True, "response": response, "response_message_item": rmi})
         return results

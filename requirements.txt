@@ -49,6 +49,7 @@ pyasn1-modules==0.2.8
 pydub==0.25.1
 pyparsing==3.0.4
 python-dateutil==2.8.2
+python-json-logger
 pytube==11.0.1
 pytz==2021.3
 requests==2.26.0
