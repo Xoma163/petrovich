@@ -72,8 +72,8 @@ class Message:
         return clear_msg
 
     def parse_from_payload(self, payload):
-        command = payload.get('command')
-        args = payload.get('args')
+        command = payload.get("command")
+        args = payload.get("args")
         raw = command
         if args:
             if isinstance(args, str):

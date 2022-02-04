@@ -20,7 +20,7 @@ class ResponseMessage:
         Вывод в логи
         """
         dict_self = copy(self.__dict__)
-        dict_self['messages'] = [x.to_log() for x in dict_self['messages']]
+        dict_self["messages"] = [x.to_log() for x in dict_self["messages"]]
         return dict_self
 
     def to_api(self) -> dict:
@@ -28,7 +28,7 @@ class ResponseMessage:
         Вывод в API
         """
         dict_self = copy(self.__dict__)
-        dict_self['messages'] = [x.to_api() for x in dict_self['messages']]
+        dict_self["messages"] = [x.to_api() for x in dict_self["messages"]]
 
         return dict_self
 
@@ -44,11 +44,11 @@ class ResponseMessageItem:
         msg_copy = copy(msg)
 
         self.peer_id = peer_id
-        self.text = msg_copy.pop('text', "")
-        self.attachments = msg_copy.pop('attachments', [])
+        self.text = msg_copy.pop("text", "")
+        self.attachments = msg_copy.pop("attachments", [])
         if not isinstance(self.attachments, list):
             self.attachments = [self.attachments]
-        self.keyboard = msg_copy.pop('keyboard', {})
+        self.keyboard = msg_copy.pop("keyboard", {})
         self.kwargs = msg_copy
 
     def to_log(self) -> dict:
@@ -56,7 +56,7 @@ class ResponseMessageItem:
         Вывод в логи
         """
         dict_self = copy(self.__dict__)
-        dict_self['attachments'] = [x.to_log() for x in dict_self['attachments']]
+        dict_self["attachments"] = [x.to_log() for x in dict_self["attachments"]]
         return dict_self
 
     def to_api(self) -> dict:
@@ -64,8 +64,8 @@ class ResponseMessageItem:
         Вывод в API
         """
         dict_self = copy(self.__dict__)
-        dict_self['attachments'] = [x.to_api() for x in dict_self['attachments']]
-        del dict_self['peer_id']
+        dict_self["attachments"] = [x.to_api() for x in dict_self["attachments"]]
+        del dict_self["peer_id"]
 
         return dict_self
 

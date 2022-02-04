@@ -4,7 +4,7 @@ from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Role, Platform
 from apps.bot.utils.DoTheLinuxComand import do_the_linux_command
 from apps.bot.utils.utils import draw_text_on_image
-from petrovich.settings import BASE_DIR
+from petrovich.settings import BASE_DIR, DEBUG_FILE
 
 
 class Logs(Command):
@@ -25,28 +25,30 @@ class Logs(Command):
         if self.event.message.args:
             arg0 = self.event.message.args[0]
         menu = [
-            [['веб', 'web', 'сайт', 'site'], self.get_web_logs],
+            # [['веб', 'web', 'сайт', 'site'], self.get_web_logs],
             [['бот', 'bot'], self.get_bot_logs],
             [['default'], self.get_bot_logs]
         ]
         method = self.handle_menu(menu, arg0)
         image = method()
-
+        # return get_tg_formatted_text(image)
         img_byte_arr = io.BytesIO()
         image.save(img_byte_arr, format='PNG')
         return {'attachments': self.bot.upload_document(img_byte_arr, peer_id=self.event.peer_id, filename='logs.png')}
 
-    def get_web_logs(self):
-        count = self.get_count(50, 1000)
-        command = f"systemctl status petrovich_site -n{count}"
-        res = self.get_server_logs(command)
-        img = draw_text_on_image(res)
-        return img
+    # def get_web_logs(self):
+    #     count = self.get_count(50, 1000)
+    #     command = f"systemctl status petrovich_site -n{count}"
+    #     res = self.get_server_logs(command)
+    #     img = draw_text_on_image(res)
+    #     return img
 
     def get_bot_logs(self):
         count = self.get_count(50, 1000)
-        command = f"systemctl status petrovich -n{count}"
-        res = self._get_bot_logs(command)
+        # if self.event.message.args
+        res = self.read_file(DEBUG_FILE, count)
+        # command = f"systemctl status petrovich -n{count}"
+        # res = self._get_bot_logs(command)
         img = draw_text_on_image(res)
         return img
 
@@ -116,3 +118,8 @@ class Logs(Command):
             right_index = old_str.find('\n', word_index)
             old_str = old_str[:left_index] + old_str[right_index:]
         return old_str
+
+    def read_file(self, path, rows_count):
+        with open(path, 'r') as file:
+            lines = file.readlines()[-rows_count:]
+        return lines

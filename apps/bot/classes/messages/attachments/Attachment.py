@@ -104,7 +104,7 @@ class Attachment:
         Вывод в логи
         """
         dict_self = copy.copy(self.__dict__)
-        ignore_fields = ['private_download_url', 'content']
+        ignore_fields = ["private_download_url", "content"]
         for ignore_field in ignore_fields:
             dict_self[ignore_field] = '*' * 5 if dict_self[ignore_field] else dict_self[ignore_field]
         return dict_self
