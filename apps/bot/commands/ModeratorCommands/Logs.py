@@ -1,4 +1,5 @@
 import io
+import json
 
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Role, Platform
@@ -44,12 +45,19 @@ class Logs(Command):
     #     return img
 
     def get_bot_logs(self):
-        count = self.get_count(50, 1000)
-        # if self.event.message.args
+        count = self.get_count(10, 20)
         res = self.read_file(DEBUG_FILE, count)
-        # command = f"systemctl status petrovich -n{count}"
-        # res = self._get_bot_logs(command)
-        img = draw_text_on_image(res)
+        res2 = []
+        for item in res:
+            item_json = json.loads(item)
+            if 'exc_info' in item_json:
+                item_json['exc_info'] = item_json['exc_info'].split('\n')
+            if 'event' in item_json:
+                del item_json['event']
+            item_str = json.dumps(item_json, indent=2, ensure_ascii=False)
+            res2.append(item_str)
+        text = "\n".join(res2)
+        img = draw_text_on_image(text)
         return img
 
     def get_server_logs(self, command):
