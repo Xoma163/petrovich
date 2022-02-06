@@ -17,9 +17,16 @@ REDDIT_URLS = ("www.reddit.com",)
 TIKTOK_URLS = ("www.tiktok.com", 'vm.tiktok.com', 'm.tiktok.com')
 INSTAGRAM_URLS = ('www.instagram.com', 'instagram.com')
 TWITTER_URLS = ('www.twitter.com', 'twitter.com')
+PIKABU_URLS = ('www.pikabu.ru', 'pikabu.ru')
 
 MEDIA_URLS = tuple(
-    list(YOUTUBE_URLS) + list(REDDIT_URLS) + list(TIKTOK_URLS) + list(INSTAGRAM_URLS) + list(TWITTER_URLS))
+    list(YOUTUBE_URLS) +
+    list(REDDIT_URLS) +
+    list(TIKTOK_URLS) +
+    list(INSTAGRAM_URLS) +
+    list(TWITTER_URLS) +
+    list(PIKABU_URLS)
+)
 
 
 class Media(Command):
@@ -37,7 +44,8 @@ class Media(Command):
             TIKTOK_URLS: self.get_tiktok_video,
             REDDIT_URLS: self.get_reddit_attachment,
             INSTAGRAM_URLS: self.get_instagram_attachment,
-            TWITTER_URLS: self.get_twitter_attachment,
+            TWITTER_URLS: self.get_twitter_video,
+            PIKABU_URLS: self.get_pikabu_video,
         }
 
     def start(self):
@@ -215,10 +223,7 @@ class Media(Command):
         else:
             raise PWarning("Ссылка на инстаграмм не является видео/фото")
 
-    def get_twitter_attachment(self, url):
-        # r = requests.get(url)
-        # bs4 = BeautifulSoup(r.content, 'html.parser')
-
+    def get_twitter_video(self, url):
         ydl_params = {
             'outtmpl': '%(id)s%(ext)s',
             'logger': NothingLogger()
@@ -234,6 +239,21 @@ class Media(Command):
         video_content = requests.get(video_url).content
         attachments = [self.bot.upload_video(video_content, peer_id=self.event.peer_id)]
         return attachments, video_info['title']
+
+    def get_pikabu_video(self, url):
+        headers = {
+            'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+        }
+        r = requests.get(url, headers=headers)
+        bs4 = BeautifulSoup(r.content, 'html.parser')
+        player = bs4.find('div',{'class':"player"})
+        if not player:
+            raise PWarning("Не нашёл видео в этом посте")
+        title = bs4.find('meta', attrs={'property': 'og:title'}).attrs['content']
+        webm = player.attrs['data-webm']
+        video_content = requests.get(webm).content
+        attachments = [self.bot.upload_video(video_content, peer_id=self.event.peer_id)]
+        return attachments, title
 
 
 class NothingLogger(object):
