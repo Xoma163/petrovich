@@ -16,7 +16,7 @@ class Command(BaseCommand):
             'clid': env.str('YANDEX_TAXI_CLID'),
             'apikey': env.str('YANDEX_TAXI_API_KEY'),
             'rll': env.str('YANDEX_TAXI_TEST_COORDS'),
-            'class': 'econom,business,comfortplus',
+            'class': 'econom,business,comfortplus,express,courier',
         }
         response = requests.get(url, params).json()
         TaxiInfo(data=response).save()
