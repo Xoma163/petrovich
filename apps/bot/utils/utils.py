@@ -198,6 +198,8 @@ def get_role_by_str(role_str):
         who = Role.HOME
     elif role_str in ['мразь', 'мразота', 'мрази']:
         who = Role.MRAZ
+    elif role_str in ['пользователь', 'юзер']:
+        who = Role.MRAZ
 
     return who
 
