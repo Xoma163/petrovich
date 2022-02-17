@@ -13,7 +13,6 @@ from apps.service.models import Service
 
 class Nostalgia(Command):
     name = "ностальгия"
-    names = ["ностальжи", "(с)"]
     help_text = "генерирует картинку с сообщениями из конфы беседки мразей"
     help_texts = [
         "- присылает 10 случайных сообщений",
