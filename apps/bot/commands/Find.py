@@ -18,10 +18,16 @@ class Find(Command):
     def start(self):
         query = self.event.message.args_str
 
-        photo_results = self.get_photo_results(query)
-        music_results = self.get_music_results(query)
-
-        return [f"Результаты по запросу '{query}'", photo_results, music_results]
+        try:
+            photo_results = self.get_photo_results(query)
+        except PWarning as e:
+            photo_results = str(e)
+        try:
+            music_results = self.get_music_results(query)
+        except PWarning as e:
+            music_results = str(e)
+        result = [f"Результаты по запросу '{query}'", photo_results, music_results]
+        return result
 
     def get_photo_results(self, query):
         count = 5
@@ -29,7 +35,7 @@ class Find(Command):
         gcs_api = GoogleCustomSearchAPI()
         urls = gcs_api.get_images_urls(query)
         if len(urls) == 0:
-            raise PWarning("Ничего не нашёл")
+            raise PWarning("Ничего не нашёл по картинкам")
 
         attachments = []
         if self.event.platform == Platform.VK:
@@ -46,18 +52,19 @@ class Find(Command):
         else:
             attachments = self.bot.upload_photos(urls, 5)
         if len(attachments) == 0:
-            raise PWarning("Ничего не нашёл")
+            raise PWarning("Ничего не нашёл по картинкам")
         return {'attachments': attachments}
 
     def get_music_results(self, query):
         spotify_api = SpotifyAPI()
         musics = spotify_api.search_music(query, limit=5)
-
+        if not musics:
+            raise PWarning("Ничего не нашёл по музыке")
         message = []
         for music_info in musics:
             music = f"{', '.join(music_info['artists'])} — {music_info['name']}"
             if self.event.platform == Platform.TG:
                 message.append(get_tg_formatted_url(music, music_info['url']))
             else:
-                message.append(f"{music} (music_info['url'])")
-        return {'text': "\n".join(message)}
+                message.append(f"{music} ({music_info['url']})")
+        return message
