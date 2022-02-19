@@ -67,4 +67,4 @@ class Find(Command):
                 message.append(get_tg_formatted_url(music, music_info['url']))
             else:
                 message.append(f"{music} ({music_info['url']})")
-        return message
+        return {'text': "\n".join(message)}
