@@ -3,9 +3,8 @@ import json
 
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Role, Platform
-from apps.bot.utils.DoTheLinuxComand import do_the_linux_command
 from apps.bot.utils.utils import draw_text_on_image
-from petrovich.settings import BASE_DIR, DEBUG_FILE
+from petrovich.settings import DEBUG_FILE
 
 
 class Logs(Command):
@@ -15,99 +14,62 @@ class Logs(Command):
 
     help_text = "логи бота"
     help_texts = [
-        "[сервис=бот/сервер] [кол-во строк=50] - логи. Макс 1000 строк."
+        "[кол-во строк=10] - логи. Макс 50 строк."
     ]
 
     access = Role.MODERATOR
     platforms = [Platform.VK, Platform.TG]
 
+    MAX_LOGS_COUNT = 50
+
     def start(self):
-        arg0 = None
-        if self.event.message.args:
-            arg0 = self.event.message.args[0]
-        menu = [
-            # [['веб', 'web', 'сайт', 'site'], self.get_web_logs],
-            [['бот', 'bot'], self.get_bot_logs],
-            [['default'], self.get_bot_logs]
-        ]
-        method = self.handle_menu(menu, arg0)
-        image = method()
-        # return get_tg_formatted_text(image)
+        logs_txt = self.get_bot_logs()
+        img = draw_text_on_image(logs_txt)
         img_byte_arr = io.BytesIO()
-        image.save(img_byte_arr, format='PNG')
+        img.save(img_byte_arr, format='PNG')
         return {'attachments': self.bot.upload_document(img_byte_arr, peer_id=self.event.peer_id, filename='logs.png')}
 
-    # def get_web_logs(self):
-    #     count = self.get_count(50, 1000)
-    #     command = f"systemctl status petrovich_site -n{count}"
-    #     res = self.get_server_logs(command)
-    #     img = draw_text_on_image(res)
-    #     return img
+    def transform_logs_by_values(self, items):
+        if isinstance(items, dict):
+            keys_to_del = []
+            for key in items:
+                item = items[key]
+                if not item:
+                    keys_to_del.append(key)
+                    continue
+                if isinstance(item, dict):
+                    self.transform_logs_by_values(item)
+                    if not item:
+                        keys_to_del.append(key)
+                elif isinstance(item, list):
+                    for _item in item:
+                        self.transform_logs_by_values(item)
+                        if not item:
+                            keys_to_del.append(key)
+                else:
+                    if item in ["null", "*****"]:
+                        keys_to_del.append(key)
+                    elif isinstance(item, str) and "\n" in item:
+                        items[key] = item.split('\n')
+            for key in keys_to_del:
+                del items[key]
+        elif isinstance(items, list):
+            for item in items:
+                self.transform_logs_by_values(item)
 
     def get_bot_logs(self):
-        count = self.get_count(10, 20)
+        count = self.get_count(10, self.MAX_LOGS_COUNT)
         res = self.read_file(DEBUG_FILE, count)
         res2 = []
+        separator = "-" * 150
         for item in res:
             item_json = json.loads(item)
-            if 'exc_info' in item_json:
-                item_json['exc_info'] = item_json['exc_info'].split('\n')
-            if 'event' in item_json:
-                del item_json['event']
+            self.transform_logs_by_values(item_json)
             item_str = json.dumps(item_json, indent=2, ensure_ascii=False)
+            res2.append(separator)
             res2.append(item_str)
         text = "\n".join(res2)
-        img = draw_text_on_image(text)
-        return img
-
-    def get_server_logs(self, command):
-        output = do_the_linux_command(command)
-
-        # Обрезаем инфу самого systemctl
-        index_command = output.find(command)
-        if index_command != -1:
-            output = output[index_command + len(command) + 1:]
-        else:
-            start_command = f"{BASE_DIR}/venv/bin/uwsgi --ini {BASE_DIR}/config/uwsgi.ini"
-            index_command = output.rfind(start_command)
-            if index_command != -1:
-                output = output[index_command + len(start_command) + 1:]
-
-        # Удаляем всё до старта
-        start_string = "*** uWSGI is running in multiple interpreter mode ***"
-        if output.find(start_string) != -1:
-            output = output[output.find(start_string) + len(start_string):]
-
-        # Удаляем везде вхождения этой ненужной строки
-        index_removing = output.find("server python[")
-        if index_removing != -1:
-            for_removing = output[index_removing:output.find(']', index_removing + 1) + 1]
-            output = output.replace(for_removing, '')
-
-        output = "Логи:\n" + output + "\n"
-        words = ["GET", "POST", "spawned uWSGI", "Not Found:", "HEAD", "pidfile", "WSGI app 0", "Bad Request",
-                 "HTTP_HOST", "OPTIONS "]
-        for word in words:
-            output = self.remove_rows_if_find_word(output, word)
-        return output
-
-    def _get_bot_logs(self, command):
-        output = do_the_linux_command(command)
-
-        # Обрезаем инфу самого systemctl
-        index_command = output.find(command)
-        if index_command != -1:
-            output = output[index_command + len(command) + 1:]
-
-        index_removing = output.find("server python[")
-        if index_removing != -1:
-            for_removing = output[index_removing:output.find(']', index_removing + 1) + 1]
-            output = output.replace(for_removing, '')
-        words = ["USER=root", "user root", "Stopped", "Started"]
-        for word in words:
-            output = self.remove_rows_if_find_word(output, word)
-        output = "Логи:\n" + output + "\n"
-        return output
+        return text
 
     def get_count(self, default, max_count):
         if self.event.message.args:
@@ -119,15 +81,7 @@ class Logs(Command):
         return default
 
     @staticmethod
-    def remove_rows_if_find_word(old_str, word):
-        while old_str.find(word) != -1:
-            word_index = old_str.find(word)
-            left_index = old_str.rfind('\n', 0, word_index - len(word))
-            right_index = old_str.find('\n', word_index)
-            old_str = old_str[:left_index] + old_str[right_index:]
-        return old_str
-
-    def read_file(self, path, rows_count):
+    def read_file(path, rows_count):
         with open(path, 'r') as file:
             lines = file.readlines()[-rows_count:]
         return lines
