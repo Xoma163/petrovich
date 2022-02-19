@@ -95,6 +95,7 @@ class Logs(Command):
             if len(res2) > count:
                 break
         res2.append(separator)
+        res2 = list(reversed(res2))
         text = "\n".join(res2)
         return text
 
