@@ -83,7 +83,7 @@ class Logs(Command):
         res2 = []
         for i in range(len(file_rows) - 1, -1, -1):
             item_json = json.loads(file_rows[i])
-            if filter_chat and str(item_json['event']['peer_id']) != self.event.chat.chat_id:
+            if filter_chat and 'event' in item_json and str(item_json['event']['peer_id']) != self.event.chat.chat_id:
                 continue
             if filter_level and item_json['levelname'] not in filter_level:
                 continue
