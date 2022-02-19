@@ -2,7 +2,7 @@ from django.contrib.auth.models import Group
 from django.test import TestCase
 
 from apps.bot.classes.Command import Command
-from apps.bot.classes.bots.TgBot import TgBot
+from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning, PError
 from apps.bot.classes.events.TgEvent import TgEvent

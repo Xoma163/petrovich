@@ -3,10 +3,10 @@ import threading
 
 import vk_api
 from vk_api import VkApi, VkUpload
-from vk_api.bot_longpoll import VkBotLongPoll
 from vk_api.utils import get_random_id
 
 from apps.bot.classes.bots.Bot import Bot as CommonBot
+from apps.bot.classes.bots.vk.MyVkBotLongPoll import MyVkBotLongPoll
 from apps.bot.classes.consts.ActivitiesEnum import VK_ACTIVITIES, ActivitiesEnum
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.events.VkEvent import VkEvent
@@ -279,14 +279,3 @@ class VkBot(CommonBot):
         )
         return response['items'][0]
     # END EXTRA
-
-
-class MyVkBotLongPoll(VkBotLongPoll):
-    def listen(self):
-        while True:
-            try:
-                for event in self.check():
-                    yield event
-            except Exception as e:
-                error = {'exception': f'Longpoll Error (VK): {str(e)}'}
-                print(error)

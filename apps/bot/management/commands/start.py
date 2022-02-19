@@ -1,9 +1,9 @@
 from django.core.management import BaseCommand
 
 from apps.birds.CameraHandler import CameraHandler
-from apps.bot.classes.bots.TgBot import TgBot
-from apps.bot.classes.bots.VkBot import VkBot
-from apps.bot.classes.bots.YandexBot import YandexBot
+from apps.bot.classes.bots.tg.TgBot import TgBot
+from apps.bot.classes.bots.vk.VkBot import VkBot
+from apps.bot.classes.bots.yandex.YandexBot import YandexBot
 
 camera_handler = CameraHandler()
 

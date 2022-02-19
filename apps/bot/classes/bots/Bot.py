@@ -395,9 +395,9 @@ def get_bot_by_platform(platform: Platform):
     """
     Получение бота по платформе
     """
-    from apps.bot.classes.bots.VkBot import VkBot
-    from apps.bot.classes.bots.TgBot import TgBot
-    from apps.bot.classes.bots.YandexBot import YandexBot
+    from apps.bot.classes.bots.vk.VkBot import VkBot
+    from apps.bot.classes.bots.tg.TgBot import TgBot
+    from apps.bot.classes.bots.yandex.YandexBot import YandexBot
 
     platforms = {
         Platform.VK: VkBot,
@@ -413,7 +413,7 @@ def send_message_to_moderator_chat(msgs):
         return Chat.objects.get(pk=test_chat_id).chat_id
 
     def get_moderator_bot_class():
-        from apps.bot.classes.bots.TgBot import TgBot
+        from apps.bot.classes.bots.tg.TgBot import TgBot
         return TgBot
 
     bot = get_moderator_bot_class()()

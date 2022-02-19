@@ -1,10 +1,9 @@
 import json
 import threading
-import time
-
-import requests
 
 from apps.bot.classes.bots.Bot import Bot as CommonBot
+from apps.bot.classes.bots.tg.MyTgBotLongPoll import MyTgBotLongPoll
+from apps.bot.classes.bots.tg.TgRequests import TgRequests
 from apps.bot.classes.consts.ActivitiesEnum import ActivitiesEnum, TG_ACTIVITIES
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PError, PWarning, PSkip
@@ -13,17 +12,15 @@ from apps.bot.classes.events.TgEvent import TgEvent
 from apps.bot.classes.messages.ResponseMessage import ResponseMessageItem, ResponseMessage
 from apps.bot.classes.messages.attachments.DocumentAttachment import DocumentAttachment
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
+from apps.bot.classes.messages.attachments.StickerAttachment import StickerAttachment
 from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
 from apps.bot.commands.Meme import Meme
 from apps.bot.models import Profile
 from apps.bot.utils.utils import get_thumbnail_for_image, get_tg_formatted_url
 from petrovich.settings import env
 
-API_TELEGRAM_URL = 'api.telegram.org'
-
 
 class TgBot(CommonBot):
-    API_TELEGRAM_URL = API_TELEGRAM_URL
 
     def __init__(self):
         CommonBot.__init__(self, Platform.TG)
@@ -140,6 +137,14 @@ class TgBot(CommonBot):
                 raise PError("Нельзя загружать видео более 40 мб в телеграмм")
             return self.requests.get('sendVideo', default_params, files={'video': video.content})
 
+    def _send_sticker(self, rm: ResponseMessageItem, default_params):
+        """
+        Отправка стикера
+        """
+        sticker: StickerAttachment = rm.attachments[0]
+        default_params['sticker'] = sticker.file_id
+        return self.requests.get('sendSticker', default_params)
+
     def _send_text(self, default_params):
         self.set_activity(default_params['chat_id'], ActivitiesEnum.TYPING)
         default_params['text'] = default_params.pop('caption')
@@ -190,6 +195,8 @@ class TgBot(CommonBot):
                 return self._send_video(rm, params)
             elif isinstance(rm.attachments[0], DocumentAttachment):
                 return self._send_document(rm, params)
+            elif isinstance(rm.attachments[0], StickerAttachment):
+                return self._send_sticker(rm, params)
         return self._send_text(params)
 
     # END  MAIN ROUTING AND MESSAGING
@@ -298,56 +305,7 @@ class TgBot(CommonBot):
         help_texts_tg.sort(key=lambda x: x['command'])
         self.requests.get('setMyCommands', json={'commands': help_texts_tg})
 
+    def get_sticker_set(self, name):
+        res = self.requests.get('getStickerSet', json={'name': name}).json()
+        return res['result']['stickers']
     # END EXTRA
-
-
-class TgRequests:
-    def __init__(self, token):
-        self.token = token
-
-    def get(self, method_name, params=None, **kwargs):
-        url = f'https://{API_TELEGRAM_URL}/bot{self.token}/{method_name}'
-        return requests.get(url, params, **kwargs)
-
-    def post(self, method_name, params=None, **kwargs):
-        url = f'https://{API_TELEGRAM_URL}/bot{self.token}/{method_name}'
-        return requests.post(url, params, **kwargs)
-
-
-class MyTgBotLongPoll:
-    def __init__(self, token):
-        self.token = token
-        self.request = TgRequests(token)
-        self.last_update_id = None
-
-    def set_last_update_id(self):
-        """
-        Запоминание последнего обработанного собщения
-        """
-        result = self.request.get('getUpdates')
-        if result.status_code == 200:
-            result = result.json()['result']
-            if len(result) > 0:
-                self.last_update_id = result[-1]['update_id'] + 1
-
-    def check(self):
-        """
-        Проверка на новое сообщение
-        """
-        result = self.request.get('getUpdates', {'offset': self.last_update_id, 'timeout': 30}, timeout=35)
-        if result.status_code != 200:
-            return []
-        result = result.json()['result']
-        return result
-
-    def listen(self):
-        while True:
-            try:
-                for event in self.check():
-                    yield event
-                    self.last_update_id = event['update_id'] + 1
-                time.sleep(0.5)
-
-            except Exception as e:
-                error = {'exception': f'Longpoll Error (TG): {str(e)}'}
-                print(error)

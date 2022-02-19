@@ -7,6 +7,7 @@ class StickerAttachment(Attachment):
         super().__init__('sticker')
         self.width = None
         self.height = None
+        self.emoji = None
 
     def parse_vk_sticker(self, event_sticker):
         for image in event_sticker['images']:
@@ -15,3 +16,8 @@ class StickerAttachment(Attachment):
                 self.height = image['height']
                 self.url = image['url']
                 break
+
+    def parse_tg_sticker(self, sticker):
+        attrs = ['width', 'height', 'file_id', 'file_size', 'emoji']
+        for attr in attrs:
+            setattr(self, attr, sticker[attr])

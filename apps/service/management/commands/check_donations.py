@@ -1,7 +1,7 @@
 import requests
 from django.core.management.base import BaseCommand
 
-from apps.bot.classes.bots.TgBot import TgBot
+from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.models import Chat
 from apps.service.models import Service, Donations
 from petrovich.settings import env

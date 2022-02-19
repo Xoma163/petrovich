@@ -5,8 +5,8 @@ from django.http import JsonResponse
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 
-from apps.bot.classes.bots.APIBot import APIBot
-from apps.bot.classes.bots.YandexBot import YandexBot
+from apps.bot.classes.bots.api.APIBot import APIBot
+from apps.bot.classes.bots.yandex.YandexBot import YandexBot
 from apps.bot.classes.consts.Exceptions import PError
 from apps.bot.classes.mixins import CSRFExemptMixin
 
