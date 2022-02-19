@@ -10,7 +10,6 @@ class Donations(Command):
     help_text = "список всех донатов"
     access = Role.TRUSTED
 
-
     def start(self):
         donations = DonationsModel.objects.all()
         if len(donations) == 0:

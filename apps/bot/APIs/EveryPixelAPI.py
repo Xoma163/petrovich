@@ -19,7 +19,9 @@ class EveryPixelAPI:
                             auth=(self.CLIENT_ID, self.CLIENT_SECRET)).json()
 
     def get_image_quality_by_file(self, file):
-        data = {'data': file}
+        data = {
+            'data': file
+        }
         return requests.post(self.IMAGE_QUALITY_URL,
                              files=data,
                              auth=(self.CLIENT_ID, self.CLIENT_SECRET)).json()
@@ -35,7 +37,9 @@ class EveryPixelAPI:
         return f"{round(response['quality']['score'] * 100, 2)}%"
 
     def get_faces_on_photo_by_url(self, url):
-        params = {'url': url}
+        params = {
+            'url': url
+        }
         return requests.get(self.IMAGE_FACES_URL,
                             params=params,
                             auth=(self.CLIENT_ID, self.CLIENT_SECRET)).json()

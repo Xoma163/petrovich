@@ -4,27 +4,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 
-  <link rel="icon" type="image/png" href="{% static "favicon_256.png" %}"/>
-  <title>andrewsha.net{% if title %} | {% endif %}{% block title %}{% endblock %}</title>
-  {% render_bundle 'app' 'css' %}
+    <link rel="icon" type="image/png" href="{% static "favicon_256.png" %}"/>
+    <title>andrewsha.net{% if title %} | {% endif %}{% block title %}{% endblock %}</title>
+    {% render_bundle 'app' 'css' %}
 
-  {% block css %}
-  {% endblock %}
+    {% block css %}
+    {% endblock %}
 
 </head>
 <body>
 {% block body %}
-  <div id="calculator">
-    {{ message }}
-  </div>
+    <div id="calculator">
+        {{ message }}
+    </div>
 {% endblock %}
 <footer>
-  {% render_bundle 'app' 'js' %}
-  {% block js %}
-  {% endblock %}
+    {% render_bundle 'app' 'js' %}
+    {% block js %}
+    {% endblock %}
 </footer>
 </body>
 

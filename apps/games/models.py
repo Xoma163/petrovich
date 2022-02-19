@@ -69,6 +69,7 @@ class PetrovichGames(models.Model):
     def __str__(self):
         return str(self.profile)
 
+
 def get_default_board():
     return [['', '', ''], ['', '', ''], ['', '', '']]
 

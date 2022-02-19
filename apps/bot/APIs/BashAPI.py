@@ -11,7 +11,11 @@ class BashAPI:
     def parse(self):
         r = requests.get(self.URL)
         bsop = BeautifulSoup(r.text, 'html.parser')
-        html_quotes = bsop.find('section', {'class': 'quotes'}).find_all('div', {'class': 'quote__body'})[:self.count]
+        html_quotes = bsop.find('section', {
+            'class': 'quotes'
+        }).find_all('div', {
+            'class': 'quote__body'
+        })[:self.count]
         bash_quotes = []
 
         for quote in html_quotes:

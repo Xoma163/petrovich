@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
 {% block body %}
-  <div class="container">
-    <div class="row">
-      {% for session in object_list %}
-        <div class="col-3">
-          <a href="{% url 'web:calculator_session' session.id %}">{{ session.name }}</a>
+    <div class="container">
+        <div class="row">
+            {% for session in object_list %}
+                <div class="col-3">
+                    <a href="{% url 'web:calculator_session' session.id %}">{{ session.name }}</a>
+                </div>
+            {% endfor %}
         </div>
-      {% endfor %}
     </div>
-  </div>
 {% endblock %}

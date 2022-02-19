@@ -72,7 +72,6 @@ class Profile(models.Model):
     default_platform = models.CharField('Тип платформы по умолчанию', max_length=20, choices=PlatformEnum.choices(),
                                         blank=True)
 
-
     def set_avatar(self, url):
         ext, image = get_avatar_content(url)
         self.avatar.save(f"avatar_{str(self)}.{ext}", File(image))

@@ -19,7 +19,13 @@ class BotInitializer(TestCase):
         initial_command = InitCommand()
         initial_command.init_groups()
         tz, _ = TimeZone.objects.get_or_create(name='Europe/Samara')
-        city = {'name': 'Самара', 'synonyms': 'самара смр', 'lat': 53.195538, 'lon': 50.101783, 'timezone': tz}
+        city = {
+            'name': 'Самара',
+            'synonyms': 'самара смр',
+            'lat': 53.195538,
+            'lon': 50.101783,
+            'timezone': tz
+        }
         city, _ = City.objects.update_or_create(name=city['name'], defaults=city)
 
         all_groups = Group.objects.exclude(name="BANNED")

@@ -27,7 +27,9 @@ class OCRApi:
         }
         return requests.post(
             self.URL,
-            files={'filename.jpg': file},
+            files={
+                'filename.jpg': file
+            },
             data=payload,
         ).json()
 

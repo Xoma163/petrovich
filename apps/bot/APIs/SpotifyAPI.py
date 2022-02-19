@@ -18,7 +18,10 @@ class SpotifyAPI:
         results = self.sp.search(q=q, limit=limit, market="RU")
         return [{
             'artists': [y['name'] for y in x['artists']],
-            'album': {'title': x['album']['name'], 'image': x['album']['images'][1]['url']},
+            'album': {
+                'title': x['album']['name'],
+                'image': x['album']['images'][1]['url']
+            },
             'name': x['name'],
             'url': x['external_urls']['spotify']
         } for x in results['tracks']['items']]

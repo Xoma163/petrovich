@@ -13,7 +13,9 @@ from petrovich.settings import env
 class YandexWeatherAPI:
     URL = "https://api.weather.yandex.ru/v1/informers"
     TOKEN = env.str("YANDEX_WEATHER_TOKEN")
-    HEADERS = {'X-Yandex-API-Key': TOKEN}
+    HEADERS = {
+        'X-Yandex-API-Key': TOKEN
+    }
 
     def __init__(self, city):
         self.city = city
@@ -42,7 +44,8 @@ class YandexWeatherAPI:
                 'pressure': fact['pressure_mm'],
                 'humidity': fact['humidity'],
             },
-            'forecast': []}
+            'forecast': []
+        }
 
         # Проставление part_name для времени сейчас
         index = list(DAY_TRANSLATOR.keys()).index(response['forecast']['parts'][0]['part_name'])

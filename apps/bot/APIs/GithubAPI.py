@@ -12,7 +12,9 @@ class GithubAPI:
     ISSUES_URL = f'https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/issues'
     LABELS_URL = f'https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/labels'
     TOKEN = env.str('GITHUB_TOKEN')
-    HEADERS = {"Authorization": f"token {TOKEN}"}
+    HEADERS = {
+        "Authorization": f"token {TOKEN}"
+    }
 
     def create_issue(self, title, body=None, assignee=None, milestone=None, labels=None):
         """Создание issue."""

@@ -1,7 +1,7 @@
 <template>
-  <main class="container-fluid" id="calculator" v-if="session">
+  <main v-if="session" id="calculator" class="container-fluid">
     <h3>{{ session.name }}</h3>
-    <div class="calculator-product header" v-if="session.products.length>0">
+    <div v-if="session.products.length>0" class="calculator-product header">
       <div class="is-bought vertical-center"></div>
       <div class="name">Название</div>
       <div class="count">Кол-во</div>
@@ -23,9 +23,9 @@
       </CalculatorProduct>
     </div>
     <div class="buttons flex-end">
-      <a @click="users" class="cursor-pointer btn btn-secondary">Пользователи</a>
-      <a @click="addProduct" class="cursor-pointer btn btn-success">Добавить</a>
-      <a @click="calculate" class="cursor-pointer btn btn-primary">Рассчитать</a>
+      <a class="cursor-pointer btn btn-secondary" @click="users">Пользователи</a>
+      <a class="cursor-pointer btn btn-success" @click="addProduct">Добавить</a>
+      <a class="cursor-pointer btn btn-primary" @click="calculate">Рассчитать</a>
     </div>
     <div class="result fancybox">
       <div v-for="transaction in result.transactions">
@@ -41,8 +41,8 @@
     </div>
     <div class="users fancybox">
       <CalculatorUsers
-          :users="session.users"
           :sessionId="session.id"
+          :users="session.users"
           @delete-user="deleteUser"
       ></CalculatorUsers>
     </div>
@@ -71,7 +71,7 @@ export default {
 
   methods: {
     users() {
-      $.fancybox.open($(".users"), { touch: false });
+      $.fancybox.open($(".users"), {touch: false});
     },
 
     addProduct() {
@@ -120,7 +120,7 @@ export default {
       axios.get(`/calculator_session/api/calculator_session/${sessionId}/calculate/`)
           .then((response) => {
             this.result = response.data.data;
-            $.fancybox.open($(".result"), { touch: false });
+            $.fancybox.open($(".result"), {touch: false});
           });
     }
   },

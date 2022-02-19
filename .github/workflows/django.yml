@@ -31,17 +31,17 @@ jobs:
       - name: Apt dependencies
         run: |
           sudo apt-get install libpq-dev python3-dev
-#          sudo pg_ctlcluster 12 main start
-#          sudo ln -s /tmp/.s.PGSQL.5432 /var/run/postgresql/.s.PGSQL.5432
+      #          sudo pg_ctlcluster 12 main start
+      #          sudo ln -s /tmp/.s.PGSQL.5432 /var/run/postgresql/.s.PGSQL.5432
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-#      - name: Run tests
-#        env:
-#          SECRET_KEY: d7e72d9c61c4774bc5024bdd1434b1b322c62404d01ebc968b
-#          DEBUG: False
-#        run: python manage.py migrate
+      #      - name: Run tests
+      #        env:
+      #          SECRET_KEY: d7e72d9c61c4774bc5024bdd1434b1b322c62404d01ebc968b
+      #          DEBUG: False
+      #        run: python manage.py migrate
       - name: Run tests
         env:
           SECRET_KEY: d7e72d9c61c4774bc5024bdd1434b1b322c62404d01ebc968b

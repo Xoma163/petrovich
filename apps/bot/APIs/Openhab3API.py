@@ -13,7 +13,9 @@ class Openhab3API:
     }
 
     def get_items(self, room=None):
-        params = {'recursive': True}
+        params = {
+            'recursive': True
+        }
         items = requests.get(f"{self.URL}/items", params, headers=self.HEADERS).json()
         if 'error' in items:
             raise PWarning("Ошибка")
@@ -30,7 +32,8 @@ class Openhab3API:
                 'label': item['label'],
                 'type': item['type'],
                 'category': item['category'],
-                'sub_items': []}
+                'sub_items': []
+            }
             sub_items = item.get('members', [])
             for sub_item in sub_items:
                 parsed_sub_item = {
@@ -51,7 +54,9 @@ class Openhab3API:
         item = self.find_item_by_label(items, item_name)
 
         state = "ON" if state else "OFF"
-        headers = {"Content-Type": "text/plain"}
+        headers = {
+            "Content-Type": "text/plain"
+        }
         headers.update(self.HEADERS)
         res = requests.post(f"{self.URL}/items/{item['name']}/", data=state, headers=headers)
         if res.status_code != 200:

@@ -246,7 +246,7 @@ class Media(Command):
         }
         r = requests.get(url, headers=headers)
         bs4 = BeautifulSoup(r.content, 'html.parser')
-        player = bs4.find('div',{'class':"player"})
+        player = bs4.find('div', {'class': "player"})
         if not player:
             raise PWarning("Не нашёл видео в этом посте")
         title = bs4.find('meta', attrs={'property': 'og:title'}).attrs['content']

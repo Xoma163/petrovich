@@ -1,28 +1,28 @@
 <template>
   <div class="mb-2 calculator-product">
     <div class="is-bought vertical-center">
-      <input type="checkbox" v-model="product.is_bought" class="form-control no-focus no-select">
+      <input v-model="product.is_bought" class="form-control no-focus no-select" type="checkbox">
     </div>
     <div class="name">
-      <input type="text" class="form-control" v-model="product.name">
+      <input v-model="product.name" class="form-control" type="text">
     </div>
     <div class="count">
-      <input type="number" class="form-control no-arrows" v-model="product.count">
+      <input v-model="product.count" class="form-control no-arrows" type="number">
     </div>
     <div class="uom">
       <select v-model="product.uom" class="form-control">
-        <option selected :value="null">---</option>
+        <option :value="null" selected>---</option>
         <template v-for="uom in uomList">
           <option :value="uom.value">{{ uom.label }}</option>
         </template>
       </select>
     </div>
     <div class="price">
-      <input type="number" v-model="product.price" class="form-control no-arrows">
+      <input v-model="product.price" class="form-control no-arrows" type="number">
     </div>
     <div class="user">
       <select v-model="product.bought_by" class="form-control">
-        <option selected :value="null">---</option>
+        <option :value="null" selected>---</option>
         <template v-for="user in users">
           <option :value="user.id">{{ user.name }}</option>
         </template>

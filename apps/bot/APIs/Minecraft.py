@@ -58,7 +58,10 @@ class MinecraftAPI:
         return response['InstanceState']['Name'] == 'running'
 
     def _prepare_message(self, action):
-        translator = {'start': 'Стартуем', 'stop': "Финишируем"}
+        translator = {
+            'start': 'Стартуем',
+            'stop': "Финишируем"
+        }
 
         return f"{translator[action]} майн {self.get_version()}!" \
                f"\nИнициатор - {self.event.sender}"
@@ -146,7 +149,9 @@ class MinecraftAPI:
         players_list_pos = response_lines[2].find('[')
         if players_list_pos != -1:
             players_list = response_lines[2][players_list_pos:].replace("[\'", '').replace('\']', '').split(',')
-            server_info['players'] = [{'name': x[:x.find(' ')]} for x in players_list]
+            server_info['players'] = [{
+                'name': x[:x.find(' ')]
+            } for x in players_list]
         return server_info
 
     def get_server_info(self):

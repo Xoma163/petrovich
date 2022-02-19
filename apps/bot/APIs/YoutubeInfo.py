@@ -23,5 +23,6 @@ class YoutubeInfo:
                 'title': last_video.find('title').text,
                 'link': last_video.find('link').attrs['href'],
                 'date': datetime.strptime(last_video.find('published').text, '%Y-%m-%dT%H:%M:%S%z'),
-            }}
+            }
+        }
         return youtube_info

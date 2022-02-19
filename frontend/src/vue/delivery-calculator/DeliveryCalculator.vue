@@ -4,11 +4,11 @@
     <div class="row">
       <div class="col-sm col-12">
         <label for="deliveryCost">Стоимость доставки</label>
-        <input type="number" id="deliveryCost" class="form-control no-arrows" v-model.number="deliveryCost">
+        <input id="deliveryCost" v-model.number="deliveryCost" class="form-control no-arrows" type="number">
       </div>
       <div class="col-sm col-12">
         <label for="discount">Процент скидки</label>
-        <input type="number" id="discount" class="form-control no-arrows" v-model.number="discount">
+        <input id="discount" v-model.number="discount" class="form-control no-arrows" type="number">
       </div>
     </div>
     <div class="row">
@@ -25,7 +25,7 @@
         <div class="col delete">
         </div>
       </div>
-      <div class="users w-100" v-for="user in users" :key="user.id">
+      <div v-for="user in users" :key="user.id" class="users w-100">
         <DeliveryCalculatorUser
             :id="user.id"
             :deliveryCost="deliveryCost"
@@ -43,11 +43,13 @@
 
       >Добавить</a>
     </div>
-    <div class="total" v-if="sumPrice!==0">
+    <div v-if="sumPrice!==0" class="total">
       <div> Общая сумма заказа - {{ sumPrice }}</div>
       <div v-if="discount !==0"> Общая сумма заказа со скидкой - {{ sumPriceDiscount }}</div>
       <div v-if="deliveryCost!==0"> Общая сумма заказа с доставкой - {{ sumPriceDelivery }}</div>
-      <div v-if="deliveryCost!==0 && discount !==0"> Общая сумма заказа со скидкой и с доставкой - {{ sumPriceDiscountDelivery}}</div>
+      <div v-if="deliveryCost!==0 && discount !==0"> Общая сумма заказа со скидкой и с доставкой -
+        {{ sumPriceDiscountDelivery }}
+      </div>
     </div>
   </main>
 </template>
@@ -71,7 +73,7 @@ export default {
   },
   methods: {
     addUser() {
-      this.users.push({ id: this.id, price: 0 });
+      this.users.push({id: this.id, price: 0});
       this.id += 1;
     },
     deleteUser(user) {

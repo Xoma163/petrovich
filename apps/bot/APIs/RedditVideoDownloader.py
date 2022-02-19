@@ -26,11 +26,15 @@ class RedditVideoSaver:
         xml = requests.get(url).content
         bs4 = BeautifulSoup(xml, 'html.parser')
         try:
-            filename = bs4.find("adaptationset", {'contenttype': 'audio'}).find('representation').find('baseurl').text
+            filename = bs4.find("adaptationset", {
+                'contenttype': 'audio'
+            }).find('representation').find('baseurl').text
             return filename
         except Exception:
             try:
-                filename = bs4.find("representation", {'id': 'AUDIO-1'}).find('baseurl').text
+                filename = bs4.find("representation", {
+                    'id': 'AUDIO-1'
+                }).find('baseurl').text
                 return filename
             except Exception:
                 return None

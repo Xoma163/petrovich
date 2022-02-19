@@ -25,7 +25,7 @@ class Restart(Command):
         return method()
 
     def menu_bot(self):
-        self.bot.parse_and_send_msgs_thread('Рестартим бота',self.event.peer_id)
+        self.bot.parse_and_send_msgs_thread('Рестартим бота', self.event.peer_id)
         do_the_linux_command('sudo systemctl restart petrovich')
         return 'Рестартим бота'
 
