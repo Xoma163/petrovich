@@ -31,13 +31,14 @@ class Logs(Command):
         level_name = "DEBUG"
         if self.event.message.args:
             level = logging._nameToLevel.get(self.event.message.args[0].upper(), logging._nameToLevel[level_name])
-        self.int_args = [-1]
-        try:
-            self.parse_int()
-            count = self.event.message.args[-1]
-            count = min(count, 30)
-        except PWarning:
-            pass
+
+            self.int_args = [-1]
+            try:
+                self.parse_int()
+                count = self.event.message.args[-1]
+                count = min(count, 30)
+            except PWarning:
+                pass
 
         filter_levels = [logging._levelToName[x] for x in logging._levelToName if x >= level]
         filter_chat = self.event.peer_id if self.event.chat else None
@@ -93,6 +94,7 @@ class Logs(Command):
 
             if len(res2) > count:
                 break
+        res2.append(separator)
         text = "\n".join(res2)
         return text
 
