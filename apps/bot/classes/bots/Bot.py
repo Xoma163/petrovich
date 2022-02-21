@@ -61,9 +61,11 @@ class Bot(Thread):
         except PSkip:
             pass
         except Exception as e:
-            print(str(e))
-            tb = traceback.format_exc()
-            print(tb)
+            msg = "Непредвиденная ошибка. Сообщите разработчику. Команда /баг"
+            rm = ResponseMessage(msg, event.peer_id)
+            self.logger.error({"exception": str(e), "message": rm.to_log(), "event": event.to_log()})
+            if send:
+                self.send_response_message(rm)
 
     def parse_and_send_msgs(self, msgs, peer_id):
         """
