@@ -20,9 +20,9 @@ def random_probability(probability) -> bool:
     """
     Возвращает True с заданной вероятностью
     """
-    if 1 > probability > 99:
-        raise PWarning("Вероятность события должна быть от 1 до 99")
-    rand_int = get_random_int(1, 100)
+    if 0 > probability > 100:
+        raise PWarning("Вероятность события должна быть от 0 до 100")
+    rand_int = get_random_int(0, 100)
     if rand_int <= probability:
         return True
     else:

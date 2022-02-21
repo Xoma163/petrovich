@@ -19,7 +19,7 @@ class Turett(Command):
 
     @staticmethod
     def send_turett(event):
-        chance = 0.5 if event.chat.mentioning else 2
+        chance = 1 if event.chat.mentioning else 2
         if random_probability(chance):
             if isinstance(event.bot, TgBot):
                 if random_probability(50):

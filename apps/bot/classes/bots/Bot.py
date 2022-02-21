@@ -61,9 +61,7 @@ class Bot(Thread):
         except PSkip:
             pass
         except Exception as e:
-            msg = "Непредвиденная ошибка. Сообщите разработчику. Команда /баг"
-            rm = ResponseMessage(msg, event.peer_id)
-            self.logger.error({"exception": str(e), "message": rm.to_log(), "event": event.to_log()})
+            rm = self._get_unexpected_error(e, event)
             if send:
                 self.send_response_message(rm)
 
@@ -96,6 +94,17 @@ class Bot(Thread):
         """
         pass
 
+    def _get_unexpected_error(self, e, event):
+        msg = "Непредвиденная ошибка. Сообщите разработчику. Команда /баг"
+        rm = ResponseMessage(msg, event.peer_id)
+        self.logger.error({
+            "exception": str(e),
+            "message": rm.to_log(),
+            "event": event.to_log(),
+            "exc_info": traceback.format_exc()
+        })
+        return rm
+
     def route(self, event: Event) -> ResponseMessage:
         """
         Выбор команды
@@ -124,11 +133,7 @@ class Bot(Thread):
             except PSkip as e:
                 raise e
             except Exception as e:
-                msg = "Непредвиденная ошибка. Сообщите разработчику. Команда /баг"
-                rm = ResponseMessage(msg, event.peer_id)
-                self.logger.error({"exception": str(e), "message": rm.to_log(), "event": event.to_log()},
-                                  exc_info=traceback.format_exc())
-                return rm
+                return self._get_unexpected_error(e, event)
 
         # Если указана настройка не реагировать на неверные команды, то скипаем
         if event.chat and not event.chat.need_reaction:
