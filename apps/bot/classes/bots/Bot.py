@@ -94,15 +94,17 @@ class Bot(Thread):
         """
         pass
 
+    # ToDo: я не понимаю чё он орёт на .error
     def _get_unexpected_error(self, e, event):
         msg = "Непредвиденная ошибка. Сообщите разработчику. Команда /баг"
         rm = ResponseMessage(msg, event.peer_id)
         self.logger.error({
             "exception": str(e),
             "message": rm.to_log(),
-            "event": event.to_log(),
-            "exc_info": traceback.format_exc()
-        })
+            "event": event.to_log()
+        },
+            exc_info=traceback.format_exc()
+        )
         return rm
 
     def route(self, event: Event) -> ResponseMessage:
@@ -157,6 +159,9 @@ class Bot(Thread):
         similar_command = None
         tanimoto_max = 0
         user_groups = event.sender.get_list_of_role_names()
+        if not event.message:
+            msg = "Я не понял, что вы от меня хотите(("
+            return msg
         for command in commands:
             if not command.full_names:
                 continue
