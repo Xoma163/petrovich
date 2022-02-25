@@ -15,7 +15,11 @@ class VkEvent(Event):
         if is_fwd:
             message = self.raw
             chat_id = None
-            self.peer_id = message['peer_id']
+            self.peer_id = message.get('peer_id')
+            # Вк на репли сообщение стал слать второй ивент зачем-то
+            if not self.peer_id:
+                self.force_response = False
+                return
             self.from_id = message['from_id']
             if self.from_id > 0:
                 self.is_from_user = True

@@ -56,7 +56,7 @@ class ResponseMessageItem:
         Вывод в логи
         """
         dict_self = copy(self.__dict__)
-        dict_self["attachments"] = [x.to_log() for x in dict_self["attachments"]]
+        dict_self["attachments"] = [x.to_log() for x in dict_self["attachments"] if isinstance(x, dict)]
         return dict_self
 
     def to_api(self) -> dict:
