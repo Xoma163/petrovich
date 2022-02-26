@@ -32,7 +32,7 @@ class VkEvent(Event):
 
             self.is_from_chat = self.raw.from_chat
             self.is_from_user = self.raw.from_user
-            self.is_from_bot = self.raw.from_group
+            self.is_from_bot = self.raw.from_group or self.raw.message.from_id < 0
 
             self.from_id = message['from_id']
             self.peer_id = message['peer_id']

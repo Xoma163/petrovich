@@ -56,6 +56,8 @@ class Event:
         """
         if self.force_response is not None:
             return self.force_response
+        if not self.sender:
+            return False
 
         if self.sender.check_role(Role.BANNED):
             return False
