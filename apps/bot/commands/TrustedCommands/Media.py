@@ -129,7 +129,7 @@ class Media(Command):
             raise PWarning("Нельзя грузить видосы > 60 секунд с ютуба")
         if 'formats' in video_info:
             for _format in video_info['formats']:
-                if _format['ext'] == 'mp4' and _format['asr']:
+                if _format['ext'] == 'mp4' and 'asr' in _format:
                     video_urls.append(_format)
 
         if len(video_urls) == 0:
