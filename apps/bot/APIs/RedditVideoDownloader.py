@@ -56,23 +56,14 @@ class RedditVideoSaver:
                 media_data = data["media"]
         if not media_data:
             raise PWarning("Нет видео в посте")
-        audio_filename = None
-        # ToDo: gifs ?
-        # if not media_data:
-        #     if data['url'].endswith('.gifv'):
-        #         video_url = data['url'][:-1]
-        #     else:
-        #         # ToDo: ya hz
-        #         raise PWarning("фыв")
-        # else:
+        audio_url = None
+        video_url = None
+
         if media_data.get('type') == 'gfycat.com':
             video_url = media_data['oembed']['thumbnail_url'].replace('size_restricted.gif', 'mobile.mp4')
-        else:
+        elif "reddit_video" in media_data:
             video_url = media_data["reddit_video"]["fallback_url"]
             audio_filename = self.parse_mpd_audio_filename(media_data['reddit_video']['dash_url'])
-
-        audio_url = None
-        if audio_filename:
             audio_url = video_url.split("DASH_")[0] + audio_filename
 
         return video_url, audio_url
