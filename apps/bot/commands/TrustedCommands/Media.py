@@ -124,17 +124,13 @@ class Media(Command):
             video_info = ydl.extract_info(url, download=False)
         except youtube_dl.utils.DownloadError:
             raise PWarning("Не смог найти видео по этой ссылке")
-        video_urls = []
         if video_info['duration'] > 60:
             raise PWarning("Нельзя грузить видосы > 60 секунд с ютуба")
-        if 'formats' in video_info:
-            for _format in video_info['formats']:
-                if _format['ext'] == 'mp4' and 'asr' in _format:
-                    video_urls.append(_format)
+        video_urls = [x for x in video_info['formats'] if x['ext'] == 'mp4' and x.get('asr')]
 
         if len(video_urls) == 0:
             raise PWarning("Чёт проблемки, напишите разрабу и пришли ссылку на видео")
-        max_quality_video = sorted(video_urls, key=lambda x: x['format_note'])[0]
+        max_quality_video = sorted(video_urls, key=lambda x: x['format_note'], reverse=True)[0]
         url = max_quality_video['url']
         video_content = requests.get(url).content
         attachments = [self.bot.upload_video(video_content, peer_id=self.event.peer_id)]
