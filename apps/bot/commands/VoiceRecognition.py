@@ -22,6 +22,13 @@ class VoiceRecognition(Command):
     attachments = [VoiceAttachment]
     priority = -100
 
+    @staticmethod
+    def accept_extra(event):
+        is_chat_auto_voice_recognize = event.is_from_chat and event.chat.recognize_voice
+        if is_chat_auto_voice_recognize and event.has_voice_message:
+            return True
+        return False
+
     def start(self):
         audio_messages = self.event.get_all_attachments(VoiceAttachment)
         audio_message = audio_messages[0]

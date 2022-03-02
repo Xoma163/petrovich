@@ -48,6 +48,15 @@ class Meme(Command):
             return True
         return super().accept(event)
 
+    @staticmethod
+    def accept_extra(event):
+        if event.message and not event.message.mentioned:
+            if event.is_from_chat and event.chat.need_meme and not event.message.mentioned:
+                message_is_exact_meme_name = MemeModel.objects.filter(name=event.message.clear, approved=True).exists()
+                if message_is_exact_meme_name:
+                    return True
+        return False
+
     def start(self):
         if not self.event.message.args:
             return self.menu_random()

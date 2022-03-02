@@ -1,5 +1,4 @@
 import copy
-from urllib.parse import urlparse
 
 from apps.bot.classes.consts.Consts import Platform, Role
 from apps.bot.classes.messages.Message import Message
@@ -8,7 +7,6 @@ from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachmen
 from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
 from apps.bot.classes.messages.attachments.VoiceAttachment import VoiceAttachment
 from apps.bot.models import Profile, Chat, User
-from apps.bot.utils.utils import get_urls_from_text
 
 
 class Event:
@@ -93,37 +91,18 @@ class Event:
         """
         Проверка, нужен ли пользователю ответ c учётом особенностей команд
         """
-        if self.message and not self.message.mentioned:
-            if self.is_from_chat and self.chat.need_meme and not self.message.mentioned:
-                from apps.bot.commands.Meme import Meme as MemeCommand
-                from apps.service.models import Meme as MemeModel
-                message_is_exact_meme_name = MemeModel.objects.filter(name=self.message.clear, approved=True).exists()
-                if message_is_exact_meme_name:
-                    self.command = MemeCommand
-                    return True
+        from apps.bot.commands.Meme import Meme as MemeCommand
+        from apps.bot.commands.TrustedCommands.Media import Media
+        from apps.bot.commands.All import All
+        from apps.bot.commands.VoiceRecognition import VoiceRecognition
 
-            all_urls = get_urls_from_text(self.message.clear_case)
-            has_fwd_with_message = self.fwd and self.fwd[0].message and self.fwd[0].message.clear_case
-            if self.is_from_pm and has_fwd_with_message:
-                all_urls += get_urls_from_text(self.fwd[0].message.clear_case)
-            from apps.bot.commands.TrustedCommands.Media import Media
-            from apps.bot.commands.TrustedCommands.Media import MEDIA_URLS
-            for url in all_urls:
-                message_is_media_link = urlparse(url).hostname in MEDIA_URLS
-                if message_is_media_link:
-                    self.command = Media
-                    return True
+        # get automatically
+        extra_commands = [MemeCommand, Media, All, VoiceRecognition]
 
-            if self.is_from_chat and self.message.command == "@all":
-                from apps.bot.commands.All import All
-                self.command = All
+        for e_command in extra_commands:
+            if e_command.accept_extra(self):
+                self.command = e_command
                 return True
-
-        is_chat_auto_voice_recognize = self.is_from_chat and self.chat.recognize_voice
-        if is_chat_auto_voice_recognize and self.has_voice_message:
-            from apps.bot.commands.VoiceRecognition import VoiceRecognition
-            self.command = VoiceRecognition
-            return True
 
         return False
 

@@ -70,6 +70,13 @@ class Command:
             return True
         return False
 
+    @staticmethod
+    def accept_extra(event):
+        """
+        Метод, определяющий нужно ли отреагировать команде вне обычных условий
+        """
+        pass
+
     def check_and_start(self, bot: Bot, event: Event):
         """
         Выполнение всех проверок и старт команды

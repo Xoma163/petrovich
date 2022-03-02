@@ -48,6 +48,19 @@ class Media(Command):
             PIKABU_URLS: self.get_pikabu_video,
         }
 
+    @staticmethod
+    def accept_extra(event):
+        if event.message and not event.message.mentioned:
+            all_urls = get_urls_from_text(event.message.clear_case)
+            has_fwd_with_message = event.fwd and event.fwd[0].message and event.fwd[0].message.clear_case
+            if event.is_from_pm and has_fwd_with_message:
+                all_urls += get_urls_from_text(event.fwd[0].message.clear_case)
+            for url in all_urls:
+                message_is_media_link = urlparse(url).hostname in MEDIA_URLS
+                if message_is_media_link:
+                    return True
+        return False
+
     def start(self):
 
         if self.event.message.command in self.full_names:
