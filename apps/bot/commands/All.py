@@ -1,7 +1,6 @@
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning
-from apps.bot.classes.events.Event import Event
 
 
 class All(Command):
@@ -15,9 +14,6 @@ class All(Command):
     ]
     platforms = [Platform.TG]
     conversation = True
-
-    def accept(self, event: Event):
-        pass
 
     @staticmethod
     def accept_extra(event):

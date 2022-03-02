@@ -44,7 +44,6 @@ class Bot(Thread):
         """
         Получение новых событий и их обработка
         """
-        pass
 
     def handle_event(self, event: Event, send=True) -> ResponseMessage:
         """
@@ -84,15 +83,12 @@ class Bot(Thread):
         Вовзращает список результатов отправки в формате
         [{success:bool, response:Response, response_message_item:ResponseMessageItem}]
         """
-        pass
-        # raise NotImplementedError
 
     def send_response_message_item(self, rm: ResponseMessageItem):
         """
         Отправка ResponseMessageItem сообщения
         Возвращает Response платформы
         """
-        pass
 
     # ToDo: я не понимаю чё он орёт на .error
     def _get_unexpected_error(self, e, event):
@@ -243,7 +239,6 @@ class Bot(Thread):
         """
         Обновление аватарки пользователя
         """
-        pass
 
     # ToDo: очень говнокод
     @staticmethod
@@ -372,14 +367,15 @@ class Bot(Thread):
 
     # EXTRA
     def set_activity(self, peer_id, activity: ActivitiesEnum):
-        pass
+        """
+        Проставление активности боту (например, отправка сообщения)
+        """
 
     @staticmethod
     def _get_keyboard_buttons(buttons):
         """
         Определение структуры кнопок. Переопределяется в каждом боте
         """
-        pass
 
     def get_inline_keyboard(self, buttons: list, cols=1):
         """
@@ -395,10 +391,14 @@ class Bot(Thread):
         return keyboard
 
     def get_mention(self, profile: Profile, name=None):
-        pass
+        """
+        Получение меншона пользователя
+        """
 
     def delete_message(self, peer_id, message_id):
-        pass
+        """
+        Удаление сообщения
+        """
 
     # END EXTRA
 

@@ -10,9 +10,6 @@ class BitLyAPI:
         "Content-Type": "application/json"
     }
 
-    def __init__(self):
-        pass
-
     def get_short_link(self, long_url):
         params = {
             "domain": "bit.ly",

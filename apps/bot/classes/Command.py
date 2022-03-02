@@ -75,7 +75,6 @@ class Command:
         """
         Метод, определяющий нужно ли отреагировать команде вне обычных условий
         """
-        pass
 
     def check_and_start(self, bot: Bot, event: Event):
         """

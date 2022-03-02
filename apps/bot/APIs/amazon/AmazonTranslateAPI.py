@@ -4,9 +4,6 @@ from petrovich.settings import AMAZON_REGION
 
 
 class AmazonTranslateAPI:
-    def __init__(self):
-        pass
-
     @staticmethod
     def get_translate(text, target_lang='ru', source_lang='en'):
         if target_lang != 'ru':
