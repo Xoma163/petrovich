@@ -11,11 +11,11 @@ class Command(BaseCommand):
 
     @staticmethod
     def init_groups():
-        groups = [{'name': x.name} for x in Role]
+        groups = [x.name for x in Role]
         for group in groups:
-            if group['name'] == "админ конфы":
+            if group == "админ конфы":
                 continue
-            Group.objects.update_or_create(name=group['name'])
+            Group.objects.update_or_create(name=group)
 
     @staticmethod
     def init_cities_offline():

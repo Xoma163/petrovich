@@ -1,6 +1,6 @@
 from apps.bot.classes.bots.Bot import Bot
 from apps.bot.classes.consts.Consts import Role, ATTACHMENT_TRANSLATOR, Platform
-from apps.bot.classes.consts.Exceptions import PWarning, PSkip
+from apps.bot.classes.consts.Exceptions import PWarning, PSkip, PIDK
 from apps.bot.classes.events.Event import Event
 from apps.bot.utils.utils import get_help_texts_for_command, transform_k, get_tg_formatted_text
 
@@ -33,6 +33,7 @@ class Command:
     city: bool = False  # Должно ли сообщение обрабатываться только с заданным городом у пользователя
     mentioned: bool = False  # Должно ли сообщение обрабатываться только с упоминанием бота
     non_mentioned: bool = False  # Должно ли сообщение обрабатываться только без упоминания бота
+    hidden: bool = False  # Скрытая команда, будет отвечать пользователям без соответствующих прав заглушкой "я вас не понял"
 
     def __init__(self, bot: Bot = None, event: Event = None):
         self.bot: Bot = bot
@@ -52,6 +53,12 @@ class Command:
         if self.name_tg:
             self.full_names.append(self.name_tg)
             self.full_help_texts_tg = f"{self.name_tg.lower()} - {self.help_text}"
+
+        if self.hidden:
+            if self.suggest_for_similar:
+                raise RuntimeError("Поле hidden=True и suggest_for_similar=True не могут быть вместе")
+            if self.access == Role.USER:
+                raise RuntimeError("Поле hidden=True и self.access=Role.USER не могут быть вместе")
 
     def __eq__(self, other):
         return self.name == other.name
@@ -135,6 +142,8 @@ class Command:
         if role == Role.CONFERENCE_ADMIN:
             if self.event.chat.admin == self.event.sender:
                 return True
+        if self.hidden:
+            raise PIDK()
         error = f"Команда доступна только для пользователей с уровнем прав {role.value}"
         raise PWarning(error)
 

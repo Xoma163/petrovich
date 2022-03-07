@@ -8,7 +8,7 @@ from django.contrib.auth.models import Group
 
 from apps.bot.classes.consts.ActivitiesEnum import ActivitiesEnum
 from apps.bot.classes.consts.Consts import Platform, Role
-from apps.bot.classes.consts.Exceptions import PWarning, PError, PSkip
+from apps.bot.classes.consts.Exceptions import PWarning, PError, PSkip, PIDK
 from apps.bot.classes.events.Event import Event
 from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
 from apps.bot.classes.messages.attachments.DocumentAttachment import DocumentAttachment
@@ -128,6 +128,8 @@ class Bot(Thread):
                 rm = ResponseMessage(msg, event.peer_id)
                 getattr(self.logger, e.level)({"message": rm.to_log(), "event": event.to_log()})
                 return rm
+            except PIDK:
+                continue
             except PSkip as e:
                 raise e
             except Exception as e:
