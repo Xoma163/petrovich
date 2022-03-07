@@ -1,7 +1,6 @@
 import time
 
 from apps.bot.classes.Command import Command
-from apps.bot.classes.consts.Consts import Platform
 from apps.bot.utils.utils import random_event, random_probability
 
 
@@ -9,7 +8,6 @@ from apps.bot.utils.utils import random_event, random_probability
 class Apologize(Command):
     name = "извинись"
     names = ["извиняйся", "извинитесь"]
-    platforms = [Platform.VK, Platform.TG]
     suggest_for_similar = False
     non_mentioned = True
 

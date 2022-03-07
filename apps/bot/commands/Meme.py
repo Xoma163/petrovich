@@ -37,7 +37,6 @@ class Meme(Command):
         "удалить (название/id) - удаляет мем (для модераторов)"
     ]
 
-    platforms = [Platform.VK, Platform.TG]
     priority = 70
 
     ALLOWED_URLS = ['youtu.be', 'youtube.com', 'coub.com']

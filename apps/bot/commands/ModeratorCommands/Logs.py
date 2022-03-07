@@ -3,7 +3,7 @@ import json
 import logging
 
 from apps.bot.classes.Command import Command
-from apps.bot.classes.consts.Consts import Role, Platform
+from apps.bot.classes.consts.Consts import Role
 from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.utils.utils import draw_text_on_image
 from petrovich.settings import DEBUG_FILE
@@ -20,7 +20,6 @@ class Logs(Command):
     ]
 
     access = Role.MODERATOR
-    platforms = [Platform.VK, Platform.TG]
 
     MAX_LOGS_COUNT = 50
 
