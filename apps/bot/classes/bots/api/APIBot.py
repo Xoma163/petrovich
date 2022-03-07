@@ -12,7 +12,7 @@ class APIBot(CommonBot):
     def parse(self, raw_event):
         token = raw_event['token']
         try:
-            Profile.objects.get(api_token=token)
+            raw_event['profile'] = Profile.objects.get(api_token=token)
         except Profile.DoesNotExist:
             raise PError('user for this token was not found')
         api_event = APIEvent(raw_event, self)

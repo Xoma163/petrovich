@@ -4,11 +4,9 @@ from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachmen
 
 class APIEvent(Event):
     def setup_event(self, is_fwd=False):
-        user_id = self.raw['token']
         text = self.raw['text']
-
-        self.user = self.bot.get_user_by_id(user_id)
-        self.sender = self.bot.get_profile_by_user(self.user)
+        self.sender = self.raw['profile']
+        self.user = self.sender.user.instance
         self.is_from_user = True
         self.is_from_pm = True
         self.set_message(text)

@@ -36,7 +36,7 @@ class VPN(Command):
             Domain.objects.get(name=url)
             return "Такой домен уже есть"
         except Domain.DoesNotExist:
-            domain = Domain.objects.create(name=url)
+            Domain.objects.create(name=url)
             return "Добавил"
 
     def list(self):
