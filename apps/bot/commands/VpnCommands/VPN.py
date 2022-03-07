@@ -20,6 +20,7 @@ class VPN(Command):
             arg0 = None
         menu = [
             [['добавить', 'add'], self.add],
+            [['удалить', 'remove'], self.remove],
             [['default'], self.list]
         ]
         method = self.handle_menu(menu, arg0)
@@ -28,10 +29,7 @@ class VPN(Command):
     def add(self):
         self.check_args(2)
         url = self.event.message.args[1]
-        if not validators.url(url):
-            raise PWarning("Ссылка не валидна")
-        if not url.startswith("https"):
-            raise PWarning("Ссылка должна начинаться с https")
+        self.check_valid_url(url)
         try:
             Domain.objects.get(name=url)
             return "Такой домен уже есть"
@@ -39,9 +37,28 @@ class VPN(Command):
             Domain.objects.create(name=url)
             return "Добавил"
 
+    def remove(self):
+        self.check_args(2)
+        url = self.event.message.args[1]
+        self.check_valid_url(url)
+        try:
+            domain = Domain.objects.get(name=url)
+            domain.delete()
+            return "Удалил"
+        except Domain.DoesNotExist:
+            return "Такого домена нет в базе"
+
     def list(self):
         domains = Domain.objects.all()
         if not domains.exists():
             return "Доменов нет"
         domains_str = [x.name for x in domains]
         return "\n".join(domains_str)
+
+    @staticmethod
+    def check_valid_url(url):
+        if not validators.url(url):
+            raise PWarning("Ссылка не валидна")
+
+        if not url.startswith("https"):
+            raise PWarning("Ссылка должна начинаться с https")
