@@ -201,6 +201,8 @@ class Media(Command):
     def get_instagram_attachment(self, url):
         r = requests.get(url)
         bs4 = BeautifulSoup(r.content, 'html.parser')
+        if bs4.find("html", {'class': "not-logged-in"}):
+            raise PWarning("Требуется логин для скачивания")
         if 'reel' in url:
             content_type = 'reel'
         else:
