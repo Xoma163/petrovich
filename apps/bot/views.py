@@ -25,10 +25,13 @@ class APIView(CSRFExemptMixin, View):
             return JsonResponse({'error': 'no authorization header provided'}, status=500)
         if not authorization.startswith("Bearer "):
             return JsonResponse({'error': 'no bearer token in authorization header'}, status=500)
-        if not request.POST:
+        if not request.POST and not request.body:
             return JsonResponse({'error': 'POST data is empty'}, status=500)
-
-        text = request.POST.get('text')
+        if request.POST:
+            data = request.POST
+        else:
+            data = json.loads(request.body.decode())
+        text = data.get('text')
         if not text:
             return JsonResponse({'error': 'no text in POST data'}, status=500)
 
@@ -36,7 +39,7 @@ class APIView(CSRFExemptMixin, View):
             'text': text,
             'token': authorization.replace("Bearer ", '')
         }
-        attachments = request.POST.get('attachments')
+        attachments = data.get('attachments')
         if attachments:
             query['attachments'] = attachments
 
