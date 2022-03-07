@@ -223,3 +223,7 @@ class TaxiInfo(models.Model):
 
     def __str__(self):
         return str(self.created)
+
+
+class Domain(models.Model):
+    name = models.CharField("Название", max_length=100)

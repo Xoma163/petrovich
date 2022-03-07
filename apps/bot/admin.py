@@ -17,6 +17,9 @@ class ProfileAdmin(admin.ModelAdmin):
         ('Настройки', {
             'fields': ('celebrate_bday', 'default_platform'),
         }),
+        ('API', {
+            'fields': ('api_token',),
+        }),
 
     )
 

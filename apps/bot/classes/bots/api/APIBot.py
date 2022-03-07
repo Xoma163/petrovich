@@ -12,8 +12,8 @@ class APIBot(CommonBot):
     def parse(self, raw_event):
         token = raw_event['token']
         try:
-            self.user_model.get(user_id=token)
+            Profile.objects.get(api_token=token)
         except Profile.DoesNotExist:
             raise PError('user for this token was not found')
-        ya_event = APIEvent(raw_event, self)
-        return self.handle_event(ya_event)
+        api_event = APIEvent(raw_event, self)
+        return self.handle_event(api_event)
