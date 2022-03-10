@@ -35,29 +35,35 @@ class Command(BaseCommand):
         tariff_map = {
             'econom': 0,
             'comfort': 1,
-            'comfortplus': 2
+            'comfortplus': 2,
+            'express': 3,
+            'courier': 4,
+
         }
         tariff_val = tariff_map[tariff]
-        len_data = len(data)
         x_data = [localize_datetime(remove_tz(x.created), 'Europe/Samara').replace(day=1, month=1, year=1900)
                   + datetime.timedelta(hours=4)
                   for x in data[list(data.keys())[0]]]
         y_data = [0 for _ in range(len(x_data))]
+        y_data_len = [0 for _ in range(len(x_data))]
         for key in data:
             for i, item in enumerate(data[key]):
                 try:
                     y = item.data['options'][tariff_val]['price']
-                    y_data[i] += y / len_data
+                    y_data[i] += y
+                    y_data_len[i] += 1
                 except Exception:
                     pass
-
+        y_data = [x[0] / x[1] for x in zip(y_data, y_data_len)]
         return x_data, y_data
 
     def print_price_by_time_graphic(self, weekdays, friday, weekends, tariff):
         tariff_map = {
             'econom': "эконом",
             'comfort': "комфорт",
-            'comfortplus': "комфорт+"
+            'comfortplus': "комфорт+",
+            'express': "доставка",
+            'courier': "курьер"
         }
 
         weekdays_x, weekdays_y = self.get_avg_price_data(weekdays, tariff)
@@ -80,6 +86,8 @@ class Command(BaseCommand):
         ax.grid(which='minor',
                 color='gray',
                 linestyle=':')
+
+        ax.set_ylim([100, 600])
 
         window_len = 10  # minutes
         kernel = np.ones(window_len, dtype=float) / window_len
@@ -120,3 +128,5 @@ class Command(BaseCommand):
         self.print_price_by_time_graphic(taxi_info_weekday, taxi_info_friday, taxi_info_weekend, tariff='econom')
         self.print_price_by_time_graphic(taxi_info_weekday, taxi_info_friday, taxi_info_weekend, tariff='comfort')
         self.print_price_by_time_graphic(taxi_info_weekday, taxi_info_friday, taxi_info_weekend, tariff='comfortplus')
+        self.print_price_by_time_graphic(taxi_info_weekday, taxi_info_friday, taxi_info_weekend, tariff='express')
+        self.print_price_by_time_graphic(taxi_info_weekday, taxi_info_friday, taxi_info_weekend, tariff='courier')
