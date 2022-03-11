@@ -44,7 +44,7 @@ class ResponseMessageItem:
         msg_copy = copy(msg)
 
         self.peer_id = peer_id
-        self.text = msg_copy.pop("text", "")
+        self.text = str(msg_copy.pop("text", ""))
         self.attachments = msg_copy.pop("attachments", [])
         if not isinstance(self.attachments, list):
             self.attachments = [self.attachments]
