@@ -1,5 +1,6 @@
 from apps.bot.APIs.GithubAPI import GithubAPI
 from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.Consts import Role
 
 
 class DeIssue(Command):
@@ -11,6 +12,7 @@ class DeIssue(Command):
     ]
     args = 1
     non_mentioned = False
+    access = Role.ADMIN
 
     def start(self):
         _id = self.event.message.args[0]
