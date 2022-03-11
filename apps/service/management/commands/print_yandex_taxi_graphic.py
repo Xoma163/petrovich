@@ -101,7 +101,7 @@ class Command(BaseCommand):
 
         plt.xlabel('Время', fontsize=21)
         plt.ylabel('Цена, руб.', fontsize=21)
-        plt.title(f'Цена {tariff_map[tariff]} тарифа в зависимости от времени. Маршрут дом-работа', fontsize=21)
+        plt.title(f'Цена тарифа "{tariff_map[tariff]}" в зависимости от времени. Маршрут дом-работа', fontsize=21)
         plt.legend()
 
         fig.set_figwidth(19.20)
@@ -126,7 +126,7 @@ class Command(BaseCommand):
         taxi_info_weekend = self.get_grouped_taxi_infos(taxi_info_weekend)
 
         self.print_price_by_time_graphic(taxi_info_weekday, taxi_info_friday, taxi_info_weekend, tariff='econom')
-        self.print_price_by_time_graphic(taxi_info_weekday, taxi_info_friday, taxi_info_weekend, tariff='comfort')
-        self.print_price_by_time_graphic(taxi_info_weekday, taxi_info_friday, taxi_info_weekend, tariff='comfortplus')
-        self.print_price_by_time_graphic(taxi_info_weekday, taxi_info_friday, taxi_info_weekend, tariff='express')
-        self.print_price_by_time_graphic(taxi_info_weekday, taxi_info_friday, taxi_info_weekend, tariff='courier')
+        # self.print_price_by_time_graphic(taxi_info_weekday, taxi_info_friday, taxi_info_weekend, tariff='comfort')
+        # self.print_price_by_time_graphic(taxi_info_weekday, taxi_info_friday, taxi_info_weekend, tariff='comfortplus')
+        # self.print_price_by_time_graphic(taxi_info_weekday, taxi_info_friday, taxi_info_weekend, tariff='express')
+        # self.print_price_by_time_graphic(taxi_info_weekday, taxi_info_friday, taxi_info_weekend, tariff='courier')
