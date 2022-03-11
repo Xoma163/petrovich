@@ -21,7 +21,7 @@ class GithubAPI:
         if labels is None:
             labels = []
 
-        issue = {
+        issue_data = {
             'title': title,
             'body': body,
             'assignee': assignee,
@@ -29,9 +29,19 @@ class GithubAPI:
             'labels': labels
         }
 
-        r = requests.post(self.ISSUES_URL, json.dumps(issue), headers=self.HEADERS)
+        r = requests.post(self.ISSUES_URL, json.dumps(issue_data), headers=self.HEADERS)
         if r.status_code != 201:
             raise PError("Не удалось создать issue на github")
+        return r.json()
+
+    def delete_issue(self, _id):
+        issue_data = {
+            "state": "closed",
+            "labels": ["Не пофикшу"]
+        }
+        r = requests.post(f"{self.ISSUES_URL}/{_id}", json.dumps(issue_data), headers=self.HEADERS)
+        if r.status_code != 200:
+            raise PError("Не удалось закрыть issue на github")
         return r.json()
 
     def get_all_labels(self):
