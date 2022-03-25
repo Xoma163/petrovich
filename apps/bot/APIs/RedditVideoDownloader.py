@@ -9,7 +9,6 @@ from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.utils.DoTheLinuxComand import do_the_linux_command
 
 
-# ToDo: tempfiles?
 class RedditVideoSaver:
     def __init__(self):
         self.timestamp = datetime.datetime.now().timestamp()
@@ -54,8 +53,7 @@ class RedditVideoSaver:
             if 'crosspost_parent_list' in data:
                 data = data['crosspost_parent_list'][0]
                 media_data = data["media"]
-        if not media_data:
-            raise PWarning("Нет видео в посте")
+
         audio_url = None
         video_url = None
 
@@ -64,8 +62,12 @@ class RedditVideoSaver:
         elif "reddit_video" in media_data:
             video_url = media_data["reddit_video"]["fallback_url"]
             audio_filename = self.parse_mpd_audio_filename(media_data['reddit_video']['dash_url'])
-            audio_url = video_url.split("DASH_")[0] + audio_filename
-
+            if audio_filename:
+                audio_url = video_url.split("DASH_")[0] + audio_filename
+        elif data.get('url_overridden_by_dest'):
+            video_url = data['url_overridden_by_dest']
+        else:
+            raise PWarning("Нет видео в посте")
         return video_url, audio_url
 
     def get_download_video_and_audio(self, video_url, audio_url):
