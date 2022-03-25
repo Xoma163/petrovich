@@ -31,6 +31,7 @@ class Platform(Enum):
     TG = 'tg'
     API = 'api'
     YANDEX = 'yandex'
+    DISCORD = 'discord'
 
     @classmethod
     def choices(cls):

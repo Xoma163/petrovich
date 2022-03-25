@@ -1,6 +1,7 @@
 from django.core.management import BaseCommand
 
 from apps.birds.CameraHandler import CameraHandler
+# from apps.bot.classes.bots.discord.DiscordBot import DiscordBot
 from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.bots.vk.VkBot import VkBot
 from apps.bot.classes.bots.yandex.YandexBot import YandexBot
@@ -16,10 +17,12 @@ class Command(BaseCommand):
         self.vk_bot = VkBot()
         self.tg_bot = TgBot()
         self.ya_bot = YandexBot()
+        # self.ds_bot = DiscordBot()
         self.camera_handler = camera_handler
 
     def handle(self, *args, **kwargs):
         debug = kwargs.get('debug', False)
+        # self.ds_bot.run()
         self.vk_bot.start()
         self.tg_bot.start()
         print('start')
