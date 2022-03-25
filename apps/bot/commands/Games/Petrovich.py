@@ -66,12 +66,6 @@ class Petrovich(Command):
     def menu_play(self):
         with lock:
             datetime_now = localize_datetime(datetime.datetime.utcnow(), DEFAULT_TIME_ZONE)
-
-            # Мемчик с Пашей
-            if datetime_now.hour == 0 and datetime_now.minute < 10 and self.event.sender.pk == 79:
-                raise PWarning(random_event(
-                    ["Опять меня вызвал Паша ночью...", "Ни стыда, ни совести", "Подожди остальных", "ААААА"]))
-
             winner_today = PetrovichGames.objects.filter(chat=self.event.chat).first()
             if winner_today:
                 datetime_last = localize_datetime(remove_tz(winner_today.date), DEFAULT_TIME_ZONE)

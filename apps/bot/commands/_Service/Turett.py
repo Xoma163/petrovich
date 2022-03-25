@@ -6,6 +6,8 @@ from apps.bot.utils.utils import random_probability, random_event
 
 
 class Turett(Command):
+    MENTIONED_CHANCE = 1
+    NOT_MENTIONED_CHANCE = 0.07
     conversation = True
     priority = 85
 
@@ -17,9 +19,8 @@ class Turett(Command):
     def start(self):
         pass
 
-    @staticmethod
-    def send_turett(event):
-        chance = 0.2 if event.chat.mentioning else 2
+    def send_turett(self, event):
+        chance = self.NOT_MENTIONED_CHANCE if event.chat.mentioning else self.MENTIONED_CHANCE
         if random_probability(chance):
             if isinstance(event.bot, TgBot):
                 if random_probability(50):
