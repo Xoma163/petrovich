@@ -8,6 +8,7 @@ class StickerAttachment(Attachment):
         self.width = None
         self.height = None
         self.emoji = None
+        self.animated = False
 
     def parse_vk_sticker(self, event_sticker):
         for image in event_sticker['images']:
@@ -21,4 +22,6 @@ class StickerAttachment(Attachment):
         attrs = ['width', 'height', 'file_id', 'file_size', 'emoji']
         for attr in attrs:
             setattr(self, attr, sticker[attr])
+        self.animated = sticker['is_video'] or sticker['is_animated']
+
         self.set_private_download_url_tg(tg_bot, self.file_id)

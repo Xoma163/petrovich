@@ -4,6 +4,7 @@ from io import BytesIO
 from PIL import Image
 
 from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 from apps.bot.classes.messages.attachments.StickerAttachment import StickerAttachment
 from apps.bot.utils.Demotivator import DemotivatorBuilder
@@ -21,6 +22,8 @@ class Demotivator(Command):
 
     def start(self):
         image = self.event.get_all_attachments(self.attachments)[0]
+        if isinstance(image, StickerAttachment) and image.animated:
+            raise PWarning("Пришлите стикер без анимации")
 
         text = self.event.message.raw.split(' ', 1)[1]
 
