@@ -6,7 +6,7 @@ import requests
 import youtube_dl
 from bs4 import BeautifulSoup
 
-from apps.bot.APIs.RedditVideoDownloader import RedditVideoSaver
+from apps.bot.APIs.RedditVideoDownloader import RedditSaver
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning, PSkip
@@ -97,7 +97,7 @@ class Media(Command):
             text = ""
             if title:
                 text = f"{title}\n"
-            text += f"От пользователя {self.event.sender}"
+            text += f"\nОт пользователя {self.event.sender}"
 
             if self.event.platform == Platform.TG:
                 text += f'\n{get_tg_formatted_url("Сурс", chosen_url)}'
@@ -193,10 +193,17 @@ class Media(Command):
         return attachments, title
 
     def get_reddit_attachment(self, url):
-        rvs = RedditVideoSaver()
-        video = rvs.get_video_from_post(url)
-        attachments = [self.bot.upload_video(video, peer_id=self.event.peer_id)]
-        return attachments, rvs.title
+        rs = RedditSaver()
+        attachment = rs.get_from_reddit(url)
+        if rs.is_image or rs.is_images:
+            attachments = self.bot.upload_photos(attachment, peer_id=self.event.peer_id)
+        elif rs.is_video:
+            attachments = self.bot.upload_video(attachment, peer_id=self.event.peer_id)
+        elif rs.is_text or rs.is_link:
+            return [], f"{rs.title}\n\n{attachment}"
+        else:
+            raise PWarning("Я хз чё за контент")
+        return attachments, rs.title
 
     def get_instagram_attachment(self, url):
         r = requests.get(url)
