@@ -161,10 +161,7 @@ class RedditSaver:
         self.data = data[0]["data"]["children"][0]["data"]
         self.title = self.data['title']
         self.media_data = self.data["media"]
-        self.content_type = self.data.get('post_hint')
-        if not self.content_type:
-            if len(self.data['media_metadata']) > 1:
-                self.content_type = self.CONTENT_TYPE_IMAGES
+        self.content_type = self.data.get('post_hint', self.CONTENT_TYPE_TEXT)
 
     def set_post_url(self, post_url):
         parsed_url = urlparse(post_url)
