@@ -51,12 +51,6 @@ class RedditSaver:
                 return None
 
     def _get_reddit_video_audio_urls(self):
-
-        if not self.media_data:
-            if 'crosspost_parent_list' in self.data:
-                data = self.data['crosspost_parent_list'][0]
-                media_data = data["media"]
-
         audio_url = None
         video_url = None
 
@@ -162,6 +156,11 @@ class RedditSaver:
         self.title = self.data['title']
         self.media_data = self.data["media"]
         self.content_type = self.data.get('post_hint', self.CONTENT_TYPE_TEXT)
+
+        if not self.media_data:
+            if 'crosspost_parent_list' in self.data:
+                self.data = self.data['crosspost_parent_list'][0]
+                self.media_data = data["media"]
 
     def set_post_url(self, post_url):
         parsed_url = urlparse(post_url)
