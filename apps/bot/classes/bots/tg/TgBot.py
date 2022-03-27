@@ -16,7 +16,7 @@ from apps.bot.classes.messages.attachments.StickerAttachment import StickerAttac
 from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
 from apps.bot.commands.Meme import Meme
 from apps.bot.models import Profile
-from apps.bot.utils.utils import get_thumbnail_for_image, get_tg_formatted_url
+from apps.bot.utils.utils import get_thumbnail_for_image, get_tg_formatted_url, get_chunks
 from petrovich.settings import env
 
 
@@ -148,6 +148,13 @@ class TgBot(CommonBot):
     def _send_text(self, default_params):
         self.set_activity(default_params['chat_id'], ActivitiesEnum.TYPING)
         default_params['text'] = default_params.pop('caption')
+        if len(default_params['text']) > 4096:
+            # Шлём длинные сообщения чанками. Последний чанк через return
+            chunks = list(get_chunks(default_params['text'], 4096))
+            for chunk in chunks[:-1]:
+                default_params['text'] = chunk
+                self.requests.get('sendMessage', default_params)
+            default_params['text'] = chunks[-1]
         return self.requests.get('sendMessage', default_params)
 
     def send_response_message(self, rm: ResponseMessage) -> list:
