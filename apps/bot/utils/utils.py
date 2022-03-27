@@ -22,8 +22,8 @@ def random_probability(probability) -> bool:
     """
     if 0 > probability > 100:
         raise PWarning("Вероятность события должна быть от 0 до 100")
-    rand_int = get_random_int(0, 100)
-    if rand_int <= probability:
+    rand_float = get_random_float(0, 100)
+    if rand_float <= probability:
         return True
     else:
         return False
@@ -56,6 +56,17 @@ def get_random_int(val1, val2=None, seed=None) -> int:
     random_int = random.randint(val1, val2)
     random.seed()
     return random_int
+
+
+def get_random_float(val1, val2=None, seed=None):
+    if not val2:
+        val2 = val1
+        val1 = 0
+    if seed:
+        random.seed(seed)
+    random_float = random.uniform(val1, val2)
+    random.seed()
+    return random_float
 
 
 def has_cyrillic(text) -> bool:

@@ -7,7 +7,7 @@ from apps.bot.utils.utils import random_probability, random_event
 
 class Turett(Command):
     MENTIONED_CHANCE = 1
-    NOT_MENTIONED_CHANCE = 0.07
+    NOT_MENTIONED_CHANCE = 0.3
     conversation = True
     priority = 85
 
