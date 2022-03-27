@@ -157,6 +157,7 @@ class RedditSaver:
         self.media_data = self.data["media"]
         self.content_type = self.data.get('post_hint', self.CONTENT_TYPE_TEXT)
 
+        # ToDo: unchecked
         if not self.media_data:
             if 'crosspost_parent_list' in self.data:
                 self.data = self.data['crosspost_parent_list'][0]

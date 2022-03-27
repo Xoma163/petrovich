@@ -1,6 +1,4 @@
 import os
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-import sys
 
 from apps.bot.classes.consts.Consts import Platform
 
