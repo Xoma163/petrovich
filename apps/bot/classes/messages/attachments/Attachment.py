@@ -77,7 +77,11 @@ class Attachment:
         self.prepare_obj(attachment, allowed_exts_url=allowed_exts_url, filename=filename)
 
     def get_download_url(self):
-        return self.public_download_url if self.public_download_url else self.private_download_url
+        if self.public_download_url:
+            return self.public_download_url
+        if not self.private_download_url:
+            self.set_private_download_url_tg()
+        return self.private_download_url
 
     def download_content(self) -> bytes:
         if not self.content:

@@ -4,6 +4,7 @@ from apps.bot.classes.events.Event import Event
 from apps.bot.classes.messages.Message import Message
 from apps.bot.classes.messages.TgMessage import TgMessage
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
+from apps.bot.classes.messages.attachments.StickerAttachment import StickerAttachment
 from apps.bot.classes.messages.attachments.VoiceAttachment import VoiceAttachment
 from petrovich.settings import env
 
@@ -103,6 +104,7 @@ class TgEvent(Event):
         photo = message.get('photo')
         voice = message.get('voice')
         document = message.get('document')
+        sticker = message.get('sticker')
         message_text = None
         if voice:
             self.setup_voice(voice)
@@ -113,6 +115,8 @@ class TgEvent(Event):
             if document['mime_type'] in ['image/png', 'image/jpg', 'image/jpeg']:
                 self.setup_photo(document)
                 message_text = message.get('caption')
+        elif sticker:
+            self.setup_sticker(sticker)
         else:
             message_text = message.get('text')
         entities = message.get('entities')
@@ -127,6 +131,11 @@ class TgEvent(Event):
         tg_voice = VoiceAttachment()
         tg_voice.parse_tg_voice(voice_event, self.bot)
         self.attachments.append(tg_voice)
+
+    def setup_sticker(self, sticker_event):
+        tg_sticker = StickerAttachment()
+        tg_sticker.parse_tg_sticker(sticker_event, self.bot)
+        self.attachments.append(tg_sticker)
 
     def setup_fwd(self, fwd):
         if fwd:

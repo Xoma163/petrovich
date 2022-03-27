@@ -3,6 +3,7 @@ from enum import Enum
 from apps.bot.classes.messages.attachments.AudioAttachment import AudioAttachment
 from apps.bot.classes.messages.attachments.DocumentAttachment import DocumentAttachment
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
+from apps.bot.classes.messages.attachments.StickerAttachment import StickerAttachment
 from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
 from apps.bot.classes.messages.attachments.VoiceAttachment import VoiceAttachment
 
@@ -127,7 +128,8 @@ ATTACHMENT_TRANSLATOR = {
     VideoAttachment: 'видео',
     PhotoAttachment: 'фото',
     DocumentAttachment: 'документ',
-    VoiceAttachment: 'голосовое'
+    VoiceAttachment: 'голосовое',
+    StickerAttachment: 'стикер'
 }
 
 BAD_ANSWERS = [

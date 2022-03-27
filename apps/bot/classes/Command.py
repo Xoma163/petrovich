@@ -311,7 +311,7 @@ class Command:
                 if type(att) in self.attachments:
                     return True
 
-        allowed_types = ' '.join([ATTACHMENT_TRANSLATOR[_type] for _type in self.attachments])
+        allowed_types = ', '.join([ATTACHMENT_TRANSLATOR[_type] for _type in self.attachments])
         error = f"Для работы команды требуются вложения: {allowed_types}"
         raise PWarning(error)
 

@@ -17,7 +17,8 @@ class StickerAttachment(Attachment):
                 self.url = image['url']
                 break
 
-    def parse_tg_sticker(self, sticker):
+    def parse_tg_sticker(self, sticker, tg_bot):
         attrs = ['width', 'height', 'file_id', 'file_size', 'emoji']
         for attr in attrs:
             setattr(self, attr, sticker[attr])
+        self.set_private_download_url_tg(tg_bot, self.file_id)

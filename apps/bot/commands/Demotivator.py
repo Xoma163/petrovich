@@ -5,6 +5,7 @@ from PIL import Image
 
 from apps.bot.classes.Command import Command
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
+from apps.bot.classes.messages.attachments.StickerAttachment import StickerAttachment
 from apps.bot.utils.Demotivator import DemotivatorBuilder
 
 
@@ -16,10 +17,10 @@ class Demotivator(Command):
         "Разделитель текста ;"
     ]
     args = 1
-    attachments = [PhotoAttachment]
+    attachments = [PhotoAttachment, StickerAttachment]
 
     def start(self):
-        image = self.event.get_all_attachments(PhotoAttachment)[0]
+        image = self.event.get_all_attachments(self.attachments)[0]
 
         text = self.event.message.raw.split(' ', 1)[1]
 
