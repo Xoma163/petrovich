@@ -211,13 +211,15 @@ class Media(Command):
                     link = text[item.regs[2][0]:item.regs[2][1]]
                     tg_url = get_tg_formatted_url(link_text, link)
                     text = text[:start_pos] + tg_url + text[end_pos:]
-                p = re.compile(r"https.*player")
-                for item in reversed(list(p.finditer(text))):
-                    start_pos = item.start()
-                    end_pos = item.end()
-                    link = text[start_pos:end_pos]
-                    tg_url = get_tg_formatted_url("Видео", link)
-                    text = text[:start_pos] + tg_url + text[end_pos:]
+                regexps_with_static = ((r"https.*player", "Видео"), (r"https://preview\.redd\.it/.*", "Фото"))
+                for regexp, _text in regexps_with_static:
+                    p = re.compile(regexp)
+                    for item in reversed(list(p.finditer(text))):
+                        start_pos = item.start()
+                        end_pos = item.end()
+                        link = text[start_pos:end_pos]
+                        tg_url = get_tg_formatted_url(_text, link)
+                        text = text[:start_pos] + tg_url + text[end_pos:]
 
             return [], f"{rs.title}\n\n{text}"
         else:
