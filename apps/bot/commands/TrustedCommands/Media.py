@@ -200,7 +200,26 @@ class Media(Command):
         elif rs.is_video:
             attachments = self.bot.upload_video(attachment, peer_id=self.event.peer_id)
         elif rs.is_text or rs.is_link:
-            return [], f"{rs.title}\n\n{attachment}"
+            text = attachment
+            if self.event.platform == Platform.TG:
+                text = text.replace("&#x200B;", "").replace("&amp;#x200B;", "").replace("&amp;", "&").strip()
+                p = re.compile(r"\[(.*)\]\((.*)\)")
+                for item in reversed(list(p.finditer(text))):
+                    start_pos = item.start()
+                    end_pos = item.end()
+                    link_text = text[item.regs[1][0]:item.regs[1][1]]
+                    link = text[item.regs[2][0]:item.regs[2][1]]
+                    tg_url = get_tg_formatted_url(link_text, link)
+                    text = text[:start_pos] + tg_url + text[end_pos:]
+                p = re.compile(r"https.*player")
+                for item in reversed(list(p.finditer(text))):
+                    start_pos = item.start()
+                    end_pos = item.end()
+                    link = text[start_pos:end_pos]
+                    tg_url = get_tg_formatted_url("Видео", link)
+                    text = text[:start_pos] + tg_url + text[end_pos:]
+
+            return [], f"{rs.title}\n\n{text}"
         else:
             raise PWarning("Я хз чё за контент")
         return attachments, rs.title
