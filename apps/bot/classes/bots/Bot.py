@@ -21,6 +21,7 @@ from petrovich.settings import env
 
 
 class Bot(Thread):
+    ERROR_MSG = "Непредвиденная ошибка. Сообщите разработчику. Команда /баг"
     def __init__(self, platform):
         Thread.__init__(self)
 
@@ -92,8 +93,7 @@ class Bot(Thread):
 
     # ToDo: я не понимаю чё он орёт на .error
     def _get_unexpected_error(self, e, event):
-        msg = "Непредвиденная ошибка. Сообщите разработчику. Команда /баг"
-        rm = ResponseMessage(msg, event.peer_id)
+        rm = ResponseMessage(self.ERROR_MSG, event.peer_id)
         self.logger.error({
             "exception": str(e),
             "message": rm.to_log(),

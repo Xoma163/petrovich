@@ -171,9 +171,8 @@ class TgBot(CommonBot):
 
                 # Непредвиденная ошибка
                 if response.status_code != 200:
-                    error_msg = "Непредвиденная ошибка. Сообщите разработчику. Команда /баг"
-                    error_rm = ResponseMessage(error_msg, rmi.peer_id).messages[0]
-                    self.logger.error({'message': error_msg, 'error': response.json()['description']})
+                    error_rm = ResponseMessage(self.ERROR_MSG, rmi.peer_id).messages[0]
+                    self.logger.error({'message': self.ERROR_MSG, 'error': response.json()['description']})
                     response = self.send_response_message_item(error_rm)
                     results.append({"success": False, "response": response, "response_message_item": error_rm})
                 else:

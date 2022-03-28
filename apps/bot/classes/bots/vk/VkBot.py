@@ -52,9 +52,8 @@ class VkBot(CommonBot):
                 results.append({"success": True, "response": response, "response_message_item": rmi})
             except vk_api.exceptions.ApiError as e:
                 if e.code not in [901, 917]:
-                    error_msg = "Непредвиденная ошибка. Сообщите разработчику. Команда /баг"
-                    error_rm = ResponseMessage(error_msg, rmi.peer_id).messages[0]
-                    self.logger.error({'message': error_msg, 'error': str(e)})
+                    error_rm = ResponseMessage(self.ERROR_MSG, rmi.peer_id).messages[0]
+                    self.logger.error({'message': self.ERROR_MSG, 'error': str(e)})
                     response = self.send_response_message_item(error_rm)
                     results.append({"success": False, "response": response, "response_message_item": error_rm})
         return results
