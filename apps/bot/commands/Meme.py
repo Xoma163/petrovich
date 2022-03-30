@@ -554,7 +554,7 @@ class Meme(Command):
         memes = memes[:max_count]
         memes = self.get_tanimoto_memes(memes, filter_list)
 
+        all_memes_qr += self._get_inline_qrs([x for x in memes if x.type == StickerAttachment.TYPE])
         all_memes_qr += self._get_inline_qrs([x for x in memes if x.type == LinkAttachment.TYPE])
         all_memes_qr += self._get_inline_qrs([x for x in memes if x.type == PhotoAttachment.TYPE])
-        all_memes_qr += self._get_inline_qrs([x for x in memes if x.type == StickerAttachment.TYPE])
         return all_memes_qr
