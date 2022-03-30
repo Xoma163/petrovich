@@ -395,7 +395,7 @@ class Meme(Command):
         msg = {}
 
         if self.event.platform == Platform.TG:
-            if meme.type == StickerAttachment.TYPE:
+            if meme.type == PhotoAttachment.TYPE:
                 msg['attachments'] = self.bot.upload_photos(meme.link, peer_id=self.event.peer_id)
             elif meme.type == StickerAttachment.TYPE:
                 msg['attachments'] = StickerAttachment()
@@ -493,12 +493,18 @@ class Meme(Command):
         _inline_qr = []
         for meme in memes:
             # Todo: send sticker as sticker
-            if meme.type in [PhotoAttachment.TYPE, StickerAttachment.TYPE]:
+            if meme.type in [PhotoAttachment.TYPE]:
                 qr = {
                     'id': meme.pk,
                     'type': meme.type,
                     'photo_url': meme.link,
                     'thumb_url': meme.link
+                }
+            elif meme.type in [StickerAttachment.TYPE]:
+                qr = {
+                    'id': meme.pk,
+                    'type': meme.type,
+                    'sticker_file_id': meme.sticker_file_id,
                 }
             elif meme.type == LinkAttachment.TYPE:
                 parsed_url = urlparse(meme.link)
@@ -533,7 +539,7 @@ class Meme(Command):
         else:
             filtered_memes = MemeModel.objects.all().order_by('-uses')
 
-        q = Q(approved=True) & (Q(type='link', link__icontains="youtu") | Q(type='photo'))
+        q = Q(approved=True) & (Q(type='link', link__icontains="youtu") | Q(type='photo') | Q(type='sticker'))
         memes = filtered_memes.filter(q)
 
         all_memes_qr = []
@@ -550,4 +556,5 @@ class Meme(Command):
 
         all_memes_qr += self._get_inline_qrs([x for x in memes if x.type == LinkAttachment.TYPE])
         all_memes_qr += self._get_inline_qrs([x for x in memes if x.type == PhotoAttachment.TYPE])
+        all_memes_qr += self._get_inline_qrs([x for x in memes if x.type == StickerAttachment.TYPE])
         return all_memes_qr

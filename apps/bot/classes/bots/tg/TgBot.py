@@ -64,7 +64,7 @@ class TgBot(CommonBot):
         params = {
             'inline_query_id': data['id'],
             'results': json.dumps(inline_query_result, ensure_ascii=False),
-            # 'cache_time': 0
+            'cache_time': 0
         }
         response = self.requests.get('answerInlineQuery', params)
         if response.status_code != 200:
