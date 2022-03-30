@@ -2,9 +2,10 @@ from apps.bot.classes.messages.attachments.Attachment import Attachment
 
 
 class PhotoAttachment(Attachment):
+    TYPE = "photo"
 
     def __init__(self):
-        super().__init__('photo')
+        super().__init__(self.TYPE)
         self.width = None
         self.height = None
 

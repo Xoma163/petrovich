@@ -2,9 +2,10 @@ from apps.bot.classes.messages.attachments.Attachment import Attachment
 
 
 class StickerAttachment(Attachment):
+    TYPE = 'sticker'
 
     def __init__(self):
-        super().__init__('sticker')
+        super().__init__(self.TYPE)
         self.width = None
         self.height = None
         self.emoji = None

@@ -2,9 +2,9 @@ from apps.bot.classes.messages.attachments.Attachment import Attachment
 
 
 class VideoAttachment(Attachment):
-
+    TYPE = 'video'
     def __init__(self):
-        super().__init__('video')
+        super().__init__(self.TYPE)
         self.duration = None  # sec
 
     def parse_vk_video(self, event_video):

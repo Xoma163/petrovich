@@ -7,8 +7,10 @@ from apps.bot.classes.Command import Command
 from apps.bot.classes.bots.Bot import upload_image_to_vk_server, send_message_to_moderator_chat, get_bot_by_platform
 from apps.bot.classes.consts.Consts import Role, Platform
 from apps.bot.classes.consts.Exceptions import PWarning, PError
+from apps.bot.classes.messages.attachments.AudioAttachment import AudioAttachment
 from apps.bot.classes.messages.attachments.LinkAttachment import LinkAttachment
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
+from apps.bot.classes.messages.attachments.StickerAttachment import StickerAttachment
 from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
 from apps.bot.utils.utils import tanimoto, get_tg_formatted_text
 from apps.service.models import Meme as MemeModel
@@ -87,7 +89,7 @@ class Meme(Command):
 
     def menu_add(self):
         self.check_args(2)
-        attachments = self.event.get_all_attachments(PhotoAttachment)
+        attachments = self.event.get_all_attachments([PhotoAttachment, StickerAttachment])
         if len(attachments) == 0:
             url = self.event.message.args_case[-1]
             self._check_allowed_url(url)
@@ -102,8 +104,10 @@ class Meme(Command):
         self.check_meme_name_is_no_digits(meme_name_list)
         meme_name = " ".join(meme_name_list)
 
-        if self.event.platform != Platform.VK and type(attachment) not in [PhotoAttachment, LinkAttachment]:
-            raise PWarning('В данной платформе поддерживается добавление только картинок-мемов и youtube/coub ссылок')
+        if self.event.platform != Platform.VK and type(attachment) not in [PhotoAttachment, StickerAttachment,
+                                                                           LinkAttachment]:
+            raise PWarning(
+                'В данной платформе поддерживается добавление только картинок/стикеров-мемов и youtube/coub ссылок')
 
         new_meme = {
             'name': meme_name,
@@ -125,7 +129,7 @@ class Meme(Command):
 
         if isinstance(attachment, LinkAttachment):
             new_meme['link'] = attachment.url
-        elif isinstance(attachment, PhotoAttachment):  # or attachment.type == 'doc':
+        elif isinstance(attachment, PhotoAttachment):
             if self.event.platform == Platform.VK:
                 new_meme['link'] = attachment.public_download_url
             else:
@@ -389,16 +393,16 @@ class Meme(Command):
         msg = {}
 
         if self.event.platform == Platform.TG:
-            if meme.type == 'photo':
+            if meme.type == PhotoAttachment.TYPE:
                 msg['attachments'] = self.bot.upload_photos(meme.link, peer_id=self.event.peer_id)
             else:
                 msg['text'] = meme.link
         elif self.event.platform == Platform.VK:
-            if meme.type in ['video', 'audio']:
+            if meme.type in [VideoAttachment.TYPE, AudioAttachment.TYPE]:
                 msg['attachments'] = [meme.link.replace(VK_URL, '')]
-            elif meme.type == 'link':
+            elif meme.type == LinkAttachment.TYPE:
                 msg['text'] = meme.link
-            elif meme.type == 'photo':
+            elif meme.type == PhotoAttachment.TYPE:
                 msg['attachments'] = self.bot.upload_photos(meme.link, peer_id=self.event.peer_id)
             else:
                 raise PError("У мема нет типа. Тыкай разраба")
@@ -407,19 +411,9 @@ class Meme(Command):
             if msg.get('text', None):
                 msg['text'] += f"\n{meme.name}"
 
-        ############## ToDo: удалить когда не будет БУНДа
-        if meme.type == 'video':
-            msg['text'] = f"Ваш мем я нашёл, но я вам его не отдам. Обновите мем на ютуб-ссылку, пожалуйста\n" \
-                          f"id={meme.pk}"
-            if send_keyboard:
-                msg['keyboard'] = self.bot.get_inline_keyboard(
-                    [{'command': self.name, 'button_text': "Ещё"},
-                     {'command': self.name, 'button_text': "Инфо", 'args': ["инфо", meme.pk]}])
-        else:
-            ############## ToDo: удалить когда не будет БУНДа
-            if send_keyboard:
-                msg['keyboard'] = self.bot.get_inline_keyboard(
-                    [{'command': self.name, 'button_text': "Ещё"}])
+        if send_keyboard:
+            msg['keyboard'] = self.bot.get_inline_keyboard(
+                [{'command': self.name, 'button_text': "Ещё"}])
         return msg
 
     @staticmethod
@@ -493,14 +487,14 @@ class Meme(Command):
     def _get_inline_qrs(memes):
         _inline_qr = []
         for meme in memes:
-            if meme.type == 'photo':
+            if meme.type == PhotoAttachment.TYPE:
                 qr = {
                     'id': meme.pk,
                     'type': meme.type,
                     'photo_url': meme.link,
                     'thumb_url': meme.link
                 }
-            elif meme.type == 'link':
+            elif meme.type == LinkAttachment.TYPE:
                 parsed_url = urlparse(meme.link)
                 video_id = parsed_url.path.strip('/')
                 if parsed_url.query:
@@ -548,6 +542,6 @@ class Meme(Command):
         memes = memes[:max_count]
         memes = self.get_tanimoto_memes(memes, filter_list)
 
-        all_memes_qr += self._get_inline_qrs([x for x in memes if x.type == 'link'])
-        all_memes_qr += self._get_inline_qrs([x for x in memes if x.type == 'photo'])
+        all_memes_qr += self._get_inline_qrs([x for x in memes if x.type == LinkAttachment.TYPE])
+        all_memes_qr += self._get_inline_qrs([x for x in memes if x.type == PhotoAttachment.TYPE])
         return all_memes_qr
