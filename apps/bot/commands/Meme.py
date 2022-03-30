@@ -136,7 +136,8 @@ class Meme(Command):
                 new_meme['link'] = upload_image_to_vk_server(attachment.download_content())
         elif isinstance(attachment, StickerAttachment):
             new_meme['sticker_file_id'] = attachment.file_id
-            new_meme['link'] = upload_image_to_vk_server(attachment.download_content())
+            if not attachment.animated:
+                new_meme['link'] = upload_image_to_vk_server(attachment.download_content())
         new_meme_obj = MemeModel.objects.create(**new_meme)
         if new_meme['approved']:
             return "Добавил"
