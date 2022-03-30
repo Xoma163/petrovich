@@ -135,6 +135,8 @@ class Meme(Command):
             else:
                 new_meme['link'] = upload_image_to_vk_server(attachment.download_content())
         elif isinstance(attachment, StickerAttachment):
+            if self.event.platform != Platform.TG:
+                raise PWarning("Добавление стикер-мемов доступно только в TG")
             new_meme['sticker_file_id'] = attachment.file_id
             if not attachment.animated:
                 new_meme['link'] = upload_image_to_vk_server(attachment.download_content())
@@ -161,23 +163,8 @@ class Meme(Command):
             attachments = [attachment]
             id_name = self.get_id_or_meme_name(self.event.message.args[1:-1])
         except PWarning:
-            attachments = self.event.get_all_attachments([VideoAttachment, PhotoAttachment])
+            attachments = self.event.get_all_attachments([VideoAttachment, PhotoAttachment, StickerAttachment])
             id_name = self.get_id_or_meme_name(self.event.message.args[1:])
-
-        if len(attachments) == 0:
-            raise PWarning("Не нашёл вложений в сообщении или пересланном сообщении\n"
-                           "Не нашёл ссылки на youtube/coub")
-
-        attachment = attachments[0]
-        if isinstance(attachment, LinkAttachment):
-            new_meme_link = attachment.url
-        elif isinstance(attachment, PhotoAttachment):
-            if self.event.platform == Platform.VK:
-                new_meme_link = attachment.public_download_url
-            else:
-                new_meme_link = upload_image_to_vk_server(attachment.download_content())
-        else:
-            raise PWarning("Невозможно")
 
         meme_filter = {}
         if isinstance(id_name, int):
@@ -188,8 +175,31 @@ class Meme(Command):
             meme_filter['filter_user'] = self.event.sender
 
         meme = self.get_meme(**meme_filter)
-        meme.link = new_meme_link
-        meme.type = attachment.type
+
+        if len(attachments) == 0:
+            raise PWarning("Не нашёл вложений в сообщении или пересланном сообщении\n"
+                           "Не нашёл ссылки на youtube/coub")
+
+        attachment = attachments[0]
+        fields = {'type': attachment.type}
+        if isinstance(attachment, LinkAttachment):
+            fields['link'] = attachment.url
+        elif isinstance(attachment, PhotoAttachment):
+            if self.event.platform == Platform.VK:
+                fields['link'] = attachment.public_download_url
+            else:
+                fields['link'] = upload_image_to_vk_server(attachment.download_content())
+        elif isinstance(attachment, StickerAttachment):
+            if self.event.platform != Platform.TG:
+                raise PWarning("Обновление стикер-мемов доступно только в TG")
+            fields['sticker_file_id'] = attachment.file_id
+            if not attachment.animated:
+                fields['link'] = upload_image_to_vk_server(attachment.download_content())
+        else:
+            raise PWarning("Невозможно")
+
+        for attr, value in fields.items():
+            setattr(meme, attr, value)
         meme.save()
 
         if self.event.sender.check_role(Role.MODERATOR) or self.event.sender.check_role(Role.TRUSTED):
