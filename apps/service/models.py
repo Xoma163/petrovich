@@ -66,12 +66,13 @@ class Meme(models.Model):
         ('audio', 'Аудио'),
         ('doc', 'Документ'),
         ('link', 'Ссылка'),
+        ('sticker', 'Стикер'),
     ]
 
     name = models.CharField("Название", max_length=1000, default="")
     link = models.CharField("Ссылка", max_length=1000, default="", null=True, blank=True)
     author = models.ForeignKey(Profile, models.SET_NULL, verbose_name="Автор", null=True)
-    type = models.CharField("Тип", max_length=5, choices=types, blank=True)
+    type = models.CharField("Тип", max_length=10, choices=types, blank=True)
     uses = models.PositiveIntegerField("Использований", default=0)
     approved = models.BooleanField("Разрешённый", default=False)
 
