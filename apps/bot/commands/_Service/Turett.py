@@ -8,6 +8,7 @@ from apps.bot.utils.utils import random_probability, random_event
 class Turett(Command):
     MENTIONED_CHANCE = 1
     NOT_MENTIONED_CHANCE = 0.3
+    STICKER_CHANCE = 50
     conversation = True
     priority = 85
 
@@ -23,13 +24,13 @@ class Turett(Command):
         chance = self.NOT_MENTIONED_CHANCE if event.chat.mentioning else self.MENTIONED_CHANCE
         if random_probability(chance):
             if isinstance(event.bot, TgBot):
-                if random_probability(50):
+                if random_probability(self.STICKER_CHANCE):
                     msg = random_event(TURETT_WORDS)
                 else:
                     stickers = event.bot.get_sticker_set("SamPriFle")
                     random_sticker = random_event(stickers)
                     tg_sticker = StickerAttachment()
-                    tg_sticker.parse_tg_sticker(random_sticker)
+                    tg_sticker.parse_tg_sticker(random_sticker, event.bot)
                     msg = {'attachments': tg_sticker}
             else:
                 msg = random_event(TURETT_WORDS)

@@ -134,7 +134,9 @@ class Meme(Command):
                 new_meme['link'] = attachment.public_download_url
             else:
                 new_meme['link'] = upload_image_to_vk_server(attachment.download_content())
-
+        elif isinstance(attachment, StickerAttachment):
+            new_meme['sticker_file_id'] = attachment.file_id
+            new_meme['link'] = upload_image_to_vk_server(attachment.download_content())
         new_meme_obj = MemeModel.objects.create(**new_meme)
         if new_meme['approved']:
             return "Добавил"
@@ -393,8 +395,11 @@ class Meme(Command):
         msg = {}
 
         if self.event.platform == Platform.TG:
-            if meme.type == PhotoAttachment.TYPE:
+            if meme.type == StickerAttachment.TYPE:
                 msg['attachments'] = self.bot.upload_photos(meme.link, peer_id=self.event.peer_id)
+            elif meme.type == StickerAttachment.TYPE:
+                msg['attachments'] = StickerAttachment()
+                msg['attachments'].file_id = meme.sticker_file_id
             else:
                 msg['text'] = meme.link
         elif self.event.platform == Platform.VK:
@@ -402,7 +407,7 @@ class Meme(Command):
                 msg['attachments'] = [meme.link.replace(VK_URL, '')]
             elif meme.type == LinkAttachment.TYPE:
                 msg['text'] = meme.link
-            elif meme.type == PhotoAttachment.TYPE:
+            elif meme.type in [PhotoAttachment.TYPE, StickerAttachment.TYPE]:
                 msg['attachments'] = self.bot.upload_photos(meme.link, peer_id=self.event.peer_id)
             else:
                 raise PError("У мема нет типа. Тыкай разраба")
@@ -487,7 +492,8 @@ class Meme(Command):
     def _get_inline_qrs(memes):
         _inline_qr = []
         for meme in memes:
-            if meme.type == PhotoAttachment.TYPE:
+            # Todo: send sticker as sticker
+            if meme.type in [PhotoAttachment.TYPE, StickerAttachment.TYPE]:
                 qr = {
                     'id': meme.pk,
                     'type': meme.type,
