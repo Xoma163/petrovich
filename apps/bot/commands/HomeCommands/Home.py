@@ -22,7 +22,8 @@ class Home(Command):
                 'RGB_strip',
                 'Fan',
                 'Meteostation1',
-                'heater_in_legs'
+                'heater_in_legs',
+                "OctoPrint_server"
             ]
         },
         'Bedroom': {
