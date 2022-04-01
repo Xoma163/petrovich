@@ -327,7 +327,6 @@ class Meme(Command):
             memes = self.get_filtered_memes(self.event.message.args)
             try:
                 meme = self.get_one_meme(memes, self.event.message.args)
-                meme = MemeModel.objects.filter(approved=True).order_by('?').first()
             except PWarning:
                 tanimoto_memes = self.get_tanimoto_memes(memes, " ".join(self.event.message.args))
                 if len(tanimoto_memes) == 0:
@@ -335,7 +334,7 @@ class Meme(Command):
                 meme = tanimoto_memes[0]
                 warning_message = self.get_similar_memes_names(tanimoto_memes)
 
-        # meme.uses += 1
+        meme.uses += 1
         meme.save()
         prepared_meme = self.prepare_meme_to_send(meme)
         if warning_message:
