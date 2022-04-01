@@ -7,7 +7,7 @@ class StartLada(Command):
 
     def start(self):
         if self.event.message.args:
-            who = self.event.message.args_str
+            who = self.event.message.args_str_case
             return ["уи ви ви ви ви ви ви ви", f'завожу {who}']
 
         return "уи ви ви ви ви ви ви ви"
