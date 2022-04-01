@@ -384,21 +384,21 @@ class Meme(Command):
         if len(memes) == 0:
             raise PWarning("Не нашёл :(")
         elif len(memes) == 1:
-            return memes.first()
+            return MemeModel.objects.filter(approved=True).order_by('?').first()
         elif not approved:
-            return memes.first()
+            return MemeModel.objects.filter(approved=True).order_by('?').first()
         else:
             filters_str = " ".join(filter_list)
             for meme in memes:
                 if meme.name == filters_str:
-                    return meme
+                    return MemeModel.objects.filter(approved=True).order_by('?').first()
             raise PWarning("Под запрос подходит 2 и более мема")
 
     def get_meme(self, filter_list=None, filter_user=None, approved=True, _id=None) -> MemeModel:
         """
         :return: 1 мем. Если передан параметр use_tanimoto, то список мемов отсортированных по коэфф. Танимото
         """
-        memes = self.get_filtered_memes(filter_list, filter_user, approved, _id)
+        return MemeModel.objects.filter(approved=True).order_by('?').first()
         meme = self.get_one_meme(memes, filter_list, approved)
         return meme
 
@@ -544,7 +544,7 @@ class Meme(Command):
 
         return _inline_qr
 
-    def get_tg_inline_memes(self, filter_list, max_count=10):
+    def get_tg_inline_memes(self, filter_list, max_count=15):
         if filter_list:
             filtered_memes = self.get_filtered_memes(filter_list)
         else:
@@ -558,13 +558,13 @@ class Meme(Command):
             this_meme = self.get_one_meme(memes, filter_list)
             this_meme_qr = self._get_inline_qrs([this_meme])
             all_memes_qr += this_meme_qr
-            memes = memes.exclude(pk=this_meme.pk)
+            # memes = memes.exclude(pk=this_meme.pk)
         except PWarning:
             pass
 
-        memes = memes[:max_count]
-        memes = self.get_tanimoto_memes(memes, filter_list)
-
+        # memes = memes[:max_count]
+        # memes = self.get_tanimoto_memes(memes, filter_list)
+        memes = MemeModel.objects.filter(q).filter(approved=True).order_by('?')[:max_count]
         all_memes_qr += self._get_inline_qrs([x for x in memes if x.type == LinkAttachment.TYPE])
         all_memes_qr += self._get_inline_qrs([x for x in memes if x.type == StickerAttachment.TYPE])
         all_memes_qr += self._get_inline_qrs([x for x in memes if x.type == PhotoAttachment.TYPE])
