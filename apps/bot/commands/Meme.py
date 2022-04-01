@@ -333,7 +333,6 @@ class Meme(Command):
                 if len(tanimoto_memes) == 0:
                     raise PWarning("Не нашёл :(")
                 meme = tanimoto_memes[0]
-                meme = MemeModel.objects.filter(approved=True).order_by('?').first()
                 warning_message = self.get_similar_memes_names(tanimoto_memes)
 
         # meme.uses += 1
