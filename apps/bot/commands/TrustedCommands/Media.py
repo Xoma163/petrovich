@@ -202,7 +202,8 @@ class Media(Command):
         elif rs.is_text or rs.is_link:
             text = attachment
             if self.event.platform == Platform.TG:
-                text = text.replace("&#x200B;", "").replace("&amp;#x200B;", "").replace("&amp;", "&").strip()
+                text = text.replace("&#x200B;", "").replace("&amp;#x200B;", "").replace("&amp;", "&").replace(" ",
+                                                                                                              " ").strip()
                 p = re.compile(r"\[(.*)\]\((.*)\)")
                 for item in reversed(list(p.finditer(text))):
                     start_pos = item.start()
@@ -217,6 +218,8 @@ class Media(Command):
                     for item in reversed(list(p.finditer(text))):
                         start_pos = item.start()
                         end_pos = item.end()
+                        if text[start_pos - 9:start_pos] == "<a href=\"":
+                            continue
                         link = text[start_pos:end_pos]
                         tg_url = get_tg_formatted_url(_text, link)
                         text = text[:start_pos] + tg_url + text[end_pos:]
