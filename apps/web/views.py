@@ -99,7 +99,7 @@ class MinecraftSkin(View):
 
     def get(self, *args, **kwargs):
         name = kwargs['name']
-        file = BASE_DIR + static(f"files/minecraft/capes/{name}.png")
+        file = BASE_DIR + static(f"files/minecraft/skins/{name}.png")
         return FileResponse(open(file, 'rb'))
 
 
