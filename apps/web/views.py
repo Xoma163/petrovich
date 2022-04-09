@@ -1,7 +1,9 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
-from django.http import JsonResponse
+from django.http import JsonResponse, FileResponse
 from django.shortcuts import render
+from django.templatetags.static import static
+from django.views import View
 from django.views.generic import TemplateView
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
@@ -11,6 +13,7 @@ from apps.bot.APIs.YoutubeLiveCheckerAPI import YoutubeLiveCheckerAPI
 from apps.web.models import CalculatorSession, CalculatorProduct, CalculatorUser
 from apps.web.serializers import CalculatorProductSerializer, \
     CalculatorSessionSerializer, CalculatorSessionViewSerializer, CalculatorUserSerializer
+from petrovich.settings import BASE_DIR
 
 
 def main_page(request):
@@ -90,3 +93,19 @@ def calculate(request, pk):
 
 class CustomLoginView(LoginView):
     template_name = "web/accounts/login.html"
+
+
+class MinecraftSkin(View):
+
+    def get(self, *args, **kwargs):
+        name = kwargs['name']
+        file = BASE_DIR + static(f"files/minecraft/capes/{name}.png")
+        return FileResponse(open(file, 'rb'))
+
+
+class MinecraftCape(View):
+
+    def get(self, *args, **kwargs):
+        name = kwargs['name']
+        file = BASE_DIR + static(f"files/minecraft/capes/{name}.png")
+        return FileResponse(open(file, 'rb'))
