@@ -309,4 +309,4 @@ class NothingLogger(object):
 
     @staticmethod
     def error(msg):
-        print(msg)
+        pass

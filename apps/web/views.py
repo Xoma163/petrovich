@@ -96,7 +96,6 @@ class CustomLoginView(LoginView):
 
 
 class MinecraftSkin(View):
-
     def get(self, *args, **kwargs):
         name = kwargs['name']
         file = BASE_DIR + static(f"files/minecraft/skins/{name}.png")
@@ -104,7 +103,6 @@ class MinecraftSkin(View):
 
 
 class MinecraftCape(View):
-
     def get(self, *args, **kwargs):
         name = kwargs['name']
         file = BASE_DIR + static(f"files/minecraft/capes/{name}.png")
