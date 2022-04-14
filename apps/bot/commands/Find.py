@@ -22,11 +22,11 @@ class Find(Command):
             photo_results = self.get_photo_results(query)
         except PWarning as e:
             photo_results = str(e)
-        try:
-            music_results = self.get_music_results(query)
-        except PWarning as e:
-            music_results = str(e)
-        result = [f"Результаты по запросу '{query}'", photo_results, music_results]
+        # try:
+        #     music_results = self.get_music_results(query)
+        # except PWarning as e:
+        #     music_results = str(e)
+        result = [f"Результаты по запросу '{query}'", photo_results]
         return result
 
     def get_photo_results(self, query):
