@@ -174,13 +174,9 @@ class RedditSaver:
 
     @property
     def is_video(self):
-        if self._is_video_link:
+        if self.media_data and 'reddit_video' in self.media_data:
             return True
         return self.content_type in [self.CONTENT_TYPE_VIDEO, self.CONTENT_TYPE_RICH_VIDEO]
-
-    @property
-    def _is_video_link(self):
-        return self.content_type == self.CONTENT_TYPE_LINK and self.media_data and 'reddit_video' in self.media_data
 
     @property
     def is_image(self):
