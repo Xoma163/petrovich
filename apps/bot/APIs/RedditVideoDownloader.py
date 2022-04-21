@@ -159,9 +159,14 @@ class RedditSaver:
 
         # ToDo: unchecked
         if not self.media_data:
-            if 'crosspost_parent_list' in self.data:
+            if self.data.get('media'):
+                self.media_data = self.data["media"]
+            elif 'crosspost_parent_list' in self.data:
                 self.data = self.data['crosspost_parent_list'][0]
-                self.media_data = data["media"]
+                if isinstance(data, dict):
+                    self.media_data = data["media"]
+                else:
+                    self.media_data = self.data['media']
 
     def set_post_url(self, post_url):
         parsed_url = urlparse(post_url)
@@ -169,7 +174,13 @@ class RedditSaver:
 
     @property
     def is_video(self):
+        if self._is_video_link:
+            return True
         return self.content_type in [self.CONTENT_TYPE_VIDEO, self.CONTENT_TYPE_RICH_VIDEO]
+
+    @property
+    def _is_video_link(self):
+        return self.content_type == self.CONTENT_TYPE_LINK and self.media_data and 'reddit_video' in self.media_data
 
     @property
     def is_image(self):
