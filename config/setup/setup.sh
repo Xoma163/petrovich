@@ -1,7 +1,7 @@
 #!/bin/bash
 # install python, python-venv and project requirements
 sudo apt -y update
-sudo apt install -y python3.8 python3.8-venv python3-venv python3.8-dev python3-wheel postgresql libpq-dev ffmpeg nginx build-essential python3-opencv awscli
+sudo apt install -y python3.8 python3.8-venv python3-venv python3.8-dev python3-wheel postgresql libpq-dev ffmpeg nginx build-essential python3-opencv awscli uwsgi
 
 python3.8 -m venv venv
 set -e
@@ -42,13 +42,13 @@ sed -i "s#$old_path#$PWD/#g" ./config/systemd/petrovich_site.service
 sed -i "s#$old_path#$PWD/#g" ./config/nginx/petrovich_nginx.conf
 sed -i "s#$old_path#$PWD/#g" ./config/nginx/conf/petrovich-default-locations.conf
 
+sudo mkdir /etc/nginx/conf || echo $
+
 sudo ln -s "$PWD/config/nginx/petrovich_nginx.conf" /etc/nginx/sites-available/ || echo $
 sudo ln -s "$PWD/config/nginx/petrovich_nginx.conf" /etc/nginx/sites-enabled/ || echo $
 sudo ln -s "$PWD/config/nginx/conf/petrovich-default-config.conf" /etc/nginx/conf/ || echo $
 sudo ln -s "$PWD/config/nginx/conf/petrovich-default-locations.conf" /etc/nginx/conf/ || echo $
 sudo ln -s "$PWD/config/nginx/conf/andrewsha-ssl.conf" /etc/nginx/conf/ || echo $
-
-sudo mkdir /etc/nginx/conf || echo $
 
 sudo systemctl restart nginx
 
