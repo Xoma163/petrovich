@@ -91,7 +91,7 @@ class Event:
         Проверка, нужен ли пользователю ответ c учётом особенностей команд
         """
         from apps.bot.commands.Meme import Meme as MemeCommand
-        from apps.bot.commands.TrustedCommands.Media import Media
+        from apps.bot.commands.Media import Media
         from apps.bot.commands.All import All
         from apps.bot.commands.VoiceRecognition import VoiceRecognition
 

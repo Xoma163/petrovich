@@ -25,6 +25,7 @@ class YouTube(Command):
     ]
     args = 1
     platforms = [Platform.VK, Platform.TG]
+    access = Role.TRUSTED
 
     def start(self):
         arg0 = self.event.message.args[0]
