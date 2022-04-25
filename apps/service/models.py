@@ -230,3 +230,8 @@ class TaxiInfo(models.Model):
 
 class Domain(models.Model):
     name = models.CharField("Название", max_length=100)
+
+
+class MilanaTranslate(models.Model):
+    milana_text = models.CharField("Текст Миланы", max_length=30)
+    translated_text = models.CharField("Переведённый текст", max_length=30)
