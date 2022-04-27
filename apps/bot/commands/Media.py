@@ -14,7 +14,7 @@ from apps.bot.utils.utils import get_urls_from_text, get_tg_formatted_url
 
 YOUTUBE_URLS = ('www.youtube.com', 'youtube.com', "www.youtu.be", "youtu.be")
 REDDIT_URLS = ("www.reddit.com",)
-TIKTOK_URLS = ("www.tiktok.com", 'vm.tiktok.com', 'm.tiktok.com', 'vt.tiktok')
+TIKTOK_URLS = ("www.tiktok.com", 'vm.tiktok.com', 'm.tiktok.com', 'vt.tiktok.com')
 INSTAGRAM_URLS = ('www.instagram.com', 'instagram.com')
 TWITTER_URLS = ('www.twitter.com', 'twitter.com')
 PIKABU_URLS = ('www.pikabu.ru', 'pikabu.ru')
