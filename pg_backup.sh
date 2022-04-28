@@ -3,7 +3,7 @@
 # Backup a Postgresql database into a daily file.
 #
 
-BACKUP_DIR=/mnt/NAS/NAS/backup/db
+BACKUP_DIR=/mnt/nas1/NAS/backup/db
 DAYS_TO_KEEP=31
 FILE_SUFFIX=_pg_backup.sql
 
