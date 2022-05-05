@@ -13,7 +13,7 @@ class Turett(Command):
     priority = 85
 
     def accept(self, event):
-        if event.chat and event.chat.need_turett:
+        if event.chat and event.chat.need_turett and event.chat.use_swear:
             self.send_turett(event)
         return False
 

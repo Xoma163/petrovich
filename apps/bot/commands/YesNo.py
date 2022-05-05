@@ -71,7 +71,7 @@ class YesNo(Command):
                          ["Нет", "Неа", "Ни за что", "Нуу... нет", "NO"],
                          ["Ну тут даже я хз", "ДА НЕ ЗНАЮ Я", "Хз", "Спроси у другого бота", "Да нет наверное"]]
         probability_events1 = [47, 47, 6]
-        probability_events2 = [40, 15, 15, 15, 15]
+        probability_events2 = [25, 19, 19, 19, 19]
         seed = clear
         selected_event = random_event(random_events, probability_events1, seed=seed)
         selected_event2 = random_event(selected_event, probability_events2, seed=seed)

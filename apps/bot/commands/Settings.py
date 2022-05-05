@@ -18,11 +18,12 @@ class Settings(Command):
         "упоминание (вкл/выкл) - определяет будет ли бот триггериться на команды без упоминания в конфе(требуются админские права)",
         "реагировать (вкл/выкл) - определяет, будет ли бот реагировать на неправильные команды в конфе. Это сделано для того, чтобы в конфе с несколькими ботами не было ложных срабатываний",
         "мемы (вкл/выкл) - определяет, будет ли бот присылать мем если прислано его точное название без / (боту требуется доступ к переписке)",
-        "туретт (вкл/выкл) - определяет, будет ли бот иногда ругаться)",
+        "туретт (вкл/выкл) - определяет, будет ли бот случайно присылать ругательства",
         "голосовые (вкл/выкл) - определяет, будет ли бот автоматически распознавать голосовые",
         "майнкрафт (вкл/выкл) - определяет, будет ли бот присылать информацию о серверах майна. (для доверенных)",
         "др (вкл/выкл) - определяет, будет ли бот поздравлять с Днём рождения и будет ли ДР отображаться в /профиль",
-        "платформа (вк/vk/тг/tg) - определяет платформу по умолчанию для важных писем от бота. По умолчанию первая платформа с которой вы написали боту"
+        "платформа (вк/vk/тг/tg) - определяет платформу по умолчанию для важных писем от бота. По умолчанию первая платформа с которой вы написали боту",
+        "ругаться (вкл/выкл) - определяет будет ли бот использовать ругательные команды",
     ]
 
     def start(self):
@@ -40,6 +41,7 @@ class Settings(Command):
             [['платформа'], self.menu_platform],
             [['голосовые', 'голос', 'голосовухи', 'голосовуха', 'голосовое'], self.menu_voice],
             [['туретт', 'туррет', 'турретт', 'турет'], self.menu_turett],
+            [['ругаться'], self.menu_swear],
             [['default'], self.menu_default],
         ]
         method = self.handle_menu(menu, arg0)
@@ -116,6 +118,15 @@ class Settings(Command):
         self.event.chat.save()
         return "Сохранил настройку"
 
+    def menu_swear(self):
+        self.check_sender(Role.CONFERENCE_ADMIN)
+        self.check_args(2)
+
+        value = self.get_on_or_off(self.event.message.args[1])
+        self.event.chat.use_swear = value
+        self.event.chat.save()
+        return "Сохранил настройку"
+
     def menu_default(self):
         msg = ""
         if self.event.chat:
@@ -126,12 +137,14 @@ class Settings(Command):
             mentioning = self.event.chat.mentioning
             turett = self.event.chat.need_turett
             recognize_voice = self.event.chat.recognize_voice
+            use_swear = self.event.chat.use_swear
 
             msg += f"Реагировать на неправильные команды - {TRUE_FALSE_TRANSLATOR[reaction]}\n"
             msg += f"Присылать мемы по точным названиям - {TRUE_FALSE_TRANSLATOR[need_meme]}\n"
             msg += f"Триггериться на команды без упоминания - {TRUE_FALSE_TRANSLATOR[mentioning]}\n"
             msg += f"Автоматически распознавать голосовые - {TRUE_FALSE_TRANSLATOR[recognize_voice]}\n"
             msg += f"Синдром Туретта - {TRUE_FALSE_TRANSLATOR[turett]}\n"
+            msg += f"Использовать ругательные команды - {TRUE_FALSE_TRANSLATOR[use_swear]}\n"
 
             msg += "\n"
 

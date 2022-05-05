@@ -11,7 +11,10 @@ class Uyu(Command):
     excluded_platforms = [Platform.YANDEX]
 
     def start(self):
-        add_word = "бля"
+        if self.event.chat and not self.event.chat.use_swear:
+            add_word = "ня"
+        else:
+            add_word = "бля"
         if self.event.message.args_str:
             add_word = self.event.message.args_str
 
