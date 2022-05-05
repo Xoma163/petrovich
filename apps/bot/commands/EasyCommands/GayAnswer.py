@@ -7,7 +7,7 @@ class GayAnswer(Command):
     non_mentioned = True
 
     def accept(self, event):
-        if self.event.chat and not self.event.chat.use_swear:
+        if event.chat and not event.chat.use_swear:
             return False
         return event.message and event.message.clear == 'пидора ответ'
 
