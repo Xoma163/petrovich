@@ -18,6 +18,7 @@ TIKTOK_URLS = ("www.tiktok.com", 'vm.tiktok.com', 'm.tiktok.com', 'vt.tiktok.com
 INSTAGRAM_URLS = ('www.instagram.com', 'instagram.com')
 TWITTER_URLS = ('www.twitter.com', 'twitter.com')
 PIKABU_URLS = ('www.pikabu.ru', 'pikabu.ru')
+THE_HOLE_URLS = ('www.the-hole.tv', 'the-hole.tv')
 
 MEDIA_URLS = tuple(
     list(YOUTUBE_URLS) +
@@ -25,7 +26,8 @@ MEDIA_URLS = tuple(
     list(TIKTOK_URLS) +
     list(INSTAGRAM_URLS) +
     list(TWITTER_URLS) +
-    list(PIKABU_URLS)
+    list(PIKABU_URLS) +
+    list(THE_HOLE_URLS)
 )
 
 
@@ -46,6 +48,7 @@ class Media(Command):
             INSTAGRAM_URLS: self.get_instagram_attachment,
             TWITTER_URLS: self.get_twitter_video,
             PIKABU_URLS: self.get_pikabu_video,
+            THE_HOLE_URLS: self.get_the_hole_video,
         }
 
     @staticmethod
@@ -300,6 +303,32 @@ class Media(Command):
         webm = player.attrs['data-webm']
         video_content = requests.get(webm).content
         attachments = [self.bot.upload_video(video_content, peer_id=self.event.peer_id)]
+        return attachments, title
+
+    def get_the_hole_video(self, url):
+        content = requests.get(url).content
+        bs4 = BeautifulSoup(content, 'html.parser')
+        title = bs4.find('meta', attrs={'name': "og:title"}).attrs['content']
+        _id = url.split("/")[-1]
+        prepend_text = f"https://video-cdn.the-hole.tv/episodes/{_id}"
+
+        master_m3u8 = requests.get(f"{prepend_text}/master.m3u8").text
+        r = re.compile('1920x1080.*VIDEO-RANGE=SDR\n(.*)')
+        m3u8_1080p = r.findall(master_m3u8)[0]
+
+        original_video_m3u8 = f"{prepend_text}/{m3u8_1080p}"
+        original_video_m3u8_list = requests.get(original_video_m3u8).text.split("\n")
+        new_m3u8 = []
+        next_line_replace = False
+        for row in original_video_m3u8_list:
+            if row.startswith("#EXTINF:"):
+                next_line_replace = True
+            elif next_line_replace:
+                next_line_replace = False
+                row = f"{prepend_text}/{row}"
+            new_m3u8.append(row)
+        wtf = str.encode("\n".join(new_m3u8))
+        attachments = [self.bot.upload_document(wtf, peer_id=self.event.peer_id, filename="the-hole.m3u8")]
         return attachments, title
 
 
