@@ -328,7 +328,7 @@ class Media(Command):
                 row = f"{prepend_text}/{row}"
             new_m3u8.append(row)
         wtf = str.encode("\n".join(new_m3u8))
-        attachments = [self.bot.upload_document(wtf, peer_id=self.event.peer_id, filename="the-hole.m3u8")]
+        attachments = [self.bot.upload_document(wtf, peer_id=self.event.peer_id, filename=f"{title} | The Hole.m3u8")]
         return attachments, title
 
 
