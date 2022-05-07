@@ -308,6 +308,8 @@ class Media(Command):
     def get_the_hole_video(self, url):
         content = requests.get(url).content
         bs4 = BeautifulSoup(content, 'html.parser')
+        show_name = \
+        [x.text for x in bs4.select('a[href*=shows]') if x.attrs['href'].startswith("/shows/") if x.text.strip()][0]
         title = bs4.find('meta', attrs={'name': "og:title"}).attrs['content']
         _id = url.split("/")[-1]
         prepend_text = f"https://video-cdn.the-hole.tv/episodes/{_id}"
@@ -328,8 +330,9 @@ class Media(Command):
                 row = f"{prepend_text}/{row}"
             new_m3u8.append(row)
         wtf = str.encode("\n".join(new_m3u8))
-        attachments = [self.bot.upload_document(wtf, peer_id=self.event.peer_id, filename=f"{title} | The Hole.m3u8")]
-        return attachments, title
+        attachments = [self.bot.upload_document(wtf, peer_id=self.event.peer_id,
+                                                filename=f"{title} - {show_name} | The Hole.m3u8")]
+        return attachments, f"{title} | {show_name}"
 
 
 class NothingLogger(object):
