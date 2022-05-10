@@ -7,6 +7,7 @@ import youtube_dl
 from bs4 import BeautifulSoup
 
 from apps.bot.APIs.RedditVideoDownloader import RedditSaver
+from apps.bot.APIs.TikTokDownloaderAPI import TikTokDownloaderAPI
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning, PSkip
@@ -153,54 +154,12 @@ class Media(Command):
         return attachments, video_info['title']
 
     def get_tiktok_video(self, url):
-        headers = {
-            'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
-        }
-
-        content = requests.get(url, headers=headers).content
-        bs4 = BeautifulSoup(content, 'html.parser')
-
-        og_video = bs4.find('meta', attrs={'property': 'og:video'})
-        script = bs4.find("script", attrs={"id": "SIGI_STATE"})
-
-        if og_video:
-            video_url = og_video.attrs['content']
-        elif script:
-            data = json.loads(script.text)
-            video_url = data['ItemList']['video']['preloadList'][0]['url']
-        else:
-            data_str = bs4.find("script", attrs={"id": "sigi-persisted-data"}).text
-            regexp = re.compile(r"window\['\w*'\]=")
-            keys_positions = re.finditer(regexp, data_str)
-
-            key = -1
-            pos = -1
-            data = {}
-            for x in keys_positions:
-                if pos != -1:
-                    data[key] = json.loads(data_str[pos: x.regs[0][0] - 1])
-                regexp = r"\['\w*'\]"
-                key = re.findall(regexp, data_str[x.regs[0][0]:x.regs[0][1]])[0] \
-                    .replace("[", '') \
-                    .replace("]", "") \
-                    .strip("'") \
-                    .strip('\\')
-                if key != -1:
-                    pos = x.regs[0][1]
-            data[key] = json.loads(data_str[pos: len(data_str)])
-            if not data or "SIGI_STATE" not in data:
-                raise PWarning("Не смог распарсить Тикток видео")
-            try:
-                video_url = data['SIGI_STATE']['ItemList']['video']['preloadList'][0]['url']
-            except:
-                raise PWarning("Не смог распарсить Тикток видео")
-
-        title = bs4.find('meta', attrs={'property': 'og:title'}).attrs['content']
-
-        video = requests.get(video_url, headers=headers).content
+        ttd_api = TikTokDownloaderAPI()
+        video_url = ttd_api.download(url)
+        video = requests.get(video_url).content
 
         attachments = [self.bot.upload_video(video, peer_id=self.event.peer_id)]
-        return attachments, title
+        return attachments, None
 
     def get_reddit_attachment(self, url):
         rs = RedditSaver()
