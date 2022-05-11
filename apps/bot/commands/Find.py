@@ -1,10 +1,8 @@
 from apps.bot.APIs.GoogleCustomSearchAPI import GoogleCustomSearchAPI
-from apps.bot.APIs.SpotifyAPI import SpotifyAPI
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.ActivitiesEnum import ActivitiesEnum
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning
-from apps.bot.utils.utils import get_tg_formatted_url
 
 
 class Find(Command):
@@ -22,10 +20,6 @@ class Find(Command):
             photo_results = self.get_photo_results(query)
         except PWarning as e:
             photo_results = str(e)
-        # try:
-        #     music_results = self.get_music_results(query)
-        # except PWarning as e:
-        #     music_results = str(e)
         result = [f"Результаты по запросу '{query}'", photo_results]
         return result
 
@@ -54,17 +48,3 @@ class Find(Command):
         if len(attachments) == 0:
             raise PWarning("Ничего не нашёл по картинкам")
         return {'attachments': attachments}
-
-    def get_music_results(self, query):
-        spotify_api = SpotifyAPI()
-        musics = spotify_api.search_music(query, limit=5)
-        if not musics:
-            raise PWarning("Ничего не нашёл по музыке")
-        message = []
-        for music_info in musics:
-            music = f"{', '.join(music_info['artists'])} — {music_info['name']}"
-            if self.event.platform == Platform.TG:
-                message.append(get_tg_formatted_url(music, music_info['url']))
-            else:
-                message.append(f"{music} ({music_info['url']})")
-        return {'text': "\n".join(message)}
