@@ -105,8 +105,7 @@ class Roulette(Command):
 
     def menu_balance(self):
         if len(self.event.message.args) > 1:
-            username = " ".join(self.event.message.args[1:])
-            user = self.bot.get_profile_by_name(username, self.event.chat)
+            user = self.bot.get_profile_by_name(self.event.message.args[1:], self.event.chat)
             user_gamer = Gamer.objects.filter(profile=user).first()
             if not user_gamer:
                 raise PWarning("Не нашёл такого игрока")
@@ -145,8 +144,7 @@ class Roulette(Command):
             raise PWarning("Недостаточно очков")
         if points_transfer <= 0:
             raise PWarning("Очков должно быть >0")
-        username = " ".join(self.event.message.args[1:-1])
-        user_gamer = self.get_gamer_by_name(username)
+        user_gamer = self.get_gamer_by_name(self.event.message.args[1:-1])
 
         if self.gamer == user_gamer:
             raise PWarning("))")
@@ -167,8 +165,7 @@ class Roulette(Command):
 
         points_transfer = self.event.message.args[-1]
 
-        username = " ".join(self.event.message.args[1:-1])
-        user_gamer = self.get_gamer_by_name(username)
+        user_gamer = self.get_gamer_by_name(self.event.message.args[1:-1])
 
         user_gamer.roulette_points += points_transfer
         user_gamer.save()

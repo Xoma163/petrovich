@@ -257,6 +257,9 @@ class Bot(Thread):
             users = users.filter(chats=filter_chat)
         if len(args) >= 2:
             user = users.filter(name=args[0].capitalize(), surname=args[1].capitalize())
+            if not user:
+                user = users.filter(name=args[1].capitalize(), surname=args[0].capitalize())
+
         else:
             user = users.filter(nickname_real=args[0].capitalize())
             if len(user) == 0:
