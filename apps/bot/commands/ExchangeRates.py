@@ -12,7 +12,7 @@ class ExchangeRates(Command):
     ]
 
     def start(self):
-        filters_list = ["USD", "EUR", "NOK", "JPY", "GBP", "KZT", "UAH"]
+        filters_list = ["USD", "EUR", "NOK", "JPY", "GBP", "KZT", "UAH", "AMD"]
 
         cbr_api = CBRAPI(filters_list)
         ex_rates = cbr_api.do()
