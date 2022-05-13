@@ -79,6 +79,7 @@ class Roulette(Command):
         "чётное/нечётное (ставка) - ставка на кратность",
         "первая/вторая (ставка) - ставка на 1/2 части стола",
         "баланс [игрок] - баланс",
+        "ставки - текущие ставки игроков",
         "картинка - картинка рулетки",
         "бонус - получение пособия по безработице",
         "передать (игрок) (очки) - передача очков другому игроку"
@@ -186,7 +187,7 @@ class Roulette(Command):
         msg = ""
         for rr in rrs:
             rate_on_dict = rr.rate_on
-            msg += f"{rr.gamer.user} поставил на {rate_on_dict['verbose_name']} {rr.rate} очков\n"
+            msg += f"{rr.gamer.profile} поставил на {rate_on_dict['verbose_name']} {rr.rate} очков\n"
         return msg
 
     def menu_rate_on(self):
@@ -241,7 +242,7 @@ class Roulette(Command):
                     win_points = rr.rate * rate_on['coefficient']
                     rr.gamer.roulette_points += win_points
                     rr.gamer.save()
-                    winners.append({'user': rr.gamer.user, 'points': win_points})
+                    winners.append({'user': rr.gamer.profile, 'points': win_points})
             if len(winners) > 0:
                 msg3 = "Победители:\n"
                 for winner in winners:
