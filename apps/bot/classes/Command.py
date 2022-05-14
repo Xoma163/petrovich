@@ -2,7 +2,7 @@ from apps.bot.classes.bots.Bot import Bot
 from apps.bot.classes.consts.Consts import Role, ATTACHMENT_TRANSLATOR, Platform
 from apps.bot.classes.consts.Exceptions import PWarning, PSkip, PIDK
 from apps.bot.classes.events.Event import Event
-from apps.bot.utils.utils import get_help_texts_for_command, transform_k, get_tg_formatted_text
+from apps.bot.utils.utils import get_help_texts_for_command, transform_k
 
 
 class Command:
@@ -17,23 +17,23 @@ class Command:
     enabled: bool = True  # Включена ли команда
     suggest_for_similar: bool = True  # предлагать ли команду в выдаче похожих команд при ошибке пользователя в вводе
     priority: int = 0  # Приоритет обработки команды
+    hidden: bool = False  # Скрытая команда, будет отвечать пользователям без соответствующих прав заглушкой "я вас не понял"
 
     # Проверки
     access: Role = Role.USER  # Необходимые права для выполнения команды
     pm: bool = False  # Должно ли сообщение обрабатываться только в лс
     conversation: bool = False  # Должно ли сообщение обрабатываться только в конфе
     fwd: bool = False  # Должно ли сообщение обрабатываться только с пересланными сообщениями
-    args: int = None  # Должно ли сообщение обрабатываться только с заданным количеством аргументов
+    args: int = 0  # Должно ли сообщение обрабатываться только с заданным количеством аргументов
     args_or_fwd: int = None  # Должно ли сообщение обрабатываться только с пересланными сообщениями или аргументами
-    int_args: list = None  # Список аргументов, которые должны быть целым числом
-    float_args: list = None  # Список аргументов, которые должны быть числом
+    int_args: list = []  # Список аргументов, которые должны быть целым числом
+    float_args: list = []  # Список аргументов, которые должны быть числом
     platforms: list = list(Platform)  # Список платформ, которые могут обрабатывать команду
     excluded_platforms: list = []  # Список исключённых платформ.
     attachments: list = []  # Должно ли сообщение обрабатываться только с вложениями
     city: bool = False  # Должно ли сообщение обрабатываться только с заданным городом у пользователя
     mentioned: bool = False  # Должно ли сообщение обрабатываться только с упоминанием бота
     non_mentioned: bool = False  # Должно ли сообщение обрабатываться только без упоминания бота
-    hidden: bool = False  # Скрытая команда, будет отвечать пользователям без соответствующих прав заглушкой "я вас не понял"
 
     def __init__(self, bot: Bot = None, event: Event = None):
         self.bot: Bot = bot
@@ -153,7 +153,7 @@ class Command:
         :param args: количество требуемых аргументов
         :return: bool
         """
-        if args is None:
+        if args is None or args == 0:
             args = self.args
         if self.event.message and self.event.message.args:
             if len(self.event.message.args) >= args:
@@ -161,14 +161,9 @@ class Command:
             else:
                 error = "Передано недостаточно аргументов"
                 error += f"\n\n{get_help_texts_for_command(self)}"
-                raise PWarning(error)
-
-        error = "Для работы команды требуются аргументы"
-        if self.event.platform == Platform.TG:
-            error += f"\n\n{get_tg_formatted_text(get_help_texts_for_command(self))}"
         else:
-            error += f"\n\n{get_help_texts_for_command(self)}"
-        raise PWarning(error)
+            error = "Для работы команды требуются аргументы"
+        raise PWarning(error, keyboard=self._get_help_button_keyboard())
 
     def check_args_or_fwd(self, args: int = None):
         if args is None:
@@ -188,7 +183,8 @@ class Command:
 
         error = "Для работы команды требуются аргументы или пересылаемые сообщения"
         error += f"\n\n{get_help_texts_for_command(self)}"
-        raise PWarning(error)
+
+        raise PWarning(error, keyboard=self._get_help_button_keyboard())
 
     @staticmethod
     def check_number_arg_range(arg, _min=-float('inf'), _max=float('inf'), banned_list: list = None):
@@ -361,4 +357,13 @@ class Command:
         if default_item:
             return default_item
         # raise PWarning(f"{self.help_texts}")
-        raise PWarning(get_help_texts_for_command(self))
+        # help_text = get_help_texts_for_command(self)
+        # if self.event.platform == Platform.TG:
+        #     lines = help_text.split("\n")
+        #     help_text = "\n".join([get_tg_formatted_text_line(x) for x in lines])
+        return self.check_args(1)
+
+    def _get_help_button_keyboard(self):
+        button = self.bot.get_button(f"/помощь {self.name}", "помощь", [self.name])
+        keyboard = self.bot.get_inline_keyboard([button])
+        return keyboard
