@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from apps.service.models import Service, Counter, Meme, Notify, City, \
-    Donations, TimeZone, YoutubeSubscribe, WakeOnLanUserData, Horoscope, QuoteBook, Words, TaxiInfo, MilanaTranslate
+    Donations, TimeZone, Subscribe, WakeOnLanUserData, Horoscope, QuoteBook, Words, TaxiInfo, MilanaTranslate
 
 
 @admin.register(Service)
@@ -46,8 +46,8 @@ class DonationsAdmin(admin.ModelAdmin):
     list_display = ('username', 'amount', 'currency', 'message', 'date')
 
 
-@admin.register(YoutubeSubscribe)
-class YoutubeSubscribeAdmin(admin.ModelAdmin):
+@admin.register(Subscribe)
+class SubscribeAdmin(admin.ModelAdmin):
     list_display = ('author', 'chat', 'title', 'date',)
     list_filter = (('author', admin.RelatedOnlyFieldListFilter), ('chat', admin.RelatedOnlyFieldListFilter),)
 

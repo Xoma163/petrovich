@@ -143,17 +143,31 @@ class Donations(models.Model):
         return f"{self.username}. {self.amount}"
 
 
-class YoutubeSubscribe(models.Model):
-    author = models.ForeignKey(Profile, models.CASCADE, verbose_name="Автор", null=True)
+class Subscribe(models.Model):
+    SERVICE_YOUTUBE = 1
+    SERVICE_THE_HOLE = 2
+    SERVICE_CHOICES = (
+        (SERVICE_YOUTUBE, 'Ютуб'),
+        (SERVICE_THE_HOLE, 'The hole'),
+    )
+
+    author = models.ForeignKey(User, models.CASCADE, verbose_name="Автор", null=True)
     chat = models.ForeignKey(Chat, models.CASCADE, verbose_name='Чат', null=True, blank=True)
 
     channel_id = models.CharField("ID канала", max_length=100)
     title = models.CharField("Название канала", max_length=100)
-    date = models.DateTimeField("Дата последней публикации")
+    date = models.DateTimeField("Дата последней публикации", null=True, blank=True)
+    last_video_id = models.CharField("ID последнего видео", max_length=100, null=True)
+
+    service = models.SmallIntegerField("Сервис", blank=True, choices=SERVICE_CHOICES, default=SERVICE_YOUTUBE)
+
+    @property
+    def peer_id(self):
+        return self.chat.chat_id if self.chat else self.author.user_id
 
     class Meta:
-        verbose_name = "Подписка ютуба"
-        verbose_name_plural = "Подписки ютуба"
+        verbose_name = "Подписка"
+        verbose_name_plural = "Подписки"
         ordering = ['title']
 
     def __str__(self):
@@ -227,11 +241,23 @@ class TaxiInfo(models.Model):
     def __str__(self):
         return str(self.created)
 
+    class Meta:
+        verbose_name = "Инфо о такси"
+        verbose_name_plural = "Инфо о такси"
+
 
 class Domain(models.Model):
     name = models.CharField("Название", max_length=100)
+
+    class Meta:
+        verbose_name = "Домены"
+        verbose_name_plural = "Домен"
 
 
 class MilanaTranslate(models.Model):
     milana_text = models.CharField("Текст Миланы", max_length=30)
     translated_text = models.CharField("Переведённый текст", max_length=30)
+
+    class Meta:
+        verbose_name = "Словечки Миланы"
+        verbose_name_plural = "Словечко Миланы"

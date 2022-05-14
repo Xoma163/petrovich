@@ -11,7 +11,7 @@ class YoutubeInfo:
         self.channel_id = channel_id
         self.url = f"https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}"
 
-    def get_youtube_channel_info(self):
+    def get_youtube_last_video(self):
         response = requests.get(self.url)
         if response.status_code != 200:
             raise PWarning("Не нашёл такого канала")
