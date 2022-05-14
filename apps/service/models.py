@@ -246,14 +246,6 @@ class TaxiInfo(models.Model):
         verbose_name_plural = "Инфо о такси"
 
 
-class Domain(models.Model):
-    name = models.CharField("Название", max_length=100)
-
-    class Meta:
-        verbose_name = "Домены"
-        verbose_name_plural = "Домен"
-
-
 class MilanaTranslate(models.Model):
     milana_text = models.CharField("Текст Миланы", max_length=30)
     translated_text = models.CharField("Переведённый текст", max_length=30)
