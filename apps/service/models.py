@@ -146,9 +146,11 @@ class Donations(models.Model):
 class Subscribe(models.Model):
     SERVICE_YOUTUBE = 1
     SERVICE_THE_HOLE = 2
+    SERVICE_WASD = 3
     SERVICE_CHOICES = (
-        (SERVICE_YOUTUBE, 'Ютуб'),
+        (SERVICE_YOUTUBE, 'YouTube'),
         (SERVICE_THE_HOLE, 'The hole'),
+        (SERVICE_WASD, 'WASD'),
     )
 
     author = models.ForeignKey(User, models.CASCADE, verbose_name="Автор", null=True)
@@ -160,6 +162,10 @@ class Subscribe(models.Model):
     last_video_id = models.CharField("ID последнего видео", max_length=100, null=True, blank=True)
 
     service = models.SmallIntegerField("Сервис", blank=True, choices=SERVICE_CHOICES, default=SERVICE_YOUTUBE)
+
+    is_stream = models.BooleanField("Флаг стрима", blank=True, default=False)
+    last_stream_status = models.BooleanField("Последнее состояние стрима", blank=True,
+                                             default=False)  # True - активен, False - нет
 
     @property
     def peer_id(self):

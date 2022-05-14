@@ -27,6 +27,7 @@ class Subscribe(Command):
 
     THE_HOLE_URL = "the-hole.tv"
     YOUTUBE_URL = "youtube.com"
+    WASD_URL = "wasd.tv"
 
     def start(self):
         arg0 = self.event.message.args[0]
@@ -44,11 +45,14 @@ class Subscribe(Command):
         url = self.event.message.args_case[1]
 
         if self.YOUTUBE_URL in url:
-            channel_id, title, date, last_video_id = self.menu_add_youtube(url)
+            channel_id, title, date, last_video_id, is_stream = self.menu_add_youtube(url)
             service = SubscribeModel.SERVICE_YOUTUBE
         elif self.THE_HOLE_URL in url:
-            channel_id, title, date, last_video_id = self.menu_add_the_hole(url)
+            channel_id, title, date, last_video_id, is_stream = self.menu_add_the_hole(url)
             service = SubscribeModel.SERVICE_THE_HOLE
+        elif self.WASD_URL in url:
+            channel_id, title, date, last_video_id, is_stream = self.menu_add_wasd(url)
+            service = SubscribeModel.SERVICE_WASD
         else:
             raise PWarning("Незнакомый сервис. Доступные: \nЮтуб, The-Hole")
 
@@ -66,7 +70,8 @@ class Subscribe(Command):
             title=title,
             date=date,
             service=service,
-            last_video_id=last_video_id
+            last_video_id=last_video_id,
+            is_stream=is_stream
         )
         sub.save()
         return f'Подписал на канал {title}'
@@ -83,7 +88,9 @@ class Subscribe(Command):
         title = youtube_data['title']
         date = youtube_data['last_video']['date']
 
-        return channel_id, title, date, None
+        is_stream = False
+
+        return channel_id, title, date, None, is_stream
 
     @staticmethod
     def menu_add_the_hole(url):
@@ -92,7 +99,28 @@ class Subscribe(Command):
         title = bs4.find('meta', attrs={'name': 'og:title'}).attrs['content']
         channel_id = url.split('/')[-1]
         last_video_id = bs4.select_one('a[href*=episodes]').attrs['href']
-        return channel_id, title, None, last_video_id
+
+        is_stream = False
+
+        return channel_id, title, None, last_video_id, is_stream
+
+    @staticmethod
+    def menu_add_wasd(url):
+        last_part = url.split('/')[-1]
+
+        try:
+            channel_id = int(last_part)
+            title = requests.get(f"https://wasd.tv/api/v2/channels/{channel_id}").json()['result']['channel_name']
+        except:
+            title = last_part
+            channel_id = requests.get(
+                "https://wasd.tv/api/v2/broadcasts/public",
+                params={"with_extra": "true", "channel_name": title}) \
+                .json()['result']['channel']['channel_id']
+
+        is_stream = True
+
+        return channel_id, title, None, None, is_stream
 
     def menu_delete(self):
         self.check_args(2)
@@ -112,10 +140,10 @@ class Subscribe(Command):
     def get_sub(self, filters, for_delete=False):
         if self.event.chat:
             subs = SubscribeModel.objects.filter(chat=self.event.chat)
-            if self.event.chat.admin != self.event.sender:
-                subs = subs.filter(author=self.event.sender)
+            if self.event.chat.admin != self.event.user:
+                subs = subs.filter(author=self.event.user)
         else:
-            subs = SubscribeModel.objects.filter(author=self.event.sender)
+            subs = SubscribeModel.objects.filter(author=self.event.user)
             if for_delete:
                 subs = subs.filter(chat__isnull=True)
 
@@ -146,7 +174,7 @@ class Subscribe(Command):
         if conversation:
             subs = SubscribeModel.objects.filter(chat=self.event.chat)
         else:
-            subs = SubscribeModel.objects.filter(author=self.event.sender)
+            subs = SubscribeModel.objects.filter(author=self.event.user)
             if self.event.chat:
                 subs = subs.filter(chat=self.event.chat)
         if subs.count() == 0:
