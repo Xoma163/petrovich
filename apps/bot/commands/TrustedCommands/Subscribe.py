@@ -111,7 +111,7 @@ class Subscribe(Command):
         try:
             channel_id = int(last_part)
             title = requests.get(f"https://wasd.tv/api/v2/channels/{channel_id}").json()['result']['channel_name']
-        except:
+        except ValueError:
             title = last_part
             channel_id = requests.get(
                 "https://wasd.tv/api/v2/broadcasts/public",
