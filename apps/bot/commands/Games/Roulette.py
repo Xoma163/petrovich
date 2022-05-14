@@ -84,6 +84,7 @@ class Roulette(Command):
         "бонус - получение пособия по безработице",
         "передать (игрок) (очки) - передача очков другому игроку"
     ]
+    access = Role.GAMER
 
     def start(self):
         self.gamer = self.bot.get_gamer_by_profile(self.event.sender)

@@ -2,6 +2,7 @@ import random
 from threading import Lock
 
 from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.Consts import Role
 from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.utils.utils import decl_of_num
 from apps.games.models import BullsAndCowsSession
@@ -20,6 +21,7 @@ class BullsAndCows(Command):
         "[число] - проверяет гипотезу",
         "сдаться - закончить игру",
     ]
+    access = Role.GAMER
 
     def start(self):
         with lock:

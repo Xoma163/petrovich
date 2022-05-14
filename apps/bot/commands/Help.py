@@ -1,6 +1,5 @@
 from apps.bot.classes.Command import Command
-from apps.bot.classes.consts.Consts import Platform
-from apps.bot.utils.utils import find_command_by_name, get_help_texts_for_command, get_tg_formatted_text_line
+from apps.bot.utils.utils import find_command_by_name, get_help_texts_for_command
 
 
 class Help(Command):
@@ -18,25 +17,22 @@ class Help(Command):
         if self.event.message.args:
             command = find_command_by_name(self.event.message.args[0])
             self.check_sender(command.access)
-            help_text = get_help_texts_for_command(command)
-            if self.event.platform == Platform.TG:
-                lines = help_text.split("\n")
-                help_text = "\n".join([get_tg_formatted_text_line(x) for x in lines])
+            help_text = get_help_texts_for_command(command, self.event.platform)
             return help_text
-        text = "/помощь (название команды) - помощь по конкретной команде\n" \
-               "/документация - документация по боту. Самый подробный мануал по всему в одном месте\n" \
-               "/команды - список всех команд с кратким описанием\n" \
-               "\n" \
-               "Основы основ:\n" \
-               "Пример конкретной команды: /рандом 10\n" \
-               "* / — упоминание бота\n" \
-               "* рандом — команда\n" \
-               "* 10 — аргумент команды\n" \
-               "\n" \
-               "Формат детальной помощи по командам:\n" \
-               "Команда - выполняет команду\n" \
-               "Команда параметр - выполняет команду с параметром\n" \
-               "Команда (аргумент) - выполняет команду с обязательным аргументом\n" \
-               "Команда [аргумент=10] - выполняет команду с необязательным аргументом. Если не указать его, будет " \
-               "подставлено значение по умолчанию"
+        text = \
+            "/помощь (название команды) - помощь по конкретной команде\n" \
+            "/документация - документация по боту. Самый подробный мануал по всему в одном месте\n" \
+            "/команды - список всех команд с кратким описанием\n" \
+            "\n" \
+            "Основы основ:\n" \
+            "Пример конкретной команды: /рандом 10\n" \
+            "* / — упоминание бота\n" \
+            "* рандом — команда\n" \
+            "* 10 — аргумент команды\n" \
+            "\n" \
+            "Формат детальной помощи по командам:\n" \
+            "Команда - выполняет команду\n" \
+            "Команда параметр - выполняет команду с параметром\n" \
+            "Команда (аргумент) - выполняет команду с обязательным аргументом\n" \
+            "Команда [аргумент=10] - выполняет команду с необязательным аргументом. Если не указать его, будет подставлено значение по умолчанию"
         return text

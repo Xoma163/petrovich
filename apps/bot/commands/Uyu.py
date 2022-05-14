@@ -6,7 +6,7 @@ from apps.bot.classes.consts.Exceptions import PWarning
 class Uyu(Command):
     name = "уъу"
     names = ["ъуъ"]
-    help_text = "Добавляет слово в текст (уъуфикация)"
+    help_text = "добавляет слово в текст (уъуфикация)"
     help_texts = ["(Пересланные сообщения) [новое слово=бля] - добавляет слово в текст (уъуфикация)"]
     excluded_platforms = [Platform.YANDEX]
 

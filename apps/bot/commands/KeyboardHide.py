@@ -4,7 +4,7 @@ from apps.bot.classes.consts.Consts import Platform
 
 class KeyboardHide(Command):
     name = "скрыть"
-    help_text = "Скрыть - убирает клавиатуру"
+    help_text = "убирает клавиатуру"
 
     platforms = [Platform.VK]
 

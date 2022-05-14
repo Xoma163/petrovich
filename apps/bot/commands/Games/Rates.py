@@ -23,6 +23,7 @@ class Rates(Command):
 
     conversation = True
     platforms = [Platform.VK, Platform.TG]
+    access = Role.GAMER
 
     def start(self):
         with lock:

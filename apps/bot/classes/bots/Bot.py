@@ -235,7 +235,9 @@ class Bot(Thread):
                 user.profile.save()
 
                 group_user = Group.objects.get(name=Role.USER.name)
+                group_gamer = Group.objects.get(name=Role.GAMER.name)
                 user.profile.groups.add(group_user)
+                user.profile.groups.add(group_gamer)
         return user.profile
 
     def update_profile_avatar(self, profile: Profile, user_id):

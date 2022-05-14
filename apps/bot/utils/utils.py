@@ -9,7 +9,7 @@ from typing import List
 import pytz
 from PIL import Image, ImageDraw, ImageFont
 
-from apps.bot.classes.consts.Consts import Role
+from apps.bot.classes.consts.Consts import Role, Platform
 from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.classes.messages.attachments.Attachment import Attachment
 from apps.service.models import Service
@@ -128,7 +128,7 @@ def find_command_by_name(command_name):
     raise PWarning("Я не знаю такой команды")
 
 
-def get_help_texts_for_command(command) -> str:
+def get_help_texts_for_command(command, platform=None) -> str:
     """
     Получает help_texts для команды
     """
@@ -140,7 +140,20 @@ def get_help_texts_for_command(command) -> str:
     if result:
         result += '\n'
     if command.help_texts:
-        result += command.full_help_texts
+        if platform == Platform.TG:
+            lines = command.full_help_texts.split("\n")
+            full_help_texts_list = []
+            for line in lines:
+                dash_pos = line.find("-")
+                if dash_pos == -1:
+                    new_line = line
+                else:
+                    new_line = get_tg_formatted_text_line(line[:line.find("-") - 1]) + line[line.find("-") - 1:]
+                full_help_texts_list.append(new_line)
+            full_help_texts = "\n".join(full_help_texts_list)
+            result += full_help_texts
+        else:
+            result += command.full_help_texts
     else:
         result += "У данной команды нет подробного описания"
     return result

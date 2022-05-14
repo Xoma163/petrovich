@@ -1,7 +1,7 @@
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Role, Platform
 from apps.bot.classes.consts.Exceptions import PWarning
-from apps.bot.utils.utils import get_role_by_str, get_tg_formatted_text
+from apps.bot.utils.utils import get_role_by_str, get_tg_formatted_text_line
 
 
 class Commands(Command):
@@ -27,6 +27,7 @@ class Commands(Command):
             {"role": Role.TERRARIA, "text": "команды для игроков террарии"},
             {"role": Role.HOME, "text": "команды для домашних пользователей"},
             {"role": Role.MRAZ, "text": "команды для мразей"},
+            {"role": Role.GAMER, "text": "команды для игроков"},
         ]
 
         if self.event.message.args:
@@ -44,21 +45,24 @@ class Commands(Command):
         output = ""
         for role in ordered_roles:
             output += self.get_str_for_role(help_texts, role)
-        if 'games' in help_texts:
-            output += "\n— игры —\n"
-            if self.event.platform == Platform.TG:
-                output += get_tg_formatted_text(help_texts['games'])
-            else:
-                output += help_texts['games']
         output = output.rstrip()
         return output
 
     def get_str_for_role(self, help_texts, role):
         result = ""
         if self.event.sender.check_role(role['role']) and help_texts[role['role'].name]:
-            result += f"\n— {role['text']} —\n"
+            result += f"\n\n— {role['text']} —\n"
             if self.event.platform == Platform.TG:
-                result += get_tg_formatted_text(help_texts[role['role'].name])
+                help_texts_list = help_texts[role['role'].name].split('\n')
+                help_texts_list_new = []
+                for help_text in help_texts_list:
+                    dash_pos = help_text.find("-")
+                    if dash_pos == -1:
+                        new_line = help_text
+                    else:
+                        new_line = get_tg_formatted_text_line(help_text[:dash_pos - 1]) + help_text[dash_pos - 1:]
+                    help_texts_list_new.append(new_line)
+                result += "\n".join(help_texts_list_new)
             else:
                 result += help_texts[role['role'].name]
         return result

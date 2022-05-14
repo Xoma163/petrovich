@@ -20,6 +20,7 @@ class Role(Enum):
     BANNED = "забанен"
     TRUSTED = "доверенный"
     MRAZ = "мразь"
+    GAMER = "игрок"
 
     @classmethod
     def has_value(cls, value):

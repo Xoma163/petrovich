@@ -27,6 +27,7 @@ class Petrovich(Command):
 
     conversation = True
     platforms = [Platform.VK, Platform.TG]
+    access = Role.GAMER
 
     def start(self):
         if self.event.message.args:

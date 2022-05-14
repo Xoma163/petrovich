@@ -29,17 +29,13 @@ def generate_commands():
 
 def generate_help_text():
     def append_to_list(_list):
-        # Если команда игра, то в отдельный список
-        if command.__class__.__module__.split('.')[-2] == 'Games':
-            _list['games'].append(text['text'])
+        text_for = text['for'].name
+        if text_for in _list:
+            _list[text_for].append(text['text'])
         else:
-            text_for = text['for'].name
-            if text_for in _list:
-                _list[text_for].append(text['text'])
-            else:
-                print(f"Warn: Ошибка в генерации help_text. Ключ {text_for} не найден")
+            print(f"Warn: Ошибка в генерации help_text. Ключ {text_for} не найден")
 
-    groups = [x['name'] for x in Group.objects.all().values('name')] + ["games"]
+    groups = [x['name'] for x in Group.objects.all().values('name')]
     help_text_generated = {platform: {group: "" for group in groups} for platform in list(Platform)}
     help_text_list = {platform: {group: [] for group in groups} for platform in list(Platform)}
 

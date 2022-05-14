@@ -4,6 +4,7 @@ from django.contrib.auth.models import Group
 from django.core.management.base import BaseCommand
 
 from apps.bot.classes.consts.Consts import Role
+from apps.bot.models import Profile
 from apps.service.models import City, TimeZone, Service
 
 
@@ -408,6 +409,14 @@ class Command(BaseCommand):
         Service.objects.get_or_create(name='mrazi_chats_index_from', defaults={'value': 0})
         Service.objects.get_or_create(name='mrazi_chats_index_to', defaults={'value': 20})
 
+    @staticmethod
+    def add_gamer_to_all_users():
+        profiles = Profile.objects.all()
+        group_gamer = Group.objects.get(name=Role.GAMER.name)
+
+        for profile in profiles:
+            profile.groups.add(group_gamer)
+
     def handle(self, *args, **options):
         self.init_groups()
         print('done init groups')
@@ -420,4 +429,5 @@ class Command(BaseCommand):
         # self.init_cities_online()
         print('done init services_db')
 
+        self.add_gamer_to_all_users()
         print("done all")

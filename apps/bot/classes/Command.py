@@ -163,7 +163,7 @@ class Command:
                 return True
             else:
                 error = "Передано недостаточно аргументов"
-                error += f"\n\n{get_help_texts_for_command(self)}"
+                error += f"\n\n{get_help_texts_for_command(self, self.event.platform)}"
         else:
             error = "Для работы команды требуются аргументы"
         raise PWarning(error, keyboard=self._get_help_button_keyboard())
@@ -185,7 +185,7 @@ class Command:
             return True
 
         error = "Для работы команды требуются аргументы или пересылаемые сообщения"
-        error += f"\n\n{get_help_texts_for_command(self)}"
+        error += f"\n\n{get_help_texts_for_command(self, self.event.platform)}"
 
         raise PWarning(error, keyboard=self._get_help_button_keyboard())
 
