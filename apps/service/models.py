@@ -157,7 +157,7 @@ class Subscribe(models.Model):
     channel_id = models.CharField("ID канала", max_length=100)
     title = models.CharField("Название канала", max_length=100)
     date = models.DateTimeField("Дата последней публикации", null=True, blank=True)
-    last_video_id = models.CharField("ID последнего видео", max_length=100, null=True)
+    last_video_id = models.CharField("ID последнего видео", max_length=100, null=True, blank=True)
 
     service = models.SmallIntegerField("Сервис", blank=True, choices=SERVICE_CHOICES, default=SERVICE_YOUTUBE)
 
