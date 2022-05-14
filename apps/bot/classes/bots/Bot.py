@@ -12,6 +12,7 @@ from apps.bot.classes.consts.Exceptions import PWarning, PError, PSkip, PIDK
 from apps.bot.classes.events.Event import Event
 from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
 from apps.bot.classes.messages.attachments.DocumentAttachment import DocumentAttachment
+from apps.bot.classes.messages.attachments.GifAttachment import GifAttachment
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
 from apps.bot.models import Profile, Chat, Bot as BotModel, User
@@ -22,6 +23,7 @@ from petrovich.settings import env
 
 class Bot(Thread):
     ERROR_MSG = "Непредвиденная ошибка. Сообщите разработчику. Команда /баг"
+
     def __init__(self, platform):
         Thread.__init__(self)
 
@@ -367,6 +369,13 @@ class Bot(Thread):
         va = VideoAttachment()
         va.parse_response(document, filename=filename)
         return va
+
+    def upload_gif(self, gif, peer_id=None, title="Гифа", filename=None):
+        if peer_id:
+            self.set_activity(peer_id, ActivitiesEnum.UPLOAD_VIDEO)
+        ga = GifAttachment()
+        ga.parse_response(gif, filename=filename)
+        return ga
 
     # END ATTACHMENTS
 

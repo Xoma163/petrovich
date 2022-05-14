@@ -16,7 +16,7 @@ class Logs(Command):
 
     help_text = "логи бота"
     help_texts = [
-        "[уровень логов = DEBUG] [кол-во записей=10] - логи. Макс 30 записей. Возможные уровни логов: DEBUG/INFO/WARNING/ERROR/CRITICAL"
+        "[уровень логов = ERROR] [кол-во записей=1] - логи. Макс 30 записей. Возможные уровни логов: DEBUG/INFO/WARNING/ERROR/CRITICAL"
     ]
 
     access = Role.MODERATOR
@@ -24,10 +24,10 @@ class Logs(Command):
     MAX_LOGS_COUNT = 50
 
     def start(self):
-        count = 10
+        count = 1
 
         level = logging.DEBUG
-        level_name = "DEBUG"
+        level_name = "ERROR"
         if self.event.message.args:
             level = logging._nameToLevel.get(self.event.message.args[0].upper(), logging._nameToLevel[level_name])
 

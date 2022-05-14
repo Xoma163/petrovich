@@ -128,7 +128,7 @@ class RedditSaver:
         self.set_post_url(post_url)
         self.get_post_data()
 
-        if self.is_video:
+        if self.is_video or self.is_gif:
             return self.get_video_from_post()
         elif self.is_image:
             return self.get_photo_from_post()
@@ -174,9 +174,16 @@ class RedditSaver:
 
     @property
     def is_video(self):
-        if self.media_data and 'reddit_video' in self.media_data:
+        if self.media_data and 'reddit_video' in self.media_data or self.data.get('url_overridden_by_dest'):
             return True
         return self.content_type in [self.CONTENT_TYPE_VIDEO, self.CONTENT_TYPE_RICH_VIDEO]
+
+    @property
+    def is_gif(self):
+        url = self.data.get('url_overridden_by_dest')
+        if url and (url.endswith('.gif') or url.endswith(".gifv")):
+            return True
+        return False
 
     @property
     def is_image(self):

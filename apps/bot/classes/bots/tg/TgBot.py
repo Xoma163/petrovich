@@ -11,6 +11,7 @@ from apps.bot.classes.events.Event import Event
 from apps.bot.classes.events.TgEvent import TgEvent
 from apps.bot.classes.messages.ResponseMessage import ResponseMessageItem, ResponseMessage
 from apps.bot.classes.messages.attachments.DocumentAttachment import DocumentAttachment
+from apps.bot.classes.messages.attachments.GifAttachment import GifAttachment
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 from apps.bot.classes.messages.attachments.StickerAttachment import StickerAttachment
 from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
@@ -137,6 +138,21 @@ class TgBot(CommonBot):
                 raise PError("Нельзя загружать видео более 40 мб в телеграмм")
             return self.requests.get('sendVideo', default_params, files={'video': video.content})
 
+    def _send_gif(self, rm: ResponseMessageItem, default_params):
+        """
+        Отправка гифы. Ссылка или файл
+        """
+        self.set_activity(default_params['chat_id'], ActivitiesEnum.UPLOAD_VIDEO)
+        gif: GifAttachment = rm.attachments[0]
+        if gif.public_download_url:
+            default_params['animation'] = gif.public_download_url
+            return self.requests.get('sendAnimation', default_params)
+        else:
+            if gif.get_size_mb() > 40:
+                rm.attachments = []
+                raise PError("Нельзя загружать гифы более 40 мб в телеграмм")
+            return self.requests.get('sendAnimation', default_params, files={'animation': gif.content})
+
     def _send_sticker(self, rm: ResponseMessageItem, default_params):
         """
         Отправка стикера
@@ -192,17 +208,20 @@ class TgBot(CommonBot):
         """
         params = {'chat_id': rm.peer_id, 'caption': rm.text, 'reply_markup': json.dumps(rm.keyboard)}
         params.update(rm.kwargs)
+
+        att_map = {
+            PhotoAttachment: self._send_photo,
+            GifAttachment: self._send_gif,
+            VideoAttachment: self._send_video,
+            DocumentAttachment: self._send_document,
+            StickerAttachment: self._send_sticker,
+        }
+
         if rm.attachments:
             if len(rm.attachments) > 1:
                 return self._send_media_group(rm, params)
-            elif isinstance(rm.attachments[0], PhotoAttachment):
-                return self._send_photo(rm, params)
-            elif isinstance(rm.attachments[0], VideoAttachment):
-                return self._send_video(rm, params)
-            elif isinstance(rm.attachments[0], DocumentAttachment):
-                return self._send_document(rm, params)
-            elif isinstance(rm.attachments[0], StickerAttachment):
-                return self._send_sticker(rm, params)
+            else:
+                return att_map[rm.attachments[0].__class__](rm, params)
         return self._send_text(params)
 
     # END  MAIN ROUTING AND MESSAGING
