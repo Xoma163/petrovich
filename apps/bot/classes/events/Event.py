@@ -65,11 +65,11 @@ class Event:
         if self.payload:
             return True
 
-        if self.is_from_pm:
-            return True
-
         need_a_response_extra = self.need_a_response_extra()
         if need_a_response_extra:
+            return True
+
+        if self.is_from_pm:
             return True
 
         if self.message is None:

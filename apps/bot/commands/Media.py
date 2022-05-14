@@ -90,30 +90,25 @@ class Media(Command):
             else:
                 raise PSkip()
 
-        if has_command_name or self.event.is_from_pm:
-            return {'attachments': attachments}
+        chosen_url_pos = source.find(chosen_url)
+        extra_text = source[:chosen_url_pos].strip() + "\n" + source[chosen_url_pos + len(chosen_url):].strip()
+        extra_text = extra_text.strip()
+
+        text = ""
+        if title:
+            text = f"{title}\n"
+
+        if self.event.platform == Platform.TG:
+            text += f'\n{get_tg_formatted_url("Сурс", chosen_url)}'
         else:
+            text += f"\n{chosen_url}"
+        # Костыль, чтобы видосы которые шарятся с мобилы с реддита не дублировали title
+        if extra_text and extra_text != title:
+            text += f"\n{extra_text}"
 
-            chosen_url_pos = source.find(chosen_url)
-            extra_text = source[:chosen_url_pos].strip() + "\n" + source[chosen_url_pos + len(chosen_url):].strip()
-            extra_text = extra_text.strip()
-
-            text = ""
-            if title:
-                text = f"{title}\n"
-            text += f"\nОт пользователя {self.event.sender}"
-
-            if self.event.platform == Platform.TG:
-                text += f'\n{get_tg_formatted_url("Сурс", chosen_url)}'
-            else:
-                text += f"\n{chosen_url}"
-            # Костыль, чтобы видосы которые шарятся с мобилы с реддита не дублировали title
-            if extra_text and extra_text != title:
-                text += f"\n{extra_text}"
-
-            res = self.bot.parse_and_send_msgs({'text': text, 'attachments': attachments}, self.event.peer_id)
-            if res[0]['success']:
-                self.bot.delete_message(self.event.peer_id, self.event.message.id)
+        res = self.bot.parse_and_send_msgs({'text': text, 'attachments': attachments}, self.event.peer_id)
+        if res[0]['success']:
+            self.bot.delete_message(self.event.peer_id, self.event.message.id)
 
     def get_method_and_chosen_url(self, source):
         method = None
