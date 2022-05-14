@@ -25,7 +25,7 @@ class Rate(Command):
         with lock:
             gamer = self.bot.get_gamer_by_profile(self.event.sender)
 
-            min_gamers = int(len(Profile.objects.filter(chats=self.event.chat)) / 2)
+            min_gamers = int(len(Profile.objects.filter(chats=self.event.chat)) / 3)
             if min_gamers < 2:
                 min_gamers = 2
             rates_gamers = RateModel.objects.filter(chat=self.event.chat)
