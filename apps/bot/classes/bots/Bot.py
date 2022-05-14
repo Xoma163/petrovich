@@ -126,8 +126,7 @@ class Bot(Thread):
                     self.logger.debug({"message": rm.to_log(), "event": event.to_log()})
                     return rm
             except (PWarning, PError) as e:
-                msg = str(e)
-                rm = ResponseMessage(msg, event.peer_id)
+                rm = ResponseMessage({'text': e.msg, 'keyboard': e.keyboard}, event.peer_id)
                 getattr(self.logger, e.level)({"message": rm.to_log(), "event": event.to_log()})
                 return rm
             except PIDK:
@@ -386,10 +385,17 @@ class Bot(Thread):
         """
 
     @staticmethod
-    def _get_keyboard_buttons(buttons):
+    def get_button(text, command, args=None):
         """
-        Определение структуры кнопок. Переопределяется в каждом боте
+        Определение кнопки для клавиатур
         """
+
+    @staticmethod
+    def get_keyboard_buttons(buttons):
+        """
+        Определение структуры кнопок
+        """
+        return [buttons]
 
     def get_inline_keyboard(self, buttons: list, cols=1):
         """
@@ -401,7 +407,7 @@ class Bot(Thread):
             if 'args' not in buttons[i] or buttons[i]['args'] is None:
                 buttons[i]['args'] = {}
         buttons_chunks = get_chunks(buttons, cols)
-        keyboard = [self._get_keyboard_buttons(chunk) for chunk in buttons_chunks]
+        keyboard = list(buttons_chunks)
         return keyboard
 
     def get_mention(self, profile: Profile, name=None):

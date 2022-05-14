@@ -225,22 +225,18 @@ class VkBot(CommonBot):
             self.vk.messages.setActivity(type=tg_activity, peer_id=peer_id, group_id=self.group_id)
 
     @staticmethod
-    def _get_keyboard_buttons(buttons):
-        """
-        Определение структуры кнопок
-        """
-
-        return [{
+    def get_button(text, command, args=None):
+        return {
             'action': {
                 'type': 'text',
-                'label': button_item['button_text'],
+                'label': text,
                 "payload": json.dumps({
-                    "command": button_item['command'],
-                    "args": button_item.get('args'),
+                    "command": command,
+                    "args": args,
                 }, ensure_ascii=False)
             },
             'color': 'primary',
-        } for button_item in buttons]
+        }
 
     def get_inline_keyboard(self, buttons: list, cols=1):
         """

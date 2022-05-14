@@ -242,17 +242,14 @@ class TgBot(CommonBot):
     # EXTRA
 
     @staticmethod
-    def _get_keyboard_buttons(_buttons):
-        """
-        Определение структуры кнопок
-        """
-        return [{
-            'text': button_item['button_text'],
+    def get_button(text, command, args=None):
+        return {
+            'text': text,
             'callback_data': json.dumps({
-                'command': button_item['command'],
-                "args": button_item.get('args'),
+                'command': command,
+                "args": args,
             }, ensure_ascii=False)
-        } for button_item in _buttons]
+        }
 
     def get_inline_keyboard(self, buttons: list, cols=1):
         """

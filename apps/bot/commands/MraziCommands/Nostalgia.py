@@ -118,9 +118,8 @@ class Nostalgia(Command):
         for i in range(first_item, last_item):
             index = searched_indexes[i]
             author = data[index]['author'].split(' ')[0]
-            buttons.append(
-                {'command': self.name, 'button_text': f"{author}: {data[index]['text']}", 'args': [index + 1]})
-
+            button = self.bot.get_button(f"{author}: {data[index]['text']}", self.name, [index + 1], )
+            buttons.append(button)
         keyboard = self.bot.get_inline_keyboard(buttons)
 
         return {"text": f"Результаты по запросу {search_query}.\n\nСтраница {page}/{total_pages}", "keyboard": keyboard}
