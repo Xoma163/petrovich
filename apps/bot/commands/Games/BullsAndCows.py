@@ -66,7 +66,8 @@ class BullsAndCows(Command):
                     msg = f"Отгадали всего за {session.steps} {decl}!"
                     msg2 = "Начислил 1000 очков"
                     session.delete()
-                    keyboard = self.bot.get_inline_keyboard([{'command': self.name, 'button_text': "Ещё"}])
+                    button = self.bot.get_button("Ещё", self.name)
+                    keyboard = self.bot.get_inline_keyboard([button])
                     return [{"text": msg, "keyboard": keyboard}, msg2]
 
                 bulls = 0

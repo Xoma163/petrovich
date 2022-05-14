@@ -35,5 +35,5 @@ class Joke(Command):
             self.check_number_arg_range(a_type, 1, 19, [9, 10, 17, 19])
         rzhunemogu_api = RzhunemoguAPI()
         msg = rzhunemogu_api.get_joke(a_type)
-        return {"text": msg, "keyboard": self.bot.get_inline_keyboard(
-            [{'command': self.name, 'button_text': "Ещё", 'args': [a_type]}])}
+        button = self.bot.get_button("Ещё", self.name, [a_type])
+        return {"text": msg, "keyboard": self.bot.get_inline_keyboard([button])}

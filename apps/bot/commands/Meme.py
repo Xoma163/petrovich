@@ -428,8 +428,8 @@ class Meme(Command):
                 msg['text'] += f"\n{meme.name}"
 
         if send_keyboard:
-            msg['keyboard'] = self.bot.get_inline_keyboard(
-                [{'command': self.name, 'button_text': "Ещё"}])
+            button = self.bot.get_button("Ещё", self.name)
+            msg['keyboard'] = self.bot.get_inline_keyboard([button])
         return msg
 
     @staticmethod

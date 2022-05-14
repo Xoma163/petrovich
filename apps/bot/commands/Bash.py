@@ -21,8 +21,5 @@ class Bash(Command):
             self.check_number_arg_range(quotes_count, 1, MAX_QUOTES)
         bash_api = BashAPI(quotes_count)
         msg = bash_api.parse()
-        return {
-            "text": msg,
-            "keyboard": self.bot.get_inline_keyboard(
-                [{'command': self.name, 'button_text': "Ещё", 'args': [quotes_count]}])
-        }
+        button = self.bot.get_button("Ещё", self.name, [quotes_count])
+        return {"text": msg, "keyboard": self.bot.get_inline_keyboard([button])}

@@ -164,14 +164,18 @@ class Nostalgia(Command):
             attachments = self.bot.upload_photos(bytes_io, peer_id=self.event.peer_id)
         msg = f"{msgs[0]['datetime']}\n" \
               f"{index_from} - {index_to}"
-        buttons = [{'command': self.name, 'button_text': "Ещё", 'args': None}]
+        button = self.bot.get_button("Ещё", self.name)
+        buttons = [button]
         diff = index_to - index_from + 1
         if index_from != 1:
-            buttons.append({'command': self.name, 'button_text': "До", 'args': [index_from - diff, index_to - diff]})
+            button = self.bot.get_button("До", self.name, [index_from - diff, index_to - diff])
+            buttons.append(button)
         if index_to != len(data) - 1:
-            buttons.append({'command': self.name, 'button_text': "После", 'args': [index_from + diff, index_to + diff]})
+            button = self.bot.get_button("После", self.name, [index_from + diff, index_to + diff])
+            buttons.append(button)
         if has_att_link:
-            buttons.append({'command': self.name, 'button_text': "Вложения", 'args': "вложения"})
+            button = self.bot.get_button("Вложения", self.name, ["вложения"])
+            buttons.append(button)
 
         keyboard = self.bot.get_inline_keyboard(buttons)
 

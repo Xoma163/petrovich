@@ -119,8 +119,8 @@ class Horoscope(Command):
             prepared_meme['text'] = f"{zodiac_sign_name}\n{prepared_meme['text']}"
         else:
             prepared_meme['text'] = zodiac_sign_name
-        prepared_meme['keyboard'] = self.bot.get_inline_keyboard(
-            [{'command': self.name, 'button_text': self.name.capitalize()}])
+        button = self.bot.get_button(self.name.capitalize(), self.name)
+        prepared_meme['keyboard'] = self.bot.get_inline_keyboard([button])
         return prepared_meme
 
 

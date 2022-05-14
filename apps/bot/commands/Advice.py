@@ -13,7 +13,8 @@ class Advice(Command):
         try:
             fga = FuckingGreatAdviceAPI()
             advice = fga.get_advice()
-            keyboard = self.bot.get_inline_keyboard([{'command': self.name, 'button_text': "Ещё"}])
+            button = self.bot.get_button("Ещё", self.name)
+            keyboard = self.bot.get_inline_keyboard([button])
             return {"text": advice, "keyboard": keyboard}
 
         except Exception:

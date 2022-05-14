@@ -26,9 +26,6 @@ class Camera(Command):
         else:
             document = camera_handler.get_gif(frames)
             attachments = [self.bot.upload_video(document, self.event.peer_id, "Камера", filename="camera.gif")]
-        return {
-            'attachments': attachments,
-            "keyboard": self.bot.get_inline_keyboard(
-                [{'command': self.name, 'button_text': "Ещё", 'args': [frames]}]
-            )
-        }
+        button = self.bot.get_button("Ещё", self.name, [frames])
+
+        return {'attachments': attachments, "keyboard": self.bot.get_inline_keyboard([button])}
