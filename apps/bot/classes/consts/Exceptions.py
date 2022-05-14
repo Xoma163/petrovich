@@ -1,7 +1,7 @@
 class PetrovichException(Exception):
     def __init__(self, msg=None, keyboard=None):
         if keyboard is None:
-            keyboard = []
+            keyboard = {}
         self.msg = msg
         self.keyboard = keyboard
 

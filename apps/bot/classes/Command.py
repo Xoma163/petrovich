@@ -356,12 +356,7 @@ class Command:
                 default_item = item[1]
         if default_item:
             return default_item
-        # raise PWarning(f"{self.help_texts}")
-        # help_text = get_help_texts_for_command(self)
-        # if self.event.platform == Platform.TG:
-        #     lines = help_text.split("\n")
-        #     help_text = "\n".join([get_tg_formatted_text_line(x) for x in lines])
-        return self.check_args(1)
+        raise PWarning("Нет такого пункта меню", keyboard=self._get_help_button_keyboard())
 
     def _get_help_button_keyboard(self):
         button = self.bot.get_button(f"/помощь {self.name}", "помощь", [self.name])
