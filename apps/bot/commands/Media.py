@@ -97,6 +97,7 @@ class Media(Command):
         text = ""
         if title:
             text = f"{title}\n"
+        text += f"\nОт пользователя {self.event.sender}"
 
         if self.event.platform == Platform.TG:
             text += f'\n{get_tg_formatted_url("Сурс", chosen_url)}'
