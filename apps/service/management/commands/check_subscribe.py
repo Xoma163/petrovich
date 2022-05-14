@@ -7,6 +7,8 @@ from django.core.management import BaseCommand
 from apps.bot.APIs.YoutubeInfo import YoutubeInfo
 from apps.bot.classes.bots.Bot import get_bot_by_platform
 from apps.bot.classes.consts.Consts import Platform
+from apps.bot.classes.events.Event import Event
+from apps.bot.commands.Media import Media
 from apps.bot.utils.utils import get_tg_formatted_url
 from apps.service.models import Subscribe
 
@@ -20,8 +22,7 @@ class Command(BaseCommand):
         subs = Subscribe.objects.all()
         for sub in subs:
             if sub.service == Subscribe.SERVICE_YOUTUBE:
-                pass
-                # self.check_youtube_video(sub)
+                self.check_youtube_video(sub)
             elif sub.service == Subscribe.SERVICE_THE_HOLE:
                 self.check_the_hole_video(sub)
 
@@ -50,6 +51,7 @@ class Command(BaseCommand):
             title = titles[i]
             link = f"https://the-hole.tv/{new_video}"
             self.send_notify(sub, title, link)
+            self.send_the_hole_file(sub, link)
         sub.last_video_id = last_videos[0]
         sub.save()
 
@@ -66,3 +68,15 @@ class Command(BaseCommand):
                    f"{link}"
 
         bot.parse_and_send_msgs(text, sub.peer_id)
+
+    @staticmethod
+    def send_the_hole_file(sub, link):
+        platform = sub.author.get_platform_enum()
+        bot = get_bot_by_platform(platform)
+
+        event = Event(bot=bot)
+        event.peer_id = sub.peer_id
+
+        media_command = Media(bot, event)
+        att, title = media_command.get_the_hole_video(link)
+        bot.parse_and_send_msgs({'text': title, 'attachments': att}, peer_id=sub.peer_id)
