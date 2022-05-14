@@ -40,18 +40,6 @@ class Media(Command):
     ]
     platforms = [Platform.TG]
 
-    def __init__(self):
-        super().__init__()
-        self.MEDIA_TRANSLATOR = {
-            YOUTUBE_URLS: self.get_youtube_video,
-            TIKTOK_URLS: self.get_tiktok_video,
-            REDDIT_URLS: self.get_reddit_attachment,
-            INSTAGRAM_URLS: self.get_instagram_attachment,
-            TWITTER_URLS: self.get_twitter_video,
-            PIKABU_URLS: self.get_pikabu_video,
-            THE_HOLE_URLS: self.get_the_hole_video,
-        }
-
     @staticmethod
     def accept_extra(event):
         if event.message and not event.message.mentioned:
@@ -66,7 +54,6 @@ class Media(Command):
         return False
 
     def start(self):
-
         if self.event.message.command in self.full_names:
             if self.event.message.args:
                 source = self.event.message.args_case[0]
@@ -112,15 +99,25 @@ class Media(Command):
             self.bot.delete_message(self.event.peer_id, self.event.message.id)
 
     def get_method_and_chosen_url(self, source):
+        MEDIA_TRANSLATOR = {
+            YOUTUBE_URLS: self.get_youtube_video,
+            TIKTOK_URLS: self.get_tiktok_video,
+            REDDIT_URLS: self.get_reddit_attachment,
+            INSTAGRAM_URLS: self.get_instagram_attachment,
+            TWITTER_URLS: self.get_twitter_video,
+            PIKABU_URLS: self.get_pikabu_video,
+            THE_HOLE_URLS: self.get_the_hole_video,
+        }
+
         method = None
         urls = get_urls_from_text(source)
         for url in urls:
             hostname = urlparse(url).hostname
             if not hostname:
                 raise PWarning("Не нашёл ссылки")
-            for k in self.MEDIA_TRANSLATOR:
+            for k in MEDIA_TRANSLATOR:
                 if hostname in k:
-                    return self.MEDIA_TRANSLATOR[k], url
+                    return MEDIA_TRANSLATOR[k], url
 
         if not method:
             raise PWarning("Не youtube/tiktok/reddit/instagram ссылка")

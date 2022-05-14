@@ -7,6 +7,46 @@ from apps.bot.commands.Meme import Meme
 from apps.service.models import Horoscope as HoroscopeModel
 
 
+class ZodiacSign:
+    def __init__(self, name, signs, start_date):
+        self.name = name
+        self.signs = signs
+        self.start_date = start_date
+
+    def is_contains_name_or_sign(self, text):
+        if text in self.name or text in self.signs:
+            return True
+
+
+class ZodiacSigns:
+    def __init__(self, signs: list):
+        self.signs = signs
+
+    def find_zodiac_sign_by_date(self, date):
+        date = date.replace(year=1900)
+        zodiac_days = [x.start_date for x in self.signs]
+        for i in range(len(zodiac_days) - 1):
+            zodiac_date_start = datetime.strptime(zodiac_days[i], "%d.%m").date()
+            zodiac_date_end = datetime.strptime(zodiac_days[i + 1], "%d.%m").date()
+            if zodiac_date_start <= date < zodiac_date_end:
+                return self.signs[i]
+        return self.signs[-1]
+
+    def get_zodiac_sign_index(self, zodiac_sign: ZodiacSign):
+        for i, _zodiac_sign in enumerate(self.signs):
+            if zodiac_sign == _zodiac_sign:
+                return i
+
+    def get_zodiac_sign_by_sign_or_name(self, text):
+        for zodiac_sign in self.signs:
+            if zodiac_sign.is_contains_name_or_sign(text):
+                return zodiac_sign
+        raise PWarning("Не знаю такого знака зодиака")
+
+    def get_zodiac_signs(self):
+        return self.signs
+
+
 class Horoscope(Command):
     name = "гороскоп"
     name_tg = "horoscope"
@@ -18,24 +58,20 @@ class Horoscope(Command):
         "инфо (знак зодиака) - пришлёт информацию о мемасе в гороскопе по знаку зодиака",
         "конфа - пришлёт гороскоп для всех участников конфы"
     ]
-
-    def __init__(self):
-        super().__init__()
-
-        self.zodiac_signs = ZodiacSigns([
-            ZodiacSign("водолей", ['♒', "♒️"], "21.01"),
-            ZodiacSign("рыбы", ["♓", "♓️"], "19.02"),
-            ZodiacSign("овен", ["♈", "♈️"], "21.03"),
-            ZodiacSign("телец", ["♉", "♉️"], "21.04"),
-            ZodiacSign("близнецы", ["♊", "♊️"], "22.05"),
-            ZodiacSign("рак", ["♋", "♋️"], "22.06"),
-            ZodiacSign("лев", ["♌", "♌️"], "23.07"),
-            ZodiacSign("дева", ["♍", "♍️"], "24.08"),
-            ZodiacSign("весы", ["♎", "♎️"], "24.09"),
-            ZodiacSign("скорпион", ["♏", "♏️"], "24.10"),
-            ZodiacSign("стрелец", ["♐", "♐️"], "23.11"),
-            ZodiacSign("козерог", ["♑", "♑️"], "22.12"),
-        ])
+    zodiac_signs = ZodiacSigns([
+        ZodiacSign("водолей", ['♒', "♒️"], "21.01"),
+        ZodiacSign("рыбы", ["♓", "♓️"], "19.02"),
+        ZodiacSign("овен", ["♈", "♈️"], "21.03"),
+        ZodiacSign("телец", ["♉", "♉️"], "21.04"),
+        ZodiacSign("близнецы", ["♊", "♊️"], "22.05"),
+        ZodiacSign("рак", ["♋", "♋️"], "22.06"),
+        ZodiacSign("лев", ["♌", "♌️"], "23.07"),
+        ZodiacSign("дева", ["♍", "♍️"], "24.08"),
+        ZodiacSign("весы", ["♎", "♎️"], "24.09"),
+        ZodiacSign("скорпион", ["♏", "♏️"], "24.10"),
+        ZodiacSign("стрелец", ["♐", "♐️"], "23.11"),
+        ZodiacSign("козерог", ["♑", "♑️"], "22.12"),
+    ])
 
     def start(self):
         if self.event.message.args:
@@ -122,43 +158,3 @@ class Horoscope(Command):
         button = self.bot.get_button(self.name.capitalize(), self.name)
         prepared_meme['keyboard'] = self.bot.get_inline_keyboard([button])
         return prepared_meme
-
-
-class ZodiacSign:
-    def __init__(self, name, signs, start_date):
-        self.name = name
-        self.signs = signs
-        self.start_date = start_date
-
-    def is_contains_name_or_sign(self, text):
-        if text in self.name or text in self.signs:
-            return True
-
-
-class ZodiacSigns:
-    def __init__(self, signs: list):
-        self.signs = signs
-
-    def find_zodiac_sign_by_date(self, date):
-        date = date.replace(year=1900)
-        zodiac_days = [x.start_date for x in self.signs]
-        for i in range(len(zodiac_days) - 1):
-            zodiac_date_start = datetime.strptime(zodiac_days[i], "%d.%m").date()
-            zodiac_date_end = datetime.strptime(zodiac_days[i + 1], "%d.%m").date()
-            if zodiac_date_start <= date < zodiac_date_end:
-                return self.signs[i]
-        return self.signs[-1]
-
-    def get_zodiac_sign_index(self, zodiac_sign: ZodiacSign):
-        for i, _zodiac_sign in enumerate(self.signs):
-            if zodiac_sign == _zodiac_sign:
-                return i
-
-    def get_zodiac_sign_by_sign_or_name(self, text):
-        for zodiac_sign in self.signs:
-            if zodiac_sign.is_contains_name_or_sign(text):
-                return zodiac_sign
-        raise PWarning("Не знаю такого знака зодиака")
-
-    def get_zodiac_signs(self):
-        return self.signs
