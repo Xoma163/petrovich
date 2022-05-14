@@ -18,7 +18,7 @@ from petrovich.settings import env, BASE_DIR, MAIN_DOMAIN
 
 class MinecraftAPI:
 
-    def __init__(self, ip, port=25565, amazon=False, event=None, delay=None, names=None, map_url=None):
+    def __init__(self, ip, port=25565, amazon=False, event=None, delay=None, names=None, map_url=None, auto_off=False):
         self.ip = ip
         self.port = port
         self.amazon = amazon
@@ -29,6 +29,7 @@ class MinecraftAPI:
         self.map_url = map_url
 
         self.server_info = None
+        self.auto_off = auto_off
 
     def get_version(self):
         return self.names[0]
@@ -210,6 +211,8 @@ class MinecraftAPI:
         thread.start()
 
     def stop_if_need(self):
+        if not self.auto_off:
+            return
         self.get_server_info()
         # Если сервак онлайн и нет игроков
         if self.server_info['online'] and not self.server_info['players']:
@@ -254,27 +257,10 @@ minecraft_servers = [
             'amazon': False,
             'event': None,
             'delay': 60,
-            'names': ['1.18.1', "1.18"],
+            'names': ['1.12.2', "1.12"],
+            'map_url': f"http://{MAIN_DOMAIN}:8123/?worldname=WTTF#",
+            'auto_off': False
         }),
-    # MinecraftAPI(
-    #     **{
-    #         'ip': MAIN_DOMAIN,
-    #         'port': 25566,
-    #         'amazon': False,
-    #         'event': None,
-    #         'delay': 60,
-    #         'names': ['1.16.5', "1.16"],
-    #         'map_url': "https://map.andrewsha.net"
-    #     }),
-    # MinecraftAPI(
-    #     **{
-    #         'ip': MAIN_DOMAIN,
-    #         'port': 25565,
-    #         'amazon': False,
-    #         'event': None,
-    #         'delay': 60,
-    #         'names': ['1.12.2', "1.12"]
-    #     }),
 ]
 
 
