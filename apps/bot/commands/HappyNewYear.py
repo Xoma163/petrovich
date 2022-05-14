@@ -7,6 +7,7 @@ class HappyNewYear(Command):
     name = "с"
     names = ["с"]
     suggest_for_similar = False
+    enabled = False
 
     def accept(self, event):
         hny_phrases = [

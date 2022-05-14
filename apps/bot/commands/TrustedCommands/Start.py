@@ -8,12 +8,11 @@ class Start(Command):
     name = "старт"
 
     help_text = "возобновляет работу сервиса"
-    help_texts = [
-        "Сервис - камера/майнкрафт/террария\n"
-        "Если майнкрафт, то может быть указана версия, 1.16.5"
-    ]
+    help_texts = ["Сервис - камера/майнкрафт/террария"]
+    help_texts_extra = "Если майнкрафт, то может быть указана версия (1.12.2)"
 
     access = Role.TRUSTED
+    args = 1
 
     def start(self):
         if self.event.message.args:

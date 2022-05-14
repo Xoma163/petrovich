@@ -7,9 +7,7 @@ class DeIssue(Command):
     name = "деишю"
     names = ["хуишю"]
     help_text = "закрывает проблему Петровича без решения"
-    help_texts = [
-        "(id) - закрывает проблему Петровича без решения"
-    ]
+    help_texts = ["(id) - закрывает проблему Петровича без решения"]
     args = 1
     non_mentioned = False
     access = Role.ADMIN

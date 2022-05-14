@@ -7,7 +7,8 @@ class Restart(Command):
     name = "рестарт"
     names = ["ребут"]
     help_text = "перезагружает бота или веб на сервере, либо сам сервер"
-    help_texts = ["[сервис=бот] - перезагружает сервис\nСервис - бот/веб/сервер"]
+    help_texts = ["[сервис=бот] - перезагружает сервис"]
+    help_texts_extra = "Сервис - бот/веб/сервер"
     access = Role.ADMIN
 
     def start(self):

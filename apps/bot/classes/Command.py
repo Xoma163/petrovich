@@ -7,12 +7,13 @@ from apps.bot.utils.utils import get_help_texts_for_command, transform_k
 
 class Command:
     # Основные поля команды
-    name: str = None  # Имя команды,
+    name: str = ""  # Имя команды,
     names: list = []  # Вспопогательные имена команды
-    name_tg: str = None  # Имя команды для списка команд в тг
+    name_tg: str = ""  # Имя команды для списка команд в тг
 
-    help_text: str = None  # Текст в /команды
+    help_text: str = ""  # Текст в /команды
     help_texts: list = []  # Текст в детальной помощи по команде /помощь (название команды)
+    help_texts_extra: str = ""  # Текст в детальной помощи по команде /помощь (название команды), который будет выводиться после основного текста
 
     enabled: bool = True  # Включена ли команда
     suggest_for_similar: bool = True  # предлагать ли команду в выдаче похожих команд при ошибке пользователя в вводе
@@ -39,10 +40,10 @@ class Command:
         self.bot: Bot = bot
         self.event: Event = event
 
-        self.full_names: str = None  # Полный список имён команды (основное имя, дополнительное, имя в тг)
-        self.full_help_text: str = None  # Сгенерированный хелп текст для команды /команды
-        self.full_help_texts: str = None  # Сгенерированный хелп текст для команды /помощь
-        self.full_help_texts_tg: str = None  # Сгенерированный хелп текст для списка команд в телеграме
+        self.full_names: str = ""  # Полный список имён команды (основное имя, дополнительное, имя в тг)
+        self.full_help_text: str = ""  # Сгенерированный хелп текст для команды /команды
+        self.full_help_texts: str = ""  # Сгенерированный хелп текст для команды /помощь
+        self.full_help_texts_tg: str = ""  # Сгенерированный хелп текст для списка команд в телеграме
 
         if self.name:
             self.full_names = [self.name] + self.names
@@ -50,6 +51,8 @@ class Command:
                 self.full_help_text = f"{self.name.capitalize()} - {self.help_text}"
             if self.help_texts:
                 self.full_help_texts = "\n".join([f"{self.name.capitalize()} {x}" for x in self.help_texts])
+            if self.help_texts_extra:
+                self.full_help_texts += f"\n{self.help_texts_extra}"
         if self.name_tg:
             self.full_names.append(self.name_tg)
             self.full_help_texts_tg = f"{self.name_tg.lower()} - {self.help_text}"

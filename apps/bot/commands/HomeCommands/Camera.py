@@ -8,7 +8,8 @@ class Camera(Command):
     # name_tg = 'camera'
 
     help_text = "ссылка и гифка с камеры"
-    help_texts = ["[кол-во кадров=100] - ссылка и гифка с камеры. Максимум 1000 кадров"]
+    help_texts = ["[кол-во кадров=100] - ссылка и гифка с камеры"]
+    help_texts_extra = f"Максимум {camera_handler.MAX_FRAMES} кадров"
 
     int_args = [0]
     access = Role.HOME

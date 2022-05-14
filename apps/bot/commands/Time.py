@@ -8,9 +8,7 @@ from apps.service.models import City
 class Time(Command):
     name = "время"
     help_text = "текущее время в городе"
-    help_texts = [
-        "[город=из профиля] - текущее время в городе"
-    ]
+    help_texts = ["[город=из профиля] - текущее время в городе"]
 
     def start(self):
         city = None

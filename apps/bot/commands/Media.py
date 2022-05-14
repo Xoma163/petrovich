@@ -34,10 +34,9 @@ MEDIA_URLS = tuple(
 
 class Media(Command):
     name = "медиа"
-    help_text = "скачивает видео из Reddit/TikTok/YouTube/Instagram и присылает его"
-    help_texts = [
-        "(ссылка на видео) - скачивает видео из Reddit/TikTok/YouTube/Instagram и присылает его"
-    ]
+    help_text = "скачивает видео из соцсетей и присылает его"
+    help_texts = ["(ссылка на видео) - скачивает видео из соцсетей и присылает его"]
+    help_texts_extra = "Поддерживаемые соцсети: Reddit/TikTok/YouTube/Instagram/Twitter/Pikabu/TheHole"
     platforms = [Platform.TG]
 
     @staticmethod

@@ -8,8 +8,8 @@ from apps.bot.classes.consts.Exceptions import PWarning
 class Find(Command):
     name = "найди"
     names = ["поиск", "найти", "ищи", "искать", "хуизфакинг", "вхуизфакинг"]
-    help_text = "ищет информацию по картинкам в гугле и музыке в спотифае"
-    help_texts = ["(запрос) - ищет информацию по картинкам в гугле и музыке в спотифае"]
+    help_text = "ищет информацию по картинкам в гугле"
+    help_texts = ["(запрос) - ищет информацию по картинкам в гугле"]
     args = 1
     excluded_platforms = [Platform.YANDEX]
 

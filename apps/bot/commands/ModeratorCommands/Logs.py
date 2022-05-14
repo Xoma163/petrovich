@@ -15,9 +15,8 @@ class Logs(Command):
     name_tg = 'logs'
 
     help_text = "логи бота"
-    help_texts = [
-        "[уровень логов = ERROR] [кол-во записей=1] - логи. Макс 30 записей. Возможные уровни логов: DEBUG/INFO/WARNING/ERROR/CRITICAL"
-    ]
+    help_texts = ["[уровень логов = ERROR] [кол-во записей=1] - логи."]
+    help_texts_extra = "Макс 30 записей. Возможные уровни логов: DEBUG/INFO/WARNING/ERROR/CRITICAL"
 
     access = Role.MODERATOR
 

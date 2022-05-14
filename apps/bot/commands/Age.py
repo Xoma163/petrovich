@@ -5,6 +5,27 @@ from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 
 
+class Age(Command):
+    name = "возраст"
+    help_text = "оценивает возраст людей на фотографии"
+    help_texts = [
+        "(Изображения/Пересылаемое сообщение с изображением) - оценивает возраст людей на фотографии"
+    ]
+    excluded_platforms = [Platform.YANDEX]
+    attachments = [PhotoAttachment]
+
+    def start(self):
+        image = self.event.get_all_attachments(PhotoAttachment)[0]
+        everypixel_api = EveryPixelAPI()
+        faces = everypixel_api.get_faces_on_photo(image.get_download_url())
+
+        if len(faces) == 0:
+            raise PWarning("Не нашёл лиц на фото")
+        file_bytes = draw_on_images(image, faces)
+        attachments = self.bot.upload_photos(file_bytes, peer_id=self.event.peer_id)
+        return {"attachments": attachments}
+
+
 def draw_on_images(image, faces):
     import numpy as np
     import cv2
@@ -42,24 +63,3 @@ def draw_on_images(image, faces):
 
     _bytes = cv2.imencode('.jpg', _image)[1].tostring()
     return _bytes
-
-
-class Age(Command):
-    name = "возраст"
-    help_text = "оценивает возраст людей на фотографии"
-    help_texts = [
-        "(Изображения/Пересылаемое сообщение с изображением) - оценивает возраст людей на фотографии"
-    ]
-    excluded_platforms = [Platform.YANDEX]
-    attachments = [PhotoAttachment]
-
-    def start(self):
-        image = self.event.get_all_attachments(PhotoAttachment)[0]
-        everypixel_api = EveryPixelAPI()
-        faces = everypixel_api.get_faces_on_photo(image.get_download_url())
-
-        if len(faces) == 0:
-            raise PWarning("Не нашёл лиц на фото")
-        file_bytes = draw_on_images(image, faces)
-        attachments = self.bot.upload_photos(file_bytes, peer_id=self.event.peer_id)
-        return {"attachments": attachments}

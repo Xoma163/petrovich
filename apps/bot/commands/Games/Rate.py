@@ -16,6 +16,7 @@ class Rate(Command):
 
     help_text = "игра, определяющая, кто ближе угадал загаданное число"
     help_texts = ["[ставка=рандом] - делает ставку"]
+    help_texts_extra = "Ставка может быть от 1 до 100"
 
     int_args = [0]
     conversation = True

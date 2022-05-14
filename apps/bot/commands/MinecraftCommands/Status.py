@@ -11,7 +11,6 @@ class Status(Command):
     name_tg = 'status'
 
     help_text = "статус серверов по играм"
-
     access = Role.MINECRAFT
 
     def start(self):
