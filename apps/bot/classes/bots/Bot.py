@@ -205,14 +205,14 @@ class Bot(Thread):
                     keyboard.append(self.get_button(name, command_name, args))
                 except PError:
                     keyboard.append(self.get_button("", ""))
-            if fixed_command:
-                args_str = fix_layout(" ".join(original_text[1:]))
-                name = f"{command_name} {args_str}"
-                args = args_str.split(' ')
-                try:
-                    keyboard.append(self.get_button(name, command_name, args))
-                except PError:
-                    keyboard.append(self.get_button("", ""))
+                if fixed_command:
+                    args_str = fix_layout(" ".join(original_text[1:]))
+                    name = f"{command_name} {args_str}"
+                    args = args_str.split(' ')
+                    try:
+                        keyboard.append(self.get_button(name, command_name, args))
+                    except PError:
+                        keyboard.append(self.get_button("", ""))
         if keyboard:
             cols = 2 if event.message.args else 1
             cols = 3 if cols == 2 and fixed_command else cols
