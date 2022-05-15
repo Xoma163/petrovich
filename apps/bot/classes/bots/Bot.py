@@ -158,9 +158,12 @@ class Bot(Thread):
         if not event.message:
             msg = "Я не понял, что вы от меня хотите(("
             return msg
-        messages = [event.message.command]
-        if not has_cyrillic(event.message.command):
-            fixed_command = fix_layout(event.message.command)
+        original_text = event.message.raw.split(' ')
+        messages = [original_text[0]]
+
+        fixed_command = None
+        if not has_cyrillic(original_text[0]):
+            fixed_command = fix_layout(original_text[0])
             messages.append(fixed_command)
         tanimoto_commands = [{command: 0 for command in commands} for _ in range(len(messages))]
 
@@ -195,13 +198,25 @@ class Bot(Thread):
             command_name = command[0].name
             keyboard.append(self.get_button(command_name, command_name))
             if event.message.args:
+                args_str = " ".join(original_text[1:])
+                name = f"{command_name} {args_str}"
+                args = args_str.split(' ')
                 try:
-                    keyboard.append(self.get_button(f"{command_name} {event.message.args_str_case}", command_name,
-                                                    event.message.args))
+                    keyboard.append(self.get_button(name, command_name, args))
                 except PError:
-                    pass
+                    keyboard.append(self.get_button("", ""))
+            if fixed_command:
+                args_str = fix_layout(" ".join(original_text[1:]))
+                name = f"{command_name} {args_str}"
+                args = args_str.split(' ')
+                try:
+                    keyboard.append(self.get_button(name, command_name, args))
+                except PError:
+                    keyboard.append(self.get_button("", ""))
         if keyboard:
-            keyboard = self.get_inline_keyboard(keyboard)
+            cols = 2 if event.message.args else 1
+            cols = 3 if cols == 2 and fixed_command else cols
+            keyboard = self.get_inline_keyboard(keyboard, cols)
         return msg, keyboard
 
     # END MAIN ROUTING AND MESSAGING

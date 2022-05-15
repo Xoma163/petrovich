@@ -63,9 +63,6 @@ class Command:
             if self.access == Role.USER:
                 raise RuntimeError("Поле hidden=True и self.access=Role.USER не могут быть вместе")
 
-    def __eq__(self, other):
-        return self.name == other.name
-
     def accept(self, event: Event):
         """
         Метод, определяющий на что среагирует команда. По умолчанию ищет команду в названиях
@@ -366,8 +363,8 @@ class Command:
         keyboard = self.bot.get_inline_keyboard([button])
         return keyboard
 
-    def __eq__(self, another):
-        return hasattr(another, 'data') and self.name == another.name
+    def __eq__(self, other):
+        return self.name == other.name
 
     def __hash__(self):
         return hash(self.name)

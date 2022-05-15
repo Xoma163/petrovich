@@ -267,10 +267,7 @@ class TgBot(CommonBot):
         Получение инлайн-клавиатуры с кнопками
         В основном используется для команд, где нужно запускать много команд и лень набирать заново
         """
-        keyboard = super().get_inline_keyboard(buttons)
-        # for i, _ in enumerate(buttons):
-        #     if 'args' not in buttons[i] or (buttons[i].get('args')) is None:
-        #         buttons[i]['args'] = {}
+        keyboard = super().get_inline_keyboard(buttons, cols)
         return {
             'inline_keyboard': keyboard
         }
