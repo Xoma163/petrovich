@@ -365,3 +365,9 @@ class Command:
         button = self.bot.get_button(f"/помощь {self.name}", "помощь", [self.name])
         keyboard = self.bot.get_inline_keyboard([button])
         return keyboard
+
+    def __eq__(self, another):
+        return hasattr(another, 'data') and self.name == another.name
+
+    def __hash__(self):
+        return hash(self.name)

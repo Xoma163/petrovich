@@ -9,7 +9,7 @@ from typing import List
 import pytz
 from PIL import Image, ImageDraw, ImageFont
 
-from apps.bot.classes.consts.Consts import Role, Platform
+from apps.bot.classes.consts.Consts import Role, Platform, trans_table, trans_table_reverse
 from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.classes.messages.attachments.Attachment import Attachment
 from apps.service.models import Service
@@ -339,3 +339,15 @@ def get_tg_formatted_text_line(text) -> str:
 
 def get_tg_formatted_url(name, url) -> str:
     return f'<a href="{url}">{name}</a>'
+
+
+def fix_layout(s):
+    new_s = ""
+    for letter in s:
+        if letter in trans_table:
+            new_s += trans_table[letter]
+        elif letter in trans_table_reverse:
+            new_s += trans_table_reverse[letter]
+        else:
+            new_s += letter
+    return new_s

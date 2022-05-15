@@ -35,5 +35,5 @@ class Waifu(Command):
             button = self.bot.get_button("Следующая", self.name, [waifu_number + 1])
         else:
             button = self.bot.get_button("Ещё", self.name)
-        keyboard = self.bot.get_inline_keyboard(button)
+        keyboard = self.bot.get_inline_keyboard([button])
         return {"text": waifu_number, "attachments": attachment, "keyboard": keyboard}

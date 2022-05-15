@@ -96,9 +96,12 @@ class TgEvent(Event):
             self.action = {'left_chat_member': [left_chat_member]}
 
     def setup_payload(self, payload):
-        self.payload = json.loads(payload)
         self.message = Message()
-        self.message.parse_from_payload(self.payload)
+        try:
+            self.payload = json.loads(payload)
+            self.message.parse_from_payload(self.payload)
+        except:
+            self.message.parse_raw(payload)
 
     def setup_attachments(self, message):
         photo = message.get('photo')

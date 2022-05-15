@@ -1,23 +1,7 @@
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning
-
-_eng_chars = u"~`!@#$%^&qwertyuiop[]asdfghjkl;'zxcvbnm,./QWERTYUIOP{}ASDFGHJKL:\"|ZXCVBNM<>?"
-_rus_chars = u"ёё!\"№;%:?йцукенгшщзхъфывапролджэячсмитьбю.ЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭ/ЯЧСМИТЬБЮ,"
-_trans_table = dict(zip(_eng_chars, _rus_chars))
-_trans_table_reverse = dict(zip(_rus_chars, _eng_chars))
-
-
-def fix_layout(s):
-    new_s = ""
-    for letter in s:
-        if letter in _trans_table:
-            new_s += _trans_table[letter]
-        elif letter in _trans_table_reverse:
-            new_s += _trans_table_reverse[letter]
-        else:
-            new_s += letter
-    return new_s
+from apps.bot.utils.utils import fix_layout
 
 
 class Fix(Command):

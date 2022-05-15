@@ -16,7 +16,7 @@ from apps.bot.classes.messages.attachments.GifAttachment import GifAttachment
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
 from apps.bot.models import Profile, Chat, Bot as BotModel, User
-from apps.bot.utils.utils import tanimoto, get_chunks
+from apps.bot.utils.utils import tanimoto, get_chunks, fix_layout, get_flat_list, has_cyrillic
 from apps.games.models import Gamer
 from petrovich.settings import env
 
@@ -145,22 +145,25 @@ class Bot(Thread):
         if event.chat and event.chat.mentioning and event.message and not event.message.mentioned:
             raise PSkip()
 
-        similar_command = self.get_similar_command(event, COMMANDS)
-        rm = ResponseMessage(similar_command, event.peer_id)
+        similar_command, keyboard = self.get_similar_command(event, COMMANDS)
+        rm = ResponseMessage({'text': similar_command, 'keyboard': keyboard}, event.peer_id)
         self.logger.debug({"message": rm.to_log(), "event": event.to_log()})
         return rm
 
-    @staticmethod
-    def get_similar_command(event: Event, commands):
+    def get_similar_command(self, event: Event, commands):
         """
         Получение похожей команды по неправильно введённой
         """
-        similar_command = None
-        tanimoto_max = 0
         user_groups = event.sender.get_list_of_role_names()
         if not event.message:
             msg = "Я не понял, что вы от меня хотите(("
             return msg
+        messages = [event.message.command]
+        if not has_cyrillic(event.message.command):
+            fixed_command = fix_layout(event.message.command)
+            messages.append(fixed_command)
+        tanimoto_commands = [{command: 0 for command in commands} for _ in range(len(messages))]
+
         for command in commands:
             if not command.full_names:
                 continue
@@ -176,15 +179,30 @@ class Bot(Thread):
 
             for name in command.full_names:
                 if name:
-                    tanimoto_current = tanimoto(event.message.command, name)
-                    if tanimoto_current > tanimoto_max:
-                        tanimoto_max = tanimoto_current
-                        similar_command = name
+                    for i, message in enumerate(messages):
+                        tanimoto_commands[i][command] = max(tanimoto(message, name), tanimoto_commands[i][command])
+
+        tanimoto_commands = [{k: v for k, v in sorted(x.items(), key=lambda item: item[1], reverse=True)} for x in
+                             tanimoto_commands]
+        tanimoto_commands = get_flat_list([list(x.items())[:2] for x in tanimoto_commands])
+        tanimoto_commands = sorted(tanimoto_commands, key=lambda x: x[1], reverse=True)
 
         msg = f"Я не понял команды \"{event.message.command}\"\n"
-        if similar_command and tanimoto_max != 0:
-            msg += f"Возможно вы имели в виду команду \"{similar_command}\""
-        return msg
+        if tanimoto_commands[0][0] and tanimoto_commands[0][1] != 0:
+            msg += f"Возможно вы имели в виду команду \"{tanimoto_commands[0][0].name}\""
+        keyboard = []
+        for command in tanimoto_commands:
+            command_name = command[0].name
+            keyboard.append(self.get_button(command_name, command_name))
+            if event.message.args:
+                try:
+                    keyboard.append(self.get_button(f"{command_name} {event.message.args_str_case}", command_name,
+                                                    event.message.args))
+                except PError:
+                    pass
+        if keyboard:
+            keyboard = self.get_inline_keyboard(keyboard)
+        return msg, keyboard
 
     # END MAIN ROUTING AND MESSAGING
 
@@ -405,9 +423,6 @@ class Bot(Thread):
         Получение инлайн-клавиатуры с кнопками
         В основном используется для команд, где нужно запускать много команд и лень набирать заново
         """
-        for i, _ in enumerate(buttons):
-            if 'args' not in buttons[i] or buttons[i]['args'] is None:
-                buttons[i]['args'] = {}
         buttons_chunks = get_chunks(buttons, cols)
         keyboard = list(buttons_chunks)
         return keyboard

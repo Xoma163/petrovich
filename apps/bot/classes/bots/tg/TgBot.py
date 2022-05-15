@@ -243,12 +243,22 @@ class TgBot(CommonBot):
 
     @staticmethod
     def get_button(text, command, args=None):
+        callback_data = json.dumps({
+            'command': command,
+            "args": args,
+        }, ensure_ascii=False)
+
+        callback_data_len = len(callback_data.encode("UTF8"))
+        if callback_data_len > 62:
+            callback_data = command
+            if args:
+                callback_data += f" {' '.join(args)}"
+            callback_data_len = len(callback_data.encode("UTF8"))
+            if callback_data_len > 62:
+                raise PError("Нельзя в callback_data передавать данные более 64 байт")
         return {
             'text': text,
-            'callback_data': json.dumps({
-                'command': command,
-                "args": args,
-            }, ensure_ascii=False)
+            'callback_data': callback_data
         }
 
     def get_inline_keyboard(self, buttons: list, cols=1):
@@ -258,6 +268,9 @@ class TgBot(CommonBot):
         В основном используется для команд, где нужно запускать много команд и лень набирать заново
         """
         keyboard = super().get_inline_keyboard(buttons)
+        # for i, _ in enumerate(buttons):
+        #     if 'args' not in buttons[i] or (buttons[i].get('args')) is None:
+        #         buttons[i]['args'] = {}
         return {
             'inline_keyboard': keyboard
         }
