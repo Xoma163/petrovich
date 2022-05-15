@@ -161,23 +161,18 @@ class Bot(Thread):
         original_text = event.message.raw.split(' ')
         messages = [original_text[0]]
 
-        fixed_command = None
+        # Если в тексте нет кириллицы, то предлагаем пофикшенное название команды
         if not has_cyrillic(original_text[0]):
             fixed_command = fix_layout(original_text[0])
             messages.append(fixed_command)
         tanimoto_commands = [{command: 0 for command in commands} for _ in range(len(messages))]
 
         for command in commands:
-            if not command.full_names:
-                continue
+            command_has_not_full_names = not command.full_names
+            user_has_not_access = command.access.name not in user_groups
+            command_is_not_suggested = not command.suggest_for_similar
 
-            # Выдача пользователю только тех команд, которые ему доступны
-            command_access = command.access
-            if command_access.name not in user_groups:
-                continue
-
-            # Выдача только тех команд, у которых стоит флаг выдачи
-            if not command.suggest_for_similar:
+            if command_has_not_full_names or user_has_not_access or command_is_not_suggested:
                 continue
 
             for name in command.full_names:
@@ -185,6 +180,7 @@ class Bot(Thread):
                     for i, message in enumerate(messages):
                         tanimoto_commands[i][command] = max(tanimoto(message, name), tanimoto_commands[i][command])
 
+        # Сортируем словари, берём топ2 и делаем из них один список, который повторно сортируем
         tanimoto_commands = [{k: v for k, v in sorted(x.items(), key=lambda item: item[1], reverse=True)} for x in
                              tanimoto_commands]
         tanimoto_commands = get_flat_list([list(x.items())[:2] for x in tanimoto_commands])
@@ -193,30 +189,14 @@ class Bot(Thread):
         msg = f"Я не понял команды \"{event.message.command}\"\n"
         if tanimoto_commands[0][0] and tanimoto_commands[0][1] != 0:
             msg += f"Возможно вы имели в виду команду \"{tanimoto_commands[0][0].name}\""
-        keyboard = []
+        buttons = []
         for command in tanimoto_commands:
             command_name = command[0].name
-            keyboard.append(self.get_button(command_name, command_name))
-            if event.message.args:
-                args_str = " ".join(original_text[1:])
-                name = f"{command_name} {args_str}"
-                args = args_str.split(' ')
-                try:
-                    keyboard.append(self.get_button(name, command_name, args))
-                except PError:
-                    keyboard.append(self.get_button("", ""))
-                if fixed_command:
-                    args_str = fix_layout(" ".join(original_text[1:]))
-                    name = f"{command_name} {args_str}"
-                    args = args_str.split(' ')
-                    try:
-                        keyboard.append(self.get_button(name, command_name, args))
-                    except PError:
-                        keyboard.append(self.get_button("", ""))
-        if keyboard:
-            cols = 2 if event.message.args else 1
-            cols = 3 if cols == 2 and fixed_command else cols
-            keyboard = self.get_inline_keyboard(keyboard, cols)
+            # Добавляем в клаву просто команду
+            buttons.append(self.get_button(command_name, command_name))
+        keyboard = {}
+        if buttons:
+            keyboard = self.get_inline_keyboard(buttons, 1)
         return msg, keyboard
 
     # END MAIN ROUTING AND MESSAGING
