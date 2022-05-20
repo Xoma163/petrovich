@@ -60,7 +60,7 @@ class YoutubeAPI:
         return url
 
     def init_for_live_check(self):
-        SECRET_FILE = f"{BASE_DIR}/secrets/google.json"
+        # SECRET_FILE = f"{BASE_DIR}/secrets/google.json"
         CREDENTIALS_PICKLE_FILE = f"{BASE_DIR}/secrets/google.pkl"
         SCOPES = ["https://www.googleapis.com/auth/youtube.readonly"]
 

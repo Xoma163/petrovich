@@ -112,6 +112,7 @@ class Media(Command):
             TWITTER_URLS: self.get_twitter_video,
             PIKABU_URLS: self.get_pikabu_video,
             THE_HOLE_URLS: self.get_the_hole_video,
+            WASD_URLS: self.get_wasd_video,
         }
 
         method = None
@@ -222,4 +223,7 @@ class Media(Command):
 
     def get_wasd_video(self, url):
         wasd_api = WASDAPI()
-        wasd_api.parse_channel()
+        wasd_api.parse_video_m3u8(url)
+        attachments = [self.bot.upload_document(wasd_api.m3u8_str, peer_id=self.event.peer_id,
+                                                filename=f"{wasd_api.title} - {wasd_api.show_name} | WASD.m3u8")]
+        return attachments, f"{wasd_api.title} | {wasd_api.show_name}"
