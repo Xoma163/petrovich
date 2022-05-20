@@ -4,7 +4,7 @@ from datetime import datetime
 
 import googleapiclient.discovery
 import requests
-import youtube_dl
+import yt_dlp
 from bs4 import BeautifulSoup
 from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -42,17 +42,17 @@ class YoutubeAPI:
             'outtmpl': '%(id)s%(ext)s',
             'logger': NothingLogger()
         }
-        ydl = youtube_dl.YoutubeDL(ydl_params)
+        ydl = yt_dlp.YoutubeDL(ydl_params)
         ydl.add_default_info_extractors()
 
         try:
             video_info = ydl.extract_info(url, download=False)
-        except youtube_dl.utils.DownloadError:
+        except yt_dlp.utils.DownloadError:
             raise PWarning("Не смог найти видео по этой ссылке")
         self.title = video_info['title']
         self.duration = video_info['duration']
-        if self.duration > 60:
-            raise PWarning("Нельзя грузить видосы > 60 секунд с ютуба")
+        if self.duration > 300:
+            raise PWarning("Нельзя грузить видосы > 5 минут с ютуба")
         video_urls = [x for x in video_info['formats'] if x['ext'] == 'mp4' and x.get('asr')]
 
         max_quality_video = sorted(video_urls, key=lambda x: x['format_note'], reverse=True)[0]
