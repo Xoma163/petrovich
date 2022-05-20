@@ -1,6 +1,8 @@
 import requests
 from bs4 import BeautifulSoup
 
+from apps.bot.utils.utils import get_max_quality_m3u8_url, prepend_url_to_m3u8
+
 
 class TheHoleAPI:
     URL = "https://the-hole.tv/"
@@ -34,27 +36,13 @@ class TheHoleAPI:
         _id = master_m3u8.split("/")[-2]
         prepend_text = f"{self.CDN_URL}episodes/{_id}"
 
-        master_m3u8 = requests.get(f"{prepend_text}/master.m3u8").text
-        master_m3u8_lines = master_m3u8.split('\n')
-        # ToDo: max quality
-        for i, line in enumerate(master_m3u8_lines):
-            if "1920x1080" in line:
-                m3u8_1080p = master_m3u8_lines[i + 1]
-                break
-        # m3u8_1080p = r.findall(master_m3u8)[0]
-
-        original_video_m3u8 = f"{prepend_text}/{m3u8_1080p}"
-        original_video_m3u8_list = requests.get(original_video_m3u8).text.split("\n")
-        new_m3u8 = []
-        next_line_replace = False
-        for row in original_video_m3u8_list:
-            if row.startswith("#EXTINF:"):
-                next_line_replace = True
-            elif next_line_replace:
-                next_line_replace = False
-                row = f"{prepend_text}/{row}"
-            new_m3u8.append(row)
-        self.m3u8_str = str.encode("\n".join(new_m3u8))
+        master_m3u8_url = f"{prepend_text}/master.m3u8"
+        master_m3u8 = requests.get(master_m3u8_url).text
+        m3u8_max_quality_url = get_max_quality_m3u8_url(master_m3u8)
+        m3u8_url = f"{prepend_text}/{m3u8_max_quality_url}"
+        m3u8 = requests.get(m3u8_url).text
+        m3u8 = prepend_url_to_m3u8(m3u8, prepend_text)
+        self.m3u8_str = str.encode("\n".join(m3u8))
 
     def get_last_videos_with_titles(self, channel_id):
         content = requests.get(f"{self.URL}shows/{channel_id}").content

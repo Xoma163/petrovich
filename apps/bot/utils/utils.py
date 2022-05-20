@@ -29,7 +29,7 @@ def random_probability(probability) -> bool:
         return False
 
 
-def random_event(events, weights=None, seed=None):
+def random_event(events: list, weights: list = None, seed=None):
     """
     Возвращает случайное событие с заданными вероятностями
     """
@@ -44,7 +44,7 @@ def random_event(events, weights=None, seed=None):
     return random_choice
 
 
-def get_random_int(val1, val2=None, seed=None) -> int:
+def get_random_int(val1: int, val2: int = None, seed=None) -> int:
     """
     Возвращает рандомное число в заданном диапазоне. Если передан seed, то по seed
     """
@@ -58,7 +58,7 @@ def get_random_int(val1, val2=None, seed=None) -> int:
     return random_int
 
 
-def get_random_float(val1, val2=None, seed=None):
+def get_random_float(val1: float, val2: float = None, seed=None):
     if not val2:
         val2 = val1
         val1 = 0
@@ -69,7 +69,7 @@ def get_random_float(val1, val2=None, seed=None):
     return random_float
 
 
-def has_cyrillic(text) -> bool:
+def has_cyrillic(text: str) -> bool:
     """
     Проверяет есть ли кириллица в тексте
     """
@@ -102,7 +102,7 @@ def normalize_datetime(dt, tz):
     return pytz.utc.normalize(localized_time, is_dst=None).astimezone(tz_utc)
 
 
-def decl_of_num(number, titles):
+def decl_of_num(number: int, titles: List[str]):
     """
     Склоняет существительное после числительного
     number: число
@@ -117,7 +117,7 @@ def decl_of_num(number, titles):
         return titles[cases[5]]
 
 
-def find_command_by_name(command_name):
+def find_command_by_name(command_name: str):
     """
     Ищет команду по имени
     """
@@ -159,7 +159,7 @@ def get_help_texts_for_command(command, platform=None) -> str:
     return result
 
 
-def tanimoto(s1, s2) -> float:
+def tanimoto(s1: str, s2: str) -> float:
     """
     Коэффициент Танимото. Степерь схожести двух строк
     """
@@ -170,7 +170,7 @@ def tanimoto(s1, s2) -> float:
     return c / (a + b - c)
 
 
-def get_image_size_by_text(txt, font):
+def get_image_size_by_text(txt: str, font):
     """
     Вычисление размеро текста если оно будет изображением
     """
@@ -179,7 +179,7 @@ def get_image_size_by_text(txt, font):
     return draw.textsize(txt, font)
 
 
-def draw_text_on_image(text):
+def draw_text_on_image(text: str):
     """
     Рисование текста на изображении
     :return: bytearray Image
@@ -199,7 +199,7 @@ def draw_text_on_image(text):
     return img
 
 
-def get_role_by_str(role_str):
+def get_role_by_str(role_str: str):
     """
     Получение роли по названию
     """
@@ -230,7 +230,7 @@ def get_role_by_str(role_str):
     return who
 
 
-def check_command_time(name, seconds):
+def check_command_time(name: str, seconds: int):
     """
     Проверка на то, прошло ли время с последнего выполнения команды и можно ли выполнять команду
     :param name: название команды
@@ -270,7 +270,7 @@ def transform_k(arg: str):
     return arg
 
 
-def replace_similar_letters(text):
+def replace_similar_letters(text: str):
     """
     Замена английский похожих букв на русские
     """
@@ -302,7 +302,7 @@ def get_thumbnail_for_image(image: Attachment, size) -> bytes:
     return thumb_byte_arr.read()
 
 
-def get_urls_from_text(text) -> list:
+def get_urls_from_text(text: str) -> list:
     """
     Поиск ссылок в тексте.
     Возвращает список найденных ссылок
@@ -310,7 +310,7 @@ def get_urls_from_text(text) -> list:
     return re.findall("(?P<url>https?://[^\s]+)", text)
 
 
-def get_chunks(lst, n):
+def get_chunks(lst: list, n: int):
     """Yield successive n-sized chunks from lst."""
     for i in range(0, len(lst), n):
         yield lst[i:i + n]
@@ -323,14 +323,14 @@ def get_flat_list(_list: List[List]):
     return [item for sublist in _list for item in sublist]
 
 
-def get_tg_formatted_text(text) -> str:
+def get_tg_formatted_text(text: str) -> str:
     """
     Форматированный текст в телеграмме (html)
     """
     return f"<pre>{text}</pre>"
 
 
-def get_tg_formatted_text_line(text) -> str:
+def get_tg_formatted_text_line(text: str) -> str:
     """
     Форматированный текст в телеграмме в одну линию (html)
     """
@@ -351,3 +351,28 @@ def fix_layout(s):
         else:
             new_s += letter
     return new_s
+
+
+# ToDo: max quality
+def get_max_quality_m3u8_url(text: str) -> str:
+    master_m3u8_lines = text.split('\n')
+    for i, line in enumerate(master_m3u8_lines):
+        if "1920x1080" in line:
+            m3u8_1080p = master_m3u8_lines[i + 1]
+            break
+    return m3u8_1080p
+
+
+def prepend_url_to_m3u8(m3u8: str, url: str):
+    m3u8_list = m3u8.split("\n")
+
+    new_m3u8 = []
+    next_line_replace = False
+    for row in m3u8_list:
+        if row.startswith("#EXTINF:"):
+            next_line_replace = True
+        elif next_line_replace:
+            next_line_replace = False
+            row = f"{url}/{row}"
+        new_m3u8.append(row)
+    return new_m3u8
