@@ -133,7 +133,7 @@ class Media(Command):
 
     def get_tiktok_video(self, url):
         ttd_api = TikTokDownloaderAPI()
-        video_url = ttd_api.download(url)
+        video_url = ttd_api.get_video_url(url)
         video = requests.get(video_url).content
 
         attachments = [self.bot.upload_video(video, peer_id=self.event.peer_id)]

@@ -10,5 +10,5 @@ class TikTokDownloaderAPI:
     }
     URL = "https://tiktok-downloader-download-tiktok-videos-without-watermark.p.rapidapi.com/vid/index"
 
-    def download(self, url):
+    def get_video_url(self, url):
         return requests.get(self.URL, params={'url': url}, headers=self.HEADERS).json()['video'][0]
