@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from apps.bot.APIs.Minecraft import minecraft_servers
+from apps.bot.APIs.MinecraftAPI import minecraft_servers
 
 
 class Command(BaseCommand):

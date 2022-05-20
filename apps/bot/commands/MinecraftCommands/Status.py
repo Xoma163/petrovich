@@ -1,5 +1,5 @@
-from apps.bot.APIs.Minecraft import minecraft_servers
-from apps.bot.APIs.Terraria import terraria_servers
+from apps.bot.APIs.MinecraftAPI import minecraft_servers
+from apps.bot.APIs.TerrariaAPI import terraria_servers
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Role
 from apps.bot.utils.DoTheLinuxComand import do_the_linux_command

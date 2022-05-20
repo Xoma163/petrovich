@@ -1,4 +1,4 @@
-from apps.bot.APIs.OCR import OCRApi
+from apps.bot.APIs.OCRApi import OCRApi
 from apps.bot.classes.Command import Command
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 

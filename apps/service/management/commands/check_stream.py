@@ -1,6 +1,6 @@
 from django.core.management import BaseCommand
 
-from apps.bot.APIs.YoutubeLiveCheckerAPI import YoutubeLiveCheckerAPI
+from apps.bot.APIs.YoutubeAPI import YoutubeAPI
 from apps.bot.classes.bots.Bot import get_bot_by_platform
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.models import Chat
@@ -15,8 +15,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         chat_pks = options['chat_id'][0].split(',')
 
-        ylc_api = YoutubeLiveCheckerAPI()
-        livestream_info = ylc_api.get_stream_info_if_online()
+        y_api = YoutubeAPI()
+        livestream_info = y_api.get_stream_info_if_online()
         if not livestream_info:
             return
 

@@ -1,5 +1,5 @@
-from apps.bot.APIs.Minecraft import get_minecraft_version_by_args
-from apps.bot.APIs.Terraria import get_terraria_server_by_version
+from apps.bot.APIs.MinecraftAPI import get_minecraft_version_by_args
+from apps.bot.APIs.TerrariaAPI import get_terraria_server_by_version
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Role
 

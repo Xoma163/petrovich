@@ -1,7 +1,9 @@
 import requests
 from bs4 import BeautifulSoup
 
-from apps.bot.APIs.YoutubeInfo import YoutubeInfo
+from apps.bot.APIs.TheHoleAPI import TheHoleAPI
+from apps.bot.APIs.WASDAPI import WASDAPI
+from apps.bot.APIs.YoutubeAPI import YoutubeAPI
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Role, Platform
 from apps.bot.classes.consts.Exceptions import PWarning
@@ -84,8 +86,8 @@ class Subscribe(Command):
         bs4 = BeautifulSoup(response.content, 'html.parser')
         channel_id = bs4.find_all('link', {'rel': 'canonical'})[0].attrs['href'].split('/')[-1]
 
-        youtube_info = YoutubeInfo(channel_id)
-        youtube_data = youtube_info.get_youtube_last_video()
+        youtube_info = YoutubeAPI()
+        youtube_data = youtube_info.get_last_video(channel_id)
 
         title = youtube_data['title']
         date = youtube_data['last_video']['date']
@@ -96,33 +98,20 @@ class Subscribe(Command):
 
     @staticmethod
     def menu_add_the_hole(url):
-        response = requests.get(url)
-        bs4 = BeautifulSoup(response.content, 'html.parser')
-        title = bs4.find('meta', attrs={'name': 'og:title'}).attrs['content']
-        channel_id = url.split('/')[-1]
-        last_video_id = bs4.select_one('a[href*=episodes]').attrs['href']
+        the_hole_api = TheHoleAPI()
+        the_hole_api.parse_channel(url)
 
         is_stream = False
 
-        return channel_id, title, None, last_video_id, is_stream
+        return the_hole_api.channel_id, the_hole_api.title, None, the_hole_api.last_video_id, is_stream
 
     @staticmethod
     def menu_add_wasd(url):
-        last_part = url.split('/')[-1]
-
-        try:
-            channel_id = int(last_part)
-            title = requests.get(f"https://wasd.tv/api/v2/channels/{channel_id}").json()['result']['channel_name']
-        except ValueError:
-            title = last_part
-            channel_id = requests.get(
-                "https://wasd.tv/api/v2/broadcasts/public",
-                params={"with_extra": "true", "channel_name": title}) \
-                .json()['result']['channel']['channel_id']
-
+        wasd_api = WASDAPI()
+        wasd_api.parse_channel(url)
         is_stream = True
 
-        return channel_id, title, None, None, is_stream
+        return wasd_api.channel_id, wasd_api.title, None, None, is_stream
 
     def menu_delete(self):
         self.check_args(2)

@@ -1,13 +1,15 @@
-import json
 import re
 from urllib.parse import urlparse
 
 import requests
 import youtube_dl
-from bs4 import BeautifulSoup
 
-from apps.bot.APIs.RedditVideoDownloader import RedditSaver
+from apps.bot.APIs.InstagramAPI import InstagramAPI
+from apps.bot.APIs.PikabuAPI import PikabuAPI
+from apps.bot.APIs.RedditSaver import RedditSaver
+from apps.bot.APIs.TheHoleAPI import TheHoleAPI
 from apps.bot.APIs.TikTokDownloaderAPI import TikTokDownloaderAPI
+from apps.bot.APIs.YoutubeAPI import YoutubeAPI
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning, PSkip
@@ -20,6 +22,7 @@ INSTAGRAM_URLS = ('www.instagram.com', 'instagram.com')
 TWITTER_URLS = ('www.twitter.com', 'twitter.com')
 PIKABU_URLS = ('www.pikabu.ru', 'pikabu.ru')
 THE_HOLE_URLS = ('www.the-hole.tv', 'the-hole.tv')
+WASD_URLS = ('www.wasd.tv', 'wasd.tv')
 
 MEDIA_URLS = tuple(
     list(YOUTUBE_URLS) +
@@ -28,7 +31,8 @@ MEDIA_URLS = tuple(
     list(INSTAGRAM_URLS) +
     list(TWITTER_URLS) +
     list(PIKABU_URLS) +
-    list(THE_HOLE_URLS)
+    list(THE_HOLE_URLS) +
+    list(WASD_URLS)
 )
 
 
@@ -122,28 +126,10 @@ class Media(Command):
             raise PWarning("Не youtube/tiktok/reddit/instagram ссылка")
 
     def get_youtube_video(self, url):
-        ydl_params = {
-            'outtmpl': '%(id)s%(ext)s',
-            'logger': NothingLogger()
-        }
-        ydl = youtube_dl.YoutubeDL(ydl_params)
-        ydl.add_default_info_extractors()
-
-        try:
-            video_info = ydl.extract_info(url, download=False)
-        except youtube_dl.utils.DownloadError:
-            raise PWarning("Не смог найти видео по этой ссылке")
-        if video_info['duration'] > 60:
-            raise PWarning("Нельзя грузить видосы > 60 секунд с ютуба")
-        video_urls = [x for x in video_info['formats'] if x['ext'] == 'mp4' and x.get('asr')]
-
-        if len(video_urls) == 0:
-            raise PWarning("Чёт проблемки, напишите разрабу и пришли ссылку на видео")
-        max_quality_video = sorted(video_urls, key=lambda x: x['format_note'], reverse=True)[0]
-        url = max_quality_video['url']
+        y_api = YoutubeAPI()
         video_content = requests.get(url).content
         attachments = [self.bot.upload_video(video_content, peer_id=self.event.peer_id)]
-        return attachments, video_info['title']
+        return attachments, y_api.title
 
     def get_tiktok_video(self, url):
         ttd_api = TikTokDownloaderAPI()
@@ -194,40 +180,12 @@ class Media(Command):
         return attachments, rs.title
 
     def get_instagram_attachment(self, url):
-        r = requests.get(url)
-        bs4 = BeautifulSoup(r.content, 'html.parser')
-        if bs4.find("html", {'class': "not-logged-in"}):
-            raise PWarning("Требуется логин для скачивания")
-        if 'reel' in url:
-            content_type = 'reel'
-        else:
-            try:
-                content_type = bs4.find('meta', attrs={'name': 'medium'}).attrs['content']
-            except Exception:
-                raise PWarning("Ссылка на инстаграмм не является видео/фото")
-
-        if content_type == 'image':
-            photo_url = bs4.find('meta', attrs={'property': 'og:image'}).attrs['content']
-            return self.bot.upload_photos([photo_url], peer_id=self.event.peer_id), ""
-        elif content_type == 'video':
-            try:
-                video_url = bs4.find('meta', attrs={'property': 'og:video'}).attrs['content']
-            except:
-                raise PWarning("Не получилось распарсить видео с инстаграма")
-            return [self.bot.upload_video(video_url, peer_id=self.event.peer_id)], ""
-        elif content_type == 'reel':
-            shared_data_text = "window._sharedData = "
-            script_text = ";</script>"
-            pos_start = r.text.find(shared_data_text) + len(shared_data_text)
-            pos_end = r.text.find(script_text, pos_start)
-            reel_data = json.loads(r.text[pos_start:pos_end])
-            entry_data = reel_data['entry_data']
-            if 'LoginAndSignupPage' in entry_data:
-                raise PWarning("Этот reel скачать не получится, требуется авторизация :(")
-            video_url = entry_data['PostPage'][0]['graphql']['shortcode_media']['video_url']
-            return [self.bot.upload_video(video_url, peer_id=self.event.peer_id)], ""
-        else:
-            raise PWarning("Ссылка на инстаграмм не является видео/фото")
+        i_api = InstagramAPI()
+        content_url = i_api.get_content_url(url)
+        if i_api.content_type == i_api.CONTENT_TYPE_IMAGE:
+            return self.bot.upload_photos([content_url], peer_id=self.event.peer_id), ""
+        elif i_api.content_type in [i_api.CONTENT_TYPE_VIDEO, i_api.CONTENT_TYPE_REEL]:
+            return [self.bot.upload_video(content_url, peer_id=self.event.peer_id)], ""
 
     def get_twitter_video(self, url):
         ydl_params = {
@@ -247,57 +205,18 @@ class Media(Command):
         return attachments, video_info['title']
 
     def get_pikabu_video(self, url):
-        headers = {
-            'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
-        }
-        r = requests.get(url, headers=headers)
-        bs4 = BeautifulSoup(r.content, 'html.parser')
-        player = bs4.select_one(".page-story .page-story__story .player")
-        if not player:
-            raise PWarning("Не нашёл видео в этом посте")
-        title = bs4.find('meta', attrs={'property': 'og:title'}).attrs['content']
-        webm = player.attrs['data-webm']
+        p_api = PikabuAPI()
+        webm = p_api.get_video_url_from_post(url)
         video_content = requests.get(webm).content
         attachments = [self.bot.upload_video(video_content, peer_id=self.event.peer_id)]
-        return attachments, title
+        return attachments, p_api.title
 
     def get_the_hole_video(self, url):
-        content = requests.get(url).content
-        bs4 = BeautifulSoup(content, 'html.parser')
-        show_name = \
-            [x.text for x in bs4.select('a[href*=shows]') if x.attrs['href'].startswith("/shows/") if x.text.strip()][0]
-
-        data_player = bs4.select_one('[data-player-source-value]').attrs
-        master_m3u8 = data_player['data-player-source-value']
-        title = data_player['data-player-title-value']
-        # title = bs4.find('meta', attrs={'name': "og:title"}).attrs['content']
-
-        _id = master_m3u8.split("/")[-2]
-        prepend_text = f"https://video-cdn.the-hole.tv/episodes/{_id}"
-
-        master_m3u8 = requests.get(f"{prepend_text}/master.m3u8").text
-        master_m3u8_lines = master_m3u8.split('\n')
-        for i, line in enumerate(master_m3u8_lines):
-            if "1920x1080" in line:
-                m3u8_1080p = master_m3u8_lines[i + 1]
-                break
-        # m3u8_1080p = r.findall(master_m3u8)[0]
-
-        original_video_m3u8 = f"{prepend_text}/{m3u8_1080p}"
-        original_video_m3u8_list = requests.get(original_video_m3u8).text.split("\n")
-        new_m3u8 = []
-        next_line_replace = False
-        for row in original_video_m3u8_list:
-            if row.startswith("#EXTINF:"):
-                next_line_replace = True
-            elif next_line_replace:
-                next_line_replace = False
-                row = f"{prepend_text}/{row}"
-            new_m3u8.append(row)
-        wtf = str.encode("\n".join(new_m3u8))
-        attachments = [self.bot.upload_document(wtf, peer_id=self.event.peer_id,
-                                                filename=f"{title} - {show_name} | The Hole.m3u8")]
-        return attachments, f"{title} | {show_name}"
+        the_hole_api = TheHoleAPI()
+        the_hole_api.parse_video(url)
+        attachments = [self.bot.upload_document(the_hole_api.m3u8_str, peer_id=self.event.peer_id,
+                                                filename=f"{the_hole_api.title} - {the_hole_api.show_name} | The Hole.m3u8")]
+        return attachments, f"{the_hole_api.title} | {the_hole_api.show_name}"
 
 
 class NothingLogger(object):

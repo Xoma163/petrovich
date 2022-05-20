@@ -2,10 +2,10 @@ import datetime
 import time
 
 import requests
-from bs4 import BeautifulSoup
 from django.core.management import BaseCommand
 
-from apps.bot.APIs.YoutubeInfo import YoutubeInfo
+from apps.bot.APIs.TheHoleAPI import TheHoleAPI
+from apps.bot.APIs.YoutubeAPI import YoutubeAPI
 from apps.bot.classes.bots.Bot import get_bot_by_platform
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.events.Event import Event
@@ -34,8 +34,8 @@ class Command(BaseCommand):
                 self.check_wasd_video(sub)
 
     def check_youtube_video(self, sub):
-        youtube_info = YoutubeInfo(sub.channel_id)
-        youtube_data = youtube_info.get_youtube_last_video()
+        youtube_info = YoutubeAPI()
+        youtube_data = youtube_info.get_last_video(sub.channel_id)
         if not youtube_data['last_video']['date'] > sub.date:
             return
         title = youtube_data['last_video']['title']
@@ -47,16 +47,14 @@ class Command(BaseCommand):
         time.sleep(2)
 
     def check_the_hole_video(self, sub):
-        content = requests.get(f"https://the-hole.tv/shows/{sub.channel_id}").content
-        bs4 = BeautifulSoup(content, 'html.parser')
-        last_videos = [x.attrs['href'] for x in bs4.select('a[href*=episodes]')]
-        titles = [x.nextSibling.nextSibling.text for x in bs4.select('a[href*=episodes]')]
+        th_api = TheHoleAPI()
+        last_videos, titles = th_api.get_last_videos_with_titles(sub.channel_id)
         last_video_id = sub.last_video_id
         new_videos = last_videos[0:last_videos.index(last_video_id)]
 
         for i, new_video in enumerate(new_videos):
             title = titles[i]
-            link = f"https://the-hole.tv/{new_video}"
+            link = f"{th_api.URL}{new_video}"
             self.send_notify(sub, title, link)
             self.send_the_hole_file(sub, link)
         sub.last_video_id = last_videos[0]
