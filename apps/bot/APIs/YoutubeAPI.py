@@ -10,7 +10,7 @@ from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
 
 from apps.bot.classes.consts.Exceptions import PWarning
-from apps.bot.commands.Media import NothingLogger
+from apps.bot.utils.NothingLogger import NothingLogger
 from petrovich.settings import BASE_DIR
 
 

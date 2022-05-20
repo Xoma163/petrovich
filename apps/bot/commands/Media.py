@@ -9,10 +9,12 @@ from apps.bot.APIs.PikabuAPI import PikabuAPI
 from apps.bot.APIs.RedditSaver import RedditSaver
 from apps.bot.APIs.TheHoleAPI import TheHoleAPI
 from apps.bot.APIs.TikTokDownloaderAPI import TikTokDownloaderAPI
+from apps.bot.APIs.WASDAPI import WASDAPI
 from apps.bot.APIs.YoutubeAPI import YoutubeAPI
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning, PSkip
+from apps.bot.utils.NothingLogger import NothingLogger
 from apps.bot.utils.utils import get_urls_from_text, get_tg_formatted_url
 
 YOUTUBE_URLS = ('www.youtube.com', 'youtube.com', "www.youtu.be", "youtu.be")
@@ -218,16 +220,6 @@ class Media(Command):
                                                 filename=f"{the_hole_api.title} - {the_hole_api.show_name} | The Hole.m3u8")]
         return attachments, f"{the_hole_api.title} | {the_hole_api.show_name}"
 
-
-class NothingLogger(object):
-    @staticmethod
-    def debug(msg):
-        pass
-
-    @staticmethod
-    def warning(msg):
-        pass
-
-    @staticmethod
-    def error(msg):
-        pass
+    def get_wasd_video(self, url):
+        wasd_api = WASDAPI()
+        wasd_api.parse_channel()

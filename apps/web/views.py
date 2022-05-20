@@ -9,7 +9,7 @@ from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 from rest_framework.viewsets import ModelViewSet
 
-from apps.bot.APIs.YoutubeLiveCheckerAPI import YoutubeLiveCheckerAPI
+from apps.bot.APIs.YoutubeAPI import YoutubeAPI
 from apps.web.models import CalculatorSession, CalculatorProduct, CalculatorUser
 from apps.web.serializers import CalculatorProductSerializer, \
     CalculatorSessionSerializer, CalculatorSessionViewSerializer, CalculatorUserSerializer
@@ -35,8 +35,8 @@ class CameraTemplateView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         cd = super().get_context_data()
 
-        ylc_api = YoutubeLiveCheckerAPI()
-        cd['youtube_info'] = ylc_api.get_stream_info_if_online()
+        y_api = YoutubeAPI()
+        cd['youtube_info'] = y_api.get_stream_info_if_online()
         return cd
 
 

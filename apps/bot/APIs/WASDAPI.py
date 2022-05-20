@@ -22,3 +22,5 @@ class WASDAPI:
             self.channel_id = requests.get(
                 f"{self.URL}api/v2/broadcasts/public",
                 params={"with_extra": "true", "channel_name": self.title}).json()['result']['channel']['channel_id']
+
+    # def get_m3u8_str(self):
