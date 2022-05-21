@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 
-from apps.bot.utils.utils import get_max_quality_m3u8_url, prepend_url_to_m3u8
+from apps.bot.utils.M3U8 import M3U8
 
 
 class TheHoleAPI:
@@ -13,7 +13,7 @@ class TheHoleAPI:
         self.title = None
         self.last_video_id = None
         self.show_name = None
-        self.m3u8_str = None
+        self.m3u8_bytes = None
 
     def parse_channel(self, url):
         content = requests.get(url).content
@@ -34,15 +34,18 @@ class TheHoleAPI:
         # title = bs4.find('meta', attrs={'name': "og:title"}).attrs['content']
 
         _id = master_m3u8.split("/")[-2]
-        prepend_text = f"{self.CDN_URL}episodes/{_id}"
+        base_uri = f"{self.CDN_URL}episodes/{_id}"
 
-        master_m3u8_url = f"{prepend_text}/master.m3u8"
+        master_m3u8_url = f"{base_uri}/master.m3u8"
         master_m3u8 = requests.get(master_m3u8_url).text
-        m3u8_max_quality_url = get_max_quality_m3u8_url(master_m3u8)
-        m3u8_url = f"{prepend_text}/{m3u8_max_quality_url}"
-        m3u8 = requests.get(m3u8_url).text
-        m3u8 = prepend_url_to_m3u8(m3u8, prepend_text)
-        self.m3u8_str = str.encode("\n".join(m3u8))
+        _m3u8 = M3U8(master_m3u8, base_uri=base_uri)
+
+        m3u8_max_quality_url = _m3u8.playlists[-1].absolute_uri
+        m3u8 = requests.get(m3u8_max_quality_url).text
+
+        _m3u8 = M3U8(m3u8, base_uri=base_uri)
+        m3u8 = _m3u8.dumps_bytes()
+        self.m3u8_bytes = m3u8
 
     def get_last_videos_with_titles(self, channel_id):
         content = requests.get(f"{self.URL}shows/{channel_id}").content

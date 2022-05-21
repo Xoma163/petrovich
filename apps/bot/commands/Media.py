@@ -218,13 +218,13 @@ class Media(Command):
     def get_the_hole_video(self, url):
         the_hole_api = TheHoleAPI()
         the_hole_api.parse_video(url)
-        attachments = [self.bot.upload_document(the_hole_api.m3u8_str, peer_id=self.event.peer_id,
+        attachments = [self.bot.upload_document(the_hole_api.m3u8_bytes, peer_id=self.event.peer_id,
                                                 filename=f"{the_hole_api.title} - {the_hole_api.show_name} | The Hole.m3u8")]
         return attachments, f"{the_hole_api.title} | {the_hole_api.show_name}"
 
     def get_wasd_video(self, url):
         wasd_api = WASDAPI()
         wasd_api.parse_video_m3u8(url)
-        attachments = [self.bot.upload_document(wasd_api.m3u8_str, peer_id=self.event.peer_id,
+        attachments = [self.bot.upload_document(wasd_api.m3u8_bytes, peer_id=self.event.peer_id,
                                                 filename=f"{wasd_api.title} - {wasd_api.show_name} | WASD.m3u8")]
         return attachments, f"{wasd_api.title} | {wasd_api.show_name}"

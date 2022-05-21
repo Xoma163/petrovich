@@ -351,28 +351,3 @@ def fix_layout(s):
         else:
             new_s += letter
     return new_s
-
-
-# ToDo: max quality
-def get_max_quality_m3u8_url(text: str) -> str:
-    master_m3u8_lines = text.split('\n')
-    for i, line in enumerate(master_m3u8_lines):
-        if "1920x1080" in line:
-            m3u8_1080p = master_m3u8_lines[i + 1]
-            break
-    return m3u8_1080p
-
-
-def prepend_url_to_m3u8(m3u8: str, url: str):
-    m3u8_list = m3u8.split("\n")
-
-    new_m3u8 = []
-    next_line_replace = False
-    for row in m3u8_list:
-        if row.startswith("#EXTINF:"):
-            next_line_replace = True
-        elif next_line_replace:
-            next_line_replace = False
-            row = f"{url}/{row}"
-        new_m3u8.append(row)
-    return new_m3u8
