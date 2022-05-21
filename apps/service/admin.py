@@ -84,4 +84,4 @@ class TaxiInfoAdmin(admin.ModelAdmin):
 
 @admin.register(MilanaTranslate)
 class MilanaTranslateAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('milana_text', 'translated_text')

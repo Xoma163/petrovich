@@ -256,6 +256,9 @@ class MilanaTranslate(models.Model):
     milana_text = models.CharField("Текст Миланы", max_length=30)
     translated_text = models.CharField("Переведённый текст", max_length=30)
 
+    def __str__(self):
+        return str(self.milana_text)
+
     class Meta:
-        verbose_name = "Словечки Миланы"
-        verbose_name_plural = "Словечко Миланы"
+        verbose_name = "Словечко Миланы"
+        verbose_name_plural = "Словечки Миланы"
