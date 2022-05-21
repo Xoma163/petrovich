@@ -1,10 +1,10 @@
 import datetime
 import time
 
-import requests
 from django.core.management import BaseCommand
 
 from apps.bot.APIs.TheHoleAPI import TheHoleAPI
+from apps.bot.APIs.WASDAPI import WASDAPI
 from apps.bot.APIs.YoutubeAPI import YoutubeAPI
 from apps.bot.classes.bots.Bot import get_bot_by_platform
 from apps.bot.classes.consts.Consts import Platform
@@ -61,19 +61,15 @@ class Command(BaseCommand):
         sub.save()
 
     def check_wasd_video(self, sub):
-        r = requests.get("https://wasd.tv/api/v2/broadcasts/public",
-                         params={"with_extra": "true", "channel_name": sub.title}) \
-            .json()
-        channel_is_live = r['result']['channel']['channel_is_live']
-
+        wasd = WASDAPI()
+        channel_is_live = wasd.channel_is_live(sub.title)
         if not channel_is_live or sub.last_stream_status:
             sub.last_stream_status = channel_is_live
             sub.save()
             return
 
-        title = r['result']['media_container']['media_container_name']
-        link = f"https://wasd.tv/{sub.title}"
-        self.send_notify(sub, title, link, is_stream=True)
+        link = f"{wasd.URL}{sub.title}"
+        self.send_notify(sub, wasd.title, link, is_stream=True)
 
         sub.last_stream_status = channel_is_live
         sub.save()
@@ -98,9 +94,7 @@ class Command(BaseCommand):
     def send_the_hole_file(sub, link):
         platform = sub.author.get_platform_enum()
         bot = get_bot_by_platform(platform)
-
-        event = Event(bot=bot)
-        event.peer_id = sub.peer_id
+        event = Event(bot=bot, peer_id=sub.peer_id)
 
         media_command = Media(bot, event)
         att, title = media_command.get_the_hole_video(link)

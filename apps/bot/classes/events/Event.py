@@ -11,7 +11,7 @@ from apps.bot.models import Profile, Chat, User
 
 class Event:
     # None тк иногда требуется вручную создать инстанс Event
-    def __init__(self, raw_event=None, bot=None):
+    def __init__(self, raw_event=None, bot=None, peer_id=None):
         from apps.bot.classes.Command import Command
 
         if not raw_event:
@@ -28,7 +28,7 @@ class Event:
         self.sender: Profile = None
 
         self.chat: Chat = None
-        self.peer_id: int = None  # Куда слать ответ
+        self.peer_id: int = peer_id  # Куда слать ответ
         self.from_id: int = None  # От кого пришло сообщение
         self.platform: Platform = bot.platform
 

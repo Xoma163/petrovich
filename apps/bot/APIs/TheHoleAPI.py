@@ -38,13 +38,8 @@ class TheHoleAPI:
 
         master_m3u8_url = f"{base_uri}/master.m3u8"
         master_m3u8 = requests.get(master_m3u8_url).text
-        _m3u8 = M3U8(master_m3u8, base_uri=base_uri)
-
-        m3u8_max_quality_url = _m3u8.playlists[-1].absolute_uri
-        m3u8 = requests.get(m3u8_max_quality_url).text
-
-        _m3u8 = M3U8(m3u8, base_uri=base_uri)
-        m3u8 = _m3u8.dumps_bytes()
+        _m3u8 = M3U8(master_m3u8, base_uri=base_uri, load_playlists=False, load_high_quality_playlist=True)
+        m3u8 = _m3u8.get_playlist_with_best_quality().loaded.dumps_bytes()
         self.m3u8_bytes = m3u8
 
     def get_last_videos_with_titles(self, channel_id):
