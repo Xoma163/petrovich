@@ -3,11 +3,12 @@ import requests
 
 
 class M3U8(m3u8.M3U8):
-    def __init__(self, *args, load_playlists=False, load_high_quality_playlist=False, **kwargs, ):
+    def __init__(self, *args, load_playlists=False, load_high_quality_playlist=False, base_playlists_uri=None,
+                 **kwargs, ):
         self.load_playlists = load_playlists
         self.segments = []  # PEP
         super().__init__(*args, **kwargs)
-        self.playlists = PlaylistList(*self.playlists)
+        self.playlists = PlaylistList(*self.playlists, base_playlists_uri=base_playlists_uri)
 
         if self.playlists:
             if load_high_quality_playlist:
@@ -44,21 +45,23 @@ class SegmentList(m3u8.SegmentList):
 
 
 class PlayList(m3u8.Playlist):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, base_playlists_uri, **kwargs):
         super().__init__(*args, **kwargs)
         self.loaded = None
+        self.base_playlists_uri = base_playlists_uri if base_playlists_uri else self.base_uri
 
     def load(self):
-        self.loaded = M3U8(requests.get(self.absolute_uri).text, base_uri=self.absolute_uri)
+        self.loaded = M3U8(requests.get(self.absolute_uri).text, base_uri=self.base_playlists_uri)
 
 
 class PlaylistList(m3u8.PlaylistList):
-    def __init__(self, *args):
+    def __init__(self, *args, base_playlists_uri):
         super().__init__()
         for item in args:
             stream_info = item.stream_info.__dict__
             stream_info['resolution'] = f"{stream_info['resolution'][0]}x{stream_info['resolution'][1]}"
-            self.append(PlayList(item.uri, item.stream_info.__dict__, item.media, item.base_uri))
+            self.append(PlayList(item.uri, item.stream_info.__dict__, item.media, item.base_uri,
+                                 base_playlists_uri=base_playlists_uri))
         self.sort_by_quality()
 
     def load(self):
