@@ -201,6 +201,18 @@ class TgBot(CommonBot):
                 results.append({"success": True, "response": response, "response_message_item": rmi})
         return results
 
+    def edit_message(self, rm: ResponseMessageItem, params):
+        if rm.keyboard and not rm.text:
+            return self.edit_keyboard(rm, params)
+        params['text'] = params.pop('caption')
+        r = self.requests.get('editMessageText', params=params)
+        return r
+
+    def edit_keyboard(self, rm, params):
+        del params['caption']
+        r = self.requests.get('editMessageReplyMarkup', params=params)
+        return r
+
     def send_response_message_item(self, rm: ResponseMessageItem):
         """
         Отправка ResponseMessageItem сообщения
@@ -208,6 +220,10 @@ class TgBot(CommonBot):
         """
         params = {'chat_id': rm.peer_id, 'caption': rm.text, 'reply_markup': json.dumps(rm.keyboard)}
         params.update(rm.kwargs)
+
+        if rm.message_id:
+            params['message_id'] = rm.message_id
+            return self.edit_message(rm, params)
 
         att_map = {
             PhotoAttachment: self._send_photo,

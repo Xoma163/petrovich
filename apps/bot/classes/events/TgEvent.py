@@ -99,6 +99,9 @@ class TgEvent(Event):
         self.message = Message()
         try:
             self.payload = json.loads(payload)
+            if not self.payload:
+                self.force_response = False
+                return
             self.message.parse_from_payload(self.payload)
         except:
             self.message.parse_raw(payload)
