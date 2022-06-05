@@ -133,9 +133,9 @@ class TgBot(CommonBot):
             default_params['video'] = video.public_download_url
             return self.requests.get('sendVideo', default_params)
         else:
-            if video.get_size_mb() > 40:
+            if video.get_size_mb() > 50:
                 rm.attachments = []
-                raise PError("Нельзя загружать видео более 40 мб в телеграмм")
+                raise PError("Нельзя загружать видео более 50 мб в телеграмм")
             return self.requests.get('sendVideo', default_params, files={'video': video.content})
 
     def _send_gif(self, rm: ResponseMessageItem, default_params):
