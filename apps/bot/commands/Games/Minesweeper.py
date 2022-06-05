@@ -107,7 +107,7 @@ class Minesweeper(Command):
         if j < 0 or j >= self.width:
             return
         data = json.loads(inline_keyboard[i][j]['callback_data'])
-        x, y, val, state = data['args']
+        _, _, val, state = data['args']
         inline_keyboard[i][j]['text'] = self.emoji_map[val]
         if data['args'][3]:
             return
@@ -121,8 +121,8 @@ class Minesweeper(Command):
 
     def game_over(self, inline_keyboard):
         first_try = True
-        for i in range(len(inline_keyboard)):
-            for j in range(len(inline_keyboard[i])):
+        for i, _ in enumerate(inline_keyboard):
+            for j, _ in enumerate(inline_keyboard[i]):
                 _, _, val, opened = json.loads(inline_keyboard[i][j]['callback_data'])['args']
                 button_text = self.emoji_map[val]
                 first_try &= not opened
