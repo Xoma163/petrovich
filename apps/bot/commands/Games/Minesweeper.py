@@ -27,7 +27,7 @@ class Minesweeper(Command):
         self.height: int = 12
         self.mines: int = 10
         self.board = []
-        self.mode = self.MODE_MINES
+        self.mode = self.MODE_DEFAULT
 
         self.FLAG = "🏳️"
 
@@ -111,8 +111,7 @@ class Minesweeper(Command):
                 buttons.append(button)
         inline_keyboard = self.bot.get_inline_keyboard(buttons, self.width)
 
-        button = self.bot.get_button(f"Включить обычный режим {self.emoji_map[self.MINE]}", self.name,
-                                     {'mode': self.MODE_DEFAULT})
+        button = self.bot.get_button(f"Включить режим планирования {self.FLAG}", self.name, {'mode': self.MODE_MINES})
         inline_keyboard['inline_keyboard'].append([button])
 
         return {'text': f'Сапёр - {self.mines} мин', "keyboard": inline_keyboard}
