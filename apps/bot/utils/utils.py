@@ -144,11 +144,11 @@ def get_help_texts_for_command(command, platform=None) -> str:
             lines = command.full_help_texts.split("\n")
             full_help_texts_list = []
             for line in lines:
-                dash_pos = line.find("-")
+                dash_pos = line.find(" - ")
                 if dash_pos == -1:
                     new_line = line
                 else:
-                    new_line = get_tg_formatted_text_line(line[:line.find("-") - 1]) + line[line.find("-") - 1:]
+                    new_line = get_tg_formatted_text_line(line[:dash_pos]) + line[dash_pos:]
                 full_help_texts_list.append(new_line)
             full_help_texts = "\n".join(full_help_texts_list)
             result += full_help_texts

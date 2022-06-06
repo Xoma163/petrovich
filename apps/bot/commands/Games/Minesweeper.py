@@ -17,6 +17,7 @@ class Minesweeper(Command):
 
     name = "сапер"
     help_text = "игра сапёр"
+    help_texts = ["[кол-во мин=10] - запускает игру в сапёра"]
     platforms = [Platform.TG]
 
     def __init__(self):
@@ -57,8 +58,12 @@ class Minesweeper(Command):
         elif 'callback_query' in self.event.raw and args:
             inline_keyboard = self.event.raw['callback_query']['message']['reply_markup']['inline_keyboard']
             args = [int(arg) for arg in args]
-            return self.press_the_button(*args, inline_keyboard)
+            return self.press_button(*args, inline_keyboard)
         else:
+            if args:
+                self.int_args = [0]
+                self.parse_int()
+                self.mines = min(self.width * self.height, int(args[0]))
             return self.send_init_keyboard()
 
     def generate(self):
@@ -69,7 +74,9 @@ class Minesweeper(Command):
         height_pool = [y for y in range(self.height)]
         mines_pos_pool = [(x[0], x[1]) for x in itertools.product(height_pool, width_pool)]
         for _ in range(self.mines):
-            x, y = random.choice(mines_pos_pool)
+            pos = random.choice(mines_pos_pool)
+            mines_pos_pool.remove(pos)
+            x, y = pos
             self.board[x][y] = self.MINE
 
         for x in range(self.height):
@@ -78,9 +85,7 @@ class Minesweeper(Command):
                     self._increase_rectangle(x, y)
 
     def _increase_rectangle(self, x, y):
-        x_val = [_x for _x in range(x - 1, x + 2) if 0 <= _x < self.height]
-        y_val = [_y for _y in range(y - 1, y + 2) if 0 <= _y < self.width]
-        positions = itertools.product(x_val, y_val)
+        positions = self._get_rectangle_pos(x, y)
 
         for pos in positions:
             i, j = pos
@@ -110,14 +115,17 @@ class Minesweeper(Command):
         self._edit_mode_button(inline_keyboard)
         return {"keyboard": {"inline_keyboard": inline_keyboard}, "message_id": self.message_id}
 
-    def press_the_button(self, i, j, real_val, flag_val, opened, inline_keyboard):
+    def press_button(self, i, j, real_val, flag_val, opened, inline_keyboard):
         callback_data_mines = json.loads(inline_keyboard[-1][0]['callback_data'])['args']['mode']
         self.mode = self.MODE_DEFAULT if callback_data_mines == self.MODE_MINES else self.MODE_MINES
         self.height = len(inline_keyboard) - 1
         self.width = len(inline_keyboard[0])
 
+        if opened == 1:
+            return self.press_opened_button(i, j, real_val, flag_val, opened, inline_keyboard)
+
         if self.mode == self.MODE_MINES:
-            return self.press_the_button_in_mines_mode(i, j, real_val, flag_val, opened, inline_keyboard)
+            return self.press_button_in_mines_mode(i, j, real_val, flag_val, opened, inline_keyboard)
 
         if real_val == self.MINE:
             return self.game_over(inline_keyboard)
@@ -131,7 +139,36 @@ class Minesweeper(Command):
 
         return {"keyboard": {"inline_keyboard": inline_keyboard}, "message_id": self.message_id}
 
-    def press_the_button_in_mines_mode(self, i, j, real_val, flag_val, opened, inline_keyboard):
+    def press_opened_button(self, i, j, real_val, flag_val, opened, inline_keyboard):
+        positions = list(self._get_rectangle_pos(i, j))
+        flags = 0
+        for position in positions:
+            x, y = position
+            callback_data = json.loads(inline_keyboard[x][y]['callback_data'])
+            _, _, _, _flag_val, _ = callback_data['args']
+            if _flag_val == 1:
+                flags += 1
+
+        if real_val != flags:
+            return
+
+        for position in positions:
+            x, y = position
+            if x == i and j == y:
+                continue
+            callback_data = json.loads(inline_keyboard[x][y]['callback_data'])
+            _i, _j, _real_val, _flag_val, _opened = callback_data['args']
+            if _opened:
+                continue
+            if _real_val == self.MINE and _flag_val == 1:
+                continue
+            if _real_val == self.MINE:
+                return self.game_over(inline_keyboard)
+
+            self.propagate(_i, _j, inline_keyboard)
+        return {"keyboard": {"inline_keyboard": inline_keyboard}, "message_id": self.message_id}
+
+    def press_button_in_mines_mode(self, i, j, real_val, flag_val, opened, inline_keyboard):
         if opened:
             return
         callback_data = json.loads(inline_keyboard[i][j]['callback_data'])
@@ -146,16 +183,14 @@ class Minesweeper(Command):
         if j < 0 or j >= self.width:
             return
         data = json.loads(inline_keyboard[i][j]['callback_data'])
-        _, _, val, _, state = data['args']
+        _, _, val, _, opened = data['args']
         inline_keyboard[i][j]['text'] = self.emoji_map[val]
-        if data['args'][4]:
+        if opened == 1:
             return
         data['args'][4] = 1
         inline_keyboard[i][j]['callback_data'] = json.dumps(data, ensure_ascii=False)
         if val == 0:
-            x_val = [_x for _x in range(i - 1, i + 2) if 0 <= _x < self.height]
-            y_val = [_y for _y in range(j - 1, j + 2) if 0 <= _y < self.width]
-            positions = itertools.product(x_val, y_val)
+            positions = self._get_rectangle_pos(i, j)
             for pos in positions:
                 i, j = pos
                 self.propagate(i, j, inline_keyboard)
@@ -179,8 +214,10 @@ class Minesweeper(Command):
             )
         else:
             text = '*хлопок*'
-        button = self.bot.get_button("Ещё", self.name)
-        inline_keyboard[-1] = [button]
+        button = self.bot.get_button("Ещё (легко)", self.name, 10)
+        button2 = self.bot.get_button("Ещё (средне)", self.name, 18)
+        button3 = self.bot.get_button("Ещё (сложно)", self.name, 25)
+        inline_keyboard[-1] = [button, button2, button3]
         return {'text': text, "keyboard": {"inline_keyboard": inline_keyboard}, 'message_id': self.message_id}
 
     def check_win(self, inline_keyboard):
@@ -203,3 +240,8 @@ class Minesweeper(Command):
             button = self.bot.get_button("Включить обычный режим", self.name, {'mode': self.MODE_DEFAULT})
 
         inline_keyboard[-1] = [button]
+
+    def _get_rectangle_pos(self, i, j):
+        x_val = [_x for _x in range(i - 1, i + 2) if 0 <= _x < self.height]
+        y_val = [_y for _y in range(j - 1, j + 2) if 0 <= _y < self.width]
+        return itertools.product(x_val, y_val)
