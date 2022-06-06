@@ -43,12 +43,14 @@ class BullsAndCows(Command):
                     new_obj['profile'] = self.event.sender
                 bacs = BullsAndCowsSession.objects.create(**new_obj)
 
+                msg = "Я создал, погнали"
                 if self.event.platform == Platform.TG:
-                    r = self.bot.parse_and_send_msgs("Я создал, погнали", self.event.peer_id)[0]
+                    r = self.bot.parse_and_send_msgs(msg, self.event.peer_id)[0]
                     message_id = r['response'].json()['result']['message_id']
                     bacs.message_body = "Я создал, погнали"
                     bacs.message_id = message_id
                     bacs.save()
+                return msg
             else:
 
                 if not session:
@@ -91,7 +93,8 @@ class BullsAndCows(Command):
                     elif argi in correct_number_str:
                         cows += 1
                 session.steps += 1
-                session.message_body += f"\n\nЧисло {arg0}\nБыков - {bulls}\nКоров - {cows}"
+                new_msg = f"Число {arg0}\nБыков - {bulls}\nКоров - {cows}"
+                session.message_body += f"\n\n{new_msg}"
                 session.save()
 
                 if self.event.platform == Platform.TG:
@@ -99,4 +102,4 @@ class BullsAndCows(Command):
                                                  self.event.peer_id)
                     self.bot.delete_message(self.event.peer_id, self.event.message.id)
                 else:
-                    return session.message_body
+                    return new_msg
