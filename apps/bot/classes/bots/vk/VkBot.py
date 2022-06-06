@@ -7,7 +7,6 @@ from vk_api.bot_longpoll import VkBotMessageEvent
 from vk_api.utils import get_random_id
 
 from apps.bot.classes.bots.Bot import Bot as CommonBot
-from apps.bot.classes.bots.vk.MyVkBotLongPoll import MyVkBotLongPoll
 from apps.bot.classes.consts.ActivitiesEnum import VK_ACTIVITIES, ActivitiesEnum
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.events.VkEvent import VkEvent
@@ -26,7 +25,7 @@ class VkBot(CommonBot):
         self.token = env.str('VK_BOT_TOKEN')
         self.group_id = env.str('VK_BOT_GROUP_ID')
         vk_session = VkApi(token=self.token, api_version="5.131", config_filename="secrets/vk_bot_config.json")
-        self.longpoll = MyVkBotLongPoll(vk_session, group_id=self.group_id)
+        # self.longpoll = MyVkBotLongPoll(vk_session, group_id=self.group_id)
         self.upload = VkUpload(vk_session)
         self.vk = vk_session.get_api()
 
