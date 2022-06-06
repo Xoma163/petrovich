@@ -112,7 +112,7 @@ class Minesweeper(Command):
         button = self.bot.get_button("Включить режим мин", self.name, {'mode': self.MODE_MINES})
         inline_keyboard['inline_keyboard'].append([button])
 
-        return {'text': 'Сапёр', "keyboard": inline_keyboard}
+        return {'text': f'Сапёр - {self.mines} мин', "keyboard": inline_keyboard}
 
     def press_switch_mode_button(self, inline_keyboard):
         self.mode = self.event.payload['args']['mode']
