@@ -128,7 +128,9 @@ class RedditSaver:
         self.set_post_url(post_url)
         self.get_post_data()
 
-        if self.is_video or self.is_gif:
+        if self.is_gallery:
+            return self.get_photos_from_post()
+        elif self.is_video or self.is_gif:
             return self.get_video_from_post()
         elif self.is_image:
             return self.get_photo_from_post()
@@ -171,6 +173,10 @@ class RedditSaver:
     def set_post_url(self, post_url):
         parsed_url = urlparse(post_url)
         self.post_url = f"{parsed_url.scheme}://{parsed_url.hostname}{parsed_url.path}"
+
+    @property
+    def is_gallery(self):
+        return self.data.get('is_gallery', False)
 
     @property
     def is_video(self):

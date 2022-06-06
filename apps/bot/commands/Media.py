@@ -148,7 +148,7 @@ class Media(Command):
         attachment = rs.get_from_reddit(url)
         if rs.is_gif:
             attachments = self.bot.upload_gif(attachment)
-        elif rs.is_image or rs.is_images:
+        elif rs.is_image or rs.is_images or rs.is_gallery:
             attachments = self.bot.upload_photos(attachment, peer_id=self.event.peer_id)
         elif rs.is_video:
             attachments = self.bot.upload_video(attachment, peer_id=self.event.peer_id)
