@@ -27,7 +27,7 @@ class Minesweeper(Command):
         self.height: int = 12
         self.mines: int = 10
         self.board = []
-        self.mode = self.MODE_DEFAULT
+        self.mode = self.MODE_MINES
 
         self.FLAG = "🏳️"
 
@@ -59,8 +59,8 @@ class Minesweeper(Command):
             inline_keyboard = self.event.raw['callback_query']['message']['reply_markup']['inline_keyboard']
             _args = self.event.payload['args']
             if len(_args) == 1:
-                self.mines = min(self.width * self.height, int(_args[0]))
-                self.mines = max(1, self.mines)
+                self.mines = min(self.width * self.height - 1, int(_args[0]))
+                self.mines = max(0, self.mines)
                 return self.send_init_keyboard()
             _args = [int(arg) for arg in _args]
             return self.press_button(*_args, inline_keyboard)
@@ -68,14 +68,13 @@ class Minesweeper(Command):
             if args:
                 self.int_args = [0]
                 self.parse_int()
-                self.mines = min(self.width * self.height, int(args[0]))
+                self.mines = min(self.width * self.height - 1, int(args[0]))
                 self.mines = max(1, self.mines)
 
             return self.send_init_keyboard()
 
     def generate(self):
         self.board = [[self.EMPTY for _ in range(self.width)] for _ in range(self.height)]
-
         # random mines
         width_pool = [x for x in range(self.width)]
         height_pool = [y for y in range(self.height)]
