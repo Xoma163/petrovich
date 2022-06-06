@@ -60,6 +60,7 @@ class Minesweeper(Command):
             _args = self.event.payload['args']
             if len(_args) == 1:
                 self.mines = min(self.width * self.height, int(_args[0]))
+                self.mines = max(1, self.mines)
                 return self.send_init_keyboard()
             _args = [int(arg) for arg in _args]
             return self.press_button(*_args, inline_keyboard)
@@ -68,6 +69,8 @@ class Minesweeper(Command):
                 self.int_args = [0]
                 self.parse_int()
                 self.mines = min(self.width * self.height, int(args[0]))
+                self.mines = max(1, self.mines)
+
             return self.send_init_keyboard()
 
     def generate(self):
@@ -241,7 +244,7 @@ class Minesweeper(Command):
         button = self.bot.get_button("Ещё (легко)", self.name, [10])
         button2 = self.bot.get_button("Ещё (средне)", self.name, [18])
         button3 = self.bot.get_button("Ещё (сложно)", self.name, [25])
-        inline_keyboard[-1] = [button, button2, button3]
+        inline_keyboard_copy[-1] = [button, button2, button3]
         return {'text': text, "keyboard": {"inline_keyboard": inline_keyboard_copy}, 'message_id': self.message_id}
 
     def _edit_mode_button(self, inline_keyboard):
