@@ -57,8 +57,12 @@ class Minesweeper(Command):
             return self.press_switch_mode_button(inline_keyboard)
         elif 'callback_query' in self.event.raw and args:
             inline_keyboard = self.event.raw['callback_query']['message']['reply_markup']['inline_keyboard']
-            args = [int(arg) for arg in args]
-            return self.press_button(*args, inline_keyboard)
+            _args = self.event.payload['args']
+            if len(_args) == 1:
+                self.mines = min(self.width * self.height, int(_args[0]))
+                return self.send_init_keyboard()
+            _args = [int(arg) for arg in _args]
+            return self.press_button(*_args, inline_keyboard)
         else:
             if args:
                 self.int_args = [0]
@@ -122,10 +126,10 @@ class Minesweeper(Command):
         self.width = len(inline_keyboard[0])
 
         if opened == 1:
-            return self.press_opened_button(i, j, real_val, flag_val, opened, inline_keyboard)
+            return self.press_opened_button(i, j, real_val, inline_keyboard)
 
         if self.mode == self.MODE_MINES:
-            return self.press_button_in_mines_mode(i, j, real_val, flag_val, opened, inline_keyboard)
+            return self.press_button_in_mines_mode(i, j, opened, inline_keyboard)
 
         if real_val == self.MINE:
             return self.game_over(inline_keyboard)
@@ -139,7 +143,7 @@ class Minesweeper(Command):
 
         return {"keyboard": {"inline_keyboard": inline_keyboard}, "message_id": self.message_id}
 
-    def press_opened_button(self, i, j, real_val, flag_val, opened, inline_keyboard):
+    def press_opened_button(self, i, j, real_val, inline_keyboard):
         positions = list(self._get_rectangle_pos(i, j))
         flags = 0
         for position in positions:
@@ -168,7 +172,7 @@ class Minesweeper(Command):
             self.propagate(_i, _j, inline_keyboard)
         return {"keyboard": {"inline_keyboard": inline_keyboard}, "message_id": self.message_id}
 
-    def press_button_in_mines_mode(self, i, j, real_val, flag_val, opened, inline_keyboard):
+    def press_button_in_mines_mode(self, i, j, opened, inline_keyboard):
         if opened:
             return
         callback_data = json.loads(inline_keyboard[i][j]['callback_data'])
@@ -214,9 +218,9 @@ class Minesweeper(Command):
             )
         else:
             text = '*хлопок*'
-        button = self.bot.get_button("Ещё (легко)", self.name, 10)
-        button2 = self.bot.get_button("Ещё (средне)", self.name, 18)
-        button3 = self.bot.get_button("Ещё (сложно)", self.name, 25)
+        button = self.bot.get_button("Ещё (легко)", self.name, [10])
+        button2 = self.bot.get_button("Ещё (средне)", self.name, [18])
+        button3 = self.bot.get_button("Ещё (сложно)", self.name, [25])
         inline_keyboard[-1] = [button, button2, button3]
         return {'text': text, "keyboard": {"inline_keyboard": inline_keyboard}, 'message_id': self.message_id}
 
