@@ -256,7 +256,7 @@ class Minesweeper(Command):
         if self.mode == self.MODE_DEFAULT:
             button = self.bot.get_button(f"Включить режим планирования {self.FLAG}", self.name,
                                          {'mode': self.MODE_MINES})
-        elif self.mode == self.MODE_MINES:
+        else:
             button = self.bot.get_button(f"Включить обычный режим {self.emoji_map[self.MINE]}", self.name,
                                          {'mode': self.MODE_DEFAULT})
 
