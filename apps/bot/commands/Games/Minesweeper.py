@@ -111,7 +111,8 @@ class Minesweeper(Command):
                 buttons.append(button)
         inline_keyboard = self.bot.get_inline_keyboard(buttons, self.width)
 
-        button = self.bot.get_button(f"Включить режим планирования {self.FLAG}", self.name, {'mode': self.MODE_MINES})
+        button = self.bot.get_button(f"Включить обычный режим {self.emoji_map[self.MINE]}", self.name,
+                                     {'mode': self.MODE_DEFAULT})
         inline_keyboard['inline_keyboard'].append([button])
 
         return {'text': f'Сапёр - {self.mines} мин', "keyboard": inline_keyboard}
