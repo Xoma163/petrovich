@@ -238,6 +238,10 @@ class Minesweeper(Command):
                 inline_keyboard_copy[i][j]['callback_data'] = "{}"
                 inline_keyboard_copy[i][j]['text'] = button_text
         text = 'Вы победили!'
+        button = self.bot.get_button("Ещё (легко)", self.name, [10])
+        button2 = self.bot.get_button("Ещё (средне)", self.name, [18])
+        button3 = self.bot.get_button("Ещё (сложно)", self.name, [25])
+        inline_keyboard[-1] = [button, button2, button3]
         return {'text': text, "keyboard": {"inline_keyboard": inline_keyboard_copy}, 'message_id': self.message_id}
 
     def _edit_mode_button(self, inline_keyboard):
