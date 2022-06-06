@@ -72,6 +72,7 @@ class TelegramView(CSRFExemptMixin, View):
 class VkView(CSRFExemptMixin, View):
     def post(self, request, *args, **kwargs):
         raw = json.loads(request.body)
+        print(raw)
         if raw['secret'] == env.str("VK_SECRET_KEY"):
             if raw['type'] == 'confirmation':
                 return HttpResponse(env.str("VK_CONFIRMATION_TOKEN"), content_type="text/plain", status=200)
