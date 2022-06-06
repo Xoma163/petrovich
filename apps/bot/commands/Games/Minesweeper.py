@@ -9,6 +9,12 @@ from apps.bot.utils.utils import random_event
 
 
 class Minesweeper(Command):
+    MODE_DEFAULT = 0
+    MODE_MINES = 1
+
+    MINE = -1
+    EMPTY = 0
+
     name = "сапер"
     help_text = "игра сапёр"
     platforms = [Platform.TG]
@@ -17,13 +23,16 @@ class Minesweeper(Command):
         super().__init__()
 
         self.width: int = 8
-        self.height: int = 8
-        self.mines: int = 9
+        self.height: int = 12
+        self.mines: int = 10
         self.board = []
+        self.mode = self.MODE_DEFAULT
+
+        self.FLAG = "🏳️"
 
         self.emoji_map = {
-            -1: "🚩",
-            0: "▪",
+            self.MINE: "🚩",
+            self.EMPTY: "▪",
             1: "1️⃣",
             2: "2️⃣",
             3: "3️⃣",
@@ -32,21 +41,28 @@ class Minesweeper(Command):
             6: "6️⃣",
             7: "7️⃣",
             8: "8️⃣",
-            9: "9️⃣",
         }
+        self.message_id = None
+
+    # x, y, real_val, flag_val, opened
 
     def start(self):
+        if 'callback_query' in self.event.raw:
+            self.message_id = self.event.raw['callback_query']['message']['message_id']
+
         args = self.event.message.args
-
-        if 'callback_query' in self.event.raw and args:
+        if args and args == ["mode"]:
             inline_keyboard = self.event.raw['callback_query']['message']['reply_markup']['inline_keyboard']
-
-            return self.press_the_button(int(args[0]), int(args[1]), int(args[2]), inline_keyboard)
+            return self.press_switch_mode_button(inline_keyboard)
+        elif 'callback_query' in self.event.raw and args:
+            inline_keyboard = self.event.raw['callback_query']['message']['reply_markup']['inline_keyboard']
+            args = [int(arg) for arg in args]
+            return self.press_the_button(*args, inline_keyboard)
         else:
             return self.send_init_keyboard()
 
     def generate(self):
-        self.board = [[0 for _ in range(self.width)] for _ in range(self.height)]
+        self.board = [[self.EMPTY for _ in range(self.width)] for _ in range(self.height)]
 
         # random mines
         width_pool = [x for x in range(self.width)]
@@ -54,7 +70,7 @@ class Minesweeper(Command):
         mines_pos_pool = [(x[0], x[1]) for x in itertools.product(height_pool, width_pool)]
         for _ in range(self.mines):
             x, y = random.choice(mines_pos_pool)
-            self.board[x][y] = -1
+            self.board[x][y] = self.MINE
 
         for x in range(self.height):
             for y in range(self.width):
@@ -80,26 +96,49 @@ class Minesweeper(Command):
         for i in range(self.height):
             for j in range(self.width):
                 button_text = "     "
-                button = self.bot.get_button(button_text, self.name, (i, j, self.board[i][j], False))
+                button = self.bot.get_button(button_text, self.name, (i, j, self.board[i][j], 0, 0))
                 buttons.append(button)
-        keyboard = self.bot.get_inline_keyboard(buttons, self.width)
-        return {'text': 'Сапёр', "keyboard": keyboard}
+        inline_keyboard = self.bot.get_inline_keyboard(buttons, self.width)
 
-    def press_the_button(self, i, j, val, inline_keyboard):
-        if val == -1:
-            return self.game_over(inline_keyboard)
+        button = self.bot.get_button("Включить режим мин", self.name, {'mode': self.MODE_MINES})
+        inline_keyboard['inline_keyboard'].append([button])
 
-        self.height = len(inline_keyboard)
+        return {'text': 'Сапёр', "keyboard": inline_keyboard}
+
+    def press_switch_mode_button(self, inline_keyboard):
+        self.mode = self.event.payload['args']['mode']
+        self._edit_mode_button(inline_keyboard)
+        return {"keyboard": {"inline_keyboard": inline_keyboard}, "message_id": self.message_id}
+
+    def press_the_button(self, i, j, real_val, flag_val, opened, inline_keyboard):
+        callback_data_mines = json.loads(inline_keyboard[-1][0]['callback_data'])['args']['mode']
+        self.mode = self.MODE_DEFAULT if callback_data_mines == self.MODE_MINES else self.MODE_MINES
+        self.height = len(inline_keyboard) - 1
         self.width = len(inline_keyboard[0])
-        message_id = self.event.raw['callback_query']['message']['message_id']
+
+        if self.mode == self.MODE_MINES:
+            return self.press_the_button_in_mines_mode(i, j, real_val, flag_val, opened, inline_keyboard)
+
+        if real_val == self.MINE:
+            return self.game_over(inline_keyboard)
 
         self.propagate(i, j, inline_keyboard)
 
         win = self.check_win(inline_keyboard)
         if win:
             return win
+        self._edit_mode_button(inline_keyboard)
 
-        return {"keyboard": {"inline_keyboard": inline_keyboard}, "message_id": message_id}
+        return {"keyboard": {"inline_keyboard": inline_keyboard}, "message_id": self.message_id}
+
+    def press_the_button_in_mines_mode(self, i, j, real_val, flag_val, opened, inline_keyboard):
+        if opened:
+            return
+        callback_data = json.loads(inline_keyboard[i][j]['callback_data'])
+        callback_data['args'][3] = 1 if callback_data['args'][3] == 0 else 0
+        inline_keyboard[i][j]['callback_data'] = json.dumps(callback_data, ensure_ascii=False)
+        inline_keyboard[i][j]['text'] = self.FLAG if callback_data['args'][3] == 1 else "     "
+        return {"keyboard": {"inline_keyboard": inline_keyboard}, "message_id": self.message_id}
 
     def propagate(self, i, j, inline_keyboard):
         if i < 0 or i >= self.height:
@@ -107,28 +146,29 @@ class Minesweeper(Command):
         if j < 0 or j >= self.width:
             return
         data = json.loads(inline_keyboard[i][j]['callback_data'])
-        _, _, val, state = data['args']
+        _, _, val, _, state = data['args']
         inline_keyboard[i][j]['text'] = self.emoji_map[val]
-        if data['args'][3]:
+        if data['args'][4]:
             return
-        data['args'][3] = True
+        data['args'][4] = 1
         inline_keyboard[i][j]['callback_data'] = json.dumps(data, ensure_ascii=False)
         if val == 0:
-            self.propagate(i, j + 1, inline_keyboard)
-            self.propagate(i + 1, j, inline_keyboard)
-            self.propagate(i, j - 1, inline_keyboard)
-            self.propagate(i - 1, j, inline_keyboard)
+            x_val = [_x for _x in range(i - 1, i + 2) if 0 <= _x < self.height]
+            y_val = [_y for _y in range(j - 1, j + 2) if 0 <= _y < self.width]
+            positions = itertools.product(x_val, y_val)
+            for pos in positions:
+                i, j = pos
+                self.propagate(i, j, inline_keyboard)
 
     def game_over(self, inline_keyboard):
         first_try = True
-        for i, _ in enumerate(inline_keyboard):
-            for j, _ in enumerate(inline_keyboard[i]):
-                _, _, val, opened = json.loads(inline_keyboard[i][j]['callback_data'])['args']
+        for i in range(self.height):
+            for j in range(self.width):
+                _, _, val, _, opened = json.loads(inline_keyboard[i][j]['callback_data'])['args']
                 button_text = self.emoji_map[val]
-                first_try &= not opened
+                first_try &= not bool(opened)
                 inline_keyboard[i][j]['callback_data'] = "{}"
                 inline_keyboard[i][j]['text'] = button_text
-        message_id = self.event.raw['callback_query']['message']['message_id']
 
         if first_try:
             text = random_event(
@@ -139,18 +179,27 @@ class Minesweeper(Command):
             )
         else:
             text = '*хлопок*'
-        return {'text': text, "keyboard": {"inline_keyboard": inline_keyboard}, 'message_id': message_id}
+        button = self.bot.get_button("Ещё", self.name)
+        inline_keyboard[-1] = [button]
+        return {'text': text, "keyboard": {"inline_keyboard": inline_keyboard}, 'message_id': self.message_id}
 
     def check_win(self, inline_keyboard):
         inline_keyboard_copy = deepcopy(inline_keyboard)
-        for i in range(len(inline_keyboard)):
-            for j in range(len(inline_keyboard[i])):
-                _, _, val, opened = json.loads(inline_keyboard[i][j]['callback_data'])['args']
+        for i in range(self.height):
+            for j in range(self.width):
+                _, _, val, _, opened = json.loads(inline_keyboard[i][j]['callback_data'])['args']
                 if val != -1 and not opened:
                     return
                 button_text = self.emoji_map[val]
                 inline_keyboard_copy[i][j]['callback_data'] = "{}"
                 inline_keyboard_copy[i][j]['text'] = button_text
-        message_id = self.event.raw['callback_query']['message']['message_id']
         text = 'Вы победили!'
-        return {'text': text, "keyboard": {"inline_keyboard": inline_keyboard_copy}, 'message_id': message_id}
+        return {'text': text, "keyboard": {"inline_keyboard": inline_keyboard_copy}, 'message_id': self.message_id}
+
+    def _edit_mode_button(self, inline_keyboard):
+        if self.mode == self.MODE_DEFAULT:
+            button = self.bot.get_button("Включить режим мин", self.name, {'mode': self.MODE_MINES})
+        elif self.mode == self.MODE_MINES:
+            button = self.bot.get_button("Включить обычный режим", self.name, {'mode': self.MODE_DEFAULT})
+
+        inline_keyboard[-1] = [button]
