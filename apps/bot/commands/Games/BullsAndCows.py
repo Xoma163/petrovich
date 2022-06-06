@@ -76,12 +76,11 @@ class BullsAndCows(Command):
                     if self.event.platform == Platform.TG:
                         self.bot.delete_message(self.event.peer_id, self.event.message.id)
                     decl = decl_of_num(session.steps, ['попытку', 'попытки', 'попыток'])
-                    msg = f"Отгадали всего число {session.number} за {session.steps} {decl}!"
-                    msg2 = "Начислил 1000 очков"
+                    msg = f"Отгадали всего число {session.number} за {session.steps} {decl}!\nНачислил 1000 очков"
                     session.delete()
                     button = self.bot.get_button("Ещё", self.name)
                     keyboard = self.bot.get_inline_keyboard([button])
-                    return [{"text": msg, "keyboard": keyboard}, msg2]
+                    return [{"text": msg, "keyboard": keyboard}]
 
                 bulls = 0
                 cows = 0
