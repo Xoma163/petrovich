@@ -170,6 +170,9 @@ class Minesweeper(Command):
                 return self.game_over(inline_keyboard)
 
             self.propagate(_i, _j, inline_keyboard)
+        win = self.check_win(inline_keyboard)
+        if win:
+            return win
         return {"keyboard": {"inline_keyboard": inline_keyboard}, "message_id": self.message_id}
 
     def press_button_in_mines_mode(self, i, j, opened, inline_keyboard):
