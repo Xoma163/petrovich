@@ -11,6 +11,7 @@ from apps.bot.classes.bots.vk.VkBot import VkBot
 from apps.bot.classes.bots.yandex.YandexBot import YandexBot
 from apps.bot.classes.consts.Exceptions import PError
 from apps.bot.classes.mixins import CSRFExemptMixin
+from petrovich.settings import env
 
 
 @csrf_exempt
@@ -70,12 +71,11 @@ class TelegramView(CSRFExemptMixin, View):
 
 class VkView(CSRFExemptMixin, View):
     def post(self, request, *args, **kwargs):
-        print
-
-    def post(self, request, *args, **kwargs):
-        return HttpResponse("80fa7f35")
-        return JsonResponse({"type": "confirmation", "group_id": 186416119}, status=200)
         raw = json.loads(request.body)
-        vk_bot = VkBot()
-        vk_bot.parse(raw)
-        return HttpResponse(status=200)
+        if raw['secret'] == env.str("VK_SECRET_KEY"):
+            if raw['type'] == 'confirmation':
+                return HttpResponse(env.str("VK_CONFIRMATION_TOKEN"), content_type="text/plain", status=200)
+            else:
+                vk_bot = VkBot()
+                vk_bot.parse(raw)
+                return HttpResponse('ok', content_type="text/plain", status=200)
