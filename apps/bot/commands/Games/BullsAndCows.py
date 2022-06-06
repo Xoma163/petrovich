@@ -2,7 +2,7 @@ import random
 from threading import Lock
 
 from apps.bot.classes.Command import Command
-from apps.bot.classes.consts.Consts import Role
+from apps.bot.classes.consts.Consts import Role, Platform
 from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.utils.utils import decl_of_num
 from apps.games.models import BullsAndCowsSession
@@ -35,14 +35,20 @@ class BullsAndCows(Command):
                 digits = [str(x) for x in range(10)]
                 random.shuffle(digits)
                 new_obj = {
-                    'number': "".join(digits[:DIGITS_IN_GAME])
+                    'number': "".join(digits[:DIGITS_IN_GAME]),
                 }
                 if self.event.is_from_chat:
                     new_obj['chat'] = self.event.chat
                 else:
                     new_obj['profile'] = self.event.sender
-                BullsAndCowsSession.objects.create(**new_obj)
-                return "Я создал, погнали!"
+                bacs = BullsAndCowsSession.objects.create(**new_obj)
+
+                if self.event.platform == Platform.TG:
+                    r = self.bot.parse_and_send_msgs("Я создал, погнали", self.event.peer_id)[0]
+                    message_id = r['response'].json()['result']['message_id']
+                    bacs.message_body = "Я создал, погнали"
+                    bacs.message_id = message_id
+                    bacs.save()
             else:
 
                 if not session:
@@ -83,5 +89,12 @@ class BullsAndCows(Command):
                     elif argi in correct_number_str:
                         cows += 1
                 session.steps += 1
+                session.message_body += f"\n\nЧисло {arg0}\nБыков - {bulls}\nКоров - {cows}"
                 session.save()
-                return f"Число {arg0}\nБыков - {bulls}\nКоров - {cows}"
+
+                if self.event.platform == Platform.TG:
+                    self.bot.parse_and_send_msgs({'text': session.message_body, 'message_id': session.message_id},
+                                                 self.event.peer_id)
+                    self.bot.delete_message(self.event.peer_id, self.event.message.id)
+                else:
+                    return session.message_body

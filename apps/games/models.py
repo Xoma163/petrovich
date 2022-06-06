@@ -95,6 +95,8 @@ class BullsAndCowsSession(models.Model):
     chat = models.ForeignKey(Chat, models.CASCADE, verbose_name="Чат", null=True)
     number = models.PositiveIntegerField("Загаданное число")
     steps = models.PositiveIntegerField("Количество попыток", default=1)
+    message_id = models.IntegerField("id первого сообщения", blank=True, default=0)
+    message_body = models.TextField("Тело сообщения для игры в одном сообщении", blank=True)
 
     class Meta:
         verbose_name = 'Сессия "Быки и коровы"'

@@ -4,7 +4,7 @@ import random
 from copy import deepcopy
 
 from apps.bot.classes.Command import Command
-from apps.bot.classes.consts.Consts import Platform
+from apps.bot.classes.consts.Consts import Platform, Role
 from apps.bot.classes.consts.Exceptions import PSkip
 from apps.bot.utils.utils import random_event
 
@@ -20,6 +20,7 @@ class Minesweeper(Command):
     help_text = "игра сапёр"
     help_texts = ["[кол-во мин=10] - запускает игру в сапёра"]
     platforms = [Platform.TG]
+    access = Role.GAMER
 
     def __init__(self):
         super().__init__()
@@ -50,7 +51,7 @@ class Minesweeper(Command):
 
     def start(self):
         if 'callback_query' in self.event.raw:
-            self.message_id = self.event.raw['callback_query']['message']['message_id']
+            self.message_id = self.event.message.id
 
         args = self.event.message.args
         if args and args == ["mode"]:
