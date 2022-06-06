@@ -5,6 +5,7 @@ from copy import deepcopy
 
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Platform
+from apps.bot.classes.consts.Exceptions import PSkip
 from apps.bot.utils.utils import random_event
 
 
@@ -156,8 +157,9 @@ class Minesweeper(Command):
                 flags += 1
 
         if real_val != flags:
-            return
+            raise PSkip()
 
+        one_updated = False
         for position in positions:
             x, y = position
             if x == i and j == y:
@@ -172,6 +174,10 @@ class Minesweeper(Command):
                 return self.game_over(inline_keyboard)
 
             self.propagate(_i, _j, inline_keyboard)
+            one_updated = True
+        if not one_updated:
+            raise PSkip()
+
         win = self.check_win(inline_keyboard)
         if win:
             return win
