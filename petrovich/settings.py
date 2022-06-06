@@ -14,7 +14,6 @@ env.read_env(os.path.join(BASE_DIR, 'secrets/.env'))
 SECRET_KEY = env.str('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool('DEBUG')
-
 MAIN_PROTOCOL = 'https'
 MAIN_DOMAIN = "andrewsha.net"
 MAIN_SITE = f'{MAIN_PROTOCOL}://{MAIN_DOMAIN}'

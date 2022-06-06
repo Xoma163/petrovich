@@ -3,7 +3,6 @@ import json
 from django.http import JsonResponse, HttpResponse
 # from django.utils.decorators import method_decorator
 from django.views import View
-from django.views.decorators.csrf import csrf_exempt
 
 from apps.bot.classes.bots.api.APIBot import APIBot
 from apps.bot.classes.bots.tg.TgBot import TgBot
@@ -14,11 +13,11 @@ from apps.bot.classes.mixins import CSRFExemptMixin
 from petrovich.settings import env
 
 
-@csrf_exempt
-def yandex(request):
-    yb = YandexBot()
-    response_data = yb.parse(json.loads(request.body))
-    return JsonResponse(response_data, status=200)
+class YandexView(CSRFExemptMixin, View):
+    def post(self, request, *args, **kwargs):
+        yb = YandexBot()
+        response_data = yb.parse(json.loads(request.body))
+        return JsonResponse(response_data, status=200)
 
 
 class APIView(CSRFExemptMixin, View):
@@ -62,6 +61,7 @@ class APIView(CSRFExemptMixin, View):
 
 
 class TelegramView(CSRFExemptMixin, View):
+
     def post(self, request, *args, **kwargs):
         raw = json.loads(request.body)
         tg_bot = TgBot()
@@ -72,13 +72,10 @@ class TelegramView(CSRFExemptMixin, View):
 class VkView(CSRFExemptMixin, View):
     def post(self, request, *args, **kwargs):
         raw = json.loads(request.body)
-        print(raw)
         if raw['secret'] == env.str("VK_SECRET_KEY"):
             if raw['type'] == 'confirmation':
                 return HttpResponse(env.str("VK_CONFIRMATION_TOKEN"), content_type="text/plain", status=200)
             else:
-                print(raw)
                 vk_bot = VkBot()
                 vk_bot.parse(raw)
                 return HttpResponse('ok', content_type="text/plain", status=200)
-        print('wtf')

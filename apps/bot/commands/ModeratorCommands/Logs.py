@@ -25,7 +25,7 @@ class Logs(Command):
     def start(self):
         count = 1
 
-        level = logging.DEBUG
+        level = logging.ERROR
         level_name = "ERROR"
         if self.event.message.args:
             level = logging._nameToLevel.get(self.event.message.args[0].upper(), logging._nameToLevel[level_name])

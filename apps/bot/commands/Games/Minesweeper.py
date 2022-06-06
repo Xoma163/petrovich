@@ -2,11 +2,14 @@ import itertools
 import json
 import random
 from copy import deepcopy
+from threading import Lock
 
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Platform, Role
 from apps.bot.classes.consts.Exceptions import PSkip
 from apps.bot.utils.utils import random_event
+
+lock = Lock()
 
 
 class Minesweeper(Command):
@@ -65,7 +68,8 @@ class Minesweeper(Command):
                 self.mines = max(0, self.mines)
                 return self.send_init_keyboard()
             _args = [int(arg) for arg in _args]
-            return self.press_button(*_args, inline_keyboard)
+            with lock:
+                return self.press_button(*_args, inline_keyboard)
         else:
             if args:
                 self.int_args = [0]

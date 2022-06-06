@@ -10,5 +10,5 @@ venv/bin/pip install -r requirements.txt
 venv/bin/python manage.py migrate
 venv/bin/python manage.py collectstatic --noinput
 
-sudo systemctl restart petrovich
+#sudo systemctl restart petrovich
 sudo systemctl restart petrovich_site

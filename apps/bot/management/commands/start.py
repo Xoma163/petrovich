@@ -20,8 +20,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         debug = kwargs.get('debug', False)
-        # self.vk_bot.start()
-        # self.tg_bot.start()
+        self.vk_bot.start()
+        self.tg_bot.start()
         print('start')
         if not debug:
             # self.ya_bot.start()
