@@ -7,14 +7,15 @@ class PetrovichException(Exception):
 
 
 class PSkip(PetrovichException):
-    pass
+    """
+    Просто скипает выполнение
+    """
 
 
 class PIDK(PetrovichException):
     """
-    I dont know commands
+    Я не знаю команды
     """
-    pass
 
 
 class PWarning(PetrovichException):
