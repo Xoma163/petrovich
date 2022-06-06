@@ -1,11 +1,13 @@
 import json
 
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 # from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 
 from apps.bot.classes.bots.api.APIBot import APIBot
+from apps.bot.classes.bots.tg.TgBot import TgBot
+from apps.bot.classes.bots.vk.VkBot import VkBot
 from apps.bot.classes.bots.yandex.YandexBot import YandexBot
 from apps.bot.classes.consts.Exceptions import PError
 from apps.bot.classes.mixins import CSRFExemptMixin
@@ -56,3 +58,24 @@ class APIView(CSRFExemptMixin, View):
 
         r_json = response.to_api()
         return JsonResponse(r_json, status=200)
+
+
+class TelegramView(CSRFExemptMixin, View):
+    def post(self, request, *args, **kwargs):
+        raw = json.loads(request.body)
+        tg_bot = TgBot()
+        tg_bot.parse(raw)
+        return HttpResponse(status=200)
+
+
+class VkView(CSRFExemptMixin, View):
+    def post(self, request, *args, **kwargs):
+        print
+
+    def post(self, request, *args, **kwargs):
+        return HttpResponse("80fa7f35")
+        return JsonResponse({"type": "confirmation", "group_id": 186416119}, status=200)
+        raw = json.loads(request.body)
+        vk_bot = VkBot()
+        vk_bot.parse(raw)
+        return HttpResponse(status=200)

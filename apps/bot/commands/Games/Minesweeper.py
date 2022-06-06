@@ -51,7 +51,7 @@ class Minesweeper(Command):
 
     def start(self):
         if 'callback_query' in self.event.raw:
-            self.message_id = self.event.message.id
+            self.message_id = self.event.raw['callback_query']['message']['message_id']
 
         args = self.event.message.args
         if args and args == ["mode"]:

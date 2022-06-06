@@ -36,8 +36,11 @@ class VkBot(CommonBot):
         Получение новых событий и их обработка
         """
         for raw_event in self.longpoll.listen():
-            vk_event = VkEvent(raw_event, self)
-            threading.Thread(target=self.handle_event, args=(vk_event,)).start()
+            self.parse(raw_event)
+
+    def parse(self, raw_event):
+        vk_event = VkEvent(raw_event, self)
+        threading.Thread(target=self.handle_event, args=(vk_event,)).start()
 
     def send_response_message(self, rm: ResponseMessage):
         """

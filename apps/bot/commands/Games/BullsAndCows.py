@@ -70,6 +70,8 @@ class BullsAndCows(Command):
                     raise PWarning("Цифры должны быть уникальны в числе")
 
                 if self.event.message.args[0] == session.number:
+                    if self.event.platform == Platform.TG:
+                        self.bot.delete_message(self.event.peer_id, self.event.message.id)
                     decl = decl_of_num(session.steps, ['попытку', 'попытки', 'попыток'])
                     msg = f"Отгадали всего за {session.steps} {decl}!"
                     msg2 = "Начислил 1000 очков"
