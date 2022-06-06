@@ -50,6 +50,7 @@ class BullsAndCows(Command):
                     bacs.message_body = "Я создал, погнали"
                     bacs.message_id = message_id
                     bacs.save()
+                    return
                 return msg
             else:
 
@@ -75,7 +76,7 @@ class BullsAndCows(Command):
                     if self.event.platform == Platform.TG:
                         self.bot.delete_message(self.event.peer_id, self.event.message.id)
                     decl = decl_of_num(session.steps, ['попытку', 'попытки', 'попыток'])
-                    msg = f"Отгадали всего за {session.steps} {decl}!"
+                    msg = f"Отгадали всего число {session.number} за {session.steps} {decl}!"
                     msg2 = "Начислил 1000 очков"
                     session.delete()
                     button = self.bot.get_button("Ещё", self.name)

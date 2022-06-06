@@ -51,11 +51,12 @@ class YoutubeAPI:
             raise PWarning("Не смог найти видео по этой ссылке")
         self.title = video_info['title']
         self.duration = video_info['duration']
-        if self.duration > 300:
-            raise PWarning("Нельзя грузить видосы > 5 минут с ютуба")
+        # if self.duration > 300:
+        #     raise PWarning("Нельзя грузить видосы > 5 минут с ютуба")
         video_urls = [x for x in video_info['formats'] if x['ext'] == 'mp4' and x.get('asr')]
 
-        max_quality_video = sorted(video_urls, key=lambda x: x['format_note'], reverse=True)[0]
+        videos = sorted(video_urls, key=lambda x: x['format_note'], reverse=True)
+        max_quality_video = videos[0]
         url = max_quality_video['url']
         return url
 
