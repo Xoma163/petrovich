@@ -76,6 +76,7 @@ class VkView(CSRFExemptMixin, View):
             if raw['type'] == 'confirmation':
                 return HttpResponse(env.str("VK_CONFIRMATION_TOKEN"), content_type="text/plain", status=200)
             else:
+                print(raw)
                 vk_bot = VkBot()
                 vk_bot.parse(raw)
                 return HttpResponse('ok', content_type="text/plain", status=200)
