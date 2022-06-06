@@ -81,3 +81,4 @@ class VkView(CSRFExemptMixin, View):
                 vk_bot = VkBot()
                 vk_bot.parse(raw)
                 return HttpResponse('ok', content_type="text/plain", status=200)
+        print('wtf')
