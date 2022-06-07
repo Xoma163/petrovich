@@ -184,11 +184,11 @@ LOGGING = {
             'filename': ERROR_FILE,
             'formatter': 'json',
         },
-        'console-warn': {
-            'level': 'WARNING',
-            'class': 'logging.StreamHandler',
-            'formatter': 'commands-console',
-        },
+        # 'console-warn': {
+        #     'level': 'WARNING',
+        #     'class': 'logging.StreamHandler',
+        #     'formatter': 'commands-console',
+        # },
         'console-debug': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
@@ -212,7 +212,7 @@ if DEBUG:
     LOGGING['loggers'][Platform.VK.name]['handlers'].append('console-debug')
     LOGGING['loggers'][Platform.TG.name]['handlers'].append('console-debug')
 
-CORS_ORIGIN_ALLOW_ALL = True
+# CORS_ORIGIN_ALLOW_ALL = True
 VK_URL = "https://vk.com/"
 
 AMAZON_REGION = "eu-north-1"
