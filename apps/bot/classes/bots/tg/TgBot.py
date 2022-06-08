@@ -10,6 +10,7 @@ from apps.bot.classes.consts.Exceptions import PError, PWarning, PSkip
 from apps.bot.classes.events.Event import Event
 from apps.bot.classes.events.TgEvent import TgEvent
 from apps.bot.classes.messages.ResponseMessage import ResponseMessageItem, ResponseMessage
+from apps.bot.classes.messages.attachments.Attachment import Attachment
 from apps.bot.classes.messages.attachments.DocumentAttachment import DocumentAttachment
 from apps.bot.classes.messages.attachments.GifAttachment import GifAttachment
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
@@ -190,10 +191,17 @@ class TgBot(CommonBot):
 
                 # Непредвиденная ошибка
                 if response.status_code != 200:
-                    error_rm = ResponseMessage(self.ERROR_MSG, rmi.peer_id).messages[0]
+                    skip_errors = [
+                        "Bad Request: canceled by new editMessageMedia request",
+                        "Bad Request: message is not modified: specified new message content and reply markup are exactly the same as a current content and reply markup of the message"
+                    ]
                     self.logger.error({'message': self.ERROR_MSG, 'error': response.json()['description']})
-                    response = self.send_response_message_item(error_rm)
-                    results.append({"success": False, "response": response, "response_message_item": error_rm})
+                    if response.json()['description'] not in skip_errors:
+                        error_rm = ResponseMessage(self.ERROR_MSG, rmi.peer_id).messages[0]
+                        response = self.send_response_message_item(error_rm)
+                        results.append({"success": False, "response": response, "response_message_item": response})
+                    results.append({"success": False, "response": response, "response_message_item": rmi})
+
                 else:
                     results.append({"success": True, "response": response, "response_message_item": rmi})
             # Предвиденная ошибка
@@ -205,6 +213,8 @@ class TgBot(CommonBot):
         return results
 
     def edit_message(self, rm: ResponseMessageItem, params):
+        if rm.attachments:
+            return self.edit_media(rm, params)
         if rm.keyboard and not rm.text:
             return self.edit_keyboard(rm, params)
         params['text'] = params.pop('caption')
@@ -214,6 +224,17 @@ class TgBot(CommonBot):
     def edit_keyboard(self, rm, params):
         del params['caption']
         r = self.requests.get('editMessageReplyMarkup', params=params)
+        return r
+
+    def edit_media(self, rm, params):
+        att: Attachment = rm.attachments[0]
+        params['media'] = {'type': att.type}
+        if att.file_id:
+            params['media']['media'] = att.file_id
+        if att.public_download_url:
+            params['media']['media'] = att.public_download_url
+        params['media'] = json.dumps(params['media'])
+        r = self.requests.get('editMessageMedia', params=params)
         return r
 
     def send_response_message_item(self, rm: ResponseMessageItem):
@@ -261,20 +282,17 @@ class TgBot(CommonBot):
     # EXTRA
 
     @staticmethod
-    def get_button(text, command, args=None):
-        callback_data = json.dumps({
-            'command': command,
-            "args": args,
-        }, ensure_ascii=False)
+    def get_button(text, command, args=None, kwargs=None):
+        callback_data = {"c": command}
+        if args:
+            callback_data['a'] = args
+        if kwargs:
+            callback_data['k'] = kwargs
+        callback_data = json.dumps(callback_data, ensure_ascii=False)
 
         callback_data_len = len(callback_data.encode("UTF8"))
         if callback_data_len > 62:
-            callback_data = command
-            if args:
-                callback_data += f" {' '.join(args)}"
-            callback_data_len = len(callback_data.encode("UTF8"))
-            if callback_data_len > 62:
-                raise PError("Нельзя в callback_data передавать данные более 64 байт")
+            raise PError("Нельзя в callback_data передавать данные более 64 байт")
         return {
             'text': text,
             'callback_data': callback_data

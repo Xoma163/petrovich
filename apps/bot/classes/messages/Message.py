@@ -30,6 +30,7 @@ class Message:
         self.args = []
         self.args_str_case = ""
         self.args_case = []
+        self.kwargs = {}
         self.id = _id
 
         if not raw_str:
@@ -72,8 +73,9 @@ class Message:
         return clear_msg
 
     def parse_from_payload(self, payload):
-        command = payload.get("command")
-        args = payload.get("args")
+        command = payload.get("c")
+        args = payload.get("a")
+        self.kwargs = payload.get("k")
         raw = command
         if args:
             if isinstance(args, str):

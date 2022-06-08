@@ -94,13 +94,13 @@ class VkBot(CommonBot):
 
     # ATTACHMENTS
 
-    def upload_photos(self, images, max_count=10, peer_id=None):
+    def upload_photos(self, images, max_count=10, peer_id=None, allowed_exts_url=None):
         """
         Загрузка фотографий на сервер ТГ.
         images: список изображений в любом формате (ссылки, байты, файлы)
         При невозможности загрузки одной из картинки просто пропускает её
         """
-        atts = super().upload_photos(images, max_count)
+        atts = super().upload_photos(images, max_count, allowed_exts_url=allowed_exts_url)
         parsed_atts = []
         for pa in atts:
             try:
@@ -229,14 +229,15 @@ class VkBot(CommonBot):
             self.vk.messages.setActivity(type=tg_activity, peer_id=peer_id, group_id=self.group_id)
 
     @staticmethod
-    def get_button(text, command, args=None):
+    def get_button(text, command, args=None, kwargs=None):
         return {
             'action': {
                 'type': 'text',
                 'label': text,
                 "payload": json.dumps({
-                    "command": command,
-                    "args": args,
+                    "c": command,
+                    "a": args,
+                    "k": kwargs,
                 }, ensure_ascii=False)
             },
             'color': 'primary',

@@ -342,12 +342,14 @@ class Bot(Thread):
     # END USERS GROUPS BOTS
 
     # ATTACHMENTS
-    def upload_photos(self, images, max_count=10, peer_id=None):
+    def upload_photos(self, images, max_count=10, peer_id=None, allowed_exts_url=None):
         """
         Загрузка фотографий на сервер ТГ.
         images: список изображений в любом формате (ссылки, байты, файлы)
         При невозможности загрузки одной из картинки просто пропускает её
         """
+        if allowed_exts_url is None:
+            allowed_exts_url = ['jpg', 'jpeg', 'png']
         if not isinstance(images, list):
             images = [images]
         attachments = []
@@ -356,7 +358,7 @@ class Bot(Thread):
                 if peer_id:
                     self.set_activity(peer_id, ActivitiesEnum.UPLOAD_PHOTO)
                 pa = PhotoAttachment()
-                pa.parse_response(image, ['jpg', 'jpeg', 'png'])
+                pa.parse_response(image, allowed_exts_url)
                 attachments.append(pa)
             except Exception:
                 continue
@@ -400,7 +402,7 @@ class Bot(Thread):
         """
 
     @staticmethod
-    def get_button(text, command, args=None):
+    def get_button(text, command, args=None, kwargs=None):
         """
         Определение кнопки для клавиатур
         """

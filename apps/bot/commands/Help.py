@@ -9,7 +9,7 @@ class Help(Command):
 
     def accept(self, event):
         # Самая первая кнопка клавы у бота
-        if event.payload and event.payload['command'] == 'start':
+        if event.payload and event.payload['c'] == 'start':
             return True
         return super().accept(event)
 

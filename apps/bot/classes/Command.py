@@ -73,7 +73,7 @@ class Command:
             return True
         if event.message and event.message.command in self.full_names:
             return True
-        if event.payload and event.payload['command'] in self.full_names:
+        if event.payload and event.payload['c'] in self.full_names:
             return True
         return False
 
