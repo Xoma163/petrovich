@@ -119,7 +119,7 @@ async function getSessionGame() {
         headers: {'Content-Type': 'application/json'},
     });
     const body = await response.json();
-    draw(body.map.map, {x: body.playerCoordinates.i, y: body.playerCoordinates.j})
+    draw(body.map, {x: body.playerCoordinates.i, y: body.playerCoordinates.j})
 }
 
 async function doTheMove(direction) {
@@ -128,7 +128,7 @@ async function doTheMove(direction) {
         headers: {'Content-Type': 'application/json'},
     });
     const body = await response.json();
-    draw(body.map.map, {x: body.playerCoordinates.i, y: body.playerCoordinates.j})
+    draw(body.map, {x: body.playerCoordinates.i, y: body.playerCoordinates.j})
 
     if (body.finish) {
         alert("Молодец какой")
