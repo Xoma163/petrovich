@@ -4,6 +4,7 @@ const BundleTracker = require("webpack-bundle-tracker");
 const VueLoaderPlugin = require("vue-loader/lib/plugin");
 const {CleanWebpackPlugin} = require("clean-webpack-plugin");
 const webpack = require("webpack");
+require("regenerator-runtime");
 
 require("dotenv").config({path: "../secrets/.env"});
 
@@ -33,7 +34,10 @@ module.exports = {
                     loader: "babel-loader",
                     options: {
                         presets: ["@babel/preset-env"],
-                        plugins: ["@babel/plugin-syntax-dynamic-import"],
+                        plugins: [
+                            "@babel/plugin-syntax-dynamic-import",
+                            "@babel/plugin-transform-runtime"
+                        ],
                     },
                 }],
             },

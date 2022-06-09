@@ -23,4 +23,5 @@ urlpatterns = [
     path('calculator_session/api/', include(router.urls)),
     path('minecraft/skins/<str:name>', views.MinecraftSkin.as_view(), name='minecraft_skins'),
     path('minecraft/capes/<str:name>', views.MinecraftCape.as_view(), name='minecraft_capes'),
+    path('labyrinth', views.LabyrinthTemplateView.as_view(), name='labyrinth'),
 ]
