@@ -2,7 +2,7 @@ import requests
 
 
 class EdubovitLabyrinthAPI:
-    BASE_URL = "https://labyrinth.andrewsha.net"
+    BASE_URL = "https://labyrinth.edubovit.net/api"
 
     def __init__(self):
         pass
