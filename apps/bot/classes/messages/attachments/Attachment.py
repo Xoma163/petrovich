@@ -30,7 +30,7 @@ class Attachment:
         file_path = tg_bot.requests.get('getFile', params={'file_id': file_id}).json()['result']['file_path']
         self.private_download_url = f'https://{tg_bot.requests.API_TELEGRAM_URL}/file/bot{tg_bot.token}/{file_path}'
 
-    def prepare_obj(self, file_like_object, allowed_exts_url=None, filename=None):
+    def prepare_obj(self, file_like_object, allowed_exts_url=None, filename=None, guarantee_url=False):
         """
         Подготовка объектов(в основном картинок) для загрузки.
         То есть метод позволяет преобразовывать почти из любого формата
@@ -39,7 +39,9 @@ class Attachment:
         parsed_url = None
         if isinstance(file_like_object, str):
             parsed_url = urlparse(file_like_object)
-        if parsed_url and parsed_url.hostname:
+        if guarantee_url:
+            self.public_download_url = file_like_object
+        elif parsed_url and parsed_url.hostname:
             if allowed_exts_url:
                 extension = parsed_url.path.split('.')[-1].lower()
                 is_default_extension = extension not in allowed_exts_url
@@ -73,8 +75,8 @@ class Attachment:
             else:
                 self.content = _bytes
 
-    def parse_response(self, attachment, allowed_exts_url=None, filename=None):
-        self.prepare_obj(attachment, allowed_exts_url=allowed_exts_url, filename=filename)
+    def parse_response(self, attachment, allowed_exts_url=None, filename=None, guarantee_url=False):
+        self.prepare_obj(attachment, allowed_exts_url=allowed_exts_url, filename=filename, guarantee_url=guarantee_url)
 
     def get_download_url(self):
         return self.public_download_url if self.public_download_url else self.private_download_url

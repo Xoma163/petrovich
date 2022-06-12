@@ -349,23 +349,26 @@ class Bot(Thread):
         images: список изображений в любом формате (ссылки, байты, файлы)
         При невозможности загрузки одной из картинки просто пропускает её
         """
-        if allowed_exts_url is None:
-            allowed_exts_url = ['jpg', 'jpeg', 'png']
         if not isinstance(images, list):
             images = [images]
         attachments = []
         for image in images:
             try:
-                if peer_id:
-                    self.set_activity(peer_id, ActivitiesEnum.UPLOAD_PHOTO)
-                pa = PhotoAttachment()
-                pa.parse_response(image, allowed_exts_url)
-                attachments.append(pa)
+                self.upload_photo(image, peer_id, allowed_exts_url)
             except Exception:
                 continue
             if len(attachments) >= max_count:
                 break
         return attachments
+
+    def upload_photo(self, image, peer_id=None, allowed_exts_url=None, guarantee_url=False):
+        if allowed_exts_url is None:
+            allowed_exts_url = ['jpg', 'jpeg', 'png']
+        if peer_id:
+            self.set_activity(peer_id, ActivitiesEnum.UPLOAD_PHOTO)
+        pa = PhotoAttachment()
+        pa.parse_response(image, allowed_exts_url, guarantee_url=guarantee_url)
+        return pa
 
     def upload_document(self, document, peer_id=None, title='Документ', filename=None):
         """

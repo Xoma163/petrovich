@@ -237,6 +237,7 @@ class Media(Command):
         track = YandexMusicAPI(url)
         audiofile = track.download_track()
         title = f"{track.artists} - {track.title}"
-        attachments = [self.bot.upload_audio(
-            audiofile, peer_id=self.event.peer_id, filename=f"{title}.{track.format}", title=title)]
+        audio_att = self.bot.upload_audio(audiofile, peer_id=self.event.peer_id, filename=f"{title}.{track.format}",
+                                          title=title)
+        attachments = [audio_att]
         return attachments, title

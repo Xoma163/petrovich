@@ -115,6 +115,13 @@ class VkBot(CommonBot):
                 continue
         return parsed_atts
 
+    def upload_photo(self, image, peer_id=None, allowed_exts_url=None):
+        pa = super().upload_photo(image, allowed_exts_url=allowed_exts_url)
+        url, public_download_url = self.upload_photo_and_urls(pa)
+        pa.url = url.replace(VK_URL, '')
+        pa.public_download_url = public_download_url
+        return pa
+
     def upload_photo_and_urls(self, image: PhotoAttachment):
         """
         Загрузка изображения на сервер VK

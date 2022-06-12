@@ -83,15 +83,21 @@ class TgBot(CommonBot):
         Отправка множества вложений. Ссылки
         """
         media = []
+        files = []
         for attachment in rm.attachments:
             if attachment.file_id:
                 media.append({'type': attachment.type, 'media': attachment.file_id, 'caption': rm.text})
             elif attachment.public_download_url:
                 media.append({'type': attachment.type, 'media': attachment.public_download_url, 'caption': rm.text})
-
+            else:
+                # https://music.yandex.ru/album/8081182/track/55359542.append({attachment.type: attachment.content})
+                files.append({'type': attachment.type, 'media': attachment.content})
         del default_params['caption']
         default_params['media'] = json.dumps(media)
-        return self.requests.get('sendMediaGroup', default_params)
+        if not files:
+            return self.requests.get('sendMediaGroup', default_params)
+        else:
+            return self.requests.get('sendMediaGroup', default_params, files=files)
 
     def _send_photo(self, rm: ResponseMessageItem, default_params):
         """
@@ -108,7 +114,7 @@ class TgBot(CommonBot):
         else:
             if photo.get_size_mb() > 5:
                 rm.attachments = []
-                raise PError("Нельзя загружать видео более 40 мб в телеграмм")
+                raise PError("Нельзя загружать фото более 5 мб в телеграмм")
             return self.requests.get('sendPhoto', default_params, files={'photo': photo.content})
 
     def _send_document(self, rm: ResponseMessageItem, default_params):
@@ -140,7 +146,8 @@ class TgBot(CommonBot):
         else:
             if video.get_size_mb() > 50:
                 rm.attachments = []
-                raise PError(f"Нельзя загружать видео более 50 мб в телеграмм. Ваше видео {video.get_size_mb()}")
+                raise PError(
+                    f"Нельзя загружать видео более 50 мб в телеграмм. Ваше видео {round(video.get_size_mb(), 2)}")
             return self.requests.get('sendVideo', default_params, files={'video': video.content})
 
     def _send_audio(self, rm: ResponseMessageItem, default_params):
@@ -153,9 +160,6 @@ class TgBot(CommonBot):
             default_params['audio'] = audio.public_download_url
             return self.requests.get('sendAudio', default_params)
         else:
-            if audio.get_size_mb() > 50:
-                rm.attachments = []
-                raise PError(f"Нельзя загружать видео более 50 мб в телеграмм. Ваше видео {audio.get_size_mb()}")
             return self.requests.get('sendAudio', default_params, files={'audio': audio.content})
 
     def _send_gif(self, rm: ResponseMessageItem, default_params):
