@@ -11,6 +11,7 @@ from apps.bot.classes.consts.Consts import Platform, Role
 from apps.bot.classes.consts.Exceptions import PWarning, PError, PSkip, PIDK
 from apps.bot.classes.events.Event import Event
 from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
+from apps.bot.classes.messages.attachments.AudioAttachment import AudioAttachment
 from apps.bot.classes.messages.attachments.DocumentAttachment import DocumentAttachment
 from apps.bot.classes.messages.attachments.GifAttachment import GifAttachment
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
@@ -375,6 +376,13 @@ class Bot(Thread):
         da = DocumentAttachment()
         da.parse_response(document, filename=filename)
         return da
+
+    def upload_audio(self, audio, peer_id=None, title=None, filename=None):
+        if peer_id:
+            self.set_activity(peer_id, ActivitiesEnum.UPLOAD_AUDIO)
+        va = AudioAttachment()
+        va.parse_response(audio, filename=filename)
+        return va
 
     def upload_video(self, document, peer_id=None, title='Документ', filename=None):
         """

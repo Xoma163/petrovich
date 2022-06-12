@@ -94,6 +94,9 @@ class VkBot(CommonBot):
 
     # ATTACHMENTS
 
+    def upload_audio(self, audio, peer_id=None, title=None, filename=None):
+        pass
+
     def upload_photos(self, images, max_count=10, peer_id=None, allowed_exts_url=None):
         """
         Загрузка фотографий на сервер ТГ.

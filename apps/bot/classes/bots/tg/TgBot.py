@@ -11,6 +11,7 @@ from apps.bot.classes.events.Event import Event
 from apps.bot.classes.events.TgEvent import TgEvent
 from apps.bot.classes.messages.ResponseMessage import ResponseMessageItem, ResponseMessage
 from apps.bot.classes.messages.attachments.Attachment import Attachment
+from apps.bot.classes.messages.attachments.AudioAttachment import AudioAttachment
 from apps.bot.classes.messages.attachments.DocumentAttachment import DocumentAttachment
 from apps.bot.classes.messages.attachments.GifAttachment import GifAttachment
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
@@ -142,6 +143,21 @@ class TgBot(CommonBot):
                 raise PError(f"Нельзя загружать видео более 50 мб в телеграмм. Ваше видео {video.get_size_mb()}")
             return self.requests.get('sendVideo', default_params, files={'video': video.content})
 
+    def _send_audio(self, rm: ResponseMessageItem, default_params):
+        """
+        Отправка аудио. Ссылка или файл
+        """
+        self.set_activity(default_params['chat_id'], ActivitiesEnum.UPLOAD_AUDIO)
+        audio: AudioAttachment = rm.attachments[0]
+        if audio.public_download_url:
+            default_params['audio'] = audio.public_download_url
+            return self.requests.get('sendAudio', default_params)
+        else:
+            if audio.get_size_mb() > 50:
+                rm.attachments = []
+                raise PError(f"Нельзя загружать видео более 50 мб в телеграмм. Ваше видео {audio.get_size_mb()}")
+            return self.requests.get('sendAudio', default_params, files={'audio': audio.content})
+
     def _send_gif(self, rm: ResponseMessageItem, default_params):
         """
         Отправка гифы. Ссылка или файл
@@ -253,6 +269,7 @@ class TgBot(CommonBot):
             PhotoAttachment: self._send_photo,
             GifAttachment: self._send_gif,
             VideoAttachment: self._send_video,
+            AudioAttachment: self._send_audio,
             DocumentAttachment: self._send_document,
             StickerAttachment: self._send_sticker,
         }

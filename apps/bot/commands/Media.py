@@ -10,6 +10,7 @@ from apps.bot.APIs.RedditSaver import RedditSaver
 from apps.bot.APIs.TheHoleAPI import TheHoleAPI
 from apps.bot.APIs.TikTokDownloaderAPI import TikTokDownloaderAPI
 from apps.bot.APIs.WASDAPI import WASDAPI
+from apps.bot.APIs.YandexMusicAPI import YandexMusicAPI
 from apps.bot.APIs.YoutubeAPI import YoutubeAPI
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Platform
@@ -25,6 +26,7 @@ TWITTER_URLS = ('www.twitter.com', 'twitter.com')
 PIKABU_URLS = ('www.pikabu.ru', 'pikabu.ru')
 THE_HOLE_URLS = ('www.the-hole.tv', 'the-hole.tv')
 WASD_URLS = ('www.wasd.tv', 'wasd.tv')
+YANDEX_MUSIC_URLS = ('music.yandex.ru',)
 
 MEDIA_URLS = tuple(
     list(YOUTUBE_URLS) +
@@ -34,7 +36,8 @@ MEDIA_URLS = tuple(
     list(TWITTER_URLS) +
     list(PIKABU_URLS) +
     list(THE_HOLE_URLS) +
-    list(WASD_URLS)
+    list(WASD_URLS) +
+    list(YANDEX_MUSIC_URLS)
 )
 
 
@@ -113,6 +116,7 @@ class Media(Command):
             PIKABU_URLS: self.get_pikabu_video,
             THE_HOLE_URLS: self.get_the_hole_video,
             WASD_URLS: self.get_wasd_video,
+            YANDEX_MUSIC_URLS: self.get_yandex_music,
         }
 
         method = None
@@ -228,3 +232,11 @@ class Media(Command):
         attachments = [self.bot.upload_document(wasd_api.m3u8_bytes, peer_id=self.event.peer_id,
                                                 filename=f"{wasd_api.title} - {wasd_api.show_name} | WASD.m3u8")]
         return attachments, f"{wasd_api.title} | {wasd_api.show_name}"
+
+    def get_yandex_music(self, url):
+        track = YandexMusicAPI(url)
+        audiofile = track.download_track()
+        title = f"{track.artists} - {track.title}"
+        attachments = [self.bot.upload_audio(
+            audiofile, peer_id=self.event.peer_id, filename=f"{title}.{track.format}", title=title)]
+        return attachments, title
