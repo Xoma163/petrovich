@@ -480,5 +480,5 @@ def send_message_to_moderator_chat(msgs):
 
 def upload_image_to_vk_server(image):
     vk_bot = get_bot_by_platform(Platform.VK)
-    photos = vk_bot.upload_photos(image, 1)
-    return photos[0].public_download_url
+    photo = vk_bot.upload_photo(image, 1)
+    return photo.public_download_url

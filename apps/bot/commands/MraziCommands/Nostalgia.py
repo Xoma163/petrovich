@@ -159,9 +159,9 @@ class Nostalgia(Command):
         bytes_io = BytesIO()
         pil_image.save(bytes_io, format='PNG')
         if pil_image.height > 1500:
-            attachments = self.bot.upload_document(bytes_io, self.event.peer_id, "Ностальгия", filename="nostalgia.png")
+            image = self.bot.upload_document(bytes_io, self.event.peer_id, "Ностальгия", filename="nostalgia.png")
         else:
-            attachments = self.bot.upload_photos(bytes_io, peer_id=self.event.peer_id)
+            image = self.bot.upload_photo(bytes_io, peer_id=self.event.peer_id)
         msg = f"{msgs[0]['datetime']}\n" \
               f"{index_from} - {index_to}"
         button = self.bot.get_button("Ещё", self.name)
@@ -179,7 +179,7 @@ class Nostalgia(Command):
 
         keyboard = self.bot.get_inline_keyboard(buttons)
 
-        return {"text": msg, "attachments": attachments, "keyboard": keyboard}
+        return {"text": msg, "attachments": image, "keyboard": keyboard}
 
     @staticmethod
     def _load_file() -> list:

@@ -41,4 +41,4 @@ class Taxi(Command):
         return self.get_attachment_by_path(f"{STATIC_ROOT}/bot/img/taxi/courier.png")
 
     def get_attachment_by_path(self, path):
-        return {'attachments': self.bot.upload_photos(path, peer_id=self.event.peer_id)}
+        return {'attachments': self.bot.upload_photo(path, peer_id=self.event.peer_id)}

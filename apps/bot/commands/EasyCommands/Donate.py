@@ -11,7 +11,7 @@ class Donate(Command):
 
     def start(self):
         url = 'https://www.donationalerts.com/r/xoma163'
-        attachments = self.bot.upload_photos(f"{STATIC_ROOT}/bot/img/donate.jpg", peer_id=self.event.peer_id)
+        attachment = self.bot.upload_photo(f"{STATIC_ROOT}/bot/img/donate.jpg", peer_id=self.event.peer_id)
         if self.event.platform == Platform.TG:
-            return {'text': get_tg_formatted_url("Задонатить", url), 'attachments': attachments}
-        return {'text': url, 'attachments': attachments}
+            return {'text': get_tg_formatted_url("Задонатить", url), 'attachments': attachment}
+        return {'text': url, 'attachments': attachment}

@@ -23,7 +23,7 @@ class Camera(Command):
 
         if frames == 0:
             image = camera_handler.get_img()
-            attachments = self.bot.upload_photos(image, peer_id=self.event.peer_id)
+            attachments = self.bot.upload_photo(image, peer_id=self.event.peer_id)
         else:
             document = camera_handler.get_gif(frames)
             attachments = [self.bot.upload_video(document, self.event.peer_id, "Камера", filename="camera.gif")]

@@ -16,5 +16,5 @@ class Saved(Command):
         if len(attachments) == 0:
             raise PWarning("Не нашёл в сообщении фотографий")
         attachments_url = [attachment.get_download_url() for attachment in attachments]
-        attachments = self.bot.upload_photos(attachments_url, peer_id=self.event.peer_id)
-        return {'attachments': attachments}
+        photo = self.bot.upload_photo(attachments_url, peer_id=self.event.peer_id)
+        return {'attachments': photo}

@@ -115,12 +115,12 @@ class Roulette(Command):
             return f"Ваш баланс - {self.gamer.roulette_points}"
 
     def menu_picture(self):
-        photos = random_event(
+        photo = random_event(
             [f"{STATIC_ROOT}/bot/img/roulette_game.jpg",
              f"{STATIC_ROOT}/bot/img/roulette.jpg"],
             [90, 10])
-        attachments = self.bot.upload_photos(photos, peer_id=self.event.peer_id)
-        return {'attachments': attachments}
+        photo = self.bot.upload_photo(photo, peer_id=self.event.peer_id)
+        return {'attachments': photo}
 
     def menu_bonus(self):
         datetime_now = localize_datetime(datetime.datetime.utcnow(), DEFAULT_TIME_ZONE)

@@ -37,5 +37,5 @@ class Demotivator(Command):
         img_byte_arr = io.BytesIO()
         demotivator.save(img_byte_arr, format="PNG")
 
-        attachments = self.bot.upload_photos(img_byte_arr, peer_id=self.event.peer_id)
-        return {"attachments": attachments}
+        attachment = self.bot.upload_photo(img_byte_arr, peer_id=self.event.peer_id)
+        return {"attachments": attachment}

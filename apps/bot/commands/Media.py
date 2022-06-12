@@ -191,9 +191,9 @@ class Media(Command):
         i_api = InstagramAPI()
         content_url = i_api.get_content_url(url)
         if i_api.content_type == i_api.CONTENT_TYPE_IMAGE:
-            return self.bot.upload_photos([content_url], peer_id=self.event.peer_id), ""
+            return self.bot.upload_photo([content_url], peer_id=self.event.peer_id), ""
         elif i_api.content_type in [i_api.CONTENT_TYPE_VIDEO, i_api.CONTENT_TYPE_REEL]:
-            return [self.bot.upload_video(content_url, peer_id=self.event.peer_id)], ""
+            return self.bot.upload_video(content_url, peer_id=self.event.peer_id), ""
 
     def get_twitter_video(self, url):
         ydl_params = {

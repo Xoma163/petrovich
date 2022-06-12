@@ -64,13 +64,13 @@ class Rates(Command):
                 gamer.save()
 
             if self.event.message.command == "казино":
-                attachments = self.bot.upload_photos(f"{STATIC_ROOT}/bot/img/rate.jpg", peer_id=self.event.peer_id)
+                image = self.bot.upload_photo(f"{STATIC_ROOT}/bot/img/rate.jpg", peer_id=self.event.peer_id)
                 if len(winners) == 1:
                     msg = {'text': f"Выпавшее число - {rnd}\nПобедитель этого казино:\n{winners_str}",
-                           'attachments': attachments}
+                           'attachments': image}
                 else:
                     msg = {'text': f"Выпавшее число - {rnd}\nПобедители этого казино:\n{winners_str}",
-                           'attachments': attachments}
+                           'attachments': image}
             else:
                 if len(winners) == 1:
                     msg = f"Выпавшее число - {rnd}\nПобедитель:\n{winners_str}"

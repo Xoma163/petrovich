@@ -407,19 +407,20 @@ class Meme(Command):
 
         if self.event.platform == Platform.TG:
             if meme.type == PhotoAttachment.TYPE:
-                msg['attachments'] = self.bot.upload_photos(meme.link, peer_id=self.event.peer_id)
+                msg['attachments'] = self.bot.upload_photo(meme.link, peer_id=self.event.peer_id)
             elif meme.type == StickerAttachment.TYPE:
-                msg['attachments'] = StickerAttachment()
-                msg['attachments'].file_id = meme.sticker_file_id
+                sticker = StickerAttachment()
+                sticker.file_id = meme.sticker_file_id
+                msg['attachments'] = sticker
             else:
                 msg['text'] = meme.link
         elif self.event.platform == Platform.VK:
             if meme.type in [VideoAttachment.TYPE, AudioAttachment.TYPE]:
-                msg['attachments'] = [meme.link.replace(VK_URL, '')]
+                msg['attachments'] = meme.link.replace(VK_URL, '')
             elif meme.type == LinkAttachment.TYPE:
                 msg['text'] = meme.link
             elif meme.type in [PhotoAttachment.TYPE, StickerAttachment.TYPE]:
-                msg['attachments'] = self.bot.upload_photos(meme.link, peer_id=self.event.peer_id)
+                msg['attachments'] = self.bot.upload_photo(meme.link, peer_id=self.event.peer_id)
             else:
                 raise PError("У мема нет типа. Тыкай разраба")
 

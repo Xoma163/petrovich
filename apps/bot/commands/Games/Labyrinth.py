@@ -34,7 +34,7 @@ class BullsAndCows(Command):
         game_id = str(r['id'])
         map_url = el_api.BASE_URL + r['mapUrl']
         keyboard = self.get_keyboard(game_id)
-        photo = self.bot.upload_photos(map_url, allowed_exts_url=False)
+        photo = self.bot.upload_photo(map_url, allowed_exts_url=False)
         return {'attachments': photo, "keyboard": keyboard}
 
     def do_the_move(self):
@@ -51,7 +51,7 @@ class BullsAndCows(Command):
         if not r['successMove']:
             raise PSkip()
 
-        photo = self.bot.upload_photos(el_api.BASE_URL + r['mapUrl'], allowed_exts_url=False)
+        photo = self.bot.upload_photo(el_api.BASE_URL + r['mapUrl'], allowed_exts_url=False)
         message_id = self.event.raw['callback_query']['message']['message_id']
         keyboard = self.get_keyboard(game_id)
 
