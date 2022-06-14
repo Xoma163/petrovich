@@ -247,11 +247,14 @@ class Minesweeper(Command):
 
     def check_win(self, inline_keyboard):
         inline_keyboard_copy = deepcopy(inline_keyboard)
+        mines_count = 0
         for i in range(self.height):
             for j in range(self.width):
                 _, _, val, _, opened = json.loads(inline_keyboard[i][j]['callback_data'])['a']
                 if val != -1 and not opened:
                     return
+                if val == -1:
+                    mines_count += 1
                 button_text = self.emoji_map[val]
                 inline_keyboard_copy[i][j]['callback_data'] = "{}"
                 inline_keyboard_copy[i][j]['text'] = button_text
@@ -260,7 +263,7 @@ class Minesweeper(Command):
         button2 = self.bot.get_button("Ещё (средне)", self.name, [18])
         button3 = self.bot.get_button("Ещё (сложно)", self.name, [25])
         inline_keyboard_copy[-1] = [button, button2, button3]
-        if self.mines >= 10:
+        if mines_count >= 10:
             prize = self.mines * 300
             gamer = self.bot.get_gamer_by_profile(self.event.sender)
             gamer.roulette_points += prize
