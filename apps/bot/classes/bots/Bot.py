@@ -354,7 +354,8 @@ class Bot(Thread):
         attachments = []
         for image in images:
             try:
-                self.upload_photo(image, peer_id, allowed_exts_url)
+                att = self.upload_photo(image, peer_id, allowed_exts_url)
+                attachments.append(att)
             except Exception:
                 continue
             if len(attachments) >= max_count:

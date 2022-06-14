@@ -130,12 +130,12 @@ class RedditSaver:
 
         if self.is_gallery:
             return self.get_photos_from_post()
-        elif self.is_video or self.is_gif:
-            return self.get_video_from_post()
         elif self.is_image:
             return self.get_photo_from_post()
         elif self.is_images:
             return self.get_photos_from_post()
+        elif self.is_video or self.is_gif:
+            return self.get_video_from_post()
         elif self.is_text:
             return self.get_text_from_post()
         elif self.is_link:
