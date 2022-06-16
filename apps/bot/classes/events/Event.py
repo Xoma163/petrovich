@@ -149,7 +149,7 @@ class Event:
         Подготовка ивента к логированию
         """
         dict_self = copy.copy(self.__dict__)
-        ignore_fields = ['bot']
+        ignore_fields = ['raw', 'bot']
         for ignore_field in ignore_fields:
             del dict_self[ignore_field]
         dict_self['message'] = dict_self['message'].to_log() if dict_self['message'] else {}
