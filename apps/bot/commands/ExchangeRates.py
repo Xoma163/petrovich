@@ -46,7 +46,7 @@ class ExchangeRates(Command):
         else:
             msg = "Курс валют:\n"
             for ex_rate in ex_rates:
-                ex_rates[ex_rate]['value'] = self.to_fixed(ex_rates[ex_rate]['value'], 2)
+                ex_rates[ex_rate]['value'] = self.to_fixed(ex_rates[ex_rate]['value'], 4)
                 msg += f"{ex_rate} - {ex_rates[ex_rate]['value']} руб.\n"
             return msg
 
