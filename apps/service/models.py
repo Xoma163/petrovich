@@ -149,7 +149,7 @@ class Subscribe(models.Model):
     SERVICE_WASD = 3
     SERVICE_CHOICES = (
         (SERVICE_YOUTUBE, 'YouTube'),
-        (SERVICE_THE_HOLE, 'The hole'),
+        (SERVICE_THE_HOLE, 'The Hole'),
         (SERVICE_WASD, 'WASD'),
     )
 

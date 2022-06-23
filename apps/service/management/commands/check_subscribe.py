@@ -1,4 +1,3 @@
-import datetime
 import time
 
 from django.core.management import BaseCommand
@@ -21,17 +20,21 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         subs = Subscribe.objects.all()
-        dt_now = datetime.datetime.now().time()
         for sub in subs:
-            if not sub.is_stream and dt_now.minute > 5:
-                continue
-
-            if sub.service == Subscribe.SERVICE_YOUTUBE:
-                self.check_youtube_video(sub)
-            elif sub.service == Subscribe.SERVICE_THE_HOLE:
+            try:
                 self.check_the_hole_video(sub)
-            elif sub.service == Subscribe.SERVICE_WASD:
-                self.check_wasd_video(sub)
+                self.check_sub(sub)
+            except:
+                pass
+
+    def check_sub(self, sub):
+
+        if sub.service == Subscribe.SERVICE_YOUTUBE:
+            self.check_youtube_video(sub)
+        elif sub.service == Subscribe.SERVICE_THE_HOLE:
+            self.check_the_hole_video(sub)
+        elif sub.service == Subscribe.SERVICE_WASD:
+            self.check_wasd_video(sub)
 
     def check_youtube_video(self, sub):
         youtube_info = YoutubeAPI()
@@ -51,6 +54,7 @@ class Command(BaseCommand):
         last_videos, titles = th_api.get_last_videos_with_titles(sub.channel_id)
         last_video_id = sub.last_video_id
         new_videos = last_videos[0:last_videos.index(last_video_id)]
+        new_videos = list(reversed(new_videos))
 
         for i, new_video in enumerate(new_videos):
             title = titles[i]

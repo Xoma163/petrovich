@@ -51,7 +51,7 @@ class WASDAPI:
 
     def channel_is_live(self, title):
         r = requests.get(f"{self.URL}api/v2/broadcasts/public",
-                         params={"with_extra": "true", "channel_name": title}).json()
+                         params={"with_extra": "true", "channel_name": title}, timeout=5).json()
         self.title = r['result']['media_container']['media_container_name']
 
         return r['result']['channel']['channel_is_live']
