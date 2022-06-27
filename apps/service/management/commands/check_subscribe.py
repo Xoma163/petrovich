@@ -22,9 +22,8 @@ class Command(BaseCommand):
         subs = Subscribe.objects.all()
         for sub in subs:
             try:
-                self.check_the_hole_video(sub)
                 self.check_sub(sub)
-            except:
+            except Exception as e:
                 pass
 
     def check_sub(self, sub):
