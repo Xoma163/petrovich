@@ -1,3 +1,4 @@
+import logging
 import time
 
 from django.core.management import BaseCommand
@@ -12,6 +13,7 @@ from apps.bot.commands.Media import Media
 from apps.bot.utils.utils import get_tg_formatted_url
 from apps.service.models import Subscribe
 
+logger = logging.getLogger('subscribe_notifier')
 
 class Command(BaseCommand):
 
@@ -24,10 +26,9 @@ class Command(BaseCommand):
             try:
                 self.check_sub(sub)
             except Exception as e:
-                pass
+                logger.exception("Ошибка в проверке/отправке оповещения о стриме")
 
     def check_sub(self, sub):
-
         if sub.service == Subscribe.SERVICE_YOUTUBE:
             self.check_youtube_video(sub)
         elif sub.service == Subscribe.SERVICE_THE_HOLE:
@@ -90,7 +91,7 @@ class Command(BaseCommand):
             text = f"{new_video_text} на канале {sub.title}\n" \
                    f"{title}\n" \
                    f"{link}"
-
+        logger.info(f"Отправил уведомление по подписке с id={sub.pk}")
         bot.parse_and_send_msgs(text, sub.peer_id)
 
     @staticmethod
