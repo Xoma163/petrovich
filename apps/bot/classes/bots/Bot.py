@@ -33,7 +33,7 @@ class Bot(Thread):
         self.chat_model = Chat.objects.filter(platform=self.platform.name)
         self.bot_model = BotModel.objects.filter(platform=self.platform.name)
 
-        self.logger = logging.getLogger(platform.name)
+        self.logger = logging.getLogger('bot')
         self.lock = Lock()
 
     # MAIN ROUTING AND MESSAGING

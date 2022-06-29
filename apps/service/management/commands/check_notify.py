@@ -1,4 +1,4 @@
-import traceback
+import logging
 from datetime import datetime, timedelta, date
 
 from crontab import CronTab
@@ -10,6 +10,7 @@ from apps.bot.classes.events.Event import Event
 from apps.bot.utils.utils import remove_tz, localize_datetime, get_tg_formatted_text_line
 from apps.service.models import Notify
 
+logger = logging.getLogger('notifier')
 
 class Command(BaseCommand):
 
@@ -26,7 +27,6 @@ class Command(BaseCommand):
                 flag = self.get_flag_by_notify(notify)
                 if not flag:
                     continue
-
                 platform = notify.chat.get_platform_enum() if notify.chat else notify.user.get_platform_enum()
                 bot = get_bot_by_platform(platform)
 
@@ -37,9 +37,7 @@ class Command(BaseCommand):
                 else:
                     notify.delete()
             except Exception as e:
-                print(str(e))
-                tb = traceback.format_exc()
-                print(tb)
+                logger.exception("Ошибка в проверке/отправке оповещения")
 
     def get_flag_by_notify(self, notify):
 
@@ -81,6 +79,7 @@ class Command(BaseCommand):
                        f"{notify.text}"
 
         result_msg = {'text': message}
+        logger.info(f"Отправил напоминание по id={notify.pk}")
 
         if notify.chat:
             bot.parse_and_send_msgs(result_msg, notify.chat.chat_id)

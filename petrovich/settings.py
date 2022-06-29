@@ -19,7 +19,7 @@ MAIN_DOMAIN = "andrewsha.net"
 MAIN_SITE = f'{MAIN_PROTOCOL}://{MAIN_DOMAIN}'
 DOMAINS_IPS = ['192.168.1.10', '46.0.113.246']
 DOMAINS = [MAIN_DOMAIN]
-SUBDOMAINS = [None, 'api', 'www', 'birds']
+SUBDOMAINS = [None, 'api', 'www']
 SUBDOMAINS_DOMAINS = []
 for subdomain in SUBDOMAINS:
     for domain in DOMAINS:
@@ -51,7 +51,6 @@ VENDORS_APPS = [
 
 PROJECT_APPS = [
     'apps.bot',
-    'apps.birds',
     'apps.service',
     'apps.games',
     'apps.web',
@@ -159,22 +158,29 @@ LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
-        'commands': {
-            'format': '%(levelname)-8s %(asctime)-25s %(message)s',
-        },
-        'commands-console': {
-            'format': '%(levelname)-8s %(message)s',
-        },
         "json": {
             "()": "pythonjsonlogger.jsonlogger.JsonFormatter",
             'format': '%(levelname)-8s %(asctime)-25s %(message)s',
             "json_ensure_ascii": False
+        },
+        'color_simple': {
+            '()': 'colorlog.ColoredFormatter',
+            'format': '%(log_color)s%(levelname)-8s %(name)-10s %(message)s',
+            'log_colors': {
+                'DEBUG': 'cyan',
+                'INFO': 'green',
+                'WARNING': 'yellow',
+                'ERROR': 'red',
+                'CRITICAL': 'red,bg_white',
+            },
         }
     },
     'handlers': {
         'file-debug': {
             'level': 'DEBUG',
-            'class': 'logging.FileHandler',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'backupCount': 5,  # keep at most 10 log files
+            'maxBytes': 10485760,  # 100*1024*1024 bytes (10MB)
             'filename': DEBUG_FILE,
             'formatter': 'json',
         },
@@ -184,33 +190,32 @@ LOGGING = {
             'filename': ERROR_FILE,
             'formatter': 'json',
         },
-        # 'console-warn': {
-        #     'level': 'WARNING',
-        #     'class': 'logging.StreamHandler',
-        #     'formatter': 'commands-console',
-        # },
         'console-debug': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
-            'formatter': 'commands-console',
+            'formatter': 'color_simple',
         },
     },
     'loggers': {
-        Platform.VK.name: {
+        'bot': {
             'handlers': ['file-debug', 'file-error'],
             'level': 'DEBUG',
-            'propagate': True,
+            'propagate': False,
         },
-        Platform.TG.name: {
+        'notifier': {
             'handlers': ['file-debug', 'file-error'],
             'level': 'DEBUG',
-            'propagate': True,
+            'propagate': False,
         },
-    },
+        'subscribe_notifier': {
+            'handlers': ['file-debug', 'file-error'],
+            'level': 'DEBUG',
+            'propagate': False,
+        }
+    }
 }
 if DEBUG:
-    LOGGING['loggers'][Platform.VK.name]['handlers'].append('console-debug')
-    LOGGING['loggers'][Platform.TG.name]['handlers'].append('console-debug')
+    LOGGING['loggers']['bot']['handlers'].append('console-debug')
 
 # CORS_ORIGIN_ALLOW_ALL = True
 VK_URL = "https://vk.com/"

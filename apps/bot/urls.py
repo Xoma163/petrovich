@@ -5,7 +5,6 @@ from . import views
 
 urlpatterns = [
     path(f'tg/{env.str("TG_TOKEN")}', views.TelegramView.as_view()),
-    # path('/tg/', views.TelegramView.as_view()),
     path('vk', views.VkView.as_view()),
     path('yandex', views.YandexView.as_view()),
     path('api', views.APIView.as_view()),
