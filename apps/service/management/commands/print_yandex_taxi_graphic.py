@@ -116,7 +116,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         date_now = datetime.datetime.now().date()
-        taxi_infos = TaxiInfo.objects.all().exclude(created__date=date_now).order_by('pk')
+        taxi_infos = TaxiInfo.objects.filter(created__gt=date_now - datetime.timedelta(days=90)).exclude(
+            created__date=date_now).order_by('pk')
 
         taxi_info_weekday = taxi_infos.filter(created__week_day__in=[2, 3, 4, 5])
         taxi_info_weekday = self.get_grouped_taxi_infos(taxi_info_weekday)
@@ -126,7 +127,7 @@ class Command(BaseCommand):
         taxi_info_weekend = self.get_grouped_taxi_infos(taxi_info_weekend)
 
         self.print_price_by_time_graphic(taxi_info_weekday, taxi_info_friday, taxi_info_weekend, tariff='econom')
-        # self.print_price_by_time_graphic(taxi_info_weekday, taxi_info_friday, taxi_info_weekend, tariff='comfort')
-        # self.print_price_by_time_graphic(taxi_info_weekday, taxi_info_friday, taxi_info_weekend, tariff='comfortplus')
-        # self.print_price_by_time_graphic(taxi_info_weekday, taxi_info_friday, taxi_info_weekend, tariff='express')
-        # self.print_price_by_time_graphic(taxi_info_weekday, taxi_info_friday, taxi_info_weekend, tariff='courier')
+        self.print_price_by_time_graphic(taxi_info_weekday, taxi_info_friday, taxi_info_weekend, tariff='comfort')
+        self.print_price_by_time_graphic(taxi_info_weekday, taxi_info_friday, taxi_info_weekend, tariff='comfortplus')
+        self.print_price_by_time_graphic(taxi_info_weekday, taxi_info_friday, taxi_info_weekend, tariff='express')
+        self.print_price_by_time_graphic(taxi_info_weekday, taxi_info_friday, taxi_info_weekend, tariff='courier')
