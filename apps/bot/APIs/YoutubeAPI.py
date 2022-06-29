@@ -1,6 +1,7 @@
 import os
 import pickle
 from datetime import datetime
+from urllib.parse import urlparse, parse_qsl
 
 import googleapiclient.discovery
 import requests
@@ -9,7 +10,9 @@ from bs4 import BeautifulSoup
 from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
 
-from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.bots.tg.TgBot import TgBot
+from apps.bot.classes.consts.Consts import Platform
+from apps.bot.classes.consts.Exceptions import PWarning, PSkip
 from apps.bot.utils.NothingLogger import NothingLogger
 from petrovich.settings import BASE_DIR
 
@@ -20,6 +23,9 @@ class YoutubeAPI:
         self.duration = 0
 
         self._youtube_api_client = None
+
+    def get_timecode(self, url):
+        return dict(parse_qsl(urlparse(url).query)).get('t')
 
     def get_last_video(self, channel_id):
         response = requests.get(f"https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}")
@@ -37,7 +43,7 @@ class YoutubeAPI:
             }
         }
 
-    def get_video_download_url(self, url):
+    def get_video_download_url(self, url, platform=None):
         ydl_params = {
             'outtmpl': '%(id)s%(ext)s',
             'logger': NothingLogger()
@@ -54,9 +60,18 @@ class YoutubeAPI:
         # if self.duration > 300:
         #     raise PWarning("Нельзя грузить видосы > 5 минут с ютуба")
         video_urls = [x for x in video_info['formats'] if x['ext'] == 'mp4' and x.get('asr')]
-
         videos = sorted(video_urls, key=lambda x: x['format_note'], reverse=True)
-        max_quality_video = videos[0]
+        if platform == Platform.TG:
+            for video in videos:
+                filesize = video.get('filesize') or video.get('filesize_approx')
+                if filesize:
+                    if filesize / 1024 / 1024 < TgBot.MAX_VIDEO_SIZE_MB:
+                        max_quality_video = video
+                        break
+            else:
+                raise PSkip()
+        else:
+            max_quality_video = videos[0]
         url = max_quality_video['url']
         return url
 

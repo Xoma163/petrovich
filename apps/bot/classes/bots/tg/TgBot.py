@@ -24,6 +24,7 @@ from petrovich.settings import env
 
 
 class TgBot(CommonBot):
+    MAX_VIDEO_SIZE_MB = 50
 
     def __init__(self):
         CommonBot.__init__(self, Platform.TG)
@@ -144,10 +145,10 @@ class TgBot(CommonBot):
             default_params['video'] = video.public_download_url
             return self.requests.get('sendVideo', default_params)
         else:
-            if video.get_size_mb() > 50:
+            if video.get_size_mb() > self.MAX_VIDEO_SIZE_MB:
                 rm.attachments = []
                 raise PError(
-                    f"Нельзя загружать видео более 50 мб в телеграмм. Ваше видео {round(video.get_size_mb(), 2)}")
+                    f"Нельзя загружать видео более {self.MAX_VIDEO_SIZE_MB} мб в телеграмм. Ваше видео {round(video.get_size_mb(), 2)}")
             return self.requests.get('sendVideo', default_params, files={'video': video.content})
 
     def _send_audio(self, rm: ResponseMessageItem, default_params):

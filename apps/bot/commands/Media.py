@@ -134,7 +134,9 @@ class Media(Command):
 
     def get_youtube_video(self, url):
         y_api = YoutubeAPI()
-        content_url = y_api.get_video_download_url(url)
+        if y_api.get_timecode(url):
+            raise PSkip()
+        content_url = y_api.get_video_download_url(url, self.event.platform)
         video_content = requests.get(content_url).content
         attachments = [self.bot.upload_video(video_content, peer_id=self.event.peer_id)]
         return attachments, y_api.title
