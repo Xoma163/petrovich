@@ -158,7 +158,7 @@ class Bot(Thread):
         user_groups = event.sender.get_list_of_role_names()
         if not event.message:
             msg = "Я не понял, что вы от меня хотите(("
-            return msg
+            return msg, {}
         original_text = event.message.raw.split(' ')
         messages = [original_text[0]]
 

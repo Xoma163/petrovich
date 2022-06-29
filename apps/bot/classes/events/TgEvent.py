@@ -27,8 +27,9 @@ class TgEvent(Event):
             self.setup_inline_query(inline_query)
             return
 
-        if not is_fwd and self.raw.get('message', {}).get('forward_from'):
+        if not is_fwd and self.raw.get('message', {}).get('forward_from') and 'voice' not in self.raw['message']:
             self.force_response = False
+            return
 
         if is_fwd:
             message = self.raw

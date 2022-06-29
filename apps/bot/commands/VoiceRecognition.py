@@ -6,7 +6,7 @@ from pydub import AudioSegment
 
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Platform
-from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.consts.Exceptions import PWarning, PSkip
 from apps.bot.classes.messages.attachments.VoiceAttachment import VoiceAttachment
 
 
@@ -22,9 +22,13 @@ class VoiceRecognition(Command):
 
     @staticmethod
     def accept_extra(event):
-        is_chat_auto_voice_recognize = event.is_from_chat and event.chat.recognize_voice
-        if is_chat_auto_voice_recognize and event.has_voice_message:
-            return True
+        if event.has_voice_message:
+            if event.is_from_chat and event.chat.recognize_voice:
+                return True
+            elif event.is_from_pm:
+                return True
+            else:
+                raise PSkip()
         return False
 
     def start(self):
