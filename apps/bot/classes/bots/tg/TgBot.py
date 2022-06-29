@@ -266,6 +266,9 @@ class TgBot(CommonBot):
         params = {'chat_id': rm.peer_id, 'caption': rm.text, 'reply_markup': json.dumps(rm.keyboard)}
         params.update(rm.kwargs)
 
+        if rm.reply_to:
+            params['reply_to_message_id'] = rm.reply_to
+
         if rm.message_id:
             params['message_id'] = rm.message_id
             return self.edit_message(rm, params)

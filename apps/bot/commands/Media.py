@@ -102,7 +102,12 @@ class Media(Command):
         if extra_text and extra_text != title:
             text += f"\n{extra_text}"
 
-        res = self.bot.parse_and_send_msgs({'text': text, 'attachments': attachments}, self.event.peer_id)
+        reply_to = None
+        if self.event.fwd:
+            reply_to = self.event.fwd[0].message.id
+
+        res = self.bot.parse_and_send_msgs({'text': text, 'attachments': attachments, 'reply_to': reply_to},
+                                           self.event.peer_id)
         if res[0]['success']:
             self.bot.delete_message(self.event.peer_id, self.event.message.id)
 
