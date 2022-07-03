@@ -3,7 +3,6 @@ from threading import Lock
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Role, Platform
 from apps.bot.classes.consts.Exceptions import PWarning
-from apps.bot.models import Profile
 from apps.bot.utils.utils import get_random_int
 from apps.games.models import Rate as RateModel
 from petrovich.settings import STATIC_ROOT
@@ -27,9 +26,9 @@ class Rates(Command):
 
     def start(self):
         with lock:
-            min_gamers = int(len(Profile.objects.filter(chats=self.event.chat)) / 3)
-            if min_gamers < 2:
-                min_gamers = 2
+            # min_gamers = int(len(Profile.objects.filter(chats=self.event.chat)) / 3)
+            # if min_gamers < 2:
+            min_gamers = 2
 
             gamers = RateModel.objects.filter(chat=self.event.chat).order_by("date")
             if self.event.message.args and self.event.message.args[0] == 'f':

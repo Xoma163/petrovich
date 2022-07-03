@@ -3,7 +3,6 @@ from threading import Lock
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Platform, Role
 from apps.bot.classes.consts.Exceptions import PWarning
-from apps.bot.models import Profile
 from apps.bot.utils.utils import random_event
 from apps.games.models import Rate as RateModel
 
@@ -27,9 +26,9 @@ class Rate(Command):
         with lock:
             gamer = self.bot.get_gamer_by_profile(self.event.sender)
 
-            min_gamers = int(len(Profile.objects.filter(chats=self.event.chat)) / 3)
-            if min_gamers < 2:
-                min_gamers = 2
+            # min_gamers = int(len(Profile.objects.filter(chats=self.event.chat)) / 3)
+            # if min_gamers < 2:
+            min_gamers = 2
             rates_gamers = RateModel.objects.filter(chat=self.event.chat)
             existed_rate = rates_gamers.filter(gamer=gamer)
 
