@@ -1,4 +1,3 @@
-import random
 from tempfile import NamedTemporaryFile
 
 import requests
@@ -166,11 +165,6 @@ class Bot(Platform):
         ext, image = get_avatar_content(url)
         self.avatar.save(f"avatar_{str(self)}.{ext}", File(image))
         image.close()
-
-
-def random_digits():
-    digits_count = 6
-    return str(random.randint(10 ** (digits_count - 1), 10 ** digits_count - 1))
 
 
 def get_avatar_content(url):

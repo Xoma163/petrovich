@@ -79,4 +79,9 @@ class Rates(Command):
 
             gamers.delete()
             messages.append(msg)
+
+            button = self.bot.get_button("Ставка", self.name)
+            keyboard = self.bot.get_inline_keyboard([button])
+
+            messages[-1]['keyboard'] = keyboard
             return messages

@@ -70,5 +70,12 @@ class Rate(Command):
             else:
                 rate_gamer_str += f"{gamer} - {arg}\n"
 
-            return f"Игроки {len(rates_gamers) + 1}/{min_gamers}:\n" \
+            button = self.bot.get_button("Ставка", self.name)
+            keyboard = self.bot.get_inline_keyboard([button])
+
+            text = f"Игроки {len(rates_gamers) + 1}/{min_gamers}:\n" \
                    f"{rate_gamer_str}"
+            return {
+                'text': text,
+                'keyboard': keyboard,
+            }
