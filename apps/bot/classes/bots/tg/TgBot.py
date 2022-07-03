@@ -228,10 +228,10 @@ class TgBot(CommonBot):
             # Предвиденная ошибка
             except (PWarning, PError) as e:
                 _error_rmi = ResponseMessageItem(e.msg, rmi.peer_id)
-                rmi.text += f"\n\n{str(e)}"
-                getattr(self.logger, e.level)({'message': rmi})
-                response = self.send_response_message_item(rmi)
-                results.append({"success": True, "response": response, "response_message_item": rmi})
+                # rmi.text += f"\n\n{str(e)}"
+                getattr(self.logger, e.level)({'message': _error_rmi})
+                response = self.send_response_message_item(_error_rmi)
+                results.append({"success": True, "response": response, "response_message_item": _error_rmi})
         return results
 
     def edit_message(self, rm: ResponseMessageItem, params):
