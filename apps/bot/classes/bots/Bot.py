@@ -127,7 +127,7 @@ class Bot(Thread):
                     self.logger.debug({"message": rm.to_log(), "event": event.to_log()})
                     return rm
             except (PWarning, PError) as e:
-                rm = ResponseMessage({'text': e.msg, 'keyboard': e.keyboard}, event.peer_id)
+                rm = ResponseMessage(e.msg, event.peer_id)
                 getattr(self.logger, e.level)({"message": rm.to_log(), "event": event.to_log()})
                 return rm
             except PIDK:

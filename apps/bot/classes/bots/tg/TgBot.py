@@ -227,6 +227,7 @@ class TgBot(CommonBot):
                     results.append({"success": True, "response": response, "response_message_item": rmi})
             # Предвиденная ошибка
             except (PWarning, PError) as e:
+                _error_rmi = ResponseMessageItem(e.msg, rmi.peer_id)
                 rmi.text += f"\n\n{str(e)}"
                 getattr(self.logger, e.level)({'message': rmi})
                 response = self.send_response_message_item(rmi)

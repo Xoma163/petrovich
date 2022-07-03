@@ -41,9 +41,11 @@ class Rate(Command):
                     rate_gamer_str += f"{str(rate_gamer.gamer)} - {rate_gamer.rate}\n"
 
             if len(existed_rate) > 0:
-                raise PWarning(f"Ставка уже поставлена\n"
-                               f"Игроки {rates_gamers.count()}/{min_gamers}:\n"
-                               f"{rate_gamer_str}")
+                raise PWarning({
+                    'text': f"Ставка уже поставлена\n"
+                            f"Игроки {rates_gamers.count()}/{min_gamers}:\n"
+                            f"{rate_gamer_str}",
+                    'reply_to': self.event.message.id})
             if self.event.message.args:
                 random = False
                 arg = self.event.message.args[0]

@@ -163,7 +163,7 @@ class Command:
                 error += f"\n\n{get_help_texts_for_command(self, self.event.platform)}"
         else:
             error = "Для работы команды требуются аргументы"
-        raise PWarning(error, keyboard=self._get_help_button_keyboard())
+        raise PWarning({'text': error, 'keyboard': self._get_help_button_keyboard()})
 
     def check_args_or_fwd(self, args: int = None):
         if args is None:
@@ -183,8 +183,7 @@ class Command:
 
         error = "Для работы команды требуются аргументы или пересылаемые сообщения"
         error += f"\n\n{get_help_texts_for_command(self, self.event.platform)}"
-
-        raise PWarning(error, keyboard=self._get_help_button_keyboard())
+        raise PWarning({'text': error, 'keyboard': self._get_help_button_keyboard()})
 
     @staticmethod
     def check_number_arg_range(arg, _min=-float('inf'), _max=float('inf'), banned_list: list = None):
