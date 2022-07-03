@@ -73,9 +73,9 @@ class Rates(Command):
                            'attachments': image}
             else:
                 if len(winners) == 1:
-                    msg = f"Выпавшее число - {rnd}\nПобедитель:\n{winners_str}"
+                    msg = {'text': f"Выпавшее число - {rnd}\nПобедитель:\n{winners_str}"}
                 else:
-                    msg = f"Выпавшее число - {rnd}\nПобедители:\n{winners_str}"
+                    msg = {'text': f"Выпавшее число - {rnd}\nПобедители:\n{winners_str}"}
 
             gamers.delete()
             messages.append(msg)
