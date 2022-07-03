@@ -80,8 +80,16 @@ class Rates(Command):
             gamers.delete()
             messages.append(msg)
 
-            button = self.bot.get_button("Ставка", self.name)
-            keyboard = self.bot.get_inline_keyboard([button])
+            button1 = self.bot.get_button("Ставка", "Ставка")
+            button2 = self.bot.get_button("Ставки", self.name)
+            keyboard = self.bot.get_inline_keyboard([button1, button2])
+
+            if 'callback_query' in self.event.raw:
+                message_id = self.event.raw['callback_query']['message']['message_id']
+            else:
+                message_id = None
 
             messages[-1]['keyboard'] = keyboard
+            messages[-1]['message_id'] = message_id
+
             return messages
