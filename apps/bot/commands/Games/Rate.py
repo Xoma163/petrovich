@@ -70,8 +70,10 @@ class Rate(Command):
             else:
                 rate_gamer_str += f"{gamer} - {arg}\n"
 
-            button = self.bot.get_button("Ставка", self.name)
-            keyboard = self.bot.get_inline_keyboard([button])
+            buttons = [self.bot.get_button("Ставка", self.name)]
+            if rates_gamers >= min_gamers:
+                buttons.append(self.bot.get_button("Ставки", "Ставки"))
+            keyboard = self.bot.get_inline_keyboard(buttons, cols=2)
             if 'callback_query' in self.event.raw:
                 message_id = self.event.raw['callback_query']['message']['message_id']
             else:
