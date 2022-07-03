@@ -42,7 +42,7 @@ class Rate(Command):
 
             if len(existed_rate) > 0:
                 raise PWarning(f"Ставка уже поставлена\n"
-                               f"Игроки {len(rates_gamers)}/{min_gamers}:\n"
+                               f"Игроки {rates_gamers.count()}/{min_gamers}:\n"
                                f"{rate_gamer_str}")
             if self.event.message.args:
                 random = False
@@ -71,7 +71,7 @@ class Rate(Command):
                 rate_gamer_str += f"{gamer} - {arg}\n"
 
             buttons = [self.bot.get_button("Ставка", self.name)]
-            if rates_gamers >= min_gamers:
+            if rates_gamers.count() >= min_gamers:
                 buttons.append(self.bot.get_button("Ставки", "Ставки"))
             keyboard = self.bot.get_inline_keyboard(buttons, cols=2)
             if 'callback_query' in self.event.raw:
