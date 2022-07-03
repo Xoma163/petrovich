@@ -81,7 +81,7 @@ class Rates(Command):
             messages.append(msg)
 
             button1 = self.bot.get_button("Ставка", "Ставка")
-            keyboard = self.bot.get_inline_keyboard([button1, button2], cols=2)
+            keyboard = self.bot.get_inline_keyboard([button1], cols=1)
 
             messages[-1]['keyboard'] = keyboard
 
