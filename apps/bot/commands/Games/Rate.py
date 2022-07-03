@@ -74,15 +74,9 @@ class Rate(Command):
             if rates_gamers.count() >= min_gamers:
                 buttons.append(self.bot.get_button("Ставки", "Ставки"))
             keyboard = self.bot.get_inline_keyboard(buttons, cols=2)
-            if 'callback_query' in self.event.raw:
-                message_id = self.event.raw['callback_query']['message']['message_id']
-            else:
-                message_id = None
-
             text = f"Игроки {len(rates_gamers) + 1}/{min_gamers}:\n" \
                    f"{rate_gamer_str}"
             return {
                 'text': text,
                 'keyboard': keyboard,
-                'message_id': message_id,
             }
