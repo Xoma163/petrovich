@@ -261,6 +261,17 @@ minecraft_servers = [
             'map_url': f"http://{MAIN_DOMAIN}:8123/?worldname=WTTF#",
             'auto_off': False
         }),
+    MinecraftAPI(
+        **{
+            'ip': MAIN_DOMAIN,
+            'port': 25566,
+            'amazon': False,
+            'event': None,
+            'delay': 60,
+            'names': ['1.18.2', "1.18"],
+            # 'map_url': f"http://{MAIN_DOMAIN}:8123/?worldname=WTTF#",
+            'auto_off': False
+        }),
 ]
 
 
