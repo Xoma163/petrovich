@@ -31,8 +31,7 @@ class ZenmoneyAPI:
         for merchant in self._get_diff().merchant:
             if merchant.title == name:
                 return merchant.id
-        else:
-            raise RuntimeError("Не найден мерчант")
+        raise RuntimeError("Не найден мерчант")
 
     def _get_transactions_by_user_name(self, name):
         user_id = self._get_merchant_id_by_name(name)
@@ -86,7 +85,3 @@ class ZenmoneyAPI:
              'incoming': x.incomeAccount == debt_account
              } for x in transactions]
         return {'transactions': reversed(transactions_dict), 'debt': debt, 'delta_exact_zero': delta_exact_zero}
-
-
-z_api = ZenmoneyAPI()
-transactions = z_api.get_transactions_by_user_name("Света")

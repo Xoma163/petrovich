@@ -16,7 +16,7 @@ class Diary(Command):
         z_api = ZenmoneyAPI()
         user_name = self.event.sender.name
         user_name = "Света"
-        res = z_api.get_transactions_by_user_name(user_name)
+        res = z_api.get_last_transactions_for_debt_by_name(user_name)
 
         if res['debt'] == 0:
             return "У тебя нет долгов. Вау!"
