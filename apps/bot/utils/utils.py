@@ -102,7 +102,7 @@ def normalize_datetime(dt, tz):
     return pytz.utc.normalize(localized_time, is_dst=None).astimezone(tz_utc)
 
 
-def decl_of_num(number: int, titles: List[str]):
+def decl_of_num(number, titles: List[str]):
     """
     Склоняет существительное после числительного
     number: число
@@ -112,7 +112,7 @@ def decl_of_num(number: int, titles: List[str]):
     if 4 < number % 100 < 20:
         return titles[2]
     elif number % 10 < 5:
-        return titles[cases[number % 10]]
+        return titles[cases[int(number) % 10]]
     else:
         return titles[cases[5]]
 
