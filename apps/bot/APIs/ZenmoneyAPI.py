@@ -34,28 +34,35 @@ class ZenmoneyAPI:
         else:
             raise RuntimeError("Не найден мерчант")
 
-    def get_transactions_by_user_name(self, name):
+    def _get_transactions_by_user_name(self, name):
         user_id = self._get_merchant_id_by_name(name)
         transactions = self._get_transactions()
-        transactions_by_user = list(
+        return list(
             sorted(filter(lambda x: x.merchant == user_id and not x.deleted, transactions), key=lambda x: x.created)
         )
 
+    def _calculate_debt(self, transactions):
         debt_account = self._get_debt_account()
 
-        outcome_transactions = []
-        income_transactions = []
+        # outcome_transactions = []
+        # income_transactions = []
         outcome_sum = 0
         income_sum = 0
-        for transaction in transactions_by_user:
+        for transaction in transactions:
             if transaction.incomeAccount == debt_account:
-                outcome_transactions.append(transaction)
+                # outcome_transactions.append(transaction)
                 outcome_sum += transaction.income
             elif transaction.outcomeAccount == debt_account:
-                income_transactions.append(transaction)
+                # income_transactions.append(transaction)
                 income_sum += transaction.income
-
         debt = outcome_sum - income_sum
+        return debt
+
+    def get_last_transactions_for_debt_by_name(self, name):
+        transactions_by_user = self._get_transactions_by_user_name(name)
+        debt_account = self._get_debt_account()
+
+        debt = self._calculate_debt(transactions_by_user)
 
         delta = debt
         transactions = []
