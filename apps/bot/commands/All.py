@@ -14,6 +14,7 @@ class All(Command):
     ]
     platforms = [Platform.TG]
     conversation = True
+    mentioned = True
 
     @staticmethod
     def accept_extra(event):
