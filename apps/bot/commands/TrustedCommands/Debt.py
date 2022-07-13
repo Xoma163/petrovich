@@ -1,5 +1,3 @@
-import datetime
-
 from apps.bot.APIs.ZenmoneyAPI import ZenmoneyAPI
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Role
@@ -34,17 +32,3 @@ class Diary(Command):
             roubles = decl_of_num(res['debt'], ["рубль", "рубля", "рублей"])
             return f"{transactions_str}\n----------\nИтого: {res['debt']} {roubles}"
 
-    @staticmethod
-    def transform_transaction_to_str(transaction):
-        roubles = decl_of_num(transaction['amount'], ["рубль", "рубля", "рублей"])
-        dt = datetime.datetime.fromtimestamp(transaction['created']).strftime("%d.%m.%Y %H:%M")
-        new_transaction = f"{dt}"
-        amount_str = f"{transaction['amount']} {roubles}"
-        if transaction['incoming']:
-            new_transaction += f"\n{amount_str}"
-        else:
-            new_transaction += f"\n+{amount_str}"
-
-        if transaction['comment']:
-            new_transaction += f"\n{transaction['comment']}"
-        return new_transaction

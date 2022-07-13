@@ -1,5 +1,8 @@
+import datetime
+
 from zenmoney import Request, OAuth2, Diff
 
+from apps.bot.utils.utils import decl_of_num
 from petrovich.settings import env
 
 
@@ -55,7 +58,7 @@ class ZenmoneyAPI:
                 # income_transactions.append(transaction)
                 income_sum += transaction.income
         debt = outcome_sum - income_sum
-        return debt
+        return round(debt, 2)
 
     def get_last_transactions_for_debt_by_name(self, name):
         transactions_by_user = self._get_transactions_by_user_name(name)
@@ -75,6 +78,7 @@ class ZenmoneyAPI:
                     delta += transaction.income
                     transactions.append(transaction)
                 if delta <= 0:
+                    delta = round(delta, 2)
                     if delta == 0:
                         delta_exact_zero = True
                     break
@@ -85,3 +89,18 @@ class ZenmoneyAPI:
              'incoming': x.incomeAccount == debt_account
              } for x in transactions]
         return {'transactions': reversed(transactions_dict), 'debt': debt, 'delta_exact_zero': delta_exact_zero}
+
+    @staticmethod
+    def transform_transaction_to_str(transaction):
+        roubles = decl_of_num(transaction['amount'], ["рубль", "рубля", "рублей"])
+        dt = datetime.datetime.fromtimestamp(transaction['created']).strftime("%d.%m.%Y %H:%M")
+        new_transaction = f"{dt}"
+        amount_str = f"{transaction['amount']} {roubles}"
+        if transaction['incoming']:
+            new_transaction += f"\n{amount_str}"
+        else:
+            new_transaction += f"\n+{amount_str}"
+
+        if transaction['comment']:
+            new_transaction += f"\n{transaction['comment']}"
+        return new_transaction
