@@ -18,9 +18,7 @@ class ModelJsonEncoder(DjangoJSONEncoder):
             return str(o)
         if isinstance(o, Enum):
             return o.value
-        # if isinstance(o, Command):
-        #     return o.value
         try:
             return super().default(o)
-        except:
-            pass
+        except Exception:
+            return str(o)
