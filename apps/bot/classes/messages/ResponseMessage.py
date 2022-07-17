@@ -1,7 +1,10 @@
+import json
 import re
 from copy import copy
 
+from apps.bot.utils.ModelJsonEncoder import ModelJsonEncoder
 from apps.bot.utils.utils import get_tg_formatted_url
+from petrovich.settings import DEBUG
 
 
 class ResponseMessage:
@@ -21,6 +24,8 @@ class ResponseMessage:
         """
         dict_self = copy(self.__dict__)
         dict_self["messages"] = [x.to_log() for x in dict_self["messages"]]
+        if DEBUG:
+            print(json.dumps(dict_self, indent=2, ensure_ascii=False, cls=ModelJsonEncoder))
         return dict_self
 
     def to_api(self) -> dict:
@@ -58,7 +63,7 @@ class ResponseMessageItem:
         Вывод в логи
         """
         dict_self = copy(self.__dict__)
-        dict_self["attachments"] = [x.to_log() for x in dict_self["attachments"] if isinstance(x, dict)]
+        dict_self["attachments"] = [x.to_log() for x in dict_self["attachments"]]
         return dict_self
 
     def to_api(self) -> dict:

@@ -17,7 +17,7 @@ DEBUG = env.bool('DEBUG')
 MAIN_PROTOCOL = 'https'
 MAIN_DOMAIN = "andrewsha.net"
 MAIN_SITE = f'{MAIN_PROTOCOL}://{MAIN_DOMAIN}'
-DOMAINS_IPS = ['192.168.1.10', '46.0.113.246']
+DOMAINS_IPS = ['192.168.1.10']
 DOMAINS = [MAIN_DOMAIN]
 SUBDOMAINS = [None, 'api', 'www']
 SUBDOMAINS_DOMAINS = []
@@ -160,12 +160,12 @@ LOGGING = {
     'formatters': {
         "json": {
             "()": "pythonjsonlogger.jsonlogger.JsonFormatter",
-            'format': '%(levelname)-8s %(asctime)-25s %(message)s',
+            'format': '%(levelname)-8s %(asctime)-25s %(name)-10s %(filename)s:%(lineno)d %(message)s',
             "json_ensure_ascii": False
         },
         'color_simple': {
             '()': 'colorlog.ColoredFormatter',
-            'format': '%(log_color)s%(levelname)-8s %(name)-10s %(message)s',
+            'format': '%(log_color)s%(levelname)-8s %(name)-10s %(filename)s:%(lineno)d\n%(message)s',
             'log_colors': {
                 'DEBUG': 'cyan',
                 'INFO': 'green',

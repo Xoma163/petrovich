@@ -1,4 +1,5 @@
 import copy
+import json
 
 from apps.bot.classes.consts.Consts import Platform, Role
 from apps.bot.classes.messages.Message import Message
@@ -7,6 +8,8 @@ from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachmen
 from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
 from apps.bot.classes.messages.attachments.VoiceAttachment import VoiceAttachment
 from apps.bot.models import Profile, Chat, User
+from apps.bot.utils.ModelJsonEncoder import ModelJsonEncoder
+from petrovich.settings import DEBUG
 
 
 class Event:
@@ -155,4 +158,9 @@ class Event:
         dict_self['message'] = dict_self['message'].to_log() if dict_self['message'] else {}
         dict_self['fwd'] = [x.to_log() for x in dict_self['fwd']]
         dict_self['attachments'] = [x.to_log() for x in dict_self['attachments']]
+
+        if dict_self['command']:
+            dict_self['command'] = dict_self['command'].name
+        if DEBUG:
+            print(json.dumps(dict_self, indent=2, ensure_ascii=False, cls=ModelJsonEncoder))
         return dict_self

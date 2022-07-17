@@ -148,7 +148,7 @@ class TgBot(CommonBot):
             if video.get_size_mb() > self.MAX_VIDEO_SIZE_MB:
                 rm.attachments = []
                 raise PError(
-                    f"Нельзя загружать видео более {self.MAX_VIDEO_SIZE_MB} мб в телеграмм. Ваше видео {round(video.get_size_mb(), 2)}")
+                    f"Нельзя загружать видео более {self.MAX_VIDEO_SIZE_MB}мб в телеграмм. Ваше видео {round(video.get_size_mb(), 2)}мб")
             return self.requests.get('sendVideo', default_params, files={'video': video.content})
 
     def _send_audio(self, rm: ResponseMessageItem, default_params):
@@ -210,28 +210,27 @@ class TgBot(CommonBot):
                 rmi.set_telegram_html()
                 response = self.send_response_message_item(rmi)
 
-                # Непредвиденная ошибка
-                if response.status_code != 200:
+                # Непредвиденная ошибка телеги
+                if response.status_code == 200:
+                    results.append({"success": True, "response": response, "response_message_item": rmi})
+                else:
                     skip_errors = [
                         "Bad Request: canceled by new editMessageMedia request",
                         "Bad Request: message is not modified: specified new message content and reply markup are exactly the same as a current content and reply markup of the message"
                     ]
                     self.logger.error({'message': self.ERROR_MSG, 'error': response.json()['description']})
-                    if response.json()['description'] not in skip_errors:
+                    if response.json()['description'] in skip_errors:
+                        results.append({"success": False, "response": response, "response_message_item": rmi})
+                    else:
                         error_rm = ResponseMessage(self.ERROR_MSG, rmi.peer_id).messages[0]
                         response = self.send_response_message_item(error_rm)
                         results.append({"success": False, "response": response, "response_message_item": response})
-                    results.append({"success": False, "response": response, "response_message_item": rmi})
-
-                else:
-                    results.append({"success": True, "response": response, "response_message_item": rmi})
             # Предвиденная ошибка
             except (PWarning, PError) as e:
                 _error_rmi = ResponseMessageItem(e.msg, rmi.peer_id)
-                # rmi.text += f"\n\n{str(e)}"
                 getattr(self.logger, e.level)({'message': _error_rmi})
                 response = self.send_response_message_item(_error_rmi)
-                results.append({"success": True, "response": response, "response_message_item": _error_rmi})
+                results.append({"success": False, "response": response, "response_message_item": _error_rmi})
         return results
 
     def edit_message(self, rm: ResponseMessageItem, params):

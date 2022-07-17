@@ -1,5 +1,4 @@
 import logging
-import traceback
 from threading import Lock
 from threading import Thread
 from typing import List
@@ -97,13 +96,10 @@ class Bot(Thread):
     # ToDo: я не понимаю чё он орёт на .error
     def _get_unexpected_error(self, e, event):
         rm = ResponseMessage(self.ERROR_MSG, event.peer_id)
-        self.logger.error({
-            "exception": str(e),
-            "message": rm.to_log(),
-            "event": event.to_log()
-        },
-            exc_info=traceback.format_exc()
-        )
+        self.logger.exception({
+            "event": event.to_log(),
+            "message": rm.to_log()
+        })
         return rm
 
     def route(self, event: Event) -> ResponseMessage:
@@ -124,11 +120,11 @@ class Bot(Thread):
                 if command.accept(event):
                     result = command.__class__().check_and_start(self, event)
                     rm = ResponseMessage(result, event.peer_id)
-                    self.logger.debug({"message": rm.to_log(), "event": event.to_log()})
+                    self.logger.debug({"event": event.to_log(), "message": rm.to_log(), })
                     return rm
             except (PWarning, PError) as e:
                 rm = ResponseMessage(e.msg, event.peer_id)
-                getattr(self.logger, e.level)({"message": rm.to_log(), "event": event.to_log()})
+                getattr(self.logger, e.level)({"event": event.to_log(), "message": rm.to_log()})
                 return rm
             except PIDK:
                 continue
@@ -148,7 +144,7 @@ class Bot(Thread):
 
         similar_command, keyboard = self.get_similar_command(event, COMMANDS)
         rm = ResponseMessage({'text': similar_command, 'keyboard': keyboard}, event.peer_id)
-        self.logger.debug({"message": rm.to_log(), "event": event.to_log()})
+        self.logger.debug({"event": event.to_log(), "message": rm.to_log()})
         return rm
 
     def get_similar_command(self, event: Event, commands):
