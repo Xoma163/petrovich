@@ -130,7 +130,7 @@ class TgEvent(Event):
         else:
             message_text = message.get('text')
         entities = message.get('entities')
-        self.message = TgMessage(message_text, message.get('message_id'), entities) if message_text else None
+        self.message = TgMessage(message_text, message.get('message_id'), entities)
 
     def setup_photo(self, photo_event):
         tg_photo = PhotoAttachment()
