@@ -1,12 +1,16 @@
 import logging
 from urllib.parse import urlparse
 
+from petrovich.settings import env
+
 logging.basicConfig(level=logging.CRITICAL)
 from yandex_music import Client
 from yandex_music.utils.request import Request
 
 
 class YandexMusicAPI:
+    ACCESS_TOKEN = env.str("YANDEX_MUSIC_ACCESS_TOKEN")
+
     def __init__(self, url):
         self.url = url
         self.id = urlparse(url).path.split('/')[-1]
@@ -19,7 +23,7 @@ class YandexMusicAPI:
         self.format = ""
 
     def download_track(self):
-        client = YandeClient(request=YandexRequest())
+        client = YandeClient(request=YandexRequest(), token=self.ACCESS_TOKEN)
         client.notice_displayed = True
         client.init()
 
