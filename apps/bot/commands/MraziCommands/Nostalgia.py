@@ -1,5 +1,6 @@
 import json
 import random
+from datetime import datetime
 from io import BytesIO
 
 from apps.bot.classes.Command import Command
@@ -184,11 +185,37 @@ class Nostalgia(Command):
 
         return {"text": msg, "attachments": image, "keyboard": keyboard}
 
+    def _load_file(self) -> list:
+        with open('secrets/mrazi_chats/mrazi_all.json', 'r') as file:
+            content = json.loads(file.read())
+        return content
+
     @staticmethod
-    def _load_file() -> list:
-        with open('secrets/mrazi_chats/mrazi1.json', 'r') as file:
-            content = file.read()
-        return json.loads(content)
+    def merge_files(*files):
+        dt_format = "%d.%m.%Y %H:%M:%S"
+        result_file = []
+        counters = [0] * len(files)
+        lens = [len(x) for x in files]
+        for _ in range(sum(lens)):
+            early_date = None
+            early_counter_index = 0
+            for i, counter in enumerate(counters):
+                if counter >= lens[early_counter_index]:
+                    counters[early_counter_index] -= 1
+                date = datetime.strptime(files[i][counters[i]]['datetime'], dt_format)
+                if not early_date:
+                    early_date = date
+                    early_counter_index = i
+                elif date < early_date:
+                    early_date = date
+                    early_counter_index = i
+            counter = counters[early_counter_index]
+            result_file.append(files[early_counter_index][counter])
+            counters[early_counter_index] += 1
+
+        with open('secrets/mrazi_chats/mrazi_all.json', 'w') as file:
+            file.write(json.dumps(result_file, ensure_ascii=False, indent=2))
+        return result_file
 
     @staticmethod
     def prepare_msgs_for_quote_generator(msgs):
