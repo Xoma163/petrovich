@@ -9,6 +9,7 @@ from yandex_music.utils.request import Request
 
 
 class YandexMusicAPI:
+    # https://github.com/MarshalX/yandex-music-api/discussions/513#discussioncomment-2729781
     ACCESS_TOKEN = env.str("YANDEX_MUSIC_ACCESS_TOKEN")
 
     def __init__(self, url):
