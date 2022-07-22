@@ -54,11 +54,12 @@ class VoiceRecognition(Command):
         with sr.AudioFile(o) as source:
             audio = r.record(source)
 
+        reply_to = self.event.message.id
         try:
             msg = r.recognize_google(audio, language='ru_RU')
-            return msg
+            return {'text': msg, 'reply_to': reply_to}
         except sr.UnknownValueError:
-            raise PWarning("Ничего не понял((")
+            raise PWarning({'text': "Ничего не понял((", 'reply_to': reply_to})
         except sr.RequestError as e:
             print(str(e))
             raise PWarning("Проблема с форматом")
