@@ -4,7 +4,7 @@ from apps.bot.classes.consts.Consts import Role
 from apps.bot.utils.utils import decl_of_num
 
 
-class Diary(Command):
+class Debt(Command):
     name = "долг"
     help_text = "ваш долг мне)0"
     access = Role.TRUSTED
@@ -24,7 +24,7 @@ class Diary(Command):
         else:
             transactions = []
             for transaction in res['transactions']:
-                new_transaction = self.transform_transaction_to_str(transaction)
+                new_transaction = z_api.transform_transaction_to_str(transaction)
                 transactions.append(new_transaction)
 
             transactions_str = "\n\n".join(transactions)
