@@ -1,6 +1,7 @@
 import logging
-from urllib.parse import urlparse
+import re
 
+from apps.bot.classes.consts.Exceptions import PWarning
 from petrovich.settings import env
 
 logging.basicConfig(level=logging.CRITICAL)
@@ -14,7 +15,11 @@ class YandexMusicAPI:
 
     def __init__(self, url):
         self.url = url
-        self.id = urlparse(url).path.split('/')[-1]
+        r = re.compile(r"https://music.yandex.ru/album/(.*)/track/(.*)")
+        try:
+            self.album_id, self.track_id = r.findall(url)[-1]
+        except IndexError:
+            raise PWarning("Не нашёл песни по этому URL")
         self.albums = ""
         self.artists = ""
         self.title = ""
@@ -28,7 +33,7 @@ class YandexMusicAPI:
         client.notice_displayed = True
         client.init()
 
-        track = client.tracks(self.id)[0]
+        track = client.tracks(self.track_id)[0]
         self.albums = ", ".join([album.title for album in track.albums])
         self.title = track.title
         self.artists = ", ".join([artist.name for artist in track.artists])
