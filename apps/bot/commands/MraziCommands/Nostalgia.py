@@ -99,10 +99,10 @@ class Nostalgia(Command):
             page = int(self.event.message.args[-1])
             if page < 1:
                 page = 1
-            search_list = self.event.message.args[:-1]
+            search_list = self.event.message.raw.split(' ')[1:-1]
         except ValueError:
             page = 1
-            search_list = self.event.message.args
+            search_list = self.event.message.raw.split(' ')[1:]
 
         search_query = " ".join(search_list)
 
