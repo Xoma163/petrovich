@@ -26,7 +26,7 @@ class Issue(Command):
         else:
             title, body, tags = msg.split('\n', 3)
 
-        body += f"\n\nИшю от пользователя {self.event.sender}\n" \
+        body += f"\n\nИшю от пользователя {self.event.sender} (id={self.event.sender.pk})\n" \
                 f"Данное ишю сгенерировано автоматически"
 
         tags = [

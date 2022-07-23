@@ -8,4 +8,6 @@ urlpatterns = [
     path('vk', views.VkView.as_view()),
     path('yandex', views.YandexView.as_view()),
     path('api', views.APIView.as_view()),
+
+    path('github', views.GithubView.as_view())
 ]
