@@ -193,7 +193,8 @@ class RedditSaver:
 
     @property
     def is_image(self):
-        return self.content_type == self.CONTENT_TYPE_IMAGE
+        return self.content_type == self.CONTENT_TYPE_IMAGE and not self.data.get('url_overridden_by_dest').endswith(
+            '.gif')
 
     @property
     def is_images(self):
