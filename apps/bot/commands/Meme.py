@@ -1,6 +1,7 @@
 from typing import List
 from urllib.parse import urlparse, parse_qsl, quote
 
+import requests
 from django.db.models import Q
 
 from apps.bot.classes.Command import Command
@@ -412,6 +413,12 @@ class Meme(Command):
                 sticker = StickerAttachment()
                 sticker.file_id = meme.sticker_file_id
                 msg['attachments'] = sticker
+            elif meme.type == LinkAttachment.TYPE:
+                from apps.bot.APIs.YoutubeAPI import YoutubeAPI
+                y_api = YoutubeAPI()
+                content_url = y_api.get_video_download_url(meme.link, self.event.platform)
+                video_content = requests.get(content_url).content
+                msg['attachments'] = [self.bot.upload_video(video_content, peer_id=self.event.peer_id)]
             else:
                 msg['text'] = meme.link
         elif self.event.platform == Platform.VK:
