@@ -9,6 +9,7 @@ class Conference(Command):
     help_text = "назвать конфу"
     help_texts = ["(название конфы) - называет конфу"]
     conversation = True
+    mentioned = True
     priority = 90
     platforms = [Platform.VK, Platform.TG]
 
