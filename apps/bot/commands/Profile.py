@@ -152,12 +152,13 @@ class Profile(Command):
         _name = user.name or "Не установлено"
         _surname = user.surname or "Не установлено"
         msg = {
-            'text': f"Город - {_city}\n"
-                    f"Имя - {_name}\n"
-                    f"Фамилия - {_surname}\n"
-                    f"Дата рождения - {_bd}\n"
-                    f"Никнейм - {_nickname}\n"
-                    f"Пол - {user.get_gender_display()}"
+            'text':
+                f"Имя - {_name}\n"
+                f"Фамилия - {_surname}\n"
+                f"Никнейм - {_nickname}\n"
+                f"Дата рождения - {_bd}\n"
+                f"Город - {_city}\n"
+                f"Пол - {user.get_gender_display()}"
         }
         if user.avatar:
             msg['attachments'] = self.bot.upload_photo(user.avatar.path, peer_id=self.event.peer_id)
