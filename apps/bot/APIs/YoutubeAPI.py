@@ -56,9 +56,10 @@ class YoutubeAPI:
         except yt_dlp.utils.DownloadError:
             raise PWarning("Не смог найти видео по этой ссылке")
         self.title = video_info['title']
-        self.duration = video_info['duration']
-        # if self.duration > 300:
-        #     raise PWarning("Нельзя грузить видосы > 5 минут с ютуба")
+
+        self.duration = video_info.get('duration')
+        if not self.duration:
+            raise PSkip()
         video_urls = [x for x in video_info['formats'] if x['ext'] == 'mp4' and x.get('asr')]
         videos = sorted(video_urls, key=lambda x: x['format_note'], reverse=True)
         if platform == Platform.TG:
