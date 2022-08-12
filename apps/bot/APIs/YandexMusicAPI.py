@@ -1,5 +1,6 @@
 import logging
 import re
+from urllib.parse import urlparse
 
 from apps.bot.classes.consts.Exceptions import PWarning
 from petrovich.settings import env
@@ -14,10 +15,11 @@ class YandexMusicAPI:
     ACCESS_TOKEN = env.str("YANDEX_MUSIC_ACCESS_TOKEN")
 
     def __init__(self, url):
-        self.url = url
+        parsed_url = urlparse(url)
+        self.url = f"{parsed_url.scheme}://{parsed_url.hostname}{parsed_url.path}"
         r = re.compile(r"https://music.yandex.ru/album/(.*)/track/(.*)")
         try:
-            self.album_id, self.track_id = r.findall(url)[-1]
+            self.album_id, self.track_id = r.findall(self.url)[-1]
         except IndexError:
             raise PWarning("Не нашёл песни по этому URL")
         self.albums = ""
