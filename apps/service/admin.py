@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from apps.service.models import Service, Counter, Meme, Notify, City, \
-    Donations, TimeZone, Subscribe, WakeOnLanUserData, Horoscope, QuoteBook, Words, TaxiInfo, MilanaTranslate
+    Donations, TimeZone, Subscribe, WakeOnLanUserData, Horoscope, QuoteBook, Words, TaxiInfo
 
 
 @admin.register(Service)
@@ -80,8 +80,3 @@ class WordsAdmin(admin.ModelAdmin):
 @admin.register(TaxiInfo)
 class TaxiInfoAdmin(admin.ModelAdmin):
     pass
-
-
-@admin.register(MilanaTranslate)
-class MilanaTranslateAdmin(admin.ModelAdmin):
-    list_display = ('milana_text', 'translated_text')
