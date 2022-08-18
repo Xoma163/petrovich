@@ -250,3 +250,9 @@ class TaxiInfo(models.Model):
     class Meta:
         verbose_name = "Инфо о такси"
         verbose_name_plural = "Инфо о такси"
+
+
+class Tag(models.Model):
+    name = models.CharField("Название", max_length=100)
+    users = models.ManyToManyField(Profile, verbose_name="Пользователи", blank=True)
+    chat = models.ForeignKey(Chat, models.CASCADE, verbose_name="Чат")
