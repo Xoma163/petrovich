@@ -66,8 +66,8 @@ class Message:
 
     @staticmethod
     def get_cleared_message(msg) -> str:
-        clear_msg = msg.replace(',', ' ')
-        clear_msg = re.sub(" +", " ", clear_msg)
+        clear_msg = re.sub(" +", " ", msg)
+        clear_msg = re.sub(",+", ",", clear_msg)
         clear_msg = clear_msg.strip().strip(',').strip().strip(' ').strip()
         clear_msg = clear_msg.replace('ё', 'е').replace("Ё", 'Е')
         return clear_msg

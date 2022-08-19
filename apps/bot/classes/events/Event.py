@@ -95,11 +95,11 @@ class Event:
         """
         from apps.bot.commands.Meme import Meme as MemeCommand
         from apps.bot.commands.Media import Media
-        from apps.bot.commands.All import All
+        from apps.bot.commands.Tag import Tag
         from apps.bot.commands.VoiceRecognition import VoiceRecognition
 
-        # get automatically
-        extra_commands = [MemeCommand, Media, All, VoiceRecognition]
+        # ToDo: get automatically
+        extra_commands = [MemeCommand, Media, VoiceRecognition, Tag]
 
         for e_command in extra_commands:
             if e_command.accept_extra(self):

@@ -256,6 +256,7 @@ class Bot(Thread):
         """
 
     # ToDo: очень говнокод
+    # ToDo: capitalize
     @staticmethod
     def get_profile_by_name(args, filter_chat=None) -> Profile:
         """

@@ -256,3 +256,9 @@ class Tag(models.Model):
     name = models.CharField("Название", max_length=100)
     users = models.ManyToManyField(Profile, verbose_name="Пользователи", blank=True)
     chat = models.ForeignKey(Chat, models.CASCADE, verbose_name="Чат")
+
+    class Meta:
+        verbose_name = "Тег"
+        verbose_name_plural = "Теги"
+        ordering = ['name']
+        unique_together = ('name', 'chat')

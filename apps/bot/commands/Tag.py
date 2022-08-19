@@ -8,14 +8,30 @@ class Tag(Command):
     names = ["менш", "меншон", "вызов", "клич", "tag", "группа"]
     help_text = "тегает людей в конфе"
     help_texts = [
-        "тег создать (название) - добавляет новую группу",
-        "тег удалить (название) - удаляет новую группу",
-        "тег добавить (название) (имя пользователя/никнейм) - добавляет пользователя в группу",
-        "тег убрать (название) (имя пользователя/никнейм) - удаляет пользователя из группы",
-        "тег список - выводит список всех тегов",
-        "тег (название) - тегает всех пользователей в группе",
+        "создать (название) - добавляет новую группу",
+        "удалить (название) - удаляет новую группу",
+        "добавить (название) (имя пользователя/никнейм) - добавляет пользователя в группу",
+        "убрать (название) (имя пользователя/никнейм) - удаляет пользователя из группы",
+        "список - выводит список всех тегов",
+        "(название) - тегает всех пользователей в группе",
     ]
     conversation = True
+
+    TAG_ALL = "all"
+
+    @staticmethod
+    def accept_extra(event):
+        if event.message and not event.message.mentioned:
+            if event.is_from_chat and event.message.command.startswith("@"):
+                tag_name = event.message.command[1:]
+                if tag_name == "all":
+                    return True
+                try:
+                    TagModel.objects.get(name=tag_name, chat=event.chat)
+                    return True
+                except TagModel.DoesNotExist:
+                    return False
+        return False
 
     def start(self):
         if self.event.message.args:
@@ -37,7 +53,13 @@ class Tag(Command):
     def menu_create(self):
         self.check_args(2)
         name = self.event.message.args[1]
-        tag = TagModel.objects.create(name=name, chat=self.event.chat)
+        if name == self.TAG_ALL:
+            raise PWarning("Это имя зарезервировано для меншона всех участников конфы")
+        try:
+            tag = TagModel.objects.create(name=name, chat=self.event.chat)
+        except Exception:  # Какой?
+            raise PWarning(f"Тег \"{name}\" уже присутствует в этой конфе")
+
         return f"Тег \"{tag.name}\" создан"
 
     def menu_delete(self):
@@ -49,17 +71,25 @@ class Tag(Command):
         self.check_args(2)
         tag = self._get_tag_by_name()
 
-        profile_name = self.event.message.args[2]
-        profile = self.bot.get_profile_by_name(profile_name, self.event.chat)
+        profiles = []
+        profiles_str = "".join(self.event.message.clear.split(' ')[3:]).split(',')
+        for profile_str in profiles_str:
+            profile = self.bot.get_profile_by_name(profile_str, self.event.chat)
+            profiles.append(profile)
 
-        tag.users.add(profile)
-        return f"Пользователь {profile} добавлен в тег \"{tag.name}\""
+        profiles = list(set(profiles))
+        for profile in profiles:
+            tag.users.add(profile)
+        if len(profiles) == 1:
+            return f"Пользователь {profiles[0]} добавлен в тег \"{tag.name}\""
+        else:
+            return f"Пользователи {', '.join(map(str, profiles))} добавлены в тег \"{tag.name}\""
 
     def menu_remove(self):
         self.check_args(2)
         tag = self._get_tag_by_name()
 
-        profile_name = self.event.message.args[2]
+        profile_name = " ".join(self.event.message.args[2:])
         profile = self.bot.get_profile_by_name(profile_name, self.event.chat)
 
         tag.users.remove(profile)
@@ -75,9 +105,17 @@ class Tag(Command):
         return "\n".join(msg_list)
 
     def menu_default(self):
-        self.check_args(1)
-        tag = self._get_tag_by_name(self.event.message.args[0])
-        users = tag.users.all()
+        if self.event.command and self.event.command == self:
+            tag_name = self.event.message.command[1:]
+        else:
+            self.check_args(1)
+            tag_name = self.event.message.args[0]
+
+        if tag_name == self.TAG_ALL:
+            users = self.event.chat.users.all().exclude(pk=self.event.sender.pk)
+        else:
+            tag = self._get_tag_by_name(tag_name)
+            users = tag.users.exclude(pk=self.event.sender.pk)
         if not users:
             raise PWarning("В теге нет пользователей")
         msg_list = [self.bot.get_mention(user) for user in users]

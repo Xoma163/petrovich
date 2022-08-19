@@ -43,7 +43,7 @@ class NotifyRepeat(Command):
         crontab = None
         date = None
         try:
-            crontab = get_crontab(self.event.message.args)
+            crontab = get_crontab(self.event.message.args_case)
             args_split = self.event.message.args_str_case.split(' ', 5)
             if len(args_split) > 5:
                 text = args_split[-1]
