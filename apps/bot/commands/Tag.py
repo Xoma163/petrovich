@@ -74,7 +74,7 @@ class Tag(Command):
         profiles = []
         profiles_str = "".join(self.event.message.clear.split(' ')[3:]).split(',')
         for profile_str in profiles_str:
-            profile = self.bot.get_profile_by_name(profile_str, self.event.chat)
+            profile = self.bot.get_profile_by_name(profile_str.split(' '), self.event.chat)
             profiles.append(profile)
 
         profiles = list(set(profiles))

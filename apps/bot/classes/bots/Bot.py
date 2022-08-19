@@ -285,7 +285,8 @@ class Bot(Thread):
             raise PWarning("2 и более пользователей подходит под поиск")
 
         if len(user) == 0:
-            raise PWarning("Пользователь не найден. Возможно опечатка или он мне ещё ни разу не писал")
+            args_str = " ".join(args)
+            raise PWarning(f"Пользователь {args_str} не найден. Возможно опечатка или он мне ещё ни разу не писал")
 
         return user.first()
 

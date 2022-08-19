@@ -63,7 +63,7 @@ class NotifyRepeat(Command):
                 date = date + timedelta(days=1)
 
             text = self.event.message.args_str_case.split(' ', 1)[1]
-        if text[0] == '/':
+        if text and text[0] == '/':
             first_space = text.find(' ')
             if first_space > 0:
                 command = text[1:first_space]
