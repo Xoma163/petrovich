@@ -33,7 +33,7 @@ class ProfileAdmin(admin.ModelAdmin):
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    search_fields = ('profile__name', 'profile__surname', 'profile__nickname_real')
+    search_fields = ('profile__name', 'profile__surname', 'profile__nickname_real', 'nickname')
     list_display = ('show_user_id', 'show_url', 'platform', 'profile', 'nickname')
     list_filter = ('platform',)
 

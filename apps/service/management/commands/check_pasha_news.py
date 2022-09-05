@@ -37,13 +37,14 @@ class Command(BaseCommand):
         news_to_send = list(filter(lambda x: self.get_news_id(x) > pasha_news_last_id, news))
         msgs = []
         for news in news_to_send:
-            news_content, news_url = self.parse_news(f"{self.URL}{news.attrs['href']}")
+            news_content, news_url, news_title = self.parse_news(f"{self.URL}{news.attrs['href']}")
             if pasha.get_platform_enum() == Platform.TG:
-                text = f'{news_content}\n\n{get_tg_formatted_url("Полная статья", news_url)}'
+                text = f'{get_tg_formatted_url(news_title, news_url)}\n\n{news_content}'
             else:
-                text = f"{news_content}\n\n{news_url}"
+                text = f"{news_title}\n\n{news_content}\n\n{news_url}"
             msgs.append(text)
-
+        if not msgs:
+            return
         last_news_id = self.get_news_id(news_to_send[0])
         pasha_news_last_id_entity.value = last_news_id
         pasha_news_last_id_entity.save()
@@ -56,7 +57,10 @@ class Command(BaseCommand):
         content = requests.get(news_url).content
         bs4 = BeautifulSoup(content, "html.parser")
         news_content = bs4.select(".news-detail .col-lg-9")[0].text.strip()
-        return news_content, news_url
+        news_title = bs4.select("h1")[0].text.strip()
+        if news_title in news_content.split('\n')[0]:
+            news_content = "\n".join(news_content.split("\n")[1:])
+        return news_content, news_url, news_title
 
     @staticmethod
     def get_news_id(x):
