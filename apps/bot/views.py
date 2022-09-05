@@ -106,7 +106,7 @@ class GithubView(CSRFExemptMixin, View):
         if not_fixed:
             text = f"Проблема была закрыта с меткой \"Не пофикшу\"\n{issue['html_url']}"
         else:
-            text = f"Проблема была закрыта и решена\n{issue['html_url']}"
+            text = f"Проблема была закрыта\n{issue['html_url']}"
         self.send_notify_to_user(data, text)
 
     def created_comment(self, data):

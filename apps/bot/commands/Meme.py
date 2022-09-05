@@ -7,7 +7,7 @@ from django.db.models import Q
 from apps.bot.classes.Command import Command
 from apps.bot.classes.bots.Bot import upload_image_to_vk_server, send_message_to_moderator_chat, get_bot_by_platform
 from apps.bot.classes.consts.Consts import Role, Platform
-from apps.bot.classes.consts.Exceptions import PWarning, PError
+from apps.bot.classes.consts.Exceptions import PWarning, PError, PSkip
 from apps.bot.classes.messages.attachments.AudioAttachment import AudioAttachment
 from apps.bot.classes.messages.attachments.LinkAttachment import LinkAttachment
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
@@ -416,9 +416,18 @@ class Meme(Command):
             elif meme.type == LinkAttachment.TYPE:
                 from apps.bot.APIs.YoutubeAPI import YoutubeAPI
                 y_api = YoutubeAPI()
-                content_url = y_api.get_video_download_url(meme.link, self.event.platform)
-                video_content = requests.get(content_url).content
-                msg['attachments'] = [self.bot.upload_video(video_content, peer_id=self.event.peer_id)]
+                try:
+                    content_url = y_api.get_video_download_url(meme.link, self.event.platform)
+                    video_content = requests.get(content_url).content
+                    msg['attachments'] = [self.bot.upload_video(video_content, peer_id=self.event.peer_id)]
+                except PSkip:
+                    msg['text'] = meme.link
+                except (PWarning, PError) as e:
+                    button = self.bot.get_button("Инфо", self.name, ["инфо", str(meme.pk)])
+                    e.keyboard = self.bot.get_inline_keyboard([button])
+                    raise e
+                except Exception as e:
+                    raise e
             else:
                 msg['text'] = meme.link
         elif self.event.platform == Platform.VK:

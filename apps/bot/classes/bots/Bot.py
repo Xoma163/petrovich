@@ -120,10 +120,10 @@ class Bot(Thread):
                 if command.accept(event):
                     result = command.__class__().check_and_start(self, event)
                     rm = ResponseMessage(result, event.peer_id)
-                    self.logger.debug({"event": event.to_log(), "message": rm.to_log(), })
+                    self.logger.debug({"event": event.to_log(), "message": rm.to_log()})
                     return rm
             except (PWarning, PError) as e:
-                rm = ResponseMessage(e.msg, event.peer_id)
+                rm = ResponseMessage({'text': e.msg, 'keyboard': e.keyboard}, event.peer_id)
                 getattr(self.logger, e.level)({"event": event.to_log(), "message": rm.to_log()})
                 return rm
             except PIDK:
