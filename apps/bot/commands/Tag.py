@@ -1,5 +1,7 @@
 from apps.bot.classes.Command import Command
+from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.utils.utils import get_tg_formatted_text_line
 from apps.service.models import Tag as TagModel
 
 
@@ -95,14 +97,20 @@ class Tag(Command):
         tag.users.remove(profile)
         return f"Пользователь {profile} удалён из тега \"{tag.name}\""
 
+    def _get_tag_name(self, name):
+        if self.event.platform == Platform.TG:
+            return get_tg_formatted_text_line(name)
+        return name
+
     def menu_list(self):
         self.check_args(1)
         tags = TagModel.objects.filter(chat=self.event.chat)
         if not tags:
             return "Тегов нет"
 
-        msg_list = [f"{tag.name} - {', '.join([str(user) for user in tag.users.all()])}" for tag in tags]
-        return "\n".join(msg_list)
+        msg_list = [f"{self._get_tag_name(tag.name)}\n{', '.join([str(user) for user in tag.users.all()])}" for tag in
+                    tags]
+        return "\n\n".join(msg_list)
 
     def menu_default(self):
         if self.event.command and self.event.command == self:
