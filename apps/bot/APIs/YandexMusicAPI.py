@@ -21,7 +21,11 @@ class YandexMusicAPI:
         try:
             self.album_id, self.track_id = r.findall(self.url)[-1]
         except IndexError:
-            raise PWarning("Не нашёл песни по этому URL")
+            try:
+                r = re.compile(r"https://music.yandex.ru/track/(.*)")
+                self.track_id = r.findall(self.url)[-1]
+            except:
+                raise PWarning("Не нашёл песни по этому URL")
         self.albums = ""
         self.artists = ""
         self.title = ""
