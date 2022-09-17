@@ -22,7 +22,20 @@ def import_all_commands():
 
 
 def generate_commands():
-    commands = [cls() for cls in Command.__subclasses__() if cls.enabled]
+    commands = [cls for cls in Command.__subclasses__()]
+    new_commands = commands
+    flag = True
+    while flag:
+        new_commands = [x for x in [cls.__subclasses__() for cls in new_commands] if x]
+        if new_commands:
+            _new_commands = []
+            for cmd in new_commands:
+                _new_commands += cmd
+            commands += _new_commands
+            new_commands = _new_commands
+        else:
+            flag = False
+    commands = [cls() for cls in commands if cls.enabled]
     commands.sort(key=lambda x: x.priority, reverse=True)
     return commands
 

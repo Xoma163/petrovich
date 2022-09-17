@@ -21,6 +21,7 @@ class Role(Enum):
     TRUSTED = "доверенный"
     MRAZ = "мразь"
     GAMER = "игрок"
+    FLAIVA = "флейва"
 
     @classmethod
     def has_value(cls, value):

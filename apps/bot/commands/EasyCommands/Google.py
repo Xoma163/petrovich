@@ -7,7 +7,7 @@ from apps.bot.utils.utils import get_tg_formatted_url
 
 class Google(Command):
     name = "гугл"
-    enabled = ["google", "ggl", "гугле", "гоогле"]
+    names = ["google", "ggl", "гугле", "гоогле"]
     help_text = "формирует ссылку в гугл"
     help_texts = ["(текст) - формирует ссылку в гугл"]
     args = 1

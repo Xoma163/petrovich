@@ -6,7 +6,7 @@ from io import BytesIO
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Role, Platform
 from apps.bot.classes.consts.Exceptions import PWarning
-from apps.bot.models import Profile
+from apps.bot.models import Profile, Bot
 from apps.bot.utils.QuotesGenerator import QuotesGenerator
 from apps.bot.utils.utils import get_urls_from_text, get_tg_formatted_url
 from apps.service.models import Service
@@ -28,6 +28,9 @@ class Nostalgia(Command):
 
     platforms = [Platform.TG, Platform.VK]
     DEFAULT_MSGS_COUNT = 10
+
+    KEY = "mrazi"
+    FILE = "secrets/mrazi_chats/mrazi_all.json"
 
     def start(self):
         if self.event.message.args:
@@ -187,12 +190,11 @@ class Nostalgia(Command):
         return {"text": msg, "attachments": image, "keyboard": keyboard}
 
     def _load_file(self) -> list:
-        with open('secrets/mrazi_chats/mrazi_all.json', 'r') as file:
+        with open(self.FILE, 'r') as file:
             content = json.loads(file.read())
         return content
 
-    @staticmethod
-    def merge_files(*files):
+    def merge_files(self, *files):
         dt_format = "%d.%m.%Y %H:%M:%S"
         result_file = []
         counters = [0] * len(files)
@@ -214,7 +216,7 @@ class Nostalgia(Command):
             result_file.append(files[early_counter_index][counter])
             counters[early_counter_index] += 1
 
-        with open('secrets/mrazi_chats/mrazi_all.json', 'w') as file:
+        with open(self.FILE, 'w') as file:
             file.write(json.dumps(result_file, ensure_ascii=False, indent=2))
         return result_file
 
@@ -239,28 +241,32 @@ class Nostalgia(Command):
                 message['text'] += '\n(Пересланные сообщения)\n'
             message['text'] = message['text'].strip()
             if msg['author'] not in users_avatars:
-                name, surname = msg['author'].split(' ', 1)
-                vk_user = Profile.objects.filter(name=name, surname=surname).first()
-                if vk_user:
-                    users_avatars[msg['author']] = vk_user.avatar
+                try:
+                    name, surname = msg['author'].split(' ', 1)
+                    if name == "Игорь" and surname == "Петрович":
+                        user = Bot.objects.filter(name=name, surname=surname).first()
+                    else:
+                        user = Profile.objects.filter(name=name, surname=surname).first()
+                except:
+                    user = None
+                if user:
+                    users_avatars[msg['author']] = user.avatar
             avatar = users_avatars.get(msg['author'], None)
 
             new_msg = {'username': msg['author'], 'message': message, 'avatar': avatar}
             new_msgs.append(new_msg)
         return new_msgs, has_att_link
 
-    @staticmethod
-    def _get_indexes_from_db():
-        index_from, _ = Service.objects.get_or_create(name='mrazi_chats_index_from')
-        index_to, _ = Service.objects.get_or_create(name='mrazi_chats_index_to')
+    def _get_indexes_from_db(self):
+        index_from, _ = Service.objects.get_or_create(name=f'{self.KEY}_chats_index_from')
+        index_to, _ = Service.objects.get_or_create(name=f'{self.KEY}_chats_index_to')
         return int(index_from.value), int(index_to.value)
 
-    @staticmethod
-    def _set_indexes_to_db(index_from, index_to):
-        index_from_obj = Service.objects.get(name='mrazi_chats_index_from')
+    def _set_indexes_to_db(self, index_from, index_to):
+        index_from_obj, _ = Service.objects.get_or_create(name=f'{self.KEY}_chats_index_from')
         index_from_obj.value = index_from
         index_from_obj.save()
 
-        index_to_obj = Service.objects.get(name='mrazi_chats_index_to')
+        index_to_obj, _ = Service.objects.get_or_create(name=f'{self.KEY}_chats_index_to')
         index_to_obj.value = index_to
         index_to_obj.save()

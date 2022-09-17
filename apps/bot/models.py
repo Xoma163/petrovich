@@ -35,6 +35,7 @@ class Chat(Platform):
     is_banned = models.BooleanField('Забанен', default=False)
     need_turett = models.BooleanField('Слать туреттные сообщения', default=False)
     use_swear = models.BooleanField("Использовать ругательства", default=True)
+
     class Meta:
         verbose_name = "Чат"
         verbose_name_plural = "Чаты"
