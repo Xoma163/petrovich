@@ -358,7 +358,6 @@ class TgBot(CommonBot):
         return get_tg_formatted_url(str(profile), f"tg://user?id={user.user_id}")
         # if user.nickname:
         #     return f"@{user.nickname}"
-        # return str(user)
 
     def delete_message(self, peer_id, message_id):
         """

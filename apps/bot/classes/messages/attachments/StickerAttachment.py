@@ -22,7 +22,7 @@ class StickerAttachment(Attachment):
     def parse_tg_sticker(self, sticker, tg_bot):
         attrs = ['width', 'height', 'file_id', 'file_size', 'emoji']
         for attr in attrs:
-            setattr(self, attr, sticker[attr])
+            setattr(self, attr, sticker.get(attr, None))
         self.animated = sticker['is_video'] or sticker['is_animated']
 
         self.set_private_download_url_tg(tg_bot, self.file_id)
