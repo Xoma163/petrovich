@@ -244,7 +244,7 @@ class Nostalgia(Command):
                 try:
                     name, surname = msg['author'].split(' ', 1)
                     if name == "Игорь" and surname == "Петрович":
-                        user = Bot.objects.filter(name=name, surname=surname).first()
+                        user = Bot.objects.filter(name=msg['author']).first()
                     else:
                         user = Profile.objects.filter(name=name, surname=surname).first()
                 except:
