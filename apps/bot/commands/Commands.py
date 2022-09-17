@@ -27,6 +27,7 @@ class Commands(Command):
             {"role": Role.TERRARIA, "text": "команды для игроков террарии"},
             {"role": Role.HOME, "text": "команды для домашних пользователей"},
             {"role": Role.MRAZ, "text": "команды для мразей"},
+            {"role": Role.FLAIVA, "text": "команды для флейвы"},
             {"role": Role.GAMER, "text": "команды для игроков"},
         ]
 
