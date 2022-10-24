@@ -81,12 +81,13 @@ class Command(BaseCommand):
 
         attachments = []
         if notify.attachments:
-            for attachment in notify.attachments:
-                key = list(attachment.keys())[0]
-                value = attachment[key]
-                att = ATTACHMENT_TYPE_TRANSLATOR[key]()
-                att.file_id = value
-                attachments.append(att)
+            if notify.user.get_platform_enum() == Platform.TG:
+                for attachment in notify.attachments:
+                    key = list(attachment.keys())[0]
+                    value = attachment[key]
+                    att = ATTACHMENT_TYPE_TRANSLATOR[key]()
+                    att.file_id = value
+                    attachments.append(att)
         result_msg = {'text': message, 'attachments': attachments}
         logger.info(f"Отправил напоминание по id={notify.pk}")
 
