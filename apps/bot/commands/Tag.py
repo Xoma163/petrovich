@@ -91,11 +91,19 @@ class Tag(Command):
         self.check_args(2)
         tag = self._get_tag_by_name()
 
-        profile_name = " ".join(self.event.message.args[2:])
-        profile = self.bot.get_profile_by_name(profile_name, self.event.chat)
+        profiles = []
+        profiles_str = "".join(self.event.message.clear.split(' ')[3:]).split(',')
+        for profile_str in profiles_str:
+            profile = self.bot.get_profile_by_name(profile_str.split(' '), self.event.chat)
+            profiles.append(profile)
 
-        tag.users.remove(profile)
-        return f"Пользователь {profile} удалён из тега \"{tag.name}\""
+        profiles = list(set(profiles))
+        for profile in profiles:
+            tag.users.remove(profile)
+        if len(profiles) == 1:
+            return f"Пользователь {profiles[0]} убран из тега \"{tag.name}\""
+        else:
+            return f"Пользователи {', '.join(map(str, profiles))} убраны из тега \"{tag.name}\""
 
     def _get_tag_name(self, name):
         if self.event.platform == Platform.TG:
