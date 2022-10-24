@@ -24,9 +24,9 @@ def get_time(arg1, arg2, timezone=None):
             delta_days += 7
         arg1 = (datetime.today().date() + timedelta(days=delta_days)).strftime("%d.%m.%Y")
 
-    default_datetime = datetime.utcnow().replace(hour=10, minute=0, second=0, microsecond=0)  # + timedelta(days=1)
-    # ToDo: зачем? тут баг из-за которого время ебошится неправильно при завтра/послезавтра
-    default_datetime = remove_tz(normalize_datetime(default_datetime, tz=timezone.name))
+    default_datetime = remove_tz(normalize_datetime(datetime.utcnow(), tz=timezone.name)).replace(hour=9, minute=0,
+                                                                                                  second=0,
+                                                                                                  microsecond=0)
     try:
         if arg1.count('.') == 1:
             arg1 = f"{arg1}.{default_datetime.year}"
