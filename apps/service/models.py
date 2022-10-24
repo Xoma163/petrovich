@@ -60,7 +60,7 @@ class Counter(models.Model):
 
 
 class Meme(models.Model):
-    types = [
+    ATTACHMENT_NAMES = [
         ('photo', 'Фото'),
         ('video', 'Видео'),
         ('audio', 'Аудио'),
@@ -72,7 +72,7 @@ class Meme(models.Model):
     name = models.CharField("Название", max_length=1000, default="")
     link = models.CharField("Ссылка", max_length=1000, default="", null=True, blank=True)
     author = models.ForeignKey(Profile, models.SET_NULL, verbose_name="Автор", null=True)
-    type = models.CharField("Тип", max_length=10, choices=types, blank=True)
+    type = models.CharField("Тип", max_length=10, choices=ATTACHMENT_NAMES, blank=True)
     uses = models.PositiveIntegerField("Использований", default=0)
     approved = models.BooleanField("Разрешённый", default=False)
 
@@ -117,6 +117,7 @@ class Notify(models.Model):
     user = models.ForeignKey(User, models.CASCADE, verbose_name="Пользователь", null=True, blank=True)
     repeat = models.BooleanField("Повторять", default=False)
     mention_sender = models.BooleanField("Упоминать автора", default=True)
+    attachments = JSONField("Вложения", blank=True, default=dict)
 
     class Meta:
         verbose_name = "напоминание"

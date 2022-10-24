@@ -5,12 +5,13 @@ from crontab import CronTab
 from django.core.management.base import BaseCommand
 
 from apps.bot.classes.bots.Bot import get_bot_by_platform
-from apps.bot.classes.consts.Consts import Role, Platform
+from apps.bot.classes.consts.Consts import Role, Platform, ATTACHMENT_TYPE_TRANSLATOR
 from apps.bot.classes.events.Event import Event
 from apps.bot.utils.utils import remove_tz, localize_datetime, get_tg_formatted_text_line
 from apps.service.models import Notify
 
 logger = logging.getLogger('notifier')
+
 
 class Command(BaseCommand):
 
@@ -78,7 +79,15 @@ class Command(BaseCommand):
             message += f"{user_str}\n" \
                        f"{notify.text}"
 
-        result_msg = {'text': message}
+        attachments = []
+        if notify.attachments:
+            for attachment in notify.attachments:
+                key = list(attachment.keys())[0]
+                value = attachment[key]
+                att = ATTACHMENT_TYPE_TRANSLATOR[key]()
+                att.file_id = value
+                attachments.append(att)
+        result_msg = {'text': message, 'attachments': attachments}
         logger.info(f"Отправил напоминание по id={notify.pk}")
 
         if notify.chat:

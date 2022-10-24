@@ -2,6 +2,8 @@ from enum import Enum
 
 from apps.bot.classes.messages.attachments.AudioAttachment import AudioAttachment
 from apps.bot.classes.messages.attachments.DocumentAttachment import DocumentAttachment
+from apps.bot.classes.messages.attachments.GifAttachment import GifAttachment
+from apps.bot.classes.messages.attachments.LinkAttachment import LinkAttachment
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 from apps.bot.classes.messages.attachments.StickerAttachment import StickerAttachment
 from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
@@ -133,6 +135,17 @@ ATTACHMENT_TRANSLATOR = {
     StickerAttachment: 'стикер'
 }
 
+ATTACHMENT_TYPE_TRANSLATOR = {
+    'photo': PhotoAttachment,
+    'video': VideoAttachment,
+    'audio': AudioAttachment,
+    'doc': DocumentAttachment,
+    'link': LinkAttachment,
+    'sticker': StickerAttachment,
+    'voice': VoiceAttachment,
+    'gif': GifAttachment
+}
+
 BAD_ANSWERS = [
     'как же вы меня затрахали...',
     'ты обижаешь бота?',
@@ -142,7 +155,10 @@ BAD_ANSWERS = [
     'тебе не стыдно?',
     'зачем ты так?',
     'что я тебе сделал?',
-    'чего ты добился?']
+    'чего ты добился?'
+    'ясно, долбоёб',
+    'САСИ',
+]
 
 DELTA_WEEKDAY = {
     'сегодня': 0,
@@ -164,7 +180,9 @@ TURETT_WORDS = [
     "ОТЪЕБИСЬ",
     "я тебе чё, бот ебаный?",
     "хуй, пизда из одного гнезда",
-    "а на грудь тебе не насрать?"
+    "а на грудь тебе не насрать?",
+    'ясно, долбоёб',
+    'САСИ'
 ]
 
 eng_chars = u"~`!@#$%^&qwertyuiop[]asdfghjkl;'zxcvbnm,./QWERTYUIOP{}ASDFGHJKL:\"|ZXCVBNM<>?"

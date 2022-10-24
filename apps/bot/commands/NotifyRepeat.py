@@ -27,8 +27,8 @@ class NotifyRepeat(Command):
     name = "напоминай"
     help_text = "напоминает о чём-либо постояно"
     help_texts = [
-        "(время) (сообщение/команда) - напоминает о чём-то каждый день в заданное время. Максимум можно добавить 5 напоминаний",
-        "(crontab) (сообщение/команда) - напоминает о чём-то с помощью crontab. Максимум можно добавить 5 напоминаний"
+        "(время) (сообщение/команда) [Прикреплённые вложения] - напоминает о чём-то каждый день в заданное время. Максимум можно добавить 5 напоминаний",
+        "(crontab) (сообщение/команда) [Прикреплённые вложения] - напоминает о чём-то с помощью crontab. Максимум можно добавить 5 напоминаний"
     ]
     args = 2
     platforms = [Platform.VK, Platform.TG]
@@ -93,6 +93,11 @@ class NotifyRepeat(Command):
                 repeat=True,
                 text_for_filter=f'{notify_datetime.strftime("%H:%M")} {text}'
             )
+
+        if self.event.attachments:
+            if self.event.platform == Platform.TG:
+                notify.attachments = [{x.type: x.file_id} for x in self.event.attachments]
+
         notify.save()
         notify.text_for_filter += f" ({notify.id})"
         notify.save()
