@@ -11,7 +11,7 @@ class Issue(Command):
     help_texts = ["(проблема)\\n[описание проблема]\\n[теги] - добавляет проблему Петровича, которую нужно решить"]
     help_texts_extra = "Возможные теги: #Баг #Фича #Говнокод #Документация #Тест #Заливка_мемов_на_канал #хелп"
     args = 1
-    non_mentioned = False
+    mentioned = True
 
     def start(self):
         msg = self.event.message.args_str_case
