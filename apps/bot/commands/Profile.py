@@ -35,7 +35,7 @@ class Profile(Command):
 
         menu = [
             [["город"], self.menu_city],
-            [["др"], self.menu_bd],
+            [["др", "дата"], self.menu_bd],
             [['ник', 'никнейм'], self.menu_nickname],
             [['имя'], self.menu_name],
             [['фамилия'], self.menu_surname],
