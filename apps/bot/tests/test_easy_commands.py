@@ -9,10 +9,8 @@ from apps.bot.commands.EasyCommands.Google import Google
 from apps.bot.commands.EasyCommands.Hi import Hi
 from apps.bot.commands.EasyCommands.Issues import Issues
 from apps.bot.commands.EasyCommands.No import No
-from apps.bot.commands.EasyCommands.Nya import Nya
 from apps.bot.commands.EasyCommands.Ping import Ping
 from apps.bot.commands.EasyCommands.Rofl import Rofl
-from apps.bot.commands.EasyCommands.Shit import Shit
 from apps.bot.commands.EasyCommands.Sho import Sho
 from apps.bot.commands.EasyCommands.SorryMe import SorryMe
 from apps.bot.commands.EasyCommands.StartLada import StartLada
@@ -111,13 +109,6 @@ class CommandNoTestCase(BotInitializer):
         return self.check_correct_answer()
 
 
-class CommandNyaTestCase(BotInitializer):
-    Command = Nya
-
-    def test_no_args(self):
-        return self.check_correct_answer()
-
-
 class CommandPingTestCase(BotInitializer):
     Command = Ping
 
@@ -127,13 +118,6 @@ class CommandPingTestCase(BotInitializer):
 
 class CommandRoflTestCase(BotInitializer):
     Command = Rofl
-
-    def test_no_args(self):
-        return self.check_correct_answer()
-
-
-class CommandShitTestCase(BotInitializer):
-    Command = Shit
 
     def test_no_args(self):
         return self.check_correct_answer()
