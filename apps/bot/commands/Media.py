@@ -100,7 +100,7 @@ class Media(Command):
             text += f"\n{chosen_url}"
         # Костыль, чтобы видосы которые шарятся с мобилы с реддита не дублировали title
         if extra_text and extra_text != title:
-            text += f"\n{extra_text}"
+            text += f"\n\n{extra_text}"
 
         reply_to = None
         if self.event.fwd:
