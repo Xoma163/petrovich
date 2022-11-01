@@ -52,7 +52,7 @@ class Command:
             if self.help_texts:
                 self.full_help_texts = "\n".join([f"{self.name.capitalize()} {x}" for x in self.help_texts])
             if self.help_texts_extra:
-                self.full_help_texts += f"\n{self.help_texts_extra}"
+                self.full_help_texts += f"\n\n{self.help_texts_extra}"
         if self.name_tg:
             self.full_names.append(self.name_tg)
             self.full_help_texts_tg = f"{self.name_tg.lower()} - {self.help_text}"
