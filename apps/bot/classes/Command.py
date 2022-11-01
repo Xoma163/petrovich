@@ -55,6 +55,7 @@ class Command:
                 self.full_help_texts += f"\n\n{self.help_texts_extra}"
         if self.name_tg:
             self.full_names.append(self.name_tg)
+            self.full_names = list(set(self.full_names))
             self.full_help_texts_tg = f"{self.name_tg.lower()} - {self.help_text}"
 
         if self.hidden:
