@@ -123,7 +123,6 @@ class Bot(Thread):
                     self.logger.debug({"event": event.to_log(), "message": rm.to_log()})
                     return rm
             except (PWarning, PError) as e:
-                # rm = ResponseMessage(e.msg, peer_id=event.peer_id)
                 rm = ResponseMessage([{'text': e.msg, 'keyboard': e.keyboard}], peer_id=event.peer_id)
                 getattr(self.logger, e.level)({"event": event.to_log(), "message": rm.to_log()})
                 return rm

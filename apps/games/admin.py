@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from apps.games.models import Rate, Gamer, PetrovichUser, PetrovichGames, RouletteRate, BullsAndCowsSession
+from apps.games.models import Rate, Gamer, PetrovichUser, PetrovichGames, RouletteRate, BullsAndCowsSession, Wordle
 
 
 @admin.register(Gamer)
@@ -39,3 +39,8 @@ class RouletteRateAdmin(admin.ModelAdmin):
 class BullsAndCowsSessionAdmin(admin.ModelAdmin):
     search_fields = ('profile__name', 'profile__surname', 'profile__nickname_real')
     list_display = ('profile', 'chat', 'number', 'steps',)
+
+
+@admin.register(Wordle)
+class WordleAdmin(admin.ModelAdmin):
+    list_display = ('profile', 'chat', 'word', 'steps', 'hypotheses')

@@ -341,6 +341,27 @@ def get_tg_formatted_url(name, url) -> str:
     return f'<a href="{url}">{name}</a>'
 
 
+def get_tg_underline_text(text: str) -> str:
+    """
+    Текст с нижним подчёркиванием в телеграмме (html)
+    """
+    return f"<u>{text}</u>"
+
+
+def get_tg_italic_text(text: str) -> str:
+    """
+    Наклонный текст в телеграмме (html)
+    """
+    return f"<i>{text}</i>"
+
+
+def get_tg_bold_text(text: str) -> str:
+    """
+    Жирный текст в телеграмме (html)
+    """
+    return f"<i>{text}</i>"
+
+
 def fix_layout(s):
     new_s = ""
     for letter in s:

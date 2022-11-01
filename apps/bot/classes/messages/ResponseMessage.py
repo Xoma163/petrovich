@@ -83,11 +83,7 @@ class ResponseMessageItem:
             if p.search(self.text):
                 self.kwargs = {'parse_mode': "html"}
 
-            p = re.compile("<pre>[\s\S]*</pre>")  # tg formatting
-            if p.search(self.text):
-                self.kwargs = {'parse_mode': "html"}
-
-            p = re.compile("<code>[\s\S]*</code>")  # tg formatting
+            p = re.compile("<[^>]*>")  # tg formatting
             if p.search(self.text):
                 self.kwargs = {'parse_mode': "html"}
 

@@ -1,3 +1,4 @@
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.db.models import JSONField
 
@@ -101,6 +102,23 @@ class BullsAndCowsSession(models.Model):
     class Meta:
         verbose_name = 'Сессия "Быки и коровы"'
         verbose_name_plural = 'Сессии "Быки и коровы"'
+        ordering = ["chat"]
+
+    def __str__(self):
+        return str(self.pk)
+
+
+class Wordle(models.Model):
+    profile = models.ForeignKey(Profile, models.CASCADE, verbose_name="Пользователь", null=True)
+    chat = models.ForeignKey(Chat, models.CASCADE, verbose_name="Чат", null=True)
+    word = models.CharField(max_length=5)
+    steps = models.PositiveIntegerField("Количество попыток", default=0)
+    hypotheses = ArrayField(models.CharField(verbose_name="Гипотеза", max_length=5), verbose_name="Гипотезы",
+                            max_length=6)
+
+    class Meta:
+        verbose_name = 'Сессия "Wordle"'
+        verbose_name_plural = 'Сессии "Wordle"'
         ordering = ["chat"]
 
     def __str__(self):
