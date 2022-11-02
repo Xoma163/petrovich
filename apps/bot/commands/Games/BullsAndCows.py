@@ -111,9 +111,10 @@ class BullsAndCows(Command):
                         session.save()
                         self.bot.delete_message(self.event.peer_id, old_msg_id)
                     else:
-                        r = \
-                        self.bot.parse_and_send_msgs({'text': session.message_body, 'message_id': session.message_id},
-                                                     self.event.peer_id)[0]
+                        r = self.bot.parse_and_send_msgs({
+                            'text': session.message_body,
+                            'message_id': session.message_id},
+                            self.event.peer_id)[0]
                     if not r['success']:
                         r = self.bot.parse_and_send_msgs({'text': session.message_body}, self.event.peer_id)[0]
                         message_id = r['response'].json()['result']['message_id']

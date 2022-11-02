@@ -4,7 +4,7 @@ from threading import Lock
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Platform, Role
 from apps.bot.classes.consts.Exceptions import PWarning
-from apps.bot.utils.utils import random_event, get_tg_italic_text, get_tg_underline_text, get_tg_bold_text
+from apps.bot.utils.utils import random_event
 from apps.games.models import Wordle as WordleModel
 
 lock = Lock()
@@ -21,7 +21,7 @@ class Wordle(Command):
         "сдаться - удаление сессии",
         "(слово из 5 букв) - попытка угадать слово"
     ]
-    help_texts_extra = "Нижнее подчёркивание означает, что буква стоит на месте, курсив+жир = буква присутствует в слове"
+    help_texts_extra = "[] означает, что буква стоит на месте\n() означает, что буква присутствует в слове"
 
     platforms = [Platform.TG]
     access = Role.GAMER
@@ -29,6 +29,7 @@ class Wordle(Command):
     MAX_STEPS = 6
     WORDLE_WORDS_PATH = "static/bot/games/wordle/wordle.json"
 
+    # ToDo: self.session
     def start(self):
         if self.event.message.args:
             arg0 = self.event.message.args[0]
@@ -70,7 +71,7 @@ class Wordle(Command):
             raise PWarning("Игра не начата! Начните её", keyboard=kb)
 
         if len(hypothesis) != 5:
-            return PWarning("Слово должно состоять из 5 букв")
+            raise PWarning("Слово должно состоять из 5 букв")
 
         if hypothesis == session.word:
             return self.win()
@@ -83,7 +84,31 @@ class Wordle(Command):
             msgs = [self.get_answer_for_user_if_wrong(session), self.lose()]
             return msgs
 
-        return self.get_answer_for_user_if_wrong(session)
+        msg = self.get_answer_for_user_if_wrong(session)
+        msg += f"\n\n{self.get_text_keyboard(session)}"
+        if self.event.platform == Platform.TG:
+            delta_messages = self.event.message.id - session.message_id
+            print(delta_messages)
+            if delta_messages > 8:
+                old_msg_id = session.message_id
+                r = self.bot.parse_and_send_msgs(msg, self.event.peer_id)[0]
+                message_id = r['response'].json()['result']['message_id']
+                session.message_id = message_id
+                session.save()
+                self.bot.delete_message(self.event.peer_id, old_msg_id)
+            else:
+                r = self.bot.parse_and_send_msgs({
+                    'text': msg,
+                    'message_id': session.message_id},
+                    self.event.peer_id)[0]
+            if not r['success']:
+                r = self.bot.parse_and_send_msgs({'text': msg}, self.event.peer_id)[0]
+                message_id = r['response'].json()['result']['message_id']
+                session.message_id = message_id
+                session.save()
+            self.bot.delete_message(self.event.peer_id, self.event.message.id)
+        else:
+            return msg
 
     def get_random_word(self):
         with open(self.WORDLE_WORDS_PATH, 'r') as f:
@@ -100,6 +125,7 @@ class Wordle(Command):
     def calculate_words(hypothesis, answer):
         correct_letters = []
         exactly_correct_letters = []
+        wrong_letters = []
         for i, letter in enumerate(hypothesis):
             for j, letter2 in enumerate(answer):
                 if letter == letter2:
@@ -107,18 +133,20 @@ class Wordle(Command):
                         exactly_correct_letters.append(i)
                     else:
                         correct_letters.append(i)
-        return correct_letters, exactly_correct_letters
+            if i not in correct_letters and i not in exactly_correct_letters:
+                wrong_letters.append(i)
+        return correct_letters, exactly_correct_letters, wrong_letters
 
     def get_answer_for_user_if_wrong(self, session) -> str:
         text = []
         for hypothesis in session.hypotheses:
-            correct_letters, exactly_correct_letters = self.calculate_words(hypothesis, session.word)
+            correct_letters, exactly_correct_letters, _ = self.calculate_words(hypothesis, session.word)
             text_line = ""
             for i, word in enumerate(hypothesis):
-                if i in correct_letters:
-                    text_line += get_tg_bold_text(get_tg_italic_text(word))
-                elif i in exactly_correct_letters:
-                    text_line += get_tg_underline_text(word)
+                if i in exactly_correct_letters:
+                    text_line += f"[{word}]"
+                elif i in correct_letters:
+                    text_line += f"({word})"
                 else:
                     text_line += f"{word}"
                 text_line += " "
@@ -126,6 +154,42 @@ class Wordle(Command):
             text.append(text_line)
 
         return "\n".join(text)
+
+    def get_text_keyboard(self, session):
+        correct_letters = set()
+        exactly_correct_letters = set()
+        wrong_letters = set()
+        for word in session.hypotheses:
+            cl, ecl, wl = self.calculate_words(word, session.word)
+            for i in ecl:
+                exactly_correct_letters.add(word[i])
+            for i in cl:
+                correct_letters.add(word[i])
+            for i in wl:
+                wrong_letters.add(word[i])
+
+        for letter in exactly_correct_letters:
+            if letter in correct_letters:
+                correct_letters.remove(letter)
+
+        layouts = [
+            ["й", "ц", "у", "к", "е", "н", "г", "ш", "щ", "з", "х", "ъ"],
+            ["ф", "ы", "в", "а", "п", "р", "о", "л", "д", "ж", "э"],
+            ["я", "ч", "с", "м", "и", "т", "ь", "б", "ю"]
+        ]
+
+        for i, layer in enumerate(layouts):
+            for j, word in enumerate(layer):
+                if word in exactly_correct_letters:
+                    layouts[i][j] = f"[{word}]"
+                if word in correct_letters:
+                    layouts[i][j] = f"({word})"
+                if word in wrong_letters:
+                    layouts[i][j] = ""
+            layouts[i] = list(filter(lambda x: x, layouts[i]))
+        layouts_list = [" ".join(x) for x in layouts]
+        kb_txt = "\n".join(layouts_list)
+        return kb_txt
 
     def win(self):
         session = self.get_session()

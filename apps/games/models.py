@@ -115,6 +115,7 @@ class Wordle(models.Model):
     steps = models.PositiveIntegerField("Количество попыток", default=0)
     hypotheses = ArrayField(models.CharField(verbose_name="Гипотеза", max_length=5), verbose_name="Гипотезы",
                             max_length=6)
+    message_id = models.IntegerField("id первого сообщения", blank=True, default=0)
 
     class Meta:
         verbose_name = 'Сессия "Wordle"'

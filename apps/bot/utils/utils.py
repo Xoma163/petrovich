@@ -362,6 +362,13 @@ def get_tg_bold_text(text: str) -> str:
     return f"<i>{text}</i>"
 
 
+def get_tg_strike_text(text: str) -> str:
+    """
+    Жирный текст в телеграмме (html)
+    """
+    return f"<s>{text}</s>"
+
+
 def fix_layout(s):
     new_s = ""
     for letter in s:
