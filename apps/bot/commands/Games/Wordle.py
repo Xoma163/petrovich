@@ -2,7 +2,7 @@ import json
 from threading import Lock
 
 from apps.bot.classes.Command import Command
-from apps.bot.classes.consts.Consts import Platform, Role
+from apps.bot.classes.consts.Consts import Platform, Role, rus_alphabet
 from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.utils.utils import random_event
 from apps.games.models import Wordle as WordleModel
@@ -46,7 +46,7 @@ class Wordle(Command):
     def start_session(self):
         existed_session = self.get_session()
         if existed_session:
-            raise PWarning("Игра уже начата")
+            return self.get_current_state(existed_session)
 
         data = {
             "word": self.get_random_word(),
@@ -70,6 +70,7 @@ class Wordle(Command):
             kb = self.bot.get_inline_keyboard([b])
             raise PWarning("Игра не начата! Начните её", keyboard=kb)
 
+        hypothesis = [x for x in hypothesis if x.isalpha() and x in rus_alphabet]
         if len(hypothesis) != 5:
             raise PWarning("Слово должно состоять из 5 букв")
 
@@ -84,6 +85,9 @@ class Wordle(Command):
             msgs = [self.get_answer_for_user_if_wrong(session), self.lose()]
             return msgs
 
+        return self.get_current_state()
+
+    def get_current_state(self, session):
         msg = self.get_answer_for_user_if_wrong(session)
         msg += f"\n\n{self.get_text_keyboard(session)}"
         if self.event.platform == Platform.TG:

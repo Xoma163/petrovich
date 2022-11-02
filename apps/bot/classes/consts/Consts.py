@@ -186,6 +186,7 @@ TURETT_WORDS = [
 ]
 
 eng_chars = u"~`!@#$%^&qwertyuiop[]asdfghjkl;'zxcvbnm,./QWERTYUIOP{}ASDFGHJKL:\"|ZXCVBNM<>?"
+rus_alphabet = "ёйцукенгшщзхъфывапролджэячсмитьбю"
 rus_chars = u"ёё!\"№;%:?йцукенгшщзхъфывапролджэячсмитьбю.ЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭ/ЯЧСМИТЬБЮ,"
 trans_table = dict(zip(eng_chars, rus_chars))
 trans_table_reverse = dict(zip(rus_chars, eng_chars))
