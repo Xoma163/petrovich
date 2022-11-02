@@ -412,7 +412,7 @@ class Bot(Thread):
         """
 
     @staticmethod
-    def get_button(text, command, args=None, kwargs=None):
+    def get_button(text, command, args=None, kwargs=None, url=None):
         """
         Определение кнопки для клавиатур
         """

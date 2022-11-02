@@ -307,7 +307,7 @@ class TgBot(CommonBot):
     # EXTRA
 
     @staticmethod
-    def get_button(text, command, args=None, kwargs=None):
+    def get_button(text, command, args=None, kwargs=None, url=None):
         callback_data = {"c": command}
         if args:
             callback_data['a'] = args
@@ -318,10 +318,13 @@ class TgBot(CommonBot):
         callback_data_len = len(callback_data.encode("UTF8"))
         if callback_data_len > 62:
             raise PError("Нельзя в callback_data передавать данные более 64 байт")
-        return {
+        data = {
             'text': text,
             'callback_data': callback_data
         }
+        if url:
+            data['url'] = url
+        return data
 
     def get_inline_keyboard(self, buttons: list, cols=1):
         """
