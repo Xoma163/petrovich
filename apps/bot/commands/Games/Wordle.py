@@ -70,7 +70,7 @@ class Wordle(Command):
             kb = self.bot.get_inline_keyboard([b])
             raise PWarning("Игра не начата! Начните её", keyboard=kb)
 
-        hypothesis = [x for x in hypothesis if x.isalpha() and x in rus_alphabet]
+        hypothesis = "".join([x for x in hypothesis if x.isalpha() and x in rus_alphabet])
         if len(hypothesis) != 5:
             raise PWarning("Слово должно состоять из 5 букв")
 
