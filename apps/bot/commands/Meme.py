@@ -424,7 +424,12 @@ class Meme(Command):
                     msg['text'] = meme.link
                 except (PWarning, PError) as e:
                     button = self.bot.get_button("Инфо", self.name, ["инфо", str(meme.pk)])
-                    e.keyboard = self.bot.get_inline_keyboard([button])
+                    if meme.type == LinkAttachment.TYPE:
+                        button2 = self.bot.get_button("Поиск", None,
+                                                      url=f"https://www.youtube.com/results?search_query={meme.name}")
+                        e.keyboard = self.bot.get_inline_keyboard([button, button2], 2)
+                    else:
+                        e.keyboard = self.bot.get_inline_keyboard([button], 1)
                     raise e
                 except Exception as e:
                     raise e
