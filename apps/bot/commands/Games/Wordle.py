@@ -85,7 +85,7 @@ class Wordle(Command):
             msgs = [self.get_answer_for_user_if_wrong(session), self.lose()]
             return msgs
 
-        return self.get_current_state()
+        return self.get_current_state(session)
 
     def get_current_state(self, session):
         msg = self.get_answer_for_user_if_wrong(session)
