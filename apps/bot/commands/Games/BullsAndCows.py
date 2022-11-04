@@ -77,9 +77,11 @@ class BullsAndCows(Command):
                         self.bot.delete_message(self.event.peer_id, self.event.message.id)
                     decl = decl_of_num(session.steps, ['попытку', 'попытки', 'попыток'])
                     gamer = self.bot.get_gamer_by_profile(self.event.sender)
-                    gamer.roulette_points += 3000
+                    gamer.roulette_points += 1000
+                    gamer.bk_points += 1
                     gamer.save()
-                    msg = f"Отгадали число {session.number} всего за {session.steps} {decl}!\nНачислил 3000 очков"
+                    msg = f"Отгадали число {session.number} всего за {session.steps} {decl}!\n" \
+                          f"Начислил 1000 очков рулетки"
                     session.delete()
                     button = self.bot.get_button("Ещё", self.name)
                     keyboard = self.bot.get_inline_keyboard([button])

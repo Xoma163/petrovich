@@ -9,6 +9,8 @@ class Gamer(models.Model):
     profile = models.ForeignKey(Profile, models.CASCADE, verbose_name="Игрок", null=True)
     points = models.IntegerField("Очки ставок", default=0)
     roulette_points = models.IntegerField("Очки рулетки", default=500)
+    bk_points = models.IntegerField("Очки быки и коровы", default=0)
+    wordle_points = models.IntegerField("Очки Wordle", default=0)
     roulette_points_today = models.DateTimeField("Дата получения очков", auto_now_add=True)
 
     class Meta:

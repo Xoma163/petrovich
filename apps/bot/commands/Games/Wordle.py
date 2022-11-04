@@ -199,7 +199,12 @@ class Wordle(Command):
         session = self.get_session()
         word = session.word
         session.delete()
-        return f"Вы победили! Загаданное слово - {word}"
+        gamer = self.bot.get_gamer_by_profile(self.event.sender)
+        gamer.roulette_points += 1000
+        gamer.wordle_points += 1
+        gamer.save()
+        return f"Вы победили! Загаданное слово - {word}\n" \
+               f"Начислил 1000 очков рулетки"
 
     def lose(self):
         session = self.get_session()
