@@ -16,7 +16,7 @@ from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning, PSkip
 from apps.bot.utils.NothingLogger import NothingLogger
-from apps.bot.utils.utils import get_urls_from_text, get_tg_formatted_url
+from apps.bot.utils.utils import get_urls_from_text, get_tg_formatted_url, get_tg_bold_text, get_tg_formatted_text_line
 
 YOUTUBE_URLS = ('www.youtube.com', 'youtube.com', "www.youtu.be", "youtu.be")
 REDDIT_URLS = ("www.reddit.com",)
@@ -169,7 +169,7 @@ class Media(Command):
             if self.event.platform == Platform.TG:
                 text = text.replace("&#x200B;", "").replace("&amp;#x200B;", "").replace("&amp;", "&").replace(" ",
                                                                                                               " ").strip()
-                p = re.compile(r"\[(.*)\]\(([^\)]*)\)")
+                p = re.compile(r"\[(.*)\]\(([^\)]*)\)")  # markdown links
                 for item in reversed(list(p.finditer(text))):
                     start_pos = item.start()
                     end_pos = item.end()
@@ -189,6 +189,21 @@ class Media(Command):
                         tg_url = get_tg_formatted_url(_text, link)
                         text = text[:start_pos] + tg_url + text[end_pos:]
 
+                p = re.compile(r'\*\*(.*)\*\*')  # markdown bold
+                for item in reversed(list(p.finditer(text))):
+                    start_pos = item.start()
+                    end_pos = item.end()
+                    bold_text = text[item.regs[1][0]:item.regs[1][1]]
+                    tg_bold_text = get_tg_bold_text(bold_text)
+                    text = text[:start_pos] + tg_bold_text + text[end_pos:]
+
+                p = re.compile(r'&gt;(.*)\n')  # markdown quote
+                for item in reversed(list(p.finditer(text))):
+                    start_pos = item.start()
+                    end_pos = item.end()
+                    quote_text = text[item.regs[1][0]:item.regs[1][1]]
+                    tg_quote_text = get_tg_formatted_text_line(quote_text)
+                    text = text[:start_pos] + tg_quote_text + text[end_pos:]
             return [], f"{rs.title}\n\n{text}"
         else:
             raise PWarning("Я хз чё за контент")
