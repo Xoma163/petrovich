@@ -203,11 +203,17 @@ class Wordle(Command):
         gamer.roulette_points += 1000
         gamer.wordle_points += 1
         gamer.save()
-        return f"Вы победили! Загаданное слово - {word}\n" \
+        text = f"Вы победили! Загаданное слово - {word}\n" \
                f"Начислил 1000 очков рулетки"
+        button = self.bot.get_button("Ещё", self.name)
+        keyboard = self.bot.get_inline_keyboard([button])
+        return {"text": text, "keyboard": keyboard}
 
     def lose(self):
         session = self.get_session()
         word = session.word
         session.delete()
-        return f"Загаданное слово - {word}"
+        text = f"Загаданное слово - {word}"
+        button = self.bot.get_button("Ещё", self.name)
+        keyboard = self.bot.get_inline_keyboard([button])
+        return {"text": text, "keyboard": keyboard}
