@@ -169,7 +169,7 @@ class Media(Command):
             if self.event.platform == Platform.TG:
                 text = text.replace("&#x200B;", "").replace("&amp;#x200B;", "").replace("&amp;", "&").replace(" ",
                                                                                                               " ").strip()
-                p = re.compile(r"\[(.*)\]\((.*)\)")
+                p = re.compile(r"\[(.*)\]\(([^\)]*)\)")
                 for item in reversed(list(p.finditer(text))):
                     start_pos = item.start()
                     end_pos = item.end()

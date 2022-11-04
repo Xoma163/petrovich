@@ -42,6 +42,8 @@ class ResponseMessage:
 
 
 class ResponseMessageItem:
+    TG_TAGS = ['pre', 'code', 'i', 'b', 'u']
+
     def __init__(self, msg, peer_id):
         if isinstance(msg, str) or isinstance(msg, int) or isinstance(msg, float):
             msg = {'text': str(msg)}
@@ -83,9 +85,11 @@ class ResponseMessageItem:
             if p.search(self.text):
                 self.kwargs = {'parse_mode': "html"}
 
-            p = re.compile("<[^>]*>")  # tg formatting
-            if p.search(self.text):
-                self.kwargs = {'parse_mode': "html"}
+            for tag in self.TG_TAGS:
+                p = re.compile(f"<{tag}>[\s\S]*</{tag}>")
+                if p.search(self.text):
+                    self.kwargs = {'parse_mode': "html"}
+                    break
 
             if self.kwargs.get('parse_mode'):
                 # Врапим ссылки без явного их врапа если у нас уже html

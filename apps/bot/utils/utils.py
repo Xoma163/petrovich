@@ -359,7 +359,7 @@ def get_tg_bold_text(text: str) -> str:
     """
     Жирный текст в телеграмме (html)
     """
-    return f"<i>{text}</i>"
+    return f"<b>{text}</b>"
 
 
 def get_tg_strike_text(text: str) -> str:
