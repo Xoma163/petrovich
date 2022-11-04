@@ -12,6 +12,7 @@ class Bash(Command):
     help_texts = ["[количество=5] - рандомная цитата с баша. Максимум 20 цитат"]
 
     int_args = [0]
+    enabled = False
 
     def start(self):
         quotes_count = 5
