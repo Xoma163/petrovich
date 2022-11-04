@@ -269,5 +269,8 @@ class Media(Command):
         audio_att = self.bot.upload_audio(audiofile, peer_id=self.event.peer_id, filename=f"{title}.{track.format}",
                                           title=title)
         cover_att = self.bot.upload_photo(cover, guarantee_url=True)
-        attachments = [audio_att, cover_att]
+        if cover_att:
+            msg = {'attachments': cover_att}
+            self.bot.parse_and_send_msgs(msg, self.event.peer_id)
+        attachments = [audio_att]
         return attachments, title

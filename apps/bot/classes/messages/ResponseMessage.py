@@ -84,12 +84,12 @@ class ResponseMessageItem:
             p = re.compile(urls_regexp)  # Ссылки
             if p.search(self.text):
                 self.kwargs = {'parse_mode': "html"}
-
-            for tag in self.TG_TAGS:
-                p = re.compile(f"<{tag}>[\s\S]*</{tag}>")
-                if p.search(self.text):
-                    self.kwargs = {'parse_mode': "html"}
-                    break
+            else:
+                for tag in self.TG_TAGS:
+                    p = re.compile(f"<{tag}>[\s\S]*</{tag}>")
+                    if p.search(self.text):
+                        self.kwargs = {'parse_mode': "html"}
+                        break
 
             if self.kwargs.get('parse_mode'):
                 # Врапим ссылки без явного их врапа если у нас уже html
