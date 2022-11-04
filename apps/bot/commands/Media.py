@@ -258,8 +258,10 @@ class Media(Command):
     def get_yandex_music(self, url):
         track = YandexMusicAPI(url)
         audiofile = track.download_track()
+        cover = track.cover_url
         title = f"{track.artists} - {track.title}"
         audio_att = self.bot.upload_audio(audiofile, peer_id=self.event.peer_id, filename=f"{title}.{track.format}",
                                           title=title)
-        attachments = [audio_att]
+        cover_att = self.bot.upload_photo(cover, guarantee_url=True)
+        attachments = [audio_att, cover_att]
         return attachments, title

@@ -43,7 +43,7 @@ class YandexMusicAPI:
         self.albums = ", ".join([album.title for album in track.albums])
         self.title = track.title
         self.artists = ", ".join([artist.name for artist in track.artists])
-        self.cover_url = track.cover_uri.replace("%%", "400x400")
+        self.cover_url = f'https://{track.cover_uri.replace("%%", "400x400")}'
         info = track.get_download_info()[0]
         self.bitrate = info.bitrate_in_kbps
         self.format = info.codec
@@ -53,11 +53,13 @@ class YandexMusicAPI:
         return mp3
 
 
+# service redefinition
 class YandexRequest(Request):
     def download(self, url, timeout=5, *args, **kwargs) -> bytes:
         return self.retrieve(url, timeout=timeout, *args, *kwargs)
 
 
+# service redefinition
 class YandeClient(Client):
     def __init__(self, token: str = None, base_url: str = None, request: Request = None, language: str = 'ru',
                  report_unknown_fields=False):
