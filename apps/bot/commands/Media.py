@@ -166,6 +166,7 @@ class Media(Command):
 
         elif rs.is_text or rs.is_link:
             text = attachment
+            all_photos = []
             if self.event.platform == Platform.TG:
                 text = text.replace("&#x200B;", "").replace("&amp;#x200B;", "").replace("&amp;", "&").replace(" ",
                                                                                                               " ").strip()
@@ -177,6 +178,7 @@ class Media(Command):
                     link = text[item.regs[2][0]:item.regs[2][1]]
                     tg_url = get_tg_formatted_url(link_text, link)
                     text = text[:start_pos] + tg_url + text[end_pos:]
+
                 regexps_with_static = ((r"https.*player", "Видео"), (r"https://preview\.redd\.it/.*", "Фото"))
                 for regexp, _text in regexps_with_static:
                     p = re.compile(regexp)
@@ -188,7 +190,8 @@ class Media(Command):
                         link = text[start_pos:end_pos]
                         tg_url = get_tg_formatted_url(_text, link)
                         text = text[:start_pos] + tg_url + text[end_pos:]
-
+                        if _text == "Фото":
+                            all_photos.append(link)
                 p = re.compile(r'\*\*(.*)\*\*')  # markdown bold
                 for item in reversed(list(p.finditer(text))):
                     start_pos = item.start()
@@ -204,6 +207,9 @@ class Media(Command):
                     quote_text = text[item.regs[1][0]:item.regs[1][1]]
                     tg_quote_text = get_tg_formatted_text_line(quote_text)
                     text = text[:start_pos] + tg_quote_text + text[end_pos:]
+            if all_photos:
+                msg = {'attachments': self.bot.upload_photos(all_photos)}
+                self.bot.parse_and_send_msgs(msg, self.event.peer_id)
             return [], f"{rs.title}\n\n{text}"
         else:
             raise PWarning("Я хз чё за контент")
