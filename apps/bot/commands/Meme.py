@@ -273,7 +273,7 @@ class Meme(Command):
         meme_filter = self.get_default_meme_filter_by_args(self.event.message.args[1:])
         meme = self.get_meme(**meme_filter)
         if meme.approved:
-            raise RuntimeWarning("Нельзя отклонить уже подтверждённый мем")
+            raise PWarning("Нельзя отклонить уже подтверждённый мем")
 
         msg = f'Мем "{meme.name}" ({meme.id}) отклонён'
         user = meme.author.get_user_by_default_platform()

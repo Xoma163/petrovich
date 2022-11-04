@@ -27,10 +27,10 @@ class NotifyRepeat(Command):
     name = "напоминай"
     help_text = "напоминает о чём-либо постояно"
     help_texts = [
-        "(время) (сообщение/команда) [Прикреплённые вложения] - напоминает о чём-то каждый день в заданное время. Максимум можно добавить 5 напоминаний",
-        "(crontab) (сообщение/команда) [Прикреплённые вложения] - напоминает о чём-то с помощью crontab. Максимум можно добавить 5 напоминаний"
+        "(время) (сообщение/команда/вложения) - напоминает о чём-то каждый день в заданное время. Максимум можно добавить 5 напоминаний",
+        "(crontab) (сообщение/команда/вложения) - напоминает о чём-то с помощью crontab. Максимум можно добавить 5 напоминаний"
     ]
-    args = 2
+    args = 1
     platforms = [Platform.VK, Platform.TG]
     city = True
 
@@ -42,13 +42,12 @@ class NotifyRepeat(Command):
 
         crontab = None
         date = None
+        text = None
         try:
             crontab = get_crontab(self.event.message.args_case)
             args_split = self.event.message.args_str_case.split(' ', 5)
             if len(args_split) > 5:
                 text = args_split[-1]
-            else:
-                text = ""
         except Exception:
             date = get_time(self.event.message.args[0])
             if not date:
@@ -62,7 +61,9 @@ class NotifyRepeat(Command):
             if (date - datetime_now).days < 0 or (datetime_now - date).seconds < 0:
                 date = date + timedelta(days=1)
 
-            text = self.event.message.args_str_case.split(' ', 1)[1]
+            split_text = self.event.message.args_str_case.split(' ', 1)
+            if len(split_text) > 1:  # Если передан текст
+                text = split_text[1]
         if text and text[0] == '/':
             first_space = text.find(' ')
             if first_space > 0:
@@ -78,25 +79,28 @@ class NotifyRepeat(Command):
         if crontab:
             notify = NotifyModel(
                 crontab=crontab,
-                text=text,
                 user=self.event.user,
                 chat=self.event.chat,
                 repeat=True,
-                text_for_filter=f'{crontab} {text}'
+                text_for_filter=f'{crontab}'
             )
         else:
             notify = NotifyModel(
                 date=date,
-                text=text,
                 user=self.event.user,
                 chat=self.event.chat,
                 repeat=True,
-                text_for_filter=f'{notify_datetime.strftime("%H:%M")} {text}'
+                text_for_filter=f'{notify_datetime.strftime("%H:%M")}'
             )
 
-        if self.event.attachments:
-            if self.event.platform == Platform.TG:
-                notify.attachments = [{x.type: x.file_id} for x in self.event.attachments]
+        tg_att_flag = self.event.attachments and self.event.platform == Platform.TG
+        if not (text or tg_att_flag):
+            raise PWarning("В напоминании должны быть текст или вложения(tg)")
+        if text:
+            notify.text = text
+            notify.text_for_filter += f" {text}"
+        if tg_att_flag:
+            notify.attachments = [{x.type: x.file_id} for x in self.event.attachments]
 
         notify.save()
         notify.text_for_filter += f" ({notify.id})"

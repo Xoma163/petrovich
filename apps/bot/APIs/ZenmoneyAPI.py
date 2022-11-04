@@ -2,6 +2,7 @@ import datetime
 
 from zenmoney import Request, OAuth2, Diff
 
+from apps.bot.classes.consts.Exceptions import PError
 from apps.bot.utils.utils import decl_of_num
 from petrovich.settings import env
 
@@ -25,7 +26,7 @@ class ZenmoneyAPI:
             if account.title == 'Debt':
                 return account.id
         else:
-            raise RuntimeError("Не найден счет Debt")
+            raise PError("Не найден счет Debt")
 
     def _get_transactions(self):
         return self._get_diff().transaction
@@ -34,7 +35,7 @@ class ZenmoneyAPI:
         for merchant in self._get_diff().merchant:
             if merchant.title == name:
                 return merchant.id
-        raise RuntimeError("Не найден мерчант")
+        raise PError("Не найден мерчант")
 
     def _get_transactions_by_user_name(self, name):
         user_id = self._get_merchant_id_by_name(name)

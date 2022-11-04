@@ -46,9 +46,9 @@ class Notify(Command):
     names = ["напомнить"]
     help_text = "напоминает о чём-либо"
     help_texts = [
-        "(дата/дата и время/день недели) (сообщение/команда) [Прикреплённые вложения] - добавляет напоминание. Максимум можно добавить 5 напоминаний"
+        "(дата/дата и время/день недели) (сообщение/команда/вложения) - добавляет напоминание. Максимум можно добавить 5 напоминаний"
     ]
-    args = 2
+    args = 1
     platforms = [Platform.VK, Platform.TG]
     city = True
 
@@ -58,10 +58,11 @@ class Notify(Command):
             raise PWarning("Нельзя добавлять более 5 напоминаний")
         timezone = self.event.sender.city.timezone.name
 
-        date, args_count, exact_time_flag = get_time(self.event.message.args[0], self.event.message.args[1],
-                                                     self.event.sender.city.timezone)
-        if args_count == 2:
-            self.check_args(3)
+        arg0 = self.event.message.args[0]
+        arg1 = self.event.message.args[1] if len(self.event.message.args) > 1 else None
+        tz = self.event.sender.city.timezone
+
+        date, args_count, exact_time_flag = get_time(arg0, arg1, tz)
         if not date:
             raise PWarning("Не смог распарсить дату")
         date = normalize_datetime(date, timezone)
@@ -74,27 +75,36 @@ class Notify(Command):
         if (date - datetime_now).days < 0 or (datetime_now - date).seconds < 0:
             raise PWarning("Нельзя указывать дату в прошлом")
 
-        text = self.event.message.args_str_case.split(' ', args_count)[args_count]
-        if text[0] == '/':
-            first_space = text.find(' ')
-            if first_space > 0:
-                command = text[1:first_space]
-            else:
-                command = text[1:]
-            from apps.bot.commands.NotifyRepeat import NotifyRepeat
-            if command in self.full_names or command in NotifyRepeat().full_names:
-                text = f"/обосрать {self.event.sender.name}"
+        text = None
+        split_text = self.event.message.args_str_case.split(' ', args_count)
+        if len(split_text) > args_count:  # Если передан текст
+            text = split_text[args_count]
+            if text[0] == '/':
+                first_space = text.find(' ')
+                if first_space > 0:
+                    command = text[1:first_space]
+                else:
+                    command = text[1:]
+                from apps.bot.commands.NotifyRepeat import NotifyRepeat
+                if command in self.full_names or command in NotifyRepeat().full_names:
+                    text = f"/обосрать {self.event.sender.name}"
         notify_datetime = localize_datetime(remove_tz(date), timezone)
 
-        notify = NotifyModel(date=date,
-                             text=text,
-                             user=self.event.user,
-                             chat=self.event.chat,
-                             text_for_filter=notify_datetime.strftime("%d.%m.%Y %H:%M") + " " + text)
+        notify = NotifyModel(
+            date=date,
+            user=self.event.user,
+            chat=self.event.chat,
+            text_for_filter=notify_datetime.strftime("%d.%m.%Y %H:%M")
+        )
 
-        if self.event.attachments:
-            if self.event.platform == Platform.TG:
-                notify.attachments = [{x.type: x.file_id} for x in self.event.attachments]
+        tg_att_flag = self.event.attachments and self.event.platform == Platform.TG
+        if not (text or tg_att_flag):
+            raise PWarning("В напоминании должны быть текст или вложения(tg)")
+        if text:
+            notify.text = text
+            notify.text_for_filter += f" {text}"
+        if tg_att_flag:
+            notify.attachments = [{x.type: x.file_id} for x in self.event.attachments]
 
         notify.save()
         notify.text_for_filter += f" ({notify.id})"
