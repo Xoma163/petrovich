@@ -36,7 +36,7 @@ class NotifyRepeat(Command):
 
     def start(self):
         if not self.event.sender.check_role(Role.TRUSTED) and \
-                len(NotifyModel.objects.filter(user=self.event.sender)) >= 5:
+                len(NotifyModel.objects.filter(user=self.event.user)) >= 5:
             raise PWarning("Нельзя добавлять более 5 напоминаний")
         timezone = self.event.sender.city.timezone.name
 
