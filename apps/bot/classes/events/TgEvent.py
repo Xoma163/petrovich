@@ -22,16 +22,17 @@ class TgEvent(Event):
         }
 
     def setup_event(self, is_fwd=False):
+        self.is_fwd = is_fwd
         inline_query = self.raw.get('inline_query')
         if inline_query:
             self.setup_inline_query(inline_query)
             return
 
-        if not is_fwd and self.raw.get('message', {}).get('forward_from') and 'voice' not in self.raw['message']:
+        if not self.is_fwd and self.raw.get('message', {}).get('forward_from') and 'voice' not in self.raw['message']:
             self.force_response = False
             return
 
-        if is_fwd:
+        if self.is_fwd:
             message = self.raw
         else:
             # edited_message = self.raw.get('edited_message')
@@ -76,12 +77,14 @@ class TgEvent(Event):
 
         self.setup_action(message)
         payload = message.get('payload')
+        # Нет нужды парсить вложения и fwd если это просто нажатие на кнопку
         if payload:
             self.setup_payload(payload)
         else:
-            # Нет нужды парсить вложения и fwd если это просто нажатие на кнопку
             self.setup_attachments(message)
             self.setup_fwd(message.get('reply_to_message'))
+            if message.get('forward_from_chat'):
+                self.is_fwd = True
 
         via_bot = message.get('via_bot')
         if via_bot:

@@ -102,5 +102,3 @@ def get_text_for_documentation(commands):
             )
         documentation.append(command_text)
     return "\n".join(documentation)
-
-# text_for_documentation = get_text_for_documentation(COMMANDS)

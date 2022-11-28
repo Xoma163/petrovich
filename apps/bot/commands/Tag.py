@@ -23,6 +23,8 @@ class Tag(Command):
 
     @staticmethod
     def accept_extra(event):
+        if event.is_fwd:
+            return False
         if event.message and not event.message.mentioned:
             if event.is_from_chat and event.message.command.startswith("@"):
                 tag_name = event.message.command[1:]

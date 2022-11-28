@@ -45,6 +45,8 @@ class Event:
         self.force_response: bool = None
         self.command: Command = None
 
+        self.is_fwd = False
+
     def setup_event(self, is_fwd=False):
         """
         Метод по установке ивента у каждого бота. Переопределяется всегда
