@@ -69,7 +69,7 @@ class Statistics(Command):
 
     def menu_bk(self):
         gamers = Gamer.objects.filter(profile__chats=self.event.chat).exclude(bk_points=0) \
-            .order_by('-roulette_points')
+            .order_by('-bk_points')
         msg = "Побед \"Быки и коровы\":\n"
         if gamers.count() == 0:
             raise PWarning(msg + "Нет статистики")
@@ -78,7 +78,7 @@ class Statistics(Command):
 
     def menu_wordle(self):
         gamers = Gamer.objects.filter(profile__chats=self.event.chat).exclude(wordle_points=0) \
-            .order_by('-roulette_points')
+            .order_by('-wordle_points')
         msg = "Побед Wordle:\n"
         if gamers.count() == 0:
             raise PWarning(msg + "Нет статистики")
