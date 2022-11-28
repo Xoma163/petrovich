@@ -95,7 +95,8 @@ class Media(Command):
         text += f"\nОт пользователя {self.event.sender}"
 
         if self.event.platform == Platform.TG:
-            text += f'\n{get_tg_formatted_url("Сурс", chosen_url)}'
+            source_hostname = str(urlparse(chosen_url).hostname).lstrip('www.')
+            text += f'\nИсточник: {get_tg_formatted_url(source_hostname, chosen_url)}'
         else:
             text += f"\n{chosen_url}"
         # Костыль, чтобы видосы которые шарятся с мобилы с реддита не дублировали title
