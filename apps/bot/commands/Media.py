@@ -197,7 +197,7 @@ class Media(Command):
                     start_pos = item.start()
                     end_pos = item.end()
                     bold_text = text[item.regs[1][0]:item.regs[1][1]]
-                    tg_bold_text = get_tg_bold_text(bold_text)
+                    tg_bold_text = get_tg_bold_text(bold_text).replace("**", '')
                     text = text[:start_pos] + tg_bold_text + text[end_pos:]
 
                 p = re.compile(r'&gt;(.*)\n')  # markdown quote
