@@ -153,9 +153,9 @@ class Bot(Thread):
         Получение похожей команды по неправильно введённой
         """
         user_groups = event.sender.get_list_of_role_names()
-        if not event.message:
-            msg = "Я не понял, что вы от меня хотите(("
-            return msg, {}
+        if not event.message or event.message.raw:
+            idk_what_you_want = "Я не понял, что вы от меня хотите(("
+            return idk_what_you_want, {}
         original_text = event.message.raw.split(' ')
         messages = [original_text[0]]
 
