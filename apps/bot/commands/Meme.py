@@ -356,7 +356,10 @@ class Meme(Command):
         yt_search_link = 'https://www.youtube.com/results?search_query=' + quote(video.name)
         prepared_video += f"\n\n{yt_search_link}"
         button = self.bot.get_button("Ещё", "видео")
-        prepared_video['keyboard'] = self.bot.get_inline_keyboard([button])
+        prepared_video = {
+            'text': prepared_video,
+            'keyboard': self.bot.get_inline_keyboard([button])
+        }
         return prepared_video
 
     # END MENU #
