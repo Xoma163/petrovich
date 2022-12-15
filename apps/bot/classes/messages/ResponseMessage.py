@@ -51,7 +51,8 @@ class ResponseMessageItem:
         msg_copy = copy(msg)
 
         self.peer_id = peer_id
-        self.text = str(msg_copy.pop("text", ""))
+        text = msg_copy.pop("text", "")
+        self.text = str(text) if text else ""
         self.attachments = msg_copy.pop("attachments", [])
         self.message_id = msg_copy.pop("message_id", None)
         self.reply_to = msg_copy.pop("reply_to", None)
