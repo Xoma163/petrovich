@@ -181,7 +181,8 @@ class Meme(Command):
             attachments = [attachment]
             id_name = self.get_id_or_meme_name(self.event.message.args[1:-1])
         except PWarning:
-            attachments = self.event.get_all_attachments([VideoAttachment, PhotoAttachment, StickerAttachment])
+            attachments = self.event.get_all_attachments(
+                [VideoAttachment, PhotoAttachment, StickerAttachment, GifAttachment, VoiceAttachment])
             id_name = self.get_id_or_meme_name(self.event.message.args[1:])
 
         meme_filter = {}
@@ -213,6 +214,14 @@ class Meme(Command):
             fields['tg_file_id'] = attachment.file_id
             if not attachment.animated:
                 fields['link'] = upload_image_to_vk_server(attachment.download_content())
+        elif isinstance(attachment, GifAttachment):
+            if self.event.platform != Platform.TG:
+                raise PWarning("Обновление гифок-мемов доступно только в TG")
+            fields['tg_file_id'] = attachment.file_id
+        elif isinstance(attachment, VoiceAttachment):
+            if self.event.platform != Platform.TG:
+                raise PWarning("Обновление голосовух-мемов доступно только в TG")
+            fields['tg_file_id'] = attachment.file_id
         else:
             raise PWarning("Невозможно")
 
@@ -555,7 +564,7 @@ class Meme(Command):
     @staticmethod
     def check_meme_name_is_no_digits(meme_name_list):
         try:
-            _ = [int(x) for x in meme_name_list]
+            [int(x) for x in meme_name_list]
             raise PWarning("Название мема не может состоять только из цифр")
         except ValueError:
             pass
@@ -565,19 +574,34 @@ class Meme(Command):
         _inline_qr = []
         for meme in memes:
             # Todo: send sticker as sticker
+            qr = {
+                'id': meme.pk,
+                'type': meme.type
+            }
             if meme.type in [PhotoAttachment.TYPE]:
-                qr = {
-                    'id': meme.pk,
-                    'type': meme.type,
+                qr.update({
                     'photo_url': meme.link,
                     'thumb_url': meme.link
-                }
+                })
             elif meme.type in [StickerAttachment.TYPE]:
-                qr = {
-                    'id': meme.pk,
-                    'type': meme.type,
-                    'tg_file_id': meme.tg_file_id,
-                }
+                qr.update({
+                    'sticker_file_id': meme.tg_file_id,
+                })
+            elif meme.type in [VideoAttachment.TYPE]:
+                qr.update({
+                    'video_file_id': meme.tg_file_id,
+                    'title': meme.name,
+                })
+            elif meme.type in [GifAttachment.TYPE]:
+                qr.update({
+                    'gif_file_id': meme.tg_file_id,
+                    'title': meme.name,
+                })
+            elif meme.type in [VoiceAttachment.TYPE]:
+                qr.update({
+                    'voice_file_id': meme.tg_file_id,
+                    'title': meme.name,
+                })
             elif meme.type == LinkAttachment.TYPE:
                 parsed_url = urlparse(meme.link)
                 video_id = parsed_url.path.strip('/')
@@ -611,7 +635,9 @@ class Meme(Command):
         else:
             filtered_memes = MemeModel.objects.all().order_by('-uses')
 
-        q = Q(approved=True) & (Q(type='link', link__icontains="youtu") | Q(type='photo') | Q(type='sticker'))
+        q = Q(approved=True) & (
+                Q(type='link', link__icontains="youtu") | Q(type='photo') | Q(type='sticker') | Q(type='video') | Q(
+            type='voice') | Q(type='gif'))
         memes = filtered_memes.filter(q)
 
         all_memes_qr = []
@@ -625,8 +651,11 @@ class Meme(Command):
 
         memes = memes[:max_count]
         memes = self.get_tanimoto_memes(memes, filter_list)
-
+        # ToDo: wtf?
+        all_memes_qr += self._get_inline_qrs([x for x in memes if x.type == VoiceAttachment.TYPE])
         all_memes_qr += self._get_inline_qrs([x for x in memes if x.type == LinkAttachment.TYPE])
+        all_memes_qr += self._get_inline_qrs([x for x in memes if x.type == VideoAttachment.TYPE])
+        all_memes_qr += self._get_inline_qrs([x for x in memes if x.type == GifAttachment.TYPE])
         all_memes_qr += self._get_inline_qrs([x for x in memes if x.type == StickerAttachment.TYPE])
         all_memes_qr += self._get_inline_qrs([x for x in memes if x.type == PhotoAttachment.TYPE])
         return all_memes_qr

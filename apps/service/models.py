@@ -67,6 +67,8 @@ class Meme(models.Model):
         ('doc', 'Документ'),
         ('link', 'Ссылка'),
         ('sticker', 'Стикер'),
+        ('gif', 'Гифка'),
+        ('voice', 'Голосовое'),
     ]
 
     name = models.CharField("Название", max_length=1000, default="")
