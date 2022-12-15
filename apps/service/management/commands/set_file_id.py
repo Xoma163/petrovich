@@ -20,7 +20,8 @@ class Command(BaseCommand):
         event = TgEvent(bot=tg_bot)
         event.peer_id = 120712437
         mc = MemeCommand(tg_bot, event)
-        for meme in memes:
+        for i, meme in enumerate(memes):
+            print(f"{i + 1}/{len(memes)}")
             try:
                 mc.prepare_meme_to_send(meme)
             except PSkip:
