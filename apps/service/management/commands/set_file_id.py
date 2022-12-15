@@ -26,4 +26,4 @@ class Command(BaseCommand):
             except PSkip:
                 pass
             except Exception as e:
-                print
+                print(e)
