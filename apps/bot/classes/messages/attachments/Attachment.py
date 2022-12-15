@@ -29,10 +29,10 @@ class Attachment:
         self.name = None
 
     def set_private_download_url_tg(self, tg_bot, file_id):
-        r = tg_bot.requests.get('getFile', params={'file_id': file_id}).json()
+        r = tg_bot.requests.get('getFile', params={'file_id': file_id})
         if r.status_code != 200:
             return
-        file_path = r['result']['file_path']
+        file_path = r.json()['result']['file_path']
         self.private_download_url = f'https://{tg_bot.requests.API_TELEGRAM_URL}/file/bot{tg_bot.token}/{file_path}'
 
     def prepare_obj(self, file_like_object, allowed_exts_url=None, filename=None, guarantee_url=False):
