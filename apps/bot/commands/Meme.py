@@ -470,6 +470,12 @@ class Meme(Command):
                         video_content = requests.get(content_url).content
                         msg['attachments'] = [self.bot.upload_video(video_content, peer_id=self.event.peer_id)]
                         msg['text'] = self._get_youtube_timestamp(meme.link)
+
+                        r = self.bot.parse_and_send_msgs(msg, self.event.peer_id)
+                        file_id = r[0]['response'].json()['result']['video']['file_id']
+                        meme.tg_file_id = file_id
+                        meme.save()
+                        return
                     except PSkip:
                         msg['text'] = meme.link
                     except (PWarning, PError) as e:
@@ -483,11 +489,6 @@ class Meme(Command):
                         raise e
                     except Exception as e:
                         raise e
-                    r = self.bot.parse_and_send_msgs(msg, self.event.peer_id)
-                    file_id = r[0]['response'].json()['result']['video']['file_id']
-                    meme.tg_file_id = file_id
-                    meme.save()
-                    raise PSkip()
             else:
                 msg['text'] = meme.link
         elif self.event.platform == Platform.VK:
