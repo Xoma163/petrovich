@@ -1,3 +1,4 @@
+import threading
 from datetime import timedelta
 from typing import List
 from urllib.parse import urlparse, parse_qsl, quote, parse_qs
@@ -18,7 +19,7 @@ from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachmen
 from apps.bot.classes.messages.attachments.VoiceAttachment import VoiceAttachment
 from apps.bot.utils.utils import tanimoto, get_tg_formatted_text
 from apps.service.models import Meme as MemeModel
-from petrovich.settings import VK_URL
+from petrovich.settings import VK_URL, env
 
 
 class Meme(Command):
@@ -45,7 +46,8 @@ class Meme(Command):
 
     priority = 70
 
-    ALLOWED_URLS = ['youtu.be', 'youtube.com', 'coub.com']
+    YOUTUBE_URLS = ['youtu.be', 'youtube.com']
+    ALLOWED_URLS = YOUTUBE_URLS + ['coub.com']
 
     def accept(self, event):
         if event.command:
@@ -82,14 +84,6 @@ class Meme(Command):
         ]
         method = self.handle_menu(menu, arg0)
         return method()
-
-    def _check_allowed_url(self, url):
-        parsed_url = urlparse(url)
-        if not parsed_url.hostname:
-            raise PWarning("Не нашёл ссылку на youtube видео")
-
-        if parsed_url.hostname.replace('www.', '').lower() not in self.ALLOWED_URLS:
-            raise PWarning("Это ссылка не на youtube/coub видео")
 
     # MENU #
 
@@ -159,6 +153,10 @@ class Meme(Command):
                 raise PWarning("Добавление голосовух-мемов доступно только в TG")
             new_meme['tg_file_id'] = attachment.file_id
         new_meme_obj = MemeModel.objects.create(**new_meme)
+
+        # Кэш
+        if isinstance(attachment, LinkAttachment) and self._is_youtube_url(attachment.url):
+            self.set_youtube_file_id(new_meme_obj)
         if new_meme['approved']:
             return "Добавил"
 
@@ -228,6 +226,9 @@ class Meme(Command):
         for attr, value in fields.items():
             setattr(meme, attr, value)
         meme.save()
+        # Кэш
+        if isinstance(attachment, LinkAttachment) and self._is_youtube_url(attachment.url):
+            self.set_youtube_file_id(meme)
 
         if self.event.sender.check_role(Role.MODERATOR) or self.event.sender.check_role(Role.TRUSTED):
             return f'Обновил мем "{meme.name}"'
@@ -470,12 +471,8 @@ class Meme(Command):
                         video_content = requests.get(content_url).content
                         msg['attachments'] = [self.bot.upload_video(video_content, peer_id=self.event.peer_id)]
                         msg['text'] = self._get_youtube_timestamp(meme.link)
-
-                        r = self.bot.parse_and_send_msgs(msg, self.event.peer_id)
-                        file_id = r[0]['response'].json()['result']['video']['file_id']
-                        meme.tg_file_id = file_id
-                        meme.save()
-                        return
+                        self.set_youtube_file_id(meme)
+                        # return
                     except PSkip:
                         msg['text'] = meme.link
                     except (PWarning, PError) as e:
@@ -509,6 +506,44 @@ class Meme(Command):
             button = self.bot.get_button("Ещё", self.name)
             msg['keyboard'] = self.bot.get_inline_keyboard([button])
         return msg
+
+    def _check_allowed_url(self, url):
+        parsed_url = urlparse(url)
+        if not parsed_url.hostname:
+            raise PWarning("Не нашёл ссылку на youtube видео")
+
+        if parsed_url.hostname.replace('www.', '').lower() not in self.ALLOWED_URLS:
+            raise PWarning("Это ссылка не на youtube/coub видео")
+
+    def _is_youtube_url(self, url):
+        parsed_url = urlparse(url)
+        return parsed_url.hostname.replace('www.', '').lower() in self.YOUTUBE_URLS
+
+    def set_youtube_file_id(self, meme):
+        thread = threading.Thread(target=self._set_youtube_file_id, args=(meme,))
+        thread.start()
+
+    def _set_youtube_file_id(self, meme):
+        from apps.bot.APIs.YoutubeAPI import YoutubeAPI
+        from apps.bot.models import Chat
+
+        y_api = YoutubeAPI()
+        msg = {}
+        try:
+            content_url = y_api.get_video_download_url(meme.link, self.event.platform)
+            video_content = requests.get(content_url).content
+
+            video_uploading_chat = Chat.objects.get(pk=env.str("TG_PHOTO_UPLOADING_CHAT_PK"))
+            msg['attachments'] = [self.bot.upload_video(video_content, peer_id=video_uploading_chat.chat_id)]
+            r = self.bot.parse_and_send_msgs(msg, video_uploading_chat.chat_id)
+            r_json = r[0]['response'].json()
+            self.bot.delete_message(video_uploading_chat.chat_id, r_json['result']['message_id'])
+            file_id = r_json['result']['video']['file_id']
+            meme.tg_file_id = file_id
+            meme.save()
+            return
+        except:
+            return
 
     @staticmethod
     def _get_youtube_timestamp(link):
