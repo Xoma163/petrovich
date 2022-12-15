@@ -3,8 +3,10 @@ import json
 from apps.bot.classes.events.Event import Event
 from apps.bot.classes.messages.Message import Message
 from apps.bot.classes.messages.TgMessage import TgMessage
+from apps.bot.classes.messages.attachments.GifAttachment import GifAttachment
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 from apps.bot.classes.messages.attachments.StickerAttachment import StickerAttachment
+from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
 from apps.bot.classes.messages.attachments.VoiceAttachment import VoiceAttachment
 from petrovich.settings import env
 
@@ -115,6 +117,8 @@ class TgEvent(Event):
 
     def setup_attachments(self, message):
         photo = message.get('photo')
+        video = message.get('video')
+        gif = message.get('animation')
         voice = message.get('voice')
         document = message.get('document')
         sticker = message.get('sticker')
@@ -123,6 +127,12 @@ class TgEvent(Event):
             self.setup_voice(voice)
         elif photo:
             self.setup_photo(photo[-1])
+            message_text = message.get('caption')
+        elif video:
+            self.setup_video(video)
+            message_text = message.get('caption')
+        elif gif:
+            self.setup_gif(gif)
             message_text = message.get('caption')
         elif document:
             if document['mime_type'] in ['image/png', 'image/jpg', 'image/jpeg']:
@@ -139,6 +149,16 @@ class TgEvent(Event):
         tg_photo = PhotoAttachment()
         tg_photo.parse_tg_photo(photo_event, self.bot)
         self.attachments.append(tg_photo)
+
+    def setup_video(self, video_event):
+        tg_video = VideoAttachment()
+        tg_video.parse_tg_video(video_event, self.bot)
+        self.attachments.append(tg_video)
+
+    def setup_gif(self, gif_event):
+        tg_gif = GifAttachment()
+        tg_gif.parse_tg_gif(gif_event, self.bot)
+        self.attachments.append(tg_gif)
 
     def setup_voice(self, voice_event):
         tg_voice = VoiceAttachment()

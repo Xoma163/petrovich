@@ -26,6 +26,8 @@ class Attachment:
         # tg
         self.file_id = None
 
+        self.name = None
+
     def set_private_download_url_tg(self, tg_bot, file_id):
         file_path = tg_bot.requests.get('getFile', params={'file_id': file_id}).json()['result']['file_path']
         self.private_download_url = f'https://{tg_bot.requests.API_TELEGRAM_URL}/file/bot{tg_bot.token}/{file_path}'

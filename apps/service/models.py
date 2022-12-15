@@ -76,7 +76,7 @@ class Meme(models.Model):
     uses = models.PositiveIntegerField("Использований", default=0)
     approved = models.BooleanField("Разрешённый", default=False)
 
-    sticker_file_id = models.CharField("file_id стикера в телеграме", max_length=128, blank=True)
+    tg_file_id = models.CharField("file_id стикера в телеграме", max_length=128, blank=True)
 
     def get_info(self):
         return f"Название: {self.name}\n" \

@@ -17,6 +17,7 @@ from apps.bot.classes.messages.attachments.GifAttachment import GifAttachment
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 from apps.bot.classes.messages.attachments.StickerAttachment import StickerAttachment
 from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
+from apps.bot.classes.messages.attachments.VoiceAttachment import VoiceAttachment
 from apps.bot.commands.Meme import Meme
 from apps.bot.models import Profile
 from apps.bot.utils.utils import get_thumbnail_for_image, get_tg_formatted_url, get_chunks
@@ -144,6 +145,9 @@ class TgBot(CommonBot):
         if video.public_download_url:
             default_params['video'] = video.public_download_url
             return self.requests.get('sendVideo', default_params)
+        elif video.file_id:
+            default_params['video'] = video.file_id
+            return self.requests.get('sendVideo', default_params)
         else:
             if video.get_size_mb() > self.MAX_VIDEO_SIZE_MB:
                 rm.attachments = []
@@ -172,6 +176,9 @@ class TgBot(CommonBot):
         if gif.public_download_url:
             default_params['animation'] = gif.public_download_url
             return self.requests.get('sendAnimation', default_params)
+        elif gif.file_id:
+            default_params['animation'] = gif.file_id
+            return self.requests.get('sendAnimation', default_params)
         else:
             if gif.get_size_mb() > 40:
                 rm.attachments = []
@@ -185,6 +192,14 @@ class TgBot(CommonBot):
         sticker: StickerAttachment = rm.attachments[0]
         default_params['sticker'] = sticker.file_id
         return self.requests.get('sendSticker', default_params)
+
+    def _send_voice(self, rm: ResponseMessageItem, default_params):
+        """
+        Отправка голосовухи
+        """
+        voice: VoiceAttachment = rm.attachments[0]
+        default_params['voice'] = voice.file_id
+        return self.requests.get('sendVoice', default_params)
 
     def _send_text(self, default_params):
         self.set_activity(default_params['chat_id'], ActivitiesEnum.TYPING)
@@ -218,9 +233,18 @@ class TgBot(CommonBot):
                         "Bad Request: canceled by new editMessageMedia request",
                         "Bad Request: message is not modified: specified new message content and reply markup are exactly the same as a current content and reply markup of the message"
                     ]
+                    catch_errors = {
+                        'Bad Request: VOICE_MESSAGES_FORBIDDEN': "Не могу отправить голосовуху из-за ваших настроек безопасности"
+                    }
                     self.logger.error({'message': self.ERROR_MSG, 'error': response.json()['description']})
-                    if response.json()['description'] in skip_errors:
+                    error = response.json()['description']
+                    if error in skip_errors:
                         results.append({"success": False, "response": response, "response_message_item": rmi})
+                    elif error in catch_errors:
+                        msg = catch_errors[error]
+                        warn_rm = ResponseMessage(msg, rmi.peer_id).messages[0]
+                        response = self.send_response_message_item(warn_rm)
+                        results.append({"success": False, "response": response, "response_message_item": response})
                     else:
                         error_rm = ResponseMessage(self.ERROR_MSG, rmi.peer_id).messages[0]
                         response = self.send_response_message_item(error_rm)
@@ -280,6 +304,7 @@ class TgBot(CommonBot):
             AudioAttachment: self._send_audio,
             DocumentAttachment: self._send_document,
             StickerAttachment: self._send_sticker,
+            VoiceAttachment: self._send_voice,
         }
 
         if rm.attachments:

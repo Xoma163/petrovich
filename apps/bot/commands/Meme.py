@@ -10,10 +10,12 @@ from apps.bot.classes.bots.Bot import upload_image_to_vk_server, send_message_to
 from apps.bot.classes.consts.Consts import Role, Platform
 from apps.bot.classes.consts.Exceptions import PWarning, PError, PSkip
 from apps.bot.classes.messages.attachments.AudioAttachment import AudioAttachment
+from apps.bot.classes.messages.attachments.GifAttachment import GifAttachment
 from apps.bot.classes.messages.attachments.LinkAttachment import LinkAttachment
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 from apps.bot.classes.messages.attachments.StickerAttachment import StickerAttachment
 from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
+from apps.bot.classes.messages.attachments.VoiceAttachment import VoiceAttachment
 from apps.bot.utils.utils import tanimoto, get_tg_formatted_text
 from apps.service.models import Meme as MemeModel
 from petrovich.settings import VK_URL
@@ -93,7 +95,8 @@ class Meme(Command):
 
     def menu_add(self):
         self.check_args(2)
-        attachments = self.event.get_all_attachments([PhotoAttachment, StickerAttachment])
+        attachments = self.event.get_all_attachments(
+            [PhotoAttachment, StickerAttachment, VideoAttachment, GifAttachment, VoiceAttachment])
         if len(attachments) == 0:
             url = self.event.message.args_case[-1]
             self._check_allowed_url(url)
@@ -108,10 +111,9 @@ class Meme(Command):
         self.check_meme_name_is_no_digits(meme_name_list)
         meme_name = " ".join(meme_name_list)
 
-        if self.event.platform != Platform.VK and type(attachment) not in [PhotoAttachment, StickerAttachment,
-                                                                           LinkAttachment]:
-            raise PWarning(
-                'В данной платформе поддерживается добавление только картинок/стикеров-мемов и youtube/coub ссылок')
+        allowed_vk_types = [StickerAttachment, VideoAttachment, GifAttachment, VoiceAttachment]
+        if self.event.platform == Platform.VK and type(attachment) in allowed_vk_types:
+            raise PWarning('В вк не поддерживается этот тип вложений')
 
         new_meme = {
             'name': meme_name,
@@ -141,9 +143,21 @@ class Meme(Command):
         elif isinstance(attachment, StickerAttachment):
             if self.event.platform != Platform.TG:
                 raise PWarning("Добавление стикер-мемов доступно только в TG")
-            new_meme['sticker_file_id'] = attachment.file_id
+            new_meme['tg_file_id'] = attachment.file_id
             if not attachment.animated:
                 new_meme['link'] = upload_image_to_vk_server(attachment.download_content())
+        elif isinstance(attachment, VideoAttachment):
+            if self.event.platform != Platform.TG:
+                raise PWarning("Добавление видео-мемов доступно только в TG")
+            new_meme['tg_file_id'] = attachment.file_id
+        elif isinstance(attachment, GifAttachment):
+            if self.event.platform != Platform.TG:
+                raise PWarning("Добавление гифок-мемов доступно только в TG")
+            new_meme['tg_file_id'] = attachment.file_id
+        elif isinstance(attachment, VoiceAttachment):
+            if self.event.platform != Platform.TG:
+                raise PWarning("Добавление голосовух-мемов доступно только в TG")
+            new_meme['tg_file_id'] = attachment.file_id
         new_meme_obj = MemeModel.objects.create(**new_meme)
         if new_meme['approved']:
             return "Добавил"
@@ -196,7 +210,7 @@ class Meme(Command):
         elif isinstance(attachment, StickerAttachment):
             if self.event.platform != Platform.TG:
                 raise PWarning("Обновление стикер-мемов доступно только в TG")
-            fields['sticker_file_id'] = attachment.file_id
+            fields['tg_file_id'] = attachment.file_id
             if not attachment.animated:
                 fields['link'] = upload_image_to_vk_server(attachment.download_content())
         else:
@@ -417,10 +431,22 @@ class Meme(Command):
         if self.event.platform == Platform.TG:
             if meme.type == PhotoAttachment.TYPE:
                 msg['attachments'] = self.bot.upload_photo(meme.link, peer_id=self.event.peer_id)
-            elif meme.type == StickerAttachment.TYPE:
+            elif meme.type in [StickerAttachment.TYPE]:
                 sticker = StickerAttachment()
-                sticker.file_id = meme.sticker_file_id
+                sticker.file_id = meme.tg_file_id
                 msg['attachments'] = sticker
+            elif meme.type == VideoAttachment.TYPE:
+                video = VideoAttachment()
+                video.file_id = meme.tg_file_id
+                msg['attachments'] = video
+            elif meme.type == GifAttachment.TYPE:
+                gif = GifAttachment()
+                gif.file_id = meme.tg_file_id
+                msg['attachments'] = gif
+            elif meme.type == VoiceAttachment.TYPE:
+                voice = VoiceAttachment()
+                voice.file_id = meme.tg_file_id
+                msg['attachments'] = voice
             elif meme.type == LinkAttachment.TYPE:
                 from apps.bot.APIs.YoutubeAPI import YoutubeAPI
                 y_api = YoutubeAPI()
@@ -550,7 +576,7 @@ class Meme(Command):
                 qr = {
                     'id': meme.pk,
                     'type': meme.type,
-                    'sticker_file_id': meme.sticker_file_id,
+                    'tg_file_id': meme.tg_file_id,
                 }
             elif meme.type == LinkAttachment.TYPE:
                 parsed_url = urlparse(meme.link)
