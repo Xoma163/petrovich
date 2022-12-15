@@ -456,7 +456,7 @@ class Meme(Command):
                     msg['attachments'] = [self.bot.upload_video(video_content, peer_id=self.event.peer_id)]
                     t = parse_qs(urlparse(meme.link).query).get('t')
                     if t:
-                        t = t[0]
+                        t = t[0].rstrip('s')
                         h, m, s = str(timedelta(seconds=int(t))).split(":")
                         msg['text'] = f"{m}:{s}"
                 except PSkip:
