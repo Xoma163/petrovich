@@ -20,7 +20,7 @@ class MemeAdmin(admin.ModelAdmin):
     list_display = (
     'id', 'name', 'preview_image', 'preview_link', 'author', 'approved', 'type', 'uses', 'link', 'tg_file_id')
     search_fields = ('name',)
-    list_filter = (('author', admin.RelatedOnlyFieldListFilter), 'type', 'approved', 'tg_file_id')
+    list_filter = (('author', admin.RelatedOnlyFieldListFilter), 'type', 'approved',)
 
 
 @admin.register(Notify)

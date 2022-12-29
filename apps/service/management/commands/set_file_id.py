@@ -1,11 +1,6 @@
 from django.core.management import BaseCommand
-from django.db.models import Q
 
-from apps.bot.classes.bots.tg.TgBot import TgBot
-from apps.bot.classes.consts.Exceptions import PSkip
-from apps.bot.classes.events.TgEvent import TgEvent
-from apps.bot.commands.Meme import Meme as MemeCommand
-from apps.service.models import Meme
+from apps.service.models import Meme as MemeModel
 
 
 class Command(BaseCommand):
@@ -14,17 +9,6 @@ class Command(BaseCommand):
         super().__init__()
 
     def handle(self, *args, **kwargs):
-        q = Q(approved=True) & (Q(type='link', link__icontains="youtu") & Q(tg_file_id=''))
-        memes = Meme.objects.filter(q)
-        tg_bot = TgBot()
-        event = TgEvent(bot=tg_bot)
-        event.peer_id = 120712437
-        mc = MemeCommand(tg_bot, event)
-        for i, meme in enumerate(memes):
-            print(f"{i + 1}/{len(memes)}")
-            try:
-                mc.prepare_meme_to_send(meme)
-            except PSkip:
-                pass
-            except Exception as e:
-                print(e)
+        for meme in MemeModel.objects.filter(type='link', link__icontains="youtu", tg_file_id=''):
+            meme.type = 'link'
+            meme.save()
