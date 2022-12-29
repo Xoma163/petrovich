@@ -639,10 +639,14 @@ class Meme(Command):
                     'sticker_file_id': meme.tg_file_id,
                 })
             elif meme.type in [VideoAttachment.TYPE]:
-                qr.update({
-                    'video_file_id': meme.tg_file_id,
-                    'title': meme.name,
-                })
+                if meme.tg_file_id:
+                    qr.update({
+                        'video_file_id': meme.tg_file_id,
+                        'title': meme.name,
+                    })
+                else:
+                    continue
+
             elif meme.type in [GifAttachment.TYPE]:
                 qr.update({
                     'gif_file_id': meme.tg_file_id,
@@ -654,25 +658,28 @@ class Meme(Command):
                     'title': meme.name,
                 })
             elif meme.type == LinkAttachment.TYPE:
+                parsed_url = urlparse(meme.link)
+                video_id = parsed_url.path.strip('/')
+                if parsed_url.query:
+                    # dict cast
+                    query_dict = {x[0]: x[1] for x in parse_qsl(parsed_url.query)}
+                    v = query_dict.get('v', None)
+                    if v:
+                        video_id = v
+
+                ts = self._get_youtube_timestamp(meme.link)
+
                 if meme.tg_file_id:
                     qr.update({
+                        'id': meme.pk,
+                        'type': 'video',
                         'video_file_id': meme.tg_file_id,
                         'title': meme.name,
-                        'type': 'video',
+                        'thumb_url': f"https://img.youtube.com/vi/{video_id}/default.jpg"
                     })
-                    ts = self._get_youtube_timestamp(meme.link)
                     if ts:
                         qr['caption'] = ts
                 else:
-                    parsed_url = urlparse(meme.link)
-                    video_id = parsed_url.path.strip('/')
-                    if parsed_url.query:
-                        # dict cast
-                        query_dict = {x[0]: x[1] for x in parse_qsl(parsed_url.query)}
-                        v = query_dict.get('v', None)
-                        if v:
-                            video_id = v
-
                     qr = {
                         'id': meme.pk,
                         'type': "video",
@@ -684,6 +691,8 @@ class Meme(Command):
                             'message_text': meme.link
                         }
                     }
+                    if ts:
+                        qr['caption'] = ts
             else:
                 raise RuntimeError()
             _inline_qr.append(qr)
@@ -719,4 +728,4 @@ class Meme(Command):
         all_memes_qr += self._get_inline_qrs([x for x in memes if x.type == GifAttachment.TYPE])
         all_memes_qr += self._get_inline_qrs([x for x in memes if x.type == StickerAttachment.TYPE])
         all_memes_qr += self._get_inline_qrs([x for x in memes if x.type == PhotoAttachment.TYPE])
-        return all_memes_qr
+        return [all_memes_qr[5]]
