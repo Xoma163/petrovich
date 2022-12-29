@@ -14,7 +14,7 @@ class Command(BaseCommand):
         super().__init__()
 
     def handle(self, *args, **kwargs):
-        q = Q(approved=True) & (Q(type='link', link__icontains="youtu"))
+        q = Q(approved=True) & (Q(type='link', link__icontains="youtu") & Q(tg_file_id=''))
         memes = Meme.objects.filter(q)
         tg_bot = TgBot()
         event = TgEvent(bot=tg_bot)
