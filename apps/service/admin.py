@@ -17,9 +17,10 @@ class CounterAdmin(admin.ModelAdmin):
 
 @admin.register(Meme)
 class MemeAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'preview_image', 'preview_link', 'author', 'approved', 'type', 'uses')
+    list_display = (
+    'id', 'name', 'preview_image', 'preview_link', 'author', 'approved', 'type', 'uses', 'link', 'tg_file_id')
     search_fields = ('name',)
-    list_filter = (('author', admin.RelatedOnlyFieldListFilter), 'type', 'approved')
+    list_filter = (('author', admin.RelatedOnlyFieldListFilter), 'type', 'approved', 'tg_file_id')
 
 
 @admin.register(Notify)
