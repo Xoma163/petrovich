@@ -3,6 +3,7 @@ from urllib.parse import urlparse
 
 import requests
 import youtube_dl
+from urllib3.exceptions import MaxRetryError
 
 from apps.bot.APIs.InstagramAPI import InstagramAPI
 from apps.bot.APIs.PikabuAPI import PikabuAPI
@@ -218,7 +219,11 @@ class Media(Command):
 
     def get_instagram_attachment(self, url):
         i_api = InstagramAPI()
-        content_url = i_api.get_content_url(url)
+        try:
+            content_url = i_api.get_content_url(url)
+        except (MaxRetryError, requests.exceptions.ConnectionError):
+            raise PWarning("Инста забанена :(")
+
         if i_api.content_type == i_api.CONTENT_TYPE_IMAGE:
             return self.bot.upload_photo([content_url], peer_id=self.event.peer_id), ""
         elif i_api.content_type in [i_api.CONTENT_TYPE_VIDEO, i_api.CONTENT_TYPE_REEL]:
