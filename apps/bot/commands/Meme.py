@@ -728,4 +728,4 @@ class Meme(Command):
         all_memes_qr += self._get_inline_qrs([x for x in memes if x.type == GifAttachment.TYPE])
         all_memes_qr += self._get_inline_qrs([x for x in memes if x.type == StickerAttachment.TYPE])
         all_memes_qr += self._get_inline_qrs([x for x in memes if x.type == PhotoAttachment.TYPE])
-        return [all_memes_qr[5]]
+        return all_memes_qr
