@@ -120,6 +120,7 @@ class Notify(models.Model):
     repeat = models.BooleanField("Повторять", default=False)
     mention_sender = models.BooleanField("Упоминать автора", default=True)
     attachments = JSONField("Вложения", blank=True, default=dict)
+    message_thread_id = models.IntegerField("message_thread_id", blank=True, null=True, default=None)
 
     class Meta:
         verbose_name = "напоминание"
@@ -169,6 +170,8 @@ class Subscribe(models.Model):
     is_stream = models.BooleanField("Флаг стрима", blank=True, default=False)
     last_stream_status = models.BooleanField("Последнее состояние стрима", blank=True,
                                              default=False)  # True - активен, False - нет
+
+    message_thread_id = models.IntegerField("message_thread_id", blank=True, null=True, default=None)
 
     @property
     def peer_id(self):

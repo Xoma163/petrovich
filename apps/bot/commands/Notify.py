@@ -94,7 +94,8 @@ class Notify(Command):
             date=date,
             user=self.event.user,
             chat=self.event.chat,
-            text_for_filter=notify_datetime.strftime("%d.%m.%Y %H:%M")
+            text_for_filter=notify_datetime.strftime("%d.%m.%Y %H:%M"),
+            message_thread_id=self.event.message_thread_id
         )
 
         tg_att_flag = self.event.attachments and self.event.platform == Platform.TG

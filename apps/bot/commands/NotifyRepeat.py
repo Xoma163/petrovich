@@ -82,7 +82,8 @@ class NotifyRepeat(Command):
                 user=self.event.user,
                 chat=self.event.chat,
                 repeat=True,
-                text_for_filter=f'{crontab}'
+                text_for_filter=f'{crontab}',
+                message_thread_id=self.event.message_thread_id
             )
         else:
             notify = NotifyModel(
@@ -90,7 +91,8 @@ class NotifyRepeat(Command):
                 user=self.event.user,
                 chat=self.event.chat,
                 repeat=True,
-                text_for_filter=f'{notify_datetime.strftime("%H:%M")}'
+                text_for_filter=f'{notify_datetime.strftime("%H:%M")}',
+                message_thread_id=self.event.message_thread_id
             )
 
         tg_att_flag = self.event.attachments and self.event.platform == Platform.TG

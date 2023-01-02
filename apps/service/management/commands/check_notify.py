@@ -93,10 +93,10 @@ class Command(BaseCommand):
 
         # ToDo: notify message_thread_id
         if notify.chat:
-            bot.parse_and_send_msgs(result_msg, notify.chat.chat_id)
+            bot.parse_and_send_msgs(result_msg, notify.chat.chat_id, notify.message_thread_id)
         else:
             if not notify.text.startswith('/'):
-                bot.parse_and_send_msgs(result_msg, notify.user.user_id)
+                bot.parse_and_send_msgs(result_msg, notify.user.user_id, notify.message_thread_id)
 
     @staticmethod
     def send_command_notify_message(bot, notify):

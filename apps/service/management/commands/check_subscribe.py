@@ -93,7 +93,7 @@ class Command(BaseCommand):
                    f"{link}"
         logger.info(f"Отправил уведомление по подписке с id={sub.pk}")
         # ToDo: check message_thread_id
-        bot.parse_and_send_msgs(text, sub.peer_id)
+        bot.parse_and_send_msgs(text, sub.peer_id, sub.message_thread_id)
 
     @staticmethod
     def send_the_hole_file(sub, link):
@@ -104,4 +104,5 @@ class Command(BaseCommand):
         media_command = Media(bot, event)
         att, title = media_command.get_the_hole_video(link)
         # ToDo: check message_thread_id
-        bot.parse_and_send_msgs({'text': title, 'attachments': att}, peer_id=sub.peer_id)
+        msg = {'text': title, 'attachments': att}
+        bot.parse_and_send_msgs(msg, sub.peer_id, sub.message_thread_id)

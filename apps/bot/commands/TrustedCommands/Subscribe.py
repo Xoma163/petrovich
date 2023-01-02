@@ -75,7 +75,8 @@ class Subscribe(Command):
             date=date,
             service=service,
             last_video_id=last_video_id,
-            is_stream=is_stream
+            is_stream=is_stream,
+            message_thread_id=self.event.message_thread_id
         )
         sub.save()
         return f'Подписал на канал {title}'
