@@ -109,7 +109,7 @@ class Media(Command):
             reply_to = self.event.fwd[0].message.id
 
         res = self.bot.parse_and_send_msgs({'text': text, 'attachments': attachments, 'reply_to': reply_to},
-                                           self.event.peer_id)
+                                           self.event.peer_id, self.event.message_thread_id)
         if res[0]['success']:
             self.bot.delete_message(self.event.peer_id, self.event.message.id)
 
@@ -211,7 +211,7 @@ class Media(Command):
                     text = text[:start_pos] + tg_quote_text + text[end_pos:]
             if all_photos:
                 msg = {'attachments': self.bot.upload_photos(all_photos)}
-                self.bot.parse_and_send_msgs(msg, self.event.peer_id)
+                self.bot.parse_and_send_msgs(msg, self.event.peer_id, self.event.message_thread_id)
             return [], f"{rs.title}\n\n{text}"
         else:
             raise PWarning("Я хз чё за контент")
@@ -277,6 +277,6 @@ class Media(Command):
         cover_att = self.bot.upload_photo(cover, guarantee_url=True)
         if cover_att:
             msg = {'attachments': cover_att}
-            self.bot.parse_and_send_msgs(msg, self.event.peer_id)
+            self.bot.parse_and_send_msgs(msg, self.event.peer_id, self.event.message_thread_id)
         attachments = [audio_att]
         return attachments, title

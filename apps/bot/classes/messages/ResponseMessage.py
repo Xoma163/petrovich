@@ -8,15 +8,15 @@ from petrovich.settings import DEBUG
 
 
 class ResponseMessage:
-    def __init__(self, msgs, peer_id):
+    def __init__(self, msgs, peer_id, thread_message_id=None):
         self.messages = []
 
         if isinstance(msgs, list):
             for item in msgs:
-                rmi = ResponseMessageItem(item, peer_id)
+                rmi = ResponseMessageItem(item, peer_id, thread_message_id)
                 self.messages.append(rmi)
         else:
-            self.messages = [ResponseMessageItem(msgs, peer_id)] if msgs else []
+            self.messages = [ResponseMessageItem(msgs, peer_id, thread_message_id)] if msgs else []
 
     def to_log(self) -> dict:
         """
@@ -44,7 +44,7 @@ class ResponseMessage:
 class ResponseMessageItem:
     TG_TAGS = ['pre', 'code', 'i', 'b', 'u']
 
-    def __init__(self, msg, peer_id):
+    def __init__(self, msg, peer_id, message_thread_id=None):
         if isinstance(msg, str) or isinstance(msg, int) or isinstance(msg, float):
             msg = {'text': str(msg)}
 
@@ -56,6 +56,7 @@ class ResponseMessageItem:
         self.attachments = msg_copy.pop("attachments", [])
         self.message_id = msg_copy.pop("message_id", None)
         self.reply_to = msg_copy.pop("reply_to", None)
+        self.message_thread_id = message_thread_id
         if not isinstance(self.attachments, list):
             self.attachments = [self.attachments]
         self.keyboard = msg_copy.pop("keyboard", {})

@@ -88,13 +88,13 @@ class Horoscope(Command):
                         prepared_meme = meme_command.prepare_meme_to_send(meme)
                     except PWarning as e:
                         error_msg = f"{zodiac_sign_name}\n{str(e)}"
-                        self.bot.parse_and_send_msgs_thread(error_msg, self.event.peer_id)
+                        self.bot.parse_and_send_msgs_thread(error_msg, self.event.peer_id, self.event.message_thread_id)
                         continue
                     if prepared_meme.get('text', None):
                         prepared_meme['text'] = f"{zodiac_sign_name}\n{prepared_meme['text']}"
                     else:
                         prepared_meme['text'] = zodiac_sign_name
-                    self.bot.parse_and_send_msgs_thread(prepared_meme, self.event.peer_id)
+                    self.bot.parse_and_send_msgs_thread(prepared_meme, self.event.peer_id, self.event.message_thread_id)
                     sleep(1)
                 return
             elif self.event.message.args[0] in "инфо":

@@ -204,7 +204,7 @@ class MinecraftAPI:
                     users_notify = users_notify.exclude(pk__in=users_in_chat)
             for user in users_notify:
                 bot = get_bot_by_platform(user.get_default_platform_enum())
-                bot.parse_and_send_msgs_thread(message, user.user_id)
+                bot.parse_and_send_msgs_thread(message, user.user_id, self.event.message_thread_id)
 
         thread = threading.Thread(target=send_notify)
         thread.start()
@@ -223,7 +223,7 @@ class MinecraftAPI:
                 users_notify = Profile.objects.filter(groups__name=Role.MINECRAFT_NOTIFY.name)
                 for user in users_notify:
                     bot = get_bot_by_platform(user.get_default_platform_enum())
-                    bot.parse_and_send_msgs_thread(message, user.user_id)
+                    bot.parse_and_send_msgs_thread(message, user.user_id, self.event.message_thread_id)
 
             # Если событие уже было создано, значит пора отрубать
             else:
@@ -239,7 +239,7 @@ class MinecraftAPI:
                     users_notify = Profile.objects.filter(groups__name=Role.MINECRAFT_NOTIFY.name)
                     for user in users_notify:
                         bot = get_bot_by_platform(user.get_default_platform_enum())
-                        bot.parse_and_send_msgs_thread(message, user.user_id)
+                        bot.parse_and_send_msgs_thread(message, user.user_id, self.event.message_thread_id)
                 else:
                     obj.delete()
 

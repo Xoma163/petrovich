@@ -242,16 +242,16 @@ class TgBot(CommonBot):
                         results.append({"success": False, "response": response, "response_message_item": rmi})
                     elif error in catch_errors:
                         msg = catch_errors[error]
-                        warn_rm = ResponseMessage(msg, rmi.peer_id).messages[0]
+                        warn_rm = ResponseMessage(msg, rmi.peer_id, rmi.message_thread_id).messages[0]
                         response = self.send_response_message_item(warn_rm)
                         results.append({"success": False, "response": response, "response_message_item": response})
                     else:
-                        error_rm = ResponseMessage(self.ERROR_MSG, rmi.peer_id).messages[0]
+                        error_rm = ResponseMessage(self.ERROR_MSG, rmi.peer_id, rmi.message_thread_id).messages[0]
                         response = self.send_response_message_item(error_rm)
                         results.append({"success": False, "response": response, "response_message_item": response})
             # Предвиденная ошибка
             except (PWarning, PError) as e:
-                _error_rmi = ResponseMessageItem(e.msg, rmi.peer_id)
+                _error_rmi = ResponseMessageItem(e.msg, rmi.peer_id, rmi.message_thread_id)
                 getattr(self.logger, e.level)({'message': _error_rmi})
                 response = self.send_response_message_item(_error_rmi)
                 results.append({"success": False, "response": response, "response_message_item": _error_rmi})
@@ -292,6 +292,8 @@ class TgBot(CommonBot):
 
         if rm.reply_to:
             params['reply_to_message_id'] = rm.reply_to
+        if rm.message_thread_id:
+            params['message_thread_id'] = rm.message_thread_id
 
         if rm.message_id:
             params['message_id'] = rm.message_id

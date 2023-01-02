@@ -47,6 +47,9 @@ class Event:
 
         self.is_fwd = False
 
+        # Tg
+        self.message_thread_id: int = None
+
     def setup_event(self, is_fwd=False):
         """
         Метод по установке ивента у каждого бота. Переопределяется всегда

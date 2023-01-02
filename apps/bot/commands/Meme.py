@@ -255,7 +255,7 @@ class Meme(Command):
                        f'соответствует правилам или был удалён автором.'
             user = meme.author.get_user_by_default_platform()
             bot = get_bot_by_platform(user.get_platform_enum())
-            bot.parse_and_send_msgs(user_msg, user.user_id)
+            bot.parse_and_send_msgs(user_msg, user.user_id, self.event.message_thread_id)
 
         meme_name = meme.name
         meme.delete()
@@ -286,7 +286,7 @@ class Meme(Command):
         user_msg = f'Мем с названием "{meme.name}" подтверждён.'
         user = meme.author.get_user_by_default_platform()
         bot = get_bot_by_platform(user.get_platform_enum())
-        bot.parse_and_send_msgs(user_msg, user.user_id)
+        bot.parse_and_send_msgs(user_msg, user.user_id, self.event.message_thread_id)
 
         msg = f'Мем "{meme.name}" ({meme.id}) подтверждён'
         meme.approved = True
@@ -305,7 +305,7 @@ class Meme(Command):
         msg = f'Мем "{meme.name}" ({meme.id}) отклонён'
         user = meme.author.get_user_by_default_platform()
         bot = get_bot_by_platform(user.get_platform_enum())
-        bot.parse_and_send_msgs(msg, user.user_id)
+        bot.parse_and_send_msgs(msg, user.user_id, self.event.message_thread_id)
 
         meme.delete()
         return msg
@@ -336,7 +336,7 @@ class Meme(Command):
         if meme.author != self.event.sender:
             user = meme.author.get_user_by_default_platform()
             bot = get_bot_by_platform(user.get_platform_enum())
-            bot.parse_and_send_msgs(user_msg, user.user_id)
+            bot.parse_and_send_msgs(user_msg, user.user_id, self.event.message_thread_id)
         return user_msg
 
     def menu_info(self):
@@ -535,7 +535,7 @@ class Meme(Command):
 
             video_uploading_chat = Chat.objects.get(pk=env.str("TG_PHOTO_UPLOADING_CHAT_PK"))
             msg['attachments'] = [self.bot.upload_video(video_content, peer_id=video_uploading_chat.chat_id)]
-            r = self.bot.parse_and_send_msgs(msg, video_uploading_chat.chat_id)
+            r = self.bot.parse_and_send_msgs(msg, video_uploading_chat.chat_id, self.event.message_thread_id)
             r_json = r[0]['response'].json()
             self.bot.delete_message(video_uploading_chat.chat_id, r_json['result']['message_id'])
             file_id = r_json['result']['video']['file_id']

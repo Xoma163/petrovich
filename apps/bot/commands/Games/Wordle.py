@@ -95,7 +95,7 @@ class Wordle(Command):
             print(delta_messages)
             if delta_messages > 8:
                 old_msg_id = session.message_id
-                r = self.bot.parse_and_send_msgs(msg, self.event.peer_id)[0]
+                r = self.bot.parse_and_send_msgs(msg, self.event.peer_id, self.event.message_thread_id)[0]
                 message_id = r['response'].json()['result']['message_id']
                 session.message_id = message_id
                 session.save()
@@ -104,9 +104,11 @@ class Wordle(Command):
                 r = self.bot.parse_and_send_msgs({
                     'text': msg,
                     'message_id': session.message_id},
-                    self.event.peer_id)[0]
+                    self.event.peer_id,
+                    self.event.message_thread_id
+                )[0]
             if not r['success']:
-                r = self.bot.parse_and_send_msgs({'text': msg}, self.event.peer_id)[0]
+                r = self.bot.parse_and_send_msgs({'text': msg}, self.event.peer_id, self.event.message_thread_id)[0]
                 message_id = r['response'].json()['result']['message_id']
                 session.message_id = message_id
                 session.save()

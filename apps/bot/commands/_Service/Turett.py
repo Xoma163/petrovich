@@ -34,4 +34,4 @@ class Turett(Command):
                     msg = {'attachments': tg_sticker}
             else:
                 msg = random_event(TURETT_WORDS)
-            event.bot.parse_and_send_msgs(msg, event.peer_id)
+            event.bot.parse_and_send_msgs(msg, event.peer_id, event.message_thread_id)

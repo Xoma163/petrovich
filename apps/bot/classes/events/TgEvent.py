@@ -17,6 +17,7 @@ class TgEvent(Event):
         super().__init__(raw_event, bot)
 
         self.inline_mode: bool = False
+
         self.inline_data = {
             'query_id': None,
             'query': None,
@@ -53,6 +54,8 @@ class TgEvent(Event):
                 message = my_chat_member
             else:
                 message = self.raw.get('message')
+
+        self.message_thread_id = message.get('message_thread_id')
 
         self.peer_id = message['chat']['id']
         self.from_id = message['from']['id']

@@ -91,6 +91,7 @@ class Command(BaseCommand):
         result_msg = {'text': message, 'attachments': attachments}
         logger.info(f"Отправил напоминание по id={notify.pk}")
 
+        # ToDo: notify message_thread_id
         if notify.chat:
             bot.parse_and_send_msgs(result_msg, notify.chat.chat_id)
         else:
