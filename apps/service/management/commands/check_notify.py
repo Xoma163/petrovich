@@ -107,6 +107,7 @@ class Command(BaseCommand):
             event.set_message(notify.text)
             event.sender = notify.user.profile
             event.is_from_user = True
+            event.message_thread_id = notify.message_thread_id
             if notify.chat:
                 event.peer_id = notify.chat.chat_id
                 event.chat = notify.chat
