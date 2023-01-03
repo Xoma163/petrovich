@@ -481,8 +481,11 @@ class Meme(Command):
                     except (PWarning, PError) as e:
                         button = self.bot.get_button("Инфо", self.name, ["инфо", str(meme.pk)])
                         if meme.type == LinkAttachment.TYPE:
-                            button2 = self.bot.get_button("Поиск", None,
-                                                          url=f"https://www.youtube.com/results?search_query={meme.name}")
+                            button2 = self.bot.get_button(
+                                "Поиск",
+                                None,
+                                url=f"https://www.youtube.com/results?search_query={meme.name}"
+                            )
                             e.keyboard = self.bot.get_inline_keyboard([button, button2], 2)
                         else:
                             e.keyboard = self.bot.get_inline_keyboard([button], 1)
@@ -545,7 +548,7 @@ class Meme(Command):
             meme.tg_file_id = file_id
             meme.save()
             return
-        except:
+        except Exception:
             return
 
     @staticmethod
@@ -593,7 +596,7 @@ class Meme(Command):
     @staticmethod
     def get_id_or_meme_name(args):
         """
-        Возвращает int если это id и передан только один аргумент
+        Возвращает int если это id и передан только один аргумент.
         Возвращает str если это name
         """
         if isinstance(args, str):
@@ -709,8 +712,8 @@ class Meme(Command):
             filtered_memes = MemeModel.objects.all().order_by('-uses')
 
         q = Q(approved=True) & (
-                Q(type='link', link__icontains="youtu") | Q(type='photo') | Q(type='sticker') | Q(type='video') | Q(
-            type='voice') | Q(type='gif'))
+                Q(type='link', link__icontains="youtu") |
+                Q(type__in=['photo', 'sticker', 'video', 'voice', 'gif']))
         memes = filtered_memes.filter(q)
 
         all_memes_qr = []
@@ -725,10 +728,14 @@ class Meme(Command):
         memes = memes[:max_count]
         memes = self.get_tanimoto_memes(memes, filter_list)
         # ToDo: wtf?
-        all_memes_qr += self._get_inline_qrs([x for x in memes if x.type == VoiceAttachment.TYPE])
-        all_memes_qr += self._get_inline_qrs([x for x in memes if x.type == LinkAttachment.TYPE])
-        all_memes_qr += self._get_inline_qrs([x for x in memes if x.type == VideoAttachment.TYPE])
-        all_memes_qr += self._get_inline_qrs([x for x in memes if x.type == GifAttachment.TYPE])
-        all_memes_qr += self._get_inline_qrs([x for x in memes if x.type == StickerAttachment.TYPE])
-        all_memes_qr += self._get_inline_qrs([x for x in memes if x.type == PhotoAttachment.TYPE])
+        att_types = [
+            VoiceAttachment.TYPE,
+            LinkAttachment.TYPE,
+            VideoAttachment.TYPE,
+            GifAttachment.TYPE,
+            StickerAttachment.TYPE,
+            PhotoAttachment.TYPE
+        ]
+        for att_type in att_types:
+            all_memes_qr += self._get_inline_qrs(list(filter(lambda x: x.type == att_type, memes)))
         return all_memes_qr
