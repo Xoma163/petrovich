@@ -175,6 +175,8 @@ class TgEvent(Event):
 
     def setup_fwd(self, fwd):
         if fwd:
+            if fwd['message_id'] == fwd['message_thread_id']:
+                return
             fwd_event = TgEvent(fwd, self.bot)
             fwd_event.setup_event(is_fwd=True)
             self.fwd = [fwd_event]

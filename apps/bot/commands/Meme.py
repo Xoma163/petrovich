@@ -446,9 +446,12 @@ class Meme(Command):
                 sticker.file_id = meme.tg_file_id
                 msg['attachments'] = sticker
             elif meme.type == VideoAttachment.TYPE:
-                video = VideoAttachment()
-                video.file_id = meme.tg_file_id
-                msg['attachments'] = video
+                if meme.tg_file_id:
+                    video = VideoAttachment()
+                    video.file_id = meme.tg_file_id
+                    msg['attachments'] = video
+                else:
+                    msg['text'] = meme.link
             elif meme.type == GifAttachment.TYPE:
                 gif = GifAttachment()
                 gif.file_id = meme.tg_file_id
