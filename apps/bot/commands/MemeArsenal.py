@@ -23,4 +23,4 @@ class MemeArsenal(Command):
             text_list.append(f"{i + 1}. {meme['title']}")
         text = "\n".join(text_list)
 
-        return {'text': f"Результаты по запросу '{self.event.message.args_str}\n\n{text}'", 'attachments': attachments}
+        return {'text': f"Результаты по запросу '{self.event.message.args_str}'\n\n{text}", 'attachments': attachments}
