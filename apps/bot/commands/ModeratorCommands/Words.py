@@ -14,6 +14,7 @@ class Words(Command):
     name = "слова"
     help_text = "принудительно затягивает слова с Google Drive"
     access = Role.MODERATOR
+    mentioned = True
 
     def start(self):
         return self.get_words()
