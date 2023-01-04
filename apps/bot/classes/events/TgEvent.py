@@ -66,7 +66,10 @@ class TgEvent(Event):
         else:
             self.is_from_pm = True
 
-        _from = message['from']
+        if self.is_fwd:
+            _from = message['forward_from']
+        else:
+            _from = message['from']
         if _from['is_bot']:
             self.is_from_bot = True
         else:
