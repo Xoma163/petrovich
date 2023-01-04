@@ -75,7 +75,7 @@ class Meme(Command):
             [['добавить'], self.menu_add],
             [['обновить'], self.menu_refresh],
             [['удалить'], self.menu_delete],
-            [['подтвердить', 'принять', '+'], self.menu_confirm],
+            [['подтвердить', 'принять', '+'], self.menu_approve],
             [['отклонить', 'отменить', '-'], self.menu_reject],
             [['переименовать', 'правка'], self.menu_rename],
             [['инфо'], self.menu_info],
@@ -164,6 +164,10 @@ class Meme(Command):
         meme_to_send['text'] = "Запрос на подтверждение мема:\n" \
                                f"{new_meme_obj.author}\n" \
                                f"{new_meme_obj.name} ({new_meme_obj.id})"
+
+        button_approve = self.bot.get_button("Подтвердить", self.name, args=["подтвердить", new_meme_obj.pk])
+        button_decline = self.bot.get_button("Отклонить", self.name, args=["отклонить", new_meme_obj.pk])
+        meme_to_send['keyboard'] = self.bot.get_inline_keyboard([button_approve, button_decline])
 
         # Отправка сообщения в модераторную
         send_message_to_moderator_chat(meme_to_send)
@@ -265,7 +269,7 @@ class Meme(Command):
         meme = MemeModel.objects.filter(approved=True).order_by('?').first()
         return self.prepare_meme_to_send(meme, print_name=True, send_keyboard=True)
 
-    def menu_confirm(self):
+    def menu_approve(self):
         self.check_sender(Role.MODERATOR)
 
         if len(self.event.message.args) == 1:
