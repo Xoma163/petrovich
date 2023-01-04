@@ -371,6 +371,13 @@ def get_tg_strike_text(text: str) -> str:
     return f"<s>{text}</s>"
 
 
+def get_tg_spoiler_text(text: str) -> str:
+    """
+    Спойлер-текст в телеграмме (html)
+    """
+    return f'<span class="tg-spoiler">{text}</span>'
+
+
 def fix_layout(s):
     new_s = ""
     for letter in s:

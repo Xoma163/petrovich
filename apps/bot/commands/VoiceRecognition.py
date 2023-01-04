@@ -8,6 +8,7 @@ from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning, PSkip
 from apps.bot.classes.messages.attachments.VoiceAttachment import VoiceAttachment
+from apps.bot.utils.utils import get_tg_bold_text, get_tg_spoiler_text
 
 
 class VoiceRecognition(Command):
@@ -56,13 +57,26 @@ class VoiceRecognition(Command):
 
         reply_to = self.event.message.id
         try:
-            msg = r.recognize_google(audio, language='ru_RU', pfilter=0)
-            return {'text': msg, 'reply_to': reply_to}
+            msg: str = r.recognize_google(audio, language='ru_RU', pfilter=0)
+            # return {'text': msg, 'reply_to': reply_to}
         except sr.UnknownValueError:
             raise PWarning("Ничего не понял((", reply_to=reply_to)
         except sr.RequestError as e:
             print(str(e))
             raise PWarning("Проблема с форматом")
+
+        if self.event.platform != Platform.TG:
+            return msg
+
+        spoiler_text = "спойлер"
+        if spoiler_text not in msg.lower():
+            return msg
+
+        spoiler_index = msg.lower().index(spoiler_text)
+        text_before_spoiler = msg[:spoiler_index]
+        text_after_spoiler = msg[spoiler_index + len(spoiler_text):]
+
+        return text_before_spoiler + get_tg_bold_text(spoiler_text) + get_tg_spoiler_text(text_after_spoiler)
 
 
 # переопределение класса для отключения pFilter
