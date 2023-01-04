@@ -1,6 +1,6 @@
 import os
 import pickle
-from datetime import datetime
+from datetime import datetime, timedelta
 from urllib.parse import urlparse, parse_qsl
 
 import googleapiclient.discovery
@@ -10,7 +10,6 @@ from bs4 import BeautifulSoup
 from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
 
-from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning, PSkip
 from apps.bot.utils.NothingLogger import NothingLogger
@@ -24,8 +23,17 @@ class YoutubeAPI:
 
         self._youtube_api_client = None
 
-    def get_timecode(self, url):
+    @staticmethod
+    def get_timecode(url):
         return dict(parse_qsl(urlparse(url).query)).get('t')
+
+    def get_timecode_str(self, url):
+        t = self.get_timecode(url)
+        if t:
+            t = t[0].rstrip('s')
+            h, m, s = str(timedelta(seconds=int(t))).split(":")
+            return f"{m}:{s}"
+        return None
 
     def get_last_video(self, channel_id):
         response = requests.get(f"https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}")
@@ -66,6 +74,8 @@ class YoutubeAPI:
             for video in videos:
                 filesize = video.get('filesize') or video.get('filesize_approx')
                 if filesize:
+                    from apps.bot.classes.bots.tg.TgBot import TgBot
+
                     if filesize / 1024 / 1024 < TgBot.MAX_VIDEO_SIZE_MB:
                         max_quality_video = video
                         break

@@ -1,11 +1,11 @@
 import threading
-from datetime import timedelta
 from typing import List
-from urllib.parse import urlparse, parse_qsl, quote, parse_qs
+from urllib.parse import urlparse, parse_qsl, quote
 
 import requests
 from django.db.models import Q
 
+from apps.bot.APIs.YoutubeAPI import YoutubeAPI
 from apps.bot.classes.Command import Command
 from apps.bot.classes.bots.Bot import upload_image_to_vk_server, send_message_to_moderator_chat, get_bot_by_platform
 from apps.bot.classes.consts.Consts import Role, Platform
@@ -465,15 +465,15 @@ class Meme(Command):
                     video = VideoAttachment()
                     video.file_id = meme.tg_file_id
                     msg['attachments'] = video
-                    msg['text'] = self._get_youtube_timestamp(meme.link)
+                    y_api = YoutubeAPI()
+                    msg['text'] = y_api.get_timecode_str(meme.link)
                 else:
-                    from apps.bot.APIs.YoutubeAPI import YoutubeAPI
                     y_api = YoutubeAPI()
                     try:
                         content_url = y_api.get_video_download_url(meme.link, self.event.platform)
                         video_content = requests.get(content_url).content
                         msg['attachments'] = [self.bot.upload_video(video_content, peer_id=self.event.peer_id)]
-                        msg['text'] = self._get_youtube_timestamp(meme.link)
+                        msg['text'] = y_api.get_timecode_str(meme.link)
                         self.set_youtube_file_id(meme)
                         # return
                     except PSkip:
@@ -550,15 +550,6 @@ class Meme(Command):
             return
         except Exception:
             return
-
-    @staticmethod
-    def _get_youtube_timestamp(link):
-        t = parse_qs(urlparse(link).query).get('t')
-        if t:
-            t = t[0].rstrip('s')
-            h, m, s = str(timedelta(seconds=int(t))).split(":")
-            return f"{m}:{s}"
-        return None
 
     @staticmethod
     def get_tanimoto_memes(memes, filter_list) -> List[MemeModel]:
@@ -673,7 +664,8 @@ class Meme(Command):
                     if v:
                         video_id = v
 
-                ts = self._get_youtube_timestamp(meme.link)
+                y_api = YoutubeAPI()
+                ts = y_api.get_timecode_str(meme.link)
 
                 if meme.tg_file_id:
                     qr.update({

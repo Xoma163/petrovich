@@ -141,12 +141,15 @@ class Media(Command):
 
     def get_youtube_video(self, url):
         y_api = YoutubeAPI()
-        if y_api.get_timecode(url):
-            raise PSkip()
+        timecode = y_api.get_timecode_str(url)
         content_url = y_api.get_video_download_url(url, self.event.platform)
         video_content = requests.get(content_url).content
         attachments = [self.bot.upload_video(video_content, peer_id=self.event.peer_id)]
-        return attachments, y_api.title
+
+        text = y_api.title
+        if timecode:
+            text = f"{text}\n\n{timecode}"
+        return attachments, text
 
     def get_tiktok_video(self, url):
         ttd_api = TikTokDownloaderAPI()
