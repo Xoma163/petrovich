@@ -7,6 +7,10 @@ class AudioAttachment(Attachment):
     def __init__(self):
         super().__init__(self.TYPE)
         self.duration = None
+        self.thumb = None
+
+        self.artist = None
+        self.title = None
 
     def parse_vk_audio(self, event_audio):
         from petrovich.settings import VK_URL

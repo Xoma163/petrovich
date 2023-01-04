@@ -88,12 +88,17 @@ class TgBot(CommonBot):
         files = []
         for attachment in rm.attachments:
             if attachment.file_id:
-                media.append({'type': attachment.type, 'media': attachment.file_id, 'caption': rm.text})
+                media.append({'type': attachment.type, 'media': attachment.file_id})
             elif attachment.public_download_url:
-                media.append({'type': attachment.type, 'media': attachment.public_download_url, 'caption': rm.text})
+                media.append({'type': attachment.type, 'media': attachment.public_download_url})
             else:
-                # https://music.yandex.ru/album/8081182/track/55359542.append({attachment.type: attachment.content})
                 files.append({'type': attachment.type, 'media': attachment.content})
+
+        if len(media) > 0:
+            media[0]['caption'] = rm.text
+        # if len(files) > 0:
+        #     files[0]['caption'] = rm.text
+
         del default_params['caption']
         default_params['media'] = json.dumps(media)
         if not files:
@@ -161,11 +166,21 @@ class TgBot(CommonBot):
         """
         self.set_activity(default_params['chat_id'], ActivitiesEnum.UPLOAD_AUDIO)
         audio: AudioAttachment = rm.attachments[0]
+
+        if audio.artist:
+            default_params['performer'] = audio.artist
+        if audio.title:
+            default_params['title'] = audio.title
+
         if audio.public_download_url:
             default_params['audio'] = audio.public_download_url
             return self.requests.get('sendAudio', default_params)
         else:
-            return self.requests.get('sendAudio', default_params, files={'audio': audio.content})
+            files = {'audio': audio.content}
+            if audio.thumb:
+                thumb_file = self.upload_photo(audio.thumb, guarantee_url=True)
+                files['thumb'] = thumb_file.get_bytes_io_content()
+            return self.requests.get('sendAudio', default_params, files=files)
 
     def _send_gif(self, rm: ResponseMessageItem, default_params):
         """

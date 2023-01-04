@@ -20,8 +20,7 @@ class Find(Command):
             photo_results = self.get_photo_results(query)
         except PWarning as e:
             photo_results = str(e)
-        result = [f"Результаты по запросу '{query}'", photo_results]
-        return result
+        return photo_results
 
     def get_photo_results(self, query):
         count = 5
@@ -47,4 +46,4 @@ class Find(Command):
             attachments = self.bot.upload_photos(urls, 5)
         if len(attachments) == 0:
             raise PWarning("Ничего не нашёл по картинкам")
-        return {'attachments': attachments}
+        return {'text': f"Результаты по запросу '{query}'", 'attachments': attachments}

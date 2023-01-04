@@ -43,7 +43,7 @@ class YandexMusicAPI:
         self.albums = ", ".join([album.title for album in track.albums])
         self.title = track.title
         self.artists = ", ".join([artist.name for artist in track.artists])
-        self.cover_url = f'https://{track.cover_uri.replace("%%", "400x400")}'
+        self.cover_url = f'https://{track.cover_uri.replace("%%", "300x300")}'
         info = track.get_download_info()[0]
         self.bitrate = info.bitrate_in_kbps
         self.format = info.codec

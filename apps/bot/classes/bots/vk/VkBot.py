@@ -94,16 +94,13 @@ class VkBot(CommonBot):
 
     # ATTACHMENTS
 
-    def upload_audio(self, audio, peer_id=None, title=None, filename=None):
-        pass
-
-    def upload_photos(self, images, max_count=10, peer_id=None, allowed_exts_url=None):
+    def upload_photos(self, images, max_count=10, peer_id=None, allowed_exts_url=None, guarantee_url=False):
         """
         Загрузка фотографий на сервер ТГ.
         images: список изображений в любом формате (ссылки, байты, файлы)
         При невозможности загрузки одной из картинки просто пропускает её
         """
-        atts = super().upload_photos(images, max_count, allowed_exts_url=allowed_exts_url)
+        atts = super().upload_photos(images, max_count, allowed_exts_url=allowed_exts_url, guarantee_url=guarantee_url)
         parsed_atts = []
         for pa in atts:
             try:

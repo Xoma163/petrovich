@@ -342,7 +342,7 @@ class Bot(Thread):
     # END USERS GROUPS BOTS
 
     # ATTACHMENTS
-    def upload_photos(self, images, max_count=10, peer_id=None, allowed_exts_url=None):
+    def upload_photos(self, images, max_count=10, peer_id=None, allowed_exts_url=None, guarantee_url=False):
         """
         Загрузка фотографий на сервер ТГ.
         images: список изображений в любом формате (ссылки, байты, файлы)
@@ -353,7 +353,7 @@ class Bot(Thread):
         attachments = []
         for image in images:
             try:
-                att = self.upload_photo(image, peer_id, allowed_exts_url)
+                att = self.upload_photo(image, peer_id, allowed_exts_url, guarantee_url)
                 attachments.append(att)
             except Exception:
                 continue
@@ -380,11 +380,14 @@ class Bot(Thread):
         da.parse_response(document, filename=filename)
         return da
 
-    def upload_audio(self, audio, peer_id=None, title=None, filename=None):
+    def upload_audio(self, audio, peer_id=None, title=None, artist=None, filename=None, thumb=None):
         if peer_id:
             self.set_activity(peer_id, ActivitiesEnum.UPLOAD_AUDIO)
         va = AudioAttachment()
         va.parse_response(audio, filename=filename)
+        va.thumb = thumb
+        va.title = title
+        va.artist = artist
         return va
 
     def upload_video(self, document, peer_id=None, title='Документ', filename=None):
