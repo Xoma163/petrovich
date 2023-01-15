@@ -54,8 +54,9 @@ class TgEvent(Event):
                 message = my_chat_member
             else:
                 message = self.raw.get('message')
-
-        self.message_thread_id = message.get('message_thread_id')
+        is_topic_message = message.get('is_topic_message')
+        if is_topic_message:
+            self.message_thread_id = message.get('message_thread_id')
 
         self.peer_id = message['chat']['id']
         self.from_id = message['from']['id']
