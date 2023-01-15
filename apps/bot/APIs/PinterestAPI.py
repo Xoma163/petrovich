@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 class PinterestAPI:
     IMAGE = "image"
     VIDEO = "video"
+    GIF = "gif"
 
     def __init__(self, url):
         self.url = url
@@ -28,7 +29,12 @@ class PinterestAPI:
 
     def get_photo(self, bs4):
         self.type = self.IMAGE
-        return json.loads(bs4.find("script", {'data-test-id': 'leaf-snippet'}).text)['image']
+        image = json.loads(bs4.find("script", {'data-test-id': 'leaf-snippet'}).text)
+        self.title = image['headline']
+        image_url = image['image']
+        if image_url.endswith('.gif') or image_url.endswith('.gifv'):
+            self.type = self.GIF
+        return image_url
 
     def get_video(self, bs4):
         self.type = self.VIDEO
@@ -41,3 +47,7 @@ class PinterestAPI:
     @property
     def is_image(self):
         return self.type == self.IMAGE
+
+    @property
+    def is_gif(self):
+        return self.type == self.GIF

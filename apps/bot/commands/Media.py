@@ -289,6 +289,8 @@ class Media(Command):
             attachments = [self.bot.upload_video(content, peer_id=self.event.peer_id)]
         elif p_api.is_image:
             attachments = [self.bot.upload_photo(content, peer_id=self.event.peer_id)]
+        elif p_api.is_gif:
+            attachments = [self.bot.upload_gif(content, peer_id=self.event.peer_id)]
         else:
             raise PWarning("Я хз чё за контент")
 
