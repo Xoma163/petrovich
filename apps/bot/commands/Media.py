@@ -7,6 +7,7 @@ from urllib3.exceptions import MaxRetryError
 
 from apps.bot.APIs.InstagramAPI import InstagramAPI
 from apps.bot.APIs.PikabuAPI import PikabuAPI
+from apps.bot.APIs.PinterestAPI import PinterestAPI
 from apps.bot.APIs.RedditSaver import RedditSaver
 from apps.bot.APIs.TheHoleAPI import TheHoleAPI
 from apps.bot.APIs.TikTokDownloaderAPI import TikTokDownloaderAPI
@@ -28,6 +29,7 @@ PIKABU_URLS = ('www.pikabu.ru', 'pikabu.ru')
 THE_HOLE_URLS = ('www.the-hole.tv', 'the-hole.tv')
 WASD_URLS = ('www.wasd.tv', 'wasd.tv')
 YANDEX_MUSIC_URLS = ('music.yandex.ru',)
+PINTEREST_URLS = ('pinterest.com', 'ru.pinterest.com', 'www.pinterest.com')
 
 MEDIA_URLS = tuple(
     list(YOUTUBE_URLS) +
@@ -38,7 +40,8 @@ MEDIA_URLS = tuple(
     list(PIKABU_URLS) +
     list(THE_HOLE_URLS) +
     list(WASD_URLS) +
-    list(YANDEX_MUSIC_URLS)
+    list(YANDEX_MUSIC_URLS) +
+    list(PINTEREST_URLS)
 )
 
 
@@ -124,6 +127,7 @@ class Media(Command):
             THE_HOLE_URLS: self.get_the_hole_video,
             WASD_URLS: self.get_wasd_video,
             YANDEX_MUSIC_URLS: self.get_yandex_music,
+            PINTEREST_URLS: self.get_pinterest_attachment,
         }
 
         method = None
@@ -277,3 +281,15 @@ class Media(Command):
         audio_att = self.bot.upload_audio(audiofile, peer_id=self.event.peer_id, filename=f"{title}.{track.format}",
                                           thumb=track.cover_url, artist=track.artists, title=track.title)
         return [audio_att], ""
+
+    def get_pinterest_attachment(self, url):
+        p_api = PinterestAPI(url)
+        content = p_api.get_attachment()
+        if p_api.is_video:
+            attachments = [self.bot.upload_video(content, peer_id=self.event.peer_id)]
+        elif p_api.is_image:
+            attachments = [self.bot.upload_photo(content, peer_id=self.event.peer_id)]
+        else:
+            raise PWarning("Я хз чё за контент")
+
+        return attachments, p_api.title

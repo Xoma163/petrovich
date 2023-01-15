@@ -35,7 +35,7 @@ class YandexMusicAPI:
         self.format = ""
 
     def download_track(self):
-        client = YandeClient(request=YandexRequest(), token=self.ACCESS_TOKEN)
+        client = YandexClient(request=YandexRequest(), token=self.ACCESS_TOKEN)
         client.notice_displayed = True
         client.init()
 
@@ -60,7 +60,7 @@ class YandexRequest(Request):
 
 
 # service redefinition
-class YandeClient(Client):
+class YandexClient(Client):
     def __init__(self, token: str = None, base_url: str = None, request: Request = None, language: str = 'ru',
                  report_unknown_fields=False):
         self.logger = logging.getLogger('yandex_music.client')
