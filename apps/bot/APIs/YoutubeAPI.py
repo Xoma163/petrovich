@@ -30,7 +30,7 @@ class YoutubeAPI:
     def get_timecode_str(self, url):
         t = self.get_timecode(url)
         if t:
-            t = t[0].rstrip('s')
+            t = t.rstrip('s')
             h, m, s = str(timedelta(seconds=int(t))).split(":")
             return f"{m}:{s}"
         return None
