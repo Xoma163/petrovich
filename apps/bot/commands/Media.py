@@ -299,7 +299,7 @@ class Media(Command):
 
     def get_tg_inline_media(self, url):
         method, chosen_url = self.get_method_and_chosen_url(url)
-        attachments, title = method(chosen_url)
+        attachments, _ = method(chosen_url)
         tg_file_id = self._get_file_id(attachments[0], 'audio')
         source_hostname = str(urlparse(chosen_url).hostname).lstrip('www.')
         text = f'\nИсточник: {get_tg_formatted_url(source_hostname, chosen_url)}'
