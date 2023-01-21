@@ -17,8 +17,10 @@ from apps.bot.APIs.YoutubeAPI import YoutubeAPI
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning, PSkip
+from apps.bot.models import Chat
 from apps.bot.utils.NothingLogger import NothingLogger
 from apps.bot.utils.utils import get_urls_from_text, get_tg_formatted_url, get_tg_bold_text, get_tg_formatted_text_line
+from petrovich.settings import env
 
 YOUTUBE_URLS = ('www.youtube.com', 'youtube.com', "www.youtu.be", "youtu.be")
 REDDIT_URLS = ("www.reddit.com",)
@@ -29,7 +31,7 @@ PIKABU_URLS = ('www.pikabu.ru', 'pikabu.ru')
 THE_HOLE_URLS = ('www.the-hole.tv', 'the-hole.tv')
 WASD_URLS = ('www.wasd.tv', 'wasd.tv')
 YANDEX_MUSIC_URLS = ('music.yandex.ru',)
-PINTEREST_URLS = ('pinterest.com', 'ru.pinterest.com', 'www.pinterest.com')
+PINTEREST_URLS = ('pinterest.com', 'ru.pinterest.com', 'www.pinterest.com', 'pin.it')
 
 MEDIA_URLS = tuple(
     list(YOUTUBE_URLS) +
@@ -96,7 +98,8 @@ class Media(Command):
         text = ""
         if title:
             text = f"{title}\n"
-        text += f"\nОт пользователя {self.event.sender}"
+        if self.event.is_from_chat:
+            text += f"\nОт {self.event.sender}"
 
         if self.event.platform == Platform.TG:
             source_hostname = str(urlparse(chosen_url).hostname).lstrip('www.')
@@ -130,7 +133,6 @@ class Media(Command):
             PINTEREST_URLS: self.get_pinterest_attachment,
         }
 
-        method = None
         urls = get_urls_from_text(source)
         for url in urls:
             hostname = urlparse(url).hostname
@@ -140,8 +142,7 @@ class Media(Command):
                 if hostname in k:
                     return MEDIA_TRANSLATOR[k], url
 
-        if not method:
-            raise PWarning("Не youtube/tiktok/reddit/instagram ссылка")
+        raise PWarning("Не youtube/tiktok/reddit/instagram ссылка")
 
     def get_youtube_video(self, url):
         y_api = YoutubeAPI()
@@ -295,3 +296,28 @@ class Media(Command):
             raise PWarning("Я хз чё за контент")
 
         return attachments, p_api.title
+
+    def get_tg_inline_media(self, url):
+        method, chosen_url = self.get_method_and_chosen_url(url)
+        attachments, title = method(chosen_url)
+        tg_file_id = self._get_file_id(attachments[0], 'audio')
+        source_hostname = str(urlparse(chosen_url).hostname).lstrip('www.')
+        text = f'\nИсточник: {get_tg_formatted_url(source_hostname, chosen_url)}'
+        qr = {
+            'id': url,
+            'type': 'audio',
+            'audio_file_id': tg_file_id,
+            'caption': text,
+            'parse_mode': "html"
+        }
+
+        return [qr]
+
+    def _get_file_id(self, att, _type):
+        video_uploading_chat = Chat.objects.get(pk=env.str("TG_PHOTO_UPLOADING_CHAT_PK"))
+        r = self.bot.parse_and_send_msgs({'attachments': [att]}, video_uploading_chat.chat_id,
+                                         self.event.message_thread_id)
+        r_json = r[0]['response'].json()
+        self.bot.delete_message(video_uploading_chat.chat_id, r_json['result']['message_id'])
+        file_id = r_json['result'][_type]['file_id']
+        return file_id

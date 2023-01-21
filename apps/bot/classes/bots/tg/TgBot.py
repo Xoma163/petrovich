@@ -1,5 +1,6 @@
 import json
 import threading
+from urllib.parse import urlparse
 
 from apps.bot.classes.bots.Bot import Bot as CommonBot
 from apps.bot.classes.bots.tg.MyTgBotLongPoll import MyTgBotLongPoll
@@ -18,6 +19,7 @@ from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachmen
 from apps.bot.classes.messages.attachments.StickerAttachment import StickerAttachment
 from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
 from apps.bot.classes.messages.attachments.VoiceAttachment import VoiceAttachment
+from apps.bot.commands.Media import Media, YANDEX_MUSIC_URLS
 from apps.bot.commands.Meme import Meme
 from apps.bot.models import Profile
 from apps.bot.utils.utils import get_thumbnail_for_image, get_tg_formatted_url, get_chunks
@@ -67,8 +69,16 @@ class TgBot(CommonBot):
 
         filter_list = event.inline_data['message'].clear.split(' ')
         filter_list = filter_list if filter_list[0] else []
-        meme_cmd = Meme(self, event)
-        inline_query_result = meme_cmd.get_tg_inline_memes(filter_list)
+
+        text = event.inline_data['message'].clear_case
+        message_is_media_link = urlparse(text).hostname in YANDEX_MUSIC_URLS
+        if message_is_media_link:
+            media_cmd = Media(self, event)
+            inline_query_result = media_cmd.get_tg_inline_media(text)
+        else:
+            meme_cmd = Meme(self, event)
+            inline_query_result = meme_cmd.get_tg_inline_memes(filter_list)
+
         params = {
             'inline_query_id': data['id'],
             'results': json.dumps(inline_query_result, ensure_ascii=False),
