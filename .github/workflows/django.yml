@@ -52,6 +52,7 @@ jobs:
           TIMEZONEDB_API_KEY: ''
           YANDEX_GEO_TOKEN: ''
           RAPID_API_KEY: ''
+          YANDEX_MUSIC_ACCESS_TOKEN: ''
         run: |
           python manage.py test
       - name: Deploy on production
