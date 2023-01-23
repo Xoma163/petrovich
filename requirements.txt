@@ -79,7 +79,7 @@ s3transfer==0.5.0
 six==1.16.0
 soupsieve==2.3
 SpeechRecognition==3.8.1
-spotipy==2.19.0
+spotipy==2.22.1
 sqlparse==0.4.2
 transliterate==1.10.2
 uritemplate==4.1.1
