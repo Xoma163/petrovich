@@ -94,6 +94,6 @@ Werkzeug==2.1.2
 wikipedia==1.4.0
 yandex-music==2.0.1
 yarl==1.7.2
-youtube-dl==2021.6.6
-yt-dlp==2022.5.18
+youtube-dl==2021.12.17
+yt-dlp==2023.1.6
 zenmoney==0.9

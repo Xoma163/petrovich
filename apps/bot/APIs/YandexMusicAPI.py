@@ -34,7 +34,7 @@ class YandexMusicAPI:
         self.bitrate = 0
         self.format = ""
 
-    def download_track(self):
+    def download(self):
         client = YandexClient(request=YandexRequest(), token=self.ACCESS_TOKEN)
         client.notice_displayed = True
         client.init()

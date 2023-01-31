@@ -14,6 +14,7 @@ from apps.bot.APIs.TikTokDownloaderAPI import TikTokDownloaderAPI
 from apps.bot.APIs.WASDAPI import WASDAPI
 from apps.bot.APIs.YandexMusicAPI import YandexMusicAPI
 from apps.bot.APIs.YoutubeAPI import YoutubeAPI
+from apps.bot.APIs.YoutubeMusicAPI import YoutubeMusicAPI
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning, PSkip
@@ -23,6 +24,7 @@ from apps.bot.utils.utils import get_urls_from_text, get_tg_formatted_url, get_t
 from petrovich.settings import env
 
 YOUTUBE_URLS = ('www.youtube.com', 'youtube.com', "www.youtu.be", "youtu.be")
+YOUTUBE_MUSIC_URLS = ("music.youtube.com",)
 REDDIT_URLS = ("www.reddit.com",)
 TIKTOK_URLS = ("www.tiktok.com", 'vm.tiktok.com', 'm.tiktok.com', 'vt.tiktok.com')
 INSTAGRAM_URLS = ('www.instagram.com', 'instagram.com')
@@ -35,6 +37,7 @@ PINTEREST_URLS = ('pinterest.com', 'ru.pinterest.com', 'www.pinterest.com', 'pin
 
 MEDIA_URLS = tuple(
     list(YOUTUBE_URLS) +
+    list(YOUTUBE_MUSIC_URLS) +
     list(REDDIT_URLS) +
     list(TIKTOK_URLS) +
     list(INSTAGRAM_URLS) +
@@ -122,6 +125,7 @@ class Media(Command):
     def get_method_and_chosen_url(self, source):
         MEDIA_TRANSLATOR = {
             YOUTUBE_URLS: self.get_youtube_video,
+            YOUTUBE_MUSIC_URLS: self.get_youtube_audio,
             TIKTOK_URLS: self.get_tiktok_video,
             REDDIT_URLS: self.get_reddit_attachment,
             INSTAGRAM_URLS: self.get_instagram_attachment,
@@ -155,6 +159,16 @@ class Media(Command):
         if timecode:
             text = f"{text}\n\n{timecode}"
         return attachments, text
+
+    def get_youtube_audio(self, url):
+        track = YoutubeMusicAPI(url)
+        track.get_info()
+        title = f"{track.artists} - {track.title}"
+        audio_att = self.bot.upload_audio(track.content, peer_id=self.event.peer_id,
+                                          filename=f"{title}.{track.format}",
+                                          thumb=track.cover_url, artist=track.artists, title=track.title)
+        # audio_att.download_content()
+        return [audio_att], ""
 
     def get_tiktok_video(self, url):
         ttd_api = TikTokDownloaderAPI()
@@ -277,7 +291,7 @@ class Media(Command):
 
     def get_yandex_music(self, url):
         track = YandexMusicAPI(url)
-        audiofile = track.download_track()
+        audiofile = track.download()
         title = f"{track.artists} - {track.title}"
         audio_att = self.bot.upload_audio(audiofile, peer_id=self.event.peer_id, filename=f"{title}.{track.format}",
                                           thumb=track.cover_url, artist=track.artists, title=track.title)

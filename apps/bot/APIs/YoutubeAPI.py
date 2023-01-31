@@ -39,7 +39,11 @@ class YoutubeAPI:
     @staticmethod
     def clear_url(url):
         parsed = urlparse(url)
-        return f"{parsed.scheme}://{parsed.hostname}{parsed.path}"
+        v = dict(parse_qsl(parsed.query)).get('v')
+        res = f"{parsed.scheme}://{parsed.hostname}{parsed.path}"
+        if v:
+            res += f"?v={v}"
+        return res
 
     def get_last_video(self, channel_id):
         response = requests.get(f"https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}")
@@ -59,7 +63,6 @@ class YoutubeAPI:
 
     def get_video_download_url(self, url, platform=None):
         ydl_params = {
-            'outtmpl': '%(id)s%(ext)s',
             'logger': NothingLogger()
         }
         ydl = yt_dlp.YoutubeDL(ydl_params)
