@@ -9,6 +9,7 @@ class VideoAttachment(Attachment):
         self.duration = None  # sec
         self.width = None
         self.height = None
+        self.thumb: str = None
 
     def parse_vk_video(self, event_video):
         from petrovich.settings import VK_URL

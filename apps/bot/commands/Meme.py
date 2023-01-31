@@ -544,7 +544,11 @@ class Meme(Command):
             video_content = requests.get(content_url).content
 
             video_uploading_chat = Chat.objects.get(pk=env.str("TG_PHOTO_UPLOADING_CHAT_PK"))
-            msg['attachments'] = [self.bot.upload_video(video_content, peer_id=video_uploading_chat.chat_id)]
+            video = self.bot.upload_video(video_content, peer_id=video_uploading_chat.chat_id)
+            parsed_url = urlparse(meme.link)
+            video_id = parsed_url.path.strip('/')
+            video.thumb = f"https://img.youtube.com/vi/{video_id}/default.jpg"
+            msg['attachments'] = [video]
             r = self.bot.parse_and_send_msgs(msg, video_uploading_chat.chat_id, self.event.message_thread_id)
             r_json = r[0]['response'].json()
             self.bot.delete_message(video_uploading_chat.chat_id, r_json['result']['message_id'])
@@ -677,7 +681,7 @@ class Meme(Command):
                         'type': 'video',
                         'video_file_id': meme.tg_file_id,
                         'title': meme.name,
-                        'thumb_url': f"https://img.youtube.com/vi/{video_id}/default.jpg"
+                        # 'thumb_url': f"https://img.youtube.com/vi/{video_id}/default.jpg"
                     })
                     if ts:
                         qr['caption'] = ts

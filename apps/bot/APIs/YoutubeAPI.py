@@ -20,6 +20,7 @@ class YoutubeAPI:
     def __init__(self):
         self.title = None
         self.duration = 0
+        self.id = None
 
         self._youtube_api_client = None
 
@@ -34,6 +35,11 @@ class YoutubeAPI:
             h, m, s = str(timedelta(seconds=int(t))).split(":")
             return f"{m}:{s}"
         return None
+
+    @staticmethod
+    def clear_url(url):
+        parsed = urlparse(url)
+        return f"{parsed.scheme}://{parsed.hostname}{parsed.path}"
 
     def get_last_video(self, channel_id):
         response = requests.get(f"https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}")
@@ -59,6 +65,7 @@ class YoutubeAPI:
         ydl = yt_dlp.YoutubeDL(ydl_params)
         ydl.add_default_info_extractors()
 
+        url = self.clear_url(url)
         try:
             video_info = ydl.extract_info(url, download=False)
         except yt_dlp.utils.DownloadError:

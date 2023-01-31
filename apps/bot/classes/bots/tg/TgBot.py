@@ -2,6 +2,8 @@ import json
 import threading
 from urllib.parse import urlparse
 
+import requests
+
 from apps.bot.classes.bots.Bot import Bot as CommonBot
 from apps.bot.classes.bots.tg.MyTgBotLongPoll import MyTgBotLongPoll
 from apps.bot.classes.bots.tg.TgRequests import TgRequests
@@ -157,6 +159,9 @@ class TgBot(CommonBot):
         """
         self.set_activity(default_params['chat_id'], ActivitiesEnum.UPLOAD_VIDEO)
         video: VideoAttachment = rm.attachments[0]
+        files = {'video': video.content}
+        if video.thumb:
+            files['thumb'] = requests.get(video.thumb).content
         if video.public_download_url:
             default_params['video'] = video.public_download_url
             return self.requests.get('sendVideo', default_params)
@@ -168,7 +173,7 @@ class TgBot(CommonBot):
                 rm.attachments = []
                 raise PError(
                     f"Нельзя загружать видео более {self.MAX_VIDEO_SIZE_MB}мб в телеграмм. Ваше видео {round(video.get_size_mb(), 2)}мб")
-            return self.requests.get('sendVideo', default_params, files={'video': video.content})
+            return self.requests.get('sendVideo', default_params, files=files)
 
     def _send_audio(self, rm: ResponseMessageItem, default_params):
         """
