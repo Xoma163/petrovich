@@ -29,11 +29,15 @@ class PinterestAPI:
 
     def get_photo(self, bs4):
         self.type = self.IMAGE
-        image = json.loads(bs4.find("script", {'data-test-id': 'leaf-snippet'}).text)
-        self.title = image['headline']
-        image_url = image['image']
-        if image_url.endswith('.gif') or image_url.endswith('.gifv'):
-            self.type = self.GIF
+        try:
+            image = json.loads(bs4.find("script", {'data-test-id': 'leaf-snippet'}).text)
+            self.title = image['headline']
+            image_url = image['image']
+            if image_url.endswith('.gif') or image_url.endswith('.gifv'):
+                self.type = self.GIF
+        except:
+            self.title = None
+            image_url = bs4.find("meta", {"name": "og:image"}).attrs['content']
         return image_url
 
     def get_video(self, bs4):
