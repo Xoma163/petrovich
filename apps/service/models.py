@@ -268,3 +268,6 @@ class Tag(models.Model):
         verbose_name_plural = "Теги"
         ordering = ['name']
         unique_together = ('name', 'chat')
+
+    def __str__(self):
+        return str(self.name)
