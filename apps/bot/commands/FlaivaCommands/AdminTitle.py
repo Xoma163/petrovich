@@ -37,7 +37,10 @@ class AdminTitle(Nostalgia):
                 profile = self.bot.get_profile_by_name(name, self.event.chat)
                 user_id = profile.get_user_by_platform(Platform.TG).user_id
                 self.bot.set_chat_admin_title(self.event.chat.chat_id, user_id, title)
-                return f"Поменял должность пользователю {self.bot.get_mention(profile)} на {title}"
+                if title == self.EMPTY:
+                    return f"Сбросил должность пользователю {self.bot.get_mention(profile)}"
+                else:
+                    return f"Поменял должность пользователю {self.bot.get_mention(profile)} на {title}"
         else:
             self.bot.set_chat_admin_title(self.event.chat.chat_id, self.event.user.user_id, self.EMPTY)
             return f"Сбросил вашу должность"
