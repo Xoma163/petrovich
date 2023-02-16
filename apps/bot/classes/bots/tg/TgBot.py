@@ -468,14 +468,5 @@ class TgBot(CommonBot):
             'user_id': user_id,
             'custom_title': title
         }).json()
-        print
-
-    def promote_chat_member(self, chat_id, user_id):
-        res = self.requests.get('promoteChatMember', json={
-            'chat_id': chat_id,
-            'user_id': user_id,
-            'can_manage_chat': True,
-            'can_pin_messages': True,
-        }).json()
-        print
+        return res
     # END EXTRA
