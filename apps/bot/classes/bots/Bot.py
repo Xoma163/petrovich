@@ -441,6 +441,12 @@ class Bot(Thread):
         Удаление сообщения
         """
 
+    def set_chat_admin_title(self, chat_id, user_id, title):
+        """
+        Смена должности в чате
+        """
+        pass
+
     # END EXTRA
 
 

@@ -461,4 +461,21 @@ class TgBot(CommonBot):
     def get_sticker_set(self, name):
         res = self.requests.get('getStickerSet', json={'name': name}).json()
         return res['result']['stickers']
+
+    def set_chat_admin_title(self, chat_id, user_id, title):
+        res = self.requests.get('setChatAdministratorCustomTitle', json={
+            'chat_id': chat_id,
+            'user_id': user_id,
+            'custom_title': title
+        }).json()
+        print
+
+    def promote_chat_member(self, chat_id, user_id):
+        res = self.requests.get('promoteChatMember', json={
+            'chat_id': chat_id,
+            'user_id': user_id,
+            'can_manage_chat': True,
+            'can_pin_messages': True,
+        }).json()
+        print
     # END EXTRA
