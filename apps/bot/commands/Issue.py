@@ -24,9 +24,13 @@ class Issue(Command):
         if msg.count('\n') == 0:
             title = msg
         elif msg.count('\n') == 1:
-            title, body = msg.split('\n')
+            msg_split = msg.split('\n')
+            title, body = msg_split
         else:
-            title, body, tags = msg.split('\n', 3)
+            msg_split = msg.split('\n')
+            title = msg_split[0]
+            body = "\n".join(msg_split[1:-1])
+            tags = msg_split[-1]
         photos = self.event.get_all_attachments([PhotoAttachment])
         if photos:
             photo = photos[0]
