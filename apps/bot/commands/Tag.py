@@ -74,16 +74,9 @@ class Tag(Command):
         return f"Тег \"{tag_name}\" удалён"
 
     def menu_add(self):
-        self.check_args(2)
+        profiles = self._get_profiles_from_args()
         tag = self._get_tag_by_name()
 
-        profiles = []
-        profiles_str = "".join(self.event.message.clear.split(' ')[3:]).split(',')
-        for profile_str in profiles_str:
-            profile = self.bot.get_profile_by_name(profile_str.split(' '), self.event.chat)
-            profiles.append(profile)
-
-        profiles = list(set(profiles))
         for profile in profiles:
             tag.users.add(profile)
         if len(profiles) == 1:
@@ -92,22 +85,27 @@ class Tag(Command):
             return f"Пользователи {', '.join(map(str, profiles))} добавлены в тег \"{tag.name}\""
 
     def menu_remove(self):
-        self.check_args(2)
+        profiles = self._get_profiles_from_args()
         tag = self._get_tag_by_name()
 
-        profiles = []
-        profiles_str = "".join(self.event.message.clear.split(' ')[3:]).split(',')
-        for profile_str in profiles_str:
-            profile = self.bot.get_profile_by_name(profile_str.split(' '), self.event.chat)
-            profiles.append(profile)
-
-        profiles = list(set(profiles))
         for profile in profiles:
             tag.users.remove(profile)
         if len(profiles) == 1:
             return f"Пользователь {profiles[0]} убран из тега \"{tag.name}\""
         else:
             return f"Пользователи {', '.join(map(str, profiles))} убраны из тега \"{tag.name}\""
+
+    def _get_profiles_from_args(self) -> list:
+        self.check_args(2)
+
+        profiles = []
+        profiles_str = self.event.message.clear.split(' ')[3:]
+        for profile_str in profiles_str:
+            profile = self.bot.get_profile_by_name(profile_str.split(' '), self.event.chat)
+            profiles.append(profile)
+
+        profiles = list(set(profiles))
+        return profiles
 
     def _get_tag_name(self, name):
         if self.event.platform == Platform.TG:
