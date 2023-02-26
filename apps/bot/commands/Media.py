@@ -54,12 +54,16 @@ class Media(Command):
     name = "медиа"
     help_text = "скачивает видео из соцсетей и присылает его"
     help_texts = ["(ссылка на видео) - скачивает видео из соцсетей и присылает его"]
-    help_texts_extra = "Поддерживаемые соцсети: Reddit/TikTok/YouTube/Instagram/Twitter/Pikabu/TheHole"
+    help_texts_extra = "Поддерживаемые соцсети: Reddit/TikTok/YouTube/Instagram/Twitter/Pikabu/TheHole/Yandex Music/Pinterest\n\n" \
+                       "Ключ --nomedia позволяет не запускать команду\n" \
+                       "Ключ --audio позволяет скачивать аудиодорожку для видео с ютуба"
     platforms = [Platform.TG]
 
     @staticmethod
     def accept_extra(event):
         if event.message and not event.message.mentioned:
+            if "nomedia" in event.message.keys:
+                return False
             all_urls = get_urls_from_text(event.message.clear_case)
             has_fwd_with_message = event.fwd and event.fwd[0].message and event.fwd[0].message.clear_case
             if event.is_from_pm and has_fwd_with_message:
@@ -95,8 +99,6 @@ class Media(Command):
                 raise PSkip()
 
         chosen_url_pos = source.find(chosen_url)
-        extra_text = source[:chosen_url_pos].strip() + "\n" + source[chosen_url_pos + len(chosen_url):].strip()
-        extra_text = extra_text.strip()
 
         text = ""
         if title:
@@ -110,6 +112,12 @@ class Media(Command):
         else:
             text += f"\n{chosen_url}"
         # Костыль, чтобы видосы которые шарятся с мобилы с реддита не дублировали title
+
+        extra_text = source[:chosen_url_pos].strip() + "\n" + source[chosen_url_pos + len(chosen_url):].strip()
+        for key in self.event.message.keys:
+            extra_text = extra_text.replace(self.event.message.KEYS_STR + key, "")
+            extra_text = extra_text.replace(self.event.message.KEYS_SYMBOL + key, "")
+        extra_text = extra_text.strip()
         if extra_text and extra_text != title:
             text += f"\n\n{extra_text}"
 
@@ -151,9 +159,12 @@ class Media(Command):
     def get_youtube_video(self, url):
         y_api = YoutubeAPI()
         timecode = y_api.get_timecode_str(url)
-        content_url = y_api.get_video_download_url(url, self.event.platform)
-        video_content = requests.get(content_url).content
-        attachments = [self.bot.upload_video(video_content, peer_id=self.event.peer_id)]
+        if 'audio' in self.event.message.keys:
+            return self.get_youtube_audio(url)
+        else:
+            content_url = y_api.get_video_download_url(url, self.event.platform)
+            video_content = requests.get(content_url).content
+            attachments = [self.bot.upload_video(video_content, peer_id=self.event.peer_id)]
 
         text = y_api.title
         if timecode:
@@ -310,22 +321,6 @@ class Media(Command):
             raise PWarning("Я хз чё за контент")
 
         return attachments, p_api.title
-
-    def get_tg_inline_media(self, url):
-        method, chosen_url = self.get_method_and_chosen_url(url)
-        attachments, _ = method(chosen_url)
-        tg_file_id = self._get_file_id(attachments[0], 'audio')
-        source_hostname = str(urlparse(chosen_url).hostname).lstrip('www.')
-        text = f'\nИсточник: {get_tg_formatted_url(source_hostname, chosen_url)}'
-        qr = {
-            'id': url,
-            'type': 'audio',
-            'audio_file_id': tg_file_id,
-            'caption': text,
-            'parse_mode': "html"
-        }
-
-        return [qr]
 
     def _get_file_id(self, att, _type):
         video_uploading_chat = Chat.objects.get(pk=env.str("TG_PHOTO_UPLOADING_CHAT_PK"))

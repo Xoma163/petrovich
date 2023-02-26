@@ -61,7 +61,7 @@ class YoutubeAPI:
             }
         }
 
-    def get_video_download_url(self, url, platform=None):
+    def _get_video_info(self, url):
         ydl_params = {
             'logger': NothingLogger()
         }
@@ -73,8 +73,11 @@ class YoutubeAPI:
             video_info = ydl.extract_info(url, download=False)
         except yt_dlp.utils.DownloadError:
             raise PWarning("Не смог найти видео по этой ссылке")
-        self.title = video_info['title']
+        return video_info
 
+    def get_video_download_url(self, url, platform=None):
+        video_info = self._get_video_info(url)
+        self.title = video_info['title']
         self.duration = video_info.get('duration')
         if not self.duration:
             raise PSkip()
@@ -95,6 +98,14 @@ class YoutubeAPI:
             max_quality_video = videos[0]
         url = max_quality_video['url']
         return url
+
+    def get_audio_download_url(self, url, platform=None):
+        video_info = self._get_video_info(url)
+        self.title = video_info['title']
+        self.duration = video_info.get('duration')
+        if not self.duration:
+            raise PSkip()
+        print
 
     def init_for_live_check(self):
         # SECRET_FILE = f"{BASE_DIR}/secrets/google.json"

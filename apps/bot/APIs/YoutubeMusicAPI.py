@@ -59,7 +59,12 @@ class YoutubeMusicAPI:
             self.artists = artist
         else:
             full_title = full_title.replace('—', '-').replace('–', '-').replace('−', '-')
-            self.artists, self.title = full_title.split('-')
+            try:
+                self.artists, self.title = full_title.split('-')
+            except:
+                self.artists = info['uploader']
+                self.title = full_title
+
             self.artists = self.artists.strip()
             self.title = self.title.strip()
 

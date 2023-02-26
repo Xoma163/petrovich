@@ -4,6 +4,8 @@ import re
 
 class Message:
     COMMAND_SYMBOLS = ['/', '!']
+    KEYS_SYMBOL = "—"
+    KEYS_STR = "--"
 
     def __init__(self, raw_str=None, _id=None):
         """
@@ -19,6 +21,7 @@ class Message:
         args_str_case - аргументы с учётом регистра строкой
 
         """
+
         self.has_command_symbols = False
         self.has_mention = False
 
@@ -26,11 +29,19 @@ class Message:
         self.command = ""
         self.clear = ""
         self.clear_case = ""
+
+        # Аргументы
         self.args_str = ""
         self.args = []
         self.args_str_case = ""
         self.args_case = []
+
+        # Кварги с клавиатур
         self.kwargs = {}
+
+        # Ключи
+        self.keys = []
+
         self.id = _id
 
         if not raw_str:
@@ -51,6 +62,18 @@ class Message:
         self.clear = clear_message.lower()
         msg_split = self.clear.split(' ', 1)
         self.command = msg_split[0]
+
+        new_msg_split = []
+        for item in msg_split:
+            if item.startswith(self.KEYS_STR):
+                self.keys.append(item[2:])
+                continue
+            if item.startswith(self.KEYS_SYMBOL):
+                self.keys.append(item[1:])
+                continue
+            new_msg_split.append(item)
+        msg_split = new_msg_split
+
         if len(msg_split) > 1:
             self.args_str = msg_split[1]
             self.args = self.args_str.split(' ')
