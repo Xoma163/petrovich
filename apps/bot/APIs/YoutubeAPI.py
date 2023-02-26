@@ -105,7 +105,6 @@ class YoutubeAPI:
         self.duration = video_info.get('duration')
         if not self.duration:
             raise PSkip()
-        print
 
     def init_for_live_check(self):
         # SECRET_FILE = f"{BASE_DIR}/secrets/google.json"

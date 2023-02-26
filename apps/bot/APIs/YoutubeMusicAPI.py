@@ -22,7 +22,6 @@ class YoutubeMusicAPI:
 
         self.content = None
         self._temp_file_path = ""
-        print
 
     @property
     def clear_url(self):
@@ -61,7 +60,7 @@ class YoutubeMusicAPI:
             full_title = full_title.replace('—', '-').replace('–', '-').replace('−', '-')
             try:
                 self.artists, self.title = full_title.split('-')
-            except:
+            except ValueError:
                 self.artists = info['uploader']
                 self.title = full_title
 

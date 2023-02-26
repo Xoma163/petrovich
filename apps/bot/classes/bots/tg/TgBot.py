@@ -1,6 +1,5 @@
 import json
 import threading
-from urllib.parse import urlparse
 
 import requests
 
@@ -21,7 +20,6 @@ from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachmen
 from apps.bot.classes.messages.attachments.StickerAttachment import StickerAttachment
 from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
 from apps.bot.classes.messages.attachments.VoiceAttachment import VoiceAttachment
-from apps.bot.commands.Media import YANDEX_MUSIC_URLS
 from apps.bot.commands.Meme import Meme
 from apps.bot.models import Profile
 from apps.bot.utils.utils import get_thumbnail_for_image, get_tg_formatted_url, get_chunks
@@ -72,8 +70,6 @@ class TgBot(CommonBot):
         filter_list = event.inline_data['message'].clear.split(' ')
         filter_list = filter_list if filter_list[0] else []
 
-        text = event.inline_data['message'].clear_case
-        message_is_media_link = urlparse(text).hostname in YANDEX_MUSIC_URLS
         meme_cmd = Meme(self, event)
         inline_query_result = meme_cmd.get_tg_inline_memes(filter_list)
 
