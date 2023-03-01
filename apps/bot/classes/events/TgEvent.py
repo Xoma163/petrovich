@@ -31,9 +31,10 @@ class TgEvent(Event):
             self.setup_inline_query(inline_query)
             return
 
+        fwd_message_without_voice = False
         if not self.is_fwd and self.raw.get('message', {}).get('forward_from') and 'voice' not in self.raw['message']:
-            self.force_response = False
-            return
+            # self.force_response = False
+            fwd_message_without_voice = True
 
         if self.is_fwd:
             message = self.raw
@@ -102,6 +103,12 @@ class TgEvent(Event):
 
         if self.sender and self.chat:
             self.bot.add_chat_to_profile(self.sender, self.chat)
+
+        if fwd_message_without_voice:
+            need_a_response_extra = self.need_a_response_extra()
+            if not need_a_response_extra:
+                self.force_response = False
+                return
 
     def setup_action(self, message):
         new_chat_members = message.get('new_chat_members')
