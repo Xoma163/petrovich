@@ -51,13 +51,16 @@ class YoutubeAPI:
             raise PWarning("Не нашёл такого канала")
         bsop = BeautifulSoup(response.content, 'html.parser')
         last_video = bsop.find_all('entry')[0]
+        link = last_video.find('link').attrs['href']
+        duration = self._get_video_info(link)['duration']
         self.title = bsop.find('title').text
         return {
             'title': self.title,
             'last_video': {
                 'title': last_video.find('title').text,
-                'link': last_video.find('link').attrs['href'],
+                'link': link,
                 'date': datetime.strptime(last_video.find('published').text, '%Y-%m-%dT%H:%M:%S%z'),
+                'is_shorts': duration <= 60,
             }
         }
 

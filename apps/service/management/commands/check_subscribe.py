@@ -15,6 +15,7 @@ from apps.service.models import Subscribe
 
 logger = logging.getLogger('subscribe_notifier')
 
+
 class Command(BaseCommand):
 
     def __init__(self):
@@ -40,6 +41,11 @@ class Command(BaseCommand):
         youtube_info = YoutubeAPI()
         youtube_data = youtube_info.get_last_video(sub.channel_id)
         if not youtube_data['last_video']['date'] > sub.date:
+            return
+        is_shorts = youtube_data['last_video']['is_shorts']
+        if sub.youtube_ignore_shorts and is_shorts:
+            sub.date = youtube_data['last_video']['date']
+            sub.save()
             return
         title = youtube_data['last_video']['title']
         link = youtube_data['last_video']['link']

@@ -171,6 +171,7 @@ class Subscribe(models.Model):
     last_stream_status = models.BooleanField("Последнее состояние стрима", blank=True,
                                              default=False)  # True - активен, False - нет
 
+    youtube_ignore_shorts = models.BooleanField("Игнорировать Youtube shorts", blank=True, default=False)
     message_thread_id = models.IntegerField("message_thread_id", blank=True, null=True, default=None)
 
     @property
