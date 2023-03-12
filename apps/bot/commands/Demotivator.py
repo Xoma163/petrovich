@@ -14,8 +14,8 @@ class Demotivator(Command):
     name = "демотиватор"
     help_text = "создаёт демотиватор"
     help_texts = [
-        "(Изображения/Пересылаемое сообщение с изображением) (большой текст)[;маленький текст] - создаёт демотиватор"]
-    help_texts_extra = "Разделитель текста ;"
+        "(Изображения/Пересылаемое сообщение с изображением) (большой текст)[\\nмаленький текст] - создаёт демотиватор"]
+    help_texts_extra = "Разделитель текста - перенос строки"
     args = 1
     attachments = [PhotoAttachment, StickerAttachment]
 
@@ -26,7 +26,7 @@ class Demotivator(Command):
 
         text = self.event.message.raw.split(' ', 1)[1]
 
-        texts = list(map(str.strip, text.split(';')))
+        texts = list(map(str.strip, text.split('\n', 1)))
         if not texts[0]:
             return "Первая фраза обязательно должна быть"
 
