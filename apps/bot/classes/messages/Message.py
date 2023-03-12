@@ -6,6 +6,7 @@ class Message:
     COMMAND_SYMBOLS = ['/', '!']
     KEYS_SYMBOL = "—"
     KEYS_STR = "--"
+    SPACE_REGEX = r' |\n'
 
     def __init__(self, raw_str=None, _id=None):
         """
@@ -60,7 +61,7 @@ class Message:
 
         # No case
         self.clear = clear_message.lower()
-        msg_split = self.clear.split(' ', 1)
+        msg_split = re.split(self.SPACE_REGEX, self.clear, 1)
         self.command = msg_split[0]
 
         new_msg_split = []
@@ -76,16 +77,18 @@ class Message:
 
         if len(msg_split) > 1:
             self.args_str = msg_split[1]
-            self.args = self.args_str.split(' ')
+            self.args = re.split(self.SPACE_REGEX, self.args_str)
 
         # case
         self.clear_case = clear_message
-        msg_case_split = clear_message.split(' ', 1)
         self.args_str_case = None
         self.args_case = None
+
+        msg_case_split = re.split(self.SPACE_REGEX, clear_message, 1)
+
         if len(msg_case_split) > 1:
             self.args_str_case = msg_case_split[1]
-            self.args_case = self.args_str_case.split(' ')
+            self.args_case = re.split(self.SPACE_REGEX, self.args_str_case)
 
     @staticmethod
     def get_cleared_message(msg) -> str:

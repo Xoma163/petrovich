@@ -1,6 +1,9 @@
+import re
+
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.messages.Message import Message
 from apps.bot.utils.utils import get_tg_formatted_text_line
 from apps.service.models import Tag as TagModel
 
@@ -129,7 +132,7 @@ class Tag(Command):
         else:
             self.check_args(1)
             tag_name = self.event.message.args[0]
-            text = " ".join(self.event.message.args_str_case.split(' ')[1:])
+            text = " ".join(re.split(Message.SPACE_REGEX, self.event.message.args_str_case)[1:])
 
         if tag_name == self.TAG_ALL:
             users = self.event.chat.users.all().exclude(pk=self.event.sender.pk)
