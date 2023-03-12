@@ -125,9 +125,11 @@ class Tag(Command):
     def menu_default(self):
         if self.event.command and self.event.command == self:
             tag_name = self.event.message.command[1:]
+            text = self.event.message.args_str_case
         else:
             self.check_args(1)
             tag_name = self.event.message.args[0]
+            text = " ".join(self.event.message.args_str_case.split(' ')[1:])
 
         if tag_name == self.TAG_ALL:
             users = self.event.chat.users.all().exclude(pk=self.event.sender.pk)
@@ -137,8 +139,11 @@ class Tag(Command):
         if not users:
             raise PWarning("В теге нет пользователей")
         msg_list = [self.bot.get_mention(user) for user in users]
-        msg = "\n".join(msg_list)
-        return msg
+        msg = "\n".join(msg_list) + f"\n\n{text}"
+
+        reply_to = self.event.fwd[0].message.id if self.event.fwd else None
+
+        return {'text': msg, 'reply_to': reply_to}
 
     def _get_tag_by_name(self, tag_name=None):
         if tag_name is None:
