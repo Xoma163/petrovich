@@ -218,8 +218,6 @@ def get_role_by_str(role_str: str):
         who = Role.BANNED
     elif role_str in ['доверенный', 'проверенный']:
         who = Role.TRUSTED
-    elif role_str in ['дом', 'домашний', 'дома']:
-        who = Role.HOME
     elif role_str in ['мразь', 'мразота', 'мрази']:
         who = Role.MRAZ
     elif role_str in ['флейва']:

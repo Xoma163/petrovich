@@ -1,4 +1,3 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
 from django.http import JsonResponse, FileResponse
 from django.shortcuts import render
@@ -9,7 +8,6 @@ from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 from rest_framework.viewsets import ModelViewSet
 
-from apps.bot.APIs.YoutubeAPI import YoutubeAPI
 from apps.web.models import CalculatorSession, CalculatorProduct, CalculatorUser
 from apps.web.serializers import CalculatorProductSerializer, \
     CalculatorSessionSerializer, CalculatorSessionViewSerializer, CalculatorUserSerializer
@@ -27,17 +25,6 @@ def lana_translate(request):
 
 class DeliveryCalculatorTemplateView(TemplateView):
     template_name = "web/delivery_calculator.html"
-
-
-class CameraTemplateView(LoginRequiredMixin, TemplateView):
-    template_name = "web/camera.html"
-
-    def get_context_data(self, **kwargs):
-        cd = super().get_context_data()
-
-        y_api = YoutubeAPI()
-        cd['youtube_info'] = y_api.get_stream_info_if_online()
-        return cd
 
 
 class CalculatorSessionListView(ListView):
@@ -108,6 +95,3 @@ class MinecraftCape(View):
         file = BASE_DIR + static(f"files/minecraft/capes/{name}.png")
         return FileResponse(open(file, 'rb'))
 
-
-class LabyrinthTemplateView(TemplateView):
-    template_name = "web/labyrinth.html"

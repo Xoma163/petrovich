@@ -8,7 +8,7 @@ class Stop(Command):
     name = "стоп"
 
     help_text = "останавливает работу сервиса"
-    help_texts = ["(сервис) - камера/майнкрафт/террария"]
+    help_texts = ["(сервис) - майнкрафт/террария"]
     help_texts_extra = "Если майнкрафт, то может быть указана версия (1.12.2)"
 
     access = Role.TRUSTED
@@ -21,22 +21,12 @@ class Stop(Command):
             arg0 = None
 
         menu = [
-            [["камера"], self.menu_camera],
             [["майн", "майнкрафт", "mine", "minecraft"], self.menu_minecraft],
             [['террария', 'terraria'], self.menu_terraria],
         ]
         method = self.handle_menu(menu, arg0)
         return method()
 
-    def menu_camera(self):
-        self.check_sender(Role.ADMIN)
-        from apps.bot.management.commands.start import camera_handler
-
-        if camera_handler.is_active():
-            camera_handler.terminate()
-            return "Финишируем камеру"
-        else:
-            return "Камера уже финишировала"
 
     def menu_minecraft(self):
         self.check_sender(Role.MINECRAFT)

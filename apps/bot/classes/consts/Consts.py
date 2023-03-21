@@ -17,7 +17,6 @@ class Role(Enum):
     MINECRAFT = "майнкрафт"
     TERRARIA = "террария"
     MINECRAFT_NOTIFY = "уведомления майна"
-    HOME = "дом"
     USER = "пользователь"
     BANNED = "забанен"
     TRUSTED = "доверенный"
