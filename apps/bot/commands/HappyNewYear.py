@@ -27,7 +27,8 @@ class HappyNewYear(Command):
                 "ЧТО ОПЯТЬ НАС ОБМАНУТ, НИЧЕГО НЕ ДАДУТ",
                 "https://youtu.be/xviBEvbxgZ0"
             ],
-            {'attachments': self.bot.upload_photo(f"{STATIC_ROOT}/bot/img/sng.jpg", peer_id=self.event.peer_id)},
+            {'attachments': self.bot.upload_photo(f"{STATIC_ROOT}/bot/img/sng.jpg", peer_id=self.event.peer_id,
+                                                  filename="petrovich_hny.jpg")},
             "https://youtu.be/8PzPHKGpNXs",
             "https://youtu.be/pESX7mQwTNU"
         ]

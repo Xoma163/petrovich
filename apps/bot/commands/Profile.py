@@ -161,7 +161,8 @@ class Profile(Command):
                 f"Пол - {user.get_gender_display()}"
         }
         if user.avatar:
-            msg['attachments'] = self.bot.upload_photo(user.avatar.path, peer_id=self.event.peer_id)
+            msg['attachments'] = self.bot.upload_photo(user.avatar.path, peer_id=self.event.peer_id,
+                                                       filename="petrovich_user_avatar.png")
         return msg
 
 

@@ -167,9 +167,10 @@ class Nostalgia(Command):
         bytes_io = BytesIO()
         pil_image.save(bytes_io, format='PNG')
         if pil_image.height > 1500:
-            image = self.bot.upload_document(bytes_io, self.event.peer_id, "Ностальгия", filename="nostalgia.png")
+            image = self.bot.upload_document(bytes_io, self.event.peer_id, "Ностальгия",
+                                             filename="petrovich_nostalgia.png")
         else:
-            image = self.bot.upload_photo(bytes_io, peer_id=self.event.peer_id)
+            image = self.bot.upload_photo(bytes_io, peer_id=self.event.peer_id, filename="petrovich_nostalgia.png")
         msg = f"{msgs[0]['datetime']}\n" \
               f"{index_from} - {index_to}"
         button = self.bot.get_button("Ещё", self.name)

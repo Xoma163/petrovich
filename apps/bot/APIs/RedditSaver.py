@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 
 from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.utils.DoTheLinuxComand import do_the_linux_command
+from apps.bot.utils.utils import get_url_file_ext
 
 
 class RedditSaver:
@@ -27,6 +28,8 @@ class RedditSaver:
         self.media_data = None
         self.post_url = None
         self.content_type = None
+
+        self.filename = None
 
     @staticmethod
     def _parse_mpd_audio_filename(url):
@@ -99,6 +102,8 @@ class RedditSaver:
         """
 
         video_url, audio_url = self._get_reddit_video_audio_urls()
+        ext = get_url_file_ext(video_url)
+        self.filename = f"{self.title.replace(' ', '_')}.{ext}"
         # Нет нужды делать временные файлы для джоина видео и аудио, если аудио нет, то просто кидаем видео и всё
         if not audio_url:
             return video_url
@@ -114,10 +119,19 @@ class RedditSaver:
         return self.data['url_overridden_by_dest']
 
     def get_photo_from_post(self):
-        return self.data['url_overridden_by_dest']
+        photo_url = self.data['url_overridden_by_dest']
+        ext = get_url_file_ext(photo_url)
+
+        self.filename = f"{self.title.replace(' ', '_')}.{ext}"
+        return photo_url
 
     def get_photos_from_post(self):
         gallery_data_items = self.data['gallery_data']['items']
+        first_url = \
+        self.data["media_metadata"][self.data['gallery_data']['items'][0]["media_id"]]["s"]["u"].partition("?")[0]
+        ext = get_url_file_ext(first_url)
+        self.filename = f"{self.title.replace(' ', '_')}.{ext}"
+
         # Чёрная магия
         return [
             self.data["media_metadata"][x["media_id"]]["s"]["u"].partition("?")[0].replace("/preview.", "/i.", 1)

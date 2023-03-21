@@ -13,8 +13,8 @@ from apps.bot.APIs.TheHoleAPI import TheHoleAPI
 from apps.bot.APIs.TikTokDownloaderAPI import TikTokDownloaderAPI
 from apps.bot.APIs.WASDAPI import WASDAPI
 from apps.bot.APIs.YandexMusicAPI import YandexMusicAPI
-from apps.bot.APIs.YoutubeAPI import YoutubeAPI
 from apps.bot.APIs.YoutubeMusicAPI import YoutubeMusicAPI
+from apps.bot.APIs.YoutubeVideoAPI import YoutubeVideoAPI
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning, PSkip
@@ -157,16 +157,17 @@ class Media(Command):
         raise PWarning("Не youtube/tiktok/reddit/instagram ссылка")
 
     def get_youtube_video(self, url):
-        y_api = YoutubeAPI()
-        timecode = y_api.get_timecode_str(url)
+        y_api = YoutubeVideoAPI()
         if 'audio' in self.event.message.keys:
             return self.get_youtube_audio(url)
         else:
             content_url = y_api.get_video_download_url(url, self.event.platform)
             video_content = requests.get(content_url).content
-            attachments = [self.bot.upload_video(video_content, peer_id=self.event.peer_id)]
+            attachments = [
+                self.bot.upload_video(video_content, peer_id=self.event.peer_id, filename=y_api.filename)]
 
         text = y_api.title
+        timecode = y_api.get_timecode_str(url)
         if timecode:
             text = f"{text}\n\n{timecode}"
         return attachments, text
@@ -186,18 +187,18 @@ class Media(Command):
         video_url = ttd_api.get_video_url(url)
         video = requests.get(video_url).content
 
-        attachments = [self.bot.upload_video(video, peer_id=self.event.peer_id)]
+        attachments = [self.bot.upload_video(video, peer_id=self.event.peer_id, filename="tiktok.mp4")]
         return attachments, None
 
     def get_reddit_attachment(self, url):
         rs = RedditSaver()
         attachment = rs.get_from_reddit(url)
         if rs.is_gif:
-            attachments = self.bot.upload_gif(attachment)
+            attachments = self.bot.upload_gif(attachment, filename=rs.filename)
         elif rs.is_image or rs.is_images or rs.is_gallery:
-            attachments = self.bot.upload_photos(attachment, peer_id=self.event.peer_id)
+            attachments = self.bot.upload_photos(attachment, peer_id=self.event.peer_id, filename=rs.filename)
         elif rs.is_video:
-            attachments = self.bot.upload_video(attachment, peer_id=self.event.peer_id)
+            attachments = self.bot.upload_video(attachment, peer_id=self.event.peer_id, filename=rs.filename)
 
         elif rs.is_text or rs.is_link:
             text = attachment
@@ -243,7 +244,7 @@ class Media(Command):
                     tg_quote_text = get_tg_formatted_text_line(quote_text)
                     text = text[:start_pos] + tg_quote_text + text[end_pos:]
             if all_photos:
-                msg = {'attachments': self.bot.upload_photos(all_photos)}
+                msg = {'attachments': self.bot.upload_photos(all_photos, filename=rs.filename)}
                 self.bot.parse_and_send_msgs(msg, self.event.peer_id, self.event.message_thread_id)
             return [], f"{rs.title}\n\n{text}"
         else:
@@ -283,7 +284,7 @@ class Media(Command):
         p_api = PikabuAPI()
         webm = p_api.get_video_url_from_post(url)
         video_content = requests.get(webm).content
-        attachments = [self.bot.upload_video(video_content, peer_id=self.event.peer_id)]
+        attachments = [self.bot.upload_video(video_content, peer_id=self.event.peer_id, filename=p_api.filename)]
         return attachments, p_api.title
 
     def get_the_hole_video(self, url):
@@ -312,11 +313,11 @@ class Media(Command):
         p_api = PinterestAPI(url)
         content = p_api.get_attachment()
         if p_api.is_video:
-            attachments = [self.bot.upload_video(content, peer_id=self.event.peer_id)]
+            attachments = [self.bot.upload_video(content, peer_id=self.event.peer_id, filename=p_api.filename)]
         elif p_api.is_image:
-            attachments = [self.bot.upload_photo(content, peer_id=self.event.peer_id)]
+            attachments = [self.bot.upload_photo(content, peer_id=self.event.peer_id, filename=p_api.filename)]
         elif p_api.is_gif:
-            attachments = [self.bot.upload_gif(content, peer_id=self.event.peer_id)]
+            attachments = [self.bot.upload_gif(content, peer_id=self.event.peer_id, filename=p_api.filename)]
         else:
             raise PWarning("Я хз чё за контент")
 

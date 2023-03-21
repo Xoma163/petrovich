@@ -5,7 +5,7 @@ from django.core.management import BaseCommand
 
 from apps.bot.APIs.TheHoleAPI import TheHoleAPI
 from apps.bot.APIs.WASDAPI import WASDAPI
-from apps.bot.APIs.YoutubeAPI import YoutubeAPI
+from apps.bot.APIs.YoutubeVideoAPI import YoutubeVideoAPI
 from apps.bot.classes.bots.Bot import get_bot_by_platform
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.events.Event import Event
@@ -38,7 +38,7 @@ class Command(BaseCommand):
             self.check_wasd_video(sub)
 
     def check_youtube_video(self, sub):
-        youtube_info = YoutubeAPI()
+        youtube_info = YoutubeVideoAPI()
         youtube_data = youtube_info.get_last_video(sub.channel_id)
         if not youtube_data['last_video']['date'] > sub.date:
             return

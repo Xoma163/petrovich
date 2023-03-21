@@ -342,7 +342,8 @@ class Bot(Thread):
     # END USERS GROUPS BOTS
 
     # ATTACHMENTS
-    def upload_photos(self, images, max_count=10, peer_id=None, allowed_exts_url=None, guarantee_url=False):
+    def upload_photos(self, images, max_count=10, peer_id=None, allowed_exts_url=None, guarantee_url=False,
+                      filename=None):
         """
         Загрузка фотографий на сервер ТГ.
         images: список изображений в любом формате (ссылки, байты, файлы)
@@ -353,7 +354,7 @@ class Bot(Thread):
         attachments = []
         for image in images:
             try:
-                att = self.upload_photo(image, peer_id, allowed_exts_url, guarantee_url)
+                att = self.upload_photo(image, peer_id, allowed_exts_url, guarantee_url, filename)
                 attachments.append(att)
             except Exception:
                 continue
@@ -361,13 +362,13 @@ class Bot(Thread):
                 break
         return attachments
 
-    def upload_photo(self, image, peer_id=None, allowed_exts_url=None, guarantee_url=False):
+    def upload_photo(self, image, peer_id=None, allowed_exts_url=None, guarantee_url=False, filename=None):
         if allowed_exts_url is None:
             allowed_exts_url = ['jpg', 'jpeg', 'png']
         if peer_id:
             self.set_activity(peer_id, ActivitiesEnum.UPLOAD_PHOTO)
         pa = PhotoAttachment()
-        pa.parse_response(image, allowed_exts_url, guarantee_url=guarantee_url)
+        pa.parse_response(image, allowed_exts_url, guarantee_url=guarantee_url, filename=filename)
         return pa
 
     def upload_document(self, document, peer_id=None, title='Документ', filename=None):

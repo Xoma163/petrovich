@@ -3,6 +3,8 @@ import json
 import requests
 from bs4 import BeautifulSoup
 
+from apps.bot.utils.utils import get_url_file_ext
+
 
 class PinterestAPI:
     IMAGE = "image"
@@ -13,6 +15,8 @@ class PinterestAPI:
         self.url = url
         self.title = None
         self.type = None
+
+        self.filename = None
 
     def get_attachment(self):
         content = requests.get(self.url).content
@@ -33,16 +37,23 @@ class PinterestAPI:
             image = json.loads(bs4.find("script", {'data-test-id': 'leaf-snippet'}).text)
             self.title = image['headline']
             image_url = image['image']
-            if image_url.endswith('.gif') or image_url.endswith('.gifv'):
+            ext = get_url_file_ext(image_url)
+            if ext in ['gif', 'gifv']:
                 self.type = self.GIF
         except:
             self.title = None
             image_url = bs4.find("meta", {"name": "og:image"}).attrs['content']
+            ext = get_url_file_ext(image_url)
+
+        self.filename = f"{self.title.replace(' ', '.')}.{ext}"
         return image_url
 
     def get_video(self, bs4):
         self.type = self.VIDEO
-        return json.loads(bs4.find("script", {'data-test-id': 'video-snippet'}).text)['contentUrl']
+        video_url = json.loads(bs4.find("script", {'data-test-id': 'video-snippet'}).text)['contentUrl']
+        ext = get_url_file_ext(video_url)
+        self.filename = f"{self.title.replace(' ', '.')}.{ext}"
+        return video_url
 
     @property
     def is_video(self):

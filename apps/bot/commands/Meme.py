@@ -5,7 +5,7 @@ from urllib.parse import urlparse, parse_qsl, quote
 import requests
 from django.db.models import Q
 
-from apps.bot.APIs.YoutubeAPI import YoutubeAPI
+from apps.bot.APIs.YoutubeVideoAPI import YoutubeVideoAPI
 from apps.bot.classes.Command import Command
 from apps.bot.classes.bots.Bot import upload_image_to_vk_server, send_message_to_moderator_chat, get_bot_by_platform
 from apps.bot.classes.consts.Consts import Role, Platform
@@ -469,10 +469,10 @@ class Meme(Command):
                     video = VideoAttachment()
                     video.file_id = meme.tg_file_id
                     msg['attachments'] = video
-                    y_api = YoutubeAPI()
+                    y_api = YoutubeVideoAPI()
                     msg['text'] = y_api.get_timecode_str(meme.link)
                 else:
-                    y_api = YoutubeAPI()
+                    y_api = YoutubeVideoAPI()
                     try:
                         content_url = y_api.get_video_download_url(meme.link, self.event.platform)
                         video_content = requests.get(content_url).content
@@ -534,10 +534,10 @@ class Meme(Command):
         thread.start()
 
     def _set_youtube_file_id(self, meme):
-        from apps.bot.APIs.YoutubeAPI import YoutubeAPI
+        from apps.bot.APIs.YoutubeVideoAPI import YoutubeVideoAPI
         from apps.bot.models import Chat
 
-        y_api = YoutubeAPI()
+        y_api = YoutubeVideoAPI()
         msg = {}
         try:
             content_url = y_api.get_video_download_url(meme.link, self.event.platform)
@@ -672,7 +672,7 @@ class Meme(Command):
                     if v:
                         video_id = v
 
-                y_api = YoutubeAPI()
+                y_api = YoutubeVideoAPI()
                 ts = y_api.get_timecode_str(meme.link)
 
                 if meme.tg_file_id:

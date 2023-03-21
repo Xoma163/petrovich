@@ -2,11 +2,13 @@ import requests
 from bs4 import BeautifulSoup
 
 from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.utils.utils import get_url_file_ext
 
 
 class PikabuAPI:
     def __init__(self):
         self.title = None
+        self.filename = None
 
     def get_video_url_from_post(self, url):
         headers = {
@@ -19,4 +21,6 @@ class PikabuAPI:
             raise PWarning("Не нашёл видео в этом посте")
         self.title = bs4.find('meta', attrs={'property': 'og:title'}).attrs['content']
         webm = player.attrs['data-webm']
+        ext = get_url_file_ext(webm)
+        self.filename = f"{self.title.replace(' ', '.')}.{ext}"
         return webm

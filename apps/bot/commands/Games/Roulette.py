@@ -119,7 +119,7 @@ class Roulette(Command):
             [f"{STATIC_ROOT}/bot/img/roulette_game.jpg",
              f"{STATIC_ROOT}/bot/img/roulette.jpg"],
             [90, 10])
-        photo = self.bot.upload_photo(photo, peer_id=self.event.peer_id)
+        photo = self.bot.upload_photo(photo, peer_id=self.event.peer_id, filename="petrovich_roulette.jpg")
         return {'attachments': photo}
 
     def menu_bonus(self):

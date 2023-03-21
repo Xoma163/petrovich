@@ -45,7 +45,8 @@ class Logs(Command):
         img = draw_text_on_image(logs_txt)
         img_byte_arr = io.BytesIO()
         img.save(img_byte_arr, format='PNG')
-        return {'attachments': self.bot.upload_document(img_byte_arr, peer_id=self.event.peer_id, filename='logs.png')}
+        return {'attachments': self.bot.upload_document(img_byte_arr, peer_id=self.event.peer_id,
+                                                        filename='petrovich_logs.png')}
 
     def transform_logs_by_values(self, items):
         if isinstance(items, dict):

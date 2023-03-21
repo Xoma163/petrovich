@@ -5,6 +5,7 @@ import re
 from datetime import datetime
 from io import BytesIO
 from typing import List
+from urllib.parse import urlparse
 
 import pytz
 from PIL import Image, ImageDraw, ImageFont
@@ -386,3 +387,7 @@ def fix_layout(s):
         else:
             new_s += letter
     return new_s
+
+
+def get_url_file_ext(url):
+    return urlparse(url).path.rsplit('.', 1)[-1]

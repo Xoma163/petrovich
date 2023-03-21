@@ -32,7 +32,7 @@ class Find(Command):
 
         attachments = []
         if self.event.platform == Platform.VK:
-            attachments = self.bot.upload_photos(urls, count, peer_id=self.event.peer_id)
+            attachments = self.bot.upload_photos(urls, count, peer_id=self.event.peer_id, filename="petrovich_find.jpg")
         elif self.event.platform == Platform.TG:
             for url in urls:
                 self.bot.set_activity(self.event.peer_id, ActivitiesEnum.UPLOAD_PHOTO)
@@ -43,7 +43,7 @@ class Find(Command):
                 if len(attachments) == count:
                     break
         else:
-            attachments = self.bot.upload_photos(urls, 5)
+            attachments = self.bot.upload_photos(urls, 5, filename="petrovich_find.jpg")
         if len(attachments) == 0:
             raise PWarning("Ничего не нашёл по картинкам")
         return {'text': f"Результаты по запросу '{query}'", 'attachments': attachments}
