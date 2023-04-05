@@ -22,4 +22,4 @@ class KeyboardHide(Command):
         if self.event.platform == Platform.VK:
             return {'keyboard': self.EMPTY_KEYBOARD_VK}
         elif self.event.platform == Platform.TG:
-            return {'keyboard': self.EMPTY_KEYBOARD_TG}
+            return {'keyboard': self.EMPTY_KEYBOARD_TG, 'text': "Скрыл"}
