@@ -13,9 +13,7 @@ class KeyboardHide(Command):
         "buttons": []
     }
     EMPTY_KEYBOARD_TG = {
-        'inline_keyboard': {
-            'remove_keyboard': True
-        }
+        'remove_keyboard': True
     }
 
     def start(self):
