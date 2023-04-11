@@ -61,6 +61,8 @@ class Event:
         """
         if self.force_response is not None:
             return self.force_response
+        if self.action:
+            return True
         if not self.sender:
             return False
 
@@ -68,8 +70,6 @@ class Event:
             return False
         if self.is_from_bot:
             return False
-        if self.action:
-            return True
         if self.payload:
             return True
 

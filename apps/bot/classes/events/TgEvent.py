@@ -113,10 +113,13 @@ class TgEvent(Event):
     def setup_action(self, message):
         new_chat_members = message.get('new_chat_members')
         left_chat_member = message.get('left_chat_member')
+        migrate_from_chat_id = message.get('migrate_from_chat_id')
         if new_chat_members:
             self.action = {'new_chat_members': new_chat_members}
         elif left_chat_member:
             self.action = {'left_chat_member': [left_chat_member]}
+        elif migrate_from_chat_id:
+            self.action = {'migrate_from_chat_id': migrate_from_chat_id}
 
     def setup_payload(self, payload):
         self.message = Message()

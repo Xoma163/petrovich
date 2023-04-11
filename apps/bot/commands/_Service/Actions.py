@@ -1,6 +1,7 @@
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PError
+from apps.bot.models import Chat
 from apps.games.models import PetrovichUser
 from apps.service.models import Tag
 from petrovich.settings import env
@@ -16,6 +17,7 @@ class Actions(Command):
     def start(self):
         new_chat_members = self.event.action.get('new_chat_members')
         left_chat_member = self.event.action.get('left_chat_member')
+        migrate_from_chat_id = self.event.action.get('migrate_from_chat_id')
         if new_chat_members:
             answer = []
             for member in new_chat_members:
@@ -24,6 +26,8 @@ class Actions(Command):
         elif left_chat_member:
             for member in left_chat_member:
                 self.setup_left_chat_member(member['id'], is_bot=member['is_bot'])
+        elif migrate_from_chat_id:
+            self.setup_new_chat_id(migrate_from_chat_id)
 
     def setup_new_chat_member(self, member_id, is_bot):
         if not is_bot:
@@ -64,6 +68,12 @@ class Actions(Command):
             if pu.exists():
                 pu.active = False
                 pu.save()
+
+    def setup_new_chat_id(self, chat_id):
+        chat = Chat.objects.get(chat_id=chat_id)
+        chat.chat_id = self.event.chat.chat_id
+        chat.save()
+        self.event.chat.delete()
 
     # По изменению чата конфы
     # elif self.event.action['type'] == 'chat_title_update':

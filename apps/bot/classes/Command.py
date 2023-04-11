@@ -100,6 +100,8 @@ class Command:
         """
         Проверки
         """
+        if self.event.action:
+            return
         self.check_platforms()
         self.check_sender(self.access)
         if self.pm:
