@@ -33,6 +33,9 @@ class Nostalgia(Command):
     FILE = "secrets/mrazi_chats/mrazi_all.json"
 
     def start(self):
+        if self.event.chat.pk != 56 or self.event.is_from_pm:
+            raise PWarning("Команда работает только в ЛС или конфе мразей")
+
         if self.event.message.args:
             arg0 = str(self.event.message.args[0])
         else:
