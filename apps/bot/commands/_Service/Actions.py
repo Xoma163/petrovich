@@ -2,8 +2,6 @@ from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PError
 from apps.bot.models import Chat
-from apps.games.models import PetrovichUser
-from apps.service.models import Tag
 from petrovich.settings import env
 
 
@@ -58,16 +56,6 @@ class Actions(Command):
             profile = self.bot.get_profile_by_user_id(member_id)
             self.bot.remove_chat_from_profile(profile, self.event.chat)
 
-            # Tags
-            tags_with_user = Tag.objects.filter(chat=self.event.chat, users__in=[profile])
-            for tag in tags_with_user:
-                tag.users.remove(profile)
-
-            # Petrovich Game
-            pu = PetrovichUser.objects.filter(chat=self.event.chat, profile=profile)
-            if pu.exists():
-                pu.active = False
-                pu.save()
 
     def setup_new_chat_id(self, chat_id):
         chat = Chat.objects.get(chat_id=chat_id)

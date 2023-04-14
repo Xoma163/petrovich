@@ -78,8 +78,12 @@ class Petrovich(Command):
                     return f"{winner_gender} дня - {winner_today.profile}"
 
             group_banned = Group.objects.get(name=Role.BANNED.name)
-            winner = PetrovichUser.objects.filter(chat=self.event.chat, active=True).exclude(
-                profile__groups=group_banned).order_by("?").first()
+            winner = PetrovichUser.objects \
+                .filter(chat=self.event.chat, active=True) \
+                .exclude(profile__groups=group_banned) \
+                .filter(profile__chats=self.event.chat) \
+                .order_by("?") \
+                .first()
             if winner:
                 winner = winner.profile
             else:

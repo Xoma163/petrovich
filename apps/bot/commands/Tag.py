@@ -121,8 +121,10 @@ class Tag(Command):
         if not tags:
             return "Тегов нет"
 
-        msg_list = [f"{self._get_tag_name(tag.name)}\n{', '.join([str(user) for user in tag.users.all()])}" for tag in
-                    tags]
+        msg_list = [
+            f"{self._get_tag_name(tag.name)}\n{', '.join([str(user) for user in tag.users.filter(pk__in=self.event.chat.users.all())])}"
+            for tag in
+            tags]
         return "\n\n".join(msg_list)
 
     def menu_default(self):
@@ -138,7 +140,8 @@ class Tag(Command):
             users = self.event.chat.users.all().exclude(pk=self.event.sender.pk)
         else:
             tag = self._get_tag_by_name(tag_name)
-            users = tag.users.exclude(pk=self.event.sender.pk)
+            users = tag.users.exclude(pk=self.event.sender.pk).filter(pk__in=self.event.chat.users.all())
+
         if not users:
             raise PWarning("В теге нет пользователей")
         msg_list = [self.bot.get_mention(user) for user in users]
