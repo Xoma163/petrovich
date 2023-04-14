@@ -1,9 +1,9 @@
+from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Platform, Role
 from apps.bot.classes.consts.Exceptions import PWarning
-from apps.bot.commands.MraziCommands.Nostalgia import Nostalgia
 
 
-class AdminTitle(Nostalgia):
+class AdminTitle(Command):
     name = "должность"
     names = ['title']
     help_text = "меняет должность в чате флейвы"

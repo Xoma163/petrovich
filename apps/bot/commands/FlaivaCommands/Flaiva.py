@@ -1,4 +1,5 @@
 from apps.bot.classes.consts.Consts import Platform, Role
+from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.commands.MraziCommands.Nostalgia import Nostalgia
 
 
@@ -21,3 +22,7 @@ class Flaiva(Nostalgia):
 
     KEY = "flaiva"
     FILE = "secrets/flaiva_chats/flaiva.json"
+
+    def check_rights(self):
+        if not (self.event.is_from_pm or self.event.chat and self.event.chat.pk == 46):
+            raise PWarning("Команда работает только в ЛС или конфе флейвы")

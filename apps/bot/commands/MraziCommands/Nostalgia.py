@@ -32,10 +32,13 @@ class Nostalgia(Command):
     KEY = "mrazi"
     FILE = "secrets/mrazi_chats/mrazi_all.json"
 
-    def start(self):
+    def check_rights(self):
+
         if not (self.event.is_from_pm or self.event.chat and self.event.chat.pk == 56):
             raise PWarning("Команда работает только в ЛС или конфе мразей")
 
+    def start(self):
+        self.check_rights()
         if self.event.message.args:
             arg0 = str(self.event.message.args[0])
         else:

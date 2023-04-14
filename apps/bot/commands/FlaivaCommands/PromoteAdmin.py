@@ -1,8 +1,8 @@
+from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Platform, Role
-from apps.bot.commands.MraziCommands.Nostalgia import Nostalgia
 
 
-class PromoteAdmin(Nostalgia):
+class PromoteAdmin(Command):
     name = "promote"
     access = Role.FLAIVA
     platforms = [Platform.TG]
