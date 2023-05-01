@@ -196,14 +196,15 @@ class MinecraftAPI:
         """
 
         def send_notify():
-            users_notify = Profile.objects.filter(groups__name=Role.MINECRAFT_NOTIFY.name)
+            profiles_notify = Profile.objects.filter(groups__name=Role.MINECRAFT_NOTIFY.name)
             if self.event:
-                users_notify = users_notify.exclude(id=self.event.sender.id)
+                profiles_notify = profiles_notify.exclude(id=self.event.sender.id)
                 if self.event.chat:
                     users_in_chat = self.event.chat.users.all()
-                    users_notify = users_notify.exclude(pk__in=users_in_chat)
-            for user in users_notify:
-                bot = get_bot_by_platform(user.get_default_platform_enum())
+                    profiles_notify = profiles_notify.exclude(pk__in=users_in_chat)
+            for profile in profiles_notify:
+                bot = get_bot_by_platform(profile.get_default_platform_enum())
+                user = profile.get_user_by_default_platform()
                 bot.parse_and_send_msgs_thread(message, user.user_id, self.event.message_thread_id)
 
         thread = threading.Thread(target=send_notify)
@@ -259,18 +260,8 @@ minecraft_servers = [
             'names': ['1.19.2', "1.19"],
             # 'map_url': f"http://{MAIN_DOMAIN}:8123/?worldname=WTTF#",
             'auto_off': False
-        }),
-    # MinecraftAPI(
-    #     **{
-    #         'ip': MAIN_DOMAIN,
-    #         'port': 25565,
-    #         'amazon': False,
-    #         'event': None,
-    #         'delay': 60,
-    #         'names': ['1.12.2', "1.12"],
-    #         'map_url': f"http://{MAIN_DOMAIN}:8123/?worldname=WTTF#",
-    #         'auto_off': False
-    #     }),
+        }
+    ),
 ]
 
 
