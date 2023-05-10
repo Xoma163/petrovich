@@ -21,5 +21,5 @@ class APIEvent(Event):
 
     def setup_photo(self, photo_event):
         tg_photo = PhotoAttachment()
-        tg_photo.parse_api_photo(photo_event)
+        tg_photo.parse_api(photo_event)
         self.attachments.append(tg_photo)

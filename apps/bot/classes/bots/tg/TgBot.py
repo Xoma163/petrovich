@@ -347,7 +347,7 @@ class TgBot(CommonBot):
         if len(photos) == 0:
             raise PWarning("Нет фотографий в профиле")
         pa = PhotoAttachment()
-        pa.parse_tg_photo(photos[0][-1], self)
+        pa.parse_tg(photos[0][-1], self)
 
         profile.set_avatar(pa.private_download_url)
 

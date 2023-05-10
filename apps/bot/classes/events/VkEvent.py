@@ -103,27 +103,27 @@ class VkEvent(Event):
 
     def setup_photo(self, photo):
         vk_photo = PhotoAttachment()
-        vk_photo.parse_vk_photo(photo)
+        vk_photo.parse_vk(photo)
         self.attachments.append(vk_photo)
 
     def setup_video(self, video):
         vk_video = VideoAttachment()
-        vk_video.parse_vk_video(video)
+        vk_video.parse_vk(video)
         self.attachments.append(vk_video)
 
     def setup_audio(self, video):
         vk_audio = AudioAttachment()
-        vk_audio.parse_vk_audio(video)
+        vk_audio.parse_vk(video)
         self.attachments.append(vk_audio)
 
     def setup_voice(self, voice):
         vk_voice = VoiceAttachment()
-        vk_voice.parse_vk_voice(voice)
+        vk_voice.parse_vk(voice)
         self.attachments.append(vk_voice)
 
     def setup_sticker(self, sticker):
         vk_sticker = StickerAttachment()
-        vk_sticker.parse_vk_sticker(sticker)
+        vk_sticker.parse_vk(sticker)
         self.attachments.append(vk_sticker)
 
     def setup_fwd(self, fwd):

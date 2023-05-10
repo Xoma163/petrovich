@@ -7,6 +7,7 @@ from pydub import AudioSegment
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning, PSkip
+from apps.bot.classes.messages.attachments.VideoNoteAttachment import VideoNoteAttachment
 from apps.bot.classes.messages.attachments.VoiceAttachment import VoiceAttachment
 from apps.bot.utils.utils import get_tg_bold_text, get_tg_spoiler_text
 
@@ -18,7 +19,7 @@ class VoiceRecognition(Command):
     help_texts = ["(Пересланное сообщение с голосовым сообщением) - распознаёт голосовое сообщение"]
     help_texts_extra = "Если дан доступ к переписке, то распознает автоматически"
     platforms = [Platform.VK, Platform.TG]
-    attachments = [VoiceAttachment]
+    attachments = [VoiceAttachment, VideoNoteAttachment]
     priority = -100
 
     @staticmethod
@@ -33,7 +34,7 @@ class VoiceRecognition(Command):
         return False
 
     def start(self):
-        audio_messages = self.event.get_all_attachments(VoiceAttachment)
+        audio_messages = self.event.get_all_attachments([VoiceAttachment, VideoNoteAttachment])
         audio_message = audio_messages[0]
 
         download_url = audio_message.get_download_url()

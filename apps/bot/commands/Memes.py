@@ -1,19 +1,11 @@
 from django.core.paginator import Paginator
 
 from apps.bot.classes.Command import Command
-from apps.bot.classes.consts.Consts import Role, Platform
+from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.commands.Meme import Meme
-from apps.bot.utils.utils import get_tg_formatted_text
+from apps.bot.utils.utils import get_tg_formatted_text, get_tg_formatted_text_line
 from apps.service.models import Meme as MemeModel
-
-
-def get_memes_names(memes, sender):
-    if sender.check_role(Role.MODERATOR):
-        meme_names = [f"{meme.name} (id - {meme.id})" for meme in memes]
-    else:
-        meme_names = [meme.name for meme in memes]
-    return meme_names
 
 
 class Memes(Command):
@@ -44,9 +36,9 @@ class Memes(Command):
             msg_header = f"Страница {page}/{p.num_pages}"
 
             memes_on_page = p.page(page)
-            meme_names = get_memes_names(memes_on_page, self.event.sender)
-            msg_body = ";\n".join(meme_names)
-            if len(meme_names) > 0:
+            memes_names = self.get_memes_names(memes_on_page)
+            msg_body = ";\n".join(memes_names)
+            if len(memes_names) > 0:
                 msg_body += '.'
 
             if page != p.num_pages:
@@ -70,14 +62,18 @@ class Memes(Command):
             memes = meme_command.get_tanimoto_memes(memes, self.event.message.args)
 
             memes_sliced = memes[:20]
-            meme_names = get_memes_names(memes_sliced, self.event.sender)
-            meme_names_str = ";\n".join(meme_names)
+            memes_names = self.get_memes_names(memes_sliced)
+            memes_names_str = ";\n".join(memes_names)
             if len(memes) > len(memes_sliced):
-                meme_names_str += "\n..."
+                memes_names_str += "\n..."
             elif len(memes) > 0:
-                meme_names_str += '.'
-            if self.event.platform == Platform.TG:
-                text = f"{get_tg_formatted_text(meme_names_str)}\nВсего - {len(memes)}"
-            else:
-                text = f"{meme_names_str}\n\nВсего - {len(memes)}"
+                memes_names_str += '.'
+
+            text = f"{memes_names_str}\n\nВсего - {len(memes)}"
             return text
+
+    def get_memes_names(self, memes) -> list:
+        if self.event.platform == Platform.TG:
+            return [f"{get_tg_formatted_text_line(meme.name)} (id - {meme.id})" for meme in memes]
+        else:
+            return [f"{meme.name} (id - {meme.id})" for meme in memes]

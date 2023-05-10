@@ -7,6 +7,7 @@ from apps.bot.classes.messages.attachments.GifAttachment import GifAttachment
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 from apps.bot.classes.messages.attachments.StickerAttachment import StickerAttachment
 from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
+from apps.bot.classes.messages.attachments.VideoNoteAttachment import VideoNoteAttachment
 from apps.bot.classes.messages.attachments.VoiceAttachment import VoiceAttachment
 from petrovich.settings import env
 
@@ -135,6 +136,7 @@ class TgEvent(Event):
     def setup_attachments(self, message):
         photo = message.get('photo')
         video = message.get('video')
+        video_note = message.get('video_note')
         gif = message.get('animation')
         voice = message.get('voice')
         document = message.get('document')
@@ -148,6 +150,8 @@ class TgEvent(Event):
         elif video:
             self.setup_video(video)
             message_text = message.get('caption')
+        elif video_note:
+            self.setup_video_note(video_note)
         elif gif:
             self.setup_gif(gif)
             message_text = message.get('caption')
@@ -164,27 +168,32 @@ class TgEvent(Event):
 
     def setup_photo(self, photo_event):
         tg_photo = PhotoAttachment()
-        tg_photo.parse_tg_photo(photo_event, self.bot)
+        tg_photo.parse_tg(photo_event, self.bot)
         self.attachments.append(tg_photo)
 
     def setup_video(self, video_event):
         tg_video = VideoAttachment()
-        tg_video.parse_tg_video(video_event, self.bot)
+        tg_video.parse_tg(video_event, self.bot)
+        self.attachments.append(tg_video)
+
+    def setup_video_note(self, video_event):
+        tg_video = VideoNoteAttachment()
+        tg_video.parse_tg(video_event, self.bot)
         self.attachments.append(tg_video)
 
     def setup_gif(self, gif_event):
         tg_gif = GifAttachment()
-        tg_gif.parse_tg_gif(gif_event, self.bot)
+        tg_gif.parse_tg(gif_event, self.bot)
         self.attachments.append(tg_gif)
 
     def setup_voice(self, voice_event):
         tg_voice = VoiceAttachment()
-        tg_voice.parse_tg_voice(voice_event, self.bot)
+        tg_voice.parse_tg(voice_event, self.bot)
         self.attachments.append(tg_voice)
 
     def setup_sticker(self, sticker_event):
         tg_sticker = StickerAttachment()
-        tg_sticker.parse_tg_sticker(sticker_event, self.bot)
+        tg_sticker.parse_tg(sticker_event, self.bot)
         self.attachments.append(tg_sticker)
 
     def setup_fwd(self, fwd):

@@ -12,8 +12,8 @@ class AudioAttachment(Attachment):
         self.artist = None
         self.title = None
 
-    def parse_vk_audio(self, event_audio):
+    def parse_vk(self, event):
         from petrovich.settings import VK_URL
-        self.url = f"{VK_URL}video{event_audio['owner_id']}_{event_audio['id']}"
-        self.private_download_url = event_audio['url']
-        self.duration = event_audio['duration']
+        self.url = f"{VK_URL}video{event['owner_id']}_{event['id']}"
+        self.private_download_url = event['url']
+        self.duration = event['duration']

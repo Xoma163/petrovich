@@ -1,25 +1,16 @@
 from apps.bot.classes.messages.attachments.Attachment import Attachment
 
 
-class VideoAttachment(Attachment):
-    TYPE = 'video'
+class VideoNoteAttachment(Attachment):
+    TYPE = 'video_note'
 
     def __init__(self):
         super().__init__(self.TYPE)
         self.duration = None  # sec
-        self.width = None
-        self.height = None
         self.thumb: str = None
-
-    def parse_vk(self, event):
-        from petrovich.settings import VK_URL
-        self.url = f"{VK_URL}video{event['owner_id']}_{event['id']}"
-        self.duration = event['duration']
 
     def parse_tg(self, event, tg_bot):
         self.duration = event.get('duration')
-        self.width = event.get('width')
-        self.height = event.get('height')
         self.name = event.get('name')
         self.size = event['file_size']
 

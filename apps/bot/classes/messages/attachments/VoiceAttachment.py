@@ -8,12 +8,12 @@ class VoiceAttachment(Attachment):
         super().__init__(self.TYPE)
         self.duration = None  # sec
 
-    def parse_tg_voice(self, event_voice, tg_bot):
-        self.duration = event_voice['duration']
-        self.size = event_voice['file_size']
-        self.file_id = event_voice['file_id']
+    def parse_tg(self, event, tg_bot):
+        self.duration = event['duration']
+        self.size = event['file_size']
+        self.file_id = event['file_id']
         self.set_private_download_url_tg(tg_bot, self.file_id)
 
-    def parse_vk_voice(self, event_voice):
-        self.public_download_url = event_voice['link_mp3']
-        self.duration = event_voice['duration']
+    def parse_vk(self, event):
+        self.public_download_url = event['link_mp3']
+        self.duration = event['duration']

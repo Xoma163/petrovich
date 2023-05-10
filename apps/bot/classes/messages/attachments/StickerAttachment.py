@@ -11,18 +11,18 @@ class StickerAttachment(Attachment):
         self.emoji = None
         self.animated = False
 
-    def parse_vk_sticker(self, event_sticker):
-        for image in event_sticker['images']:
+    def parse_vk(self, event):
+        for image in event['images']:
             if image['height'] == 128:
                 self.width = image['width']
                 self.height = image['height']
                 self.url = image['url']
                 break
 
-    def parse_tg_sticker(self, sticker, tg_bot):
+    def parse_tg(self, event, tg_bot):
         attrs = ['width', 'height', 'file_id', 'file_size', 'emoji']
         for attr in attrs:
-            setattr(self, attr, sticker.get(attr, None))
-        self.animated = sticker['is_video'] or sticker['is_animated']
+            setattr(self, attr, event.get(attr, None))
+        self.animated = event['is_video'] or event['is_animated']
 
         self.set_private_download_url_tg(tg_bot, self.file_id)
