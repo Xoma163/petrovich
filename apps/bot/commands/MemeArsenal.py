@@ -17,8 +17,7 @@ class MemeArsenal(Command):
         memes = ma_api.get_memes(self.event.message.args_str)
         if not memes:
             raise PWarning("Не нашёл :(")
-        attachments = self.bot.upload_photos([x['url'] for x in memes], guarantee_url=True,
-                                             filename="petrovich_memearsenal.jpg")
+        attachments = [self.bot.get_photo_attachment(x['url']) for x in memes]
         text_list = []
         for i, meme in enumerate(memes):
             text_list.append(f"{i + 1}. {meme['title']}")

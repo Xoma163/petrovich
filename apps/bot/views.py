@@ -4,11 +4,10 @@ import re
 from django.http import JsonResponse, HttpResponse
 from django.views import View
 
-from apps.bot.classes.bots.Bot import get_bot_by_platform
 from apps.bot.classes.bots.api.APIBot import APIBot
 from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.consts.Exceptions import PError
-from apps.bot.classes.mixins import CSRFExemptMixin
+from apps.bot.mixins import CSRFExemptMixin
 from apps.bot.models import Profile
 
 
@@ -72,10 +71,9 @@ class GithubView(CSRFExemptMixin, View):
             return HttpResponse('ok', status=200)
         profile_pk = match[-1]
         profile = Profile.objects.get(pk=profile_pk)
-        platform = profile.get_default_platform_enum()
-        peer_id = profile.get_user_by_default_platform().user_id
-        bot = get_bot_by_platform(platform)
-        bot.parse_and_send_msgs(text, peer_id)
+        user = profile.get_tg_user()
+        bot = TgBot()
+        bot.parse_and_send_msgs(text, user.peer_id)
 
     def closed_issue(self, data):
         issue = data['issue']

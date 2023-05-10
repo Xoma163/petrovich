@@ -6,7 +6,7 @@ from django.core.management import BaseCommand
 from apps.bot.APIs.TheHoleAPI import TheHoleAPI
 from apps.bot.APIs.WASDAPI import WASDAPI
 from apps.bot.APIs.YoutubeVideoAPI import YoutubeVideoAPI
-from apps.bot.classes.bots.Bot import get_bot_by_platform
+from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.events.Event import Event
 from apps.bot.commands.Media import Media
@@ -86,7 +86,7 @@ class Command(BaseCommand):
 
     @staticmethod
     def send_notify(sub, title, link, is_stream=False):
-        bot = get_bot_by_platform(sub.author.get_platform_enum())
+        bot = TgBot()
 
         new_video_text = "Новое видео" if not is_stream else "Стрим"
 
@@ -103,8 +103,7 @@ class Command(BaseCommand):
 
     @staticmethod
     def send_the_hole_file(sub, link):
-        platform = sub.author.get_platform_enum()
-        bot = get_bot_by_platform(platform)
+        bot = TgBot()
         event = Event(bot=bot, peer_id=sub.peer_id)
 
         media_command = Media(bot, event)

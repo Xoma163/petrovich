@@ -2,7 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 from django.core.management.base import BaseCommand
 
-from apps.bot.classes.bots.Bot import get_bot_by_platform
+from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.models import User
 from apps.bot.utils.utils import get_tg_formatted_url
@@ -18,7 +18,6 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         chat_id = options['chat_id'][0]
         pasha = User.objects.get(user_id=chat_id)
-        bot = get_bot_by_platform(pasha.get_platform_enum())
 
         pasha_news_last_id_entity, created = Service.objects.get_or_create(
             name='pasha_news_last_id',
@@ -49,6 +48,7 @@ class Command(BaseCommand):
         pasha_news_last_id_entity.value = last_news_id
         pasha_news_last_id_entity.save()
 
+        bot = TgBot()
         for msg in msgs:
             bot.parse_and_send_msgs(msg, pasha.user_id)
 

@@ -11,8 +11,8 @@ class Donate(Command):
 
     def start(self):
         url = 'https://www.donationalerts.com/r/xoma163'
-        attachment = self.bot.upload_photo(f"{STATIC_ROOT}/bot/img/donate.jpg", peer_id=self.event.peer_id,
-                                           filename="petrovich_donate.jpg")
+        attachment = self.bot.get_photo_attachment(f"{STATIC_ROOT}/bot/img/donate.jpg", peer_id=self.event.peer_id,
+                                                   filename="petrovich_donate.jpg")
         if self.event.platform == Platform.TG:
             return {'text': get_tg_formatted_url("Задонатить", url), 'attachments': attachment}
         return {'text': url, 'attachments': attachment}

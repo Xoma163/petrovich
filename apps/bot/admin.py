@@ -15,7 +15,7 @@ class ProfileAdmin(admin.ModelAdmin):
             'fields': ('groups', 'chats'),
         }),
         ('Настройки', {
-            'fields': ('celebrate_bday', 'default_platform'),
+            'fields': ('celebrate_bday',),
         }),
         ('API', {
             'fields': ('api_token',),

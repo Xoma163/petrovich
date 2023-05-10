@@ -30,7 +30,6 @@ class Role(Enum):
 
 
 class Platform(Enum):
-    VK = 'vk'
     TG = 'tg'
     API = 'api'
     YANDEX = 'yandex'

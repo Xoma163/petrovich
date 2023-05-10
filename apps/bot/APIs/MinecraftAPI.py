@@ -1,27 +1,22 @@
 import json
 import threading
-import time
-from datetime import datetime
 
-import requests
 from mcrcon import MCRcon
 
-from apps.bot.classes.bots.Bot import get_bot_by_platform
+from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.consts.Consts import Role
 from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.models import Profile
 from apps.bot.utils.DoTheLinuxComand import do_the_linux_command
-from apps.bot.utils.utils import remove_tz, check_command_time
-from apps.service.models import Service
+from apps.bot.utils.utils import check_command_time
 from petrovich.settings import env, BASE_DIR, MAIN_DOMAIN
 
 
 class MinecraftAPI:
 
-    def __init__(self, ip, port=25565, amazon=False, event=None, delay=None, names=None, map_url=None, auto_off=False):
+    def __init__(self, ip, port=25565, event=None, delay=None, names=None, map_url=None, auto_off=False):
         self.ip = ip
         self.port = port
-        self.amazon = amazon
         self.event = event
 
         self.delay = delay
@@ -51,13 +46,6 @@ class MinecraftAPI:
         except Exception:
             return False
 
-    # ToDo: hardcode
-    @staticmethod
-    def check_amazon_server_status():
-        url = env.str("MINECRAFT_1_12_2_STATUS_URL")
-        response = requests.get(url).json()
-        return response['InstanceState']['Name'] == 'running'
-
     def _prepare_message(self, action):
         translator = {
             'start': 'Стартуем',
@@ -70,25 +58,10 @@ class MinecraftAPI:
     def _start_local(self):
         do_the_linux_command(f'sudo systemctl start {self._get_service_name()}')
 
-    # ToDo: hardcode
-    @staticmethod
-    def _start_amazon():
-        url = env.str("MINECRAFT_1_12_2_START_URL")
-        url_status = env.str("MINECRAFT_1_12_2_STATUS_URL")
-        response = requests.get(url_status).json()
-        if response['InstanceState']['Name'] == 'stopped':
-            requests.post(url)
-        else:
-            raise PWarning(
-                f"Сервер сейчас имеет состояние {response['InstanceState']['Name']}, не могу запустить")
-
     def start(self, send_notify=True):
         check_command_time(self._get_service_name(), self.delay)
 
-        if self.amazon:
-            self._start_amazon()
-        else:
-            self._start_local()
+        self._start_local()
 
         if send_notify:
             message = self._prepare_message("start")
@@ -97,28 +70,10 @@ class MinecraftAPI:
     def _stop_local(self):
         do_the_linux_command(f'sudo systemctl stop {self._get_service_name()}')
 
-    def _stop_amazon(self):
-        if not self.check_amazon_server_status():
-            return False
-        self.send_rcon('/stop')
-        while True:
-            server_is_offline = not self.send_rcon('/help')
-            if server_is_offline:
-                break
-            time.sleep(5)
-
-        url = env.str("MINECRAFT_1_12_2_STOP_URL")
-        requests.post(url)
-        Service.objects.filter(name=f'stop_{self._get_service_name()}').delete()
-        return True
-
     def stop(self, send_notify=True):
         check_command_time(self._get_service_name(), self.delay)
 
-        if self.amazon:
-            self._stop_amazon()
-        else:
-            self._stop_local()
+        self._stop_local()
         if send_notify:
             message = self._prepare_message("stop")
             self.send_notify_thread(message)
@@ -203,50 +158,16 @@ class MinecraftAPI:
                     users_in_chat = self.event.chat.users.all()
                     profiles_notify = profiles_notify.exclude(pk__in=users_in_chat)
             for profile in profiles_notify:
-                bot = get_bot_by_platform(profile.get_default_platform_enum())
-                user = profile.get_user_by_default_platform()
-                bot.parse_and_send_msgs_thread(message, user.user_id, self.event.message_thread_id)
+                user = profile.get_tg_user()
+                self.send_notify([user], message)
 
         thread = threading.Thread(target=send_notify)
         thread.start()
 
-    def stop_if_need(self):
-        if not self.auto_off:
-            return
-        self.get_server_info()
-        # Если сервак онлайн и нет игроков
-        if self.server_info['online'] and not self.server_info['players']:
-            obj, created = Service.objects.get_or_create(name=f'stop_{self._get_service_name()}')
-
-            # Создание событие. Уведомление, что мы скоро всё отрубим
-            if created:
-                message = f"Если никто не зайдёт на сервак по майну {self.get_version()}, то через полчаса я его остановлю"
-                users_notify = Profile.objects.filter(groups__name=Role.MINECRAFT_NOTIFY.name)
-                for user in users_notify:
-                    bot = get_bot_by_platform(user.get_default_platform_enum())
-                    bot.parse_and_send_msgs_thread(message, user.user_id, self.event.message_thread_id)
-
-            # Если событие уже было создано, значит пора отрубать
-            else:
-                update_datetime = obj.update_datetime
-                delta_seconds = (datetime.utcnow() - remove_tz(update_datetime)).seconds
-                if delta_seconds <= 1800 + 100:
-                    obj.delete()
-                    Service.objects.get_or_create(self._get_service_name())
-
-                    self.stop(send_notify=False)
-
-                    message = f"Вырубаю майн {self.get_version()}"
-                    users_notify = Profile.objects.filter(groups__name=Role.MINECRAFT_NOTIFY.name)
-                    for user in users_notify:
-                        bot = get_bot_by_platform(user.get_default_platform_enum())
-                        bot.parse_and_send_msgs_thread(message, user.user_id, self.event.message_thread_id)
-                else:
-                    obj.delete()
-
-        # Эта ветка нужна, чтобы вручную вырубленные серверы не провоцировали при последующем старте отключение в 0/30 минут
-        else:
-            Service.objects.filter(name=f'stop_{self._get_service_name()}').delete()
+    def send_notify(self, users, message):
+        for user in users:
+            bot = TgBot()
+            bot.parse_and_send_msgs_thread(message, user.user_id, self.event.message_thread_id)
 
 
 minecraft_servers = [
@@ -254,7 +175,6 @@ minecraft_servers = [
         **{
             'ip': MAIN_DOMAIN,
             'port': 25565,
-            'amazon': False,
             'event': None,
             'delay': 30,
             'names': ['1.19.2', "1.19"],

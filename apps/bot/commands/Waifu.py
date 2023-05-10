@@ -29,7 +29,7 @@ class Waifu(Command):
         else:
             waifu_number = get_random_int(waifus_count)
         url = f"https://www.thiswaifudoesnotexist.net/example-{waifu_number}.jpg"
-        attachment = self.bot.upload_photo(url, peer_id=self.event.peer_id, filename="petrovich_waifu.png")
+        attachment = self.bot.get_photo_attachment(url, peer_id=self.event.peer_id, filename="petrovich_waifu.png")
 
         if self.event.message.args:
             button = self.bot.get_button("Следующая", self.name, [waifu_number + 1])

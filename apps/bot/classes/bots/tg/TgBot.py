@@ -185,7 +185,7 @@ class TgBot(CommonBot):
         else:
             files = {'audio': audio.content}
             if audio.thumb:
-                thumb_file = self.upload_photo(audio.thumb, guarantee_url=True)
+                thumb_file = self.get_photo_attachment(audio.thumb, guarantee_url=True)
                 files['thumb'] = thumb_file.get_bytes_io_content()
             return self.requests.get('sendAudio', default_params, files=files)
 
@@ -406,7 +406,7 @@ class TgBot(CommonBot):
         """
         Получение меншона пользователя
         """
-        user = profile.get_user_by_platform(self.platform)
+        user = profile.get_tg_user()
         return get_tg_formatted_url(str(profile), f"tg://user?id={user.user_id}")
         # if user.nickname:
         #     return f"@{user.nickname}"
@@ -417,7 +417,7 @@ class TgBot(CommonBot):
         """
         self.requests.get('deleteMessage', params={'chat_id': peer_id, 'message_id': message_id})
 
-    def upload_image_to_tg_server(self, url) -> PhotoAttachment:
+    def upload_image_to_tg_server(self, image) -> PhotoAttachment:
         """
         Загрузка изображения на сервера ТГ с костылями
 
@@ -426,8 +426,7 @@ class TgBot(CommonBot):
         """
 
         photo_uploading_chat = self.chat_model.get(pk=env.str("TG_PHOTO_UPLOADING_CHAT_PK"))
-        pa = PhotoAttachment()
-        pa.public_download_url = url
+        pa = self.get_photo_attachment(image)
         rm = ResponseMessage({'attachments': [pa]}, peer_id=photo_uploading_chat.chat_id)
         response = self.send_response_message_item(rm.messages[0])
         if response.status_code != 200:

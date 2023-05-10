@@ -7,7 +7,7 @@ from django.db.models import Q
 
 from apps.bot.APIs.YoutubeVideoAPI import YoutubeVideoAPI
 from apps.bot.classes.Command import Command
-from apps.bot.classes.bots.Bot import upload_image_to_tg_server, send_message_to_moderator_chat, get_bot_by_platform
+from apps.bot.classes.bots.Bot import send_message_to_moderator_chat
 from apps.bot.classes.consts.Consts import Role, Platform
 from apps.bot.classes.consts.Exceptions import PWarning, PError, PSkip
 from apps.bot.classes.messages.attachments.GifAttachment import GifAttachment
@@ -124,25 +124,7 @@ class Meme(Command):
 
         if isinstance(attachment, LinkAttachment):
             new_meme['link'] = attachment.url
-        elif isinstance(attachment, PhotoAttachment):
-            new_meme['link'] = upload_image_to_tg_server(attachment.download_content())
-        elif isinstance(attachment, StickerAttachment):
-            if self.event.platform != Platform.TG:
-                raise PWarning("Добавление стикер-мемов доступно только в TG")
-            new_meme['tg_file_id'] = attachment.file_id
-            if not attachment.animated:
-                new_meme['link'] = upload_image_to_tg_server(attachment.download_content())
-        elif isinstance(attachment, VideoAttachment):
-            if self.event.platform != Platform.TG:
-                raise PWarning("Добавление видео-мемов доступно только в TG")
-            new_meme['tg_file_id'] = attachment.file_id
-        elif isinstance(attachment, GifAttachment):
-            if self.event.platform != Platform.TG:
-                raise PWarning("Добавление гифок-мемов доступно только в TG")
-            new_meme['tg_file_id'] = attachment.file_id
-        elif isinstance(attachment, VoiceAttachment):
-            if self.event.platform != Platform.TG:
-                raise PWarning("Добавление голосовух-мемов доступно только в TG")
+        else:
             new_meme['tg_file_id'] = attachment.file_id
         new_meme_obj = MemeModel.objects.create(**new_meme)
 
@@ -197,24 +179,8 @@ class Meme(Command):
         fields = {'type': attachment.type}
         if isinstance(attachment, LinkAttachment):
             fields['link'] = attachment.url
-        elif isinstance(attachment, PhotoAttachment):
-            fields['link'] = upload_image_to_tg_server(attachment.download_content())
-        elif isinstance(attachment, StickerAttachment):
-            if self.event.platform != Platform.TG:
-                raise PWarning("Обновление стикер-мемов доступно только в TG")
-            fields['tg_file_id'] = attachment.file_id
-            if not attachment.animated:
-                fields['link'] = upload_image_to_tg_server(attachment.download_content())
-        elif isinstance(attachment, GifAttachment):
-            if self.event.platform != Platform.TG:
-                raise PWarning("Обновление гифок-мемов доступно только в TG")
-            fields['tg_file_id'] = attachment.file_id
-        elif isinstance(attachment, VoiceAttachment):
-            if self.event.platform != Platform.TG:
-                raise PWarning("Обновление голосовух-мемов доступно только в TG")
-            fields['tg_file_id'] = attachment.file_id
         else:
-            raise PWarning("Невозможно")
+            fields['tg_file_id'] = attachment.file_id
 
         for attr, value in fields.items():
             setattr(meme, attr, value)
@@ -246,9 +212,8 @@ class Meme(Command):
         if self.event.sender.check_role(Role.MODERATOR) and meme.author != self.event.sender:
             user_msg = f'Мем с названием "{meme.name}" удалён поскольку он не ' \
                        f'соответствует правилам или был удалён автором.'
-            user = meme.author.get_user_by_default_platform()
-            bot = get_bot_by_platform(user.get_platform_enum())
-            bot.parse_and_send_msgs(user_msg, user.user_id, self.event.message_thread_id)
+            user = meme.author.get_tg_user()
+            self.bot.parse_and_send_msgs(user_msg, user.user_id, self.event.message_thread_id)
 
         meme_name = meme.name
         meme.delete()
@@ -277,9 +242,8 @@ class Meme(Command):
             raise PWarning("Мем уже подтверждён")
 
         user_msg = f'Мем с названием "{meme.name}" подтверждён.'
-        user = meme.author.get_user_by_default_platform()
-        bot = get_bot_by_platform(user.get_platform_enum())
-        bot.parse_and_send_msgs(user_msg, user.user_id, self.event.message_thread_id)
+        user = meme.author.get_tg_user()
+        self.bot.parse_and_send_msgs(user_msg, user.user_id, self.event.message_thread_id)
 
         msg = f'Мем "{meme.name}" ({meme.id}) подтверждён'
         meme.approved = True
@@ -296,9 +260,8 @@ class Meme(Command):
             raise PWarning("Нельзя отклонить уже подтверждённый мем")
 
         msg = f'Мем "{meme.name}" ({meme.id}) отклонён'
-        user = meme.author.get_user_by_default_platform()
-        bot = get_bot_by_platform(user.get_platform_enum())
-        bot.parse_and_send_msgs(msg, user.user_id, self.event.message_thread_id)
+        user = meme.author.get_tg_user()
+        self.bot.parse_and_send_msgs(msg, user.user_id, self.event.message_thread_id)
 
         meme.delete()
         return msg
@@ -327,9 +290,8 @@ class Meme(Command):
         meme.save()
 
         if meme.author != self.event.sender:
-            user = meme.author.get_user_by_default_platform()
-            bot = get_bot_by_platform(user.get_platform_enum())
-            bot.parse_and_send_msgs(user_msg, user.user_id, self.event.message_thread_id)
+            user = meme.author.get_tg_user()
+            self.bot.parse_and_send_msgs(user_msg, user.user_id, self.event.message_thread_id)
         return user_msg
 
     def menu_info(self):
@@ -433,11 +395,12 @@ class Meme(Command):
 
         if self.event.platform == Platform.TG:
             if meme.type == PhotoAttachment.TYPE:
-                msg['attachments'] = self.bot.upload_photo(meme.link, peer_id=self.event.peer_id)
-            elif meme.type in [StickerAttachment.TYPE]:
-                sticker = StickerAttachment()
-                sticker.file_id = meme.tg_file_id
-                msg['attachments'] = sticker
+                if meme.tg_file_id:
+                    photo = PhotoAttachment()
+                    photo.file_id = meme.tg_file_id
+                    msg['attachments'] = photo
+                else:
+                    msg['attachments'] = self.bot.get_photo_attachment(meme.link, peer_id=self.event.peer_id)
             elif meme.type == VideoAttachment.TYPE:
                 if meme.tg_file_id:
                     video = VideoAttachment()
@@ -445,6 +408,10 @@ class Meme(Command):
                     msg['attachments'] = video
                 else:
                     msg['text'] = meme.link
+            elif meme.type in [StickerAttachment.TYPE]:
+                sticker = StickerAttachment()
+                sticker.file_id = meme.tg_file_id
+                msg['attachments'] = sticker
             elif meme.type == GifAttachment.TYPE:
                 gif = GifAttachment()
                 gif.file_id = meme.tg_file_id
@@ -465,7 +432,7 @@ class Meme(Command):
                     try:
                         content_url = y_api.get_video_download_url(meme.link, self.event.platform)
                         video_content = requests.get(content_url).content
-                        msg['attachments'] = self.bot.upload_video(video_content, peer_id=self.event.peer_id)
+                        msg['attachments'] = self.bot.get_video_attachment(video_content, peer_id=self.event.peer_id)
                         msg['text'] = y_api.get_timecode_str(meme.link)
                         self.set_youtube_file_id(meme)
                         # return
@@ -524,7 +491,7 @@ class Meme(Command):
             video_content = requests.get(content_url).content
 
             video_uploading_chat = Chat.objects.get(pk=env.str("TG_PHOTO_UPLOADING_CHAT_PK"))
-            video = self.bot.upload_video(video_content, peer_id=video_uploading_chat.chat_id)
+            video = self.bot.get_video_attachment(video_content, peer_id=video_uploading_chat.chat_id)
             parsed_url = urlparse(meme.link)
             video_id = parsed_url.path.strip('/')
             video.thumb = f"https://img.youtube.com/vi/{video_id}/default.jpg"

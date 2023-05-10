@@ -130,9 +130,7 @@ class Settings(Command):
             minecraft_notify = self.event.sender.check_role(Role.MINECRAFT_NOTIFY)
             msg += f"Уведомления по майну - {TRUE_FALSE_TRANSLATOR[minecraft_notify]}\n"
         celebrate_bday = self.event.sender.celebrate_bday
-        default_platform = self.event.sender.default_platform
         msg += f"Поздравлять с днём рождения - {TRUE_FALSE_TRANSLATOR[celebrate_bday]}\n"
-        msg += f"Платформа по умолчанию - {default_platform}"
         return msg
 
     def setup_default_chat_setting(self, name):

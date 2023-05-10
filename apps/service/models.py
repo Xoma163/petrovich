@@ -46,19 +46,6 @@ class Service(models.Model):
         return self.name
 
 
-class Counter(models.Model):
-    name = models.CharField("Имя", max_length=50, blank=True)
-    count = models.IntegerField("Количество", default=0)
-    chat = models.ForeignKey(Chat, models.CASCADE, verbose_name='Чат', null=True, blank=True)
-
-    class Meta:
-        verbose_name = "счётчик"
-        verbose_name_plural = "счётчики"
-
-    def __str__(self):
-        return self.name
-
-
 class BaseMeme(models.Model):
     ATTACHMENT_NAMES = [
         ('photo', 'Фото'),
@@ -221,21 +208,6 @@ class WakeOnLanUserData(models.Model):
 
     def __str__(self):
         return f"{self.author}-{self.name} {self.ip}:{self.port}"
-
-
-class QuoteBook(models.Model):
-    text = models.TextField("Текст", max_length=5000)
-    date = models.DateTimeField("Дата", auto_now_add=True, blank=True)
-    profile = models.ForeignKey(Profile, models.CASCADE, verbose_name="Автор", null=True, blank=True)
-    chat = models.ForeignKey(Chat, models.CASCADE, verbose_name="Чат", null=True, blank=True)
-
-    class Meta:
-        verbose_name = "Цитата"
-        verbose_name_plural = "Цитаты"
-        ordering = ['-date']
-
-    def __str__(self):
-        return str(self.text)
 
 
 class Words(models.Model):

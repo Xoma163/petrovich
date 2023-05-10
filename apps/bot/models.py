@@ -69,13 +69,10 @@ class Profile(models.Model):
     celebrate_bday = models.BooleanField('Поздравлять с Днём рождения', default=True)
     show_birthday_year = models.BooleanField('Показывать год', default=True)
 
-    default_platform = models.CharField('Тип платформы по умолчанию', max_length=20, choices=PlatformEnum.choices(),
-                                        blank=True)
-
     api_token = models.CharField("Токен для API", max_length=100, blank=True)
 
     def set_avatar(self, url):
-        ext, image = get_avatar_content(url)
+        ext, image = get_image_content(url)
         self.avatar.save(f"avatar_{str(self)}.{ext}", File(image))
         image.close()
 
@@ -87,16 +84,8 @@ class Profile(models.Model):
         groups = self.groups.all().values()
         return [group['name'] for group in groups]
 
-    def get_user_by_platform(self, platform):
-        return self.user.get(platform=platform.name)
-
-    def get_default_platform_enum(self):
-        if not self.default_platform:
-            return None
-        return [x for x in PlatformEnum if x.name == self.default_platform][0]
-
-    def get_user_by_default_platform(self):
-        return self.get_user_by_platform(self.get_default_platform_enum())
+    def get_tg_user(self):
+        return self.user.get(platform=PlatformEnum.TG)
 
     class Meta:
         verbose_name = "Профиль"
@@ -127,7 +116,7 @@ class User(Platform):
     show_url.short_description = "Ссылка"
 
     def show_user_id(self):
-        if self.get_platform_enum() == PlatformEnum.VK or self.get_platform_enum() == PlatformEnum.TG:
+        if self.get_platform_enum() == PlatformEnum.TG:
             return self.user_id
         else:
             return self.user_id[:8] + "..."
@@ -161,12 +150,12 @@ class Bot(Platform):
             return f"Неопознанный бот #{self.id}"
 
     def set_avatar(self, url):
-        ext, image = get_avatar_content(url)
+        ext, image = get_image_content(url)
         self.avatar.save(f"avatar_{str(self)}.{ext}", File(image))
         image.close()
 
 
-def get_avatar_content(url):
+def get_image_content(url):
     ext = url.split('.')[-1].split('?')[0]
     image = NamedTemporaryFile()
     content = requests.get(url).content

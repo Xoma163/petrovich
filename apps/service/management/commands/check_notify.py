@@ -4,7 +4,7 @@ from datetime import datetime, timedelta, date
 from crontab import CronTab
 from django.core.management.base import BaseCommand
 
-from apps.bot.classes.bots.Bot import get_bot_by_platform
+from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.consts.Consts import Role, Platform, ATTACHMENT_TYPE_TRANSLATOR
 from apps.bot.classes.events.Event import Event
 from apps.bot.utils.utils import remove_tz, localize_datetime, get_tg_formatted_text_line
@@ -28,8 +28,7 @@ class Command(BaseCommand):
                 flag = self.get_flag_by_notify(notify)
                 if not flag:
                     continue
-                platform = notify.chat.get_platform_enum() if notify.chat else notify.user.get_platform_enum()
-                bot = get_bot_by_platform(platform)
+                bot = TgBot()
 
                 self.send_notify_message(bot, notify)
                 self.send_command_notify_message(bot, notify)

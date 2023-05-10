@@ -1,4 +1,4 @@
-from apps.bot.APIs.amazon.AmazonTranslateAPI import AmazonTranslateAPI
+from apps.bot.APIs.AmazonTranslateAPI import AmazonTranslateAPI
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.utils.utils import has_cyrillic

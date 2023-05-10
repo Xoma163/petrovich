@@ -1,5 +1,6 @@
 from apps.bot.APIs.GoogleCustomSearchAPI import GoogleCustomSearchAPI
 from apps.bot.classes.Command import Command
+from apps.bot.classes.bots.Bot import upload_image_to_tg_server
 from apps.bot.classes.consts.ActivitiesEnum import ActivitiesEnum
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning
@@ -31,17 +32,14 @@ class Find(Command):
             raise PWarning("Ничего не нашёл по картинкам")
 
         attachments = []
-        if self.event.platform == Platform.TG:
-            for url in urls:
-                self.bot.set_activity(self.event.peer_id, ActivitiesEnum.UPLOAD_PHOTO)
-                try:
-                    attachments.append(self.bot.upload_image_to_tg_server(url))
-                except PWarning:
-                    continue
-                if len(attachments) == count:
-                    break
-        else:
-            attachments = self.bot.upload_photos(urls, 5, filename="petrovich_find.jpg")
+        for url in urls:
+            self.bot.set_activity(self.event.peer_id, ActivitiesEnum.UPLOAD_PHOTO)
+            try:
+                attachments.append(upload_image_to_tg_server(url))
+            except PWarning:
+                continue
+            if len(attachments) == count:
+                break
         if len(attachments) == 0:
             raise PWarning("Ничего не нашёл по картинкам")
         return {'text': f"Результаты по запросу '{query}'", 'attachments': attachments}

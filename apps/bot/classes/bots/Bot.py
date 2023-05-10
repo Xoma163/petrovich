@@ -6,10 +6,11 @@ from typing import List
 from django.contrib.auth.models import Group
 
 from apps.bot.classes.consts.ActivitiesEnum import ActivitiesEnum
-from apps.bot.classes.consts.Consts import Platform, Role
+from apps.bot.classes.consts.Consts import Role
 from apps.bot.classes.consts.Exceptions import PWarning, PError, PSkip, PIDK
 from apps.bot.classes.events.Event import Event
 from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
+from apps.bot.classes.messages.attachments.AudioAttachment import AudioAttachment
 from apps.bot.classes.messages.attachments.DocumentAttachment import DocumentAttachment
 from apps.bot.classes.messages.attachments.GifAttachment import GifAttachment
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
@@ -241,7 +242,6 @@ class Bot(Thread):
 
         if is_new:
             with self.lock:
-                user.profile.default_platform = self.platform
                 user.profile.save()
 
                 group_user = Group.objects.get(name=Role.USER.name)
@@ -249,11 +249,6 @@ class Bot(Thread):
                 user.profile.groups.add(group_user)
                 user.profile.groups.add(group_gamer)
         return user.profile
-
-    def update_profile_avatar(self, profile: Profile, user_id):
-        """
-        Обновление аватарки пользователя
-        """
 
     # ToDo: очень говнокод
     # ToDo: capitalize
@@ -341,27 +336,7 @@ class Bot(Thread):
     # END USERS GROUPS BOTS
 
     # ATTACHMENTS
-    def upload_photos(self, images, max_count=10, peer_id=None, allowed_exts_url=None, guarantee_url=False,
-                      filename=None):
-        """
-        Загрузка фотографий на сервер ТГ.
-        images: список изображений в любом формате (ссылки, байты, файлы)
-        При невозможности загрузки одной из картинки просто пропускает её
-        """
-        if not isinstance(images, list):
-            images = [images]
-        attachments = []
-        for image in images:
-            try:
-                att = self.upload_photo(image, peer_id, allowed_exts_url, guarantee_url, filename)
-                attachments.append(att)
-            except Exception:
-                continue
-            if len(attachments) >= max_count:
-                break
-        return attachments
-
-    def upload_photo(self, image, peer_id=None, allowed_exts_url=None, guarantee_url=False, filename=None):
+    def get_photo_attachment(self, image, peer_id=None, allowed_exts_url=None, guarantee_url=False, filename=None):
         if allowed_exts_url is None:
             allowed_exts_url = ['jpg', 'jpeg', 'png']
         if peer_id:
@@ -370,7 +345,7 @@ class Bot(Thread):
         pa.parse_response(image, allowed_exts_url, guarantee_url=guarantee_url, filename=filename)
         return pa
 
-    def upload_document(self, document, peer_id=None, filename=None):
+    def get_document_attachment(self, document, peer_id=None, filename=None):
         """
         Загрузка документа
         """
@@ -380,7 +355,7 @@ class Bot(Thread):
         da.parse_response(document, filename=filename)
         return da
 
-    def upload_audio(self, audio, peer_id=None, title=None, artist=None, filename=None, thumb=None):
+    def get_audio_attachment(self, audio, peer_id=None, title=None, artist=None, filename=None, thumb=None):
         if peer_id:
             self.set_activity(peer_id, ActivitiesEnum.UPLOAD_AUDIO)
         va = AudioAttachment()
@@ -390,7 +365,7 @@ class Bot(Thread):
         va.artist = artist
         return va
 
-    def upload_video(self, document, peer_id=None, filename=None):
+    def get_video_attachment(self, document, peer_id=None, filename=None):
         """
         Загрузка гифки
         """
@@ -400,7 +375,7 @@ class Bot(Thread):
         va.parse_response(document, filename=filename)
         return va
 
-    def upload_gif(self, gif, peer_id=None, filename=None):
+    def get_gif_attachment(self, gif, peer_id=None, filename=None):
         if peer_id:
             self.set_activity(peer_id, ActivitiesEnum.UPLOAD_VIDEO)
         ga = GifAttachment()
@@ -440,26 +415,7 @@ class Bot(Thread):
         """
         Удаление сообщения
         """
-
-    def set_chat_admin_title(self, chat_id, user_id, title):
-        """
-        Смена должности в чате
-        """
-        pass
-
     # END EXTRA
-
-
-def get_bot_by_platform(platform: Platform):
-    """
-    Получение бота по платформе
-    """
-    from apps.bot.classes.bots.tg.TgBot import TgBot
-
-    platforms = {
-        Platform.TG: TgBot,
-    }
-    return platforms[platform]()
 
 
 def send_message_to_moderator_chat(msgs):
@@ -467,16 +423,14 @@ def send_message_to_moderator_chat(msgs):
         test_chat_id = env.str("TG_MODERATOR_CHAT_PK")
         return Chat.objects.get(pk=test_chat_id).chat_id
 
-    def get_moderator_bot_class():
-        from apps.bot.classes.bots.tg.TgBot import TgBot
-        return TgBot
-
-    bot = get_moderator_bot_class()()
+    from apps.bot.classes.bots.tg.TgBot import TgBot
+    bot = TgBot()
     peer_id = get_moderator_chat_peer_id()
     return bot.parse_and_send_msgs(msgs, peer_id)
 
 
-def upload_image_to_tg_server(image_url):
-    tg_bot = get_bot_by_platform(Platform.TG)
-    photo = tg_bot.upload_image_to_tg_server(image_url)
+def upload_image_to_tg_server(image):
+    from apps.bot.classes.bots.tg.TgBot import TgBot
+    tg_bot = TgBot()
+    photo = tg_bot.upload_image_to_tg_server(image)
     return photo.public_download_url

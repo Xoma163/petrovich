@@ -8,12 +8,6 @@ class ServiceAdmin(admin.ModelAdmin):
     list_display = ('name', 'value', 'update_datetime')
 
 
-@admin.register(Counter)
-class CounterAdmin(admin.ModelAdmin):
-    list_display = ('name', 'count', 'chat')
-    list_filter = (('chat', admin.RelatedOnlyFieldListFilter),)
-
-
 @admin.register(Meme)
 class MemeAdmin(admin.ModelAdmin):
     list_display = (
@@ -62,12 +56,6 @@ class WakeOnLanUserDataAdmin(admin.ModelAdmin):
 class HoroscopeAdmin(admin.ModelAdmin):
     list_display = ('pk',)
     filter_horizontal = ('memes',)
-
-
-@admin.register(QuoteBook)
-class QuoteBookAdmin(admin.ModelAdmin):
-    list_display = ('chat', 'profile', 'date', 'text')
-    list_filter = (('chat', admin.RelatedOnlyFieldListFilter), ('profile', admin.RelatedOnlyFieldListFilter),)
 
 
 @admin.register(Words)

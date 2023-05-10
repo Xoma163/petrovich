@@ -1,5 +1,6 @@
 from apps.bot.APIs.GithubAPI import GithubAPI
 from apps.bot.classes.Command import Command
+from apps.bot.classes.bots.Bot import upload_image_to_tg_server
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 from apps.bot.utils.utils import get_tg_formatted_url

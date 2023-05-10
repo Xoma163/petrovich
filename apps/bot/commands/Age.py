@@ -22,7 +22,8 @@ class Age(Command):
         if len(faces) == 0:
             raise PWarning("Не нашёл лиц на фото")
         file_bytes = draw_on_images(image, faces)
-        attachments = self.bot.upload_photo(file_bytes, peer_id=self.event.peer_id, filename="petrovich_age.jpg")
+        attachments = self.bot.get_photo_attachment(file_bytes, peer_id=self.event.peer_id,
+                                                    filename="petrovich_age.jpg")
         return {"attachments": attachments}
 
 

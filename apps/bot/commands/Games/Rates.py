@@ -63,8 +63,8 @@ class Rates(Command):
                 gamer.save()
 
             if self.event.message.command == "казино":
-                image = self.bot.upload_photo(f"{STATIC_ROOT}/bot/img/rate.jpg", peer_id=self.event.peer_id,
-                                              filename="petrovich_rate.jpg")
+                image = self.bot.get_photo_attachment(f"{STATIC_ROOT}/bot/img/rate.jpg", peer_id=self.event.peer_id,
+                                                      filename="petrovich_rate.jpg")
                 if len(winners) == 1:
                     msg = {'text': f"Выпавшее число - {rnd}\nПобедитель этого казино:\n{winners_str}",
                            'attachments': image}

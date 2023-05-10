@@ -93,7 +93,7 @@ class Notifies(Command):
     def menu_get_for_user(self):
         self.check_conversation()
         profile = self.bot.get_profile_by_name(self.event.message.args_str, self.event.chat)
-        user = profile.get_user_by_platform(self.event.platform)
+        user = profile.get_tg_user()
         notifies = Notify.objects.filter(user=user, chat=self.event.chat)
         return get_notifies_from_object(notifies, self.event.sender.city.timezone.name, True)
 

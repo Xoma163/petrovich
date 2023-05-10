@@ -17,5 +17,4 @@ TG_ACTIVITIES = {
     ActivitiesEnum.UPLOAD_DOCUMENT: 'upload_document',
     ActivitiesEnum.RECORD_AUDIO: 'record_audio',
     ActivitiesEnum.UPLOAD_AUDIO: 'upload_audio',
-
 }
