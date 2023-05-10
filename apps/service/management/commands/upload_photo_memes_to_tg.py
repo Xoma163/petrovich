@@ -13,6 +13,9 @@ class Command(BaseCommand):
 
         for i, meme in enumerate(memes):
             print(f"{i}/{len(memes)}")
-            photo = tg_bot.upload_image_to_tg_server(meme.link)
+            try:
+                photo = tg_bot.upload_image_to_tg_server(meme.link)
+            except:
+                continue
             meme.tg_file_id = photo.file_id
             meme.save()
