@@ -59,7 +59,7 @@ class Counter(models.Model):
         return self.name
 
 
-class Meme(models.Model):
+class BaseMeme(models.Model):
     ATTACHMENT_NAMES = [
         ('photo', 'Фото'),
         ('video', 'Видео'),
@@ -70,7 +70,6 @@ class Meme(models.Model):
         ('gif', 'Гифка'),
         ('voice', 'Голосовое'),
     ]
-
     name = models.CharField("Название", max_length=1000, default="")
     link = models.CharField("Ссылка", max_length=1000, default="", null=True, blank=True)
     author = models.ForeignKey(Profile, models.SET_NULL, verbose_name="Автор", null=True)
@@ -88,18 +87,9 @@ class Meme(models.Model):
                f"Ссылка: {self.link}\n" \
                f"Использований: {self.uses}\n"
 
-    class Meta:
-        verbose_name = "мем"
-        verbose_name_plural = "мемы"
-        ordering = ["name"]
-
-    def __str__(self):
-        return str(self.name)
-
     def preview_image(self):
         if self.link and self.type == 'photo':
             return format_html('<img src="{src}" width="150"/>', src=self.link)
-
         else:
             return '(Нет изображения)'
 
@@ -108,6 +98,19 @@ class Meme(models.Model):
             return format_html('<a href="{href}">Тык</a>', href=self.link)
         else:
             return '(Нет изображения)'
+
+    class Meta:
+        abstract = True
+
+    def __str__(self):
+        return str(self.name)
+
+
+class Meme(BaseMeme):
+    class Meta:
+        verbose_name = "мем"
+        verbose_name_plural = "мемы"
+        ordering = ["name"]
 
 
 class Notify(models.Model):
@@ -187,8 +190,11 @@ class Subscribe(models.Model):
         return self.title
 
 
-class HoroscopeMeme(Meme):
-    pass
+class HoroscopeMeme(BaseMeme):
+    class Meta:
+        verbose_name = "мем гороскопа"
+        verbose_name_plural = "мемы гороскопа"
+        ordering = ["name"]
 
 
 class Horoscope(models.Model):
