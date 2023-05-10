@@ -34,7 +34,7 @@ class Command(BaseCommand):
 
     def delete_migrations_files_app(self, app):
         self.stdout.write("Deleting APP (%s) migrations files" % app)
-        migrations_dir = os.path.join(app, 'migrations')
+        migrations_dir = os.path.join(f"apps/{app}", 'migrations')
         if os.path.exists(migrations_dir):
             files = [f for f in listdir(migrations_dir) if isfile(join(migrations_dir, f))]
             files = list(filter(lambda x: x != '__init__.py', files))
@@ -47,12 +47,12 @@ class Command(BaseCommand):
         for app in apps:
             self.delete_django_migrations_db_app(app)
             # uncomment on local. Comment on production
-            self.delete_migrations_files_app(app)
-            self.stdout.write("APP (%s) deleted with success" % app)
+            # self.delete_migrations_files_app(app)
+            # self.stdout.write("APP (%s) deleted with success" % app)
 
         # uncomment on local. Comment on production
-        for app in apps:
-            call_command('makemigrations', app)
+        # for app in apps:
+        #     call_command('makemigrations', app)
 
         for app in apps:
             call_command('migrate', app, '--fake')
