@@ -11,13 +11,6 @@ class StickerAttachment(Attachment):
         self.emoji = None
         self.animated = False
 
-    def parse_vk(self, event):
-        for image in event['images']:
-            if image['height'] == 128:
-                self.width = image['width']
-                self.height = image['height']
-                self.url = image['url']
-                break
 
     def parse_tg(self, event, tg_bot):
         attrs = ['width', 'height', 'file_id', 'file_size', 'emoji']

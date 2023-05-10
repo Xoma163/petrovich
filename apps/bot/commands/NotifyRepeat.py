@@ -31,7 +31,7 @@ class NotifyRepeat(Command):
         "(crontab) (сообщение/команда/вложения) - напоминает о чём-то с помощью crontab. Максимум можно добавить 5 напоминаний"
     ]
     args = 1
-    platforms = [Platform.VK, Platform.TG]
+    platforms = [Platform.TG]
     city = True
 
     def start(self):

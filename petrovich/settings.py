@@ -144,7 +144,6 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # CORS_ORIGIN_ALLOW_ALL = True
-VK_URL = "https://vk.com/"
 
 # Logging
 LOGS_DIR = os.path.join(BASE_DIR, 'logs')
@@ -216,9 +215,6 @@ LOGGING = {
 }
 if DEBUG:
     LOGGING['loggers']['bot']['handlers'].append('console-debug')
-
-# CORS_ORIGIN_ALLOW_ALL = True
-VK_URL = "https://vk.com/"
 
 AMAZON_REGION = "eu-north-1"
 

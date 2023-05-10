@@ -7,19 +7,9 @@ from django.views import View
 from apps.bot.classes.bots.Bot import get_bot_by_platform
 from apps.bot.classes.bots.api.APIBot import APIBot
 from apps.bot.classes.bots.tg.TgBot import TgBot
-from apps.bot.classes.bots.vk.VkBot import VkBot
-from apps.bot.classes.bots.yandex.YandexBot import YandexBot
 from apps.bot.classes.consts.Exceptions import PError
 from apps.bot.classes.mixins import CSRFExemptMixin
 from apps.bot.models import Profile
-from petrovich.settings import env
-
-
-class YandexView(CSRFExemptMixin, View):
-    def post(self, request, *args, **kwargs):
-        yb = YandexBot()
-        response_data = yb.parse(json.loads(request.body))
-        return JsonResponse(response_data, status=200)
 
 
 class APIView(CSRFExemptMixin, View):
@@ -69,18 +59,6 @@ class TelegramView(CSRFExemptMixin, View):
         tg_bot = TgBot()
         tg_bot.parse(raw)
         return HttpResponse(status=200)
-
-
-class VkView(CSRFExemptMixin, View):
-    def post(self, request, *args, **kwargs):
-        raw = json.loads(request.body)
-        if raw['secret'] == env.str("VK_SECRET_KEY"):
-            if raw['type'] == 'confirmation':
-                return HttpResponse(env.str("VK_CONFIRMATION_TOKEN"), content_type="text/plain", status=200)
-            else:
-                vk_bot = VkBot()
-                vk_bot.parse(raw)
-                return HttpResponse('ok', content_type="text/plain", status=200)
 
 
 class GithubView(CSRFExemptMixin, View):

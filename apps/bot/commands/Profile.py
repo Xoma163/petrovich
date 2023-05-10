@@ -122,7 +122,7 @@ class Profile(Command):
         if len(images) > 0:
             self.event.sender.set_avatar(images[0].get_download_url())
         else:
-            if self.event.platform not in [Platform.VK, Platform.TG]:
+            if self.event.platform not in [Platform.TG]:
                 raise PWarning("Обновление аватара по пользователю доступно только для ВК/ТГ")
             self.bot.update_profile_avatar(self.event.sender, self.event.user.user_id)
         return "Изменил аватарку"

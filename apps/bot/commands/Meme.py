@@ -7,10 +7,9 @@ from django.db.models import Q
 
 from apps.bot.APIs.YoutubeVideoAPI import YoutubeVideoAPI
 from apps.bot.classes.Command import Command
-from apps.bot.classes.bots.Bot import upload_image_to_vk_server, send_message_to_moderator_chat, get_bot_by_platform
+from apps.bot.classes.bots.Bot import upload_image_to_tg_server, send_message_to_moderator_chat, get_bot_by_platform
 from apps.bot.classes.consts.Consts import Role, Platform
 from apps.bot.classes.consts.Exceptions import PWarning, PError, PSkip
-from apps.bot.classes.messages.attachments.AudioAttachment import AudioAttachment
 from apps.bot.classes.messages.attachments.GifAttachment import GifAttachment
 from apps.bot.classes.messages.attachments.LinkAttachment import LinkAttachment
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
@@ -19,7 +18,7 @@ from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachmen
 from apps.bot.classes.messages.attachments.VoiceAttachment import VoiceAttachment
 from apps.bot.utils.utils import tanimoto, get_tg_formatted_text
 from apps.service.models import Meme as MemeModel
-from petrovich.settings import VK_URL, env
+from petrovich.settings import env
 
 
 class Meme(Command):
@@ -105,10 +104,6 @@ class Meme(Command):
         self.check_meme_name_is_no_digits(meme_name_list)
         meme_name = " ".join(meme_name_list)
 
-        allowed_vk_types = [StickerAttachment, VideoAttachment, GifAttachment, VoiceAttachment]
-        if self.event.platform == Platform.VK and type(attachment) in allowed_vk_types:
-            raise PWarning('В вк не поддерживается этот тип вложений')
-
         new_meme = {
             'name': meme_name,
             'type': attachment.type,
@@ -130,16 +125,13 @@ class Meme(Command):
         if isinstance(attachment, LinkAttachment):
             new_meme['link'] = attachment.url
         elif isinstance(attachment, PhotoAttachment):
-            if self.event.platform == Platform.VK:
-                new_meme['link'] = attachment.public_download_url
-            else:
-                new_meme['link'] = upload_image_to_vk_server(attachment.download_content())
+            new_meme['link'] = upload_image_to_tg_server(attachment.download_content())
         elif isinstance(attachment, StickerAttachment):
             if self.event.platform != Platform.TG:
                 raise PWarning("Добавление стикер-мемов доступно только в TG")
             new_meme['tg_file_id'] = attachment.file_id
             if not attachment.animated:
-                new_meme['link'] = upload_image_to_vk_server(attachment.download_content())
+                new_meme['link'] = upload_image_to_tg_server(attachment.download_content())
         elif isinstance(attachment, VideoAttachment):
             if self.event.platform != Platform.TG:
                 raise PWarning("Добавление видео-мемов доступно только в TG")
@@ -206,16 +198,13 @@ class Meme(Command):
         if isinstance(attachment, LinkAttachment):
             fields['link'] = attachment.url
         elif isinstance(attachment, PhotoAttachment):
-            if self.event.platform == Platform.VK:
-                fields['link'] = attachment.public_download_url
-            else:
-                fields['link'] = upload_image_to_vk_server(attachment.download_content())
+            fields['link'] = upload_image_to_tg_server(attachment.download_content())
         elif isinstance(attachment, StickerAttachment):
             if self.event.platform != Platform.TG:
                 raise PWarning("Обновление стикер-мемов доступно только в TG")
             fields['tg_file_id'] = attachment.file_id
             if not attachment.animated:
-                fields['link'] = upload_image_to_vk_server(attachment.download_content())
+                fields['link'] = upload_image_to_tg_server(attachment.download_content())
         elif isinstance(attachment, GifAttachment):
             if self.event.platform != Platform.TG:
                 raise PWarning("Обновление гифок-мемов доступно только в TG")
@@ -476,7 +465,7 @@ class Meme(Command):
                     try:
                         content_url = y_api.get_video_download_url(meme.link, self.event.platform)
                         video_content = requests.get(content_url).content
-                        msg['attachments'] = [self.bot.upload_video(video_content, peer_id=self.event.peer_id)]
+                        msg['attachments'] = self.bot.upload_video(video_content, peer_id=self.event.peer_id)
                         msg['text'] = y_api.get_timecode_str(meme.link)
                         self.set_youtube_file_id(meme)
                         # return
@@ -498,15 +487,6 @@ class Meme(Command):
                         raise e
             else:
                 msg['text'] = meme.link
-        elif self.event.platform == Platform.VK:
-            if meme.type in [VideoAttachment.TYPE, AudioAttachment.TYPE]:
-                msg['attachments'] = meme.link.replace(VK_URL, '')
-            elif meme.type == LinkAttachment.TYPE:
-                msg['text'] = meme.link
-            elif meme.type in [PhotoAttachment.TYPE, StickerAttachment.TYPE]:
-                msg['attachments'] = self.bot.upload_photo(meme.link, peer_id=self.event.peer_id)
-            else:
-                raise PError("У мема нет типа. Тыкай разраба")
 
         if print_name:
             if msg.get('text', None):

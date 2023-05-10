@@ -31,9 +31,7 @@ class Find(Command):
             raise PWarning("Ничего не нашёл по картинкам")
 
         attachments = []
-        if self.event.platform == Platform.VK:
-            attachments = self.bot.upload_photos(urls, count, peer_id=self.event.peer_id, filename="petrovich_find.jpg")
-        elif self.event.platform == Platform.TG:
+        if self.event.platform == Platform.TG:
             for url in urls:
                 self.bot.set_activity(self.event.peer_id, ActivitiesEnum.UPLOAD_PHOTO)
                 try:

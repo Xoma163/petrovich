@@ -129,7 +129,7 @@ class Event:
         """
         self.message = Message(text, _id) if text else None
 
-    def get_all_attachments(self, _type, from_first_fwd=True):
+    def get_all_attachments(self, _type):
         attachments = []
 
         if _type is None:
@@ -141,10 +141,7 @@ class Event:
                 if type(att) in _type:
                     attachments.append(att)
         if self.fwd:
-            if from_first_fwd:
-                msgs = [self.fwd[0]]
-            else:
-                msgs = self.fwd
+            msgs = self.fwd
             for msg in msgs:
                 if msg.attachments:
                     for att in msg.attachments:

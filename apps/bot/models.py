@@ -119,9 +119,7 @@ class User(Platform):
     nickname = models.CharField("Никнейм", max_length=40, blank=True, null=True)
 
     def show_url(self):
-        if self.get_platform_enum() == PlatformEnum.VK:
-            return format_html(f"<a href='https://vk.com/id{self.user_id}'>{self.platform}</a>")
-        elif self.get_platform_enum() == PlatformEnum.TG:
+        if self.get_platform_enum() == PlatformEnum.TG:
             return format_html(f"<a href='https://t.me/{self.nickname}'>{self.platform}</a>")
         else:
             return self.platform

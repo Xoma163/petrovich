@@ -43,11 +43,10 @@ class Notifies(Command):
         "конфа - выводит все напоминания по конфе",
         "(имя, фамилия, логин/id, никнейм) - напоминания пользователя по конфе",
     ]
-    platforms = [Platform.VK, Platform.TG]
+    platforms = [Platform.TG]
     city = True
 
     def start(self):
-        self.user_timezone = self.event.sender.city.timezone.name
 
         if not self.event.message.args:
             return self.menu_notifications()
@@ -89,17 +88,17 @@ class Notifies(Command):
     def menu_conference(self):
         self.check_conversation()
         notifies = Notify.objects.filter(chat=self.event.chat)
-        return get_notifies_from_object(notifies, self.user_timezone, True)
+        return get_notifies_from_object(notifies, self.event.sender.city.timezone.name, True)
 
     def menu_get_for_user(self):
         self.check_conversation()
         profile = self.bot.get_profile_by_name(self.event.message.args_str, self.event.chat)
         user = profile.get_user_by_platform(self.event.platform)
         notifies = Notify.objects.filter(user=user, chat=self.event.chat)
-        return get_notifies_from_object(notifies, self.user_timezone, True)
+        return get_notifies_from_object(notifies, self.event.sender.city.timezone.name, True)
 
     def menu_notifications(self):
         notifies = Notify.objects.filter(user=self.event.user).order_by("date")
         if self.event.chat:
             notifies = notifies.filter(chat=self.event.chat)
-        return get_notifies_from_object(notifies, self.user_timezone)
+        return get_notifies_from_object(notifies, self.event.sender.city.timezone.name)

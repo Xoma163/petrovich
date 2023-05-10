@@ -27,39 +27,81 @@ def is_red(n):
 
 
 def generate_translator():
-    translator_numbers = {str(i): {'win_numbers': [i], 'coefficient': MAX_NUMBERS, 'verbose_name': i} for i in
-                          range(MAX_NUMBERS + 1)}
+    translator_numbers = {
+        str(i): {
+            'win_numbers': [i],
+            'coefficient': MAX_NUMBERS,
+            'verbose_name': i
+        } for i in range(MAX_NUMBERS + 1)
+    }
     translator = {
-        'красное': {'win_numbers': [i for i in range(1, MAX_NUMBERS + 1) if is_red(i)], 'coefficient': 2,
-                    'verbose_name': "красное"},
-        'черное': {'win_numbers': [i for i in range(1, MAX_NUMBERS + 1) if not is_red(i)], 'coefficient': 2,
-                   'verbose_name': "чёрное"},
-        'строка': {1: {'win_numbers': [i for i in range(3, MAX_NUMBERS + 1, 3)], 'coefficient': 3,
-                       'verbose_name': "1я строка"},
-                   2: {'win_numbers': [i for i in range(2, MAX_NUMBERS, 3)], 'coefficient': 3,
-                       'verbose_name': "2 строка"},
-                   3: {'win_numbers': [i for i in range(1, MAX_NUMBERS, 3)], 'coefficient': 3,
-                       'verbose_name': "3 строка"},
-                   },
-        'столбец': {1: {'win_numbers': [i for i in range(1, MAX_NUMBERS // 3 + 1)], 'coefficient': 3,
-                        'verbose_name': "1 столбец"},
-                    2: {'win_numbers': [i for i in range(MAX_NUMBERS // 3 + 1, MAX_NUMBERS * 2 // 3 + 1)],
-                        'coefficient': 3, 'verbose_name': "2 столбец"},
-                    3: {'win_numbers': [i for i in range(MAX_NUMBERS * 2 // 3 + 1, MAX_NUMBERS + 1)], 'coefficient': 3,
-                        'verbose_name': "3 столбец"},
-                    },
-        'первая': {'win_numbers': [i for i in range(1, MAX_NUMBERS // 2 + 1)], 'coefficient': 2,
-                   'verbose_name': "первая половина"},
-        'вторая': {'win_numbers': [i for i in range(MAX_NUMBERS // 2 + 1, MAX_NUMBERS + 1)], 'coefficient': 2},
-        'verbose_name': "вторая половина",
-        'четное': {'win_numbers': [i for i in range(2, MAX_NUMBERS + 1, 2)], 'coefficient': 2,
-                   'verbose_name': "чётное"},
-        'нечетное': {'win_numbers': [i for i in range(1, MAX_NUMBERS, 2)], 'coefficient': 2,
-                     'verbose_name': "нечётное"},
+        "красное": {
+            "win_numbers": [i for i in range(1, MAX_NUMBERS + 1) if is_red(i)],
+            "coefficient": 2,
+            "verbose_name": "красное"
+        },
+        "черное": {
+            "win_numbers": [i for i in range(1, MAX_NUMBERS + 1) if not is_red(i)],
+            "coefficient": 2,
+            "verbose_name": "чёрное"
+        },
+        "строка": {
+            1: {
+                "win_numbers": [i for i in range(3, MAX_NUMBERS + 1, 3)],
+                "coefficient": 3,
+                "verbose_name": "1я строка"
+            },
+            2: {
+                "win_numbers": [i for i in range(2, MAX_NUMBERS, 3)],
+                "coefficient": 3,
+                "verbose_name": "2 строка"
+            },
+            3: {
+                "win_numbers": [i for i in range(1, MAX_NUMBERS, 3)],
+                "coefficient": 3,
+                "verbose_name": "3 строка"
+            },
+        },
+        "столбец": {
+            1: {
+                "win_numbers": [i for i in range(1, MAX_NUMBERS // 3 + 1)],
+                "coefficient": 3,
+                "verbose_name": "1 столбец"
+            },
+            2: {
+                "win_numbers": [i for i in range(MAX_NUMBERS // 3 + 1, MAX_NUMBERS * 2 // 3 + 1)],
+                "coefficient": 3,
+                "verbose_name": "2 столбец"
+            },
+            3: {
+                "win_numbers": [i for i in range(MAX_NUMBERS * 2 // 3 + 1, MAX_NUMBERS + 1)],
+                "coefficient": 3,
+                "verbose_name": "3 столбец"
+            },
+        },
+        "первая": {
+            "win_numbers": [i for i in range(1, MAX_NUMBERS // 2 + 1)],
+            "coefficient": 2,
+            "verbose_name": "первая половина"
+        },
+        "вторая": {
+            "win_numbers": [i for i in range(MAX_NUMBERS // 2 + 1, MAX_NUMBERS + 1)],
+            "coefficient": 2,
+            "verbose_name": "вторая половина",
+        },
+        "четное": {
+            "win_numbers": [i for i in range(2, MAX_NUMBERS + 1, 2)],
+            "coefficient": 2,
+            "verbose_name": "чётное"
+        },
+        "нечетное": {
+            "win_numbers": [i for i in range(1, MAX_NUMBERS, 2)],
+            "coefficient": 2,
+            "verbose_name": "нечётное"
+        },
     }
 
     translator.update(translator_numbers)
-
     return translator
 
 
@@ -86,8 +128,13 @@ class Roulette(Command):
     ]
     access = Role.GAMER
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.gamer = None
+
     def start(self):
         self.gamer = self.bot.get_gamer_by_profile(self.event.sender)
+
         if not self.event.message.args:
             return self.menu_play()
         arg0 = self.event.message.args[0]

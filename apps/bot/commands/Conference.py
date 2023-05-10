@@ -11,7 +11,7 @@ class Conference(Command):
     conversation = True
     mentioned = True
     priority = 90
-    platforms = [Platform.VK, Platform.TG]
+    platforms = [Platform.TG]
 
     def accept(self, event):
         if event.chat and (event.chat.name is None or event.chat.name == ""):

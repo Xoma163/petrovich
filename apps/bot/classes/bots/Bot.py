@@ -10,7 +10,6 @@ from apps.bot.classes.consts.Consts import Platform, Role
 from apps.bot.classes.consts.Exceptions import PWarning, PError, PSkip, PIDK
 from apps.bot.classes.events.Event import Event
 from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
-from apps.bot.classes.messages.attachments.AudioAttachment import AudioAttachment
 from apps.bot.classes.messages.attachments.DocumentAttachment import DocumentAttachment
 from apps.bot.classes.messages.attachments.GifAttachment import GifAttachment
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
@@ -62,8 +61,8 @@ class Bot(Thread):
             return message
         except PSkip:
             pass
-        except Exception as e:
-            rm = self._get_unexpected_error(e, event)
+        except Exception:
+            rm = self._get_unexpected_error(event)
             if send:
                 self.send_response_message(rm)
 
@@ -94,7 +93,7 @@ class Bot(Thread):
         """
 
     # ToDo: я не понимаю чё он орёт на .error
-    def _get_unexpected_error(self, e, event):
+    def _get_unexpected_error(self, event):
         rm = ResponseMessage(self.ERROR_MSG, event.peer_id, event.message_thread_id)
         self.logger.exception({
             "event": event.to_log(),
@@ -131,8 +130,8 @@ class Bot(Thread):
                 continue
             except PSkip as e:
                 raise e
-            except Exception as e:
-                return self._get_unexpected_error(e, event)
+            except Exception:
+                return self._get_unexpected_error(event)
 
         # Если указана настройка не реагировать на неверные команды, то скипаем
         if event.chat and not event.chat.need_reaction:
@@ -371,7 +370,7 @@ class Bot(Thread):
         pa.parse_response(image, allowed_exts_url, guarantee_url=guarantee_url, filename=filename)
         return pa
 
-    def upload_document(self, document, peer_id=None, title='Документ', filename=None):
+    def upload_document(self, document, peer_id=None, filename=None):
         """
         Загрузка документа
         """
@@ -391,7 +390,7 @@ class Bot(Thread):
         va.artist = artist
         return va
 
-    def upload_video(self, document, peer_id=None, title='Документ', filename=None):
+    def upload_video(self, document, peer_id=None, filename=None):
         """
         Загрузка гифки
         """
@@ -401,7 +400,7 @@ class Bot(Thread):
         va.parse_response(document, filename=filename)
         return va
 
-    def upload_gif(self, gif, peer_id=None, title="Гифа", filename=None):
+    def upload_gif(self, gif, peer_id=None, filename=None):
         if peer_id:
             self.set_activity(peer_id, ActivitiesEnum.UPLOAD_VIDEO)
         ga = GifAttachment()
@@ -455,14 +454,10 @@ def get_bot_by_platform(platform: Platform):
     """
     Получение бота по платформе
     """
-    from apps.bot.classes.bots.vk.VkBot import VkBot
     from apps.bot.classes.bots.tg.TgBot import TgBot
-    from apps.bot.classes.bots.yandex.YandexBot import YandexBot
 
     platforms = {
-        Platform.VK: VkBot,
         Platform.TG: TgBot,
-        Platform.YANDEX: YandexBot
     }
     return platforms[platform]()
 
@@ -481,7 +476,7 @@ def send_message_to_moderator_chat(msgs):
     return bot.parse_and_send_msgs(msgs, peer_id)
 
 
-def upload_image_to_vk_server(image):
-    vk_bot = get_bot_by_platform(Platform.VK)
-    photo = vk_bot.upload_photo(image, 1)
+def upload_image_to_tg_server(image_url):
+    tg_bot = get_bot_by_platform(Platform.TG)
+    photo = tg_bot.upload_image_to_tg_server(image_url)
     return photo.public_download_url

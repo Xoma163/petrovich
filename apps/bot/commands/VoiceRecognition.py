@@ -18,7 +18,7 @@ class VoiceRecognition(Command):
     help_text = "распознаёт голосовое сообщение"
     help_texts = ["(Пересланное сообщение с голосовым сообщением) - распознаёт голосовое сообщение"]
     help_texts_extra = "Если дан доступ к переписке, то распознает автоматически"
-    platforms = [Platform.VK, Platform.TG]
+    platforms = [Platform.TG]
     attachments = [VoiceAttachment, VideoNoteAttachment]
     priority = -100
 
@@ -93,7 +93,7 @@ class PFilterGoogleRecognizer(sr.Recognizer):
             convert_width=2  # audio samples must be 16-bit
         )
         if key is None: key = "AIzaSyBOti4mM-6x9WDnZIjIeyEU21OpBXqWBgw"
-        url = "http://www.google.com/speech-api/v2/recognize?{}".format(sr.urlencode({
+        url = "https://www.google.com/speech-api/v2/recognize?{}".format(sr.urlencode({
             "client": "chromium",
             "lang": language,
             "key": key,

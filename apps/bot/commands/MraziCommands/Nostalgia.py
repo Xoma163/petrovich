@@ -26,7 +26,7 @@ class Nostalgia(Command):
     ]
     access = Role.MRAZ
 
-    platforms = [Platform.TG, Platform.VK]
+    platforms = [Platform.TG]
     DEFAULT_MSGS_COUNT = 10
 
     KEY = "mrazi"

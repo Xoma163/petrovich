@@ -17,7 +17,7 @@ class Flaiva(Nostalgia):
     ]
     access = Role.FLAIVA
 
-    platforms = [Platform.TG, Platform.VK]
+    platforms = [Platform.TG]
     DEFAULT_MSGS_COUNT = 10
 
     KEY = "flaiva"

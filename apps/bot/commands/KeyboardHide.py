@@ -6,18 +6,11 @@ class KeyboardHide(Command):
     name = "скрыть"
     help_text = "убирает клавиатуру"
 
-    platforms = [Platform.VK, Platform.TG]
+    platforms = [Platform.TG]
 
-    EMPTY_KEYBOARD_VK = {
-        "one_time": False,
-        "buttons": []
-    }
     EMPTY_KEYBOARD_TG = {
         'remove_keyboard': True
     }
 
     def start(self):
-        if self.event.platform == Platform.VK:
-            return {'keyboard': self.EMPTY_KEYBOARD_VK}
-        elif self.event.platform == Platform.TG:
-            return {'keyboard': self.EMPTY_KEYBOARD_TG, 'text': "Скрыл"}
+        return {'keyboard': self.EMPTY_KEYBOARD_TG, 'text': "Скрыл"}

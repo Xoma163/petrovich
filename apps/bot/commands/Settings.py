@@ -1,9 +1,8 @@
 from django.contrib.auth.models import Group
 
 from apps.bot.classes.Command import Command
-from apps.bot.classes.consts.Consts import ON_OFF_TRANSLATOR, Role, TRUE_FALSE_TRANSLATOR, Platform
+from apps.bot.classes.consts.Consts import ON_OFF_TRANSLATOR, Role, TRUE_FALSE_TRANSLATOR
 from apps.bot.classes.consts.Exceptions import PWarning
-from apps.bot.models import User
 
 
 class Settings(Command):
@@ -21,7 +20,6 @@ class Settings(Command):
         "голосовые (вкл/выкл) - определяет, будет ли бот автоматически распознавать голосовые",
         "майнкрафт (вкл/выкл) - определяет, будет ли бот присылать информацию о серверах майна. (для доверенных)",
         "др (вкл/выкл) - определяет, будет ли бот поздравлять с Днём рождения и будет ли ДР отображаться в /профиль",
-        "платформа (вк/vk/тг/tg) - определяет платформу по умолчанию для важных писем от бота. По умолчанию первая платформа с которой вы написали боту",
         "ругаться (вкл/выкл) - определяет будет ли бот использовать ругательные команды"
     ]
 
@@ -37,7 +35,6 @@ class Settings(Command):
             [['майнкрафт', 'майн', 'minecraft', 'mine'], self.menu_minecraft_notify],
             [['мемы', 'мем'], self.menu_memes],
             [['др', 'днюха'], self.menu_bd],
-            [['платформа'], self.menu_platform],
             [['голосовые', 'голос', 'голосовухи', 'голосовуха', 'голосовое'], self.menu_voice],
             [['туретт', 'туррет', 'турретт', 'турет'], self.menu_turett],
             [['ругаться'], self.menu_swear],
@@ -68,26 +65,6 @@ class Settings(Command):
         self.event.sender.celebrate_bday = value
         self.event.sender.save()
         return "Сохранил настройку"
-
-    def menu_platform(self):
-        self.check_args(2)
-        value = self.event.message.args[1]
-        if value in ['vk', 'вк', 'вконтакте']:
-            platform = Platform.VK
-        elif value in ['tg', 'тг', 'телеграм', 'телега', 'телеграмм']:
-            platform = Platform.TG
-        else:
-            raise PWarning(f"Я не знаю платформы {self.event.message.args[1]}")
-
-        try:
-            self.event.sender.get_user_by_platform(platform)
-        except User.DoesNotExist:
-            raise PWarning("У вас нет пользователя в этой платформе")
-
-        self.event.sender.default_platform = platform.name
-        self.event.sender.save()
-
-        return f"Поменял платформу на {platform.name}"
 
     def menu_minecraft_notify(self):
         self.check_sender(Role.TRUSTED)

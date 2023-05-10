@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
-import dateutil
 from dateutil import parser
+from dateutil.parser import ParserError
 
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import WEEK_TRANSLATOR, Role, DELTA_WEEKDAY, Platform
@@ -33,11 +33,11 @@ def get_time(arg1, arg2, timezone=None):
         date_str = f"{arg1} {arg2}"
 
         return parser.parse(date_str, default=default_datetime, dayfirst=True), 2, exact_datetime_flag
-    except dateutil.parser._parser.ParserError:
+    except ParserError:
         try:
             exact_datetime_flag = False
             return parser.parse(arg1, default=default_datetime, dayfirst=True), 1, exact_datetime_flag
-        except dateutil.parser._parser.ParserError:
+        except ParserError:
             return None, None, None
 
 
@@ -49,7 +49,7 @@ class Notify(Command):
         "(дата/дата и время/день недели) (сообщение/команда/вложения) - добавляет напоминание. Максимум можно добавить 5 напоминаний"
     ]
     args = 1
-    platforms = [Platform.VK, Platform.TG]
+    platforms = [Platform.TG]
     city = True
 
     def start(self):

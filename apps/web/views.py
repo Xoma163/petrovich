@@ -1,4 +1,3 @@
-from django.contrib.auth.views import LoginView
 from django.http import JsonResponse, FileResponse
 from django.shortcuts import render
 from django.templatetags.static import static
@@ -17,10 +16,6 @@ from petrovich.settings import BASE_DIR
 def main_page(request):
     context = {}
     return render(request, 'web/index.html', context)
-
-
-def lana_translate(request):
-    return render(request, 'lana_translate.html')
 
 
 class DeliveryCalculatorTemplateView(TemplateView):
@@ -76,10 +71,6 @@ class CalculatorSessionViewSet(ModelViewSet):
 def calculate(request, pk):
     session = CalculatorSession.objects.get(pk=pk)
     return JsonResponse({'data': session.calculate()}, status=200)
-
-
-class CustomLoginView(LoginView):
-    template_name = "web/accounts/login.html"
 
 
 class MinecraftSkin(View):

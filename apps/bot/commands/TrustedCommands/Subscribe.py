@@ -26,7 +26,7 @@ class Subscribe(Command):
         "Проверка новых видео проходит каждый час. Стримов - 5 минут\n" \
         "Админ конфы может удалять подписки в конф"
     args = 1
-    platforms = [Platform.VK, Platform.TG]
+    platforms = [Platform.TG]
     access = Role.TRUSTED
 
     THE_HOLE_URL = "the-hole.tv"

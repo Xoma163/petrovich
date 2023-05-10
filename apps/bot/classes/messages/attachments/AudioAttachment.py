@@ -11,9 +11,3 @@ class AudioAttachment(Attachment):
 
         self.artist = None
         self.title = None
-
-    def parse_vk(self, event):
-        from petrovich.settings import VK_URL
-        self.url = f"{VK_URL}video{event['owner_id']}_{event['id']}"
-        self.private_download_url = event['url']
-        self.duration = event['duration']

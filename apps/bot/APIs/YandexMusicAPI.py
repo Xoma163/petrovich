@@ -6,6 +6,7 @@ from apps.bot.classes.consts.Exceptions import PWarning
 from petrovich.settings import env
 
 logging.basicConfig(level=logging.CRITICAL)
+
 from yandex_music import Client
 from yandex_music.utils.request import Request
 

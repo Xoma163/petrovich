@@ -19,8 +19,3 @@ TG_ACTIVITIES = {
     ActivitiesEnum.UPLOAD_AUDIO: 'upload_audio',
 
 }
-
-VK_ACTIVITIES = {
-    ActivitiesEnum.TYPING: 'typing',
-    ActivitiesEnum.RECORD_AUDIO: 'audiomessage',
-}

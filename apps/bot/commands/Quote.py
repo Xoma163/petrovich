@@ -14,7 +14,7 @@ class Quote(Command):
     help_text = "генерирует картинку с цитатой"
     help_texts = ["(Пересылаемые сообщение) - генерирует картинку с цитатой"]
     fwd = True
-    platforms = [Platform.VK, Platform.TG]
+    platforms = [Platform.TG]
 
     def start(self):
         msgs = self.parse_fwd(self.event.fwd)
@@ -40,14 +40,12 @@ class Quote(Command):
             if msg.is_from_user:
                 username = str(msg.sender)
                 avatar = msg.sender.avatar
-                if not avatar and self.event.platform in [Platform.VK, Platform.TG]:
+                if not avatar and self.event.platform in [Platform.TG]:
                     self.bot.update_profile_avatar(self.event.sender, msg.from_id)
             else:
                 quote_bot = self.bot.get_bot_by_id(msg.from_id)
                 username = str(quote_bot)
                 avatar = quote_bot.avatar
-                if not avatar and self.event.platform == Platform.VK:
-                    self.bot.update_bot_avatar(msg.from_id)
             if msg.attachments:
                 photo = msg.attachments[0]
                 if isinstance(photo, PhotoAttachment):

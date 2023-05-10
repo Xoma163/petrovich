@@ -26,7 +26,7 @@ class Petrovich(Command):
     ]
 
     conversation = True
-    platforms = [Platform.VK, Platform.TG]
+    platforms = [Platform.TG]
     access = Role.GAMER
 
     def start(self):

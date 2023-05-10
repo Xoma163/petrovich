@@ -1,6 +1,5 @@
 from apps.bot.APIs.GithubAPI import GithubAPI
 from apps.bot.classes.Command import Command
-from apps.bot.classes.bots.Bot import upload_image_to_vk_server
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 from apps.bot.utils.utils import get_tg_formatted_url
@@ -34,7 +33,7 @@ class Issue(Command):
         photos = self.event.get_all_attachments([PhotoAttachment])
         if photos:
             photo = photos[0]
-            image_url = upload_image_to_vk_server(photo.download_content())
+            image_url = upload_image_to_tg_server(photo.download_content())
             body += f"\n![image]({image_url})"
         body += f"\n\nИшю от пользователя {self.event.sender} (id={self.event.sender.pk})\n" \
                 f"Данное ишю сгенерировано автоматически"

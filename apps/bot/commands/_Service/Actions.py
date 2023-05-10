@@ -32,9 +32,7 @@ class Actions(Command):
             profile = self.bot.get_profile_by_user_id(member_id)
             self.bot.add_chat_to_profile(profile, self.event.chat)
         else:
-            if self.event.platform == Platform.VK:
-                bot_group_id = env.int('VK_BOT_GROUP_ID')
-            elif self.event.platform == Platform.TG:
+            if self.event.platform == Platform.TG:
                 bot_group_id = env.int('TG_BOT_GROUP_ID')
             else:
                 raise PError("Неизвестный клиент")

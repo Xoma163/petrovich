@@ -16,7 +16,7 @@ class Who(Command):
             "Чтобы узнать свои права существует команда /права"
     conversation = True
     args = 1
-    platforms = [Platform.VK, Platform.TG]
+    platforms = [Platform.TG]
     mentioned = True
 
     def start(self):

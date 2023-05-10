@@ -11,11 +11,6 @@ class VideoAttachment(Attachment):
         self.height = None
         self.thumb: str = None
 
-    def parse_vk(self, event):
-        from petrovich.settings import VK_URL
-        self.url = f"{VK_URL}video{event['owner_id']}_{event['id']}"
-        self.duration = event['duration']
-
     def parse_tg(self, event, tg_bot):
         self.duration = event.get('duration')
         self.width = event.get('width')
