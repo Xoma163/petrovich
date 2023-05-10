@@ -9,22 +9,22 @@ const TerserPlugin = require("terser-webpack-plugin");
 const common = require("./webpack.common");
 
 module.exports = merge(common, {
-    stats: "errors-warnings",
-    optimization: {
-        minimizer: [
-            new TerserPlugin({
-                parallel: true,
-                terserOptions: {
-                    ecma: 11,
-                },
-            }),
-            new CssMinimizerPlugin({}),
-        ],
-    },
-    plugins: [
-        new BundleAnalyzerPlugin({
-            analyzerMode: "static",
-            openAnalyzer: false,
-        }),
+  stats: "errors-warnings",
+  optimization: {
+    minimizer: [
+      new TerserPlugin({
+        parallel: true,
+        terserOptions: {
+          ecma: 11,
+        },
+      }),
+      new CssMinimizerPlugin({}),
     ],
+  },
+  plugins: [
+    new BundleAnalyzerPlugin({
+      analyzerMode: "static",
+      openAnalyzer: false,
+    }),
+  ],
 });

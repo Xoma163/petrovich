@@ -5,6 +5,7 @@ from apps.bot.APIs.TheHoleAPI import TheHoleAPI
 from apps.bot.APIs.WASDAPI import WASDAPI
 from apps.bot.APIs.YoutubeVideoAPI import YoutubeVideoAPI
 from apps.bot.classes.Command import Command
+from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.consts.Consts import Role, Platform
 from apps.bot.classes.consts.Exceptions import PWarning
 from apps.service.models import Subscribe as SubscribeModel
@@ -28,6 +29,8 @@ class Subscribe(Command):
     args = 1
     platforms = [Platform.TG]
     access = Role.TRUSTED
+
+    bot: TgBot
 
     THE_HOLE_URL = "the-hole.tv"
     YOUTUBE_URL = "youtube.com"

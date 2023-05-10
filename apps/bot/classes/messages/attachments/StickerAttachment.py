@@ -11,7 +11,6 @@ class StickerAttachment(Attachment):
         self.emoji = None
         self.animated = False
 
-
     def parse_tg(self, event, tg_bot):
         attrs = ['width', 'height', 'file_id', 'file_size', 'emoji']
         for attr in attrs:

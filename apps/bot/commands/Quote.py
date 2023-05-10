@@ -1,6 +1,7 @@
 from io import BytesIO
 
 from apps.bot.classes.Command import Command
+from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 from apps.bot.classes.messages.attachments.StickerAttachment import StickerAttachment
@@ -16,6 +17,8 @@ class Quote(Command):
     fwd = True
     platforms = [Platform.TG]
 
+    bot: TgBot
+
     def start(self):
         msgs = self.parse_fwd(self.event.fwd)
 
@@ -24,8 +27,7 @@ class Quote(Command):
         bytes_io = BytesIO()
         pil_image.save(bytes_io, format='PNG')
         if pil_image.height > 1500:
-            attachments = self.bot.get_document_attachment(bytes_io, self.event.peer_id, "Сохры",
-                                                           filename="petrovich_quote.png")
+            attachments = self.bot.get_document_attachment(bytes_io, self.event.peer_id, filename="petrovich_quote.png")
         else:
             attachments = self.bot.get_photo_attachment(bytes_io, peer_id=self.event.peer_id,
                                                         filename="petrovich_quote.png")

@@ -3,6 +3,7 @@ from datetime import datetime
 from apps.bot.APIs.TimezoneDBAPI import TimezoneDBAPI
 from apps.bot.APIs.YandexGeoAPI import YandexGeoAPI
 from apps.bot.classes.Command import Command
+from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
@@ -26,6 +27,10 @@ class Profile(Command):
         "аватар - обновляет аватар",
         "аватар (изображение) - обновляет аватар из вложения",
     ]
+
+    platforms = [Platform.TG]
+
+    bot: TgBot
 
     def start(self):
         if self.event.message.args:

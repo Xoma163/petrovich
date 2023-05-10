@@ -26,7 +26,7 @@ class Command(BaseCommand):
         for sub in subs:
             try:
                 self.check_sub(sub)
-            except Exception as e:
+            except Exception:
                 logger.exception("Ошибка в проверке/отправке оповещения о стриме")
 
     def check_sub(self, sub):

@@ -1,5 +1,4 @@
 from apps.bot.APIs.MinecraftAPI import get_minecraft_version_by_args
-from apps.bot.APIs.TerrariaAPI import terraria_servers
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Role
 
@@ -9,9 +8,9 @@ class Stop(Command):
 
     help_text = "останавливает работу сервиса"
     help_texts = ["(сервис) - майнкрафт/террария"]
-    help_texts_extra = "Если майнкрафт, то может быть указана версия (1.12.2)"
+    help_texts_extra = "Если майнкрафт, то может быть указана версия (1.19.2)"
 
-    access = Role.TRUSTED
+    access = Role.MINECRAFT
     args = 1
 
     def start(self):
@@ -21,15 +20,12 @@ class Stop(Command):
             arg0 = None
 
         menu = [
-            [["майн", "майнкрафт", "mine", "minecraft"], self.menu_minecraft],
-            [['террария', 'terraria'], self.menu_terraria],
+            [["майн", "майнкрафт", "mine", "minecraft"], self.menu_minecraft]
         ]
         method = self.handle_menu(menu, arg0)
         return method()
 
-
     def menu_minecraft(self):
-        self.check_sender(Role.MINECRAFT)
         version = self.event.message.args[1] if len(self.event.message.args) > 1 else None
         minecraft_server = get_minecraft_version_by_args(version)
         version = minecraft_server.get_version()
@@ -38,9 +34,3 @@ class Stop(Command):
 
         message = f"Финишируем майн {version}"
         return message
-
-    def menu_terraria(self):
-        self.check_sender(Role.TERRARIA)
-        terraria_server = terraria_servers[0]
-        terraria_server.stop()
-        return "Финишируем террарию!"

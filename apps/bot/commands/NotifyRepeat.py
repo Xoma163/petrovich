@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from crontab import CronTab
 
 from apps.bot.classes.Command import Command
+from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.consts.Consts import Role, Platform
 from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.utils.utils import localize_datetime, normalize_datetime, remove_tz
@@ -33,6 +34,8 @@ class NotifyRepeat(Command):
     args = 1
     platforms = [Platform.TG]
     city = True
+
+    bot: TgBot
 
     def start(self):
         if not self.event.sender.check_role(Role.TRUSTED) and \

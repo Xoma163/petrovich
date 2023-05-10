@@ -2,6 +2,7 @@ import json
 from threading import Lock
 
 from apps.bot.classes.Command import Command
+from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.consts.Consts import Platform, Role, rus_alphabet
 from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.utils.utils import random_event
@@ -25,6 +26,8 @@ class Wordle(Command):
 
     platforms = [Platform.TG]
     access = Role.GAMER
+
+    bot: TgBot
 
     MAX_STEPS = 6
     WORDLE_WORDS_PATH = "static/bot/games/wordle/wordle.json"

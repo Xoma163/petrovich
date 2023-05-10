@@ -54,7 +54,6 @@ class Actions(Command):
             profile = self.bot.get_profile_by_user_id(member_id)
             self.bot.remove_chat_from_profile(profile, self.event.chat)
 
-
     def setup_new_chat_id(self, chat_id):
         chat = Chat.objects.get(chat_id=chat_id)
         chat.chat_id = self.event.chat.chat_id

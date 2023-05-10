@@ -5,6 +5,7 @@ from copy import deepcopy
 from threading import Lock
 
 from apps.bot.classes.Command import Command
+from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.consts.Consts import Platform, Role
 from apps.bot.classes.consts.Exceptions import PSkip
 from apps.bot.utils.utils import random_event
@@ -24,6 +25,8 @@ class Minesweeper(Command):
     help_texts = ["[кол-во мин=10] - запускает игру в сапёра"]
     platforms = [Platform.TG]
     access = Role.GAMER
+
+    bot: TgBot
 
     def __init__(self):
         super().__init__()
@@ -128,7 +131,7 @@ class Minesweeper(Command):
         self._edit_mode_button(inline_keyboard)
         return {"keyboard": {"inline_keyboard": inline_keyboard}, "message_id": self.message_id}
 
-    def press_button(self, i, j, real_val, flag_val, opened, inline_keyboard):
+    def press_button(self, i, j, real_val, _, opened, inline_keyboard):
         callback_data_mines = json.loads(inline_keyboard[-1][0]['callback_data'])['a']['mode']
         self.mode = self.MODE_DEFAULT if callback_data_mines == self.MODE_MINES else self.MODE_MINES
         self.height = len(inline_keyboard) - 1

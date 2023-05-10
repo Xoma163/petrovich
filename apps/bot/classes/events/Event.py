@@ -1,5 +1,6 @@
 import copy
 import json
+from typing import Optional
 
 from apps.bot.classes.consts.Consts import Platform, Role
 from apps.bot.classes.messages.Message import Message
@@ -27,28 +28,28 @@ class Event:
         self.is_from_chat: bool = False
         self.is_from_pm: bool = False
 
-        self.user: User = None
-        self.sender: Profile = None
+        self.user: Optional[User] = None
+        self.sender: Optional[Profile] = None
 
-        self.chat: Chat = None
+        self.chat: Optional[Chat] = None
         self.peer_id: int = peer_id  # Куда слать ответ
-        self.from_id: int = None  # От кого пришло сообщение
+        self.from_id: Optional[int] = None  # От кого пришло сообщение
         self.platform: Platform = bot.platform
 
         self.payload: dict = {}
         self.action = None
 
-        self.message: Message = None
+        self.message: Optional[Message] = None
         self.fwd: list = []
         self.attachments: list = []
 
-        self.force_response: bool = None
-        self.command: Command = None
+        self.force_response: Optional[bool] = None
+        self.command: Optional[Command] = None
 
         self.is_fwd = False
 
         # Tg
-        self.message_thread_id: int = None
+        self.message_thread_id: Optional[int] = None
 
     def setup_event(self, is_fwd=False):
         """

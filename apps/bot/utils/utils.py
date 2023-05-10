@@ -10,7 +10,7 @@ from urllib.parse import urlparse
 import pytz
 from PIL import Image, ImageDraw, ImageFont
 
-from apps.bot.classes.consts.Consts import Role, Platform, trans_table, trans_table_reverse
+from apps.bot.classes.consts.Consts import Role, Platform
 from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.classes.messages.attachments.Attachment import Attachment
 from apps.service.models import Service
@@ -100,7 +100,7 @@ def normalize_datetime(dt, tz):
     localized_time = tz_obj.localize(dt, is_dst=None)
 
     tz_utc = pytz.timezone("UTC")
-    return pytz.utc.normalize(localized_time, is_dst=None).astimezone(tz_utc)
+    return pytz.utc.normalize(localized_time).astimezone(tz_utc)
 
 
 def decl_of_num(number, titles: List[str]):
@@ -213,8 +213,6 @@ def get_role_by_str(role_str: str):
         who = Role.MINECRAFT_NOTIFY
     elif role_str in ['майнкрафт', 'майн']:
         who = Role.MINECRAFT
-    elif role_str in ['террария']:
-        who = Role.TERRARIA
     elif role_str in ['забанен', 'бан']:
         who = Role.BANNED
     elif role_str in ['доверенный', 'проверенный']:
@@ -375,6 +373,12 @@ def get_tg_spoiler_text(text: str) -> str:
     Спойлер-текст в телеграмме (html)
     """
     return f'<span class="tg-spoiler">{text}</span>'
+
+
+eng_chars = u"~`!@#$%^&qwertyuiop[]asdfghjkl;'zxcvbnm,./QWERTYUIOP{}ASDFGHJKL:\"|ZXCVBNM<>?"
+rus_chars = u"ёё!\"№;%:?йцукенгшщзхъфывапролджэячсмитьбю.ЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭ/ЯЧСМИТЬБЮ,"
+trans_table = dict(zip(eng_chars, rus_chars))
+trans_table_reverse = dict(zip(rus_chars, eng_chars))
 
 
 def fix_layout(s):

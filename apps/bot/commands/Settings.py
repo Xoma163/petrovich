@@ -1,7 +1,7 @@
 from django.contrib.auth.models import Group
 
 from apps.bot.classes.Command import Command
-from apps.bot.classes.consts.Consts import ON_OFF_TRANSLATOR, Role, TRUE_FALSE_TRANSLATOR
+from apps.bot.classes.consts.Consts import Role
 from apps.bot.classes.consts.Exceptions import PWarning
 
 
@@ -23,6 +23,31 @@ class Settings(Command):
         "ругаться (вкл/выкл) - определяет будет ли бот использовать ругательные команды"
     ]
 
+    ON_OFF_TRANSLATOR = {
+        'вкл': True,
+        'on': True,
+        '1': True,
+        'true': True,
+        'включить': True,
+        'включи': True,
+        'вруби': True,
+        'подключи': True,
+
+        'выкл': False,
+        'off': False,
+        '0': False,
+        'false': False,
+        'выключить': False,
+        'выключи': False,
+        'выруби': False,
+        'отключи': False
+    }
+
+    TRUE_FALSE_TRANSLATOR = {
+        True: 'вкл ✅',
+        False: 'выкл ⛔'
+    }
+
     def start(self):
         if self.event.message.args:
             arg0 = self.event.message.args[0]
@@ -43,10 +68,9 @@ class Settings(Command):
         method = self.handle_menu(menu, arg0)
         return method()
 
-    @staticmethod
-    def get_on_or_off(arg):
-        if arg in ON_OFF_TRANSLATOR:
-            return ON_OFF_TRANSLATOR[arg]
+    def get_on_or_off(self, arg):
+        if arg in self.ON_OFF_TRANSLATOR:
+            return self.ON_OFF_TRANSLATOR[arg]
         else:
             raise PWarning("Не понял, включить или выключить?")
 
@@ -115,12 +139,12 @@ class Settings(Command):
             recognize_voice = self.event.chat.recognize_voice
             use_swear = self.event.chat.use_swear
 
-            msg += f"Реагировать на неправильные команды - {TRUE_FALSE_TRANSLATOR[reaction]}\n"
-            msg += f"Присылать мемы по точным названиям - {TRUE_FALSE_TRANSLATOR[need_meme]}\n"
-            msg += f"Триггериться на команды без упоминания - {TRUE_FALSE_TRANSLATOR[mentioning]}\n"
-            msg += f"Автоматически распознавать голосовые - {TRUE_FALSE_TRANSLATOR[recognize_voice]}\n"
-            msg += f"Синдром Туретта - {TRUE_FALSE_TRANSLATOR[turett]}\n"
-            msg += f"Использовать ругательные команды - {TRUE_FALSE_TRANSLATOR[use_swear]}\n"
+            msg += f"Реагировать на неправильные команды - {self.TRUE_FALSE_TRANSLATOR[reaction]}\n"
+            msg += f"Присылать мемы по точным названиям - {self.TRUE_FALSE_TRANSLATOR[need_meme]}\n"
+            msg += f"Триггериться на команды без упоминания - {self.TRUE_FALSE_TRANSLATOR[mentioning]}\n"
+            msg += f"Автоматически распознавать голосовые - {self.TRUE_FALSE_TRANSLATOR[recognize_voice]}\n"
+            msg += f"Синдром Туретта - {self.TRUE_FALSE_TRANSLATOR[turett]}\n"
+            msg += f"Использовать ругательные команды - {self.TRUE_FALSE_TRANSLATOR[use_swear]}\n"
 
             msg += "\n"
 
@@ -128,9 +152,9 @@ class Settings(Command):
 
         if self.event.sender.check_role(Role.TRUSTED):
             minecraft_notify = self.event.sender.check_role(Role.MINECRAFT_NOTIFY)
-            msg += f"Уведомления по майну - {TRUE_FALSE_TRANSLATOR[minecraft_notify]}\n"
+            msg += f"Уведомления по майну - {self.TRUE_FALSE_TRANSLATOR[minecraft_notify]}\n"
         celebrate_bday = self.event.sender.celebrate_bday
-        msg += f"Поздравлять с днём рождения - {TRUE_FALSE_TRANSLATOR[celebrate_bday]}\n"
+        msg += f"Поздравлять с днём рождения - {self.TRUE_FALSE_TRANSLATOR[celebrate_bday]}\n"
         return msg
 
     def setup_default_chat_setting(self, name):

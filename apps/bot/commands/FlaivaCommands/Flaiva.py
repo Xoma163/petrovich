@@ -1,3 +1,4 @@
+from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.consts.Consts import Platform, Role
 from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.commands.MraziCommands.Nostalgia import Nostalgia
@@ -18,6 +19,9 @@ class Flaiva(Nostalgia):
     access = Role.FLAIVA
 
     platforms = [Platform.TG]
+
+    bot: TgBot
+
     DEFAULT_MSGS_COUNT = 10
 
     KEY = "flaiva"

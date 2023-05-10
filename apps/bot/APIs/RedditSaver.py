@@ -55,7 +55,6 @@ class RedditSaver:
 
     def _get_reddit_video_audio_urls(self):
         audio_url = None
-        video_url = None
 
         if self.media_data and self.media_data.get('type') == 'gfycat.com':
             video_url = self.media_data['oembed']['thumbnail_url'].replace('size_restricted.gif', 'mobile.mp4')
@@ -128,7 +127,7 @@ class RedditSaver:
     def get_photos_from_post(self):
         gallery_data_items = self.data['gallery_data']['items']
         first_url = \
-        self.data["media_metadata"][self.data['gallery_data']['items'][0]["media_id"]]["s"]["u"].partition("?")[0]
+            self.data["media_metadata"][self.data['gallery_data']['items'][0]["media_id"]]["s"]["u"].partition("?")[0]
         ext = get_url_file_ext(first_url)
         self.filename = f"{self.title.replace(' ', '_')}.{ext}"
 

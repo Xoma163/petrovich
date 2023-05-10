@@ -4,6 +4,7 @@ from datetime import datetime
 from io import BytesIO
 
 from apps.bot.classes.Command import Command
+from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.consts.Consts import Role, Platform
 from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.models import Profile, Bot
@@ -27,6 +28,9 @@ class Nostalgia(Command):
     access = Role.MRAZ
 
     platforms = [Platform.TG]
+
+    bot: TgBot
+
     DEFAULT_MSGS_COUNT = 10
 
     KEY = "mrazi"
@@ -173,8 +177,7 @@ class Nostalgia(Command):
         bytes_io = BytesIO()
         pil_image.save(bytes_io, format='PNG')
         if pil_image.height > 1500:
-            image = self.bot.get_document_attachment(bytes_io, self.event.peer_id, "Ностальгия",
-                                                     filename="petrovich_nostalgia.png")
+            image = self.bot.get_document_attachment(bytes_io, self.event.peer_id, filename="petrovich_nostalgia.png")
         else:
             image = self.bot.get_photo_attachment(bytes_io, peer_id=self.event.peer_id,
                                                   filename="petrovich_nostalgia.png")

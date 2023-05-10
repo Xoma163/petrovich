@@ -16,6 +16,7 @@ from apps.bot.APIs.YandexMusicAPI import YandexMusicAPI
 from apps.bot.APIs.YoutubeMusicAPI import YoutubeMusicAPI
 from apps.bot.APIs.YoutubeVideoAPI import YoutubeVideoAPI
 from apps.bot.classes.Command import Command
+from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning, PSkip
 from apps.bot.models import Chat
@@ -58,6 +59,8 @@ class Media(Command):
                        "Ключ --nomedia позволяет не запускать команду\n" \
                        "Ключ --audio позволяет скачивать аудиодорожку для видео с ютуба"
     platforms = [Platform.TG]
+
+    bot: TgBot
 
     @staticmethod
     def accept_extra(event):

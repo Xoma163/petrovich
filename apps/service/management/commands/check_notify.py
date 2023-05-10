@@ -5,12 +5,33 @@ from crontab import CronTab
 from django.core.management.base import BaseCommand
 
 from apps.bot.classes.bots.tg.TgBot import TgBot
-from apps.bot.classes.consts.Consts import Role, Platform, ATTACHMENT_TYPE_TRANSLATOR
+from apps.bot.classes.consts.Consts import Role, Platform
 from apps.bot.classes.events.Event import Event
+from apps.bot.classes.messages.attachments.AudioAttachment import AudioAttachment
+from apps.bot.classes.messages.attachments.DocumentAttachment import DocumentAttachment
+from apps.bot.classes.messages.attachments.GifAttachment import GifAttachment
+from apps.bot.classes.messages.attachments.LinkAttachment import LinkAttachment
+from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
+from apps.bot.classes.messages.attachments.StickerAttachment import StickerAttachment
+from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
+from apps.bot.classes.messages.attachments.VideoNoteAttachment import VideoNoteAttachment
+from apps.bot.classes.messages.attachments.VoiceAttachment import VoiceAttachment
 from apps.bot.utils.utils import remove_tz, localize_datetime, get_tg_formatted_text_line
 from apps.service.models import Notify
 
 logger = logging.getLogger('notifier')
+
+ATTACHMENT_TYPE_TRANSLATOR = {
+    'photo': PhotoAttachment,
+    'video': VideoAttachment,
+    'video_note': VideoNoteAttachment,
+    'audio': AudioAttachment,
+    'doc': DocumentAttachment,
+    'link': LinkAttachment,
+    'sticker': StickerAttachment,
+    'voice': VoiceAttachment,
+    'gif': GifAttachment
+}
 
 
 class Command(BaseCommand):
@@ -36,7 +57,7 @@ class Command(BaseCommand):
                     self.extend_repeat_notify(notify)
                 else:
                     notify.delete()
-            except Exception as e:
+            except Exception:
                 logger.exception("Ошибка в проверке/отправке оповещения")
 
     def get_flag_by_notify(self, notify):

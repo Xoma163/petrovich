@@ -3,7 +3,6 @@ from django.contrib.auth.models import Group
 from apps.bot.classes.consts.Consts import Role
 from apps.bot.commands.AdminCommands.Ban import Ban
 from apps.bot.commands.AdminCommands.DeBan import DeBan
-from apps.bot.commands.AdminCommands.Flood import Flood
 from apps.bot.commands.AdminCommands.Linux import Linux
 from apps.bot.commands.AdminCommands.Restart import Restart
 from apps.bot.models import User
@@ -57,18 +56,6 @@ class CommandDeBanTestCase(BotInitializer):
 
     def test_no_args(self):
         self.check_correct_pwarning()
-
-
-class CommandFloodTestCase(BotInitializer):
-    Command = Flood
-
-    def test_flood(self):
-        n = 10
-        self.event.set_message(f"Флуд {n}")
-
-        answer = self.check_correct_answer()
-        if len(answer) != n:
-            self.fail()
 
 
 class CommandLinuxTestCase(BotInitializer):

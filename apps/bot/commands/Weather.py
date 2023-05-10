@@ -2,7 +2,6 @@ import json
 
 from apps.bot.APIs.YandexWeatherAPI import YandexWeatherAPI
 from apps.bot.classes.Command import Command
-from apps.bot.classes.consts.Consts import WEATHER_TRANSLATOR, DAY_TRANSLATOR, WEATHER_WIND_DIRECTION_TRANSLATOR
 from apps.bot.classes.consts.Exceptions import PWarning
 from apps.service.models import City, Service
 
@@ -15,6 +14,46 @@ class Weather(Command):
         "[город=из профиля] - прогноз погоды",
         "[город=из профиля] изм/изменения - изменения погоды по сравнению со вчерашним днём",
     ]
+
+    WEATHER_TRANSLATOR = {
+        'clear': 'Ясно ☀',
+        'partly-cloudy': 'Малооблачно ⛅',
+        'cloudy': 'Облачно с прояснениями 🌥',
+        'overcast': 'Пасмурно ☁',
+        'partly-cloudy-and-light-rain': 'Небольшой дождь 🌧',
+        'partly-cloudy-and-rain': 'Дождь 🌧',
+        'overcast-and-rain': 'Сильный дождь 🌧🌧',
+        'overcast-thunderstorms-with-rain': 'Сильный дождь, гроза 🌩',
+        'cloudy-and-light-rain': 'Небольшой дождь 🌧',
+        'overcast-and-light-rain': 'Небольшой дождь 🌧',
+        'cloudy-and-rain': 'Дождь 🌧',
+        'overcast-and-wet-snow': 'Дождь со снегом 🌨',
+        'partly-cloudy-and-light-snow': 'Небольшой снег 🌨',
+        'partly-cloudy-and-snow': 'Снег 🌨',
+        'overcast-and-snow': 'Снегопад 🌨',
+        'cloudy-and-light-snow': 'Небольшой снег 🌨',
+        'overcast-and-light-snow': 'Небольшой снег 🌨',
+        'cloudy-and-snow': 'Снег 🌨'
+    }
+
+    WEATHER_WIND_DIRECTION_TRANSLATOR = {
+        "nw": "северо-западный",
+        "n": "северный",
+        "ne": "северо-восточный",
+        "e": "восточный",
+        "se": "юго-восточный",
+        "s": "южный",
+        "sw": "юго-западный",
+        "w": "западный",
+        "c": "штиль",
+    }
+
+    DAY_TRANSLATOR = {
+        'night': 'ночь',
+        'morning': 'утро',
+        'day': 'день',
+        'evening': 'вечер',
+    }
 
     def start(self):
         changes = False
@@ -34,7 +73,7 @@ class Weather(Command):
             return self.weather_changes(city)
         yandexweather_api = YandexWeatherAPI(city)
         weather_data = yandexweather_api.get_weather()
-        weather_str = get_weather_str(city, weather_data)
+        weather_str = self.get_weather_str(city, weather_data)
         return weather_str
 
     def weather_changes(self, city):
@@ -57,7 +96,7 @@ class Weather(Command):
             # Если погода не ясная или не облачная
             clear_weather_statuses = ['clear', 'partly-cloudy', 'cloudy', 'overcast']
             if today_part['condition'] not in clear_weather_statuses:
-                weather_today_str = WEATHER_TRANSLATOR[today_part['condition']]
+                weather_today_str = self.WEATHER_TRANSLATOR[today_part['condition']]
                 difference_for_part += f"Ожидается {weather_today_str}\n"
 
             if part in parts_yesterday:
@@ -85,7 +124,7 @@ class Weather(Command):
                     difference_for_part += f"Порывы скорости ветра до {today_part['wind_gust']}м/с\n"
 
             if difference_for_part:
-                difference_total.append(f"Изменения на {DAY_TRANSLATOR[part]}:\n"
+                difference_total.append(f"Изменения на {self.DAY_TRANSLATOR[part]}:\n"
                                         f"{difference_for_part}")
         if not difference_total:
             return f"Нет изменений погоды в г. {city}"
@@ -118,38 +157,37 @@ class Weather(Command):
         elif 'temp_min' in weather:
             return (weather['temp_max'] + weather['temp_min']) / 2
 
+    def get_weather_str(self, city, weather_data):
+        now = \
+            f"Погода в г. {city.name} сейчас:\n" \
+            f"{self.WEATHER_TRANSLATOR[weather_data['now']['condition']]}\n" \
+            f"Температура {weather_data['now']['temp']}°С (ощущается как {weather_data['now']['temp_feels_like']}°С)\n" \
+            f"Ветер {self.WEATHER_WIND_DIRECTION_TRANSLATOR[weather_data['now']['wind_dir']]} {weather_data['now']['wind_speed']}м/c (порывы до {weather_data['now']['wind_gust']}м/c)\n" \
+            f"Давление {weather_data['now']['pressure']}мм.рт.ст.\n" \
+            f"Влажность {weather_data['now']['humidity']}%"
 
-def get_weather_str(city, weather_data):
-    now = \
-        f"Погода в г. {city.name} сейчас:\n" \
-        f"{WEATHER_TRANSLATOR[weather_data['now']['condition']]}\n" \
-        f"Температура {weather_data['now']['temp']}°С (ощущается как {weather_data['now']['temp_feels_like']}°С)\n" \
-        f"Ветер {WEATHER_WIND_DIRECTION_TRANSLATOR[weather_data['now']['wind_dir']]} {weather_data['now']['wind_speed']}м/c (порывы до {weather_data['now']['wind_gust']}м/c)\n" \
-        f"Давление {weather_data['now']['pressure']}мм.рт.ст.\n" \
-        f"Влажность {weather_data['now']['humidity']}%"
-
-    forecast = ""
-    for x in weather_data['forecast']:
-        forecast += \
-            f"\n\n" \
-            f"Прогноз на {DAY_TRANSLATOR[x['part_name']]}:\n" \
-            f"{WEATHER_TRANSLATOR[x['condition']]}\n"
-
-        if x['temp_min'] != x['temp_max']:
-            forecast += f"Температура от {x['temp_min']} до {x['temp_max']}°С"
-        else:
-            forecast += f"Температура {x['temp_max']}°С"
-
-        forecast += \
-            f" (ощущается как {x['temp_feels_like']}°С)\n" \
-            f"Ветер {WEATHER_WIND_DIRECTION_TRANSLATOR[weather_data['now']['wind_dir']]} {x['wind_speed']}м/c (порывы до {x['wind_gust']}м/c)\n" \
-            f"Давление {x['pressure']} мм.рт.ст.\n" \
-            f"Влажность {x['humidity']}%\n"
-        if x['prec_mm'] != 0:
+        forecast = ""
+        for x in weather_data['forecast']:
             forecast += \
-                f"Осадки {x['prec_mm']}мм " \
-                f"на протяжении {x['prec_period']} часов " \
-                f"с вероятностью {x['prec_prob']}%"
-        else:
-            forecast += "Без осадков"
-    return now + forecast
+                f"\n\n" \
+                f"Прогноз на {self.DAY_TRANSLATOR[x['part_name']]}:\n" \
+                f"{self.WEATHER_TRANSLATOR[x['condition']]}\n"
+
+            if x['temp_min'] != x['temp_max']:
+                forecast += f"Температура от {x['temp_min']} до {x['temp_max']}°С"
+            else:
+                forecast += f"Температура {x['temp_max']}°С"
+
+            forecast += \
+                f" (ощущается как {x['temp_feels_like']}°С)\n" \
+                f"Ветер {self.WEATHER_WIND_DIRECTION_TRANSLATOR[weather_data['now']['wind_dir']]} {x['wind_speed']}м/c (порывы до {x['wind_gust']}м/c)\n" \
+                f"Давление {x['pressure']} мм.рт.ст.\n" \
+                f"Влажность {x['humidity']}%\n"
+            if x['prec_mm'] != 0:
+                forecast += \
+                    f"Осадки {x['prec_mm']}мм " \
+                    f"на протяжении {x['prec_period']} часов " \
+                    f"с вероятностью {x['prec_prob']}%"
+            else:
+                forecast += "Без осадков"
+        return now + forecast

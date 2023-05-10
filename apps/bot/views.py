@@ -62,7 +62,8 @@ class TelegramView(CSRFExemptMixin, View):
 
 class GithubView(CSRFExemptMixin, View):
 
-    def send_notify_to_user(self, data, text):
+    @staticmethod
+    def send_notify_to_user(data, text):
         issue = data['issue']
         issue_body = issue['body']
         r = re.compile(r"Ишю от пользователя .* \(id=(.*)\)")

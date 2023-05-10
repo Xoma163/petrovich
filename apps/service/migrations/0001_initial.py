@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -74,7 +73,9 @@ class Migration(migrations.Migration):
                 ('n1', models.CharField(max_length=500, null=True, verbose_name='Средний')),
                 ('mm', models.CharField(max_length=500, null=True, verbose_name='Множественный мужской')),
                 ('fm', models.CharField(max_length=500, null=True, verbose_name='Множественный женский')),
-                ('type', models.CharField(choices=[('bad', 'Плохое'), ('good', 'Хорошее')], default='bad', max_length=10, verbose_name='Тип')),
+                ('type',
+                 models.CharField(choices=[('bad', 'Плохое'), ('good', 'Хорошее')], default='bad', max_length=10,
+                                  verbose_name='Тип')),
             ],
             options={
                 'verbose_name': 'Слово',
@@ -169,7 +170,8 @@ class Migration(migrations.Migration):
                 ('uses', models.PositiveIntegerField(default=0, verbose_name='Использований')),
                 ('approved', models.BooleanField(default=False, verbose_name='Разрешённый')),
                 (
-                'tg_file_id', models.CharField(blank=True, max_length=128, verbose_name='file_id стикера в телеграме')),
+                    'tg_file_id',
+                    models.CharField(blank=True, max_length=128, verbose_name='file_id стикера в телеграме')),
                 ('author', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='bot.profile',
                                              verbose_name='Автор')),
             ],
@@ -193,7 +195,8 @@ class Migration(migrations.Migration):
                 ('uses', models.PositiveIntegerField(default=0, verbose_name='Использований')),
                 ('approved', models.BooleanField(default=False, verbose_name='Разрешённый')),
                 (
-                'tg_file_id', models.CharField(blank=True, max_length=128, verbose_name='file_id стикера в телеграме')),
+                    'tg_file_id',
+                    models.CharField(blank=True, max_length=128, verbose_name='file_id стикера в телеграме')),
                 ('author', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='bot.profile',
                                              verbose_name='Автор')),
             ],
@@ -222,7 +225,8 @@ class Migration(migrations.Migration):
                 ('synonyms', models.CharField(max_length=300, verbose_name='Похожие названия')),
                 ('lat', models.FloatField(null=True, verbose_name='Широта')),
                 ('lon', models.FloatField(null=True, verbose_name='Долгота')),
-                ('timezone', models.ForeignKey(default='', null=True, on_delete=django.db.models.deletion.SET_NULL, to='service.timezone', verbose_name='Временная зона UTC')),
+                ('timezone', models.ForeignKey(default='', null=True, on_delete=django.db.models.deletion.SET_NULL,
+                                               to='service.timezone', verbose_name='Временная зона UTC')),
             ],
             options={
                 'verbose_name': 'город',

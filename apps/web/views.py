@@ -85,4 +85,3 @@ class MinecraftCape(View):
         name = kwargs['name']
         file = BASE_DIR + static(f"files/minecraft/capes/{name}.png")
         return FileResponse(open(file, 'rb'))
-

@@ -39,7 +39,8 @@ class SegmentList(m3u8.SegmentList):
         new_list = list(map(self.__absolute_setter, self))
         super().__init__(new_list)
 
-    def __absolute_setter(self, x):
+    @staticmethod
+    def __absolute_setter(x):
         x.uri = x.absolute_uri
         return x
 

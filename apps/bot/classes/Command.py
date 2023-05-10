@@ -2,6 +2,13 @@ from apps.bot.classes.bots.Bot import Bot
 from apps.bot.classes.consts.Consts import Role, ATTACHMENT_TRANSLATOR, Platform
 from apps.bot.classes.consts.Exceptions import PWarning, PSkip, PIDK
 from apps.bot.classes.events.Event import Event
+from apps.bot.classes.messages.attachments.AudioAttachment import AudioAttachment
+from apps.bot.classes.messages.attachments.DocumentAttachment import DocumentAttachment
+from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
+from apps.bot.classes.messages.attachments.StickerAttachment import StickerAttachment
+from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
+from apps.bot.classes.messages.attachments.VideoNoteAttachment import VideoNoteAttachment
+from apps.bot.classes.messages.attachments.VoiceAttachment import VoiceAttachment
 from apps.bot.utils.utils import get_help_texts_for_command, transform_k
 
 
@@ -35,6 +42,16 @@ class Command:
     city: bool = False  # Должно ли сообщение обрабатываться только с заданным городом у пользователя
     mentioned: bool = False  # Должно ли сообщение обрабатываться только с упоминанием бота
     non_mentioned: bool = False  # Должно ли сообщение обрабатываться только без упоминания бота
+
+    ATTACHMENT_TRANSLATOR = {
+        AudioAttachment: 'аудио',
+        VideoAttachment: 'видео',
+        PhotoAttachment: 'фото',
+        DocumentAttachment: 'документ',
+        VoiceAttachment: 'голосовое',
+        StickerAttachment: 'стикер',
+        VideoNoteAttachment: 'кружочек'
+    }
 
     def __init__(self, bot: Bot = None, event: Event = None):
         self.bot: Bot = bot

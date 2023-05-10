@@ -283,12 +283,12 @@ class TgBot(CommonBot):
         if rm.attachments:
             return self.edit_media(rm, params)
         if rm.keyboard and not rm.text:
-            return self.edit_keyboard(rm, params)
+            return self.edit_keyboard(params)
         params['text'] = params.pop('caption')
         r = self.requests.get('editMessageText', params=params)
         return r
 
-    def edit_keyboard(self, rm, params):
+    def edit_keyboard(self, params):
         del params['caption']
         r = self.requests.get('editMessageReplyMarkup', params=params)
         return r

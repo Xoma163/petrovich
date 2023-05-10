@@ -1,4 +1,5 @@
 from apps.bot.classes.Command import Command
+from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.consts.Consts import Role, Platform
 from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.utils.utils import localize_datetime, remove_tz
@@ -45,6 +46,8 @@ class Notifies(Command):
     ]
     platforms = [Platform.TG]
     city = True
+
+    bot: TgBot
 
     def start(self):
 

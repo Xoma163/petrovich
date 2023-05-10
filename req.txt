@@ -15,6 +15,7 @@ matplotlib
 mcrcon
 mcstatus
 oauth2client
+opencv-python
 Pillow
 psycopg2
 pydub

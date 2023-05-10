@@ -1,7 +1,7 @@
 import logging
 from threading import Lock
 from threading import Thread
-from typing import List
+from typing import List, Optional
 
 from django.contrib.auth.models import Group
 
@@ -48,7 +48,7 @@ class Bot(Thread):
         Получение новых событий и их обработка
         """
 
-    def handle_event(self, event: Event, send=True) -> ResponseMessage:
+    def handle_event(self, event: Event, send=True) -> Optional[ResponseMessage]:
         """
         Обработка входящего ивента
         """

@@ -4,10 +4,27 @@ from dateutil import parser
 from dateutil.parser import ParserError
 
 from apps.bot.classes.Command import Command
-from apps.bot.classes.consts.Consts import WEEK_TRANSLATOR, Role, DELTA_WEEKDAY, Platform
+from apps.bot.classes.bots.tg.TgBot import TgBot
+from apps.bot.classes.consts.Consts import Role, Platform
 from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.utils.utils import localize_datetime, normalize_datetime, remove_tz
 from apps.service.models import Notify as NotifyModel
+
+DELTA_WEEKDAY = {
+    'сегодня': 0,
+    'завтра': 1,
+    'послезавтра': 2,
+}
+
+WEEK_TRANSLATOR = {
+    'понедельник': 1, 'пн': 1,
+    'вторник': 2, 'вт': 2,
+    'среда': 3, 'ср': 3,
+    'четверг': 4, 'чт': 4,
+    'пятница': 5, 'пт': 5,
+    'суббота': 6, 'сб': 6,
+    'воскресенье': 7, 'воскресение': 7, 'вс': 7,
+}
 
 
 # Возвращает datetime, кол-во аргументов использованных для получения даты, была ли передана точная дата и время
@@ -51,6 +68,8 @@ class Notify(Command):
     args = 1
     platforms = [Platform.TG]
     city = True
+
+    bot: TgBot
 
     def start(self):
         if not self.event.sender.check_role(Role.TRUSTED) and \

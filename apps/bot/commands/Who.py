@@ -1,4 +1,5 @@
 from apps.bot.classes.Command import Command
+from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.models import Profile
@@ -19,6 +20,8 @@ class Who(Command):
     platforms = [Platform.TG]
     mentioned = True
 
+    bot: TgBot
+
     def start(self):
         arg = self.event.message.args_str
         role = get_role_by_str(arg)
@@ -38,6 +41,7 @@ class Who(Command):
         result = "\n".join(users_list)
         return str(result)
 
-    def get_users(self, chat, role):
+    @staticmethod
+    def get_users(chat, role):
         params = {'chats': chat, 'groups__name': role.name}
         return list(Profile.objects.filter(**params))

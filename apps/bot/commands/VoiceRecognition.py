@@ -5,6 +5,7 @@ import speech_recognition as sr
 from pydub import AudioSegment
 
 from apps.bot.classes.Command import Command
+from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning, PSkip
 from apps.bot.classes.messages.attachments.VideoNoteAttachment import VideoNoteAttachment
@@ -21,6 +22,8 @@ class VoiceRecognition(Command):
     platforms = [Platform.TG]
     attachments = [VoiceAttachment, VideoNoteAttachment]
     priority = -100
+
+    bot: TgBot
 
     @staticmethod
     def accept_extra(event):
@@ -82,8 +85,8 @@ class VoiceRecognition(Command):
 
 # переопределение класса для отключения pFilter
 class PFilterGoogleRecognizer(sr.Recognizer):
-    def recognize_google(self, audio_data, key=None, language="en-US", show_all=False, pfilter=1):
-
+    def recognize_google(self, audio_data, key=None, language="en-US", show_all=False, pfilter=1,
+                         with_confidence=False):
         assert isinstance(audio_data, sr.AudioData), "``audio_data`` must be audio data"
         assert key is None or isinstance(key, str), "``key`` must be ``None`` or a string"
         assert isinstance(language, str), "``language`` must be a string"

@@ -1,4 +1,5 @@
 from apps.bot.classes.Command import Command
+from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.consts.Consts import Platform, Role
 from apps.bot.classes.consts.Exceptions import PWarning
 
@@ -18,6 +19,8 @@ class AdminTitle(Command):
     conversation = True
 
     EMPTY = "ㅤ"
+
+    bot: TgBot
 
     def start(self):
         if self.event.message.args:

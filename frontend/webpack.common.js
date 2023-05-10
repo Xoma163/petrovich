@@ -9,96 +9,96 @@ require("regenerator-runtime");
 require("dotenv").config({path: "../secrets/.env"});
 
 module.exports = {
-    entry: {
-        app: path.join(__dirname, "./src/js/index.js"),
-    },
+  entry: {
+    app: path.join(__dirname, "./src/js/index.js"),
+  },
 
-    output: {
-        path: path.join(__dirname, "../staticfiles/dist/"),
-        filename: "js/[name]-[fullhash].js",
-        publicPath: "/static/dist/",
-    },
+  output: {
+    path: path.join(__dirname, "../staticfiles/dist/"),
+    filename: "js/[name]-[fullhash].js",
+    publicPath: "/static/dist/",
+  },
 
-    devtool: "source-map",
+  devtool: "source-map",
 
-    module: {
-        rules: [
-            {
-                test: /\.vue$/,
-                loader: "vue-loader"
+  module: {
+    rules: [
+      {
+        test: /\.vue$/,
+        loader: "vue-loader"
+      },
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        use: [{
+          loader: "babel-loader",
+          options: {
+            presets: ["@babel/preset-env"],
+            plugins: [
+              "@babel/plugin-syntax-dynamic-import",
+              "@babel/plugin-transform-runtime"
+            ],
+          },
+        }],
+      },
+      {
+        test: /\.s[ac]ss$/i,
+        use: [
+          {
+            loader: MiniCssExtractPlugin.loader,
+          },
+          {
+            loader: "css-loader",
+            options: {
+              sourceMap: true,
             },
-            {
-                test: /\.js$/,
-                exclude: /node_modules/,
-                use: [{
-                    loader: "babel-loader",
-                    options: {
-                        presets: ["@babel/preset-env"],
-                        plugins: [
-                            "@babel/plugin-syntax-dynamic-import",
-                            "@babel/plugin-transform-runtime"
-                        ],
-                    },
-                }],
-            },
-            {
-                test: /\.s[ac]ss$/i,
-                use: [
+          },
+          {
+            loader: "postcss-loader",
+            options: {
+              sourceMap: true,
+              postcssOptions: {
+                plugins: [
+                  [
+                    "postcss-preset-env",
                     {
-                        loader: MiniCssExtractPlugin.loader,
+                      // Options
                     },
-                    {
-                        loader: "css-loader",
-                        options: {
-                            sourceMap: true,
-                        },
-                    },
-                    {
-                        loader: "postcss-loader",
-                        options: {
-                            sourceMap: true,
-                            postcssOptions: {
-                                plugins: [
-                                    [
-                                        "postcss-preset-env",
-                                        {
-                                            // Options
-                                        },
-                                    ],
-                                ],
-                            },
-                        },
-                    },
-                    {
-                        loader: "sass-loader",
-                    },
+                  ],
                 ],
+              },
             },
+          },
+          {
+            loader: "sass-loader",
+          },
         ],
-    },
-
-    plugins: [
-        new webpack.HotModuleReplacementPlugin(),
-        new webpack.ProvidePlugin({
-            $: "jquery",
-            jQuery: "jquery",
-            "window.jQuery": "jquery"
-        }),
-        new BundleTracker({
-            filename: "webpack-stats.json",
-        }),
-        new VueLoaderPlugin(),
-        new CleanWebpackPlugin(),
-        new MiniCssExtractPlugin({
-            filename: "css/[name]-[fullhash].css",
-            chunkFilename: "css/[id].css",
-        }),
+      },
     ],
+  },
 
-    resolve: {
-        alias: {
-            "vue$": "vue/dist/vue.esm.js"
-        },
-        extensions: ["*", ".js", ".vue", ".json"]
+  plugins: [
+    new webpack.HotModuleReplacementPlugin(),
+    new webpack.ProvidePlugin({
+      $: "jquery",
+      jQuery: "jquery",
+      "window.jQuery": "jquery"
+    }),
+    new BundleTracker({
+      filename: "webpack-stats.json",
+    }),
+    new VueLoaderPlugin(),
+    new CleanWebpackPlugin(),
+    new MiniCssExtractPlugin({
+      filename: "css/[name]-[fullhash].css",
+      chunkFilename: "css/[id].css",
+    }),
+  ],
+
+  resolve: {
+    alias: {
+      "vue$": "vue/dist/vue.esm.js"
     },
+    extensions: ["*", ".js", ".vue", ".json"]
+  },
 };

@@ -1,6 +1,7 @@
 from threading import Lock
 
 from apps.bot.classes.Command import Command
+from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.consts.Consts import Role, Platform
 from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.utils.utils import get_random_int
@@ -23,6 +24,8 @@ class Rates(Command):
     conversation = True
     platforms = [Platform.TG]
     access = Role.GAMER
+
+    bot: TgBot
 
     def start(self):
         with lock:

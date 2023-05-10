@@ -73,7 +73,7 @@ class DemotivatorBuilder:
 
         def get_y():
             return 2 * (self.BLACK_OUTER_FRAME[1] + self.WHITE_FRAME[1] + self.BLACK_INNER_FRAME[1]) + \
-                   self.image.height + self.text1.height + self.text2.height
+                self.image.height + self.text1.height + self.text2.height
 
         return get_x(), get_y()
 

@@ -573,7 +573,8 @@ class Meme(Command):
         except ValueError:
             pass
 
-    def _get_inline_qrs(self, memes):
+    @staticmethod
+    def _get_inline_qrs(memes):
         _inline_qr = []
         for meme in memes:
             # Todo: send sticker as sticker

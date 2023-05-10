@@ -67,12 +67,14 @@ class BaseMeme(models.Model):
     tg_file_id = models.CharField("file_id стикера в телеграме", max_length=128, blank=True)
 
     def get_info(self):
-        return f"Название: {self.name}\n" \
+        info = f"Название: {self.name}\n" \
                f"Тип: {self.get_type_display()}\n" \
                f"ID: {self.pk}\n" \
                f"Автор: {self.author}\n" \
-               f"Ссылка: {self.link}\n" \
-               f"Использований: {self.uses}\n"
+               f"Использований: {self.uses}"
+        if self.link:
+            info += f"\nСсылка: {self.link}"
+        return info
 
     def preview_image(self):
         if self.link and self.type == 'photo':

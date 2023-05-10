@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -77,8 +76,10 @@ class Migration(migrations.Migration):
                 ('rate', models.IntegerField(verbose_name='Ставка')),
                 ('date', models.DateTimeField(auto_now_add=True, verbose_name='Дата')),
                 ('random', models.BooleanField(default=False, verbose_name='Случайная')),
-                ('chat', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='bot.chat', verbose_name='Чат')),
-                ('gamer', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='games.gamer', verbose_name='Пользователь')),
+                ('chat', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='bot.chat',
+                                           verbose_name='Чат')),
+                ('gamer', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='games.gamer',
+                                            verbose_name='Пользователь')),
             ],
             options={
                 'verbose_name': 'Ставка',
@@ -128,7 +129,8 @@ class Migration(migrations.Migration):
                 ('steps', models.PositiveIntegerField(default=1, verbose_name='Количество попыток')),
                 ('message_id', models.IntegerField(blank=True, default=0, verbose_name='id первого сообщения')),
                 (
-                'message_body', models.TextField(blank=True, verbose_name='Тело сообщения для игры в одном сообщении')),
+                    'message_body',
+                    models.TextField(blank=True, verbose_name='Тело сообщения для игры в одном сообщении')),
                 ('chat', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='bot.chat',
                                            verbose_name='Чат')),
                 ('profile', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='bot.profile',

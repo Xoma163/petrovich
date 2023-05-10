@@ -4,6 +4,7 @@ from threading import Lock
 from django.contrib.auth.models import Group
 
 from apps.bot.classes.Command import Command
+from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.consts.Consts import Platform, Role
 from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.utils.utils import localize_datetime, remove_tz, random_event
@@ -28,6 +29,8 @@ class Petrovich(Command):
     conversation = True
     platforms = [Platform.TG]
     access = Role.GAMER
+
+    bot: TgBot
 
     def start(self):
         if self.event.message.args:
