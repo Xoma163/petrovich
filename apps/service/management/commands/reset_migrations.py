@@ -47,12 +47,12 @@ class Command(BaseCommand):
         for app in apps:
             self.delete_django_migrations_db_app(app)
             # uncomment on local. Comment on production
-            # self.delete_migrations_files_app(app)
-            # self.stdout.write("APP (%s) deleted with success" % app)
+            self.delete_migrations_files_app(app)
+            self.stdout.write("APP (%s) deleted with success" % app)
 
         # uncomment on local. Comment on production
-        # for app in apps:
-        #     call_command('makemigrations', app)
+        for app in apps:
+            call_command('makemigrations', app)
 
         for app in apps:
             call_command('migrate', app, '--fake')
