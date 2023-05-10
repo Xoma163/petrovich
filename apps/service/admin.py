@@ -1,7 +1,6 @@
 from django.contrib import admin
 
-from apps.service.models import Service, Counter, Meme, Notify, City, \
-    Donations, TimeZone, Subscribe, WakeOnLanUserData, Horoscope, QuoteBook, Words, TaxiInfo, Tag
+from apps.service.models import *
 
 
 @admin.register(Service)

@@ -187,8 +187,12 @@ class Subscribe(models.Model):
         return self.title
 
 
+class HoroscopeMeme(Meme):
+    pass
+
+
 class Horoscope(models.Model):
-    memes = models.ManyToManyField(Meme)
+    memes = models.ManyToManyField(HoroscopeMeme)
 
     class Meta:
         verbose_name = "Гороскоп"
