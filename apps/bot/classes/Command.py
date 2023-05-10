@@ -1,5 +1,5 @@
 from apps.bot.classes.bots.Bot import Bot
-from apps.bot.classes.consts.Consts import Role, ATTACHMENT_TRANSLATOR, Platform
+from apps.bot.classes.consts.Consts import Role, Platform
 from apps.bot.classes.consts.Exceptions import PWarning, PSkip, PIDK
 from apps.bot.classes.events.Event import Event
 from apps.bot.classes.messages.attachments.AudioAttachment import AudioAttachment
@@ -326,7 +326,7 @@ class Command:
                 if type(att) in self.attachments:
                     return True
 
-        allowed_types = ', '.join([ATTACHMENT_TRANSLATOR[_type] for _type in self.attachments])
+        allowed_types = ', '.join([self.ATTACHMENT_TRANSLATOR[_type] for _type in self.attachments])
         error = f"Для работы команды требуются вложения: {allowed_types}"
         raise PWarning(error)
 

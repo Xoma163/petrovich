@@ -1,7 +1,5 @@
 from apps.bot.classes.Command import Command
-from apps.bot.classes.consts.Consts import BAD_ANSWERS
 from apps.bot.classes.consts.Exceptions import PWarning
-from apps.bot.utils.utils import random_event
 from apps.service.models import Words
 
 gender_translator = {
@@ -56,13 +54,8 @@ def get_praise_or_scold(bot, event, _type):
     if event.message.args:
         recipient = " ".join(args_case)
 
-        if "петрович" in recipient.lower():
-            if _type == 'bad':
-                msg = random_event(BAD_ANSWERS)
-            elif _type == 'good':
-                msg = "спс))"
-            else:
-                msg = "wtf"
+        if "петрович" in recipient.lower() and _type == 'good':
+            msg = "спс))"
         else:
             msg = get_from_db(gender_translator[translator_key], _type)
             if recipient:

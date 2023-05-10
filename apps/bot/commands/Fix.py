@@ -1,5 +1,4 @@
 from apps.bot.classes.Command import Command
-from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.utils.utils import fix_layout
 
@@ -12,7 +11,6 @@ class Fix(Command):
         "(Пересылаемые сообщения) - исправляет раскладку текста",
         "(текст) - исправляет раскладку текста"
     ]
-    excluded_platforms = [Platform.YANDEX]
     args_or_fwd = 1
 
     def start(self):

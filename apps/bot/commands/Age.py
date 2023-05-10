@@ -1,6 +1,5 @@
 from apps.bot.APIs.EveryPixelAPI import EveryPixelAPI
 from apps.bot.classes.Command import Command
-from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 
@@ -11,7 +10,6 @@ class Age(Command):
     help_texts = [
         "(Изображения/Пересылаемое сообщение с изображением) - оценивает возраст людей на фотографии"
     ]
-    excluded_platforms = [Platform.YANDEX]
     attachments = [PhotoAttachment]
 
     def start(self):

@@ -3,7 +3,6 @@ from datetime import datetime
 
 import requests
 
-from apps.bot.classes.consts.Consts import DAY_TRANSLATOR
 from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.utils.utils import remove_tz
 from apps.service.models import Service
@@ -45,6 +44,13 @@ class YandexWeatherAPI:
                 'humidity': fact['humidity'],
             },
             'forecast': []
+        }
+
+        DAY_TRANSLATOR = {
+            'night': 'ночь',
+            'morning': 'утро',
+            'day': 'день',
+            'evening': 'вечер',
         }
 
         # Проставление part_name для времени сейчас

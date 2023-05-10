@@ -2,7 +2,6 @@ from apps.bot.APIs.GoogleCustomSearchAPI import GoogleCustomSearchAPI
 from apps.bot.classes.Command import Command
 from apps.bot.classes.bots.Bot import upload_image_to_tg_server
 from apps.bot.classes.consts.ActivitiesEnum import ActivitiesEnum
-from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning
 
 
@@ -12,7 +11,6 @@ class Find(Command):
     help_text = "ищет информацию по картинкам в гугле"
     help_texts = ["(запрос) - ищет информацию по картинкам в гугле"]
     args = 1
-    excluded_platforms = [Platform.YANDEX]
 
     def start(self):
         query = self.event.message.args_str

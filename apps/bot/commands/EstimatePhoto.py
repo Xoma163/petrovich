@@ -1,6 +1,5 @@
 from apps.bot.APIs.EveryPixelAPI import EveryPixelAPI
 from apps.bot.classes.Command import Command
-from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 
 
@@ -9,7 +8,6 @@ class EstimatePhoto(Command):
     names = ["оценить"]
     help_text = "оценить качество фотографии"
     help_texts = ["(Изображение/Пересылаемое сообщение с изображением) - оценивает качество изображения"]
-    excluded_platforms = [Platform.YANDEX]
     attachments = [PhotoAttachment]
 
     def start(self):

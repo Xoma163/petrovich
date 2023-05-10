@@ -1,5 +1,4 @@
 from apps.bot.classes.Command import Command
-from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.utils.utils import get_random_int
 
@@ -13,7 +12,6 @@ class Waifu(Command):
         "[номер=рандом] - присылает несуществующую вайфу по номеру (0-100000)",
         "(слово) - присылает несуществующую вайфу вычисляя её номер"
     ]
-    excluded_platforms = [Platform.YANDEX]
 
     def start(self):
         waifus_count = 100000

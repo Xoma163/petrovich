@@ -1,5 +1,4 @@
 from apps.bot.classes.Command import Command
-from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning
 
 
@@ -8,7 +7,6 @@ class Uyu(Command):
     names = ["ъуъ"]
     help_text = "добавляет слово в текст (уъуфикация)"
     help_texts = ["(Пересланные сообщения) [новое слово=бля] - добавляет слово в текст (уъуфикация)"]
-    excluded_platforms = [Platform.YANDEX]
 
     def start(self):
         if self.event.chat and not self.event.chat.use_swear:
