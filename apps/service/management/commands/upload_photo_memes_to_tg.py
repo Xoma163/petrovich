@@ -1,3 +1,5 @@
+import time
+
 from django.core.management import BaseCommand
 
 from apps.bot.classes.bots.tg.TgBot import TgBot
@@ -19,3 +21,5 @@ class Command(BaseCommand):
                 continue
             meme.tg_file_id = photo.file_id
             meme.save()
+
+            time.sleep(2)
