@@ -380,12 +380,7 @@ class Meme(Command):
         msg = {}
 
         if self.event.platform == Platform.TG:
-
-            if meme.tg_file_id:
-                att = ATTACHMENT_TYPE_TRANSLATOR[meme.type]()
-                att.file_id = meme.tg_file_id
-                msg['attachments'] = att
-            elif meme.type == LinkAttachment.TYPE:
+            if meme.type == LinkAttachment.TYPE:
                 y_api = YoutubeVideoAPI()
                 try:
                     content_url = y_api.get_video_download_url(meme.link, self.event.platform)
@@ -398,6 +393,11 @@ class Meme(Command):
                     msg['text'] = meme.link
                 except Exception as e:
                     raise e
+            elif meme.tg_file_id:
+                att = ATTACHMENT_TYPE_TRANSLATOR[meme.type]()
+                att.file_id = meme.tg_file_id
+                msg['attachments'] = att
+
             else:
                 msg['text'] = meme.link
 
