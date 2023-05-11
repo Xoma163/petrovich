@@ -17,8 +17,9 @@ class Command(BaseCommand):
         for meme in random_memes:
             meme_dict = meme.__dict__
             del meme_dict['_state']
-            del meme_dict['id']
+            pk = meme_dict.pop('id')
             hm = HoroscopeMeme(**meme_dict)
+            hm.meme_pk = pk
             hm.save()
             hms.append(hm)
 

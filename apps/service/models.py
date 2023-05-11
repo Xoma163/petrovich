@@ -179,6 +179,18 @@ class Subscribe(models.Model):
 
 
 class HoroscopeMeme(BaseMeme):
+    meme_pk = models.PositiveIntegerField(verbose_name="ID мема", blank=True, default=0)
+
+    def get_info(self):
+        info = f"Название: {self.name}\n" \
+               f"Тип: {self.get_type_display()}\n" \
+               f"ID: {self.meme_pk}\n" \
+               f"Автор: {self.author}\n" \
+               f"Использований: {self.uses}"
+        if self.link:
+            info += f"\nСсылка: {self.link}"
+        return info
+
     class Meta:
         verbose_name = "мем гороскопа"
         verbose_name_plural = "мемы гороскопа"
