@@ -530,10 +530,11 @@ class Meme(Command):
             if meme.type in [PhotoAttachment.TYPE]:
                 qr.update({
                     'photo_file_id': meme.tg_file_id,
+                    'title': meme.name,
                 })
             elif meme.type in [StickerAttachment.TYPE]:
                 qr.update({
-                    'sticker_file_id': meme.tg_file_id,
+                    'sticker_file_id': meme.tg_file_id
                 })
             elif meme.type in [VideoAttachment.TYPE]:
                 if meme.tg_file_id:
