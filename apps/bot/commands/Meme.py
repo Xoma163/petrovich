@@ -481,7 +481,6 @@ class Meme(Command):
         thread.start()
 
     def _set_youtube_file_id(self, meme):
-        from apps.bot.APIs.YoutubeVideoAPI import YoutubeVideoAPI
         from apps.bot.models import Chat
 
         y_api = YoutubeVideoAPI()

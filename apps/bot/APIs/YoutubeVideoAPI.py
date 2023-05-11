@@ -23,7 +23,7 @@ class YoutubeVideoAPI:
         t = dict(parse_qsl(urlparse(url).query)).get('t')
         if t:
             t = t.rstrip('s')
-            h, m, s = str(timedelta(seconds=int(t))).split(":")
+            _, m, s = str(timedelta(seconds=int(t))).split(":")
             return f"{m}:{s}"
         return None
 

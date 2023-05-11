@@ -1,6 +1,7 @@
 from django.contrib import admin
 
-from apps.service.models import *
+from apps.service.models import Service, Meme, Notify, City, Donations, TimeZone, Subscribe, WakeOnLanUserData, \
+    Horoscope, Words, TaxiInfo, Tag
 
 
 @admin.register(Service)
@@ -71,5 +72,5 @@ class TaxiInfoAdmin(admin.ModelAdmin):
 
 
 @admin.register(Tag)
-class Tag(admin.ModelAdmin):
+class TagAdmin(admin.ModelAdmin):
     list_filter = (('chat', admin.RelatedOnlyFieldListFilter), ('users', admin.RelatedOnlyFieldListFilter))

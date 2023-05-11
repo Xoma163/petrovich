@@ -27,4 +27,5 @@ class Platform(Enum):
     def choices(cls):
         return tuple((i.name, i.value) for i in cls)
 
+
 rus_alphabet = "ёйцукенгшщзхъфывапролджэячсмитьбю"

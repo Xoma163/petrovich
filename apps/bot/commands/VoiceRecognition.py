@@ -87,9 +87,6 @@ class VoiceRecognition(Command):
 class PFilterGoogleRecognizer(sr.Recognizer):
     def recognize_google(self, audio_data, key=None, language="en-US", show_all=False, pfilter=1,
                          with_confidence=False):
-        assert isinstance(audio_data, sr.AudioData), "``audio_data`` must be audio data"
-        assert key is None or isinstance(key, str), "``key`` must be ``None`` or a string"
-        assert isinstance(language, str), "``language`` must be a string"
 
         flac_data = audio_data.get_flac_data(
             convert_rate=None if audio_data.sample_rate >= 8000 else 8000,  # audio samples must be at least 8 kHz

@@ -46,4 +46,4 @@ class AdminTitle(Command):
                     return f"Поменял должность пользователю {self.bot.get_mention(profile)} на {title}"
         else:
             self.bot.set_chat_admin_title(self.event.chat.chat_id, self.event.user.user_id, self.EMPTY)
-            return f"Сбросил вашу должность"
+            return "Сбросил вашу должность"

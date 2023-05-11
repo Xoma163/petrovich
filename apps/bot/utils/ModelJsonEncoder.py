@@ -9,7 +9,6 @@ from django.db.models.fields.files import ImageFieldFile
 
 
 class ModelJsonEncoder(DjangoJSONEncoder):
-
     def default(self, o):
         if isinstance(o, Model):
             # return model_to_dict(o)

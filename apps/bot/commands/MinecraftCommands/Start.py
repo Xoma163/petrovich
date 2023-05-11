@@ -20,7 +20,7 @@ class Start(Command):
             arg0 = None
 
         menu = [
-            [["майн", "майнкрафт", "mine", "minecraft"], self.menu_minecraft],
+            [["майн", "майнкрафт", "mine", "minecraft"], self.menu_minecraft]
         ]
         method = self.handle_menu(menu, arg0)
         return method()
