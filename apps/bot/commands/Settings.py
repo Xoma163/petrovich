@@ -32,6 +32,7 @@ class Settings(Command):
         'включи': True,
         'вруби': True,
         'подключи': True,
+        'истина': True,
 
         'выкл': False,
         'off': False,
@@ -40,7 +41,8 @@ class Settings(Command):
         'выключить': False,
         'выключи': False,
         'выруби': False,
-        'отключи': False
+        'отключи': False,
+        'ложь': False
     }
 
     TRUE_FALSE_TRANSLATOR = {
@@ -110,22 +112,10 @@ class Settings(Command):
         return self.setup_default_chat_setting('recognize_voice')
 
     def menu_turett(self):
-        self.check_sender(Role.CONFERENCE_ADMIN)
-        self.check_args(2)
-
-        value = self.get_on_or_off(self.event.message.args[1])
-        self.event.chat.need_turett = value
-        self.event.chat.save()
-        return "Сохранил настройку"
+        return self.setup_default_chat_setting("need_turett")
 
     def menu_swear(self):
-        self.check_sender(Role.CONFERENCE_ADMIN)
-        self.check_args(2)
-
-        value = self.get_on_or_off(self.event.message.args[1])
-        self.event.chat.use_swear = value
-        self.event.chat.save()
-        return "Сохранил настройку"
+        return self.setup_default_chat_setting("use_swear")
 
     def menu_default(self):
         msg = ""

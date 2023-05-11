@@ -28,34 +28,6 @@ WEEK_TRANSLATOR = {
 
 
 # Возвращает datetime, кол-во аргументов использованных для получения даты, была ли передана точная дата и время
-def get_time(arg1, arg2, timezone=None):
-    exact_datetime_flag = True
-    if arg1 in DELTA_WEEKDAY:
-        exact_datetime_flag = False
-        arg1 = (datetime.today().date() + timedelta(days=DELTA_WEEKDAY[arg1])).strftime("%d.%m.%Y")
-
-    if arg1 in WEEK_TRANSLATOR:
-        exact_datetime_flag = False
-        delta_days = WEEK_TRANSLATOR[arg1] - datetime.today().isoweekday()
-        if delta_days <= 0:
-            delta_days += 7
-        arg1 = (datetime.today().date() + timedelta(days=delta_days)).strftime("%d.%m.%Y")
-
-    default_datetime = remove_tz(normalize_datetime(datetime.utcnow(), tz=timezone.name)).replace(hour=9, minute=0,
-                                                                                                  second=0,
-                                                                                                  microsecond=0)
-    try:
-        if arg1.count('.') == 1:
-            arg1 = f"{arg1}.{default_datetime.year}"
-        date_str = f"{arg1} {arg2}"
-
-        return parser.parse(date_str, default=default_datetime, dayfirst=True), 2, exact_datetime_flag
-    except ParserError:
-        try:
-            exact_datetime_flag = False
-            return parser.parse(arg1, default=default_datetime, dayfirst=True), 1, exact_datetime_flag
-        except ParserError:
-            return None, None, None
 
 
 class Notify(Command):
@@ -72,16 +44,22 @@ class Notify(Command):
     bot: TgBot
 
     def start(self):
+        self.start_for_notify()
+
+    def check_max_notifies(self):
         if not self.event.sender.check_role(Role.TRUSTED) and \
                 len(NotifyModel.objects.filter(user=self.event.user)) >= 5:
             raise PWarning("Нельзя добавлять более 5 напоминаний")
+
+    def start_for_notify(self):
+        self.check_max_notifies()
         timezone = self.event.sender.city.timezone.name
 
         arg0 = self.event.message.args[0]
         arg1 = self.event.message.args[1] if len(self.event.message.args) > 1 else None
         tz = self.event.sender.city.timezone
 
-        date, args_count, exact_time_flag = get_time(arg0, arg1, tz)
+        date, args_count, exact_time_flag = self.get_time(arg0, arg1, tz)
         if not date:
             raise PWarning("Не смог распарсить дату")
         date = normalize_datetime(date, timezone)
@@ -89,8 +67,10 @@ class Notify(Command):
 
         if (date - datetime_now).seconds < 60:
             raise PWarning("Нельзя добавлять напоминание на ближайшую минуту")
+
         if not exact_time_flag and ((date - datetime_now).days < 0 or (datetime_now - date).seconds < 0):
             date = date + timedelta(days=1)
+
         if (date - datetime_now).days < 0 or (datetime_now - date).seconds < 0:
             raise PWarning("Нельзя указывать дату в прошлом")
 
@@ -131,3 +111,33 @@ class Notify(Command):
         notify.save()
 
         return f'Сохранил на дату {str(notify_datetime.strftime("%d.%m.%Y %H:%M"))}'
+
+    @staticmethod
+    def get_time(arg1, arg2, timezone=None):
+        exact_datetime_flag = True
+        if arg1 in DELTA_WEEKDAY:
+            exact_datetime_flag = False
+            arg1 = (datetime.today().date() + timedelta(days=DELTA_WEEKDAY[arg1])).strftime("%d.%m.%Y")
+
+        if arg1 in WEEK_TRANSLATOR:
+            exact_datetime_flag = False
+            delta_days = WEEK_TRANSLATOR[arg1] - datetime.today().isoweekday()
+            if delta_days <= 0:
+                delta_days += 7
+            arg1 = (datetime.today().date() + timedelta(days=delta_days)).strftime("%d.%m.%Y")
+
+        default_datetime = remove_tz(normalize_datetime(datetime.utcnow(), tz=timezone.name)).replace(hour=9, minute=0,
+                                                                                                      second=0,
+                                                                                                      microsecond=0)
+        try:
+            if arg1.count('.') == 1:
+                arg1 = f"{arg1}.{default_datetime.year}"
+            date_str = f"{arg1} {arg2}"
+
+            return parser.parse(date_str, default=default_datetime, dayfirst=True), 2, exact_datetime_flag
+        except ParserError:
+            try:
+                exact_datetime_flag = False
+                return parser.parse(arg1, default=default_datetime, dayfirst=True), 1, exact_datetime_flag
+            except ParserError:
+                return None, None, None
