@@ -95,7 +95,6 @@ class Wordle(Command):
         msg += f"\n\n{self.get_text_keyboard(session)}"
         if self.event.platform == Platform.TG:
             delta_messages = self.event.message.id - session.message_id
-            print(delta_messages)
             if delta_messages > 8:
                 old_msg_id = session.message_id
                 r = self.bot.parse_and_send_msgs(msg, self.event.peer_id, self.event.message_thread_id)[0]

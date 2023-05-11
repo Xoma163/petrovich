@@ -212,8 +212,9 @@ class Meme(Command):
         if self.event.sender.check_role(Role.MODERATOR) and meme.author != self.event.sender:
             user_msg = f'Мем с названием "{meme.name}" удалён поскольку он не ' \
                        f'соответствует правилам или был удалён автором.'
-            user = meme.author.get_tg_user()
-            self.bot.parse_and_send_msgs(user_msg, user.user_id, self.event.message_thread_id)
+            if meme.author:
+                user = meme.author.get_tg_user()
+                self.bot.parse_and_send_msgs(user_msg, user.user_id, self.event.message_thread_id)
 
         meme_name = meme.name
         meme.delete()

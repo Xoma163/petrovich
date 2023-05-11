@@ -104,7 +104,6 @@ class BullsAndCows(Command):
 
                 if self.event.platform == Platform.TG:
                     delta_messages = self.event.message.id - session.message_id
-                    print(delta_messages)
                     if delta_messages > 8:
                         old_msg_id = session.message_id
                         r = self.bot.parse_and_send_msgs(session.message_body, self.event.peer_id,
