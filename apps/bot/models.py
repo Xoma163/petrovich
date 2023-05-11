@@ -85,7 +85,7 @@ class Profile(models.Model):
         return [group['name'] for group in groups]
 
     def get_tg_user(self):
-        return self.user.get(platform=PlatformEnum.TG)
+        return self.user.get(platform=PlatformEnum.TG.name)
 
     class Meta:
         verbose_name = "Профиль"

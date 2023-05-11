@@ -7,19 +7,30 @@ from apps.bot.models import Profile, Chat, Bot, User
 class ProfileAdmin(admin.ModelAdmin):
     list_display = ('name', 'surname', 'nickname_real', 'gender', 'birthday', 'city')
     fieldsets = (
-        ('Информация о пользователе', {
-            'fields': (
-                'name', 'surname', 'nickname_real', 'gender', 'birthday', 'city', 'avatar'),
-        }),
-        ('Прочее', {
-            'fields': ('groups', 'chats'),
-        }),
-        ('Настройки', {
-            'fields': ('celebrate_bday',),
-        }),
-        ('API', {
-            'fields': ('api_token',),
-        }),
+        (
+            'Информация о профиле',
+            {
+                'fields': ('name', 'surname', 'nickname_real', 'gender', 'birthday', 'city', 'avatar')
+            }
+        ),
+        (
+            'Прочее',
+            {
+                'fields': ('groups', 'chats')
+            }
+        ),
+        (
+            'Настройки',
+            {
+                'fields': ('celebrate_bday',)
+            }
+        ),
+        (
+            'API',
+            {
+                'fields': ('api_token',)
+            }
+        ),
 
     )
 
