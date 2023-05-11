@@ -328,7 +328,7 @@ class Meme(Command):
         return prepared_meme
 
     def menu_video(self):
-        video = MemeModel.objects.filter(type='video', approved=True).order_by('?').first()
+        video = MemeModel.objects.filter(type='video', approved=True, tg_file_id="").order_by('?').first()
         if not video:
             raise PWarning("Видео с вк закончились, ура, товарищи!")
 
