@@ -19,6 +19,7 @@ from apps.bot.classes.messages.attachments.GifAttachment import GifAttachment
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 from apps.bot.classes.messages.attachments.StickerAttachment import StickerAttachment
 from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
+from apps.bot.classes.messages.attachments.VideoNoteAttachment import VideoNoteAttachment
 from apps.bot.classes.messages.attachments.VoiceAttachment import VoiceAttachment
 from apps.bot.commands.Meme import Meme
 from apps.bot.models import Profile
@@ -166,6 +167,14 @@ class TgBot(CommonBot):
                 raise PError(
                     f"Нельзя загружать видео более {self.MAX_VIDEO_SIZE_MB}мб в телеграмм. Ваше видео {round(video.get_size_mb(), 2)}мб")
             return self.requests.get('sendVideo', default_params, files=files)
+
+    def _send_video_note(self, rm: ResponseMessageItem, default_params):
+        """
+        Отправка видео. Ссылка или файл
+        """
+        video_note: VideoNoteAttachment = rm.attachments[0]
+        default_params['video_note'] = video_note.file_id
+        return self.requests.get('sendVideoNote', default_params)
 
     def _send_audio(self, rm: ResponseMessageItem, default_params):
         """
@@ -325,6 +334,7 @@ class TgBot(CommonBot):
             PhotoAttachment: self._send_photo,
             GifAttachment: self._send_gif,
             VideoAttachment: self._send_video,
+            VideoNoteAttachment: self._send_video_note,
             AudioAttachment: self._send_audio,
             DocumentAttachment: self._send_document,
             StickerAttachment: self._send_sticker,

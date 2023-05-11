@@ -4,9 +4,14 @@ from typing import Optional
 
 from apps.bot.classes.consts.Consts import Platform, Role
 from apps.bot.classes.messages.Message import Message
+from apps.bot.classes.messages.attachments.AudioAttachment import AudioAttachment
 from apps.bot.classes.messages.attachments.DocumentAttachment import DocumentAttachment
+from apps.bot.classes.messages.attachments.GifAttachment import GifAttachment
+from apps.bot.classes.messages.attachments.LinkAttachment import LinkAttachment
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
+from apps.bot.classes.messages.attachments.StickerAttachment import StickerAttachment
 from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
+from apps.bot.classes.messages.attachments.VideoNoteAttachment import VideoNoteAttachment
 from apps.bot.classes.messages.attachments.VoiceAttachment import VoiceAttachment
 from apps.bot.models import Profile, Chat, User
 from apps.bot.utils.ModelJsonEncoder import ModelJsonEncoder
@@ -134,7 +139,8 @@ class Event:
         attachments = []
 
         if _type is None:
-            _type = [VoiceAttachment, VideoAttachment, PhotoAttachment, DocumentAttachment]
+            _type = [AudioAttachment, DocumentAttachment, GifAttachment, LinkAttachment, PhotoAttachment,
+                     StickerAttachment, VideoAttachment, VideoNoteAttachment]
         if not isinstance(_type, list):
             _type = [_type]
         if self.attachments:

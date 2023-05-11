@@ -50,12 +50,11 @@ class BaseMeme(models.Model):
     ATTACHMENT_NAMES = [
         ('photo', 'Фото'),
         ('video', 'Видео'),
-        ('audio', 'Аудио'),
-        ('doc', 'Документ'),
         ('link', 'Ссылка'),
         ('sticker', 'Стикер'),
         ('gif', 'Гифка'),
         ('voice', 'Голосовое'),
+        ('video_note', 'Кружочек'),
     ]
     name = models.CharField("Название", max_length=1000, default="")
     link = models.CharField("Ссылка", max_length=1000, default="", null=True, blank=True)

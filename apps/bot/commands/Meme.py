@@ -1,6 +1,6 @@
 import threading
 from typing import List
-from urllib.parse import urlparse, parse_qsl, quote
+from urllib.parse import urlparse, parse_qsl
 
 import requests
 from django.db.models import Q
@@ -8,13 +8,14 @@ from django.db.models import Q
 from apps.bot.APIs.YoutubeVideoAPI import YoutubeVideoAPI
 from apps.bot.classes.Command import Command
 from apps.bot.classes.bots.Bot import send_message_to_moderator_chat
-from apps.bot.classes.consts.Consts import Role, Platform
-from apps.bot.classes.consts.Exceptions import PWarning, PError, PSkip
+from apps.bot.classes.consts.Consts import Role, Platform, ATTACHMENT_TYPE_TRANSLATOR
+from apps.bot.classes.consts.Exceptions import PWarning, PSkip
 from apps.bot.classes.messages.attachments.GifAttachment import GifAttachment
 from apps.bot.classes.messages.attachments.LinkAttachment import LinkAttachment
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 from apps.bot.classes.messages.attachments.StickerAttachment import StickerAttachment
 from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
+from apps.bot.classes.messages.attachments.VideoNoteAttachment import VideoNoteAttachment
 from apps.bot.classes.messages.attachments.VoiceAttachment import VoiceAttachment
 from apps.bot.utils.utils import tanimoto, get_tg_formatted_text
 from apps.service.models import Meme as MemeModel
@@ -48,6 +49,10 @@ class Meme(Command):
     YOUTUBE_URLS = ['youtu.be', 'youtube.com']
     ALLOWED_URLS = YOUTUBE_URLS + ['coub.com']
 
+    ALLOWED_ATTACHMENTS = [
+        PhotoAttachment, VideoAttachment, StickerAttachment, GifAttachment, VoiceAttachment, VideoNoteAttachment
+    ]
+
     def accept(self, event):
         if event.command:
             event.message.args = event.message.clear.split(' ')
@@ -78,7 +83,6 @@ class Meme(Command):
             [['отклонить', 'отменить', '-'], self.menu_reject],
             [['переименовать', 'правка'], self.menu_rename],
             [['инфо'], self.menu_info],
-            [['видео'], self.menu_video],
             [['default'], self.menu_default]
         ]
         method = self.handle_menu(menu, arg0)
@@ -88,8 +92,7 @@ class Meme(Command):
 
     def menu_add(self):
         self.check_args(2)
-        attachments = self.event.get_all_attachments(
-            [PhotoAttachment, StickerAttachment, VideoAttachment, GifAttachment, VoiceAttachment])
+        attachments = self.event.get_all_attachments(self.ALLOWED_ATTACHMENTS)
         if len(attachments) == 0:
             url = self.event.message.args_case[-1]
             self._check_allowed_url(url)
@@ -157,8 +160,7 @@ class Meme(Command):
             attachments = [attachment]
             id_name = self.get_id_or_meme_name(self.event.message.args[1:-1])
         except PWarning:
-            attachments = self.event.get_all_attachments(
-                [VideoAttachment, PhotoAttachment, StickerAttachment, GifAttachment, VoiceAttachment])
+            attachments = self.event.get_all_attachments(self.ALLOWED_ATTACHMENTS)
             id_name = self.get_id_or_meme_name(self.event.message.args[1:])
 
         meme_filter = {}
@@ -327,23 +329,6 @@ class Meme(Command):
             return [prepared_meme, warning_message]
         return prepared_meme
 
-    def menu_video(self):
-        video = MemeModel.objects.filter(type='video', approved=True, tg_file_id="").order_by('?').first()
-        if not video:
-            raise PWarning("Видео с вк закончились, ура, товарищи!")
-
-        prepared_video = video.get_info()
-        yt_search_link = 'https://www.youtube.com/results?search_query=' + quote(video.name)
-        prepared_video += f"\n\n{yt_search_link}"
-        button = self.bot.get_button("Ещё", self.name, "видео")
-        prepared_video = {
-            'text': prepared_video,
-            'keyboard': self.bot.get_inline_keyboard([button])
-        }
-        return prepared_video
-
-    # END MENU #
-
     def get_filtered_memes(self, filter_list=None, filter_user=None, approved=True, _id=None):
         memes = MemeModel.objects
         if _id:
@@ -395,64 +380,24 @@ class Meme(Command):
         msg = {}
 
         if self.event.platform == Platform.TG:
-            if meme.type == PhotoAttachment.TYPE:
-                if meme.tg_file_id:
-                    photo = PhotoAttachment()
-                    photo.file_id = meme.tg_file_id
-                    msg['attachments'] = photo
-                else:
-                    msg['attachments'] = self.bot.get_photo_attachment(meme.link, peer_id=self.event.peer_id)
-            elif meme.type == VideoAttachment.TYPE:
-                if meme.tg_file_id:
-                    video = VideoAttachment()
-                    video.file_id = meme.tg_file_id
-                    msg['attachments'] = video
-                else:
-                    msg['text'] = meme.link
-            elif meme.type in [StickerAttachment.TYPE]:
-                sticker = StickerAttachment()
-                sticker.file_id = meme.tg_file_id
-                msg['attachments'] = sticker
-            elif meme.type == GifAttachment.TYPE:
-                gif = GifAttachment()
-                gif.file_id = meme.tg_file_id
-                msg['attachments'] = gif
-            elif meme.type == VoiceAttachment.TYPE:
-                voice = VoiceAttachment()
-                voice.file_id = meme.tg_file_id
-                msg['attachments'] = voice
+
+            if meme.tg_file_id:
+                att = ATTACHMENT_TYPE_TRANSLATOR[meme.type]()
+                att.file_id = meme.tg_file_id
+                msg['attachments'] = att
             elif meme.type == LinkAttachment.TYPE:
-                if meme.tg_file_id:
-                    video = VideoAttachment()
-                    video.file_id = meme.tg_file_id
-                    msg['attachments'] = video
-                    y_api = YoutubeVideoAPI()
+                y_api = YoutubeVideoAPI()
+                try:
+                    content_url = y_api.get_video_download_url(meme.link, self.event.platform)
+                    video_content = requests.get(content_url).content
+                    msg['attachments'] = self.bot.get_video_attachment(video_content, peer_id=self.event.peer_id)
                     msg['text'] = y_api.get_timecode_str(meme.link)
-                else:
-                    y_api = YoutubeVideoAPI()
-                    try:
-                        content_url = y_api.get_video_download_url(meme.link, self.event.platform)
-                        video_content = requests.get(content_url).content
-                        msg['attachments'] = self.bot.get_video_attachment(video_content, peer_id=self.event.peer_id)
-                        msg['text'] = y_api.get_timecode_str(meme.link)
-                        self.set_youtube_file_id(meme)
-                        # return
-                    except PSkip:
-                        msg['text'] = meme.link
-                    except (PWarning, PError) as e:
-                        button = self.bot.get_button("Инфо", self.name, ["инфо", str(meme.pk)])
-                        if meme.type == LinkAttachment.TYPE:
-                            button2 = self.bot.get_button(
-                                "Поиск",
-                                None,
-                                url=f"https://www.youtube.com/results?search_query={meme.name}"
-                            )
-                            e.keyboard = self.bot.get_inline_keyboard([button, button2], 2)
-                        else:
-                            e.keyboard = self.bot.get_inline_keyboard([button], 1)
-                        raise e
-                    except Exception as e:
-                        raise e
+                    self.set_youtube_file_id(meme)
+                    # return
+                except PSkip:
+                    msg['text'] = meme.link
+                except Exception as e:
+                    raise e
             else:
                 msg['text'] = meme.link
 
@@ -629,10 +574,7 @@ class Meme(Command):
                         'type': 'video',
                         'video_file_id': meme.tg_file_id,
                         'title': meme.name,
-                        # 'thumb_url': f"https://img.youtube.com/vi/{video_id}/default.jpg"
                     })
-                    if ts:
-                        qr['caption'] = ts
                 else:
                     qr = {
                         'id': meme.pk,
@@ -645,8 +587,8 @@ class Meme(Command):
                             'message_text': meme.link
                         }
                     }
-                    if ts:
-                        qr['caption'] = ts
+                if ts:
+                    qr['caption'] = ts
             else:
                 raise RuntimeError()
             _inline_qr.append(qr)
