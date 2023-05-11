@@ -133,6 +133,8 @@ def get_help_texts_for_command(command, platform=None) -> str:
     """
     Получает help_texts для команды
     """
+    from apps.bot.classes.bots.tg.TgBot import TgBot
+
     result = ""
     if len(command.full_names) > 1:
         result += f"Названия команды: {', '.join(command.full_names)}\n"
@@ -149,7 +151,7 @@ def get_help_texts_for_command(command, platform=None) -> str:
                 if dash_pos == -1:
                     new_line = line
                 else:
-                    new_line = get_tg_formatted_text_line(line[:dash_pos]) + line[dash_pos:]
+                    new_line = TgBot.get_formatted_text_line(line[:dash_pos]) + line[dash_pos:]
                 full_help_texts_list.append(new_line)
             full_help_texts = "\n".join(full_help_texts_list)
             result += full_help_texts
@@ -320,59 +322,6 @@ def get_flat_list(_list: List[List]):
     Получение списка размерностью 1 из списка размерностью 2
     """
     return [item for sublist in _list for item in sublist]
-
-
-def get_tg_formatted_text(text: str) -> str:
-    """
-    Форматированный текст в телеграмме (html)
-    """
-    return f"<pre>{text}</pre>"
-
-
-def get_tg_formatted_text_line(text: str) -> str:
-    """
-    Форматированный текст в телеграмме в одну линию (html)
-    """
-    return f"<code>{text}</code>"
-
-
-def get_tg_formatted_url(name, url) -> str:
-    return f'<a href="{url}">{name}</a>'
-
-
-def get_tg_underline_text(text: str) -> str:
-    """
-    Текст с нижним подчёркиванием в телеграмме (html)
-    """
-    return f"<u>{text}</u>"
-
-
-def get_tg_italic_text(text: str) -> str:
-    """
-    Наклонный текст в телеграмме (html)
-    """
-    return f"<i>{text}</i>"
-
-
-def get_tg_bold_text(text: str) -> str:
-    """
-    Жирный текст в телеграмме (html)
-    """
-    return f"<b>{text}</b>"
-
-
-def get_tg_strike_text(text: str) -> str:
-    """
-    Жирный текст в телеграмме (html)
-    """
-    return f"<s>{text}</s>"
-
-
-def get_tg_spoiler_text(text: str) -> str:
-    """
-    Спойлер-текст в телеграмме (html)
-    """
-    return f'<span class="tg-spoiler">{text}</span>'
 
 
 eng_chars = u"~`!@#$%^&qwertyuiop[]asdfghjkl;'zxcvbnm,./QWERTYUIOP{}ASDFGHJKL:\"|ZXCVBNM<>?"

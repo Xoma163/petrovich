@@ -23,7 +23,7 @@ from apps.bot.classes.messages.attachments.VideoNoteAttachment import VideoNoteA
 from apps.bot.classes.messages.attachments.VoiceAttachment import VoiceAttachment
 from apps.bot.commands.Meme import Meme
 from apps.bot.models import Profile
-from apps.bot.utils.utils import get_thumbnail_for_image, get_tg_formatted_url, get_chunks
+from apps.bot.utils.utils import get_thumbnail_for_image, get_chunks
 from petrovich.settings import env
 
 
@@ -417,7 +417,7 @@ class TgBot(CommonBot):
         Получение меншона пользователя
         """
         user = profile.get_tg_user()
-        return get_tg_formatted_url(str(profile), f"tg://user?id={user.user_id}")
+        return self.get_formatted_url(str(profile), f"tg://user?id={user.user_id}")
         # if user.nickname:
         #     return f"@{user.nickname}"
 
@@ -479,5 +479,58 @@ class TgBot(CommonBot):
             'can_pin_messages': True,
         }).json()
         return res
+
+    @classmethod
+    def get_formatted_text(cls, text: str) -> str:
+        """
+        Форматированный текст
+        """
+        return f"<pre>{text}</pre>"
+
+    @classmethod
+    def get_formatted_text_line(cls, text: str) -> str:
+        """
+        Форматированный текст в одну линию
+        """
+        return f"<code>{text}</code>"
+
+    @classmethod
+    def get_formatted_url(cls, name, url) -> str:
+        return f'<a href="{url}">{name}</a>'
+
+    @classmethod
+    def get_underline_text(cls, text: str) -> str:
+        """
+        Текст с нижним подчёркиванием
+        """
+        return f"<u>{text}</u>"
+
+    @classmethod
+    def get_italic_text(cls, text: str) -> str:
+        """
+        Наклонный текст
+        """
+        return f"<i>{text}</i>"
+
+    @classmethod
+    def get_bold_text(cls, text: str) -> str:
+        """
+        Жирный текст
+        """
+        return f"<b>{text}</b>"
+
+    @classmethod
+    def get_strike_text(cls, text: str) -> str:
+        """
+        Жирный текст
+        """
+        return f"<s>{text}</s>"
+
+    @classmethod
+    def get_spoiler_text(cls, text: str) -> str:
+        """
+        Спойлер-текст
+        """
+        return f'<span class="tg-spoiler">{text}</span>'
 
     # END EXTRA

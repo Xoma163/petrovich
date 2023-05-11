@@ -17,7 +17,7 @@ from apps.bot.classes.messages.attachments.StickerAttachment import StickerAttac
 from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
 from apps.bot.classes.messages.attachments.VideoNoteAttachment import VideoNoteAttachment
 from apps.bot.classes.messages.attachments.VoiceAttachment import VoiceAttachment
-from apps.bot.utils.utils import tanimoto, get_tg_formatted_text
+from apps.bot.utils.utils import tanimoto
 from apps.service.models import Meme as MemeModel
 from petrovich.settings import env
 
@@ -324,12 +324,11 @@ class Meme(Command):
         meme.save()
         prepared_meme = self.prepare_meme_to_send(meme)
         if warning_message:
-            if self.event.platform == Platform.TG:
-                return [prepared_meme, get_tg_formatted_text(warning_message)]
-            return [prepared_meme, warning_message]
+            return [prepared_meme, self.bot.get_formatted_text(warning_message)]
         return prepared_meme
 
-    def get_filtered_memes(self, filter_list=None, filter_user=None, approved=True, _id=None):
+    @staticmethod
+    def get_filtered_memes(filter_list=None, filter_user=None, approved=True, _id=None):
         memes = MemeModel.objects
         if _id:
             memes = memes.filter(id=_id)
@@ -337,8 +336,6 @@ class Meme(Command):
             if filter_list is None:
                 filter_list = []
             memes = memes.filter(approved=approved)
-            if self.event.platform == Platform.TG:
-                memes = memes.exclude(type='audio')
             if filter_list:
                 filter_list = list(map(lambda x: x.lower(), filter_list))
                 for _filter in filter_list:
@@ -463,11 +460,8 @@ class Meme(Command):
         return memes_list
 
     def get_similar_memes_names(self, memes):
-        meme_name_limit = 50
-        meme_count_limit = 10
-        if self.event.platform == Platform.TG:
-            meme_name_limit = 120
-            meme_count_limit = 20
+        meme_name_limit = 120
+        meme_count_limit = 20
         total_memes_count = len(memes)
         memes = memes[:meme_count_limit]
         meme_names = []

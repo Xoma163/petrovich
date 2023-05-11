@@ -1,10 +1,8 @@
 import re
 
 from apps.bot.classes.Command import Command
-from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.classes.messages.Message import Message
-from apps.bot.utils.utils import get_tg_formatted_text_line
 from apps.service.models import Tag as TagModel
 
 
@@ -111,9 +109,7 @@ class Tag(Command):
         return profiles
 
     def _get_tag_name(self, name):
-        if self.event.platform == Platform.TG:
-            return get_tg_formatted_text_line(name)
-        return name
+        return self.bot.get_formatted_text_line(name)
 
     def menu_list(self):
         self.check_args(1)

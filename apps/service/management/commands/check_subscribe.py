@@ -7,10 +7,8 @@ from apps.bot.APIs.TheHoleAPI import TheHoleAPI
 from apps.bot.APIs.WASDAPI import WASDAPI
 from apps.bot.APIs.YoutubeVideoAPI import YoutubeVideoAPI
 from apps.bot.classes.bots.tg.TgBot import TgBot
-from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.events.Event import Event
 from apps.bot.commands.Media import Media
-from apps.bot.utils.utils import get_tg_formatted_url
 from apps.service.models import Subscribe
 
 logger = logging.getLogger('subscribe_notifier')
@@ -90,13 +88,8 @@ class Command(BaseCommand):
 
         new_video_text = "Новое видео" if not is_stream else "Стрим"
 
-        if bot.platform == Platform.TG:
-            text = f"{new_video_text} на канале {sub.title}\n" \
-                   f"{get_tg_formatted_url(title, link)}"
-        else:
-            text = f"{new_video_text} на канале {sub.title}\n" \
-                   f"{title}\n" \
-                   f"{link}"
+        text = f"{new_video_text} на канале {sub.title}\n" \
+               f"{bot.get_formatted_url(title, link)}"
         logger.info(f"Отправил уведомление по подписке с id={sub.pk}")
         # ToDo: check message_thread_id
         bot.parse_and_send_msgs(text, sub.peer_id, sub.message_thread_id)

@@ -1,7 +1,7 @@
 from apps.bot.classes.Command import Command
-from apps.bot.classes.consts.Consts import Role, Platform
+from apps.bot.classes.consts.Consts import Role
 from apps.bot.classes.consts.Exceptions import PWarning
-from apps.bot.utils.utils import get_role_by_str, get_tg_formatted_text_line
+from apps.bot.utils.utils import get_role_by_str
 
 
 class Commands(Command):
@@ -51,17 +51,14 @@ class Commands(Command):
         result = ""
         if self.event.sender.check_role(role['role']) and help_texts[role['role'].name]:
             result += f"\n\n— {role['text']} —\n"
-            if self.event.platform == Platform.TG:
-                help_texts_list = help_texts[role['role'].name].split('\n')
-                help_texts_list_new = []
-                for help_text in help_texts_list:
-                    dash_pos = help_text.find("-")
-                    if dash_pos == -1:
-                        new_line = help_text
-                    else:
-                        new_line = get_tg_formatted_text_line(help_text[:dash_pos - 1]) + help_text[dash_pos - 1:]
-                    help_texts_list_new.append(new_line)
-                result += "\n".join(help_texts_list_new)
-            else:
-                result += help_texts[role['role'].name]
+            help_texts_list = help_texts[role['role'].name].split('\n')
+            help_texts_list_new = []
+            for help_text in help_texts_list:
+                dash_pos = help_text.find("-")
+                if dash_pos == -1:
+                    new_line = help_text
+                else:
+                    new_line = self.bot.get_formatted_text_line(help_text[:dash_pos - 1]) + help_text[dash_pos - 1:]
+                help_texts_list_new.append(new_line)
+            result += "\n".join(help_texts_list_new)
         return result

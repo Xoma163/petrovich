@@ -337,6 +337,9 @@ class Bot(Thread):
 
     # ATTACHMENTS
     def get_photo_attachment(self, image, peer_id=None, allowed_exts_url=None, guarantee_url=False, filename=None):
+        """
+        Получение фото
+        """
         if allowed_exts_url is None:
             allowed_exts_url = ['jpg', 'jpeg', 'png']
         if peer_id:
@@ -347,7 +350,7 @@ class Bot(Thread):
 
     def get_document_attachment(self, document, peer_id=None, filename=None):
         """
-        Загрузка документа
+        Получение документа
         """
         if peer_id:
             self.set_activity(peer_id, ActivitiesEnum.UPLOAD_DOCUMENT)
@@ -356,6 +359,9 @@ class Bot(Thread):
         return da
 
     def get_audio_attachment(self, audio, peer_id=None, title=None, artist=None, filename=None, thumb=None):
+        """
+        Получение аудио
+        """
         if peer_id:
             self.set_activity(peer_id, ActivitiesEnum.UPLOAD_AUDIO)
         va = AudioAttachment()
@@ -367,7 +373,7 @@ class Bot(Thread):
 
     def get_video_attachment(self, document, peer_id=None, filename=None):
         """
-        Загрузка гифки
+        Получение видео
         """
         if peer_id:
             self.set_activity(peer_id, ActivitiesEnum.UPLOAD_VIDEO)
@@ -376,6 +382,9 @@ class Bot(Thread):
         return va
 
     def get_gif_attachment(self, gif, peer_id=None, filename=None):
+        """
+        Получение гифки
+        """
         if peer_id:
             self.set_activity(peer_id, ActivitiesEnum.UPLOAD_VIDEO)
         ga = GifAttachment()
@@ -415,6 +424,60 @@ class Bot(Thread):
         """
         Удаление сообщения
         """
+
+    @classmethod
+    def get_formatted_text(cls, text: str) -> str:
+        """
+        Форматированный текст
+        """
+        return text
+
+    @classmethod
+    def get_formatted_text_line(cls, text: str) -> str:
+        """
+        Форматированный текст в одну линию
+        """
+        return text
+
+    @classmethod
+    def get_formatted_url(cls, name, url) -> str:
+        return url
+
+    @classmethod
+    def get_underline_text(cls, text: str) -> str:
+        """
+        Текст с нижним подчёркиванием
+        """
+        return text
+
+    @classmethod
+    def get_italic_text(cls, text: str) -> str:
+        """
+        Наклонный текст
+        """
+        return text
+
+    @classmethod
+    def get_bold_text(cls, text: str) -> str:
+        """
+        Жирный текст
+        """
+        return text
+
+    @classmethod
+    def get_strike_text(cls, text: str) -> str:
+        """
+        Жирный текст
+        """
+        return text
+
+    @classmethod
+    def get_spoiler_text(cls, text: str) -> str:
+        """
+        Спойлер-текст
+        """
+        return text
+
     # END EXTRA
 
 
@@ -433,4 +496,4 @@ def upload_image_to_tg_server(image):
     from apps.bot.classes.bots.tg.TgBot import TgBot
     tg_bot = TgBot()
     photo = tg_bot.upload_image_to_tg_server(image)
-    return photo.public_download_url
+    return photo

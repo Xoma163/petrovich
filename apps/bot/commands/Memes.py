@@ -1,10 +1,8 @@
 from django.core.paginator import Paginator
 
 from apps.bot.classes.Command import Command
-from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.commands.Meme import Meme
-from apps.bot.utils.utils import get_tg_formatted_text, get_tg_formatted_text_line
 from apps.service.models import Meme as MemeModel
 
 
@@ -46,10 +44,7 @@ class Memes(Command):
             else:
                 on_last_page = p.count
             msg_footer = f'----{p.per_page * (page - 1) + 1}-{on_last_page}----'
-            if self.event.platform == Platform.TG:
-                text = f"{msg_header}\n{get_tg_formatted_text(msg_body)}\n{msg_footer}"
-            else:
-                text = f"{msg_header}\n\n{msg_body}\n\n{msg_footer}"
+            text = f"{msg_header}\n{self.bot.get_formatted_text(msg_body)}\n{msg_footer}"
             return text
         except PWarning:
             memes = MemeModel.objects.filter(approved=True)
@@ -73,7 +68,4 @@ class Memes(Command):
             return text
 
     def get_memes_names(self, memes) -> list:
-        if self.event.platform == Platform.TG:
-            return [f"{get_tg_formatted_text_line(meme.name)} (id - {meme.id})" for meme in memes]
-        else:
-            return [f"{meme.name} (id - {meme.id})" for meme in memes]
+        return [f"{self.bot.get_formatted_text_line(meme.name)} (id - {meme.id})" for meme in memes]

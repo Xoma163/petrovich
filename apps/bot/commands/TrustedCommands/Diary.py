@@ -1,6 +1,5 @@
 from apps.bot.classes.Command import Command
-from apps.bot.classes.consts.Consts import Role, Platform
-from apps.bot.utils.utils import get_tg_formatted_url
+from apps.bot.classes.consts.Consts import Role
 
 
 class Diary(Command):
@@ -11,7 +10,4 @@ class Diary(Command):
 
     def start(self):
         url = 'https://diary.andrewsha.net/'
-
-        if self.event.platform == Platform.TG:
-            url = get_tg_formatted_url("Ежедневник", url)
-        return url
+        return self.bot.get_formatted_url("Ежедневник", url)

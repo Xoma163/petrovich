@@ -3,7 +3,6 @@ import re
 from copy import copy
 
 from apps.bot.utils.ModelJsonEncoder import ModelJsonEncoder
-from apps.bot.utils.utils import get_tg_formatted_url
 from petrovich.settings import DEBUG
 
 
@@ -113,7 +112,8 @@ class ResponseMessageItem:
                     if left_part == '<a href="' and right_part == '">':
                         continue
 
-                    self.text = self.text[:start_pos] + get_tg_formatted_url(url, url) + self.text[end_pos:]
+                    from apps.bot.classes.bots.tg.TgBot import TgBot
+                    self.text = self.text[:start_pos] + TgBot.get_formatted_url(url, url) + self.text[end_pos:]
 
                     # self.text = self.text.replace(url, get_tg_formatted_url(url, url))
 

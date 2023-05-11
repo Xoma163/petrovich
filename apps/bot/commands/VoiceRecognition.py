@@ -10,7 +10,6 @@ from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning, PSkip
 from apps.bot.classes.messages.attachments.VideoNoteAttachment import VideoNoteAttachment
 from apps.bot.classes.messages.attachments.VoiceAttachment import VoiceAttachment
-from apps.bot.utils.utils import get_tg_bold_text, get_tg_spoiler_text
 
 
 class VoiceRecognition(Command):
@@ -69,9 +68,6 @@ class VoiceRecognition(Command):
             print(str(e))
             raise PWarning("Проблема с форматом")
 
-        if self.event.platform != Platform.TG:
-            return msg
-
         spoiler_text = "спойлер"
         if spoiler_text not in msg.lower():
             return msg
@@ -80,7 +76,8 @@ class VoiceRecognition(Command):
         text_before_spoiler = msg[:spoiler_index]
         text_after_spoiler = msg[spoiler_index + len(spoiler_text):]
 
-        return text_before_spoiler + get_tg_bold_text(spoiler_text) + get_tg_spoiler_text(text_after_spoiler)
+        return text_before_spoiler + self.bot.get_bold_text(spoiler_text) + self.bot.get_spoiler_text(
+            text_after_spoiler)
 
 
 # переопределение класса для отключения pFilter

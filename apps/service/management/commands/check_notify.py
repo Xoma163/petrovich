@@ -5,9 +5,9 @@ from crontab import CronTab
 from django.core.management.base import BaseCommand
 
 from apps.bot.classes.bots.tg.TgBot import TgBot
-from apps.bot.classes.consts.Consts import Role, Platform, ATTACHMENT_TYPE_TRANSLATOR
+from apps.bot.classes.consts.Consts import Role, ATTACHMENT_TYPE_TRANSLATOR
 from apps.bot.classes.events.Event import Event
-from apps.bot.utils.utils import remove_tz, localize_datetime, get_tg_formatted_text_line
+from apps.bot.utils.utils import remove_tz, localize_datetime
 from apps.service.models import Notify
 
 logger = logging.getLogger('notifier')
@@ -70,23 +70,19 @@ class Command(BaseCommand):
                       f"{user_str}\n" \
                       f"{notify.text}"
         else:
-            if notify.user.get_platform_enum() == Platform.TG:
-                message = f"Напоминалка по {get_tg_formatted_text_line(notify.crontab)}\n"
-            else:
-                message = f"Напоминалка по {notify.crontab}\n"
+            message = f"Напоминалка по {bot.get_formatted_text_line(notify.crontab)}\n"
             user_str = f"{bot.get_mention(notify.user.profile)}" if notify.mention_sender else f"{notify.user.profile}"
             message += f"{user_str}\n" \
                        f"{notify.text}"
 
         attachments = []
         if notify.attachments:
-            if notify.user.get_platform_enum() == Platform.TG:
-                for attachment in notify.attachments:
-                    key = list(attachment.keys())[0]
-                    value = attachment[key]
-                    att = ATTACHMENT_TYPE_TRANSLATOR[key]()
-                    att.file_id = value
-                    attachments.append(att)
+            for attachment in notify.attachments:
+                key = list(attachment.keys())[0]
+                value = attachment[key]
+                att = ATTACHMENT_TYPE_TRANSLATOR[key]()
+                att.file_id = value
+                attachments.append(att)
         result_msg = {'text': message, 'attachments': attachments}
         logger.info(f"Отправил напоминание по id={notify.pk}")
 

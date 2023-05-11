@@ -1,6 +1,5 @@
 from apps.bot.classes.Command import Command
-from apps.bot.classes.consts.Consts import Role, Platform
-from apps.bot.utils.utils import get_tg_formatted_url
+from apps.bot.classes.consts.Consts import Role
 
 
 class Discord(Command):
@@ -14,7 +13,4 @@ class Discord(Command):
 
     def start(self):
         url = 'https://discord.gg/kYGSNzv'
-
-        if self.event.platform == Platform.TG:
-            url = get_tg_formatted_url("Дискорд", url)
-        return url
+        return self.bot.get_formatted_url("Дискорд", url)

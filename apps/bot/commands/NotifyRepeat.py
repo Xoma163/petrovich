@@ -98,13 +98,12 @@ class NotifyRepeat(Command):
                 message_thread_id=self.event.message_thread_id
             )
 
-        tg_att_flag = self.event.attachments and self.event.platform == Platform.TG
-        if not (text or tg_att_flag):
+        if not (text or self.event.attachments):
             raise PWarning("В напоминании должны быть текст или вложения(tg)")
         if text:
             notify.text = text
             notify.text_for_filter += f" {text}"
-        if tg_att_flag:
+        if self.event.attachments:
             notify.attachments = [{x.type: x.file_id} for x in self.event.attachments]
 
         notify.save()

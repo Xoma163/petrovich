@@ -3,9 +3,7 @@ from bs4 import BeautifulSoup
 from django.core.management.base import BaseCommand
 
 from apps.bot.classes.bots.tg.TgBot import TgBot
-from apps.bot.classes.consts.Consts import Platform
 from apps.bot.models import User
-from apps.bot.utils.utils import get_tg_formatted_url
 from apps.service.models import Service
 
 
@@ -35,12 +33,10 @@ class Command(BaseCommand):
 
         news_to_send = list(filter(lambda x: self.get_news_id(x) > pasha_news_last_id, news))
         msgs = []
+        bot = TgBot()
         for news in news_to_send:
             news_content, news_url, news_title = self.parse_news(f"{self.URL}{news.attrs['href']}")
-            if pasha.get_platform_enum() == Platform.TG:
-                text = f'{get_tg_formatted_url(news_title, news_url)}\n\n{news_content}'
-            else:
-                text = f"{news_title}\n\n{news_content}\n\n{news_url}"
+            text = f'{bot.get_formatted_url(news_title, news_url)}\n\n{news_content}'
             msgs.append(text)
         if not msgs:
             return
@@ -48,7 +44,6 @@ class Command(BaseCommand):
         pasha_news_last_id_entity.value = last_news_id
         pasha_news_last_id_entity.save()
 
-        bot = TgBot()
         for msg in msgs:
             bot.parse_and_send_msgs(msg, pasha.user_id)
 

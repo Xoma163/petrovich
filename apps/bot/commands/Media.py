@@ -21,7 +21,7 @@ from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning, PSkip
 from apps.bot.models import Chat
 from apps.bot.utils.NothingLogger import NothingLogger
-from apps.bot.utils.utils import get_urls_from_text, get_tg_formatted_url, get_tg_bold_text, get_tg_formatted_text_line
+from apps.bot.utils.utils import get_urls_from_text
 from petrovich.settings import env
 
 YOUTUBE_URLS = ('www.youtube.com', 'youtube.com', "www.youtu.be", "youtu.be")
@@ -109,11 +109,9 @@ class Media(Command):
         if self.event.is_from_chat:
             text += f"\nОт {self.event.sender}"
 
-        if self.event.platform == Platform.TG:
-            source_hostname = str(urlparse(chosen_url).hostname).lstrip('www.')
-            text += f'\nИсточник: {get_tg_formatted_url(source_hostname, chosen_url)}'
-        else:
-            text += f"\n{chosen_url}"
+        source_hostname = str(urlparse(chosen_url).hostname).lstrip('www.')
+        text += f'\nИсточник: {self.bot.get_formatted_url(source_hostname, chosen_url)}'
+
         # Костыль, чтобы видосы которые шарятся с мобилы с реддита не дублировали title
 
         extra_text = source[:chosen_url_pos].strip() + "\n" + source[chosen_url_pos + len(chosen_url):].strip()
@@ -206,46 +204,45 @@ class Media(Command):
         elif rs.is_text or rs.is_link:
             text = attachment
             all_photos = []
-            if self.event.platform == Platform.TG:
-                text = text.replace("&#x200B;", "").replace("&amp;#x200B;", "").replace("&amp;", "&").replace(" ",
-                                                                                                              " ").strip()
-                p = re.compile(r"\[(.*)\]\(([^\)]*)\)")  # markdown links
+            text = text.replace("&#x200B;", "").replace("&amp;#x200B;", "").replace("&amp;", "&").replace(" ",
+                                                                                                          " ").strip()
+            p = re.compile(r"\[(.*)\]\(([^\)]*)\)")  # markdown links
+            for item in reversed(list(p.finditer(text))):
+                start_pos = item.start()
+                end_pos = item.end()
+                link_text = text[item.regs[1][0]:item.regs[1][1]]
+                link = text[item.regs[2][0]:item.regs[2][1]]
+                tg_url = self.bot.get_formatted_url(link_text, link)
+                text = text[:start_pos] + tg_url + text[end_pos:]
+
+            regexps_with_static = ((r"https.*player", "Видео"), (r"https://preview\.redd\.it/.*", "Фото"))
+            for regexp, _text in regexps_with_static:
+                p = re.compile(regexp)
                 for item in reversed(list(p.finditer(text))):
                     start_pos = item.start()
                     end_pos = item.end()
-                    link_text = text[item.regs[1][0]:item.regs[1][1]]
-                    link = text[item.regs[2][0]:item.regs[2][1]]
-                    tg_url = get_tg_formatted_url(link_text, link)
+                    if text[start_pos - 9:start_pos] == "<a href=\"":
+                        continue
+                    link = text[start_pos:end_pos]
+                    tg_url = self.bot.get_formatted_url(_text, link)
                     text = text[:start_pos] + tg_url + text[end_pos:]
+                    if _text == "Фото":
+                        all_photos.append(link)
+            p = re.compile(r'\*\*(.*)\*\*')  # markdown bold
+            for item in reversed(list(p.finditer(text))):
+                start_pos = item.start()
+                end_pos = item.end()
+                bold_text = text[item.regs[1][0]:item.regs[1][1]]
+                tg_bold_text = self.bot.get_bold_text(bold_text).replace("**", '')
+                text = text[:start_pos] + tg_bold_text + text[end_pos:]
 
-                regexps_with_static = ((r"https.*player", "Видео"), (r"https://preview\.redd\.it/.*", "Фото"))
-                for regexp, _text in regexps_with_static:
-                    p = re.compile(regexp)
-                    for item in reversed(list(p.finditer(text))):
-                        start_pos = item.start()
-                        end_pos = item.end()
-                        if text[start_pos - 9:start_pos] == "<a href=\"":
-                            continue
-                        link = text[start_pos:end_pos]
-                        tg_url = get_tg_formatted_url(_text, link)
-                        text = text[:start_pos] + tg_url + text[end_pos:]
-                        if _text == "Фото":
-                            all_photos.append(link)
-                p = re.compile(r'\*\*(.*)\*\*')  # markdown bold
-                for item in reversed(list(p.finditer(text))):
-                    start_pos = item.start()
-                    end_pos = item.end()
-                    bold_text = text[item.regs[1][0]:item.regs[1][1]]
-                    tg_bold_text = get_tg_bold_text(bold_text).replace("**", '')
-                    text = text[:start_pos] + tg_bold_text + text[end_pos:]
-
-                p = re.compile(r'&gt;(.*)\n')  # markdown quote
-                for item in reversed(list(p.finditer(text))):
-                    start_pos = item.start()
-                    end_pos = item.end()
-                    quote_text = text[item.regs[1][0]:item.regs[1][1]]
-                    tg_quote_text = get_tg_formatted_text_line(quote_text)
-                    text = text[:start_pos] + tg_quote_text + text[end_pos:]
+            p = re.compile(r'&gt;(.*)\n')  # markdown quote
+            for item in reversed(list(p.finditer(text))):
+                start_pos = item.start()
+                end_pos = item.end()
+                quote_text = text[item.regs[1][0]:item.regs[1][1]]
+                tg_quote_text = self.bot.get_formatted_text_line(quote_text)
+                text = text[:start_pos] + tg_quote_text + text[end_pos:]
             if all_photos:
                 msg = {'attachments': [self.bot.get_photo_attachment(x, filename=rs.filename) for x in all_photos]}
                 self.bot.parse_and_send_msgs(msg, self.event.peer_id, self.event.message_thread_id)

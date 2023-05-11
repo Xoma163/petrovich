@@ -9,7 +9,7 @@ from apps.bot.classes.consts.Consts import Role, Platform
 from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.models import Profile, Bot
 from apps.bot.utils.QuotesGenerator import QuotesGenerator
-from apps.bot.utils.utils import get_urls_from_text, get_tg_formatted_url
+from apps.bot.utils.utils import get_urls_from_text
 from apps.service.models import Service
 
 
@@ -92,10 +92,7 @@ class Nostalgia(Command):
         for msg in msgs:
             for att in msg['attachments']:
                 if 'link' in att:
-                    if self.event.platform == Platform.TG:
-                        all_atts.append(get_tg_formatted_url("Ссылка", att['link']))
-                    else:
-                        all_atts.append(att['link'])
+                    all_atts.append(self.bot.get_formatted_url("Ссылка", att['link']))
             all_atts += get_urls_from_text(msg['text'])
 
         return "\n".join(all_atts)
