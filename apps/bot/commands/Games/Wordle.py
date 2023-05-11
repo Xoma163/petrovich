@@ -5,7 +5,7 @@ from apps.bot.classes.Command import Command
 from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.consts.Consts import Platform, Role, rus_alphabet
 from apps.bot.classes.consts.Exceptions import PWarning
-from apps.bot.utils.utils import random_event
+from apps.bot.utils.utils import random_event, _send_message_session_or_edit
 from apps.games.models import Wordle as WordleModel
 
 lock = Lock()
@@ -93,30 +93,7 @@ class Wordle(Command):
     def get_current_state(self, session):
         msg = self.get_answer_for_user_if_wrong(session)
         msg += f"\n\n{self.get_text_keyboard(session)}"
-        if self.event.platform == Platform.TG:
-            delta_messages = self.event.message.id - session.message_id
-            if delta_messages > 8:
-                old_msg_id = session.message_id
-                r = self.bot.parse_and_send_msgs(msg, self.event.peer_id, self.event.message_thread_id)[0]
-                message_id = r['response'].json()['result']['message_id']
-                session.message_id = message_id
-                session.save()
-                self.bot.delete_message(self.event.peer_id, old_msg_id)
-            else:
-                r = self.bot.parse_and_send_msgs({
-                    'text': msg,
-                    'message_id': session.message_id},
-                    self.event.peer_id,
-                    self.event.message_thread_id
-                )[0]
-            if not r['success']:
-                r = self.bot.parse_and_send_msgs({'text': msg}, self.event.peer_id, self.event.message_thread_id)[0]
-                message_id = r['response'].json()['result']['message_id']
-                session.message_id = message_id
-                session.save()
-            self.bot.delete_message(self.event.peer_id, self.event.message.id)
-        else:
-            return msg
+        _send_message_session_or_edit(self.bot, self.event, session, msg, max_delta=8)
 
     def get_random_word(self):
         with open(self.WORDLE_WORDS_PATH, 'r') as f:
@@ -221,3 +198,4 @@ class Wordle(Command):
         button = self.bot.get_button("Ещё", self.name)
         keyboard = self.bot.get_inline_keyboard([button])
         return {"text": text, "keyboard": keyboard}
+

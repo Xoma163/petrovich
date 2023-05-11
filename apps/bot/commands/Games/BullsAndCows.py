@@ -4,7 +4,7 @@ from threading import Lock
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Role, Platform
 from apps.bot.classes.consts.Exceptions import PWarning
-from apps.bot.utils.utils import decl_of_num
+from apps.bot.utils.utils import decl_of_num, _send_message_session_or_edit
 from apps.games.models import BullsAndCowsSession
 
 lock = Lock()
@@ -102,32 +102,4 @@ class BullsAndCows(Command):
                 session.message_body += f"\n\n{new_msg}"
                 session.save()
 
-                if self.event.platform == Platform.TG:
-                    delta_messages = self.event.message.id - session.message_id
-                    if delta_messages > 8:
-                        old_msg_id = session.message_id
-                        r = self.bot.parse_and_send_msgs(session.message_body, self.event.peer_id,
-                                                         self.event.message_thread_id)[0]
-                        message_id = r['response'].json()['result']['message_id']
-                        session.message_id = message_id
-                        session.save()
-                        self.bot.delete_message(self.event.peer_id, old_msg_id)
-                    else:
-                        r = self.bot.parse_and_send_msgs({
-                            'text': session.message_body,
-                            'message_id': session.message_id},
-                            self.event.peer_id,
-                            self.event.message_thread_id
-                        )[0]
-                    if not r['success']:
-                        r = self.bot.parse_and_send_msgs(
-                            {'text': session.message_body},
-                            self.event.peer_id,
-                            self.event.message_thread_id
-                        )[0]
-                        message_id = r['response'].json()['result']['message_id']
-                        session.message_id = message_id
-                        session.save()
-                    self.bot.delete_message(self.event.peer_id, self.event.message.id)
-                else:
-                    return new_msg
+                _send_message_session_or_edit(self.bot, self.event, session, session.message_body, 8)

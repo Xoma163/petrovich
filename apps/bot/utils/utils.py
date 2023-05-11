@@ -395,3 +395,34 @@ def fix_layout(s):
 
 def get_url_file_ext(url):
     return urlparse(url).path.rsplit('.', 1)[-1]
+
+
+# ToDo: придумать, куда это вынести.
+def _send_message_session_or_edit(bot, event, session, msg, max_delta):
+    delta_messages = event.message.id - session.message_id
+
+    if delta_messages > max_delta:
+        old_msg_id = session.message_id
+        r = bot.parse_and_send_msgs(msg, event.peer_id, event.message_thread_id)[0]
+        message_id = r['response'].json()['result']['message_id']
+        session.message_id = message_id
+        session.save()
+        bot.delete_message(event.peer_id, old_msg_id)
+    else:
+        r = bot.parse_and_send_msgs({
+            'text': msg,
+            'message_id': session.message_id
+        },
+            event.peer_id,
+            event.message_thread_id
+        )[0]
+    if not r['success']:
+        r = bot.parse_and_send_msgs(
+            {'text': msg},
+            event.peer_id,
+            event.message_thread_id
+        )[0]
+        message_id = r['response'].json()['result']['message_id']
+        session.message_id = message_id
+        session.save()
+    bot.delete_message(event.peer_id, event.message.id)
