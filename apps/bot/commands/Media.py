@@ -285,21 +285,29 @@ class Media(Command):
         webm = p_api.get_video_url_from_post(url)
         video_content = requests.get(webm).content
         attachments = [
-            self.bot.get_video_attachment(video_content, peer_id=self.event.peer_id, filename=p_api.filename)]
+            self.bot.get_video_attachment(video_content, peer_id=self.event.peer_id, filename=p_api.filename)
+        ]
         return attachments, p_api.title
 
     def get_the_hole_video(self, url):
         the_hole_api = TheHoleAPI()
         the_hole_api.parse_video(url)
-        attachments = [self.bot.get_document_attachment(the_hole_api.m3u8_bytes, peer_id=self.event.peer_id,
-                                                        filename=f"{the_hole_api.title} - {the_hole_api.show_name} | The Hole.m3u8")]
+        attachments = [
+            self.bot.get_document_attachment(
+                the_hole_api.m3u8_bytes,
+                peer_id=self.event.peer_id,
+                filename=f"{the_hole_api.title} - {the_hole_api.show_name} | The Hole.m3u8")
+        ]
         return attachments, f"{the_hole_api.title} | {the_hole_api.show_name}"
 
     def get_wasd_video(self, url):
         wasd_api = WASDAPI()
         wasd_api.parse_video_m3u8(url)
-        attachments = [self.bot.get_document_attachment(wasd_api.m3u8_bytes, peer_id=self.event.peer_id,
-                                                        filename=f"{wasd_api.title} - {wasd_api.show_name} | WASD.m3u8")]
+        attachments = [
+            self.bot.get_document_attachment(
+                wasd_api.m3u8_bytes, peer_id=self.event.peer_id,
+                filename=f"{wasd_api.title} - {wasd_api.show_name} | WASD.m3u8")
+        ]
         return attachments, f"{wasd_api.title} | {wasd_api.show_name}"
 
     def get_yandex_music(self, url):

@@ -56,7 +56,7 @@ class Profile(Command):
         arg1 = self.event.message.args_case[1]
         if arg1 == 'добавить':
             city_name = " ".join(self.event.message.args_case[2:])
-            city = add_city_to_db(city_name)
+            city = self.add_city_to_db(city_name)
             return f"Добавил новый город - {city.name}"
         else:
             city_name = " ".join(self.event.message.args_case[1:])
@@ -163,33 +163,33 @@ class Profile(Command):
                 f"Никнейм - {_nickname}\n"
                 f"Дата рождения - {_bd}\n"
                 f"Город - {_city}\n"
-                f"Пол - {user.get_gender_display()}"
+                f"Пол - {user.get_gender_display().capitalize()}"
         }
         if user.avatar:
             msg['attachments'] = self.bot.get_photo_attachment(user.avatar.path, peer_id=self.event.peer_id,
                                                                filename="petrovich_user_avatar.png")
         return msg
 
+    @staticmethod
+    def add_city_to_db(city_name):
+        city_name = city_name.capitalize()
+        yandexgeo_api = YandexGeoAPI()
+        city_info = yandexgeo_api.get_city_info_by_name(city_name)
+        if not city_info:
+            raise PWarning("Не смог найти координаты для города")
+        city_info['name'] = city_info['name'].replace('ё', 'е')
+        city = City.objects.filter(name=city_info['name'])
+        if len(city) != 0:
+            return city.first()
+            # raise PWarning("Такой город уже есть")
+        city_info['synonyms'] = city_info['name'].lower()
+        timezonedb_api = TimezoneDBAPI()
+        timezone_name = timezonedb_api.get_timezone_by_coordinates(city_info['lat'], city_info['lon'])
+        if not timezone_name:
+            raise PWarning("Не смог найти таймзону для города")
+        timezone_obj, _ = TimeZone.objects.get_or_create(name=timezone_name)
 
-def add_city_to_db(city_name):
-    city_name = city_name.capitalize()
-    yandexgeo_api = YandexGeoAPI()
-    city_info = yandexgeo_api.get_city_info_by_name(city_name)
-    if not city_info:
-        raise PWarning("Не смог найти координаты для города")
-    city_info['name'] = city_info['name'].replace('ё', 'е')
-    city = City.objects.filter(name=city_info['name'])
-    if len(city) != 0:
-        return city.first()
-        # raise PWarning("Такой город уже есть")
-    city_info['synonyms'] = city_info['name'].lower()
-    timezonedb_api = TimezoneDBAPI()
-    timezone_name = timezonedb_api.get_timezone_by_coordinates(city_info['lat'], city_info['lon'])
-    if not timezone_name:
-        raise PWarning("Не смог найти таймзону для города")
-    timezone_obj, _ = TimeZone.objects.get_or_create(name=timezone_name)
-
-    city_info['timezone'] = timezone_obj
-    city = City(**city_info)
-    city.save()
-    return city
+        city_info['timezone'] = timezone_obj
+        city = City(**city_info)
+        city.save()
+        return city

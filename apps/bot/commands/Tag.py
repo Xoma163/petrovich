@@ -49,7 +49,7 @@ class Tag(Command):
             [['удалить', "delete"], self.menu_delete],
             [["добавить", "add"], self.menu_add],
             [['убрать', "remove"], self.menu_remove],
-            [['список', "list"], self.menu_list],
+            [['список', "list", "все"], self.menu_list],
             [['default'], self.menu_default],
         ]
         method = self.handle_menu(menu, arg0)
@@ -120,7 +120,8 @@ class Tag(Command):
         msg_list = [
             f"{self._get_tag_name(tag.name)}\n{', '.join([str(user) for user in tag.users.filter(pk__in=self.event.chat.users.all())])}"
             for tag in
-            tags]
+            tags
+        ]
         return "\n\n".join(msg_list)
 
     def menu_default(self):

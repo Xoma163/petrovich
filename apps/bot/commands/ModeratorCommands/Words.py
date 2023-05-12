@@ -21,8 +21,10 @@ class Words(Command):
 
     @staticmethod
     def get_words():
-        scopes = ['https://spreadsheets.google.com/feeds',
-                  'https://www.googleapis.com/auth/drive']
+        scopes = [
+            'https://spreadsheets.google.com/feeds',
+            'https://www.googleapis.com/auth/drive'
+        ]
 
         creds = ServiceAccountCredentials.from_json_keyfile_name(f"{BASE_DIR}/secrets/Petrovich-google.json",
                                                                  scopes)

@@ -10,7 +10,7 @@ from petrovich.settings import BASE_DIR
 
 
 def import_all_commands():
-    base_commands_folder_dir = f"{BASE_DIR}/apps/bot/commands"
+    base_commands_folder_dir = os.path.join(BASE_DIR, "apps", "bot", "commands")
     commands_dirs = []
     for path in os.walk(base_commands_folder_dir):
         if not path[0].endswith('__pycache__'):
@@ -22,7 +22,7 @@ def import_all_commands():
 
 
 def generate_commands():
-    commands = [cls for cls in Command.__subclasses__()]
+    commands = Command.__subclasses__()
     new_commands = commands
     flag = True
     while flag:

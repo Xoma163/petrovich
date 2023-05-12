@@ -1,3 +1,6 @@
+import cv2
+import numpy as np
+
 from apps.bot.APIs.EveryPixelAPI import EveryPixelAPI
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Exceptions import PWarning
@@ -26,8 +29,6 @@ class Age(Command):
 
 
 def draw_on_images(image, faces):
-    import numpy as np
-    import cv2
 
     data = image.download_content()
 

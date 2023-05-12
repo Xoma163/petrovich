@@ -10,5 +10,4 @@ class Git(Command):
 
     def start(self):
         url = 'https://github.com/Xoma163/petrovich/'
-
         return self.bot.get_formatted_url("Гитхаб", url)

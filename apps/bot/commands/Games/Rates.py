@@ -66,14 +66,21 @@ class Rates(Command):
                 gamer.save()
 
             if self.event.message.command == "казино":
-                image = self.bot.get_photo_attachment(f"{STATIC_ROOT}/bot/img/rate.jpg", peer_id=self.event.peer_id,
-                                                      filename="petrovich_rate.jpg")
+                image = self.bot.get_photo_attachment(
+                    f"{STATIC_ROOT}/bot/img/rate.jpg",
+                    peer_id=self.event.peer_id,
+                    filename="petrovich_rate.jpg"
+                )
                 if len(winners) == 1:
-                    msg = {'text': f"Выпавшее число - {rnd}\nПобедитель этого казино:\n{winners_str}",
-                           'attachments': image}
+                    msg = {
+                        'text': f"Выпавшее число - {rnd}\nПобедитель этого казино:\n{winners_str}",
+                        'attachments': image
+                    }
                 else:
-                    msg = {'text': f"Выпавшее число - {rnd}\nПобедители этого казино:\n{winners_str}",
-                           'attachments': image}
+                    msg = {
+                        'text': f"Выпавшее число - {rnd}\nПобедители этого казино:\n{winners_str}",
+                        'attachments': image
+                    }
             else:
                 if len(winners) == 1:
                     msg = {'text': f"Выпавшее число - {rnd}\nПобедитель:\n{winners_str}"}
@@ -81,11 +88,9 @@ class Rates(Command):
                     msg = {'text': f"Выпавшее число - {rnd}\nПобедители:\n{winners_str}"}
 
             gamers.delete()
-            messages.append(msg)
 
             button1 = self.bot.get_button("Ставка", "Ставка")
             keyboard = self.bot.get_inline_keyboard([button1], cols=1)
-
-            messages[-1]['keyboard'] = keyboard
-
+            msg['keyboard'] = keyboard
+            messages.append(msg)
             return messages

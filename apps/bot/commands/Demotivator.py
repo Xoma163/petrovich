@@ -14,7 +14,8 @@ class Demotivator(Command):
     name = "демотиватор"
     help_text = "создаёт демотиватор"
     help_texts = [
-        "(Изображения/Пересылаемое сообщение с изображением) (большой текст)[\\nмаленький текст] - создаёт демотиватор"]
+        "(Изображения/Пересылаемое сообщение с изображением) (большой текст)[\\nмаленький текст] - создаёт демотиватор"
+    ]
     help_texts_extra = "Разделитель текста - перенос строки"
     args = 1
     attachments = [PhotoAttachment, StickerAttachment]
@@ -37,6 +38,9 @@ class Demotivator(Command):
         img_byte_arr = io.BytesIO()
         demotivator.save(img_byte_arr, format="PNG")
 
-        attachment = self.bot.get_photo_attachment(img_byte_arr, peer_id=self.event.peer_id,
-                                                   filename="petrovich_demotivator.png")
+        attachment = self.bot.get_photo_attachment(
+            img_byte_arr,
+            peer_id=self.event.peer_id,
+            filename="petrovich_demotivator.png"
+        )
         return {"attachments": attachment}

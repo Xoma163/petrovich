@@ -30,76 +30,81 @@ class BullsAndCows(Command):
             else:
                 session = BullsAndCowsSession.objects.filter(profile=self.event.sender).first()
             if not self.event.message.args:
-                if session:
-                    return f"Игра уже создана, присылай мне число из {DIGITS_IN_GAME} цифр"
-                digits = [str(x) for x in range(10)]
-                random.shuffle(digits)
-                new_obj = {
-                    'number': "".join(digits[:DIGITS_IN_GAME]),
-                }
-                if self.event.is_from_chat:
-                    new_obj['chat'] = self.event.chat
-                else:
-                    new_obj['profile'] = self.event.sender
-                bacs = BullsAndCowsSession.objects.create(**new_obj)
-
-                msg = "Я создал, погнали"
-                if self.event.platform == Platform.TG:
-                    r = self.bot.parse_and_send_msgs(msg, self.event.peer_id, self.event.message_thread_id)[0]
-                    message_id = r['response'].json()['result']['message_id']
-                    bacs.message_body = "Я создал, погнали"
-                    bacs.message_id = message_id
-                    bacs.save()
-                    return
-                return msg
+                return self.start_game(session)
             else:
+                return self.play_game(session)
 
-                if not session:
-                    raise PWarning("Нет созданной игры. Начни её - /бк")
+    def start_game(self, session):
+        if session:
+            return f"Игра уже создана, присылай мне число из {DIGITS_IN_GAME} цифр"
+        digits = [str(x) for x in range(10)]
+        random.shuffle(digits)
+        new_obj = {
+            'number': "".join(digits[:DIGITS_IN_GAME]),
+        }
+        if self.event.is_from_chat:
+            new_obj['chat'] = self.event.chat
+        else:
+            new_obj['profile'] = self.event.sender
+        bacs = BullsAndCowsSession.objects.create(**new_obj)
 
-                arg0 = self.event.message.args[0]
-                if arg0 in ['сдаться', 'сдаюсь', 'ойвсё', 'пощади', 'надоело']:
-                    correct_number_str = str(session.number)
-                    correct_number_str = "0" * (DIGITS_IN_GAME - len(correct_number_str)) + correct_number_str
-                    session.delete()
-                    return f"В следующий раз повезёт :(\nЗагаданное число - {correct_number_str}"
+        msg = "Я создал, погнали"
+        if self.event.platform == Platform.TG:
+            r = self.bot.parse_and_send_msgs(msg, self.event.peer_id, self.event.message_thread_id)[0]
+            message_id = r['response'].json()['result']['message_id']
+            bacs.message_body = "Я создал, погнали"
+            bacs.message_id = message_id
+            bacs.save()
+            return
+        return msg
 
-                if len(arg0) != DIGITS_IN_GAME:
-                    raise PWarning(f"В отгадываемом числе должно быть {DIGITS_IN_GAME} цифр")
-                self.int_args = [0]
-                self.parse_int()
+    def play_game(self, session):
+        if not session:
+            raise PWarning("Нет созданной игры. Начни её - /бк")
 
-                if arg0 != ''.join(sorted(set(arg0), key=arg0.index)):
-                    raise PWarning("Цифры должны быть уникальны в числе")
+        arg0 = self.event.message.args[0]
+        if arg0 in ['сдаться', 'сдаюсь', 'ойвсё', 'пощади', 'надоело']:
+            correct_number_str = str(session.number)
+            correct_number_str = "0" * (DIGITS_IN_GAME - len(correct_number_str)) + correct_number_str
+            session.delete()
+            return f"В следующий раз повезёт :(\nЗагаданное число - {correct_number_str}"
 
-                if self.event.message.args[0] == session.number:
-                    if self.event.platform == Platform.TG:
-                        self.bot.delete_message(self.event.peer_id, self.event.message.id)
-                    decl = decl_of_num(session.steps, ['попытку', 'попытки', 'попыток'])
-                    gamer = self.bot.get_gamer_by_profile(self.event.sender)
-                    gamer.roulette_points += 1000
-                    gamer.bk_points += 1
-                    gamer.save()
-                    msg = f"Отгадали число {session.number} всего за {session.steps} {decl}!\n" \
-                          f"Начислил 1000 очков рулетки"
-                    session.delete()
-                    button = self.bot.get_button("Ещё", self.name)
-                    keyboard = self.bot.get_inline_keyboard([button])
-                    return [{"text": msg, "keyboard": keyboard}]
+        if len(arg0) != DIGITS_IN_GAME:
+            raise PWarning(f"В отгадываемом числе должно быть {DIGITS_IN_GAME} цифр")
+        self.int_args = [0]
+        self.parse_int()
 
-                bulls = 0
-                cows = 0
-                correct_number_str = str(session.number)
-                # Добиваем нулями если число начинается с нулей
-                correct_number_str = "0" * (DIGITS_IN_GAME - len(correct_number_str)) + correct_number_str
-                for i, argi in enumerate(arg0):
-                    if argi == correct_number_str[i]:
-                        bulls += 1
-                    elif argi in correct_number_str:
-                        cows += 1
-                session.steps += 1
-                new_msg = f"Число {arg0}\nБыков - {bulls}\nКоров - {cows}"
-                session.message_body += f"\n\n{new_msg}"
-                session.save()
+        if arg0 != ''.join(sorted(set(arg0), key=arg0.index)):
+            raise PWarning("Цифры должны быть уникальны в числе")
 
-                _send_message_session_or_edit(self.bot, self.event, session, session.message_body, 8)
+        if self.event.message.args[0] == session.number:
+            if self.event.platform == Platform.TG:
+                self.bot.delete_message(self.event.peer_id, self.event.message.id)
+            decl = decl_of_num(session.steps, ['попытку', 'попытки', 'попыток'])
+            gamer = self.bot.get_gamer_by_profile(self.event.sender)
+            gamer.roulette_points += 1000
+            gamer.bk_points += 1
+            gamer.save()
+            msg = f"Отгадали число {session.number} всего за {session.steps} {decl}!\n" \
+                  f"Начислил 1000 очков рулетки"
+            session.delete()
+            button = self.bot.get_button("Ещё", self.name)
+            keyboard = self.bot.get_inline_keyboard([button])
+            return [{"text": msg, "keyboard": keyboard}]
+
+        bulls = 0
+        cows = 0
+        correct_number_str = str(session.number)
+        # Добиваем нулями если число начинается с нулей
+        correct_number_str = "0" * (DIGITS_IN_GAME - len(correct_number_str)) + correct_number_str
+        for i, argi in enumerate(arg0):
+            if argi == correct_number_str[i]:
+                bulls += 1
+            elif argi in correct_number_str:
+                cows += 1
+        session.steps += 1
+        new_msg = f"Число {arg0}\nБыков - {bulls}\nКоров - {cows}"
+        session.message_body += f"\n\n{new_msg}"
+        session.save()
+
+        _send_message_session_or_edit(self.bot, self.event, session, session.message_body, 8)

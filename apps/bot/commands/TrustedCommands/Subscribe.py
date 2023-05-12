@@ -104,7 +104,6 @@ class Subscribe(Command):
     def menu_add_the_hole(url):
         the_hole_api = TheHoleAPI()
         the_hole_api.parse_channel(url)
-
         is_stream = False
 
         return the_hole_api.channel_id, the_hole_api.title, None, the_hole_api.last_video_id, is_stream

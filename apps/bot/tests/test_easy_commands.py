@@ -10,7 +10,6 @@ from apps.bot.commands.EasyCommands.Hi import Hi
 from apps.bot.commands.EasyCommands.Issues import Issues
 from apps.bot.commands.EasyCommands.No import No
 from apps.bot.commands.EasyCommands.Ping import Ping
-from apps.bot.commands.EasyCommands.Rofl import Rofl
 from apps.bot.commands.EasyCommands.Sho import Sho
 from apps.bot.commands.EasyCommands.SorryMe import SorryMe
 from apps.bot.commands.EasyCommands.StartLada import StartLada
@@ -111,13 +110,6 @@ class CommandNoTestCase(BotInitializer):
 
 class CommandPingTestCase(BotInitializer):
     Command = Ping
-
-    def test_no_args(self):
-        return self.check_correct_answer()
-
-
-class CommandRoflTestCase(BotInitializer):
-    Command = Rofl
 
     def test_no_args(self):
         return self.check_correct_answer()

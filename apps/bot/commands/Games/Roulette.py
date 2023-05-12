@@ -15,18 +15,17 @@ MAX_NUMBERS = 36
 lock = Lock()
 
 
-# By E.Dubovitsky
-def is_red(n):
-    j = (n - 1) % 9  # номер в квадратике
-    i = (n - 1) / 9  # номер самого квадратика
-
-    j_even = j % 2 == 0  # попадает ли номер внутри квадратика в крестик
-    i_even = i % 2 == 0  # чётный ли сам квадратик
-
-    return j_even and (i_even or j != 0)
-
-
 def generate_translator():
+    # By E.Dubovitsky
+    def is_red(n):
+        j = (n - 1) % 9  # номер в квадратике
+        i = (n - 1) / 9  # номер самого квадратика
+
+        j_even = j % 2 == 0  # попадает ли номер внутри квадратика в крестик
+        i_even = i % 2 == 0  # чётный ли сам квадратик
+
+        return j_even and (i_even or j != 0)
+
     translator_numbers = {
         str(i): {
             'win_numbers': [i],
@@ -158,8 +157,7 @@ class Roulette(Command):
             if not user_gamer:
                 raise PWarning("Не нашёл такого игрока")
             return f"Баланс игрока {user} - {user_gamer.roulette_points}"
-        else:
-            return f"Ваш баланс - {self.gamer.roulette_points}"
+        return f"Ваш баланс - {self.gamer.roulette_points}"
 
     def menu_picture(self):
         photo = random_event(
@@ -172,13 +170,12 @@ class Roulette(Command):
     def menu_bonus(self):
         datetime_now = localize_datetime(datetime.datetime.utcnow(), DEFAULT_TIME_ZONE)
         datetime_last = localize_datetime(remove_tz(self.gamer.roulette_points_today), DEFAULT_TIME_ZONE)
-        if (datetime_now.date() - datetime_last.date()).days > 0:
-            self.gamer.roulette_points += 500
-            self.gamer.roulette_points_today = datetime_now
-            self.gamer.save()
-            return "Выдал пособие по безработице"
-        else:
+        if (datetime_now.date() - datetime_last.date()).days <= 0:
             raise PWarning("Ты уже получил бонус. Приходи завтра")
+        self.gamer.roulette_points += 500
+        self.gamer.roulette_points_today = datetime_now
+        self.gamer.save()
+        return "Выдал пособие по безработице"
 
     def menu_transfer(self):
         self.check_conversation()
@@ -223,8 +220,7 @@ class Roulette(Command):
         elif points_transfer < 0:
             return f"Забрал у игрока {user_gamer.profile} {-points_transfer} " \
                    f"{decl_of_num(-points_transfer, ['очко', 'очка', 'очков'])}"
-        else:
-            return "ммм"
+        return "ммм"
 
     def menu_rates(self):
         rrs = self.get_active_rates()
@@ -237,41 +233,38 @@ class Roulette(Command):
 
     def menu_rate_on(self):
         rate_on = self.event.message.args[0]
-        # rate_is_int = str_is_int(rate_on)
-        if rate_on in TRANSLATOR:  # or rate_is_int:
-            self.args = 2
-            self.check_args()
-            if self.event.message.args[-1] == 'все':
-                rate = self.gamer.roulette_points
-            else:
-                self.int_args = [-1]
-                self.parse_int()
-                rate = self.event.message.args[-1]
-            if rate <= 0:
-                raise PWarning("Ставка не может быть ⩽0")
-            if rate > self.gamer.roulette_points:
-                raise PWarning(f"Ставка не может быть больше ваших очков - {self.gamer.roulette_points}")
-
-            if rate_on in ['строка', 'столбец']:
-                self.args = 3
-                self.int_args = [1, 2]
-                self.check_args()
-                self.parse_int()
-                row_col = self.event.message.args[1]
-                self.check_number_arg_range(row_col, 1, 3)
-
-                rate_obj = TRANSLATOR[rate_on][row_col]
-            else:
-                rate_obj = TRANSLATOR[rate_on]
-            rr = RouletteRate(gamer=self.gamer, chat=self.event.chat, rate_on=rate_obj, rate=rate)
-            rr.save()
-            self.gamer.roulette_points -= rate
-            self.gamer.save()
-
-            return "Поставил"
-
-        else:
+        if rate_on not in TRANSLATOR:
             raise PWarning("Не могу понять на что вы поставили. /ман рулетка")
+        self.args = 2
+        self.check_args()
+        if self.event.message.args[-1] == 'все':
+            rate = self.gamer.roulette_points
+        else:
+            self.int_args = [-1]
+            self.parse_int()
+            rate = self.event.message.args[-1]
+        if rate <= 0:
+            raise PWarning("Ставка не может быть ⩽0")
+        if rate > self.gamer.roulette_points:
+            raise PWarning(f"Ставка не может быть больше ваших очков - {self.gamer.roulette_points}")
+
+        if rate_on in ['строка', 'столбец']:
+            self.args = 3
+            self.int_args = [1, 2]
+            self.check_args()
+            self.parse_int()
+            row_col = self.event.message.args[1]
+            self.check_number_arg_range(row_col, 1, 3)
+
+            rate_obj = TRANSLATOR[rate_on][row_col]
+        else:
+            rate_obj = TRANSLATOR[rate_on]
+        rr = RouletteRate(gamer=self.gamer, chat=self.event.chat, rate_on=rate_obj, rate=rate)
+        rr.save()
+        self.gamer.roulette_points -= rate
+        self.gamer.save()
+
+        return "Поставил"
 
     def menu_play(self):
         with lock:

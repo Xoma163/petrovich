@@ -214,8 +214,6 @@ LOGGING = {
 if DEBUG:
     LOGGING['loggers']['bot']['handlers'].append('console-debug')
 
-AMAZON_REGION = "eu-north-1"
-
 WEBPACK_DEV_SERVER = DEBUG
 
 WEBPACK_LOADER = {

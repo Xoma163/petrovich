@@ -31,7 +31,6 @@ class WOL(Command):
             msg = "Нашел несколько устройств. Уточните какое:\n" \
                   f"{wol_data_str}"
             raise PWarning(msg)
-        else:
-            wol_data = wol_data.first()
+        wol_data = wol_data.first()
         send_magic_packet(wol_data.mac, ip_address=wol_data.ip, port=wol_data.port)
         return "Отправил"

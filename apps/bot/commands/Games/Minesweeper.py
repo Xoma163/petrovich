@@ -37,7 +37,7 @@ class Minesweeper(Command):
         self.board = []
         self.mode = self.MODE_DEFAULT
 
-        self.FLAG = "🏳️"
+        self.flag = "🏳️"
 
         self.emoji_map = {
             self.MINE: "🚩",
@@ -121,7 +121,7 @@ class Minesweeper(Command):
                 buttons.append(button)
         inline_keyboard = self.bot.get_inline_keyboard(buttons, self.width)
 
-        button = self.bot.get_button(f"Включить режим планирования {self.FLAG}", self.name, {'mode': self.MODE_MINES})
+        button = self.bot.get_button(f"Включить режим планирования {self.flag}", self.name, {'mode': self.MODE_MINES})
         inline_keyboard['inline_keyboard'].append([button])
 
         return {'text': f'Сапёр - {self.mines} мин', "keyboard": inline_keyboard}
@@ -198,7 +198,7 @@ class Minesweeper(Command):
         callback_data = json.loads(inline_keyboard[i][j]['callback_data'])
         callback_data['a'][3] = 1 if callback_data['a'][3] == 0 else 0
         inline_keyboard[i][j]['callback_data'] = json.dumps(callback_data, ensure_ascii=False)
-        inline_keyboard[i][j]['text'] = self.FLAG if callback_data['a'][3] == 1 else "     "
+        inline_keyboard[i][j]['text'] = self.flag if callback_data['a'][3] == 1 else "     "
         return {"keyboard": {"inline_keyboard": inline_keyboard}, "message_id": self.message_id}
 
     def propagate(self, i, j, inline_keyboard):
@@ -276,7 +276,7 @@ class Minesweeper(Command):
 
     def _edit_mode_button(self, inline_keyboard):
         if self.mode == self.MODE_DEFAULT:
-            button = self.bot.get_button(f"Включить режим планирования {self.FLAG}", self.name,
+            button = self.bot.get_button(f"Включить режим планирования {self.flag}", self.name,
                                          {'mode': self.MODE_MINES})
         else:
             button = self.bot.get_button(f"Включить обычный режим {self.emoji_map[self.MINE]}", self.name,

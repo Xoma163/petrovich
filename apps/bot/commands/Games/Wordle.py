@@ -69,9 +69,9 @@ class Wordle(Command):
         hypothesis = self.event.message.args[0]
         session = self.get_session()
         if not session:
-            b = self.bot.get_button("Начать", "wordle")
-            kb = self.bot.get_inline_keyboard([b])
-            raise PWarning("Игра не начата! Начните её", keyboard=kb)
+            button = self.bot.get_button("Начать", "wordle")
+            keyboard = self.bot.get_inline_keyboard([button])
+            raise PWarning("Игра не начата! Начните её", keyboard=keyboard)
 
         hypothesis = "".join([x for x in hypothesis if x.isalpha() and x in rus_alphabet])
         if len(hypothesis) != 5:
@@ -198,4 +198,3 @@ class Wordle(Command):
         button = self.bot.get_button("Ещё", self.name)
         keyboard = self.bot.get_inline_keyboard([button])
         return {"text": text, "keyboard": keyboard}
-

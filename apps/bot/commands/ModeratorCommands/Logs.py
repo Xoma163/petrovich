@@ -110,5 +110,5 @@ class Logs(Command):
     @staticmethod
     def read_file(path):
         with open(path, 'r') as file:
-            lines = file.readlines()  # [-rows_count:]
+            lines = file.readlines()
         return lines

@@ -1,5 +1,4 @@
 from datetime import datetime
-from time import sleep
 
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Exceptions import PWarning
@@ -77,69 +76,70 @@ class Horoscope(Command):
         if self.event.message.args:
             # Гороскоп для всех знаков
             if self.event.message.args[0] in "все":
-                horoscope = HoroscopeModel.objects.first()
-                if not horoscope:
-                    raise PWarning("На сегодня ещё нет гороскопа")
-                for i, zodiac_sign in enumerate(self.zodiac_signs.get_zodiac_signs()):
-                    meme = horoscope.memes.all()[i]
-                    zodiac_sign_name = zodiac_sign.name.capitalize()
-                    try:
-                        meme_command = Meme(bot=self.bot, event=self.event)
-                        prepared_meme = meme_command.prepare_meme_to_send(meme)
-                    except PWarning as e:
-                        error_msg = f"{zodiac_sign_name}\n{str(e)}"
-                        self.bot.parse_and_send_msgs_thread(error_msg, self.event.peer_id, self.event.message_thread_id)
-                        continue
-                    if prepared_meme.get('text', None):
-                        prepared_meme['text'] = f"{zodiac_sign_name}\n{prepared_meme['text']}"
-                    else:
-                        prepared_meme['text'] = zodiac_sign_name
-                    self.bot.parse_and_send_msgs_thread(prepared_meme, self.event.peer_id, self.event.message_thread_id)
-                    sleep(1)
-                return
+                return self.get_horoscope_for_all()
             elif self.event.message.args[0] in "инфо":
-                self.check_args(2)
-                try:
-                    zodiac_sign_name = self.event.message.args[1]
-                    zodiac_sign = self.zodiac_signs.get_zodiac_sign_by_sign_or_name(zodiac_sign_name)
-                    zodiac_sign_index = self.zodiac_signs.get_zodiac_sign_index(zodiac_sign)
-                except Exception:
-                    raise PWarning("Не знаю такого знака зодиака")
-                horoscope = HoroscopeModel.objects.first()
-                if not horoscope:
-                    raise PWarning("На сегодня ещё нет гороскопа")
-                meme = horoscope.memes.all()[zodiac_sign_index]
-                return f"{zodiac_sign.name.capitalize()}\n{meme.get_info()}"
+                return self.get_horoscope_info()
             elif self.event.message.args[0] in "конфа":
-                self.check_conversation()
-                chat_users = self.event.chat.users.all()
-                chat_signs = {}
-                for user in chat_users:
-                    sign = self.zodiac_signs.find_zodiac_sign_by_date(user.birthday)
-                    if sign in chat_signs:
-                        chat_signs[sign].append(str(user))
-                    else:
-                        chat_signs[sign] = [str(user)]
-
-                messages = []
-                for sign in chat_signs:
-                    message = self.get_horoscope_by_zodiac_sign(sign)
-                    users_sign_str = "\n".join(chat_signs[sign])
-                    message['text'] += f"\n\n{users_sign_str}"
-                    messages.append(message)
-                return messages
+                return self.get_horoscope_for_conference()
             # Гороскоп для знака зодиака в аргументах
             zodiac_sign_name = self.event.message.args[0]
             zodiac_sign = self.zodiac_signs.get_zodiac_sign_by_sign_or_name(zodiac_sign_name)
-            return self.get_horoscope_by_zodiac_sign(zodiac_sign)
+            horoscope = self.get_horoscope_by_zodiac_sign(zodiac_sign)
+            horoscope_with_button = self.get_horoscope_hint_msg(horoscope)
+            return horoscope_with_button
 
         # Гороскоп по ДР из профиля
         elif self.event.sender.birthday:
             zodiac_sign = self.zodiac_signs.find_zodiac_sign_by_date(self.event.sender.birthday)
-            return self.get_horoscope_by_zodiac_sign(zodiac_sign)
+            horoscope = self.get_horoscope_by_zodiac_sign(zodiac_sign)
+            horoscope_with_button = self.get_horoscope_hint_msg(horoscope)
+            return horoscope_with_button
         else:
             raise PWarning("Не указана дата рождения в профиле, не могу прислать гороскоп((. \n"
                            "Укажи знак зодиака в аргументе: /гороскоп дева")
+
+    def get_horoscope_for_all(self):
+        horoscope = HoroscopeModel.objects.first()
+        if not horoscope:
+            raise PWarning("На сегодня ещё нет гороскопа")
+        # for i, zodiac_sign in enumerate(self.zodiac_signs.get_zodiac_signs()):
+        signs = self.zodiac_signs.get_zodiac_signs()
+        messages = []
+        for sign in signs:
+            message = self.get_horoscope_by_zodiac_sign(sign)
+            messages.append(message)
+        return messages
+
+    def get_horoscope_for_conference(self):
+        self.check_conversation()
+        chat_users = self.event.chat.users.all()
+        signs = []
+        for user in chat_users:
+            sign = self.zodiac_signs.find_zodiac_sign_by_date(user.birthday)
+            if sign not in signs:
+                signs.append(sign)
+
+        messages = []
+        for sign in signs:
+            message = self.get_horoscope_by_zodiac_sign(sign)
+            messages.append(message)
+
+        messages.append(self.get_horoscope_hint_msg())
+        return messages
+
+    def get_horoscope_info(self):
+        self.check_args(2)
+        try:
+            zodiac_sign_name = self.event.message.args[1]
+            zodiac_sign = self.zodiac_signs.get_zodiac_sign_by_sign_or_name(zodiac_sign_name)
+            zodiac_sign_index = self.zodiac_signs.get_zodiac_sign_index(zodiac_sign)
+        except Exception:
+            raise PWarning("Не знаю такого знака зодиака")
+        horoscope = HoroscopeModel.objects.first()
+        if not horoscope:
+            raise PWarning("На сегодня ещё нет гороскопа")
+        meme = horoscope.memes.all()[zodiac_sign_index]
+        return f"{zodiac_sign.name.capitalize()}\n{meme.get_info()}"
 
     def get_horoscope_by_zodiac_sign(self, zodiac_sign):
         horoscope = HoroscopeModel.objects.first()
@@ -155,6 +155,11 @@ class Horoscope(Command):
             prepared_meme['text'] = f"{zodiac_sign_name}\n{prepared_meme['text']}"
         else:
             prepared_meme['text'] = zodiac_sign_name
-        button = self.bot.get_button(self.name.capitalize(), self.name)
-        prepared_meme['keyboard'] = self.bot.get_inline_keyboard([button])
         return prepared_meme
+
+    def get_horoscope_hint_msg(self, msg=None):
+        if not msg:
+            msg = {'text': "Узнать мой гороскоп"}
+        button = self.bot.get_button(self.name.capitalize(), self.name)
+        msg['keyboard'] = self.bot.get_inline_keyboard([button])
+        return msg

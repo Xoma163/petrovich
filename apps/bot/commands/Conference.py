@@ -34,22 +34,19 @@ class Conference(Command):
                 self.event.chat.save()
                 return f"Поменял название беседы на {self.event.message.args_str_case}"
             except PWarning as e:
-                if self.event.chat.admin is None:
-                    msg = "Так как администратора конфы не было, то теперь вы стали администратором конфы!"
-                    self.event.chat.admin = self.event.sender
-                    same_chats = self.bot.chat_model.filter(name=self.event.message.args_str_case)
-                    if len(same_chats) > 0:
-                        msg += "\nКонфа с таким названием уже есть. Придумайте другое"
-                        return msg
-                    self.event.chat.name = self.event.message.args_str_case
-                    self.event.chat.save()
-                    msg += f"\nПоменял название беседы на {self.event.message.args_str_case}"
-                    return msg
-                else:
+                if self.event.chat.admin:
                     return str(e)
-
+                msg = "Так как администратора конфы не было, то теперь вы стали администратором конфы!"
+                self.event.chat.admin = self.event.sender
+                same_chats = self.bot.chat_model.filter(name=self.event.message.args_str_case)
+                if len(same_chats) > 0:
+                    msg += "\nКонфа с таким названием уже есть. Придумайте другое"
+                    return msg
+                self.event.chat.name = self.event.message.args_str_case
+                self.event.chat.save()
+                msg += f"\nПоменял название беседы на {self.event.message.args_str_case}"
+                return msg
+        elif self.event.chat.name and self.event.chat.name != "":
+            return f"Название конфы - {self.event.chat.name}"
         else:
-            if self.event.chat.name and self.event.chat.name != "":
-                return f"Название конфы - {self.event.chat.name}"
-            else:
-                raise PWarning("Конфа не имеет названия")
+            raise PWarning("Конфа не имеет названия")

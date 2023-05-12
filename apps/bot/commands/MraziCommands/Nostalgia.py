@@ -35,6 +35,7 @@ class Nostalgia(Command):
 
     KEY = "mrazi"
     FILE = "secrets/mrazi_chats/mrazi_all.json"
+    MAX_PER_PAGE = 10
 
     def check_rights(self):
 
@@ -103,7 +104,7 @@ class Nostalgia(Command):
         return self.menu_range()
 
     def menu_search(self):
-        MAX_PER_PAGE = 10
+
         data = self._load_file()
 
         try:
@@ -124,11 +125,11 @@ class Nostalgia(Command):
                 searched_indexes.append(i)
         if len(searched_indexes) == 0:
             return f'Ничего не нашёл по запросу "{search_query}"'
-        total_pages = (len(searched_indexes) - 1) // MAX_PER_PAGE + 1
-        if page * MAX_PER_PAGE > len(searched_indexes):
+        total_pages = (len(searched_indexes) - 1) // self.MAX_PER_PAGE + 1
+        if page * self.MAX_PER_PAGE > len(searched_indexes):
             page = total_pages
-        first_item = (page - 1) * MAX_PER_PAGE
-        last_item = min((page * MAX_PER_PAGE, len(searched_indexes)))
+        first_item = (page - 1) * self.MAX_PER_PAGE
+        last_item = min((page * self.MAX_PER_PAGE, len(searched_indexes)))
         buttons = []
         for i in range(first_item, last_item):
             index = searched_indexes[i]
@@ -145,16 +146,14 @@ class Nostalgia(Command):
         if index_from is None:
             index_from = random.randint(0, len(data) - self.DEFAULT_MSGS_COUNT)
 
-        if index_from < 1:
-            index_from = 1
+        index_from = max(index_from, 1)
 
         if index_to is None:
             index_to = index_from + self.DEFAULT_MSGS_COUNT
 
         if index_from > index_to:
             index_from, index_to = index_to, index_from
-            if index_from < 1:
-                index_from = 1
+            index_from = max(index_from, 1)
 
         if index_to - index_from > 200:
             raise PWarning("Ну давай не надо больше 200 сообщений... Проц перегреется")
