@@ -105,13 +105,10 @@ class Horoscope(Command):
         horoscope = HoroscopeModel.objects.first()
         if not horoscope:
             raise PWarning("На сегодня ещё нет гороскопа")
-        # for i, zodiac_sign in enumerate(self.zodiac_signs.get_zodiac_signs()):
         signs = self.zodiac_signs.get_zodiac_signs()
-        messages = []
         for sign in signs:
             message = self.get_horoscope_by_zodiac_sign(sign)
-            messages.append(message)
-        return messages
+            self.bot.parse_and_send_msgs_thread(message, self.event.peer_id, self.event.message_thread_id)
 
     def get_horoscope_for_conference(self):
         self.check_conversation()
@@ -128,13 +125,9 @@ class Horoscope(Command):
                 "Ни у кого в конфе не проставлено ДР\n"
                 f"Укажите дату рождения в профиле: {self.bot.get_formatted_text_line('/профиль др ДД.ММ.ГГГГ')}"
             )
-        messages = []
         for sign in signs:
             message = self.get_horoscope_by_zodiac_sign(sign)
-            messages.append(message)
-
-        messages.append(self.get_horoscope_hint_msg())
-        return messages
+            self.bot.parse_and_send_msgs_thread(message, self.event.peer_id, self.event.message_thread_id)
 
     def get_horoscope_info(self):
         self.check_args(2)
