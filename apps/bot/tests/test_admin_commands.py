@@ -4,7 +4,6 @@ from apps.bot.classes.consts.Consts import Role
 from apps.bot.commands.AdminCommands.Ban import Ban
 from apps.bot.commands.AdminCommands.DeBan import DeBan
 from apps.bot.commands.AdminCommands.Linux import Linux
-from apps.bot.commands.AdminCommands.Restart import Restart
 from apps.bot.models import User
 from apps.bot.tests.BotInitializer import BotInitializer
 
@@ -60,7 +59,3 @@ class CommandDeBanTestCase(BotInitializer):
 
 class CommandLinuxTestCase(BotInitializer):
     Command = Linux
-
-
-class CommandRestartTestCase(BotInitializer):
-    Command = Restart
