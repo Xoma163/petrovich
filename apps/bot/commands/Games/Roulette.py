@@ -234,7 +234,7 @@ class Roulette(Command):
     def menu_rate_on(self):
         rate_on = self.event.message.args[0]
         if rate_on not in TRANSLATOR:
-            raise PWarning("Не могу понять на что вы поставили. /ман рулетка")
+            raise PWarning(f"Не могу понять на что вы поставили. {self.bot.get_formatted_text_line('/ман рулетка')}")
         self.args = 2
         self.check_args()
         if self.event.message.args[-1] == 'все':

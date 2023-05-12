@@ -90,7 +90,12 @@ class Petrovich(Command):
             if winner:
                 winner = winner.profile
             else:
-                raise PWarning("Нет участников игры. Зарегистрируйтесь! /петрович рег")
+                button = self.bot.get_button('Зарегистрироваться', self.name, 'рег')
+                keyboard = self.bot.get_inline_keyboard([button])
+                raise PWarning(
+                    f"Нет участников игры. Зарегистрируйтесь! {self.bot.get_formatted_text_line('/петрович рег')}",
+                    keyboard=keyboard
+                )
 
             winner_petrovich = PetrovichGames(profile=winner, chat=self.event.chat)
             winner_petrovich.save()

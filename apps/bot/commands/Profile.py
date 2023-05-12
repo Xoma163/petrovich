@@ -62,7 +62,10 @@ class Profile(Command):
             city_name = " ".join(self.event.message.args_case[1:])
             city = City.objects.filter(synonyms__icontains=city_name).first()
             if not city:
-                raise PWarning("Не нашёл такого города. /профиль город добавить (название)")
+                raise PWarning(
+                    "Не нашёл такого города.\n"
+                    f"{self.bot.get_formatted_text_line('/профиль город добавить (название)')}"
+                )
             self.event.sender.city = city
             self.event.sender.save()
             return f"Изменил город на {self.event.sender.city.name}"

@@ -60,7 +60,12 @@ class BullsAndCows(Command):
 
     def play_game(self, session):
         if not session:
-            raise PWarning("Нет созданной игры. Начни её - /бк")
+            button = self.bot.get_button('Начать игру', self.name)
+            keyboard = self.bot.get_inline_keyboard([button])
+            raise PWarning(
+                f"Нет созданной игры. Начни её - {self.bot.get_formatted_text_line('/бк')}",
+                keyboard=keyboard
+            )
 
         arg0 = self.event.message.args[0]
         if arg0 in ['сдаться', 'сдаюсь', 'ойвсё', 'пощади', 'надоело']:

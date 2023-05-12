@@ -95,8 +95,11 @@ class Horoscope(Command):
             horoscope_with_button = self.get_horoscope_hint_msg(horoscope)
             return horoscope_with_button
         else:
-            raise PWarning("Не указана дата рождения в профиле, не могу прислать гороскоп((. \n"
-                           "Укажи знак зодиака в аргументе: /гороскоп дева")
+            raise PWarning(
+                "Не указана дата рождения в профиле, не могу прислать гороскоп\n"
+                f"Укажи знак зодиака в аргументе: {self.bot.get_formatted_text_line('/гороскоп дева')}\n"
+                f"Или укажите дату рождения в профиле: {self.bot.get_formatted_text_line('/профиль др ДД.ММ.ГГГГ')}"
+            )
 
     def get_horoscope_for_all(self):
         horoscope = HoroscopeModel.objects.first()
@@ -115,10 +118,16 @@ class Horoscope(Command):
         chat_users = self.event.chat.users.all()
         signs = []
         for user in chat_users:
+            if not user.birthday:
+                continue
             sign = self.zodiac_signs.find_zodiac_sign_by_date(user.birthday)
             if sign not in signs:
                 signs.append(sign)
-
+        if not signs:
+            raise PWarning(
+                "Ни у кого в конфе не проставлено ДР\n"
+                f"Укажите дату рождения в профиле: {self.bot.get_formatted_text_line('/профиль др ДД.ММ.ГГГГ')}"
+            )
         messages = []
         for sign in signs:
             message = self.get_horoscope_by_zodiac_sign(sign)
