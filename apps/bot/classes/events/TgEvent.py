@@ -102,7 +102,7 @@ class TgEvent(Event):
             if via_bot['username'] == env.str("TG_BOT_LOGIN"):
                 self.force_response = False
 
-        if self.sender and self.chat:
+        if self.sender and self.chat and not self.is_fwd:
             self.bot.add_chat_to_profile(self.sender, self.chat)
 
         if fwd_message_without_voice:
