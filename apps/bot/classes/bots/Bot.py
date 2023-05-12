@@ -20,6 +20,7 @@ from apps.bot.utils.utils import tanimoto, get_chunks, fix_layout, get_flat_list
 from apps.games.models import Gamer
 from petrovich.settings import env
 
+lock = Lock()
 
 class Bot(Thread):
     ERROR_MSG = "Непредвиденная ошибка. Сообщите разработчику. Команда /баг"
@@ -33,7 +34,6 @@ class Bot(Thread):
         self.bot_model = BotModel.objects.filter(platform=self.platform.name)
 
         self.logger = logging.getLogger('bot')
-        self.lock = Lock()
 
     # MAIN ROUTING AND MESSAGING
 
@@ -210,7 +210,7 @@ class Bot(Thread):
         defaults = {}
         defaults.update(_defaults)
 
-        with self.lock:
+        with lock:
             user, _ = self.user_model.get_or_create(
                 user_id=user_id,
                 platform=self.platform.name,
@@ -233,7 +233,7 @@ class Bot(Thread):
         defaults.update(_defaults)
 
         if not user.profile:
-            with self.lock:
+            with lock:
                 profile = Profile(**defaults)
                 profile.save()
                 user.profile = profile
@@ -241,7 +241,7 @@ class Bot(Thread):
                 is_new = True
 
         if is_new:
-            with self.lock:
+            with lock:
                 user.profile.save()
 
                 group_user = Group.objects.get(name=Role.USER.name)
@@ -289,7 +289,7 @@ class Bot(Thread):
         """
         Возвращает чат по его id
         """
-        with self.lock:
+        with lock:
             chat, _ = self.chat_model.get_or_create(
                 chat_id=chat_id, platform=self.platform.name
             )
@@ -301,7 +301,7 @@ class Bot(Thread):
         """
         if bot_id > 0:
             bot_id = -bot_id
-        with self.lock:
+        with lock:
             bot, _ = self.bot_model.get_or_create(
                 bot_id=bot_id, platform=self.platform.name
             )
@@ -311,7 +311,7 @@ class Bot(Thread):
         """
         Получение игрока по модели пользователя
         """
-        with self.lock:
+        with lock:
             gamer, _ = Gamer.objects.get_or_create(profile=profile)
         return gamer
 
@@ -319,7 +319,7 @@ class Bot(Thread):
         """
         Добавление чата пользователю
         """
-        with self.lock:
+        with lock:
             chats = profile.chats
             if chat not in chats.all():
                 chats.add(chat)
@@ -328,7 +328,7 @@ class Bot(Thread):
         """
         Удаление чата пользователю
         """
-        with self.lock:
+        with lock:
             chats = profile.chats
             if chat in chats.all():
                 chats.remove(chat)

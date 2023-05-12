@@ -1,6 +1,4 @@
 from apps.bot.classes.Command import Command
-from apps.bot.classes.consts.Consts import Platform
-from apps.bot.classes.consts.Exceptions import PError
 from apps.bot.models import Chat
 from petrovich.settings import env
 
@@ -16,38 +14,32 @@ class Actions(Command):
         new_chat_members = self.event.action.get('new_chat_members')
         left_chat_member = self.event.action.get('left_chat_member')
         migrate_from_chat_id = self.event.action.get('migrate_from_chat_id')
+        group_chat_created = self.event.action.get('group_chat_created')
         if new_chat_members:
             answer = []
             for member in new_chat_members:
                 answer.append(self.setup_new_chat_member(member['id'], is_bot=member['is_bot']))
             return answer[0]
         elif left_chat_member:
-            for member in left_chat_member:
-                self.setup_left_chat_member(member['id'], is_bot=member['is_bot'])
+            self.setup_left_chat_member(left_chat_member['id'], is_bot=left_chat_member['is_bot'])
         elif migrate_from_chat_id:
-            self.setup_new_chat_id(migrate_from_chat_id)
+            return self.setup_new_chat_id(migrate_from_chat_id)
+        elif group_chat_created:
+            return self.group_chat_created()
 
     def setup_new_chat_member(self, member_id, is_bot):
         if not is_bot:
             profile = self.bot.get_profile_by_user_id(member_id)
             self.bot.add_chat_to_profile(profile, self.event.chat)
         else:
-            if self.event.platform == Platform.TG:
-                bot_group_id = env.int('TG_BOT_GROUP_ID')
-            else:
-                raise PError("Неизвестный клиент")
+            bot_group_id = env.int('TG_BOT_GROUP_ID')
+            if member_id != bot_group_id:
+                return
 
-            if member_id == bot_group_id:
-                if self.event.chat.admin is None:
-                    self.event.chat.admin = self.event.sender
-                    self.event.chat.save()
-                    return f"Администратором конфы является {self.event.sender}\n" \
-                           f"Задайте имя конфы:\n" \
-                           "/конфа {Название конфы}"
-                else:
-                    return "Давненько не виделись!"
+            if self.event.chat.admin is None:
+                return self.group_chat_created()
             else:
-                self.bot.get_bot_by_id(member_id)
+                return "Давненько не виделись!"
 
     def setup_left_chat_member(self, member_id, is_bot):
         if not is_bot:
@@ -59,6 +51,13 @@ class Actions(Command):
         chat.chat_id = self.event.chat.chat_id
         chat.save()
         self.event.chat.delete()
+
+    def group_chat_created(self):
+        self.event.chat.admin = self.event.sender
+        self.event.chat.save()
+        return f"Администратором конфы является {self.event.sender}\n" \
+               f"Задайте имя конфы:\n" \
+               "/конфа {Название конфы}"
 
     # По изменению чата конфы
     # elif self.event.action['type'] == 'chat_title_update':
