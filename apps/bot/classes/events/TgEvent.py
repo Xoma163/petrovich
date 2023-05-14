@@ -4,6 +4,7 @@ from apps.bot.classes.events.Event import Event
 from apps.bot.classes.messages.Message import Message
 from apps.bot.classes.messages.TgMessage import TgMessage
 from apps.bot.classes.messages.attachments.GifAttachment import GifAttachment
+from apps.bot.classes.messages.attachments.LinkAttachment import LinkAttachment
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 from apps.bot.classes.messages.attachments.StickerAttachment import StickerAttachment
 from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
@@ -166,6 +167,8 @@ class TgEvent(Event):
             self.setup_sticker(sticker)
         else:
             message_text = message.get('text')
+        if message_text:
+            self.setup_link(message_text)
         entities = message.get('entities')
         self.message = TgMessage(message_text, message.get('message_id'), entities)
 
@@ -198,6 +201,13 @@ class TgEvent(Event):
         tg_sticker = StickerAttachment()
         tg_sticker.parse_tg(sticker_event, self.bot)
         self.attachments.append(tg_sticker)
+
+    def setup_link(self, text):
+        res = LinkAttachment.parse(text)
+        for url in res:
+            link = LinkAttachment()
+            link.url = url
+            self.attachments.append(link)
 
     def setup_fwd(self, fwd):
         if fwd:

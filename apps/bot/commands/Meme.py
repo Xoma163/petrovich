@@ -50,7 +50,8 @@ class Meme(Command):
     ALLOWED_URLS = YOUTUBE_URLS + ['coub.com']
 
     ALLOWED_ATTACHMENTS = [
-        PhotoAttachment, VideoAttachment, StickerAttachment, GifAttachment, VoiceAttachment, VideoNoteAttachment
+        PhotoAttachment, VideoAttachment, StickerAttachment, GifAttachment, VoiceAttachment, VideoNoteAttachment,
+        LinkAttachment
     ]
 
     def accept(self, event):
@@ -94,15 +95,13 @@ class Meme(Command):
         self.check_args(2)
         attachments = self.event.get_all_attachments(self.ALLOWED_ATTACHMENTS)
         if len(attachments) == 0:
-            url = self.event.message.args_case[-1]
-            self._check_allowed_url(url)
+            raise PWarning("Не нашёл вложений в сообщении")
+        attachment = attachments[0]
 
-            attachment = LinkAttachment()
-            attachment.url = url
-            meme_name_list = self.event.message.args[1:-1]
-        else:
-            meme_name_list = self.event.message.args[1:]
-            attachment = attachments[0]
+        meme_name_list = self.event.message.args[1:]
+        if isinstance(attachment, LinkAttachment):
+            self._check_allowed_url(attachment.url)
+            meme_name_list.remove(attachment.url.lower())
 
         self.check_meme_name_is_no_digits(meme_name_list)
         meme_name = " ".join(meme_name_list)
@@ -111,7 +110,8 @@ class Meme(Command):
             'name': meme_name,
             'type': attachment.type,
             'author': self.event.sender,
-            'approved': self.event.sender.check_role(Role.MODERATOR) or self.event.sender.check_role(Role.TRUSTED)
+            'approved': self.event.sender.check_role(Role.MODERATOR) or
+                        self.event.sender.check_role(Role.TRUSTED)
         }
 
         ban_list = ['добавить', 'обновить', 'удалить', 'конфа', 'рандом', 'р', 'подтвердить', 'принять', '+',
@@ -132,7 +132,7 @@ class Meme(Command):
         new_meme_obj = MemeModel.objects.create(**new_meme)
 
         # Кэш
-        if isinstance(attachment, LinkAttachment) and self._is_youtube_url(attachment.url):
+        if isinstance(attachment, LinkAttachment) and attachment.is_youtube_link():
             self.set_youtube_file_id(new_meme_obj)
         if new_meme['approved']:
             return "Добавил"
@@ -152,16 +152,17 @@ class Meme(Command):
 
     def menu_refresh(self):
         self.check_args(2)
-        try:
-            url = self.event.message.args_case[-1]
-            self._check_allowed_url(url)
-            attachment = LinkAttachment()
-            attachment.url = url
-            attachments = [attachment]
-            id_name = self.get_id_or_meme_name(self.event.message.args[1:-1])
-        except PWarning:
-            attachments = self.event.get_all_attachments(self.ALLOWED_ATTACHMENTS)
-            id_name = self.get_id_or_meme_name(self.event.message.args[1:])
+        attachments = self.event.get_all_attachments(self.ALLOWED_ATTACHMENTS)
+        if len(attachments) == 0:
+            raise PWarning("Не нашёл вложений в сообщении")
+        attachment = attachments[0]
+        id_name_list = self.event.message.args[1:]
+
+        if isinstance(attachment, LinkAttachment):
+            self._check_allowed_url(attachment.url)
+            id_name_list.remove(attachment.url.lower())
+
+        id_name = self.get_id_or_meme_name(id_name_list)
 
         meme_filter = {}
         if isinstance(id_name, int):
@@ -173,11 +174,6 @@ class Meme(Command):
 
         meme = self.get_meme(**meme_filter)
 
-        if len(attachments) == 0:
-            raise PWarning("Не нашёл вложений в сообщении или пересланном сообщении\n"
-                           "Не нашёл ссылки на youtube/coub")
-
-        attachment = attachments[0]
         fields = {'type': attachment.type}
         if isinstance(attachment, LinkAttachment):
             fields['link'] = attachment.url
@@ -186,19 +182,21 @@ class Meme(Command):
 
         for attr, value in fields.items():
             setattr(meme, attr, value)
-        meme.save()
         # Кэш
-        if isinstance(attachment, LinkAttachment) and self._is_youtube_url(attachment.url):
-            self.set_youtube_file_id(meme)
 
-        if self.event.sender.check_role(Role.MODERATOR) or self.event.sender.check_role(Role.TRUSTED):
+        if self.event.sender.check_role(Role.MODERATOR) or \
+                self.event.sender.check_role(Role.TRUSTED):
+            meme.save()
+            if isinstance(attachment, LinkAttachment) and attachment.is_youtube_link():
+                self.set_youtube_file_id(meme)
             return f'Обновил мем "{meme.name}"'
 
         meme_to_send = self.prepare_meme_to_send(meme)
         meme_to_send['text'] = "Запрос на обновление мема:\n" \
                                f"{meme.author}\n" \
                                f"{meme.name} ({meme.id})"
-
+        if meme.link:
+            meme_to_send['text'] += f"\n{meme.link}"
         send_message_to_moderator_chat(meme_to_send)
 
         return "Обновил. Воспользоваться мемом можно после проверки модераторами."
@@ -210,11 +208,13 @@ class Meme(Command):
             meme_filter['filter_user'] = self.event.sender
         meme = self.get_meme(**meme_filter)
 
+        if not self.event.sender.check_role(Role.MODERATOR) and meme.author != self.event.sender:
+            raise PWarning("У вас нет прав на удаление мемов")
         # Если удаляем мем другого человека, шлём ему сообщением
-        if self.event.sender.check_role(Role.MODERATOR) and meme.author != self.event.sender:
-            user_msg = f'Мем с названием "{meme.name}" удалён поскольку он не ' \
-                       f'соответствует правилам или был удалён автором.'
-            if meme.author:
+        if meme.author:
+            if meme.author != self.event.sender:
+                user_msg = f'Мем с названием "{meme.name}" удалён поскольку он не ' \
+                           f'соответствует правилам, устарел или является дубликатом.'
                 user = meme.author.get_tg_user()
                 self.bot.parse_and_send_msgs(user_msg, user.user_id, self.event.message_thread_id)
 
@@ -378,12 +378,12 @@ class Meme(Command):
 
         if self.event.platform == Platform.TG:
             if meme.type == LinkAttachment.TYPE:
-                y_api = YoutubeVideoAPI()
+                yt_api = YoutubeVideoAPI()
                 try:
-                    content_url = y_api.get_video_download_url(meme.link, self.event.platform)
+                    content_url = yt_api.get_video_download_url(meme.link, self.event.platform)
                     video_content = requests.get(content_url).content
                     msg['attachments'] = self.bot.get_video_attachment(video_content, peer_id=self.event.peer_id)
-                    msg['text'] = y_api.get_timecode_str(meme.link)
+                    msg['text'] = yt_api.get_timecode_str(meme.link)
                     self.set_youtube_file_id(meme)
                     # return
                 except PSkip:
@@ -414,10 +414,6 @@ class Meme(Command):
 
         if parsed_url.hostname.replace('www.', '').lower() not in self.ALLOWED_URLS:
             raise PWarning("Это ссылка не на youtube/coub видео")
-
-    def _is_youtube_url(self, url):
-        parsed_url = urlparse(url)
-        return parsed_url.hostname.replace('www.', '').lower() in self.YOUTUBE_URLS
 
     def set_youtube_file_id(self, meme):
         thread = threading.Thread(target=self._set_youtube_file_id, args=(meme,))

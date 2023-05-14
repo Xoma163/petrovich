@@ -19,6 +19,8 @@ from apps.bot.classes.Command import Command
 from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning, PSkip
+from apps.bot.classes.messages.attachments.LinkAttachment import LinkAttachment
+from apps.bot.commands.TrimVideo import TrimVideo
 from apps.bot.models import Chat
 from apps.bot.utils.NothingLogger import NothingLogger
 from apps.bot.utils.utils import get_urls_from_text
@@ -54,11 +56,12 @@ MEDIA_URLS = tuple(
 class Media(Command):
     name = "медиа"
     help_text = "скачивает видео из соцсетей и присылает его"
-    help_texts = ["(ссылка на видео) - скачивает видео из соцсетей и присылает его"]
+    help_texts = ["(ссылка на видео/пост) - скачивает видео из соцсетей и присылает его"]
     help_texts_extra = "Поддерживаемые соцсети: Reddit/TikTok/YouTube/Instagram/Twitter/Pikabu/TheHole/Yandex Music/Pinterest\n\n" \
                        "Ключ --nomedia позволяет не запускать команду\n" \
                        "Ключ --audio позволяет скачивать аудиодорожку для видео с ютуба"
     platforms = [Platform.TG]
+    attachments = [LinkAttachment]
 
     bot: TgBot
 
@@ -80,14 +83,14 @@ class Media(Command):
     def start(self):
         if self.event.message.command in self.full_names:
             if self.event.message.args:
-                source = self.event.message.args_case[0]
+                source = self.event.attachments[0].url
             elif self.event.fwd:
-                source = self.event.fwd[0].message.raw
+                source = self.event.fwd[0].attachments[0].url
             else:
                 raise PWarning("Для работы команды требуются аргументы или пересылаемые сообщения")
             has_command_name = True
         else:
-            source = self.event.message.raw
+            source = self.event.attachments[0].url
             has_command_name = False
 
         method, chosen_url = self.get_method_and_chosen_url(source)
@@ -158,19 +161,24 @@ class Media(Command):
         raise PWarning("Не youtube/tiktok/reddit/instagram ссылка")
 
     def get_youtube_video(self, url):
-        y_api = YoutubeVideoAPI()
         if 'audio' in self.event.message.keys:
             return self.get_youtube_audio(url)
-        else:
-            content_url = y_api.get_video_download_url(url, self.event.platform)
+        y_api = YoutubeVideoAPI()
+        content_url = y_api.get_video_download_url(url, self.event.platform)
+
+        timecode = y_api.get_timecode_str(url)
+        args = self.event.message.args[1:] if self.event.message.command in self.full_names else self.event.message.args
+
+        if not (timecode or args):
             video_content = requests.get(content_url).content
-            attachments = [
-                self.bot.get_video_attachment(video_content, peer_id=self.event.peer_id, filename=y_api.filename)]
+        else:
+            tv_cmd = TrimVideo()
+            video_content = tv_cmd.parse_link(self.event.attachments[0], args, self.event.platform)
+        attachments = [
+            self.bot.get_video_attachment(video_content, peer_id=self.event.peer_id, filename=y_api.filename)
+        ]
 
         text = y_api.title
-        timecode = y_api.get_timecode_str(url)
-        if timecode:
-            text = f"{text}\n\n{timecode}"
         return attachments, text
 
     def get_youtube_audio(self, url):

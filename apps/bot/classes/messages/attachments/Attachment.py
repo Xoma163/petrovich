@@ -17,8 +17,6 @@ class Attachment:
         self.public_download_url = None
         # Приватная ссылка для скачивания файла
         self.private_download_url = None
-        # youtube links
-        self.url = None
         self.size = 0
         # bytes
         self.content = None

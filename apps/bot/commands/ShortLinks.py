@@ -1,6 +1,7 @@
 from apps.bot.APIs.BitLyAPI import BitLyAPI
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.messages.attachments.LinkAttachment import LinkAttachment
 
 
 class ShortLinks(Command):
@@ -11,14 +12,13 @@ class ShortLinks(Command):
         "(ссылка) - сокращение ссылки",
         "(Пересылаемое сообщение) - сокращение ссылки"
     ]
-    args = 1
+    attachments = [LinkAttachment]
 
     def start(self):
-        msgs = self.event.fwd
-        if msgs:
-            long_link = self.event.fwd[0]['text']
+        if self.event.fwd:
+            long_link = self.event.fwd[0].attachments[0].url
         else:
-            long_link = self.event.message.args[0]
+            long_link = self.event.attachments[0].url
         try:
             bl_api = BitLyAPI()
             return bl_api.get_short_link(long_link)

@@ -4,6 +4,7 @@ from apps.bot.classes.consts.Exceptions import PWarning, PSkip, PIDK
 from apps.bot.classes.events.Event import Event
 from apps.bot.classes.messages.attachments.AudioAttachment import AudioAttachment
 from apps.bot.classes.messages.attachments.DocumentAttachment import DocumentAttachment
+from apps.bot.classes.messages.attachments.LinkAttachment import LinkAttachment
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 from apps.bot.classes.messages.attachments.StickerAttachment import StickerAttachment
 from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
@@ -50,7 +51,8 @@ class Command:
         DocumentAttachment: 'документ',
         VoiceAttachment: 'голосовое',
         StickerAttachment: 'стикер',
-        VideoNoteAttachment: 'кружочек'
+        VideoNoteAttachment: 'кружочек',
+        LinkAttachment: 'ссылка'
     }
 
     def __init__(self, bot: Bot = None, event: Event = None):

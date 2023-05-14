@@ -8,6 +8,7 @@ from apps.bot.classes.Command import Command
 from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.consts.Consts import Role, Platform
 from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.messages.attachments.LinkAttachment import LinkAttachment
 from apps.service.models import Subscribe as SubscribeModel
 
 MAX_USER_SUBS_COUNT = 3
@@ -24,7 +25,7 @@ class Subscribe(Command):
         "конфа - пришлёт активные подписки по конфе"
     ]
     help_texts_extra = \
-        "Проверка новых видео проходит каждый час. Стримов - 5 минут\n" \
+        "Проверка новых видео проходит каждые 10 минут. Стримов - 5 минут\n" \
         "Админ конфы может удалять подписки в конф"
     args = 1
     platforms = [Platform.TG]
@@ -49,19 +50,21 @@ class Subscribe(Command):
 
     def menu_add(self):
         self.check_args(2)
-        url = self.event.message.args_case[1]
+        self.attachments = [LinkAttachment]
+        self.check_attachments()
+        attachment: LinkAttachment = self.event.attachments[0]
 
-        if self.YOUTUBE_URL in url:
-            channel_id, title, date, last_video_id, is_stream = self.menu_add_youtube(url)
+        if attachment.is_youtube_link:
+            channel_id, title, date, last_video_id, is_stream = self.menu_add_youtube(attachment.url)
             service = SubscribeModel.SERVICE_YOUTUBE
-        elif self.THE_HOLE_URL in url:
-            channel_id, title, date, last_video_id, is_stream = self.menu_add_the_hole(url)
+        elif attachment.is_the_hole_link:
+            channel_id, title, date, last_video_id, is_stream = self.menu_add_the_hole(attachment.url)
             service = SubscribeModel.SERVICE_THE_HOLE
-        elif self.WASD_URL in url:
-            channel_id, title, date, last_video_id, is_stream = self.menu_add_wasd(url)
+        elif attachment.is_wasd_link:
+            channel_id, title, date, last_video_id, is_stream = self.menu_add_wasd(attachment.url)
             service = SubscribeModel.SERVICE_WASD
         else:
-            raise PWarning("Незнакомый сервис. Доступные: \nЮтуб, The-Hole")
+            raise PWarning("Незнакомый сервис. Доступные: \nYouTube, The-Hole, WAST")
 
         if self.event.chat:
             existed_sub = SubscribeModel.objects.filter(chat=self.event.chat, channel_id=channel_id)
