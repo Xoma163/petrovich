@@ -19,6 +19,8 @@ from apps.bot.classes.Command import Command
 from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning, PSkip
+from apps.bot.classes.events.Event import Event
+from apps.bot.classes.messages.Message import Message
 from apps.bot.classes.messages.attachments.LinkAttachment import LinkAttachment
 from apps.bot.commands.TrimVideo import TrimVideo
 from apps.bot.models import Chat
@@ -172,8 +174,14 @@ class Media(Command):
             content_url = y_api.get_video_download_url(url, self.event.platform)
             video_content = requests.get(content_url).content
         else:
-            tv_cmd = TrimVideo()
-            video_content = tv_cmd.parse_link(self.event.attachments[0], args, self.event.platform)
+            event = Event(bot=self.bot)
+            event.sender = self.event.sender
+            event.platform = self.event.platform
+            event.message = Message()
+            args.append(self.event.attachments[0].url)
+            event.message.args = args
+            tv_cmd = TrimVideo(event=event)
+            video_content = tv_cmd.parse_link(self.event.attachments[0])
         attachments = [
             self.bot.get_video_attachment(video_content, peer_id=self.event.peer_id, filename=y_api.filename)
         ]

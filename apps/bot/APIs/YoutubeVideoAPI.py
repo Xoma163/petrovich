@@ -15,7 +15,7 @@ class YoutubeVideoAPI:
         self.title = None
         self.duration = 0
         self.id = None
-
+        self.filesize = 0
         self.filename = ""
 
     @staticmethod
@@ -83,13 +83,16 @@ class YoutubeVideoAPI:
             for video in videos:
                 filesize = video.get('filesize') or video.get('filesize_approx')
                 if filesize:
-                    mbps = filesize / 1024 / self.duration
-                    if filesize / 1024 / 1024 < TgBot.MAX_VIDEO_SIZE_MB:
+                    self.filesize = filesize / 1024 / 1024
+
+                    if self.filesize < TgBot.MAX_VIDEO_SIZE_MB:
                         max_quality_video = video
                         break
-                    if timedelta and mbps * timedelta < TgBot.MAX_VIDEO_SIZE_MB - 2:
-                        max_quality_video = video
-                        break
+                    if timedelta:
+                        mbps = self.filesize / self.duration
+                        if mbps * timedelta < TgBot.MAX_VIDEO_SIZE_MB - 2:
+                            max_quality_video = video
+                            break
             else:
                 raise PSkip()
         else:

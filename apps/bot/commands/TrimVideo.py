@@ -3,7 +3,7 @@ from datetime import datetime
 from apps.bot.APIs.YoutubeVideoAPI import YoutubeVideoAPI
 from apps.bot.classes.Command import Command
 from apps.bot.classes.bots.tg.TgBot import TgBot
-from apps.bot.classes.consts.Consts import Platform
+from apps.bot.classes.consts.Consts import Platform, Role
 from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.classes.messages.attachments.LinkAttachment import LinkAttachment
 from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
@@ -41,12 +41,11 @@ class TrimVideo(Command):
         video = self.bot.get_video_attachment(video_bytes, peer_id=self.event.peer_id)
         return {'attachments': [video]}
 
-    def parse_link(self, att, args=None, platform=None):
+    def parse_link(self, att):
         yt_api = YoutubeVideoAPI()
 
-        if args is None:
-            args = [x for x in self.event.message.args]
-            args.remove(att.url.lower())
+        args = [x for x in self.event.message.args]
+        args.remove(att.url.lower())
 
         delta = None
         end_pos = None
@@ -67,8 +66,9 @@ class TrimVideo(Command):
         start_pos = self.parse_timecode(start_pos)
         end_pos = self.parse_timecode(end_pos)
 
-        platform = self.event.platform if self.event else platform
-        download_url = yt_api.get_video_download_url(att.url, platform, timedelta=delta)
+        download_url = yt_api.get_video_download_url(att.url, self.event.platform, timedelta=delta)
+        if yt_api.filesize > 100 and not self.event.sender.check_role(Role.TRUSTED):
+            raise PWarning("Нельзя грузить отрезки из ютуба больше 100мб")
         vt = VideoTrimmer()
         return vt.trim(download_url, start_pos, end_pos)
 
