@@ -69,7 +69,7 @@ class YoutubeVideoAPI:
             raise PWarning("Не смог найти видео по этой ссылке")
         return video_info
 
-    def get_video_download_url(self, url, platform=None):
+    def get_video_download_url(self, url, platform=None, timedelta=None):
         video_info = self._get_video_info(url)
         self.title = video_info['title']
         self.duration = video_info.get('duration')
@@ -78,12 +78,16 @@ class YoutubeVideoAPI:
         video_urls = [x for x in video_info['formats'] if x['ext'] == 'mp4' and x.get('asr')]
         videos = sorted(video_urls, key=lambda x: x['format_note'], reverse=True)
         if platform == Platform.TG:
+            from apps.bot.classes.bots.tg.TgBot import TgBot
+
             for video in videos:
                 filesize = video.get('filesize') or video.get('filesize_approx')
                 if filesize:
-                    from apps.bot.classes.bots.tg.TgBot import TgBot
-
+                    mbps = filesize / 1024 / self.duration
                     if filesize / 1024 / 1024 < TgBot.MAX_VIDEO_SIZE_MB:
+                        max_quality_video = video
+                        break
+                    if timedelta and mbps * timedelta < TgBot.MAX_VIDEO_SIZE_MB - 2:
                         max_quality_video = video
                         break
             else:

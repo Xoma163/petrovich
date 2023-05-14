@@ -48,22 +48,27 @@ class TrimVideo(Command):
             args = [x for x in self.event.message.args]
             args.remove(att.url.lower())
 
-        platform = self.event.platform if self.event else platform
-        download_url = yt_api.get_video_download_url(att.url, platform)
-
+        delta = None
         end_pos = None
         yt_timecode = yt_api.get_timecode_str(att.url)
         if yt_timecode:
             start_pos = yt_timecode
             if args:
-                end_pos = self.parse_timecode(args[0])
+                end_pos = args[0]
         else:
             if not args:
                 raise PWarning("Должны быть переданы аргументы или таймкод должен быть в ссылке youtube видео")
-            start_pos = self.parse_timecode(args[0])
+            start_pos = args[0]
             if len(args) == 2:
-                end_pos = self.parse_timecode(args[1])
+                end_pos = args[1]
 
+        if end_pos:
+            delta = (datetime.strptime(end_pos, "%M:%S") - datetime.strptime(start_pos, "%M:%S")).seconds
+        start_pos = self.parse_timecode(start_pos)
+        end_pos = self.parse_timecode(end_pos)
+
+        platform = self.event.platform if self.event else platform
+        download_url = yt_api.get_video_download_url(att.url, platform, timedelta=delta)
         vt = VideoTrimmer()
         return vt.trim(download_url, start_pos, end_pos)
 

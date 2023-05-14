@@ -164,12 +164,12 @@ class Media(Command):
         if 'audio' in self.event.message.keys:
             return self.get_youtube_audio(url)
         y_api = YoutubeVideoAPI()
-        content_url = y_api.get_video_download_url(url, self.event.platform)
 
         timecode = y_api.get_timecode_str(url)
         args = self.event.message.args[1:] if self.event.message.command in self.full_names else self.event.message.args
 
         if not (timecode or args):
+            content_url = y_api.get_video_download_url(url, self.event.platform)
             video_content = requests.get(content_url).content
         else:
             tv_cmd = TrimVideo()
