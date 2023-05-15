@@ -17,7 +17,7 @@ class TgRequests:
 
 
 class TgRequestLocal:
-    API_TELEGRAM_URL = '192.168.1.10:11005'
+    API_TELEGRAM_URL = '192.168.1.10:10010'
 
     def __init__(self, token):
         self.token = token
