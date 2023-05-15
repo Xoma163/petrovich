@@ -12,7 +12,7 @@ from apps.bot.utils.VideoTrimmer import VideoTrimmer
 
 class TrimVideo(Command):
     name = "обрезка"
-    names = ["обрежь", "обрез", "обрезание", "отрежь", "отрезание", "crop", "cut", "trim"]
+    names = ["обрежь", "обрез", "обрезание", "отрежь", "отрезание", "crop", "cut", "trim", "обрезать", "отрезать"]
     name_tg = "trim"
 
     help_text = "обрезание видео"
