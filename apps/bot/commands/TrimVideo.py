@@ -23,7 +23,7 @@ class TrimVideo(Command):
         "(youtube ссылка с таймкодом) - обрезает с таймкода и до конца",
         "(youtube ссылка с таймкодом) (таймкод конца) - обрезает по таймкодам",
     ]
-    help_texts_extra = "Формат для таймкодов: %M:%S, т.е. валидные таймкоды: 09:04, 9:04, 09:4, 9:4"
+    help_texts_extra = "Формат для таймкодов: [%H]:%M:%S, т.е. валидные таймкоды: 09:04, 9:04, 09:4, 9:4, 01:09:04"
     platforms = [Platform.TG]
     bot: TgBot
 
@@ -73,6 +73,8 @@ class TrimVideo(Command):
         return vt.trim(download_url, start_pos, end_pos)
 
     def parse_video(self, video: VideoAttachment):
+        if video.size_mb > 20:
+            raise PWarning("Я не могу обрезать видео из-за ограничений телеги. Максимум 20мб")
         start_pos = self.parse_timecode(self.event.message.args[0])
         end_pos = self.parse_timecode(self.event.message.args[1])
 
@@ -80,5 +82,8 @@ class TrimVideo(Command):
         return vt.trim(video.private_download_url, start_pos, end_pos)
 
     def parse_timecode(self, timecode):
-        dt = datetime.strptime(timecode, "%M:%S")
+        try:
+            dt = datetime.strptime(timecode, "%M:%S")
+        except ValueError:
+            dt = datetime.strptime(timecode, "%H:%M:%S")
         return dt.strftime("%H:%M:%S")

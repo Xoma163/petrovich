@@ -12,7 +12,7 @@ class VideoNoteAttachment(Attachment):
     def parse_tg(self, event, tg_bot):
         self.duration = event.get('duration')
         self.name = event.get('name')
-        self.size = event['file_size']
+        self.set_size(event['file_size'])
 
         self.file_id = event['file_id']
         self.set_private_download_url_tg(tg_bot, self.file_id)

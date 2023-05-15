@@ -11,6 +11,7 @@ from apps.bot.classes.consts.Exceptions import PWarning
 
 class Attachment:
 
+
     def __init__(self, _type):
         self.type = _type
         # Публичная ссылка для скачивания файла
@@ -18,6 +19,7 @@ class Attachment:
         # Приватная ссылка для скачивания файла
         self.private_download_url = None
         self.size = 0
+        self.size_mb = 0
         # bytes
         self.content = None
 
@@ -27,6 +29,8 @@ class Attachment:
         self.name = None
 
     def set_private_download_url_tg(self, tg_bot, file_id):
+        if self.size_mb > 20:
+            return
         r = tg_bot.requests.get('getFile', params={'file_id': file_id})
         if r.status_code != 200:
             return
@@ -95,9 +99,9 @@ class Attachment:
     def get_size(self):
         if not self.size and self.content:
             try:
-                self.size = len(self.content)
+                self.set_size(len(self.content))
             except TypeError:
-                self.size = self.content.seek(0, 2)
+                self.set_size(self.content.seek(0, 2))
                 self.content.seek(0)
         return self.size
 
@@ -123,3 +127,7 @@ class Attachment:
         for ignore_field in ignore_fields:
             dict_self[ignore_field] = '*' * 5 if dict_self[ignore_field] else dict_self[ignore_field]
         return dict_self
+
+    def set_size(self, size):
+        self.size = size
+        self.size_mb = self.size / 1024 / 1024
