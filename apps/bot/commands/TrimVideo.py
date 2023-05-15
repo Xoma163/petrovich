@@ -17,6 +17,7 @@ class TrimVideo(Command):
 
     help_text = "обрезание видео"
     help_texts = [
+        "(вложенное видео) (таймкод начала) - обрезает видео с таймкода и до конца",
         "(вложенное видео) (таймкод начала) (таймкод конца) - обрезает видео по таймкодам",
         "(youtube ссылка) (таймкод начала) - обрезает с таймкода и до конца",
         "(youtube ссылка) (таймкод начала) (таймкод конца) - обрезает по таймкодам",
@@ -70,14 +71,16 @@ class TrimVideo(Command):
         if yt_api.filesize > 100 and not self.event.sender.check_role(Role.TRUSTED):
             raise PWarning("Нельзя грузить отрезки из ютуба больше 100мб")
         vt = VideoTrimmer()
-        return vt.trim(start_pos, end_pos, download_url)
+        return vt.trim(download_url, start_pos, end_pos)
 
     def parse_video(self, video: VideoAttachment):
         start_pos = self.parse_timecode(self.event.message.args[0])
-        end_pos = self.parse_timecode(self.event.message.args[1])
+        end_pos = None
+        if len(self.event.message.args) > 1:
+            end_pos = self.parse_timecode(self.event.message.args[1])
 
         vt = VideoTrimmer()
-        return vt.trim(start_pos, end_pos, video)
+        return vt.trim(video, start_pos, end_pos)
 
     @staticmethod
     def parse_timecode(timecode):

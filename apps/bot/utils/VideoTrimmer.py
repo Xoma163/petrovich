@@ -9,7 +9,7 @@ class VideoTrimmer:
         self.tmp_file_in = None
         self.tmp_file_out = None
 
-    def trim(self, start_pos, end_pos, attachment_or_link):
+    def trim(self, attachment_or_link, start_pos, end_pos=None):
         content = None
         url = None
 
