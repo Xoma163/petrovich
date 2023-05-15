@@ -1,6 +1,5 @@
 import io
 
-import requests
 import speech_recognition as sr
 from pydub import AudioSegment
 
@@ -39,15 +38,14 @@ class VoiceRecognition(Command):
         audio_messages = self.event.get_all_attachments([VoiceAttachment, VideoNoteAttachment])
         audio_message = audio_messages[0]
 
-        download_url = audio_message.get_download_url()
-        response = requests.get(download_url, stream=True)
-        i = io.BytesIO(response.content)
+        i = audio_message.get_bytes_io_content()
         i.seek(0)
         o = io.BytesIO()
         o.name = "recognition.wav"
+
+        input_file_format = None
         try:
-            input_file_format = download_url.split('.')[-1]
-            if input_file_format == 'oga':
+            if audio_message.ext == 'oga':
                 input_file_format = 'ogg'
         except Exception:
             input_file_format = 'mp3'

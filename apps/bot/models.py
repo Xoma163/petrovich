@@ -1,12 +1,10 @@
-from tempfile import NamedTemporaryFile
-
-import requests
 from django.contrib.auth.models import Group
 from django.core.files import File
 from django.db import models
 from django.utils.html import format_html
 
 from apps.bot.classes.consts.Consts import Platform as PlatformEnum
+from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 
 
 class Platform(models.Model):
@@ -72,10 +70,9 @@ class Profile(models.Model):
 
     api_token = models.CharField("Токен для API", max_length=100, blank=True)
 
-    def set_avatar(self, url):
-        ext, image = get_image_content(url)
-        self.avatar.save(f"avatar_{str(self)}.{ext}", File(image))
-        image.close()
+    def set_avatar(self, att: PhotoAttachment = None):
+        image = att.get_bytes_io_content()
+        self.avatar.save(f"avatar_{str(self)}.{att.ext}", File(image))
 
     def check_role(self, role):
         group = self.groups.filter(name=role.name)
@@ -149,17 +146,3 @@ class Bot(Platform):
             return self.name
         else:
             return f"Неопознанный бот #{self.id}"
-
-    def set_avatar(self, url):
-        ext, image = get_image_content(url)
-        self.avatar.save(f"avatar_{str(self)}.{ext}", File(image))
-        image.close()
-
-
-def get_image_content(url):
-    ext = url.split('.')[-1].split('?')[0]
-    image = NamedTemporaryFile()
-    content = requests.get(url).content
-    image.write(content)
-    image.flush()
-    return ext, image

@@ -11,33 +11,40 @@ from apps.bot.classes.consts.Exceptions import PWarning
 
 class Attachment:
 
-
     def __init__(self, _type):
         self.type = _type
         # Публичная ссылка для скачивания файла
         self.public_download_url = None
         # Приватная ссылка для скачивания файла
         self.private_download_url = None
+        # Приватный путь для файла. Доступно только для локального сервера TgBot
+        self.private_download_path = None
         self.size = 0
-        self.size_mb = 0
         # bytes
         self.content = None
-
+        self.ext = None
         # tg
         self.file_id = None
 
         self.name = None
 
-    def set_private_download_url_tg(self, tg_bot, file_id):
-        if self.size_mb > 20:
+    def get_file(self):
+        from apps.bot.classes.bots.tg.TgBot import TgBot
+        tg_bot = TgBot()
+
+        if self.get_size_mb() > tg_bot.MAX_ATTACHMENT_SIZE_MB:
             return
-        r = tg_bot.requests.get('getFile', params={'file_id': file_id})
+        r = tg_bot.requests.get('getFile', params={'file_id': self.file_id})
         if r.status_code != 200:
             return
         file_path = r.json()['result']['file_path']
-        self.private_download_url = f'https://{tg_bot.requests.API_TELEGRAM_URL}/file/bot{tg_bot.token}/{file_path}'
+        if tg_bot.MODE == tg_bot.LOCAL_SERVER:
+            self.private_download_path = file_path
+        else:
+            self.private_download_url = f'https://{tg_bot.requests.API_TELEGRAM_URL}/file/bot{tg_bot.token}/{file_path}'
+        self.ext = file_path.rsplit('.')[-1]
 
-    def prepare_obj(self, file_like_object, allowed_exts_url=None, filename=None, guarantee_url=False):
+    def parse(self, file_like_object, allowed_exts_url=None, filename=None, guarantee_url=False):
         """
         Подготовка объектов(в основном картинок) для загрузки.
         То есть метод позволяет преобразовывать почти из любого формата
@@ -82,26 +89,40 @@ class Attachment:
             else:
                 self.content = _bytes
 
-    def parse_response(self, attachment, allowed_exts_url=None, filename=None, guarantee_url=False):
-        self.prepare_obj(attachment, allowed_exts_url=allowed_exts_url, filename=filename, guarantee_url=guarantee_url)
-
-    def get_download_url(self):
-        return self.public_download_url if self.public_download_url else self.private_download_url
+    def _get_download_url(self):
+        if self.public_download_url:
+            return self.public_download_url
+        if not self.private_download_url:
+            self.get_file()
+        return self.private_download_url
 
     def download_content(self) -> bytes:
         if not self.content:
-            self.content = requests.get(self.get_download_url()).content
+            download_url = self._get_download_url()
+            if self.private_download_path:
+                try:
+                    with open(self.private_download_path, 'rb') as file:
+                        self.content = file.read()
+                finally:
+                    self.delete_download_path_file()
+            else:
+                self.content = requests.get(download_url).content
         return self.content
 
     def get_bytes_io_content(self) -> BytesIO:
         return BytesIO(self.download_content())
 
+    def delete_download_path_file(self):
+        if os.path.exists(self.private_download_path):
+            os.remove(self.private_download_path)
+            self.private_download_path = None
+
     def get_size(self):
         if not self.size and self.content:
             try:
-                self.set_size(len(self.content))
+                self.size = len(self.content)
             except TypeError:
-                self.set_size(self.content.seek(0, 2))
+                self.size = self.content.seek(0, 2)
                 self.content.seek(0)
         return self.size
 
@@ -127,7 +148,3 @@ class Attachment:
         for ignore_field in ignore_fields:
             dict_self[ignore_field] = '*' * 5 if dict_self[ignore_field] else dict_self[ignore_field]
         return dict_self
-
-    def set_size(self, size):
-        self.size = size
-        self.size_mb = self.size / 1024 / 1024

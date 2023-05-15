@@ -11,12 +11,11 @@ class VideoAttachment(Attachment):
         self.height = None
         self.thumb: str = None
 
-    def parse_tg(self, event, tg_bot):
+    def parse_tg(self, event):
         self.duration = event.get('duration')
         self.width = event.get('width')
         self.height = event.get('height')
         self.name = event.get('name')
-        self.set_size(event['file_size'])
+        self.size = event['file_size']
 
         self.file_id = event['file_id']
-        self.set_private_download_url_tg(tg_bot, self.file_id)

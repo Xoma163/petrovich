@@ -2,10 +2,11 @@ import json
 import threading
 
 import requests
+from numpy import inf
 
 from apps.bot.classes.bots.Bot import Bot as CommonBot
 from apps.bot.classes.bots.tg.MyTgBotLongPoll import MyTgBotLongPoll
-from apps.bot.classes.bots.tg.TgRequests import TgRequests
+from apps.bot.classes.bots.tg.TgRequests import TgRequests, TgRequestLocal
 from apps.bot.classes.consts.ActivitiesEnum import ActivitiesEnum, TG_ACTIVITIES
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PError, PWarning, PSkip
@@ -28,12 +29,23 @@ from petrovich.settings import env
 
 
 class TgBot(CommonBot):
-    MAX_VIDEO_SIZE_MB = 50
+    TG_SERVER = 0
+    LOCAL_SERVER = 1
+    MODE = LOCAL_SERVER
+
+    MAX_VIDEO_SIZE_MB = 50 if MODE == TG_SERVER else 2000
+    MAX_ATTACHMENT_SIZE_MB = 20 if MODE == TG_SERVER else inf
+    MAX_PHOTO_SIZE = 5 if MODE == TG_SERVER else inf
+    MAX_GIF_SIZE = 40 if MODE == TG_SERVER else inf
 
     def __init__(self):
         CommonBot.__init__(self, Platform.TG)
         self.token = env.str("TG_TOKEN")
-        self.requests = TgRequests(self.token)
+        if self.MODE == self.TG_SERVER:
+            self.requests = TgRequests(self.token)
+        else:
+            self.requests = TgRequestLocal(self.token)
+
         self.longpoll = MyTgBotLongPoll(self.token)
 
     # MAIN ROUTING AND MESSAGING
@@ -124,9 +136,9 @@ class TgBot(CommonBot):
             default_params['photo'] = photo.public_download_url
             return self.requests.get('sendPhoto', default_params)
         else:
-            if photo.get_size_mb() > 5:
+            if photo.get_size_mb() > self.MAX_PHOTO_SIZE:
                 rm.attachments = []
-                raise PError("Нельзя загружать фото более 5 мб в телеграмм")
+                raise PError(f"Нельзя загружать фото более {self.MAX_PHOTO_SIZE} мб в телеграмм")
             return self.requests.get('sendPhoto', default_params, files={'photo': photo.content})
 
     def _send_document(self, rm: ResponseMessageItem, default_params):
@@ -165,7 +177,7 @@ class TgBot(CommonBot):
             if video.get_size_mb() > self.MAX_VIDEO_SIZE_MB:
                 rm.attachments = []
                 raise PError(
-                    f"Нельзя загружать видео более {self.MAX_VIDEO_SIZE_MB}мб в телеграмм. Ваше видео {round(video.get_size_mb(), 2)}мб")
+                    f"Нельзя загружать видео более {self.MAX_VIDEO_SIZE_MB} мб в телеграмм. Ваше видео {round(video.get_size_mb(), 2)} мб")
             return self.requests.get('sendVideo', default_params, files=files)
 
     def _send_video_note(self, rm: ResponseMessageItem, default_params):
@@ -211,9 +223,9 @@ class TgBot(CommonBot):
             default_params['animation'] = gif.file_id
             return self.requests.get('sendAnimation', default_params)
         else:
-            if gif.get_size_mb() > 40:
+            if gif.get_size_mb() > self.MAX_GIF_SIZE:
                 rm.attachments = []
-                raise PError("Нельзя загружать гифы более 40 мб в телеграмм")
+                raise PError(f"Нельзя загружать гифы более {self.MAX_GIF_SIZE} мб в телеграмм")
             return self.requests.get('sendAnimation', default_params, files={'animation': gif.content})
 
     def _send_sticker(self, rm: ResponseMessageItem, default_params):
@@ -242,7 +254,8 @@ class TgBot(CommonBot):
                 default_params['text'] = chunk
                 self.requests.get('sendMessage', default_params)
             default_params['text'] = chunks[-1]
-        return self.requests.get('sendMessage', default_params)
+        r = self.requests.get('sendMessage', default_params)
+        return r
 
     def send_response_message(self, rm: ResponseMessage) -> list:
         """
@@ -357,9 +370,9 @@ class TgBot(CommonBot):
         if len(photos) == 0:
             raise PWarning("Нет фотографий в профиле")
         pa = PhotoAttachment()
-        pa.parse_tg(photos[0][-1], self)
+        pa.parse_tg(photos[0][-1])
 
-        profile.set_avatar(pa.private_download_url)
+        profile.set_avatar(pa)
 
     # END USERS GROUPS BOTS
 
@@ -376,7 +389,7 @@ class TgBot(CommonBot):
 
         callback_data_len = len(callback_data.encode("UTF8"))
         if callback_data_len > 62:
-            raise PError("Нельзя в callback_data передавать данные более 64 байт")
+            raise RuntimeError("Нельзя в callback_data передавать данные более 64 байт")
         data = {
             'text': text,
             'callback_data': callback_data

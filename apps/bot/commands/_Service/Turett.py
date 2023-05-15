@@ -48,7 +48,7 @@ class Turett(Command):
                     stickers = event.bot.get_sticker_set("SamPriFle")
                     random_sticker = random_event(stickers)
                     tg_sticker = StickerAttachment()
-                    tg_sticker.parse_tg(random_sticker, event.bot)
+                    tg_sticker.parse_tg(random_sticker)
                     msg = {'attachments': tg_sticker}
             else:
                 msg = random_event(self.TURETT_WORDS)
