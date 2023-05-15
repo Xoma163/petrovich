@@ -1,5 +1,4 @@
 import io
-from io import BytesIO
 
 from PIL import Image
 
@@ -31,8 +30,7 @@ class Demotivator(Command):
         if not texts[0]:
             return "Первая фраза обязательно должна быть"
 
-        content = image.download_content()
-        base_image = Image.open(BytesIO(content))
+        base_image = Image.open(image.get_bytes_io_content())
         db = DemotivatorBuilder(base_image, *texts)
         demotivator = db.get_demotivator()
         img_byte_arr = io.BytesIO()

@@ -4,7 +4,6 @@ from apps.bot.classes.Command import Command
 from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
-from apps.bot.classes.messages.attachments.StickerAttachment import StickerAttachment
 from apps.bot.utils.QuotesGenerator import QuotesGenerator
 
 
@@ -52,11 +51,11 @@ class Quote(Command):
             if msg.attachments:
                 photo = msg.attachments[0]
                 if isinstance(photo, PhotoAttachment):
-                    message['photo'] = photo.get_download_url()
+                    message['photo'] = photo.download_content()
 
-                sticker = msg.attachments[0]
-                if isinstance(sticker, StickerAttachment):
-                    message['photo'] = sticker.url
+                # sticker = msg.attachments[0]
+                # if isinstance(sticker, StickerAttachment):
+                #     message['photo'] = sticker.url
 
             # stack messages from one user
             if msgs and msgs[-1]['username'] == username:

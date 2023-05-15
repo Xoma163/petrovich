@@ -18,7 +18,7 @@ class Age(Command):
     def start(self):
         image = self.event.get_all_attachments(PhotoAttachment)[0]
         everypixel_api = EveryPixelAPI()
-        faces = everypixel_api.get_faces_on_photo(image.get_download_url())
+        faces = everypixel_api.get_faces_on_photo(image.download_content())
 
         if len(faces) == 0:
             raise PWarning("Не нашёл лиц на фото")

@@ -132,7 +132,7 @@ class Meme(Command):
         new_meme_obj = MemeModel.objects.create(**new_meme)
 
         # Кэш
-        if isinstance(attachment, LinkAttachment) and attachment.is_youtube_link():
+        if isinstance(attachment, LinkAttachment) and attachment.is_youtube_link:
             self.set_youtube_file_id(new_meme_obj)
         if new_meme['approved']:
             return "Добавил"
@@ -187,7 +187,7 @@ class Meme(Command):
         if self.event.sender.check_role(Role.MODERATOR) or \
                 self.event.sender.check_role(Role.TRUSTED):
             meme.save()
-            if isinstance(attachment, LinkAttachment) and attachment.is_youtube_link():
+            if isinstance(attachment, LinkAttachment) and attachment.is_youtube_link:
                 self.set_youtube_file_id(meme)
             return f'Обновил мем "{meme.name}"'
 

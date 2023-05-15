@@ -128,7 +128,7 @@ class Profile(Command):
     def menu_avatar(self):
         images = self.event.get_all_attachments(PhotoAttachment)
         if len(images) > 0:
-            self.event.sender.set_avatar(images[0].get_download_url())
+            self.event.sender.set_avatar(images[0])
         else:
             if self.event.platform not in [Platform.TG]:
                 raise PWarning("Обновление аватара по пользователю доступно только для ВК/ТГ")

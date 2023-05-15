@@ -10,14 +10,6 @@ class EveryPixelAPI:
     CLIENT_ID = env.str("EVERYPIXEL_CLIENT_ID")
     CLIENT_SECRET = env.str("EVERYPIXEL_CLIENT_SECRET")
 
-    def get_image_quality_by_url(self, url):
-        params = {
-            'url': url
-        }
-        return requests.get(self.IMAGE_QUALITY_URL,
-                            params,
-                            auth=(self.CLIENT_ID, self.CLIENT_SECRET)).json()
-
     def get_image_quality_by_file(self, file):
         data = {
             'data': file
@@ -26,23 +18,12 @@ class EveryPixelAPI:
                              files=data,
                              auth=(self.CLIENT_ID, self.CLIENT_SECRET)).json()
 
-    def get_image_quality(self, url_or_bytes):
-        if isinstance(url_or_bytes, str):
-            response = self.get_image_quality_by_url(url_or_bytes)
-        else:
-            response = self.get_image_quality_by_file(url_or_bytes)
+    def get_image_quality(self, _bytes):
+        response = self.get_image_quality_by_file(_bytes)
 
         if response['status'] != 'ok':
             raise PError("Ошибка")
         return f"{round(response['quality']['score'] * 100, 2)}%"
-
-    def get_faces_on_photo_by_url(self, url):
-        params = {
-            'url': url
-        }
-        return requests.get(self.IMAGE_FACES_URL,
-                            params=params,
-                            auth=(self.CLIENT_ID, self.CLIENT_SECRET)).json()
 
     def get_faces_on_photo_by_file(self, file):
         data = {
@@ -52,11 +33,8 @@ class EveryPixelAPI:
                              files=data,
                              auth=(self.CLIENT_ID, self.CLIENT_SECRET)).json()
 
-    def get_faces_on_photo(self, url_or_bytes):
-        if isinstance(url_or_bytes, str):
-            response = self.get_faces_on_photo_by_url(url_or_bytes)
-        else:
-            response = self.get_faces_on_photo_by_file(url_or_bytes)
+    def get_faces_on_photo(self, _bytes):
+        response = self.get_faces_on_photo_by_file(_bytes)
 
         if response['status'] == 'error':
             if response['message'] == 'ratelimit exceeded 100 requests per 86400 seconds':

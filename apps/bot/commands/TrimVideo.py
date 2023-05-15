@@ -70,18 +70,17 @@ class TrimVideo(Command):
         if yt_api.filesize > 100 and not self.event.sender.check_role(Role.TRUSTED):
             raise PWarning("Нельзя грузить отрезки из ютуба больше 100мб")
         vt = VideoTrimmer()
-        return vt.trim(download_url, start_pos, end_pos)
+        return vt.trim(start_pos, end_pos, download_url)
 
     def parse_video(self, video: VideoAttachment):
-        if video.size_mb > 20:
-            raise PWarning("Я не могу обрезать видео из-за ограничений телеги. Максимум 20мб")
         start_pos = self.parse_timecode(self.event.message.args[0])
         end_pos = self.parse_timecode(self.event.message.args[1])
 
         vt = VideoTrimmer()
-        return vt.trim(video.private_download_url, start_pos, end_pos)
+        return vt.trim(start_pos, end_pos, video)
 
-    def parse_timecode(self, timecode):
+    @staticmethod
+    def parse_timecode(timecode):
         try:
             dt = datetime.strptime(timecode, "%M:%S")
         except ValueError:

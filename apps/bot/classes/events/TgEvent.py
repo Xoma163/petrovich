@@ -174,32 +174,32 @@ class TgEvent(Event):
 
     def setup_photo(self, photo_event):
         tg_photo = PhotoAttachment()
-        tg_photo.parse_tg(photo_event, self.bot)
+        tg_photo.parse_tg(photo_event)
         self.attachments.append(tg_photo)
 
     def setup_video(self, video_event):
         tg_video = VideoAttachment()
-        tg_video.parse_tg(video_event, self.bot)
+        tg_video.parse_tg(video_event)
         self.attachments.append(tg_video)
 
     def setup_video_note(self, video_event):
         tg_video = VideoNoteAttachment()
-        tg_video.parse_tg(video_event, self.bot)
+        tg_video.parse_tg(video_event)
         self.attachments.append(tg_video)
 
     def setup_gif(self, gif_event):
         tg_gif = GifAttachment()
-        tg_gif.parse_tg(gif_event, self.bot)
+        tg_gif.parse_tg(gif_event)
         self.attachments.append(tg_gif)
 
     def setup_voice(self, voice_event):
         tg_voice = VoiceAttachment()
-        tg_voice.parse_tg(voice_event, self.bot)
+        tg_voice.parse_tg(voice_event)
         self.attachments.append(tg_voice)
 
     def setup_sticker(self, sticker_event):
         tg_sticker = StickerAttachment()
-        tg_sticker.parse_tg(sticker_event, self.bot)
+        tg_sticker.parse_tg(sticker_event)
         self.attachments.append(tg_sticker)
 
     def setup_link(self, text):

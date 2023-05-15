@@ -1,7 +1,7 @@
 import os
 import textwrap
+from io import BytesIO
 
-import requests
 from PIL import ImageFont, Image, ImageDraw, ImageFilter
 
 from apps.bot.utils.utils import get_image_size_by_text
@@ -145,7 +145,7 @@ class QuotesGenerator:
             fwd_margin = 20
         if msg.get('photo'):
             try:
-                image = Image.open(requests.get(msg['photo'], stream=True).raw).convert('RGBA')
+                image = Image.open(BytesIO(msg['photo']))
             except Exception:
                 image = None
             if image:

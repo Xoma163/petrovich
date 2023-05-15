@@ -25,7 +25,7 @@ lock = Lock()
 class Bot(Thread):
     ERROR_MSG = "Непредвиденная ошибка. Сообщите разработчику. Команда /баг"
 
-    def __init__(self, platform):
+    def __init__(self, platform, **kwargs):
         Thread.__init__(self)
 
         self.platform = platform
@@ -345,7 +345,7 @@ class Bot(Thread):
         if peer_id:
             self.set_activity(peer_id, ActivitiesEnum.UPLOAD_PHOTO)
         pa = PhotoAttachment()
-        pa.parse_response(image, allowed_exts_url, guarantee_url=guarantee_url, filename=filename)
+        pa.parse(image, allowed_exts_url, guarantee_url=guarantee_url, filename=filename)
         return pa
 
     def get_document_attachment(self, document, peer_id=None, filename=None):
@@ -355,7 +355,7 @@ class Bot(Thread):
         if peer_id:
             self.set_activity(peer_id, ActivitiesEnum.UPLOAD_DOCUMENT)
         da = DocumentAttachment()
-        da.parse_response(document, filename=filename)
+        da.parse(document, filename=filename)
         return da
 
     def get_audio_attachment(self, audio, peer_id=None, title=None, artist=None, filename=None, thumb=None):
@@ -365,7 +365,7 @@ class Bot(Thread):
         if peer_id:
             self.set_activity(peer_id, ActivitiesEnum.UPLOAD_AUDIO)
         va = AudioAttachment()
-        va.parse_response(audio, filename=filename)
+        va.parse(audio, filename=filename)
         va.thumb = thumb
         va.title = title
         va.artist = artist
@@ -378,7 +378,7 @@ class Bot(Thread):
         if peer_id:
             self.set_activity(peer_id, ActivitiesEnum.UPLOAD_VIDEO)
         va = VideoAttachment()
-        va.parse_response(document, filename=filename)
+        va.parse(document, filename=filename)
         return va
 
     def get_gif_attachment(self, gif, peer_id=None, filename=None):
@@ -388,7 +388,7 @@ class Bot(Thread):
         if peer_id:
             self.set_activity(peer_id, ActivitiesEnum.UPLOAD_VIDEO)
         ga = GifAttachment()
-        ga.parse_response(gif, filename=filename)
+        ga.parse(gif, filename=filename)
         return ga
 
     # END ATTACHMENTS

@@ -28,8 +28,8 @@ class Minesweeper(Command):
 
     bot: TgBot
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
         self.width: int = 8
         self.height: int = 12
