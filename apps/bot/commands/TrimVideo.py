@@ -62,10 +62,10 @@ class TrimVideo(Command):
             if len(args) == 2:
                 end_pos = args[1]
 
-        if end_pos:
-            delta = (datetime.strptime(end_pos, "%M:%S") - datetime.strptime(start_pos, "%M:%S")).seconds
         start_pos = self.parse_timecode(start_pos)
-        end_pos = self.parse_timecode(end_pos)
+        if end_pos:
+            end_pos = self.parse_timecode(end_pos)
+            delta = (datetime.strptime(end_pos, "%H:%M:%S") - datetime.strptime(start_pos, "%H:%M:%S")).seconds
 
         download_url = yt_api.get_video_download_url(att.url, self.event.platform, timedelta=delta)
         if yt_api.filesize > 100 and not self.event.sender.check_role(Role.TRUSTED):

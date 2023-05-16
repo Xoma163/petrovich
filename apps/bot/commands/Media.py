@@ -187,7 +187,7 @@ class Media(Command):
             event.sender = self.event.sender
             event.platform = self.event.platform
             event.message = Message()
-            args.append(self.event.attachments[0].url)
+            args.append(self.event.attachments[0].url.lower())
             event.message.args = args
             tv_cmd = TrimVideo(event=event)
             video_content = tv_cmd.parse_link(self.event.attachments[0])
