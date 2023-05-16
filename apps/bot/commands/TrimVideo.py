@@ -82,8 +82,8 @@ class TrimVideo(Command):
         vt = VideoTrimmer()
         return vt.trim(video, start_pos, end_pos)
 
-    @staticmethod
-    def parse_timecode(timecode):
+    @classmethod
+    def parse_timecode(cls, timecode):
         try:
             dt = datetime.strptime(timecode, "%M:%S")
         except ValueError:

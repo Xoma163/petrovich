@@ -101,7 +101,8 @@ class Meme(Command):
         meme_name_list = self.event.message.args[1:]
         if isinstance(attachment, LinkAttachment):
             self._check_allowed_url(attachment.url)
-            meme_name_list.remove(attachment.url.lower())
+            if not self.event.fwd:
+                meme_name_list.remove(attachment.url.lower())
 
         self.check_meme_name_is_no_digits(meme_name_list)
         meme_name = " ".join(meme_name_list)
@@ -160,7 +161,8 @@ class Meme(Command):
 
         if isinstance(attachment, LinkAttachment):
             self._check_allowed_url(attachment.url)
-            id_name_list.remove(attachment.url.lower())
+            if not self.event.fwd:
+                id_name_list.remove(attachment.url.lower())
 
         id_name = self.get_id_or_meme_name(id_name_list)
 

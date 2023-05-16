@@ -169,8 +169,17 @@ class Media(Command):
 
         timecode = y_api.get_timecode_str(url)
         args = self.event.message.args[1:] if self.event.message.command in self.full_names else self.event.message.args
+        args_is_timecodes = False
+        if args:
+            try:
+                TrimVideo.parse_timecode(args[0])
+                if len(args) > 1:
+                    TrimVideo.parse_timecode(args[1])
+                args_is_timecodes = True
+            except ValueError:
+                args_is_timecodes = False
 
-        if not (timecode or args):
+        if not (timecode or args_is_timecodes):
             content_url = y_api.get_video_download_url(url, self.event.platform)
             video_content = requests.get(content_url).content
         else:
