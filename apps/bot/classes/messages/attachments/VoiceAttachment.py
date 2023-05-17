@@ -1,3 +1,4 @@
+from apps.bot.classes.consts.ActivitiesEnum import ActivitiesEnum
 from apps.bot.classes.messages.attachments.Attachment import Attachment
 
 
@@ -7,6 +8,7 @@ class VoiceAttachment(Attachment):
     def __init__(self):
         super().__init__(self.TYPE)
         self.duration = None  # sec
+        self.activity = ActivitiesEnum.UPLOAD_AUDIO
 
     def parse_tg(self, event):
         self.duration = event['duration']

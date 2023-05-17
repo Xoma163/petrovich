@@ -3,11 +3,12 @@ from enum import Enum
 
 class ActivitiesEnum(Enum):
     TYPING = 'typing'
-    UPLOAD_VIDEO = 'send_video'
-    UPLOAD_PHOTO = 'send_photo'
-    UPLOAD_DOCUMENT = 'send_file'
+    UPLOAD_VIDEO = 'upload_video'
+    UPLOAD_PHOTO = 'upload_photo'
+    UPLOAD_DOCUMENT = 'upload_document'
     RECORD_AUDIO = 'record_audio'
     UPLOAD_AUDIO = 'upload_audio'
+    UPLOAD_VIDEO_NOTE = 'upload_video_note'
 
 
 TG_ACTIVITIES = {
@@ -17,4 +18,5 @@ TG_ACTIVITIES = {
     ActivitiesEnum.UPLOAD_DOCUMENT: 'upload_document',
     ActivitiesEnum.RECORD_AUDIO: 'record_audio',
     ActivitiesEnum.UPLOAD_AUDIO: 'upload_audio',
+    ActivitiesEnum.UPLOAD_VIDEO_NOTE: 'upload_video_note',
 }

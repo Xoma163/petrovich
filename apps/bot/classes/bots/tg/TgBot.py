@@ -127,7 +127,7 @@ class TgBot(CommonBot):
         """
         Отправка фото. Ссылка или файл
         """
-        self.set_activity(default_params['chat_id'], ActivitiesEnum.UPLOAD_PHOTO)
+        self.set_activity_thread(default_params['chat_id'], ActivitiesEnum.UPLOAD_PHOTO)
         photo: PhotoAttachment = rm.attachments[0]
         if photo.file_id:
             default_params['photo'] = photo.file_id
@@ -145,7 +145,7 @@ class TgBot(CommonBot):
         """
         Отправка документа. Ссылка или файл
         """
-        self.set_activity(default_params['chat_id'], ActivitiesEnum.UPLOAD_DOCUMENT)
+        self.set_activity_thread(default_params['chat_id'], ActivitiesEnum.UPLOAD_DOCUMENT)
         document: DocumentAttachment = rm.attachments[0]
         if document.public_download_url:
             default_params['document'] = document.public_download_url
@@ -162,7 +162,7 @@ class TgBot(CommonBot):
         """
         Отправка видео. Ссылка или файл
         """
-        self.set_activity(default_params['chat_id'], ActivitiesEnum.UPLOAD_VIDEO)
+        self.set_activity_thread(default_params['chat_id'], ActivitiesEnum.UPLOAD_VIDEO)
         video: VideoAttachment = rm.attachments[0]
         files = {'video': video.content}
         if video.thumb:
@@ -184,6 +184,7 @@ class TgBot(CommonBot):
         """
         Отправка видео. Ссылка или файл
         """
+        self.set_activity_thread(default_params['chat_id'], ActivitiesEnum.UPLOAD_VIDEO_NOTE)
         video_note: VideoNoteAttachment = rm.attachments[0]
         default_params['video_note'] = video_note.file_id
         return self.requests.get('sendVideoNote', default_params)
@@ -192,7 +193,7 @@ class TgBot(CommonBot):
         """
         Отправка аудио. Ссылка или файл
         """
-        self.set_activity(default_params['chat_id'], ActivitiesEnum.UPLOAD_AUDIO)
+        self.set_activity_thread(default_params['chat_id'], ActivitiesEnum.UPLOAD_AUDIO)
         audio: AudioAttachment = rm.attachments[0]
 
         if audio.artist:
@@ -207,14 +208,14 @@ class TgBot(CommonBot):
             files = {'audio': audio.content}
             if audio.thumb:
                 thumb_file = self.get_photo_attachment(audio.thumb, guarantee_url=True)
-                files['thumb'] = thumb_file.get_bytes_io_content()
+                files['thumb'] = thumb_file.get_bytes_io_content(default_params['chat_id'])
             return self.requests.get('sendAudio', default_params, files=files)
 
     def _send_gif(self, rm: ResponseMessageItem, default_params):
         """
         Отправка гифы. Ссылка или файл
         """
-        self.set_activity(default_params['chat_id'], ActivitiesEnum.UPLOAD_VIDEO)
+        self.set_activity_thread(default_params['chat_id'], ActivitiesEnum.UPLOAD_VIDEO)
         gif: GifAttachment = rm.attachments[0]
         if gif.public_download_url:
             default_params['animation'] = gif.public_download_url
@@ -240,6 +241,7 @@ class TgBot(CommonBot):
         """
         Отправка голосовухи
         """
+        self.set_activity_thread(default_params['chat_id'], ActivitiesEnum.UPLOAD_AUDIO)
         voice: VoiceAttachment = rm.attachments[0]
         default_params['voice'] = voice.file_id
         return self.requests.get('sendVoice', default_params)
@@ -355,10 +357,13 @@ class TgBot(CommonBot):
         }
 
         if rm.attachments:
-            if len(rm.attachments) > 1:
-                return self._send_media_group(rm, params)
-            else:
-                return att_map[rm.attachments[0].__class__](rm, params)
+            try:
+                if len(rm.attachments) > 1:
+                    return self._send_media_group(rm, params)
+                else:
+                    return att_map[rm.attachments[0].__class__](rm, params)
+            finally:
+                self.stop_activity_thread()
         return self._send_text(params)
 
     # END  MAIN ROUTING AND MESSAGING

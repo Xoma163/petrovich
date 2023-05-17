@@ -38,7 +38,7 @@ class VoiceRecognition(Command):
         audio_messages = self.event.get_all_attachments([VoiceAttachment, VideoNoteAttachment])
         audio_message = audio_messages[0]
 
-        i = audio_message.get_bytes_io_content()
+        i = audio_message.get_bytes_io_content(self.event.peer_id)
         i.seek(0)
         o = io.BytesIO()
         o.name = "recognition.wav"

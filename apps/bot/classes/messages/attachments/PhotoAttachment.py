@@ -1,3 +1,4 @@
+from apps.bot.classes.consts.ActivitiesEnum import ActivitiesEnum
 from apps.bot.classes.messages.attachments.Attachment import Attachment
 
 
@@ -8,6 +9,7 @@ class PhotoAttachment(Attachment):
         super().__init__(self.TYPE)
         self.width = None
         self.height = None
+        self.activity = ActivitiesEnum.UPLOAD_PHOTO
 
     def parse_tg(self, event):
         self.width = event.get('width')

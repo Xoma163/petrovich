@@ -27,13 +27,16 @@ class Attachment:
         self.file_id = None
 
         self.name = None
+        self.activity = None
 
-    def get_file(self):
+    def get_file(self, peer_id=None):
         from apps.bot.classes.bots.tg.TgBot import TgBot
         tg_bot = TgBot()
 
         if self.get_size_mb() > tg_bot.MAX_ATTACHMENT_SIZE_MB:
             return
+        if peer_id and self.activity:
+            tg_bot.set_activity_thread(peer_id, self.activity)
         r = tg_bot.requests.get('getFile', params={'file_id': self.file_id})
         if r.status_code != 200:
             return
@@ -43,6 +46,7 @@ class Attachment:
         else:
             self.private_download_url = f'https://{tg_bot.requests.API_TELEGRAM_URL}/file/bot{tg_bot.token}/{file_path}'
         self.ext = file_path.rsplit('.')[-1]
+        tg_bot.stop_activity_thread()
 
     def parse(self, file_like_object, allowed_exts_url=None, filename=None, guarantee_url=False):
         """
@@ -89,16 +93,16 @@ class Attachment:
             else:
                 self.content = _bytes
 
-    def _get_download_url(self):
+    def _get_download_url(self, peer_id=None):
         if self.public_download_url:
             return self.public_download_url
         if not self.private_download_url:
-            self.get_file()
+            self.get_file(peer_id)
         return self.private_download_url
 
-    def download_content(self) -> bytes:
+    def download_content(self, peer_id=None) -> bytes:
         if not self.content:
-            download_url = self._get_download_url()
+            download_url = self._get_download_url(peer_id)
             if self.private_download_path:
                 try:
                     with open(self.private_download_path, 'rb') as file:
@@ -109,8 +113,8 @@ class Attachment:
                 self.content = requests.get(download_url).content
         return self.content
 
-    def get_bytes_io_content(self) -> BytesIO:
-        return BytesIO(self.download_content())
+    def get_bytes_io_content(self, peer_id=None) -> BytesIO:
+        return BytesIO(self.download_content(peer_id))
 
     def delete_download_path_file(self):
         if os.path.exists(self.private_download_path):

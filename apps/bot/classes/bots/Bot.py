@@ -1,4 +1,6 @@
 import logging
+import threading
+import time
 from threading import Lock
 from threading import Thread
 from typing import List, Optional
@@ -22,6 +24,7 @@ from petrovich.settings import env
 
 lock = Lock()
 
+
 class Bot(Thread):
     ERROR_MSG = "Непредвиденная ошибка. Сообщите разработчику. Команда /баг"
 
@@ -34,6 +37,8 @@ class Bot(Thread):
         self.bot_model = BotModel.objects.filter(platform=self.platform.name)
 
         self.logger = logging.getLogger('bot')
+
+        self.activity_thread_flag = False
 
     # MAIN ROUTING AND MESSAGING
 
@@ -107,7 +112,6 @@ class Bot(Thread):
         Выбор команды
         Если в Event есть команда, поиск не требуется
         """
-        # self.set_activity(event.peer_id, ActivitiesEnum.TYPING)
         from apps.bot.initial import COMMANDS
 
         if event.command:
@@ -343,9 +347,10 @@ class Bot(Thread):
         if allowed_exts_url is None:
             allowed_exts_url = ['jpg', 'jpeg', 'png']
         if peer_id:
-            self.set_activity(peer_id, ActivitiesEnum.UPLOAD_PHOTO)
+            self.set_activity_thread(peer_id, ActivitiesEnum.UPLOAD_PHOTO)
         pa = PhotoAttachment()
         pa.parse(image, allowed_exts_url, guarantee_url=guarantee_url, filename=filename)
+        self.stop_activity_thread()
         return pa
 
     def get_document_attachment(self, document, peer_id=None, filename=None):
@@ -353,9 +358,10 @@ class Bot(Thread):
         Получение документа
         """
         if peer_id:
-            self.set_activity(peer_id, ActivitiesEnum.UPLOAD_DOCUMENT)
+            self.set_activity_thread(peer_id, ActivitiesEnum.UPLOAD_DOCUMENT)
         da = DocumentAttachment()
         da.parse(document, filename=filename)
+        self.stop_activity_thread()
         return da
 
     def get_audio_attachment(self, audio, peer_id=None, title=None, artist=None, filename=None, thumb=None):
@@ -363,12 +369,13 @@ class Bot(Thread):
         Получение аудио
         """
         if peer_id:
-            self.set_activity(peer_id, ActivitiesEnum.UPLOAD_AUDIO)
+            self.set_activity_thread(peer_id, ActivitiesEnum.UPLOAD_AUDIO)
         va = AudioAttachment()
         va.parse(audio, filename=filename)
         va.thumb = thumb
         va.title = title
         va.artist = artist
+        self.stop_activity_thread()
         return va
 
     def get_video_attachment(self, document, peer_id=None, filename=None):
@@ -376,9 +383,10 @@ class Bot(Thread):
         Получение видео
         """
         if peer_id:
-            self.set_activity(peer_id, ActivitiesEnum.UPLOAD_VIDEO)
+            self.set_activity_thread(peer_id, ActivitiesEnum.UPLOAD_VIDEO)
         va = VideoAttachment()
         va.parse(document, filename=filename)
+        self.stop_activity_thread()
         return va
 
     def get_gif_attachment(self, gif, peer_id=None, filename=None):
@@ -386,9 +394,10 @@ class Bot(Thread):
         Получение гифки
         """
         if peer_id:
-            self.set_activity(peer_id, ActivitiesEnum.UPLOAD_VIDEO)
+            self.set_activity_thread(peer_id, ActivitiesEnum.UPLOAD_VIDEO)
         ga = GifAttachment()
         ga.parse(gif, filename=filename)
+        self.stop_activity_thread()
         return ga
 
     # END ATTACHMENTS
@@ -398,6 +407,21 @@ class Bot(Thread):
         """
         Проставление активности боту (например, отправка сообщения)
         """
+
+    def set_activity_thread(self, peer_id, activity: ActivitiesEnum):
+        self.activity_thread_flag = True
+        threading.Thread(
+            target=self._set_activity_thread,
+            args=(peer_id, activity)
+        ).start()
+
+    def stop_activity_thread(self):
+        self.activity_thread_flag = False
+
+    def _set_activity_thread(self, peer_id, activity):
+        while self.activity_thread_flag:
+            self.set_activity(peer_id, activity)
+            time.sleep(5)
 
     @staticmethod
     def get_button(text, command, args=None, kwargs=None, url=None):

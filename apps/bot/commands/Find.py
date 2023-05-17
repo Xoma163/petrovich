@@ -30,14 +30,15 @@ class Find(Command):
             raise PWarning("Ничего не нашёл по картинкам")
 
         attachments = []
+        self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.UPLOAD_PHOTO)
         for url in urls:
-            self.bot.set_activity(self.event.peer_id, ActivitiesEnum.UPLOAD_PHOTO)
             try:
                 attachments.append(upload_image_to_tg_server(url))
             except PWarning:
                 continue
             if len(attachments) == count:
                 break
+        self.bot.stop_activity_thread()
         if len(attachments) == 0:
             raise PWarning("Ничего не нашёл по картинкам")
         return {'text': f"Результаты по запросу '{query}'", 'attachments': attachments}

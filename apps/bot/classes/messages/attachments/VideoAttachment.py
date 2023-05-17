@@ -1,3 +1,4 @@
+from apps.bot.classes.consts.ActivitiesEnum import ActivitiesEnum
 from apps.bot.classes.messages.attachments.Attachment import Attachment
 
 
@@ -10,6 +11,7 @@ class VideoAttachment(Attachment):
         self.width = None
         self.height = None
         self.thumb: str = None
+        self.activity = ActivitiesEnum.UPLOAD_VIDEO
 
     def parse_tg(self, event):
         self.duration = event.get('duration')

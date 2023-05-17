@@ -3,6 +3,7 @@ from datetime import datetime
 from apps.bot.APIs.YoutubeVideoAPI import YoutubeVideoAPI
 from apps.bot.classes.Command import Command
 from apps.bot.classes.bots.tg.TgBot import TgBot
+from apps.bot.classes.consts.ActivitiesEnum import ActivitiesEnum
 from apps.bot.classes.consts.Consts import Platform, Role
 from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.classes.messages.attachments.LinkAttachment import LinkAttachment
@@ -33,12 +34,14 @@ class TrimVideo(Command):
 
     def start(self):
         att = self.event.get_all_attachments([LinkAttachment, VideoAttachment])[0]
+        self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.UPLOAD_VIDEO)
         if isinstance(att, LinkAttachment):
             if not att.is_youtube_link:
                 raise PWarning("Обрезка по ссылке доступна только для YouTube")
             video_bytes = self.parse_link(att)
         else:
             video_bytes = self.parse_video(att)
+        self.bot.stop_activity_thread()
         video = self.bot.get_video_attachment(video_bytes, peer_id=self.event.peer_id)
         return {'attachments': [video]}
 
@@ -70,15 +73,18 @@ class TrimVideo(Command):
         download_url = yt_api.get_video_download_url(att.url, self.event.platform, timedelta=delta)
         if yt_api.filesize > 100 and not self.event.sender.check_role(Role.TRUSTED):
             raise PWarning("Нельзя грузить отрезки из ютуба больше 100мб")
-        vt = VideoTrimmer()
-        return vt.trim(download_url, start_pos, end_pos)
+        return self.trim(download_url, start_pos, end_pos)
 
     def parse_video(self, video: VideoAttachment):
         start_pos = self.parse_timecode(self.event.message.args[0])
         end_pos = None
         if len(self.event.message.args) > 1:
             end_pos = self.parse_timecode(self.event.message.args[1])
+        video = video.download_content(self.event.peer_id)
+        return self.trim(video, start_pos, end_pos)
 
+    @staticmethod
+    def trim(video, start_pos, end_pos):
         vt = VideoTrimmer()
         return vt.trim(video, start_pos, end_pos)
 

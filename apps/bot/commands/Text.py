@@ -19,5 +19,5 @@ class Text(Command):
 
         ocr_api = OCRApi()
         image = self.event.get_all_attachments(PhotoAttachment)[0]
-        content = image.download_content()
+        content = image.download_content(self.event.peer_id)
         return ocr_api.recognize(content, lang)

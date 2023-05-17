@@ -1,3 +1,4 @@
+from apps.bot.classes.consts.ActivitiesEnum import ActivitiesEnum
 from apps.bot.classes.messages.attachments.Attachment import Attachment
 
 
@@ -11,3 +12,5 @@ class AudioAttachment(Attachment):
 
         self.artist = None
         self.title = None
+
+        self.activity = ActivitiesEnum.UPLOAD_AUDIO

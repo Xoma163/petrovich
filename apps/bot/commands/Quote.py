@@ -51,7 +51,7 @@ class Quote(Command):
             if msg.attachments:
                 photo = msg.attachments[0]
                 if isinstance(photo, PhotoAttachment):
-                    message['photo'] = photo.download_content()
+                    message['photo'] = photo.download_content(self.event.peer_id)
 
                 # sticker = msg.attachments[0]
                 # if isinstance(sticker, StickerAttachment):

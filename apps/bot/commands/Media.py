@@ -17,16 +17,15 @@ from apps.bot.APIs.YoutubeMusicAPI import YoutubeMusicAPI
 from apps.bot.APIs.YoutubeVideoAPI import YoutubeVideoAPI
 from apps.bot.classes.Command import Command
 from apps.bot.classes.bots.tg.TgBot import TgBot
+from apps.bot.classes.consts.ActivitiesEnum import ActivitiesEnum
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning, PSkip
 from apps.bot.classes.events.Event import Event
 from apps.bot.classes.messages.Message import Message
 from apps.bot.classes.messages.attachments.LinkAttachment import LinkAttachment
 from apps.bot.commands.TrimVideo import TrimVideo
-from apps.bot.models import Chat
 from apps.bot.utils.NothingLogger import NothingLogger
 from apps.bot.utils.utils import get_urls_from_text
-from petrovich.settings import env
 
 YOUTUBE_URLS = ('www.youtube.com', 'youtube.com', "www.youtu.be", "youtu.be")
 YOUTUBE_MUSIC_URLS = ("music.youtube.com",)
@@ -180,8 +179,10 @@ class Media(Command):
                 args_is_timecodes = False
 
         if not (timecode or args_is_timecodes):
+            self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.UPLOAD_VIDEO)
             content_url = y_api.get_video_download_url(url, self.event.platform)
             video_content = requests.get(content_url).content
+            self.bot.stop_activity_thread()
         else:
             event = Event(bot=self.bot)
             event.sender = self.event.sender
@@ -205,7 +206,6 @@ class Media(Command):
         audio_att = self.bot.get_audio_attachment(track.content, peer_id=self.event.peer_id,
                                                   filename=f"{title}.{track.format}",
                                                   thumb=track.cover_url, artist=track.artists, title=track.title)
-        # audio_att.download_content()
         return [audio_att], ""
 
     def get_tiktok_video(self, url):
@@ -357,12 +357,3 @@ class Media(Command):
             raise PWarning("Я хз чё за контент")
 
         return attachments, p_api.title
-
-    def _get_file_id(self, att, _type):
-        video_uploading_chat = Chat.objects.get(pk=env.str("TG_PHOTO_UPLOADING_CHAT_PK"))
-        r = self.bot.parse_and_send_msgs({'attachments': [att]}, video_uploading_chat.chat_id,
-                                         self.event.message_thread_id)
-        r_json = r[0]['response'].json()
-        self.bot.delete_message(video_uploading_chat.chat_id, r_json['result']['message_id'])
-        file_id = r_json['result'][_type]['file_id']
-        return file_id

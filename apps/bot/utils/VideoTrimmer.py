@@ -1,6 +1,5 @@
 from tempfile import NamedTemporaryFile
 
-from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
 from apps.bot.utils.DoTheLinuxComand import do_the_linux_command
 
 
@@ -9,15 +8,14 @@ class VideoTrimmer:
         self.tmp_file_in = None
         self.tmp_file_out = None
 
-    def trim(self, attachment_or_link, start_pos, end_pos=None):
+    def trim(self, content_or_link, start_pos, end_pos=None):
         content = None
         url = None
 
-        if isinstance(attachment_or_link, VideoAttachment):
-            att = attachment_or_link
-            content = att.download_content()
+        if isinstance(content_or_link, bytes):
+            content = content_or_link
         else:
-            url = attachment_or_link
+            url = content_or_link
 
         try:
             self.tmp_file_in = NamedTemporaryFile()

@@ -30,7 +30,7 @@ class Demotivator(Command):
         if not texts[0]:
             return "Первая фраза обязательно должна быть"
 
-        base_image = Image.open(image.get_bytes_io_content())
+        base_image = Image.open(image.get_bytes_io_content(self.event.peer_id))
         db = DemotivatorBuilder(base_image, *texts)
         demotivator = db.get_demotivator()
         img_byte_arr = io.BytesIO()
