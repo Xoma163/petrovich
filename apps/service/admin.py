@@ -13,7 +13,7 @@ class ServiceAdmin(admin.ModelAdmin):
 class MemeAdmin(admin.ModelAdmin):
     list_display = (
         'id', 'name', 'preview_image', 'preview_link', 'author', 'approved', 'type', 'uses', 'link', 'tg_file_id')
-    search_fields = ('name',)
+    search_fields = ('name', 'link')
     list_filter = (('author', admin.RelatedOnlyFieldListFilter), 'type', 'approved',)
 
 
