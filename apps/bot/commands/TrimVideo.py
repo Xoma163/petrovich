@@ -9,6 +9,7 @@ from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.classes.messages.attachments.LinkAttachment import LinkAttachment
 from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
 from apps.bot.utils.VideoTrimmer import VideoTrimmer
+from apps.bot.utils.utils import prepend_symbols, append_symbols
 
 
 class TrimVideo(Command):
@@ -25,7 +26,7 @@ class TrimVideo(Command):
         "(youtube ссылка с таймкодом) - обрезает с таймкода и до конца",
         "(youtube ссылка с таймкодом) (таймкод конца) - обрезает по таймкодам",
     ]
-    help_texts_extra = "Формат для таймкодов: [%H]:%M:%S, т.е. валидные таймкоды: 09:04, 9:04, 09:4, 9:4, 01:09:04"
+    help_texts_extra = "Формат для таймкодов: [%H:]%M:%S[.%MS], т.е. валидные таймкоды: 09:04, 9:04, 09:4, 9:4, 01:09:04, 9:04.123"
     platforms = [Platform.TG]
     bot: TgBot
 
@@ -90,8 +91,32 @@ class TrimVideo(Command):
 
     @classmethod
     def parse_timecode(cls, timecode):
-        try:
-            dt = datetime.strptime(timecode, "%M:%S")
-        except ValueError:
-            dt = datetime.strptime(timecode, "%H:%M:%S")
-        return dt.strftime("%H:%M:%S")
+        h = "0"
+        m = "0"
+        s = "0"
+        ms = "0"
+        numbers = []
+        last_save_index = 0
+
+        dot_in_timecode = False
+        for i, symbol in enumerate(timecode):
+            if symbol == ":":
+                numbers.append(timecode[last_save_index:i])
+                last_save_index = i + 1
+            if symbol == ".":
+                dot_in_timecode = True
+                numbers.append(timecode[last_save_index:i])
+                ms = timecode[i + 1:len(timecode)]
+                break
+        if not dot_in_timecode:
+            numbers.append(timecode[last_save_index:len(timecode)])
+        if len(numbers) == 3:
+            h, m, s = numbers
+        elif len(numbers) == 2:
+            m, s = numbers
+        elif len(numbers) == 1:
+            s = numbers[0]
+        else:
+            raise PWarning("Ошибка парсинга таймкода")
+        res = f"{prepend_symbols(h, '0', 2)}:{prepend_symbols(m, '0', 2)}:{prepend_symbols(s, '0', 2)}.{append_symbols(ms, '0', 3)}"
+        return res

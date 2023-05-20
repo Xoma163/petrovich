@@ -118,17 +118,6 @@ def decl_of_num(number, titles: List[str]):
         return titles[cases[5]]
 
 
-def find_command_by_name(command_name: str):
-    """
-    Ищет команду по имени
-    """
-    from apps.bot.initial import COMMANDS
-    for command in COMMANDS:
-        if command_name == command.name or (command.names and command_name in command.names):
-            return command
-    raise PWarning("Я не знаю такой команды")
-
-
 def get_help_texts_for_command(command, platform=None) -> str:
     """
     Получает help_texts для команды
@@ -375,3 +364,23 @@ def _send_message_session_or_edit(bot, event, session, msg, max_delta):
         session.message_id = message_id
         session.save()
     bot.delete_message(event.peer_id, event.message.id)
+
+
+def prepend_symbols(string: str, symbol: str, n: int):
+    """
+    Добивает строку до N символов вставляя их перед строкой
+    """
+    n_symbols = n - len(string)
+    if n_symbols > 0:
+        return n_symbols * symbol + string
+    return string
+
+
+def append_symbols(string: str, symbol: str, n: int):
+    """
+    Добивает строку до N символов вставляя их после строки
+    """
+    n_symbols = n - len(string)
+    if n_symbols > 0:
+        return string + n_symbols * symbol
+    return string

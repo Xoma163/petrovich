@@ -1,5 +1,6 @@
 from apps.bot.classes.Command import Command
-from apps.bot.utils.utils import find_command_by_name, get_help_texts_for_command
+from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.utils.utils import get_help_texts_for_command
 
 
 class Help(Command):
@@ -15,7 +16,7 @@ class Help(Command):
 
     def start(self):
         if self.event.message.args:
-            command = find_command_by_name(self.event.message.args[0])
+            command = self.find_command_by_name(self.event.message.args[0])
             self.check_sender(command.access)
             help_text = get_help_texts_for_command(command, self.event.platform)
             return help_text
@@ -36,3 +37,14 @@ class Help(Command):
             "Команда (аргумент) - выполняет команду с обязательным аргументом\n" \
             "Команда [аргумент=10] - выполняет команду с необязательным аргументом. Если не указать его, будет подставлено значение по умолчанию"
         return text
+
+    @staticmethod
+    def find_command_by_name(command_name: str):
+        """
+        Ищет команду по имени
+        """
+        from apps.bot.initial import COMMANDS
+        for command in COMMANDS:
+            if command_name == command.name or (command.names and command_name in command.names):
+                return command
+        raise PWarning("Я не знаю такой команды")
