@@ -67,7 +67,9 @@ class YoutubeVideoAPI:
         url = self._clear_url(url)
         try:
             video_info = ydl.extract_info(url, download=False)
-        except yt_dlp.utils.DownloadError:
+        except yt_dlp.utils.DownloadError as e:
+            if "Sign in to confirm your age" in e.msg:
+                raise PWarning("К сожалению видос доступен только залогиненым пользователям")
             raise PWarning("Не смог найти видео по этой ссылке")
         return video_info
 

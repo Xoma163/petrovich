@@ -43,6 +43,7 @@ class Meme(Command):
         "переименовать (id) (новое название) - переименовывает мем (для модераторов)",
         "удалить (название/id) - удаляет мем (для модераторов)"
     ]
+    help_texts_extra = "Поддерживается добавление/обновление мемов с нарезкой по аналогии с командами /Медиа и /Нарезка"
 
     priority = 70
 
@@ -101,8 +102,9 @@ class Meme(Command):
         meme_name_list = self.event.message.args[1:]
         if isinstance(attachment, LinkAttachment):
             self._check_allowed_url(attachment.url)
-            if not self.event.fwd:
-                meme_name_list.remove(attachment.url.lower())
+            att_url_lower = attachment.url.lower()
+            if not self.event.fwd and att_url_lower in meme_name_list:
+                meme_name_list = meme_name_list[:meme_name_list.index(att_url_lower)]
 
         self.check_meme_name_is_no_digits(meme_name_list)
         meme_name = " ".join(meme_name_list)
@@ -161,9 +163,9 @@ class Meme(Command):
 
         if isinstance(attachment, LinkAttachment):
             self._check_allowed_url(attachment.url)
-            if not self.event.fwd:
-                id_name_list.remove(attachment.url.lower())
-
+            att_url_lower = attachment.url.lower()
+            if not self.event.fwd and att_url_lower in id_name_list:
+                id_name_list = id_name_list[:id_name_list.index(att_url_lower)]
         id_name = self.get_id_or_meme_name(id_name_list)
 
         meme_filter = {}
@@ -380,23 +382,25 @@ class Meme(Command):
 
         if self.event.platform == Platform.TG:
             if meme.type == LinkAttachment.TYPE:
-                yt_api = YoutubeVideoAPI()
-                try:
-                    content_url = yt_api.get_video_download_url(meme.link, self.event.platform)
-                    video_content = requests.get(content_url).content
-                    msg['attachments'] = self.bot.get_video_attachment(video_content, peer_id=self.event.peer_id)
-                    msg['text'] = yt_api.get_timecode_str(meme.link)
-                    self.set_youtube_file_id(meme)
-                    # return
-                except PSkip:
-                    msg['text'] = meme.link
-                except Exception as e:
-                    raise e
+                if meme.tg_file_id:
+                    att = VideoAttachment()
+                    att.file_id = meme.tg_file_id
+                    msg['attachments'] = att
+                else:
+                    yt_api = YoutubeVideoAPI()
+                    try:
+                        content_url = yt_api.get_video_download_url(meme.link, self.event.platform)
+                        video_content = requests.get(content_url).content
+                        msg['attachments'] = self.bot.get_video_attachment(video_content, peer_id=self.event.peer_id)
+                        msg['text'] = yt_api.get_timecode_str(meme.link)
+                    except PSkip:
+                        msg['text'] = meme.link
+                    except Exception as e:
+                        raise e
             elif meme.tg_file_id:
                 att = ATTACHMENT_TYPE_TRANSLATOR[meme.type]()
                 att.file_id = meme.tg_file_id
                 msg['attachments'] = att
-
             else:
                 msg['text'] = meme.link
 
@@ -423,19 +427,26 @@ class Meme(Command):
 
     def _set_youtube_file_id(self, meme):
         from apps.bot.models import Chat
+        from apps.bot.commands.TrimVideo import TrimVideo
 
-        y_api = YoutubeVideoAPI()
-        msg = {}
+        lower_link_index = self.event.message.args.index(meme.link.lower())
+        args = self.event.message.args[lower_link_index + 1:]
+        start_pos, end_pos = TrimVideo.get_timecodes(meme.link, args)
         try:
-            content_url = y_api.get_video_download_url(meme.link, self.event.platform)
-            video_content = requests.get(content_url).content
-
             video_uploading_chat = Chat.objects.get(pk=env.str("TG_PHOTO_UPLOADING_CHAT_PK"))
+            # Если видео надо нарезать
+            if start_pos:
+                tm = TrimVideo()
+                video_content = tm.trim_link_pos(meme.link, start_pos, end_pos)
+            else:
+                y_api = YoutubeVideoAPI()
+                content_url = y_api.get_video_download_url(meme.link, self.event.platform)
+                video_content = requests.get(content_url).content
             video = self.bot.get_video_attachment(video_content, peer_id=video_uploading_chat.chat_id)
             parsed_url = urlparse(meme.link)
             video_id = parsed_url.path.strip('/')
             video.thumb = f"https://img.youtube.com/vi/{video_id}/default.jpg"
-            msg['attachments'] = [video]
+            msg = {'attachments': [video]}
             r = self.bot.parse_and_send_msgs(msg, video_uploading_chat.chat_id, self.event.message_thread_id)
             r_json = r[0]['response'].json()
             self.bot.delete_message(video_uploading_chat.chat_id, r_json['result']['message_id'])

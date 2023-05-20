@@ -19,8 +19,6 @@ from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.consts.ActivitiesEnum import ActivitiesEnum
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning, PSkip
-from apps.bot.classes.events.Event import Event
-from apps.bot.classes.messages.Message import Message
 from apps.bot.classes.messages.attachments.LinkAttachment import LinkAttachment
 from apps.bot.commands.TrimVideo import TrimVideo
 from apps.bot.utils.NothingLogger import NothingLogger
@@ -166,32 +164,17 @@ class Media(Command):
             return self.get_youtube_audio(url)
         y_api = YoutubeVideoAPI()
 
-        timecode = y_api.get_timecode_str(url)
         args = self.event.message.args[1:] if self.event.message.command in self.full_names else self.event.message.args
-        args_is_timecodes = False
-        if args:
-            try:
-                TrimVideo.parse_timecode(args[0])
-                if len(args) > 1:
-                    TrimVideo.parse_timecode(args[1])
-                args_is_timecodes = True
-            except ValueError:
-                args_is_timecodes = False
+        start_pos, end_pos = TrimVideo.get_timecodes(url, args)
 
-        if not (timecode or args_is_timecodes):
+        if start_pos:
+            tm = TrimVideo()
+            video_content = tm.trim_link_pos(url, start_pos, end_pos)
+        else:
             self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.UPLOAD_VIDEO)
             content_url = y_api.get_video_download_url(url, self.event.platform)
             video_content = requests.get(content_url).content
             self.bot.stop_activity_thread()
-        else:
-            event = Event(bot=self.bot)
-            event.sender = self.event.sender
-            event.platform = self.event.platform
-            event.message = Message()
-            args.append(self.event.attachments[0].url.lower())
-            event.message.args = args
-            tv_cmd = TrimVideo(event=event)
-            video_content = tv_cmd.parse_link(self.event.attachments[0])
         attachments = [
             self.bot.get_video_attachment(video_content, peer_id=self.event.peer_id, filename=y_api.filename)
         ]

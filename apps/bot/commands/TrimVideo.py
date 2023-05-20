@@ -40,46 +40,33 @@ class TrimVideo(Command):
             if isinstance(att, LinkAttachment):
                 if not att.is_youtube_link:
                     raise PWarning("Обрезка по ссылке доступна только для YouTube")
-                video_bytes = self.parse_link(att)
+                video_bytes = self.trim_att_by_link(att)
             else:
-                video_bytes = self.parse_video(att)
+                video_bytes = self.trim_video(att)
         finally:
             self.bot.stop_activity_thread()
 
         video = self.bot.get_video_attachment(video_bytes, peer_id=self.event.peer_id)
         return {'attachments': [video]}
 
-    def parse_link(self, att):
-        yt_api = YoutubeVideoAPI()
-
+    def trim_att_by_link(self, att):
         args = [x for x in self.event.message.args]
         args.remove(att.url.lower())
 
+        start_pos, end_pos = self.get_timecodes(att.url, args)
+        return self.trim_link_pos(att.url, start_pos, end_pos, self.event.platform)
+
+    def trim_link_pos(self, link, start_pos, end_pos=None, platform=None):
         delta = None
-        end_pos = None
-        yt_timecode = yt_api.get_timecode_str(att.url)
-        if yt_timecode:
-            start_pos = yt_timecode
-            if args:
-                end_pos = args[0]
-        else:
-            if not args:
-                raise PWarning("Должны быть переданы аргументы или таймкод должен быть в ссылке youtube видео")
-            start_pos = args[0]
-            if len(args) == 2:
-                end_pos = args[1]
-
-        start_pos = self.parse_timecode(start_pos)
         if end_pos:
-            end_pos = self.parse_timecode(end_pos)
             delta = (datetime.strptime(end_pos, "%H:%M:%S.%f") - datetime.strptime(start_pos, "%H:%M:%S.%f")).seconds
-
-        download_url = yt_api.get_video_download_url(att.url, self.event.platform, timedelta=delta)
+        yt_api = YoutubeVideoAPI()
+        link = yt_api.get_video_download_url(link, platform, timedelta=delta)
         if yt_api.filesize > 100 and not self.event.sender.check_role(Role.TRUSTED):
             raise PWarning("Нельзя грузить отрезки из ютуба больше 100мб")
-        return self.trim(download_url, start_pos, end_pos)
+        return self.trim(link, start_pos, end_pos)
 
-    def parse_video(self, video: VideoAttachment):
+    def trim_video(self, video: VideoAttachment):
         start_pos = self.parse_timecode(self.event.message.args[0])
         end_pos = None
         if len(self.event.message.args) > 1:
@@ -123,3 +110,29 @@ class TrimVideo(Command):
             raise PWarning("Ошибка парсинга таймкода")
         res = f"{prepend_symbols(h, '0', 2)}:{prepend_symbols(m, '0', 2)}:{prepend_symbols(s, '0', 2)}.{append_symbols(ms, '0', 3)}"
         return res
+
+    @classmethod
+    def get_timecodes(cls, url: str, args: list):
+        """
+        Метод вытаскивает таймкоды для команды Trim
+        """
+        from apps.bot.APIs.YoutubeVideoAPI import YoutubeVideoAPI
+
+        y_api = YoutubeVideoAPI()
+        start_yt_timecode = y_api.get_timecode_str(url)
+
+        end_pos = None
+        if start_yt_timecode:
+            start_pos = TrimVideo.parse_timecode(start_yt_timecode)
+            if args:
+                end_pos = TrimVideo.parse_timecode(args[0])
+        elif args:
+            try:
+                start_pos = TrimVideo.parse_timecode(args[0])
+                if len(args) > 1:
+                    end_pos = TrimVideo.parse_timecode(args[1])
+            except ValueError:
+                return None, None
+        else:
+            return None, None
+        return start_pos, end_pos

@@ -9,12 +9,23 @@ class ServiceAdmin(admin.ModelAdmin):
     list_display = ('name', 'value', 'update_datetime')
 
 
+@admin.action(description="Проставить тип: видео")
+def set_type_video(modeladmin, request, queryset):
+    queryset.update(type="video")
+
+
+@admin.action(description="Проставить тип: ссылка")
+def set_type_link(modeladmin, request, queryset):
+    queryset.update(type="link")
+
+
 @admin.register(Meme)
 class MemeAdmin(admin.ModelAdmin):
     list_display = (
         'id', 'name', 'preview_image', 'preview_link', 'author', 'approved', 'type', 'uses', 'link', 'tg_file_id')
     search_fields = ('name', 'link')
     list_filter = (('author', admin.RelatedOnlyFieldListFilter), 'type', 'approved',)
+    actions = [set_type_video, set_type_link]
 
 
 @admin.register(Notify)
