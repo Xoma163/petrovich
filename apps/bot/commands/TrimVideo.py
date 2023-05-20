@@ -35,14 +35,17 @@ class TrimVideo(Command):
 
     def start(self):
         att = self.event.get_all_attachments([LinkAttachment, VideoAttachment])[0]
-        self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.UPLOAD_VIDEO)
-        if isinstance(att, LinkAttachment):
-            if not att.is_youtube_link:
-                raise PWarning("Обрезка по ссылке доступна только для YouTube")
-            video_bytes = self.parse_link(att)
-        else:
-            video_bytes = self.parse_video(att)
-        self.bot.stop_activity_thread()
+        try:
+            self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.UPLOAD_VIDEO)
+            if isinstance(att, LinkAttachment):
+                if not att.is_youtube_link:
+                    raise PWarning("Обрезка по ссылке доступна только для YouTube")
+                video_bytes = self.parse_link(att)
+            else:
+                video_bytes = self.parse_video(att)
+        finally:
+            self.bot.stop_activity_thread()
+
         video = self.bot.get_video_attachment(video_bytes, peer_id=self.event.peer_id)
         return {'attachments': [video]}
 
@@ -69,7 +72,7 @@ class TrimVideo(Command):
         start_pos = self.parse_timecode(start_pos)
         if end_pos:
             end_pos = self.parse_timecode(end_pos)
-            delta = (datetime.strptime(end_pos, "%H:%M:%S") - datetime.strptime(start_pos, "%H:%M:%S")).seconds
+            delta = (datetime.strptime(end_pos, "%H:%M:%S.%f") - datetime.strptime(start_pos, "%H:%M:%S.%f")).seconds
 
         download_url = yt_api.get_video_download_url(att.url, self.event.platform, timedelta=delta)
         if yt_api.filesize > 100 and not self.event.sender.check_role(Role.TRUSTED):
