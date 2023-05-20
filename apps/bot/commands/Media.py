@@ -8,7 +8,6 @@ from urllib3.exceptions import MaxRetryError
 from apps.bot.APIs.InstagramAPI import InstagramAPI
 from apps.bot.APIs.PikabuAPI import PikabuAPI
 from apps.bot.APIs.PinterestAPI import PinterestAPI
-from apps.bot.APIs.RedditSaver import RedditSaver
 from apps.bot.APIs.TheHoleAPI import TheHoleAPI
 from apps.bot.APIs.TikTokDownloaderAPI import TikTokDownloaderAPI
 from apps.bot.APIs.WASDAPI import WASDAPI
@@ -25,6 +24,7 @@ from apps.bot.classes.messages.Message import Message
 from apps.bot.classes.messages.attachments.LinkAttachment import LinkAttachment
 from apps.bot.commands.TrimVideo import TrimVideo
 from apps.bot.utils.NothingLogger import NothingLogger
+from apps.bot.utils.RedditSaver import RedditSaver
 from apps.bot.utils.utils import get_urls_from_text
 
 YOUTUBE_URLS = ('www.youtube.com', 'youtube.com', "www.youtu.be", "youtu.be")
