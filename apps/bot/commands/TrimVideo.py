@@ -99,7 +99,9 @@ class TrimVideo(Command):
                 ms = timecode[i + 1:len(timecode)]
                 break
         if not dot_in_timecode:
-            numbers.append(timecode[last_save_index:len(timecode)])
+            n = timecode[last_save_index:len(timecode)]
+            n = str(int(n))
+            numbers.append(n)
         if len(numbers) == 3:
             h, m, s = numbers
         elif len(numbers) == 2:
@@ -116,8 +118,6 @@ class TrimVideo(Command):
         """
         Метод вытаскивает таймкоды для команды Trim
         """
-        from apps.bot.APIs.YoutubeVideoAPI import YoutubeVideoAPI
-
         y_api = YoutubeVideoAPI()
         start_yt_timecode = y_api.get_timecode_str(url)
 

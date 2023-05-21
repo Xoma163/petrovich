@@ -165,7 +165,10 @@ class Media(Command):
         y_api = YoutubeVideoAPI()
 
         args = self.event.message.args[1:] if self.event.message.command in self.full_names else self.event.message.args
-        start_pos, end_pos = TrimVideo.get_timecodes(url, args)
+        try:
+            start_pos, end_pos = TrimVideo.get_timecodes(url, args)
+        except ValueError:
+            start_pos = None
 
         if start_pos:
             tm = TrimVideo()
