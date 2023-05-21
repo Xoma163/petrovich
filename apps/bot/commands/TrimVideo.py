@@ -81,26 +81,25 @@ class TrimVideo(Command):
 
     @classmethod
     def parse_timecode(cls, timecode):
-        h = "0"
-        m = "0"
-        s = "0"
-        ms = "0"
+        h = 0
+        m = 0
+        s = 0
+        ms = 0
         numbers = []
         last_save_index = 0
 
         dot_in_timecode = False
         for i, symbol in enumerate(timecode):
             if symbol == ":":
-                numbers.append(timecode[last_save_index:i])
+                numbers.append(int(timecode[last_save_index:i]))
                 last_save_index = i + 1
             if symbol == ".":
                 dot_in_timecode = True
-                numbers.append(timecode[last_save_index:i])
-                ms = timecode[i + 1:len(timecode)]
+                numbers.append(int(timecode[last_save_index:i]))
+                ms = int(timecode[i + 1:len(timecode)])
                 break
         if not dot_in_timecode:
-            n = timecode[last_save_index:len(timecode)]
-            n = str(int(n))
+            n = int(timecode[last_save_index:len(timecode)])
             numbers.append(n)
         if len(numbers) == 3:
             h, m, s = numbers
@@ -110,7 +109,19 @@ class TrimVideo(Command):
             s = numbers[0]
         else:
             raise PWarning("Ошибка парсинга таймкода")
-        res = f"{prepend_symbols(h, '0', 2)}:{prepend_symbols(m, '0', 2)}:{prepend_symbols(s, '0', 2)}.{append_symbols(ms, '0', 3)}"
+
+        s_div_60 = s // 60
+        if s_div_60 > 0:
+            s = s % 60
+            m += s_div_60
+
+        m_div_60 = m // 60
+        if m_div_60 > 0:
+            m = m % 60
+            h += m_div_60
+
+        res = f"{prepend_symbols(str(h), '0', 2)}:{prepend_symbols(str(m), '0', 2)}:" \
+              f"{prepend_symbols(str(s), '0', 2)}.{append_symbols(str(ms), '0', 3)}"
         return res
 
     @classmethod
