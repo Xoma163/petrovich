@@ -142,9 +142,10 @@ class Tag(Command):
         if not users:
             raise PWarning("В теге нет пользователей")
         msg_list = [self.bot.get_mention(user) for user in users]
-        msg = "\n".join(msg_list)
+        msg = ""
         if text:
-            msg += f"\n\n{text}"
+            msg += f"{text}\n\n"
+        msg += "\n".join(msg_list)
 
         reply_to = self.event.fwd[0].message.id if self.event.fwd else None
 
