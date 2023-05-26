@@ -1,8 +1,10 @@
+import json
 import re
 from urllib.parse import urlparse
 
 import requests
 import youtube_dl
+from bs4 import BeautifulSoup
 from urllib3.exceptions import MaxRetryError
 
 from apps.bot.APIs.InstagramAPI import InstagramAPI
@@ -36,6 +38,7 @@ THE_HOLE_URLS = ('www.the-hole.tv', 'the-hole.tv')
 WASD_URLS = ('www.wasd.tv', 'wasd.tv')
 YANDEX_MUSIC_URLS = ('music.yandex.ru',)
 PINTEREST_URLS = ('pinterest.com', 'ru.pinterest.com', 'www.pinterest.com', 'pin.it')
+COUB_URLS = ('coub.com',)
 
 MEDIA_URLS = tuple(
     list(YOUTUBE_URLS) +
@@ -48,7 +51,8 @@ MEDIA_URLS = tuple(
     list(THE_HOLE_URLS) +
     list(WASD_URLS) +
     list(YANDEX_MUSIC_URLS) +
-    list(PINTEREST_URLS)
+    list(PINTEREST_URLS) +
+    list(COUB_URLS)
 )
 
 
@@ -146,6 +150,7 @@ class Media(Command):
             WASD_URLS: self.get_wasd_video,
             YANDEX_MUSIC_URLS: self.get_yandex_music,
             PINTEREST_URLS: self.get_pinterest_attachment,
+            COUB_URLS: self.get_coub_video,
         }
 
         urls = get_urls_from_text(source)
@@ -343,3 +348,15 @@ class Media(Command):
             raise PWarning("Я хз чё за контент")
 
         return attachments, p_api.title
+
+    def get_coub_video(self, url):
+        headers = {
+            'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+        }
+        content = requests.get(url, headers=headers).content
+        bs4 = BeautifulSoup(content, "html.parser")
+        data = json.loads(bs4.find("script", {'id': 'coubPageCoubJson'}).text)
+        video_url = data['file_versions']['share']['default']
+        attachments = [self.bot.get_video_attachment(video_url, peer_id=self.event.peer_id)]
+        title = data['title']
+        return attachments, title
