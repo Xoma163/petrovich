@@ -558,18 +558,6 @@ class Meme(Command):
                     'title': meme.name,
                 })
             elif meme.type == LinkAttachment.TYPE:
-                parsed_url = urlparse(meme.link)
-                video_id = parsed_url.path.strip('/')
-                if parsed_url.query:
-                    # dict cast
-                    query_dict = {x[0]: x[1] for x in parse_qsl(parsed_url.query)}
-                    v = query_dict.get('v', None)
-                    if v:
-                        video_id = v
-
-                y_api = YoutubeVideoAPI()
-                ts = y_api.get_timecode_str(meme.link)
-
                 if meme.tg_file_id:
                     qr.update({
                         'id': meme.pk,
@@ -578,6 +566,16 @@ class Meme(Command):
                         'title': meme.name,
                     })
                 else:
+                    parsed_url = urlparse(meme.link)
+                    video_id = parsed_url.path.strip('/')
+                    if parsed_url.query:
+                        # dict cast
+                        query_dict = {x[0]: x[1] for x in parse_qsl(parsed_url.query)}
+                        v = query_dict.get('v', None)
+                        if v:
+                            video_id = v
+                    y_api = YoutubeVideoAPI()
+                    ts = y_api.get_timecode_str(meme.link)
                     qr = {
                         'id': meme.pk,
                         'type': "video",
@@ -587,10 +585,9 @@ class Meme(Command):
                         'thumb_url': f"https://img.youtube.com/vi/{video_id}/default.jpg",
                         'input_message_content': {
                             'message_text': meme.link
-                        }
+                        },
+                        'caption': ts
                     }
-                if ts:
-                    qr['caption'] = ts
             else:
                 raise RuntimeError()
             _inline_qr.append(qr)
