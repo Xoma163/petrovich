@@ -5,18 +5,19 @@ import requests
 import yt_dlp
 from bs4 import BeautifulSoup
 
-from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning, PSkip
 from apps.bot.utils.NothingLogger import NothingLogger
 
 
 class YoutubeVideoAPI:
-    def __init__(self):
+    def __init__(self, max_filesize_mb=None):
         self.title = None
         self.duration = 0
         self.id = None
         self.filesize = 0
         self.filename = ""
+
+        self.max_filesize_mb = max_filesize_mb
 
     @staticmethod
     def get_timecode_str(url):
@@ -81,20 +82,18 @@ class YoutubeVideoAPI:
             raise PSkip()
         video_urls = [x for x in video_info['formats'] if x['ext'] == 'mp4' and x.get('asr')]
         videos = sorted(video_urls, key=lambda x: x['format_note'], reverse=True)
-        if platform == Platform.TG:
-            from apps.bot.classes.bots.tg.TgBot import TgBot
-
+        if self.max_filesize_mb:  # for tg
             for video in videos:
                 filesize = video.get('filesize') or video.get('filesize_approx')
                 if filesize:
                     self.filesize = filesize / 1024 / 1024
 
-                    if self.filesize < TgBot.MAX_VIDEO_SIZE_MB:
+                    if self.filesize < self.max_filesize_mb:
                         max_quality_video = video
                         break
                     if timedelta:
                         mbps = self.filesize / self.duration
-                        if mbps * timedelta < TgBot.MAX_VIDEO_SIZE_MB - 2:
+                        if mbps * timedelta < self.max_filesize_mb - 2:
                             max_quality_video = video
                             break
             else:

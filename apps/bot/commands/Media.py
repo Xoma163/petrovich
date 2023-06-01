@@ -25,6 +25,7 @@ from apps.bot.classes.messages.attachments.LinkAttachment import LinkAttachment
 from apps.bot.commands.TrimVideo import TrimVideo
 from apps.bot.utils.NothingLogger import NothingLogger
 from apps.bot.utils.RedditSaver import RedditSaver
+from apps.bot.utils.VKVideoDownloader import VKVideoDownloader
 from apps.bot.utils.utils import get_urls_from_text
 
 YOUTUBE_URLS = ('www.youtube.com', 'youtube.com', "www.youtu.be", "youtu.be")
@@ -39,6 +40,7 @@ WASD_URLS = ('www.wasd.tv', 'wasd.tv')
 YANDEX_MUSIC_URLS = ('music.yandex.ru',)
 PINTEREST_URLS = ('pinterest.com', 'ru.pinterest.com', 'www.pinterest.com', 'pin.it')
 COUB_URLS = ('coub.com',)
+VK_URLS = ('vk.com',)
 
 MEDIA_URLS = tuple(
     list(YOUTUBE_URLS) +
@@ -52,7 +54,8 @@ MEDIA_URLS = tuple(
     list(WASD_URLS) +
     list(YANDEX_MUSIC_URLS) +
     list(PINTEREST_URLS) +
-    list(COUB_URLS)
+    list(COUB_URLS) +
+    list(VK_URLS)
 )
 
 
@@ -151,6 +154,7 @@ class Media(Command):
             YANDEX_MUSIC_URLS: self.get_yandex_music,
             PINTEREST_URLS: self.get_pinterest_attachment,
             COUB_URLS: self.get_coub_video,
+            VK_URLS: self.get_vk_video,
         }
 
         urls = get_urls_from_text(source)
@@ -167,7 +171,8 @@ class Media(Command):
     def get_youtube_video(self, url):
         if 'audio' in self.event.message.keys:
             return self.get_youtube_audio(url)
-        y_api = YoutubeVideoAPI()
+        max_filesize_mb = self.bot.MAX_VIDEO_SIZE_MB if isinstance(self.bot, TgBot) else None
+        y_api = YoutubeVideoAPI(max_filesize_mb=max_filesize_mb)
 
         args = self.event.message.args[1:] if self.event.message.command in self.full_names else self.event.message.args
         try:
@@ -359,4 +364,13 @@ class Media(Command):
         video_url = data['file_versions']['share']['default']
         attachments = [self.bot.get_video_attachment(video_url, peer_id=self.event.peer_id)]
         title = data['title']
+        return attachments, title
+
+    def get_vk_video(self, url):
+        max_filesize_mb = self.bot.MAX_VIDEO_SIZE_MB if isinstance(self.bot, TgBot) else None
+
+        vk_vd = VKVideoDownloader(max_filesize_mb=max_filesize_mb)
+        video_url = vk_vd.get_video(url)
+        attachments = [self.bot.get_video_attachment(video_url, peer_id=self.event.peer_id, filename="video.mp4")]
+        title = vk_vd.title
         return attachments, title

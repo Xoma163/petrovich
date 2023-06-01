@@ -13,9 +13,6 @@ class WASDAPI:
         self.show_name = None
         self.m3u8_bytes = None
 
-    def get_m3u8(self):
-        pass
-
     def parse_channel(self, url):
         last_part = url.split('/')[-1]
 

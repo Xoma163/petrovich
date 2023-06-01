@@ -1,12 +1,10 @@
-import datetime
-from tempfile import NamedTemporaryFile
 from urllib.parse import urlparse
 
 import requests
 from bs4 import BeautifulSoup
 
 from apps.bot.classes.consts.Exceptions import PWarning
-from apps.bot.utils.DoTheLinuxComand import do_the_linux_command
+from apps.bot.utils.AudioVideoMuxer import AudioVideoMuxer
 from apps.bot.utils.utils import get_url_file_ext
 
 
@@ -19,10 +17,6 @@ class RedditSaver:
     CONTENT_TYPE_LINK = "link"
 
     def __init__(self):
-        self.timestamp = datetime.datetime.now().timestamp()
-        self.tmp_video_file = NamedTemporaryFile()
-        self.tmp_audio_file = NamedTemporaryFile()
-        self.tmp_output_file = NamedTemporaryFile()
         self.title = None
         self.data = None
         self.media_data = None
@@ -69,32 +63,6 @@ class RedditSaver:
             raise PWarning("Нет видео в посте")
         return video_url, audio_url
 
-    def _get_download_video_and_audio(self, video_url, audio_url):
-        do_the_linux_command(f"curl -o {self.tmp_video_file.name} {video_url}")
-        do_the_linux_command(f"curl -o {self.tmp_audio_file.name} {audio_url}")
-
-    def _mux_video_and_audio(self):
-        try:
-            do_the_linux_command(
-                f"ffmpeg -i {self.tmp_video_file.name} -i {self.tmp_audio_file.name} -c:v copy -c:a aac -strict experimental -f mp4 -y {self.tmp_output_file.name}")
-        finally:
-            self._delete_video_audio_files()
-
-    def _delete_video_audio_files(self):
-        self.tmp_video_file.close()
-        self.tmp_audio_file.close()
-
-    def _delete_output_file(self):
-        self.tmp_output_file.close()
-
-    def _get_video_bytes(self):
-        try:
-            with open(self.tmp_output_file.name, 'rb') as file:
-                file_bytes = file.read()
-        finally:
-            self._delete_output_file()
-        return file_bytes
-
     def get_video_from_post(self) -> bytes:
         """
         Получаем видео с аудио
@@ -107,9 +75,11 @@ class RedditSaver:
         if not audio_url:
             return video_url
             # return requests.get(video_url).content
-        self._get_download_video_and_audio(video_url, audio_url)
-        self._mux_video_and_audio()
-        return self._get_video_bytes()
+        avm = AudioVideoMuxer()
+        video_content = requests.get(video_url).content
+        audio_content = requests.get(audio_url).content
+        video = avm.mux(video_content, audio_content)
+        return video
 
     def get_text_from_post(self):
         return self.data['selftext']
