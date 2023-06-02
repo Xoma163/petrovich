@@ -1,4 +1,6 @@
 import logging
+import os
+import shutil
 import time
 from itertools import groupby
 
@@ -12,6 +14,7 @@ from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.events.Event import Event
 from apps.bot.commands.Media import Media
 from apps.service.models import Subscribe, VideoCache
+from petrovich.settings import env
 
 logger = logging.getLogger('subscribe_notifier')
 
@@ -32,9 +35,9 @@ class Command(BaseCommand):
             #     logger.exception("Ошибка в проверке/отправке оповещения о стриме")
 
     def check_subs(self, service, subs):
-        # if service == Subscribe.SERVICE_YOUTUBE:
-        #     self.check_youtube_video(subs)
-        if service == Subscribe.SERVICE_THE_HOLE:
+        if service == Subscribe.SERVICE_YOUTUBE:
+            self.check_youtube_video(subs)
+        elif service == Subscribe.SERVICE_THE_HOLE:
             self.check_the_hole_video(subs)
         elif service == Subscribe.SERVICE_WASD:
             self.check_wasd_video(subs)
@@ -146,20 +149,19 @@ class Command(BaseCommand):
             for i, message in enumerate(messages):
                 self.send_notify(sub, titles[i], urls[i])
                 bot.parse_and_send_msgs(message, sub.peer_id, sub.message_thread_id)
+
+                if sub.save_to_plex:
+                    cache = VideoCache.objects.get(channel_id=sub.channel_id, video_id=ids[i])
+                    self._save_to_plex(cache, sub.title, titles[i])
+
                 time.sleep(1)
             sub.last_video_id = ids[-1]
             sub.save()
 
-    @staticmethod
-    def _save_video_to_media(channel_id, video_id, file_id, name, content):
-        filename = f"{name}.mp4"
-        cache = VideoCache(
-            channel_id=channel_id,
-            video_id=video_id,
-            file_id=file_id,
-            filename=filename
-        )
-        cache.save()
-        cache.video.save(filename, content=content)
-        cache.save()
-        return cache
+    def _save_to_plex(self, cache, show_name, series_name):
+        path = env.str('PLEX_SAVE_PATH')
+
+        show_folder = os.path.join(path, show_name)
+        if not os.path.exists(show_folder):
+            os.makedirs(show_folder)
+        shutil.copyfile(cache.video.path, os.path.join(show_folder, f"{series_name}.mp4"))

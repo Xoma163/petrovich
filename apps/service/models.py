@@ -1,5 +1,8 @@
+import os
+
 from django.db import models
 from django.db.models import JSONField
+from django.dispatch import receiver
 from django.utils.html import format_html
 
 from apps.bot.models import Chat, Profile, User
@@ -167,6 +170,8 @@ class Subscribe(models.Model):
     youtube_ignore_shorts = models.BooleanField("Игнорировать Youtube shorts", blank=True, default=False)
     message_thread_id = models.IntegerField("message_thread_id", blank=True, null=True, default=None)
 
+    save_to_plex = models.BooleanField("Сохранять в plex", default=False)
+
     @property
     def peer_id(self):
         return self.chat.chat_id if self.chat else self.author.user_id
@@ -187,10 +192,6 @@ class VideoCache(models.Model):
     filename = models.CharField('Название файла', max_length=256)
     video = models.FileField('Видео', blank=True, upload_to="service/video/")
 
-    def delete(self, using=None, keep_parents=False):
-        self.video.delete()
-        super().delete(using, keep_parents)
-
     class Meta:
         unique_together = ('channel_id', 'video_id')
         verbose_name = "Кэш видео"
@@ -199,6 +200,17 @@ class VideoCache(models.Model):
 
     def __str__(self):
         return self.filename
+
+
+@receiver(models.signals.post_delete, sender=VideoCache)
+def auto_delete_file_on_delete(sender, instance, **kwargs):
+    """
+    Deletes file from filesystem
+    when corresponding `MediaFile` object is deleted.
+    """
+    if instance.video:
+        if os.path.isfile(instance.video.path):
+            os.remove(instance.video.path)
 
 
 class HoroscopeMeme(BaseMeme):
