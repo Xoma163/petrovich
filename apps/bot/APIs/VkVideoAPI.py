@@ -1,9 +1,9 @@
+import json
 import os
 from tempfile import NamedTemporaryFile
 from typing import Tuple, Optional
 from urllib.parse import urlparse
 
-import json
 import requests
 import xmltodict
 import yt_dlp
@@ -11,9 +11,11 @@ from bs4 import BeautifulSoup
 
 from apps.bot.utils.AudioVideoMuxer import AudioVideoMuxer
 from apps.bot.utils.DoTheLinuxComand import do_the_linux_command
+from apps.bot.utils.NothingLogger import NothingLogger
 
 
-class VKVideoDownloader:
+class VKVideoAPI:
+    URL = "https://vk.com/video"
     headers = {
         'authority': 'vk.com',
         'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
@@ -33,6 +35,9 @@ class VKVideoDownloader:
     def __init__(self, max_filesize_mb=None):
         self.title = None
         self.max_filesize_mb = max_filesize_mb
+
+        self.channel_id = None
+        self.last_video_id = None
 
     def get_video(self, url):
         player_url = self._get_player_url(url)
@@ -99,7 +104,10 @@ class VKVideoDownloader:
 
     @staticmethod
     def _get_video_hls(hls_url) -> tuple[bytes, None]:
-        ytdl = yt_dlp.YoutubeDL()
+        ydl_params = {
+            'logger': NothingLogger()
+        }
+        ytdl = yt_dlp.YoutubeDL(ydl_params)
         info = ytdl.extract_info(hls_url, download=False)
         url = info['formats'][-1]['url']
 
@@ -111,3 +119,47 @@ class VKVideoDownloader:
         finally:
             os.remove(tmp_video_file)
         return video_content, None
+
+    def parse_channel(self, url):
+        content = requests.get(url, headers=self.headers).content
+        bs4 = BeautifulSoup(content, "html.parser")
+        title = bs4.select_one('.VideoHeader__breadcrumbsEntity .VideoHeader__name').text
+        if 'playlist' in url:
+            playlist_id = url.rsplit('_', 1)[1]
+            videos = bs4.find('div', {'id': f"video_subtab_pane_playlist_{playlist_id}"}) \
+                .find_all('div', {'class': 'VideoCard__info'})
+            show_name = bs4.select('.ui_crumb')[-1].text
+            self.title = f"{title} | {show_name}"
+        else:
+            videos = bs4.find('div', {'id': "video_subtab_pane_all"}).find_all('div', {'class': 'VideoCard__info'})
+            self.title = title
+        last_video = videos[0]
+        self.last_video_id = last_video.find("a", {"class": "VideoCard__title"}).attrs['data-id']
+        self.channel_id = urlparse(url).path.split('/', 2)[2]
+
+    def get_last_video_ids_with_titles(self, channel_id, last_video_id=None):
+        url = f"{self.URL}/{channel_id}"
+        content = requests.get(url, headers=self.headers).content
+        bs4 = BeautifulSoup(content, "html.parser")
+
+        if 'playlist' in url:
+            playlist_id = url.rsplit('_', 1)[1]
+            videos = bs4.find('div', {'id': f"video_subtab_pane_playlist_{playlist_id}"}) \
+                .find_all('div', {'class': 'VideoCard__info'})
+        else:
+            videos = bs4.find('div', {'id': "video_subtab_pane_all"}).find_all('div', {'class': 'VideoCard__info'})
+
+        ids = [video.find('a', {'class': 'VideoCard__title'}).attrs['data-id'] for video in videos]
+        titles = [video.select_one('.VideoCard__title').text.strip() for video in videos]
+
+        if last_video_id:
+            try:
+                index = ids.index(last_video_id)
+                ids = ids[:index]
+                titles = titles[:index]
+            except IndexError:
+                pass
+
+        ids = list(reversed(ids))
+        titles = list(reversed(titles))
+        return ids, titles

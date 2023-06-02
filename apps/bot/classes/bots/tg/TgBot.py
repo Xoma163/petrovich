@@ -147,7 +147,10 @@ class TgBot(CommonBot):
         """
         self.set_activity_thread(default_params['chat_id'], ActivitiesEnum.UPLOAD_DOCUMENT)
         document: DocumentAttachment = rm.attachments[0]
-        if document.public_download_url:
+        if document.file_id:
+            default_params['document'] = document.file_id
+            return self.requests.get('sendDocument', default_params)
+        elif document.public_download_url:
             default_params['document'] = document.public_download_url
             return self.requests.get('sendDocument', default_params)
         else:

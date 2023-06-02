@@ -447,7 +447,7 @@ class Meme(Command):
             video_id = parsed_url.path.strip('/')
             video.thumb = f"https://img.youtube.com/vi/{video_id}/default.jpg"
             msg = {'attachments': [video]}
-            r = self.bot.parse_and_send_msgs(msg, video_uploading_chat.chat_id, self.event.message_thread_id)
+            r = self.bot.parse_and_send_msgs(msg, video_uploading_chat.chat_id)
             r_json = r[0]['response'].json()
             self.bot.delete_message(video_uploading_chat.chat_id, r_json['result']['message_id'])
             file_id = r_json['result']['video']['file_id']

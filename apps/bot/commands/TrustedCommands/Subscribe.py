@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from apps.bot.APIs.TheHoleAPI import TheHoleAPI
+from apps.bot.APIs.VKVideoAPI import VKVideoAPI
 from apps.bot.APIs.WASDAPI import WASDAPI
 from apps.bot.APIs.YoutubeVideoAPI import YoutubeVideoAPI
 from apps.bot.classes.Command import Command
@@ -17,7 +18,7 @@ MAX_USER_SUBS_COUNT = 3
 class Subscribe(Command):
     name = "подписка"
     names = ['подписки']
-    help_text = "создаёт подписку на каналы"
+    help_text = "создаёт подписку на каналы. Доступные: YouTube, The-Hole, WAST, VK"
     help_texts = [
         "добавить (ссылка на канал) - создаёт подписку на канал. Бот пришлёт тебе новое видео с канала",
         "удалить (название канала) - удаляет вашу подписку на канал (если в конфе, то только по конфе, в лс только по лс)",
@@ -32,10 +33,6 @@ class Subscribe(Command):
     access = Role.TRUSTED
 
     bot: TgBot
-
-    THE_HOLE_URL = "the-hole.tv"
-    YOUTUBE_URL = "youtube.com"
-    WASD_URL = "wasd.tv"
 
     def start(self):
         arg0 = self.event.message.args[0]
@@ -63,8 +60,11 @@ class Subscribe(Command):
         elif attachment.is_wasd_link:
             channel_id, title, date, last_video_id, is_stream = self.menu_add_wasd(attachment.url)
             service = SubscribeModel.SERVICE_WASD
+        elif attachment.is_vk_link:
+            channel_id, title, date, last_video_id, is_stream = self.menu_add_vk(attachment.url)
+            service = SubscribeModel.SERVICE_VK
         else:
-            raise PWarning("Незнакомый сервис. Доступные: \nYouTube, The-Hole, WAST")
+            raise PWarning("Незнакомый сервис. Доступные: \nYouTube, The-Hole, WAST, VK")
 
         if self.event.chat:
             existed_sub = SubscribeModel.objects.filter(chat=self.event.chat, channel_id=channel_id)
@@ -98,7 +98,6 @@ class Subscribe(Command):
 
         title = youtube_data['title']
         date = youtube_data['last_video']['date']
-
         is_stream = False
 
         return channel_id, title, date, None, is_stream
@@ -118,6 +117,14 @@ class Subscribe(Command):
         is_stream = True
 
         return wasd_api.channel_id, wasd_api.title, None, None, is_stream
+
+    @staticmethod
+    def menu_add_vk(url):
+        vk_api = VKVideoAPI()
+        vk_api.parse_channel(url)
+        is_stream = False
+
+        return vk_api.channel_id, vk_api.title, None, vk_api.last_video_id, is_stream
 
     def menu_delete(self):
         self.check_args(2)

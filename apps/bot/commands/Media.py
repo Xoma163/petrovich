@@ -12,6 +12,7 @@ from apps.bot.APIs.PikabuAPI import PikabuAPI
 from apps.bot.APIs.PinterestAPI import PinterestAPI
 from apps.bot.APIs.TheHoleAPI import TheHoleAPI
 from apps.bot.APIs.TikTokDownloaderAPI import TikTokDownloaderAPI
+from apps.bot.APIs.VKVideoAPI import VKVideoAPI
 from apps.bot.APIs.WASDAPI import WASDAPI
 from apps.bot.APIs.YandexMusicAPI import YandexMusicAPI
 from apps.bot.APIs.YoutubeMusicAPI import YoutubeMusicAPI
@@ -25,7 +26,6 @@ from apps.bot.classes.messages.attachments.LinkAttachment import LinkAttachment
 from apps.bot.commands.TrimVideo import TrimVideo
 from apps.bot.utils.NothingLogger import NothingLogger
 from apps.bot.utils.RedditSaver import RedditSaver
-from apps.bot.utils.VKVideoDownloader import VKVideoDownloader
 from apps.bot.utils.utils import get_urls_from_text
 
 YOUTUBE_URLS = ('www.youtube.com', 'youtube.com', "www.youtu.be", "youtu.be")
@@ -369,7 +369,7 @@ class Media(Command):
     def get_vk_video(self, url):
         max_filesize_mb = self.bot.MAX_VIDEO_SIZE_MB if isinstance(self.bot, TgBot) else None
 
-        vk_vd = VKVideoDownloader(max_filesize_mb=max_filesize_mb)
+        vk_vd = VKVideoAPI(max_filesize_mb=max_filesize_mb)
         video_url = vk_vd.get_video(url)
         attachments = [self.bot.get_video_attachment(video_url, peer_id=self.event.peer_id, filename="video.mp4")]
         title = vk_vd.title
