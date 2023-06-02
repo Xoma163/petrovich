@@ -381,7 +381,13 @@ class Media(Command):
             attachment = VideoAttachment()
             attachment.file_id = cache.file_id
         except VideoCache.DoesNotExist:
-            video_url = vk_v_api.get_video(url)
+
+            try:
+                self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.UPLOAD_VIDEO)
+                video_url = vk_v_api.get_video(url)
+            finally:
+                self.bot.stop_activity_thread()
+
             attachment = self.bot.get_video_attachment(video_url, peer_id=self.event.peer_id, filename="video.mp4")
             filename = f"{video_info['channel_title']}_{title}"
 

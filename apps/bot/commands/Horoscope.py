@@ -1,4 +1,5 @@
 from datetime import datetime
+from time import sleep
 
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Exceptions import PWarning
@@ -109,6 +110,7 @@ class Horoscope(Command):
         for sign in signs:
             message = self.get_horoscope_by_zodiac_sign(sign)
             self.bot.parse_and_send_msgs_thread(message, self.event.peer_id, self.event.message_thread_id)
+            sleep(1)
 
     def get_horoscope_for_conference(self):
         self.check_conversation()
@@ -128,6 +130,7 @@ class Horoscope(Command):
         for sign in signs:
             message = self.get_horoscope_by_zodiac_sign(sign)
             self.bot.parse_and_send_msgs_thread(message, self.event.peer_id, self.event.message_thread_id)
+            sleep(1)
 
     def get_horoscope_info(self):
         self.check_args(2)
