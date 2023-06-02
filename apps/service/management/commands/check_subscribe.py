@@ -12,8 +12,8 @@ from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.events.Event import Event
 from apps.bot.commands.Media import Media
 from apps.bot.models import Chat
-from apps.service.models import Subscribe
-from petrovich.settings import env
+from apps.service.models import Subscribe, VideoCache
+from petrovich.settings import env, MAIN_SITE
 
 logger = logging.getLogger('subscribe_notifier')
 
@@ -28,10 +28,10 @@ class Command(BaseCommand):
         groupped_subs = groupby(subs.order_by("channel_id"), lambda x: (x.service, x.channel_id))
         for (service, _), subs in groupped_subs:
             subs = list(subs)
-            try:
-                self.check_subs(service, subs)
-            except Exception:
-                logger.exception("Ошибка в проверке/отправке оповещения о стриме")
+            # try:
+            self.check_subs(service, subs)
+            # except Exception:
+            #     logger.exception("Ошибка в проверке/отправке оповещения о стриме")
 
     def check_subs(self, service, subs):
         # if service == Subscribe.SERVICE_YOUTUBE:
@@ -52,6 +52,7 @@ class Command(BaseCommand):
             is_shorts = youtube_data['last_video']['is_shorts']
             if sub.youtube_ignore_shorts and is_shorts:
                 sub.date = youtube_data['last_video']['date']
+                sub.last_video_id = youtube_data['last_video']['id']  # прост так.
                 sub.save()
                 return
             title = youtube_data['last_video']['title']
@@ -136,6 +137,7 @@ class Command(BaseCommand):
         bot = TgBot()
         video_uploading_chat = Chat.objects.get(pk=env.str("TG_PHOTO_UPLOADING_CHAT_PK"))
         messages = []
+        cache_urls = []
         for i, url in enumerate(urls):
             message = method(url)
 
@@ -145,11 +147,31 @@ class Command(BaseCommand):
             file_id = r_json['result'][_type]['file_id']
 
             message['attachments'][0].file_id = file_id
+
+            if _type == 'video':
+                cache = self._save_video_to_media(subs[0].channel_id, ids[i], file_id, f"{subs[0].title}_{titles[i]}",
+                                                  message['attachments'][0].download_content())
+                cache_urls.append(MAIN_SITE + cache.video.url)
             messages.append(message)
 
         for sub in subs:
             for i, message in enumerate(messages):
                 self.send_notify(sub, titles[i], urls[i])
+                message['text'] += f"\nCкачать можно здесь {bot.get_formatted_url('здесь', cache_urls[i])}"
                 bot.parse_and_send_msgs(message, sub.peer_id, sub.message_thread_id)
             sub.last_video_id = ids[-1]
             sub.save()
+
+    @staticmethod
+    def _save_video_to_media(channel_id, video_id, file_id, name, content):
+        filename = f"{name}.mp4"
+        cache = VideoCache(
+            channel_id=channel_id,
+            video_id=video_id,
+            file_id=file_id,
+            filename=filename
+        )
+        cache.save()
+        cache.video.save(filename, content=content)
+        cache.save()
+        return cache

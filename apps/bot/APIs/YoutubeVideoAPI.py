@@ -51,6 +51,7 @@ class YoutubeVideoAPI:
         return {
             'title': self.title,
             'last_video': {
+                'id': last_video.find('yt:videoid').text,
                 'title': last_video.find('title').text,
                 'link': link,
                 'date': datetime.strptime(last_video.find('published').text, '%Y-%m-%dT%H:%M:%S%z'),

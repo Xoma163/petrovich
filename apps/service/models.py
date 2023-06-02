@@ -180,6 +180,27 @@ class Subscribe(models.Model):
         return self.title
 
 
+class VideoCache(models.Model):
+    channel_id = models.CharField("ID канала", max_length=100)
+    video_id = models.CharField("ID видео", max_length=100, null=True)
+    file_id = models.CharField('file_id', max_length=128)
+    filename = models.CharField('Название файла', max_length=256)
+    video = models.FileField('Видео', blank=True, upload_to="service/video/")
+
+    def delete(self, using=None, keep_parents=False):
+        self.video.delete()
+        super().delete(using, keep_parents)
+
+    class Meta:
+        unique_together = ('channel_id', 'video_id')
+        verbose_name = "Кэш видео"
+        verbose_name_plural = "Кэши видео"
+        ordering = ['filename']
+
+    def __str__(self):
+        return self.filename
+
+
 class HoroscopeMeme(BaseMeme):
     meme_pk = models.PositiveIntegerField(verbose_name="ID мема", blank=True, default=0)
 

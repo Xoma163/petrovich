@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from apps.service.models import Service, Meme, Notify, City, Donations, TimeZone, Subscribe, WakeOnLanUserData, \
-    Horoscope, Words, TaxiInfo, Tag
+    Horoscope, Words, TaxiInfo, Tag, VideoCache
 
 
 @admin.register(Service)
@@ -56,6 +56,11 @@ class DonationsAdmin(admin.ModelAdmin):
 class SubscribeAdmin(admin.ModelAdmin):
     list_display = ('author', 'chat', 'title', 'service', 'date',)
     list_filter = (('author', admin.RelatedOnlyFieldListFilter), ('chat', admin.RelatedOnlyFieldListFilter),)
+
+
+@admin.register(VideoCache)
+class VideoCacheAdmin(admin.ModelAdmin):
+    list_display = ('filename',)
 
 
 @admin.register(WakeOnLanUserData)

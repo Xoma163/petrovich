@@ -98,9 +98,10 @@ class Subscribe(Command):
 
         title = youtube_data['title']
         date = youtube_data['last_video']['date']
+        last_video_id = youtube_data['last_video']['id']
         is_stream = False
 
-        return channel_id, title, date, None, is_stream
+        return channel_id, title, date, last_video_id, is_stream
 
     @staticmethod
     def menu_add_the_hole(url):
