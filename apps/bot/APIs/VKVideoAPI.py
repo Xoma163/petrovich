@@ -36,9 +36,6 @@ class VKVideoAPI:
         self.title = None
         self.max_filesize_mb = max_filesize_mb
 
-        self.channel_id = None
-        self.last_video_id = None
-
     def get_video(self, url):
         player_url = self._get_player_url(url)
         video_content, audio_content = self._get_download_urls(player_url)
@@ -129,13 +126,28 @@ class VKVideoAPI:
             videos = bs4.find('div', {'id': f"video_subtab_pane_playlist_{playlist_id}"}) \
                 .find_all('div', {'class': 'VideoCard__info'})
             show_name = bs4.select('.ui_crumb')[-1].text
-            self.title = f"{title} | {show_name}"
+            title = f"{title} | {show_name}"
         else:
             videos = bs4.find('div', {'id': "video_subtab_pane_all"}).find_all('div', {'class': 'VideoCard__info'})
-            self.title = title
         last_video = videos[0]
-        self.last_video_id = last_video.find("a", {"class": "VideoCard__title"}).attrs['data-id']
-        self.channel_id = urlparse(url).path.split('/', 2)[2]
+        last_video_id = last_video.find("a", {"class": "VideoCard__title"}).attrs['data-id']
+        channel_id = urlparse(url).path.split('/', 2)[2]
+
+        return {
+            'title': title,
+            'last_video_id': last_video_id,
+            'channel_id': channel_id,
+        }
+
+    def get_video_info(self, url):
+        content = requests.get(url, headers=self.headers).content
+        bs4 = BeautifulSoup(content, 'html.parser')
+        return {
+            'channel_id': bs4.find('a', {'class': 'VideoSubheader__actionLink'}).attrs['href'].split('/')[2],
+            'video_id': urlparse(url).path.split('video')[1],
+            'channel_title': bs4.find('span', {'class': 'VideoHeader__name'}).text,
+            'video_title': bs4.find('meta', property="og:title").attrs['content'],
+        }
 
     def get_last_video_ids_with_titles(self, channel_id, last_video_id=None):
         url = f"{self.URL}/{channel_id}"

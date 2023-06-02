@@ -18,12 +18,16 @@ class WASDAPI:
 
         try:
             self.channel_id = int(last_part)
-            self.title = requests.get(f"{self.URL}api/v2/channels/{self.channel_id}").json()['result']['channel_name']
+            title = requests.get(f"{self.URL}api/v2/channels/{self.channel_id}").json()['result']['channel_name']
         except ValueError:
-            self.title = last_part
+            title = last_part
             self.channel_id = requests.get(
                 f"{self.URL}api/v2/broadcasts/public",
-                params={"with_extra": "true", "channel_name": self.title}).json()['result']['channel']['channel_id']
+                params={"with_extra": "true", "channel_name": title}).json()['result']['channel']['channel_id']
+        return {
+            'channel_id': self.channel_id,
+            'title': title
+        }
 
     def parse_video_m3u8(self, url):
         if not self.channel_id:

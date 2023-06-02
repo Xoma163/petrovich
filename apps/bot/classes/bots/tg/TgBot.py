@@ -23,7 +23,7 @@ from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachmen
 from apps.bot.classes.messages.attachments.VideoNoteAttachment import VideoNoteAttachment
 from apps.bot.classes.messages.attachments.VoiceAttachment import VoiceAttachment
 from apps.bot.commands.Meme import Meme
-from apps.bot.models import Profile
+from apps.bot.models import Profile, Chat
 from apps.bot.utils.utils import get_thumbnail_for_image, get_chunks
 from petrovich.settings import env
 
@@ -500,6 +500,16 @@ class TgBot(CommonBot):
             'can_pin_messages': True,
         }).json()
         return res
+
+    def get_file_id(self, attachment, _type):
+        video_uploading_chat = Chat.objects.get(pk=env.str("TG_PHOTO_UPLOADING_CHAT_PK"))
+        try:
+            r = self.parse_and_send_msgs({'attachments': [attachment]}, video_uploading_chat.chat_id)
+            r_json = r[0]['response'].json()
+        finally:
+            self.delete_message(video_uploading_chat.chat_id, r_json['result']['message_id'])
+        file_id = r_json['result'][_type]['file_id']
+        return file_id
 
     @classmethod
     def get_formatted_text(cls, text: str) -> str:

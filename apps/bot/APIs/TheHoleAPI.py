@@ -9,18 +9,18 @@ class TheHoleAPI:
     CDN_URL = "https://video-cdn.the-hole.tv"
 
     def __init__(self):
-        self.channel_id = None
         self.title = None
-        self.last_video_id = None
         self.show_name = None
         self.m3u8_bytes = None
 
     def parse_channel(self, url):
         content = requests.get(url).content
         bs4 = BeautifulSoup(content, 'html.parser')
-        self.title = bs4.find('meta', attrs={'name': 'og:title'}).attrs['content']
-        self.channel_id = url.split('/')[-1]
-        self.last_video_id = bs4.select_one('a[href*=episodes]').attrs['href']
+        return {
+            'title': bs4.find('meta', attrs={'name': 'og:title'}).attrs['content'],
+            'channel_id': url.split('/')[-1],
+            'last_video_id': bs4.select_one('a[href*=episodes]').attrs['href']
+        }
 
     def parse_video(self, url):
         content = requests.get(url).content

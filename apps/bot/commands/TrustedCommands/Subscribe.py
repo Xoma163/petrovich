@@ -106,26 +106,26 @@ class Subscribe(Command):
     @staticmethod
     def menu_add_the_hole(url):
         the_hole_api = TheHoleAPI()
-        the_hole_api.parse_channel(url)
+        parsed = the_hole_api.parse_channel(url)
         is_stream = False
 
-        return the_hole_api.channel_id, the_hole_api.title, None, the_hole_api.last_video_id, is_stream
+        return parsed['channel_id'], parsed['title'], None, parsed['last_video_id'], is_stream
 
     @staticmethod
     def menu_add_wasd(url):
         wasd_api = WASDAPI()
-        wasd_api.parse_channel(url)
+        parsed = wasd_api.parse_channel(url)
         is_stream = True
 
-        return wasd_api.channel_id, wasd_api.title, None, None, is_stream
+        return parsed['channel_id'], parsed['title'], None, None, is_stream
 
     @staticmethod
     def menu_add_vk(url):
         vk_api = VKVideoAPI()
-        vk_api.parse_channel(url)
+        parsed = vk_api.parse_channel(url)
         is_stream = False
 
-        return vk_api.channel_id, vk_api.title, None, vk_api.last_video_id, is_stream
+        return parsed['channel_id'], parsed['title'], None, parsed['last_video_id'], is_stream
 
     def menu_delete(self):
         self.check_args(2)

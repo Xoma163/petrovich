@@ -23,10 +23,13 @@ from apps.bot.classes.consts.ActivitiesEnum import ActivitiesEnum
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning, PSkip
 from apps.bot.classes.messages.attachments.LinkAttachment import LinkAttachment
+from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
 from apps.bot.commands.TrimVideo import TrimVideo
 from apps.bot.utils.NothingLogger import NothingLogger
 from apps.bot.utils.RedditSaver import RedditSaver
 from apps.bot.utils.utils import get_urls_from_text
+from apps.service.models import VideoCache
+from petrovich.settings import MAIN_SITE
 
 YOUTUBE_URLS = ('www.youtube.com', 'youtube.com', "www.youtu.be", "youtu.be")
 YOUTUBE_MUSIC_URLS = ("music.youtube.com",)
@@ -369,8 +372,42 @@ class Media(Command):
     def get_vk_video(self, url):
         max_filesize_mb = self.bot.MAX_VIDEO_SIZE_MB if isinstance(self.bot, TgBot) else None
 
-        vk_vd = VKVideoAPI(max_filesize_mb=max_filesize_mb)
-        video_url = vk_vd.get_video(url)
-        attachments = [self.bot.get_video_attachment(video_url, peer_id=self.event.peer_id, filename="video.mp4")]
-        title = vk_vd.title
-        return attachments, title
+        vk_v_api = VKVideoAPI(max_filesize_mb=max_filesize_mb)
+        video_info = vk_v_api.get_video_info(url)
+        title = video_info['video_title']
+
+        try:
+            cache = VideoCache.objects.get(channel_id=video_info['channel_id'], video_id=video_info['video_id'])
+            attachment = VideoAttachment()
+            attachment.file_id = cache.file_id
+        except VideoCache.DoesNotExist:
+            video_url = vk_v_api.get_video(url)
+            attachment = self.bot.get_video_attachment(video_url, peer_id=self.event.peer_id, filename="video.mp4")
+            filename = f"{video_info['channel_title']}_{title}"
+
+            file_id = self.bot.get_file_id(attachment, 'video')
+            cache = self._save_video_to_media_cache(
+                video_info['channel_id'],
+                video_info['video_id'],
+                file_id,
+                filename,
+                attachment.download_content()
+            )
+            attachment.content.seek(0)
+
+        msg = title + f"\nCкачать можно здесь {self.bot.get_formatted_url('здесь', MAIN_SITE + cache.video.url)}"
+        return [attachment], msg
+
+    @staticmethod
+    def _save_video_to_media_cache(channel_id, video_id, file_id, name, content):
+        filename = f"{name}.mp4"
+        cache = VideoCache(
+            channel_id=channel_id,
+            video_id=video_id,
+            file_id=file_id,
+            filename=filename
+        )
+        cache.save()
+        cache.video.save(filename, content=content)
+        cache.save()
+        return cache

@@ -11,9 +11,7 @@ from apps.bot.APIs.YoutubeVideoAPI import YoutubeVideoAPI
 from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.events.Event import Event
 from apps.bot.commands.Media import Media
-from apps.bot.models import Chat
 from apps.service.models import Subscribe, VideoCache
-from petrovich.settings import env, MAIN_SITE
 
 logger = logging.getLogger('subscribe_notifier')
 
@@ -61,7 +59,7 @@ class Command(BaseCommand):
 
             sub.date = youtube_data['last_video']['date']
             sub.save()
-            time.sleep(2)
+            time.sleep(1)
 
     def check_the_hole_video(self, subs):
         if len(set(x.last_video_id for x in subs)) == 1:
@@ -135,30 +133,20 @@ class Command(BaseCommand):
 
     def send_file_or_video(self, subs, ids, urls, titles, method, _type):
         bot = TgBot()
-        video_uploading_chat = Chat.objects.get(pk=env.str("TG_PHOTO_UPLOADING_CHAT_PK"))
         messages = []
-        cache_urls = []
         for i, url in enumerate(urls):
             message = method(url)
-
-            r = bot.parse_and_send_msgs(message, video_uploading_chat.chat_id)
-            r_json = r[0]['response'].json()
-            bot.delete_message(video_uploading_chat.chat_id, r_json['result']['message_id'])
-            file_id = r_json['result'][_type]['file_id']
-
-            message['attachments'][0].file_id = file_id
-
-            if _type == 'video':
-                cache = self._save_video_to_media(subs[0].channel_id, ids[i], file_id, f"{subs[0].title}_{titles[i]}",
-                                                  message['attachments'][0].download_content())
-                cache_urls.append(MAIN_SITE + cache.video.url)
+            att = message['attachments'][0]
+            if not att.file_id:
+                file_id = bot.get_file_id(att, 'video')
+                message['attachments'][0].file_id = file_id
             messages.append(message)
 
         for sub in subs:
             for i, message in enumerate(messages):
                 self.send_notify(sub, titles[i], urls[i])
-                message['text'] += f"\nCкачать можно здесь {bot.get_formatted_url('здесь', cache_urls[i])}"
                 bot.parse_and_send_msgs(message, sub.peer_id, sub.message_thread_id)
+                time.sleep(1)
             sub.last_video_id = ids[-1]
             sub.save()
 
