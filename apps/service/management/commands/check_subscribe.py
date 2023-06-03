@@ -161,6 +161,8 @@ class Command(BaseCommand):
 
     def _save_to_plex(self, cache, show_name, series_name):
         path = env.str('PLEX_SAVE_PATH')
+        show_name = show_name.replace(" |", '.').replace("|", ".")
+        series_name = series_name.replace(" |", '.').replace("|", ".")
 
         show_folder = os.path.join(path, show_name)
         if not os.path.exists(show_folder):
