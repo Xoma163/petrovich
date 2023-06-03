@@ -6,12 +6,10 @@ from urllib.parse import urlparse
 
 import requests
 import xmltodict
-import yt_dlp
 from bs4 import BeautifulSoup
 
 from apps.bot.utils.AudioVideoMuxer import AudioVideoMuxer
 from apps.bot.utils.DoTheLinuxComand import do_the_linux_command
-from apps.bot.utils.NothingLogger import NothingLogger
 
 
 class VKVideoAPI:
@@ -39,17 +37,16 @@ class VKVideoAPI:
     def get_video(self, url):
         player_url = self._get_player_url(url)
         video_content, audio_content = self._get_download_urls(player_url)
-        if audio_content:
+        if audio_content is not None:
             avm = AudioVideoMuxer()
             return avm.mux(video_content, audio_content)
-        else:
-            return video_content
+        return video_content
 
     def _get_player_url(self, url: str) -> str:
         response = requests.get(url, headers=self.headers)
-        soup = BeautifulSoup(response.text, 'html.parser')
-        player_url = soup.find("meta", property="og:video").attrs['content']
-        self.title = soup.find("meta", property="og:title").attrs['content']
+        bs4 = BeautifulSoup(response.text, 'html.parser')
+        player_url = bs4.find("meta", property="og:video").attrs['content']
+        self.title = bs4.find("meta", property="og:title").attrs['content']
         return player_url
 
     def _get_download_urls(self, player_url: str) -> Tuple[bytes, Optional[bytes]]:
@@ -79,21 +76,7 @@ class VKVideoAPI:
         audio_representations = adaptation_sets[1]['Representation']
 
         audio_url = f"{parsed_url.scheme}://{parsed_url.hostname}/{audio_representations[-1]['BaseURL']}"
-        audio_content_length = float(requests.head(audio_url, headers=self.headers).headers['Content-Length'])
-        audio_filesize = round(audio_content_length / 1024 / 1024, 2)
-
-        video_url = None
-        if self.max_filesize_mb:
-            for video in reversed(video_representations):
-                video_url = f"{parsed_url.scheme}://{parsed_url.hostname}/{video['BaseURL']}"
-                video_content_length = float(
-                    requests.head(video_url, headers=self.headers).headers['Content-Length'])
-                video_filesize = round(video_content_length / 1024 / 1024, 2)
-
-                if video_filesize + audio_filesize < self.max_filesize_mb:
-                    break
-        else:
-            video_url = f"{parsed_url.scheme}://{parsed_url.hostname}/{video_representations[-1]['BaseURL']}"
+        video_url = f"{parsed_url.scheme}://{parsed_url.hostname}/{video_representations[-1]['BaseURL']}"
 
         video_content = requests.get(video_url, headers=self.headers).content
         audio_content = requests.get(audio_url, headers=self.headers).content
@@ -101,16 +84,9 @@ class VKVideoAPI:
 
     @staticmethod
     def _get_video_hls(hls_url) -> tuple[bytes, None]:
-        ydl_params = {
-            'logger': NothingLogger()
-        }
-        ytdl = yt_dlp.YoutubeDL(ydl_params)
-        info = ytdl.extract_info(hls_url, download=False)
-        url = info['formats'][-1]['url']
-
         tmp_video_file = NamedTemporaryFile().name
         try:
-            do_the_linux_command(f"yt-dlp -o {tmp_video_file} {url}")
+            do_the_linux_command(f"yt-dlp -o {tmp_video_file} {hls_url}")
             with open(tmp_video_file, 'rb') as file:
                 video_content = file.read()
         finally:
@@ -122,8 +98,8 @@ class VKVideoAPI:
         bs4 = BeautifulSoup(content, "html.parser")
         title = bs4.select_one('.VideoHeader__breadcrumbsEntity .VideoHeader__name').text
         if 'playlist' in url:
-            playlist_id = url.rsplit('_', 1)[1]
-            videos = bs4.find('div', {'id': f"video_subtab_pane_playlist_{playlist_id}"}) \
+            _playlist_id = url.rsplit('_', 1)[1]
+            videos = bs4.find('div', {'id': f"video_subtab_pane_playlist_{_playlist_id}"}) \
                 .find_all('div', {'class': 'VideoCard__info'})
             show_name = bs4.select('.ui_crumb')[-1].text
             title = f"{title} | {show_name}"
@@ -131,12 +107,14 @@ class VKVideoAPI:
             videos = bs4.find('div', {'id': "video_subtab_pane_all"}).find_all('div', {'class': 'VideoCard__info'})
         last_video = videos[0]
         last_video_id = last_video.find("a", {"class": "VideoCard__title"}).attrs['data-id']
-        channel_id = urlparse(url).path.split('/', 2)[2]
 
+        channel_id = bs4.select_one('.VideoCard__additionalInfo a').attrs['href'].split('/')[-1]
+        playlist_id = urlparse(url).path.split('/', 2)[2]
         return {
             'title': title,
             'last_video_id': last_video_id,
             'channel_id': channel_id,
+            'playlist_id': playlist_id if channel_id != playlist_id else None
         }
 
     def get_video_info(self, url):
@@ -149,8 +127,8 @@ class VKVideoAPI:
             'video_title': bs4.find('meta', property="og:title").attrs['content'],
         }
 
-    def get_last_video_ids_with_titles(self, channel_id, last_video_id=None):
-        url = f"{self.URL}/{channel_id}"
+    def get_last_video_ids_with_titles(self, path, last_video_id=None):
+        url = f"{self.URL}/{path}"
         content = requests.get(url, headers=self.headers).content
         bs4 = BeautifulSoup(content, "html.parser")
 

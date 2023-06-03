@@ -1,5 +1,6 @@
 import json
 import re
+from io import BytesIO
 from urllib.parse import urlparse
 
 import requests
@@ -23,7 +24,6 @@ from apps.bot.classes.consts.ActivitiesEnum import ActivitiesEnum
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning, PSkip
 from apps.bot.classes.messages.attachments.LinkAttachment import LinkAttachment
-from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
 from apps.bot.commands.TrimVideo import TrimVideo
 from apps.bot.utils.NothingLogger import NothingLogger
 from apps.bot.utils.RedditSaver import RedditSaver
@@ -378,42 +378,33 @@ class Media(Command):
 
         try:
             cache = VideoCache.objects.get(channel_id=video_info['channel_id'], video_id=video_info['video_id'])
-            attachment = VideoAttachment()
-            attachment.file_id = cache.file_id
         except VideoCache.DoesNotExist:
-
             try:
                 self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.UPLOAD_VIDEO)
-                video_url = vk_v_api.get_video(url)
+                video = vk_v_api.get_video(url)
             finally:
                 self.bot.stop_activity_thread()
 
-            attachment = self.bot.get_video_attachment(video_url, peer_id=self.event.peer_id, filename="video.mp4")
             filename = f"{video_info['channel_title']}_{title}"
 
-            file_id = self.bot.get_file_id(attachment, 'video')
             cache = self._save_video_to_media_cache(
                 video_info['channel_id'],
                 video_info['video_id'],
-                file_id,
                 filename,
-                attachment.download_content()
+                video
             )
-            attachment.content.seek(0)
 
         msg = title + f"\nCкачать можно здесь {self.bot.get_formatted_url('здесь', MAIN_SITE + cache.video.url)}"
-        return [attachment], msg
+        return [], msg
 
     @staticmethod
-    def _save_video_to_media_cache(channel_id, video_id, file_id, name, content):
+    def _save_video_to_media_cache(channel_id, video_id, name, content):
         filename = f"{name}.mp4"
         cache = VideoCache(
             channel_id=channel_id,
             video_id=video_id,
-            file_id=file_id,
             filename=filename
         )
-        cache.save()
-        cache.video.save(filename, content=content)
+        cache.video.save(filename, content=BytesIO(content))
         cache.save()
         return cache

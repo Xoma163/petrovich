@@ -19,7 +19,6 @@ from apps.bot.classes.messages.attachments.VideoNoteAttachment import VideoNoteA
 from apps.bot.classes.messages.attachments.VoiceAttachment import VoiceAttachment
 from apps.bot.utils.utils import tanimoto
 from apps.service.models import Meme as MemeModel
-from petrovich.settings import env
 
 
 class Meme(Command):
@@ -426,14 +425,12 @@ class Meme(Command):
         thread.start()
 
     def _set_youtube_file_id(self, meme):
-        from apps.bot.models import Chat
         from apps.bot.commands.TrimVideo import TrimVideo
 
         lower_link_index = self.event.message.args.index(meme.link.lower())
         args = self.event.message.args[lower_link_index + 1:]
         start_pos, end_pos = TrimVideo.get_timecodes(meme.link, args)
         try:
-            video_uploading_chat = Chat.objects.get(pk=env.str("TG_PHOTO_UPLOADING_CHAT_PK"))
             # Если видео надо нарезать
             if start_pos:
                 tm = TrimVideo()
@@ -442,12 +439,12 @@ class Meme(Command):
                 y_api = YoutubeVideoAPI()
                 content_url = y_api.get_video_download_url(meme.link, self.event.platform)
                 video_content = requests.get(content_url).content
-            video = self.bot.get_video_attachment(video_content, peer_id=video_uploading_chat.chat_id)
+            video = self.bot.get_video_attachment(video_content)
             parsed_url = urlparse(meme.link)
             video_id = parsed_url.path.strip('/')
             video.thumb = f"https://img.youtube.com/vi/{video_id}/default.jpg"
-            file_id = self.bot.get_file_id(video, 'video')
-            meme.tg_file_id = file_id
+            video.set_file_id()
+            meme.tg_file_id = video.file_id
             meme.save()
             return
         except Exception:

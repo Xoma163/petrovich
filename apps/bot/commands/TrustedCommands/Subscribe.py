@@ -27,7 +27,9 @@ class Subscribe(Command):
     ]
     help_texts_extra = \
         "Проверка новых видео проходит каждые 10 минут. Стримов - 5 минут\n" \
-        "Админ конфы может удалять подписки в конф"
+        "Админ конфы может удалять подписки в конф\n" \
+        "Для вк нужно перейти в 'Показать все' и скопировать ссылку оттуда. Также поддерживаются ссылки на плейлисты"
+
     args = 1
     platforms = [Platform.TG]
     access = Role.TRUSTED
@@ -51,25 +53,28 @@ class Subscribe(Command):
         self.check_attachments()
         attachment: LinkAttachment = self.event.attachments[0]
 
+        # ToDo: сделать красиво
         if attachment.is_youtube_link:
-            channel_id, title, date, last_video_id, is_stream = self.menu_add_youtube(attachment.url)
+            channel_id, title, date, last_video_id, is_stream, playlist_id = self.menu_add_youtube(attachment.url)
             service = SubscribeModel.SERVICE_YOUTUBE
         elif attachment.is_the_hole_link:
-            channel_id, title, date, last_video_id, is_stream = self.menu_add_the_hole(attachment.url)
+            channel_id, title, date, last_video_id, is_stream, playlist_id = self.menu_add_the_hole(attachment.url)
             service = SubscribeModel.SERVICE_THE_HOLE
         elif attachment.is_wasd_link:
-            channel_id, title, date, last_video_id, is_stream = self.menu_add_wasd(attachment.url)
+            channel_id, title, date, last_video_id, is_stream, playlist_id = self.menu_add_wasd(attachment.url)
             service = SubscribeModel.SERVICE_WASD
         elif attachment.is_vk_link:
-            channel_id, title, date, last_video_id, is_stream = self.menu_add_vk(attachment.url)
+            channel_id, title, date, last_video_id, is_stream, playlist_id = self.menu_add_vk(attachment.url)
             service = SubscribeModel.SERVICE_VK
         else:
             raise PWarning("Незнакомый сервис. Доступные: \nYouTube, The-Hole, WAST, VK")
 
         if self.event.chat:
-            existed_sub = SubscribeModel.objects.filter(chat=self.event.chat, channel_id=channel_id)
+            existed_sub = SubscribeModel.objects.filter(chat=self.event.chat, channel_id=channel_id,
+                                                        playlist_id=playlist_id)
         else:
-            existed_sub = SubscribeModel.objects.filter(chat__isnull=True, channel_id=channel_id)
+            existed_sub = SubscribeModel.objects.filter(chat__isnull=True, channel_id=channel_id,
+                                                        playlist_id=playlist_id)
         if existed_sub.exists():
             raise PWarning(f"Ты уже и так подписан на канал {existed_sub.first().title}")
 
@@ -77,6 +82,7 @@ class Subscribe(Command):
             author=self.event.user,
             chat=self.event.chat,
             channel_id=channel_id,
+            playlist_id=playlist_id,
             title=title,
             date=date,
             service=service,
@@ -101,7 +107,7 @@ class Subscribe(Command):
         last_video_id = youtube_data['last_video']['id']
         is_stream = False
 
-        return channel_id, title, date, last_video_id, is_stream
+        return channel_id, title, date, last_video_id, is_stream, None
 
     @staticmethod
     def menu_add_the_hole(url):
@@ -109,7 +115,7 @@ class Subscribe(Command):
         parsed = the_hole_api.parse_channel(url)
         is_stream = False
 
-        return parsed['channel_id'], parsed['title'], None, parsed['last_video_id'], is_stream
+        return parsed['channel_id'], parsed['title'], None, parsed['last_video_id'], is_stream, None
 
     @staticmethod
     def menu_add_wasd(url):
@@ -117,7 +123,7 @@ class Subscribe(Command):
         parsed = wasd_api.parse_channel(url)
         is_stream = True
 
-        return parsed['channel_id'], parsed['title'], None, None, is_stream
+        return parsed['channel_id'], parsed['title'], None, None, is_stream, None
 
     @staticmethod
     def menu_add_vk(url):
@@ -125,7 +131,7 @@ class Subscribe(Command):
         parsed = vk_api.parse_channel(url)
         is_stream = False
 
-        return parsed['channel_id'], parsed['title'], None, parsed['last_video_id'], is_stream
+        return parsed['channel_id'], parsed['title'], None, parsed['last_video_id'], is_stream, parsed['playlist_id']
 
     def menu_delete(self):
         self.check_args(2)

@@ -1,8 +1,10 @@
 from apps.bot.APIs.GoogleCustomSearchAPI import GoogleCustomSearchAPI
 from apps.bot.classes.Command import Command
-from apps.bot.classes.bots.Bot import upload_image_to_tg_server
+from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.consts.ActivitiesEnum import ActivitiesEnum
+from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 
 
 class Find(Command):
@@ -11,6 +13,9 @@ class Find(Command):
     help_text = "ищет информацию по картинкам в гугле"
     help_texts = ["(запрос) - ищет информацию по картинкам в гугле"]
     args = 1
+    platforms = [Platform.TG]
+
+    bot: TgBot
 
     def start(self):
         query = self.event.message.args_str
@@ -33,7 +38,10 @@ class Find(Command):
         self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.UPLOAD_PHOTO)
         for url in urls:
             try:
-                attachments.append(upload_image_to_tg_server(url))
+                att = PhotoAttachment()
+                att.public_download_url = url
+                att.set_file_id()
+                attachments.append(att)
             except PWarning:
                 continue
             if len(attachments) == count:

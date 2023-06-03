@@ -448,26 +448,6 @@ class TgBot(CommonBot):
         """
         self.requests.get('deleteMessage', params={'chat_id': peer_id, 'message_id': message_id})
 
-    def upload_image_to_tg_server(self, image) -> PhotoAttachment:
-        """
-        Загрузка изображения на сервера ТГ с костылями
-
-        Без бутылки не разобраться. У телеги нет встроенных методов по тупой загрузке файлов, поэтому приходится
-        Отправлять сообщение в пустую конфу, забирать оттуда file_id и уже потом формировать сообщение
-        """
-
-        photo_uploading_chat = self.chat_model.get(pk=env.str("TG_PHOTO_UPLOADING_CHAT_PK"))
-        pa = self.get_photo_attachment(image)
-        rm = ResponseMessage({'attachments': [pa]}, peer_id=photo_uploading_chat.chat_id)
-        response = self.send_response_message_item(rm.messages[0])
-        if response.status_code != 200:
-            raise PWarning
-        r_json = response.json()
-        self.delete_message(photo_uploading_chat.chat_id, r_json['result']['message_id'])
-        uploaded_image = r_json['result']['photo'] if response.status_code == 200 else response
-        pa.file_id = uploaded_image[-1]['file_id']
-        return pa
-
     def update_help_texts(self):
         """
         Обновление списка команд в телеграме
@@ -501,12 +481,12 @@ class TgBot(CommonBot):
         }).json()
         return res
 
-    def get_file_id(self, attachment, _type):
+    def get_file_id(self, attachment):
         video_uploading_chat = Chat.objects.get(pk=env.str("TG_PHOTO_UPLOADING_CHAT_PK"))
         r = self.parse_and_send_msgs({'attachments': [attachment]}, video_uploading_chat.chat_id)
         r_json = r[0]['response'].json()
         self.delete_message(video_uploading_chat.chat_id, r_json['result']['message_id'])
-        file_id = r_json['result'][_type]['file_id']
+        file_id = r_json['result'][attachment.type]['file_id']
         return file_id
 
     @classmethod

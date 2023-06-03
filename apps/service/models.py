@@ -157,6 +157,7 @@ class Subscribe(models.Model):
     chat = models.ForeignKey(Chat, models.CASCADE, verbose_name='Чат', null=True, blank=True)
 
     channel_id = models.CharField("ID канала", max_length=100)
+    playlist_id = models.CharField("ID плейлиста", max_length=100, blank=True, null=True)
     title = models.CharField("Название канала", max_length=100)
     date = models.DateTimeField("Дата последней публикации", null=True, blank=True)
     last_video_id = models.CharField("ID последнего видео", max_length=100, null=True, blank=True)
@@ -188,7 +189,6 @@ class Subscribe(models.Model):
 class VideoCache(models.Model):
     channel_id = models.CharField("ID канала", max_length=100)
     video_id = models.CharField("ID видео", max_length=100, null=True)
-    file_id = models.CharField('file_id', max_length=128)
     filename = models.CharField('Название файла', max_length=256)
     video = models.FileField('Видео', blank=True, upload_to="service/video/")
 

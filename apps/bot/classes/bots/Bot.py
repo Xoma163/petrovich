@@ -516,8 +516,3 @@ def send_message_to_moderator_chat(msgs):
     return bot.parse_and_send_msgs(msgs, peer_id)
 
 
-def upload_image_to_tg_server(image):
-    from apps.bot.classes.bots.tg.TgBot import TgBot
-    tg_bot = TgBot()
-    photo = tg_bot.upload_image_to_tg_server(image)
-    return photo

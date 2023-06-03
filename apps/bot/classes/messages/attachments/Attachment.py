@@ -152,3 +152,8 @@ class Attachment:
         for ignore_field in ignore_fields:
             dict_self[ignore_field] = '*' * 5 if dict_self[ignore_field] else dict_self[ignore_field]
         return dict_self
+
+    def set_file_id(self):
+        from apps.bot.classes.bots.tg.TgBot import TgBot
+        tg_bot = TgBot()
+        self.file_id = tg_bot.get_file_id(self)

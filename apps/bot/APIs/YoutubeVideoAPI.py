@@ -43,7 +43,7 @@ class YoutubeVideoAPI:
         response = requests.get(f"https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}")
         if response.status_code != 200:
             raise PWarning("Не нашёл такого канала")
-        bsop = BeautifulSoup(response.content, 'html.parser')
+        bsop = BeautifulSoup(response.content, 'lxml')
         last_video = bsop.find_all('entry')[0]
         link = last_video.find('link').attrs['href']
         duration = self._get_video_info(link)['duration']

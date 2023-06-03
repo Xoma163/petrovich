@@ -95,7 +95,8 @@ class Command(BaseCommand):
     def check_vk_video(self, subs):
         if len(set(x.last_video_id for x in subs)) == 1:
             vk_v_api = VKVideoAPI()
-            ids, titles = vk_v_api.get_last_video_ids_with_titles(subs[0].channel_id, subs[0].last_video_id)
+            ids, titles = vk_v_api.get_last_video_ids_with_titles(subs[0].playlist_id or subs[0].channel_id,
+                                                                  subs[0].last_video_id)
             if len(ids) == 0:
                 return
 
@@ -139,10 +140,10 @@ class Command(BaseCommand):
         messages = []
         for i, url in enumerate(urls):
             message = method(url)
-            att = message['attachments'][0]
-            if not att.file_id:
-                file_id = bot.get_file_id(att, 'video')
-                message['attachments'][0].file_id = file_id
+            if message['attachments']:
+                att = message['attachments'][0]
+                if not att.file_id:
+                    att.set_file_id()
             messages.append(message)
 
         for sub in subs:
