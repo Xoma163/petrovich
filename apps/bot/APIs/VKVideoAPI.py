@@ -8,6 +8,7 @@ import requests
 import xmltodict
 from bs4 import BeautifulSoup
 
+from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.utils.AudioVideoMuxer import AudioVideoMuxer
 from apps.bot.utils.DoTheLinuxComand import do_the_linux_command
 
@@ -45,6 +46,10 @@ class VKVideoAPI:
     def _get_player_url(self, url: str) -> str:
         response = requests.get(url, headers=self.headers)
         bs4 = BeautifulSoup(response.text, 'html.parser')
+        og_video = bs4.find("meta", property="og:video")
+        if not og_video:
+            raise PWarning("К сожалению видео старое и скачать его не получится. "
+                           "Поддерживаются видео с апреля-мая 2023 года")
         player_url = bs4.find("meta", property="og:video").attrs['content']
         self.title = bs4.find("meta", property="og:title").attrs['content']
         return player_url
