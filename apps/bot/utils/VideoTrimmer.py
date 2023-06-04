@@ -25,7 +25,7 @@ class VideoTrimmer:
             else:
                 with open(self.tmp_file_in.name, 'wb') as file:
                     file.write(content)
-            cmd = [f"ffmpeg -i {self.tmp_file_in.name} -ss {start_pos}"]
+            cmd = [f"ffmpeg6 -i {self.tmp_file_in.name} -ss {start_pos}"]
             if end_pos:
                 cmd.append(f"-to {end_pos}")
             cmd.append(f"-f mp4 -y {self.tmp_file_out.name}")

@@ -23,7 +23,7 @@ class AudioVideoMuxer:
     def _mux_video_and_audio(self):
         try:
             do_the_linux_command(
-                f"ffmpeg -i {self.tmp_video_file.name} -i {self.tmp_audio_file.name} -c:v copy -c:a copy -strict -2 -f mp4 -y {self.tmp_output_file.name}")
+                f"ffmpeg6 -i {self.tmp_video_file.name} -i {self.tmp_audio_file.name} -c:v copy -c:a copy -strict -2 -f mp4 -y {self.tmp_output_file.name}")
         finally:
             self._delete_video_audio_files()
 

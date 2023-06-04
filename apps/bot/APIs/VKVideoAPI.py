@@ -59,13 +59,16 @@ class VKVideoAPI:
         info = json.loads(replacements)
         info = info.get('params')[0]
         dash_webm = info.get('dash_webm')
+        dash_sep = info.get('dash_sep')
         hls = info.get('hls')
         if dash_webm:
-            return self._get_video_autio_dash_webm(dash_webm)
+            return self._get_video_audio_dash(dash_webm)
+        elif dash_sep:
+            return self._get_video_audio_dash(dash_sep)
         else:
             return self._get_video_hls(hls)
 
-    def _get_video_autio_dash_webm(self, dash_webm_url) -> Tuple[bytes, bytes]:
+    def _get_video_audio_dash(self, dash_webm_url) -> Tuple[bytes, bytes]:
         parsed_url = urlparse(dash_webm_url)
 
         response = requests.get(dash_webm_url, headers=self.headers).content
