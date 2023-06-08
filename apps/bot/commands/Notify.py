@@ -7,6 +7,11 @@ from apps.bot.classes.Command import Command
 from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.consts.Consts import Role, Platform
 from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.messages.attachments.AudioAttachment import AudioAttachment
+from apps.bot.classes.messages.attachments.DocumentAttachment import DocumentAttachment
+from apps.bot.classes.messages.attachments.GifAttachment import GifAttachment
+from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
+from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
 from apps.bot.utils.utils import localize_datetime, normalize_datetime, remove_tz
 from apps.service.models import Notify as NotifyModel
 
@@ -41,7 +46,7 @@ class Notify(Command):
     bot: TgBot
 
     def start(self):
-        self.start_for_notify()
+        return self.start_for_notify()
 
     def check_max_notifies(self):
         if not self.event.sender.check_role(Role.TRUSTED) and \
@@ -94,14 +99,17 @@ class Notify(Command):
             message_thread_id=self.event.message_thread_id
         )
 
-        tg_att_flag = self.event.attachments and self.event.platform == Platform.TG
+        attachments = self.event.get_all_attachments(
+            [AudioAttachment, DocumentAttachment, GifAttachment, PhotoAttachment, VideoAttachment])
+
+        tg_att_flag = attachments and self.event.platform == Platform.TG
         if not (text or tg_att_flag):
             raise PWarning("В напоминании должны быть текст или вложения(tg)")
         if text:
             notify.text = text
             notify.text_for_filter += f" {text}"
         if tg_att_flag:
-            notify.attachments = [{x.type: x.file_id} for x in self.event.attachments]
+            notify.attachments = [{x.type: x.file_id} for x in attachments]
 
         notify.save()
         notify.text_for_filter += f" ({notify.id})"

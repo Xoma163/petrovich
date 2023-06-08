@@ -188,7 +188,7 @@ class Media(Command):
             video_content = tm.trim_link_pos(url, start_pos, end_pos)
         else:
             self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.UPLOAD_VIDEO)
-            content_url = y_api.get_video_download_url(url, self.event.platform)
+            content_url = y_api.get_video_download_url(url)
             video_content = requests.get(content_url).content
             self.bot.stop_activity_thread()
         attachments = [

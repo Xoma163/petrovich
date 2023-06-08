@@ -62,7 +62,7 @@ class TrimVideo(Command):
             delta = (datetime.strptime(end_pos, "%H:%M:%S.%f") - datetime.strptime(start_pos, "%H:%M:%S.%f")).seconds
         max_filesize_mb = self.bot.MAX_VIDEO_SIZE_MB if isinstance(self.bot, TgBot) else None
         yt_api = YoutubeVideoAPI(max_filesize_mb=max_filesize_mb)
-        link = yt_api.get_video_download_url(link, platform, timedelta=delta)
+        link = yt_api.get_video_download_url(link, timedelta=delta)
         if yt_api.filesize > 100 and not self.event.sender.check_role(Role.TRUSTED):
             raise PWarning("Нельзя грузить отрезки из ютуба больше 100мб")
         return self.trim(link, start_pos, end_pos)

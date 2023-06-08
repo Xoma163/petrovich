@@ -75,13 +75,15 @@ class YoutubeVideoAPI:
             raise PWarning("Не смог найти видео по этой ссылке")
         return video_info
 
-    def get_video_download_url(self, url, platform=None, timedelta=None):
+    def get_video_download_url(self, url, timedelta=None):
         video_info = self._get_video_info(url)
         self.title = video_info['title']
         self.duration = video_info.get('duration')
         if not self.duration:
             raise PSkip()
         video_urls = [x for x in video_info['formats'] if x['ext'] == 'mp4' and x.get('asr')]
+        if not video_urls:
+            raise PWarning("Нет доступных ссылок для скачивания")
         videos = sorted(video_urls, key=lambda x: x['format_note'], reverse=True)
         if self.max_filesize_mb:  # for tg
             for video in videos:

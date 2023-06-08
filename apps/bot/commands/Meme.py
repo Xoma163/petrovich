@@ -388,7 +388,7 @@ class Meme(Command):
                 else:
                     yt_api = YoutubeVideoAPI()
                     try:
-                        content_url = yt_api.get_video_download_url(meme.link, self.event.platform)
+                        content_url = yt_api.get_video_download_url(meme.link)
                         video_content = requests.get(content_url).content
                         msg['attachments'] = self.bot.get_video_attachment(video_content, peer_id=self.event.peer_id)
                         msg['text'] = yt_api.get_timecode_str(meme.link)
@@ -437,7 +437,7 @@ class Meme(Command):
                 video_content = tm.trim_link_pos(meme.link, start_pos, end_pos)
             else:
                 y_api = YoutubeVideoAPI()
-                content_url = y_api.get_video_download_url(meme.link, self.event.platform)
+                content_url = y_api.get_video_download_url(meme.link)
                 video_content = requests.get(content_url).content
             video = self.bot.get_video_attachment(video_content)
             parsed_url = urlparse(meme.link)
