@@ -129,7 +129,7 @@ class VKVideoAPI:
         content = requests.get(url, headers=self.headers).content
         bs4 = BeautifulSoup(content, 'html.parser')
         return {
-            'channel_id': bs4.find('a', {'class': 'VideoSubheader__actionLink'}).attrs['href'].split('/')[2],
+            'channel_id': bs4.select_one('#video_tab_all a').attrs['href'].split('/')[-1],
             'video_id': urlparse(url).path.split('video')[1],
             'channel_title': bs4.find('span', {'class': 'VideoHeader__name'}).text,
             'video_title': bs4.find('meta', property="og:title").attrs['content'],
