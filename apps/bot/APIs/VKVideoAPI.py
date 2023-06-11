@@ -128,10 +128,13 @@ class VKVideoAPI:
     def get_video_info(self, url):
         content = requests.get(url, headers=self.headers).content
         bs4 = BeautifulSoup(content, 'html.parser')
+
+        a_tag = bs4.select_one(".VideoCard__additionalInfo a")
+
         return {
-            'channel_id': bs4.select_one('#video_tab_all a').attrs['href'].split('/')[-1],
+            'channel_id': a_tag.attrs['href'].split('/')[-1],
             'video_id': urlparse(url).path.split('video')[1],
-            'channel_title': bs4.find('span', {'class': 'VideoHeader__name'}).text,
+            'channel_title': a_tag.text,
             'video_title': bs4.find('meta', property="og:title").attrs['content'],
         }
 
