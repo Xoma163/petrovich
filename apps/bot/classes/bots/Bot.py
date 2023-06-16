@@ -127,6 +127,7 @@ class Bot(Thread):
                     self.logger.debug({"event": event.to_log(), "message": rm.to_log()})
                     return rm
             except (PWarning, PError) as e:
+                self.stop_activity_thread()
                 msg = {'text': e.msg, 'keyboard': e.keyboard, 'reply_to': e.reply_to}
                 rm = ResponseMessage(msg, event.peer_id, event.message_thread_id)
                 getattr(self.logger, e.level)({"event": event.to_log(), "message": rm.to_log()})
@@ -136,6 +137,7 @@ class Bot(Thread):
             except PSkip as e:
                 raise e
             except Exception:
+                self.stop_activity_thread()
                 return self._get_unexpected_error(event)
 
         # Если указана настройка не реагировать на неверные команды, то скипаем

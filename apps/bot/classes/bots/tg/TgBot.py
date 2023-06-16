@@ -482,11 +482,14 @@ class TgBot(CommonBot):
         return res
 
     def get_file_id(self, attachment):
-        video_uploading_chat = Chat.objects.get(pk=env.str("TG_PHOTO_UPLOADING_CHAT_PK"))
-        r = self.parse_and_send_msgs({'attachments': [attachment]}, video_uploading_chat.chat_id)
+        uploading_chat = Chat.objects.get(pk=env.str("TG_PHOTO_UPLOADING_CHAT_PK"))
+        r = self.parse_and_send_msgs({'attachments': [attachment]}, uploading_chat.chat_id)
         r_json = r[0]['response'].json()
-        self.delete_message(video_uploading_chat.chat_id, r_json['result']['message_id'])
-        file_id = r_json['result'][attachment.type]['file_id']
+        self.delete_message(uploading_chat.chat_id, r_json['result']['message_id'])
+        att = r_json['result'][attachment.type]
+        # if isinstance(att, list):
+        #     att = att[0]
+        file_id = att['file_id']
         return file_id
 
     @classmethod
