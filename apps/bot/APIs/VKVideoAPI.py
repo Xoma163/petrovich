@@ -81,7 +81,10 @@ class VKVideoAPI:
         adaptation_sets = dash_webm_dict['MPD']['Period']['AdaptationSet']
 
         video_representations = adaptation_sets[0]['Representation']
+        video_representations = list(sorted(video_representations, key=lambda x: int(x['@bandwidth'])))
+
         audio_representations = adaptation_sets[1]['Representation']
+        audio_representations = list(sorted(audio_representations, key=lambda x: int(x['@bandwidth'])))
 
         audio_url = f"{parsed_url.scheme}://{parsed_url.hostname}/{audio_representations[-1]['BaseURL']}"
         video_url = f"{parsed_url.scheme}://{parsed_url.hostname}/{video_representations[-1]['BaseURL']}"
