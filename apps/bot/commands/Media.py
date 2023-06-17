@@ -183,13 +183,15 @@ class Media(Command):
         except ValueError:
             start_pos = None
 
-        if start_pos:
-            tm = TrimVideo()
-            video_content = tm.trim_link_pos(url, start_pos, end_pos)
-        else:
+        try:
             self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.UPLOAD_VIDEO)
-            content_url = y_api.get_video_download_url(url)
-            video_content = requests.get(content_url).content
+            if start_pos:
+                tm = TrimVideo()
+                video_content = tm.trim_link_pos(url, start_pos, end_pos)
+            else:
+                content_url = y_api.get_video_download_url(url)
+                video_content = requests.get(content_url).content
+        finally:
             self.bot.stop_activity_thread()
         attachments = [
             self.bot.get_video_attachment(video_content, peer_id=self.event.peer_id, filename=y_api.filename)
