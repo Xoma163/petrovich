@@ -44,6 +44,7 @@ YANDEX_MUSIC_URLS = ('music.yandex.ru',)
 PINTEREST_URLS = ('pinterest.com', 'ru.pinterest.com', 'www.pinterest.com', 'pin.it')
 COUB_URLS = ('coub.com',)
 VK_URLS = ('vk.com',)
+SCOPE_GG_URLS = ('app.scope.gg',)
 
 MEDIA_URLS = tuple(
     list(YOUTUBE_URLS) +
@@ -58,7 +59,8 @@ MEDIA_URLS = tuple(
     list(YANDEX_MUSIC_URLS) +
     list(PINTEREST_URLS) +
     list(COUB_URLS) +
-    list(VK_URLS)
+    list(VK_URLS) +
+    list(SCOPE_GG_URLS)
 )
 
 
@@ -158,6 +160,7 @@ class Media(Command):
             PINTEREST_URLS: self.get_pinterest_attachment,
             COUB_URLS: self.get_coub_video,
             VK_URLS: self.get_vk_video,
+            SCOPE_GG_URLS: self.get_scope_gg_video,
         }
 
         urls = get_urls_from_text(source)
@@ -398,6 +401,21 @@ class Media(Command):
 
         msg = title + f"\nCкачать можно здесь {self.bot.get_formatted_url('здесь', MAIN_SITE + cache.video.url)}"
         return [], msg
+
+    def get_scope_gg_video(self, url):
+        content = requests.get(url).content
+        bs4 = BeautifulSoup(content, "html.parser")
+        data = json.loads(bs4.select_one('#__NEXT_DATA__').text)
+        clip_id = data['query']['clipId']
+        snapshot_url = data['props']['initialState']['publicDashboard']['allStars']['clip']['clipSnapshotURL']
+        first_id = snapshot_url.replace('https://media.allstar.gg/', '').split('/', 1)[0]
+        url = f"https://media.allstar.gg/{first_id}/clips/{clip_id}.mp4"
+
+        # video_content = requests.get(webm).content
+        attachments = [
+            self.bot.get_video_attachment(url, peer_id=self.event.peer_id)
+        ]
+        return attachments, None
 
     @staticmethod
     def _save_video_to_media_cache(channel_id, video_id, name, content):
