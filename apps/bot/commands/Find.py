@@ -3,7 +3,7 @@ from apps.bot.classes.Command import Command
 from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.consts.ActivitiesEnum import ActivitiesEnum
 from apps.bot.classes.consts.Consts import Platform
-from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.consts.Exceptions import PWarning, PError
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 
 
@@ -42,7 +42,7 @@ class Find(Command):
                 att.public_download_url = url
                 att.set_file_id()
                 attachments.append(att)
-            except PWarning:
+            except PError:
                 continue
             if len(attachments) == count:
                 break

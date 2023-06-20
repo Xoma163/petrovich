@@ -486,10 +486,13 @@ class TgBot(CommonBot):
         r = self.parse_and_send_msgs({'attachments': [attachment]}, uploading_chat.chat_id)
         r_json = r[0]['response'].json()
         self.delete_message(uploading_chat.chat_id, r_json['result']['message_id'])
-        att = r_json['result'][attachment.type]
-        if isinstance(att, list):
-            att = att[0]
-        file_id = att['file_id']
+        try:
+            att = r_json['result'][attachment.type]
+            if isinstance(att, list):
+                att = att[0]
+            file_id = att['file_id']
+        except:
+            raise PError()
         return file_id
 
     @classmethod
