@@ -27,6 +27,7 @@ from apps.bot.classes.messages.attachments.LinkAttachment import LinkAttachment
 from apps.bot.commands.TrimVideo import TrimVideo
 from apps.bot.utils.NothingLogger import NothingLogger
 from apps.bot.utils.RedditSaver import RedditSaver
+from apps.bot.utils.VideoTrimmer import VideoTrimmer
 from apps.bot.utils.utils import get_urls_from_text
 from apps.service.models import VideoCache
 from petrovich.settings import MAIN_SITE
@@ -407,14 +408,22 @@ class Media(Command):
         bs4 = BeautifulSoup(content, "html.parser")
         data = json.loads(bs4.select_one('#__NEXT_DATA__').text)
         clip_id = data['query']['clipId']
-        snapshot_url = data['props']['initialState']['publicDashboard']['allStars']['clip']['clipSnapshotURL']
+        clip = data['props']['initialState']['publicDashboard']['allStars']['clip']
+        snapshot_url = clip['clipSnapshotURL']
+        clip_length = clip['clipLength'] - 0.3
         first_id = snapshot_url.replace('https://media.allstar.gg/', '').split('/', 1)[0]
         url = f"https://media.allstar.gg/{first_id}/clips/{clip_id}.mp4"
 
         # video_content = requests.get(webm).content
-        attachments = [
-            self.bot.get_video_attachment(url, peer_id=self.event.peer_id)
-        ]
+        video = self.bot.get_video_attachment(url, peer_id=self.event.peer_id)
+        vt = VideoTrimmer()
+        try:
+            self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.UPLOAD_VIDEO)
+            trimmed_video = vt.trim(video.download_content(), 0, clip_length)
+        finally:
+            self.bot.stop_activity_thread()
+
+        attachments = [self.bot.get_video_attachment(trimmed_video, peer_id=self.event.peer_id)]
         return attachments, None
 
     @staticmethod
