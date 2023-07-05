@@ -2,7 +2,7 @@ beautifulsoup4
 boto3
 crontab
 colorlog
-Django==3.2.19
+Django==3.2.20
 django-environ
 django-extensions
 django-hosts
