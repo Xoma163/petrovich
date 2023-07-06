@@ -75,7 +75,7 @@ class YoutubeVideoAPI:
             raise PWarning("Не смог найти видео по этой ссылке")
         return video_info
 
-    def get_video_download_url(self, url, timedelta=None):
+    def get_download_url(self, url, timedelta=None):
         video_info = self._get_video_info(url)
         self.title = video_info['title']
         self.duration = video_info.get('duration')

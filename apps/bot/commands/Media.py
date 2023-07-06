@@ -193,7 +193,9 @@ class Media(Command):
                 tm = TrimVideo()
                 video_content = tm.trim_link_pos(url, start_pos, end_pos)
             else:
-                content_url = y_api.get_video_download_url(url)
+                content_url = y_api.get_download_url(url)
+                if y_api.duration > 120:
+                    raise PSkip()
                 video_content = requests.get(content_url).content
         finally:
             self.bot.stop_activity_thread()
