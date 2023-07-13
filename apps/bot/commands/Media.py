@@ -77,6 +77,10 @@ class Media(Command):
 
     bot: TgBot
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.has_command_name = None
+
     @staticmethod
     def accept_extra(event):
         if event.message and not event.message.mentioned:
@@ -100,10 +104,10 @@ class Media(Command):
                 source = self.event.fwd[0].attachments[0].url
             else:
                 raise PWarning("Для работы команды требуются аргументы или пересылаемые сообщения")
-            has_command_name = True
+            self.has_command_name = True
         else:
             source = self.event.attachments[0].url
-            has_command_name = False
+            self.has_command_name = False
 
         method, chosen_url = self.get_method_and_chosen_url(source)
 
@@ -111,7 +115,7 @@ class Media(Command):
             attachments, title = method(chosen_url)
         except PWarning as e:
             # Если была вызвана команда или отправлено сообщение в лс
-            if has_command_name or self.event.is_from_pm:
+            if self.has_command_name or self.event.is_from_pm:
                 raise e
             else:
                 raise PSkip()
@@ -194,7 +198,7 @@ class Media(Command):
                 video_content = tm.trim_link_pos(url, start_pos, end_pos)
             else:
                 content_url = y_api.get_download_url(url)
-                if y_api.duration > 120:
+                if not self.event.is_from_pm and not self.has_command_name and y_api.duration > 120:
                     raise PSkip()
                 video_content = requests.get(content_url).content
         finally:
