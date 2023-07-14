@@ -1,10 +1,12 @@
 import copy
+import io
 import os
 from io import BytesIO
 from tempfile import NamedTemporaryFile
 from urllib.parse import urlparse
 
 import requests
+from PIL.Image import Image as PILImage
 
 from apps.bot.classes.consts.Exceptions import PWarning
 
@@ -92,6 +94,11 @@ class Attachment:
                 self.content = tmp
             else:
                 self.content = _bytes
+        elif isinstance(file_like_object, PILImage):
+            img_byte_arr = io.BytesIO()
+            file_like_object.save(img_byte_arr, format="PNG")
+            img_byte_arr.seek(0)
+            self.content = img_byte_arr.read()
 
     def _get_download_url(self, peer_id=None):
         if self.public_download_url:

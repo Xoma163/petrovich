@@ -1,5 +1,8 @@
 import json
+import os
 from threading import Lock
+
+from PIL import ImageFont, Image, ImageDraw
 
 from apps.bot.classes.Command import Command
 from apps.bot.classes.bots.tg.TgBot import TgBot
@@ -7,6 +10,7 @@ from apps.bot.classes.consts.Consts import Platform, Role, rus_alphabet
 from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.utils.utils import random_event, _send_message_session_or_edit
 from apps.games.models import Wordle as WordleModel
+from petrovich.settings import STATIC_ROOT
 
 lock = Lock()
 
@@ -77,23 +81,22 @@ class Wordle(Command):
         if len(hypothesis) != 5:
             raise PWarning("Слово должно состоять из 5 букв")
 
-        if hypothesis == session.word:
-            return self.win()
-
         session.hypotheses.append(hypothesis)
         session.steps += 1
         session.save()
 
+        if hypothesis == session.word:
+            return self.win()
+
         if len(session.hypotheses) > 5:
-            msgs = [self.get_answer_for_user_if_wrong(session), self.lose()]
-            return msgs
+            return self.lose()
 
         return self.get_current_state(session)
 
     def get_current_state(self, session):
-        msg = self.get_answer_for_user_if_wrong(session)
-        msg += f"\n\n{self.get_text_keyboard(session)}"
-        _send_message_session_or_edit(self.bot, self.event, session, msg, max_delta=8)
+        image = self.get_keyboard_image(session)
+        attachment = self.bot.get_photo_attachment(image)
+        _send_message_session_or_edit(self.bot, self.event, session, {'attachments': [attachment]}, max_delta=8)
 
     def get_random_word(self):
         with open(self.WORDLE_WORDS_PATH, 'r') as f:
@@ -122,25 +125,7 @@ class Wordle(Command):
                 wrong_letters.append(i)
         return correct_letters, exactly_correct_letters, wrong_letters
 
-    def get_answer_for_user_if_wrong(self, session) -> str:
-        text = []
-        for hypothesis in session.hypotheses:
-            correct_letters, exactly_correct_letters, _ = self.calculate_words(hypothesis, session.word)
-            text_line = ""
-            for i, word in enumerate(hypothesis):
-                if i in exactly_correct_letters:
-                    text_line += f"[{word}]"
-                elif i in correct_letters:
-                    text_line += f"({word})"
-                else:
-                    text_line += f"{word}"
-                text_line += " "
-            text_line = text_line.rstrip()
-            text.append(text_line)
-
-        return "\n".join(text)
-
-    def get_text_keyboard(self, session):
+    def get_keyboard_image(self, session):
         correct_letters = set()
         exactly_correct_letters = set()
         wrong_letters = set()
@@ -157,44 +142,166 @@ class Wordle(Command):
             if letter in correct_letters:
                 correct_letters.remove(letter)
 
+        wig = WordleImageGenerator()
+        image = wig.generate(session.hypotheses, correct_letters, exactly_correct_letters, wrong_letters, session.word)
+
+        return image
+
+    def win(self):
+        session = self.get_session()
+        word = session.word
+
+        gamer = self.bot.get_gamer_by_profile(self.event.sender)
+        gamer.roulette_points += 1000
+        gamer.wordle_points += 1
+        gamer.save()
+
+        text = f"Вы победили! Загаданное слово - {word}\n" \
+               f"Начислил 1000 очков рулетки"
+
+        button = self.bot.get_button("Ещё", self.name)
+        keyboard = self.bot.get_inline_keyboard([button])
+
+        image = self.get_keyboard_image(session)
+        attachment = self.bot.get_photo_attachment(image)
+        session.delete()
+
+        return {"text": text, "keyboard": keyboard, 'attachments': [attachment]}
+
+    def lose(self):
+        session = self.get_session()
+        text = f"Загаданное слово - {session.word}"
+
+        button = self.bot.get_button("Ещё", self.name)
+        keyboard = self.bot.get_inline_keyboard([button])
+
+        image = self.get_keyboard_image(session)
+        attachment = self.bot.get_photo_attachment(image)
+        session.delete()
+
+        return {"text": text, "keyboard": keyboard, 'attachments': [attachment]}
+
+
+class WordleImageGenerator:
+    COLOR_CORRECT_LETTER_POS = "#538d4e"
+    COLOR_CORRECT_LETTER = "#b59f3b"
+    COLOR_TEXT = "#ffffff"
+    COLOR_DEFAULT = "#818384"
+    COLOR_WRONG_LETTER = "#3a3a3c"
+    COLOR_BACKGROUND = "#121213"
+
+    MAIN_WINDOW_CELL_WIDTH = 80
+    MAIN_WINDOW_CELL_HEIGHT = 80
+    MAIN_WINDOW_CELL_MARGIN = 10
+    MAIN_WINDOW_CELL_THICKNESS = 2
+
+    MAIN_WINDOW_KEYBOARD_MARGIN = 40
+
+    KEYBOARD_CELL_WIDTH = 35
+    KEYBOARD_CELL_HEIGHT = 50
+    KEYBOARD_CELL_MARGIN = 10
+
+    MAIN_WINDOW_CELLS_COUNT = 6
+    MAIN_WINDOW_CELLS_WORDS_COUNT = 5
+
+    MAIN_WINDOW_WIDTH = MAIN_WINDOW_CELLS_WORDS_COUNT * MAIN_WINDOW_CELL_WIDTH + (
+            MAIN_WINDOW_CELLS_WORDS_COUNT - 1) * MAIN_WINDOW_CELL_MARGIN
+    MAIN_WINDOW_HEIGHT = MAIN_WINDOW_CELLS_COUNT * MAIN_WINDOW_CELL_HEIGHT + (
+            MAIN_WINDOW_CELLS_COUNT - 1) * MAIN_WINDOW_CELL_MARGIN
+
+    KEYBOARD_WIDTH = 12 * KEYBOARD_CELL_WIDTH + (12 - 1) * MAIN_WINDOW_CELL_MARGIN
+    KEYBOARD_HEIGHT = 3 * KEYBOARD_CELL_HEIGHT + (3 - 1) * MAIN_WINDOW_CELL_MARGIN
+
+    PADDING = 25
+
+    FONT_PATH = os.path.join(STATIC_ROOT, 'fonts/Intro.otf')
+
+    def generate(self, words, correct_letters, exactly_correct_letters, wrong_letters, secret_word):
+        image_words = self.generate_words(words, secret_word)
+        image_keyboard = self.generate_keyboard(correct_letters, exactly_correct_letters, wrong_letters)
+
+        width_diff = image_keyboard.width - image_words.width
+
+        dst = Image.new('RGBA', (image_keyboard.width, image_words.height + image_keyboard.height),
+                        self.COLOR_BACKGROUND)
+        dst.paste(image_words, (int(width_diff / 2), 0))
+        dst.paste(image_keyboard, (0, image_words.height))
+        return dst
+
+    def generate_words(self, words: list, secret_word):
+        image = Image.new("RGBA", (self.MAIN_WINDOW_WIDTH, self.MAIN_WINDOW_HEIGHT), self.COLOR_BACKGROUND)
+        draw = ImageDraw.Draw(image)
+        font = ImageFont.truetype(self.FONT_PATH, self.MAIN_WINDOW_CELL_WIDTH - 10, encoding="unic")
+
+        for i in range(0, self.MAIN_WINDOW_CELLS_COUNT):
+            word = None
+            if len(words) > i:
+                word = words[i]
+            for j in range(0, self.MAIN_WINDOW_CELLS_WORDS_COUNT):
+                letter = None
+                if word:
+                    letter = word[j]
+                x1 = j * self.MAIN_WINDOW_CELL_WIDTH + j * self.MAIN_WINDOW_CELL_MARGIN
+                y1 = i * self.MAIN_WINDOW_CELL_HEIGHT + i * self.MAIN_WINDOW_CELL_MARGIN
+                x2 = j * self.MAIN_WINDOW_CELL_WIDTH + j * self.MAIN_WINDOW_CELL_MARGIN + self.MAIN_WINDOW_CELL_WIDTH
+                y2 = i * self.MAIN_WINDOW_CELL_HEIGHT + i * self.MAIN_WINDOW_CELL_MARGIN + self.MAIN_WINDOW_CELL_HEIGHT
+
+                color = self.COLOR_DEFAULT
+                if letter:
+                    if letter == secret_word[j]:
+                        color = self.COLOR_CORRECT_LETTER_POS
+                    elif letter in secret_word:
+                        color = self.COLOR_CORRECT_LETTER
+                    elif letter not in secret_word:
+                        color = self.COLOR_WRONG_LETTER
+                draw.rectangle((x1, y1, x2, y2), color)
+                if letter:
+                    letter_width = font.getlength(letter)
+                    letter_margin = (self.MAIN_WINDOW_CELL_WIDTH - letter_width) / 2
+                    draw.text((x1 + letter_margin, y1 + 11), letter.upper(), font=font, fill=self.COLOR_TEXT)
+
+        dst = Image.new('RGBA', (image.width + self.PADDING * 2, image.height + self.PADDING * 2),
+                        self.COLOR_BACKGROUND)
+        dst.paste(image, (self.PADDING, self.PADDING))
+        return dst
+
+    def generate_keyboard(self, correct_letters, exactly_correct_letters, wrong_letters):
         layouts = [
             ["й", "ц", "у", "к", "е", "н", "г", "ш", "щ", "з", "х", "ъ"],
             ["ф", "ы", "в", "а", "п", "р", "о", "л", "д", "ж", "э"],
             ["я", "ч", "с", "м", "и", "т", "ь", "б", "ю"]
         ]
 
-        for i, layer in enumerate(layouts):
-            for j, word in enumerate(layer):
-                if word in exactly_correct_letters:
-                    layouts[i][j] = f"[{word}]"
-                if word in correct_letters:
-                    layouts[i][j] = f"({word})"
-                if word in wrong_letters:
-                    layouts[i][j] = ""
-            layouts[i] = list(filter(lambda x: x, layouts[i]))
-        layouts_list = [" ".join(x) for x in layouts]
-        kb_txt = "\n".join(layouts_list)
-        return kb_txt
+        image = Image.new("RGBA", (self.KEYBOARD_WIDTH, self.KEYBOARD_HEIGHT), self.COLOR_BACKGROUND)
+        draw = ImageDraw.Draw(image)
+        font = ImageFont.truetype(self.FONT_PATH, self.KEYBOARD_CELL_WIDTH, encoding="unic")
 
-    def win(self):
-        session = self.get_session()
-        word = session.word
-        session.delete()
-        gamer = self.bot.get_gamer_by_profile(self.event.sender)
-        gamer.roulette_points += 1000
-        gamer.wordle_points += 1
-        gamer.save()
-        text = f"Вы победили! Загаданное слово - {word}\n" \
-               f"Начислил 1000 очков рулетки"
-        button = self.bot.get_button("Ещё", self.name)
-        keyboard = self.bot.get_inline_keyboard([button])
-        return {"text": text, "keyboard": keyboard}
+        for i, row in enumerate(layouts):
 
-    def lose(self):
-        session = self.get_session()
-        word = session.word
-        session.delete()
-        text = f"Загаданное слово - {word}"
-        button = self.bot.get_button("Ещё", self.name)
-        keyboard = self.bot.get_inline_keyboard([button])
-        return {"text": text, "keyboard": keyboard}
+            total_width = len(row) * self.KEYBOARD_CELL_WIDTH + (len(row) - 1) * self.MAIN_WINDOW_CELL_MARGIN
+            left_margin = (self.KEYBOARD_WIDTH - total_width) / 2
+            for j, letter in enumerate(row):
+                x1 = j * self.KEYBOARD_CELL_WIDTH + j * self.KEYBOARD_CELL_MARGIN
+                y1 = i * self.KEYBOARD_CELL_HEIGHT + i * self.KEYBOARD_CELL_MARGIN
+                x2 = j * self.KEYBOARD_CELL_WIDTH + j * self.KEYBOARD_CELL_MARGIN + self.KEYBOARD_CELL_WIDTH
+                y2 = i * self.KEYBOARD_CELL_HEIGHT + i * self.KEYBOARD_CELL_MARGIN + self.KEYBOARD_CELL_HEIGHT
+
+                color = self.COLOR_DEFAULT
+                if letter:
+                    if letter in exactly_correct_letters:
+                        color = self.COLOR_CORRECT_LETTER_POS
+                    elif letter in correct_letters:
+                        color = self.COLOR_CORRECT_LETTER
+                    elif letter in wrong_letters:
+                        color = self.COLOR_WRONG_LETTER
+
+                draw.rectangle((x1 + left_margin, y1, x2 + left_margin, y2), color)
+
+                letter_width = font.getlength(letter)
+                letter_margin = (self.KEYBOARD_CELL_WIDTH - letter_width) / 2
+                draw.text((x1 + letter_margin + left_margin, y1 + 10), letter.upper(), font=font, fill=self.COLOR_TEXT)
+
+        dst = Image.new('RGBA', (image.width + self.PADDING * 2, image.height + self.PADDING * 2),
+                        self.COLOR_BACKGROUND)
+        dst.paste(image, (self.PADDING, self.PADDING))
+        return dst

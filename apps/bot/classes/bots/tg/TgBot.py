@@ -132,7 +132,7 @@ class TgBot(CommonBot):
         if photo.file_id:
             default_params['photo'] = photo.file_id
             return self.requests.get('sendPhoto', default_params)
-        if photo.public_download_url:
+        elif photo.public_download_url:
             default_params['photo'] = photo.public_download_url
             return self.requests.get('sendPhoto', default_params)
         else:
@@ -325,8 +325,10 @@ class TgBot(CommonBot):
         params['media'] = {'type': att.type}
         if att.file_id:
             params['media']['media'] = att.file_id
-        if att.public_download_url:
+        elif att.public_download_url:
             params['media']['media'] = att.public_download_url
+        else:
+            params['media']['media'] = self.get_file_id(att)
         params['media'] = json.dumps(params['media'])
         r = self.requests.get('editMessageMedia', params=params)
         return r

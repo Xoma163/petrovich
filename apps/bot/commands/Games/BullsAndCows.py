@@ -112,4 +112,4 @@ class BullsAndCows(Command):
         session.message_body += f"\n\n{new_msg}"
         session.save()
 
-        _send_message_session_or_edit(self.bot, self.event, session, session.message_body, 8)
+        _send_message_session_or_edit(self.bot, self.event, session, {'text': session.message_body}, 8)

@@ -336,7 +336,7 @@ def get_url_file_ext(url):
 
 
 # ToDo: придумать, куда это вынести.
-def _send_message_session_or_edit(bot, event, session, msg, max_delta):
+def _send_message_session_or_edit(bot, event, session, msg: dict, max_delta):
     delta_messages = event.message.id - session.message_id
 
     if delta_messages > max_delta:
@@ -347,16 +347,15 @@ def _send_message_session_or_edit(bot, event, session, msg, max_delta):
         session.save()
         bot.delete_message(event.peer_id, old_msg_id)
     else:
-        r = bot.parse_and_send_msgs({
-            'text': msg,
-            'message_id': session.message_id
-        },
+        msg['message_id'] = session.message_id
+        r = bot.parse_and_send_msgs(
+            msg,
             event.peer_id,
             event.message_thread_id
         )[0]
     if not r['success']:
         r = bot.parse_and_send_msgs(
-            {'text': msg},
+            msg,
             event.peer_id,
             event.message_thread_id
         )[0]
