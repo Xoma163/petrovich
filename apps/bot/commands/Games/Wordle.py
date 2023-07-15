@@ -159,27 +159,23 @@ class Wordle(Command):
         text = f"Вы победили! Загаданное слово - {word}\n" \
                f"Начислил 1000 очков рулетки"
 
-        button = self.bot.get_button("Ещё", self.name)
-        keyboard = self.bot.get_inline_keyboard([button])
-
-        image = self.get_keyboard_image(session)
-        attachment = self.bot.get_photo_attachment(image)
-        session.delete()
-
-        return {"text": text, "keyboard": keyboard, 'attachments': [attachment]}
+        return self._end_game(session, text)
 
     def lose(self):
         session = self.get_session()
         text = f"Загаданное слово - {session.word}"
+        return self._end_game(session, text)
 
+    def _end_game(self, session, text):
         button = self.bot.get_button("Ещё", self.name)
         keyboard = self.bot.get_inline_keyboard([button])
 
         image = self.get_keyboard_image(session)
         attachment = self.bot.get_photo_attachment(image)
         session.delete()
+        _send_message_session_or_edit(self.bot, self.event, session, {'attachments': [attachment]}, max_delta=8)
 
-        return {"text": text, "keyboard": keyboard, 'attachments': [attachment]}
+        return {"text": text, "keyboard": keyboard}
 
 
 class WordleImageGenerator:
