@@ -182,8 +182,7 @@ class Media(Command):
     def get_youtube_video(self, url):
         if 'audio' in self.event.message.keys:
             return self.get_youtube_audio(url)
-        max_filesize_mb = self.bot.MAX_VIDEO_SIZE_MB if isinstance(self.bot, TgBot) else None
-        y_api = YoutubeVideoAPI(max_filesize_mb=max_filesize_mb)
+        y_api = YoutubeVideoAPI(max_filesize_mb=self.bot.MAX_VIDEO_SIZE_MB)
 
         args = self.event.message.args[1:] if self.event.message.command in self.full_names else self.event.message.args
         try:
@@ -328,13 +327,32 @@ class Media(Command):
     def get_the_hole_video(self, url):
         the_hole_api = TheHoleAPI()
         the_hole_api.parse_video(url)
-        attachments = [
-            self.bot.get_document_attachment(
-                the_hole_api.m3u8_bytes,
-                peer_id=self.event.peer_id,
-                filename=f"{the_hole_api.title} - {the_hole_api.show_name} | The Hole.m3u8")
-        ]
-        return attachments, f"{the_hole_api.title} | {the_hole_api.show_name}"
+        title = the_hole_api.video_title
+
+        try:
+            cache = VideoCache.objects.get(channel_id=the_hole_api.channel_id, video_id=the_hole_api.video_id)
+        except VideoCache.DoesNotExist:
+            try:
+                self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.UPLOAD_VIDEO)
+                video = the_hole_api.get_video(url)
+            finally:
+                self.bot.stop_activity_thread()
+
+            filename = f"{the_hole_api.channel_title}_{the_hole_api.video_title}"
+
+            cache = self._save_video_to_media_cache(
+                the_hole_api.channel_id,
+                the_hole_api.video_id,
+                filename,
+                video
+            )
+
+        filesize_mb = len(cache.video) / 1024 / 1024
+        attachments = []
+        if filesize_mb < self.bot.MAX_VIDEO_SIZE_MB:
+            attachments = [self.bot.get_video_attachment(cache.video, peer_id=self.event.peer_id)]
+        msg = title + f"\nCкачать можно здесь {self.bot.get_formatted_url('здесь', MAIN_SITE + cache.video.url)}"
+        return attachments, msg
 
     def get_wasd_video(self, url):
         wasd_api = WASDAPI()
@@ -382,9 +400,7 @@ class Media(Command):
         return attachments, title
 
     def get_vk_video(self, url):
-        max_filesize_mb = self.bot.MAX_VIDEO_SIZE_MB if isinstance(self.bot, TgBot) else None
-
-        vk_v_api = VKVideoAPI(max_filesize_mb=max_filesize_mb)
+        vk_v_api = VKVideoAPI()
         video_info = vk_v_api.get_video_info(url)
         title = video_info['video_title']
 
@@ -405,9 +421,12 @@ class Media(Command):
                 filename,
                 video
             )
-
+        filesize_mb = len(cache.video) / 1024 / 1024
+        attachments = []
+        if filesize_mb < self.bot.MAX_VIDEO_SIZE_MB:
+            attachments = [self.bot.get_video_attachment(cache.video, peer_id=self.event.peer_id)]
         msg = title + f"\nCкачать можно здесь {self.bot.get_formatted_url('здесь', MAIN_SITE + cache.video.url)}"
-        return [], msg
+        return attachments, msg
 
     def get_scope_gg_video(self, url):
         content = requests.get(url).content

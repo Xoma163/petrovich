@@ -31,9 +31,8 @@ class VKVideoAPI:
         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36',
     }
 
-    def __init__(self, max_filesize_mb=None):
+    def __init__(self):
         self.title = None
-        self.max_filesize_mb = max_filesize_mb
 
     def get_video(self, url):
         player_url = self._get_player_url(url)

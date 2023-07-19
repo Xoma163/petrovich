@@ -72,7 +72,7 @@ class Command(BaseCommand):
                 return
 
             urls = [f"{th_api.URL}{link}" for link in ids]
-            self.send_file_or_video(subs, ids, urls, titles, method=self.get_the_hole_video_msg, _type='document')
+            self.send_file_or_video(subs, ids, urls, titles, method=self.get_the_hole_video_msg)
         else:
             for sub in subs:
                 self.check_the_hole_video([sub])
@@ -101,7 +101,7 @@ class Command(BaseCommand):
                 return
 
             urls = [f"{vk_v_api.URL}{x}" for x in ids]
-            self.send_file_or_video(subs, ids, urls, titles, method=self.get_vk_video_msg, _type='video')
+            self.send_file_or_video(subs, ids, urls, titles, method=self.get_vk_video_msg)
         else:
             for sub in subs:
                 self.check_vk_video([sub])
@@ -135,7 +135,7 @@ class Command(BaseCommand):
         msg = {'text': title, 'attachments': att}
         return msg
 
-    def send_file_or_video(self, subs, ids, urls, titles, method, _type):
+    def send_file_or_video(self, subs, ids, urls, titles, method):
         bot = TgBot()
         messages = []
         for i, url in enumerate(urls):

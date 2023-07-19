@@ -7,6 +7,7 @@ from urllib.parse import urlparse
 
 import requests
 from PIL.Image import Image as PILImage
+from django.db.models.fields.files import FieldFile
 
 from apps.bot.classes.consts.Exceptions import PWarning
 
@@ -99,6 +100,8 @@ class Attachment:
             file_like_object.save(img_byte_arr, format="PNG")
             img_byte_arr.seek(0)
             self.content = img_byte_arr.read()
+        elif isinstance(file_like_object, FieldFile):
+            self.content = file_like_object.file.read()
 
     def _get_download_url(self, peer_id=None):
         if self.public_download_url:
