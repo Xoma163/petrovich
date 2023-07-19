@@ -68,6 +68,7 @@ soupsieve==2.4.1
 SpeechRecognition==3.10.0
 sqlparse==0.4.4
 transliterate==1.10.2
+twitch-dl==2.1.3
 urllib3==1.26.15
 uWSGI==2.0.21
 virtualenv==20.23.0

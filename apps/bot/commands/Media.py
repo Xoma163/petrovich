@@ -6,6 +6,8 @@ from urllib.parse import urlparse
 import requests
 import youtube_dl
 from bs4 import BeautifulSoup
+from twitchdl import twitch
+from twitchdl.commands.download import get_clip_authenticated_url
 from urllib3.exceptions import MaxRetryError
 
 from apps.bot.APIs.InstagramAPI import InstagramAPI
@@ -32,7 +34,7 @@ from apps.bot.utils.utils import get_urls_from_text
 from apps.service.models import VideoCache
 from petrovich.settings import MAIN_SITE
 
-YOUTUBE_URLS = ('www.youtube.com', 'youtube.com', "www.youtu.be", "youtu.be")
+YOUTUBE_URLS = ('www.youtube.com', 'youtube.com', "www.youtu.be", "youtu.be", "m.youtube.com")
 YOUTUBE_MUSIC_URLS = ("music.youtube.com",)
 REDDIT_URLS = ("www.reddit.com",)
 TIKTOK_URLS = ("www.tiktok.com", 'vm.tiktok.com', 'm.tiktok.com', 'vt.tiktok.com')
@@ -46,6 +48,7 @@ PINTEREST_URLS = ('pinterest.com', 'ru.pinterest.com', 'www.pinterest.com', 'pin
 COUB_URLS = ('coub.com',)
 VK_URLS = ('vk.com',)
 SCOPE_GG_URLS = ('app.scope.gg',)
+CLIPS_TWITCH_URLS = ('clips.twitch.tv',)
 
 MEDIA_URLS = tuple(
     list(YOUTUBE_URLS) +
@@ -61,7 +64,8 @@ MEDIA_URLS = tuple(
     list(PINTEREST_URLS) +
     list(COUB_URLS) +
     list(VK_URLS) +
-    list(SCOPE_GG_URLS)
+    list(SCOPE_GG_URLS) +
+    list(CLIPS_TWITCH_URLS)
 )
 
 
@@ -166,6 +170,7 @@ class Media(Command):
             COUB_URLS: self.get_coub_video,
             VK_URLS: self.get_vk_video,
             SCOPE_GG_URLS: self.get_scope_gg_video,
+            CLIPS_TWITCH_URLS: self.get_clips_twitch_video,
         }
 
         urls = get_urls_from_text(source)
@@ -450,6 +455,15 @@ class Media(Command):
 
         attachments = [self.bot.get_video_attachment(trimmed_video, peer_id=self.event.peer_id)]
         return attachments, None
+
+    def get_clips_twitch_video(self, url):
+
+        slug = url.split(CLIPS_TWITCH_URLS[0], 1)[-1].lstrip('/')
+        clip_info = twitch.get_clip(slug)
+        title = clip_info['title']
+        video_url = get_clip_authenticated_url(slug, "source")
+        attachments = [self.bot.get_video_attachment(video_url, peer_id=self.event.peer_id)]
+        return attachments, title
 
     @staticmethod
     def _save_video_to_media_cache(channel_id, video_id, name, content):
