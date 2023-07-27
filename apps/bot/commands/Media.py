@@ -73,7 +73,8 @@ class Media(Command):
     name = "медиа"
     help_text = "скачивает видео из соцсетей и присылает его"
     help_texts = ["(ссылка на видео/пост) - скачивает видео из соцсетей и присылает его"]
-    help_texts_extra = "Поддерживаемые соцсети: Reddit/TikTok/YouTube/Instagram/Twitter/Pikabu/TheHole/Yandex Music/Pinterest\n\n" \
+    help_texts_extra = "Поддерживаемые соцсети: Youtube/Youtube Music/Reddit/TikTok/Instagram/Twitter/Pikabu/" \
+                       "The Hole/WASD/Yandex Music/Pinterest/Coub/VK Video/ScopeGG/TwitchClips\n\n" \
                        "Ключ --nomedia позволяет не запускать команду\n" \
                        "Ключ --audio позволяет скачивать аудиодорожку для видео с ютуба"
     platforms = [Platform.TG]

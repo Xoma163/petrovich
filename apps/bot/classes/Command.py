@@ -60,18 +60,10 @@ class Command:
         self.event: Event = event
 
         self.full_names: str = ""  # Полный список имён команды (основное имя, дополнительное, имя в тг)
-        self.full_help_text: str = ""  # Сгенерированный хелп текст для команды /команды
-        self.full_help_texts: str = ""  # Сгенерированный хелп текст для команды /помощь
         self.full_help_texts_tg: str = ""  # Сгенерированный хелп текст для списка команд в телеграме
 
         if self.name:
             self.full_names = [self.name] + self.names
-            if self.help_text:
-                self.full_help_text = f"{self.name.capitalize()} - {self.help_text}"
-            if self.help_texts:
-                self.full_help_texts = "\n".join([f"{self.name.capitalize()} {x}" for x in self.help_texts])
-            if self.help_texts_extra:
-                self.full_help_texts += f"\n\n{self.help_texts_extra}"
         if self.name_tg:
             self.full_names.append(self.name_tg)
             self.full_names = list(set(self.full_names))
@@ -79,9 +71,9 @@ class Command:
 
         if self.hidden:
             if self.suggest_for_similar:
-                raise RuntimeError("Поле hidden=True и suggest_for_similar=True не могут быть вместе")
+                raise RuntimeError("Поле hidden=True и suggest_for_similar=True не могут быть переданы вместе")
             if self.access == Role.USER:
-                raise RuntimeError("Поле hidden=True и self.access=Role.USER не могут быть вместе")
+                raise RuntimeError("Поле hidden=True и self.access=Role.USER не могут быть переданы вместе")
 
     def accept(self, event: Event):
         """
