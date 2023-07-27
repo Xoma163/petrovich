@@ -133,15 +133,18 @@ def get_help_texts_for_command(command, platform=None) -> str:
         result += '\n'
     if command.help_texts:
         if platform == Platform.TG:
-            lines = command.full_help_texts.split("\n")
+            lines = command.help_texts
             full_help_texts_list = []
             for line in lines:
                 dash_pos = line.find(" - ")
                 if dash_pos == -1:
-                    new_line = line
+                    new_line = f"/{command.name} {line}"
                 else:
-                    new_line = TgBot.get_formatted_text_line(line[:dash_pos]) + line[dash_pos:]
+                    new_line = TgBot.get_formatted_text_line(f"/{command.name} {line[:dash_pos]}") + line[dash_pos:]
                 full_help_texts_list.append(new_line)
+            if command.help_texts_extra:
+                full_help_texts_list.append("")
+                full_help_texts_list.append(command.help_texts_extra)
             full_help_texts = "\n".join(full_help_texts_list)
             result += full_help_texts
         else:
