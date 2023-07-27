@@ -106,12 +106,12 @@ class VKVideoAPI:
     def parse_channel(self, url):
         content = requests.get(url, headers=self.headers).content
         bs4 = BeautifulSoup(content, "html.parser")
-        title = bs4.select_one('.VideoHeader__breadcrumbsEntity .VideoHeader__name').text
+        title = bs4.select_one(".VideoCard__ownerLink").text
         if 'playlist' in url:
             _playlist_id = url.rsplit('_', 1)[1]
             videos = bs4.find('div', {'id': f"video_subtab_pane_playlist_{_playlist_id}"}) \
                 .find_all('div', {'class': 'VideoCard__info'})
-            show_name = bs4.select('.ui_crumb')[-1].text
+            show_name = bs4.find("title").text.split(" | ", 1)[0]
             title = f"{title} | {show_name}"
         else:
             videos = bs4.find('div', {'id': "video_subtab_pane_all"}).find_all('div', {'class': 'VideoCard__info'})
@@ -131,8 +131,16 @@ class VKVideoAPI:
         content = requests.get(url, headers=self.headers).content
         bs4 = BeautifulSoup(content, 'html.parser')
 
-        a_tag = bs4.select_one(".VideoCard__additionalInfo a")
+        if "/clip-" in url:
+            a_tag = bs4.select_one('.ui_crumb')
+            return {
+                'channel_id': f"@{a_tag.attrs['href'].split('/')[-1]}",
+                'video_id': urlparse(url).path.split('clip')[1],
+                'channel_title': a_tag.text,
+                'video_title': bs4.find('meta', property="og:title").attrs['content'],
+            }
 
+        a_tag = bs4.select_one(".VideoCard__additionalInfo a")
         return {
             'channel_id': a_tag.attrs['href'].split('/')[-1],
             'video_id': urlparse(url).path.split('video')[1],
