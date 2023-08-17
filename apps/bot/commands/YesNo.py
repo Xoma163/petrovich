@@ -7,7 +7,7 @@ class YesNo(Command):
     help_text = "вернёт да или нет"
     help_texts = ["- вернёт да или нет"]
     help_texts_extra = "Для вызова команды просто в конце нужно написать знак вопроса"
-    priority = 80
+    priority = -10
     mentioned = True
 
     def accept(self, event):
