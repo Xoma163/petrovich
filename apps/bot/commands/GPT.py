@@ -62,7 +62,7 @@ class GPT(Command):
             raise PWarning("Какая-то непредвиденная ошибка. Попробуйте ещё раз")
 
         result = ""
-        update_per_symbols = 30
+        update_per_symbols = 100
         counter = update_per_symbols
         message_id = None
 
