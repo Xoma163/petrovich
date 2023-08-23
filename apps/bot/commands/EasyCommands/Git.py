@@ -1,4 +1,5 @@
 from apps.bot.classes.Command import Command
+from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
 
 
 class Git(Command):
@@ -8,6 +9,7 @@ class Git(Command):
 
     help_text = "ссылка на гитхаб"
 
-    def start(self):
+    def start(self) -> ResponseMessage:
         url = 'https://github.com/Xoma163/petrovich/'
-        return self.bot.get_formatted_url("Гитхаб", url)
+        answer = self.bot.get_formatted_url("Гитхаб", url)
+        return ResponseMessage(ResponseMessageItem(text=answer))

@@ -3,6 +3,7 @@ from wakeonlan import send_magic_packet
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Role
 from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
 from apps.service.models import WakeOnLanUserData
 
 
@@ -18,7 +19,7 @@ class WOL(Command):
 
     access = Role.TRUSTED
 
-    def start(self):
+    def start(self) -> ResponseMessage:
         wol_data = WakeOnLanUserData.objects.filter(author=self.event.sender)
 
         if self.event.message.args:
@@ -33,4 +34,5 @@ class WOL(Command):
             raise PWarning(msg)
         wol_data = wol_data.first()
         send_magic_packet(wol_data.mac, ip_address=wol_data.ip, port=wol_data.port)
-        return "Отправил"
+        answer = "Отправил"
+        return ResponseMessage(ResponseMessageItem(text=answer))

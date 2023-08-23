@@ -1,5 +1,6 @@
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
 from apps.service.models import Words
 
 gender_translator = {
@@ -36,7 +37,7 @@ def add_phrase_before(recipient, word, field_name):
         raise PWarning("Ошибка определения числа и рода")
 
 
-def get_praise_or_scold(bot, event, _type):
+def get_praise_or_scold(bot, event, _type) -> ResponseMessageItem:
     if event.message.args_str and event.message.args[-1].replace('-', '') in gender_translator:
         translator_key = event.message.args[-1].replace('-', '')
         args_case = event.message.args_case[:-1]
@@ -55,18 +56,18 @@ def get_praise_or_scold(bot, event, _type):
         recipient = " ".join(args_case)
 
         if "петрович" in recipient.lower() and _type == 'good':
-            msg = "спс))"
+            answer = "спс))"
         else:
-            msg = get_from_db(gender_translator[translator_key], _type)
+            answer = get_from_db(gender_translator[translator_key], _type)
             if recipient:
-                msg = add_phrase_before(recipient, msg, gender_translator[translator_key])
+                answer = add_phrase_before(recipient, answer, gender_translator[translator_key])
 
     else:
-        msg = get_from_db(gender_translator[translator_key], _type)
-    return msg
+        answer = get_from_db(gender_translator[translator_key], _type)
+    return ResponseMessageItem(text=answer)
 
 
-def get_praise_or_scold_self(event, _type):
+def get_praise_or_scold_self(event, _type) -> str:
     recipient = event.sender
     if recipient.gender == '1':
         translator_key = 'ж1'
@@ -90,5 +91,6 @@ class Praise(Command):
         "Если в качестве параметра передаётся имя, фамилия, логин/id, никнейм, то род выберется из БД\n" \
         "Пример. /похвалить бабушка ж"
 
-    def start(self):
-        return get_praise_or_scold(self.bot, self.event, 'good')
+    def start(self) -> ResponseMessage:
+        rmi = get_praise_or_scold(self.bot, self.event, 'good')
+        return ResponseMessage(rmi)

@@ -6,6 +6,7 @@ from apps.bot.classes.Command import Command
 from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.consts.Consts import Role, Platform
 from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
 from apps.bot.classes.messages.attachments.AudioAttachment import AudioAttachment
 from apps.bot.classes.messages.attachments.DocumentAttachment import DocumentAttachment
 from apps.bot.classes.messages.attachments.GifAttachment import GifAttachment
@@ -28,15 +29,16 @@ class NotifyRepeat(Command):
 
     bot: TgBot
 
-    def start(self):
-        return self.start_for_notify_repeat()
+    def start(self) -> ResponseMessage:
+        rmi = self.start_for_notify_repeat()
+        return ResponseMessage(rmi)
 
     def check_max_notifies(self):
         if not self.event.sender.check_role(Role.TRUSTED) and \
                 len(NotifyModel.objects.filter(user=self.event.user)) >= 5:
             raise PWarning("Нельзя добавлять более 5 напоминаний")
 
-    def start_for_notify_repeat(self):
+    def start_for_notify_repeat(self) -> ResponseMessageItem:
         self.check_max_notifies()
         timezone = self.event.sender.city.timezone.name
 
@@ -84,12 +86,12 @@ class NotifyRepeat(Command):
         if crontab:
             notify_dict['crontab'] = crontab
             notify_dict['text_for_filter'] = crontab
-            msg = 'Добавил напоминание'
+            answer = 'Добавил напоминание'
         else:
             notify_datetime = localize_datetime(remove_tz(date), timezone)
             notify_dict['date'] = date
             notify_dict['text_for_filter'] = notify_datetime.strftime("%H:%M")
-            msg = f'Следующее выполнение - {str(notify_datetime.strftime("%d.%m.%Y %H:%M"))}'
+            answer = f'Следующее выполнение - {str(notify_datetime.strftime("%d.%m.%Y %H:%M"))}'
         notify = NotifyModel(**notify_dict)
 
         attachments = self.event.get_all_attachments(
@@ -106,7 +108,7 @@ class NotifyRepeat(Command):
         notify.text_for_filter += f" ({notify.id})"
         notify.save()
 
-        return msg
+        return ResponseMessageItem(text=answer)
 
     @staticmethod
     def get_time(time):

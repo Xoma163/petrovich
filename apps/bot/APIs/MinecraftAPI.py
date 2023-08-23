@@ -1,11 +1,11 @@
 import json
-import threading
 
 from mcrcon import MCRcon
 
 from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.consts.Consts import Role
 from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.messages.ResponseMessage import ResponseMessageItem
 from apps.bot.models import Profile
 from apps.bot.utils.DoTheLinuxComand import do_the_linux_command
 from apps.bot.utils.utils import check_command_time
@@ -46,14 +46,15 @@ class MinecraftAPI:
         except Exception:
             return False
 
-    def _prepare_message(self, action):
+    def _prepare_message(self, action) -> ResponseMessageItem:
         translator = {
             'start': 'Стартуем',
             'stop': "Финишируем"
         }
 
-        return f"{translator[action]} майн {self.get_version()}!" \
-               f"\nИнициатор - {self.event.sender}"
+        answer = f"{translator[action]} майн {self.get_version()}!" \
+                 f"\nИнициатор - {self.event.sender}"
+        return ResponseMessageItem(text=answer)
 
     def _start_local(self):
         do_the_linux_command(f'sudo systemctl start {self._get_service_name()}')
@@ -65,7 +66,7 @@ class MinecraftAPI:
 
         if send_notify:
             message = self._prepare_message("start")
-            self.send_notify_thread(message)
+            self.send_notify(message)
 
     def _stop_local(self):
         do_the_linux_command(f'sudo systemctl stop {self._get_service_name()}')
@@ -76,7 +77,7 @@ class MinecraftAPI:
         self._stop_local()
         if send_notify:
             message = self._prepare_message("stop")
-            self.send_notify_thread(message)
+            self.send_notify(message)
 
     # Only if online
     def parse_server_info(self):
@@ -145,29 +146,18 @@ class MinecraftAPI:
                 result += f"\nКарта - {self.map_url}"
         return result
 
-    def send_notify_thread(self, message):
-        """
-        Не задерживаем вывод ответа от Петровича при старте/стопе сервера
-        """
-
-        def send_notify():
-            profiles_notify = Profile.objects.filter(groups__name=Role.MINECRAFT_NOTIFY.name)
-            if self.event:
-                profiles_notify = profiles_notify.exclude(id=self.event.sender.id)
-                if self.event.chat:
-                    users_in_chat = self.event.chat.users.all()
-                    profiles_notify = profiles_notify.exclude(pk__in=users_in_chat)
-            for profile in profiles_notify:
-                user = profile.get_tg_user()
-                self.send_notify([user], message)
-
-        thread = threading.Thread(target=send_notify)
-        thread.start()
-
-    def send_notify(self, users, message):
-        for user in users:
-            bot = TgBot()
-            bot.parse_and_send_msgs_thread(message, user.user_id, self.event.message_thread_id)
+    def send_notify(self, message: ResponseMessageItem):
+        profiles_notify = Profile.objects.filter(groups__name=Role.MINECRAFT_NOTIFY.name)
+        if self.event:
+            profiles_notify = profiles_notify.exclude(id=self.event.sender.id)
+            if self.event.chat:
+                users_in_chat = self.event.chat.users.all()
+                profiles_notify = profiles_notify.exclude(pk__in=users_in_chat)
+        bot = TgBot()
+        for profile in profiles_notify:
+            user = profile.get_tg_user()
+            message.peer_id = user.user_id
+            bot.send_response_message_item(message)
 
 
 minecraft_servers = [

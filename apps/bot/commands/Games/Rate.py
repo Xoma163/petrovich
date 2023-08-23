@@ -4,6 +4,7 @@ from apps.bot.classes.Command import Command
 from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.consts.Consts import Platform, Role
 from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
 from apps.bot.utils.utils import random_event
 from apps.games.models import Rate as RateModel
 
@@ -25,7 +26,7 @@ class Rate(Command):
 
     bot: TgBot
 
-    def start(self):
+    def start(self) -> ResponseMessage:
         with lock:
             gamer = self.bot.get_gamer_by_profile(self.event.sender)
 
@@ -78,9 +79,7 @@ class Rate(Command):
             if rates_gamers.count() + 1 >= min_gamers:
                 buttons.append(self.bot.get_button("Ставки", "Ставки"))
             keyboard = self.bot.get_inline_keyboard(buttons, cols=2)
-            text = f"Игроки {rates_gamers.count() + 1}/{min_gamers}:\n" \
-                   f"{rate_gamer_str}"
-            return {
-                'text': text,
-                'keyboard': keyboard,
-            }
+            answer = f"Игроки {rates_gamers.count() + 1}/{min_gamers}:\n" \
+                     f"{rate_gamer_str}"
+
+            return ResponseMessage(ResponseMessageItem(text=answer, keyboard=keyboard))

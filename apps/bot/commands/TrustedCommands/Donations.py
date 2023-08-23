@@ -1,6 +1,7 @@
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Role
 from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.messages.ResponseMessage import ResponseMessageItem, ResponseMessage
 from apps.service.models import Donations as DonationsModel
 
 
@@ -10,7 +11,7 @@ class Donations(Command):
     help_text = "список всех донатов"
     access = Role.TRUSTED
 
-    def start(self):
+    def start(self) -> ResponseMessage:
         donations = DonationsModel.objects.all()
         if len(donations) == 0:
             raise PWarning("Нема :(")
@@ -31,4 +32,5 @@ class Donations(Command):
             total_msg += f"{total[key]} {key}\n"
         msg += f'{"-" * 30}\n' \
                f'{total_msg}'
-        return msg
+        answer = msg
+        return ResponseMessage(ResponseMessageItem(text=answer))

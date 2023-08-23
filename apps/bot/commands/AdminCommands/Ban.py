@@ -3,6 +3,7 @@ from django.contrib.auth.models import Group
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Role
 from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
 
 
 class Ban(Command):
@@ -12,7 +13,7 @@ class Ban(Command):
     access = Role.ADMIN
     args = 1
 
-    def start(self):
+    def start(self) -> ResponseMessage:
         profile = self.bot.get_profile_by_name(self.event.message.args, self.event.chat)
 
         if profile.check_role(Role.ADMIN):
@@ -22,5 +23,8 @@ class Ban(Command):
         profile.save()
 
         if profile.gender == profile.GENDER_FEMALE:
-            return "Забанена"
-        return "Забанен"
+            answer = "Забанена"
+        else:
+            answer = "Забанен"
+
+        return ResponseMessage(ResponseMessageItem(text=answer))

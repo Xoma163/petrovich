@@ -4,6 +4,7 @@ from apps.bot.classes.Command import Command
 from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.consts.Consts import Role, Platform
 from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.messages.ResponseMessage import ResponseMessageItem, ResponseMessage
 from apps.bot.utils.utils import get_random_int
 from apps.games.models import Rate as RateModel
 from petrovich.settings import STATIC_ROOT
@@ -27,7 +28,7 @@ class Rates(Command):
 
     bot: TgBot
 
-    def start(self):
+    def start(self) -> ResponseMessage:
         with lock:
             # min_gamers = int(len(Profile.objects.filter(chats=self.event.chat)) / 3)
             # if min_gamers < 2:
@@ -41,7 +42,7 @@ class Rates(Command):
             else:
                 if len(gamers) < min_gamers:
                     raise PWarning(f"Минимальное количество игроков - {min_gamers}")
-            messages = ["Ставки сделаны, ставок больше нет."]
+            rmi1 = ResponseMessageItem("Ставки сделаны, ставок больше нет.")
 
             rnd = get_random_int(1, 100)
 
@@ -72,25 +73,22 @@ class Rates(Command):
                     filename="petrovich_rate.jpg"
                 )
                 if len(winners) == 1:
-                    msg = {
-                        'text': f"Выпавшее число - {rnd}\nПобедитель этого казино:\n{winners_str}",
-                        'attachments': image
-                    }
+                    answer = f"Выпавшее число - {rnd}\nПобедитель этого казино:\n{winners_str}"
                 else:
-                    msg = {
-                        'text': f"Выпавшее число - {rnd}\nПобедители этого казино:\n{winners_str}",
-                        'attachments': image
-                    }
+                    answer = f"Выпавшее число - {rnd}\nПобедители этого казино:\n{winners_str}"
+                rmi2 = ResponseMessageItem(text=answer, attachments=[image])
+
             else:
                 if len(winners) == 1:
-                    msg = {'text': f"Выпавшее число - {rnd}\nПобедитель:\n{winners_str}"}
+                    answer = f"Выпавшее число - {rnd}\nПобедитель:\n{winners_str}"
                 else:
-                    msg = {'text': f"Выпавшее число - {rnd}\nПобедители:\n{winners_str}"}
-
+                    answer = f"Выпавшее число - {rnd}\nПобедители:\n{winners_str}"
+                rmi2 = ResponseMessageItem(text=answer)
             gamers.delete()
 
             button1 = self.bot.get_button("Ставка", "Ставка")
             keyboard = self.bot.get_inline_keyboard([button1], cols=1)
-            msg['keyboard'] = keyboard
-            messages.append(msg)
-            return messages
+            rmi2.keyboard = keyboard
+            return ResponseMessage([
+                rmi1, rmi2
+            ])

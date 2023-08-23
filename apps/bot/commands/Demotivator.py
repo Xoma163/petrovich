@@ -4,6 +4,7 @@ from PIL import Image
 
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 from apps.bot.classes.messages.attachments.StickerAttachment import StickerAttachment
 from apps.bot.utils.Demotivator import DemotivatorBuilder
@@ -19,7 +20,7 @@ class Demotivator(Command):
     args = 1
     attachments = [PhotoAttachment, StickerAttachment]
 
-    def start(self):
+    def start(self) -> ResponseMessage:
         image = self.event.get_all_attachments(self.attachments)[0]
         if isinstance(image, StickerAttachment) and image.animated:
             raise PWarning("Пришлите стикер без анимации")
@@ -28,7 +29,7 @@ class Demotivator(Command):
 
         texts = list(map(str.strip, text.split('\n', 1)))
         if not texts[0]:
-            return "Первая фраза обязательно должна быть"
+            raise PWarning("Первая фраза обязательно должна быть")
 
         base_image = Image.open(image.get_bytes_io_content(self.event.peer_id))
         db = DemotivatorBuilder(base_image, *texts)
@@ -41,4 +42,4 @@ class Demotivator(Command):
             peer_id=self.event.peer_id,
             filename="petrovich_demotivator.png"
         )
-        return {"attachments": attachment}
+        return ResponseMessage(ResponseMessageItem(attachments=[attachment]))

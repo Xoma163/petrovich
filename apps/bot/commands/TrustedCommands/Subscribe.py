@@ -9,6 +9,7 @@ from apps.bot.classes.Command import Command
 from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.consts.Consts import Role, Platform
 from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
 from apps.bot.classes.messages.attachments.LinkAttachment import LinkAttachment
 from apps.service.models import Subscribe as SubscribeModel
 
@@ -36,7 +37,7 @@ class Subscribe(Command):
 
     bot: TgBot
 
-    def start(self):
+    def start(self) -> ResponseMessage:
         arg0 = self.event.message.args[0]
         menu = [
             [['добавить', 'подписаться', 'подписка'], self.menu_add],
@@ -45,9 +46,10 @@ class Subscribe(Command):
             [['конфа'], self.menu_conference],
         ]
         method = self.handle_menu(menu, arg0)
-        return method()
+        rmi = method()
+        return ResponseMessage(rmi)
 
-    def menu_add(self):
+    def menu_add(self) -> ResponseMessageItem:
         self.check_args(2)
         self.attachments = [LinkAttachment]
         self.check_attachments()
@@ -91,7 +93,8 @@ class Subscribe(Command):
             message_thread_id=self.event.message_thread_id
         )
         sub.save()
-        return f'Подписал на канал {title}'
+        answer = f'Подписал на канал {title}'
+        return ResponseMessageItem(text=answer)
 
     @staticmethod
     def menu_add_youtube(url):
@@ -133,20 +136,23 @@ class Subscribe(Command):
 
         return parsed['channel_id'], parsed['title'], None, parsed['last_video_id'], is_stream, parsed['playlist_id']
 
-    def menu_delete(self):
+    def menu_delete(self) -> ResponseMessageItem:
         self.check_args(2)
         channel_filter = self.event.message.args[1:]
         sub = self.get_sub(channel_filter, True)
         sub_title = sub.title
         sub.delete()
-        return f"Удалил подписку на канал {sub_title}"
+        answer = f"Удалил подписку на канал {sub_title}"
+        return ResponseMessageItem(text=answer)
 
-    def menu_subs(self):
-        return self.get_subs()
+    def menu_subs(self) -> ResponseMessageItem:
+        answer = self.get_subs()
+        return ResponseMessageItem(text=answer)
 
-    def menu_conference(self):
+    def menu_conference(self) -> ResponseMessageItem:
         self.check_conversation()
-        return self.get_subs(conversation=True)
+        answer = self.get_subs(conversation=True)
+        return ResponseMessageItem(text=answer)
 
     def get_sub(self, filters, for_delete=False):
         if self.event.chat:

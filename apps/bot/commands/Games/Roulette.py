@@ -4,6 +4,7 @@ from threading import Lock
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Role
 from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
 from apps.bot.utils.utils import random_event, localize_datetime, remove_tz, decl_of_num, \
     get_random_int
 from apps.games.models import RouletteRate, Gamer
@@ -131,11 +132,12 @@ class Roulette(Command):
         super().__init__(*args, **kwargs)
         self.gamer = None
 
-    def start(self):
+    def start(self) -> ResponseMessage:
         self.gamer = self.bot.get_gamer_by_profile(self.event.sender)
 
         if not self.event.message.args:
-            return self.menu_play()
+            rmi = self.menu_play()
+            return ResponseMessage(rmi)
         arg0 = self.event.message.args[0]
 
         menu = [
@@ -148,26 +150,29 @@ class Roulette(Command):
             [['default'], self.menu_rate_on]
         ]
         method = self.handle_menu(menu, arg0)
-        return method()
+        rmi = method()
+        return ResponseMessage(rmi)
 
-    def menu_balance(self):
+    def menu_balance(self) -> ResponseMessageItem:
         if len(self.event.message.args) > 1:
             user = self.bot.get_profile_by_name(self.event.message.args[1:], self.event.chat)
             user_gamer = Gamer.objects.filter(profile=user).first()
             if not user_gamer:
                 raise PWarning("Не нашёл такого игрока")
-            return f"Баланс игрока {user} - {user_gamer.roulette_points}"
-        return f"Ваш баланс - {self.gamer.roulette_points}"
+            answer = f"Баланс игрока {user} - {user_gamer.roulette_points}"
+            return ResponseMessageItem(text=answer)
+        answer = f"Ваш баланс - {self.gamer.roulette_points}"
+        return ResponseMessageItem(text=answer)
 
-    def menu_picture(self):
+    def menu_picture(self) -> ResponseMessageItem:
         photo = random_event(
             [f"{STATIC_ROOT}/bot/img/roulette_game.jpg",
              f"{STATIC_ROOT}/bot/img/roulette.jpg"],
             [90, 10])
         photo = self.bot.get_photo_attachment(photo, peer_id=self.event.peer_id, filename="petrovich_roulette.jpg")
-        return {'attachments': photo}
+        return ResponseMessageItem(attachments=[photo])
 
-    def menu_bonus(self):
+    def menu_bonus(self) -> ResponseMessageItem:
         datetime_now = localize_datetime(datetime.datetime.utcnow(), DEFAULT_TIME_ZONE)
         datetime_last = localize_datetime(remove_tz(self.gamer.roulette_points_today), DEFAULT_TIME_ZONE)
         if (datetime_now.date() - datetime_last.date()).days <= 0:
@@ -175,9 +180,10 @@ class Roulette(Command):
         self.gamer.roulette_points += 500
         self.gamer.roulette_points_today = datetime_now
         self.gamer.save()
-        return "Выдал пособие по безработице"
+        answer = "Выдал пособие по безработице"
+        return ResponseMessageItem(text=answer)
 
-    def menu_transfer(self):
+    def menu_transfer(self) -> ResponseMessageItem:
         self.check_conversation()
         self.args = 3
         self.int_args = [-1]
@@ -198,9 +204,11 @@ class Roulette(Command):
         self.gamer.save()
         user_gamer.roulette_points += points_transfer
         user_gamer.save()
-        return f"Передал игроку {user_gamer.profile} {points_transfer} {decl_of_num(points_transfer, ['очко', 'очка', 'очков'])}"
 
-    def menu_give(self):
+        answer = f"Передал игроку {user_gamer.profile} {points_transfer} {decl_of_num(points_transfer, ['очко', 'очка', 'очков'])}"
+        return ResponseMessageItem(text=answer)
+
+    def menu_give(self) -> ResponseMessageItem:
         self.check_sender(Role.ADMIN)
         self.check_conversation()
         self.args = 3
@@ -215,23 +223,26 @@ class Roulette(Command):
         user_gamer.roulette_points += points_transfer
         user_gamer.save()
         if points_transfer > 0:
-            return f"Начислил игроку {user_gamer.profile} {points_transfer} " \
-                   f"{decl_of_num(points_transfer, ['очко', 'очка', 'очков'])}"
+            answer = f"Начислил игроку {user_gamer.profile} {points_transfer} " \
+                     f"{decl_of_num(points_transfer, ['очко', 'очка', 'очков'])}"
+            return ResponseMessageItem(text=answer)
         elif points_transfer < 0:
-            return f"Забрал у игрока {user_gamer.profile} {-points_transfer} " \
-                   f"{decl_of_num(-points_transfer, ['очко', 'очка', 'очков'])}"
-        return "ммм"
+            answer = f"Забрал у игрока {user_gamer.profile} {-points_transfer} " \
+                     f"{decl_of_num(-points_transfer, ['очко', 'очка', 'очков'])}"
+            return ResponseMessageItem(text=answer)
+        answer = "ммм"
+        return ResponseMessageItem(text=answer)
 
-    def menu_rates(self):
+    def menu_rates(self) -> ResponseMessageItem:
         rrs = self.get_active_rates()
 
-        msg = ""
+        answer = ""
         for rr in rrs:
             rate_on_dict = rr.rate_on
-            msg += f"{rr.gamer.profile} поставил на {rate_on_dict['verbose_name']} {rr.rate} очков\n"
-        return msg
+            answer += f"{rr.gamer.profile} поставил на {rate_on_dict['verbose_name']} {rr.rate} очков\n"
+        return ResponseMessageItem(text=answer)
 
-    def menu_rate_on(self):
+    def menu_rate_on(self) -> ResponseMessageItem:
         rate_on = self.event.message.args[0]
         if rate_on not in TRANSLATOR:
             raise PWarning(f"Не могу понять на что вы поставили. {self.bot.get_formatted_text_line('/ман рулетка')}")
@@ -264,9 +275,10 @@ class Roulette(Command):
         self.gamer.roulette_points -= rate
         self.gamer.save()
 
-        return "Поставил"
+        answer = "Поставил"
+        return ResponseMessageItem(text=answer)
 
-    def menu_play(self):
+    def menu_play(self) -> ResponseMessageItem:
         with lock:
             rrs = self.get_active_rates()
             msg1 = "Ставки сделаны. Ставок больше нет\n"
@@ -287,9 +299,9 @@ class Roulette(Command):
                     msg3 += f"{winner['user']} - {winner['points']}\n"
             else:
                 msg3 = "Нет победителей"
-            msg = msg1 + msg2 + msg3
+            answer = msg1 + msg2 + msg3
             rrs.delete()
-            return msg
+            return ResponseMessageItem(text=answer)
 
     def get_gamer_by_name(self, username):
         user = self.bot.get_profile_by_name(username, self.event.chat)

@@ -1,4 +1,6 @@
 from apps.bot.classes.Command import Command
+from apps.bot.classes.events.Event import Event
+from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
 
 
 class WhoreArgument(Command):
@@ -6,8 +8,9 @@ class WhoreArgument(Command):
     suggest_for_similar = False
     non_mentioned = True
 
-    def accept(self, event):
+    def accept(self, event: Event) -> bool:
         return event.message and event.message.clear == 'шлюхи аргумент'
 
-    def start(self):
-        return "Аргумент не нужен, пидор обнаружен"
+    def start(self) -> ResponseMessage:
+        answer = "Аргумент не нужен, пидор обнаружен"
+        return ResponseMessage(ResponseMessageItem(text=answer))

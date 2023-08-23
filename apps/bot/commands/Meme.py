@@ -10,6 +10,8 @@ from apps.bot.classes.Command import Command
 from apps.bot.classes.bots.Bot import send_message_to_moderator_chat
 from apps.bot.classes.consts.Consts import Role, Platform, ATTACHMENT_TYPE_TRANSLATOR
 from apps.bot.classes.consts.Exceptions import PWarning, PSkip
+from apps.bot.classes.events.Event import Event
+from apps.bot.classes.messages.ResponseMessage import ResponseMessageItem, ResponseMessage
 from apps.bot.classes.messages.attachments.GifAttachment import GifAttachment
 from apps.bot.classes.messages.attachments.LinkAttachment import LinkAttachment
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
@@ -54,14 +56,14 @@ class Meme(Command):
         LinkAttachment
     ]
 
-    def accept(self, event):
+    def accept(self, event: Event) -> bool:
         if event.command:
             event.message.args = event.message.clear.split(' ')
             return True
         return super().accept(event)
 
     @staticmethod
-    def accept_extra(event):
+    def accept_extra(event: Event) -> bool:
         if event.is_fwd:
             return False
         if event.message and not event.message.mentioned:
@@ -71,7 +73,7 @@ class Meme(Command):
                     return True
         return False
 
-    def start(self):
+    def start(self) -> ResponseMessage:
         if not self.event.message.args:
             return self.menu_random()
 
@@ -91,7 +93,7 @@ class Meme(Command):
 
     # MENU #
 
-    def menu_add(self):
+    def menu_add(self) -> ResponseMessage:
         self.check_args(2)
         attachments = self.event.get_all_attachments(self.ALLOWED_ATTACHMENTS)
         if len(attachments) == 0:
@@ -137,22 +139,24 @@ class Meme(Command):
         if isinstance(attachment, LinkAttachment) and attachment.is_youtube_link:
             self.set_youtube_file_id(new_meme_obj)
         if new_meme['approved']:
-            return "Добавил"
+            answer = "Добавил"
+            return ResponseMessage(ResponseMessageItem(text=answer))
 
         meme_to_send = self.prepare_meme_to_send(new_meme_obj)
-        meme_to_send['text'] = "Запрос на подтверждение мема:\n" \
-                               f"{new_meme_obj.author}\n" \
-                               f"{new_meme_obj.name} ({new_meme_obj.id})"
+        meme_to_send.text = "Запрос на подтверждение мема:\n" \
+                            f"{new_meme_obj.author}\n" \
+                            f"{new_meme_obj.name} ({new_meme_obj.id})"
 
         button_approve = self.bot.get_button("Подтвердить", self.name, args=["подтвердить", new_meme_obj.pk])
         button_decline = self.bot.get_button("Отклонить", self.name, args=["отклонить", new_meme_obj.pk])
-        meme_to_send['keyboard'] = self.bot.get_inline_keyboard([button_approve, button_decline])
+        meme_to_send.keyboard = self.bot.get_inline_keyboard([button_approve, button_decline])
 
         # Отправка сообщения в модераторную
         send_message_to_moderator_chat(meme_to_send)
-        return "Добавил. Воспользоваться мемом можно после проверки модераторами."
+        answer = "Добавил. Воспользоваться мемом можно после проверки модераторами."
+        return ResponseMessage(ResponseMessageItem(text=answer))
 
-    def menu_refresh(self):
+    def menu_refresh(self) -> ResponseMessage:
         self.check_args(2)
         attachments = self.event.get_all_attachments(self.ALLOWED_ATTACHMENTS)
         if len(attachments) == 0:
@@ -192,19 +196,21 @@ class Meme(Command):
             meme.save()
             if isinstance(attachment, LinkAttachment) and attachment.is_youtube_link:
                 self.set_youtube_file_id(meme)
-            return f'Обновил мем "{meme.name}"'
+            answer = f'Обновил мем "{meme.name}"'
+            return ResponseMessage(ResponseMessageItem(text=answer))
 
         meme_to_send = self.prepare_meme_to_send(meme)
-        meme_to_send['text'] = "Запрос на обновление мема:\n" \
-                               f"{meme.author}\n" \
-                               f"{meme.name} ({meme.id})"
+        meme_to_send.text = "Запрос на обновление мема:\n" \
+                            f"{meme.author}\n" \
+                            f"{meme.name} ({meme.id})"
         if meme.link:
-            meme_to_send['text'] += f"\n{meme.link}"
+            meme_to_send.text += f"\n{meme.link}"
         send_message_to_moderator_chat(meme_to_send)
 
-        return "Обновил. Воспользоваться мемом можно после проверки модераторами."
+        answer = "Обновил. Воспользоваться мемом можно после проверки модераторами."
+        return ResponseMessage(ResponseMessageItem(text=answer))
 
-    def menu_delete(self):
+    def menu_delete(self) -> ResponseMessage:
         self.check_args(2)
         meme_filter = self.get_default_meme_filter_by_args(self.event.message.args[1:])
         if not self.event.sender.check_role(Role.MODERATOR):
@@ -219,25 +225,31 @@ class Meme(Command):
                 user_msg = f'Мем с названием "{meme.name}" удалён поскольку он не ' \
                            f'соответствует правилам, устарел или является дубликатом.'
                 user = meme.author.get_tg_user()
-                self.bot.parse_and_send_msgs(user_msg, user.user_id, self.event.message_thread_id)
+                rmi = ResponseMessageItem(
+                    text=user_msg,
+                    peer_id=user.user_id,
+                    message_thread_id=self.event.message_thread_id)
+                self.bot.send_response_message_item(rmi)
 
         meme_name = meme.name
         meme.delete()
-        return f'Удалил мем "{meme_name}"'
+        answer = f'Удалил мем "{meme_name}"'
+        return ResponseMessage(ResponseMessageItem(text=answer))
 
-    def menu_random(self):
+    def menu_random(self) -> ResponseMessage:
         meme = MemeModel.objects.filter(approved=True).order_by('?').first()
-        return self.prepare_meme_to_send(meme, print_name=True, send_keyboard=True)
+        rmi = self.prepare_meme_to_send(meme, print_name=True, send_keyboard=True)
+        return ResponseMessage(rmi)
 
-    def menu_approve(self):
+    def menu_approve(self) -> ResponseMessage:
         self.check_sender(Role.MODERATOR)
 
         if len(self.event.message.args) == 1:
             meme = self.get_meme(approved=False)
-            meme_to_send = self.prepare_meme_to_send(meme)
-            meme_to_send['text'] = f"{meme.author}\n" \
-                                   f"{meme.name} ({meme.id})"
-            return meme_to_send
+            rmi = self.prepare_meme_to_send(meme)
+            rmi.text = f"{meme.author}\n" \
+                       f"{meme.name} ({meme.id})"
+            return ResponseMessage(rmi)
 
         self.check_args(2)
 
@@ -247,16 +259,17 @@ class Meme(Command):
         if meme.approved:
             raise PWarning("Мем уже подтверждён")
 
-        user_msg = f'Мем с названием "{meme.name}" подтверждён.'
+        answer = f'Мем с названием "{meme.name}" подтверждён.'
         user = meme.author.get_tg_user()
-        self.bot.parse_and_send_msgs(user_msg, user.user_id, self.event.message_thread_id)
 
-        msg = f'Мем "{meme.name}" ({meme.id}) подтверждён'
         meme.approved = True
         meme.save()
-        return msg
+        return ResponseMessage([
+            ResponseMessageItem(text=answer),
+            ResponseMessageItem(text=answer, peer_id=user.user_id)
+        ])
 
-    def menu_reject(self):
+    def menu_reject(self) -> ResponseMessage:
         self.check_sender(Role.MODERATOR)
         self.check_args(2)
 
@@ -265,14 +278,19 @@ class Meme(Command):
         if meme.approved:
             raise PWarning("Нельзя отклонить уже подтверждённый мем")
 
-        msg = f'Мем "{meme.name}" ({meme.id}) отклонён'
+        answer = f'Мем "{meme.name}" ({meme.id}) отклонён'
         user = meme.author.get_tg_user()
-        self.bot.parse_and_send_msgs(msg, user.user_id, self.event.message_thread_id)
 
         meme.delete()
-        return msg
+        return ResponseMessage([
+            ResponseMessageItem(text=answer),
+            ResponseMessageItem(
+                text=answer,
+                peer_id=user.user_id
+            )
+        ])
 
-    def menu_rename(self):
+    def menu_rename(self) -> ResponseMessage:
         self.check_sender(Role.MODERATOR)
         self.check_args(3)
         self.int_args = [1]
@@ -295,18 +313,25 @@ class Meme(Command):
         meme.name = new_name
         meme.save()
 
+        rm = ResponseMessage()
+        rm.messages.append(ResponseMessageItem(text=user_msg))
         if meme.author != self.event.sender:
             user = meme.author.get_tg_user()
-            self.bot.parse_and_send_msgs(user_msg, user.user_id, self.event.message_thread_id)
-        return user_msg
+            rmi = ResponseMessageItem(
+                text=user_msg,
+                peer_id=user.user_id
+            )
+            rm.messages.append(rmi)
+        return rm
 
-    def menu_info(self):
+    def menu_info(self) -> ResponseMessage:
         self.check_args(2)
         meme_filter = self.get_default_meme_filter_by_args(self.event.message.args[1:])
         meme = self.get_meme(**meme_filter)
-        return meme.get_info()
+        answer = meme.get_info()
+        return ResponseMessage(ResponseMessageItem(text=answer))
 
-    def menu_default(self):
+    def menu_default(self) -> ResponseMessage:
         warning_message = None
 
         id_name = self.get_id_or_meme_name(self.event.message.args)
@@ -325,10 +350,11 @@ class Meme(Command):
 
         meme.uses += 1
         meme.save()
-        prepared_meme = self.prepare_meme_to_send(meme)
+        rm = ResponseMessage()
+        rm.messages.append(self.prepare_meme_to_send(meme))
         if warning_message:
-            return [prepared_meme, self.bot.get_formatted_text(warning_message)]
-        return prepared_meme
+            rm.messages.append(warning_message)
+        return rm
 
     @staticmethod
     def get_filtered_memes(filter_list=None, filter_user=None, approved=True, _id=None):
@@ -376,41 +402,40 @@ class Meme(Command):
         meme = self.get_one_meme(memes, filter_list, approved)
         return meme
 
-    def prepare_meme_to_send(self, meme, print_name=False, send_keyboard=False):
-        msg = {}
-
+    def prepare_meme_to_send(self, meme, print_name=False, send_keyboard=False) -> ResponseMessageItem:
+        rmi = ResponseMessageItem()
         if self.event.platform == Platform.TG:
             if meme.type == LinkAttachment.TYPE:
                 if meme.tg_file_id:
                     att = VideoAttachment()
                     att.file_id = meme.tg_file_id
-                    msg['attachments'] = att
+                    rmi.attachments = [att]
                 else:
                     yt_api = YoutubeVideoAPI()
                     try:
                         content_url = yt_api.get_download_url(meme.link)
                         video_content = requests.get(content_url).content
-                        msg['attachments'] = self.bot.get_video_attachment(video_content, peer_id=self.event.peer_id)
-                        msg['text'] = yt_api.get_timecode_str(meme.link)
+                        rmi.attachments = [self.bot.get_video_attachment(video_content, peer_id=self.event.peer_id)]
+                        rmi.text = yt_api.get_timecode_str(meme.link)
                     except PSkip:
-                        msg['text'] = meme.link
+                        rmi.text = meme.link
                     except Exception as e:
                         raise e
             elif meme.tg_file_id:
                 att = ATTACHMENT_TYPE_TRANSLATOR[meme.type]()
                 att.file_id = meme.tg_file_id
-                msg['attachments'] = att
+                rmi.attachments = [att]
             else:
-                msg['text'] = meme.link
+                rmi.text = meme.link
 
         if print_name:
-            if msg.get('text', None):
-                msg['text'] += f"\n{meme.name}"
+            if rmi.text:
+                rmi.text += f"\n{meme.name}"
 
         if send_keyboard:
             button = self.bot.get_button("Ещё", self.name)
-            msg['keyboard'] = self.bot.get_inline_keyboard([button])
-        return msg
+            rmi.keyboard = self.bot.get_inline_keyboard([button])
+        return rmi
 
     def _check_allowed_url(self, url):
         parsed_url = urlparse(url)
@@ -461,7 +486,8 @@ class Meme(Command):
         memes_list = [meme['meme'] for meme in memes_list]
         return memes_list
 
-    def get_similar_memes_names(self, memes):
+    @staticmethod
+    def get_similar_memes_names(memes) -> ResponseMessageItem:
         meme_name_limit = 120
         meme_count_limit = 20
         total_memes_count = len(memes)
@@ -474,11 +500,11 @@ class Meme(Command):
                 meme_names.append(meme.name[:meme_name_limit] + "...")
         meme_names_str = ";\n".join(meme_names)
 
-        msg = f"Нашёл сразу {total_memes_count}, уточните:\n\n" \
-              f"{meme_names_str}" + '.'
+        answer = f"Нашёл сразу {total_memes_count}, уточните:\n\n" \
+                 f"{meme_names_str}" + '.'
         if total_memes_count > meme_count_limit:
-            msg += "\n..."
-        return msg
+            answer += "\n..."
+        return ResponseMessageItem(text=answer)
 
     @staticmethod
     def get_id_or_meme_name(args):

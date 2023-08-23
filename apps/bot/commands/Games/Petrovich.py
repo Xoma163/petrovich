@@ -7,6 +7,7 @@ from apps.bot.classes.Command import Command
 from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.consts.Consts import Platform, Role
 from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.messages.ResponseMessage import ResponseMessageItem, ResponseMessage
 from apps.bot.utils.utils import localize_datetime, remove_tz, random_event
 from apps.games.models import PetrovichGames, PetrovichUser
 from petrovich.settings import DEFAULT_TIME_ZONE
@@ -32,7 +33,7 @@ class Petrovich(Command):
 
     bot: TgBot
 
-    def start(self):
+    def start(self) -> ResponseMessage:
         if self.event.message.args:
             arg0 = self.event.message.args[0]
         else:
@@ -45,29 +46,32 @@ class Petrovich(Command):
         method = self.handle_menu(menu, arg0)
         return method()
 
-    def menu_reg(self):
+    def menu_reg(self) -> ResponseMessage:
         p_user = PetrovichUser.objects.filter(profile=self.event.sender, chat=self.event.chat).first()
         if p_user is not None:
             if not p_user.active:
                 p_user.active = True
                 p_user.save()
-                return "Возвращаю тебя в строй"
+                answer = "Возвращаю тебя в строй"
             else:
-                return "Ты уже зарегистрирован"
+                answer = "Ты уже зарегистрирован"
+            return ResponseMessage(ResponseMessageItem(text=answer))
 
         PetrovichUser.objects.create(profile=self.event.sender, chat=self.event.chat, active=True)
-        return "Регистрация прошла успешно"
+        answer = "Регистрация прошла успешно"
+        return ResponseMessage(ResponseMessageItem(text=answer))
 
     def menu_dereg(self):
         p_user = PetrovichUser.objects.filter(profile=self.event.sender, chat=self.event.chat).first()
         if p_user is not None and p_user.active:
             p_user.active = False
             p_user.save()
-            return "Ок"
+            answer = "Ок"
         else:
-            return "А ты и не зареган"
+            answer = "А ты и не зареган"
+        return ResponseMessage(ResponseMessageItem(text=answer))
 
-    def menu_play(self):
+    def menu_play(self) -> ResponseMessage:
         with lock:
             datetime_now = localize_datetime(datetime.datetime.utcnow(), DEFAULT_TIME_ZONE)
             winner_today = PetrovichGames.objects.filter(chat=self.event.chat).first()
@@ -78,7 +82,8 @@ class Petrovich(Command):
                         winner_gender = "Петровна"
                     else:
                         winner_gender = "Петрович"
-                    return f"{winner_gender} дня - {winner_today.profile}"
+                    answer = f"{winner_gender} дня - {winner_today.profile}"
+                    return ResponseMessage(ResponseMessageItem(text=answer))
 
             group_banned = Group.objects.get(name=Role.BANNED.name)
             winner = PetrovichUser.objects \
@@ -104,7 +109,7 @@ class Petrovich(Command):
             else:
                 winner_gender = "Наш сегодняшний Петрович дня"
 
-            first_message = random_event(
+            first_answer = random_event(
                 [
                     "Такс такс такс, кто тут у нас",
                     "*барабанная дробь*",
@@ -114,8 +119,9 @@ class Petrovich(Command):
                     "Опять вы в игрульки свои играете да? Ну ладно"
                 ]
             )
+            second_answer = f"{winner_gender} - {self.bot.get_mention(winner, str(winner))}"
 
-            return [
-                first_message,
-                f"{winner_gender} - {self.bot.get_mention(winner, str(winner))}"
-            ]
+            return ResponseMessage([
+                ResponseMessageItem(text=first_answer),
+                ResponseMessageItem(text=second_answer)
+            ])

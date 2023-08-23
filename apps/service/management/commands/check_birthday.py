@@ -3,6 +3,7 @@ from datetime import datetime
 from django.core.management.base import BaseCommand
 
 from apps.bot.classes.bots.tg.TgBot import TgBot
+from apps.bot.classes.messages.ResponseMessage import ResponseMessageItem, ResponseMessage
 from apps.bot.models import Chat, Profile
 from apps.games.models import Gamer
 
@@ -28,13 +29,11 @@ class Command(BaseCommand):
                     gamer.roulette_points += 100000
                     gamer.save()
                     if profile.celebrate_bday:
-                        tg_bot.parse_and_send_msgs(
-                            [
-                                f"С Днём рождения, {tg_bot.get_mention(profile)}!",
-                                "На ваш счет зачислено 100 000 бонусных очков."
-                            ],
-                            chat.chat_id
-                        )
+                        rmi1 = ResponseMessageItem(f"С Днём рождения, {tg_bot.get_mention(profile)}!",
+                                                   peer_id=chat.chat_id)
+                        rmi2 = ResponseMessageItem("На ваш счет зачислено 100 000 бонусных очков.")
+                        rm = ResponseMessage([rmi1, rmi2])
+                        tg_bot.send_response_message(rm)
 
     def add_arguments(self, parser):
         parser.add_argument('chat_id', nargs='+', type=str, help='chat_id')

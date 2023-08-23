@@ -1,5 +1,6 @@
 from apps.bot.APIs.GithubAPI import GithubAPI
 from apps.bot.classes.Command import Command
+from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
 
 
 class Issue(Command):
@@ -11,7 +12,7 @@ class Issue(Command):
     args = 1
     mentioned = True
 
-    def start(self):
+    def start(self) -> ResponseMessage:
         msg = self.event.message.args_str_case
 
         body = ""
@@ -45,6 +46,6 @@ class Issue(Command):
         labels_in_github = [x for x in github_api.get_all_labels() if x.lower() in tags] if tags else []
 
         response = github_api.create_issue(title, body, GithubAPI.REPO_OWNER, labels=labels_in_github)
-        text = f"Отслеживать созданное ишю можно по {self.bot.get_formatted_url('ссылке', response['html_url'])}"
+        answer = f"Отслеживать созданное ишю можно по {self.bot.get_formatted_url('ссылке', response['html_url'])}"
 
-        return text
+        return ResponseMessage(ResponseMessageItem(text=answer))

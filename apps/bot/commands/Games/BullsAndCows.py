@@ -4,6 +4,7 @@ from threading import Lock
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Role, Platform
 from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.messages.ResponseMessage import ResponseMessageItem, ResponseMessage
 from apps.bot.utils.utils import decl_of_num, _send_message_session_or_edit
 from apps.games.models import BullsAndCowsSession
 
@@ -23,7 +24,7 @@ class BullsAndCows(Command):
     ]
     access = Role.GAMER
 
-    def start(self):
+    def start(self) -> ResponseMessage:
         with lock:
             if self.event.chat:
                 session = BullsAndCowsSession.objects.filter(chat=self.event.chat).first()
@@ -34,9 +35,9 @@ class BullsAndCows(Command):
             else:
                 return self.play_game(session)
 
-    def start_game(self, session):
+    def start_game(self, session) -> ResponseMessage:
         if session:
-            return f"Игра уже создана, присылай мне число из {DIGITS_IN_GAME} цифр"
+            raise PWarning(f"Игра уже создана, присылай мне число из {DIGITS_IN_GAME} цифр")
         digits = [str(x) for x in range(10)]
         random.shuffle(digits)
         new_obj = {
@@ -48,17 +49,19 @@ class BullsAndCows(Command):
             new_obj['profile'] = self.event.sender
         bacs = BullsAndCowsSession.objects.create(**new_obj)
 
-        msg = "Я создал, погнали"
+        answer = "Я создал, погнали"
         if self.event.platform == Platform.TG:
-            r = self.bot.parse_and_send_msgs(msg, self.event.peer_id, self.event.message_thread_id)[0]
-            message_id = r['response'].json()['result']['message_id']
+            rmi = ResponseMessageItem(text=answer, peer_id=self.event.peer_id,
+                                      message_thread_id=self.event.message_thread_id)
+            r = self.bot.send_response_message_item(rmi)
+            message_id = r.json()['result']['message_id']
             bacs.message_body = "Я создал, погнали"
             bacs.message_id = message_id
             bacs.save()
             return
-        return msg
+        return ResponseMessage(ResponseMessageItem(text=answer))
 
-    def play_game(self, session):
+    def play_game(self, session) -> ResponseMessage:
         if not session:
             button = self.bot.get_button('Начать игру', self.name)
             keyboard = self.bot.get_inline_keyboard([button])
@@ -72,7 +75,9 @@ class BullsAndCows(Command):
             correct_number_str = str(session.number)
             correct_number_str = "0" * (DIGITS_IN_GAME - len(correct_number_str)) + correct_number_str
             session.delete()
-            return f"В следующий раз повезёт :(\nЗагаданное число - {correct_number_str}"
+
+            answer = f"В следующий раз повезёт :(\nЗагаданное число - {correct_number_str}"
+            return ResponseMessage(ResponseMessageItem(text=answer))
 
         if len(arg0) != DIGITS_IN_GAME:
             raise PWarning(f"В отгадываемом числе должно быть {DIGITS_IN_GAME} цифр")
@@ -90,12 +95,13 @@ class BullsAndCows(Command):
             gamer.roulette_points += 1000
             gamer.bk_points += 1
             gamer.save()
-            msg = f"Отгадали число {session.number} всего за {session.steps} {decl}!\n" \
-                  f"Начислил 1000 очков рулетки"
+            answer = f"Отгадали число {session.number} всего за {session.steps} {decl}!\n" \
+                     f"Начислил 1000 очков рулетки"
             session.delete()
             button = self.bot.get_button("Ещё", self.name)
             keyboard = self.bot.get_inline_keyboard([button])
-            return [{"text": msg, "keyboard": keyboard}]
+
+            return ResponseMessage(ResponseMessageItem(text=answer, keyboard=keyboard))
 
         bulls = 0
         cows = 0
@@ -112,4 +118,6 @@ class BullsAndCows(Command):
         session.message_body += f"\n\n{new_msg}"
         session.save()
 
-        _send_message_session_or_edit(self.bot, self.event, session, {'text': session.message_body}, 8)
+        rmi = ResponseMessageItem(text=session.message_body, peer_id=self.event.peer_id,
+                                  message_thread_id=self.event.message_thread_id)
+        _send_message_session_or_edit(self.bot, self.event, session, rmi, 8)

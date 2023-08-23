@@ -1,4 +1,5 @@
 from apps.bot.classes.Command import Command
+from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
 
 
 class Sho(Command):
@@ -7,5 +8,6 @@ class Sho(Command):
     suggest_for_similar = False
     non_mentioned = True
 
-    def start(self):
-        return "я нишо а ты шо"
+    def start(self) -> ResponseMessage:
+        answer = "я нишо а ты шо"
+        return ResponseMessage(ResponseMessageItem(text=answer))

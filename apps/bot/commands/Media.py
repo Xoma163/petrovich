@@ -25,6 +25,8 @@ from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.consts.ActivitiesEnum import ActivitiesEnum
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning, PSkip
+from apps.bot.classes.events.Event import Event
+from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
 from apps.bot.classes.messages.attachments.LinkAttachment import LinkAttachment
 from apps.bot.commands.TrimVideo import TrimVideo
 from apps.bot.utils.NothingLogger import NothingLogger
@@ -87,7 +89,7 @@ class Media(Command):
         self.has_command_name = None
 
     @staticmethod
-    def accept_extra(event):
+    def accept_extra(event: Event) -> bool:
         if event.message and not event.message.mentioned:
             if "nomedia" in event.message.keys:
                 return False
@@ -101,7 +103,7 @@ class Media(Command):
                     return True
         return False
 
-    def start(self):
+    def start(self) -> ResponseMessage:
         if self.event.message.command in self.full_names:
             if self.event.message.args:
                 source = self.event.attachments[0].url
@@ -127,14 +129,14 @@ class Media(Command):
 
         chosen_url_pos = source.find(chosen_url)
 
-        text = ""
+        answer = ""
         if title:
-            text = f"{title}\n"
+            answer = f"{title}\n"
         if self.event.is_from_chat:
-            text += f"\nОт {self.event.sender}"
+            answer += f"\nОт {self.event.sender}"
 
         source_hostname = str(urlparse(chosen_url).hostname).lstrip('www.')
-        text += f'\nИсточник: {self.bot.get_formatted_url(source_hostname, chosen_url)}'
+        answer += f'\nИсточник: {self.bot.get_formatted_url(source_hostname, chosen_url)}'
 
         # Костыль, чтобы видосы которые шарятся с мобилы с реддита не дублировали title
 
@@ -144,15 +146,16 @@ class Media(Command):
             extra_text = extra_text.replace(self.event.message.KEYS_SYMBOL + key, "")
         extra_text = extra_text.strip()
         if extra_text and extra_text != title:
-            text += f"\n\n{extra_text}"
+            answer += f"\n\n{extra_text}"
 
         reply_to = None
         if self.event.fwd:
             reply_to = self.event.fwd[0].message.id
 
-        res = self.bot.parse_and_send_msgs({'text': text, 'attachments': attachments, 'reply_to': reply_to},
-                                           self.event.peer_id, self.event.message_thread_id)
-        if res[0]['success']:
+        rmi = ResponseMessageItem(text=answer, attachments=attachments, reply_to=reply_to, peer_id=self.event.peer_id,
+                                  message_thread_id=self.event.message_thread_id)
+        res = self.bot.send_response_message_item(rmi)
+        if res.json()['ok']:
             self.bot.delete_message(self.event.peer_id, self.event.message.id)
 
     def get_method_and_chosen_url(self, source):
@@ -285,8 +288,10 @@ class Media(Command):
                 tg_quote_text = self.bot.get_formatted_text_line(quote_text)
                 text = text[:start_pos] + tg_quote_text + text[end_pos:]
             if all_photos:
-                msg = {'attachments': [self.bot.get_photo_attachment(x, filename=rs.filename) for x in all_photos]}
-                self.bot.parse_and_send_msgs(msg, self.event.peer_id, self.event.message_thread_id)
+                atatchments = [self.bot.get_photo_attachment(x, filename=rs.filename) for x in all_photos]
+                rmi = ResponseMessageItem(attachments=atatchments, peer_id=self.event.peer_id,
+                                          message_thread_id=self.event.message_thread_id)
+                self.bot.send_response_message_item(rmi)
             return [], f"{rs.title}\n\n{text}"
         else:
             raise PWarning("Я хз чё за контент")

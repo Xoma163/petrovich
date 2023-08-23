@@ -2,7 +2,9 @@ import re
 
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.events.Event import Event
 from apps.bot.classes.messages.Message import Message
+from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
 from apps.service.models import Tag as TagModel
 
 
@@ -23,7 +25,7 @@ class Tag(Command):
     TAG_ALL = "all"
 
     @staticmethod
-    def accept_extra(event):
+    def accept_extra(event: Event) -> bool:
         if event.is_fwd:
             return False
         if event.message and not event.message.mentioned:
@@ -38,11 +40,8 @@ class Tag(Command):
                     return False
         return False
 
-    def start(self):
-        if self.event.message.args:
-            arg0 = self.event.message.args[0]
-        else:
-            arg0 = None
+    def start(self) -> ResponseMessage:
+        arg0 = self.event.message.args[0] if self.event.message.args else None
 
         menu = [
             [["создать", "create"], self.menu_create],
@@ -53,9 +52,10 @@ class Tag(Command):
             [['default'], self.menu_default],
         ]
         method = self.handle_menu(menu, arg0)
-        return method()
+        rmi = method()
+        return ResponseMessage(rmi)
 
-    def menu_create(self):
+    def menu_create(self) -> ResponseMessageItem:
         self.check_args(2)
         name = self.event.message.args[1]
         if name == self.TAG_ALL:
@@ -65,36 +65,40 @@ class Tag(Command):
         except Exception:  # Какой?
             raise PWarning(f"Тег \"{name}\" уже присутствует в этой конфе")
 
-        return f"Тег \"{tag.name}\" создан"
+        answer = f"Тег \"{tag.name}\" создан"
+        return ResponseMessageItem(text=answer)
 
-    def menu_delete(self):
+    def menu_delete(self) -> ResponseMessageItem:
         self.check_args(2)
         tag = self._get_tag_by_name()
         tag_name = tag.name
         tag.delete()
-        return f"Тег \"{tag_name}\" удалён"
+        answer = f"Тег \"{tag_name}\" удалён"
+        return ResponseMessageItem(text=answer)
 
-    def menu_add(self):
+    def menu_add(self) -> ResponseMessageItem:
         profiles = self._get_profiles_from_args()
         tag = self._get_tag_by_name()
 
         for profile in profiles:
             tag.users.add(profile)
         if len(profiles) == 1:
-            return f"Пользователь {profiles[0]} добавлен в тег \"{tag.name}\""
+            answer = f"Пользователь {profiles[0]} добавлен в тег \"{tag.name}\""
         else:
-            return f"Пользователи {', '.join(map(str, profiles))} добавлены в тег \"{tag.name}\""
+            answer = f"Пользователи {', '.join(map(str, profiles))} добавлены в тег \"{tag.name}\""
+        return ResponseMessageItem(text=answer)
 
-    def menu_remove(self):
+    def menu_remove(self) -> ResponseMessageItem:
         profiles = self._get_profiles_from_args()
         tag = self._get_tag_by_name()
 
         for profile in profiles:
             tag.users.remove(profile)
         if len(profiles) == 1:
-            return f"Пользователь {profiles[0]} убран из тега \"{tag.name}\""
+            answer = f"Пользователь {profiles[0]} убран из тега \"{tag.name}\""
         else:
-            return f"Пользователи {', '.join(map(str, profiles))} убраны из тега \"{tag.name}\""
+            answer = f"Пользователи {', '.join(map(str, profiles))} убраны из тега \"{tag.name}\""
+        return ResponseMessageItem(text=answer)
 
     def _get_profiles_from_args(self) -> list:
         self.check_args(2)
@@ -111,20 +115,21 @@ class Tag(Command):
     def _get_tag_name(self, name):
         return self.bot.get_formatted_text_line(name)
 
-    def menu_list(self):
+    def menu_list(self) -> ResponseMessageItem:
         self.check_args(1)
         tags = TagModel.objects.filter(chat=self.event.chat)
         if not tags:
-            return "Тегов нет"
-
+            answer = "Тегов нет"
+            return ResponseMessageItem(text=answer)
         msg_list = [
             f"{self._get_tag_name(tag.name)}\n{', '.join([str(user) for user in tag.users.filter(pk__in=self.event.chat.users.all())])}"
             for tag in
             tags
         ]
-        return "\n\n".join(msg_list)
+        answer = "\n\n".join(msg_list)
+        return ResponseMessageItem(text=answer)
 
-    def menu_default(self):
+    def menu_default(self) -> ResponseMessageItem:
         if self.event.command and self.event.command == self:
             tag_name = self.event.message.command[1:]
             text = self.event.message.args_str_case
@@ -142,14 +147,14 @@ class Tag(Command):
         if not users:
             raise PWarning("В теге нет пользователей")
         msg_list = [self.bot.get_mention(user) for user in users]
-        msg = ""
+        answer = ""
         if text:
-            msg += f"{text}\n\n"
-        msg += "\n".join(msg_list)
+            answer += f"{text}\n\n"
+        answer += "\n".join(msg_list)
 
         reply_to = self.event.fwd[0].message.id if self.event.fwd else None
 
-        return {'text': msg, 'reply_to': reply_to}
+        return ResponseMessageItem(text=answer, reply_to=reply_to)
 
     def _get_tag_by_name(self, tag_name=None):
         if tag_name is None:

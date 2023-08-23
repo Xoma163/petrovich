@@ -4,6 +4,7 @@ from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.consts.ActivitiesEnum import ActivitiesEnum
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning, PError
+from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 
 
@@ -17,13 +18,10 @@ class Find(Command):
 
     bot: TgBot
 
-    def start(self):
+    def start(self) -> ResponseMessage:
         query = self.event.message.args_str
 
-        try:
-            photo_results = self.get_photo_results(query)
-        except PWarning as e:
-            photo_results = str(e)
+        photo_results = self.get_photo_results(query)
         return photo_results
 
     def get_photo_results(self, query):
@@ -49,4 +47,5 @@ class Find(Command):
         self.bot.stop_activity_thread()
         if len(attachments) == 0:
             raise PWarning("Ничего не нашёл по картинкам")
-        return {'text': f"Результаты по запросу '{query}'", 'attachments': attachments}
+        answer = f"Результаты по запросу '{query}'"
+        return ResponseMessage(ResponseMessageItem(text=answer, attachments=attachments))

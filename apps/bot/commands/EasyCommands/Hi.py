@@ -1,4 +1,5 @@
 from apps.bot.classes.Command import Command
+from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
 from apps.bot.utils.utils import random_event
 
 
@@ -8,5 +9,6 @@ class Hi(Command):
              "куку", "здаров", "здарова", "хеей", "хало", "hi", "hello", 'салам']
     mentioned = True
 
-    def start(self):
-        return random_event(self.full_names)
+    def start(self) -> ResponseMessage:
+        answer = random_event(self.full_names)
+        return ResponseMessage(ResponseMessageItem(text=answer))

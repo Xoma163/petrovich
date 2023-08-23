@@ -12,6 +12,7 @@ from apps.bot.APIs.WASDAPI import WASDAPI
 from apps.bot.APIs.YoutubeVideoAPI import YoutubeVideoAPI
 from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.events.Event import Event
+from apps.bot.classes.messages.ResponseMessage import ResponseMessageItem, ResponseMessage
 from apps.bot.commands.Media import Media
 from apps.service.models import Subscribe, VideoCache
 from petrovich.settings import env
@@ -112,44 +113,47 @@ class Command(BaseCommand):
 
         new_video_text = "Новое видео" if not is_stream else "Стрим"
 
-        text = f"{new_video_text} на канале {sub.title}\n" \
-               f"{bot.get_formatted_url(title, link)}"
+        answer = f"{new_video_text} на канале {sub.title}\n" \
+                 f"{bot.get_formatted_url(title, link)}"
         logger.info(f"Отправил уведомление по подписке с id={sub.pk}")
-        bot.parse_and_send_msgs(text, sub.peer_id, sub.message_thread_id)
+        rmi = ResponseMessageItem(text=answer, peer_id=sub.peer_id, message_thread_id=sub.message_thread_id)
+        bot.send_response_message_item(rmi)
 
     @staticmethod
-    def get_the_hole_video_msg(link):
+    def get_the_hole_video_msg(link) -> ResponseMessageItem:
         bot = TgBot()
         event = Event(bot=bot)
         media_command = Media(bot, event)
         att, title = media_command.get_the_hole_video(link)
-        msg = {'text': title, 'attachments': att}
-        return msg
+        rmi = ResponseMessageItem(text=title, attachments=att)
+        return rmi
 
     @staticmethod
-    def get_vk_video_msg(link):
+    def get_vk_video_msg(link) -> ResponseMessageItem:
         bot = TgBot()
         event = Event(bot=bot)
         media_command = Media(bot, event)
         att, title = media_command.get_vk_video(link)
-        msg = {'text': title, 'attachments': att}
-        return msg
+        rmi = ResponseMessageItem(text=title, attachments=att)
+        return rmi
 
     def send_file_or_video(self, subs, ids, urls, titles, method):
         bot = TgBot()
-        messages = []
+        rm = ResponseMessage()
         for i, url in enumerate(urls):
             message = method(url)
-            if message['attachments']:
-                att = message['attachments'][0]
+            if message.attachments:
+                att = message.attachments[0]
                 if not att.file_id:
                     att.set_file_id()
-            messages.append(message)
+            rm.messages.append(message)
 
         for sub in subs:
-            for i, message in enumerate(messages):
+            for i, message in enumerate(rm.messages):
                 self.send_notify(sub, titles[i], urls[i])
-                bot.parse_and_send_msgs(message, sub.peer_id, sub.message_thread_id)
+                message.peer_id = sub.peer_id
+                message.message_thread_id = sub.message_thread_id
+                bot.send_response_message_item(message)
 
                 if sub.save_to_plex:
                     cache = VideoCache.objects.get(channel_id=sub.channel_id, video_id=ids[i])
@@ -159,7 +163,8 @@ class Command(BaseCommand):
             sub.last_video_id = ids[-1]
             sub.save()
 
-    def _save_to_plex(self, cache, show_name, series_name):
+    @staticmethod
+    def _save_to_plex(cache, show_name, series_name):
         path = env.str('PLEX_SAVE_PATH')
         show_name = show_name.replace(" |", '.').replace("|", ".")
         series_name = series_name.replace(" |", '.').replace("|", ".")

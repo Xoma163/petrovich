@@ -1,4 +1,5 @@
 from apps.bot.classes.Command import Command
+from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
 
 
 class Issues(Command):
@@ -8,6 +9,7 @@ class Issues(Command):
 
     help_text = "список проблем"
 
-    def start(self):
+    def start(self) -> ResponseMessage:
         url = "https://github.com/Xoma163/petrovich/issues"
-        return self.bot.get_formatted_url("Ишюс", url)
+        answer = self.bot.get_formatted_url("Ишюс", url)
+        return ResponseMessage(ResponseMessageItem(text=answer))

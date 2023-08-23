@@ -5,6 +5,7 @@ import logging
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Role
 from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
 from apps.bot.utils.utils import draw_text_on_image
 from petrovich.settings import DEBUG_FILE
 
@@ -22,7 +23,7 @@ class Logs(Command):
 
     MAX_LOGS_COUNT = 50
 
-    def start(self):
+    def start(self) -> ResponseMessage:
         count = 1
 
         level = logging.ERROR
@@ -45,8 +46,10 @@ class Logs(Command):
         img = draw_text_on_image(logs_txt)
         img_byte_arr = io.BytesIO()
         img.save(img_byte_arr, format='PNG')
-        return {'attachments': self.bot.get_document_attachment(img_byte_arr, peer_id=self.event.peer_id,
-                                                                filename='petrovich_logs.png')}
+
+        attachment = self.bot.get_document_attachment(img_byte_arr, peer_id=self.event.peer_id,
+                                                      filename='petrovich_logs.png')
+        return ResponseMessage(ResponseMessageItem(attachments=attachment))
 
     def transform_logs_by_values(self, items):
         if isinstance(items, dict):

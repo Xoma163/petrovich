@@ -1,5 +1,6 @@
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
 from apps.bot.utils.utils import fix_layout
 
 
@@ -13,7 +14,7 @@ class Fix(Command):
     ]
     args_or_fwd = 1
 
-    def start(self):
+    def start(self) -> ResponseMessage:
         if self.event.message.args:
             msgs = fix_layout(self.event.message.args_str)
         else:
@@ -23,4 +24,5 @@ class Fix(Command):
                     msgs += f"{fix_layout(fwd.message.raw)}"
             if not msgs:
                 raise PWarning("Нет текста в сообщении или пересланных сообщениях")
-        return msgs
+        answer = msgs
+        return ResponseMessage(ResponseMessageItem(text=answer))

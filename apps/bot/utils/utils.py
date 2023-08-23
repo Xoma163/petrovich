@@ -12,6 +12,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 from apps.bot.classes.consts.Consts import Role, Platform
 from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.messages.ResponseMessage import ResponseMessageItem
 from apps.bot.classes.messages.attachments.Attachment import Attachment
 from apps.service.models import Service
 from petrovich.settings import STATIC_ROOT
@@ -339,30 +340,23 @@ def get_url_file_ext(url):
 
 
 # ToDo: придумать, куда это вынести.
-def _send_message_session_or_edit(bot, event, session, msg: dict, max_delta):
+def _send_message_session_or_edit(bot, event, session, rmi: ResponseMessageItem, max_delta):
     delta_messages = event.message.id - session.message_id
 
     if delta_messages > max_delta:
         old_msg_id = session.message_id
-        r = bot.parse_and_send_msgs(msg, event.peer_id, event.message_thread_id)[0]
-        message_id = r['response'].json()['result']['message_id']
+        r = bot.send_response_message_item(rmi)
+        message_id = r.json()['result']['message_id']
         session.message_id = message_id
         session.save()
         bot.delete_message(event.peer_id, old_msg_id)
     else:
-        msg['message_id'] = session.message_id
-        r = bot.parse_and_send_msgs(
-            msg,
-            event.peer_id,
-            event.message_thread_id
-        )[0]
-    if not r['success']:
-        r = bot.parse_and_send_msgs(
-            msg,
-            event.peer_id,
-            event.message_thread_id
-        )[0]
-        message_id = r['response'].json()['result']['message_id']
+        rmi.message_id = session.message_id
+        r = bot.send_response_message_item(rmi)
+    if not r.json()['ok']:
+        rmi.message_id = None
+        r = bot.send_response_message_item(rmi)
+        message_id = r.json()['result']['message_id']
         session.message_id = message_id
         session.save()
     bot.delete_message(event.peer_id, event.message.id)
