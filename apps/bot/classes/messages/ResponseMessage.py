@@ -18,8 +18,6 @@ class ResponseMessageItem:
             self.attachments = [self.attachments]
         self.reply_to = reply_to
         self.keyboard = keyboard
-        if self.keyboard is None:
-            self.keyboard = {}
         self.message_id = message_id
         self.message_thread_id = message_thread_id
         self.peer_id = peer_id

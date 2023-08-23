@@ -84,7 +84,7 @@ class Bot(Thread):
         [{success:bool, response:Response, response_message_item:ResponseMessageItem}]
         """
 
-    def send_response_message_item(self, rm: ResponseMessageItem):
+    def send_response_message_item(self, rmi: ResponseMessageItem):
         """
         Отправка ResponseMessageItem сообщения
         Возвращает Response платформы

@@ -340,7 +340,9 @@ class TgBot(CommonBot):
         Возвращает Response платформы
         """
         rmi.set_telegram_html()
-        params = {'chat_id': rmi.peer_id, 'caption': rmi.text, 'reply_markup': json.dumps(rmi.keyboard)}
+        params = {'chat_id': rmi.peer_id, 'caption': rmi.text}
+        if rmi.keyboard:
+            params['reply_markup'] = json.dumps(rmi.keyboard)
         params.update(rmi.kwargs)
 
         if rmi.reply_to:
