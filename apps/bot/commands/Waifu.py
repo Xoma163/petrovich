@@ -1,5 +1,6 @@
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
 from apps.bot.utils.utils import get_random_int
 
 
@@ -13,7 +14,7 @@ class Waifu(Command):
         "(слово) - присылает несуществующую вайфу вычисляя её номер"
     ]
 
-    def start(self):
+    def start(self) -> ResponseMessage:
         waifus_count = 100000
         if self.event.message.args:
             try:
@@ -34,4 +35,4 @@ class Waifu(Command):
         else:
             button = self.bot.get_button("Ещё", self.name)
         keyboard = self.bot.get_inline_keyboard([button])
-        return {"text": waifu_number, "attachments": attachment, "keyboard": keyboard}
+        return ResponseMessage(ResponseMessageItem(text=waifu_number, attachments=[attachment], keyboard=keyboard))

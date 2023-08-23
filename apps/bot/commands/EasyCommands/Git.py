@@ -9,13 +9,7 @@ class Git(Command):
 
     help_text = "ссылка на гитхаб"
 
-    def start(self):
+    def start(self) -> ResponseMessage:
         url = 'https://github.com/Xoma163/petrovich/'
         answer = self.bot.get_formatted_url("Гитхаб", url)
-        return ResponseMessage(
-            ResponseMessageItem(
-                text=answer,
-                peer_id=self.event.peer_id,
-                message_thread_id=self.event.message_thread_id
-            )
-        )
+        return ResponseMessage(ResponseMessageItem(text=answer))

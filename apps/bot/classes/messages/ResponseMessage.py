@@ -10,8 +10,8 @@ from petrovich.settings import DEBUG
 class ResponseMessageItem:
     TG_TAGS = ['pre', 'code', 'i', 'b', 'u']
 
-    def __init__(self, text=None, attachments=None, reply_to=None, keyboard=None, message_id=None,
-                 message_thread_id=None, peer_id=None):
+    def __init__(self, text: str = None, attachments: list = None, reply_to: str = None, keyboard: dict = None,
+                 message_id: str = None, message_thread_id: str = None, peer_id: int = None):
         self.text = text
         self.attachments = attachments if attachments else []
         if not isinstance(self.attachments, list):
@@ -85,7 +85,9 @@ class ResponseMessageItem:
 
 
 class ResponseMessage:
-    def __init__(self, messages):
+    def __init__(self, messages=None):
+        if messages is None:
+            messages = []
         if isinstance(messages, list):
             self.messages: List[ResponseMessageItem] = messages
         else:

@@ -2,6 +2,7 @@ from django.core.paginator import Paginator
 
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
 from apps.bot.commands.Meme import Meme
 from apps.service.models import Meme as MemeModel
 
@@ -14,7 +15,7 @@ class Memes(Command):
         "(поисковая фраза) - присылает список мемов, подходящих поисковому запросу"
     ]
 
-    def start(self):
+    def start(self) -> ResponseMessage:
         try:
             if self.event.message.args:
                 self.int_args = [0]
@@ -44,8 +45,8 @@ class Memes(Command):
             else:
                 on_last_page = p.count
             msg_footer = f'----{p.per_page * (page - 1) + 1}-{on_last_page}----'
-            text = f"{msg_header}\n{self.bot.get_formatted_text(msg_body)}\n{msg_footer}"
-            return text
+            answer = f"{msg_header}\n{self.bot.get_formatted_text(msg_body)}\n{msg_footer}"
+            return ResponseMessage(ResponseMessageItem(text=answer))
         except PWarning:
             memes = MemeModel.objects.filter(approved=True)
             for arg in self.event.message.args:
@@ -64,8 +65,8 @@ class Memes(Command):
             elif len(memes) > 0:
                 memes_names_str += '.'
 
-            text = f"{memes_names_str}\n\nВсего - {len(memes)}"
-            return text
+            answer = f"{memes_names_str}\n\nВсего - {len(memes)}"
+            return ResponseMessage(ResponseMessageItem(text=answer))
 
     def get_memes_names(self, memes) -> list:
         return [f"{self.bot.get_formatted_text_line(meme.name)} (id - {meme.id})" for meme in memes]

@@ -1,5 +1,7 @@
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.events.Event import Event
+from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
 
 MAX_OPERATIONS = 20
 ACCURACY = 15
@@ -11,12 +13,12 @@ class Calc(Command):
     help_text = "калькулятор"
     help_texts = ["(выражение) - калькулятор выражений. Умеет работать с + - * / ^ ( )"]
 
-    def accept(self, event):
+    def accept(self, event: Event) -> bool:
         if event.message and event.message.clear and event.message.clear[0] == '=':
             return True
         return super().accept(event)
 
-    def start(self):
+    def start(self) -> ResponseMessage:
         if self.event.message.clear[0] == '=':
             expression = self.event.message.clear[1:]
         else:
@@ -47,14 +49,15 @@ class Calc(Command):
         else:
             try:
                 if isinstance(root.value, float) and root.value == int(root.value):
-                    return str(int(root.value))
+                    answer = str(int(root.value))
                 else:
-                    return str(root.value)
+                    answer = str(root.value)
             except OverflowError:
                 if root.value > 0:
-                    return "∞"
+                    answer = "∞"
                 else:
-                    return "-∞"
+                    answer = "-∞"
+            return ResponseMessage(ResponseMessageItem(text=answer))
 
     @staticmethod
     def replace_consts(expression):

@@ -8,7 +8,7 @@ class Donate(Command):
     name_tg = 'donate'
     help_text = "ссылка на донат"
 
-    def start(self):
+    def start(self) -> ResponseMessage:
         url = 'https://www.donationalerts.com/r/xoma163'
         attachment = self.bot.get_photo_attachment(
             f"{STATIC_ROOT}/bot/img/donate.jpg",
@@ -16,11 +16,4 @@ class Donate(Command):
             filename="petrovich_donate.jpg"
         )
         answer = self.bot.get_formatted_url("Задонатить", url)
-        return ResponseMessage(
-            ResponseMessageItem(
-                text=answer,
-                attachments=[attachment],
-                peer_id=self.event.peer_id,
-                message_thread_id=self.event.message_thread_id
-            )
-        )
+        return ResponseMessage(ResponseMessageItem(text=answer, attachments=[attachment]))

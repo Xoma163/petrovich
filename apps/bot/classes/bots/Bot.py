@@ -72,18 +72,10 @@ class Bot(Thread):
                 rm = self._get_unexpected_error(event)
                 self.send_response_message(rm)
 
-    # def parse_and_send_msgs(self, msgs, peer_id, message_thread_id=None):
-    #     """
-    #     Отправка сообщений. Принимает любой формат
-    #     """
-    #     rm = msgs if isinstance(msgs, ResponseMessage) else ResponseMessage(msgs, peer_id, message_thread_id)
-    #     return self.send_response_message(rm)
-    #
-    # def parse_and_send_msgs_thread(self, msgs, peer_id: int, message_thread_id=None):
-    #     """
-    #     Парсинг сырых сообщений и отправка их в отдельном потоке
-    #     """
-    #     Thread(target=self.parse_and_send_msgs, args=(msgs, peer_id, message_thread_id)).start()
+    def send_response_message_thread(self, rm: ResponseMessage):
+        for rmi in rm.messages:
+            # self.send_response_message_item(rmi)
+            Thread(target=self.send_response_message_item, args=(rmi,)).start()
 
     def send_response_message(self, rm: ResponseMessage) -> List[dict]:
         """
@@ -124,7 +116,7 @@ class Bot(Thread):
             try:
                 if command.accept(event):
                     rm = command.__class__().check_and_start(self, event)
-                    self.logger.debug({"event": event.to_log(), "message": rm.to_log()})
+                    self.logger.debug({"event": event.to_log(), "message": rm.to_log() if rm else None})
                     return rm
             except (PWarning, PError) as e:
                 self.stop_activity_thread()
@@ -510,12 +502,12 @@ class Bot(Thread):
     # END EXTRA
 
 
-def send_message_to_moderator_chat(msgs):
+def send_message_to_moderator_chat(msg: ResponseMessageItem):
     def get_moderator_chat_peer_id():
         test_chat_id = env.str("TG_MODERATOR_CHAT_PK")
         return Chat.objects.get(pk=test_chat_id).chat_id
 
     from apps.bot.classes.bots.tg.TgBot import TgBot
     bot = TgBot()
-    peer_id = get_moderator_chat_peer_id()
-    return bot.parse_and_send_msgs(msgs, peer_id)
+    msg.peer_id = get_moderator_chat_peer_id()
+    return bot.send_response_message_item(msg)

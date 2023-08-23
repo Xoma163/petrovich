@@ -8,6 +8,7 @@ from apps.bot.classes.Command import Command
 from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.consts.Consts import Platform, Role
 from apps.bot.classes.consts.Exceptions import PSkip
+from apps.bot.classes.messages.ResponseMessage import ResponseMessageItem, ResponseMessage
 from apps.bot.utils.utils import random_event
 
 lock = Lock()
@@ -55,7 +56,7 @@ class Minesweeper(Command):
 
     # x, y, real_val, flag_val, opened
 
-    def start(self):
+    def start(self) -> ResponseMessage:
         with lock:
 
             if 'callback_query' in self.event.raw:
@@ -111,7 +112,7 @@ class Minesweeper(Command):
                 continue
             self.board[i][j] += 1
 
-    def send_init_keyboard(self):
+    def send_init_keyboard(self) -> ResponseMessage:
         self.generate()
         buttons = []
         for i in range(self.height):
@@ -119,19 +120,21 @@ class Minesweeper(Command):
                 button_text = "     "
                 button = self.bot.get_button(button_text, self.name, (i, j, self.board[i][j], 0, 0))
                 buttons.append(button)
-        inline_keyboard = self.bot.get_inline_keyboard(buttons, self.width)
+        keyboard = self.bot.get_inline_keyboard(buttons, self.width)
 
         button = self.bot.get_button(f"Включить режим планирования {self.flag}", self.name, {'mode': self.MODE_MINES})
-        inline_keyboard['inline_keyboard'].append([button])
+        keyboard['inline_keyboard'].append([button])
 
-        return {'text': f'Сапёр - {self.mines} мин', "keyboard": inline_keyboard}
+        answer = f'Сапёр - {self.mines} мин'
+        return ResponseMessage(ResponseMessageItem(text=answer, keyboard=keyboard, message_id=self.message_id))
 
-    def press_switch_mode_button(self, inline_keyboard):
+    def press_switch_mode_button(self, inline_keyboard) -> ResponseMessage:
         self.mode = self.event.payload['a']['mode']
         self._edit_mode_button(inline_keyboard)
-        return {"keyboard": {"inline_keyboard": inline_keyboard}, "message_id": self.message_id}
+        keyboard = {"inline_keyboard": inline_keyboard}
+        return ResponseMessage(ResponseMessageItem(keyboard=keyboard, message_id=self.message_id))
 
-    def press_button(self, i, j, real_val, _, opened, inline_keyboard):
+    def press_button(self, i, j, real_val, _, opened, inline_keyboard) -> ResponseMessage:
         callback_data_mines = json.loads(inline_keyboard[-1][0]['callback_data'])['a']['mode']
         self.mode = self.MODE_DEFAULT if callback_data_mines == self.MODE_MINES else self.MODE_MINES
         self.height = len(inline_keyboard) - 1
@@ -153,9 +156,10 @@ class Minesweeper(Command):
             return win
         self._edit_mode_button(inline_keyboard)
 
-        return {"keyboard": {"inline_keyboard": inline_keyboard}, "message_id": self.message_id}
+        keyboard = {"inline_keyboard": inline_keyboard}
+        return ResponseMessage(ResponseMessageItem(keyboard=keyboard, message_id=self.message_id))
 
-    def press_opened_button(self, i, j, real_val, inline_keyboard):
+    def press_opened_button(self, i, j, real_val, inline_keyboard) -> ResponseMessage:
         positions = list(self._get_rectangle_pos(i, j))
         flags = 0
         for position in positions:
@@ -190,16 +194,20 @@ class Minesweeper(Command):
         win = self.check_win(inline_keyboard)
         if win:
             return win
-        return {"keyboard": {"inline_keyboard": inline_keyboard}, "message_id": self.message_id}
 
-    def press_button_in_mines_mode(self, i, j, opened, inline_keyboard):
+        keyboard = {"inline_keyboard": inline_keyboard}
+        return ResponseMessage(ResponseMessageItem(keyboard=keyboard, message_id=self.message_id))
+
+    def press_button_in_mines_mode(self, i, j, opened, inline_keyboard) -> ResponseMessage:
         if opened:
             return
         callback_data = json.loads(inline_keyboard[i][j]['callback_data'])
         callback_data['a'][3] = 1 if callback_data['a'][3] == 0 else 0
         inline_keyboard[i][j]['callback_data'] = json.dumps(callback_data, ensure_ascii=False)
         inline_keyboard[i][j]['text'] = self.flag if callback_data['a'][3] == 1 else "     "
-        return {"keyboard": {"inline_keyboard": inline_keyboard}, "message_id": self.message_id}
+
+        keyboard = {"inline_keyboard": inline_keyboard}
+        return ResponseMessage(ResponseMessageItem(keyboard=keyboard, message_id=self.message_id))
 
     def propagate(self, i, j, inline_keyboard):
         if i < 0 or i >= self.height:
@@ -219,7 +227,7 @@ class Minesweeper(Command):
                 i, j = pos
                 self.propagate(i, j, inline_keyboard)
 
-    def game_over(self, inline_keyboard):
+    def game_over(self, inline_keyboard) -> ResponseMessage:
         first_try = True
         for i in range(self.height):
             for j in range(self.width):
@@ -246,9 +254,11 @@ class Minesweeper(Command):
         button2 = self.bot.get_button("Ещё (средне)", self.name, [18])
         button3 = self.bot.get_button("Ещё (сложно)", self.name, [25])
         inline_keyboard[-1] = [button, button2, button3]
-        return {'text': text, "keyboard": {"inline_keyboard": inline_keyboard}, 'message_id': self.message_id}
 
-    def check_win(self, inline_keyboard):
+        keyboard = {"inline_keyboard": inline_keyboard}
+        return ResponseMessage(ResponseMessageItem(text=text, keyboard=keyboard, message_id=self.message_id))
+
+    def check_win(self, inline_keyboard) -> ResponseMessage:
         inline_keyboard_copy = deepcopy(inline_keyboard)
         mines_count = 0
         for i in range(self.height):
@@ -272,7 +282,9 @@ class Minesweeper(Command):
             gamer.roulette_points += prize
             gamer.save()
             text += f"\nНачислил {prize} очков"
-        return {'text': text, "keyboard": {"inline_keyboard": inline_keyboard_copy}, 'message_id': self.message_id}
+
+        keyboard = {"inline_keyboard": inline_keyboard}
+        return ResponseMessage(ResponseMessageItem(text=text, keyboard=keyboard, message_id=self.message_id))
 
     def _edit_mode_button(self, inline_keyboard):
         if self.mode == self.MODE_DEFAULT:

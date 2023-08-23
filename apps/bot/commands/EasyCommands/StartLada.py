@@ -6,17 +6,11 @@ class StartLada(Command):
     name = "заведи"
     names = ["завести"]
 
-    def start(self):
+    def start(self) -> ResponseMessage:
         if self.event.message.args:
             who = self.event.message.args_str_case
             answer = ["уи ви ви ви ви ви ви ви", f'завожу {who}']
         else:
             answer = "уи ви ви ви ви ви ви ви"
 
-        return ResponseMessage(
-            ResponseMessageItem(
-                text=answer,
-                peer_id=self.event.peer_id,
-                message_thread_id=self.event.message_thread_id
-            )
-        )
+        return ResponseMessage(ResponseMessageItem(text=answer))

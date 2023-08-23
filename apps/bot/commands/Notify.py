@@ -7,6 +7,7 @@ from apps.bot.classes.Command import Command
 from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.consts.Consts import Role, Platform
 from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
 from apps.bot.classes.messages.attachments.AudioAttachment import AudioAttachment
 from apps.bot.classes.messages.attachments.DocumentAttachment import DocumentAttachment
 from apps.bot.classes.messages.attachments.GifAttachment import GifAttachment
@@ -45,15 +46,16 @@ class Notify(Command):
 
     bot: TgBot
 
-    def start(self):
-        return self.start_for_notify()
+    def start(self) -> ResponseMessage:
+        rmi = self.start_for_notify()
+        return ResponseMessage(rmi)
 
     def check_max_notifies(self):
         if not self.event.sender.check_role(Role.TRUSTED) and \
                 len(NotifyModel.objects.filter(user=self.event.user)) >= 5:
             raise PWarning("Нельзя добавлять более 5 напоминаний")
 
-    def start_for_notify(self):
+    def start_for_notify(self) -> ResponseMessageItem:
         self.check_max_notifies()
         timezone = self.event.sender.city.timezone.name
 
@@ -115,7 +117,8 @@ class Notify(Command):
         notify.text_for_filter += f" ({notify.id})"
         notify.save()
 
-        return f'Сохранил на дату {str(notify_datetime.strftime("%d.%m.%Y %H:%M"))}'
+        answer = f'Сохранил на дату {str(notify_datetime.strftime("%d.%m.%Y %H:%M"))}'
+        return ResponseMessageItem(text=answer)
 
     @staticmethod
     def get_time(arg1, arg2, timezone=None):

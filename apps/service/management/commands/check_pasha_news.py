@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 from django.core.management.base import BaseCommand
 
 from apps.bot.classes.bots.tg.TgBot import TgBot
+from apps.bot.classes.messages.ResponseMessage import ResponseMessageItem, ResponseMessage
 from apps.bot.models import User
 from apps.service.models import Service
 
@@ -32,20 +33,19 @@ class Command(BaseCommand):
             return
 
         news_to_send = list(filter(lambda x: self.get_news_id(x) > pasha_news_last_id, news))
-        msgs = []
+        rm = ResponseMessage()
         bot = TgBot()
         for news in news_to_send:
             news_content, news_url, news_title = self.parse_news(f"{self.URL}{news.attrs['href']}")
-            text = f'{bot.get_formatted_url(news_title, news_url)}\n\n{news_content}'
-            msgs.append(text)
-        if not msgs:
+            answer = f'{bot.get_formatted_url(news_title, news_url)}\n\n{news_content}'
+            rm.messages.append(ResponseMessageItem(text=answer, peer_id=pasha.user_id))
+        if not rm.messages:
             return
         last_news_id = self.get_news_id(news_to_send[0])
         pasha_news_last_id_entity.value = last_news_id
         pasha_news_last_id_entity.save()
 
-        for msg in msgs:
-            bot.parse_and_send_msgs(msg, pasha.user_id)
+        bot.send_response_message(rm)
 
     @staticmethod
     def parse_news(news_url):

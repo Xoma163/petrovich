@@ -5,7 +5,7 @@ import requests
 
 from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.utils.utils import remove_tz
-from apps.service.models import Service
+from apps.service.models import Service, City
 from petrovich.settings import env
 
 DAY_TRANSLATOR = {
@@ -56,7 +56,7 @@ class YandexWeatherAPI:
         'X-Yandex-API-Key': TOKEN
     }
 
-    def send_weather_request(self, city):
+    def send_weather_request(self, city: City):
         params = {
             'lat': city.lat,
             'lon': city.lon,
@@ -69,7 +69,7 @@ class YandexWeatherAPI:
 
         return response
 
-    def get_weather(self, city, use_cached=True):
+    def get_weather(self, city: City, use_cached=True):
         entity, created = Service.objects.get_or_create(name=f'weather_{city.name}')
         if use_cached and not created:
             delta_time = (datetime.utcnow() - remove_tz(entity.update_datetime))

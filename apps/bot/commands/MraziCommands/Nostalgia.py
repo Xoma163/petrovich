@@ -7,6 +7,7 @@ from apps.bot.classes.Command import Command
 from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.consts.Consts import Role, Platform
 from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
 from apps.bot.models import Profile, Bot
 from apps.bot.utils.QuotesGenerator import QuotesGenerator
 from apps.bot.utils.utils import get_urls_from_text
@@ -42,7 +43,7 @@ class Nostalgia(Command):
         if not (self.event.is_from_pm or self.event.chat and self.event.chat.pk == 56):
             raise PWarning("Команда работает только в ЛС или конфе мразей")
 
-    def start(self):
+    def start(self) -> ResponseMessage:
         self.check_rights()
         if self.event.message.args:
             arg0 = str(self.event.message.args[0])
@@ -54,14 +55,16 @@ class Nostalgia(Command):
                 self.int_args = [0, 1]
                 try:
                     self.parse_int()
-                    return self.menu_range(self.event.message.args[0], self.event.message.args[1])
+                    rmi = self.menu_range(self.event.message.args[0], self.event.message.args[1])
+                    return ResponseMessage(rmi)
                 except PWarning:
                     pass
             else:
                 self.int_args = [0]
                 try:
                     self.parse_int()
-                    return self.menu_range(self.event.message.args[0])
+                    rmi = self.menu_range(self.event.message.args[0])
+                    return ResponseMessage(rmi)
                 except PWarning:
                     pass
 
@@ -75,17 +78,17 @@ class Nostalgia(Command):
         method = self.handle_menu(menu, arg0)
         return method()
 
-    def menu_before(self):
+    def menu_before(self) -> ResponseMessageItem:
         index_from, index_to = self._get_indexes_from_db()
         diff = index_to - index_from + 1
         return self.menu_range(index_to - diff, index_from - diff)
 
-    def menu_after(self):
+    def menu_after(self) -> ResponseMessageItem:
         index_from, index_to = self._get_indexes_from_db()
         diff = index_to - index_from + 1
         return self.menu_range(index_to + diff, index_from + diff)
 
-    def menu_attachments(self):
+    def menu_attachments(self) -> ResponseMessageItem:
         data = self._load_file()
         index_from, index_to = self._get_indexes_from_db()
         msgs = data[index_from - 1: index_to]
@@ -95,15 +98,15 @@ class Nostalgia(Command):
                 if 'link' in att:
                     all_atts.append(self.bot.get_formatted_url("Ссылка", att['link']))
             all_atts += get_urls_from_text(msg['text'])
+        answer = "\n".join(all_atts)
+        return ResponseMessageItem(text=answer)
 
-        return "\n".join(all_atts)
-
-    def menu_default(self):
+    def menu_default(self) -> ResponseMessageItem:
         if self.event.message.args:
             return self.menu_search()
         return self.menu_range()
 
-    def menu_search(self):
+    def menu_search(self) -> ResponseMessageItem:
 
         data = self._load_file()
 
@@ -124,7 +127,8 @@ class Nostalgia(Command):
             if all(y in item['text'].lower() for y in search_list):
                 searched_indexes.append(i)
         if len(searched_indexes) == 0:
-            return f'Ничего не нашёл по запросу "{search_query}"'
+            answer = f'Ничего не нашёл по запросу "{search_query}"'
+            return ResponseMessageItem(text=answer)
         total_pages = (len(searched_indexes) - 1) // self.MAX_PER_PAGE + 1
         if page * self.MAX_PER_PAGE > len(searched_indexes):
             page = total_pages
@@ -137,10 +141,10 @@ class Nostalgia(Command):
             button = self.bot.get_button(f"{author}: {data[index]['text']}", self.name, [index + 1], )
             buttons.append(button)
         keyboard = self.bot.get_inline_keyboard(buttons)
+        answer = f"Результаты по запросу {search_query}.\n\nСтраница {page}/{total_pages}"
+        return ResponseMessageItem(text=answer, keyboard=keyboard)
 
-        return {"text": f"Результаты по запросу {search_query}.\n\nСтраница {page}/{total_pages}", "keyboard": keyboard}
-
-    def menu_range(self, index_from: int = None, index_to: int = None):
+    def menu_range(self, index_from: int = None, index_to: int = None) -> ResponseMessageItem:
         data = self._load_file()
 
         if index_from is None:
@@ -177,8 +181,8 @@ class Nostalgia(Command):
         else:
             image = self.bot.get_photo_attachment(bytes_io, peer_id=self.event.peer_id,
                                                   filename="petrovich_nostalgia.png")
-        msg = f"{msgs[0]['datetime']}\n" \
-              f"{index_from} - {index_to}"
+        answer = f"{msgs[0]['datetime']}\n" \
+                 f"{index_from} - {index_to}"
         button = self.bot.get_button("Ещё", self.name)
         buttons = [button]
         diff = index_to - index_from + 1
@@ -194,7 +198,7 @@ class Nostalgia(Command):
 
         keyboard = self.bot.get_inline_keyboard(buttons)
 
-        return {"text": msg, "attachments": image, "keyboard": keyboard}
+        return ResponseMessageItem(text=answer, attachments=[image], keyboard=keyboard)
 
     def _load_file(self) -> list:
         with open(self.FILE, 'r') as file:

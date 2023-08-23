@@ -1,6 +1,7 @@
 from apps.bot.APIs.MemeArsenalAPI import MemeArsenalAPI
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.messages.ResponseMessage import ResponseMessageItem, ResponseMessage
 
 
 class MemeArsenal(Command):
@@ -12,7 +13,7 @@ class MemeArsenal(Command):
         "(текст) - ищет мемы по названию и присылает топ-5"
     ]
 
-    def start(self):
+    def start(self) -> ResponseMessage:
         ma_api = MemeArsenalAPI()
         memes = ma_api.get_memes(self.event.message.args_str)
         if not memes:
@@ -23,4 +24,5 @@ class MemeArsenal(Command):
             text_list.append(f"{i + 1}. {meme['title']}")
         text = "\n".join(text_list)
 
-        return {'text': f"Результаты по запросу '{self.event.message.args_str}'\n\n{text}", 'attachments': attachments}
+        answer = f"Результаты по запросу '{self.event.message.args_str}'\n\n{text}"
+        return ResponseMessage(ResponseMessageItem(text=answer, attachments=attachments))

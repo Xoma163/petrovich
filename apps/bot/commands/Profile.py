@@ -6,6 +6,7 @@ from apps.bot.classes.Command import Command
 from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 from apps.service.models import City, TimeZone
 
@@ -32,7 +33,7 @@ class Profile(Command):
 
     bot: TgBot
 
-    def start(self):
+    def start(self) -> ResponseMessage:
         if self.event.message.args:
             arg0 = self.event.message.args[0]
         else:
@@ -49,15 +50,17 @@ class Profile(Command):
             [['default'], self.menu_default],
         ]
         method = self.handle_menu(menu, arg0)
-        return method()
+        rmi = method()
+        return ResponseMessage(rmi)
 
-    def menu_city(self):
+    def menu_city(self) -> ResponseMessageItem:
         self.check_args(2)
         arg1 = self.event.message.args_case[1]
         if arg1 == 'добавить':
             city_name = " ".join(self.event.message.args_case[2:])
             city = self.add_city_to_db(city_name)
-            return f"Добавил новый город - {city.name}"
+            answer = f"Добавил новый город - {city.name}"
+            return ResponseMessageItem(text=answer)
         else:
             city_name = " ".join(self.event.message.args_case[1:])
             city = City.objects.filter(synonyms__icontains=city_name).first()
@@ -68,9 +71,10 @@ class Profile(Command):
                 )
             self.event.sender.city = city
             self.event.sender.save()
-            return f"Изменил город на {self.event.sender.city.name}"
+            answer = f"Изменил город на {self.event.sender.city.name}"
+            return ResponseMessageItem(text=answer)
 
-    def menu_bd(self):
+    def menu_bd(self) -> ResponseMessageItem:
         self.check_args(2)
         birthday = self.event.message.args[1]
 
@@ -89,30 +93,35 @@ class Profile(Command):
 
         new_bday = self.event.sender.birthday.strftime(
             '%d.%m.%Y') if show_birthday_year else self.event.sender.birthday.strftime('%d.%m')
-        return f"Изменил дату рождения на {new_bday}"
+        answer = f"Изменил дату рождения на {new_bday}"
+        return ResponseMessageItem(text=answer)
 
-    def menu_nickname(self):
+    def menu_nickname(self) -> ResponseMessageItem:
         self.check_args(2)
         nickname = " ".join(self.event.message.args_case[1:])
         self.event.sender.nickname_real = nickname
         self.event.sender.save()
-        return f"Изменил никнейм на {self.event.sender.nickname_real}"
+        answer = f"Изменил никнейм на {self.event.sender.nickname_real}"
+        return ResponseMessageItem(text=answer)
 
-    def menu_name(self):
+    def menu_name(self) -> ResponseMessageItem:
         self.check_args(2)
         name = " ".join(self.event.message.args_case[1:])
         self.event.sender.name = name
         self.event.sender.save()
-        return f"Изменил имя на {self.event.sender.name}"
+        answer = f"Изменил имя на {self.event.sender.name}"
 
-    def menu_surname(self):
+        return ResponseMessageItem(text=answer)
+
+    def menu_surname(self) -> ResponseMessageItem:
         self.check_args(2)
         surname = " ".join(self.event.message.args_case[1:])
         self.event.sender.surname = surname
         self.event.sender.save()
-        return f"Изменил фамилию на {self.event.sender.surname}"
+        answer = f"Изменил фамилию на {self.event.sender.surname}"
+        return ResponseMessageItem(text=answer)
 
-    def menu_gender(self):
+    def menu_gender(self) -> ResponseMessageItem:
         self.check_args(2)
         gender = self.event.message.args[1]
         if gender in ['мужской', 'м', 'муж']:
@@ -123,9 +132,10 @@ class Profile(Command):
             gender_code = self.event.sender.GENDER_NONE
         self.event.sender.gender = gender_code
         self.event.sender.save()
-        return f"Изменил пол на {self.event.sender.get_gender_display()}"
+        answer = f"Изменил пол на {self.event.sender.get_gender_display()}"
+        return ResponseMessageItem(text=answer)
 
-    def menu_avatar(self):
+    def menu_avatar(self) -> ResponseMessageItem:
         images = self.event.get_all_attachments(PhotoAttachment)
         if len(images) > 0:
             self.event.sender.set_avatar(images[0])
@@ -133,9 +143,10 @@ class Profile(Command):
             if self.event.platform not in [Platform.TG]:
                 raise PWarning("Обновление аватара по пользователю доступно только для ВК/ТГ")
             self.bot.update_profile_avatar(self.event.sender, self.event.user.user_id)
-        return "Изменил аватарку"
+        answer = "Изменил аватарку"
+        return ResponseMessageItem(text=answer)
 
-    def menu_default(self):
+    def menu_default(self) -> ResponseMessageItem:
         if self.event.message.args:
             self.check_conversation()
             user = self.bot.get_profile_by_name(self.event.message.args, filter_chat=self.event.chat)
@@ -143,7 +154,7 @@ class Profile(Command):
         user = self.event.sender
         return self.get_user_profile(user)
 
-    def get_user_profile(self, user):
+    def get_user_profile(self, user) -> ResponseMessageItem:
         _city = user.city or "Не установлено"
         _bd = user.birthday
         if user.celebrate_bday:
@@ -159,19 +170,19 @@ class Profile(Command):
         _nickname = user.nickname_real or "Не установлено"
         _name = user.name or "Не установлено"
         _surname = user.surname or "Не установлено"
-        msg = {
-            'text':
-                f"Имя - {_name}\n"
-                f"Фамилия - {_surname}\n"
-                f"Никнейм - {_nickname}\n"
-                f"Дата рождения - {_bd}\n"
-                f"Город - {_city}\n"
-                f"Пол - {user.get_gender_display().capitalize()}"
-        }
+        answer = f"Имя - {_name}\n" \
+                 f"Фамилия - {_surname}\n" \
+                 f"Никнейм - {_nickname}\n" \
+                 f"Дата рождения - {_bd}\n" \
+                 f"Город - {_city}\n" \
+                 f"Пол - {user.get_gender_display().capitalize()}"
+        rmi = ResponseMessageItem(text=answer)
+
         if user.avatar:
-            msg['attachments'] = self.bot.get_photo_attachment(user.avatar.path, peer_id=self.event.peer_id,
-                                                               filename="petrovich_user_avatar.png")
-        return msg
+            attachment = [self.bot.get_photo_attachment(user.avatar.path, peer_id=self.event.peer_id,
+                                                        filename="petrovich_user_avatar.png")]
+            rmi.attachments = [attachment]
+        return rmi
 
     @staticmethod
     def add_city_to_db(city_name):

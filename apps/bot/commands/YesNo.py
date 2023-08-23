@@ -1,4 +1,6 @@
 from apps.bot.classes.Command import Command
+from apps.bot.classes.events.Event import Event
+from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
 from apps.bot.utils.utils import random_event, replace_similar_letters
 
 
@@ -10,17 +12,19 @@ class YesNo(Command):
     priority = -10
     mentioned = True
 
-    def accept(self, event):
+    def accept(self, event: Event) -> bool:
         if event.message and event.message.clear and event.message.clear[-1] == self.name:
             return True
         return super().accept(event)
 
-    def start(self):
+    def start(self) -> ResponseMessage:
         clear = replace_similar_letters(self.event.message.clear)
         if clear in ['идиот?', 'ты идиот?']:
-            return "Мне потанцевать нельзя?"
+            answer = "Мне потанцевать нельзя?"
+            return ResponseMessage(ResponseMessageItem(text=answer))
         elif clear in ['да?']:
-            return "https://youtu.be/ePddSQQl2kc"
+            answer = "https://youtu.be/ePddSQQl2kc"
+            return ResponseMessage(ResponseMessageItem(text=answer))
 
         random_events = [["Да", "Ага", "Канеш", "Само собой", "Абсолютно"],
                          ["Нет", "Неа", "Ни за что", "Нуу... нет", "NO"],
@@ -30,4 +34,5 @@ class YesNo(Command):
         seed = clear
         selected_event = random_event(random_events, probability_events1, seed=seed)
         selected_event2 = random_event(selected_event, probability_events2, seed=seed)
-        return selected_event2
+        answer = selected_event2
+        return ResponseMessage(ResponseMessageItem(text=answer))

@@ -9,12 +9,6 @@ class Hi(Command):
              "куку", "здаров", "здарова", "хеей", "хало", "hi", "hello", 'салам']
     mentioned = True
 
-    def start(self):
+    def start(self) -> ResponseMessage:
         answer = random_event(self.full_names)
-        return ResponseMessage(
-            ResponseMessageItem(
-                text=answer,
-                peer_id=self.event.peer_id,
-                message_thread_id=self.event.message_thread_id
-            )
-        )
+        return ResponseMessage(ResponseMessageItem(text=answer))

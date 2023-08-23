@@ -1,6 +1,7 @@
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Role
 from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
 from apps.bot.utils.utils import get_role_by_str
 
 
@@ -13,7 +14,7 @@ class Commands(Command):
         "(название роли) - список команд для роли"
     ]
 
-    def start(self):
+    def start(self) -> ResponseMessage:
         from apps.bot.initial import HELP_TEXTS
 
         help_texts = HELP_TEXTS[self.event.platform]
@@ -37,15 +38,17 @@ class Commands(Command):
                 if ordered_role['role'] == role:
                     result = self.get_str_for_role(help_texts, ordered_role)
                     if not result:
-                        return "У вас нет прав для просмотра команд данной роли"
-                    return result
-            return "У данной роли нет списка команд"
+                        answer = "У вас нет прав для просмотра команд данной роли"
+                        return ResponseMessage(ResponseMessageItem(text=answer))
+                    return ResponseMessage(ResponseMessageItem(text=result))
+            answer = "У данной роли нет списка команд"
+            return ResponseMessage(ResponseMessageItem(text=answer))
 
-        output = ""
+        answer = ""
         for role in ordered_roles:
-            output += self.get_str_for_role(help_texts, role)
-        output = output.rstrip()
-        return output
+            answer += self.get_str_for_role(help_texts, role)
+        answer = answer.rstrip()
+        return ResponseMessage(ResponseMessageItem(text=answer))
 
     def get_str_for_role(self, help_texts, role):
         result = ""

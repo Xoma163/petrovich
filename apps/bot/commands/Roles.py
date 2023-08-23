@@ -1,6 +1,7 @@
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Role
 from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
 
 
 class Roles(Command):
@@ -12,25 +13,22 @@ class Roles(Command):
         "[N] - роли пользователя в беседе. N - имя, фамилия, логин/id, никнейм"
     ]
 
-    def start(self):
+    def start(self) -> ResponseMessage:
         if not self.event.message.args:
             user = self.event.sender
         else:
             self.check_conversation()
-            try:
-                user = self.bot.get_profile_by_name(self.event.message.args, self.event.chat)
-            except PWarning as e:
-                return str(e)
+            user = self.bot.get_profile_by_name(self.event.message.args, self.event.chat)
 
         roles = self.get_roles(user)
         if len(roles) == 0:
             raise PWarning("Нет прав")
 
-        result = "\n".join(roles)
+        answer = "\n".join(roles)
 
         if self.event.chat and self.event.chat.admin == user:
-            result += "\nадмин конфы (в этой)"
-        return result
+            answer += "\nадмин конфы (в этой)"
+        return ResponseMessage(ResponseMessageItem(text=answer))
 
     @staticmethod
     def get_roles(user):

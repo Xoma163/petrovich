@@ -6,6 +6,7 @@ from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.ActivitiesEnum import ActivitiesEnum
 from apps.bot.classes.consts.Consts import Role
 from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
 from petrovich.settings import env
 
 
@@ -21,12 +22,12 @@ class GPT(Command):
     access = Role.TRUSTED
     args = 1
 
-    def start(self):
+    def start(self) -> ResponseMessage:
         if self.event.message.args[0] == "нарисуй":
             return self.draw_image()
         return self.text_chat()
 
-    def draw_image(self):
+    def draw_image(self) -> ResponseMessage:
         openai.api_key = env.str("CHIMERA_SECRET_KEY")
         openai.api_base = "https://chimeragpt.adventblocks.cc/api/v1"
 
@@ -44,10 +45,11 @@ class GPT(Command):
             self.bot.stop_activity_thread()
 
         attachments = [self.bot.get_photo_attachment(x['url']) for x in response["data"]]
-        return {'text': f'Результат генерации по запросу "{request_text}"', 'attachments': attachments,
-                'reply_to': self.event.message.id}
+        answer = f'Результат генерации по запросу "{request_text}"'
+        return ResponseMessage(
+            ResponseMessageItem(text=answer, attachments=attachments, reply_to=self.event.message.id))
 
-    def text_chat(self):
+    def text_chat(self) -> ResponseMessage:
         request_text = self.event.message.args_str_case
 
         openai.api_key = env.str("CHIMERA_SECRET_KEY")
@@ -65,9 +67,9 @@ class GPT(Command):
             raise PWarning("Какая-то непредвиденная ошибка. Попробуйте ещё раз")
         finally:
             self.bot.stop_activity_thread()
-        result = response.choices[0].message.content
-        result = self.replace_specsymbols_to_tg_format(result)
-        return {'text': result, 'reply_to': self.event.message.id}
+        answer = response.choices[0].message.content
+        answer = self.replace_specsymbols_to_tg_format(answer)
+        return ResponseMessage(ResponseMessageItem(text=answer, reply_to=self.event.message.id))
 
     def replace_specsymbols_to_tg_format(self, text):
         p = re.compile(r'\*\*(.*)\*\*')  # markdown bold

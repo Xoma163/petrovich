@@ -106,8 +106,20 @@ class Command:
         self.event = event
 
         self.checks()
-        return self.start()
+        rm = self.start()
 
+        if not rm:
+            rm = ResponseMessage()
+
+        # Установка peer_id и message_thread_id по умолчанию, чтобы не писать в каждой команде
+        # Если нужно указать другой peer_id и message_thread_id, то нужно указать это явно
+        for rm_message in rm.messages:
+            if rm_message.peer_id is None:
+                rm_message.peer_id = event.peer_id
+            if rm_message.message_thread_id is None:
+                rm_message.message_thread_id = event.message_thread_id
+
+        return rm
     def checks(self):
         """
         Проверки

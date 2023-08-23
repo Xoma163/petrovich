@@ -8,13 +8,6 @@ class Sho(Command):
     suggest_for_similar = False
     non_mentioned = True
 
-    def start(self):
+    def start(self) -> ResponseMessage:
         answer = "я нишо а ты шо"
-
-        return ResponseMessage(
-            ResponseMessageItem(
-                text=answer,
-                peer_id=self.event.peer_id,
-                message_thread_id=self.event.message_thread_id
-            )
-        )
+        return ResponseMessage(ResponseMessageItem(text=answer))

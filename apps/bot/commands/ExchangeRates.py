@@ -1,6 +1,7 @@
 from apps.bot.APIs.CBRAPI import CBRAPI
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
 
 
 class ExchangeRates(Command):
@@ -11,16 +12,17 @@ class ExchangeRates(Command):
         "[количество=1] (валюта) - перевод в другие валюты конкретное количество валюты"
     ]
 
-    def start(self):
+    def start(self) -> ResponseMessage:
         filters_list = ["USD", "EUR", "NOK", "JPY", "GBP", "KZT", "UAH", "AMD", "UZS"]
 
         cbr_api = CBRAPI(filters_list)
         ex_rates = cbr_api.do()
 
         if self.event.message.args:
-            return self.concrete_rate(ex_rates)
+            answer = self.concrete_rate(ex_rates)
         else:
-            return self.all_rates(ex_rates)
+            answer = self.all_rates(ex_rates)
+        return ResponseMessage(ResponseMessageItem(text=answer))
 
     def concrete_rate(self, ex_rates):
         self.check_args(1)

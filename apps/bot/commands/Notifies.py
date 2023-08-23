@@ -2,6 +2,7 @@ from apps.bot.classes.Command import Command
 from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.consts.Consts import Role, Platform
 from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
 from apps.bot.utils.utils import localize_datetime, remove_tz
 from apps.service.models import Notify
 
@@ -21,10 +22,10 @@ class Notifies(Command):
 
     bot: TgBot
 
-    def start(self):
+    def start(self) -> ResponseMessage:
 
         if not self.event.message.args:
-            return self.menu_notifications()
+            rmi = self.menu_notifications()
         else:
             arg0 = self.event.message.args[0]
             menu = [
@@ -33,9 +34,10 @@ class Notifies(Command):
                 [['default'], self.menu_get_for_user],
             ]
             method = self.handle_menu(menu, arg0)
-            return method()
+            rmi = method()
+        return ResponseMessage(rmi)
 
-    def menu_delete(self):
+    def menu_delete(self) -> ResponseMessageItem:
         self.check_args(2)
         notifies = Notify.objects.filter(user=self.event.user).order_by("date")
         if self.event.chat:
@@ -58,25 +60,29 @@ class Notifies(Command):
                            f"{notifies_texts_str}")
 
         notifies.delete()
-        return "Удалил"
+        answer = "Удалил"
+        return ResponseMessageItem(text=answer)
 
-    def menu_conference(self):
+    def menu_conference(self) -> ResponseMessageItem:
         self.check_conversation()
         notifies = Notify.objects.filter(chat=self.event.chat)
-        return self.get_notifies_from_object(notifies, self.event.sender.city.timezone.name, True)
+        answer = self.get_notifies_from_object(notifies, self.event.sender.city.timezone.name, True)
+        return ResponseMessageItem(text=answer)
 
-    def menu_get_for_user(self):
+    def menu_get_for_user(self) -> ResponseMessageItem:
         self.check_conversation()
         profile = self.bot.get_profile_by_name(self.event.message.args_str, self.event.chat)
         user = profile.get_tg_user()
         notifies = Notify.objects.filter(user=user, chat=self.event.chat)
-        return self.get_notifies_from_object(notifies, self.event.sender.city.timezone.name, True)
+        answer = self.get_notifies_from_object(notifies, self.event.sender.city.timezone.name, True)
+        return ResponseMessageItem(text=answer)
 
-    def menu_notifications(self):
+    def menu_notifications(self) -> ResponseMessageItem:
         notifies = Notify.objects.filter(user=self.event.user).order_by("date")
         if self.event.chat:
             notifies = notifies.filter(chat=self.event.chat)
-        return self.get_notifies_from_object(notifies, self.event.sender.city.timezone.name)
+        answer = self.get_notifies_from_object(notifies, self.event.sender.city.timezone.name)
+        return ResponseMessageItem(text=answer)
 
     @staticmethod
     def get_notifies_from_object(notifies_obj, timezone, print_username=False):

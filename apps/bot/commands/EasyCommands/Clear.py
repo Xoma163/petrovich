@@ -9,16 +9,10 @@ class Clear(Command):
     suggest_for_similar = False
     non_mentioned = True
 
-    def start(self):
+    def start(self) -> ResponseMessage:
         if self.event.message.command == 'ммм':
             answer = random_event(["Данон", "Хуета"])
         else:
             answer = "Хуета"
 
-        return ResponseMessage(
-            ResponseMessageItem(
-                text=answer,
-                peer_id=self.event.peer_id,
-                message_thread_id=self.event.message_thread_id
-            )
-        )
+        return ResponseMessage(ResponseMessageItem(text=answer))

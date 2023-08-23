@@ -24,7 +24,7 @@ class BullsAndCows(Command):
     ]
     access = Role.GAMER
 
-    def start(self):
+    def start(self) -> ResponseMessage:
         with lock:
             if self.event.chat:
                 session = BullsAndCowsSession.objects.filter(chat=self.event.chat).first()
@@ -35,7 +35,7 @@ class BullsAndCows(Command):
             else:
                 return self.play_game(session)
 
-    def start_game(self, session):
+    def start_game(self, session) -> ResponseMessage:
         if session:
             raise PWarning(f"Игра уже создана, присылай мне число из {DIGITS_IN_GAME} цифр")
         digits = [str(x) for x in range(10)]
@@ -54,20 +54,14 @@ class BullsAndCows(Command):
             rmi = ResponseMessageItem(text=answer, peer_id=self.event.peer_id,
                                       message_thread_id=self.event.message_thread_id)
             r = self.bot.send_response_message_item(rmi)
-            message_id = r['response'].json()['result']['message_id']
+            message_id = r.json()['result']['message_id']
             bacs.message_body = "Я создал, погнали"
             bacs.message_id = message_id
             bacs.save()
             return
-        return ResponseMessage(
-            ResponseMessageItem(
-                text=answer,
-                peer_id=self.event.peer_id,
-                message_thread_id=self.event.message_thread_id
-            )
-        )
+        return ResponseMessage(ResponseMessageItem(text=answer))
 
-    def play_game(self, session):
+    def play_game(self, session) -> ResponseMessage:
         if not session:
             button = self.bot.get_button('Начать игру', self.name)
             keyboard = self.bot.get_inline_keyboard([button])
@@ -83,13 +77,7 @@ class BullsAndCows(Command):
             session.delete()
 
             answer = f"В следующий раз повезёт :(\nЗагаданное число - {correct_number_str}"
-            return ResponseMessage(
-                ResponseMessageItem(
-                    text=answer,
-                    peer_id=self.event.peer_id,
-                    message_thread_id=self.event.message_thread_id
-                )
-            )
+            return ResponseMessage(ResponseMessageItem(text=answer))
 
         if len(arg0) != DIGITS_IN_GAME:
             raise PWarning(f"В отгадываемом числе должно быть {DIGITS_IN_GAME} цифр")
@@ -113,14 +101,7 @@ class BullsAndCows(Command):
             button = self.bot.get_button("Ещё", self.name)
             keyboard = self.bot.get_inline_keyboard([button])
 
-            return ResponseMessage(
-                ResponseMessageItem(
-                    text=answer,
-                    keyboard=keyboard,
-                    peer_id=self.event.peer_id,
-                    message_thread_id=self.event.message_thread_id
-                )
-            )
+            return ResponseMessage(ResponseMessageItem(text=answer, keyboard=keyboard))
 
         bulls = 0
         cows = 0
@@ -137,4 +118,6 @@ class BullsAndCows(Command):
         session.message_body += f"\n\n{new_msg}"
         session.save()
 
-        _send_message_session_or_edit(self.bot, self.event, session, {'text': session.message_body}, 8)
+        rmi = ResponseMessageItem(text=session.message_body, peer_id=self.event.peer_id,
+                                  message_thread_id=self.event.message_thread_id)
+        _send_message_session_or_edit(self.bot, self.event, session, rmi, 8)

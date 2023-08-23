@@ -7,6 +7,8 @@ from apps.bot.classes.Command import Command
 from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.consts.Consts import Platform
 from apps.bot.classes.consts.Exceptions import PWarning, PSkip
+from apps.bot.classes.events.Event import Event
+from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
 from apps.bot.classes.messages.attachments.VideoNoteAttachment import VideoNoteAttachment
 from apps.bot.classes.messages.attachments.VoiceAttachment import VoiceAttachment
 
@@ -24,7 +26,7 @@ class VoiceRecognition(Command):
     bot: TgBot
 
     @staticmethod
-    def accept_extra(event):
+    def accept_extra(event: Event) -> bool:
         if event.has_voice_message:
             if event.is_from_chat and event.chat.recognize_voice:
                 return True
@@ -34,7 +36,7 @@ class VoiceRecognition(Command):
                 raise PSkip()
         return False
 
-    def start(self):
+    def start(self) -> ResponseMessage:
         audio_messages = self.event.get_all_attachments([VoiceAttachment, VideoNoteAttachment])
         audio_message = audio_messages[0]
 
@@ -58,8 +60,7 @@ class VoiceRecognition(Command):
 
         reply_to = self.event.message.id
         try:
-            msg: str = r.recognize_google(audio, language='ru_RU', pfilter=0)
-            # return {'text': msg, 'reply_to': reply_to}
+            answer: str = r.recognize_google(audio, language='ru_RU', pfilter=0)
         except sr.UnknownValueError:
             raise PWarning("Ничего не понял((", reply_to=reply_to)
         except sr.RequestError as e:
@@ -67,15 +68,16 @@ class VoiceRecognition(Command):
             raise PWarning("Проблема с форматом")
 
         spoiler_text = "спойлер"
-        if spoiler_text not in msg.lower():
-            return msg
+        if spoiler_text not in answer.lower():
+            return ResponseMessage(ResponseMessageItem(text=answer))
 
-        spoiler_index = msg.lower().index(spoiler_text)
-        text_before_spoiler = msg[:spoiler_index]
-        text_after_spoiler = msg[spoiler_index + len(spoiler_text):]
+        spoiler_index = answer.lower().index(spoiler_text)
+        text_before_spoiler = answer[:spoiler_index]
+        text_after_spoiler = answer[spoiler_index + len(spoiler_text):]
 
-        return text_before_spoiler + self.bot.get_bold_text(spoiler_text) + self.bot.get_spoiler_text(
+        answer = text_before_spoiler + self.bot.get_bold_text(spoiler_text) + self.bot.get_spoiler_text(
             text_after_spoiler)
+        return ResponseMessage(ResponseMessageItem(text=answer))
 
 
 # переопределение класса для отключения pFilter

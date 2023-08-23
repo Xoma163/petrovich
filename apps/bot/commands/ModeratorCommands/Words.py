@@ -6,6 +6,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Role
 from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
 from apps.service.models import Words as WordsModel
 from petrovich.settings import BASE_DIR
 
@@ -16,7 +17,7 @@ class Words(Command):
     access = Role.MODERATOR
     mentioned = True
 
-    def start(self):
+    def start(self) -> ResponseMessage:
         return self.get_words()
 
     @staticmethod
@@ -55,9 +56,9 @@ class Words(Command):
                     created_words += 1
             time2 = time.time()
 
-            msg = f"Время выполнения - {round(time2 - time1, 2)}\n" \
-                  f"Добавлено слов - {created_words}"
-            return msg
+            answer = f"Время выполнения - {round(time2 - time1, 2)}\n" \
+                     f"Добавлено слов - {created_words}"
+            return ResponseMessage(ResponseMessageItem(text=answer))
         except Exception as e:
             raise PWarning("Ошибка при обновлении слов\n"
                            f"{str(e)}")

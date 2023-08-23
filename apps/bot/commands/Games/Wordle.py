@@ -8,6 +8,7 @@ from apps.bot.classes.Command import Command
 from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.consts.Consts import Platform, Role, rus_alphabet
 from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.messages.ResponseMessage import ResponseMessageItem, ResponseMessage
 from apps.bot.utils.utils import random_event, _send_message_session_or_edit
 from apps.games.models import Wordle as WordleModel
 from petrovich.settings import STATIC_ROOT
@@ -37,7 +38,7 @@ class Wordle(Command):
     WORDLE_WORDS_PATH = "static/bot/games/wordle/wordle.json"
 
     # ToDo: self.session
-    def start(self):
+    def start(self) -> ResponseMessage:
         if self.event.message.args:
             arg0 = self.event.message.args[0]
         else:
@@ -48,12 +49,13 @@ class Wordle(Command):
             [['default'], self.hypothesis]
         ]
         method = self.handle_menu(menu, arg0)
-        return method()
+        rmi = method()
+        return ResponseMessage(rmi)
 
-    def start_session(self):
+    def start_session(self) -> ResponseMessageItem:
         existed_session = self.get_session()
         if existed_session:
-            return self.get_current_state(existed_session)
+            self.get_current_state(existed_session)
 
         data = {
             "word": self.get_random_word(),
@@ -67,7 +69,8 @@ class Wordle(Command):
             data['profile'] = self.event.sender
         WordleModel.objects.create(**data)
 
-        return "Игра начата. Поехали!"
+        answer = "Игра начата. Поехали!"
+        return ResponseMessageItem(text=answer)
 
     def hypothesis(self):
         hypothesis = self.event.message.args[0]
@@ -91,12 +94,14 @@ class Wordle(Command):
         if len(session.hypotheses) > 5:
             return self.lose()
 
-        return self.get_current_state(session)
+        self.get_current_state(session)
 
     def get_current_state(self, session):
         image = self.get_keyboard_image(session)
         attachment = self.bot.get_photo_attachment(image)
-        _send_message_session_or_edit(self.bot, self.event, session, {'attachments': [attachment]}, max_delta=8)
+        rmi = ResponseMessageItem(attachments=[attachment], peer_id=self.event.peer_id,
+                                  message_thread_id=self.event.message_thread_id)
+        _send_message_session_or_edit(self.bot, self.event, session, rmi, max_delta=8)
 
     def get_random_word(self):
         with open(self.WORDLE_WORDS_PATH, 'r') as f:
@@ -147,7 +152,7 @@ class Wordle(Command):
 
         return image
 
-    def win(self):
+    def win(self) -> ResponseMessageItem:
         session = self.get_session()
         word = session.word
 
@@ -161,7 +166,7 @@ class Wordle(Command):
 
         return self._end_game(session, text)
 
-    def lose(self):
+    def lose(self) -> ResponseMessageItem:
         session = self.get_session()
         text = f"Загаданное слово - {session.word}"
         return self._end_game(session, text)
@@ -173,9 +178,12 @@ class Wordle(Command):
         image = self.get_keyboard_image(session)
         attachment = self.bot.get_photo_attachment(image)
         session.delete()
-        _send_message_session_or_edit(self.bot, self.event, session, {'attachments': [attachment]}, max_delta=8)
+        rmi = ResponseMessageItem(attachments=[attachment], peer_id=self.event.peer_id,
+                                  message_thread_id=self.event.message_thread_id)
+        _send_message_session_or_edit(self.bot, self.event, session, rmi, max_delta=8)
 
-        return {"text": text, "keyboard": keyboard}
+        # Зачем?
+        return ResponseMessageItem(text=text, keyboard=keyboard)
 
 
 class WordleImageGenerator:

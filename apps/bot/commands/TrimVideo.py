@@ -6,6 +6,7 @@ from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.consts.ActivitiesEnum import ActivitiesEnum
 from apps.bot.classes.consts.Consts import Platform, Role
 from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
 from apps.bot.classes.messages.attachments.LinkAttachment import LinkAttachment
 from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachment
 from apps.bot.utils.VideoTrimmer import VideoTrimmer
@@ -33,7 +34,7 @@ class TrimVideo(Command):
     attachments = [LinkAttachment, VideoAttachment]
     args = 1
 
-    def start(self):
+    def start(self) -> ResponseMessage:
         att = self.event.get_all_attachments([LinkAttachment, VideoAttachment])[0]
         try:
             self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.UPLOAD_VIDEO)
@@ -47,16 +48,16 @@ class TrimVideo(Command):
             self.bot.stop_activity_thread()
 
         video = self.bot.get_video_attachment(video_bytes, peer_id=self.event.peer_id)
-        return {'attachments': [video]}
+        return ResponseMessage(ResponseMessageItem(attachments=[video]))
 
     def trim_att_by_link(self, att):
         args = [x for x in self.event.message.args]
         args.remove(att.url.lower())
 
         start_pos, end_pos = self.get_timecodes(att.url, args)
-        return self.trim_link_pos(att.url, start_pos, end_pos, self.event.platform)
+        return self.trim_link_pos(att.url, start_pos, end_pos)
 
-    def trim_link_pos(self, link, start_pos, end_pos=None, platform=None):
+    def trim_link_pos(self, link, start_pos, end_pos=None):
         delta = None
         if end_pos:
             delta = (datetime.strptime(end_pos, "%H:%M:%S.%f") - datetime.strptime(start_pos, "%H:%M:%S.%f")).seconds

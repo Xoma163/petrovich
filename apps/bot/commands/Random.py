@@ -1,4 +1,5 @@
 from apps.bot.classes.Command import Command
+from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
 from apps.bot.utils.utils import get_random_int
 
 
@@ -16,7 +17,7 @@ class Random(Command):
 
     int_args = [0, 1]
 
-    def start(self):
+    def start(self) -> ResponseMessage:
         if self.event.message.args:
             if len(self.event.message.args) == 2:
                 int1 = self.event.message.args[0]
@@ -33,4 +34,5 @@ class Random(Command):
             int1, int2 = int2, int1
 
         rand_int = get_random_int(int1, int2)
-        return str(rand_int)
+        answer = str(rand_int)
+        return ResponseMessage(ResponseMessageItem(text=answer))

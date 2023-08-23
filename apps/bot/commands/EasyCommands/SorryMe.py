@@ -5,13 +5,6 @@ from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseM
 class SorryMe(Command):
     name = 'извиниться'
 
-    def start(self):
+    def start(self) -> ResponseMessage:
         answer = f"{self.event.sender} извиняется перед всеми"
-
-        return ResponseMessage(
-            ResponseMessageItem(
-                text=answer,
-                peer_id=self.event.peer_id,
-                message_thread_id=self.event.message_thread_id
-            )
-        )
+        return ResponseMessage(ResponseMessageItem(text=answer))

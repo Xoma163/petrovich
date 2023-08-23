@@ -3,6 +3,7 @@ from time import sleep
 
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
 from apps.bot.commands.Meme import Meme
 from apps.service.models import Horoscope as HoroscopeModel
 
@@ -73,7 +74,7 @@ class Horoscope(Command):
         ZodiacSign("козерог", ["♑", "♑️"], "22.12"),
     ])
 
-    def start(self):
+    def start(self) -> ResponseMessage:
         if self.event.message.args:
             # Гороскоп для всех знаков
             if self.event.message.args[0] in "все":
@@ -109,7 +110,9 @@ class Horoscope(Command):
         signs = self.zodiac_signs.get_zodiac_signs()
         for sign in signs:
             message = self.get_horoscope_by_zodiac_sign(sign)
-            self.bot.parse_and_send_msgs_thread(message, self.event.peer_id, self.event.message_thread_id)
+            message.peer_id = self.event.peer_id
+            message.message_thread_id = self.event.message_thread_id
+            self.bot.send_response_message_thread(ResponseMessage(message))
             sleep(1)
 
     def get_horoscope_for_conference(self):
@@ -129,10 +132,12 @@ class Horoscope(Command):
             )
         for sign in signs:
             message = self.get_horoscope_by_zodiac_sign(sign)
-            self.bot.parse_and_send_msgs_thread(message, self.event.peer_id, self.event.message_thread_id)
+            message.peer_id = self.event.peer_id
+            message.message_thread_id = self.event.message_thread_id
+            self.bot.send_response_message_thread(ResponseMessage(message))
             sleep(1)
 
-    def get_horoscope_info(self):
+    def get_horoscope_info(self) -> ResponseMessage:
         self.check_args(2)
         try:
             zodiac_sign_name = self.event.message.args[1]
@@ -144,9 +149,10 @@ class Horoscope(Command):
         if not horoscope:
             raise PWarning("На сегодня ещё нет гороскопа")
         meme = horoscope.memes.all()[zodiac_sign_index]
-        return f"{zodiac_sign.name.capitalize()}\n{meme.get_info()}"
+        answer = f"{zodiac_sign.name.capitalize()}\n{meme.get_info()}"
+        return ResponseMessage(ResponseMessageItem(text=answer))
 
-    def get_horoscope_by_zodiac_sign(self, zodiac_sign):
+    def get_horoscope_by_zodiac_sign(self, zodiac_sign) -> ResponseMessageItem:
         horoscope = HoroscopeModel.objects.first()
         if not horoscope:
             raise PWarning("На сегодня ещё нет гороскопа")
@@ -156,15 +162,15 @@ class Horoscope(Command):
 
         meme_command = Meme(bot=self.bot, event=self.event)
         prepared_meme = meme_command.prepare_meme_to_send(meme)
-        if prepared_meme.get('text', None):
-            prepared_meme['text'] = f"{zodiac_sign_name}\n{prepared_meme['text']}"
+        if prepared_meme.text:
+            prepared_meme.text = f"{zodiac_sign_name}\n{prepared_meme.text}"
         else:
-            prepared_meme['text'] = zodiac_sign_name
+            prepared_meme.text = zodiac_sign_name
         return prepared_meme
 
-    def get_horoscope_hint_msg(self, msg=None):
-        if not msg:
-            msg = {'text': "Узнать мой гороскоп"}
+    def get_horoscope_hint_msg(self, rmi: ResponseMessageItem = None) -> ResponseMessage:
+        if not rmi:
+            rmi = ResponseMessageItem(text="Узнать мой гороскоп")
         button = self.bot.get_button(self.name.capitalize(), self.name)
-        msg['keyboard'] = self.bot.get_inline_keyboard([button])
-        return msg
+        rmi.keyboard = self.bot.get_inline_keyboard([button])
+        return ResponseMessage(rmi)

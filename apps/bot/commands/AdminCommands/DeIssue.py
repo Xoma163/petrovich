@@ -13,16 +13,9 @@ class DeIssue(Command):
     non_mentioned = False
     access = Role.ADMIN
 
-    def start(self):
+    def start(self) -> ResponseMessage:
         _id = self.event.message.args[0]
         github_api = GithubAPI()
         github_api.delete_issue(_id)
         answer = "Ишю закрыта"
-
-        return ResponseMessage(
-            ResponseMessageItem(
-                text=answer,
-                peer_id=self.event.peer_id,
-                message_thread_id=self.event.message_thread_id
-            )
-        )
+        return ResponseMessage(ResponseMessageItem(text=answer))

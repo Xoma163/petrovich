@@ -2,6 +2,7 @@ from apps.bot.APIs.MinecraftAPI import get_minecraft_version_by_args
 from apps.bot.APIs.MinecraftAPI import minecraft_servers
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Role
+from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
 
 
 class Minecraft(Command):
@@ -16,7 +17,7 @@ class Minecraft(Command):
 
     access = Role.MINECRAFT
 
-    def start(self):
+    def start(self) -> ResponseMessage:
         if self.event.message.args:
             arg0 = self.event.message.args[0]
         else:
@@ -30,7 +31,8 @@ class Minecraft(Command):
 
         ]
         method = self.handle_menu(menu, arg0)
-        return method()
+        rmi = method()
+        return ResponseMessage(rmi)
 
     def get_minecraft_server(self):
         version = self.event.message.args[1] if len(self.event.message.args) > 1 else None
@@ -38,30 +40,31 @@ class Minecraft(Command):
         minecraft_server.event = self.event
         return minecraft_server
 
-    def menu_start(self):
+    def menu_start(self) -> ResponseMessageItem:
         self.check_args(1)
         minecraft_server = self.get_minecraft_server()
         minecraft_server.start()
 
         version = minecraft_server.get_version()
-        message = f"Стартуем майн {version}"
-        return message
+        answer = f"Стартуем майн {version}"
+        return ResponseMessageItem(text=answer)
 
-    def menu_stop(self):
+    def menu_stop(self) -> ResponseMessageItem:
         self.check_args(1)
         minecraft_server = self.get_minecraft_server()
         minecraft_server.stop()
 
         version = minecraft_server.get_version()
-        message = f"Финишируем майн {version}"
-        return message
+        answer = f"Финишируем майн {version}"
+        return ResponseMessageItem(text=answer)
 
     @staticmethod
-    def menu_status():
+    def menu_status() -> ResponseMessageItem:
         minecraft_result = ""
         for server in minecraft_servers:
             server.get_server_info()
             result = server.get_server_info_str()
             minecraft_result += f"{result}\n\n"
 
-        return minecraft_result
+        answer = minecraft_result
+        return ResponseMessageItem(text=answer)

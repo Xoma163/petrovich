@@ -4,6 +4,7 @@ import numpy as np
 from apps.bot.APIs.EveryPixelAPI import EveryPixelAPI
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 
 
@@ -15,7 +16,7 @@ class Age(Command):
     ]
     attachments = [PhotoAttachment]
 
-    def start(self):
+    def start(self) -> ResponseMessage:
         image = self.event.get_all_attachments(PhotoAttachment)[0]
         everypixel_api = EveryPixelAPI()
         faces = everypixel_api.get_faces_on_photo(image.download_content(self.event.peer_id))
@@ -23,9 +24,9 @@ class Age(Command):
         if len(faces) == 0:
             raise PWarning("Не нашёл лиц на фото")
         file_bytes = self.draw_on_images(image, faces)
-        attachments = self.bot.get_photo_attachment(file_bytes, peer_id=self.event.peer_id,
-                                                    filename="petrovich_age.jpg")
-        return {"attachments": attachments}
+        attachment = self.bot.get_photo_attachment(file_bytes, peer_id=self.event.peer_id,
+                                                   filename="petrovich_age.jpg")
+        return ResponseMessage(ResponseMessageItem(attachments=[attachment]))
 
     def draw_on_images(self, image, faces):
 

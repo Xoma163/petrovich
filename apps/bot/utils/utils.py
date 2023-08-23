@@ -340,10 +340,8 @@ def get_url_file_ext(url):
 
 
 # ToDo: придумать, куда это вынести.
-def _send_message_session_or_edit(bot, event, session, msg: dict, max_delta):
+def _send_message_session_or_edit(bot, event, session, rmi: ResponseMessageItem, max_delta):
     delta_messages = event.message.id - session.message_id
-
-    rmi = ResponseMessageItem(text=msg, peer_id=event.peer_id, message_thread_id=event.message_thread_id)
 
     if delta_messages > max_delta:
         old_msg_id = session.message_id
@@ -356,7 +354,7 @@ def _send_message_session_or_edit(bot, event, session, msg: dict, max_delta):
         rmi.message_id = session.message_id
         r = bot.send_response_message_item(rmi)
     if not r.json()['ok']:
-        rmi = ResponseMessageItem(text=msg, peer_id=event.peer_id, message_thread_id=event.message_thread_id)
+        rmi.message_id = None
         r = bot.send_response_message_item(rmi)
         message_id = r.json()['result']['message_id']
         session.message_id = message_id
