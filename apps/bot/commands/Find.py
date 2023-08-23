@@ -40,7 +40,7 @@ class Find(Command):
                 att.public_download_url = url
                 att.set_file_id()
                 attachments.append(att)
-            except PError:
+            except (PError, Exception):
                 continue
             if len(attachments) == count:
                 break

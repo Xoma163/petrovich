@@ -271,7 +271,6 @@ class TgBot(CommonBot):
         results = []
         for rmi in rm.messages:
             try:
-                rmi.set_telegram_html()
                 response = self.send_response_message_item(rmi)
 
                 if response.status_code == 200:
@@ -335,22 +334,23 @@ class TgBot(CommonBot):
         r = self.requests.get('editMessageMedia', params=params)
         return r
 
-    def send_response_message_item(self, rm: ResponseMessageItem):
+    def send_response_message_item(self, rmi: ResponseMessageItem):
         """
         Отправка ResponseMessageItem сообщения
         Возвращает Response платформы
         """
-        params = {'chat_id': rm.peer_id, 'caption': rm.text, 'reply_markup': json.dumps(rm.keyboard)}
-        params.update(rm.kwargs)
+        rmi.set_telegram_html()
+        params = {'chat_id': rmi.peer_id, 'caption': rmi.text, 'reply_markup': json.dumps(rmi.keyboard)}
+        params.update(rmi.kwargs)
 
-        if rm.reply_to:
-            params['reply_to_message_id'] = rm.reply_to
-        if rm.message_thread_id:
-            params['message_thread_id'] = rm.message_thread_id
+        if rmi.reply_to:
+            params['reply_to_message_id'] = rmi.reply_to
+        if rmi.message_thread_id:
+            params['message_thread_id'] = rmi.message_thread_id
 
-        if rm.message_id:
-            params['message_id'] = rm.message_id
-            return self.edit_message(rm, params)
+        if rmi.message_id:
+            params['message_id'] = rmi.message_id
+            return self.edit_message(rmi, params)
 
         att_map = {
             PhotoAttachment: self._send_photo,
@@ -363,12 +363,12 @@ class TgBot(CommonBot):
             VoiceAttachment: self._send_voice,
         }
 
-        if rm.attachments:
+        if rmi.attachments:
             try:
-                if len(rm.attachments) > 1:
-                    return self._send_media_group(rm, params)
+                if len(rmi.attachments) > 1:
+                    return self._send_media_group(rmi, params)
                 else:
-                    return att_map[rm.attachments[0].__class__](rm, params)
+                    return att_map[rmi.attachments[0].__class__](rmi, params)
             finally:
                 self.stop_activity_thread()
         return self._send_text(params)
