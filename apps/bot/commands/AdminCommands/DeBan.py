@@ -2,6 +2,7 @@ from django.contrib.auth.models import Group
 
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Role
+from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
 
 
 class DeBan(Command):
@@ -18,5 +19,14 @@ class DeBan(Command):
         profile.save()
 
         if profile.gender == profile.GENDER_FEMALE:
-            return "Разбанена"
-        return "Разбанен"
+            answer = "Разбанена"
+        else:
+            answer = "Разбанен"
+
+        return ResponseMessage(
+            ResponseMessageItem(
+                text=answer,
+                peer_id=self.event.peer_id,
+                message_thread_id=self.event.message_thread_id
+            )
+        )

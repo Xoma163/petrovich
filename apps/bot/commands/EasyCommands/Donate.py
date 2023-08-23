@@ -1,4 +1,5 @@
 from apps.bot.classes.Command import Command
+from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
 from petrovich.settings import STATIC_ROOT
 
 
@@ -14,4 +15,12 @@ class Donate(Command):
             peer_id=self.event.peer_id,
             filename="petrovich_donate.jpg"
         )
-        return {'text': self.bot.get_formatted_url("Задонатить", url), 'attachments': attachment}
+        answer = self.bot.get_formatted_url("Задонатить", url)
+        return ResponseMessage(
+            ResponseMessageItem(
+                text=answer,
+                attachments=[attachment],
+                peer_id=self.event.peer_id,
+                message_thread_id=self.event.message_thread_id
+            )
+        )

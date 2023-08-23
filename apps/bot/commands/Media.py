@@ -152,7 +152,7 @@ class Media(Command):
 
         res = self.bot.parse_and_send_msgs({'text': text, 'attachments': attachments, 'reply_to': reply_to},
                                            self.event.peer_id, self.event.message_thread_id)
-        if res[0]['success']:
+        if res.json()['ok']:
             self.bot.delete_message(self.event.peer_id, self.event.message.id)
 
     def get_method_and_chosen_url(self, source):

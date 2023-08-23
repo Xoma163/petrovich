@@ -1,4 +1,5 @@
 from apps.bot.classes.Command import Command
+from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
 from apps.bot.utils.utils import random_event
 
 
@@ -7,4 +8,12 @@ class Thanks(Command):
     names = ["спс", 'ty', 'дякую', 'сяп']
 
     def start(self):
-        return random_event(["Всегда пожалуйста", "На здоровье", "Обращайся", "<3"])
+        answer = random_event(["Всегда пожалуйста", "На здоровье", "Обращайся", "<3"])
+
+        return ResponseMessage(
+            ResponseMessageItem(
+                text=answer,
+                peer_id=self.event.peer_id,
+                message_thread_id=self.event.message_thread_id
+            )
+        )

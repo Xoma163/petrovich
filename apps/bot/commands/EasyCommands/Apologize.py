@@ -1,6 +1,7 @@
 import time
 
 from apps.bot.classes.Command import Command
+from apps.bot.classes.messages.ResponseMessage import ResponseMessageItem
 from apps.bot.utils.utils import random_event, random_probability
 
 
@@ -15,8 +16,13 @@ class Apologize(Command):
         phrases = ["Извини", "Нет", "Сам извинись", "за что?", "КАВО", "Ты уверен?", "а может быть ты извинишься?",
                    "ок"]
         phrase = random_event(phrases)
-        self.bot.parse_and_send_msgs(phrase, self.event.peer_id, self.event.message_thread_id)
+        rmi = ResponseMessageItem(text=phrase, peer_id=self.event.peer_id,
+                                  message_thread_id=self.event.message_thread_id)
+        self.bot.send_response_message_item(rmi)
         if phrase == "Извини":
             if random_probability(33):
                 time.sleep(3)
-                self.bot.parse_and_send_msgs("сь", self.event.peer_id, self.event.message_thread_id)
+                rmi = ResponseMessageItem(text="сь", peer_id=self.event.peer_id,
+                                          message_thread_id=self.event.message_thread_id)
+
+                self.bot.send_response_message_item(rmi)

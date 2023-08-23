@@ -68,22 +68,22 @@ class Bot(Thread):
         except PSkip:
             pass
         except Exception:
-            rm = self._get_unexpected_error(event)
             if send:
+                rm = self._get_unexpected_error(event)
                 self.send_response_message(rm)
 
-    def parse_and_send_msgs(self, msgs, peer_id, message_thread_id=None):
-        """
-        Отправка сообщений. Принимает любой формат
-        """
-        rm = msgs if isinstance(msgs, ResponseMessage) else ResponseMessage(msgs, peer_id, message_thread_id)
-        return self.send_response_message(rm)
-
-    def parse_and_send_msgs_thread(self, msgs, peer_id: int, message_thread_id=None):
-        """
-        Парсинг сырых сообщений и отправка их в отдельном потоке
-        """
-        Thread(target=self.parse_and_send_msgs, args=(msgs, peer_id, message_thread_id)).start()
+    # def parse_and_send_msgs(self, msgs, peer_id, message_thread_id=None):
+    #     """
+    #     Отправка сообщений. Принимает любой формат
+    #     """
+    #     rm = msgs if isinstance(msgs, ResponseMessage) else ResponseMessage(msgs, peer_id, message_thread_id)
+    #     return self.send_response_message(rm)
+    #
+    # def parse_and_send_msgs_thread(self, msgs, peer_id: int, message_thread_id=None):
+    #     """
+    #     Парсинг сырых сообщений и отправка их в отдельном потоке
+    #     """
+    #     Thread(target=self.parse_and_send_msgs, args=(msgs, peer_id, message_thread_id)).start()
 
     def send_response_message(self, rm: ResponseMessage) -> List[dict]:
         """
@@ -98,9 +98,10 @@ class Bot(Thread):
         Возвращает Response платформы
         """
 
-    # ToDo: я не понимаю чё он орёт на .error
-    def _get_unexpected_error(self, event):
-        rm = ResponseMessage(self.ERROR_MSG, event.peer_id, event.message_thread_id)
+    def _get_unexpected_error(self, event) -> ResponseMessage:
+        rm = ResponseMessage(
+            ResponseMessageItem(text=self.ERROR_MSG, peer_id=event.peer_id, message_thread_id=event.message_thread_id)
+        )
         self.logger.exception({
             "event": event.to_log(),
             "message": rm.to_log()
@@ -122,14 +123,15 @@ class Bot(Thread):
         for command in commands:
             try:
                 if command.accept(event):
-                    result = command.__class__().check_and_start(self, event)
-                    rm = ResponseMessage(result, event.peer_id, event.message_thread_id)
+                    rm = command.__class__().check_and_start(self, event)
                     self.logger.debug({"event": event.to_log(), "message": rm.to_log()})
                     return rm
             except (PWarning, PError) as e:
                 self.stop_activity_thread()
-                msg = {'text': e.msg, 'keyboard': e.keyboard, 'reply_to': e.reply_to}
-                rm = ResponseMessage(msg, event.peer_id, event.message_thread_id)
+                rm = ResponseMessage(ResponseMessageItem(
+                    text=e.msg, peer_id=event.peer_id, message_thread_id=event.message_thread_id, reply_to=e.reply_to,
+                    keyboard=e.keyboard
+                ))
                 getattr(self.logger, e.level)({"event": event.to_log(), "message": rm.to_log()})
                 return rm
             except PIDK:
@@ -150,7 +152,8 @@ class Bot(Thread):
             raise PSkip()
 
         similar_command, keyboard = self.get_similar_command(event, COMMANDS)
-        rm = ResponseMessage({'text': similar_command, 'keyboard': keyboard}, event.peer_id, event.message_thread_id)
+        rm = ResponseMessage(ResponseMessageItem(text=similar_command, keyboard=keyboard, peer_id=event.peer_id,
+                                                 message_thread_id=event.message_thread_id))
         self.logger.debug({"event": event.to_log(), "message": rm.to_log()})
         return rm
 
@@ -516,5 +519,3 @@ def send_message_to_moderator_chat(msgs):
     bot = TgBot()
     peer_id = get_moderator_chat_peer_id()
     return bot.parse_and_send_msgs(msgs, peer_id)
-
-

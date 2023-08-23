@@ -1,4 +1,5 @@
 from apps.bot.classes.Command import Command
+from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
 
 
 class GayAnswer(Command):
@@ -12,4 +13,12 @@ class GayAnswer(Command):
         return event.message and event.message.clear == 'пидора ответ'
 
     def start(self):
-        return "Шлюхи аргумент"
+        answer = "Шлюхи аргумент"
+
+        return ResponseMessage(
+            ResponseMessageItem(
+                text=answer,
+                peer_id=self.event.peer_id,
+                message_thread_id=self.event.message_thread_id
+            )
+        )

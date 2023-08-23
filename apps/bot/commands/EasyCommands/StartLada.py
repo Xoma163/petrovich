@@ -1,4 +1,5 @@
 from apps.bot.classes.Command import Command
+from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
 
 
 class StartLada(Command):
@@ -8,6 +9,14 @@ class StartLada(Command):
     def start(self):
         if self.event.message.args:
             who = self.event.message.args_str_case
-            return ["уи ви ви ви ви ви ви ви", f'завожу {who}']
+            answer = ["уи ви ви ви ви ви ви ви", f'завожу {who}']
+        else:
+            answer = "уи ви ви ви ви ви ви ви"
 
-        return "уи ви ви ви ви ви ви ви"
+        return ResponseMessage(
+            ResponseMessageItem(
+                text=answer,
+                peer_id=self.event.peer_id,
+                message_thread_id=self.event.message_thread_id
+            )
+        )

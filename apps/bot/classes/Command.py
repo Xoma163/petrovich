@@ -2,6 +2,7 @@ from apps.bot.classes.bots.Bot import Bot
 from apps.bot.classes.consts.Consts import Role, Platform
 from apps.bot.classes.consts.Exceptions import PWarning, PSkip, PIDK
 from apps.bot.classes.events.Event import Event
+from apps.bot.classes.messages.ResponseMessage import ResponseMessage
 from apps.bot.classes.messages.attachments.AudioAttachment import AudioAttachment
 from apps.bot.classes.messages.attachments.DocumentAttachment import DocumentAttachment
 from apps.bot.classes.messages.attachments.LinkAttachment import LinkAttachment
@@ -75,7 +76,7 @@ class Command:
             if self.access == Role.USER:
                 raise RuntimeError("Поле hidden=True и self.access=Role.USER не могут быть переданы вместе")
 
-    def accept(self, event: Event):
+    def accept(self, event: Event) -> bool:
         """
         Метод, определяющий на что среагирует команда. По умолчанию ищет команду в названиях
         :param event: событие
@@ -95,7 +96,7 @@ class Command:
         Метод, определяющий нужно ли отреагировать команде вне обычных условий
         """
 
-    def check_and_start(self, bot: Bot, event: Event):
+    def check_and_start(self, bot: Bot, event: Event) -> ResponseMessage:
         """
         Выполнение всех проверок и старт команды
         :param bot: сущность Bot
@@ -138,7 +139,7 @@ class Command:
         if self.non_mentioned:
             self.check_non_mentioned()
 
-    def start(self):
+    def start(self) -> ResponseMessage:
         """
         Обработка самой команды
         :return: result (см. документацию)

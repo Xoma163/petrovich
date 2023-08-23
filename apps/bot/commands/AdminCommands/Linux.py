@@ -1,5 +1,6 @@
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Role
+from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
 from apps.bot.utils.DoTheLinuxComand import do_the_linux_command
 
 
@@ -12,4 +13,12 @@ class Linux(Command):
     args = 1
 
     def start(self):
-        return do_the_linux_command(self.event.message.args_str)
+        answer = do_the_linux_command(self.event.message.args_str)
+
+        return ResponseMessage(
+            ResponseMessageItem(
+                text=answer,
+                peer_id=self.event.peer_id,
+                message_thread_id=self.event.message_thread_id
+            )
+        )

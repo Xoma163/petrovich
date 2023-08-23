@@ -274,30 +274,32 @@ class TgBot(CommonBot):
                 rmi.set_telegram_html()
                 response = self.send_response_message_item(rmi)
 
-                # Непредвиденная ошибка телеги
                 if response.status_code == 200:
                     results.append({"success": True, "response": response, "response_message_item": rmi})
+                    continue
+                # Непредвиденная ошибка телеги
+                skip_errors = [
+                    "Bad Request: canceled by new editMessageMedia request",
+                    "Bad Request: message is not modified: specified new message content and reply markup are exactly the same as a current content and reply markup of the message"
+                ]
+                catch_errors = {
+                    'Bad Request: VOICE_MESSAGES_FORBIDDEN': "Не могу отправить голосовуху из-за ваших настроек безопасности"
+                }
+                self.logger.error({'message': self.ERROR_MSG, 'error': response.json()['description']})
+                error = response.json()['description']
+                if error in skip_errors:
+                    results.append({"success": False, "response": response, "response_message_item": rmi})
+                elif error in catch_errors:
+                    msg = catch_errors[error]
+                    warn_rmi = ResponseMessageItem(text=msg, peer_id=rmi.peer_id,
+                                                   message_thread_id=rmi.message_thread_id)
+                    response = self.send_response_message_item(warn_rmi)
+                    results.append({"success": False, "response": response, "response_message_item": response})
                 else:
-                    skip_errors = [
-                        "Bad Request: canceled by new editMessageMedia request",
-                        "Bad Request: message is not modified: specified new message content and reply markup are exactly the same as a current content and reply markup of the message"
-                    ]
-                    catch_errors = {
-                        'Bad Request: VOICE_MESSAGES_FORBIDDEN': "Не могу отправить голосовуху из-за ваших настроек безопасности"
-                    }
-                    self.logger.error({'message': self.ERROR_MSG, 'error': response.json()['description']})
-                    error = response.json()['description']
-                    if error in skip_errors:
-                        results.append({"success": False, "response": response, "response_message_item": rmi})
-                    elif error in catch_errors:
-                        msg = catch_errors[error]
-                        warn_rm = ResponseMessage(msg, rmi.peer_id, rmi.message_thread_id).messages[0]
-                        response = self.send_response_message_item(warn_rm)
-                        results.append({"success": False, "response": response, "response_message_item": response})
-                    else:
-                        error_rm = ResponseMessage(self.ERROR_MSG, rmi.peer_id, rmi.message_thread_id).messages[0]
-                        response = self.send_response_message_item(error_rm)
-                        results.append({"success": False, "response": response, "response_message_item": response})
+                    error_rmi = ResponseMessageItem(text=self.ERROR_MSG, peer_id=rmi.peer_id,
+                                                    message_thread_id=rmi.message_thread_id)
+                    response = self.send_response_message_item(error_rmi)
+                    results.append({"success": False, "response": response, "response_message_item": response})
             # Предвиденная ошибка
             except (PWarning, PError) as e:
                 _error_rmi = ResponseMessageItem(e.msg, rmi.peer_id, rmi.message_thread_id)

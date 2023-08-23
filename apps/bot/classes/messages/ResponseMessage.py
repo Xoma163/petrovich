@@ -1,65 +1,30 @@
 import json
 import re
 from copy import copy
+from typing import List
 
 from apps.bot.utils.ModelJsonEncoder import ModelJsonEncoder
 from petrovich.settings import DEBUG
 
 
-class ResponseMessage:
-    def __init__(self, msgs, peer_id, thread_message_id=None):
-        self.messages = []
-
-        if isinstance(msgs, list):
-            for item in msgs:
-                rmi = ResponseMessageItem(item, peer_id, thread_message_id)
-                self.messages.append(rmi)
-        else:
-            self.messages = [ResponseMessageItem(msgs, peer_id, thread_message_id)] if msgs else []
-
-    def to_log(self) -> dict:
-        """
-        Вывод в логи
-        """
-        dict_self = copy(self.__dict__)
-        dict_self["messages"] = [x.to_log() for x in dict_self["messages"]]
-        if DEBUG:
-            print(json.dumps(dict_self, indent=2, ensure_ascii=False, cls=ModelJsonEncoder))
-        return dict_self
-
-    def to_api(self) -> dict:
-        """
-        Вывод в API
-        """
-        dict_self = copy(self.__dict__)
-        dict_self["messages"] = [x.to_api() for x in dict_self["messages"]]
-
-        return dict_self
-
-    def __str__(self):
-        return "\n".join([str(message) if message else "" for message in self.messages])
-
-
 class ResponseMessageItem:
     TG_TAGS = ['pre', 'code', 'i', 'b', 'u']
 
-    def __init__(self, msg, peer_id, message_thread_id=None):
-        if isinstance(msg, str) or isinstance(msg, int) or isinstance(msg, float):
-            msg = {'text': str(msg)}
-
-        msg_copy = copy(msg)
-
-        self.peer_id = peer_id
-        text = msg_copy.pop("text", "")
-        self.text = str(text) if text else ""
-        self.attachments = msg_copy.pop("attachments", [])
-        self.message_id = msg_copy.pop("message_id", None)
-        self.reply_to = msg_copy.pop("reply_to", None)
-        self.message_thread_id = message_thread_id
+    def __init__(self, text=None, attachments=None, reply_to=None, keyboard=None, message_id=None,
+                 message_thread_id=None, peer_id=None):
+        self.text = text
+        self.attachments = attachments if attachments else []
         if not isinstance(self.attachments, list):
             self.attachments = [self.attachments]
-        self.keyboard = msg_copy.pop("keyboard", {})
-        self.kwargs = msg_copy
+        self.reply_to = reply_to
+        self.keyboard = keyboard
+        if self.keyboard is None:
+            self.keyboard = {}
+        self.message_id = message_id
+        self.message_thread_id = message_thread_id
+        self.peer_id = peer_id
+
+        self.kwargs = {}
 
     def to_log(self) -> dict:
         """
@@ -115,7 +80,32 @@ class ResponseMessageItem:
                     from apps.bot.classes.bots.tg.TgBot import TgBot
                     self.text = self.text[:start_pos] + TgBot.get_formatted_url(url, url) + self.text[end_pos:]
 
-                    # self.text = self.text.replace(url, get_tg_formatted_url(url, url))
-
     def __str__(self):
         return self.text if self.text else ""
+
+
+class ResponseMessage:
+    def __init__(self, messages):
+        if isinstance(messages, list):
+            self.messages: List[ResponseMessageItem] = messages
+        else:
+            self.messages: List[ResponseMessageItem] = [messages]
+
+    def to_log(self) -> dict:
+        """
+        Вывод в логи
+        """
+        dict_self = copy(self.__dict__)
+        dict_self["messages"] = [x.to_log() for x in dict_self["messages"]]
+        if DEBUG:
+            print(json.dumps(dict_self, indent=2, ensure_ascii=False, cls=ModelJsonEncoder))
+        return dict_self
+
+    def to_api(self) -> dict:
+        """
+        Вывод в API
+        """
+        dict_self = copy(self.__dict__)
+        dict_self["messages"] = [x.to_api() for x in dict_self["messages"]]
+
+        return dict_self

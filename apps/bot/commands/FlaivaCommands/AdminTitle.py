@@ -2,6 +2,7 @@ from apps.bot.classes.Command import Command
 from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.consts.Consts import Platform, Role
 from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
 
 
 class AdminTitle(Command):
@@ -27,7 +28,7 @@ class AdminTitle(Command):
             if len(self.event.message.args) == 1:
                 title = self.event.message.args_str_case
                 self.bot.set_chat_admin_title(self.event.chat.chat_id, self.event.user.user_id, title)
-                return f"Поменял вашу должность на {title}"
+                answer = f"Поменял вашу должность на {title}"
             else:
                 self.check_args(2)
                 name = self.event.message.args[0]
@@ -41,9 +42,17 @@ class AdminTitle(Command):
                 user_id = profile.get_tg_user().user_id
                 self.bot.set_chat_admin_title(self.event.chat.chat_id, user_id, title)
                 if title == self.EMPTY:
-                    return f"Сбросил должность пользователю {self.bot.get_mention(profile)}"
+                    answer = f"Сбросил должность пользователю {self.bot.get_mention(profile)}"
                 else:
-                    return f"Поменял должность пользователю {self.bot.get_mention(profile)} на {title}"
+                    answer = f"Поменял должность пользователю {self.bot.get_mention(profile)} на {title}"
         else:
             self.bot.set_chat_admin_title(self.event.chat.chat_id, self.event.user.user_id, self.EMPTY)
-            return "Сбросил вашу должность"
+            answer = "Сбросил вашу должность"
+
+        return ResponseMessage(
+            ResponseMessageItem(
+                text=answer,
+                peer_id=self.event.peer_id,
+                message_thread_id=self.event.message_thread_id
+            )
+        )

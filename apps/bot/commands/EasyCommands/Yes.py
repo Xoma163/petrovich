@@ -1,5 +1,6 @@
 from apps.bot.classes.Command import Command
 from apps.bot.classes.events.Event import Event
+from apps.bot.classes.messages.ResponseMessage import ResponseMessageItem, ResponseMessage
 
 
 class Yes(Command):
@@ -15,4 +16,12 @@ class Yes(Command):
             return super().accept(event)
 
     def start(self):
-        return "Пизда"
+        answer = "Пизда"
+
+        return ResponseMessage(
+            ResponseMessageItem(
+                text=answer,
+                peer_id=self.event.peer_id,
+                message_thread_id=self.event.message_thread_id
+            )
+        )
