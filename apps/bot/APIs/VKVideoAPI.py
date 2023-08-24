@@ -130,23 +130,25 @@ class VKVideoAPI:
     def get_video_info(self, url):
         content = requests.get(url, headers=self.headers).content
         bs4 = BeautifulSoup(content, 'html.parser')
+        try:
+            if "/clip-" in url:
+                a_tag = bs4.select_one('.ui_crumb')
+                return {
+                    'channel_id': f"@{a_tag.attrs['href'].split('/')[-1]}",
+                    'video_id': urlparse(url).path.split('clip')[1],
+                    'channel_title': a_tag.text,
+                    'video_title': bs4.find('meta', property="og:title").attrs['content'],
+                }
 
-        if "/clip-" in url:
-            a_tag = bs4.select_one('.ui_crumb')
+            a_tag = bs4.select_one(".VideoCard__additionalInfo a")
             return {
-                'channel_id': f"@{a_tag.attrs['href'].split('/')[-1]}",
-                'video_id': urlparse(url).path.split('clip')[1],
+                'channel_id': a_tag.attrs['href'].split('/')[-1],
+                'video_id': urlparse(url).path.split('video')[1],
                 'channel_title': a_tag.text,
                 'video_title': bs4.find('meta', property="og:title").attrs['content'],
             }
-
-        a_tag = bs4.select_one(".VideoCard__additionalInfo a")
-        return {
-            'channel_id': a_tag.attrs['href'].split('/')[-1],
-            'video_id': urlparse(url).path.split('video')[1],
-            'channel_title': a_tag.text,
-            'video_title': bs4.find('meta', property="og:title").attrs['content'],
-        }
+        except:
+            return {}
 
     def get_last_video_ids_with_titles(self, path, last_video_id=None):
         url = f"{self.URL}/{path}"

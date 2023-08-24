@@ -206,7 +206,7 @@ class Media(Command):
                 video_content = tm.trim_link_pos(url, start_pos, end_pos)
             else:
                 content_url = y_api.get_download_url(url)
-                if not self.event.is_from_pm and not self.has_command_name and y_api.duration > 120:
+                if not self.has_command_name and y_api.duration > 120:
                     raise PSkip()
                 video_content = requests.get(content_url).content
         finally:
@@ -413,6 +413,10 @@ class Media(Command):
     def get_vk_video(self, url):
         vk_v_api = VKVideoAPI()
         video_info = vk_v_api.get_video_info(url)
+
+        if not video_info and not self.has_command_name > 120:
+            raise PSkip()
+
         title = video_info['video_title']
 
         try:
