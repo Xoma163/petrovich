@@ -3,6 +3,7 @@ import json
 from apps.bot.classes.events.Event import Event
 from apps.bot.classes.messages.Message import Message
 from apps.bot.classes.messages.TgMessage import TgMessage
+from apps.bot.classes.messages.attachments.AudioAttachment import AudioAttachment
 from apps.bot.classes.messages.attachments.GifAttachment import GifAttachment
 from apps.bot.classes.messages.attachments.LinkAttachment import LinkAttachment
 from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
@@ -145,6 +146,7 @@ class TgEvent(Event):
         voice = message.get('voice')
         document = message.get('document')
         sticker = message.get('sticker')
+        audio = message.get('audio')
         message_text = None
         if voice:
             self.setup_voice(voice)
@@ -165,6 +167,8 @@ class TgEvent(Event):
                 message_text = message.get('caption')
         elif sticker:
             self.setup_sticker(sticker)
+        elif audio:
+            self.setup_audio(audio)
         else:
             message_text = message.get('text')
         if message_text:
@@ -201,6 +205,11 @@ class TgEvent(Event):
         tg_sticker = StickerAttachment()
         tg_sticker.parse_tg(sticker_event)
         self.attachments.append(tg_sticker)
+
+    def setup_audio(self, audio_event):
+        tg_audio = AudioAttachment()
+        tg_audio.parse_tg(audio_event)
+        self.attachments.append(tg_audio)
 
     def setup_link(self, text):
         res = LinkAttachment.parse(text)
