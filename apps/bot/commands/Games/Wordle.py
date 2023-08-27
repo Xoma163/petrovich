@@ -7,7 +7,7 @@ from PIL import ImageFont, Image, ImageDraw
 from apps.bot.classes.Command import Command
 from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.consts.Consts import Platform, Role, rus_alphabet
-from apps.bot.classes.consts.Exceptions import PWarning
+from apps.bot.classes.consts.Exceptions import PWarning, PSkip
 from apps.bot.classes.messages.ResponseMessage import ResponseMessageItem, ResponseMessage
 from apps.bot.utils.utils import random_event, _send_message_session_or_edit
 from apps.games.models import Wordle as WordleModel
@@ -56,6 +56,7 @@ class Wordle(Command):
         existed_session = self.get_session()
         if existed_session:
             self.get_current_state(existed_session)
+            raise PSkip()
 
         data = {
             "word": self.get_random_word(),
@@ -76,9 +77,7 @@ class Wordle(Command):
         hypothesis = self.event.message.args[0]
         session = self.get_session()
         if not session:
-            button = self.bot.get_button("Начать", "wordle")
-            keyboard = self.bot.get_inline_keyboard([button])
-            raise PWarning("Игра не начата! Начните её", keyboard=keyboard)
+            self._raise_start_game()
 
         hypothesis = "".join([x for x in hypothesis if x.isalpha() and x in rus_alphabet])
         if len(hypothesis) != 5:
@@ -168,6 +167,8 @@ class Wordle(Command):
 
     def lose(self) -> ResponseMessageItem:
         session = self.get_session()
+        if not session:
+            self._raise_start_game()
         text = f"Загаданное слово - {session.word}"
         return self._end_game(session, text)
 
@@ -177,15 +178,18 @@ class Wordle(Command):
 
         image = self.get_keyboard_image(session)
         attachment = self.bot.get_photo_attachment(image)
-        session.delete()
         rmi = ResponseMessageItem(attachments=[attachment], peer_id=self.event.peer_id,
                                   message_thread_id=self.event.message_thread_id)
         _send_message_session_or_edit(self.bot, self.event, session, rmi, max_delta=8)
+        session.delete()
 
         # Зачем?
         return ResponseMessageItem(text=text, keyboard=keyboard)
 
-
+    def _raise_start_game(self):
+        button = self.bot.get_button("Начать", "wordle")
+        keyboard = self.bot.get_inline_keyboard([button])
+        raise PWarning("Игра не начата! Начните её", keyboard=keyboard)
 class WordleImageGenerator:
     COLOR_CORRECT_LETTER_POS = "#538d4e"
     COLOR_CORRECT_LETTER = "#b59f3b"

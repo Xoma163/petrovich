@@ -341,7 +341,9 @@ def get_url_file_ext(url):
 
 # ToDo: придумать, куда это вынести.
 def _send_message_session_or_edit(bot, event, session, rmi: ResponseMessageItem, max_delta):
-    delta_messages = event.message.id - session.message_id
+    delta_messages = 0
+    if event.message.id:
+        delta_messages = event.message.id - session.message_id
 
     if delta_messages > max_delta:
         old_msg_id = session.message_id
