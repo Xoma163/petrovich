@@ -23,25 +23,25 @@ class Message:
 
         """
 
-        self.has_command_symbols = False
-        self.has_mention = False
+        self.has_command_symbols: bool = False
+        self.has_mention: bool = False
 
-        self.raw = ""
-        self.command = ""
-        self.clear = ""
-        self.clear_case = ""
+        self.raw: str = ""
+        self.command: str = ""
+        self.clear: str = ""
+        self.clear_case: str = ""
 
         # Аргументы
-        self.args_str = ""
-        self.args = []
-        self.args_str_case = ""
-        self.args_case = []
+        self.args_str: str = ""
+        self.args: list = []
+        self.args_str_case: str = ""
+        self.args_case: list = []
 
         # Кварги с клавиатур
-        self.kwargs = {}
+        self.kwargs: dict = {}
 
         # Ключи
-        self.keys = []
+        self.keys: list = []
 
         self.id = _id
 

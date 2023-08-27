@@ -42,7 +42,7 @@ class Event:
         self.platform: Platform = bot.platform
 
         self.payload: dict = {}
-        self.action = None
+        self.action: dict = {}
 
         self.message: Optional[Message] = None
         self.fwd: list = []
@@ -51,7 +51,7 @@ class Event:
         self.force_response: Optional[bool] = None
         self.command: Optional[Command] = None
 
-        self.is_fwd = False
+        self.is_fwd: bool = False
 
         # Tg
         self.message_thread_id: Optional[int] = None
