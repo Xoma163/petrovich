@@ -131,7 +131,7 @@ class VKVideoAPI:
         content = requests.get(url, headers=self.headers).content
         bs4 = BeautifulSoup(content, 'html.parser')
         try:
-            if "/clip-" in url:
+            if "clip-" in url:
                 a_tag = bs4.select_one('.ui_crumb')
                 return {
                     'channel_id': f"@{a_tag.attrs['href'].split('/')[-1]}",
