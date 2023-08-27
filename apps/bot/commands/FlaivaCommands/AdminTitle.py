@@ -30,13 +30,13 @@ class AdminTitle(Command):
             return ResponseMessage(ResponseMessageItem(text=answer))
 
         if len(self.event.message.args) == 1:
-            title = self.event.message.args_str_case
+            title = self.event.message.raw.split(' ', 1)[1]
             self.bot.set_chat_admin_title(self.event.chat.chat_id, self.event.user.user_id, title)
             answer = f"Поменял вашу должность на {title}"
         else:
             self.check_args(2)
             name = self.event.message.args[0]
-            title = " ".join(self.event.message.args_case[1:])
+            title = self.event.message.raw.split(' ', 2)[2]
             if title == '-':
                 title = self.EMPTY
             if len(title) > 16:
