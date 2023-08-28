@@ -84,7 +84,7 @@ class Command(BaseCommand):
                 att = ATTACHMENT_TYPE_TRANSLATOR[key]()
                 att.file_id = value
                 attachments.append(att)
-        rmi = ResponseMessageItem(text=answer, attachments=[attachments])
+        rmi = ResponseMessageItem(text=answer, attachments=attachments)
         logger.info(f"Отправил напоминание по id={notify.pk}")
 
         if notify.chat:
