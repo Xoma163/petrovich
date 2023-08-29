@@ -113,8 +113,6 @@ class TgBot(CommonBot):
 
         if len(media) > 0:
             media[0]['caption'] = rm.text
-        # if len(files) > 0:
-        #     files[0]['caption'] = rm.text
 
         del default_params['caption']
         default_params['media'] = json.dumps(media)
@@ -307,11 +305,7 @@ class TgBot(CommonBot):
                 results.append({"success": False, "response": response, "response_message_item": _error_rmi})
         return results
 
-    def edit_message(self, rm: ResponseMessageItem, params):
-        if rm.attachments:
-            return self.edit_media(rm, params)
-        if rm.keyboard and not rm.text:
-            return self.edit_keyboard(params)
+    def edit_message(self, params):
         params['text'] = params.pop('caption')
         r = self.requests.get('editMessageText', params=params)
         return r
@@ -352,7 +346,11 @@ class TgBot(CommonBot):
 
         if rmi.message_id:
             params['message_id'] = rmi.message_id
-            return self.edit_message(rmi, params)
+            if rmi.attachments:
+                return self.edit_media(rmi, params)
+            if rmi.keyboard and not rmi.text:
+                return self.edit_keyboard(params)
+            return self.edit_message(params)
 
         att_map = {
             PhotoAttachment: self._send_photo,

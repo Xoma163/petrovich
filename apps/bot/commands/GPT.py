@@ -1,4 +1,4 @@
-import re
+import time
 
 import openai
 
@@ -7,6 +7,8 @@ from apps.bot.classes.consts.ActivitiesEnum import ActivitiesEnum
 from apps.bot.classes.consts.Consts import Role
 from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
+from apps.bot.utils.utils import replace_markdown_links, replace_markdown_bolds, replace_markdown_quotes, \
+    replace_markdown_code
 from petrovich.settings import env
 
 
@@ -21,6 +23,8 @@ class GPT(Command):
     ]
     access = Role.TRUSTED
     args = 1
+
+    MAX_TRIES = 5
 
     def start(self) -> ResponseMessage:
         if self.event.message.args[0] == "нарисуй":
@@ -54,29 +58,35 @@ class GPT(Command):
 
         openai.api_key = env.str("CHIMERA_SECRET_KEY")
         openai.api_base = "https://chimeragpt.adventblocks.cc/api/v1"
-        try:
-            self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.TYPING)
-            response = openai.ChatCompletion.create(
-                model='gpt-3.5-turbo-16k',
-                messages=[
-                    {'role': 'user', 'content': request_text},
-                ],
-                allow_fallback=True
-            )
-        except openai.error.APIError:
-            raise PWarning("Какая-то непредвиденная ошибка. Попробуйте ещё раз")
-        finally:
-            self.bot.stop_activity_thread()
-        answer = response.choices[0].message.content
-        answer = self.replace_specsymbols_to_tg_format(answer)
-        return ResponseMessage(ResponseMessageItem(text=answer, reply_to=self.event.message.id))
 
-    def replace_specsymbols_to_tg_format(self, text):
-        p = re.compile(r'\*\*(.*)\*\*')  # markdown bold
-        for item in reversed(list(p.finditer(text))):
-            start_pos = item.start()
-            end_pos = item.end()
-            bold_text = text[item.regs[1][0]:item.regs[1][1]]
-            tg_bold_text = self.bot.get_bold_text(bold_text).replace("**", '')
-            text = text[:start_pos] + tg_bold_text + text[end_pos:]
-        return text
+        tries = 0
+        response = None
+
+        while not response and tries < 5:
+            try:
+                self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.TYPING)
+                response = openai.ChatCompletion.create(
+                    model='gpt-3.5-turbo-16k',
+                    messages=[
+                        {'role': 'user', 'content': request_text},
+                    ],
+                    allow_fallback=True
+                )
+            except openai.error.RateLimitError:
+                time.sleep(5)
+            except openai.error.APIError:
+                time.sleep(2)
+                # raise PWarning("Какая-то непредвиденная ошибка. Попробуйте ещё раз")
+            finally:
+                tries += 1
+                self.bot.stop_activity_thread()
+            print(tries)
+        if not response:
+            raise PWarning("Какая-то непредвиденная ошибка. Попробуйте ещё раз")
+
+        answer = response.choices[0].message.content
+        answer = replace_markdown_links(answer, self.bot)
+        answer = replace_markdown_bolds(answer, self.bot)
+        answer = replace_markdown_quotes(answer, self.bot)
+        answer = replace_markdown_code(answer, self.bot)
+        return ResponseMessage(ResponseMessageItem(text=answer, reply_to=self.event.message.id))

@@ -382,3 +382,48 @@ def append_symbols(string: str, symbol: str, n: int):
     if n_symbols > 0:
         return string + n_symbols * symbol
     return string
+
+
+def replace_markdown_links(text, bot):
+    p = re.compile(r"\[(.*)\]\(([^\)]*)\)")  # markdown links
+    for item in reversed(list(p.finditer(text))):
+        start_pos = item.start()
+        end_pos = item.end()
+        link_text = text[item.regs[1][0]:item.regs[1][1]]
+        link = text[item.regs[2][0]:item.regs[2][1]]
+        tg_url = bot.get_formatted_url(link_text, link)
+        text = text[:start_pos] + tg_url + text[end_pos:]
+    return text
+
+
+def replace_markdown_bolds(text, bot):
+    p = re.compile(r'\*\*(.*)\*\*')  # markdown bold
+    for item in reversed(list(p.finditer(text))):
+        start_pos = item.start()
+        end_pos = item.end()
+        bold_text = text[item.regs[1][0]:item.regs[1][1]]
+        tg_bold_text = bot.get_bold_text(bold_text).replace("**", '')
+        text = text[:start_pos] + tg_bold_text + text[end_pos:]
+    return text
+
+
+def replace_markdown_quotes(text, bot):
+    p = re.compile(r'&gt;(.*)\n')  # markdown quote
+    for item in reversed(list(p.finditer(text))):
+        start_pos = item.start()
+        end_pos = item.end()
+        quote_text = text[item.regs[1][0]:item.regs[1][1]]
+        tg_quote_text = bot.get_formatted_text_line(quote_text)
+        text = text[:start_pos] + tg_quote_text + text[end_pos:]
+    return text
+
+
+def replace_markdown_code(text: str, bot):
+    p = re.compile(r'```([\S\s]*)```')  # markdown formatting
+    for item in reversed(list(p.finditer(text))):
+        start_pos = item.start()
+        end_pos = item.end()
+        code_text = text[item.regs[1][0]:item.regs[1][1]]
+        tg_code_text = bot.get_formatted_text(code_text).replace("**", '')
+        text = text[:start_pos] + tg_code_text + text[end_pos:]
+    return text

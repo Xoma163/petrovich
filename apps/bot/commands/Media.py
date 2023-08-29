@@ -32,13 +32,14 @@ from apps.bot.commands.TrimVideo import TrimVideo
 from apps.bot.utils.NothingLogger import NothingLogger
 from apps.bot.utils.RedditSaver import RedditSaver
 from apps.bot.utils.VideoTrimmer import VideoTrimmer
-from apps.bot.utils.utils import get_urls_from_text
+from apps.bot.utils.utils import get_urls_from_text, replace_markdown_links, replace_markdown_bolds, \
+    replace_markdown_quotes
 from apps.service.models import VideoCache
 from petrovich.settings import MAIN_SITE
 
 YOUTUBE_URLS = ('www.youtube.com', 'youtube.com', "www.youtu.be", "youtu.be", "m.youtube.com")
 YOUTUBE_MUSIC_URLS = ("music.youtube.com",)
-REDDIT_URLS = ("www.reddit.com",)
+REDDIT_URLS = ("www.reddit.com", "reddit.com")
 TIKTOK_URLS = ("www.tiktok.com", 'vm.tiktok.com', 'm.tiktok.com', 'vt.tiktok.com')
 INSTAGRAM_URLS = ('www.instagram.com', 'instagram.com')
 TWITTER_URLS = ('www.twitter.com', 'twitter.com')
@@ -250,14 +251,7 @@ class Media(Command):
             all_photos = []
             text = text.replace("&#x200B;", "").replace("&amp;#x200B;", "").replace("&amp;", "&").replace(" ",
                                                                                                           " ").strip()
-            p = re.compile(r"\[(.*)\]\(([^\)]*)\)")  # markdown links
-            for item in reversed(list(p.finditer(text))):
-                start_pos = item.start()
-                end_pos = item.end()
-                link_text = text[item.regs[1][0]:item.regs[1][1]]
-                link = text[item.regs[2][0]:item.regs[2][1]]
-                tg_url = self.bot.get_formatted_url(link_text, link)
-                text = text[:start_pos] + tg_url + text[end_pos:]
+            text = replace_markdown_links(text, self.bot)
 
             regexps_with_static = ((r"https.*player", "Видео"), (r"https://preview\.redd\.it/.*", "Фото"))
             for regexp, _text in regexps_with_static:
@@ -272,21 +266,9 @@ class Media(Command):
                     text = text[:start_pos] + tg_url + text[end_pos:]
                     if _text == "Фото":
                         all_photos.append(link)
-            p = re.compile(r'\*\*(.*)\*\*')  # markdown bold
-            for item in reversed(list(p.finditer(text))):
-                start_pos = item.start()
-                end_pos = item.end()
-                bold_text = text[item.regs[1][0]:item.regs[1][1]]
-                tg_bold_text = self.bot.get_bold_text(bold_text).replace("**", '')
-                text = text[:start_pos] + tg_bold_text + text[end_pos:]
+            text = replace_markdown_bolds(text, self.bot)
+            text = replace_markdown_quotes(text, self.bot)
 
-            p = re.compile(r'&gt;(.*)\n')  # markdown quote
-            for item in reversed(list(p.finditer(text))):
-                start_pos = item.start()
-                end_pos = item.end()
-                quote_text = text[item.regs[1][0]:item.regs[1][1]]
-                tg_quote_text = self.bot.get_formatted_text_line(quote_text)
-                text = text[:start_pos] + tg_quote_text + text[end_pos:]
             if all_photos:
                 atatchments = [self.bot.get_photo_attachment(x, filename=rs.filename) for x in all_photos]
                 rmi = ResponseMessageItem(attachments=atatchments, peer_id=self.event.peer_id,
