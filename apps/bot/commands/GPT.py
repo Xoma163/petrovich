@@ -72,11 +72,12 @@ class GPT(Command):
                     ],
                     allow_fallback=True
                 )
-            except openai.error.RateLimitError:
+            except (openai.error.RateLimitError, openai.error.InvalidRequestError):
                 time.sleep(5)
             except openai.error.APIError:
                 time.sleep(2)
-                # raise PWarning("Какая-то непредвиденная ошибка. Попробуйте ещё раз")
+            except openai.error.PermissionError:
+                raise PWarning("Не смогу дать ответ на этот запрос")
             finally:
                 tries += 1
                 self.bot.stop_activity_thread()
