@@ -1,36 +1,36 @@
 {
   "status": "done",
   "assets": {
-    "css/app-4e5fce01afebfdf587c8.css": {
-      "name": "css/app-4e5fce01afebfdf587c8.css",
-      "path": "/srv/andrewsha/petrovich/staticfiles/dist/css/app-4e5fce01afebfdf587c8.css",
-      "publicPath": "/static/dist/css/app-4e5fce01afebfdf587c8.css"
+    "css/app-49907a29e5e0524faae3.css": {
+      "name": "css/app-49907a29e5e0524faae3.css",
+      "path": "/srv/andrewsha/petrovich/staticfiles/dist/css/app-49907a29e5e0524faae3.css",
+      "publicPath": "/static/dist/css/app-49907a29e5e0524faae3.css"
     },
-    "js/app-4e5fce01afebfdf587c8.js": {
-      "name": "js/app-4e5fce01afebfdf587c8.js",
-      "path": "/srv/andrewsha/petrovich/staticfiles/dist/js/app-4e5fce01afebfdf587c8.js",
-      "publicPath": "/static/dist/js/app-4e5fce01afebfdf587c8.js"
+    "css/app-49907a29e5e0524faae3.css.map": {
+      "name": "css/app-49907a29e5e0524faae3.css.map",
+      "path": "/srv/andrewsha/petrovich/staticfiles/dist/css/app-49907a29e5e0524faae3.css.map",
+      "publicPath": "/static/dist/css/app-49907a29e5e0524faae3.css.map"
     },
-    "js/app-4e5fce01afebfdf587c8.js.LICENSE.txt": {
-      "name": "js/app-4e5fce01afebfdf587c8.js.LICENSE.txt",
-      "path": "/srv/andrewsha/petrovich/staticfiles/dist/js/app-4e5fce01afebfdf587c8.js.LICENSE.txt",
-      "publicPath": "/static/dist/js/app-4e5fce01afebfdf587c8.js.LICENSE.txt"
+    "js/app-49907a29e5e0524faae3.js": {
+      "name": "js/app-49907a29e5e0524faae3.js",
+      "path": "/srv/andrewsha/petrovich/staticfiles/dist/js/app-49907a29e5e0524faae3.js",
+      "publicPath": "/static/dist/js/app-49907a29e5e0524faae3.js"
     },
-    "css/app-4e5fce01afebfdf587c8.css.map": {
-      "name": "css/app-4e5fce01afebfdf587c8.css.map",
-      "path": "/srv/andrewsha/petrovich/staticfiles/dist/css/app-4e5fce01afebfdf587c8.css.map",
-      "publicPath": "/static/dist/css/app-4e5fce01afebfdf587c8.css.map"
+    "js/app-49907a29e5e0524faae3.js.LICENSE.txt": {
+      "name": "js/app-49907a29e5e0524faae3.js.LICENSE.txt",
+      "path": "/srv/andrewsha/petrovich/staticfiles/dist/js/app-49907a29e5e0524faae3.js.LICENSE.txt",
+      "publicPath": "/static/dist/js/app-49907a29e5e0524faae3.js.LICENSE.txt"
     },
-    "js/app-4e5fce01afebfdf587c8.js.map": {
-      "name": "js/app-4e5fce01afebfdf587c8.js.map",
-      "path": "/srv/andrewsha/petrovich/staticfiles/dist/js/app-4e5fce01afebfdf587c8.js.map",
-      "publicPath": "/static/dist/js/app-4e5fce01afebfdf587c8.js.map"
+    "js/app-49907a29e5e0524faae3.js.map": {
+      "name": "js/app-49907a29e5e0524faae3.js.map",
+      "path": "/srv/andrewsha/petrovich/staticfiles/dist/js/app-49907a29e5e0524faae3.js.map",
+      "publicPath": "/static/dist/js/app-49907a29e5e0524faae3.js.map"
     }
   },
   "chunks": {
     "app": [
-      "css/app-4e5fce01afebfdf587c8.css",
-      "js/app-4e5fce01afebfdf587c8.js"
+      "css/app-49907a29e5e0524faae3.css",
+      "js/app-49907a29e5e0524faae3.js"
     ]
   },
   "publicPath": "/static/dist/"
