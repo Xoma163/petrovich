@@ -179,8 +179,8 @@ class Profile(Command):
         rmi = ResponseMessageItem(text=answer)
 
         if user.avatar:
-            attachment = [self.bot.get_photo_attachment(user.avatar.path, peer_id=self.event.peer_id,
-                                                        filename="petrovich_user_avatar.png")]
+            attachment = self.bot.get_photo_attachment(user.avatar.path, peer_id=self.event.peer_id,
+                                                       filename="petrovich_user_avatar.png")
             rmi.attachments = [attachment]
         return rmi
 
