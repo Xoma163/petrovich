@@ -135,7 +135,7 @@ class Media(Command):
             answer += f"\nОт {self.event.sender}"
 
         source_hostname = str(urlparse(chosen_url).hostname).lstrip('www.')
-        if len(attachments) < 2:
+        if isinstance(attachments, list) and len(attachments) < 2:
             answer += f'\nИсточник: {self.bot.get_formatted_url(source_hostname, chosen_url)}'
         else:
             answer += f'\nИсточник: {chosen_url}'

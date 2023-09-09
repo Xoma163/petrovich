@@ -26,11 +26,11 @@ class InstagramAPI:
         r = requests.get(f"{self.URL}/{post_id}", headers=self.HEADERS).json()
         if 'video_versions' in r['data']:
             self.content_type = self.CONTENT_TYPE_VIDEO
-            self.caption = r['data']['caption']['text']
+            self.caption = r['data']['caption']['text'].strip()
             return r['data']['video_versions'][0]['url']
         elif 'image_versions2' in r['data']:
             self.content_type = self.CONTENT_TYPE_IMAGE
-            self.caption = r['data']['caption']['text']
+            self.caption = r['data']['caption']['text'].strip()
             return r['data']['image_versions2']['candidates'][0]['url']
         else:
             raise PWarning("Ссылка на инстаграмм не является видео/фото")

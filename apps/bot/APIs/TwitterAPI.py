@@ -28,15 +28,15 @@ class TwitterAPI:
         if r.get('video_url'):
             videos = filter(lambda x: x.get('bitrate') and x['content_type'] == 'video/mp4', r['video_url'])
             best_video = sorted(videos, key=lambda x: x['bitrate'], reverse=True)[0]['url']
-            self.caption = r['text'].rsplit(' ', 1)[0]
+            self.caption = r['text'].rsplit(' ', 1)[0].strip()
             self.content_type = self.CONTENT_TYPE_VIDEO
             return best_video
         elif r.get('media_url'):
-            self.caption = r['text'].rsplit(' ', 1)[0]
+            self.caption = r['text'].rsplit(' ', 1)[0].strip()
             self.content_type = self.CONTENT_TYPE_IMAGE
             return r['media_url']
         elif 'text' in r:
-            self.caption = r['text'].rsplit(' ', 1)[0]
+            self.caption = r['text'].rsplit(' ', 1)[0].strip()
             self.content_type = self.CONTENT_TYPE_TEXT
         else:
             raise PWarning("Ссылка на твит не является видео/фото/текстом")
