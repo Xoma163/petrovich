@@ -135,7 +135,7 @@ class Media(Command):
             answer += f"\nОт {self.event.sender}"
 
         source_hostname = str(urlparse(chosen_url).hostname).lstrip('www.')
-        if isinstance(attachments, list) and len(attachments) < 2:
+        if len(attachments) == 1:
             answer += f'\nИсточник: {self.bot.get_formatted_url(source_hostname, chosen_url)}'
         else:
             answer += f'\nИсточник: {chosen_url}'
@@ -188,9 +188,9 @@ class Media(Command):
                 if hostname in k:
                     return MEDIA_TRANSLATOR[k], url
 
-        raise PWarning("Не youtube/tiktok/reddit/instagram ссылка")
+        raise PWarning("Не медиа ссылка")
 
-    def get_youtube_video(self, url):
+    def get_youtube_video(self, url) -> (list, str):
         if 'audio' in self.event.message.keys:
             return self.get_youtube_audio(url)
         y_api = YoutubeVideoAPI(max_filesize_mb=self.bot.MAX_VIDEO_SIZE_MB)
@@ -213,14 +213,12 @@ class Media(Command):
                 video_content = requests.get(content_url).content
         finally:
             self.bot.stop_activity_thread()
-        attachments = [
-            self.bot.get_video_attachment(video_content, peer_id=self.event.peer_id, filename=y_api.filename)
-        ]
+        video = self.bot.get_video_attachment(video_content, peer_id=self.event.peer_id, filename=y_api.filename)
 
         text = y_api.title
-        return attachments, text
+        return [video], text
 
-    def get_youtube_audio(self, url):
+    def get_youtube_audio(self, url) -> (list, str):
         track = YoutubeMusicAPI(url)
         track.get_info()
         title = f"{track.artists} - {track.title}"
@@ -229,26 +227,27 @@ class Media(Command):
                                                   thumb=track.cover_url, artist=track.artists, title=track.title)
         return [audio_att], ""
 
-    def get_tiktok_video(self, url):
+    def get_tiktok_video(self, url) -> (list, str):
         ttd_api = TikTokDownloaderAPI()
         video_url = ttd_api.get_video_url(url)
-        video = requests.get(video_url).content
+        video_content = requests.get(video_url).content
 
-        attachments = [self.bot.get_video_attachment(video, peer_id=self.event.peer_id, filename="tiktok.mp4")]
-        return attachments, None
+        video = self.bot.get_video_attachment(video_content, peer_id=self.event.peer_id, filename="tiktok.mp4")
+        return [video], None
 
-    def get_reddit_attachment(self, url):
+    def get_reddit_attachment(self, url) -> (list, str):
         rs = RedditSaver()
-        attachment = rs.get_from_reddit(url)
+        reddit_data = rs.get_from_reddit(url)
         if rs.is_gif:
-            attachments = self.bot.get_gif_attachment(attachment, filename=rs.filename)
+            attachments = [self.bot.get_gif_attachment(reddit_data, peer_id=self.event.peer_id, filename=rs.filename)]
         elif rs.is_image or rs.is_images or rs.is_gallery:
-            attachments = self.bot.get_photo_attachment(attachment, peer_id=self.event.peer_id, filename=rs.filename)
+            attachments = [self.bot.get_photo_attachment(att, peer_id=self.event.peer_id, filename=rs.filename) for att
+                           in reddit_data]
         elif rs.is_video:
-            attachments = self.bot.get_video_attachment(attachment, peer_id=self.event.peer_id, filename=rs.filename)
+            attachments = [self.bot.get_video_attachment(reddit_data, peer_id=self.event.peer_id, filename=rs.filename)]
 
         elif rs.is_text or rs.is_link:
-            text = attachment
+            text = reddit_data
             all_photos = []
             text = text.replace("&#x200B;", "").replace("&amp;#x200B;", "").replace("&amp;", "&").replace(" ",
                                                                                                           " ").strip()
@@ -280,16 +279,19 @@ class Media(Command):
             raise PWarning("Я хз чё за контент")
         return attachments, rs.title
 
-    def get_instagram_attachment(self, url):
+    def get_instagram_attachment(self, url) -> (list, str):
         i_api = InstagramAPI()
         content_url = i_api.get_content_url(url)
 
         if i_api.content_type == i_api.CONTENT_TYPE_IMAGE:
-            return self.bot.get_photo_attachment(content_url, peer_id=self.event.peer_id), i_api.caption
+            attachment = self.bot.get_photo_attachment(content_url, peer_id=self.event.peer_id)
         elif i_api.content_type == i_api.CONTENT_TYPE_VIDEO:
-            return self.bot.get_video_attachment(content_url, peer_id=self.event.peer_id), i_api.caption
+            attachment = self.bot.get_video_attachment(content_url, peer_id=self.event.peer_id)
+        else:
+            raise PWarning("Ссылка на инстаграмм не является видео/фото")
+        return [attachment], i_api.caption
 
-    def get_twitter_video(self, url):
+    def get_twitter_video(self, url) -> (list, str):
         t_api = TwitterAPI()
         content_url = t_api.get_content_url(url)
 
@@ -301,20 +303,21 @@ class Media(Command):
                 attachments = [self.bot.get_photo_attachment(content_url, peer_id=self.event.peer_id)]
             return attachments, t_api.caption
         elif t_api.content_type == t_api.CONTENT_TYPE_VIDEO:
-            return self.bot.get_video_attachment(content_url, peer_id=self.event.peer_id), t_api.caption
+            video = self.bot.get_video_attachment(content_url, peer_id=self.event.peer_id)
+            return [video], t_api.caption
         elif t_api.content_type == t_api.CONTENT_TYPE_TEXT:
             return [], t_api.caption
+        else:
+            raise PWarning("Ссылка на твит не является видео/фото/текстом")
 
-    def get_pikabu_video(self, url):
+    def get_pikabu_video(self, url) -> (list, str):
         p_api = PikabuAPI()
         webm = p_api.get_video_url_from_post(url)
         video_content = requests.get(webm).content
-        attachments = [
-            self.bot.get_video_attachment(video_content, peer_id=self.event.peer_id, filename=p_api.filename)
-        ]
-        return attachments, p_api.title
+        video = self.bot.get_video_attachment(video_content, peer_id=self.event.peer_id, filename=p_api.filename)
+        return [video], p_api.title
 
-    def get_the_hole_video(self, url):
+    def get_the_hole_video(self, url) -> (list, str):
         the_hole_api = TheHoleAPI()
         the_hole_api.parse_video(url)
         title = the_hole_api.video_title
@@ -344,40 +347,45 @@ class Media(Command):
         msg = title + f"\nCкачать можно здесь {self.bot.get_formatted_url('здесь', MAIN_SITE + cache.video.url)}"
         return attachments, msg
 
-    def get_wasd_video(self, url):
+    def get_wasd_video(self, url) -> (list, str):
         wasd_api = WASDAPI()
         wasd_api.parse_video_m3u8(url)
-        attachments = [
-            self.bot.get_document_attachment(
-                wasd_api.m3u8_bytes, peer_id=self.event.peer_id,
-                filename=f"{wasd_api.title} - {wasd_api.show_name} | WASD.m3u8")
-        ]
-        return attachments, f"{wasd_api.title} | {wasd_api.show_name}"
+        file = self.bot.get_document_attachment(
+            wasd_api.m3u8_bytes,
+            peer_id=self.event.peer_id,
+            filename=f"{wasd_api.title} - {wasd_api.show_name} | WASD.m3u8"
+        )
+        return [file], f"{wasd_api.title} | {wasd_api.show_name}"
 
-    def get_yandex_music(self, url):
+    def get_yandex_music(self, url) -> (list, str):
         track = YandexMusicAPI(url)
         audiofile = track.download()
         title = f"{track.artists} - {track.title}"
-        audio_att = self.bot.get_audio_attachment(audiofile, peer_id=self.event.peer_id,
-                                                  filename=f"{title}.{track.format}",
-                                                  thumb=track.cover_url, artist=track.artists, title=track.title)
-        return [audio_att], ""
+        audio = self.bot.get_audio_attachment(
+            audiofile,
+            peer_id=self.event.peer_id,
+            filename=f"{title}.{track.format}",
+            thumb=track.cover_url,
+            artist=track.artists,
+            title=track.title
+        )
+        return [audio], ""
 
-    def get_pinterest_attachment(self, url):
+    def get_pinterest_attachment(self, url) -> (list, str):
         p_api = PinterestAPI(url)
         content = p_api.get_attachment()
         if p_api.is_video:
-            attachments = [self.bot.get_video_attachment(content, peer_id=self.event.peer_id, filename=p_api.filename)]
+            attachment = self.bot.get_video_attachment(content, peer_id=self.event.peer_id, filename=p_api.filename)
         elif p_api.is_image:
-            attachments = [self.bot.get_photo_attachment(content, peer_id=self.event.peer_id, filename=p_api.filename)]
+            attachment = self.bot.get_photo_attachment(content, peer_id=self.event.peer_id, filename=p_api.filename)
         elif p_api.is_gif:
-            attachments = [self.bot.get_gif_attachment(content, peer_id=self.event.peer_id, filename=p_api.filename)]
+            attachment = self.bot.get_gif_attachment(content, peer_id=self.event.peer_id, filename=p_api.filename)
         else:
             raise PWarning("Я хз чё за контент")
 
-        return attachments, p_api.title
+        return [attachment], p_api.title
 
-    def get_coub_video(self, url):
+    def get_coub_video(self, url) -> (list, str):
         headers = {
             'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
         }
@@ -385,11 +393,11 @@ class Media(Command):
         bs4 = BeautifulSoup(content, "html.parser")
         data = json.loads(bs4.find("script", {'id': 'coubPageCoubJson'}).text)
         video_url = data['file_versions']['share']['default']
-        attachments = [self.bot.get_video_attachment(video_url, peer_id=self.event.peer_id)]
+        video = self.bot.get_video_attachment(video_url, peer_id=self.event.peer_id)
         title = data['title']
-        return attachments, title
+        return [video], title
 
-    def get_vk_video(self, url):
+    def get_vk_video(self, url) -> (list, str):
         vk_v_api = VKVideoAPI()
         video_info = vk_v_api.get_video_info(url)
 
@@ -422,7 +430,7 @@ class Media(Command):
         msg = title + f"\nCкачать можно здесь {self.bot.get_formatted_url('здесь', MAIN_SITE + cache.video.url)}"
         return attachments, msg
 
-    def get_scope_gg_video(self, url):
+    def get_scope_gg_video(self, url) -> (list, str):
         content = requests.get(url).content
         bs4 = BeautifulSoup(content, "html.parser")
         data = json.loads(bs4.select_one('#__NEXT_DATA__').text)
@@ -442,17 +450,17 @@ class Media(Command):
         finally:
             self.bot.stop_activity_thread()
 
-        attachments = [self.bot.get_video_attachment(trimmed_video, peer_id=self.event.peer_id)]
-        return attachments, None
+        video = self.bot.get_video_attachment(trimmed_video, peer_id=self.event.peer_id)
+        return [video], None
 
-    def get_clips_twitch_video(self, url):
+    def get_clips_twitch_video(self, url) -> (list, str):
 
         slug = url.split(CLIPS_TWITCH_URLS[0], 1)[-1].lstrip('/')
         clip_info = twitch.get_clip(slug)
         title = clip_info['title']
         video_url = get_clip_authenticated_url(slug, "source")
-        attachments = [self.bot.get_video_attachment(video_url, peer_id=self.event.peer_id)]
-        return attachments, title
+        video = self.bot.get_video_attachment(video_url, peer_id=self.event.peer_id)
+        return [video], title
 
     @staticmethod
     def _save_video_to_media_cache(channel_id, video_id, name, content):
