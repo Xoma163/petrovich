@@ -75,8 +75,9 @@ class ResponseMessageItem:
                     if left_part == '<a href="' and right_part == '">':
                         continue
 
-                    from apps.bot.classes.bots.tg.TgBot import TgBot
-                    self.text = self.text[:start_pos] + TgBot.get_formatted_url(url, url) + self.text[end_pos:]
+                    if len(self.attachments) < 2:
+                        from apps.bot.classes.bots.tg.TgBot import TgBot
+                        self.text = self.text[:start_pos] + TgBot.get_formatted_url(url, url) + self.text[end_pos:]
 
     def __str__(self):
         return self.text if self.text else ""

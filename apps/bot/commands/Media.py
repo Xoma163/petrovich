@@ -4,17 +4,16 @@ from io import BytesIO
 from urllib.parse import urlparse
 
 import requests
-import youtube_dl
 from bs4 import BeautifulSoup
 from twitchdl import twitch
 from twitchdl.commands.download import get_clip_authenticated_url
-from urllib3.exceptions import MaxRetryError
 
 from apps.bot.APIs.InstagramAPI import InstagramAPI
 from apps.bot.APIs.PikabuAPI import PikabuAPI
 from apps.bot.APIs.PinterestAPI import PinterestAPI
 from apps.bot.APIs.TheHoleAPI import TheHoleAPI
 from apps.bot.APIs.TikTokDownloaderAPI import TikTokDownloaderAPI
+from apps.bot.APIs.TwitterAPI import TwitterAPI
 from apps.bot.APIs.VKVideoAPI import VKVideoAPI
 from apps.bot.APIs.WASDAPI import WASDAPI
 from apps.bot.APIs.YandexMusicAPI import YandexMusicAPI
@@ -29,7 +28,6 @@ from apps.bot.classes.events.Event import Event
 from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
 from apps.bot.classes.messages.attachments.LinkAttachment import LinkAttachment
 from apps.bot.commands.TrimVideo import TrimVideo
-from apps.bot.utils.NothingLogger import NothingLogger
 from apps.bot.utils.RedditSaver import RedditSaver
 from apps.bot.utils.VideoTrimmer import VideoTrimmer
 from apps.bot.utils.utils import get_urls_from_text, replace_markdown_links, replace_markdown_bolds, \
@@ -42,7 +40,7 @@ YOUTUBE_MUSIC_URLS = ("music.youtube.com",)
 REDDIT_URLS = ("www.reddit.com", "reddit.com")
 TIKTOK_URLS = ("www.tiktok.com", 'vm.tiktok.com', 'm.tiktok.com', 'vt.tiktok.com')
 INSTAGRAM_URLS = ('www.instagram.com', 'instagram.com')
-TWITTER_URLS = ('www.twitter.com', 'twitter.com')
+TWITTER_URLS = ('www.twitter.com', 'twitter.com', 'x.com')
 PIKABU_URLS = ('www.pikabu.ru', 'pikabu.ru')
 THE_HOLE_URLS = ('www.the-hole.tv', 'the-hole.tv')
 WASD_URLS = ('www.wasd.tv', 'wasd.tv')
@@ -137,7 +135,10 @@ class Media(Command):
             answer += f"\nОт {self.event.sender}"
 
         source_hostname = str(urlparse(chosen_url).hostname).lstrip('www.')
-        answer += f'\nИсточник: {self.bot.get_formatted_url(source_hostname, chosen_url)}'
+        if len(attachments) < 2:
+            answer += f'\nИсточник: {self.bot.get_formatted_url(source_hostname, chosen_url)}'
+        else:
+            answer += f'\nИсточник: {chosen_url}'
 
         # Костыль, чтобы видосы которые шарятся с мобилы с реддита не дублировали title
 
@@ -281,32 +282,28 @@ class Media(Command):
 
     def get_instagram_attachment(self, url):
         i_api = InstagramAPI()
-        try:
-            content_url = i_api.get_content_url(url)
-        except (MaxRetryError, requests.exceptions.ConnectionError):
-            raise PWarning("Инста забанена :(")
+        content_url = i_api.get_content_url(url)
 
         if i_api.content_type == i_api.CONTENT_TYPE_IMAGE:
-            return self.bot.get_photo_attachment([content_url], peer_id=self.event.peer_id), ""
-        elif i_api.content_type in [i_api.CONTENT_TYPE_VIDEO, i_api.CONTENT_TYPE_REEL]:
-            return self.bot.get_video_attachment(content_url, peer_id=self.event.peer_id), ""
+            return self.bot.get_photo_attachment(content_url, peer_id=self.event.peer_id), i_api.caption
+        elif i_api.content_type == i_api.CONTENT_TYPE_VIDEO:
+            return self.bot.get_video_attachment(content_url, peer_id=self.event.peer_id), i_api.caption
 
     def get_twitter_video(self, url):
-        ydl_params = {
-            'outtmpl': '%(id)s%(ext)s',
-            'logger': NothingLogger()
-        }
-        ydl = youtube_dl.YoutubeDL(ydl_params)
-        ydl.add_default_info_extractors()
+        t_api = TwitterAPI()
+        content_url = t_api.get_content_url(url)
 
-        try:
-            video_info = ydl.extract_info(url, download=False)
-        except youtube_dl.utils.DownloadError:
-            raise PWarning("Не смог найти видео по этой ссылке")
-        video_url = video_info['url']
-        video_content = requests.get(video_url).content
-        attachments = [self.bot.get_video_attachment(video_content, peer_id=self.event.peer_id)]
-        return attachments, video_info['title']
+        if t_api.content_type == t_api.CONTENT_TYPE_IMAGE:
+            if isinstance(content_url, list):
+                attachments = [self.bot.get_photo_attachment(image_url, peer_id=self.event.peer_id) for image_url in
+                               content_url]
+            else:
+                attachments = [self.bot.get_photo_attachment(content_url, peer_id=self.event.peer_id)]
+            return attachments, t_api.caption
+        elif t_api.content_type == t_api.CONTENT_TYPE_VIDEO:
+            return self.bot.get_video_attachment(content_url, peer_id=self.event.peer_id), t_api.caption
+        elif t_api.content_type == t_api.CONTENT_TYPE_TEXT:
+            return [], t_api.caption
 
     def get_pikabu_video(self, url):
         p_api = PikabuAPI()
