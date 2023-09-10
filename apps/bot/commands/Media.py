@@ -8,6 +8,7 @@ from bs4 import BeautifulSoup
 from twitchdl import twitch
 from twitchdl.commands.download import get_clip_authenticated_url
 
+from apps.bot.APIs.FacebookVideoAPI import FacebookVideoAPI
 from apps.bot.APIs.InstagramAPI import InstagramAPI
 from apps.bot.APIs.PikabuAPI import PikabuAPI
 from apps.bot.APIs.PinterestAPI import PinterestAPI
@@ -50,6 +51,7 @@ COUB_URLS = ('coub.com',)
 VK_URLS = ('vk.com',)
 SCOPE_GG_URLS = ('app.scope.gg',)
 CLIPS_TWITCH_URLS = ('clips.twitch.tv',)
+FACEBOOK_URLS = ('www.facebook.com', 'facebook.com', 'fb.watch')
 
 MEDIA_URLS = tuple(
     list(YOUTUBE_URLS) +
@@ -66,7 +68,8 @@ MEDIA_URLS = tuple(
     list(COUB_URLS) +
     list(VK_URLS) +
     list(SCOPE_GG_URLS) +
-    list(CLIPS_TWITCH_URLS)
+    list(CLIPS_TWITCH_URLS) +
+    list(FACEBOOK_URLS)
 )
 
 
@@ -75,7 +78,7 @@ class Media(Command):
     help_text = "скачивает видео из соцсетей и присылает его"
     help_texts = ["(ссылка на видео/пост) - скачивает видео из соцсетей и присылает его"]
     help_texts_extra = "Поддерживаемые соцсети: Youtube/Youtube Music/Reddit/TikTok/Instagram/Twitter/Pikabu/" \
-                       "The Hole/WASD/Yandex Music/Pinterest/Coub/VK Video/ScopeGG/TwitchClips\n\n" \
+                       "The Hole/WASD/Yandex Music/Pinterest/Coub/VK Video/ScopeGG/TwitchClips/Facebook video\n\n" \
                        "Ключ --nomedia позволяет не запускать команду\n" \
                        "Ключ --audio позволяет скачивать аудиодорожку для видео с ютуба"
     platforms = [Platform.TG]
@@ -177,6 +180,7 @@ class Media(Command):
             VK_URLS: self.get_vk_video,
             SCOPE_GG_URLS: self.get_scope_gg_video,
             CLIPS_TWITCH_URLS: self.get_clips_twitch_video,
+            FACEBOOK_URLS: self.get_facebook_video,
         }
 
         urls = get_urls_from_text(source)
@@ -460,7 +464,17 @@ class Media(Command):
         title = clip_info['title']
         video_url = get_clip_authenticated_url(slug, "source")
         video = self.bot.get_video_attachment(video_url, peer_id=self.event.peer_id)
+        video.download_content()
+        video.public_download_url = None
         return [video], title
+
+    def get_facebook_video(self, url) -> (list, str):
+        f_api = FacebookVideoAPI()
+        content_url = f_api.get_content_url(url)
+
+        video = self.bot.get_video_attachment(content_url, peer_id=self.event.peer_id)
+        # raise PWarning("Ссылка на фейсбук не является видео/фото")
+        return [video], f_api.caption
 
     @staticmethod
     def _save_video_to_media_cache(channel_id, video_id, name, content):

@@ -168,11 +168,11 @@ class TgBot(CommonBot):
         files = {'video': video.content}
         if video.thumb:
             files['thumb'] = requests.get(video.thumb).content
-        if video.public_download_url:
-            default_params['video'] = video.public_download_url
-            return self.requests.get('sendVideo', default_params)
-        elif video.file_id:
+        if video.file_id:
             default_params['video'] = video.file_id
+            return self.requests.get('sendVideo', default_params)
+        elif video.public_download_url:
+            default_params['video'] = video.public_download_url
             return self.requests.get('sendVideo', default_params)
         else:
             if video.get_size_mb() > self.MAX_VIDEO_SIZE_MB:
@@ -218,11 +218,11 @@ class TgBot(CommonBot):
         """
         self.set_activity_thread(default_params['chat_id'], ActivitiesEnum.UPLOAD_VIDEO)
         gif: GifAttachment = rm.attachments[0]
-        if gif.public_download_url:
-            default_params['animation'] = gif.public_download_url
-            return self.requests.get('sendAnimation', default_params)
-        elif gif.file_id:
+        if gif.file_id:
             default_params['animation'] = gif.file_id
+            return self.requests.get('sendAnimation', default_params)
+        elif gif.public_download_url:
+            default_params['animation'] = gif.public_download_url
             return self.requests.get('sendAnimation', default_params)
         else:
             if gif.get_size_mb() > self.MAX_GIF_SIZE:
