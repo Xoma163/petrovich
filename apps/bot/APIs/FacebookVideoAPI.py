@@ -5,12 +5,12 @@ from petrovich.settings import env
 
 
 class FacebookVideoAPI:
-    _HOST = "https://facebook-reel-and-video-downloader.p.rapidapi.com"
+    _HOST = "facebook-reel-and-video-downloader.p.rapidapi.com"
     HEADERS = {
-        "X-RapidAPI-Host": _HOST.replace("https://", ''),
+        "X-RapidAPI-Host": _HOST,
         "X-RapidAPI-Key": env.str("RAPID_API_KEY"),
     }
-    URL = f"{_HOST}/app/main.php"
+    URL = f"https://{_HOST}/app/main.php"
 
     def __init__(self):
         self.caption = ""
