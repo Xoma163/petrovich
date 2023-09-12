@@ -63,7 +63,8 @@ class Minesweeper(Command):
                 self.message_id = self.event.raw['callback_query']['message']['message_id']
 
             args = self.event.message.args
-            if args and args == ["mode"]:
+            kwargs = self.event.message.kwargs
+            if kwargs and "mode" in kwargs:
                 inline_keyboard = self.event.raw['callback_query']['message']['reply_markup']['inline_keyboard']
                 return self.press_switch_mode_button(inline_keyboard)
             elif 'callback_query' in self.event.raw and args:
@@ -118,24 +119,25 @@ class Minesweeper(Command):
         for i in range(self.height):
             for j in range(self.width):
                 button_text = "     "
-                button = self.bot.get_button(button_text, self.name, (i, j, self.board[i][j], 0, 0))
+                button = self.bot.get_button(button_text, self.name, [i, j, self.board[i][j], 0, 0])
                 buttons.append(button)
         keyboard = self.bot.get_inline_keyboard(buttons, self.width)
 
-        button = self.bot.get_button(f"Включить режим планирования {self.flag}", self.name, {'mode': self.MODE_MINES})
+        button = self.bot.get_button(f"Включить режим планирования {self.flag}", self.name,
+                                     kwargs={'mode': self.MODE_MINES})
         keyboard['inline_keyboard'].append([button])
 
         answer = f'Сапёр - {self.mines} мин'
         return ResponseMessage(ResponseMessageItem(text=answer, keyboard=keyboard, message_id=self.message_id))
 
     def press_switch_mode_button(self, inline_keyboard) -> ResponseMessage:
-        self.mode = self.event.payload['a']['mode']
+        self.mode = self.event.payload['k']['mode']
         self._edit_mode_button(inline_keyboard)
         keyboard = {"inline_keyboard": inline_keyboard}
         return ResponseMessage(ResponseMessageItem(keyboard=keyboard, message_id=self.message_id))
 
     def press_button(self, i, j, real_val, _, opened, inline_keyboard) -> ResponseMessage:
-        callback_data_mines = json.loads(inline_keyboard[-1][0]['callback_data'])['a']['mode']
+        callback_data_mines = json.loads(inline_keyboard[-1][0]['callback_data'])['k']['mode']
         self.mode = self.MODE_DEFAULT if callback_data_mines == self.MODE_MINES else self.MODE_MINES
         self.height = len(inline_keyboard) - 1
         self.width = len(inline_keyboard[0])
@@ -289,10 +291,10 @@ class Minesweeper(Command):
     def _edit_mode_button(self, inline_keyboard):
         if self.mode == self.MODE_DEFAULT:
             button = self.bot.get_button(f"Включить режим планирования {self.flag}", self.name,
-                                         {'mode': self.MODE_MINES})
+                                         kwargs={'mode': self.MODE_MINES})
         else:
             button = self.bot.get_button(f"Включить обычный режим {self.emoji_map[self.MINE]}", self.name,
-                                         {'mode': self.MODE_DEFAULT})
+                                         kwargs={'mode': self.MODE_DEFAULT})
 
         inline_keyboard[-1] = [button]
 

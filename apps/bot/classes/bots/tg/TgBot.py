@@ -391,8 +391,10 @@ class TgBot(CommonBot):
     # EXTRA
 
     @staticmethod
-    def get_button(text, command, args=None, kwargs=None, url=None):
-        callback_data = {"c": command}
+    def get_button(text: str, command: str = None, args: list = None, kwargs: dict = None, url: str = None):
+        callback_data = {}
+        if command:
+            callback_data["c"] = command
         if args:
             callback_data['a'] = args
         if kwargs:

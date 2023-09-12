@@ -92,7 +92,11 @@ class TgEvent(Event):
         payload = message.get('payload')
         # Нет нужды парсить вложения и fwd если это просто нажатие на кнопку
         if payload:
-            self.setup_payload(payload)
+            # Если у нас не уместилось содержимое в кнопку и сраные 64 байта, то мы берём и парсим прям текст кнопки
+            first_button_text = message['reply_markup']['inline_keyboard'][0][0]['text']
+            self.setup_payload(payload, first_button_text)
+            if not json.loads(payload) and first_button_text:
+                self.setup_attachments(message, first_button_text)
         else:
             self.setup_attachments(message)
             self.setup_fwd(message.get('reply_to_message'))
@@ -127,18 +131,22 @@ class TgEvent(Event):
         elif group_chat_created:
             self.action = {'group_chat_created': group_chat_created}
 
-    def setup_payload(self, payload):
+    def setup_payload(self, payload, first_button_text):
         self.message = Message()
         try:
             self.payload = json.loads(payload)
-            if not self.payload:
+            if not self.payload and not first_button_text:
                 self.force_response = False
                 return
-            self.message.parse_from_payload(self.payload)
+            if self.payload:
+                self.message.parse_from_payload(self.payload)
+            elif first_button_text:
+                self.message.parse_raw(first_button_text)
+
         except:
             self.message.parse_raw(payload)
 
-    def setup_attachments(self, message):
+    def setup_attachments(self, message, payload_message_text=None):
         photo = message.get('photo')
         video = message.get('video')
         video_note = message.get('video_note')
@@ -171,6 +179,10 @@ class TgEvent(Event):
             self.setup_audio(audio)
         else:
             message_text = message.get('text')
+
+        if payload_message_text:
+            message_text = payload_message_text
+
         if message_text:
             self.setup_link(message_text)
         entities = message.get('entities')

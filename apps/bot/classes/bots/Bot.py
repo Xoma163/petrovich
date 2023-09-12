@@ -420,8 +420,9 @@ class Bot(Thread):
             self.set_activity(peer_id, activity)
             time.sleep(5)
 
+    # ToDo: А может лучше перенести в Event?
     @staticmethod
-    def get_button(text, command, args=None, kwargs=None, url=None):
+    def get_button(text: str, command: str = None, args: list = None, kwargs: dict = None, url: str = None):
         """
         Определение кнопки для клавиатур
         """

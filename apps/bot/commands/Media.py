@@ -75,12 +75,15 @@ MEDIA_URLS = tuple(
 
 class Media(Command):
     name = "медиа"
+    names = ["media"]
     help_text = "скачивает видео из соцсетей и присылает его"
     help_texts = ["(ссылка на видео/пост) - скачивает видео из соцсетей и присылает его"]
     help_texts_extra = "Поддерживаемые соцсети: Youtube/Youtube Music/Reddit/TikTok/Instagram/Twitter/Pikabu/" \
                        "The Hole/WASD/Yandex Music/Pinterest/Coub/VK Video/ScopeGG/TwitchClips/Facebook video\n\n" \
                        "Ключ --nomedia позволяет не запускать команду\n" \
-                       "Ключ --audio позволяет скачивать аудиодорожку для видео с ютуба"
+                       "Ключ --audio позволяет скачивать аудиодорожку для видео с ютуба\n\n" \
+                       "Видосы из ютуба качаются автоматически только если длина ролика < 2 минут. \n" \
+                       "Вручную с указанием команды - скачается"
     platforms = [Platform.TG]
     attachments = [LinkAttachment]
 
@@ -198,6 +201,7 @@ class Media(Command):
         y_api = YoutubeVideoAPI(max_filesize_mb=self.bot.MAX_VIDEO_SIZE_MB)
 
         args = self.event.message.args[1:] if self.event.message.command in self.full_names else self.event.message.args
+        end_pos = None
         try:
             start_pos, end_pos = TrimVideo.get_timecodes(url, args)
         except ValueError:
@@ -211,7 +215,11 @@ class Media(Command):
             else:
                 content_url = y_api.get_download_url(url)
                 if not self.has_command_name and y_api.duration > 120:
-                    raise PSkip()
+                    button = self.bot.get_button(f"{self.event.message.COMMAND_SYMBOLS[0]}{self.name} {url}")
+                    keyboard = self.bot.get_inline_keyboard([button])
+                    raise PWarning(
+                        "Видосы до 2х минут не парсятся без упоминания. Если в этом есть нужда - жми на кнопку",
+                        keyboard=keyboard)
                 video_content = requests.get(content_url).content
         finally:
             self.bot.stop_activity_thread()
