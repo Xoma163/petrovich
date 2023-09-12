@@ -23,7 +23,7 @@ from apps.bot.APIs.YoutubeVideoAPI import YoutubeVideoAPI
 from apps.bot.classes.Command import Command
 from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.consts.ActivitiesEnum import ActivitiesEnum
-from apps.bot.classes.consts.Consts import Platform
+from apps.bot.classes.consts.Consts import Platform, Role
 from apps.bot.classes.consts.Exceptions import PWarning, PSkip
 from apps.bot.classes.events.Event import Event
 from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
@@ -107,15 +107,13 @@ class Media(Command):
 
     def start(self) -> ResponseMessage:
         if self.event.message.command in self.full_names:
-            if self.event.message.args:
-                source = self.event.attachments[0].url
-            elif self.event.fwd:
-                source = self.event.fwd[0].attachments[0].url
+            if self.event.message.args or self.event.fwd:
+                source = self.event.get_all_attachments([LinkAttachment])[0].url
             else:
                 raise PWarning("Для работы команды требуются аргументы или пересылаемые сообщения")
             self.has_command_name = True
         else:
-            source = self.event.attachments[0].url
+            source = self.event.get_all_attachments([LinkAttachment])[0].url
             self.has_command_name = False
 
         method, chosen_url = self.get_method_and_chosen_url(source)
@@ -284,6 +282,11 @@ class Media(Command):
         return attachments, rs.title
 
     def get_instagram_attachment(self, url) -> (list, str):
+        try:
+            self.check_sender(Role.TRUSTED)
+        except PWarning:
+            raise PWarning("медиа инстаграмм доступен только для доверенных пользователей")
+
         i_api = InstagramAPI()
         content_url = i_api.get_content_url(url)
 
@@ -296,6 +299,11 @@ class Media(Command):
         return [attachment], i_api.caption
 
     def get_twitter_video(self, url) -> (list, str):
+        try:
+            self.check_sender(Role.TRUSTED)
+        except PWarning:
+            raise PWarning("медиа твиттер доступен только для доверенных пользователей")
+
         t_api = TwitterAPI()
         content_url = t_api.get_content_url(url)
 
@@ -458,7 +466,6 @@ class Media(Command):
         return [video], None
 
     def get_clips_twitch_video(self, url) -> (list, str):
-
         slug = url.split(CLIPS_TWITCH_URLS[0], 1)[-1].lstrip('/')
         clip_info = twitch.get_clip(slug)
         title = clip_info['title']
