@@ -92,18 +92,21 @@ class TgBot(CommonBot):
             'cache_time': 0
         }
         r = self.requests.get('answerInlineQuery', params)
+        response_json = r.json()
         if r.status_code != 200:
-            response_json = r.json()
             error_msg = "Ошибка в inline_memes"
-            self.logger.error({'message': error_msg, 'error': response_json})
+            self.logger.error({'message': error_msg, 'response': response_json})
+            return
+        self.logger.debug({'response': r})
+        return r
 
-    def _send_media_group(self, rm: ResponseMessageItem, default_params):
+    def _send_media_group(self, rmi: ResponseMessageItem, default_params):
         """
         Отправка множества вложений. Ссылки
         """
         media = []
         files = []
-        for attachment in rm.attachments:
+        for attachment in rmi.attachments:
             if attachment.file_id:
                 media.append({'type': attachment.type, 'media': attachment.file_id})
             elif attachment.public_download_url:
@@ -112,7 +115,7 @@ class TgBot(CommonBot):
                 files.append({'type': attachment.type, 'media': attachment.content})
 
         if len(media) > 0:
-            media[0]['caption'] = rm.text
+            media[0]['caption'] = rmi.text
 
         del default_params['caption']
         default_params['media'] = json.dumps(media)
@@ -121,12 +124,12 @@ class TgBot(CommonBot):
         else:
             return self.requests.get('sendMediaGroup', default_params, files=files)
 
-    def _send_photo(self, rm: ResponseMessageItem, default_params):
+    def _send_photo(self, rmi: ResponseMessageItem, default_params):
         """
         Отправка фото. Ссылка или файл
         """
         self.set_activity_thread(default_params['chat_id'], ActivitiesEnum.UPLOAD_PHOTO)
-        photo: PhotoAttachment = rm.attachments[0]
+        photo: PhotoAttachment = rmi.attachments[0]
         if photo.file_id:
             default_params['photo'] = photo.file_id
             return self.requests.get('sendPhoto', default_params)
@@ -135,16 +138,16 @@ class TgBot(CommonBot):
             return self.requests.get('sendPhoto', default_params)
         else:
             if photo.get_size_mb() > self.MAX_PHOTO_SIZE:
-                rm.attachments = []
+                rmi.attachments = []
                 raise PError(f"Нельзя загружать фото более {self.MAX_PHOTO_SIZE} мб в телеграмм")
             return self.requests.get('sendPhoto', default_params, files={'photo': photo.content})
 
-    def _send_document(self, rm: ResponseMessageItem, default_params):
+    def _send_document(self, rmi: ResponseMessageItem, default_params):
         """
         Отправка документа. Ссылка или файл
         """
         self.set_activity_thread(default_params['chat_id'], ActivitiesEnum.UPLOAD_DOCUMENT)
-        document: DocumentAttachment = rm.attachments[0]
+        document: DocumentAttachment = rmi.attachments[0]
         if document.file_id:
             default_params['document'] = document.file_id
             return self.requests.get('sendDocument', default_params)
@@ -159,12 +162,12 @@ class TgBot(CommonBot):
                 pass
             return self.requests.get('sendDocument', default_params, files=files)
 
-    def _send_video(self, rm: ResponseMessageItem, default_params):
+    def _send_video(self, rmi: ResponseMessageItem, default_params):
         """
         Отправка видео. Ссылка или файл
         """
         self.set_activity_thread(default_params['chat_id'], ActivitiesEnum.UPLOAD_VIDEO)
-        video: VideoAttachment = rm.attachments[0]
+        video: VideoAttachment = rmi.attachments[0]
         files = {'video': video.content}
         if video.thumb:
             files['thumb'] = requests.get(video.thumb).content
@@ -176,26 +179,26 @@ class TgBot(CommonBot):
             return self.requests.get('sendVideo', default_params)
         else:
             if video.get_size_mb() > self.MAX_VIDEO_SIZE_MB:
-                rm.attachments = []
+                rmi.attachments = []
                 raise PError(
                     f"Нельзя загружать видео более {self.MAX_VIDEO_SIZE_MB} мб в телеграмм. Ваше видео {round(video.get_size_mb(), 2)} мб")
             return self.requests.get('sendVideo', default_params, files=files)
 
-    def _send_video_note(self, rm: ResponseMessageItem, default_params):
+    def _send_video_note(self, rmi: ResponseMessageItem, default_params):
         """
         Отправка видео. Ссылка или файл
         """
         self.set_activity_thread(default_params['chat_id'], ActivitiesEnum.UPLOAD_VIDEO_NOTE)
-        video_note: VideoNoteAttachment = rm.attachments[0]
+        video_note: VideoNoteAttachment = rmi.attachments[0]
         default_params['video_note'] = video_note.file_id
         return self.requests.get('sendVideoNote', default_params)
 
-    def _send_audio(self, rm: ResponseMessageItem, default_params):
+    def _send_audio(self, rmi: ResponseMessageItem, default_params):
         """
         Отправка аудио. Ссылка или файл
         """
         self.set_activity_thread(default_params['chat_id'], ActivitiesEnum.UPLOAD_AUDIO)
-        audio: AudioAttachment = rm.attachments[0]
+        audio: AudioAttachment = rmi.attachments[0]
 
         if audio.artist:
             default_params['performer'] = audio.artist
@@ -212,12 +215,12 @@ class TgBot(CommonBot):
                 files['thumb'] = thumb_file.get_bytes_io_content(default_params['chat_id'])
             return self.requests.get('sendAudio', default_params, files=files)
 
-    def _send_gif(self, rm: ResponseMessageItem, default_params):
+    def _send_gif(self, rmi: ResponseMessageItem, default_params):
         """
         Отправка гифы. Ссылка или файл
         """
         self.set_activity_thread(default_params['chat_id'], ActivitiesEnum.UPLOAD_VIDEO)
-        gif: GifAttachment = rm.attachments[0]
+        gif: GifAttachment = rmi.attachments[0]
         if gif.file_id:
             default_params['animation'] = gif.file_id
             return self.requests.get('sendAnimation', default_params)
@@ -226,24 +229,24 @@ class TgBot(CommonBot):
             return self.requests.get('sendAnimation', default_params)
         else:
             if gif.get_size_mb() > self.MAX_GIF_SIZE:
-                rm.attachments = []
+                rmi.attachments = []
                 raise PError(f"Нельзя загружать гифы более {self.MAX_GIF_SIZE} мб в телеграмм")
             return self.requests.get('sendAnimation', default_params, files={'animation': gif.content})
 
-    def _send_sticker(self, rm: ResponseMessageItem, default_params):
+    def _send_sticker(self, rmi: ResponseMessageItem, default_params):
         """
         Отправка стикера
         """
-        sticker: StickerAttachment = rm.attachments[0]
+        sticker: StickerAttachment = rmi.attachments[0]
         default_params['sticker'] = sticker.file_id
         return self.requests.get('sendSticker', default_params)
 
-    def _send_voice(self, rm: ResponseMessageItem, default_params):
+    def _send_voice(self, rmi: ResponseMessageItem, default_params):
         """
         Отправка голосовухи
         """
         self.set_activity_thread(default_params['chat_id'], ActivitiesEnum.UPLOAD_AUDIO)
-        voice: VoiceAttachment = rm.attachments[0]
+        voice: VoiceAttachment = rmi.attachments[0]
         default_params['voice'] = voice.file_id
         return self.requests.get('sendVoice', default_params)
 
@@ -264,15 +267,15 @@ class TgBot(CommonBot):
         """
         Отправка ResponseMessage сообщения
         Вовзращает список результатов отправки в формате
-        [{success:bool, response:Response, response_message_item:ResponseMessageItem}]
+        [{success:bool, r:Response, response_message_item:ResponseMessageItem}]
         """
         results = []
         for rmi in rm.messages:
             try:
-                response = self.send_response_message_item(rmi)
+                r = self.send_response_message_item(rmi)
 
-                if response.status_code == 200:
-                    results.append({"success": True, "response": response, "response_message_item": rmi})
+                if r.status_code == 200:
+                    results.append({"success": True, "response": r, "response_message_item": rmi})
                     continue
                 # Непредвиденная ошибка телеги
                 skip_errors = [
@@ -282,37 +285,46 @@ class TgBot(CommonBot):
                 catch_errors = {
                     'Bad Request: VOICE_MESSAGES_FORBIDDEN': "Не могу отправить голосовуху из-за ваших настроек безопасности"
                 }
-                self.logger.error({'message': self.ERROR_MSG, 'error': response.json()['description']})
-                error = response.json()['description']
+                error = r.json()['description']
                 if error in skip_errors:
-                    results.append({"success": False, "response": response, "response_message_item": rmi})
+                    results.append({"success": False, "response": r, "response_message_item": rmi})
+                    continue
                 elif error in catch_errors:
                     msg = catch_errors[error]
-                    warn_rmi = ResponseMessageItem(text=msg, peer_id=rmi.peer_id,
-                                                   message_thread_id=rmi.message_thread_id)
-                    response = self.send_response_message_item(warn_rmi)
-                    results.append({"success": False, "response": response, "response_message_item": response})
+                    log_level = "warning"
                 else:
-                    error_rmi = ResponseMessageItem(text=self.ERROR_MSG, peer_id=rmi.peer_id,
-                                                    message_thread_id=rmi.message_thread_id)
-                    response = self.send_response_message_item(error_rmi)
-                    results.append({"success": False, "response": response, "response_message_item": response})
+                    msg = self.ERROR_MSG
+                    log_level = "error"
+                error_rmi = ResponseMessageItem(
+                    text=msg,
+                    peer_id=rmi.peer_id,
+                    message_thread_id=rmi.message_thread_id,
+                    log_level=log_level
+                )
+                r = self.send_response_message_item(error_rmi)
+                results.append({"success": False, "response": r, "response_message_item": r})
             # Предвиденная ошибка
             except (PWarning, PError) as e:
-                _error_rmi = ResponseMessageItem(e.msg, rmi.peer_id, rmi.message_thread_id)
-                getattr(self.logger, e.level)({'message': _error_rmi})
-                response = self.send_response_message_item(_error_rmi)
-                results.append({"success": False, "response": response, "response_message_item": _error_rmi})
+                _error_rmi = ResponseMessageItem(
+                    text=e.msg,
+                    peer_id=rmi.peer_id,
+                    message_thread_id=rmi.message_thread_id,
+                    log_level=e.level
+                )
+                r = self.send_response_message_item(_error_rmi)
+                results.append({"success": False, "response": r, "response_message_item": _error_rmi})
         return results
 
     def edit_message(self, params):
         params['text'] = params.pop('caption')
         r = self.requests.get('editMessageText', params=params)
+        self.logger.debug({'response': r.json()})
         return r
 
     def edit_keyboard(self, params):
         del params['caption']
         r = self.requests.get('editMessageReplyMarkup', params=params)
+        self.logger.debug({'response': r.json()})
         return r
 
     def edit_media(self, rm, params):
@@ -326,6 +338,7 @@ class TgBot(CommonBot):
             params['media']['media'] = self.get_file_id(att)
         params['media'] = json.dumps(params['media'])
         r = self.requests.get('editMessageMedia', params=params)
+        self.logger.debug({'response': r.json()})
         return r
 
     def send_response_message_item(self, rmi: ResponseMessageItem):
@@ -366,19 +379,29 @@ class TgBot(CommonBot):
         if rmi.attachments:
             try:
                 if len(rmi.attachments) > 1:
-                    return self._send_media_group(rmi, params)
+                    r = self._send_media_group(rmi, params)
                 else:
-                    return att_map[rmi.attachments[0].__class__](rmi, params)
+                    r = att_map[rmi.attachments[0].__class__](rmi, params)
             finally:
                 self.stop_activity_thread()
-        return self._send_text(params)
+        else:
+            r = self._send_text(params)
+
+        # log
+        to_log = {"message": rmi.to_log(), "response": r.json()}
+        if rmi.exc_info:
+            to_log['exc_info'] = rmi.exc_info
+        getattr(self.logger, rmi.log_level)(to_log)
+
+        return r
 
     # END  MAIN ROUTING AND MESSAGING
 
     # USERS GROUPS BOTS
     def update_profile_avatar(self, profile: Profile, user_id):
-        r = self.requests.get('getUserProfilePhotos', {'user_id': user_id})
-        photos = r.json()['result']['photos']
+        r = self.requests.get('getUserProfilePhotos', {'user_id': user_id}).json()
+        self.logger.debug({'response': r})
+        photos = r['result']['photos']
         if len(photos) == 0:
             raise PWarning("Нет фотографий в профиле")
         pa = PhotoAttachment()
@@ -452,7 +475,9 @@ class TgBot(CommonBot):
         """
         Удаление одного сообщения
         """
-        self.requests.get('deleteMessage', params={'chat_id': peer_id, 'message_id': message_id})
+        r = self.requests.get('deleteMessage', params={'chat_id': peer_id, 'message_id': message_id}).json()
+        self.logger.debug({'response': r.json()})
+        return r
 
     def update_help_texts(self):
         """
@@ -464,19 +489,23 @@ class TgBot(CommonBot):
         help_texts_tg = [x.full_help_texts_tg.split(' - ') for x in commands_with_tg_name]
         help_texts_tg = [{'command': x[0], 'description': x[1]} for x in help_texts_tg]
         help_texts_tg.sort(key=lambda x: x['command'])
-        self.requests.get('setMyCommands', json={'commands': help_texts_tg})
+        r = self.requests.get('setMyCommands', json={'commands': help_texts_tg}).json()
+        return r
 
     def get_sticker_set(self, name):
-        r = self.requests.get('getStickerSet', json={'name': name})
-        return r.json()['result']['stickers']
+        r = self.requests.get('getStickerSet', json={'name': name}).json()
+        self.logger.debug({'response': r})
+        return r['result']['stickers']
 
     def set_chat_admin_title(self, chat_id, user_id, title):
         r = self.requests.get('setChatAdministratorCustomTitle', json={
             'chat_id': chat_id,
             'user_id': user_id,
             'custom_title': title
-        })
-        return r.json()
+        }).json()
+        self.logger.debug({'response': r})
+
+        return r
 
     def promote_chat_member(self, chat_id, user_id):
         r = self.requests.get('promoteChatMember', json={
@@ -484,8 +513,10 @@ class TgBot(CommonBot):
             'user_id': user_id,
             'can_manage_chat': False,
             'can_pin_messages': True,
-        })
-        return r.json()
+        }).json()
+        self.logger.debug({'response': r})
+
+        return r
 
     def get_file_id(self, attachment):
         uploading_chat = Chat.objects.get(pk=env.str("TG_PHOTO_UPLOADING_CHAT_PK"))

@@ -242,7 +242,7 @@ class Media(Command):
         try:
             video_url = ttd_api.get_video_url(url)
         except PWarning as e:
-            button = self.bot.get_button(f"Повторить", command=self.name, args=[url])
+            button = self.bot.get_button("Повторить", command=self.name, args=[url])
             keyboard = self.bot.get_inline_keyboard([button])
             raise PWarning(e.msg, keyboard=keyboard)
         video_content = requests.get(video_url).content

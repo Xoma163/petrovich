@@ -10,8 +10,10 @@ from petrovich.settings import DEBUG
 class ResponseMessageItem:
     TG_TAGS = ['pre', 'code', 'i', 'b', 'u']
 
-    def __init__(self, text: str = None, attachments: list = None, reply_to: str = None, keyboard: dict = None,
-                 message_id: str = None, message_thread_id: str = None, peer_id: int = None):
+    def __init__(
+            self, text: str = None, attachments: list = None, reply_to: str = None, keyboard: dict = None,
+            message_id: str = None, message_thread_id: str = None, peer_id: int = None, log_level='debug', exc_info=None
+    ):
         self.text = text
         self.attachments = attachments if attachments else []
         if not isinstance(self.attachments, list):
@@ -22,6 +24,9 @@ class ResponseMessageItem:
         self.message_thread_id = message_thread_id
         self.peer_id = peer_id
 
+        self.log_level = log_level
+        self.exc_info = exc_info
+
         self.kwargs = {}
 
     def to_log(self) -> dict:
@@ -29,6 +34,10 @@ class ResponseMessageItem:
         Вывод в логи
         """
         dict_self = copy(self.__dict__)
+        ignore_fields = ['log_level', 'exc_info']
+        for ignore_field in ignore_fields:
+            del dict_self[ignore_field]
+
         dict_self["attachments"] = [x.to_log() for x in dict_self["attachments"]]
         return dict_self
 
@@ -37,8 +46,11 @@ class ResponseMessageItem:
         Вывод в API
         """
         dict_self = copy(self.__dict__)
+
+        ignore_fields = ['log_level', 'exc_info', "peer_id"]
+        for ignore_field in ignore_fields:
+            del dict_self[ignore_field]
         dict_self["attachments"] = [x.to_api() for x in dict_self["attachments"]]
-        del dict_self["peer_id"]
 
         return dict_self
 

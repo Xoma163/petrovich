@@ -12,23 +12,26 @@ from petrovich.settings import DEBUG_FILE
 
 
 class Logs(Command):
+    DEFAULT_LEVEL = logging.DEBUG
+    DEFAULT_LEVEL_NAME = "DEBUG"
+    DEFAULT_COUNT = 3
+    MAX_LOGS_COUNT = 50
+
     name = "логи"
     names = ["лог"]
     name_tg = 'logs'
 
     help_text = "логи бота"
-    help_texts = ["[уровень логов = ERROR] [кол-во записей=1] - логи."]
-    help_texts_extra = "Макс 30 записей. Возможные уровни логов: DEBUG/INFO/WARNING/ERROR/CRITICAL"
+    help_texts = [f"[уровень логов = {DEFAULT_LEVEL}] [кол-во записей = {DEFAULT_COUNT}] - логи."]
+    help_texts_extra = f"Макс {MAX_LOGS_COUNT} записей. Возможные уровни логов: DEBUG/INFO/WARNING/ERROR/CRITICAL"
 
     access = Role.MODERATOR
 
-    MAX_LOGS_COUNT = 50
-
     def start(self) -> ResponseMessage:
-        count = 1
+        count = self.DEFAULT_COUNT
 
-        level = logging.ERROR
-        level_name = "ERROR"
+        level = self.DEFAULT_LEVEL
+        level_name = self.DEFAULT_LEVEL_NAME
         if self.event.message.args:
             level = logging._nameToLevel.get(self.event.message.args[0].upper(), logging._nameToLevel[level_name])
 
@@ -36,7 +39,7 @@ class Logs(Command):
             try:
                 self.parse_int()
                 count = self.event.message.args[-1]
-                count = min(count, 30)
+                count = min(count, self.MAX_LOGS_COUNT)
             except PWarning:
                 pass
 
@@ -111,7 +114,7 @@ class Logs(Command):
     def get_bot_logs(self, count, filter_chat=None, filter_level=None):
         file_rows = self.read_file(DEBUG_FILE)
         res = []
-        for i in range(len(file_rows) - 1, -1, -1):
+        for i in range(len(file_rows) - 2, -1, -1):
             item_json = json.loads(file_rows[i])
             if filter_chat and 'event' in item_json and str(item_json['event']['peer_id']) != self.event.chat.chat_id:
                 continue

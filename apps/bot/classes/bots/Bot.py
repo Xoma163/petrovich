@@ -1,6 +1,7 @@
 import logging
 import threading
 import time
+import traceback
 from threading import Lock
 from threading import Thread
 from typing import List, Optional
@@ -74,7 +75,6 @@ class Bot(Thread):
 
     def send_response_message_thread(self, rm: ResponseMessage):
         for rmi in rm.messages:
-            # self.send_response_message_item(rmi)
             Thread(target=self.send_response_message_item, args=(rmi,)).start()
 
     def send_response_message(self, rm: ResponseMessage) -> List[dict]:
@@ -91,13 +91,11 @@ class Bot(Thread):
         """
 
     def _get_unexpected_error(self, event) -> ResponseMessage:
+        exc_info = traceback.format_exc()
         rm = ResponseMessage(
-            ResponseMessageItem(text=self.ERROR_MSG, peer_id=event.peer_id, message_thread_id=event.message_thread_id)
+            ResponseMessageItem(text=self.ERROR_MSG, peer_id=event.peer_id, message_thread_id=event.message_thread_id,
+                                log_level="exception", exc_info=exc_info)
         )
-        self.logger.exception({
-            "event": event.to_log(),
-            "message": rm.to_log()
-        })
         return rm
 
     def route(self, event: Event) -> ResponseMessage:
@@ -107,32 +105,33 @@ class Bot(Thread):
         """
         from apps.bot.initial import COMMANDS
 
-        if event.command:
-            commands = [event.command()]
-        else:
-            commands = COMMANDS
+        commands = [event.command()] if event.command else COMMANDS
 
+        self.logger.debug({"event": event.to_log()})
         for command in commands:
             try:
                 if command.accept(event):
                     rm = command.__class__().check_and_start(self, event)
-                    self.logger.debug({"event": event.to_log(), "message": rm.to_log() if rm else None})
                     return rm
             except (PWarning, PError) as e:
                 self.stop_activity_thread()
                 rm = ResponseMessage(ResponseMessageItem(
-                    text=e.msg, peer_id=event.peer_id, message_thread_id=event.message_thread_id, reply_to=e.reply_to,
-                    keyboard=e.keyboard
+                    text=e.msg,
+                    peer_id=event.peer_id,
+                    message_thread_id=event.message_thread_id,
+                    reply_to=e.reply_to,
+                    keyboard=e.keyboard,
+                    log_level=e.level
                 ))
-                getattr(self.logger, e.level)({"event": event.to_log(), "message": rm.to_log()})
                 return rm
             except PIDK:
                 continue
             except PSkip as e:
                 raise e
             except Exception:
-                self.stop_activity_thread()
                 return self._get_unexpected_error(event)
+            finally:
+                self.stop_activity_thread()
 
         # Если указана настройка не реагировать на неверные команды, то скипаем
         if event.chat and not event.chat.need_reaction:
@@ -146,7 +145,6 @@ class Bot(Thread):
         similar_command, keyboard = self.get_similar_command(event, COMMANDS)
         rm = ResponseMessage(ResponseMessageItem(text=similar_command, keyboard=keyboard, peer_id=event.peer_id,
                                                  message_thread_id=event.message_thread_id))
-        self.logger.debug({"event": event.to_log(), "message": rm.to_log()})
         return rm
 
     def get_similar_command(self, event: Event, commands):
