@@ -27,9 +27,8 @@ class TwitterAPI:
 
     def get_content_url(self, url):
         tweet_id = urlparse(url).path.strip('/').split('/')[-1]
-        r = requests.get(f"{self.URL}", headers=self.HEADERS, params={'tweet_id': tweet_id})
-        logger.debug(r.content)
-        r = r.json()
+        r = requests.get(f"{self.URL}", headers=self.HEADERS, params={'tweet_id': tweet_id}).json()
+        logger.debug({"response": r})
         if r.get('video_url'):
             videos = filter(lambda x: x.get('bitrate') and x['content_type'] == 'video/mp4', r['video_url'])
             best_video = sorted(videos, key=lambda x: x['bitrate'], reverse=True)[0]['url']

@@ -95,8 +95,8 @@ class TgEvent(Event):
             # Если у нас не уместилось содержимое в кнопку и сраные 64 байта, то мы берём и парсим прям текст кнопки
             first_button_text = message['reply_markup']['inline_keyboard'][0][0]['text']
             self.setup_payload(payload, first_button_text)
-            if not json.loads(payload) and first_button_text:
-                self.setup_attachments(message, first_button_text)
+            if self.message.raw:
+                self.setup_attachments(message, self.message.raw)
         else:
             self.setup_attachments(message)
             self.setup_fwd(message.get('reply_to_message'))

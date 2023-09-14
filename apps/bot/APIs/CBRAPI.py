@@ -17,7 +17,7 @@ class CBRAPI:
 
     def do(self):
         r = requests.get(self.URL, stream=True)
-        logger.debug(r.content)
+        logger.debug({"response": r.content})
         elements = BeautifulSoup(r.content, 'xml').find('ValCurs').find_all("Valute")
 
         for elem in elements:

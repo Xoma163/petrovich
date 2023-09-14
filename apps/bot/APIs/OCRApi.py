@@ -18,10 +18,10 @@ class OCRApi:
             'apikey': self.API_KEY,
             'language': language,
         }
-        r = requests.post(self.URL, files={'filename.jpg': file}, data=payload)
-        logger.debug(r.content)
+        r = requests.post(self.URL, files={'filename.jpg': file}, data=payload).json()
+        logger.debug({"response": r})
 
-        return r.json()
+        return r
 
     def recognize(self, url_or_bytes, lang):
         r = self.get_recognize_by_bytes(url_or_bytes, lang)

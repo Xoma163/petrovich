@@ -20,9 +20,8 @@ class FacebookVideoAPI:
         self.caption = ""
 
     def get_content_url(self, url):
-        r = requests.get(self.URL, headers=self.HEADERS, params={"url": url})
-        logger.debug(r.content)
-        r = r.json()
+        r = requests.get(self.URL, headers=self.HEADERS, params={"url": url}).json()
+        logger.debug({"response": r})
         if r.get('title'):
             self.caption = r['title']
 

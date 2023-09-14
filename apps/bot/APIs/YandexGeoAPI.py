@@ -19,10 +19,10 @@ class YandexGeoAPI:
             'result': '1',
             'lang': 'ru_RU'
         }
-        r = requests.get(self.url, params)
-        logger.debug(r.content)
+        r = requests.get(self.url, params).json()
+        logger.debug({"response": r})
 
-        return r.json()['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']['metaDataProperty'][
+        return r['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']['metaDataProperty'][
             'GeocoderMetaData']['text']
 
     def get_city_info_by_name(self, city_name):
@@ -33,10 +33,10 @@ class YandexGeoAPI:
             'result': '1',
             'lang': 'ru_RU'
         }
-        r = requests.get(self.url, params)
-        logger.debug(r.content)
+        r = requests.get(self.url, params).json()
+        logger.debug({"response": r})
 
-        result = r.json()['response']['GeoObjectCollection']['featureMember']
+        result = r['response']['GeoObjectCollection']['featureMember']
         if len(result) == 0:
             return None
         city_data = result[0]['GeoObject']

@@ -18,9 +18,9 @@ class EveryPixelAPI:
         data = {
             'data': file
         }
-        r = requests.post(self.IMAGE_QUALITY_URL, files=data, auth=(self.CLIENT_ID, self.CLIENT_SECRET))
-        logger.debug(r.content)
-        return r.json()
+        r = requests.post(self.IMAGE_QUALITY_URL, files=data, auth=(self.CLIENT_ID, self.CLIENT_SECRET)).json()
+        logger.debug({"response": r})
+        return r
 
     def get_image_quality(self, _bytes):
         r = self.get_image_quality_by_file(_bytes)
@@ -33,9 +33,9 @@ class EveryPixelAPI:
         data = {
             'data': file
         }
-        r = requests.post(self.IMAGE_FACES_URL, files=data, auth=(self.CLIENT_ID, self.CLIENT_SECRET))
-        logger.debug(r.content)
-        return r.json()
+        r = requests.post(self.IMAGE_FACES_URL, files=data, auth=(self.CLIENT_ID, self.CLIENT_SECRET)).json()
+        logger.debug({"response": r})
+        return r
 
     def get_faces_on_photo(self, _bytes):
         r = self.get_faces_on_photo_by_file(_bytes)

@@ -1,6 +1,7 @@
 import io
 import json
 import logging
+import textwrap
 
 from apps.bot.classes.Command import Command
 from apps.bot.classes.consts.Consts import Role
@@ -41,8 +42,12 @@ class Logs(Command):
 
         filter_levels = [logging._levelToName[x] for x in logging._levelToName if x >= level]
         filter_chat = self.event.peer_id if self.event.chat else None
+        separator = "-" * 150
 
-        logs_txt = self.get_bot_logs(count, filter_chat, filter_levels)
+        logs_list = self.get_bot_logs(count, filter_chat, filter_levels)
+        for b in range(0, len(logs_list)):
+            logs_list.insert(b * 2 + 1, separator)
+        logs_txt = "\n".join(logs_list)
         img = draw_text_on_image(logs_txt)
         img_byte_arr = io.BytesIO()
         img.save(img_byte_arr, format='PNG')
@@ -79,10 +84,33 @@ class Logs(Command):
             for item in items:
                 self.transform_logs_by_values(item)
 
+    def wrap_long_texts(self, items, wrap_val=150) -> object:
+        if isinstance(items, dict):
+            for key in items:
+                item = items[key]
+                if isinstance(item, dict):
+                    items[key] = self.wrap_long_texts(item)
+                elif isinstance(item, list):
+                    for i, _item in enumerate(item):
+                        items[key][i] = self.wrap_long_texts(_item)
+                elif isinstance(item, str):
+                    if len(item) > wrap_val:
+                        items[key] = textwrap.fill(item, wrap_val).replace('\\n', '\n')
+            return items
+        elif isinstance(items, list):
+            for i, item in enumerate(items):
+                items[i] = self.wrap_long_texts(item)
+            return items
+        elif isinstance(items, str):
+            if len(items) > wrap_val:
+                return textwrap.fill(items, wrap_val).replace('\\n', '\n')
+            return items
+        else:
+            return items
+
     def get_bot_logs(self, count, filter_chat=None, filter_level=None):
         file_rows = self.read_file(DEBUG_FILE)
-        separator = "-" * 150
-        res2 = []
+        res = []
         for i in range(len(file_rows) - 1, -1, -1):
             item_json = json.loads(file_rows[i])
             if filter_chat and 'event' in item_json and str(item_json['event']['peer_id']) != self.event.chat.chat_id:
@@ -90,16 +118,15 @@ class Logs(Command):
             if filter_level and item_json['levelname'] not in filter_level:
                 continue
             self.transform_logs_by_values(item_json)
-            item_str = json.dumps(item_json, indent=2, ensure_ascii=False)
-            res2.append(separator)
-            res2.append(item_str)
+            self.wrap_long_texts(item_json.get("response"))
+            self.wrap_long_texts(item_json.get("message"))
+            item_str = json.dumps(item_json, indent=2, ensure_ascii=False).replace('\\n', '\n')
+            res.append(item_str)
 
-            if len(res2) > count:
+            if len(res) >= count:
                 break
-        res2.append(separator)
-        res2 = list(reversed(res2))
-        text = "\n".join(res2)
-        return text
+        res = list(reversed(res))
+        return res
 
     def get_count(self, default, max_count):
         if self.event.message.args:

@@ -17,7 +17,7 @@ class MemeArsenalAPI:
             'items_on_page': items_on_page,
             'lang': 'ru',
             'query': text,
-        })
-        logger.debug(r.content)
+        }).json()
+        logger.debug({"response": r})
 
-        return [{'title': x['title'], 'url': x['url']} for x in r.json()['data']]
+        return [{'title': x['title'], 'url': x['url']} for x in r['data']]

@@ -19,7 +19,7 @@ class TimezoneDBAPI:
             'lat': lat,
             'lng': lon
         }
-        r = requests.get(self.URL, params=params)
-        logger.debug(r.content)
+        r = requests.get(self.URL, params=params).json()
+        logger.debug({"response": r})
 
-        return r.json()['zoneName']
+        return r['zoneName']

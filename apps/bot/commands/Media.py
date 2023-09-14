@@ -12,8 +12,9 @@ from apps.bot.APIs.FacebookVideoAPI import FacebookVideoAPI
 from apps.bot.APIs.InstagramAPI import InstagramAPI
 from apps.bot.APIs.PikabuAPI import PikabuAPI
 from apps.bot.APIs.PinterestAPI import PinterestAPI
+from apps.bot.APIs.RedditSaver import RedditSaver
 from apps.bot.APIs.TheHoleAPI import TheHoleAPI
-from apps.bot.APIs.TikTokDownloaderAPI import TikTokDownloaderAPI
+from apps.bot.APIs.TikTokAPI import TikTokAPI
 from apps.bot.APIs.TwitterAPI import TwitterAPI
 from apps.bot.APIs.VKVideoAPI import VKVideoAPI
 from apps.bot.APIs.WASDAPI import WASDAPI
@@ -29,7 +30,6 @@ from apps.bot.classes.events.Event import Event
 from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
 from apps.bot.classes.messages.attachments.LinkAttachment import LinkAttachment
 from apps.bot.commands.TrimVideo import TrimVideo
-from apps.bot.utils.RedditSaver import RedditSaver
 from apps.bot.utils.VideoTrimmer import VideoTrimmer
 from apps.bot.utils.utils import get_urls_from_text, replace_markdown_links, replace_markdown_bolds, \
     replace_markdown_quotes
@@ -238,8 +238,13 @@ class Media(Command):
         return [audio_att], ""
 
     def get_tiktok_video(self, url) -> (list, str):
-        ttd_api = TikTokDownloaderAPI()
-        video_url = ttd_api.get_video_url(url)
+        ttd_api = TikTokAPI()
+        try:
+            video_url = ttd_api.get_video_url(url)
+        except PWarning as e:
+            button = self.bot.get_button(f"Повторить", command=self.name, args=[url])
+            keyboard = self.bot.get_inline_keyboard([button])
+            raise PWarning(e.msg, keyboard=keyboard)
         video_content = requests.get(video_url).content
 
         video = self.bot.get_video_attachment(video_content, peer_id=self.event.peer_id, filename="tiktok.mp4")

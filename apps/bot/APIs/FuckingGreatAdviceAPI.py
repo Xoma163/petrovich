@@ -9,7 +9,7 @@ class FuckingGreatAdviceAPI:
     URL = "https://fucking-great-advice.ru/api/random"
 
     def get_advice(self):
-        r = requests.get(self.URL)
-        logger.debug(r.content)
+        r = requests.get(self.URL).json()
+        logger.debug({"response": r})
 
-        return r.json()['text']
+        return r['text']

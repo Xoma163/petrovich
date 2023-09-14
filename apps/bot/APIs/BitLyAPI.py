@@ -19,7 +19,7 @@ class BitLyAPI:
             "domain": "bit.ly",
             "long_url": long_url
         }
-        r = requests.post(self.URL, json=params, headers=self.HEADERS)
-        logger.debug(r.content)
+        r = requests.post(self.URL, json=params, headers=self.HEADERS).json()
+        logger.debug({"response": r})
 
-        return r.json()['link']
+        return r['link']

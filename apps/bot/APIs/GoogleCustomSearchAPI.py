@@ -19,10 +19,9 @@ class GoogleCustomSearchAPI:
             "q": query
         }
 
-        r = requests.get(self.URL, params=querystring)
-        logger.debug(r.content)
+        r = requests.get(self.URL, params=querystring).json()
+        logger.debug({"response": r})
 
-        r = r.json()
         images_urls = []
         if 'items' in r:
             images_urls = [x['link'] for x in r['items']]

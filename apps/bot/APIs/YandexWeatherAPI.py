@@ -64,10 +64,9 @@ class YandexWeatherAPI:
             'lon': city.lon,
             'lang': 'ru_RU'
         }
-        r = requests.get(self.URL, params, headers=self.HEADERS)
-        logger.debug(r.content)
+        r = requests.get(self.URL, params, headers=self.HEADERS).json()
+        logger.debug({"response": r})
 
-        r = r.json()
         if 'status' in r:
             if r['status'] == 403:
                 raise PWarning("На сегодня я исчерпал все запросы к Yandex Weather :(")

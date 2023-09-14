@@ -22,17 +22,17 @@ class WASDAPI:
 
         try:
             self.channel_id = int(last_part)
-            r = requests.get(f"{self.URL}api/v2/channels/{self.channel_id}")
-            logger.debug(r.content)
+            r = requests.get(f"{self.URL}api/v2/channels/{self.channel_id}").json()
+            logger.debug({"response": r})
 
-            title = r.json()['result']['channel_name']
+            title = r['result']['channel_name']
         except ValueError:
             title = last_part
             r = requests.get(f"{self.URL}api/v2/broadcasts/public",
-                             params={"with_extra": "true", "channel_name": title})
-            logger.debug(r.content)
+                             params={"with_extra": "true", "channel_name": title}).json()
+            logger.debug({"response": r})
 
-            self.channel_id = r.json()['result']['channel']['channel_id']
+            self.channel_id = r['result']['channel']['channel_id']
         return {
             'channel_id': self.channel_id,
             'title': title
@@ -41,10 +41,10 @@ class WASDAPI:
     def parse_video_m3u8(self, url):
         if not self.channel_id:
             self.parse_channel(url)
-        r = requests.get(f"{self.URL}api/v2/media-containers", params={"channel_id": self.channel_id})
-        logger.debug(r.content)
+        r = requests.get(f"{self.URL}api/v2/media-containers", params={"channel_id": self.channel_id}).json()
+        logger.debug({"response": r})
 
-        channel_media_data = r.json()['result'][0]
+        channel_media_data = r['result'][0]
         user_id = channel_media_data['user_id']
         base_uri = f"{self.CDN_URL}live/{user_id}"
 
@@ -62,9 +62,8 @@ class WASDAPI:
 
     def channel_is_live(self, title):
         r = requests.get(f"{self.URL}api/v2/broadcasts/public", params={"with_extra": "true", "channel_name": title},
-                         timeout=5)
-        logger.debug(r.content)
-        r = r.json()
+                         timeout=5).json()
+        logger.debug({"response": r})
         media_container = r['result']['media_container']
         if media_container:
             self.title = media_container['media_container_name']
