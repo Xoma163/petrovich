@@ -1,7 +1,11 @@
+import logging
+
 import requests
 
 from apps.bot.classes.consts.Exceptions import PWarning, PError
 from petrovich.settings import env
+
+logger = logging.getLogger('bot')
 
 
 class EveryPixelAPI:
@@ -14,32 +18,32 @@ class EveryPixelAPI:
         data = {
             'data': file
         }
-        return requests.post(self.IMAGE_QUALITY_URL,
-                             files=data,
-                             auth=(self.CLIENT_ID, self.CLIENT_SECRET)).json()
+        r = requests.post(self.IMAGE_QUALITY_URL, files=data, auth=(self.CLIENT_ID, self.CLIENT_SECRET))
+        logger.debug(r.content)
+        return r.json()
 
     def get_image_quality(self, _bytes):
-        response = self.get_image_quality_by_file(_bytes)
+        r = self.get_image_quality_by_file(_bytes)
 
-        if response['status'] != 'ok':
+        if r['status'] != 'ok':
             raise PError("Ошибка")
-        return f"{round(response['quality']['score'] * 100, 2)}%"
+        return f"{round(r['quality']['score'] * 100, 2)}%"
 
     def get_faces_on_photo_by_file(self, file):
         data = {
             'data': file
         }
-        return requests.post(self.IMAGE_FACES_URL,
-                             files=data,
-                             auth=(self.CLIENT_ID, self.CLIENT_SECRET)).json()
+        r = requests.post(self.IMAGE_FACES_URL, files=data, auth=(self.CLIENT_ID, self.CLIENT_SECRET))
+        logger.debug(r.content)
+        return r.json()
 
     def get_faces_on_photo(self, _bytes):
-        response = self.get_faces_on_photo_by_file(_bytes)
+        r = self.get_faces_on_photo_by_file(_bytes)
 
-        if response['status'] == 'error':
-            if response['message'] == 'ratelimit exceeded 100 requests per 86400 seconds':
+        if r['status'] == 'error':
+            if r['message'] == 'ratelimit exceeded 100 requests per 86400 seconds':
                 raise PWarning("Сегодняшний лимит исчерпан")
             raise PError("Ошибка получения возраста на изображении")
-        if response['status'] != "ok":
+        if r['status'] != "ok":
             raise PError("Ошибка. Статус не ок((")
-        return response['faces']
+        return r['faces']

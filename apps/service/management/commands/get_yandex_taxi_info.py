@@ -18,5 +18,5 @@ class Command(BaseCommand):
             'rll': env.str('YANDEX_TAXI_TEST_COORDS'),
             'class': 'econom,business,comfortplus,express,courier',
         }
-        response = requests.get(url, params).json()
-        TaxiInfo(data=response).save()
+        r = requests.get(url, params)
+        TaxiInfo(data=r.json()).save()

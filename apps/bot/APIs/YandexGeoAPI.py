@@ -1,6 +1,10 @@
+import logging
+
 import requests
 
 from petrovich.settings import env
+
+logger = logging.getLogger('bot')
 
 
 class YandexGeoAPI:
@@ -15,8 +19,10 @@ class YandexGeoAPI:
             'result': '1',
             'lang': 'ru_RU'
         }
-        result = requests.get(self.url, params).json()
-        return result['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']['metaDataProperty'][
+        r = requests.get(self.url, params)
+        logger.debug(r.content)
+
+        return r.json()['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']['metaDataProperty'][
             'GeocoderMetaData']['text']
 
     def get_city_info_by_name(self, city_name):
@@ -27,11 +33,13 @@ class YandexGeoAPI:
             'result': '1',
             'lang': 'ru_RU'
         }
-        result = requests.get(self.url, params).json()
-        result2 = result['response']['GeoObjectCollection']['featureMember']
-        if len(result2) == 0:
+        r = requests.get(self.url, params)
+        logger.debug(r.content)
+
+        result = r.json()['response']['GeoObjectCollection']['featureMember']
+        if len(result) == 0:
             return None
-        city_data = result2[0]['GeoObject']
+        city_data = result[0]['GeoObject']
         lon, lat = city_data['Point']['pos'].split(' ', 2)
         city_name = city_data['name']
         city_info = {

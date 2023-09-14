@@ -1,9 +1,12 @@
 import json
+import logging
 
 import requests
 
 from apps.bot.classes.consts.Exceptions import PError
 from petrovich.settings import env
+
+logger = logging.getLogger('bot')
 
 
 class GithubAPI:
@@ -30,6 +33,8 @@ class GithubAPI:
         }
 
         r = requests.post(self.ISSUES_URL, json.dumps(issue_data), headers=self.HEADERS)
+        logger.debug(r.content)
+
         if r.status_code != 201:
             raise PError("Не удалось создать issue на github")
         return r.json()
@@ -40,10 +45,13 @@ class GithubAPI:
             "labels": ["Не пофикшу"]
         }
         r = requests.post(f"{self.ISSUES_URL}/{_id}", json.dumps(issue_data), headers=self.HEADERS)
+        logger.debug(r.content)
+
         if r.status_code != 200:
             raise PError("Не удалось закрыть issue на github")
         return r.json()
 
     def get_all_labels(self):
         r = requests.get(self.LABELS_URL, json.dumps({}), headers=self.HEADERS)
+        logger.debug(r.content)
         return [x['name'] for x in r.json()]

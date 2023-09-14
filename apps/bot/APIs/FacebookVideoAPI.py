@@ -1,7 +1,11 @@
+import logging
+
 import requests
 
 from apps.bot.classes.consts.Exceptions import PWarning
 from petrovich.settings import env
+
+logger = logging.getLogger('bot')
 
 
 class FacebookVideoAPI:
@@ -16,13 +20,15 @@ class FacebookVideoAPI:
         self.caption = ""
 
     def get_content_url(self, url):
-        response = requests.get(self.URL, headers=self.HEADERS, params={"url": url}).json()
-        if response.get('title'):
-            self.caption = response['title']
+        r = requests.get(self.URL, headers=self.HEADERS, params={"url": url})
+        logger.debug(r.content)
+        r = r.json()
+        if r.get('title'):
+            self.caption = r['title']
 
         video_url = None
-        if response['links']:
-            video_url = response['links']['Download High Quality'] or response['links']['Download Low Quality']
+        if r['links']:
+            video_url = r['links']['Download High Quality'] or r['links']['Download Low Quality']
         if not video_url:
             raise PWarning("Ссылка на инстаграмм не является видео/фото")
         return video_url

@@ -15,14 +15,14 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         url = "https://www.donationalerts.com/api/v1/alerts/donations"
         headers = {'Authorization': 'Bearer ' + env.str('DONATIONALERT_ACCESS_TOKEN')}
-        response = requests.get(url, headers=headers).json()
+        r = requests.get(url, headers=headers).json()
         donations, created = Service.objects.get_or_create(name='donations')
         if created:
-            donations.value = response['meta']['total']
+            donations.value = r['meta']['total']
             donations.save()
             return
-        new_donation_count = int(response['meta']['total']) - int(donations.value)
-        donations.value = response['meta']['total']
+        new_donation_count = int(r['meta']['total']) - int(donations.value)
+        donations.value = r['meta']['total']
         donations.save()
 
         if new_donation_count > 0:
@@ -31,7 +31,7 @@ class Command(BaseCommand):
             else:
                 answer = 'Новые донаты!\n\n'
             for i in range(new_donation_count):
-                donation = response['data'][i]
+                donation = r['data'][i]
                 new_donation = Donations(username=donation['username'],
                                          amount=donation['amount'],
                                          currency=donation['currency'],

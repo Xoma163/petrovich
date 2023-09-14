@@ -1,4 +1,8 @@
+import logging
+
 import requests
+
+logger = logging.getLogger('bot')
 
 
 class MemeArsenalAPI:
@@ -13,5 +17,7 @@ class MemeArsenalAPI:
             'items_on_page': items_on_page,
             'lang': 'ru',
             'query': text,
-        }).json()
-        return [{'title': x['title'], 'url': x['url']} for x in r['data']]
+        })
+        logger.debug(r.content)
+
+        return [{'title': x['title'], 'url': x['url']} for x in r.json()['data']]

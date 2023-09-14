@@ -98,8 +98,8 @@ class Subscribe(Command):
 
     @staticmethod
     def menu_add_youtube(url):
-        response = requests.get(url)
-        bs4 = BeautifulSoup(response.content, 'html.parser')
+        r = requests.get(url)
+        bs4 = BeautifulSoup(r.content, 'html.parser')
         channel_id = bs4.find_all('link', {'rel': 'canonical'})[0].attrs['href'].split('/')[-1]
 
         youtube_info = YoutubeVideoAPI()

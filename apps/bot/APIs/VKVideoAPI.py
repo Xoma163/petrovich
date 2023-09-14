@@ -43,8 +43,8 @@ class VKVideoAPI:
         return video_content
 
     def _get_player_url(self, url: str) -> str:
-        response = requests.get(url, headers=self.headers)
-        bs4 = BeautifulSoup(response.text, 'html.parser')
+        r = requests.get(url, headers=self.headers)
+        bs4 = BeautifulSoup(r.text, 'html.parser')
         og_video = bs4.find("meta", property="og:video")
         if not og_video:
             raise PWarning("К сожалению видео старое и скачать его не получится. "
@@ -54,8 +54,8 @@ class VKVideoAPI:
         return player_url
 
     def _get_download_urls(self, player_url: str) -> Tuple[bytes, Optional[bytes]]:
-        response = requests.get(player_url, headers=self.headers)
-        bs4 = BeautifulSoup(response.text, 'html.parser')
+        r = requests.get(player_url, headers=self.headers)
+        bs4 = BeautifulSoup(r.text, 'html.parser')
         js_code = bs4.select_one('body > script:nth-child(11)').text
         first_split = js_code.split('var playerParams = ')[1]
         second_split = first_split.split('var container')[0]
@@ -75,8 +75,8 @@ class VKVideoAPI:
     def _get_video_audio_dash(self, dash_webm_url) -> Tuple[bytes, bytes]:
         parsed_url = urlparse(dash_webm_url)
 
-        response = requests.get(dash_webm_url, headers=self.headers).content
-        dash_webm_dict = xmltodict.parse(response)
+        r = requests.get(dash_webm_url, headers=self.headers).content
+        dash_webm_dict = xmltodict.parse(r)
         adaptation_sets = dash_webm_dict['MPD']['Period']['AdaptationSet']
 
         video_representations = adaptation_sets[0]['Representation']

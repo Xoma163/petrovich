@@ -1,6 +1,10 @@
+import logging
+
 import requests
 
 from petrovich.settings import env
+
+logger = logging.getLogger('bot')
 
 
 class TimezoneDBAPI:
@@ -15,5 +19,7 @@ class TimezoneDBAPI:
             'lat': lat,
             'lng': lon
         }
-        result = requests.get(self.URL, params=params).json()
-        return result['zoneName']
+        r = requests.get(self.URL, params=params)
+        logger.debug(r.content)
+
+        return r.json()['zoneName']

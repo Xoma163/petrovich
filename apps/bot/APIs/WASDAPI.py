@@ -1,6 +1,10 @@
+import logging
+
 import requests
 
 from apps.bot.utils.M3U8 import M3U8
+
+logger = logging.getLogger('bot')
 
 
 class WASDAPI:
@@ -18,12 +22,17 @@ class WASDAPI:
 
         try:
             self.channel_id = int(last_part)
-            title = requests.get(f"{self.URL}api/v2/channels/{self.channel_id}").json()['result']['channel_name']
+            r = requests.get(f"{self.URL}api/v2/channels/{self.channel_id}")
+            logger.debug(r.content)
+
+            title = r.json()['result']['channel_name']
         except ValueError:
             title = last_part
-            self.channel_id = requests.get(
-                f"{self.URL}api/v2/broadcasts/public",
-                params={"with_extra": "true", "channel_name": title}).json()['result']['channel']['channel_id']
+            r = requests.get(f"{self.URL}api/v2/broadcasts/public",
+                             params={"with_extra": "true", "channel_name": title})
+            logger.debug(r.content)
+
+            self.channel_id = r.json()['result']['channel']['channel_id']
         return {
             'channel_id': self.channel_id,
             'title': title
@@ -32,9 +41,10 @@ class WASDAPI:
     def parse_video_m3u8(self, url):
         if not self.channel_id:
             self.parse_channel(url)
-        channel_media_data = \
-            requests.get(f"{self.URL}api/v2/media-containers", params={"channel_id": self.channel_id}).json()['result'][
-                0]
+        r = requests.get(f"{self.URL}api/v2/media-containers", params={"channel_id": self.channel_id})
+        logger.debug(r.content)
+
+        channel_media_data = r.json()['result'][0]
         user_id = channel_media_data['user_id']
         base_uri = f"{self.CDN_URL}live/{user_id}"
 
@@ -51,8 +61,10 @@ class WASDAPI:
         self.m3u8_bytes = m3u8
 
     def channel_is_live(self, title):
-        r = requests.get(f"{self.URL}api/v2/broadcasts/public",
-                         params={"with_extra": "true", "channel_name": title}, timeout=5).json()
+        r = requests.get(f"{self.URL}api/v2/broadcasts/public", params={"with_extra": "true", "channel_name": title},
+                         timeout=5)
+        logger.debug(r.content)
+        r = r.json()
         media_container = r['result']['media_container']
         if media_container:
             self.title = media_container['media_container_name']

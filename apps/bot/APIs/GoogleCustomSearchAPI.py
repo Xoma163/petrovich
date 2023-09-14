@@ -1,6 +1,10 @@
+import logging
+
 import requests
 
 from petrovich.settings import env
+
+logger = logging.getLogger('bot')
 
 
 class GoogleCustomSearchAPI:
@@ -15,8 +19,11 @@ class GoogleCustomSearchAPI:
             "q": query
         }
 
-        response = requests.get(self.URL, params=querystring).json()
+        r = requests.get(self.URL, params=querystring)
+        logger.debug(r.content)
+
+        r = r.json()
         images_urls = []
-        if 'items' in response:
-            images_urls = [x['link'] for x in response['items']]
+        if 'items' in r:
+            images_urls = [x['link'] for x in r['items']]
         return images_urls

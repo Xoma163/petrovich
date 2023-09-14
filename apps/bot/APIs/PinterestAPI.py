@@ -21,7 +21,7 @@ class PinterestAPI:
     def get_attachment(self):
         content = requests.get(self.url).content
         bs4 = BeautifulSoup(content, 'html.parser')
-        # meta = bs4.find_all("meta")
+
         self.title = bs4.find("meta", {"name": "og:title"}).attrs['content']
 
         if bs4.find("script", {'data-test-id': 'video-snippet'}):

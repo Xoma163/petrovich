@@ -91,9 +91,9 @@ class TgBot(CommonBot):
             'results': json.dumps(inline_query_result, ensure_ascii=False),
             'cache_time': 0
         }
-        response = self.requests.get('answerInlineQuery', params)
-        if response.status_code != 200:
-            response_json = response.json()
+        r = self.requests.get('answerInlineQuery', params)
+        if r.status_code != 200:
+            response_json = r.json()
             error_msg = "Ошибка в inline_memes"
             self.logger.error({'message': error_msg, 'error': response_json})
 
@@ -377,8 +377,8 @@ class TgBot(CommonBot):
 
     # USERS GROUPS BOTS
     def update_profile_avatar(self, profile: Profile, user_id):
-        response = self.requests.get('getUserProfilePhotos', {'user_id': user_id})
-        photos = response.json()['result']['photos']
+        r = self.requests.get('getUserProfilePhotos', {'user_id': user_id})
+        photos = r.json()['result']['photos']
         if len(photos) == 0:
             raise PWarning("Нет фотографий в профиле")
         pa = PhotoAttachment()
@@ -467,25 +467,25 @@ class TgBot(CommonBot):
         self.requests.get('setMyCommands', json={'commands': help_texts_tg})
 
     def get_sticker_set(self, name):
-        res = self.requests.get('getStickerSet', json={'name': name}).json()
-        return res['result']['stickers']
+        r = self.requests.get('getStickerSet', json={'name': name})
+        return r.json()['result']['stickers']
 
     def set_chat_admin_title(self, chat_id, user_id, title):
-        res = self.requests.get('setChatAdministratorCustomTitle', json={
+        r = self.requests.get('setChatAdministratorCustomTitle', json={
             'chat_id': chat_id,
             'user_id': user_id,
             'custom_title': title
-        }).json()
-        return res
+        })
+        return r.json()
 
     def promote_chat_member(self, chat_id, user_id):
-        res = self.requests.get('promoteChatMember', json={
+        r = self.requests.get('promoteChatMember', json={
             'chat_id': chat_id,
             'user_id': user_id,
             'can_manage_chat': False,
             'can_pin_messages': True,
-        }).json()
-        return res
+        })
+        return r.json()
 
     def get_file_id(self, attachment):
         uploading_chat = Chat.objects.get(pk=env.str("TG_PHOTO_UPLOADING_CHAT_PK"))

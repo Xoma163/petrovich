@@ -1,5 +1,9 @@
+import logging
+
 import requests
 from bs4 import BeautifulSoup
+
+logger = logging.getLogger('bot')
 
 
 class CBRAPI:
@@ -12,8 +16,9 @@ class CBRAPI:
         } for x in filters_list}
 
     def do(self):
-        response = requests.get(self.URL, stream=True)
-        elements = BeautifulSoup(response.content, 'xml').find('ValCurs').find_all("Valute")
+        r = requests.get(self.URL, stream=True)
+        logger.debug(r.content)
+        elements = BeautifulSoup(r.content, 'xml').find('ValCurs').find_all("Valute")
 
         for elem in elements:
             for _filter in self.filters:

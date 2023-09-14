@@ -1,9 +1,12 @@
+import logging
 from urllib.parse import urlparse
 
 import requests
 
 from apps.bot.classes.consts.Exceptions import PWarning
 from petrovich.settings import env
+
+logger = logging.getLogger('bot')
 
 
 class InstagramAPI:
@@ -38,8 +41,10 @@ class InstagramAPI:
         _id = urlparse(instagram_link).path.strip('/').split('/')[-1]
         data = {"id": _id}
 
-        r = requests.post(url, json=data, headers=headers).json()
-        return self._parse_photo_or_video(r['response']['body']['items'][0])
+        r = requests.post(url, json=data, headers=headers)
+        logger.debug(r.content)
+
+        return self._parse_photo_or_video(r.json()['response']['body']['items'][0])
 
     def get_post_data(self, instagram_link):
         host = "instagram-scraper-20231.p.rapidapi.com"
@@ -50,8 +55,10 @@ class InstagramAPI:
         URL = f"https://{host}/postdetail"
 
         post_id = urlparse(instagram_link).path.strip('/').split('/')[1]
-        r = requests.get(f"{URL}/{post_id}", headers=HEADERS).json()
-        return self._parse_photo_or_video(r['data'])
+        r = requests.get(f"{URL}/{post_id}", headers=HEADERS)
+        logger.debug(r.content)
+
+        return self._parse_photo_or_video(r.json()['data'])
 
     def _parse_photo_or_video(self, data):
         if 'video_versions' in data:

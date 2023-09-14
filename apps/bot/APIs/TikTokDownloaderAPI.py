@@ -1,6 +1,10 @@
+import logging
+
 import requests
 
 from petrovich.settings import env
+
+logger = logging.getLogger('bot')
 
 
 class TikTokDownloaderAPI:
@@ -11,4 +15,6 @@ class TikTokDownloaderAPI:
     URL = "https://tiktok-downloader-download-tiktok-videos-without-watermark.p.rapidapi.com/vid/index"
 
     def get_video_url(self, url):
-        return requests.get(self.URL, params={'url': url}, headers=self.HEADERS).json()['video'][0]
+        r = requests.get(self.URL, params={'url': url}, headers=self.HEADERS)
+        logger.debug(r.content)
+        return r.json()['video'][0]

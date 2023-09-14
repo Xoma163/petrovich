@@ -1,6 +1,10 @@
+import logging
+
 import requests
 
 from petrovich.settings import env
+
+logger = logging.getLogger('bot')
 
 
 class BitLyAPI:
@@ -15,5 +19,7 @@ class BitLyAPI:
             "domain": "bit.ly",
             "long_url": long_url
         }
-        response = requests.post(self.URL, json=params, headers=self.HEADERS).json()
-        return response['link']
+        r = requests.post(self.URL, json=params, headers=self.HEADERS)
+        logger.debug(r.content)
+
+        return r.json()['link']

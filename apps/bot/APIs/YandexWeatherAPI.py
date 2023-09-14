@@ -1,4 +1,5 @@
 import json
+import logging
 from datetime import datetime
 
 import requests
@@ -47,6 +48,7 @@ WEATHER_WIND_DIRECTION_TRANSLATOR = {
     "w": "западный",
     "c": "штиль",
 }
+logger = logging.getLogger('bot')
 
 
 class YandexWeatherAPI:
@@ -62,12 +64,15 @@ class YandexWeatherAPI:
             'lon': city.lon,
             'lang': 'ru_RU'
         }
-        response = requests.get(self.URL, params, headers=self.HEADERS).json()
-        if 'status' in response:
-            if response['status'] == 403:
+        r = requests.get(self.URL, params, headers=self.HEADERS)
+        logger.debug(r.content)
+
+        r = r.json()
+        if 'status' in r:
+            if r['status'] == 403:
                 raise PWarning("На сегодня я исчерпал все запросы к Yandex Weather :(")
 
-        return response
+        return r
 
     def get_weather(self, city: City, use_cached=True):
         entity, created = Service.objects.get_or_create(name=f'weather_{city.name}')
