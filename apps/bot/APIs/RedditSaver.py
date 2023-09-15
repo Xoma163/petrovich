@@ -133,9 +133,13 @@ class RedditSaver:
         # use UA headers to prevent 429 error
         headers = {
             'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.106 Safari/537.36 OPR/38.0.2220.41',
-            'From': 'testyouremail@domain.com'
+            # 'From': 'testyouremail@domain.com'
         }
-        url = self.post_url + ".json"
+        post_url = requests.get(self.post_url, headers=headers).history[-1].url
+        self.post_url = post_url
+        urlparsed = urlparse(post_url)
+
+        url = f"{urlparsed.scheme}://{urlparsed.netloc}{urlparsed.path}.json"
         data = requests.get(url, headers=headers).json()
         self.data = data[0]["data"]["children"][0]["data"]
         self.title = self.data['title']
