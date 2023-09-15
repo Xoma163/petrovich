@@ -317,14 +317,14 @@ class TgBot(CommonBot):
 
     def edit_message(self, params):
         params['text'] = params.pop('caption')
-        r = self.requests.get('editMessageText', params=params)
-        self.logger.debug({'response': r.json()})
+        r = self.requests.get('editMessageText', params=params).json()
+        self.logger.debug({'response': r})
         return r
 
     def edit_keyboard(self, params):
         del params['caption']
-        r = self.requests.get('editMessageReplyMarkup', params=params)
-        self.logger.debug({'response': r.json()})
+        r = self.requests.get('editMessageReplyMarkup', params=params).json()
+        self.logger.debug({'response': r})
         return r
 
     def edit_media(self, rm, params):
@@ -337,8 +337,8 @@ class TgBot(CommonBot):
         else:
             params['media']['media'] = self.get_file_id(att)
         params['media'] = json.dumps(params['media'])
-        r = self.requests.get('editMessageMedia', params=params)
-        self.logger.debug({'response': r.json()})
+        r = self.requests.get('editMessageMedia', params=params).json()
+        self.logger.debug({'response': r})
         return r
 
     def send_response_message_item(self, rmi: ResponseMessageItem):
@@ -476,7 +476,7 @@ class TgBot(CommonBot):
         Удаление одного сообщения
         """
         r = self.requests.get('deleteMessage', params={'chat_id': peer_id, 'message_id': message_id}).json()
-        self.logger.debug({'response': r.json()})
+        self.logger.debug({'response': r})
         return r
 
     def update_help_texts(self):
