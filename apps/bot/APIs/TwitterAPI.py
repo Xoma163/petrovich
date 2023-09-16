@@ -25,30 +25,27 @@ class TwitterAPI:
     URL_TWEET_REPLIES = f"https://{_HOST}/tweet/replies"
 
     def __init__(self):
-        self.content_type = None
         self.caption = ""
         self.with_replies = False
 
-    def get_content_url(self, url):
+    def get_attachments(self, url):
         tweet_id = urlparse(url).path.strip('/').split('/')[-1]
         r = requests.get(self.URL_TWEET_INFO, headers=self.HEADERS, params={'tweet_id': tweet_id}).json()
         if r.get('detail') == 'Error while parsing tweet':
             raise PWarning("Ошибка на стороне API")
         logger.debug({"response": r})
-        first_post_text, first_post_attachments = self.get_text_and_attachments(r)
 
         time.sleep(1)
-        text_with_replies, attachments_in_replies = self.get_post_and_replies(first_post_text, first_post_attachments,
-                                                                              tweet_id, r['user']['user_id'])
-        if first_post_text != text_with_replies:
+        try:
+            post_text, post_attachments = self._get_post_with_replies(r)
             self.with_replies = True
+        except RuntimeError:
+            post_text, post_attachments = self._get_text_and_attachments(r)
 
-        self.caption = text_with_replies
-        # self.caption = first_post_text
-        # return first_post_attachments
-        return attachments_in_replies
+        self.caption = post_text
+        return post_attachments
 
-    def get_text_and_attachments(self, tweet_data) -> (str, list):
+    def _get_text_and_attachments(self, tweet_data) -> (str, list):
         text = self._get_text_without_tco_links(tweet_data.get('text', ""))
         attachments = []
         if tweet_data.get('video_url'):
@@ -62,8 +59,39 @@ class TwitterAPI:
             attachments = [{self.CONTENT_TYPE_IMAGE: x} for x in photos]
         return text, attachments
 
-    def _get_text_without_tco_links(self, text):
-        p = re.compile(r"https:\/\/t.co\/.*")  # markdown bold
+    def _get_post_with_replies(self, tweet_data) -> (str, list):
+        tweet_id = tweet_data["tweet_id"]
+        user_id = tweet_data['user']['user_id']
+
+        r = requests.get(self.URL_TWEET_REPLIES, headers=self.HEADERS, params={'tweet_id': tweet_id}).json()
+        logger.debug({"response": r})
+        replies = list(filter(lambda x: x['user']['user_id'] == user_id, r['replies']))
+
+        replies_tweet_reply_id_dict = {x['in_reply_to_status_id']: x for x in replies}
+
+        tweet_chain = [tweet_data]
+        while tweet_id in replies_tweet_reply_id_dict:
+            current_tweet = replies_tweet_reply_id_dict[tweet_id]
+            tweet_chain.append(current_tweet)
+            tweet_id = current_tweet['tweet_id']
+        del replies_tweet_reply_id_dict
+
+        if len(tweet_chain) == 1:
+            raise RuntimeError
+
+        texts = []
+        attachments = []
+        for tweet in tweet_chain:
+            _text, _attachments = self._get_text_and_attachments(tweet)
+            if _text:
+                texts.append(_text)
+            if _attachments:
+                attachments += _attachments
+        return "\n\n".join(texts), attachments
+
+    @staticmethod
+    def _get_text_without_tco_links(text):
+        p = re.compile(r"https:\/\/t.co\/.*")
         for item in reversed(list(p.finditer(text))):
             start_pos = item.start()
             end_pos = item.end()
@@ -79,27 +107,3 @@ class TwitterAPI:
         videos = filter(lambda x: x.get('bitrate') and x['content_type'] == 'video/mp4', video_info['variants'])
         best_video = sorted(videos, key=lambda x: x['bitrate'], reverse=True)[0]['url']
         return best_video
-
-    def get_post_and_replies(self, tweet_text: str, tweet_attachments: list, tweet_id, user_id) -> (str, list):
-        r = requests.get(self.URL_TWEET_REPLIES, headers=self.HEADERS, params={'tweet_id': tweet_id}).json()
-        logger.debug({"response": r})
-        replies = list(filter(lambda x: x['user']['user_id'] == user_id, r['replies']))
-
-        replies_tweet_reply_id_dict = {x['in_reply_to_status_id']: x for x in replies}
-
-        tweet_chain = []
-        while tweet_id in replies_tweet_reply_id_dict:
-            current_tweet = replies_tweet_reply_id_dict[tweet_id]
-            tweet_chain.append(current_tweet)
-            tweet_id = current_tweet['tweet_id']
-        del replies_tweet_reply_id_dict
-
-        texts = [tweet_text]
-        attachments = tweet_attachments
-        for tweet in tweet_chain:
-            _text, _attachments = self.get_text_and_attachments(tweet)
-            if _text:
-                texts.append(_text)
-            if _attachments:
-                attachments += _attachments
-        return "\n\n".join(texts), attachments
