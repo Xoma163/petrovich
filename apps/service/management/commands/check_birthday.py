@@ -31,7 +31,8 @@ class Command(BaseCommand):
                     if profile.celebrate_bday:
                         rmi1 = ResponseMessageItem(f"С Днём рождения, {tg_bot.get_mention(profile)}!",
                                                    peer_id=chat.chat_id)
-                        rmi2 = ResponseMessageItem("На ваш счет зачислено 100 000 бонусных очков.")
+                        rmi2 = ResponseMessageItem("На ваш счет зачислено 100 000 бонусных очков.",
+                                                   peer_id=chat.chat_id)
                         rm = ResponseMessage([rmi1, rmi2])
                         tg_bot.send_response_message(rm)
 

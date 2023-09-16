@@ -7,6 +7,7 @@ from typing import List, Optional
 
 from django.contrib.auth.models import Group
 
+from apps.bot.classes.BotResponse import BotResponse
 from apps.bot.classes.consts.ActivitiesEnum import ActivitiesEnum
 from apps.bot.classes.consts.Consts import Role
 from apps.bot.classes.consts.Exceptions import PWarning, PError, PSkip, PIDK
@@ -87,7 +88,7 @@ class Bot(Thread):
         for rmi in rm.messages:
             Thread(target=self.send_response_message_item, args=(rmi,)).start()
 
-    def send_response_message(self, rm: ResponseMessage) -> List[dict]:
+    def send_response_message(self, rm: ResponseMessage) -> List[BotResponse]:
         """
         Отправка ResponseMessage сообщения
         Вовзращает список результатов отправки в формате
@@ -96,14 +97,14 @@ class Bot(Thread):
         results = []
 
         for rmi in rm.messages:
-            r = self.send_response_message_item(rmi)
-            results.append(r)
+            br = self.send_response_message_item(rmi)
+            results.append(br)
         return results
 
-    def send_response_message_item(self, rmi: ResponseMessageItem) -> dict:
+    def send_response_message_item(self, rmi: ResponseMessageItem) -> BotResponse:
         """
         Отправка ResponseMessageItem сообщения
-        Возвращает {success:bool, response:Response.json()}
+        Возвращает BotResponse
         """
 
     def route(self, event: Event) -> Optional[ResponseMessage]:

@@ -4,6 +4,7 @@ import threading
 import requests
 from numpy import inf
 
+from apps.bot.classes.BotResponse import BotResponse
 from apps.bot.classes.bots.Bot import Bot as CommonBot
 from apps.bot.classes.bots.tg.MyTgBotLongPoll import MyTgBotLongPoll
 from apps.bot.classes.bots.tg.TgRequests import TgRequests, TgRequestLocal
@@ -307,7 +308,12 @@ class TgBot(CommonBot):
         self.log_response(r, "editMessageMedia")
         return r
 
-    def send_response_message_item(self, rmi: ResponseMessageItem) -> dict:
+    def send_response_message_item(self, rmi: ResponseMessageItem) -> BotResponse:
+        """
+        Отправка ResponseMessageItem сообщения
+        Возвращает {success:bool, response:Response.json()}
+        """
+
         try:
             r = self._send_response_message_item(rmi)
         except (PWarning, PError) as e:
@@ -321,10 +327,10 @@ class TgBot(CommonBot):
             self.log_message(error_rmi, e.level)
 
             r = self._send_response_message_item(error_rmi)
-            return {'success': False, "response": r}
+            return BotResponse(False, r)
 
         if r['ok']:
-            return {'success': True, "response": r}
+            return BotResponse(True, r)
 
         # Непредвиденная ошибка телеги
         skip_errors = [
@@ -339,7 +345,7 @@ class TgBot(CommonBot):
         }
         error = r['description']
         if error in skip_errors:
-            return {"success": False, "response": r}
+            return BotResponse(False, r)
         elif error in catch_errors:
             msg = catch_errors[error]
             log_level = "warning"
@@ -355,7 +361,7 @@ class TgBot(CommonBot):
         self.log_message(error_rmi, log_level)
 
         r = self._send_response_message_item(error_rmi)
-        return {'success': False, "response": r}
+        return BotResponse(False, r)
 
     def _send_response_message_item(self, rmi: ResponseMessageItem) -> dict:
         """
@@ -534,11 +540,12 @@ class TgBot(CommonBot):
     def get_file_id(self, attachment):
         uploading_chat = Chat.objects.get(pk=env.str("TG_PHOTO_UPLOADING_CHAT_PK"))
         rmi = ResponseMessageItem(attachments=[attachment], peer_id=uploading_chat.chat_id)
-        r_json = self.send_response_message_item(rmi)
-        self.delete_message(uploading_chat.chat_id, r_json['result']['message_id'])
+        br = self.send_response_message_item(rmi)
+        r = br.response
+        self.delete_message(uploading_chat.chat_id, r['result']['message_id'])
 
         try:
-            att = r_json['result'][attachment.type]
+            att = r['result'][attachment.type]
             if isinstance(att, list):
                 att = att[0]
             file_id = att['file_id']

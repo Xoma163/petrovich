@@ -162,8 +162,8 @@ class Media(Command):
             peer_id=self.event.peer_id,
             message_thread_id=self.event.message_thread_id
         )
-        res = self.bot.send_response_message_item(rmi)
-        if res['success']:
+        br = self.bot.send_response_message_item(rmi)
+        if br.success:
             self.bot.delete_message(self.event.peer_id, self.event.message.id)
 
     def get_method_and_chosen_url(self, source):
