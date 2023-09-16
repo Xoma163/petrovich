@@ -25,7 +25,7 @@ from apps.bot.classes.messages.attachments.VideoNoteAttachment import VideoNoteA
 from apps.bot.classes.messages.attachments.VoiceAttachment import VoiceAttachment
 from apps.bot.commands.Meme import Meme
 from apps.bot.models import Profile, Chat
-from apps.bot.utils.utils import get_thumbnail_for_image, get_chunks
+from apps.bot.utils.utils import get_thumbnail_for_image, split_text_by_n_symbols
 from petrovich.settings import env
 
 
@@ -222,7 +222,6 @@ class TgBot(CommonBot):
                 thumb_file = self.get_photo_attachment(audio.thumb, guarantee_url=True)
                 files['thumb'] = thumb_file.get_bytes_io_content(default_params['chat_id'])
             r = self.requests.get('sendAudio', default_params, files=files).json()
-        r = r.json()
         self.log_response(r, "sendAudio")
         return r
 
@@ -272,7 +271,7 @@ class TgBot(CommonBot):
         default_params['text'] = default_params.pop('caption')
         if len(default_params['text']) > 4096:
             # Шлём длинные сообщения чанками. Последний чанк через return
-            chunks = list(get_chunks(default_params['text'], 4096))
+            chunks = split_text_by_n_symbols(default_params['text'], 4096)
             for chunk in chunks[:-1]:
                 default_params['text'] = chunk
                 r = self.requests.get('sendMessage', default_params).json()

@@ -41,7 +41,7 @@ YOUTUBE_MUSIC_URLS = ("music.youtube.com",)
 REDDIT_URLS = ("www.reddit.com", "reddit.com")
 TIKTOK_URLS = ("www.tiktok.com", 'vm.tiktok.com', 'm.tiktok.com', 'vt.tiktok.com')
 INSTAGRAM_URLS = ('www.instagram.com', 'instagram.com')
-TWITTER_URLS = ('www.twitter.com', 'twitter.com', 'x.com', "t.co")
+TWITTER_URLS = ('www.twitter.com', 'twitter.com', 'x.com')
 PIKABU_URLS = ('www.pikabu.ru', 'pikabu.ru')
 THE_HOLE_URLS = ('www.the-hole.tv', 'the-hole.tv')
 WASD_URLS = ('www.wasd.tv', 'wasd.tv')
@@ -139,7 +139,7 @@ class Media(Command):
             answer += f"\nОт {self.event.sender}"
 
         source_hostname = str(urlparse(chosen_url).hostname).lstrip('www.')
-        if len(attachments) == 1:
+        if len(attachments) <= 1:
             answer += f'\nИсточник: {self.bot.get_formatted_url(source_hostname, chosen_url)}'
         else:
             answer += f'\nИсточник: {chosen_url}'
@@ -320,22 +320,29 @@ class Media(Command):
             raise PWarning("медиа твиттер доступен только для доверенных пользователей")
 
         t_api = TwitterAPI()
-        content_url = t_api.get_content_url(url)
+        atts = t_api.get_content_url(url)
+        text = t_api.caption
 
-        if t_api.content_type == t_api.CONTENT_TYPE_IMAGE:
-            if isinstance(content_url, list):
-                attachments = [self.bot.get_photo_attachment(image_url, peer_id=self.event.peer_id) for image_url in
-                               content_url]
-            else:
-                attachments = [self.bot.get_photo_attachment(content_url, peer_id=self.event.peer_id)]
-            return attachments, t_api.caption
-        elif t_api.content_type == t_api.CONTENT_TYPE_VIDEO:
-            video = self.bot.get_video_attachment(content_url, peer_id=self.event.peer_id)
-            return [video], t_api.caption
-        elif t_api.content_type == t_api.CONTENT_TYPE_TEXT:
-            return [], t_api.caption
-        else:
-            raise PWarning("Ссылка на твит не является видео/фото/текстом")
+        if not atts:
+            return [], text
+
+        attachments = []
+        for att in atts:
+            if t_api.CONTENT_TYPE_VIDEO in att:
+                att_link = att[t_api.CONTENT_TYPE_VIDEO]
+                video = self.bot.get_video_attachment(att_link, peer_id=self.event.peer_id)
+                attachments.append(video)
+            elif t_api.CONTENT_TYPE_IMAGE in att:
+                att_link = att[t_api.CONTENT_TYPE_IMAGE]
+                photo = self.bot.get_photo_attachment(att_link, peer_id=self.event.peer_id)
+                attachments.append(photo)
+
+        if not t_api.with_replies or not attachments:
+            return attachments, text
+
+        rmi = ResponseMessageItem(text=text, peer_id=self.event.peer_id)
+        self.bot.send_response_message_item(rmi)
+        return attachments, ""
 
     def get_pikabu_video(self, url) -> (list, str):
         p_api = PikabuAPI()

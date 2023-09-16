@@ -4,7 +4,7 @@ import random
 import re
 from datetime import datetime
 from io import BytesIO
-from typing import List
+from typing import List, Optional
 from urllib.parse import urlparse
 
 import pytz
@@ -427,3 +427,25 @@ def replace_markdown_code(text: str, bot):
         tg_code_text = bot.get_formatted_text(code_text).replace("**", '')
         text = text[:start_pos] + tg_code_text + text[end_pos:]
     return text
+
+
+def split_text_by_n_symbols(text: str, n: int, split_on: Optional[List[str]] = None) -> List[str]:
+    """
+    Разбивает текст на чанки с делением по спецсимволам указанным в split_on
+    """
+    if split_on is None:
+        split_on = ['\n', ',', ' ', '']
+    if len(text) < n:
+        return [text]
+
+    texts = []
+    while len(text) > n:
+        for split_on_symbol in split_on:
+            split_by_pos = text.rfind(split_on_symbol, 0, n)
+            if split_by_pos == -1:
+                continue
+            texts.append(text[:split_by_pos + 1])
+            text = text[split_by_pos + 1:]
+            break
+    texts.append(text)
+    return texts
