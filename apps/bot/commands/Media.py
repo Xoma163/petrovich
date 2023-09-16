@@ -144,13 +144,12 @@ class Media(Command):
         else:
             answer += f'\nИсточник: {chosen_url}'
 
-        # Костыль, чтобы видосы которые шарятся с мобилы с реддита не дублировали title
-
         extra_text = source[:chosen_url_pos].strip() + "\n" + source[chosen_url_pos + len(chosen_url):].strip()
         for key in self.event.message.keys:
             extra_text = extra_text.replace(self.event.message.KEYS_STR + key, "")
             extra_text = extra_text.replace(self.event.message.KEYS_SYMBOL + key, "")
         extra_text = extra_text.strip()
+        # Костыль, чтобы видосы которые шарятся с мобилы с реддита не дублировали title
         if extra_text and extra_text != title:
             answer += f"\n\n{extra_text}"
 
@@ -161,7 +160,7 @@ class Media(Command):
         rmi = ResponseMessageItem(text=answer, attachments=attachments, reply_to=reply_to, peer_id=self.event.peer_id,
                                   message_thread_id=self.event.message_thread_id)
         res = self.bot.send_response_message_item(rmi)
-        if res.json()['ok']:
+        if res['ok']:
             self.bot.delete_message(self.event.peer_id, self.event.message.id)
 
     def get_method_and_chosen_url(self, source):
@@ -307,6 +306,8 @@ class Media(Command):
             attachment = self.bot.get_photo_attachment(content_url, peer_id=self.event.peer_id)
         elif i_api.content_type == i_api.CONTENT_TYPE_VIDEO:
             attachment = self.bot.get_video_attachment(content_url, peer_id=self.event.peer_id)
+            attachment.download_content()
+            attachment.public_download_url = None
         else:
             raise PWarning("Ссылка на инстаграмм не является видео/фото")
         return [attachment], i_api.caption

@@ -1,7 +1,6 @@
 import logging
 import threading
 import time
-import traceback
 from threading import Lock
 from threading import Thread
 from typing import List, Optional
@@ -62,16 +61,27 @@ class Bot(Thread):
             event.setup_event()
             if not event.need_a_response():
                 return
-            message = self.route(event)
+            rm = self.route(event)
             if send:
-                self.send_response_message(message)
-            return message
+                self.send_response_message(rm)
+            return rm
         except PSkip:
             pass
         except Exception:
+            rm = ResponseMessage(
+                ResponseMessageItem(
+                    text=self.ERROR_MSG,
+                    peer_id=event.peer_id,
+                    message_thread_id=event.message_thread_id
+                )
+            )
+            # exc_info = traceback.format_exc()
+            self.log_message(rm, "exception")
             if send:
-                rm = self._get_unexpected_error(event)
                 self.send_response_message(rm)
+            return rm
+        finally:
+            self.stop_activity_thread()
 
     def send_response_message_thread(self, rm: ResponseMessage):
         for rmi in rm.messages:
@@ -90,15 +100,7 @@ class Bot(Thread):
         Возвращает Response платформы
         """
 
-    def _get_unexpected_error(self, event) -> ResponseMessage:
-        exc_info = traceback.format_exc()
-        rm = ResponseMessage(
-            ResponseMessageItem(text=self.ERROR_MSG, peer_id=event.peer_id, message_thread_id=event.message_thread_id,
-                                log_level="exception", exc_info=exc_info)
-        )
-        return rm
-
-    def route(self, event: Event) -> ResponseMessage:
+    def route(self, event: Event) -> Optional[ResponseMessage]:
         """
         Выбор команды
         Если в Event есть команда, поиск не требуется
@@ -107,31 +109,29 @@ class Bot(Thread):
 
         commands = [event.command()] if event.command else COMMANDS
 
-        self.logger.debug({"event": event.to_log()})
         for command in commands:
             try:
                 if command.accept(event):
+                    self.log_event(event)
                     rm = command.__class__().check_and_start(self, event)
+                    self.log_message(rm)
                     return rm
             except (PWarning, PError) as e:
-                self.stop_activity_thread()
-                rm = ResponseMessage(ResponseMessageItem(
-                    text=e.msg,
-                    peer_id=event.peer_id,
-                    message_thread_id=event.message_thread_id,
-                    reply_to=e.reply_to,
-                    keyboard=e.keyboard,
-                    log_level=e.level
-                ))
+                rm = ResponseMessage(
+                    ResponseMessageItem(
+                        text=e.msg,
+                        peer_id=event.peer_id,
+                        message_thread_id=event.message_thread_id,
+                        reply_to=e.reply_to,
+                        keyboard=e.keyboard
+                    )
+                )
+                self.log_message(rm, e.level)
                 return rm
             except PIDK:
                 continue
             except PSkip as e:
                 raise e
-            except Exception:
-                return self._get_unexpected_error(event)
-            finally:
-                self.stop_activity_thread()
 
         # Если указана настройка не реагировать на неверные команды, то скипаем
         if event.chat and not event.chat.need_reaction:
@@ -143,8 +143,14 @@ class Bot(Thread):
             raise PSkip()
 
         similar_command, keyboard = self.get_similar_command(event, COMMANDS)
-        rm = ResponseMessage(ResponseMessageItem(text=similar_command, keyboard=keyboard, peer_id=event.peer_id,
-                                                 message_thread_id=event.message_thread_id))
+        rm = ResponseMessage(
+            ResponseMessageItem(
+                text=similar_command,
+                keyboard=keyboard,
+                peer_id=event.peer_id,
+                message_thread_id=event.message_thread_id
+            ))
+        self.log_message(rm)
         return rm
 
     def get_similar_command(self, event: Event, commands):
@@ -198,6 +204,19 @@ class Bot(Thread):
 
     # END MAIN ROUTING AND MESSAGING
 
+    # LOGGING
+
+    def log_event(self, event: Event):
+        self.logger.debug({"event": event.to_log()})
+
+    def log_message(self, message, level="debug"):
+        getattr(self.logger, level)({"message": message.to_log()})
+
+    def log_response(self, response: dict, action):
+        self.logger.debug({"response": response, "action": action})
+
+    # END LOGGING
+
     # USERS GROUPS BOTS
 
     def get_user_by_id(self, user_id, _defaults: dict = None) -> User:
@@ -222,7 +241,8 @@ class Bot(Thread):
         profile = self.get_profile_by_user(user)
         return profile
 
-    def get_profile_by_user(self, user: User, is_new=False, _defaults: dict = None) -> Profile:
+    @staticmethod
+    def get_profile_by_user(user: User, is_new=False, _defaults: dict = None) -> Profile:
         """
         Возвращает профиль по пользователю
         """
@@ -306,7 +326,8 @@ class Bot(Thread):
             )
         return bot
 
-    def get_gamer_by_profile(self, profile: Profile) -> Gamer:
+    @staticmethod
+    def get_gamer_by_profile(profile: Profile) -> Gamer:
         """
         Получение игрока по модели пользователя
         """
@@ -314,7 +335,8 @@ class Bot(Thread):
             gamer, _ = Gamer.objects.get_or_create(profile=profile)
         return gamer
 
-    def add_chat_to_profile(self, profile: Profile, chat: Chat):
+    @staticmethod
+    def add_chat_to_profile(profile: Profile, chat: Chat):
         """
         Добавление чата пользователю
         """
@@ -323,7 +345,8 @@ class Bot(Thread):
             if chat not in chats.all():
                 chats.add(chat)
 
-    def remove_chat_from_profile(self, profile: Profile, chat: Chat):
+    @staticmethod
+    def remove_chat_from_profile(profile: Profile, chat: Chat):
         """
         Удаление чата пользователю
         """

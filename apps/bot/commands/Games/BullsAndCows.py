@@ -54,7 +54,7 @@ class BullsAndCows(Command):
             rmi = ResponseMessageItem(text=answer, peer_id=self.event.peer_id,
                                       message_thread_id=self.event.message_thread_id)
             r = self.bot.send_response_message_item(rmi)
-            message_id = r.json()['result']['message_id']
+            message_id = r['result']['message_id']
             bacs.message_body = "Я создал, погнали"
             bacs.message_id = message_id
             bacs.save()

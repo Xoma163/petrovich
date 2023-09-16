@@ -348,17 +348,17 @@ def _send_message_session_or_edit(bot, event, session, rmi: ResponseMessageItem,
     if delta_messages > max_delta:
         old_msg_id = session.message_id
         r = bot.send_response_message_item(rmi)
-        message_id = r.json()['result']['message_id']
+        message_id = r['result']['message_id']
         session.message_id = message_id
         session.save()
         bot.delete_message(event.peer_id, old_msg_id)
     else:
         rmi.message_id = session.message_id
         r = bot.send_response_message_item(rmi)
-    if not r.json()['ok']:
+    if not r['ok']:
         rmi.message_id = None
         r = bot.send_response_message_item(rmi)
-        message_id = r.json()['result']['message_id']
+        message_id = r['result']['message_id']
         session.message_id = message_id
         session.save()
     bot.delete_message(event.peer_id, event.message.id)

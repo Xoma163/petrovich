@@ -121,8 +121,7 @@ class Logs(Command):
             if filter_level and item_json['levelname'] not in filter_level:
                 continue
             self.transform_logs_by_values(item_json)
-            self.wrap_long_texts(item_json.get("response"))
-            self.wrap_long_texts(item_json.get("message"))
+            self.wrap_long_texts(item_json)
             item_str = json.dumps(item_json, indent=2, ensure_ascii=False).replace('\\n', '\n')
             res.append(item_str)
 
