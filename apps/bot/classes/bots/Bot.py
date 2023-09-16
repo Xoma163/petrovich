@@ -91,13 +91,19 @@ class Bot(Thread):
         """
         Отправка ResponseMessage сообщения
         Вовзращает список результатов отправки в формате
-        [{success:bool, response:Response, response_message_item:ResponseMessageItem}]
+        [{success:bool, response:Response}]
         """
+        results = []
 
-    def send_response_message_item(self, rmi: ResponseMessageItem):
+        for rmi in rm.messages:
+            r = self.send_response_message_item(rmi)
+            results.append(r)
+        return results
+
+    def send_response_message_item(self, rmi: ResponseMessageItem) -> dict:
         """
         Отправка ResponseMessageItem сообщения
-        Возвращает Response платформы
+        Возвращает {success:bool, response:Response.json()}
         """
 
     def route(self, event: Event) -> Optional[ResponseMessage]:
@@ -114,7 +120,8 @@ class Bot(Thread):
                 if command.accept(event):
                     self.log_event(event)
                     rm = command.__class__().check_and_start(self, event)
-                    self.log_message(rm)
+                    if rm:
+                        self.log_message(rm)
                     return rm
             except (PWarning, PError) as e:
                 rm = ResponseMessage(

@@ -81,7 +81,6 @@ class GPT(Command):
             finally:
                 tries += 1
                 self.bot.stop_activity_thread()
-            print(tries)
         if not response:
             raise PWarning("Какая-то непредвиденная ошибка. Попробуйте ещё раз")
 

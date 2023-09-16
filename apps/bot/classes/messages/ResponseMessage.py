@@ -1,10 +1,6 @@
-import json
 import re
 from copy import copy
 from typing import List
-
-from apps.bot.utils.ModelJsonEncoder import ModelJsonEncoder
-from petrovich.settings import DEBUG
 
 
 class ResponseMessageItem:
@@ -110,8 +106,6 @@ class ResponseMessage:
         """
         dict_self = copy(self.__dict__)
         dict_self["messages"] = [x.to_log() for x in dict_self["messages"]]
-        if DEBUG:
-            print(json.dumps(dict_self, indent=2, ensure_ascii=False, cls=ModelJsonEncoder))
         return dict_self
 
     def to_api(self) -> dict:
@@ -122,3 +116,6 @@ class ResponseMessage:
         dict_self["messages"] = [x.to_api() for x in dict_self["messages"]]
 
         return dict_self
+
+    def __bool__(self):
+        return len(self.messages) > 0

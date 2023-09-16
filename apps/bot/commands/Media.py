@@ -153,14 +153,17 @@ class Media(Command):
         if extra_text and extra_text != title:
             answer += f"\n\n{extra_text}"
 
-        reply_to = None
-        if self.event.fwd:
-            reply_to = self.event.fwd[0].message.id
+        reply_to = self.event.fwd[0].message.id if self.event.fwd else None
 
-        rmi = ResponseMessageItem(text=answer, attachments=attachments, reply_to=reply_to, peer_id=self.event.peer_id,
-                                  message_thread_id=self.event.message_thread_id)
+        rmi = ResponseMessageItem(
+            text=answer,
+            attachments=attachments,
+            reply_to=reply_to,
+            peer_id=self.event.peer_id,
+            message_thread_id=self.event.message_thread_id
+        )
         res = self.bot.send_response_message_item(rmi)
-        if res['ok']:
+        if res['success']:
             self.bot.delete_message(self.event.peer_id, self.event.message.id)
 
     def get_method_and_chosen_url(self, source):
@@ -306,8 +309,6 @@ class Media(Command):
             attachment = self.bot.get_photo_attachment(content_url, peer_id=self.event.peer_id)
         elif i_api.content_type == i_api.CONTENT_TYPE_VIDEO:
             attachment = self.bot.get_video_attachment(content_url, peer_id=self.event.peer_id)
-            attachment.download_content()
-            attachment.public_download_url = None
         else:
             raise PWarning("Ссылка на инстаграмм не является видео/фото")
         return [attachment], i_api.caption

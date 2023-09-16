@@ -1,5 +1,4 @@
 import copy
-import json
 from typing import Optional
 
 from apps.bot.classes.consts.Consts import Platform, Role
@@ -14,8 +13,6 @@ from apps.bot.classes.messages.attachments.VideoAttachment import VideoAttachmen
 from apps.bot.classes.messages.attachments.VideoNoteAttachment import VideoNoteAttachment
 from apps.bot.classes.messages.attachments.VoiceAttachment import VoiceAttachment
 from apps.bot.models import Profile, Chat, User
-from apps.bot.utils.ModelJsonEncoder import ModelJsonEncoder
-from petrovich.settings import DEBUG
 
 
 class Event:
@@ -170,6 +167,4 @@ class Event:
 
         if dict_self['command']:
             dict_self['command'] = dict_self['command'].name
-        if DEBUG:
-            print(json.dumps(dict_self, indent=2, ensure_ascii=False, cls=ModelJsonEncoder))
         return dict_self

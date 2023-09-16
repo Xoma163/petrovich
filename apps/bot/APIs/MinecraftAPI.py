@@ -1,11 +1,12 @@
 import json
+from copy import copy
 
 from mcrcon import MCRcon
 
 from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.consts.Consts import Role
 from apps.bot.classes.consts.Exceptions import PWarning
-from apps.bot.classes.messages.ResponseMessage import ResponseMessageItem
+from apps.bot.classes.messages.ResponseMessage import ResponseMessageItem, ResponseMessage
 from apps.bot.models import Profile
 from apps.bot.utils.DoTheLinuxComand import do_the_linux_command
 from apps.bot.utils.utils import check_command_time
@@ -146,7 +147,7 @@ class MinecraftAPI:
                 result += f"\nКарта - {self.map_url}"
         return result
 
-    def send_notify(self, message: ResponseMessageItem):
+    def send_notify(self, rmi: ResponseMessageItem):
         profiles_notify = Profile.objects.filter(groups__name=Role.MINECRAFT_NOTIFY.name)
         if self.event:
             profiles_notify = profiles_notify.exclude(id=self.event.sender.id)
@@ -154,10 +155,13 @@ class MinecraftAPI:
                 users_in_chat = self.event.chat.users.all()
                 profiles_notify = profiles_notify.exclude(pk__in=users_in_chat)
         bot = TgBot()
+        rm = ResponseMessage()
         for profile in profiles_notify:
             user = profile.get_tg_user()
-            message.peer_id = user.user_id
-            bot.send_response_message_item(message)
+            rmi_copy = copy(rmi)
+            rmi_copy.peer_id = user.user_id
+            rm.messages.append(rmi_copy)
+        bot.send_response_message_thread(rm)
 
 
 minecraft_servers = [

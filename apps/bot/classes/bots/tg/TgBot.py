@@ -1,6 +1,5 @@
 import json
 import threading
-from typing import List
 
 import requests
 from numpy import inf
@@ -32,6 +31,7 @@ from petrovich.settings import env
 class TgBot(CommonBot):
     TG_SERVER = 0
     LOCAL_SERVER = 1
+
     MODE = LOCAL_SERVER
 
     MAX_VIDEO_SIZE_MB = 50 if MODE == TG_SERVER else 2000
@@ -307,65 +307,57 @@ class TgBot(CommonBot):
         self.log_response(r, "editMessageMedia")
         return r
 
-    def send_response_message(self, rm: ResponseMessage) -> List[dict]:
-        """
-        Отправка ResponseMessage сообщения
-        Вовзращает список результатов отправки в формате
-        [{success:bool, r:Response, response_message_item:ResponseMessageItem}]
-        """
-        results = []
-        for rmi in rm.messages:
-            try:
-                r = self.send_response_message_item(rmi)
-
-                if r['ok']:
-                    results.append(r)
-                    continue
-
-                # Непредвиденная ошибка телеги
-                skip_errors = [
-                    "Bad Request: canceled by new editMessageMedia request",
-                    "Bad Request: message is not modified: specified new message content and reply markup are exactly the same as a current content and reply markup of the message"
-                ]
-                catch_errors = {
-                    'Bad Request: VOICE_MESSAGES_FORBIDDEN': "Не могу отправить голосовуху из-за ваших настроек безопасности"
-                }
-                error = r['description']
-                if error in skip_errors:
-                    results.append(r)
-                    continue
-                elif error in catch_errors:
-                    msg = catch_errors[error]
-                    log_level = "warning"
-                else:
-                    msg = self.ERROR_MSG
-                    log_level = "error"
-
-                error_rmi = ResponseMessageItem(
-                    text=msg,
-                    peer_id=rmi.peer_id,
-                    message_thread_id=rmi.message_thread_id
-                )
-                self.log_message(error_rmi, log_level)
-
-                r = self.send_response_message_item(error_rmi)
-                results.append(r)
-            # Предвиденная ошибка
-            except (PWarning, PError) as e:
-                error_rmi = ResponseMessageItem(
-                    text=e.msg,
-                    peer_id=rmi.peer_id,
-                    message_thread_id=rmi.message_thread_id,
-                    reply_to=e.reply_to,
-                    keyboard=e.keyboard
-                )
-                self.log_message(error_rmi, e.level)
-
-                r = self.send_response_message_item(error_rmi)
-                results.append(r)
-        return results
-
     def send_response_message_item(self, rmi: ResponseMessageItem) -> dict:
+        try:
+            r = self._send_response_message_item(rmi)
+        except (PWarning, PError) as e:
+            error_rmi = ResponseMessageItem(
+                text=e.msg,
+                peer_id=rmi.peer_id,
+                message_thread_id=rmi.message_thread_id,
+                reply_to=e.reply_to,
+                keyboard=e.keyboard
+            )
+            self.log_message(error_rmi, e.level)
+
+            r = self._send_response_message_item(error_rmi)
+            return {'success': False, "response": r}
+
+        if r['ok']:
+            return {'success': True, "response": r}
+
+        # Непредвиденная ошибка телеги
+        skip_errors = [
+            "Bad Request: canceled by new editMessageMedia request",
+            "Bad Request: message is not modified: specified new message content and reply markup are exactly the same as a current content and reply markup of the message",
+            "Forbidden: bot was blocked by the user",
+        ]
+        catch_errors = {
+            'Bad Request: VOICE_MESSAGES_FORBIDDEN': "Не могу отправить голосовуху из-за ваших настроек безопасности",
+            'Bad Request: failed to get HTTP URL content': "Ссылка не понравилась серверу телеграмм. Внутренняя ошибка.",
+            'Bad Request: wrong file identifier/HTTP URL specified': "Ссылка не понравилась серверу телеграмм. Внутренняя ошибка."
+        }
+        error = r['description']
+        if error in skip_errors:
+            return {"success": False, "response": r}
+        elif error in catch_errors:
+            msg = catch_errors[error]
+            log_level = "warning"
+        else:
+            msg = self.ERROR_MSG
+            log_level = "error"
+
+        error_rmi = ResponseMessageItem(
+            text=msg,
+            peer_id=rmi.peer_id,
+            message_thread_id=rmi.message_thread_id
+        )
+        self.log_message(error_rmi, log_level)
+
+        r = self._send_response_message_item(error_rmi)
+        return {'success': False, "response": r}
+
+    def _send_response_message_item(self, rmi: ResponseMessageItem) -> dict:
         """
         Отправка ResponseMessageItem сообщения
         Возвращает Response.json() платформы
@@ -542,10 +534,8 @@ class TgBot(CommonBot):
     def get_file_id(self, attachment):
         uploading_chat = Chat.objects.get(pk=env.str("TG_PHOTO_UPLOADING_CHAT_PK"))
         rmi = ResponseMessageItem(attachments=[attachment], peer_id=uploading_chat.chat_id)
-        try:
-            r_json = self.send_response_message_item(rmi)
-        finally:
-            self.delete_message(uploading_chat.chat_id, r_json['result']['message_id'])
+        r_json = self.send_response_message_item(rmi)
+        self.delete_message(uploading_chat.chat_id, r_json['result']['message_id'])
 
         try:
             att = r_json['result'][attachment.type]
