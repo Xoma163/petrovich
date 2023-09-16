@@ -35,6 +35,12 @@ class TwitterAPI:
             self.caption = r['text'].rsplit(' ', 1)[0].strip()
             self.content_type = self.CONTENT_TYPE_VIDEO
             return best_video
+        elif video_info := r['extended_entities']['media'][0].get("video_info"):
+            videos = filter(lambda x: x.get('bitrate') and x['content_type'] == 'video/mp4', video_info['variants'])
+            best_video = sorted(videos, key=lambda x: x['bitrate'], reverse=True)[0]['url']
+            self.caption = r['text'].rsplit(' ', 1)[0].strip()
+            self.content_type = self.CONTENT_TYPE_VIDEO
+            return best_video
         elif r.get('media_url'):
             self.caption = r['text'].rsplit(' ', 1)[0].strip()
             self.content_type = self.CONTENT_TYPE_IMAGE
