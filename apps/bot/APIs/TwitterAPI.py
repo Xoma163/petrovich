@@ -52,7 +52,7 @@ class TwitterAPI:
             video = self._get_video(tweet_data['video_url'])
             attachments = [{self.CONTENT_TYPE_VIDEO: video}]
         elif tweet_data.get('extended_entities') and tweet_data['extended_entities']['media'][0].get("video_info"):
-            video = self._get_video(tweet_data['extended_entities']['media'][0].get("video_info"))
+            video = self._get_video(tweet_data['extended_entities']['media'][0].get("video_info", {}).get("variants"))
             attachments = [{self.CONTENT_TYPE_VIDEO: video}]
         elif tweet_data.get('media_url'):
             photos = self._get_photos(tweet_data['media_url'])
@@ -104,6 +104,6 @@ class TwitterAPI:
 
     @staticmethod
     def _get_video(video_info):
-        videos = filter(lambda x: x.get('bitrate') and x['content_type'] == 'video/mp4', video_info['variants'])
+        videos = filter(lambda x: x.get('bitrate') and x['content_type'] == 'video/mp4', video_info)
         best_video = sorted(videos, key=lambda x: x['bitrate'], reverse=True)[0]['url']
         return best_video
