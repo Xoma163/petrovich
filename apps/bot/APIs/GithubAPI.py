@@ -32,24 +32,26 @@ class GithubAPI:
             'labels': labels
         }
 
-        r = requests.post(self.ISSUES_URL, json.dumps(issue_data), headers=self.HEADERS).json()
-        logger.debug({"response": r})
+        r = requests.post(self.ISSUES_URL, json.dumps(issue_data), headers=self.HEADERS)
+        r_json = r.json()
+        logger.debug({"response": r_json})
 
         if r.status_code != 201:
             raise PError("Не удалось создать issue на github")
-        return r
+        return r_json
 
     def delete_issue(self, _id):
         issue_data = {
             "state": "closed",
             "labels": ["Не пофикшу"]
         }
-        r = requests.post(f"{self.ISSUES_URL}/{_id}", json.dumps(issue_data), headers=self.HEADERS).json()
-        logger.debug({"response": r})
+        r = requests.post(f"{self.ISSUES_URL}/{_id}", json.dumps(issue_data), headers=self.HEADERS)
+        r_json = r.json()
+        logger.debug({"response": r_json})
 
         if r.status_code != 200:
             raise PError("Не удалось закрыть issue на github")
-        return r
+        return r_json
 
     def get_all_labels(self):
         r = requests.get(self.LABELS_URL, json.dumps({}), headers=self.HEADERS).json()

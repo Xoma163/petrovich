@@ -1,6 +1,8 @@
 from apps.bot.APIs.GithubAPI import GithubAPI
+from apps.bot.APIs.ImgurAPI import ImgurAPI
 from apps.bot.classes.Command import Command
 from apps.bot.classes.messages.ResponseMessage import ResponseMessage, ResponseMessageItem
+from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
 
 
 class Issue(Command):
@@ -28,12 +30,13 @@ class Issue(Command):
             title = msg_split[0]
             body = "\n".join(msg_split[1:-1])
             tags = msg_split[-1]
-        # ToDo: решить вопрос с картинками
-        # photos = self.event.get_all_attachments([PhotoAttachment])
-        # if photos:
-        #     photo = photos[0]
-        #     image_url = upload_image_to_tg_server(photo.download_content()).public_download_url
-        #     body += f"\n![image]({image_url})"
+
+        photos = self.event.get_all_attachments([PhotoAttachment])
+        if photos:
+            for photo in photos:
+                i_api = ImgurAPI()
+                image_url = i_api.upload_image(photo.download_content())
+                body += f"\n![image]({image_url})"
         body += f"\n\nИшю от пользователя {self.event.sender} (id={self.event.sender.pk})\n" \
                 f"Данное ишю сгенерировано автоматически"
 
