@@ -28,18 +28,20 @@ class TwitterAPI:
         self.caption = ""
         self.with_replies = False
 
-    def get_attachments(self, url):
+    def get_attachments(self, url, with_threads=False):
         tweet_id = urlparse(url).path.strip('/').split('/')[-1]
         r = requests.get(self.URL_TWEET_INFO, headers=self.HEADERS, params={'tweet_id': tweet_id}).json()
         if r.get('detail') == 'Error while parsing tweet':
             raise PWarning("Ошибка на стороне API")
         logger.debug({"response": r})
 
-        time.sleep(1)
-        try:
-            post_text, post_attachments = self._get_post_with_replies(r)
-            self.with_replies = True
-        except RuntimeError:
+        if with_threads:
+            try:
+                post_text, post_attachments = self._get_post_with_replies(r)
+                self.with_replies = True
+            except RuntimeError:
+                post_text, post_attachments = self._get_text_and_attachments(r)
+        else:
             post_text, post_attachments = self._get_text_and_attachments(r)
 
         self.caption = post_text
@@ -60,6 +62,7 @@ class TwitterAPI:
         return text, attachments
 
     def _get_post_with_replies(self, tweet_data) -> (str, list):
+        time.sleep(1)
         tweet_id = tweet_data["tweet_id"]
         user_id = tweet_data['user']['user_id']
 

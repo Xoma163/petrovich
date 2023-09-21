@@ -320,7 +320,8 @@ class Media(Command):
             raise PWarning("медиа твиттер доступен только для доверенных пользователей")
 
         t_api = TwitterAPI()
-        atts = t_api.get_attachments(url)
+        with_threads = self.event.message.keys[0] in ['thread', 'threads', 'with-threads', 'тред']
+        atts = t_api.get_attachments(url, with_threads=with_threads)
         text = t_api.caption
 
         if not atts:
