@@ -255,6 +255,9 @@ class Media(Command):
     def get_reddit_attachment(self, url) -> (list, str):
         rs = RedditSaver()
         reddit_data = rs.get_from_reddit(url)
+
+        text = rs.title
+        attachments = []
         if rs.is_gif:
             attachments = [self.bot.get_gif_attachment(reddit_data, peer_id=self.event.peer_id, filename=rs.filename)]
         elif rs.is_image or rs.is_images or rs.is_gallery:
@@ -287,14 +290,11 @@ class Media(Command):
             text = replace_markdown_quotes(text, self.bot)
 
             if all_photos:
-                atatchments = [self.bot.get_photo_attachment(x, filename=rs.filename) for x in all_photos]
-                rmi = ResponseMessageItem(attachments=atatchments, peer_id=self.event.peer_id,
-                                          message_thread_id=self.event.message_thread_id)
-                self.bot.send_response_message_item(rmi)
-            return [], f"{rs.title}\n\n{text}"
+                attachments = [self.bot.get_photo_attachment(x, filename=rs.filename) for x in all_photos]
+            text = f"{rs.title}\n\n{text}"
         else:
             raise PWarning("Я хз чё за контент")
-        return attachments, rs.title
+        return attachments, text
 
     def get_instagram_attachment(self, url) -> (list, str):
         try:
@@ -337,12 +337,7 @@ class Media(Command):
                 photo = self.bot.get_photo_attachment(att_link, peer_id=self.event.peer_id)
                 attachments.append(photo)
 
-        if not t_api.with_replies or not attachments:
-            return attachments, text
-
-        rmi = ResponseMessageItem(text=text, peer_id=self.event.peer_id)
-        self.bot.send_response_message_item(rmi)
-        return attachments, ""
+        return attachments, text
 
     def get_pikabu_video(self, url) -> (list, str):
         p_api = PikabuAPI()
