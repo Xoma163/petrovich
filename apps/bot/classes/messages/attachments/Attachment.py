@@ -58,6 +58,7 @@ class Attachment:
         То есть метод позволяет преобразовывать почти из любого формата
         """
         # url
+        self.name = filename
         parsed_url = None
         if isinstance(file_like_object, str):
             parsed_url = urlparse(file_like_object)

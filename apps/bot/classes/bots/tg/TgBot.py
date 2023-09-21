@@ -40,6 +40,9 @@ class TgBot(CommonBot):
     MAX_PHOTO_SIZE = 5 if MODE == TG_SERVER else inf
     MAX_GIF_SIZE = 40 if MODE == TG_SERVER else inf
 
+    MAX_MESSAGE_TEXT_LENGTH = 4096
+    MAX_MESSAGE_TEXT_CAPTION = 1024
+
     def __init__(self):
         CommonBot.__init__(self, Platform.TG)
         self.token = env.str("TG_TOKEN")
@@ -103,16 +106,17 @@ class TgBot(CommonBot):
         """
         media = []
         files = []
-        for attachment in rmi.attachments:
+        for i, attachment in enumerate(rmi.attachments):
             if attachment.file_id:
                 media.append({'type': attachment.type, 'media': attachment.file_id})
             elif attachment.public_download_url:
                 media.append({'type': attachment.type, 'media': attachment.public_download_url})
             else:
-                files.append({'type': attachment.type, 'media': attachment.content})
+                filename = attachment.name if attachment.name else str(i)
+                files.append((filename, attachment.content))
+                media.append({'type': attachment.type, "media": f"attach://{filename}"})
 
-        if len(media) > 0:
-            media[0]['caption'] = rmi.text
+        media[0]['caption'] = default_params['caption']
 
         del default_params['caption']
         default_params['media'] = json.dumps(media)
@@ -269,14 +273,6 @@ class TgBot(CommonBot):
     def _send_text(self, default_params) -> dict:
         self.set_activity(default_params['chat_id'], ActivitiesEnum.TYPING)
         default_params['text'] = default_params.pop('caption')
-        if len(default_params['text']) > 4096:
-            # Шлём длинные сообщения чанками. Последний чанк через return
-            chunks = split_text_by_n_symbols(default_params['text'], 4096)
-            for chunk in chunks[:-1]:
-                default_params['text'] = chunk
-                r = self.requests.get('sendMessage', default_params).json()
-                self.log_response(r, "sendMessage")
-            default_params['text'] = chunks[-1]
         r = self.requests.get('sendMessage', default_params).json()
         self.log_response(r, "sendMessage")
         return r
@@ -386,6 +382,21 @@ class TgBot(CommonBot):
                 return self.edit_keyboard(params)
             return self.edit_message(params)
 
+        # Разбиение длинных сообщений на чанки
+        chunks = None
+        if params.get('caption'):
+            # Шлём длинные сообщения чанками. Последний чанк через return
+            if rmi.attachments and len(params['caption']) > self.MAX_MESSAGE_TEXT_CAPTION:
+                chunks = split_text_by_n_symbols(params['caption'], self.MAX_MESSAGE_TEXT_CAPTION)
+                first_chunk = chunks[0]
+                text = params['caption'][len(first_chunk):]
+                chunks = split_text_by_n_symbols(text, self.MAX_MESSAGE_TEXT_LENGTH)
+                chunks = [first_chunk] + chunks
+                params['caption'] = chunks[0]
+            elif len(params['caption']) > self.MAX_MESSAGE_TEXT_LENGTH:
+                chunks = split_text_by_n_symbols(params['caption'], self.MAX_MESSAGE_TEXT_LENGTH)
+                params['caption'] = chunks[0]
+
         att_map = {
             PhotoAttachment: self._send_photo,
             GifAttachment: self._send_gif,
@@ -404,6 +415,12 @@ class TgBot(CommonBot):
                 r = att_map[rmi.attachments[0].__class__](rmi, params)
         else:
             r = self._send_text(params)
+
+        # Отправка чанков отдельно
+        if chunks:
+            for chunk in chunks[1:]:
+                params['caption'] = chunk
+                self._send_text(params)
         return r
 
     # END  MAIN ROUTING AND MESSAGING
