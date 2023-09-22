@@ -82,6 +82,7 @@ class Media(Command):
                        "The Hole/WASD/Yandex Music/Pinterest/Coub/VK Video/ScopeGG/TwitchClips/Facebook video\n\n" \
                        "Ключ --nomedia позволяет не запускать команду\n" \
                        "Ключ --audio позволяет скачивать аудиодорожку для видео с ютуба\n\n" \
+                       "Ключ --thread позволяет скачивать пост с комментариями автора для твиттера\n\n" \
                        "Видосы из ютуба качаются автоматически только если длина ролика < 2 минут. \n" \
                        "Вручную с указанием команды - скачается"
     platforms = [Platform.TG]
@@ -320,7 +321,8 @@ class Media(Command):
             raise PWarning("медиа твиттер доступен только для доверенных пользователей")
 
         t_api = TwitterAPI()
-        with_threads = self.event.message.keys[0] in ['thread', 'threads', 'with-threads', 'тред']
+        with_threads = self.event.message.keys and self.event.message.keys[0] in ['thread', 'threads', 'with-threads',
+                                                                                  'тред']
         atts = t_api.get_attachments(url, with_threads=with_threads)
         text = t_api.caption
 
