@@ -36,23 +36,32 @@ class PremiereAPI:
             self._parse_movie()
 
     def parse_show(self):
+        """
+        Данный метод используется для добавления нового сериала в подписки
+        """
+
         res2 = re.findall(r"show/(.*)/", self.url)
         self.show_id = res2[0]
         params = {'limit': 100}
         r = requests.get(f"https://premier.one/uma-api/metainfo/tv/{self.show_id}/video/", params=params).json()
         logger.debug({"response": r})
         results = r['results']
-        videos = [x for x in results if x.get('type', {}).get('id') == 6]
+        videos = [x for x in results if x.get('type', {}).get('id') == 6 and x.get('season') > 0]
         trailers = [x for x in results if x.get('type', {}).get('id') == 5]
 
-        return {
-            'show_id': res2[0],
-            'title': trailers[0].get('title') if trailers else self.show_id,
-            'last_video_id': videos[-1]['id']
-        }
+        if videos:
+            return {
+                'show_id': res2[0],
+                'title': trailers[0].get('title') if trailers else self.show_id,
+                'last_video_id': videos[-1]['id']
+            }
 
     @staticmethod
     def get_last_video_ids_with_titles(show_id, last_video_id):
+        """
+        Данный метод используется для проверки новых эпизодов в сервисе подписок
+        """
+
         params = {'limit': 100}
         r = requests.get(f"https://premier.one/uma-api/metainfo/tv/{show_id}/video/", params=params).json()
         logger.debug({"response": r})

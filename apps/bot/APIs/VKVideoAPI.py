@@ -96,6 +96,10 @@ class VKVideoAPI:
         return vd.download(hls_url, threads=10), None
 
     def parse_channel(self, url):
+        """
+        Данный метод используется для добавления нового сериала в подписки
+        """
+
         content = requests.get(url, headers=self.headers).content
         bs4 = BeautifulSoup(content, "html.parser")
         title = bs4.select_one(".VideoCard__ownerLink").text
@@ -143,6 +147,10 @@ class VKVideoAPI:
             return {}
 
     def get_last_video_ids_with_titles(self, path, last_video_id=None):
+        """
+        Данный метод используется для проверки новых эпизодов в сервисе подписок
+        """
+
         url = f"{self.URL}/{path}"
         content = requests.get(url, headers=self.headers).content
         bs4 = BeautifulSoup(content, "html.parser")

@@ -20,7 +20,7 @@ MAX_USER_SUBS_COUNT = 3
 class Subscribe(Command):
     name = "подписка"
     names = ['подписки']
-    help_text = "создаёт подписку на каналы. Доступные: YouTube, The-Hole, WAST, VK"
+    help_text = "создаёт подписку на каналы. Доступные: YouTube, The-Hole, WAST, VK, Premier"
     help_texts = [
         "добавить (ссылка на канал) - создаёт подписку на канал. Бот пришлёт тебе новое видео с канала",
         "удалить (название канала) - удаляет вашу подписку на канал (если в конфе, то только по конфе, в лс только по лс)",
@@ -145,7 +145,8 @@ class Subscribe(Command):
         p_api = PremiereAPI(url)
         parsed = p_api.parse_show()
         is_stream = False
-
+        if not parsed:
+            raise PWarning("Необходима ссылка на сериал, не фильм")
         return parsed['show_id'], parsed['title'], None, parsed['last_video_id'], is_stream, None
 
     def menu_delete(self) -> ResponseMessageItem:

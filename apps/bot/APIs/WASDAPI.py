@@ -18,6 +18,10 @@ class WASDAPI:
         self.m3u8_bytes = None
 
     def parse_channel(self, url):
+        """
+        Данный метод используется для добавления нового сериала в подписки
+        """
+
         last_part = url.split('/')[-1]
 
         try:

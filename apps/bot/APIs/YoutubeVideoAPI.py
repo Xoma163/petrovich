@@ -40,6 +40,11 @@ class YoutubeVideoAPI:
         return res
 
     def get_last_video(self, channel_id):
+        """
+        Данный метод используется для добавления нового сериала в подписки
+        Данный метод используется для проверки новых эпизодов в сервисе подписок
+        """
+
         r = requests.get(f"https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}")
         if r.status_code != 200:
             raise PWarning("Не нашёл такого канала")

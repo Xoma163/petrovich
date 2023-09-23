@@ -17,6 +17,10 @@ class TheHoleAPI:
 
     @staticmethod
     def parse_channel(url):
+        """
+        Данный метод используется для добавления нового сериала в подписки
+        """
+
         content = requests.get(url).content
         bs4 = BeautifulSoup(content, 'html.parser')
         return {
@@ -42,6 +46,10 @@ class TheHoleAPI:
         self.m3u8_url = f"{base_uri}/master.m3u8"
 
     def get_last_videos_with_titles(self, channel_id, last_video_id=None):
+        """
+        Данный метод используется для проверки новых эпизодов в сервисе подписок
+        """
+
         content = requests.get(f"{self.URL}/shows/{channel_id}").content
         bs4 = BeautifulSoup(content, 'html.parser')
         last_videos = [x.attrs['href'] for x in bs4.select('a[href*=episodes]')]
