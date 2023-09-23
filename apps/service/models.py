@@ -146,11 +146,13 @@ class Subscribe(models.Model):
     SERVICE_THE_HOLE = 2
     SERVICE_WASD = 3
     SERVICE_VK = 4
+    SERVICE_PREMIERE = 5
     SERVICE_CHOICES = (
         (SERVICE_YOUTUBE, 'YouTube'),
         (SERVICE_THE_HOLE, 'The Hole'),
         (SERVICE_WASD, 'WASD'),
         (SERVICE_VK, 'VK'),
+        (SERVICE_PREMIERE, 'Premiere'),
     )
 
     author = models.ForeignKey(User, models.CASCADE, verbose_name="Автор", null=True)

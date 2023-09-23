@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 
+from apps.bot.APIs.PremiereAPI import PremiereAPI
 from apps.bot.APIs.TheHoleAPI import TheHoleAPI
 from apps.bot.APIs.VKVideoAPI import VKVideoAPI
 from apps.bot.APIs.WASDAPI import WASDAPI
@@ -68,6 +69,9 @@ class Subscribe(Command):
         elif attachment.is_vk_link:
             channel_id, title, date, last_video_id, is_stream, playlist_id = self.menu_add_vk(attachment.url)
             service = SubscribeModel.SERVICE_VK
+        elif attachment.is_premier_link:
+            channel_id, title, date, last_video_id, is_stream, playlist_id = self.menu_add_premiere(attachment.url)
+            service = SubscribeModel.SERVICE_PREMIERE
         else:
             raise PWarning("Незнакомый сервис. Доступные: \nYouTube, The-Hole, WAST, VK")
 
@@ -134,7 +138,15 @@ class Subscribe(Command):
         parsed = vk_api.parse_channel(url)
         is_stream = False
 
-        return parsed['channel_id'], parsed['title'], None, parsed['last_video_id'], is_stream, parsed['playlist_id']
+        return parsed['channel_id'], parsed['title'], None, parsed['last_video_id'], is_stream, None
+
+    @staticmethod
+    def menu_add_premiere(url):
+        p_api = PremiereAPI(url)
+        parsed = p_api.parse_show()
+        is_stream = False
+
+        return parsed['show_id'], parsed['title'], None, parsed['last_video_id'], is_stream, None
 
     def menu_delete(self) -> ResponseMessageItem:
         self.check_args(2)

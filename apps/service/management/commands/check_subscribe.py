@@ -6,6 +6,7 @@ from itertools import groupby
 
 from django.core.management import BaseCommand
 
+from apps.bot.APIs.PremiereAPI import PremiereAPI
 from apps.bot.APIs.TheHoleAPI import TheHoleAPI
 from apps.bot.APIs.VKVideoAPI import VKVideoAPI
 from apps.bot.APIs.WASDAPI import WASDAPI
@@ -13,7 +14,7 @@ from apps.bot.APIs.YoutubeVideoAPI import YoutubeVideoAPI
 from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.events.Event import Event
 from apps.bot.classes.messages.ResponseMessage import ResponseMessageItem, ResponseMessage
-from apps.bot.commands.Media import Media
+from apps.bot.commands.TrustedCommands.Media import Media
 from apps.service.models import Subscribe, VideoCache
 from petrovich.settings import env
 
@@ -44,6 +45,8 @@ class Command(BaseCommand):
             self.check_wasd_video(subs)
         elif service == Subscribe.SERVICE_VK:
             self.check_vk_video(subs)
+        elif service == Subscribe.SERVICE_PREMIERE:
+            self.check_premier_video(subs)
 
     def check_youtube_video(self, subs):
         for sub in subs:
@@ -107,6 +110,18 @@ class Command(BaseCommand):
             for sub in subs:
                 self.check_vk_video([sub])
 
+    def check_premier_video(self, subs):
+        if len(set(x.last_video_id for x in subs)) == 1:
+            p_api = PremiereAPI(None)
+            ids, titles, urls = p_api.get_last_video_ids_with_titles(subs[0].channel_id, subs[0].last_video_id)
+            if len(ids) == 0:
+                return
+
+            self.send_file_or_video(subs, ids, urls, titles, method=self.get_premiere_video_msg)
+        else:
+            for sub in subs:
+                self.check_premier_video([sub])
+
     @staticmethod
     def send_notify(sub, title, link, is_stream=False):
         bot = TgBot()
@@ -134,6 +149,15 @@ class Command(BaseCommand):
         event = Event(bot=bot)
         media_command = Media(bot, event)
         att, title = media_command.get_vk_video(link)
+        rmi = ResponseMessageItem(text=title, attachments=att)
+        return rmi
+
+    @staticmethod
+    def get_premiere_video_msg(link) -> ResponseMessageItem:
+        bot = TgBot()
+        event = Event(bot=bot)
+        media_command = Media(bot, event)
+        att, title = media_command.get_premiere_video(link)
         rmi = ResponseMessageItem(text=title, attachments=att)
         return rmi
 

@@ -56,23 +56,23 @@ FACEBOOK_URLS = ('www.facebook.com', 'facebook.com', 'fb.watch')
 PREMIERE_URLS = ('premier.one',)
 
 MEDIA_URLS = tuple(
-    list(YOUTUBE_URLS) +
-    list(YOUTUBE_MUSIC_URLS) +
-    list(REDDIT_URLS) +
-    list(TIKTOK_URLS) +
-    list(INSTAGRAM_URLS) +
-    list(TWITTER_URLS) +
-    list(PIKABU_URLS) +
-    list(THE_HOLE_URLS) +
-    list(WASD_URLS) +
-    list(YANDEX_MUSIC_URLS) +
-    list(PINTEREST_URLS) +
-    list(COUB_URLS) +
-    list(VK_URLS) +
-    list(SCOPE_GG_URLS) +
-    list(CLIPS_TWITCH_URLS) +
-    list(FACEBOOK_URLS) +
-    list(PREMIERE_URLS)
+    YOUTUBE_URLS +
+    YOUTUBE_MUSIC_URLS +
+    REDDIT_URLS +
+    TIKTOK_URLS +
+    INSTAGRAM_URLS +
+    TWITTER_URLS +
+    PIKABU_URLS +
+    THE_HOLE_URLS +
+    WASD_URLS +
+    YANDEX_MUSIC_URLS +
+    PINTEREST_URLS +
+    COUB_URLS +
+    VK_URLS +
+    SCOPE_GG_URLS +
+    CLIPS_TWITCH_URLS +
+    FACEBOOK_URLS +
+    PREMIERE_URLS
 )
 
 
@@ -82,7 +82,7 @@ class Media(Command):
     help_text = "скачивает видео из соцсетей и присылает его"
     help_texts = ["(ссылка на видео/пост) - скачивает видео из соцсетей и присылает его"]
     help_texts_extra = "Поддерживаемые соцсети: Youtube/Youtube Music/Reddit/TikTok/Instagram/Twitter/Pikabu/" \
-                       "The Hole/WASD/Yandex Music/Pinterest/Coub/VK Video/ScopeGG/TwitchClips/Facebook video\n\n" \
+                       "The Hole/WASD/Yandex Music/Pinterest/Coub/VK Video/ScopeGG/TwitchClips/Facebook video/Premier\n\n" \
                        "Ключ --nomedia позволяет не запускать команду\n" \
                        "Ключ --audio позволяет скачивать аудиодорожку для видео с ютуба\n\n" \
                        "Ключ --thread позволяет скачивать пост с комментариями автора для твиттера\n\n" \
@@ -508,16 +508,14 @@ class Media(Command):
         content_url = f_api.get_content_url(url)
 
         video = self.bot.get_video_attachment(content_url, peer_id=self.event.peer_id)
-        # raise PWarning("Ссылка на фейсбук не является видео/фото")
         return [video], f_api.caption
 
     def get_premiere_video(self, url) -> (list, str):
         p_api = PremiereAPI(url)
         p_api.parse_video()
-        video_id = f"s{p_api.season}e{p_api.episode}"
 
         try:
-            cache = VideoCache.objects.get(channel_id=p_api.show_name, video_id=video_id)
+            cache = VideoCache.objects.get(channel_id=p_api.show_id, video_id=p_api.video_id)
         except VideoCache.DoesNotExist:
             try:
                 self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.UPLOAD_VIDEO)
@@ -525,11 +523,14 @@ class Media(Command):
             finally:
                 self.bot.stop_activity_thread()
 
-            filename = f"{p_api.show_name}_{video_id}"
+            if p_api.is_series:
+                filename = f"{p_api.show_id}_s{p_api.season}e{p_api.episode}"
+            else:
+                filename = f"{p_api.show_id}"
 
             cache = self._save_video_to_media_cache(
-                p_api.show_name,
-                video_id,
+                p_api.show_id,
+                p_api.video_id,
                 filename,
                 video
             )

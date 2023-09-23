@@ -27,6 +27,10 @@ class LinkAttachment(Attachment):
     def is_vk_link(self):
         return self._check_link(["vk.com"])
 
+    @property
+    def is_premier_link(self):
+        return self._check_link(["premier.one"])
+
     def _check_link(self, urls):
         parsed_url = urlparse(self.url)
         return parsed_url.hostname.replace('www.', '').lower() in urls
