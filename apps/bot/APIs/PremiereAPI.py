@@ -38,4 +38,4 @@ class PremiereAPI:
         master_m3u8_url = r['video_balancer']['default']
 
         vd = VideoDownloader()
-        vd.download(master_m3u8_url, threads=10)
+        return vd.download(master_m3u8_url, threads=10)
