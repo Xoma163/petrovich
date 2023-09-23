@@ -12,6 +12,7 @@ from apps.bot.APIs.FacebookVideoAPI import FacebookVideoAPI
 from apps.bot.APIs.InstagramAPI import InstagramAPI
 from apps.bot.APIs.PikabuAPI import PikabuAPI
 from apps.bot.APIs.PinterestAPI import PinterestAPI
+from apps.bot.APIs.PremiereAPI import PremiereAPI
 from apps.bot.APIs.RedditSaver import RedditSaver
 from apps.bot.APIs.TheHoleAPI import TheHoleAPI
 from apps.bot.APIs.TikTokAPI import TikTokAPI
@@ -52,6 +53,7 @@ VK_URLS = ('vk.com',)
 SCOPE_GG_URLS = ('app.scope.gg',)
 CLIPS_TWITCH_URLS = ('clips.twitch.tv',)
 FACEBOOK_URLS = ('www.facebook.com', 'facebook.com', 'fb.watch')
+PREMIERE_URLS = ('premier.one',)
 
 MEDIA_URLS = tuple(
     list(YOUTUBE_URLS) +
@@ -69,7 +71,8 @@ MEDIA_URLS = tuple(
     list(VK_URLS) +
     list(SCOPE_GG_URLS) +
     list(CLIPS_TWITCH_URLS) +
-    list(FACEBOOK_URLS)
+    list(FACEBOOK_URLS) +
+    list(PREMIERE_URLS)
 )
 
 
@@ -185,6 +188,7 @@ class Media(Command):
             SCOPE_GG_URLS: self.get_scope_gg_video,
             CLIPS_TWITCH_URLS: self.get_clips_twitch_video,
             FACEBOOK_URLS: self.get_facebook_video,
+            PREMIERE_URLS: self.get_premiere_video,
         }
 
         urls = get_urls_from_text(source)
@@ -431,6 +435,10 @@ class Media(Command):
 
     def get_vk_video(self, url) -> (list, str):
         vk_v_api = VKVideoAPI()
+        r = re.findall(r'\?(list=.*)', url)
+        if r:
+            url = url.replace(r[0], "")
+            url = url.rstrip("?")
         video_info = vk_v_api.get_video_info(url)
 
         if not video_info and not self.has_command_name > 120:
@@ -502,6 +510,35 @@ class Media(Command):
         video = self.bot.get_video_attachment(content_url, peer_id=self.event.peer_id)
         # raise PWarning("Ссылка на фейсбук не является видео/фото")
         return [video], f_api.caption
+
+    def get_premiere_video(self, url) -> (list, str):
+        p_api = PremiereAPI(url)
+        p_api.parse_video()
+        video_id = f"s{p_api.season}e{p_api.episode}"
+
+        try:
+            cache = VideoCache.objects.get(channel_id=p_api.show_name, video_id=video_id)
+        except VideoCache.DoesNotExist:
+            try:
+                self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.UPLOAD_VIDEO)
+                video = p_api.download_video()
+            finally:
+                self.bot.stop_activity_thread()
+
+            filename = f"{p_api.show_name}_{video_id}"
+
+            cache = self._save_video_to_media_cache(
+                p_api.show_name,
+                video_id,
+                filename,
+                video
+            )
+        filesize_mb = len(cache.video) / 1024 / 1024
+        attachments = []
+        if filesize_mb < self.bot.MAX_VIDEO_SIZE_MB:
+            attachments = [self.bot.get_video_attachment(cache.video, peer_id=self.event.peer_id)]
+        msg = p_api.title + f"\nCкачать можно здесь {self.bot.get_formatted_url('здесь', MAIN_SITE + cache.video.url)}"
+        return attachments, msg
 
     @staticmethod
     def _save_video_to_media_cache(channel_id, video_id, name, content):

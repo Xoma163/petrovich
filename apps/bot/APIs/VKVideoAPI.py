@@ -1,6 +1,4 @@
 import json
-import os
-from tempfile import NamedTemporaryFile
 from typing import Tuple, Optional
 from urllib.parse import urlparse
 
@@ -10,7 +8,7 @@ from bs4 import BeautifulSoup
 
 from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.utils.AudioVideoMuxer import AudioVideoMuxer
-from apps.bot.utils.DoTheLinuxComand import do_the_linux_command
+from apps.bot.utils.VideoDownloader import VideoDownloader
 
 
 class VKVideoAPI:
@@ -94,14 +92,8 @@ class VKVideoAPI:
 
     @staticmethod
     def _get_video_hls(hls_url) -> tuple[bytes, None]:
-        tmp_video_file = NamedTemporaryFile().name
-        try:
-            do_the_linux_command(f"yt-dlp -o {tmp_video_file} {hls_url}")
-            with open(tmp_video_file, 'rb') as file:
-                video_content = file.read()
-        finally:
-            os.remove(tmp_video_file)
-        return video_content, None
+        vd = VideoDownloader()
+        return vd.download(hls_url, threads=10), None
 
     def parse_channel(self, url):
         content = requests.get(url, headers=self.headers).content

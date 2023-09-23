@@ -12,7 +12,7 @@ class M3U8(m3u8.M3U8):
 
         if self.playlists:
             if load_high_quality_playlist:
-                self.playlists[-1].load()
+                self.get_playlist_with_best_quality().load()
             elif self.load_playlists:
                 self.playlists.load()
 

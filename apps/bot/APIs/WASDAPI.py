@@ -47,6 +47,7 @@ class WASDAPI:
         channel_media_data = r['result'][0]
         user_id = channel_media_data['user_id']
         base_uri = f"{self.CDN_URL}live/{user_id}"
+        base_playlist_uri = f"{self.CDN_URL}live/{user_id}/"
 
         self.title = channel_media_data['media_container_name']
         self.show_name = channel_media_data['media_container_user']['user_login']
@@ -54,8 +55,7 @@ class WASDAPI:
             ['media_meta']['media_archive_url']
 
         master_m3u8 = requests.get(master_m3u8_url).text
-        base_playlist_uri = f"https://cdn-volta.wasd.tv/live/{user_id}/"
-        _m3u8 = M3U8(master_m3u8, base_uri=base_uri, load_playlists=False, load_high_quality_playlist=True,
+        _m3u8 = M3U8(master_m3u8, base_uri=base_uri, load_high_quality_playlist=True,
                      base_playlists_uri=base_playlist_uri)
         m3u8 = _m3u8.get_playlist_with_best_quality().loaded.dumps_bytes()
         self.m3u8_bytes = m3u8

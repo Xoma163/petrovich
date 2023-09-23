@@ -1,10 +1,7 @@
-import os
-from tempfile import NamedTemporaryFile
-
 import requests
 from bs4 import BeautifulSoup
 
-from apps.bot.utils.DoTheLinuxComand import do_the_linux_command
+from apps.bot.utils.VideoDownloader import VideoDownloader
 
 
 class TheHoleAPI:
@@ -67,11 +64,5 @@ class TheHoleAPI:
         if not self.m3u8_url:
             self.parse_video(url)
 
-        tmp_video_file = NamedTemporaryFile().name
-        try:
-            do_the_linux_command(f"yt-dlp -o {tmp_video_file} {self.m3u8_url}")
-            with open(tmp_video_file, 'rb') as file:
-                video_content = file.read()
-        finally:
-            os.remove(tmp_video_file)
-        return video_content
+        vd = VideoDownloader()
+        return vd.download(self.m3u8_url)
