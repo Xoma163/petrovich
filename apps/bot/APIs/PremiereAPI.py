@@ -1,8 +1,11 @@
+import logging
 import re
 
 import requests
 
 from apps.bot.utils.VideoDownloader import VideoDownloader
+
+logger = logging.getLogger('bot')
 
 
 class PremiereAPI:
@@ -37,6 +40,7 @@ class PremiereAPI:
         self.show_id = res2[0]
         params = {'limit': 100}
         r = requests.get(f"https://premier.one/uma-api/metainfo/tv/{self.show_id}/video/", params=params).json()
+        logger.debug({"response": r})
         results = r['results']
         videos = [x for x in results if x.get('type', {}).get('id') == 6]
         trailers = [x for x in results if x.get('type', {}).get('id') == 5]
@@ -51,6 +55,7 @@ class PremiereAPI:
     def get_last_video_ids_with_titles(show_id, last_video_id):
         params = {'limit': 100}
         r = requests.get(f"https://premier.one/uma-api/metainfo/tv/{show_id}/video/", params=params).json()
+        logger.debug({"response": r})
         results = r['results']
 
         videos = [x for x in results if x.get('type', {}).get('id') == 6]
@@ -74,6 +79,7 @@ class PremiereAPI:
 
         params = {"season": self.season, 'episode': self.episode}
         r = requests.get(f"https://premier.one/uma-api/metainfo/tv/{self.show_id}/video/", params=params).json()
+        logger.debug({"response": r})
         result = r['results'][0]
         self.video_id = result['id']
         self.title = result['title_for_player'] or result['title_for_card']
@@ -81,6 +87,7 @@ class PremiereAPI:
     def _parse_movie(self):
         self.is_movie = True
         r = requests.get(f"https://premier.one/uma-api/metainfo/tv/{self.show_id}/video/").json()
+        logger.debug({"response": r})
         result = r['results'][0]
         self.video_id = result['id']
         self.title = result['title_for_player'] or result['title_for_card']
@@ -91,6 +98,7 @@ class PremiereAPI:
 
         r = requests.get(
             f"https://premier.one/api/play/options/{self.video_id}/?format=json&no_404=true&referer={self.url}").json()
+        logger.debug({"response": r})
         master_m3u8_url = r['video_balancer']['default']
 
         vd = VideoDownloader()
