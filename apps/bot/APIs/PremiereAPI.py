@@ -48,7 +48,7 @@ class PremiereAPI:
         return {
             'show_id': res2[0],
             'title': trailers[0].get('title') if trailers else self.show_id,
-            'last_video_id': videos[-2]['id']
+            'last_video_id': videos[-1]['id']
         }
 
     @staticmethod
