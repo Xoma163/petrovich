@@ -2,7 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from apps.bot.api.subscribe_service import SubscribeService
-from apps.bot.utils.VideoDownloader import VideoDownloader
+from apps.bot.utils.video.downloader import VideoDownloader
 
 
 class TheHole(SubscribeService):

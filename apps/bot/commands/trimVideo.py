@@ -9,8 +9,8 @@ from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.messages.attachments.link import LinkAttachment
 from apps.bot.classes.messages.attachments.video import VideoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
-from apps.bot.utils.VideoTrimmer import VideoTrimmer
 from apps.bot.utils.utils import prepend_symbols, append_symbols
+from apps.bot.utils.video.trimmer import VideoTrimmer
 
 
 class TrimVideo(Command):

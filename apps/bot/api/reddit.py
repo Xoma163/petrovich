@@ -4,8 +4,8 @@ import requests
 from bs4 import BeautifulSoup
 
 from apps.bot.classes.const.exceptions import PWarning
-from apps.bot.utils.audio_video_muxer import AudioVideoMuxer
 from apps.bot.utils.utils import get_url_file_ext
+from apps.bot.utils.video.muxer import AudioVideoMuxer
 
 
 class Reddit:

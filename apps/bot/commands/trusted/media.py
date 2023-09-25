@@ -30,9 +30,9 @@ from apps.bot.classes.event import Event
 from apps.bot.classes.messages.attachments.link import LinkAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.commands.trimVideo import TrimVideo
-from apps.bot.utils.VideoTrimmer import VideoTrimmer
 from apps.bot.utils.utils import get_urls_from_text, replace_markdown_links, replace_markdown_bolds, \
     replace_markdown_quotes
+from apps.bot.utils.video.trimmer import VideoTrimmer
 from apps.service.models import VideoCache
 from petrovich.settings import MAIN_SITE
 
