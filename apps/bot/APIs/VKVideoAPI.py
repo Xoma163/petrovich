@@ -6,12 +6,13 @@ import requests
 import xmltodict
 from bs4 import BeautifulSoup
 
+from apps.bot.APIs.SubscribeService import SubscribeService
 from apps.bot.classes.consts.Exceptions import PWarning
 from apps.bot.utils.AudioVideoMuxer import AudioVideoMuxer
 from apps.bot.utils.VideoDownloader import VideoDownloader
 
 
-class VKVideoAPI:
+class VKVideoAPI(SubscribeService):
     URL = "https://vk.com/video"
     headers = {
         'authority': 'vk.com',
@@ -30,6 +31,7 @@ class VKVideoAPI:
     }
 
     def __init__(self):
+        super().__init__()
         self.title = None
 
     def get_video(self, url):
@@ -95,34 +97,6 @@ class VKVideoAPI:
         vd = VideoDownloader()
         return vd.download(hls_url, threads=10), None
 
-    def parse_channel(self, url):
-        """
-        Данный метод используется для добавления нового сериала в подписки
-        """
-
-        content = requests.get(url, headers=self.headers).content
-        bs4 = BeautifulSoup(content, "html.parser")
-        title = bs4.select_one(".VideoCard__ownerLink").text
-        if 'playlist' in url:
-            _playlist_id = url.rsplit('_', 1)[1]
-            videos = bs4.find('div', {'id': f"video_subtab_pane_playlist_{_playlist_id}"}) \
-                .find_all('div', {'class': 'VideoCard__info'})
-            show_name = bs4.find("title").text.split(" | ", 1)[0]
-            title = f"{title} | {show_name}"
-        else:
-            videos = bs4.find('div', {'id': "video_subtab_pane_all"}).find_all('div', {'class': 'VideoCard__info'})
-        last_video = videos[0]
-        last_video_id = last_video.find("a", {"class": "VideoCard__title"}).attrs['data-id']
-
-        channel_id = bs4.select_one('.VideoCard__additionalInfo a').attrs['href'].split('/')[-1]
-        playlist_id = urlparse(url).path.split('/', 2)[2]
-        return {
-            'title': title,
-            'last_video_id': last_video_id,
-            'channel_id': channel_id,
-            'playlist_id': playlist_id if channel_id != playlist_id else None
-        }
-
     def get_video_info(self, url):
         content = requests.get(url, headers=self.headers).content
         bs4 = BeautifulSoup(content, 'html.parser')
@@ -146,12 +120,34 @@ class VKVideoAPI:
         except:
             return {}
 
-    def get_last_video_ids_with_titles(self, path, last_video_id=None):
-        """
-        Данный метод используется для проверки новых эпизодов в сервисе подписок
-        """
+    def get_data_to_add_new_subscribe(self, url) -> dict:
+        content = requests.get(url, headers=self.headers).content
+        bs4 = BeautifulSoup(content, "html.parser")
+        title = bs4.select_one(".VideoCard__ownerLink").text
+        if 'playlist' in url:
+            _playlist_id = url.rsplit('_', 1)[1]
+            videos = bs4.find('div', {'id': f"video_subtab_pane_playlist_{_playlist_id}"}) \
+                .find_all('div', {'class': 'VideoCard__info'})
+            show_name = bs4.find("title").text.split(" | ", 1)[0]
+            title = f"{title} | {show_name}"
+        else:
+            videos = bs4.find('div', {'id': "video_subtab_pane_all"}).find_all('div', {'class': 'VideoCard__info'})
+        last_video = videos[0]
+        last_video_id = last_video.find("a", {"class": "VideoCard__title"}).attrs['data-id']
 
-        url = f"{self.URL}/{path}"
+        channel_id = bs4.select_one('.VideoCard__additionalInfo a').attrs['href'].split('/')[-1]
+        playlist_id = urlparse(url).path.split('/', 2)[2]
+
+        return {
+            'channel_id': channel_id,
+            'title': title,
+            'last_video_id': last_video_id,
+            'is_stream': None,
+            'playlist_id': playlist_id if channel_id != playlist_id else None
+        }
+
+    def get_filtered_new_videos(self, channel_id, last_video_id, **kwargs) -> dict:
+        url = f"{self.URL}/{channel_id}"
         content = requests.get(url, headers=self.headers).content
         bs4 = BeautifulSoup(content, "html.parser")
 
@@ -175,4 +171,6 @@ class VKVideoAPI:
 
         ids = list(reversed(ids))
         titles = list(reversed(titles))
-        return ids, titles
+        urls = [f"{self.URL}{x}" for x in ids]
+
+        return {"ids": ids, "titles": titles, "urls": urls}

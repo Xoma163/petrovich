@@ -3,13 +3,15 @@ import re
 
 import requests
 
+from apps.bot.APIs.SubscribeService import SubscribeService
 from apps.bot.utils.VideoDownloader import VideoDownloader
 
 logger = logging.getLogger('bot')
 
 
-class PremiereAPI:
-    def __init__(self, url: str):
+class PremiereAPI(SubscribeService):
+    def __init__(self, url: str = None):
+        super().__init__()
         if url and not url.endswith("/"):
             url += "/"
         self.url = url
@@ -35,69 +37,18 @@ class PremiereAPI:
             self.show_id = res2[0]
             self._parse_movie()
 
-    def parse_show(self):
-        """
-        Данный метод используется для добавления нового сериала в подписки
-        """
-
-        res2 = re.findall(r"show/(.*)/", self.url)
-        self.show_id = res2[0]
-        params = {'limit': 100}
-        r = requests.get(f"https://premier.one/uma-api/metainfo/tv/{self.show_id}/video/", params=params).json()
-        logger.debug({"response": r})
-        results = r['results']
-        videos = [x for x in results if x.get('type', {}).get('id') == 6 and x.get('season') > 0]
-        trailers = [x for x in results if x.get('type', {}).get('id') == 5]
-
-        if videos:
-            return {
-                'show_id': res2[0],
-                'title': trailers[0].get('title') if trailers else self.show_id,
-                'last_video_id': videos[-1]['id']
-            }
-
-    @staticmethod
-    def get_last_video_ids_with_titles(show_id, last_video_id):
-        """
-        Данный метод используется для проверки новых эпизодов в сервисе подписок
-        """
-
-        params = {'limit': 100}
-        r = requests.get(f"https://premier.one/uma-api/metainfo/tv/{show_id}/video/", params=params).json()
-        logger.debug({"response": r})
-        results = r['results']
-
-        videos = [x for x in results if x.get('type', {}).get('id') == 6]
-
-        ids = [x['id'] for x in videos]
-        titles = [x['title'] for x in videos]
-        urls = [f"https://premier.one/show/{show_id}/season/{x['season']}/episode/{x['episode']}" for x in videos]
-
-        try:
-            index = ids.index(last_video_id) + 1
-            ids = ids[index:]
-            titles = titles[index:]
-            urls = urls[index:]
-        except IndexError:
-            pass
-
-        return ids, titles, urls
-
     def _parse_series(self):
         self.is_series = True
 
         params = {"season": self.season, 'episode': self.episode}
-        r = requests.get(f"https://premier.one/uma-api/metainfo/tv/{self.show_id}/video/", params=params).json()
-        logger.debug({"response": r})
-        result = r['results'][0]
+        result = self._get_videos(self.show_id, params)[0]
+
         self.video_id = result['id']
         self.title = result['title_for_player'] or result['title_for_card']
 
     def _parse_movie(self):
         self.is_movie = True
-        r = requests.get(f"https://premier.one/uma-api/metainfo/tv/{self.show_id}/video/").json()
-        logger.debug({"response": r})
-        result = r['results'][0]
+        result = self._get_videos(self.show_id, {})[0]
         self.video_id = result['id']
         self.title = result['title_for_player'] or result['title_for_card']
 
@@ -112,3 +63,51 @@ class PremiereAPI:
 
         vd = VideoDownloader()
         return vd.download(master_m3u8_url, threads=10)
+
+    @staticmethod
+    def _get_videos(channel_id, params):
+        r = requests.get(f"https://premier.one/uma-api/metainfo/tv/{channel_id}/video/", params=params).json()
+        logger.debug({"response": r})
+        results = r['results']
+        return results
+
+    def get_data_to_add_new_subscribe(self, url) -> dict:
+        if not url.endswith('/'):
+            url += "/"
+        res2 = re.findall(r"show/(.*)/", url)
+        show_id = res2[0]
+
+        params = {'limit': 100}
+        results = self._get_videos(show_id, params)
+
+        videos = [x for x in results if x.get('type', {}).get('id') == 6 and x.get('season') > 0]
+        trailers = [x for x in results if x.get('type', {}).get('id') == 5]
+
+        if videos:
+            return {
+                'channel_id': show_id,
+                'title': trailers[0].get('title') if trailers else show_id,
+                'last_video_id': videos[-1]['id'],
+                'is_stream': False,
+                'playlist_id': None
+            }
+
+    def get_filtered_new_videos(self, channel_id, last_video_id, **kwargs) -> dict:
+        params = {'limit': 100}
+        results = self._get_videos(channel_id, params)
+
+        videos = [x for x in results if x.get('type', {}).get('id') == 6]
+
+        ids = [x['id'] for x in videos]
+        titles = [x['title'] for x in videos]
+        urls = [f"https://premier.one/show/{channel_id}/season/{x['season']}/episode/{x['episode']}" for x in videos]
+
+        try:
+            index = ids.index(last_video_id) + 1
+            ids = ids[index:]
+            titles = titles[index:]
+            urls = urls[index:]
+        except IndexError:
+            pass
+
+        return {"ids": ids, "titles": titles, "urls": urls}

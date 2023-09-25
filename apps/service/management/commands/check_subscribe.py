@@ -9,10 +9,10 @@ from django.core.management import BaseCommand
 from apps.bot.APIs.PremiereAPI import PremiereAPI
 from apps.bot.APIs.TheHoleAPI import TheHoleAPI
 from apps.bot.APIs.VKVideoAPI import VKVideoAPI
-from apps.bot.APIs.WASDAPI import WASDAPI
 from apps.bot.APIs.YoutubeVideoAPI import YoutubeVideoAPI
 from apps.bot.classes.bots.tg.TgBot import TgBot
 from apps.bot.classes.events.Event import Event
+from apps.bot.classes.messages.Message import Message
 from apps.bot.classes.messages.ResponseMessage import ResponseMessageItem, ResponseMessage
 from apps.bot.commands.TrustedCommands.Media import Media
 from apps.service.models import Subscribe, VideoCache
@@ -30,134 +30,52 @@ class Command(BaseCommand):
         subs = Subscribe.objects.all()
         groupped_subs = groupby(subs.order_by("channel_id"), lambda x: (x.service, x.channel_id))
         for (service, _), subs in groupped_subs:
-            subs = list(subs)
-            # try:
-            self.check_subs(service, subs)
-            # except Exception:
-            #     logger.exception("Ошибка в проверке/отправке оповещения о стриме")
+            service_class = {
+                Subscribe.SERVICE_YOUTUBE: YoutubeVideoAPI,
+                Subscribe.SERVICE_THE_HOLE: TheHoleAPI,
+                Subscribe.SERVICE_VK: VKVideoAPI,
+                Subscribe.SERVICE_PREMIERE: PremiereAPI
+            }
+            service_media_method = {
+                Subscribe.SERVICE_YOUTUBE: "get_youtube_video",
+                Subscribe.SERVICE_THE_HOLE: "get_the_hole_video",
+                Subscribe.SERVICE_VK: "get_vk_video",
+                Subscribe.SERVICE_PREMIERE: "get_premiere_video"
+            }
+            sub_class = service_class[service]
+            media_method = service_media_method[service]
+            self.check_video(list(subs), sub_class, media_method)
 
-    def check_subs(self, service, subs):
-        if service == Subscribe.SERVICE_YOUTUBE:
-            self.check_youtube_video(subs)
-        elif service == Subscribe.SERVICE_THE_HOLE:
-            self.check_the_hole_video(subs)
-        elif service == Subscribe.SERVICE_WASD:
-            self.check_wasd_video(subs)
-        elif service == Subscribe.SERVICE_VK:
-            self.check_vk_video(subs)
-        elif service == Subscribe.SERVICE_PREMIERE:
-            self.check_premier_video(subs)
-
-    def check_youtube_video(self, subs):
-        for sub in subs:
-            youtube_info = YoutubeVideoAPI()
-            youtube_data = youtube_info.get_last_video(sub.channel_id)
-            if not youtube_data['last_video']['date'] > sub.date:
-                return
-            is_shorts = youtube_data['last_video']['is_shorts']
-            if sub.youtube_ignore_shorts and is_shorts:
-                sub.date = youtube_data['last_video']['date']
-                sub.last_video_id = youtube_data['last_video']['id']  # прост так.
-                sub.save()
-                return
-            title = youtube_data['last_video']['title']
-            link = youtube_data['last_video']['link']
-            self.send_notify(sub, title, link)
-
-            sub.date = youtube_data['last_video']['date']
-            sub.save()
-            time.sleep(1)
-
-    def check_the_hole_video(self, subs):
+    def check_video(self, subs, sub_class, media_method):
         if len(set(x.last_video_id for x in subs)) == 1:
-            th_api = TheHoleAPI()
-            ids, titles = th_api.get_last_videos_with_titles(subs[0].channel_id, subs[0].last_video_id)
-            if len(ids) == 0:
+            yt_api = sub_class()
+            res = yt_api.get_filtered_new_videos(subs[0].channel_id, subs[0].last_video_id)
+            if not res['ids']:
                 return
 
-            urls = [f"{th_api.URL}{link}" for link in ids]
-            self.send_file_or_video(subs, ids, urls, titles, method=self.get_the_hole_video_msg)
+            self.send_file_or_video(subs, res["ids"], res["urls"], res["titles"], method=media_method)
         else:
             for sub in subs:
-                self.check_the_hole_video([sub])
-
-    def check_wasd_video(self, subs):
-        for sub in subs:
-            wasd = WASDAPI()
-            channel_is_live = wasd.channel_is_live(sub.title)
-            if not channel_is_live or sub.last_stream_status:
-                sub.last_stream_status = channel_is_live
-                sub.save()
-                return
-
-            link = f"{wasd.URL}{sub.title}"
-            self.send_notify(sub, wasd.title, link, is_stream=True)
-
-            sub.last_stream_status = channel_is_live
-            sub.save()
-
-    def check_vk_video(self, subs):
-        if len(set(x.last_video_id for x in subs)) == 1:
-            vk_v_api = VKVideoAPI()
-            ids, titles = vk_v_api.get_last_video_ids_with_titles(subs[0].playlist_id or subs[0].channel_id,
-                                                                  subs[0].last_video_id)
-            if len(ids) == 0:
-                return
-
-            urls = [f"{vk_v_api.URL}{x}" for x in ids]
-            self.send_file_or_video(subs, ids, urls, titles, method=self.get_vk_video_msg)
-        else:
-            for sub in subs:
-                self.check_vk_video([sub])
-
-    def check_premier_video(self, subs):
-        if len(set(x.last_video_id for x in subs)) == 1:
-            p_api = PremiereAPI(None)
-            ids, titles, urls = p_api.get_last_video_ids_with_titles(subs[0].channel_id, subs[0].last_video_id)
-            if len(ids) == 0:
-                return
-
-            self.send_file_or_video(subs, ids, urls, titles, method=self.get_premiere_video_msg)
-        else:
-            for sub in subs:
-                self.check_premier_video([sub])
+                self.check_video([sub], sub_class, media_method)
 
     @staticmethod
-    def send_notify(sub, title, link, is_stream=False):
+    def send_notify(sub, title, link):
         bot = TgBot()
 
-        new_video_text = "Новое видео" if not is_stream else "Стрим"
-
-        answer = f"{new_video_text} на канале {sub.title}\n" \
+        answer = f"Новое видео на канале {sub.title}\n" \
                  f"{bot.get_formatted_url(title, link)}"
         logger.info(f"Отправил уведомление по подписке с id={sub.pk}")
         rmi = ResponseMessageItem(text=answer, peer_id=sub.peer_id, message_thread_id=sub.message_thread_id)
         bot.send_response_message_item(rmi)
 
     @staticmethod
-    def get_the_hole_video_msg(link) -> ResponseMessageItem:
+    def get_media_result_msg(link, method) -> ResponseMessageItem:
         bot = TgBot()
         event = Event(bot=bot)
+        event.message = Message()
         media_command = Media(bot, event)
-        att, title = media_command.get_the_hole_video(link)
-        rmi = ResponseMessageItem(text=title, attachments=att)
-        return rmi
-
-    @staticmethod
-    def get_vk_video_msg(link) -> ResponseMessageItem:
-        bot = TgBot()
-        event = Event(bot=bot)
-        media_command = Media(bot, event)
-        att, title = media_command.get_vk_video(link)
-        rmi = ResponseMessageItem(text=title, attachments=att)
-        return rmi
-
-    @staticmethod
-    def get_premiere_video_msg(link) -> ResponseMessageItem:
-        bot = TgBot()
-        event = Event(bot=bot)
-        media_command = Media(bot, event)
-        att, title = media_command.get_premiere_video(link)
+        media_command.has_command_name = True
+        att, title = getattr(media_command, method)(link)
         rmi = ResponseMessageItem(text=title, attachments=att)
         return rmi
 
@@ -165,7 +83,7 @@ class Command(BaseCommand):
         bot = TgBot()
         rm = ResponseMessage()
         for i, url in enumerate(urls):
-            message = method(url)
+            message = self.get_media_result_msg(url, method)
             if message.attachments:
                 att = message.attachments[0]
                 if not att.file_id:

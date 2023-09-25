@@ -20,10 +20,6 @@ class LinkAttachment(Attachment):
         return self._check_link(["the-hole.tv"])
 
     @property
-    def is_wasd_link(self):
-        return self._check_link(["wasd.tv"])
-
-    @property
     def is_vk_link(self):
         return self._check_link(["vk.com"])
 

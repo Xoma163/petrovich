@@ -1,10 +1,6 @@
-import requests
-from bs4 import BeautifulSoup
-
 from apps.bot.APIs.PremiereAPI import PremiereAPI
 from apps.bot.APIs.TheHoleAPI import TheHoleAPI
 from apps.bot.APIs.VKVideoAPI import VKVideoAPI
-from apps.bot.APIs.WASDAPI import WASDAPI
 from apps.bot.APIs.YoutubeVideoAPI import YoutubeVideoAPI
 from apps.bot.classes.Command import Command
 from apps.bot.classes.bots.tg.TgBot import TgBot
@@ -58,96 +54,72 @@ class Subscribe(Command):
 
         # ToDo: сделать красиво
         if attachment.is_youtube_link:
-            channel_id, title, date, last_video_id, is_stream, playlist_id = self.menu_add_youtube(attachment.url)
-            service = SubscribeModel.SERVICE_YOUTUBE
+            data = self.add_youtube(attachment.url)
         elif attachment.is_the_hole_link:
-            channel_id, title, date, last_video_id, is_stream, playlist_id = self.menu_add_the_hole(attachment.url)
-            service = SubscribeModel.SERVICE_THE_HOLE
-        elif attachment.is_wasd_link:
-            channel_id, title, date, last_video_id, is_stream, playlist_id = self.menu_add_wasd(attachment.url)
-            service = SubscribeModel.SERVICE_WASD
+            data = self.add_the_hole(attachment.url)
         elif attachment.is_vk_link:
-            channel_id, title, date, last_video_id, is_stream, playlist_id = self.menu_add_vk(attachment.url)
-            service = SubscribeModel.SERVICE_VK
+            data = self.add_vk(attachment.url)
         elif attachment.is_premier_link:
-            channel_id, title, date, last_video_id, is_stream, playlist_id = self.menu_add_premiere(attachment.url)
-            service = SubscribeModel.SERVICE_PREMIERE
+            data = self.add_premiere(attachment.url)
         else:
-            raise PWarning("Незнакомый сервис. Доступные: \nYouTube, The-Hole, WAST, VK")
+            raise PWarning("Незнакомый сервис. Доступные: \nYouTube, The-Hole, VK, Premier")
 
         if self.event.chat:
-            existed_sub = SubscribeModel.objects.filter(chat=self.event.chat, channel_id=channel_id,
-                                                        playlist_id=playlist_id)
+            existed_sub = SubscribeModel.objects.filter(
+                chat=self.event.chat,
+                channel_id=data["channel_id"],
+                playlist_id=data["playlist_id"]
+            )
         else:
-            existed_sub = SubscribeModel.objects.filter(chat__isnull=True, channel_id=channel_id,
-                                                        playlist_id=playlist_id)
+            existed_sub = SubscribeModel.objects.filter(
+                chat__isnull=True,
+                author=self.event.user,
+                channel_id=data["channel_id"],
+                playlist_id=data["playlist_id"]
+            )
         if existed_sub.exists():
             raise PWarning(f"Ты уже и так подписан на канал {existed_sub.first().title}")
 
-        sub = SubscribeModel(
-            author=self.event.user,
-            chat=self.event.chat,
-            channel_id=channel_id,
-            playlist_id=playlist_id,
-            title=title,
-            date=date,
-            service=service,
-            last_video_id=last_video_id,
-            is_stream=is_stream,
-            message_thread_id=self.event.message_thread_id
-        )
+        data.update({
+            "author": self.event.user,
+            "chat": self.event.chat,
+            "message_thread_id": self.event.message_thread_id,
+        })
+
+        sub = SubscribeModel(**data)
         sub.save()
-        answer = f'Подписал на канал {title}'
+        answer = f'Подписал на канал {data["title"]}'
         return ResponseMessageItem(text=answer)
 
     @staticmethod
-    def menu_add_youtube(url):
-        r = requests.get(url)
-        bs4 = BeautifulSoup(r.content, 'html.parser')
-        channel_id = bs4.find_all('link', {'rel': 'canonical'})[0].attrs['href'].split('/')[-1]
-
-        youtube_info = YoutubeVideoAPI()
-        youtube_data = youtube_info.get_last_video(channel_id)
-
-        title = youtube_data['title']
-        date = youtube_data['last_video']['date']
-        last_video_id = youtube_data['last_video']['id']
-        is_stream = False
-
-        return channel_id, title, date, last_video_id, is_stream, None
+    def add_youtube(url):
+        yt_api = YoutubeVideoAPI()
+        parsed = yt_api.get_data_to_add_new_subscribe(url)
+        parsed['service'] = SubscribeModel.SERVICE_YOUTUBE
+        return parsed
 
     @staticmethod
-    def menu_add_the_hole(url):
+    def add_the_hole(url):
         the_hole_api = TheHoleAPI()
-        parsed = the_hole_api.parse_channel(url)
-        is_stream = False
-
-        return parsed['channel_id'], parsed['title'], None, parsed['last_video_id'], is_stream, None
-
-    @staticmethod
-    def menu_add_wasd(url):
-        wasd_api = WASDAPI()
-        parsed = wasd_api.parse_channel(url)
-        is_stream = True
-
-        return parsed['channel_id'], parsed['title'], None, None, is_stream, None
+        parsed = the_hole_api.get_data_to_add_new_subscribe(url)
+        parsed['service'] = SubscribeModel.SERVICE_THE_HOLE
+        return parsed
 
     @staticmethod
-    def menu_add_vk(url):
+    def add_vk(url):
         vk_api = VKVideoAPI()
-        parsed = vk_api.parse_channel(url)
-        is_stream = False
-
-        return parsed['channel_id'], parsed['title'], None, parsed['last_video_id'], is_stream, None
+        parsed = vk_api.get_data_to_add_new_subscribe(url)
+        parsed['service'] = SubscribeModel.SERVICE_VK
+        return parsed
 
     @staticmethod
-    def menu_add_premiere(url):
-        p_api = PremiereAPI(url)
-        parsed = p_api.parse_show()
-        is_stream = False
+    def add_premiere(url):
+        p_api = PremiereAPI()
+        parsed = p_api.get_data_to_add_new_subscribe(url)
+        parsed['service'] = SubscribeModel.SERVICE_PREMIERE
         if not parsed:
             raise PWarning("Необходима ссылка на сериал, не фильм")
-        return parsed['show_id'], parsed['title'], None, parsed['last_video_id'], is_stream, None
+        return parsed
 
     def menu_delete(self) -> ResponseMessageItem:
         self.check_args(2)

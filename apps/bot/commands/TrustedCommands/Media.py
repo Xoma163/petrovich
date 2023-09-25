@@ -18,7 +18,6 @@ from apps.bot.APIs.TheHoleAPI import TheHoleAPI
 from apps.bot.APIs.TikTokAPI import TikTokAPI
 from apps.bot.APIs.TwitterAPI import TwitterAPI
 from apps.bot.APIs.VKVideoAPI import VKVideoAPI
-from apps.bot.APIs.WASDAPI import WASDAPI
 from apps.bot.APIs.YandexMusicAPI import YandexMusicAPI
 from apps.bot.APIs.YoutubeMusicAPI import YoutubeMusicAPI
 from apps.bot.APIs.YoutubeVideoAPI import YoutubeVideoAPI
@@ -45,7 +44,6 @@ INSTAGRAM_URLS = ('www.instagram.com', 'instagram.com')
 TWITTER_URLS = ('www.twitter.com', 'twitter.com', 'x.com')
 PIKABU_URLS = ('www.pikabu.ru', 'pikabu.ru')
 THE_HOLE_URLS = ('www.the-hole.tv', 'the-hole.tv')
-WASD_URLS = ('www.wasd.tv', 'wasd.tv')
 YANDEX_MUSIC_URLS = ('music.yandex.ru',)
 PINTEREST_URLS = ('pinterest.com', 'ru.pinterest.com', 'www.pinterest.com', 'pin.it')
 COUB_URLS = ('coub.com',)
@@ -64,7 +62,6 @@ MEDIA_URLS = tuple(
     TWITTER_URLS +
     PIKABU_URLS +
     THE_HOLE_URLS +
-    WASD_URLS +
     YANDEX_MUSIC_URLS +
     PINTEREST_URLS +
     COUB_URLS +
@@ -82,7 +79,7 @@ class Media(Command):
     help_text = "скачивает видео из соцсетей и присылает его"
     help_texts = ["(ссылка на видео/пост) - скачивает видео из соцсетей и присылает его"]
     help_texts_extra = "Поддерживаемые соцсети: Youtube/Youtube Music/Reddit/TikTok/Instagram/Twitter/Pikabu/" \
-                       "The Hole/WASD/Yandex Music/Pinterest/Coub/VK Video/ScopeGG/TwitchClips/Facebook video/Premier\n\n" \
+                       "The Hole/Yandex Music/Pinterest/Coub/VK Video/ScopeGG/TwitchClips/Facebook video/Premier\n\n" \
                        "Ключ --nomedia позволяет не запускать команду\n" \
                        "Ключ --audio позволяет скачивать аудиодорожку для видео с ютуба\n\n" \
                        "Ключ --thread позволяет скачивать пост с комментариями автора для твиттера\n\n" \
@@ -180,7 +177,6 @@ class Media(Command):
             TWITTER_URLS: self.get_twitter_video,
             PIKABU_URLS: self.get_pikabu_video,
             THE_HOLE_URLS: self.get_the_hole_video,
-            WASD_URLS: self.get_wasd_video,
             YANDEX_MUSIC_URLS: self.get_yandex_music,
             PINTEREST_URLS: self.get_pinterest_attachment,
             COUB_URLS: self.get_coub_video,
@@ -382,16 +378,6 @@ class Media(Command):
             attachments = [self.bot.get_video_attachment(cache.video, peer_id=self.event.peer_id)]
         msg = title + f"\nCкачать можно здесь {self.bot.get_formatted_url('здесь', MAIN_SITE + cache.video.url)}"
         return attachments, msg
-
-    def get_wasd_video(self, url) -> (list, str):
-        wasd_api = WASDAPI()
-        wasd_api.parse_video_m3u8(url)
-        file = self.bot.get_document_attachment(
-            wasd_api.m3u8_bytes,
-            peer_id=self.event.peer_id,
-            filename=f"{wasd_api.title} - {wasd_api.show_name} | WASD.m3u8"
-        )
-        return [file], f"{wasd_api.title} | {wasd_api.show_name}"
 
     def get_yandex_music(self, url) -> (list, str):
         track = YandexMusicAPI(url)

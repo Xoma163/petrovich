@@ -1,16 +1,18 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 from urllib.parse import urlparse, parse_qsl
 
 import requests
 import yt_dlp
 from bs4 import BeautifulSoup
 
+from apps.bot.APIs.SubscribeService import SubscribeService
 from apps.bot.classes.consts.Exceptions import PWarning, PSkip
 from apps.bot.utils.NothingLogger import NothingLogger
 
 
-class YoutubeVideoAPI:
+class YoutubeVideoAPI(SubscribeService):
     def __init__(self, max_filesize_mb=None):
+        super().__init__()
         self.title = None
         self.duration = 0
         self.id = None
@@ -38,31 +40,6 @@ class YoutubeVideoAPI:
         if v:
             res += f"?v={v}"
         return res
-
-    def get_last_video(self, channel_id):
-        """
-        Данный метод используется для добавления нового сериала в подписки
-        Данный метод используется для проверки новых эпизодов в сервисе подписок
-        """
-
-        r = requests.get(f"https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}")
-        if r.status_code != 200:
-            raise PWarning("Не нашёл такого канала")
-        bsop = BeautifulSoup(r.content, 'lxml')
-        last_video = bsop.find_all('entry')[0]
-        link = last_video.find('link').attrs['href']
-        duration = self._get_video_info(link)['duration']
-        self.title = bsop.find('title').text
-        return {
-            'title': self.title,
-            'last_video': {
-                'id': last_video.find('yt:videoid').text,
-                'title': last_video.find('title').text,
-                'link': link,
-                'date': datetime.strptime(last_video.find('published').text, '%Y-%m-%dT%H:%M:%S%z'),
-                'is_shorts': duration <= 60,
-            }
-        }
 
     def _get_video_info(self, url):
         ydl_params = {
@@ -112,3 +89,55 @@ class YoutubeVideoAPI:
 
         url = max_quality_video['url']
         return url
+
+    def get_data_to_add_new_subscribe(self, url) -> dict:
+        r = requests.get(url)
+        bs4 = BeautifulSoup(r.content, 'xml')
+        channel_id = bs4.find_all('link', {'rel': 'canonical'})[0].attrs['href'].split('/')[-1]
+
+        r = requests.get(f"https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}")
+        if r.status_code != 200:
+            raise PWarning("Не нашёл такого канала")
+        bsop = BeautifulSoup(r.content, 'xml')
+        last_video = bsop.find_all('entry')[0]
+        self.title = bsop.find('title').text
+
+        return {
+            'channel_id': channel_id,
+            'title': bsop.find('title').text,
+            'last_video_id': last_video.find('yt:videoId').text,
+            'is_stream': False,
+            'playlist_id': None
+        }
+
+    def get_filtered_new_videos(self, channel_id, last_video_id, **kwargs) -> dict:
+        r = requests.get(f"https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}")
+        if r.status_code != 200:
+            raise PWarning("Не нашёл такого канала")
+        bsop = BeautifulSoup(r.content, 'xml')
+
+        videos = bsop.find_all('entry')
+        ids = [x.find("yt:videoId").text for x in videos]
+        titles = [x.find("title").text for x in videos]
+
+        if last_video_id:
+            try:
+                index = ids.index(last_video_id)
+                ids = ids[:index]
+                titles = titles[:index]
+            except IndexError:
+                pass
+
+        ids = list(reversed(ids))
+        titles = list(reversed(titles))
+        urls = [f"https://www.youtube.com/watch?v={x}" for x in ids]
+
+        new_urls = []
+        for i, url in enumerate(urls):
+            video_info = self._get_video_info(url)
+            if video_info['duration'] < 60:
+                del ids[i]
+                del titles[i]
+            else:
+                new_urls.append(url)
+        return {"ids": ids, "titles": titles, "urls": new_urls}

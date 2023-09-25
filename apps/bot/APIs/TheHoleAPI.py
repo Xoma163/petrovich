@@ -1,33 +1,21 @@
 import requests
 from bs4 import BeautifulSoup
 
+from apps.bot.APIs.SubscribeService import SubscribeService
 from apps.bot.utils.VideoDownloader import VideoDownloader
 
 
-class TheHoleAPI:
+class TheHoleAPI(SubscribeService):
     URL = "https://the-hole.tv"
     CDN_URL = "https://video-cdn.the-hole.tv"
 
     def __init__(self):
+        super().__init__()
         self.channel_id = None
         self.channel_title = None
         self.video_id = None
         self.video_title = None
         self.m3u8_url = None
-
-    @staticmethod
-    def parse_channel(url):
-        """
-        Данный метод используется для добавления нового сериала в подписки
-        """
-
-        content = requests.get(url).content
-        bs4 = BeautifulSoup(content, 'html.parser')
-        return {
-            'title': bs4.find('meta', attrs={'name': 'og:title'}).attrs['content'],
-            'channel_id': url.split('/')[-1],
-            'last_video_id': bs4.select_one('a[href*=episodes]').attrs['href']
-        }
 
     def parse_video(self, url):
         content = requests.get(url).content
@@ -45,11 +33,25 @@ class TheHoleAPI:
 
         self.m3u8_url = f"{base_uri}/master.m3u8"
 
-    def get_last_videos_with_titles(self, channel_id, last_video_id=None):
-        """
-        Данный метод используется для проверки новых эпизодов в сервисе подписок
-        """
+    def get_video(self, url):
+        if not self.m3u8_url:
+            self.parse_video(url)
 
+        vd = VideoDownloader()
+        return vd.download(self.m3u8_url)
+
+    def get_data_to_add_new_subscribe(self, url) -> dict:
+        content = requests.get(url).content
+        bs4 = BeautifulSoup(content, 'html.parser')
+        return {
+            'channel_id': url.split('/')[-1],
+            'title': bs4.find('meta', attrs={'name': 'og:title'}).attrs['content'],
+            'last_video_id': bs4.select_one('a[href*=episodes]').attrs['href'],
+            'is_stream': False,
+            'playlist_id': None
+        }
+
+    def get_filtered_new_videos(self, channel_id, last_video_id, **kwargs) -> dict:
         content = requests.get(f"{self.URL}/shows/{channel_id}").content
         bs4 = BeautifulSoup(content, 'html.parser')
         last_videos = [x.attrs['href'] for x in bs4.select('a[href*=episodes]')]
@@ -65,12 +67,6 @@ class TheHoleAPI:
 
         last_videos = list(reversed(last_videos))
         titles = list(reversed(titles))
+        urls = [f"{self.URL}{link}" for link in last_videos]
 
-        return last_videos, titles
-
-    def get_video(self, url):
-        if not self.m3u8_url:
-            self.parse_video(url)
-
-        vd = VideoDownloader()
-        return vd.download(self.m3u8_url)
+        return {"ids": last_videos, "titles": titles, "urls": urls}

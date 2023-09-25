@@ -144,13 +144,11 @@ class Donations(models.Model):
 class Subscribe(models.Model):
     SERVICE_YOUTUBE = 1
     SERVICE_THE_HOLE = 2
-    SERVICE_WASD = 3
     SERVICE_VK = 4
     SERVICE_PREMIERE = 5
     SERVICE_CHOICES = (
         (SERVICE_YOUTUBE, 'YouTube'),
         (SERVICE_THE_HOLE, 'The Hole'),
-        (SERVICE_WASD, 'WASD'),
         (SERVICE_VK, 'VK'),
         (SERVICE_PREMIERE, 'Premiere'),
     )
@@ -170,7 +168,6 @@ class Subscribe(models.Model):
     last_stream_status = models.BooleanField("Последнее состояние стрима", blank=True,
                                              default=False)  # True - активен, False - нет
 
-    youtube_ignore_shorts = models.BooleanField("Игнорировать Youtube shorts", blank=True, default=False)
     message_thread_id = models.IntegerField("message_thread_id", blank=True, null=True, default=None)
 
     save_to_plex = models.BooleanField("Сохранять в plex", default=False)
