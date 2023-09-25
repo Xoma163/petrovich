@@ -28,9 +28,9 @@ export default {
         calculatorsession: this.sessionId,
       };
       axios.post("/calculator_session/api/calculator_user/", data)
-        .then((response) => {
-          this.users.push(response.data);
-        });
+          .then((response) => {
+            this.users.push(response.data);
+          });
     },
     deleteUser(user) {
       this.$emit("delete-user", user);

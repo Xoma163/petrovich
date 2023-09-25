@@ -2,7 +2,7 @@ import json
 
 from django.core.management.base import BaseCommand
 
-from apps.bot.APIs.YandexWeatherAPI import YandexWeatherAPI
+from apps.bot.api.yandex.weather import YandexWeather
 from apps.service.models import City, Service
 
 
@@ -12,7 +12,7 @@ class Command(BaseCommand):
         cities = options['cities']
         for city_name in cities:
             city = City.objects.get(name__icontains=city_name)
-            yandexweather_api = YandexWeatherAPI()
+            yandexweather_api = YandexWeather()
             weather_data = yandexweather_api.get_weather(city, False)
             weather_data_str = json.dumps(weather_data)
 

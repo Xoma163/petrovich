@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -130,7 +129,8 @@ class Migration(migrations.Migration):
                 ('steps', models.PositiveIntegerField(default=1, verbose_name='Количество попыток')),
                 ('message_id', models.IntegerField(blank=True, default=0, verbose_name='id первого сообщения')),
                 (
-                'message_body', models.TextField(blank=True, verbose_name='Тело сообщения для игры в одном сообщении')),
+                    'message_body',
+                    models.TextField(blank=True, verbose_name='Тело сообщения для игры в одном сообщении')),
                 ('chat', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='bot.chat',
                                            verbose_name='Чат')),
                 ('profile', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='bot.profile',

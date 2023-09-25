@@ -6,15 +6,15 @@ from itertools import groupby
 
 from django.core.management import BaseCommand
 
-from apps.bot.APIs.PremiereAPI import PremiereAPI
-from apps.bot.APIs.TheHoleAPI import TheHoleAPI
-from apps.bot.APIs.VKVideoAPI import VKVideoAPI
-from apps.bot.APIs.YoutubeVideoAPI import YoutubeVideoAPI
-from apps.bot.classes.bots.tg.TgBot import TgBot
-from apps.bot.classes.events.Event import Event
-from apps.bot.classes.messages.Message import Message
-from apps.bot.classes.messages.ResponseMessage import ResponseMessageItem, ResponseMessage
-from apps.bot.commands.TrustedCommands.Media import Media
+from apps.bot.api.premier import Premier
+from apps.bot.api.thehole import TheHole
+from apps.bot.api.vk.video import VKVideo
+from apps.bot.api.youtube.video import YoutubeVideo
+from apps.bot.classes.bots.tg import TgBot
+from apps.bot.classes.event import Event
+from apps.bot.classes.messages.message import Message
+from apps.bot.classes.messages.response_message import ResponseMessageItem, ResponseMessage
+from apps.bot.commands.trusted.media import Media
 from apps.service.models import Subscribe, VideoCache
 from petrovich.settings import env
 
@@ -31,10 +31,10 @@ class Command(BaseCommand):
         groupped_subs = groupby(subs.order_by("channel_id"), lambda x: (x.service, x.channel_id, x.playlist_id))
         for (service, _, _), subs in groupped_subs:
             service_class = {
-                Subscribe.SERVICE_YOUTUBE: YoutubeVideoAPI,
-                Subscribe.SERVICE_THE_HOLE: TheHoleAPI,
-                Subscribe.SERVICE_VK: VKVideoAPI,
-                Subscribe.SERVICE_PREMIERE: PremiereAPI
+                Subscribe.SERVICE_YOUTUBE: YoutubeVideo,
+                Subscribe.SERVICE_THE_HOLE: TheHole,
+                Subscribe.SERVICE_VK: VKVideo,
+                Subscribe.SERVICE_PREMIERE: Premier
             }
             service_media_method = {
                 Subscribe.SERVICE_YOUTUBE: "get_youtube_video",

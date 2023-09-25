@@ -4,8 +4,8 @@ import pkgutil
 
 from django.contrib.auth.models import Group
 
-from apps.bot.classes.Command import Command
-from apps.bot.classes.consts.Consts import Platform, Role
+from apps.bot.classes.command import Command
+from apps.bot.classes.const.consts import Platform, Role
 from petrovich.settings import BASE_DIR
 
 

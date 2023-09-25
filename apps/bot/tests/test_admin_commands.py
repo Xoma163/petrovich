@@ -1,11 +1,11 @@
 from django.contrib.auth.models import Group
 
-from apps.bot.classes.consts.Consts import Role
-from apps.bot.commands.AdminCommands.Ban import Ban
-from apps.bot.commands.AdminCommands.DeBan import DeBan
-from apps.bot.commands.AdminCommands.Linux import Linux
+from apps.bot.classes.const.consts import Role
+from apps.bot.commands.admin.ban import Ban
+from apps.bot.commands.admin.deban import DeBan
+from apps.bot.commands.admin.linux import Linux
 from apps.bot.models import User
-from apps.bot.tests.BotInitializer import BotInitializer
+from apps.bot.tests.bot_initializer import BotInitializer
 
 
 class CommandBanTestCase(BotInitializer):

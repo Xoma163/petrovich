@@ -4,9 +4,10 @@ import re
 from django.http import JsonResponse, HttpResponse
 from django.views import View
 
-from apps.bot.classes.bots.api.APIBot import APIBot
-from apps.bot.classes.bots.tg.TgBot import TgBot
-from apps.bot.classes.consts.Exceptions import PError
+from apps.bot.classes.bots.api import APIBot
+from apps.bot.classes.bots.tg import TgBot
+from apps.bot.classes.const.exceptions import PError
+from apps.bot.classes.messages.response_message import ResponseMessageItem
 from apps.bot.mixins import CSRFExemptMixin
 from apps.bot.models import Profile
 
@@ -52,7 +53,6 @@ class APIView(CSRFExemptMixin, View):
 
 
 class TelegramView(CSRFExemptMixin, View):
-
     def post(self, request, *args, **kwargs):
         raw = json.loads(request.body)
         tg_bot = TgBot()
@@ -61,7 +61,6 @@ class TelegramView(CSRFExemptMixin, View):
 
 
 class GithubView(CSRFExemptMixin, View):
-
     @staticmethod
     def send_notify_to_user(data, text):
         issue = data['issue']
@@ -74,7 +73,8 @@ class GithubView(CSRFExemptMixin, View):
         profile = Profile.objects.get(pk=profile_pk)
         user = profile.get_tg_user()
         bot = TgBot()
-        bot.parse_and_send_msgs(text, user.peer_id)
+        rmi = ResponseMessageItem(text=text, peer_id=user.peer_id)
+        bot.send_response_message_item(rmi)
 
     def closed_issue(self, data):
         issue = data['issue']

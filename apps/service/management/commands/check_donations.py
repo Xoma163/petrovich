@@ -1,8 +1,8 @@
 import requests
 from django.core.management.base import BaseCommand
 
-from apps.bot.classes.bots.tg.TgBot import TgBot
-from apps.bot.classes.messages.ResponseMessage import ResponseMessageItem
+from apps.bot.classes.bots.tg import TgBot
+from apps.bot.classes.messages.response_message import ResponseMessageItem
 from apps.bot.models import Chat
 from apps.service.models import Service, Donations
 from petrovich.settings import env

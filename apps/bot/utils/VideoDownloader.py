@@ -1,7 +1,7 @@
 import os
 from tempfile import NamedTemporaryFile
 
-from apps.bot.utils.DoTheLinuxComand import do_the_linux_command
+from apps.bot.utils.do_the_linux_command import do_the_linux_command
 
 
 class VideoDownloader:

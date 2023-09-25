@@ -10,10 +10,10 @@ from urllib.parse import urlparse
 import pytz
 from PIL import Image, ImageDraw, ImageFont
 
-from apps.bot.classes.consts.Consts import Role, Platform
-from apps.bot.classes.consts.Exceptions import PWarning
-from apps.bot.classes.messages.ResponseMessage import ResponseMessageItem
-from apps.bot.classes.messages.attachments.Attachment import Attachment
+from apps.bot.classes.const.consts import Role, Platform
+from apps.bot.classes.const.exceptions import PWarning
+from apps.bot.classes.messages.attachments.attachment import Attachment
+from apps.bot.classes.messages.response_message import ResponseMessageItem
 from apps.service.models import Service
 from petrovich.settings import STATIC_ROOT
 
@@ -123,7 +123,7 @@ def get_help_texts_for_command(command, platform=None) -> str:
     """
     Получает help_texts для команды
     """
-    from apps.bot.classes.bots.tg.TgBot import TgBot
+    from apps.bot.classes.bots.tg import TgBot
 
     result = ""
     if len(command.full_names) > 1:

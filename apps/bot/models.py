@@ -3,8 +3,8 @@ from django.core.files import File
 from django.db import models
 from django.utils.html import format_html
 
-from apps.bot.classes.consts.Consts import Platform as PlatformEnum
-from apps.bot.classes.messages.attachments.PhotoAttachment import PhotoAttachment
+from apps.bot.classes.const.consts import Platform as PlatformEnum
+from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 
 
 class Platform(models.Model):

@@ -32,12 +32,10 @@ cp config/nginx/conf/andrewsha-ssl_example.conf config/nginx/conf/andrewsha-ssl.
 cp config/nginx/conf/petrovich-default-config_example.conf config/nginx/conf/petrovich-default-config.conf
 cp config/nginx/conf/petrovich-default-locations_example.conf config/nginx/conf/petrovich-default-locations.conf
 cp config/nginx/petrovich_nginx_example.conf config/nginx/petrovich_nginx.conf
-cp config/systemd/petrovich_example.service config/systemd/petrovich.service
 cp config/systemd/petrovich_site_example.service config/systemd/petrovich_site.service
 
 # rename abs paths
 old_path="/var/www/andrewsha/petrovich/"
-sed -i "s#$old_path#$PWD/#g" ./config/systemd/petrovich.service
 sed -i "s#$old_path#$PWD/#g" ./config/systemd/petrovich_site.service
 sed -i "s#$old_path#$PWD/#g" ./config/nginx/petrovich_nginx.conf
 sed -i "s#$old_path#$PWD/#g" ./config/nginx/conf/petrovich-default-locations.conf
