@@ -142,7 +142,6 @@ class VKVideoAPI(SubscribeService):
             'channel_id': channel_id,
             'title': title,
             'last_video_id': last_video_id,
-            'is_stream': None,
             'playlist_id': playlist_id if channel_id != playlist_id else None
         }
 

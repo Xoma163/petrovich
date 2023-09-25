@@ -155,20 +155,13 @@ class Subscribe(models.Model):
 
     author = models.ForeignKey(User, models.CASCADE, verbose_name="Автор", null=True)
     chat = models.ForeignKey(Chat, models.CASCADE, verbose_name='Чат', null=True, blank=True)
+    message_thread_id = models.IntegerField("message_thread_id", blank=True, null=True, default=None)
 
     channel_id = models.CharField("ID канала", max_length=100)
     playlist_id = models.CharField("ID плейлиста", max_length=100, blank=True, null=True)
     title = models.CharField("Название канала", max_length=100)
-    date = models.DateTimeField("Дата последней публикации", null=True, blank=True)
     last_video_id = models.CharField("ID последнего видео", max_length=100, null=True, blank=True)
-
     service = models.SmallIntegerField("Сервис", blank=True, choices=SERVICE_CHOICES, default=SERVICE_YOUTUBE)
-
-    is_stream = models.BooleanField("Флаг стрима", blank=True, default=False)
-    last_stream_status = models.BooleanField("Последнее состояние стрима", blank=True,
-                                             default=False)  # True - активен, False - нет
-
-    message_thread_id = models.IntegerField("message_thread_id", blank=True, null=True, default=None)
 
     save_to_plex = models.BooleanField("Сохранять в plex", default=False)
 

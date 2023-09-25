@@ -47,7 +47,6 @@ class TheHoleAPI(SubscribeService):
             'channel_id': url.split('/')[-1],
             'title': bs4.find('meta', attrs={'name': 'og:title'}).attrs['content'],
             'last_video_id': bs4.select_one('a[href*=episodes]').attrs['href'],
-            'is_stream': False,
             'playlist_id': None
         }
 

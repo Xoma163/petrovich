@@ -88,7 +88,6 @@ class PremiereAPI(SubscribeService):
                 'channel_id': show_id,
                 'title': trailers[0].get('title') if trailers else show_id,
                 'last_video_id': videos[-1]['id'],
-                'is_stream': False,
                 'playlist_id': None
             }
 

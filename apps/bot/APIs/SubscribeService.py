@@ -11,7 +11,6 @@ class SubscribeService:
             'channel_id': str,
             'title': str,
             'last_video_id':str,
-            'is_stream': bool,
             'playlist_id': str
         }
         """

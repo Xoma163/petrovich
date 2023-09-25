@@ -54,7 +54,7 @@ class DonationsAdmin(admin.ModelAdmin):
 
 @admin.register(Subscribe)
 class SubscribeAdmin(admin.ModelAdmin):
-    list_display = ('author', 'chat', 'title', 'service', 'date',)
+    list_display = ('author', 'chat', 'title', 'service',)
     list_filter = (('author', admin.RelatedOnlyFieldListFilter), ('chat', admin.RelatedOnlyFieldListFilter),)
 
 

@@ -106,7 +106,6 @@ class YoutubeVideoAPI(SubscribeService):
             'channel_id': channel_id,
             'title': bsop.find('title').text,
             'last_video_id': last_video.find('yt:videoId').text,
-            'is_stream': False,
             'playlist_id': None
         }
 
