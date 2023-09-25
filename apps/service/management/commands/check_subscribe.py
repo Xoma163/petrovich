@@ -28,7 +28,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         subs = Subscribe.objects.all()
-        groupped_subs = groupby(subs.order_by("channel_id"), lambda x: (x.service, x.channel_id))
+        groupped_subs = groupby(subs.order_by("channel_id"), lambda x: (x.service, x.channel_id, x.playlist_id))
         for (service, _), subs in groupped_subs:
             service_class = {
                 Subscribe.SERVICE_YOUTUBE: YoutubeVideoAPI,
@@ -49,7 +49,8 @@ class Command(BaseCommand):
     def check_video(self, subs, sub_class, media_method):
         if len(set(x.last_video_id for x in subs)) == 1:
             yt_api = sub_class()
-            res = yt_api.get_filtered_new_videos(subs[0].channel_id, subs[0].last_video_id)
+            res = yt_api.get_filtered_new_videos(subs[0].channel_id, subs[0].last_video_id,
+                                                 playlist_id=subs[0].playlist_id)
             if not res['ids']:
                 return
 

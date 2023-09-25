@@ -147,6 +147,8 @@ class VKVideoAPI(SubscribeService):
         }
 
     def get_filtered_new_videos(self, channel_id, last_video_id, **kwargs) -> dict:
+        if kwargs.get('playlist_id'):
+            channel_id = kwargs['playlist_id']
         url = f"{self.URL}/{channel_id}"
         content = requests.get(url, headers=self.headers).content
         bs4 = BeautifulSoup(content, "html.parser")
