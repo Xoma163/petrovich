@@ -200,6 +200,11 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': False,
         },
+        'responses': {
+            'handlers': ['file-debug', 'file-error'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
         'notifier': {
             'handlers': ['file-debug', 'file-error'],
             'level': 'DEBUG',

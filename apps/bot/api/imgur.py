@@ -4,7 +4,7 @@ import requests
 
 from petrovich.settings import env
 
-logger = logging.getLogger('bot')
+logger = logging.getLogger('responses')
 
 
 class Imgur:

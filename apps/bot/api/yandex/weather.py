@@ -1,15 +1,12 @@
-import json
 import logging
-from datetime import datetime
 
 import requests
 
 from apps.bot.classes.const.exceptions import PWarning
-from apps.bot.utils.utils import remove_tz
-from apps.service.models import Service, City
+from apps.service.models import City
 from petrovich.settings import env
 
-logger = logging.getLogger('bot')
+logger = logging.getLogger('responses')
 
 
 class YandexWeather:
@@ -59,7 +56,18 @@ class YandexWeather:
         "c": "штиль",
     }
 
-    def send_weather_request(self, city: City):
+    def get_weather_str(self, city: City) -> str:
+        data = self._get_weather(city)
+
+        now_str = self._get_weather_part_str(data['fact'])
+
+        forecasts = [self._get_weather_part_str(x) for x in data['forecast']['parts']]
+        forecasts_str = "\n\n".join(forecasts)
+        return f"Погода в {city.name} сейчас:\n" \
+               f"{now_str}\n\n" \
+               f"{forecasts_str}"
+
+    def _get_weather(self, city: City) -> dict:
         params = {
             'lat': city.lat,
             'lon': city.lon,
@@ -74,34 +82,8 @@ class YandexWeather:
 
         return r
 
-    def get_weather(self, city: City, use_cached=True):
-        entity, created = Service.objects.get_or_create(name=f'weather_{city.name}')
-        if use_cached and not created:
-            delta_time = (datetime.utcnow() - remove_tz(entity.update_datetime))
-            if delta_time.seconds < 3600 and delta_time.days == 0:
-                weather_data = json.loads(entity.value)
-                return weather_data
-
-        weather_data = self.send_weather_request(city)
-        entity.value = json.dumps(weather_data)
-        entity.save()
-        return weather_data
-
-    def get_weather_str(self, city):
-        data = self.get_weather(city)
-
-        now = self.get_weather_part_str(data['fact'])
-
-        forecasts = [self.get_weather_part_str(x) for x in data['forecast']['parts']]
-        forecasts_str = "\n\n".join(forecasts)
-        return f"Погода в г. {city.name} сейчас:\n" \
-               f"{now}\n\n" \
-               f"{forecasts_str}"
-
-    def get_weather_part_str(self, data):
-        res = [
-            f"{self.WEATHER_TRANSLATOR[data['condition']]}"
-        ]
+    def _get_weather_part_str(self, data: dict) -> str:
+        res = [f"{self.WEATHER_TRANSLATOR[data['condition']]}"]
 
         if 'temp_max' in data:
             if data['temp_min'] != data['temp_max']:

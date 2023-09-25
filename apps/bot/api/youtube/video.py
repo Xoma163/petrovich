@@ -11,18 +11,14 @@ from apps.bot.utils.nothing_logger import NothingLogger
 
 
 class YoutubeVideo(SubscribeService):
-    def __init__(self, max_filesize_mb=None):
+    def __init__(self):
         super().__init__()
-        self.title = None
-        self.duration = 0
-        self.id = None
-        self.filesize = 0
-        self.filename = ""
-
-        self.max_filesize_mb = max_filesize_mb
 
     @staticmethod
-    def get_timecode_str(url):
+    def get_timecode_str(url) -> str:
+        """
+        Переводит таймкод из секунд в [часы:]минуты:секунды
+        """
         t = dict(parse_qsl(urlparse(url).query)).get('t')
         if t:
             t = t.rstrip('s')
@@ -30,10 +26,10 @@ class YoutubeVideo(SubscribeService):
             if h:
                 return f"{h}:{m}:{s}"
             return f"{m}:{s}"
-        return None
+        return ""
 
     @staticmethod
-    def _clear_url(url):
+    def _clear_url(url) -> str:
         parsed = urlparse(url)
         v = dict(parse_qsl(parsed.query)).get('v')
         res = f"{parsed.scheme}://{parsed.hostname}{parsed.path}"
@@ -41,7 +37,7 @@ class YoutubeVideo(SubscribeService):
             res += f"?v={v}"
         return res
 
-    def _get_video_info(self, url):
+    def _get_video_info(self, url) -> dict:
         ydl_params = {
             'logger': NothingLogger()
         }
@@ -57,38 +53,40 @@ class YoutubeVideo(SubscribeService):
             raise PWarning("Не смог найти видео по этой ссылке")
         return video_info
 
-    def get_download_url(self, url, _timedelta=None):
+    def get_video_info(self, url, _timedelta=None, max_filesize_mb=None) -> dict:
         video_info = self._get_video_info(url)
-        self.title = video_info['title']
-        self.duration = video_info.get('duration')
-        if not self.duration:
-            raise PSkip()
         video_urls = [x for x in video_info['formats'] if x['ext'] == 'mp4' and x.get('asr')]
         if not video_urls:
             raise PWarning("Нет доступных ссылок для скачивания")
+
         videos = sorted(video_urls, key=lambda x: x['format_note'], reverse=True)
-        if self.max_filesize_mb:  # for tg
+        chosen_video_filesize = 0
+        if max_filesize_mb:  # for tg
             for video in videos:
                 filesize = video.get('filesize') or video.get('filesize_approx')
                 if filesize:
-                    self.filesize = filesize / 1024 / 1024
+                    chosen_video_filesize = filesize / 1024 / 1024
 
-                    if self.filesize < self.max_filesize_mb:
+                    if chosen_video_filesize < max_filesize_mb:
                         max_quality_video = video
                         break
                     if _timedelta:
-                        mbps = self.filesize / self.duration
-                        if mbps * _timedelta < self.max_filesize_mb - 2:
+                        mbps = chosen_video_filesize / video_info.get('duration')
+                        if mbps * _timedelta < max_filesize_mb - 2:
                             max_quality_video = video
                             break
             else:
                 raise PSkip()
         else:
             max_quality_video = videos[0]
-        self.filename = f"{self.title.replace(' ', '_')}.{max_quality_video['video_ext']}"
 
         url = max_quality_video['url']
-        return url
+        return {
+            "download_url": url,
+            "filesize": chosen_video_filesize,
+            "title": video_info['title'],
+            "duration": video_info.get('duration')
+        }
 
     def get_data_to_add_new_subscribe(self, url) -> dict:
         r = requests.get(url)

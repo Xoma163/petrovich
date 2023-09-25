@@ -413,8 +413,8 @@ class Meme(Command):
                 else:
                     yt_api = YoutubeVideo()
                     try:
-                        content_url = yt_api.get_download_url(meme.link)
-                        video_content = requests.get(content_url).content
+                        data = yt_api.get_video_info(meme.link)
+                        video_content = requests.get(data['download_url']).content
                         rmi.attachments = [self.bot.get_video_attachment(video_content, peer_id=self.event.peer_id)]
                         rmi.text = yt_api.get_timecode_str(meme.link)
                     except PSkip:
@@ -450,7 +450,7 @@ class Meme(Command):
         thread.start()
 
     def _set_youtube_file_id(self, meme):
-        from apps.bot.commands.trimVideo import TrimVideo
+        from apps.bot.commands.trim_video import TrimVideo
 
         lower_link_index = self.event.message.args.index(meme.link.lower())
         args = self.event.message.args[lower_link_index + 1:]
@@ -461,9 +461,9 @@ class Meme(Command):
                 tm = TrimVideo()
                 video_content = tm.trim_link_pos(meme.link, start_pos, end_pos)
             else:
-                y_api = YoutubeVideo()
-                content_url = y_api.get_download_url(meme.link)
-                video_content = requests.get(content_url).content
+                yt_api = YoutubeVideo()
+                data = yt_api.get_video_info(meme.link)
+                video_content = requests.get(data['download_url']).content
             video = self.bot.get_video_attachment(video_content)
             parsed_url = urlparse(meme.link)
             video_id = parsed_url.path.strip('/')
@@ -593,8 +593,8 @@ class Meme(Command):
                         v = query_dict.get('v', None)
                         if v:
                             video_id = v
-                    y_api = YoutubeVideo()
-                    ts = y_api.get_timecode_str(meme.link)
+                    yt_api = YoutubeVideo()
+                    ts = yt_api.get_timecode_str(meme.link)
                     qr = {
                         'id': meme.pk,
                         'type': "video",

@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Tuple, Optional
 
 from apps.bot.api.youtube.video import YoutubeVideo
 from apps.bot.classes.bots.tg import TgBot
@@ -50,25 +51,25 @@ class TrimVideo(Command):
         video = self.bot.get_video_attachment(video_bytes, peer_id=self.event.peer_id)
         return ResponseMessage(ResponseMessageItem(attachments=[video]))
 
-    def trim_att_by_link(self, att):
+    def trim_att_by_link(self, att) -> bytes:
         args = [x for x in self.event.message.args]
         args.remove(att.url.lower())
 
         start_pos, end_pos = self.get_timecodes(att.url, args)
         return self.trim_link_pos(att.url, start_pos, end_pos)
 
-    def trim_link_pos(self, link, start_pos, end_pos=None):
+    def trim_link_pos(self, link, start_pos, end_pos=None) -> bytes:
         delta = None
         if end_pos:
             delta = (datetime.strptime(end_pos, "%H:%M:%S.%f") - datetime.strptime(start_pos, "%H:%M:%S.%f")).seconds
         max_filesize_mb = self.bot.MAX_VIDEO_SIZE_MB if isinstance(self.bot, TgBot) else None
-        yt_api = YoutubeVideo(max_filesize_mb=max_filesize_mb)
-        link = yt_api.get_download_url(link, timedelta=delta)
-        if yt_api.filesize > 100 and not self.event.sender.check_role(Role.TRUSTED):
+        yt_api = YoutubeVideo()
+        data = yt_api.get_video_info(link, _timedelta=delta, max_filesize_mb=max_filesize_mb)
+        if data['filesize'] > 100 and not self.event.sender.check_role(Role.TRUSTED):
             raise PWarning("Нельзя грузить отрезки из ютуба больше 100мб")
-        return self.trim(link, start_pos, end_pos)
+        return self.trim(data['download_url'], start_pos, end_pos)
 
-    def trim_video(self, video: VideoAttachment):
+    def trim_video(self, video: VideoAttachment) -> bytes:
         start_pos = self.parse_timecode(self.event.message.args[0])
         end_pos = None
         if len(self.event.message.args) > 1:
@@ -77,12 +78,12 @@ class TrimVideo(Command):
         return self.trim(video, start_pos, end_pos)
 
     @staticmethod
-    def trim(video, start_pos, end_pos):
+    def trim(video, start_pos: str, end_pos: str) -> bytes:
         vt = VideoTrimmer()
         return vt.trim(video, start_pos, end_pos)
 
     @classmethod
-    def parse_timecode(cls, timecode):
+    def parse_timecode(cls, timecode: str) -> str:
         h = 0
         m = 0
         s = 0
@@ -127,12 +128,12 @@ class TrimVideo(Command):
         return res
 
     @classmethod
-    def get_timecodes(cls, url: str, args: list):
+    def get_timecodes(cls, url: str, args: list) -> Tuple[Optional[str], Optional[str]]:
         """
         Метод вытаскивает таймкоды для команды Trim
         """
-        y_api = YoutubeVideo()
-        start_yt_timecode = y_api.get_timecode_str(url)
+        yt_api = YoutubeVideo()
+        start_yt_timecode = yt_api.get_timecode_str(url)
 
         end_pos = None
         if start_yt_timecode:

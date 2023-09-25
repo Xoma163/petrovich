@@ -3,7 +3,7 @@ import logging
 import requests
 from bs4 import BeautifulSoup
 
-logger = logging.getLogger('bot')
+logger = logging.getLogger('responses')
 
 
 class CBRAPI:
@@ -15,7 +15,7 @@ class CBRAPI:
             'value': 0
         } for x in filters_list}
 
-    def do(self):
+    def get_ex_rates(self) -> dict:
         r = requests.get(self.URL, stream=True)
         logger.debug({"response": r.content})
         elements = BeautifulSoup(r.content, 'xml').find('ValCurs').find_all("Valute")

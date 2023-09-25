@@ -1,16 +1,17 @@
 import logging
+from typing import List
 
 import requests
 
 from petrovich.settings import env
 
-logger = logging.getLogger('bot')
+logger = logging.getLogger('responses')
 
 
 class GoogleCustomSearch:
     URL = "https://customsearch.googleapis.com/customsearch/v1?"
 
-    def get_images_urls(self, query):
+    def get_images_urls(self, query) -> List[str]:
         querystring = {
             "key": env.str("GOOGLE_API_KEY"),
             "cx": env.str("GOOGLE_SEARCH_ENGINE_ID"),

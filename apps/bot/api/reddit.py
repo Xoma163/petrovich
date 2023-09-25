@@ -1,3 +1,4 @@
+from typing import List, Tuple, Optional
 from urllib.parse import urlparse
 
 import requests
@@ -26,7 +27,7 @@ class Reddit:
         self.filename = None
 
     @staticmethod
-    def _parse_mpd_audio_filename(url):
+    def _parse_mpd_audio_filename(url) -> Optional[str]:
         """
         Достаём имя файла на сервере реддита. Если его нет, то по умолчанию это "audio"
         Если нашли имя файла, то также проставляем формат файла
@@ -47,7 +48,7 @@ class Reddit:
             except Exception:
                 return None
 
-    def _get_reddit_video_audio_urls(self):
+    def _get_reddit_video_audio_urls(self) -> Tuple[str, str]:
         audio_url = None
 
         if self.media_data and self.media_data.get('type') == 'gfycat.com':
@@ -63,7 +64,7 @@ class Reddit:
             raise PWarning("Нет видео в посте")
         return video_url, audio_url
 
-    def get_video_from_post(self) -> bytes:
+    def _get_video_from_post(self):
         """
         Получаем видео с аудио
         """
@@ -81,20 +82,20 @@ class Reddit:
         video = avm.mux(video_content, audio_content)
         return video
 
-    def get_text_from_post(self):
+    def _get_text_from_post(self) -> str:
         return self.data['selftext']
 
-    def get_link_from_post(self):
+    def _get_link_from_post(self) -> str:
         return self.data['url_overridden_by_dest']
 
-    def get_photo_from_post(self):
+    def _get_photo_from_post(self) -> str:
         photo_url = self.data['url_overridden_by_dest']
         ext = get_url_file_ext(photo_url)
 
         self.filename = f"{self.title.replace(' ', '_')}.{ext}"
         return photo_url
 
-    def get_photos_from_post(self):
+    def _get_photos_from_post(self) -> List[str]:
         gallery_data_items = self.data['gallery_data']['items']
         first_url = \
             self.data["media_metadata"][self.data['gallery_data']['items'][0]["media_id"]]["s"]["u"].partition("?")[0]
@@ -107,29 +108,29 @@ class Reddit:
             for x in gallery_data_items
         ]
 
-    def get_from_reddit(self, post_url):
-        self.set_post_url(post_url)
-        self.get_post_data()
+    def get_post_data(self, post_url):
+        self._set_post_url(post_url)
+        self._get_post_data()
 
         if self.is_gallery:
-            return self.get_photos_from_post()
+            return self._get_photos_from_post()
         elif self.is_image:
-            return [self.get_photo_from_post()]
+            return [self._get_photo_from_post()]
         elif self.is_images:
-            return self.get_photos_from_post()
+            return self._get_photos_from_post()
         elif self.is_video or self.is_gif:
-            return self.get_video_from_post()
+            return self._get_video_from_post()
         elif self.is_text:
-            return self.get_text_from_post()
+            return self._get_text_from_post()
         elif self.is_link:
-            link = self.get_link_from_post()
+            link = self._get_link_from_post()
             formats = ["gif", "webm", "mp4"]
             if any([link.endswith(x) for x in formats]):
                 self.content_type = self.CONTENT_TYPE_VIDEO
-                return self.get_video_from_post()
+                return self._get_video_from_post()
             return link
 
-    def get_post_data(self):
+    def _get_post_data(self):
         # use UA headers to prevent 429 error
         headers = {
             'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.106 Safari/537.36 OPR/38.0.2220.41',
@@ -146,7 +147,6 @@ class Reddit:
         self.media_data = self.data["media"]
         self.content_type = self.data.get('post_hint', self.CONTENT_TYPE_TEXT)
 
-        # ToDo: unchecked
         if not self.media_data:
             if self.data.get('media'):
                 self.media_data = self.data["media"]
@@ -157,7 +157,7 @@ class Reddit:
                 else:
                     self.media_data = self.data['media']
 
-    def set_post_url(self, post_url):
+    def _set_post_url(self, post_url: str):
         parsed_url = urlparse(post_url)
         self.post_url = f"{parsed_url.scheme}://{parsed_url.hostname}{parsed_url.path}"
 

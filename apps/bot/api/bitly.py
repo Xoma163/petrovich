@@ -4,7 +4,7 @@ import requests
 
 from petrovich.settings import env
 
-logger = logging.getLogger('bot')
+logger = logging.getLogger('responses')
 
 
 class BitLy:
@@ -14,7 +14,7 @@ class BitLy:
         "Content-Type": "application/json"
     }
 
-    def get_short_link(self, long_url):
+    def get_short_link(self, long_url: str) -> str:
         params = {
             "domain": "bit.ly",
             "long_url": long_url

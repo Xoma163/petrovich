@@ -16,7 +16,7 @@ class ExchangeRates(Command):
         filters_list = ["USD", "EUR", "NOK", "JPY", "GBP", "KZT", "UAH", "AMD", "UZS"]
 
         cbr_api = CBRAPI(filters_list)
-        ex_rates = cbr_api.do()
+        ex_rates = cbr_api.get_ex_rates()
 
         if self.event.message.args:
             answer = self.concrete_rate(ex_rates)
@@ -24,7 +24,7 @@ class ExchangeRates(Command):
             answer = self.all_rates(ex_rates)
         return ResponseMessage(ResponseMessageItem(text=answer))
 
-    def concrete_rate(self, ex_rates):
+    def concrete_rate(self, ex_rates: dict) -> str:
         self.check_args(1)
         if len(self.event.message.args) == 1:
             value = 1
@@ -50,7 +50,7 @@ class ExchangeRates(Command):
                     return msg
             raise PWarning("Пока не знаю как переводить из этой валюты")
 
-    def all_rates(self, ex_rates):
+    def all_rates(self, ex_rates: dict) -> str:
         msg = "Курс валют:\n"
         for ex_rate in ex_rates:
             ex_rates[ex_rate]['value'] = self.to_fixed(ex_rates[ex_rate]['value'], 4)
@@ -58,5 +58,5 @@ class ExchangeRates(Command):
         return msg
 
     @staticmethod
-    def to_fixed(num, digits=0):
+    def to_fixed(num: float, digits=0) -> str:
         return f"{num:.{digits}f}"

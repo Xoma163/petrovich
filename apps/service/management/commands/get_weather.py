@@ -13,7 +13,7 @@ class Command(BaseCommand):
         for city_name in cities:
             city = City.objects.get(name__icontains=city_name)
             yandexweather_api = YandexWeather()
-            weather_data = yandexweather_api.get_weather(city, False)
+            weather_data = yandexweather_api._get_weather(city, False)
             weather_data_str = json.dumps(weather_data)
 
             entity_yesterday, _ = Service.objects.get_or_create(name=f'weatherchange_yesterday_{city.name}')

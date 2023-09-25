@@ -21,10 +21,6 @@ class Find(Command):
     def start(self) -> ResponseMessage:
         query = self.event.message.args_str
 
-        photo_results = self.get_photo_results(query)
-        return photo_results
-
-    def get_photo_results(self, query):
         count = 5
 
         gcs_api = GoogleCustomSearch()

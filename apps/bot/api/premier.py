@@ -4,60 +4,57 @@ import re
 import requests
 
 from apps.bot.api.subscribe_service import SubscribeService
+from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.utils.video.downloader import VideoDownloader
 
-logger = logging.getLogger('bot')
+logger = logging.getLogger('responses')
 
 
 class Premier(SubscribeService):
-    def __init__(self, url: str = None):
-        super().__init__()
-        if url and not url.endswith("/"):
-            url += "/"
-        self.url = url
-
-        self.title = ""
-        self.show_id = ""
-        self.show_name = ""
-        self.season = ""
-        self.episode = ""
-
-        self.video_id = None
-
-        self.is_series = False
-        self.is_movie = False
-
-    def parse_video(self):
-        res = re.findall(r"show/(.*)/season/(.*)/episode/(.*)/", self.url)
-        res2 = re.findall(r"show/(.*)/", self.url)
+    def parse_video(self, url: str) -> dict:
+        res = re.findall(r"show/(.*)/season/(.*)/episode/(.*)/", url)
+        res2 = re.findall(r"show/(.*)/", url)
         if res:
-            self.show_id, self.season, self.episode = res[0]
-            self._parse_series()
+            show_id, season, episode = res[0]
+            data = self._parse_series(show_id, season, episode)
+            data.update({
+                "show_id": show_id,
+                "season": season,
+                "episode": episode,
+                "is_series": True,
+                "filename": f"{data['show_id']}_s{data['season']}e{data['episode']}"
+            })
         elif res2:
-            self.show_id = res2[0]
-            self._parse_movie()
+            show_id = res2[0]
+            data = self._parse_movie(show_id)
+            data.update({
+                "show_id": show_id,
+                "is_series": False,
+                "filename": data['show_id'],
+            })
+        else:
+            raise PWarning("Не распознал ссылку как фильм или сериал")
+        return data
 
-    def _parse_series(self):
-        self.is_series = True
+    def _parse_series(self, show_id: str, season: str, episode: str) -> dict:
+        params = {"season": season, 'episode': episode}
+        result = self._get_videos(show_id, params)[0]
+        return {
+            "video_id": result['id'],
+            "title": result['title_for_player'] or result['title_for_card']
+        }
 
-        params = {"season": self.season, 'episode': self.episode}
-        result = self._get_videos(self.show_id, params)[0]
+    def _parse_movie(self, show_id: str) -> dict:
+        result = self._get_videos(show_id, {})[0]
+        return {
+            "video_id": result['id'],
+            "title": result['title_for_player'] or result['title_for_card']
+        }
 
-        self.video_id = result['id']
-        self.title = result['title_for_player'] or result['title_for_card']
-
-    def _parse_movie(self):
-        self.is_movie = True
-        result = self._get_videos(self.show_id, {})[0]
-        self.video_id = result['id']
-        self.title = result['title_for_player'] or result['title_for_card']
-
-    def download_video(self):
-        if not self.video_id:
-            self.parse_video()
-
+    @staticmethod
+    def download_video(url: str, video_id: str) -> bytes:
         r = requests.get(
-            f"https://premier.one/api/play/options/{self.video_id}/?format=json&no_404=true&referer={self.url}").json()
+            f"https://premier.one/api/play/options/{video_id}/?format=json&no_404=true&referer={url}").json()
         logger.debug({"response": r})
         master_m3u8_url = r['video_balancer']['default']
 
@@ -65,7 +62,7 @@ class Premier(SubscribeService):
         return vd.download(master_m3u8_url, threads=10)
 
     @staticmethod
-    def _get_videos(channel_id, params):
+    def _get_videos(channel_id, params) -> dict:
         r = requests.get(f"https://premier.one/uma-api/metainfo/tv/{channel_id}/video/", params=params).json()
         logger.debug({"response": r})
         results = r['results']

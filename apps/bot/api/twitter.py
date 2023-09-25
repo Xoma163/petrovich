@@ -8,7 +8,7 @@ import requests
 from apps.bot.classes.const.exceptions import PWarning
 from petrovich.settings import env
 
-logger = logging.getLogger('bot')
+logger = logging.getLogger('responses')
 
 
 class Twitter:
@@ -24,11 +24,7 @@ class Twitter:
     URL_TWEET_INFO = f"https://{_HOST}/tweet/details"
     URL_TWEET_REPLIES = f"https://{_HOST}/tweet/replies"
 
-    def __init__(self):
-        self.caption = ""
-        self.with_replies = False
-
-    def get_attachments(self, url, with_threads=False):
+    def get_post_data(self, url, with_threads=False):
         tweet_id = urlparse(url).path.strip('/').split('/')[-1]
         r = requests.get(self.URL_TWEET_INFO, headers=self.HEADERS, params={'tweet_id': tweet_id}).json()
         if r.get('detail') == 'Error while parsing tweet':
@@ -37,17 +33,13 @@ class Twitter:
 
         if with_threads:
             try:
-                post_text, post_attachments = self._get_post_with_replies(r)
-                self.with_replies = True
+                return self._get_post_with_replies(r)
             except RuntimeError:
-                post_text, post_attachments = self._get_text_and_attachments(r)
+                return self._get_text_and_attachments(r)
         else:
-            post_text, post_attachments = self._get_text_and_attachments(r)
+            return self._get_text_and_attachments(r)
 
-        self.caption = post_text
-        return post_attachments
-
-    def _get_text_and_attachments(self, tweet_data) -> (str, list):
+    def _get_text_and_attachments(self, tweet_data) -> dict:
         text = self._get_text_without_tco_links(tweet_data.get('text', ""))
         attachments = []
         if tweet_data.get('video_url'):
@@ -59,9 +51,9 @@ class Twitter:
         elif tweet_data.get('media_url'):
             photos = self._get_photos(tweet_data['media_url'])
             attachments = [{self.CONTENT_TYPE_IMAGE: x} for x in photos]
-        return text, attachments
+        return {'text': text, "attachments": attachments}
 
-    def _get_post_with_replies(self, tweet_data) -> (str, list):
+    def _get_post_with_replies(self, tweet_data) -> dict:
         time.sleep(1)
         tweet_id = tweet_data["tweet_id"]
         user_id = tweet_data['user']['user_id']
@@ -85,15 +77,18 @@ class Twitter:
         texts = []
         attachments = []
         for tweet in tweet_chain:
-            _text, _attachments = self._get_text_and_attachments(tweet)
-            if _text:
-                texts.append(_text)
-            if _attachments:
-                attachments += _attachments
-        return "\n\n".join(texts), attachments
+            data = self._get_text_and_attachments(tweet)
+            if data["text"]:
+                texts.append(data["text"])
+            if data["attachments"]:
+                attachments += data["attachments"]
+        return {
+            'text': "\n\n".join(texts),
+            'attachments': attachments
+        }
 
     @staticmethod
-    def _get_text_without_tco_links(text):
+    def _get_text_without_tco_links(text: str) -> str:
         p = re.compile(r"https:\/\/t.co\/.*")
         for item in reversed(list(p.finditer(text))):
             start_pos = item.start()
@@ -102,11 +97,11 @@ class Twitter:
         return text
 
     @staticmethod
-    def _get_photos(photo_info):
+    def _get_photos(photo_info: dict) -> dict:
         return photo_info
 
     @staticmethod
-    def _get_video(video_info):
+    def _get_video(video_info: list) -> str:
         videos = filter(lambda x: x.get('bitrate') and x['content_type'] == 'video/mp4', video_info)
         best_video = sorted(videos, key=lambda x: x['bitrate'], reverse=True)[0]['url']
         return best_video

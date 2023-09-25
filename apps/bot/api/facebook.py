@@ -5,7 +5,7 @@ import requests
 from apps.bot.classes.const.exceptions import PWarning
 from petrovich.settings import env
 
-logger = logging.getLogger('bot')
+logger = logging.getLogger('responses')
 
 
 class Facebook:
@@ -16,18 +16,16 @@ class Facebook:
     }
     URL = f"https://{_HOST}/app/main.php"
 
-    def __init__(self):
-        self.caption = ""
-
     def get_video_info(self, url):
         r = requests.get(self.URL, headers=self.HEADERS, params={"url": url}).json()
         logger.debug({"response": r})
-        if r.get('title'):
-            self.caption = r['title']
 
         video_url = None
         if r['links']:
             video_url = r['links']['Download High Quality'] or r['links']['Download Low Quality']
         if not video_url:
-            raise PWarning("Ссылка на инстаграмм не является видео/фото")
-        return video_url
+            raise PWarning("Ссылка на фейсбук не является видео")
+        return {
+            "download_url": video_url,
+            "caption": r.get('title')
+        }

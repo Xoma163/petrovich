@@ -1,17 +1,15 @@
 import logging
+from typing import List
 
 import requests
 
-logger = logging.getLogger('bot')
+logger = logging.getLogger('responses')
 
 
 class MemeArsenal:
     URL = " https://api.meme-arsenal.com/api/templates-share"
 
-    def __init__(self):
-        pass
-
-    def get_memes(self, text, items_on_page=5):
+    def get_memes(self, text, items_on_page=5) -> List[dict]:
         r = requests.get(self.URL, {
             'sort': 'popular',
             'items_on_page': items_on_page,

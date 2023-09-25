@@ -48,7 +48,7 @@ class Issue(Command):
         github_api = Github()
         labels_in_github = [x for x in github_api.get_all_labels() if x.lower() in tags] if tags else []
 
-        response = github_api.create_issue(title, body, Github.REPO_OWNER, labels=labels_in_github)
-        answer = f"Отслеживать созданное ишю можно по {self.bot.get_formatted_url('ссылке', response['html_url'])}"
+        r = github_api.create_issue(title, body, Github.REPO_OWNER, labels=labels_in_github)
+        answer = f"Отслеживать созданное ишю можно по {self.bot.get_formatted_url('ссылке', r['html_url'])}"
 
         return ResponseMessage(ResponseMessageItem(text=answer))

@@ -9,36 +9,29 @@ class TheHole(SubscribeService):
     URL = "https://the-hole.tv"
     CDN_URL = "https://video-cdn.the-hole.tv"
 
-    def __init__(self):
-        super().__init__()
-        self.channel_id = None
-        self.channel_title = None
-        self.video_id = None
-        self.video_title = None
-        self.m3u8_url = None
-
     def parse_video(self, url):
         content = requests.get(url).content
         bs4 = BeautifulSoup(content, 'html.parser')
 
         a = [x for x in bs4.select('a[href*=shows]') if x.attrs['href'].startswith("/shows/") if x.text.strip()][0]
-        self.channel_id = a.attrs['href'].replace("/shows/", "")
 
         data_player = bs4.select_one('[data-player-source-value]').attrs
-        self.channel_title = a.text
-        self.video_title = data_player['data-player-title-value']
         master_m3u8 = data_player['data-player-source-value']
-        self.video_id = master_m3u8.split("/")[-2]
-        base_uri = f"{self.CDN_URL}/episodes/{self.video_id}"
+        video_id = master_m3u8.split("/")[-1]
+        base_uri = f"{self.CDN_URL}/episodes/{video_id}"
 
-        self.m3u8_url = f"{base_uri}/master.m3u8"
+        return {
+            "channel_id": a.attrs['href'].replace("/shows/", ""),
+            "channel_title": a.text,
+            "video_id": video_id,
+            "video_title": data_player['data-player-title-value'],
+            "m3u8_url": f"{base_uri}/master.m3u8",
+        }
 
-    def get_video(self, url):
-        if not self.m3u8_url:
-            self.parse_video(url)
-
+    @staticmethod
+    def download_video(m3u8_url: str) -> bytes:
         vd = VideoDownloader()
-        return vd.download(self.m3u8_url)
+        return vd.download(m3u8_url)
 
     def get_data_to_add_new_subscribe(self, url) -> dict:
         content = requests.get(url).content

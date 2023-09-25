@@ -32,9 +32,8 @@ class VKVideo(SubscribeService):
 
     def __init__(self):
         super().__init__()
-        self.title = None
 
-    def get_video(self, url):
+    def get_video(self, url) -> bytes:
         player_url = self._get_player_url(url)
         video_content, audio_content = self._get_download_urls(player_url)
         if audio_content is not None:
@@ -50,7 +49,6 @@ class VKVideo(SubscribeService):
             raise PWarning("К сожалению видео старое и скачать его не получится. "
                            "Поддерживаются видео с апреля-мая 2023 года")
         player_url = bs4.find("meta", property="og:video").attrs['content']
-        self.title = bs4.find("meta", property="og:title").attrs['content']
         return player_url
 
     def _get_download_urls(self, player_url: str) -> Tuple[bytes, Optional[bytes]]:
@@ -97,7 +95,7 @@ class VKVideo(SubscribeService):
         vd = VideoDownloader()
         return vd.download(hls_url, threads=10), None
 
-    def get_video_info(self, url):
+    def get_video_info(self, url) -> dict:
         content = requests.get(url, headers=self.headers).content
         bs4 = BeautifulSoup(content, 'html.parser')
         try:

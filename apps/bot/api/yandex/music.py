@@ -2,13 +2,13 @@ import logging
 import re
 from urllib.parse import urlparse
 
+from yandex_music import Client
+from yandex_music.utils.request import Request
+
 from apps.bot.classes.const.exceptions import PWarning
 from petrovich.settings import env
 
 logging.basicConfig(level=logging.CRITICAL)
-
-from yandex_music import Client
-from yandex_music.utils.request import Request
 
 
 class YandexMusic:
@@ -35,7 +35,7 @@ class YandexMusic:
         self.bitrate = 0
         self.format = ""
 
-    def download(self):
+    def download(self) -> bytes:
         client = YandexClient(request=YandexRequest(), token=self.ACCESS_TOKEN)
         client.notice_displayed = True
         client.init()

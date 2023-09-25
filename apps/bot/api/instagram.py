@@ -6,7 +6,7 @@ import requests
 from apps.bot.classes.const.exceptions import PWarning
 from petrovich.settings import env
 
-logger = logging.getLogger('bot')
+logger = logging.getLogger('responses')
 
 
 class Instagram:
@@ -19,17 +19,17 @@ class Instagram:
         self.content_type = None
         self.caption = ""
 
-    def get_content_url(self, instagram_link):
+    def get_post_data(self, instagram_link) -> dict:
         if '/stories/' in instagram_link:
-            return self.get_story_data(instagram_link)
+            return self._get_story_data(instagram_link)
         elif '/reel/' in instagram_link:
-            return self.get_post_data(instagram_link)
+            return self._get_post_data(instagram_link)
         elif '/p/' in instagram_link:
-            return self.get_post_data(instagram_link)
+            return self._get_post_data(instagram_link)
         else:
             raise PWarning("Ссылка на инстаграмм не является видео/фото")
 
-    def get_story_data(self, instagram_link):
+    def _get_story_data(self, instagram_link) -> dict:
         host = "rocketapi-for-instagram.p.rapidapi.com"
         headers = {
             "content-type": "application/json",
@@ -46,7 +46,7 @@ class Instagram:
 
         return self._parse_photo_or_video(r['response']['body']['items'][0])
 
-    def get_post_data(self, instagram_link):
+    def _get_post_data(self, instagram_link) -> dict:
         host = "instagram-scraper-20231.p.rapidapi.com"
         HEADERS = {
             "X-RapidAPI-Host": host,
@@ -60,19 +60,18 @@ class Instagram:
 
         return self._parse_photo_or_video(r['data'])
 
-    def _parse_photo_or_video(self, data):
+    def _parse_photo_or_video(self, data) -> dict:
         if 'video_versions' in data:
-            self.content_type = self.CONTENT_TYPE_VIDEO
-            self.caption = data.get('caption', {})
-            self.caption = self.caption.get('text', "") if self.caption else None
-            if not self.caption:
-                self.caption = ""
-            else:
-                self.caption = self.caption.strip()
-            return data['video_versions'][0]['url']
+            return {
+                "download_url": data['video_versions'][0]['url'],
+                "content_type": self.CONTENT_TYPE_VIDEO,
+                "caption": data.get('caption', {}).get("text", "").strip()
+            }
         elif 'image_versions2' in data:
-            self.content_type = self.CONTENT_TYPE_IMAGE
-            self.caption = data['caption']['text'].strip()
-            return data['image_versions2']['candidates'][0]['url']
+            return {
+                "download_url": data['image_versions2']['candidates'][0]['url'],
+                "content_type": self.CONTENT_TYPE_IMAGE,
+                "caption": data.get('caption', {}).get("text", "").strip()
+            }
         else:
             raise PWarning("Ссылка на инстаграмм не является видео/фото")

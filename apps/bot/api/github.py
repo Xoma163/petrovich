@@ -1,12 +1,13 @@
 import json
 import logging
+from typing import List
 
 import requests
 
 from apps.bot.classes.const.exceptions import PError
 from petrovich.settings import env
 
-logger = logging.getLogger('bot')
+logger = logging.getLogger('responses')
 
 
 class Github:
@@ -19,7 +20,7 @@ class Github:
         "Authorization": f"token {TOKEN}"
     }
 
-    def create_issue(self, title, body=None, assignee=None, milestone=None, labels=None):
+    def create_issue(self, title, body=None, assignee=None, milestone=None, labels=None) -> dict:
         """Создание issue."""
         if labels is None:
             labels = []
@@ -40,7 +41,7 @@ class Github:
             raise PError("Не удалось создать issue на github")
         return r_json
 
-    def delete_issue(self, _id):
+    def delete_issue(self, _id) -> dict:
         issue_data = {
             "state": "closed",
             "labels": ["Не пофикшу"]
@@ -53,7 +54,7 @@ class Github:
             raise PError("Не удалось закрыть issue на github")
         return r_json
 
-    def get_all_labels(self):
+    def get_all_labels(self) -> List[str]:
         r = requests.get(self.LABELS_URL, json.dumps({}), headers=self.HEADERS).json()
         logger.debug({"response": r})
         return [x['name'] for x in r]

@@ -4,28 +4,14 @@ import requests
 
 from petrovich.settings import env
 
-logger = logging.getLogger('bot')
+logger = logging.getLogger('responses')
 
 
 class YandexGeo:
-    url = "https://geocode-maps.yandex.ru/1.x/"
+    URL = "https://geocode-maps.yandex.ru/1.x/"
     API_KEY = env.str("YANDEX_GEO_TOKEN")
 
-    def get_address(self, lat, lon):
-        params = {
-            'apikey': self.API_KEY,
-            'geocode': f"{lat, lon}",
-            'format': 'json',
-            'result': '1',
-            'lang': 'ru_RU'
-        }
-        r = requests.get(self.url, params).json()
-        logger.debug({"response": r})
-
-        return r['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']['metaDataProperty'][
-            'GeocoderMetaData']['text']
-
-    def get_city_info_by_name(self, city_name):
+    def get_city_info_by_name(self, city_name) -> dict:
         params = {
             'apikey': self.API_KEY,
             'geocode': city_name,
@@ -33,12 +19,12 @@ class YandexGeo:
             'result': '1',
             'lang': 'ru_RU'
         }
-        r = requests.get(self.url, params).json()
+        r = requests.get(self.URL, params).json()
         logger.debug({"response": r})
 
         result = r['response']['GeoObjectCollection']['featureMember']
         if len(result) == 0:
-            return None
+            return {}
         city_data = result[0]['GeoObject']
         lon, lat = city_data['Point']['pos'].split(' ', 2)
         city_name = city_data['name']

@@ -29,7 +29,7 @@ from apps.bot.classes.const.exceptions import PWarning, PSkip
 from apps.bot.classes.event import Event
 from apps.bot.classes.messages.attachments.link import LinkAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
-from apps.bot.commands.trimVideo import TrimVideo
+from apps.bot.commands.trim_video import TrimVideo
 from apps.bot.utils.utils import get_urls_from_text, replace_markdown_links, replace_markdown_bolds, \
     replace_markdown_quotes
 from apps.bot.utils.video.trimmer import VideoTrimmer
@@ -201,7 +201,9 @@ class Media(Command):
     def get_youtube_video(self, url) -> (list, str):
         if 'audio' in self.event.message.keys:
             return self.get_youtube_audio(url)
-        y_api = YoutubeVideo(max_filesize_mb=self.bot.MAX_VIDEO_SIZE_MB)
+
+        max_filesize_mb = self.bot.MAX_VIDEO_SIZE_MB if isinstance(self.bot, TgBot) else None
+        yt_api = YoutubeVideo()
 
         args = self.event.message.args[1:] if self.event.message.command in self.full_names else self.event.message.args
         end_pos = None
@@ -215,29 +217,30 @@ class Media(Command):
             if start_pos:
                 tm = TrimVideo()
                 video_content = tm.trim_link_pos(url, start_pos, end_pos)
+                text = None
             else:
-                content_url = y_api.get_download_url(url)
-                if not self.has_command_name and y_api.duration > 120:
+                data = yt_api.get_video_info(url, max_filesize_mb=max_filesize_mb)['url']
+                if not self.has_command_name and data['duration'] > 120:
                     button = self.bot.get_button(f"{self.event.message.COMMAND_SYMBOLS[0]}{self.name} {url}")
                     keyboard = self.bot.get_inline_keyboard([button])
                     raise PWarning(
                         "Видосы до 2х минут не парсятся без упоминания. Если в этом есть нужда - жми на кнопку",
                         keyboard=keyboard)
-                video_content = requests.get(content_url).content
+                video_content = requests.get(data['download_url']).content
+                text = data['title']
         finally:
             self.bot.stop_activity_thread()
-        video = self.bot.get_video_attachment(video_content, peer_id=self.event.peer_id, filename=y_api.filename)
+        video = self.bot.get_video_attachment(video_content, peer_id=self.event.peer_id)
 
-        text = y_api.title
         return [video], text
 
     def get_youtube_audio(self, url) -> (list, str):
-        track = YoutubeMusic(url)
-        track.get_info()
-        title = f"{track.artists} - {track.title}"
-        audio_att = self.bot.get_audio_attachment(track.content, peer_id=self.event.peer_id,
-                                                  filename=f"{title}.{track.format}",
-                                                  thumb=track.cover_url, artist=track.artists, title=track.title)
+        ytm_api = YoutubeMusic()
+        data = ytm_api.get_info(url)
+        title = f"{data['artists']} - {data['title']}"
+        audio_att = self.bot.get_audio_attachment(data['content'], peer_id=self.event.peer_id,
+                                                  filename=f"{title}.{data['format']}",
+                                                  thumb=data['cover_url'], artist=data['artists'], title=data['title'])
         return [audio_att], ""
 
     def get_tiktok_video(self, url) -> (list, str):
@@ -255,7 +258,7 @@ class Media(Command):
 
     def get_reddit_attachment(self, url) -> (list, str):
         rs = Reddit()
-        reddit_data = rs.get_from_reddit(url)
+        reddit_data = rs.get_post_data(url)
         if rs.is_gif:
             attachments = [self.bot.get_gif_attachment(reddit_data, peer_id=self.event.peer_id, filename=rs.filename)]
         elif rs.is_image or rs.is_images or rs.is_gallery:
@@ -304,15 +307,15 @@ class Media(Command):
             raise PWarning("медиа инстаграмм доступен только для доверенных пользователей")
 
         i_api = Instagram()
-        content_url = i_api.get_content_url(url)
+        data = i_api.get_post_data(url)
 
-        if i_api.content_type == i_api.CONTENT_TYPE_IMAGE:
-            attachment = self.bot.get_photo_attachment(content_url, peer_id=self.event.peer_id)
-        elif i_api.content_type == i_api.CONTENT_TYPE_VIDEO:
-            attachment = self.bot.get_video_attachment(content_url, peer_id=self.event.peer_id)
+        if data['content_type'] == i_api.CONTENT_TYPE_IMAGE:
+            attachment = self.bot.get_photo_attachment(data['download_url'], peer_id=self.event.peer_id)
+        elif data['content_type'] == i_api.CONTENT_TYPE_VIDEO:
+            attachment = self.bot.get_video_attachment(data['download_url'], peer_id=self.event.peer_id)
         else:
             raise PWarning("Ссылка на инстаграмм не является видео/фото")
-        return [attachment], i_api.caption
+        return [attachment], data['caption']
 
     def get_twitter_video(self, url) -> (list, str):
         try:
@@ -322,15 +325,15 @@ class Media(Command):
 
         t_api = Twitter()
         with_threads = self.event.message.keys and self.event.message.keys[0] in ['thread', 'threads', 'with-threads',
-                                                                                  'тред']
-        atts = t_api.get_attachments(url, with_threads=with_threads)
-        text = t_api.caption
+                                                                                  'тред', 'треды']
+        data = t_api.get_post_data(url, with_threads=with_threads)
+        text = data['text']
 
-        if not atts:
+        if not data["attachments"]:
             return [], text
 
         attachments = []
-        for att in atts:
+        for att in data["attachments"]:
             if t_api.CONTENT_TYPE_VIDEO in att:
                 att_link = att[t_api.CONTENT_TYPE_VIDEO]
                 video = self.bot.get_video_attachment(att_link, peer_id=self.event.peer_id)
@@ -344,30 +347,30 @@ class Media(Command):
 
     def get_pikabu_video(self, url) -> (list, str):
         p_api = Pikabu()
-        webm = p_api.get_video_url_from_post(url)
+        data = p_api.get_video_data(url)
         # video_content = requests.get(webm).content
-        video = self.bot.get_video_attachment(webm, peer_id=self.event.peer_id, filename=p_api.filename)
-        return [video], p_api.title
+        video = self.bot.get_video_attachment(data['download_url'], peer_id=self.event.peer_id,
+                                              filename=data['filename'])
+        return [video], data['title']
 
     def get_the_hole_video(self, url) -> (list, str):
         the_hole_api = TheHole()
-        the_hole_api.parse_video(url)
-        title = the_hole_api.video_title
+        data = the_hole_api.parse_video(url)
 
         try:
-            cache = VideoCache.objects.get(channel_id=the_hole_api.channel_id, video_id=the_hole_api.video_id)
+            cache = VideoCache.objects.get(channel_id=data['channel_id'], video_id=data['video_id'])
         except VideoCache.DoesNotExist:
             try:
                 self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.UPLOAD_VIDEO)
-                video = the_hole_api.get_video(url)
+                video = the_hole_api.download_video(data["m3u8_url"])
             finally:
                 self.bot.stop_activity_thread()
 
-            filename = f"{the_hole_api.channel_title}_{the_hole_api.video_title}"
+            filename = f"{data['channel_title']}_{data['video_title']}"
 
             cache = self._save_video_to_media_cache(
-                the_hole_api.channel_id,
-                the_hole_api.video_id,
+                data['channel_id'],
+                data['video_id'],
                 filename,
                 video
             )
@@ -376,7 +379,7 @@ class Media(Command):
         attachments = []
         if filesize_mb < self.bot.MAX_VIDEO_SIZE_MB:
             attachments = [self.bot.get_video_attachment(cache.video, peer_id=self.event.peer_id)]
-        msg = title + f"\nCкачать можно здесь {self.bot.get_formatted_url('здесь', MAIN_SITE + cache.video.url)}"
+        msg = f"{data['video_title']}\nCкачать можно здесь {self.bot.get_formatted_url('здесь', MAIN_SITE + cache.video.url)}"
         return attachments, msg
 
     def get_yandex_music(self, url) -> (list, str):
@@ -394,18 +397,21 @@ class Media(Command):
         return [audio], ""
 
     def get_pinterest_attachment(self, url) -> (list, str):
-        p_api = Pinterest(url)
-        content = p_api.get_attachment()
-        if p_api.is_video:
-            attachment = self.bot.get_video_attachment(content, peer_id=self.event.peer_id, filename=p_api.filename)
-        elif p_api.is_image:
-            attachment = self.bot.get_photo_attachment(content, peer_id=self.event.peer_id, filename=p_api.filename)
-        elif p_api.is_gif:
-            attachment = self.bot.get_gif_attachment(content, peer_id=self.event.peer_id, filename=p_api.filename)
+        p_api = Pinterest()
+        data = p_api.get_post_data(url)
+        if data['content_type'] == p_api.CONTENT_TYPE_VIDEO:
+            attachment = self.bot.get_video_attachment(data['download_url'], peer_id=self.event.peer_id,
+                                                       filename=data['filename'])
+        elif data['content_type'] == p_api.CONTENT_TYPE_IMAGE:
+            attachment = self.bot.get_photo_attachment(data['download_url'], peer_id=self.event.peer_id,
+                                                       filename=data['filename'])
+        elif data['content_type'] == p_api.CONTENT_TYPE_GIF:
+            attachment = self.bot.get_gif_attachment(data['download_url'], peer_id=self.event.peer_id,
+                                                     filename=data['filename'])
         else:
             raise PWarning("Я хз чё за контент")
 
-        return [attachment], p_api.title
+        return [attachment], data['title']
 
     def get_coub_video(self, url) -> (list, str):
         headers = {
@@ -420,15 +426,15 @@ class Media(Command):
         return [video], title
 
     def get_vk_video(self, url) -> (list, str):
-        vk_v_api = VKVideo()
+        vk_api = VKVideo()
         r = re.findall(r'\?(list=.*)', url)
         if r:
             url = url.replace(r[0], "")
             url = url.rstrip("?")
-        video_info = vk_v_api.get_video_info(url)
+        video_info = vk_api.get_video_info(url)
 
-        if not video_info and not self.has_command_name > 120:
-            raise PSkip()
+        if not video_info:
+            raise PWarning("Не получилось распарсить ссылку")
 
         title = video_info['video_title']
 
@@ -437,12 +443,11 @@ class Media(Command):
         except VideoCache.DoesNotExist:
             try:
                 self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.UPLOAD_VIDEO)
-                video = vk_v_api.get_video(url)
+                video = vk_api.get_video(url)
             finally:
                 self.bot.stop_activity_thread()
 
             filename = f"{video_info['channel_title']}_{title}"
-
             cache = self._save_video_to_media_cache(
                 video_info['channel_id'],
                 video_info['video_id'],
@@ -453,7 +458,7 @@ class Media(Command):
         attachments = []
         if filesize_mb < self.bot.MAX_VIDEO_SIZE_MB:
             attachments = [self.bot.get_video_attachment(cache.video, peer_id=self.event.peer_id)]
-        msg = title + f"\nCкачать можно здесь {self.bot.get_formatted_url('здесь', MAIN_SITE + cache.video.url)}"
+        msg = f"{title}\nCкачать можно здесь {self.bot.get_formatted_url('здесь', MAIN_SITE + cache.video.url)}"
         return attachments, msg
 
     def get_scope_gg_video(self, url) -> (list, str):
@@ -491,44 +496,39 @@ class Media(Command):
 
     def get_facebook_video(self, url) -> (list, str):
         f_api = Facebook()
-        content_url = f_api.get_video_info(url)
+        data = f_api.get_video_info(url)
 
-        video = self.bot.get_video_attachment(content_url, peer_id=self.event.peer_id)
-        return [video], f_api.caption
+        video = self.bot.get_video_attachment(data['download_url'], peer_id=self.event.peer_id)
+        return [video], data['caption']
 
     def get_premiere_video(self, url) -> (list, str):
-        p_api = Premier(url)
-        p_api.parse_video()
+        p_api = Premier()
+        data = p_api.parse_video(url)
 
         try:
-            cache = VideoCache.objects.get(channel_id=p_api.show_id, video_id=p_api.video_id)
+            cache = VideoCache.objects.get(channel_id=data['show_id'], video_id=data['video_id'])
         except VideoCache.DoesNotExist:
             try:
                 self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.UPLOAD_VIDEO)
-                video = p_api.download_video()
+                video = p_api.download_video(url, data['video_id'])
             finally:
                 self.bot.stop_activity_thread()
 
-            if p_api.is_series:
-                filename = f"{p_api.show_id}_s{p_api.season}e{p_api.episode}"
-            else:
-                filename = f"{p_api.show_id}"
-
             cache = self._save_video_to_media_cache(
-                p_api.show_id,
-                p_api.video_id,
-                filename,
+                data['show_id'],
+                data['video_id'],
+                data['filename'],
                 video
             )
         filesize_mb = len(cache.video) / 1024 / 1024
         attachments = []
         if filesize_mb < self.bot.MAX_VIDEO_SIZE_MB:
             attachments = [self.bot.get_video_attachment(cache.video, peer_id=self.event.peer_id)]
-        msg = p_api.title + f"\nCкачать можно здесь {self.bot.get_formatted_url('здесь', MAIN_SITE + cache.video.url)}"
+        msg = f"{data['title']}\nCкачать можно здесь {self.bot.get_formatted_url('здесь', MAIN_SITE + cache.video.url)}"
         return attachments, msg
 
     @staticmethod
-    def _save_video_to_media_cache(channel_id, video_id, name, content):
+    def _save_video_to_media_cache(channel_id: str, video_id: str, name: str, content: bytes):
         filename = f"{name}.mp4"
         cache = VideoCache(
             channel_id=channel_id,
