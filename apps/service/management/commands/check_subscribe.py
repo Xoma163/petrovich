@@ -29,7 +29,7 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         subs = Subscribe.objects.all()
         groupped_subs = groupby(subs.order_by("channel_id"), lambda x: (x.service, x.channel_id, x.playlist_id))
-        for (service, _), subs in groupped_subs:
+        for (service, _, _), subs in groupped_subs:
             service_class = {
                 Subscribe.SERVICE_YOUTUBE: YoutubeVideoAPI,
                 Subscribe.SERVICE_THE_HOLE: TheHoleAPI,
