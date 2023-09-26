@@ -15,9 +15,6 @@ class Imgur:
 
     HEADERS = {"Authorization": f"Bearer {ACCESS_TOKEN}"}
 
-    def __init__(self):
-        pass
-
     def upload_image(self, image: bytes) -> str:
         files = {
             "image": image
