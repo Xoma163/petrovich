@@ -1,4 +1,4 @@
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/df0f0b4230d845139d793f34bf93b875)](https://www.codacy.com/gh/Xoma163/petrovich/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Xoma163/petrovich&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/df0f0b4230d845139d793f34bf93b875)](https://app.codacy.com/gh/Xoma163/petrovich/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 
 [![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=Xoma163_petrovich&metric=duplicated_lines_density)](https://sonarcloud.io/summary/overall?id=Xoma163_petrovich)
 [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=Xoma163_petrovich&metric=reliability_rating)](https://sonarcloud.io/summary/overall?id=Xoma163_petrovich)
