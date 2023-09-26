@@ -118,7 +118,7 @@ class VKVideo(SubscribeService):
         except:
             return {}
 
-    def get_data_to_add_new_subscribe(self, url) -> dict:
+    def get_data_to_add_new_subscribe(self, url: str) -> dict:
         content = requests.get(url, headers=self.headers).content
         bs4 = BeautifulSoup(content, "html.parser")
         title = bs4.select_one(".VideoCard__ownerLink").text
@@ -143,7 +143,7 @@ class VKVideo(SubscribeService):
             'playlist_id': playlist_id if channel_id != playlist_id else None
         }
 
-    def get_filtered_new_videos(self, channel_id, last_video_id, **kwargs) -> dict:
+    def get_filtered_new_videos(self, channel_id: str, last_video_id: str, **kwargs) -> dict:
         if kwargs.get('playlist_id'):
             channel_id = kwargs['playlist_id']
         url = f"{self.URL}/{channel_id}"

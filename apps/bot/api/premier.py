@@ -62,13 +62,14 @@ class Premier(SubscribeService):
         return vd.download(master_m3u8_url, threads=10)
 
     @staticmethod
-    def _get_videos(channel_id, params) -> dict:
+    def _get_videos(channel_id: str, params: dict, log_results: bool = True) -> dict:
         r = requests.get(f"https://premier.one/uma-api/metainfo/tv/{channel_id}/video/", params=params).json()
-        logger.debug({"response": r})
+        if log_results:
+            logger.debug({"response": r})
         results = r['results']
         return results
 
-    def get_data_to_add_new_subscribe(self, url) -> dict:
+    def get_data_to_add_new_subscribe(self, url: str) -> dict:
         if not url.endswith('/'):
             url += "/"
         res2 = re.findall(r"show/(.*)/", url)
@@ -88,9 +89,9 @@ class Premier(SubscribeService):
                 'playlist_id': None
             }
 
-    def get_filtered_new_videos(self, channel_id, last_video_id, **kwargs) -> dict:
+    def get_filtered_new_videos(self, channel_id: str, last_video_id: str, **kwargs) -> dict:
         params = {'limit': 100}
-        results = self._get_videos(channel_id, params)
+        results = self._get_videos(channel_id, params, log_results=False)
 
         videos = [x for x in results if x.get('type', {}).get('id') == 6]
 

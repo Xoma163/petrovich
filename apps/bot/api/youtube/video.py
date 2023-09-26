@@ -88,7 +88,7 @@ class YoutubeVideo(SubscribeService):
             "duration": video_info.get('duration')
         }
 
-    def get_data_to_add_new_subscribe(self, url) -> dict:
+    def get_data_to_add_new_subscribe(self, url: str) -> dict:
         r = requests.get(url)
         bs4 = BeautifulSoup(r.content, 'lxml')
         channel_id = bs4.find_all('link', {'rel': 'canonical'})[0].attrs['href'].split('/')[-1]
@@ -98,7 +98,6 @@ class YoutubeVideo(SubscribeService):
             raise PWarning("Не нашёл такого канала")
         bsop = BeautifulSoup(r.content, 'lxml')
         last_video = bsop.find_all('entry')[0]
-        self.title = bsop.find('title').text
 
         return {
             'channel_id': channel_id,
@@ -107,7 +106,7 @@ class YoutubeVideo(SubscribeService):
             'playlist_id': None
         }
 
-    def get_filtered_new_videos(self, channel_id, last_video_id, **kwargs) -> dict:
+    def get_filtered_new_videos(self, channel_id: str, last_video_id: str, **kwargs) -> dict:
         r = requests.get(f"https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}")
         if r.status_code != 200:
             raise PWarning("Не нашёл такого канала")

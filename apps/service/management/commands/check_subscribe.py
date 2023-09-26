@@ -23,9 +23,6 @@ logger = logging.getLogger('subscribe_notifier')
 
 class Command(BaseCommand):
 
-    def __init__(self):
-        super().__init__()
-
     def handle(self, *args, **kwargs):
         subs = Subscribe.objects.all()
         groupped_subs = groupby(subs.order_by("channel_id"), lambda x: (x.service, x.channel_id, x.playlist_id))
@@ -44,7 +41,10 @@ class Command(BaseCommand):
             }
             sub_class = service_class[service]
             media_method = service_media_method[service]
-            self.check_video(list(subs), sub_class, media_method)
+            try:
+                self.check_video(list(subs), sub_class, media_method)
+            except Exception:
+                logger.exception("Ошибка в проверке/отправке подписки")
 
     def check_video(self, subs, sub_class, media_method):
         if len(set(x.last_video_id for x in subs)) == 1:

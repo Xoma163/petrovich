@@ -33,7 +33,7 @@ class TheHole(SubscribeService):
         vd = VideoDownloader()
         return vd.download(m3u8_url)
 
-    def get_data_to_add_new_subscribe(self, url) -> dict:
+    def get_data_to_add_new_subscribe(self, url: str) -> dict:
         content = requests.get(url).content
         bs4 = BeautifulSoup(content, 'html.parser')
         return {
@@ -43,7 +43,7 @@ class TheHole(SubscribeService):
             'playlist_id': None
         }
 
-    def get_filtered_new_videos(self, channel_id, last_video_id, **kwargs) -> dict:
+    def get_filtered_new_videos(self, channel_id: str, last_video_id: str, **kwargs) -> dict:
         content = requests.get(f"{self.URL}/shows/{channel_id}").content
         bs4 = BeautifulSoup(content, 'html.parser')
         last_videos = [x.attrs['href'] for x in bs4.select('a[href*=episodes]')]
