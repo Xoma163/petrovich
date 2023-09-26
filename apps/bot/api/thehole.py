@@ -46,15 +46,13 @@ class TheHole(SubscribeService):
     def get_filtered_new_videos(self, channel_id: str, last_video_id: str, **kwargs) -> dict:
         content = requests.get(f"{self.URL}/shows/{channel_id}").content
         bs4 = BeautifulSoup(content, 'html.parser')
-        ids = [x.attrs['href'] for x in bs4.select('a[href*=episodes]')]
-        titles = [x.nextSibling.nextSibling.text for x in bs4.select('a[href*=episodes]')]
+        videos = reversed(bs4.select('a[href*=episodes]'))
+        ids = [x.attrs['href'] for x in videos]
+        titles = [x.nextSibling.nextSibling.text for x in videos]
 
-        index = ids.index(last_video_id)
-        ids = ids[:index]
-        titles = titles[:index]
+        index = ids.index(last_video_id) + 1
 
-        ids = list(reversed(ids))
-        titles = list(reversed(titles))
-        urls = [f"{self.URL}{link}" for link in ids]
-
+        ids = ids[index:]
+        titles = titles[index:]
+        urls = [f"{self.URL}{x}" for x in ids]
         return {"ids": ids, "titles": titles, "urls": urls}
