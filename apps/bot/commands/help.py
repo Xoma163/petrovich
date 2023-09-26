@@ -1,6 +1,6 @@
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.exceptions import PWarning
-from apps.bot.classes.event import Event
+from apps.bot.classes.event.event import Event
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.utils.utils import get_help_texts_for_command
 

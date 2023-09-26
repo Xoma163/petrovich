@@ -34,7 +34,7 @@ class Attachment:
         self.activity = None
 
     def get_file(self, peer_id=None):
-        from apps.bot.classes.bots.tg import TgBot
+        from apps.bot.classes.bots.tg_bot import TgBot
         tg_bot = TgBot()
 
         if self.get_size_mb() > tg_bot.MAX_ATTACHMENT_SIZE_MB:
@@ -167,6 +167,6 @@ class Attachment:
         return dict_self
 
     def set_file_id(self):
-        from apps.bot.classes.bots.tg import TgBot
+        from apps.bot.classes.bots.tg_bot import TgBot
         tg_bot = TgBot()
         self.file_id = tg_bot.get_file_id(self)

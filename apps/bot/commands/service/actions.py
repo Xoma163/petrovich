@@ -1,5 +1,5 @@
 from apps.bot.classes.command import Command
-from apps.bot.classes.event import Event
+from apps.bot.classes.event.event import Event
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.models import Chat
 from petrovich.settings import env

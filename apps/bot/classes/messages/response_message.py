@@ -84,7 +84,7 @@ class ResponseMessageItem:
                         continue
 
                     if len(self.attachments) < 2:
-                        from apps.bot.classes.bots.tg import TgBot
+                        from apps.bot.classes.bots.tg_bot import TgBot
                         self.text = self.text[:start_pos] + TgBot.get_formatted_url(url, url) + self.text[end_pos:]
 
     def __str__(self):

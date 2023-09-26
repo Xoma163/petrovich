@@ -6,11 +6,11 @@ import requests
 from django.db.models import Q
 
 from apps.bot.api.youtube.video import YoutubeVideo
-from apps.bot.classes.bots import send_message_to_moderator_chat
+from apps.bot.classes.bots.bot import send_message_to_moderator_chat
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role, Platform, ATTACHMENT_TYPE_TRANSLATOR
 from apps.bot.classes.const.exceptions import PWarning, PSkip
-from apps.bot.classes.event import Event
+from apps.bot.classes.event.event import Event
 from apps.bot.classes.messages.attachments.gif import GifAttachment
 from apps.bot.classes.messages.attachments.link import LinkAttachment
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment

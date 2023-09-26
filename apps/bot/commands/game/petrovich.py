@@ -3,7 +3,7 @@ from threading import Lock
 
 from django.contrib.auth.models import Group
 
-from apps.bot.classes.bots.tg import TgBot
+from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Platform, Role
 from apps.bot.classes.const.exceptions import PWarning

@@ -5,14 +5,13 @@ import requests
 from numpy import inf
 
 from apps.bot.classes.bot_response import BotResponse
-from apps.bot.classes.bots import Bot
-from apps.bot.classes.bots.tg.longpoll import TgBotLongPoll
+from apps.bot.classes.bots.bot import Bot
 from apps.bot.classes.bots.tg.request import Request, RequestLocal
 from apps.bot.classes.const.activities import ActivitiesEnum, TG_ACTIVITIES
 from apps.bot.classes.const.consts import Platform
 from apps.bot.classes.const.exceptions import PError, PWarning, PSkip
-from apps.bot.classes.event import Event
-from apps.bot.classes.event.tg import TgEvent
+from apps.bot.classes.event.event import Event
+from apps.bot.classes.event.tg_event import TgEvent
 from apps.bot.classes.messages.attachments.attachment import Attachment
 from apps.bot.classes.messages.attachments.audio import AudioAttachment
 from apps.bot.classes.messages.attachments.document import DocumentAttachment

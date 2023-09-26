@@ -2,7 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 from django.core.management.base import BaseCommand
 
-from apps.bot.classes.bots.tg import TgBot
+from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.messages.response_message import ResponseMessageItem, ResponseMessage
 from apps.bot.models import User
 from apps.service.models import Service

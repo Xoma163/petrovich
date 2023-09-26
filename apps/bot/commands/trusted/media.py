@@ -21,12 +21,12 @@ from apps.bot.api.vk.video import VKVideo
 from apps.bot.api.yandex.music import YandexMusic
 from apps.bot.api.youtube.music import YoutubeMusic
 from apps.bot.api.youtube.video import YoutubeVideo
-from apps.bot.classes.bots.tg import TgBot
+from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.activities import ActivitiesEnum
 from apps.bot.classes.const.consts import Platform, Role
 from apps.bot.classes.const.exceptions import PWarning, PSkip
-from apps.bot.classes.event import Event
+from apps.bot.classes.event.event import Event
 from apps.bot.classes.messages.attachments.link import LinkAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.commands.trim_video import TrimVideo
@@ -219,7 +219,7 @@ class Media(Command):
                 video_content = tm.trim_link_pos(url, start_pos, end_pos)
                 text = None
             else:
-                data = yt_api.get_video_info(url, max_filesize_mb=max_filesize_mb)['url']
+                data = yt_api.get_video_info(url, max_filesize_mb=max_filesize_mb)
                 if not self.has_command_name and data['duration'] > 120:
                     button = self.bot.get_button(f"{self.event.message.COMMAND_SYMBOLS[0]}{self.name} {url}")
                     keyboard = self.bot.get_inline_keyboard([button])

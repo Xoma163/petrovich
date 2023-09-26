@@ -4,8 +4,8 @@ import re
 from django.http import JsonResponse, HttpResponse
 from django.views import View
 
-from apps.bot.classes.bots.api import APIBot
-from apps.bot.classes.bots.tg import TgBot
+from apps.bot.classes.bots.api_bot import APIBot
+from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.const.exceptions import PError
 from apps.bot.classes.messages.response_message import ResponseMessageItem
 from apps.bot.mixins import CSRFExemptMixin

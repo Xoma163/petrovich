@@ -1,11 +1,11 @@
 from django.contrib.auth.models import Group
 from django.test import TestCase
 
-from apps.bot.classes.bots.tg import TgBot
+from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Platform
 from apps.bot.classes.const.exceptions import PWarning, PError
-from apps.bot.classes.event.tg import TgEvent
+from apps.bot.classes.event.tg_event import TgEvent
 from apps.bot.models import User, Profile, Chat
 from apps.service.management.commands.initial import Command as InitCommand
 from apps.service.models import City, TimeZone

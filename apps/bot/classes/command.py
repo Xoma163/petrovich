@@ -1,7 +1,7 @@
-from apps.bot.classes.bots import Bot
+from apps.bot.classes.bots.bot import Bot
 from apps.bot.classes.const.consts import Role, Platform
 from apps.bot.classes.const.exceptions import PWarning, PSkip, PIDK
-from apps.bot.classes.event import Event
+from apps.bot.classes.event.event import Event
 from apps.bot.classes.messages.attachments.audio import AudioAttachment
 from apps.bot.classes.messages.attachments.document import DocumentAttachment
 from apps.bot.classes.messages.attachments.link import LinkAttachment

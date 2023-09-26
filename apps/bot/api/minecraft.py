@@ -3,7 +3,7 @@ from copy import copy
 
 from mcrcon import MCRcon
 
-from apps.bot.classes.bots.tg import TgBot
+from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.messages.response_message import ResponseMessageItem, ResponseMessage

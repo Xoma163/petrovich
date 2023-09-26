@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Tuple, Optional
 
 from apps.bot.api.youtube.video import YoutubeVideo
-from apps.bot.classes.bots.tg import TgBot
+from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.activities import ActivitiesEnum
 from apps.bot.classes.const.consts import Platform, Role

@@ -123,7 +123,7 @@ def get_help_texts_for_command(command, platform=None) -> str:
     """
     Получает help_texts для команды
     """
-    from apps.bot.classes.bots.tg import TgBot
+    from apps.bot.classes.bots.tg_bot import TgBot
 
     result = ""
     if len(command.full_names) > 1:

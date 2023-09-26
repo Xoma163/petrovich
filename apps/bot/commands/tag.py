@@ -2,7 +2,7 @@ import re
 
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.exceptions import PWarning
-from apps.bot.classes.event import Event
+from apps.bot.classes.event.event import Event
 from apps.bot.classes.messages.message import Message
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.service.models import Tag as TagModel

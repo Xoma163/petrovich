@@ -1,7 +1,7 @@
 import requests
 from django.core.management.base import BaseCommand
 
-from apps.bot.classes.bots.tg import TgBot
+from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.messages.response_message import ResponseMessageItem
 from apps.bot.models import Chat
 from apps.service.models import Service, Donations

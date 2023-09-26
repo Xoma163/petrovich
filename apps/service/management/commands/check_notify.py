@@ -4,9 +4,9 @@ from datetime import datetime, timedelta, date
 from crontab import CronTab
 from django.core.management.base import BaseCommand
 
-from apps.bot.classes.bots.tg import TgBot
+from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.const.consts import Role, ATTACHMENT_TYPE_TRANSLATOR
-from apps.bot.classes.event import Event
+from apps.bot.classes.event.event import Event
 from apps.bot.classes.messages.response_message import ResponseMessageItem
 from apps.bot.utils.utils import remove_tz, localize_datetime
 from apps.service.models import Notify

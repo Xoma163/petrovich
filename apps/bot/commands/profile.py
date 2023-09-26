@@ -2,7 +2,7 @@ from datetime import datetime
 
 from apps.bot.api.timezonedb import TimezoneDB
 from apps.bot.api.yandex.geo import YandexGeo
-from apps.bot.classes.bots.tg import TgBot
+from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Platform
 from apps.bot.classes.const.exceptions import PWarning

@@ -90,20 +90,20 @@ class YoutubeVideo(SubscribeService):
 
     def get_data_to_add_new_subscribe(self, url) -> dict:
         r = requests.get(url)
-        bs4 = BeautifulSoup(r.content, 'xml')
+        bs4 = BeautifulSoup(r.content, 'lxml')
         channel_id = bs4.find_all('link', {'rel': 'canonical'})[0].attrs['href'].split('/')[-1]
 
         r = requests.get(f"https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}")
         if r.status_code != 200:
             raise PWarning("Не нашёл такого канала")
-        bsop = BeautifulSoup(r.content, 'xml')
+        bsop = BeautifulSoup(r.content, 'lxml')
         last_video = bsop.find_all('entry')[0]
         self.title = bsop.find('title').text
 
         return {
             'channel_id': channel_id,
             'title': bsop.find('title').text,
-            'last_video_id': last_video.find('yt:videoId').text,
+            'last_video_id': last_video.find('yt:videoid').text,
             'playlist_id': None
         }
 
@@ -111,10 +111,10 @@ class YoutubeVideo(SubscribeService):
         r = requests.get(f"https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}")
         if r.status_code != 200:
             raise PWarning("Не нашёл такого канала")
-        bsop = BeautifulSoup(r.content, 'xml')
+        bsop = BeautifulSoup(r.content, 'lxml')
 
         videos = bsop.find_all('entry')
-        ids = [x.find("yt:videoId").text for x in videos]
+        ids = [x.find("yt:videoid").text for x in videos]
         titles = [x.find("title").text for x in videos]
 
         if last_video_id:

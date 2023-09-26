@@ -10,8 +10,8 @@ from apps.bot.api.premier import Premier
 from apps.bot.api.thehole import TheHole
 from apps.bot.api.vk.video import VKVideo
 from apps.bot.api.youtube.video import YoutubeVideo
-from apps.bot.classes.bots.tg import TgBot
-from apps.bot.classes.event import Event
+from apps.bot.classes.bots.tg_bot import TgBot
+from apps.bot.classes.event.event import Event
 from apps.bot.classes.messages.message import Message
 from apps.bot.classes.messages.response_message import ResponseMessageItem, ResponseMessage
 from apps.bot.commands.trusted.media import Media

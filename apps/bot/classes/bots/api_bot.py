@@ -1,7 +1,7 @@
-from apps.bot.classes.bots import Bot
+from apps.bot.classes.bots.bot import Bot
 from apps.bot.classes.const.consts import Platform
 from apps.bot.classes.const.exceptions import PError
-from apps.bot.classes.event.api import APIEvent
+from apps.bot.classes.event.api_event import APIEvent
 from apps.bot.models import Profile
 
 

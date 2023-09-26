@@ -1,6 +1,6 @@
 from io import BytesIO
 
-from apps.bot.classes.bots.tg import TgBot
+from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Platform
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment

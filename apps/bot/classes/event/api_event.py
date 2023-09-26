@@ -1,4 +1,4 @@
-from apps.bot.classes.event import Event
+from apps.bot.classes.event.event import Event
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 
 
