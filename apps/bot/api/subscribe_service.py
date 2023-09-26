@@ -1,7 +1,4 @@
 class SubscribeService:
-    def __init__(self):
-        pass
-
     def get_data_to_add_new_subscribe(self, url: str) -> dict:
         """
         Метод по выдаче информации для добавления новой подписки

@@ -75,7 +75,6 @@ class Reddit:
         # Нет нужды делать временные файлы для джоина видео и аудио, если аудио нет, то просто кидаем видео и всё
         if not audio_url:
             return video_url
-            # return requests.get(video_url).content
         avm = AudioVideoMuxer()
         video_content = requests.get(video_url).content
         audio_content = requests.get(audio_url).content

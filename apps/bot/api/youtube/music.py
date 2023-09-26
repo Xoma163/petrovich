@@ -42,8 +42,7 @@ class YoutubeMusic:
         title = info.get('title')
         full_title = info.get('fulltitle')
 
-        if artist and title:
-            title = title
+        if not artist or not title:
             artists = artist
         else:
             full_title = full_title.replace('—', '-').replace('–', '-').replace('−', '-')

@@ -23,9 +23,8 @@ class OCR:
         r = requests.post(self.URL, files={'filename.jpg': file}, data=payload).json()
         logger.debug({"response": r})
 
-        if 'OCRExitCode' in r:
-            if r['OCRExitCode'] == self.ERROR_CODE:
-                raise PError("Ошибка")
+        if 'OCRExitCode' in r and r['OCRExitCode'] == self.ERROR_CODE:
+            raise PError("Ошибка API")
         if 'ParsedResults' not in r:
             raise PWarning("Ничего не распознал")
         text_list = [x['ParsedText'].strip() for x in r['ParsedResults']]
