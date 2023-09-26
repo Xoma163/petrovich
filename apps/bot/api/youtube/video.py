@@ -129,12 +129,12 @@ class YoutubeVideo(SubscribeService):
         titles = list(reversed(titles))
         urls = [f"https://www.youtube.com/watch?v={x}" for x in ids]
 
-        new_urls = []
+        data = {"ids": [], "titles": [], "urls": []}
         for i, url in enumerate(urls):
             video_info = self._get_video_info(url)
             if video_info['duration'] < 60:
-                del ids[i]
-                del titles[i]
-            else:
-                new_urls.append(url)
-        return {"ids": ids, "titles": titles, "urls": new_urls}
+                continue
+            data['ids'].append(ids[i])
+            data['titles'].append(titles[i])
+            data['urls'].append(urls[i])
+        return data
