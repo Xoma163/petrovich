@@ -1,5 +1,6 @@
 import random
 from threading import Lock
+from typing import Optional
 
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role, Platform
@@ -35,7 +36,7 @@ class BullsAndCows(Command):
             else:
                 return self.play_game(session)
 
-    def start_game(self, session) -> ResponseMessage:
+    def start_game(self, session) -> Optional[ResponseMessage]:
         if session:
             raise PWarning(f"Игра уже создана, присылай мне число из {DIGITS_IN_GAME} цифр")
         digits = [str(x) for x in range(10)]
