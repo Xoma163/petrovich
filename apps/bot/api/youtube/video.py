@@ -116,13 +116,9 @@ class YoutubeVideo(SubscribeService):
         ids = [x.find("yt:videoid").text for x in videos]
         titles = [x.find("title").text for x in videos]
 
-        if last_video_id:
-            try:
-                index = ids.index(last_video_id)
-                ids = ids[:index]
-                titles = titles[:index]
-            except IndexError:
-                pass
+        index = ids.index(last_video_id)
+        ids = ids[:index]
+        titles = titles[:index]
 
         ids = list(reversed(ids))
         titles = list(reversed(titles))

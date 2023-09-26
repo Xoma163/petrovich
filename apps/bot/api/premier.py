@@ -99,12 +99,9 @@ class Premier(SubscribeService):
         titles = [x['title'] for x in videos]
         urls = [f"https://premier.one/show/{channel_id}/season/{x['season']}/episode/{x['episode']}" for x in videos]
 
-        try:
-            index = ids.index(last_video_id) + 1
-            ids = ids[index:]
-            titles = titles[index:]
-            urls = urls[index:]
-        except IndexError:
-            pass
+        index = ids.index(last_video_id) + 1
+        ids = ids[index:]
+        titles = titles[index:]
+        urls = urls[index:]
 
         return {"ids": ids, "titles": titles, "urls": urls}

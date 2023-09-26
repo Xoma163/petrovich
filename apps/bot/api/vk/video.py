@@ -160,13 +160,9 @@ class VKVideo(SubscribeService):
         ids = [video.find('a', {'class': 'VideoCard__title'}).attrs['data-id'] for video in videos]
         titles = [video.select_one('.VideoCard__title').text.strip() for video in videos]
 
-        if last_video_id:
-            try:
-                index = ids.index(last_video_id)
-                ids = ids[:index]
-                titles = titles[:index]
-            except IndexError:
-                pass
+        index = ids.index(last_video_id)
+        ids = ids[:index]
+        titles = titles[:index]
 
         ids = list(reversed(ids))
         titles = list(reversed(titles))
