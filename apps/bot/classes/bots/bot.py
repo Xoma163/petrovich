@@ -371,7 +371,7 @@ class Bot(Thread):
         Получение фото
         """
         if allowed_exts_url is None:
-            allowed_exts_url = ['jpg', 'jpeg', 'png']
+            allowed_exts_url = ['jpg', 'jpeg', 'png', 'webp']
         if peer_id:
             self.set_activity_thread(peer_id, ActivitiesEnum.UPLOAD_PHOTO)
         pa = PhotoAttachment()
