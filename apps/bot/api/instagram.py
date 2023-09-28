@@ -61,17 +61,20 @@ class Instagram:
         return self._parse_photo_or_video(r['data'])
 
     def _parse_photo_or_video(self, data) -> dict:
+        caption = data.get('caption')
+        if caption:
+            caption = caption.get("text", "").strip()
         if 'video_versions' in data:
             return {
                 "download_url": data['video_versions'][0]['url'],
                 "content_type": self.CONTENT_TYPE_VIDEO,
-                "caption": data.get('caption', {}).get("text", "").strip()
+                "caption": caption
             }
         elif 'image_versions2' in data:
             return {
                 "download_url": data['image_versions2']['candidates'][0]['url'],
                 "content_type": self.CONTENT_TYPE_IMAGE,
-                "caption": data.get('caption', {}).get("text", "").strip()
+                "caption": caption
             }
         else:
             raise PWarning("Ссылка на инстаграмм не является видео/фото")
