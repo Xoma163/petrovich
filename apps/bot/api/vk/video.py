@@ -1,4 +1,5 @@
 import json
+import re
 from typing import Tuple, Optional
 from urllib.parse import urlparse
 
@@ -53,12 +54,8 @@ class VKVideo(SubscribeService):
 
     def _get_download_urls(self, player_url: str) -> Tuple[bytes, Optional[bytes]]:
         r = requests.get(player_url, headers=self.headers)
-        bs4 = BeautifulSoup(r.text, 'html.parser')
-        js_code = bs4.select_one('body > script:nth-child(11)').text
-        first_split = js_code.split('var playerParams = ')[1]
-        second_split = first_split.split('var container')[0]
-        replacements = second_split.strip().replace(' ', '').replace('\n', '').replace(';', '')
-        info = json.loads(replacements)
+        js_code = re.findall('var playerParams = (\{.*\})', r.text)[0]
+        info = json.loads(js_code)
         info = info.get('params')[0]
         dash_webm = info.get('dash_webm')
         dash_sep = info.get('dash_sep')
