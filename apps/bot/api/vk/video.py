@@ -154,10 +154,10 @@ class VKVideo(SubscribeService):
         else:
             videos = bs4.find('div', {'id': "video_subtab_pane_all"}).find_all('div', {'class': 'VideoCard__info'})
 
-        videos = reversed(videos)
+        videos = list(reversed(videos))
 
         ids = [video.find('a', {'class': 'VideoCard__title'}).attrs['data-id'] for video in videos]
-        titles = [video.select_one('.VideoCard__title').text.strip() for video in videos]
+        titles = [video.find('a', {'class': 'VideoCard__title'}).text.strip() for video in videos]
 
         index = ids.index(last_video_id) + 1
 
