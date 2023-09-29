@@ -39,6 +39,8 @@ class Chat(Platform):
         verbose_name_plural = "Чаты"
         ordering = ["name"]
 
+        unique_together = ('chat_id', 'platform',)
+
     def __str__(self):
         return str(self.name)
 
@@ -125,6 +127,8 @@ class User(Platform):
         verbose_name = "Пользователь"
         verbose_name_plural = "Пользователи"
         ordering = ["profile"]
+
+        unique_together = ('user_id', 'platform',)
 
     def __str__(self):
         return f"{self.profile} ({self.platform})"
