@@ -32,7 +32,8 @@ class Command(BaseCommand):
                 bot = TgBot()
 
                 self.send_notify_message(bot, notify)
-                self.send_command_notify_message(bot, notify)
+                if notify.text.startswith('/'):
+                    self.send_command_notify_message(bot, notify)
                 if notify.repeat:
                     self.extend_repeat_notify(notify)
                 else:
@@ -91,29 +92,26 @@ class Command(BaseCommand):
             rmi.peer_id = notify.chat.chat_id
             rmi.message_thread_id = notify.message_thread_id
         else:
-            if not notify.text.startswith('/'):
-                rmi.peer_id = notify.user.user_id
+            rmi.peer_id = notify.user.user_id
         bot.send_response_message_item(rmi)
 
     @staticmethod
     def send_command_notify_message(bot, notify):
         # Если отложенная команда
+        event = Event(bot=bot)
+        event.set_message(notify.text)
+        event.sender = notify.user.profile
+        event.is_from_user = True
+        event.message_thread_id = notify.message_thread_id
+        if notify.chat:
+            event.peer_id = notify.chat.chat_id
+            event.chat = notify.chat
+            event.is_from_chat = True
+        else:
+            event.peer_id = notify.user.user_id
+            event.is_from_pm = True
 
-        if notify.text.startswith('/'):
-            event = Event(bot=bot)
-            event.set_message(notify.text)
-            event.sender = notify.user.profile
-            event.is_from_user = True
-            event.message_thread_id = notify.message_thread_id
-            if notify.chat:
-                event.peer_id = notify.chat.chat_id
-                event.chat = notify.chat
-                event.is_from_chat = True
-            else:
-                event.peer_id = notify.user.user_id
-                event.is_from_pm = True
-
-            bot.handle_event(event)
+        bot.handle_event(event)
 
     def extend_repeat_notify(self, notify):
         if notify.date:
