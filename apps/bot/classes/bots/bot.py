@@ -369,58 +369,63 @@ class Bot(Thread):
         """
         if allowed_exts_url is None:
             allowed_exts_url = ['jpg', 'jpeg', 'png', 'webp']
-        if peer_id:
+        try:
             self.set_activity_thread(peer_id, ActivitiesEnum.UPLOAD_PHOTO)
-        pa = PhotoAttachment()
-        pa.parse(image, allowed_exts_url, guarantee_url=guarantee_url, filename=filename)
-        self.stop_activity_thread()
+            pa = PhotoAttachment()
+            pa.parse(image, allowed_exts_url, guarantee_url=guarantee_url, filename=filename)
+        finally:
+            self.stop_activity_thread()
         return pa
 
     def get_document_attachment(self, document, peer_id=None, filename=None):
         """
         Получение документа
         """
-        if peer_id:
+        try:
             self.set_activity_thread(peer_id, ActivitiesEnum.UPLOAD_DOCUMENT)
-        da = DocumentAttachment()
-        da.parse(document, filename=filename)
-        self.stop_activity_thread()
+            da = DocumentAttachment()
+            da.parse(document, filename=filename)
+        finally:
+            self.stop_activity_thread()
         return da
 
     def get_audio_attachment(self, audio, peer_id=None, title=None, artist=None, filename=None, thumb=None):
         """
         Получение аудио
         """
-        if peer_id:
+        try:
             self.set_activity_thread(peer_id, ActivitiesEnum.UPLOAD_AUDIO)
-        va = AudioAttachment()
-        va.parse(audio, filename=filename)
-        va.thumb = thumb
-        va.title = title
-        va.artist = artist
-        self.stop_activity_thread()
+            va = AudioAttachment()
+            va.parse(audio, filename=filename)
+            va.thumb = thumb
+            va.title = title
+            va.artist = artist
+        finally:
+            self.stop_activity_thread()
         return va
 
     def get_video_attachment(self, document, peer_id=None, filename=None):
         """
         Получение видео
         """
-        if peer_id:
+        try:
             self.set_activity_thread(peer_id, ActivitiesEnum.UPLOAD_VIDEO)
-        va = VideoAttachment()
-        va.parse(document, filename=filename)
-        self.stop_activity_thread()
+            va = VideoAttachment()
+            va.parse(document, filename=filename)
+        finally:
+            self.stop_activity_thread()
         return va
 
     def get_gif_attachment(self, gif, peer_id=None, filename=None):
         """
         Получение гифки
         """
-        if peer_id:
+        try:
             self.set_activity_thread(peer_id, ActivitiesEnum.UPLOAD_VIDEO)
-        ga = GifAttachment()
-        ga.parse(gif, filename=filename)
-        self.stop_activity_thread()
+            ga = GifAttachment()
+            ga.parse(gif, filename=filename)
+        finally:
+            self.stop_activity_thread()
         return ga
 
     # END ATTACHMENTS
@@ -432,6 +437,8 @@ class Bot(Thread):
         """
 
     def set_activity_thread(self, peer_id, activity: ActivitiesEnum):
+        if not peer_id or not activity:
+            return
         self.activity_thread_flag = True
         threading.Thread(
             target=self._set_activity_thread,

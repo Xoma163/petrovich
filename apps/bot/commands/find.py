@@ -29,18 +29,20 @@ class Find(Command):
             raise PWarning("Ничего не нашёл по картинкам")
 
         attachments = []
-        self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.UPLOAD_PHOTO)
-        for url in urls:
-            try:
-                att = PhotoAttachment()
-                att.public_download_url = url
-                att.set_file_id()
-                attachments.append(att)
-            except (PError, Exception):
-                continue
-            if len(attachments) == count:
-                break
-        self.bot.stop_activity_thread()
+        try:
+            self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.UPLOAD_PHOTO)
+            for url in urls:
+                try:
+                    att = PhotoAttachment()
+                    att.public_download_url = url
+                    att.set_file_id()
+                    attachments.append(att)
+                except (PError, Exception):
+                    continue
+                if len(attachments) == count:
+                    break
+        finally:
+            self.bot.stop_activity_thread()
         if len(attachments) == 0:
             raise PWarning("Ничего не нашёл по картинкам")
         answer = f"Результаты по запросу '{query}'"

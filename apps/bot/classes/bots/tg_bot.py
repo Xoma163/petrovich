@@ -128,7 +128,6 @@ class TgBot(Bot):
         """
         Отправка фото. Ссылка или файл
         """
-        self.set_activity_thread(default_params['chat_id'], ActivitiesEnum.UPLOAD_PHOTO)
         photo: PhotoAttachment = rmi.attachments[0]
         if photo.file_id:
             default_params['photo'] = photo.file_id
@@ -148,7 +147,6 @@ class TgBot(Bot):
         """
         Отправка документа. Ссылка или файл
         """
-        self.set_activity_thread(default_params['chat_id'], ActivitiesEnum.UPLOAD_DOCUMENT)
         document: DocumentAttachment = rmi.attachments[0]
         if document.file_id:
             default_params['document'] = document.file_id
@@ -170,7 +168,6 @@ class TgBot(Bot):
         """
         Отправка видео. Ссылка или файл
         """
-        self.set_activity_thread(default_params['chat_id'], ActivitiesEnum.UPLOAD_VIDEO)
         video: VideoAttachment = rmi.attachments[0]
 
         if video.file_id:
@@ -195,7 +192,6 @@ class TgBot(Bot):
         """
         Отправка видео. Ссылка или файл
         """
-        self.set_activity_thread(default_params['chat_id'], ActivitiesEnum.UPLOAD_VIDEO_NOTE)
         video_note: VideoNoteAttachment = rmi.attachments[0]
         default_params['video_note'] = video_note.file_id
         r = self.requests.get('sendVideoNote', default_params).json()
@@ -206,7 +202,6 @@ class TgBot(Bot):
         """
         Отправка аудио. Ссылка или файл
         """
-        self.set_activity_thread(default_params['chat_id'], ActivitiesEnum.UPLOAD_AUDIO)
         audio: AudioAttachment = rmi.attachments[0]
 
         if audio.artist:
@@ -230,7 +225,6 @@ class TgBot(Bot):
         """
         Отправка гифы. Ссылка или файл
         """
-        self.set_activity_thread(default_params['chat_id'], ActivitiesEnum.UPLOAD_VIDEO)
         gif: GifAttachment = rmi.attachments[0]
         if gif.file_id:
             default_params['animation'] = gif.file_id
@@ -260,7 +254,6 @@ class TgBot(Bot):
         """
         Отправка голосовухи
         """
-        self.set_activity_thread(default_params['chat_id'], ActivitiesEnum.UPLOAD_AUDIO)
         voice: VoiceAttachment = rmi.attachments[0]
         default_params['voice'] = voice.file_id
         r = self.requests.get('sendVoice', default_params).json()
@@ -320,6 +313,8 @@ class TgBot(Bot):
 
             r = self._send_response_message_item(error_rmi)
             return BotResponse(False, r)
+        finally:
+            self.stop_activity_thread()
 
         if r['ok']:
             return BotResponse(True, r)
@@ -352,7 +347,11 @@ class TgBot(Bot):
         )
         self.log_message(error_rmi, log_level)
 
-        r = self._send_response_message_item(error_rmi)
+        try:
+            r = self._send_response_message_item(error_rmi)
+        finally:
+            self.stop_activity_thread()
+
         return BotResponse(False, r)
 
     def _send_response_message_item(self, rmi: ResponseMessageItem) -> dict:
@@ -406,10 +405,14 @@ class TgBot(Bot):
         }
 
         if rmi.attachments:
-            if len(rmi.attachments) > 1:
-                r = self._send_media_group(rmi, params)
-            else:
-                r = att_map[rmi.attachments[0].__class__](rmi, params)
+            try:
+                self.set_activity_thread(params['chat_id'], rmi.attachments[0].activity)
+                if len(rmi.attachments) > 1:
+                    r = self._send_media_group(rmi, params)
+                else:
+                    r = att_map[rmi.attachments[0].__class__](rmi, params)
+            finally:
+                self.stop_activity_thread()
         else:
             r = self._send_text(params)
 
@@ -492,7 +495,10 @@ class TgBot(Bot):
             target=self.requests.get,
             args=(
                 'sendChatAction',
-                {'chat_id': peer_id, 'action': tg_activity}
+                {
+                    'chat_id': peer_id,
+                    'action': tg_activity
+                }
             )
         ).start()
 

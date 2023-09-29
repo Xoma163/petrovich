@@ -39,18 +39,19 @@ class Attachment:
 
         if self.get_size_mb() > tg_bot.MAX_ATTACHMENT_SIZE_MB:
             return
-        if peer_id and self.activity:
+        try:
             tg_bot.set_activity_thread(peer_id, self.activity)
-        r = tg_bot.requests.get('getFile', params={'file_id': self.file_id})
-        if r.status_code != 200:
-            return
-        file_path = r.json()['result']['file_path']
-        if tg_bot.MODE == tg_bot.LOCAL_SERVER:
-            self.private_download_path = file_path
-        else:
-            self.private_download_url = f'https://{tg_bot.requests.API_TELEGRAM_URL}/file/bot{tg_bot.token}/{file_path}'
-        self.ext = file_path.rsplit('.')[-1]
-        tg_bot.stop_activity_thread()
+            r = tg_bot.requests.get('getFile', params={'file_id': self.file_id})
+            if r.status_code != 200:
+                return
+            file_path = r.json()['result']['file_path']
+            if tg_bot.MODE == tg_bot.LOCAL_SERVER:
+                self.private_download_path = file_path
+            else:
+                self.private_download_url = f'https://{tg_bot.requests.API_TELEGRAM_URL}/file/bot{tg_bot.token}/{file_path}'
+            self.ext = file_path.rsplit('.')[-1]
+        finally:
+            tg_bot.stop_activity_thread()
 
     def parse(self, file_like_object, allowed_exts_url=None, filename=None, guarantee_url=False):
         """
