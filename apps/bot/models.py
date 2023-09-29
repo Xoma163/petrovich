@@ -145,6 +145,8 @@ class Bot(Platform):
         verbose_name_plural = "Боты"
         ordering = ["id"]
 
+        unique_together = ('bot_id', 'platform',)
+
     def __str__(self):
         if self.name:
             return self.name

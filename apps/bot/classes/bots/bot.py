@@ -33,9 +33,6 @@ class Bot(Thread):
         Thread.__init__(self)
 
         self.platform = platform
-        self.user_model = User.objects.filter(platform=self.platform.name)
-        self.chat_model = Chat.objects.filter(platform=self.platform.name)
-        self.bot_model = BotModel.objects.filter(platform=self.platform.name)
 
         self.logger = logging.getLogger('bot')
 
@@ -237,7 +234,7 @@ class Bot(Thread):
         defaults.update(_defaults)
 
         with lock:
-            user, _ = self.user_model.get_or_create(
+            user, _ = User.objects.get_or_create(
                 user_id=user_id,
                 platform=self.platform.name,
                 defaults=defaults
@@ -317,7 +314,7 @@ class Bot(Thread):
         Возвращает чат по его id
         """
         with lock:
-            chat, _ = self.chat_model.get_or_create(
+            chat, _ = Chat.objects.get_or_create(
                 chat_id=chat_id, platform=self.platform.name
             )
         return chat
@@ -329,7 +326,7 @@ class Bot(Thread):
         if bot_id > 0:
             bot_id = -bot_id
         with lock:
-            bot, _ = self.bot_model.get_or_create(
+            bot, _ = BotModel.objects.get_or_create(
                 bot_id=bot_id, platform=self.platform.name
             )
         return bot
