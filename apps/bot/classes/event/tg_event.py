@@ -42,7 +42,6 @@ class TgEvent(Event):
         if self.is_fwd:
             message = self.raw
         else:
-            # edited_message = self.raw.get('edited_message')
             callback_query = self.raw.get('callback_query')
             my_chat_member = self.raw.get('my_chat_member')
             edited_message = self.raw.get('edited_message')

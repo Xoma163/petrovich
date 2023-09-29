@@ -63,6 +63,11 @@ class Premier(SubscribeService):
 
     @staticmethod
     def _get_videos(channel_id: str, params: dict, log_results: bool = True) -> dict:
+        response = requests.get(f"https://premier.one/uma-api/metainfo/tv/{channel_id}/video/", params=params)
+        logger.debug({"channel_id": channel_id, 'params': params, 'log_results': log_results,
+                      'url': 'f"https://premier.one/uma-api/metainfo/tv/{channel_id}/video/',
+                      'response': response.content, 'response_status_code': response.status_code})
+
         r = requests.get(f"https://premier.one/uma-api/metainfo/tv/{channel_id}/video/", params=params).json()
         if log_results:
             logger.debug({"response": r})
