@@ -49,9 +49,9 @@ class Command(BaseCommand):
 
     def check_video(self, subs, sub_class, media_method):
         if len(set(x.last_video_id for x in subs)) == 1:
-            yt_api = sub_class()
-            res = yt_api.get_filtered_new_videos(subs[0].channel_id, subs[0].last_video_id,
-                                                 playlist_id=subs[0].playlist_id)
+            api = sub_class()
+            res = api.get_filtered_new_videos(subs[0].channel_id, subs[0].last_video_id,
+                                              playlist_id=subs[0].playlist_id)
             if not res['ids']:
                 return
 
