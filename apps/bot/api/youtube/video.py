@@ -112,7 +112,7 @@ class YoutubeVideo(SubscribeService):
             raise PWarning("Не нашёл такого канала")
         bsop = BeautifulSoup(r.content, 'lxml')
 
-        videos = reversed(bsop.find_all('entry'))
+        videos = list(reversed(bsop.find_all('entry')))
         ids = [x.find("yt:videoid").text for x in videos]
         titles = [x.find("title").text for x in videos]
 

@@ -11,6 +11,7 @@ from apps.bot.api.thehole import TheHole
 from apps.bot.api.vk.video import VKVideo
 from apps.bot.api.youtube.video import YoutubeVideo
 from apps.bot.classes.bots.tg_bot import TgBot
+from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.event.event import Event
 from apps.bot.classes.messages.message import Message
 from apps.bot.classes.messages.response_message import ResponseMessageItem, ResponseMessage
@@ -44,6 +45,8 @@ class Command(BaseCommand):
             subs = list(subs)
             try:
                 self.check_video(subs, sub_class, media_method)
+            except PWarning:
+                pass
             except Exception:
                 logger.exception({"message": "Ошибка в проверке/отправке подписки", "notify_enitity": subs[0].__dict__})
 

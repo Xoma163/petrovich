@@ -24,7 +24,7 @@ class Premier(SubscribeService):
                 "season": season,
                 "episode": episode,
                 "is_series": True,
-                "filename": f"{data['show_id']}_s{data['season']}e{data['episode']}"
+                "filename": f"{show_id}_s{season}e{episode}"
             })
         elif res2:
             show_id = res2[0]
@@ -58,6 +58,8 @@ class Premier(SubscribeService):
         r = requests.get(
             f"https://premier.one/api/play/options/{video_id}/?format=json&no_404=true&referer={url}").json()
         logger.debug({"response": r})
+        if not 'video_balancer' in r:
+            raise PWarning("Не могу скачать это видео. Либо оно платное, либо чёт ещё...")
         master_m3u8_url = r['video_balancer']['default']
 
         vd = VideoDownloader()
@@ -105,10 +107,11 @@ class Premier(SubscribeService):
 
         ids = [x['id'] for x in videos]
         titles = [x['title'] for x in videos]
+        urls = [f"https://premier.one/show/{channel_id}/season/{x['season']}/episode/{x['episode']}" for x in videos]
 
         index = ids.index(last_video_id) + 1
 
         ids = ids[index:]
         titles = titles[index:]
-        urls = [f"https://premier.one/show/{channel_id}/season/{x['season']}/episode/{x['episode']}" for x in videos]
+        urls = urls[index:]
         return {"ids": ids, "titles": titles, "urls": urls}
