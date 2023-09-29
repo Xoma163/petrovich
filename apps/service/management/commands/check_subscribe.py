@@ -41,10 +41,11 @@ class Command(BaseCommand):
             }
             sub_class = service_class[service]
             media_method = service_media_method[service]
+            subs = list(subs)
             try:
-                self.check_video(list(subs), sub_class, media_method)
+                self.check_video(subs, sub_class, media_method)
             except Exception:
-                logger.exception("Ошибка в проверке/отправке подписки")
+                logger.exception({"message": "Ошибка в проверке/отправке подписки", "notify_enitity": subs[0].__dict__})
 
     def check_video(self, subs, sub_class, media_method):
         if len(set(x.last_video_id for x in subs)) == 1:
