@@ -54,14 +54,17 @@ class Premier(SubscribeService):
         }
 
     @staticmethod
-    def download_video(url: str, video_id: str) -> bytes:
+    def _get_download_url(video_id: str, url: str, log_results: bool = True):
         r = requests.get(
             f"https://premier.one/api/play/options/{video_id}/?format=json&no_404=true&referer={url}").json()
-        logger.debug({"response": r})
-        if not 'video_balancer' in r:
+        if log_results:
+            logger.debug({"response": r})
+        if 'video_balancer' not in r:
             raise PWarning("Не могу скачать это видео. Либо оно платное, либо чёт ещё...")
-        master_m3u8_url = r['video_balancer']['default']
+        return r['video_balancer']['default']
 
+    def download_video(self, video_id: str, url: str) -> bytes:
+        master_m3u8_url = self._get_download_url(url, video_id)
         vd = VideoDownloader()
         return vd.download(master_m3u8_url, threads=10)
 
@@ -114,4 +117,17 @@ class Premier(SubscribeService):
         ids = ids[index:]
         titles = titles[index:]
         urls = urls[index:]
-        return {"ids": ids, "titles": titles, "urls": urls}
+
+        # return {"ids": ids, "titles": titles, "urls": urls}
+
+        data = {"ids": [], "titles": [], "urls": []}
+        for i, url in enumerate(urls):
+            try:
+                self._get_download_url(ids[i], url, log_results=False)
+
+                data['ids'].append(ids[i])
+                data['titles'].append(titles[i])
+                data['urls'].append(urls[i])
+            except PWarning:
+                continue
+        return data

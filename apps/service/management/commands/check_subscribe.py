@@ -23,25 +23,26 @@ logger = logging.getLogger('subscribe_notifier')
 
 
 class Command(BaseCommand):
+    SERVICE_CLASS = {
+        Subscribe.SERVICE_YOUTUBE: YoutubeVideo,
+        Subscribe.SERVICE_THE_HOLE: TheHole,
+        Subscribe.SERVICE_VK: VKVideo,
+        Subscribe.SERVICE_PREMIERE: Premier
+    }
+    SERVICE_MEDIA_METHOD = {
+        Subscribe.SERVICE_YOUTUBE: "get_youtube_video",
+        Subscribe.SERVICE_THE_HOLE: "get_the_hole_video",
+        Subscribe.SERVICE_VK: "get_vk_video",
+        Subscribe.SERVICE_PREMIERE: "get_premiere_video"
+    }
 
     def handle(self, *args, **kwargs):
         subs = Subscribe.objects.all()
         groupped_subs = groupby(subs.order_by("channel_id"), lambda x: (x.service, x.channel_id, x.playlist_id))
+
         for (service, _, _), subs in groupped_subs:
-            service_class = {
-                Subscribe.SERVICE_YOUTUBE: YoutubeVideo,
-                Subscribe.SERVICE_THE_HOLE: TheHole,
-                Subscribe.SERVICE_VK: VKVideo,
-                Subscribe.SERVICE_PREMIERE: Premier
-            }
-            service_media_method = {
-                Subscribe.SERVICE_YOUTUBE: "get_youtube_video",
-                Subscribe.SERVICE_THE_HOLE: "get_the_hole_video",
-                Subscribe.SERVICE_VK: "get_vk_video",
-                Subscribe.SERVICE_PREMIERE: "get_premiere_video"
-            }
-            sub_class = service_class[service]
-            media_method = service_media_method[service]
+            sub_class = self.SERVICE_CLASS[service]
+            media_method = self.SERVICE_MEDIA_METHOD[service]
             subs = list(subs)
             try:
                 self.check_video(subs, sub_class, media_method)
@@ -119,4 +120,4 @@ class Command(BaseCommand):
         show_folder = os.path.join(path, show_name)
         if not os.path.exists(show_folder):
             os.makedirs(show_folder)
-        shutil.copyfile(cache.video.path, os.path.join(show_folder, f"{series_name}.mp4"))
+        shutil.copyfile(cache.video.path, os.path.join(str(show_folder), f"{series_name}.mp4"))
