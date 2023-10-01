@@ -69,7 +69,8 @@ class Settings(Command):
             [['default'], self.menu_default],
         ]
         method = self.handle_menu(menu, arg0)
-        return method()
+        rm = ResponseMessage(method())
+        return rm
 
     def get_on_or_off(self, arg):
         if arg in self.ON_OFF_TRANSLATOR:

@@ -59,13 +59,32 @@ class Bot(Thread):
             event.setup_event()
             if not event.need_a_response():
                 return
+
             rm = self.route(event)
-            if send:
-                self.send_response_message(rm)
-            return rm
-        except PSkip:
-            pass
+            if not rm:
+                return
+            # Если мы попали в команду
+            self.log_event(event)
+            self.log_message(rm)
+        # Если предвиденная ошибка
+        except (PWarning, PError) as e:
+            self.log_event(event)
+            rm = ResponseMessage(
+                ResponseMessageItem(
+                    text=e.msg,
+                    peer_id=event.peer_id,
+                    message_thread_id=event.message_thread_id,
+                    reply_to=e.reply_to,
+                    keyboard=e.keyboard
+                )
+            )
+            self.log_message(rm, e.level)
+        # Если нужно пропустить
+        except (PSkip, PIDK):
+            return
+        # Непредвиденная ошибка
         except Exception:
+            self.log_event(event)
             rm = ResponseMessage(
                 ResponseMessageItem(
                     text=self.ERROR_MSG,
@@ -73,13 +92,13 @@ class Bot(Thread):
                     message_thread_id=event.message_thread_id
                 )
             )
-            # exc_info = traceback.format_exc()
             self.log_message(rm, "exception")
-            if send:
-                self.send_response_message(rm)
-            return rm
         finally:
             self.stop_activity_thread()
+
+        if rm and send:
+            self.send_response_message(rm)
+        return rm
 
     def send_response_message_thread(self, rm: ResponseMessage):
         for rmi in rm.messages:
@@ -114,29 +133,8 @@ class Bot(Thread):
         commands = [event.command()] if event.command else COMMANDS
 
         for command in commands:
-            try:
-                if command.accept(event):
-                    self.log_event(event)
-                    rm = command.__class__().check_and_start(self, event)
-                    if rm:
-                        self.log_message(rm)
-                    return rm
-            except (PWarning, PError) as e:
-                rm = ResponseMessage(
-                    ResponseMessageItem(
-                        text=e.msg,
-                        peer_id=event.peer_id,
-                        message_thread_id=event.message_thread_id,
-                        reply_to=e.reply_to,
-                        keyboard=e.keyboard
-                    )
-                )
-                self.log_message(rm, e.level)
-                return rm
-            except PIDK:
-                continue
-            except PSkip as e:
-                raise e
+            if command.accept(event):
+                return command.check_and_start(self, event)
 
         # Если указана настройка не реагировать на неверные команды, то скипаем
         if event.chat and not event.chat.need_reaction:
@@ -155,7 +153,6 @@ class Bot(Thread):
                 peer_id=event.peer_id,
                 message_thread_id=event.message_thread_id
             ))
-        self.log_message(rm)
         return rm
 
     def get_similar_command(self, event: Event, commands):
