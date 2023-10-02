@@ -134,7 +134,7 @@ class Bot(Thread):
 
         for command in commands:
             if command.accept(event):
-                return command.check_and_start(self, event)
+                return command.__class__().check_and_start(self, event)
 
         # Если указана настройка не реагировать на неверные команды, то скипаем
         if event.chat and not event.chat.need_reaction:

@@ -119,6 +119,7 @@ class BullsAndCows(Command):
         session.message_body += f"\n\n{new_msg}"
         session.save()
 
-        rmi = ResponseMessageItem(text=session.message_body, peer_id=self.event.peer_id,
+        message_without_duplications = "\n\n".join(list(dict.fromkeys(session.message_body.split('\n\n'))))
+        rmi = ResponseMessageItem(text=message_without_duplications, peer_id=self.event.peer_id,
                                   message_thread_id=self.event.message_thread_id)
         _send_message_session_or_edit(self.bot, self.event, session, rmi, 8)
