@@ -355,10 +355,11 @@ def _send_message_session_or_edit(bot, event, session, rmi: ResponseMessageItem,
     else:
         rmi.message_id = session.message_id
         br = bot.send_response_message_item(rmi)
-    if not br.success:
+    if not br.success and br.response.get('description') != \
+            'Bad Request: message is not modified: specified new message content and reply markup are exactly the same as a current content and reply markup of the message':
         rmi.message_id = None
         br = bot.send_response_message_item(rmi)
-        message_id = br['response']['result']['message_id']
+        message_id = br.response['result']['message_id']
         session.message_id = message_id
         session.save()
     bot.delete_message(event.peer_id, event.message.id)
