@@ -38,7 +38,8 @@ class BullsAndCows(Command):
 
     def start_game(self, session) -> Optional[ResponseMessage]:
         if session:
-            raise PWarning(f"Игра уже создана, присылай мне число из {DIGITS_IN_GAME} цифр")
+            self._send_message(session)
+            return
         digits = [str(x) for x in range(10)]
         random.shuffle(digits)
         new_obj = {
@@ -119,6 +120,9 @@ class BullsAndCows(Command):
         session.message_body += f"\n\n{new_msg}"
         session.save()
 
+        self._send_message(session)
+
+    def _send_message(self, session):
         message_without_duplications = "\n\n".join(list(dict.fromkeys(session.message_body.split('\n\n'))))
         rmi = ResponseMessageItem(text=message_without_duplications, peer_id=self.event.peer_id,
                                   message_thread_id=self.event.message_thread_id)
