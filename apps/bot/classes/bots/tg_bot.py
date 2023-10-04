@@ -324,6 +324,7 @@ class TgBot(Bot):
             "Bad Request: canceled by new editMessageMedia request",
             "Bad Request: message is not modified: specified new message content and reply markup are exactly the same as a current content and reply markup of the message",
             "Forbidden: bot was blocked by the user",
+            "Bad Request: message to edit not found",
         ]
         catch_errors = {
             'Bad Request: VOICE_MESSAGES_FORBIDDEN': "Не могу отправить голосовуху из-за ваших настроек безопасности",
