@@ -82,8 +82,8 @@ class Command:
         :param event: событие
         :return: bool
         """
-        if event.command and event.command == self:
-            return True
+        # if event.command and event.command == self:
+        #     return True
         if event.message and event.message.command in self.full_names:
             return True
         if event.payload and event.payload['c'] in self.full_names:

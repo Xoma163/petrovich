@@ -129,12 +129,11 @@ class Bot(Thread):
         Если в Event есть команда, поиск не требуется
         """
         from apps.bot.initial import COMMANDS
-
-        commands = [event.command()] if event.command else COMMANDS
-
-        for command in commands:
+        for command in COMMANDS:
             if command.accept(event):
                 return command.__class__().check_and_start(self, event)
+        if event.command:
+            return event.command().check_and_start(self, event)
 
         # Если указана настройка не реагировать на неверные команды, то скипаем
         if event.chat and not event.chat.need_reaction:

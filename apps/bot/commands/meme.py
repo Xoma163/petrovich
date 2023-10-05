@@ -56,12 +56,6 @@ class Meme(Command):
         LinkAttachment
     ]
 
-    def accept(self, event: Event) -> bool:
-        if event.command:
-            event.message.args = event.message.clear.split(' ')
-            return True
-        return super().accept(event)
-
     @staticmethod
     def accept_extra(event: Event) -> bool:
         if event.is_fwd:
@@ -74,6 +68,9 @@ class Meme(Command):
         return False
 
     def start(self) -> ResponseMessage:
+        if self.event.command == self.__class__:
+            self.event.message.args = self.event.message.clear.split(' ')
+
         if not self.event.message.args:
             return self.menu_random()
 
