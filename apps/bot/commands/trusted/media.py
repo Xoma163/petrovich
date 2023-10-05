@@ -81,9 +81,9 @@ class Media(Command):
     help_texts_extra = "Поддерживаемые соцсети: Youtube/Youtube Music/Reddit/TikTok/Instagram/Twitter/Pikabu/" \
                        "The Hole/Yandex Music/Pinterest/Coub/VK Video/ScopeGG/TwitchClips/Facebook video/Premier\n\n" \
                        "Ключ --nomedia позволяет не запускать команду\n" \
-                       "Ключ --audio позволяет скачивать аудиодорожку для видео с ютуба\n\n" \
+                       "Ключ --audio позволяет скачивать аудиодорожку для видео с ютуба\n" \
                        "Ключ --thread позволяет скачивать пост с комментариями автора для твиттера\n\n" \
-                       "Видосы из ютуба качаются автоматически только если длина ролика < 2 минут. \n" \
+                       "Видосы из ютуба качаются автоматически только если длина ролика менее 2 минут. \n" \
                        "Вручную с указанием команды - скачается"
     platforms = [Platform.TG]
     attachments = [LinkAttachment]

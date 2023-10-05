@@ -139,7 +139,10 @@ def get_help_texts_for_command(command, platform=None) -> str:
             for line in lines:
                 dash_pos = line.find(" - ")
                 if dash_pos == -1:
-                    new_line = f"/{command.name} {line}"
+                    if line.startswith("- "):
+                        new_line = TgBot.get_formatted_text_line(f"/{command.name}") + f" {line[0:]}"
+                    else:
+                        new_line = f"/{command.name} {line}"
                 else:
                     new_line = TgBot.get_formatted_text_line(f"/{command.name} {line[:dash_pos]}") + line[dash_pos:]
                 full_help_texts_list.append(new_line)
