@@ -39,7 +39,6 @@ class Nostalgia(Command):
     MAX_PER_PAGE = 10
 
     def check_rights(self):
-
         if not (self.event.is_from_pm or self.event.chat and self.event.chat.pk == 56):
             raise PWarning("Команда работает только в ЛС или конфе мразей")
 
@@ -75,8 +74,8 @@ class Nostalgia(Command):
             [['поиск'], self.menu_search],
             [['default'], self.menu_default]
         ]
-        method = self.handle_menu(menu, arg0)
-        return method()
+        rmi = self.handle_menu(menu, arg0)()
+        return ResponseMessage(rmi)
 
     def menu_before(self) -> ResponseMessageItem:
         index_from, index_to = self._get_indexes_from_db()
