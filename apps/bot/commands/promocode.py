@@ -4,6 +4,7 @@ from django.db import IntegrityError
 from django.db.models import QuerySet, Q
 
 from apps.bot.classes.command import Command
+from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.utils.utils import localize_datetime
@@ -51,11 +52,11 @@ class Promocode(Command):
     def menu_add(self) -> ResponseMessageItem:
         self.check_args(3)
         args = self.event.message.args_case[1:]
-        name = args[0].lower()
+        name = args[0]
         code = args[1]
 
         try:
-            PromocodeModel.objects.get(name=name, code=code)
+            PromocodeModel.objects.get(name__iexact=name, code=code)
             raise PWarning("Промокод с таким кодом и названием уже есть в базе")
         except PromocodeModel.DoesNotExist:
             pass
@@ -94,7 +95,7 @@ class Promocode(Command):
             "code": self.event.message.args_case[1]
         }
         if len(self.event.message.args) > 2:
-            data['name'] = data['code'].lower()
+            data['name__iexact'] = data['code']
             data['code'] = self.event.message.args_case[2]
 
         try:
@@ -106,13 +107,16 @@ class Promocode(Command):
                 raise PWarning("Под запрос подходят два и более промокода. Уточните название сервиса")
             raise PWarning("Под запрос подходят два и более промокода")
 
+        # Удалять могут только trusted users или сами авторы своих промокодов
+        if not self.event.sender.check_role(Role.TRUSTED) and promocode.author != self.event.sender:
+            raise PWarning("Недостаточно прав для удаления промокода")
         promocode.delete()
 
         return ResponseMessageItem("Промокод удалён")
 
     def menu_search(self) -> ResponseMessageItem:
         promocodes = self._get_filtered_promocodes()
-        promocodes = promocodes.filter(name=self.event.message.args[0])
+        promocodes = promocodes.filter(name__iexact=self.event.message.args[0])
         if len(promocodes) == 0:
             raise PWarning("Не нашёл промокодов по этому названию")
         result = self._get_promocodes_str(promocodes)
@@ -124,7 +128,7 @@ class Promocode(Command):
 
     def _get_promocode_str(self, promocode: PromocodeModel) -> str:
         result = [
-            f"{self.bot.get_underline_text(promocode.name.capitalize())}",
+            f"{self.bot.get_underline_text(promocode.name)}",
             f"{self.bot.get_formatted_text_line(promocode.code)}"
         ]
 
