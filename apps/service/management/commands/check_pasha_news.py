@@ -12,11 +12,11 @@ class Command(BaseCommand):
     URL = "https://gks1frunze.ru"
 
     def add_arguments(self, parser):
-        parser.add_argument('chat_id', nargs='+', type=str, help='chat_id')
+        parser.add_argument('user_pk', nargs='+', type=str, help='chat_id')
 
     def handle(self, *args, **options):
-        chat_id = options['chat_id'][0]
-        pasha = User.objects.get(user_id=chat_id)
+        user_pk = options['user_pk'][0]
+        pasha = User.objects.get(pk=user_pk)
 
         pasha_news_last_id_entity, created = Service.objects.get_or_create(
             name='pasha_news_last_id',
