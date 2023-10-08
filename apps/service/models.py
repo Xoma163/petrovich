@@ -302,6 +302,7 @@ class Promocode(models.Model):
     code = models.CharField("Код", max_length=50)
     description = models.CharField("Описание", max_length=500)
     expiration = models.DateField('Окончание действия промокода', null=True, blank=True)
+    is_personal = models.BooleanField("Персональный", default=False)
 
     class Meta:
         verbose_name = "Промокод"

@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from django.db import IntegrityError
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Q
 
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.exceptions import PWarning
@@ -22,7 +22,9 @@ class Promocode(Command):
         "удалить (название сервиса) (промокод) - удаляет промокод",
         "удалить (промокод) - удаляет промокод"
     ]
-    help_texts_extra = "Срок действия в добавлении промокода указывается в формате ДД.ММ.ГГГГ"
+    help_texts_extra = "Срок действия в добавлении промокода указывается в формате ДД.ММ.ГГГГ\n" \
+                       "Если промокод добавлен в ЛС - он считается личным и будет выводиться только в лс\n" \
+                       "Если промокод добавлен в чате - он считается публичным и будет выводиться во всех чатах"
 
     def start(self) -> ResponseMessage:
         if not self.event.message.args:
@@ -39,7 +41,10 @@ class Promocode(Command):
         return ResponseMessage(answer)
 
     def menu_all(self) -> ResponseMessageItem:
-        promocodes = PromocodeModel.objects.all()
+        promocodes = self._get_filtered_promocodes()
+
+        if len(promocodes) == 0:
+            raise PWarning("Пока что в базе нет промокодов")
         promocodes_str = self._get_promocodes_str(promocodes)
         return ResponseMessageItem(promocodes_str)
 
@@ -74,6 +79,7 @@ class Promocode(Command):
                 name=name,
                 code=code,
                 author=self.event.sender,
+                is_personal=not self.event.chat,
                 expiration=expiration,
                 description=description,
             )
@@ -105,18 +111,18 @@ class Promocode(Command):
         return ResponseMessageItem("Промокод удалён")
 
     def menu_search(self) -> ResponseMessageItem:
-        promocodes = PromocodeModel.objects.filter(name=self.event.message.args[0])
+        promocodes = self._get_filtered_promocodes()
+        promocodes = promocodes.filter(name=self.event.message.args[0])
         if len(promocodes) == 0:
             raise PWarning("Не нашёл промокодов по этому названию")
         result = self._get_promocodes_str(promocodes)
         return ResponseMessageItem(result)
 
     def _get_promocodes_str(self, promocodes: QuerySet[PromocodeModel]) -> str:
-        # promocodes = promocodes.order_by('name')
-        promocodes_list = [self._get_one_promocode_str(x) for x in promocodes]
+        promocodes_list = [self._get_promocode_str(x) for x in promocodes]
         return "\n\n".join(promocodes_list)
 
-    def _get_one_promocode_str(self, promocode: PromocodeModel) -> str:
+    def _get_promocode_str(self, promocode: PromocodeModel) -> str:
         result = [
             f"{self.bot.get_underline_text(promocode.name.capitalize())}",
             f"{self.bot.get_formatted_text_line(promocode.code)}"
@@ -128,3 +134,9 @@ class Promocode(Command):
             result.append(f"{promocode.description}")
 
         return "\n".join(result)
+
+    def _get_filtered_promocodes(self) -> QuerySet:
+        if self.event.chat:
+            return PromocodeModel.objects.filter(is_personal=False)
+        else:
+            return PromocodeModel.objects.exclude(~Q(author=self.event.sender), is_personal=True)
