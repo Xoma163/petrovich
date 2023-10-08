@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from apps.service.models import Service, Meme, Notify, City, Donations, TimeZone, Subscribe, WakeOnLanUserData, \
-    Horoscope, Words, TaxiInfo, Tag, VideoCache
+    Horoscope, Words, TaxiInfo, Tag, VideoCache, Promocode
 
 
 @admin.register(Service)
@@ -90,3 +90,10 @@ class TaxiInfoAdmin(admin.ModelAdmin):
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
     list_filter = (('chat', admin.RelatedOnlyFieldListFilter), ('users', admin.RelatedOnlyFieldListFilter))
+
+
+@admin.register(Promocode)
+class Promocode(admin.ModelAdmin):
+    list_display = ('name', 'code', 'author', 'expiration', 'description')
+    list_filter = ('name', 'author')
+    search_fields = ('name', 'code', 'description')

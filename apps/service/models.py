@@ -294,3 +294,20 @@ class Tag(models.Model):
 
     def __str__(self):
         return str(self.name)
+
+
+class Promocode(models.Model):
+    name = models.CharField("Название", max_length=100)
+    author = models.ForeignKey(Profile, models.SET_NULL, verbose_name="Пользователь", null=True)
+    code = models.CharField("Код", max_length=50)
+    description = models.CharField("Описание", max_length=500)
+    expiration = models.DateField('Окончание действия промокода', null=True, blank=True)
+
+    class Meta:
+        verbose_name = "Промокод"
+        verbose_name_plural = "Промокоды"
+        ordering = ['name']
+        unique_together = ('name', 'code')
+
+    def __str__(self):
+        return str(self.name)
