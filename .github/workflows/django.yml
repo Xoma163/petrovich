@@ -57,11 +57,11 @@ jobs:
             cd ${{ secrets.SSH_PRODUCTION_FOLDER }}
             ./update_production.sh
 
-      - name: Send telegram message
-        uses: appleboy/telegram-action@master
-        with:
-          to: ${{ secrets.TG_PETROVICH_CHAT }}
-          token: ${{ secrets.TG_PETROVICH_TOKEN }}
-          message: |
-            Петрович обновлён. Список коммитов:
-            ${{join(github.event.commits.*.message, ', ') }}
+#      - name: Send telegram message
+#        uses: appleboy/telegram-action@master
+#        with:
+#          to: ${{ secrets.TG_PETROVICH_CHAT }}
+#          token: ${{ secrets.TG_PETROVICH_TOKEN }}
+#          message: |
+#            Петрович обновлён. Список коммитов:
+#            ${{join(github.event.commits.*.message, ', ') }}
