@@ -300,7 +300,7 @@ class Promocode(models.Model):
     name = models.CharField("Название", max_length=100)
     author = models.ForeignKey(Profile, models.SET_NULL, verbose_name="Пользователь", null=True)
     code = models.CharField("Код", max_length=50)
-    description = models.CharField("Описание", max_length=500)
+    description = models.CharField("Описание", max_length=500, blank=True)
     expiration = models.DateField('Окончание действия промокода', null=True, blank=True)
     is_personal = models.BooleanField("Персональный", default=False)
 
