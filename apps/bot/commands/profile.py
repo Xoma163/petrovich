@@ -196,7 +196,6 @@ class Profile(Command):
         city = City.objects.filter(name=city_info['name'])
         if len(city) != 0:
             return city.first()
-            # raise PWarning("Такой город уже есть")
         city_info['synonyms'] = city_info['name'].lower()
         timezonedb_api = TimezoneDB()
         timezone_name = timezonedb_api.get_timezone_by_coordinates(city_info['lat'], city_info['lon'])

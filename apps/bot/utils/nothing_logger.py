@@ -1,4 +1,8 @@
 class NothingLogger(object):
+    """
+    Класс для отключения логов
+    """
+
     @staticmethod
     def debug(msg):
         pass

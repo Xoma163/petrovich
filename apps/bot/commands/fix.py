@@ -12,7 +12,7 @@ class Fix(Command):
         "(Пересылаемые сообщения) - исправляет раскладку текста",
         "(текст) - исправляет раскладку текста"
     ]
-    args_or_fwd = 1
+    args_or_fwd = True
 
     def start(self) -> ResponseMessage:
         if self.event.message.args:

@@ -10,7 +10,7 @@ class VideoAttachment(Attachment):
         self.duration = None  # sec
         self.width = None
         self.height = None
-        self.thumb: str = None
+        self.thumb = None
         self.activity = ActivitiesEnum.UPLOAD_VIDEO
 
     def parse_tg(self, event):

@@ -68,7 +68,7 @@ class CalculatorSessionViewSet(ModelViewSet):
         return result
 
 
-def calculate(request, pk):
+def calculate(_, pk):
     session = CalculatorSession.objects.get(pk=pk)
     return JsonResponse({'data': session.calculate()}, status=200)
 

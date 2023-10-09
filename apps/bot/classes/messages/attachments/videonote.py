@@ -8,7 +8,7 @@ class VideoNoteAttachment(Attachment):
     def __init__(self):
         super().__init__(self.TYPE)
         self.duration = None  # sec
-        self.thumb: str = None
+        self.thumb = None
         self.activity = ActivitiesEnum.UPLOAD_VIDEO_NOTE
 
     def parse_tg(self, event):

@@ -350,7 +350,6 @@ class Media(Command):
     def get_pikabu_video(self, url) -> (list, str):
         p_api = Pikabu()
         data = p_api.get_video_data(url)
-        # video_content = requests.get(webm).content
         video = self.bot.get_video_attachment(data['download_url'], peer_id=self.event.peer_id,
                                               filename=data['filename'])
         return [video], data['title']
@@ -474,7 +473,6 @@ class Media(Command):
         first_id = snapshot_url.replace('https://media.allstar.gg/', '').split('/', 1)[0]
         url = f"https://media.allstar.gg/{first_id}/clips/{clip_id}.mp4"
 
-        # video_content = requests.get(webm).content
         video = self.bot.get_video_attachment(url, peer_id=self.event.peer_id)
         vt = VideoTrimmer()
         try:

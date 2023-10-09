@@ -12,7 +12,7 @@ class Translate(Command):
     help_texts = [
         "(Текст/Пересылаемые сообщения) - в зависимости от текста переводит на нужный язык (английский или русский)"
     ]
-    args_or_fwd = 1
+    args_or_fwd = True
 
     def start(self) -> ResponseMessage:
         fwd = self.event.fwd

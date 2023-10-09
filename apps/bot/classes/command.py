@@ -37,7 +37,7 @@ class Command:
     conversation: bool = False  # Должно ли сообщение обрабатываться только в конфе
     fwd: bool = False  # Должно ли сообщение обрабатываться только с пересланными сообщениями
     args: int = 0  # Должно ли сообщение обрабатываться только с заданным количеством аргументов
-    args_or_fwd: int = None  # Должно ли сообщение обрабатываться только с пересланными сообщениями или аргументами
+    args_or_fwd: bool = False  # Должно ли сообщение обрабатываться только с пересланными сообщениями или аргументами
     int_args: list = []  # Список аргументов, которые должны быть целым числом
     float_args: list = []  # Список аргументов, которые должны быть числом
     platforms: list = list(Platform)  # Список платформ, которые могут обрабатывать команду
@@ -84,8 +84,6 @@ class Command:
         :param event: событие
         :return: bool
         """
-        # if event.command and event.command == self:
-        #     return True
         if event.message and event.message.command in self.full_names:
             return True
         if event.payload and event.payload['c'] in self.full_names:
@@ -161,7 +159,7 @@ class Command:
         """
         raise NotImplementedError
 
-    def check_sender(self, role: Role):
+    def check_sender(self, role: Role) -> bool:
         """
         Проверка на роль отправителя
         :param role: требуемая роль
@@ -177,7 +175,7 @@ class Command:
         error = f"Команда доступна только для пользователей с уровнем прав {role.value}"
         raise PWarning(error)
 
-    def check_args(self, args: int = None):
+    def check_args(self, args: int = None) -> bool:
         """
         Проверка на кол-во переданных аргументов
         :param args: количество требуемых аргументов
@@ -195,7 +193,7 @@ class Command:
             error = "Для работы команды требуются аргументы"
         raise PWarning(error, keyboard=self._get_help_button_keyboard())
 
-    def check_args_or_fwd(self, args: int = None):
+    def check_args_or_fwd(self, args: int = None) -> bool:
         if args is None:
             args = self.args_or_fwd
         try:
@@ -216,7 +214,7 @@ class Command:
         raise PWarning(error, keyboard=self._get_help_button_keyboard())
 
     @staticmethod
-    def check_number_arg_range(arg, _min=-float('inf'), _max=float('inf'), banned_list: list = None):
+    def check_number_arg_range(arg, _min=-float('inf'), _max=float('inf'), banned_list: list = None) -> bool:
         """
         Проверка на вхождение числа в диапазон и исключение его из заданного списка
         :param arg: число
@@ -276,7 +274,7 @@ class Command:
                     raise PWarning(error)
         return True
 
-    def check_pm(self):
+    def check_pm(self) -> bool:
         """
         Проверка на сообщение из ЛС
         :return: bool
@@ -287,7 +285,7 @@ class Command:
         error = "Команда работает только в ЛС"
         raise PWarning(error)
 
-    def check_conversation(self):
+    def check_conversation(self) -> bool:
         """
         Проверка на сообщение из чата
         :return: bool
@@ -298,7 +296,7 @@ class Command:
         error = "Команда работает только в беседах"
         raise PWarning(error)
 
-    def check_fwd(self):
+    def check_fwd(self) -> bool:
         """
         Проверка на вложенные сообщения
         :return: bool
@@ -309,7 +307,7 @@ class Command:
         error = "Перешлите сообщения"
         raise PWarning(error)
 
-    def check_platforms(self):
+    def check_platforms(self) -> bool:
         """
         Проверка на вид платформы
         :return: bool
@@ -322,7 +320,7 @@ class Command:
             raise PWarning(error)
         return True
 
-    def check_attachments(self):
+    def check_attachments(self) -> bool:
         """
         Проверка на вложения в сообщении или пересланных сообщениях
         :return: bool
@@ -340,7 +338,7 @@ class Command:
         error = f"Для работы команды требуются вложения: {allowed_types}"
         raise PWarning(error)
 
-    def check_city(self, city=None):
+    def check_city(self, city=None) -> bool:
         """
         Проверяет на город у пользователя или в присланном сообщении
         :param city: город
@@ -354,7 +352,7 @@ class Command:
         error = "Не указан город в профиле. /профиль город (название) - устанавливает город пользователю"
         raise PWarning(error)
 
-    def check_mentioned(self):
+    def check_mentioned(self) -> bool:
         """
         Проверяет на упоминание бота в сообщении
         :return: bool
@@ -365,7 +363,7 @@ class Command:
             raise PSkip()
         return True
 
-    def check_non_mentioned(self):
+    def check_non_mentioned(self) -> bool:
         if self.event.message.mentioned:
             raise PWarning("Команда работает только без упоминания")
         return True

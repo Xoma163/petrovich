@@ -118,8 +118,6 @@ class Premier(SubscribeService):
         titles = titles[index:]
         urls = urls[index:]
 
-        # return {"ids": ids, "titles": titles, "urls": urls}
-
         data = {"ids": [], "titles": [], "urls": []}
         for i, url in enumerate(urls):
             try:

@@ -96,9 +96,8 @@ class Logs(Command):
                 elif isinstance(item, list):
                     for i, _item in enumerate(item):
                         items[key][i] = self.wrap_long_texts(_item)
-                elif isinstance(item, str):
-                    if len(item) > wrap_val:
-                        items[key] = textwrap.fill(item, wrap_val).replace('\\n', '\n')
+                elif isinstance(item, str) and len(item) > wrap_val:
+                    items[key] = textwrap.fill(item, wrap_val).replace('\\n', '\n')
             return items
         elif isinstance(items, list):
             for i, item in enumerate(items):

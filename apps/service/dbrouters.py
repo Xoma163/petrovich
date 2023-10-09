@@ -3,12 +3,14 @@ from petrovich.settings import TAXI_DB
 
 
 class TaxiDBRouter:
-    def db_for_read(self, model, **hints):
+    @staticmethod
+    def db_for_read(model):
         if model == TaxiInfo:
             return TAXI_DB
         return None
 
-    def db_for_write(self, model, **hints):
+    @staticmethod
+    def db_for_write(model):
         if model == TaxiInfo:
             return TAXI_DB
         return None

@@ -55,7 +55,7 @@ class VoiceRecognition(Command):
         AudioSegment.from_file(i, input_file_format).export(o, format='wav')
         o.seek(0)
 
-        r = PFilterGoogleRecognizer()
+        r = sr.Recognizer()
         with sr.AudioFile(o) as source:
             audio = r.record(source)
 
@@ -79,54 +79,3 @@ class VoiceRecognition(Command):
         answer = text_before_spoiler + self.bot.get_bold_text(spoiler_text) + self.bot.get_spoiler_text(
             text_after_spoiler)
         return ResponseMessage(ResponseMessageItem(text=answer))
-
-
-# переопределение класса для отключения pFilter
-class PFilterGoogleRecognizer(sr.Recognizer):
-    def recognize_google(self, audio_data, key=None, language="en-US", show_all=False, pfilter=1, **kwargs):
-
-        flac_data = audio_data.get_flac_data(
-            convert_rate=None if audio_data.sample_rate >= 8000 else 8000,  # audio samples must be at least 8 kHz
-            convert_width=2  # audio samples must be 16-bit
-        )
-        if key is None: key = "AIzaSyBOti4mM-6x9WDnZIjIeyEU21OpBXqWBgw"
-        url = "https://www.google.com/speech-api/v2/recognize?{}".format(sr.urlencode({
-            "client": "chromium",
-            "lang": language,
-            "key": key,
-            "pFilter": pfilter
-        }))
-        request = sr.Request(url, data=flac_data,
-                             headers={"Content-Type": "audio/x-flac; rate={}".format(audio_data.sample_rate)})
-
-        # obtain audio transcription results
-        try:
-            response = sr.urlopen(request, timeout=self.operation_timeout)
-        except sr.HTTPError as e:
-            raise sr.RequestError("recognition request failed: {}".format(e.reason))
-        except sr.URLError as e:
-            raise sr.RequestError("recognition connection failed: {}".format(e.reason))
-        response_text = response.read().decode("utf-8")
-
-        # ignore any blank blocks
-        actual_result = []
-        for line in response_text.split("\n"):
-            if not line: continue
-            result = sr.json.loads(line)["result"]
-            if len(result) != 0:
-                actual_result = result[0]
-                break
-
-        # return results
-        if show_all: return actual_result
-        if not isinstance(actual_result, dict) or len(
-                actual_result.get("alternative", [])) == 0: raise sr.UnknownValueError()
-
-        if "confidence" in actual_result["alternative"]:
-            # return alternative with highest confidence score
-            best_hypothesis = max(actual_result["alternative"], key=lambda alternative: alternative["confidence"])
-        else:
-            # when there is no confidence available, we arbitrarily choose the first hypothesis.
-            best_hypothesis = actual_result["alternative"][0]
-        if "transcript" not in best_hypothesis: raise sr.UnknownValueError()
-        return best_hypothesis["transcript"]

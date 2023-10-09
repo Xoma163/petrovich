@@ -18,9 +18,8 @@ class TgMessage(Message):
     @property
     def mentioned(self) -> bool:
         # Исключение меншона - если /command@не_наш_бот
-        if self.has_mention:
-            if self.MENTION not in self._mention_entities:
-                return False
+        if self.has_mention and self.MENTION not in self._mention_entities:
+            return False
         return super().mentioned
 
     def setup_message_with_entities(self, text, entities):

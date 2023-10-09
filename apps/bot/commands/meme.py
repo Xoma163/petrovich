@@ -217,16 +217,15 @@ class Meme(Command):
         if not self.event.sender.check_role(Role.MODERATOR) and meme.author != self.event.sender:
             raise PWarning("У вас нет прав на удаление мемов")
         # Если удаляем мем другого человека, шлём ему сообщением
-        if meme.author:
-            if meme.author != self.event.sender:
-                user_msg = f'Мем с названием "{meme.name}" удалён поскольку он не ' \
-                           f'соответствует правилам, устарел или является дубликатом.'
-                user = meme.author.get_tg_user()
-                rmi = ResponseMessageItem(
-                    text=user_msg,
-                    peer_id=user.user_id,
-                    message_thread_id=self.event.message_thread_id)
-                self.bot.send_response_message_item(rmi)
+        if meme.author and meme.author != self.event.sender:
+            user_msg = f'Мем с названием "{meme.name}" удалён поскольку он не ' \
+                       f'соответствует правилам, устарел или является дубликатом.'
+            user = meme.author.get_tg_user()
+            rmi = ResponseMessageItem(
+                text=user_msg,
+                peer_id=user.user_id,
+                message_thread_id=self.event.message_thread_id)
+            self.bot.send_response_message_item(rmi)
 
         meme_name = meme.name
         meme.delete()
@@ -425,9 +424,8 @@ class Meme(Command):
             else:
                 rmi.text = meme.link
 
-        if print_name:
-            if rmi.text:
-                rmi.text += f"\n{meme.name}"
+        if print_name and rmi.text:
+            rmi.text += f"\n{meme.name}"
 
         if send_keyboard:
             button = self.bot.get_button("Ещё", self.name)

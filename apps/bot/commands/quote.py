@@ -54,10 +54,6 @@ class Quote(Command):
                 if isinstance(photo, PhotoAttachment):
                     message['photo'] = photo.download_content(self.event.peer_id)
 
-                # sticker = msg.attachments[0]
-                # if isinstance(sticker, StickerAttachment):
-                #     message['photo'] = sticker.url
-
             # stack messages from one user
             if msgs and msgs[-1]['username'] == username:
                 if next_append:

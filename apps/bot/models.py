@@ -26,7 +26,6 @@ class Chat(Platform):
     admin = models.ForeignKey('Profile', models.SET_NULL, verbose_name='Админ', blank=True, null=True)
 
     need_reaction = models.BooleanField('Реагировать на неверные команды в конфе', default=True)
-    # ToDo: not working
     mentioning = models.BooleanField('Работа без упоминания в конфе', default=False)
     need_meme = models.BooleanField('Слать мемы по точному названию', default=False)
     recognize_voice = models.BooleanField('Распозновать голосовые автоматически', default=True)

@@ -7,12 +7,14 @@ from apps.bot.utils.utils import random_probability, random_event
 
 
 class Turett(Command):
-    MENTIONED_CHANCE = 1
-    NOT_MENTIONED_CHANCE = 0.3
-    STICKER_CHANCE = 50
     conversation = True
     priority = 85
 
+    MENTIONED_CHANCE = 1
+    NOT_MENTIONED_CHANCE = 0.3
+    STICKER_CHANCE = 50
+
+    STICKER_SET_ID = "SamPriFle"
     TURETT_WORDS = [
         "Пошёл нахуй",
         "Пидор",
@@ -34,28 +36,28 @@ class Turett(Command):
 
     def accept(self, event: Event) -> bool:
         if event.chat and event.chat.need_turett and event.chat.use_swear:
-            self.send_turett(event)
+            chance = self.NOT_MENTIONED_CHANCE if event.chat.mentioning else self.MENTIONED_CHANCE
+            if random_probability(chance):
+                return True
         return False
 
     def start(self) -> ResponseMessage:
-        pass
-
-    def send_turett(self, event: Event):
-        chance = self.NOT_MENTIONED_CHANCE if event.chat.mentioning else self.MENTIONED_CHANCE
-        if random_probability(chance):
-            if isinstance(event.bot, TgBot):
-                if random_probability(self.STICKER_CHANCE):
-                    answer = random_event(self.TURETT_WORDS)
-                    rmi = ResponseMessageItem(text=answer, peer_id=event.peer_id,
-                                              message_thread_id=event.message_thread_id)
-                else:
-                    stickers = event.bot.get_sticker_set("SamPriFle")
-                    random_sticker = random_event(stickers)
-                    tg_sticker = StickerAttachment()
-                    tg_sticker.parse_tg(random_sticker)
-                    rmi = ResponseMessageItem(attachments=[tg_sticker], peer_id=event.peer_id,
-                                              message_thread_id=event.message_thread_id)
+        if isinstance(self.event.bot, TgBot):
+            if random_probability(self.STICKER_CHANCE):
+                rmi = self.get_text()
             else:
-                answer = random_event(self.TURETT_WORDS)
-                rmi = ResponseMessageItem(text=answer, peer_id=event.peer_id, message_thread_id=event.message_thread_id)
-            event.bot.send_response_message_item(rmi)
+                rmi = self.get_sticker()
+        else:
+            rmi = self.get_text()
+        return ResponseMessage(rmi)
+
+    def get_sticker(self) -> ResponseMessageItem:
+        stickers = self.event.bot.get_sticker_set(self.STICKER_SET_ID)
+        random_sticker = random_event(stickers)
+        tg_sticker = StickerAttachment()
+        tg_sticker.parse_tg(random_sticker)
+        return ResponseMessageItem(attachments=[tg_sticker])
+
+    def get_text(self) -> ResponseMessageItem:
+        answer = random_event(self.TURETT_WORDS)
+        return ResponseMessageItem(text=answer)

@@ -79,9 +79,6 @@ class BotInitializer(TestCase):
         self.cmd = self.Command(self.bot, self.event)
         self.setup_event()
 
-    # def tearDown(self):
-    #     self.event.message = None
-
     def setup_event(self):
         self.event.is_from_user = True
         self.event.user = User.objects.get(user_id=1)

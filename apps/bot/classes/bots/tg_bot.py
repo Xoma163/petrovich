@@ -50,23 +50,13 @@ class TgBot(Bot):
         else:
             self.requests = RequestLocal(self.token)
 
-        # self.longpoll = TgBotLongPoll(self.token)
-
     # MAIN ROUTING AND MESSAGING
 
     def run(self):
         """
         Thread запуск основного тела команды
         """
-        # self.longpoll.set_last_update_id()
         return super().run()
-
-    # def listen(self):
-    #     """
-    #     Получение новых событий и их обработка
-    #     """
-    #     for raw_event in self.longpoll.listen():
-    #         self.parse(raw_event)
 
     def parse(self, raw_event):
         tg_event = TgEvent(raw_event, self)
@@ -509,8 +499,6 @@ class TgBot(Bot):
         """
         user = profile.get_tg_user()
         return self.get_formatted_url(str(profile), f"tg://user?id={user.user_id}")
-        # if user.nickname:
-        #     return f"@{user.nickname}"
 
     def delete_message(self, peer_id, message_id) -> dict:
         """
@@ -533,7 +521,7 @@ class TgBot(Bot):
         r = self.requests.get('setMyCommands', json={'commands': help_texts_tg}).json()
         return r
 
-    def get_sticker_set(self, name) -> dict:
+    def get_sticker_set(self, name) -> list:
         r = self.requests.get('getStickerSet', json={'name': name}).json()
         self.log_response(r, "getStickerSet")
         return r['result']['stickers']

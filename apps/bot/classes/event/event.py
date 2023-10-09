@@ -1,7 +1,8 @@
 import copy
-from typing import Optional
+from typing import Optional, List
 
 from apps.bot.classes.const.consts import Platform, Role
+from apps.bot.classes.messages.attachments.attachment import Attachment
 from apps.bot.classes.messages.attachments.audio import AudioAttachment
 from apps.bot.classes.messages.attachments.document import DocumentAttachment
 from apps.bot.classes.messages.attachments.gif import GifAttachment
@@ -132,24 +133,24 @@ class Event:
         """
         self.message = Message(text, _id) if text else None
 
-    def get_all_attachments(self, _type):
+    def get_all_attachments(self, types: Optional[List[Attachment]]):
         attachments = []
 
-        if _type is None:
-            _type = [AudioAttachment, DocumentAttachment, GifAttachment, LinkAttachment, PhotoAttachment,
+        if types is None:
+            types = [AudioAttachment, DocumentAttachment, GifAttachment, LinkAttachment, PhotoAttachment,
                      StickerAttachment, VideoAttachment, VideoNoteAttachment]
-        if not isinstance(_type, list):
-            _type = [_type]
+        if not isinstance(types, list):
+            types = [types]
         if self.attachments:
             for att in self.attachments:
-                if type(att) in _type:
+                if type(att) in types:
                     attachments.append(att)
         if self.fwd:
             msgs = self.fwd
             for msg in msgs:
                 if msg.attachments:
                     for att in msg.attachments:
-                        if type(att) in _type:
+                        if type(att) in types:
                             attachments.append(att)
         return attachments
 
