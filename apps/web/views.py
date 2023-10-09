@@ -1,21 +1,16 @@
-from django.http import JsonResponse, FileResponse
-from django.shortcuts import render
-from django.templatetags.static import static
-from django.views import View
+from django.http import JsonResponse
 from django.views.generic import TemplateView
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 from rest_framework.viewsets import ModelViewSet
 
 from apps.web.models import CalculatorSession, CalculatorProduct, CalculatorUser
-from apps.web.serializers import CalculatorProductSerializer, \
-    CalculatorSessionSerializer, CalculatorSessionViewSerializer, CalculatorUserSerializer
-from petrovich.settings import BASE_DIR
+from apps.web.serializers import CalculatorProductSerializer, CalculatorSessionSerializer, \
+    CalculatorSessionViewSerializer, CalculatorUserSerializer
 
 
-def main_page(request):
-    context = {}
-    return render(request, 'web/index.html', context)
+class MainPageTemplateView(TemplateView):
+    template_name = "web/index.html"
 
 
 class DeliveryCalculatorTemplateView(TemplateView):
@@ -63,7 +58,7 @@ class CalculatorSessionViewSet(ModelViewSet):
 
     def retrieve(self, request, *args, **kwargs):
         result = super().retrieve(request, *args, **kwargs)
-        result.data['uom_list'] = [{'label': x.label, 'value': x.value} for x in CalculatorProduct.UnitOfMeasurement]
+        result.data['uom_list'] = [{'label': x[1], 'value': x[0]} for x in CalculatorProduct.UnitOfMeasurement.choices]
 
         return result
 
@@ -73,15 +68,9 @@ def calculate(_, pk):
     return JsonResponse({'data': session.calculate()}, status=200)
 
 
-class MinecraftSkin(View):
-    def get(self, *args, **kwargs):
-        name = kwargs['name']
-        file = BASE_DIR + static(f"files/minecraft/skins/{name}.png")
-        return FileResponse(open(file, 'rb'))
+class CalculateDetailView(DetailView):
+    model = CalculatorSession
 
-
-class MinecraftCape(View):
     def get(self, *args, **kwargs):
-        name = kwargs['name']
-        file = BASE_DIR + static(f"files/minecraft/capes/{name}.png")
-        return FileResponse(open(file, 'rb'))
+        session = self.get_object()
+        return JsonResponse({'data': session.calculate()}, status=200)
