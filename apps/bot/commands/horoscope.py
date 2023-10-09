@@ -1,6 +1,6 @@
 from datetime import datetime
+from time import sleep
 
-from WorldTime import sleep
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
