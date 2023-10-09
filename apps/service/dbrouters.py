@@ -1,8 +1,11 @@
+from django.db import ConnectionRouter
+
 from apps.service.models import TaxiInfo
 from petrovich.settings import TAXI_DB
 
 
-class TaxiDBRouter:
+# noqa
+class TaxiDBRouter(ConnectionRouter):
     def db_for_read(self, model, **kwargs):
         if model == TaxiInfo:
             return TAXI_DB

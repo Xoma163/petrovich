@@ -14,8 +14,8 @@ from apps.service.models import City, TimeZone
 class BotInitializer(TestCase):
     Command = Command
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *args):
+        super().__init__(*args)
         self.bot = None
         self.event = None
         self.cmd = None
