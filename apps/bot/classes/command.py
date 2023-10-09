@@ -159,17 +159,17 @@ class Command:
         """
         raise NotImplementedError
 
-    def check_sender(self, role: Role) -> bool:
+    def check_sender(self, role: Role):
         """
         Проверка на роль отправителя
         :param role: требуемая роль
         :return: bool
         """
         if self.event.sender.check_role(role):
-            return True
+            return
         if role == Role.CONFERENCE_ADMIN:
             if self.event.chat.admin == self.event.sender:
-                return True
+                return
         if self.hidden:
             raise PIDK()
         error = f"Команда доступна только для пользователей с уровнем прав {role.value}"
@@ -214,7 +214,7 @@ class Command:
         raise PWarning(error, keyboard=self._get_help_button_keyboard())
 
     @staticmethod
-    def check_number_arg_range(arg, _min=-float('inf'), _max=float('inf'), banned_list: list = None) -> bool:
+    def check_number_arg_range(arg, _min=-float('inf'), _max=float('inf'), banned_list: list = None):
         """
         Проверка на вхождение числа в диапазон и исключение его из заданного списка
         :param arg: число
@@ -226,12 +226,12 @@ class Command:
         if _min <= arg <= _max:
             if banned_list:
                 if arg not in banned_list:
-                    return True
+                    return
                 else:
                     error = f"Аргумент не может принимать значение {arg}"
                     raise PWarning(error)
             else:
-                return True
+                return
         else:
             error = f"Значение может быть в диапазоне [{_min};{_max}]"
             raise PWarning(error)
@@ -242,7 +242,7 @@ class Command:
         :return: bool
         """
         if not self.event.message.args:
-            return True
+            return
         for checked_arg_index in self.int_args:
             if len(self.event.message.args) - 1 >= checked_arg_index:
                 if isinstance(self.event.message.args[checked_arg_index], int):
@@ -253,7 +253,6 @@ class Command:
                 except ValueError:
                     error = "Аргумент должен быть целочисленным"
                     raise PWarning(error)
-        return True
 
     def parse_float(self):
         """
@@ -261,7 +260,7 @@ class Command:
         :return: bool
         """
         if not self.event.message.args:
-            return True
+            return
         for checked_arg_index in self.float_args:
             if len(self.event.message.args) - 1 >= checked_arg_index:
                 if isinstance(self.event.message.args[checked_arg_index], float):
@@ -272,7 +271,6 @@ class Command:
                 except ValueError:
                     error = "Аргумент должен быть с плавающей запятой"
                     raise PWarning(error)
-        return True
 
     def check_pm(self) -> bool:
         """
@@ -320,7 +318,7 @@ class Command:
             raise PWarning(error)
         return True
 
-    def check_attachments(self) -> bool:
+    def check_attachments(self):
         """
         Проверка на вложения в сообщении или пересланных сообщениях
         :return: bool
@@ -328,40 +326,39 @@ class Command:
         if self.event.attachments:
             for att in self.event.attachments:
                 if type(att) in self.attachments:
-                    return True
+                    return
         if self.event.fwd and self.event.fwd[0].attachments:
             for att in self.event.fwd[0].attachments:
                 if type(att) in self.attachments:
-                    return True
+                    return
 
         allowed_types = ', '.join([self.ATTACHMENT_TRANSLATOR[_type] for _type in self.attachments])
         error = f"Для работы команды требуются вложения: {allowed_types}"
         raise PWarning(error)
 
-    def check_city(self, city=None) -> bool:
+    def check_city(self, city=None):
         """
         Проверяет на город у пользователя или в присланном сообщении
         :param city: город
         :return: bool
         """
         if city:
-            return True
+            return
         if self.event.sender.city:
-            return True
+            return
 
         error = "Не указан город в профиле. /профиль город (название) - устанавливает город пользователю"
         raise PWarning(error)
 
-    def check_mentioned(self) -> bool:
+    def check_mentioned(self):
         """
         Проверяет на упоминание бота в сообщении
         :return: bool
         """
         if self.event.is_from_pm:
-            return True
+            return
         if not self.event.message.mentioned:
             raise PSkip()
-        return True
 
     def check_non_mentioned(self) -> bool:
         if self.event.message.mentioned:
