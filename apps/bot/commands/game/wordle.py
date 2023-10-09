@@ -9,7 +9,7 @@ from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Platform, Role, rus_alphabet
 from apps.bot.classes.const.exceptions import PWarning, PSkip
 from apps.bot.classes.messages.response_message import ResponseMessageItem, ResponseMessage
-from apps.bot.utils.utils import random_event, _send_message_session_or_edit
+from apps.bot.utils.utils import random_event, send_message_session_or_edit
 from apps.games.models import Wordle as WordleModel
 from petrovich.settings import STATIC_ROOT
 
@@ -100,7 +100,7 @@ class Wordle(Command):
         attachment = self.bot.get_photo_attachment(image)
         rmi = ResponseMessageItem(attachments=[attachment], peer_id=self.event.peer_id,
                                   message_thread_id=self.event.message_thread_id)
-        _send_message_session_or_edit(self.bot, self.event, session, rmi, max_delta=8)
+        send_message_session_or_edit(self.bot, self.event, session, rmi, max_delta=8)
 
     def get_random_word(self):
         with open(self.WORDLE_WORDS_PATH, 'r') as f:
@@ -172,7 +172,7 @@ class Wordle(Command):
         text = f"Загаданное слово - {session.word}"
         return self._end_game(session, text)
 
-    def _end_game(self, session, text):
+    def _end_game(self, session: WordleModel, text):
         button = self.bot.get_button("Ещё", self.name)
         keyboard = self.bot.get_inline_keyboard([button])
 
@@ -180,7 +180,7 @@ class Wordle(Command):
         attachment = self.bot.get_photo_attachment(image)
         rmi = ResponseMessageItem(attachments=[attachment], peer_id=self.event.peer_id,
                                   message_thread_id=self.event.message_thread_id)
-        _send_message_session_or_edit(self.bot, self.event, session, rmi, max_delta=8)
+        send_message_session_or_edit(self.bot, self.event, session, rmi, max_delta=8)
         session.delete()
 
         # Зачем?

@@ -83,8 +83,7 @@ class VoiceRecognition(Command):
 
 # переопределение класса для отключения pFilter
 class PFilterGoogleRecognizer(sr.Recognizer):
-    def recognize_google(self, audio_data, key=None, language="en-US", show_all=False, pfilter=1,
-                         with_confidence=False):
+    def recognize_google(self, audio_data, key=None, language="en-US", show_all=False, pfilter=1, **kwargs):
 
         flac_data = audio_data.get_flac_data(
             convert_rate=None if audio_data.sample_rate >= 8000 else 8000,  # audio samples must be at least 8 kHz

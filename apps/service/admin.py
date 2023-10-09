@@ -94,6 +94,6 @@ class TagAdmin(admin.ModelAdmin):
 
 @admin.register(Promocode)
 class Promocode(admin.ModelAdmin):
-    list_display = ('name', 'code', 'author', 'expiration', 'description')
-    list_filter = ('name', 'author')
+    list_display = ('name', 'code', 'author', 'expiration', 'description', "is_personal")
+    list_filter = ('name', 'author', "is_personal")
     search_fields = ('name', 'code', 'description')

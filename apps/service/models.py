@@ -195,7 +195,7 @@ class VideoCache(models.Model):
 
 
 @receiver(models.signals.post_delete, sender=VideoCache)
-def auto_delete_file_on_delete(sender, instance, **kwargs):
+def auto_delete_file_on_delete(_, instance, **kwargs):
     """
     Deletes file from filesystem
     when corresponding `MediaFile` object is deleted.

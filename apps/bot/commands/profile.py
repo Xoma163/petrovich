@@ -8,6 +8,7 @@ from apps.bot.classes.const.consts import Platform
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
+from apps.bot.models import Profile
 from apps.service.models import City, TimeZone
 
 
@@ -149,17 +150,17 @@ class Profile(Command):
     def menu_default(self) -> ResponseMessageItem:
         if self.event.message.args:
             self.check_conversation()
-            user = self.bot.get_profile_by_name(self.event.message.args, filter_chat=self.event.chat)
-            return self.get_user_profile(user)
-        user = self.event.sender
-        return self.get_user_profile(user)
+            profile = self.bot.get_profile_by_name(self.event.message.args, filter_chat=self.event.chat)
+            return self.get_profile_info(profile)
+        profile = self.event.sender
+        return self.get_profile_info(profile)
 
-    def get_user_profile(self, user) -> ResponseMessageItem:
-        _city = user.city or "Не установлено"
-        _bd = user.birthday
-        if user.celebrate_bday:
+    def get_profile_info(self, profile: Profile) -> ResponseMessageItem:
+        _city = profile.city or "Не установлено"
+        _bd = profile.birthday
+        if profile.celebrate_bday:
             if _bd:
-                if not user.show_birthday_year:
+                if not profile.show_birthday_year:
                     _bd = _bd.strftime('%d.%m')
                 else:
                     _bd = _bd.strftime('%d.%m.%Y')
@@ -167,25 +168,25 @@ class Profile(Command):
                 _bd = "Не установлено"
         else:
             _bd = "Скрыто"
-        _nickname = user.nickname_real or "Не установлено"
-        _name = user.name or "Не установлено"
-        _surname = user.surname or "Не установлено"
+        _nickname = profile.nickname_real or "Не установлено"
+        _name = profile.name or "Не установлено"
+        _surname = profile.surname or "Не установлено"
         answer = f"Имя - {_name}\n" \
                  f"Фамилия - {_surname}\n" \
                  f"Никнейм - {_nickname}\n" \
                  f"Дата рождения - {_bd}\n" \
                  f"Город - {_city}\n" \
-                 f"Пол - {user.get_gender_display().capitalize()}"
+                 f"Пол - {profile.get_gender_display().capitalize()}"
         rmi = ResponseMessageItem(text=answer)
 
-        if user.avatar:
-            attachment = self.bot.get_photo_attachment(user.avatar.path, peer_id=self.event.peer_id,
+        if profile.avatar:
+            attachment = self.bot.get_photo_attachment(profile.avatar.path, peer_id=self.event.peer_id,
                                                        filename="petrovich_user_avatar.png")
             rmi.attachments = [attachment]
         return rmi
 
     @staticmethod
-    def add_city_to_db(city_name):
+    def add_city_to_db(city_name: str):
         city_name = city_name.capitalize()
         yandexgeo_api = YandexGeo()
         city_info = yandexgeo_api.get_city_info_by_name(city_name)

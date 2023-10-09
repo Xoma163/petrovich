@@ -86,7 +86,6 @@ class TrimVideo(Command):
     def parse_timecode(cls, timecode: str) -> str:
         h = 0
         m = 0
-        s = 0
         ms = 0
         numbers = []
         last_save_index = 0

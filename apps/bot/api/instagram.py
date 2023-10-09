@@ -48,14 +48,14 @@ class Instagram:
 
     def _get_post_data(self, instagram_link) -> dict:
         host = "instagram-scraper-20231.p.rapidapi.com"
-        HEADERS = {
+        headers = {
             "X-RapidAPI-Host": host,
             "X-RapidAPI-Key": self.RAPID_API_KEY,
         }
-        URL = f"https://{host}/postdetail"
+        url = f"https://{host}/postdetail"
 
         post_id = urlparse(instagram_link).path.strip('/').split('/')[1]
-        r = requests.get(f"{URL}/{post_id}", headers=HEADERS).json()
+        r = requests.get(f"{url}/{post_id}", headers=headers).json()
         logger.debug({"response": r})
 
         return self._parse_photo_or_video(r['data'])

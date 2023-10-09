@@ -6,7 +6,7 @@ from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role, Platform
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.messages.response_message import ResponseMessageItem, ResponseMessage
-from apps.bot.utils.utils import decl_of_num, _send_message_session_or_edit
+from apps.bot.utils.utils import decl_of_num, send_message_session_or_edit
 from apps.games.models import BullsAndCowsSession
 
 lock = Lock()
@@ -126,4 +126,4 @@ class BullsAndCows(Command):
         message_without_duplications = "\n\n".join(list(dict.fromkeys(session.message_body.split('\n\n'))))
         rmi = ResponseMessageItem(text=message_without_duplications, peer_id=self.event.peer_id,
                                   message_thread_id=self.event.message_thread_id)
-        _send_message_session_or_edit(self.bot, self.event, session, rmi, 8)
+        send_message_session_or_edit(self.bot, self.event, session, rmi, 8)

@@ -1,3 +1,5 @@
+from typing import Optional
+
 from apps.bot.classes.bots.bot import Bot
 from apps.bot.classes.const.consts import Role, Platform
 from apps.bot.classes.const.exceptions import PWarning, PSkip, PIDK
@@ -152,7 +154,7 @@ class Command:
         if self.non_mentioned:
             self.check_non_mentioned()
 
-    def start(self) -> ResponseMessage:
+    def start(self) -> Optional[ResponseMessage]:
         """
         Обработка самой команды
         :return: result (см. документацию)

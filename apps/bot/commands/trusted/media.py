@@ -28,7 +28,7 @@ from apps.bot.classes.const.consts import Platform, Role
 from apps.bot.classes.const.exceptions import PWarning, PSkip
 from apps.bot.classes.event.event import Event
 from apps.bot.classes.messages.attachments.link import LinkAttachment
-from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
+from apps.bot.classes.messages.response_message import ResponseMessageItem
 from apps.bot.commands.trim_video import TrimVideo
 from apps.bot.utils.utils import get_urls_from_text, replace_markdown_links, replace_markdown_bolds, \
     replace_markdown_quotes
@@ -109,7 +109,7 @@ class Media(Command):
                     return True
         return False
 
-    def start(self) -> ResponseMessage:
+    def start(self):
         if self.event.message.command in self.full_names:
             if self.event.message.args or self.event.fwd:
                 source = self.event.get_all_attachments([LinkAttachment])[0].url
@@ -168,7 +168,7 @@ class Media(Command):
             self.bot.delete_message(self.event.peer_id, self.event.message.id)
 
     def get_method_and_chosen_url(self, source):
-        MEDIA_TRANSLATOR = {
+        media_translator = {
             YOUTUBE_URLS: self.get_youtube_video,
             YOUTUBE_MUSIC_URLS: self.get_youtube_audio,
             TIKTOK_URLS: self.get_tiktok_video,
@@ -192,9 +192,9 @@ class Media(Command):
             hostname = urlparse(url).hostname
             if not hostname:
                 raise PWarning("Не нашёл ссылки")
-            for k in MEDIA_TRANSLATOR:
+            for k in media_translator:
                 if hostname in k:
-                    return MEDIA_TRANSLATOR[k], url
+                    return media_translator[k], url
 
         raise PWarning("Не медиа ссылка")
 
