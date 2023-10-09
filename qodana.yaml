@@ -20,10 +20,6 @@ profile:
 linter: jetbrains/qodana-python:latest
 name: "Excluded migrations"
 baseProfile: qodana.recommended
-inspections:
-  - group: ALL
-    ignore:
-      - "scope#file:**/migrations//*"
 exclude:
   - name: All
     paths:
@@ -31,6 +27,8 @@ exclude:
       - apps/games/migrations/*
       - apps/service/migrations/*
       - apps/web/migrations/*
+      - apps/bot/tests/*
+      - apps/service/management/commands/initial.py
       - staticfiles/*
       - frontend/*
   - name: PyUnresolvedReferencesInspection

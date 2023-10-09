@@ -1,11 +1,11 @@
 from datetime import datetime
-from time import sleep
 
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.commands.meme import Meme
 from apps.service.models import Horoscope as HoroscopeModel
+from time import sleep
 
 
 class ZodiacSign:
@@ -105,8 +105,7 @@ class Horoscope(Command):
 
     def get_horoscope_for_all(self):
         horoscope = HoroscopeModel.objects.first()
-        if not horoscope:
-            raise PWarning("На сегодня ещё нет гороскопа")
+        self.check_horoscope(horoscope)
         signs = self.zodiac_signs.get_zodiac_signs()
         for sign in signs:
             message = self.get_horoscope_by_zodiac_sign(sign)
@@ -146,16 +145,14 @@ class Horoscope(Command):
         except Exception:
             raise PWarning("Не знаю такого знака зодиака")
         horoscope = HoroscopeModel.objects.first()
-        if not horoscope:
-            raise PWarning("На сегодня ещё нет гороскопа")
+        self.check_horoscope(horoscope)
         meme = horoscope.memes.all()[zodiac_sign_index]
         answer = f"{zodiac_sign.name.capitalize()}\n{meme.get_info()}"
         return ResponseMessage(ResponseMessageItem(text=answer))
 
     def get_horoscope_by_zodiac_sign(self, zodiac_sign) -> ResponseMessageItem:
         horoscope = HoroscopeModel.objects.first()
-        if not horoscope:
-            raise PWarning("На сегодня ещё нет гороскопа")
+        self.check_horoscope(horoscope)
         zodiac_sign_index = self.zodiac_signs.get_zodiac_sign_index(zodiac_sign)
         zodiac_sign_name = zodiac_sign.name.capitalize()
         meme = horoscope.memes.all()[zodiac_sign_index]
@@ -174,3 +171,8 @@ class Horoscope(Command):
         button = self.bot.get_button(self.name.capitalize(), self.name)
         rmi.keyboard = self.bot.get_inline_keyboard([button])
         return ResponseMessage(rmi)
+
+    @staticmethod
+    def check_horoscope(horoscope: HoroscopeModel):
+        if not horoscope:
+            raise PWarning("На сегодня ещё нет гороскопа")

@@ -156,7 +156,9 @@ class Profile(Command):
         return self.get_profile_info(profile)
 
     def get_profile_info(self, profile: Profile) -> ResponseMessageItem:
-        _city = profile.city or "Не установлено"
+        not_defined = "Не установлено"
+
+        _city = profile.city or not_defined
         _bd = profile.birthday
         if profile.celebrate_bday:
             if _bd:
@@ -165,12 +167,12 @@ class Profile(Command):
                 else:
                     _bd = _bd.strftime('%d.%m.%Y')
             else:
-                _bd = "Не установлено"
+                _bd = not_defined
         else:
             _bd = "Скрыто"
-        _nickname = profile.nickname_real or "Не установлено"
-        _name = profile.name or "Не установлено"
-        _surname = profile.surname or "Не установлено"
+        _nickname = profile.nickname_real or not_defined
+        _name = profile.name or not_defined
+        _surname = profile.surname or not_defined
         answer = f"Имя - {_name}\n" \
                  f"Фамилия - {_surname}\n" \
                  f"Никнейм - {_nickname}\n" \
