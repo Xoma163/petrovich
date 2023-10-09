@@ -6,7 +6,7 @@ from apps.bot.utils.utils import localize_datetime
 from apps.service.models import City
 
 
-class Time(Command):
+class WorldTime(Command):
     name = "время"
     help_text = "текущее время в городе"
     help_texts = ["[город=из профиля] - текущее время в городе"]

@@ -32,8 +32,8 @@ class GPT(Command):
         return self.text_chat()
 
     def draw_image(self) -> ResponseMessage:
-        openai.api_key = env.str("CHIMERA_SECRET_KEY")
-        openai.api_base = "https://chimeragpt.adventblocks.cc/api/v1"
+        openai.api_key = env.str("OPENAI_KEY")
+        openai.api_base = "https://api.openai.com/v1"
 
         request_text = " ".join(self.event.message.args_case[1:])
         try:
@@ -56,21 +56,20 @@ class GPT(Command):
     def text_chat(self) -> ResponseMessage:
         request_text = self.event.message.args_str_case
 
-        openai.api_key = env.str("CHIMERA_SECRET_KEY")
-        openai.api_base = "https://chimeragpt.adventblocks.cc/api/v1"
+        openai.api_key = env.str("OPENAI_KEY")
+        openai.api_base = "https://api.openai.com/v1"
 
         tries = 0
         response = None
 
-        while not response and tries < 5:
+        while not response and tries < 1:
             try:
                 self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.TYPING)
                 response = openai.ChatCompletion.create(
-                    model='gpt-3.5-turbo-16k',
+                    model='gpt-4',
                     messages=[
                         {'role': 'user', 'content': request_text},
-                    ],
-                    allow_fallback=True
+                    ]
                 )
             except (openai.error.RateLimitError, openai.error.InvalidRequestError):
                 time.sleep(5)

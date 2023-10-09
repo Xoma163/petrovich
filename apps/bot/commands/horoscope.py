@@ -1,11 +1,11 @@
 from datetime import datetime
 
+from WorldTime import sleep
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.commands.meme import Meme
 from apps.service.models import Horoscope as HoroscopeModel
-from time import sleep
 
 
 class ZodiacSign:
