@@ -1,5 +1,4 @@
 import threading
-from dataclasses import dataclass
 from datetime import datetime
 
 from django.core.management import call_command
@@ -38,16 +37,15 @@ class Command(BaseCommand):
             # Берём прошедшие события но в пределах 1 минуты
             if item.cron.previous(dt_now) != -60:
                 continue
-
             threading.Thread(target=call_command, args=item.thread_args).start()
 
 
-@dataclass
 class ScheduleItem:
-    cron: CronTab
-    command: str
-    args: str = None
-    kwargs: dict = None
+    def __init__(self, cron: str, command: str, args: str = None, kwargs: dict = None):
+        self.cron = CronTab(cron)
+        self.command = command
+        self.args = args
+        self.kwargs = kwargs
 
     @property
     def thread_args(self):
