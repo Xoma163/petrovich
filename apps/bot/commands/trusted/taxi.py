@@ -19,7 +19,7 @@ class Taxi(Command):
             [["э", "эконом"], self.menu_econom],
             [["к", "комфорт"], self.menu_comfort],
             [["к+", "комфорт+"], self.menu_comfortplus],
-            [["экспресс"], self.menu_express],
+            [["экспресс", "доставка"], self.menu_express],
             [["курьер"], self.menu_courier],
             [['default'], self.menu_econom]
         ]

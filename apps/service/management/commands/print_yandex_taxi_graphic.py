@@ -87,7 +87,7 @@ class Command(BaseCommand):
                 color='gray',
                 linestyle=':')
 
-        ax.set_ylim([100, 600])
+        ax.set_ylim([200, 800])
 
         window_len = 10  # minutes
         kernel = np.ones(window_len, dtype=float) / window_len
