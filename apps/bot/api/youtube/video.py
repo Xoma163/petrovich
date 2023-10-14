@@ -1,4 +1,5 @@
 from datetime import timedelta
+from urllib import parse
 from urllib.parse import urlparse, parse_qsl
 
 import requests
@@ -8,6 +9,7 @@ from bs4 import BeautifulSoup
 from apps.bot.api.subscribe_service import SubscribeService
 from apps.bot.classes.const.exceptions import PWarning, PSkip
 from apps.bot.utils.nothing_logger import NothingLogger
+from petrovich.settings import env
 
 
 class YoutubeVideo(SubscribeService):
@@ -88,46 +90,114 @@ class YoutubeVideo(SubscribeService):
             "duration": video_info.get('duration')
         }
 
+    @staticmethod
+    def _get_channel_info(channel_id: str) -> dict:
+        url = "https://www.googleapis.com/youtube/v3/channels"
+        params = {
+            "id": channel_id,
+            "key": env.str('GOOGLE_API_KEY'),
+            "part": "snippet"
+        }
+        r = requests.get(url, params=params).json()
+        if not r['items']:
+            raise PWarning("Не нашёл канал")
+        return {
+            "title": r['items'][0]['snippet']['title']
+        }
+
+    @staticmethod
+    def _get_channel_videos(channel_id: str) -> list:
+        url = "https://www.googleapis.com/youtube/v3/search"
+        params = {
+            "channelId": channel_id,
+            "part": "snippet",
+            "maxResults": 50,
+            "key": env.str('GOOGLE_API_KEY'),
+            "order": "date"
+        }
+        r = requests.get(url, params=params).json()
+        videos = [x for x in r['items'] if x['id'].get('videoId')]
+        return list(reversed(videos))
+
+    @staticmethod
+    def _get_playlist_info(channel_id: str) -> dict:
+        url = "https://www.googleapis.com/youtube/v3/playlists"
+        params = {
+            "id": channel_id,
+            "key": env.str('GOOGLE_API_KEY'),
+            "part": "snippet"
+        }
+        r = requests.get(url, params=params).json()
+        if not r['items']:
+            raise PWarning("Не нашёл плейлист")
+        return {
+            "title": r['items'][0]['snippet']['title']
+        }
+
+    @staticmethod
+    def _get_playlist_videos(playlist_id: str) -> list:
+        url = "https://www.googleapis.com/youtube/v3/playlistItems"
+        params = {
+            "playlistId": playlist_id,
+            "part": "snippet",
+            "maxResults": 50,
+            "key": env.str('GOOGLE_API_KEY'),
+        }
+        videos = []
+        while True:
+            r = requests.get(url, params=params).json()
+            videos += r['items']
+            if not r.get('nextPageToken'):
+                break
+            params['pageToken'] = r['nextPageToken']
+        videos = [x for x in r['items'] if x['snippet']['resourceId'].get('videoId')]
+        return videos
+
     def get_data_to_add_new_subscribe(self, url: str) -> dict:
         r = requests.get(url)
         bs4 = BeautifulSoup(r.content, 'lxml')
-        channel_id = bs4.find_all('link', {'rel': 'canonical'})[0].attrs['href'].split('/')[-1]
+        href = bs4.find_all('link', {'rel': 'canonical'})[0].attrs['href']
+        get_params = dict(parse.parse_qsl(parse.urlsplit(href).query))
 
-        r = requests.get(f"https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}")
-        if r.status_code != 200:
-            raise PWarning("Не нашёл такого канала")
-        bsop = BeautifulSoup(r.content, 'lxml')
-        last_video = bsop.find_all('entry')[0]
+        channel_id = None
+        playlist_id = None
+
+        if get_params.get('list'):
+            playlist_id = get_params.get('list')
+            last_video = self._get_playlist_videos(playlist_id)[-2]
+            last_video_id = last_video['snippet']['resourceId']['videoId']
+            title = self._get_playlist_info(playlist_id)['title']
+        else:
+            channel_id = href.split('/')[-1]
+            last_video = self._get_channel_videos(channel_id)[-2]
+            last_video_id = last_video['id']['videoId']
+            title = self._get_channel_info(channel_id)['title']
 
         return {
             'channel_id': channel_id,
-            'title': bsop.find('title').text,
-            'last_video_id': last_video.find('yt:videoid').text,
-            'playlist_id': None
+            'title': title,
+            'last_video_id': last_video_id,
+            'playlist_id': playlist_id
         }
 
     def get_filtered_new_videos(self, channel_id: str, last_video_id: str, **kwargs) -> dict:
-        r = requests.get(f"https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}")
-        if r.status_code != 200:
-            raise PWarning("Не нашёл такого канала")
-        bsop = BeautifulSoup(r.content, 'lxml')
-
-        videos = list(reversed(bsop.find_all('entry')))
-        ids = [x.find("yt:videoid").text for x in videos]
-        titles = [x.find("title").text for x in videos]
-
+        if kwargs.get('playlist_id'):
+            videos = self._get_playlist_videos(kwargs.get('playlist_id'))
+            ids = [x['snippet']['resourceId']['videoId'] for x in videos]
+        else:
+            videos = self._get_channel_videos(channel_id)
+            ids = [x['id']['videoId'] for x in videos]
         index = ids.index(last_video_id) + 1
 
         ids = ids[index:]
-        titles = titles[index:]
         urls = [f"https://www.youtube.com/watch?v={x}" for x in ids]
 
         data = {"ids": [], "titles": [], "urls": []}
         for i, url in enumerate(urls):
             video_info = self._get_video_info(url)
-            if video_info['duration'] < 60:
+            if video_info['duration'] <= 60:
                 continue
             data['ids'].append(ids[i])
-            data['titles'].append(titles[i])
+            data['titles'].append(video_info['title'])
             data['urls'].append(urls[i])
         return data

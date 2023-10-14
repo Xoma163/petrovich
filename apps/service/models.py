@@ -157,7 +157,7 @@ class Subscribe(models.Model):
     chat = models.ForeignKey(Chat, models.CASCADE, verbose_name='Чат', null=True, blank=True)
     message_thread_id = models.IntegerField("message_thread_id", blank=True, null=True, default=None)
 
-    channel_id = models.CharField("ID канала", max_length=100)
+    channel_id = models.CharField("ID канала", max_length=100, blank=True, null=True)
     playlist_id = models.CharField("ID плейлиста", max_length=100, blank=True, null=True)
     title = models.CharField("Название канала", max_length=100)
     last_video_id = models.CharField("ID последнего видео", max_length=100, null=True, blank=True)

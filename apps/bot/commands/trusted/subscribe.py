@@ -89,7 +89,10 @@ class Subscribe(Command):
 
         sub = SubscribeModel(**data)
         sub.save()
-        answer = f'Подписал на канал {data["title"]}'
+        if sub.playlist_id:
+            answer = f'Подписал на плейлист {data["title"]}'
+        else:
+            answer = f'Подписал на канал {data["title"]}'
         return ResponseMessageItem(text=answer)
 
     @staticmethod

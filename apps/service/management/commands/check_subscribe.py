@@ -65,14 +65,24 @@ class Command(BaseCommand):
                 self.check_video([sub], sub_class, media_method)
 
     @staticmethod
-    def send_notify(sub, title, link):
+    def send_notify(sub, title, link, media_message: ResponseMessageItem):
         bot = TgBot()
 
-        answer = f"Новое видео на канале {sub.title}\n" \
-                 f"{bot.get_formatted_url(title, link)}"
-        logger.info(f"Отправил уведомление по подписке с id={sub.pk}")
-        rmi = ResponseMessageItem(text=answer, peer_id=sub.peer_id, message_thread_id=sub.message_thread_id)
+        if sub.playlist_id:
+            answer = f"Новое видео в плейлисте {sub.title}"
+        else:
+            answer = f"Новое видео на канале {sub.title}"
+
+        answer += f"\n\n{media_message.text}"
+        answer = answer.replace(title, bot.get_formatted_url(title, link))
+        rmi = ResponseMessageItem(
+            text=answer,
+            peer_id=sub.peer_id,
+            message_thread_id=sub.message_thread_id,
+            attachments=media_message.attachments
+        )
         bot.send_response_message_item(rmi)
+        logger.info(f"Отправил уведомление по подписке с id={sub.pk}")
 
     @staticmethod
     def get_media_result_msg(link, method) -> ResponseMessageItem:
@@ -86,22 +96,18 @@ class Command(BaseCommand):
         return rmi
 
     def send_file_or_video(self, subs, ids, urls, titles, method):
-        bot = TgBot()
         rm = ResponseMessage()
         for i, url in enumerate(urls):
-            message = self.get_media_result_msg(url, method)
-            if message.attachments:
-                att = message.attachments[0]
+            media_message = self.get_media_result_msg(url, method)
+            if media_message.attachments:
+                att = media_message.attachments[0]
                 if not att.file_id:
                     att.set_file_id()
-            rm.messages.append(message)
+            rm.messages.append(media_message)
 
         for sub in subs:
-            for i, message in enumerate(rm.messages):
-                self.send_notify(sub, titles[i], urls[i])
-                message.peer_id = sub.peer_id
-                message.message_thread_id = sub.message_thread_id
-                bot.send_response_message_item(message)
+            for i, media_message in enumerate(rm.messages):
+                self.send_notify(sub, titles[i], urls[i], media_message)
 
                 if sub.save_to_plex:
                     cache = VideoCache.objects.get(channel_id=sub.channel_id, video_id=ids[i])
