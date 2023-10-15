@@ -164,12 +164,12 @@ class YoutubeVideo(SubscribeService):
 
         if get_params.get('list'):
             playlist_id = get_params.get('list')
-            last_video = self._get_playlist_videos(playlist_id)[-2]
+            last_video = self._get_playlist_videos(playlist_id)[-1]
             last_video_id = last_video['snippet']['resourceId']['videoId']
             title = self._get_playlist_info(playlist_id)['title']
         else:
             channel_id = href.split('/')[-1]
-            last_video = self._get_channel_videos(channel_id)[-2]
+            last_video = self._get_channel_videos(channel_id)[-1]
             last_video_id = last_video['id']['videoId']
             title = self._get_channel_info(channel_id)['title']
 
