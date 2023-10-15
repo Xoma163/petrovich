@@ -630,7 +630,7 @@ class Meme(Command):
 
         memes = memes[:max_count]
         memes = self.get_tanimoto_memes(memes, filter_list)
-        # ToDo: wtf?
+
         att_types = [
             VoiceAttachment.TYPE,
             LinkAttachment.TYPE,

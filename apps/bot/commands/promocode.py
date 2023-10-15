@@ -118,7 +118,7 @@ class Promocode(Command):
 
     def menu_search(self) -> ResponseMessageItem:
         promocodes = self._get_filtered_promocodes()
-        promocodes = promocodes.filter(name__iexact=self.event.message.args[0])
+        promocodes = promocodes.filter(name__icontains=self.event.message.args[0])
         if len(promocodes) == 0:
             raise PWarning("Не нашёл промокодов по этому названию")
         result = self._get_promocodes_str(promocodes)
