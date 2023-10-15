@@ -372,7 +372,7 @@ class TgBot(Bot):
         # Разбиение длинных сообщений на чанки
         chunks = None
         if params.get('caption'):
-            # Шлём длинные сообщения чанками. Последний чанк через return
+            # Шлём длинные сообщения чанками.
             if rmi.attachments and len(params['caption']) > self.MAX_MESSAGE_TEXT_CAPTION:
                 chunks = split_text_by_n_symbols(params['caption'], self.MAX_MESSAGE_TEXT_CAPTION)
                 first_chunk = chunks[0]
@@ -407,7 +407,7 @@ class TgBot(Bot):
         else:
             r = self._send_text(params)
 
-        # Отправка чанков отдельно
+        # Отправка чанков отдельно. Последний чанк через return
         if chunks:
             for chunk in chunks[1:]:
                 params['caption'] = chunk

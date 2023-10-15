@@ -60,7 +60,7 @@ def get_random_int(val1: int, val2: int = None, seed=None) -> int:
     return random_int
 
 
-def get_random_float(val1: float, val2: float = None, seed=None):
+def get_random_float(val1: float, val2: float = None, seed=None) -> float:
     if not val2:
         val2 = val1
         val1 = 0
@@ -78,14 +78,14 @@ def has_cyrillic(text: str) -> bool:
     return bool(re.search('[а-яА-Я]', text))
 
 
-def remove_tz(dt):
+def remove_tz(dt: datetime) -> datetime:
     """
     Убирает временную зону у datetime
     """
     return dt.replace(tzinfo=None)
 
 
-def localize_datetime(dt, tz):
+def localize_datetime(dt: datetime, tz: str) -> datetime:
     """
     Локализация datetime
     """
@@ -93,7 +93,7 @@ def localize_datetime(dt, tz):
     return pytz.utc.localize(dt, is_dst=None).astimezone(tz_obj)
 
 
-def normalize_datetime(dt, tz):
+def normalize_datetime(dt: datetime, tz: str) -> datetime:
     """
     Нормализация datetime
     """
@@ -104,7 +104,7 @@ def normalize_datetime(dt, tz):
     return pytz.utc.normalize(localized_time).astimezone(tz_utc)
 
 
-def decl_of_num(number, titles: List[str]):
+def decl_of_num(number, titles: List[str]) -> str:
     """
     Склоняет существительное после числительного
     number: число
@@ -202,29 +202,22 @@ def get_role_by_str(role_str: str):
     """
     Получение роли по названию
     """
-    who = None
-    if role_str in ['администрация', 'администратор', 'админы', 'админ', 'главный', 'власть', 'господин']:
-        who = Role.ADMIN
-    elif role_str in ['moderators', 'moderator' 'модераторы', 'модератор', 'модеры', 'модер']:
-        who = Role.MODERATOR
-    elif role_str in ['майнкрафт уведомления', 'майн уведомления']:
-        who = Role.MINECRAFT_NOTIFY
-    elif role_str in ['майнкрафт', 'майн']:
-        who = Role.MINECRAFT
-    elif role_str in ['забанен', 'бан']:
-        who = Role.BANNED
-    elif role_str in ['доверенный', 'проверенный']:
-        who = Role.TRUSTED
-    elif role_str in ['мразь', 'мразота', 'мрази']:
-        who = Role.MRAZ
-    elif role_str in ['флейва']:
-        who = Role.FLAIVA
-    elif role_str in ['пользователь', 'юзер']:
-        who = Role.USER
-    elif role_str in ['игрок', 'геймер', 'игроки', 'геймеры']:
-        who = Role.GAMER
 
-    return who
+    roles_map = {
+        ('администрация', 'администратор', 'админы', 'админ', 'главный', 'власть', 'господин'): Role.ADMIN,
+        ('moderators', 'moderator', 'модераторы', 'модератор', 'модеры', 'модер'): Role.MODERATOR,
+        ('майнкрафт уведомления', 'майн уведомления'): Role.MINECRAFT_NOTIFY,
+        ('майнкрафт', 'майн'): Role.MINECRAFT,
+        ('забанен', 'бан'): Role.BANNED,
+        ('доверенный', 'проверенный'): Role.TRUSTED,
+        ('мразь', 'мразота', 'мрази'): Role.MRAZ,
+        ('флейва',): Role.FLAIVA,
+        ('пользователь', 'юзер'): Role.USER,
+        ('игрок', 'геймер', 'игроки', 'геймеры'): Role.GAMER,
+    }
+    for k in roles_map:
+        if role_str in k:
+            return roles_map[k]
 
 
 def check_command_time(name: str, seconds: int):
@@ -236,7 +229,7 @@ def check_command_time(name: str, seconds: int):
     """
     entity, created = Service.objects.get_or_create(name=name)
     if created:
-        return True
+        return
     update_datetime = entity.update_datetime
     delta_time = datetime.utcnow() - remove_tz(update_datetime)
     if delta_time.seconds < seconds and delta_time.days == 0:
@@ -244,7 +237,6 @@ def check_command_time(name: str, seconds: int):
         raise PWarning(error)
     entity.name = name
     entity.save()
-    return True
 
 
 def transform_k(arg: str):
@@ -313,7 +305,7 @@ def get_chunks(lst: list, n: int):
         yield lst[i:i + n]
 
 
-def get_flat_list(_list: List[List]):
+def get_flat_list(_list: List[List]) -> list:
     """
     Получение списка размерностью 1 из списка размерностью 2
     """
@@ -326,7 +318,7 @@ trans_table = dict(zip(eng_chars, rus_chars))
 trans_table_reverse = dict(zip(rus_chars, eng_chars))
 
 
-def fix_layout(s):
+def fix_layout(s) -> str:
     new_s = ""
     for letter in s:
         if letter in trans_table:
@@ -338,11 +330,10 @@ def fix_layout(s):
     return new_s
 
 
-def get_url_file_ext(url):
+def get_url_file_ext(url) -> str:
     return urlparse(url).path.rsplit('.', 1)[-1]
 
 
-# ToDo: придумать, куда это вынести.
 def send_message_session_or_edit(bot, event, session, rmi: ResponseMessageItem, max_delta):
     delta_messages = 0
     if event.message.id:
@@ -368,7 +359,7 @@ def send_message_session_or_edit(bot, event, session, rmi: ResponseMessageItem, 
     bot.delete_message(event.peer_id, event.message.id)
 
 
-def prepend_symbols(string: str, symbol: str, n: int):
+def prepend_symbols(string: str, symbol: str, n: int) -> str:
     """
     Добивает строку до N символов вставляя их перед строкой
     """
@@ -378,7 +369,7 @@ def prepend_symbols(string: str, symbol: str, n: int):
     return string
 
 
-def append_symbols(string: str, symbol: str, n: int):
+def append_symbols(string: str, symbol: str, n: int) -> str:
     """
     Добивает строку до N символов вставляя их после строки
     """
@@ -388,7 +379,7 @@ def append_symbols(string: str, symbol: str, n: int):
     return string
 
 
-def replace_markdown_links(text, bot):
+def replace_markdown_links(text: str, bot) -> str:
     p = re.compile(r"\[(.*)\]\(([^\)]*)\)")  # markdown links
     for item in reversed(list(p.finditer(text))):
         start_pos = item.start()
@@ -400,7 +391,7 @@ def replace_markdown_links(text, bot):
     return text
 
 
-def replace_markdown_bolds(text, bot):
+def replace_markdown_bolds(text: str, bot) -> str:
     p = re.compile(r'\*\*(.*)\*\*')  # markdown bold
     for item in reversed(list(p.finditer(text))):
         start_pos = item.start()
@@ -411,7 +402,7 @@ def replace_markdown_bolds(text, bot):
     return text
 
 
-def replace_markdown_quotes(text, bot):
+def replace_markdown_quotes(text: str, bot) -> str:
     p = re.compile(r'&gt;(.*)\n')  # markdown quote
     for item in reversed(list(p.finditer(text))):
         start_pos = item.start()
@@ -422,7 +413,7 @@ def replace_markdown_quotes(text, bot):
     return text
 
 
-def replace_markdown_code(text: str, bot):
+def replace_markdown_code(text: str, bot) -> str:
     p = re.compile(r'```([\S\s]*)```')  # markdown formatting
     for item in reversed(list(p.finditer(text))):
         start_pos = item.start()
