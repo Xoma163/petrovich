@@ -107,16 +107,24 @@ class YoutubeVideo(SubscribeService):
 
     @staticmethod
     def _get_channel_videos(channel_id: str) -> list:
-        url = "https://www.googleapis.com/youtube/v3/search"
-        params = {
-            "channelId": channel_id,
-            "part": "snippet",
-            "maxResults": 50,
-            "key": env.str('GOOGLE_API_KEY'),
-            "order": "date"
-        }
-        r = requests.get(url, params=params).json()
-        videos = [x for x in r['items'] if x['id'].get('videoId')]
+        # 100 cost
+
+        r = requests.get(f"https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}")
+        if r.status_code != 200:
+            raise PWarning("Не нашёл такого канала")
+        bsop = BeautifulSoup(r.content, 'lxml')
+        videos = [{'id': {'videoId': x.find('yt:videoid').text}} for x in bsop.find_all('entry')]
+
+        # url = "https://www.googleapis.com/youtube/v3/search"
+        # params = {
+        #     "channelId": channel_id,
+        #     "part": "snippet",
+        #     "maxResults": 50,
+        #     "key": env.str('GOOGLE_API_KEY'),
+        #     "order": "date"
+        # }
+        # r = requests.get(url, params=params).json()
+        # videos = [x for x in r['items'] if x['id'].get('videoId')]
         return list(reversed(videos))
 
     @staticmethod
