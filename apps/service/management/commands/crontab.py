@@ -22,7 +22,7 @@ class Command(BaseCommand):
             # Проверка оповещений
             ScheduleItem("*/1 * * * *", "check_notify"),
             # Проверка подписок
-            ScheduleItem("*/10 * * * *", "check_subscribe"),
+            ScheduleItem("*/30 * * * *", "check_subscribe"),
             # Получение гороскопа
             ScheduleItem("0 1 * * *", "get_horoscope"),
             # Сбор данных с яндекс такси
