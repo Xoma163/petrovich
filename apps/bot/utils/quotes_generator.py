@@ -33,7 +33,7 @@ class QuotesGenerator:
         mask = mask.filter(ImageFilter.GaussianBlur(blur_radius))
         img_round = Image.composite(cropped_image, back_color, mask)
 
-        img_round.thumbnail((max_size, max_size), Image.ANTIALIAS)
+        img_round.thumbnail((max_size, max_size), Image.LANCZOS)
         return img_round
 
     @staticmethod
@@ -43,7 +43,7 @@ class QuotesGenerator:
             return image
         k = w / max_size
         new_size = (max_size, h // k)
-        image.thumbnail(new_size, Image.ANTIALIAS)
+        image.thumbnail(new_size, Image.LANCZOS)
         return image
 
     @staticmethod
@@ -166,7 +166,7 @@ class QuotesGenerator:
                 msg_lines += line
             else:
                 msg_lines += [" "]
-        total_msg_lines_height = sum([font_message.getsize(msg_line)[1] for msg_line in msg_lines])
+        total_msg_lines_height = sum([get_image_size_by_text(msg_line, font_message)[1] for msg_line in msg_lines])
         if not total_msg_lines_height:
             msg_photo_margin = 0
             if not msg_photo:
@@ -189,7 +189,7 @@ class QuotesGenerator:
         offset_y = 0
         for line in msg_lines:
             d.text((msg_start_pos[0], msg_start_pos[1] + offset_y), line, fill=text_color, font=font_message)
-            offset_y += font_message.getsize(line)[1]
+            offset_y += get_image_size_by_text(line, font_message)[1]
 
         msg_photo_pos = None
         if msg_photo:

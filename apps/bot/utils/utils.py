@@ -169,13 +169,16 @@ def tanimoto(s1: str, s2: str) -> float:
     return c / (a + b - c)
 
 
-def get_image_size_by_text(txt: str, font):
+def get_image_size_by_text(txt: str, font) -> (int, int):
     """
     Вычисление размеро текста если оно будет изображением
     """
     img = Image.new('RGB', (1, 1))
     draw = ImageDraw.Draw(img)
-    return draw.textsize(txt, font)
+    box = draw.textbbox((0, 0), txt, font)
+    w = box[2] - box[0]  # bottom-top
+    h = box[3] - box[1]  # right-left
+    return w, h
 
 
 def draw_text_on_image(text: str):
