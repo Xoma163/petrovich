@@ -66,7 +66,7 @@ class Nostalgia(Command):
                     pass
 
         menu = [
-            [['вложения'], self.menu_attachments],
+            [['в', 'вложения'], self.menu_attachments],
             [['поиск'], self.menu_search],
             [['default'], self.menu_default]
         ]
@@ -208,7 +208,7 @@ class Nostalgia(Command):
             button = self.bot.get_button("После", self.name, [index_from + diff, index_to + diff])
             buttons.append(button)
         if has_att_link:
-            button = self.bot.get_button("Вложения", self.name, ["вложения", index_from, index_to])
+            button = self.bot.get_button("Вложения", self.name, ["в", index_from, index_to])
             buttons.append(button)
 
         keyboard = self.bot.get_inline_keyboard(buttons)
