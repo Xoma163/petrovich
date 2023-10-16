@@ -8,7 +8,8 @@ class ResponseMessageItem:
 
     def __init__(
             self, text: str = None, attachments: list = None, reply_to: str = None, keyboard: dict = None,
-            message_id: str = None, message_thread_id: str = None, peer_id: int = None, log_level='debug', exc_info=None
+            message_id: str = None, message_thread_id: str = None, peer_id: int = None, log_level='debug',
+            exc_info=None, disable_web_page_preview=False
     ):
         self.text = text
         self.attachments = attachments if attachments else []
@@ -22,6 +23,8 @@ class ResponseMessageItem:
 
         self.log_level = log_level
         self.exc_info = exc_info
+
+        self.disable_web_page_preview = disable_web_page_preview
 
         self.kwargs = {}
 
@@ -55,12 +58,12 @@ class ResponseMessageItem:
         if self.text:
             p = re.compile(urls_regexp)  # Ссылки
             if p.search(self.text):
-                self.kwargs = {'parse_mode': "html"}
+                self.kwargs['parse_mode'] = "html"
             else:
                 for tag in self.TG_TAGS:
                     p = re.compile(f"<{tag}>[\s\S]*</{tag}>")
                     if p.search(self.text):
-                        self.kwargs = {'parse_mode': "html"}
+                        self.kwargs['parse_mode'] = "html"
                         break
 
             if self.kwargs.get('parse_mode'):
