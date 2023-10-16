@@ -19,7 +19,7 @@ class GPT(Command):
     help_text = "чат GPT"
     help_texts = [
         "(фраза) - общение с ботом",
-        "нарисуй - генерация картинки",
+        "нарисуй (фраза) - генерация картинки",
     ]
     access = Role.TRUSTED
     args = 1
