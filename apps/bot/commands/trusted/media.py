@@ -174,9 +174,9 @@ class Media(Command):
             YOUTUBE_URLS: self.get_youtube_video,
             YOUTUBE_MUSIC_URLS: self.get_youtube_audio,
             TIKTOK_URLS: self.get_tiktok_video,
-            REDDIT_URLS: self.get_reddit_attachment,
+            REDDIT_URLS: self.get_reddit_content,
             INSTAGRAM_URLS: self.get_instagram_attachment,
-            TWITTER_URLS: self.get_twitter_video,
+            TWITTER_URLS: self.get_twitter_content,
             PIKABU_URLS: self.get_pikabu_video,
             THE_HOLE_URLS: self.get_the_hole_video,
             YANDEX_MUSIC_URLS: self.get_yandex_music,
@@ -258,7 +258,7 @@ class Media(Command):
         video = self.bot.get_video_attachment(video_content, peer_id=self.event.peer_id, filename="tiktok.mp4")
         return [video], None
 
-    def get_reddit_attachment(self, url) -> (list, str):
+    def get_reddit_content(self, url) -> (list, str):
         rs = Reddit()
         reddit_data = rs.get_post_data(url)
         if rs.is_gif:
@@ -319,7 +319,7 @@ class Media(Command):
             raise PWarning("Ссылка на инстаграмм не является видео/фото")
         return [attachment], data['caption']
 
-    def get_twitter_video(self, url) -> (list, str):
+    def get_twitter_content(self, url) -> (list, str):
         try:
             self.check_sender(Role.TRUSTED)
         except PWarning:
