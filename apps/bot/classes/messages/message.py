@@ -52,49 +52,63 @@ class Message:
 
     def parse_raw(self, raw_str):
         self.raw = raw_str
+        if not self.raw:
+            return
 
         if self.raw[0] in self.COMMAND_SYMBOLS:
             self.has_command_symbols = True
             raw_str = raw_str[1:]
 
-        clear_message = self.get_cleared_message(raw_str)
+        self.clear_case = self.get_cleared_message(raw_str)
+        self.clear = self.clear_case.lower()
 
-        # No case
-        self.clear = clear_message.lower()
-        msg_split = re.split(self.SPACE_REGEX, self.clear, 1)
-        self.command = msg_split[0]
+        msg_split = re.split(self.SPACE_REGEX, self.clear_case, 1)
 
-        new_msg_split = []
-        for item in msg_split:
-            if item.startswith(self.KEYS_STR):
-                self.keys.append(item[2:])
+        self.command = msg_split[0].lower()
+
+        # Нет аргументов - выходим
+        if len(msg_split) == 1:
+            return
+
+        args_str = msg_split[1]
+
+        new_args_split = []
+        args_split = re.split(self.SPACE_REGEX, args_str)
+        # Проставление ключей, удаление их из строки, пропуск пустых аргументов
+        for arg in args_split:
+            if not arg:
                 continue
-            if item.startswith(self.KEYS_SYMBOL):
-                self.keys.append(item[1:])
-                continue
-            new_msg_split.append(item)
-        msg_split = new_msg_split
+            key = None
+            if arg.startswith(self.KEYS_STR):
+                key = arg[2:].lower()
+            if arg.startswith(self.KEYS_SYMBOL):
+                key = arg[1:].lower()
 
-        if len(msg_split) > 1:
-            self.args_str = msg_split[1]
-            self.args = re.split(self.SPACE_REGEX, self.args_str)
+            if key:
+                index = args_str.find(arg)
+                self.keys.append(key)
 
-        # case
-        self.clear_case = clear_message
-        self.args_str_case = None
-        self.args_case = None
+                if index == 0:
+                    args_str = args_str[:index]
+                    continue
+                elif index != -1:
+                    args_str = args_str[:index - 1] + args_str[index + len(arg):]
+                    continue
+            new_args_split.append(arg)
 
-        msg_case_split = re.split(self.SPACE_REGEX, clear_message, 1)
-
-        if len(msg_case_split) > 1:
-            self.args_str_case = msg_case_split[1]
-            self.args_case = re.split(self.SPACE_REGEX, self.args_str_case)
+        # Нет аргументов - выходим
+        if len(new_args_split) == 0:
+            return
+        self.args_str_case = args_str
+        self.args_str = args_str.lower()
+        self.args_case = new_args_split
+        self.args = [x.lower() for x in self.args_case]
 
     @staticmethod
     def get_cleared_message(msg) -> str:
         clear_msg = re.sub(" +", " ", msg)
-        clear_msg = re.sub(",+", ",", clear_msg)
-        clear_msg = clear_msg.strip().strip(',').strip().strip(' ').strip()
+        clear_msg = re.sub("\n+", "\n", clear_msg)
+        clear_msg = clear_msg.strip().strip(',').strip().strip(' ').strip().strip('\n').strip()
         clear_msg = clear_msg.replace('ё', 'е').replace("Ё", 'Е')
         return clear_msg
 
