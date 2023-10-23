@@ -2,6 +2,7 @@ import os
 
 from PIL import Image, ImageDraw, ImageFont
 
+from apps.bot.utils.utils import get_image_size_by_text
 from petrovich.settings import STATIC_ROOT
 
 
@@ -35,7 +36,7 @@ class DemotivatorText:
 
         total_height = 0
         for line in self.lines:
-            total_height += drawing.textsize(line, font=self.font)[1] + self.padding
+            total_height += get_image_size_by_text(line, self.font)[1] + self.padding
         return total_height + self.margin
 
 
@@ -102,9 +103,10 @@ class DemotivatorBuilder:
             width=3)
 
     def _draw_texts_lines(self, text_obj, drawing, pos_y):
-        max_text_height = max([drawing.textsize(line, font=text_obj.font)[1] for line in text_obj.lines])
+
+        max_text_height = max([get_image_size_by_text(line, font=text_obj.font)[1] for line in text_obj.lines])
         for line in text_obj.lines:
-            text_width, _ = drawing.textsize(line, font=text_obj.font)
+            text_width = get_image_size_by_text(line, font=text_obj.font)[0]
             pos_x = int((self.available_text_width - text_width + self.BLACK_OUTER_FRAME[0]) / 2)
             drawing.text((pos_x, pos_y), line, font=text_obj.font)
             pos_y += max_text_height + text_obj.padding
@@ -146,19 +148,12 @@ class TextWrapper(object):
                 size=(100, 100)
             )
         )
-
-        self.space_width = self.draw.textsize(
-            text=' ',
-            font=self.font
-        )[0]
+        self.space_width = get_image_size_by_text(' ', self.font)[0]
         self.wrapped_text = ""
         self.wrapped_lines = []
 
     def get_text_width(self, text):
-        return self.draw.textsize(
-            text=text,
-            font=self.font
-        )[0]
+        return get_image_size_by_text(text, self.font)[0]
 
     def calculate(self):
         wrapped_lines = []
