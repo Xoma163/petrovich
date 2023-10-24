@@ -3,7 +3,7 @@ from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 
 
 class APIEvent(Event):
-    def setup_event(self, is_fwd=False):
+    def setup_event(self, **kwargs):
         text = self.raw['text']
         self.sender = self.raw['profile']
         self.user = self.sender.user.instance

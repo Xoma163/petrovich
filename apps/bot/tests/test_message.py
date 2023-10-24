@@ -224,3 +224,20 @@ class MessageTestCase(TestCase):
         self.assertEqual(message.args_case, ['Карл', 'Карлович', '123'])
 
         self.assertEqual(message.keys, [])
+
+    def test_twitter(self):
+        message = Message()
+        raw_str = "https://twitter.com/blahblah --thread"
+        message.parse_raw(raw_str)
+
+        self.assertEqual(message.raw, raw_str)
+        self.assertEqual(message.command, "https://twitter.com/blahblah")
+        self.assertEqual(message.clear, "https://twitter.com/blahblah --thread")
+        self.assertEqual(message.clear_case, "https://twitter.com/blahblah --thread")
+
+        self.assertEqual(message.args_str, "")
+        self.assertEqual(message.args, [])
+        self.assertEqual(message.args_str_case, "")
+        self.assertEqual(message.args_case, [])
+
+        self.assertEqual(message.keys, ['thread'])

@@ -27,8 +27,8 @@ class TgEvent(Event):
             'offset': None
         }
 
-    def setup_event(self, is_fwd=False):
-        self.is_fwd = is_fwd
+    def setup_event(self, **kwargs):
+        self.is_fwd = kwargs.get("is_fwd", False)
         inline_query = self.raw.get('inline_query')
         if inline_query:
             self.setup_inline_query(inline_query)
@@ -113,6 +113,8 @@ class TgEvent(Event):
             if not need_a_response_extra:
                 self.force_response = False
                 return
+
+        super().setup_event(**kwargs)
 
     def setup_action(self, message):
         new_chat_members = message.get('new_chat_members')

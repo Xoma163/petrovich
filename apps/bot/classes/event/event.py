@@ -1,6 +1,8 @@
 import copy
 from typing import Optional, List
 
+from django.core.cache import cache
+
 from apps.bot.classes.const.consts import Platform, Role
 from apps.bot.classes.messages.attachments.attachment import Attachment
 from apps.bot.classes.messages.attachments.audio import AudioAttachment
@@ -54,10 +56,12 @@ class Event:
         # Tg
         self.message_thread_id: Optional[int] = None
 
-    def setup_event(self, is_fwd=False):
+    def setup_event(self, **kwargs):
         """
         Метод по установке ивента у каждого бота. Переопределяется всегда
         """
+
+        self._cache()
 
     def need_a_response(self):
         """
@@ -169,3 +173,11 @@ class Event:
         if dict_self['command']:
             dict_self['command'] = dict_self['command'].name
         return dict_self
+
+    def _cache(self):
+        data = cache.get(self.peer_id, {})
+        # В случае если это fwd на самого бота (задумывалось так)
+        if self.message.id in data:
+            return
+        data[self.message.id] = self.raw.get('message', self.raw)
+        cache.set(self.peer_id, data, timeout=3600)

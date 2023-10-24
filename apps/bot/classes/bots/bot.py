@@ -213,9 +213,6 @@ class Bot(Thread):
     def log_message(self, message, level="debug"):
         getattr(self.logger, level)({"message": message.to_log()})
 
-    def log_response(self, response: dict, action):
-        self.logger.debug({"response": response, "action": action})
-
     # END LOGGING
 
     # USERS GROUPS BOTS
