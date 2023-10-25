@@ -112,6 +112,7 @@ class QuotesGenerator:
         margin_left = 110
         text_margin_left = 30
         text_margin_top = 10
+        text_body_margin = 3
         avatar_size = (80, 80)
         max_text_width = 290
         text_color = "#000000"
@@ -171,6 +172,7 @@ class QuotesGenerator:
             msg_photo_margin = 0
             if not msg_photo:
                 fwd_margin = 0
+        total_msg_lines_height += text_body_margin * len(msg_lines)
         total_height = username_height + text_margin_top + total_msg_lines_height + msg_photo_height + fwd_height
         total_height = max(total_height, avatar_size[1]) + margin_top + margin_bottom + msg_photo_margin + fwd_margin
 
@@ -189,7 +191,7 @@ class QuotesGenerator:
         offset_y = 0
         for line in msg_lines:
             d.text((msg_start_pos[0], msg_start_pos[1] + offset_y), line, fill=text_color, font=font_message)
-            offset_y += get_image_size_by_text(line, font_message)[1]
+            offset_y += get_image_size_by_text(line, font_message)[1] + text_body_margin
 
         msg_photo_pos = None
         if msg_photo:
