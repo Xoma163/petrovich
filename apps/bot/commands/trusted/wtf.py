@@ -41,16 +41,13 @@ class WTF(Command):
         events = self.get_last_messages_as_events(n)
         result_message = []
 
+        events = list(filter(lambda x: x.is_from_user and x.message.raw, events))
+
         last_user = events[0].sender
         messages_from_one_user = []
+
         for event in events:
             text = event.message.raw
-
-            if not event.is_from_user:
-                continue
-            if not text:
-                continue
-
             if last_user != event.sender:
                 message_header = f"[{last_user.name}]"
                 message_body = "\n".join(messages_from_one_user)
@@ -62,8 +59,10 @@ class WTF(Command):
 
             messages_from_one_user.append(text)
 
-        result = f"{promt}\n\n" + "\n".join(result_message)
-        return [{'role': "user", 'content': result}]
+        return [
+            {'role': "user", 'content': promt},
+            {'role': "user", 'content': "\n".join(result_message)},
+        ]
 
     def get_last_messages_as_events(self, n: int) -> List[Event]:
         mid = self.event.message.id
