@@ -1,3 +1,4 @@
+import re
 import time
 
 import openai
@@ -30,6 +31,8 @@ class GPT(Command):
     args = 1
     platforms = [Platform.TG]
 
+    GPT_4 = 'gpt-4'
+    GPT_3 = 'gpt-3.5-turbo-16k-0613'
 
     def start(self) -> ResponseMessage:
         if self.event.message.args[0] == "нарисуй":
@@ -59,7 +62,9 @@ class GPT(Command):
         return ResponseMessage(
             ResponseMessageItem(text=answer, attachments=attachments, reply_to=self.event.message.id))
 
-    def text_chat(self, messages) -> ResponseMessage:
+    def text_chat(self, messages, model=None) -> ResponseMessage:
+        if model is None:
+            model = self.GPT_4
         openai.api_key = env.str("OPENAI_KEY")
         openai.api_base = "https://api.openai.com/v1"
 
@@ -70,10 +75,17 @@ class GPT(Command):
             try:
                 self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.TYPING)
                 response = openai.ChatCompletion.create(
-                    model='gpt-4',
+                    model=model,
                     messages=messages
                 )
             except (openai.error.RateLimitError, openai.error.InvalidRequestError) as e:
+                if e.user_message.startswith("Rate limit reached"):
+                    raise PWarning("Ограничение на количество токенов.")
+                elif e.user_message.startswith("This model's maximum context length"):
+                    r = r"This model's maximum context length is (.*) tokens. However, your messages resulted in (.*) tokens. Please reduce the length of the messages."
+                    re.findall(r, e.user_message)
+                    k = round(int(re.findall(r, e.user_message)[0][1]) / int(re.findall(r, e.user_message)[0][0]), 2)
+                    raise PWarning(f"Ограничение на количество токенов. Уменьшите запрос в {k} раз")
                 time.sleep(5)
             except openai.error.APIError:
                 time.sleep(2)

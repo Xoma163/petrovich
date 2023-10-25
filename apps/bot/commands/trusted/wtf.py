@@ -1,5 +1,4 @@
 from collections import OrderedDict
-from datetime import datetime
 from typing import List
 
 from apps.bot.classes.command import Command
@@ -36,40 +35,53 @@ class WTF(Command):
         gpt = GPT()
         gpt.bot = self.bot
         gpt.event = self.event
-        return gpt.text_chat(messages)
+        return gpt.text_chat(messages, model=gpt.GPT_3)
 
     def get_conversation(self, n: int, promt) -> list:
         events = self.get_last_messages_as_events(n)
         result_message = []
+
+        last_user = events[0].sender
+        messages_from_one_user = []
         for event in events:
-            event_raw = event.raw['message']
-            if event.is_from_user:
-                name = str(event.sender)
-            else:
-                name = event_raw['from']['first_name']
-            dt = datetime.fromtimestamp(event_raw['date']).strftime("%H:%M:%S")
-            message_header = f"[{name} | {dt}]"
             text = event.message.raw
-            message = f"{message_header}\n{text}"
-            result_message.append(message)
+
+            if not event.is_from_user:
+                continue
+            if not text:
+                continue
+
+            if last_user != event.sender:
+                message_header = f"[{last_user.name}]"
+                message_body = "\n".join(messages_from_one_user)
+                message = f"{message_header}\n{message_body}"
+                result_message.append(message)
+
+                messages_from_one_user = []
+                last_user = event.sender
+
+            messages_from_one_user.append(text)
 
         result = f"{promt}\n\n" + "\n".join(result_message)
         return [{'role': "user", 'content': result}]
 
     def get_last_messages_as_events(self, n: int) -> List[Event]:
         mid = self.event.message.id
+        peer_id = self.event.peer_id
 
-        mc = MessagesCache(self.event.peer_id)
+        mc = MessagesCache(peer_id)
         data = mc.get_messages()
         messages = OrderedDict(sorted(data.items(), key=lambda x: x[0], reverse=True))
-
         events = []
 
         for message_id, message_body in messages.items():
             # не <= потому что не берём последнее сообщение, которым зашли в эту команду :)
             if mid - message_id < n:
-                event = TgEvent({'message': message_body}, self.bot)
-                event.setup_event()
+                try:
+                    event = TgEvent({'message': message_body}, self.bot)
+                    event.setup_event()
+                except:
+                    continue
                 events.append(event)
         events = list(reversed(events))
 
