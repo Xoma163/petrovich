@@ -61,11 +61,12 @@ class Bot(Thread):
                 return
 
             rm = self.route(event)
+            # Если мы попали в команду и не вылетели по exception
+            self.log_event(event)
             if not rm:
                 return
-            # Если мы попали в команду
-            self.log_event(event)
             self.log_message(rm)
+
         # Если предвиденная ошибка
         except (PWarning, PError) as e:
             self.log_event(event)

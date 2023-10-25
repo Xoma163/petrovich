@@ -9,9 +9,11 @@ class Request:
     API_TELEGRAM_URL = 'api.telegram.org'
     PREFIX = "https"
 
+    LOG_IGNORE_ACTIONS = ['sendChatAction']
+
     def __init__(self, token):
         self.token = token
-        self.logger = logging.getLogger('tg_bot')
+        self.logger = logging.getLogger('bot')
 
     def get(self, action, params=None, **kwargs) -> Response:
         return self._do(action, "post", params, **kwargs)
@@ -28,6 +30,8 @@ class Request:
         return r
 
     def _log(self, response: dict, action):
+        if action in self.LOG_IGNORE_ACTIONS:
+            return
         level = "debug" if response['ok'] else "error"
         getattr(self.logger, level)({"response": response, "action": action})
 
@@ -47,7 +51,6 @@ class Request:
         data = cache.get(peer_id, {})
         data[message_id] = message
         cache.set(peer_id, data, timeout=3600)
-        print()
 
 
 class RequestLocal(Request):
