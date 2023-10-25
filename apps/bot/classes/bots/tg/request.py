@@ -2,7 +2,8 @@ import logging
 
 import requests
 from aiohttp.web_response import Response
-from django.core.cache import cache
+
+from apps.bot.utils.cache import MessagesCache
 
 
 class Request:
@@ -48,9 +49,8 @@ class Request:
         peer_id = message['chat']['id']
         message_id = message['message_id']
 
-        data = cache.get(peer_id, {})
-        data[message_id] = message
-        cache.set(peer_id, data, timeout=3600)
+        mc = MessagesCache(peer_id)
+        mc.add_message(message_id, message)
 
 
 class RequestLocal(Request):

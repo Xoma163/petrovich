@@ -1,8 +1,6 @@
 import copy
 from typing import Optional, List
 
-from django.core.cache import cache
-
 from apps.bot.classes.const.consts import Platform, Role
 from apps.bot.classes.messages.attachments.attachment import Attachment
 from apps.bot.classes.messages.attachments.audio import AudioAttachment
@@ -16,6 +14,7 @@ from apps.bot.classes.messages.attachments.videonote import VideoNoteAttachment
 from apps.bot.classes.messages.attachments.voice import VoiceAttachment
 from apps.bot.classes.messages.message import Message
 from apps.bot.models import Profile, Chat, User
+from apps.bot.utils.cache import MessagesCache
 
 
 class Event:
@@ -175,9 +174,5 @@ class Event:
         return dict_self
 
     def _cache(self):
-        data = cache.get(self.peer_id, {})
-        # В случае если это fwd на самого бота (задумывалось так)
-        if self.message.id in data:
-            return
-        data[self.message.id] = self.raw.get('message', self.raw)
-        cache.set(self.peer_id, data, timeout=3600)
+        mc = MessagesCache(self.peer_id)
+        mc.add_message(self.message.id, self.raw.get('message', self.raw))

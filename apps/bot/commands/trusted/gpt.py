@@ -1,14 +1,14 @@
 import time
 
 import openai
-from django.core.cache import cache
 
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.activities import ActivitiesEnum
-from apps.bot.classes.const.consts import Role
+from apps.bot.classes.const.consts import Role, Platform
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.event.tg_event import TgEvent
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
+from apps.bot.utils.cache import MessagesCache
 from apps.bot.utils.utils import replace_markdown_links, replace_markdown_bolds, replace_markdown_quotes, \
     replace_markdown_code
 from petrovich.settings import env
@@ -28,11 +28,14 @@ class GPT(Command):
         "В кэше хранится только 1 час переписок"
     access = Role.TRUSTED
     args = 1
+    platforms = [Platform.TG]
+
 
     def start(self) -> ResponseMessage:
         if self.event.message.args[0] == "нарисуй":
             return self.draw_image()
-        return self.text_chat()
+        messages = self.get_dialog()
+        return self.text_chat(messages)
 
     def draw_image(self) -> ResponseMessage:
         openai.api_key = env.str("OPENAI_KEY")
@@ -56,7 +59,7 @@ class GPT(Command):
         return ResponseMessage(
             ResponseMessageItem(text=answer, attachments=attachments, reply_to=self.event.message.id))
 
-    def text_chat(self) -> ResponseMessage:
+    def text_chat(self, messages) -> ResponseMessage:
         openai.api_key = env.str("OPENAI_KEY")
         openai.api_base = "https://api.openai.com/v1"
 
@@ -68,9 +71,9 @@ class GPT(Command):
                 self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.TYPING)
                 response = openai.ChatCompletion.create(
                     model='gpt-4',
-                    messages=self.get_dialog()
+                    messages=messages
                 )
-            except (openai.error.RateLimitError, openai.error.InvalidRequestError):
+            except (openai.error.RateLimitError, openai.error.InvalidRequestError) as e:
                 time.sleep(5)
             except openai.error.APIError:
                 time.sleep(2)
@@ -90,7 +93,8 @@ class GPT(Command):
         return ResponseMessage(ResponseMessageItem(text=answer, reply_to=self.event.message.id))
 
     def get_dialog(self):
-        data = cache.get(self.event.peer_id)
+        mc = MessagesCache(self.event.peer_id)
+        data = mc.get_messages()
         if not self.event.fwd:
             return {'role': "user", 'content': self.event.message.args_str_case},
         reply_to_id = self.event.fwd[0].message.id
