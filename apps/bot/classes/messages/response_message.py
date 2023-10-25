@@ -11,7 +11,7 @@ class ResponseMessageItem:
             message_id: str = None, message_thread_id: str = None, peer_id: int = None, log_level='debug',
             exc_info=None, disable_web_page_preview=False
     ):
-        self.text = text
+        self.text = text if text is not None else ""
         self.attachments = attachments if attachments else []
         if not isinstance(self.attachments, list):
             self.attachments = [self.attachments]

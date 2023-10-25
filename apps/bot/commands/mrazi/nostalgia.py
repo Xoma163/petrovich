@@ -53,7 +53,7 @@ class Nostalgia(Command):
                 try:
                     self.parse_int()
                     rmi = self.menu_range(self.event.message.args[0], self.event.message.args[1])
-                    return ResponseMessage(rmi)
+                    return rmi
                 except PWarning:
                     pass
             else:
@@ -61,7 +61,7 @@ class Nostalgia(Command):
                 try:
                     self.parse_int()
                     rmi = self.menu_range(self.event.message.args[0])
-                    return ResponseMessage(rmi)
+                    return rmi
                 except PWarning:
                     pass
 
@@ -70,10 +70,10 @@ class Nostalgia(Command):
             [['поиск'], self.menu_search],
             [['default'], self.menu_default]
         ]
-        rmi = self.handle_menu(menu, arg0)()
-        return ResponseMessage(rmi)
+        rm = self.handle_menu(menu, arg0)()
+        return rm
 
-    def menu_attachments(self) -> ResponseMessageItem:
+    def menu_attachments(self) -> ResponseMessage:
         data = self._load_file()
         self.check_args(3)
         self.int_args = [1, 2]
@@ -85,8 +85,6 @@ class Nostalgia(Command):
             for att in msg['attachments']:
                 if 'link' in att:
                     all_urls.append(att['link'])
-                else:
-                    print
                 all_urls += get_urls_from_text(msg['text'])
         atts = []
         texts = []
@@ -116,14 +114,17 @@ class Nostalgia(Command):
         if not texts:
             raise PWarning("Нет вложений")
         answer = "\n".join(texts)
-        return ResponseMessageItem(text=answer, attachments=atts, disable_web_page_preview=True)
+        return ResponseMessage([
+            ResponseMessageItem(attachments=atts),
+            ResponseMessageItem(text=answer, disable_web_page_preview=True),
+        ])
 
-    def menu_default(self) -> ResponseMessageItem:
+    def menu_default(self) -> ResponseMessage:
         if self.event.message.args:
             return self.menu_search()
         return self.menu_range()
 
-    def menu_search(self) -> ResponseMessageItem:
+    def menu_search(self) -> ResponseMessage:
 
         data = self._load_file()
 
@@ -145,7 +146,7 @@ class Nostalgia(Command):
                 searched_indexes.append(i)
         if len(searched_indexes) == 0:
             answer = f'Ничего не нашёл по запросу "{search_query}"'
-            return ResponseMessageItem(text=answer)
+            return ResponseMessage(ResponseMessageItem(text=answer))
         total_pages = (len(searched_indexes) - 1) // self.MAX_PER_PAGE + 1
         if page * self.MAX_PER_PAGE > len(searched_indexes):
             page = total_pages
@@ -159,9 +160,9 @@ class Nostalgia(Command):
             buttons.append(button)
         keyboard = self.bot.get_inline_keyboard(buttons)
         answer = f"Результаты по запросу {search_query}.\n\nСтраница {page}/{total_pages}"
-        return ResponseMessageItem(text=answer, keyboard=keyboard)
+        return ResponseMessage(ResponseMessageItem(text=answer, keyboard=keyboard))
 
-    def menu_range(self, index_from: int = None, index_to: int = None) -> ResponseMessageItem:
+    def menu_range(self, index_from: int = None, index_to: int = None) -> ResponseMessage:
         data = self._load_file()
 
         if index_from is None:
@@ -213,7 +214,7 @@ class Nostalgia(Command):
 
         keyboard = self.bot.get_inline_keyboard(buttons)
 
-        return ResponseMessageItem(text=answer, attachments=[image], keyboard=keyboard)
+        return ResponseMessage(ResponseMessageItem(text=answer, attachments=[image], keyboard=keyboard))
 
     def _load_file(self) -> list:
         with open(self.FILE, 'r') as file:
