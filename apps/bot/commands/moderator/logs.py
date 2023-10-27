@@ -44,10 +44,9 @@ class Logs(Command):
                 pass
 
         filter_levels = [logging._levelToName[x] for x in logging._levelToName if x >= level]
-        filter_chat = self.event.peer_id if self.event.chat else None
         separator = "-" * 150
 
-        logs_list = self.get_bot_logs(count, filter_chat, filter_levels)
+        logs_list = self.get_bot_logs(count, filter_levels)
         for b in range(0, len(logs_list)):
             logs_list.insert(b * 2 + 1, separator)
         logs_txt = "\n".join(logs_list)
@@ -110,13 +109,11 @@ class Logs(Command):
         else:
             return items
 
-    def get_bot_logs(self, count, filter_chat=None, filter_level=None):
+    def get_bot_logs(self, count, filter_level=None):
         file_rows = self.read_file(DEBUG_FILE)
         res = []
         for i in range(len(file_rows) - 2, -1, -1):
             item_json = json.loads(file_rows[i])
-            if filter_chat and 'event' in item_json and str(item_json['event']['peer_id']) != self.event.chat.chat_id:
-                continue
             if filter_level and item_json['levelname'] not in filter_level:
                 continue
             self.transform_logs_by_values(item_json)
