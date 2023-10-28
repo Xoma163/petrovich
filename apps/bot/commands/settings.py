@@ -153,7 +153,6 @@ class Settings(Command):
 
     def setup_default_chat_setting(self, name) -> ResponseMessageItem:
         self.check_conversation()
-        self.check_sender(Role.CONFERENCE_ADMIN)
         self.check_args(2)
 
         value = self.get_on_or_off(self.event.message.args[1])

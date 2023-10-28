@@ -14,7 +14,7 @@ class Who(Command):
         "(N) - присылает список людей с ролью N в данной конфе",
     ]
     help_texts_extra = (
-        "Доступные роли: админ, админ конфы, доверенный, модератор, майнкрафт, майнкрафт уведомления, террария, забанен\n"
+        "Доступные роли: админ, доверенный, модератор, майнкрафт, майнкрафт уведомления, террария, забанен\n"
         "Чтобы узнать свои права существует команда /права"
     )
     conversation = True
@@ -27,11 +27,7 @@ class Who(Command):
     def start(self) -> ResponseMessage:
         arg = self.event.message.args_str
         role = get_role_by_str(arg)
-        if arg in ['админ конфы', 'админ беседы', 'админ конференции', 'админ чата', 'администратор конфы',
-                   'администратор беседы', 'администратор конференции', 'администратор чата']:
-            answer = str(self.event.chat.admin)
-            return ResponseMessage(ResponseMessageItem(text=answer))
-        elif arg in ['пидор']:
+        if arg in ['пидор']:
             answer = "ты"
             return ResponseMessage(ResponseMessageItem(text=answer))
         elif arg in ['петрович']:

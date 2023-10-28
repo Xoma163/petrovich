@@ -121,6 +121,7 @@ class TgEvent(Event):
         left_chat_member = message.get('left_chat_member')
         migrate_from_chat_id = message.get('migrate_from_chat_id')
         group_chat_created = message.get('group_chat_created')
+        new_chat_title = message.get('new_chat_title')
         if new_chat_members:
             self.action = {'new_chat_members': new_chat_members}
         elif left_chat_member:
@@ -129,6 +130,8 @@ class TgEvent(Event):
             self.action = {'migrate_from_chat_id': migrate_from_chat_id}
         elif group_chat_created:
             self.action = {'group_chat_created': group_chat_created}
+        elif new_chat_title:
+            self.action = {'new_chat_title': new_chat_title}
 
     def setup_payload(self, payload, first_button_text):
         self.message = Message()

@@ -52,8 +52,8 @@ class UserAdmin(admin.ModelAdmin):
 @admin.register(Chat)
 class ChatAdmin(admin.ModelAdmin):
     search_fields = ('name',)
-    list_display = ('id', 'name', 'admin', 'platform', 'is_banned')
-    list_filter = ('platform',)
+    list_display = ('id', 'name', 'platform', 'is_banned', 'kicked')
+    list_filter = ('platform', 'kicked')
 
 
 @admin.register(Bot)

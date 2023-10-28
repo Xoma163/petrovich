@@ -13,7 +13,6 @@ from apps.bot.classes.messages.attachments.voice import VoiceAttachment
 
 class Role(Enum):
     ADMIN = "администратор"
-    CONFERENCE_ADMIN = "админ конфы"
     MODERATOR = "модератор"
     MINECRAFT = "майнкрафт"
     MINECRAFT_NOTIFY = "уведомления майна"

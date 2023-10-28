@@ -167,9 +167,6 @@ class Command:
         """
         if self.event.sender.check_role(role):
             return
-        if role == Role.CONFERENCE_ADMIN:
-            if self.event.chat.admin == self.event.sender:
-                return
         if self.hidden:
             raise PIDK()
         error = f"Команда доступна только для пользователей с уровнем прав {role.value}"

@@ -18,8 +18,7 @@ class Rates(Command):
 
     help_text = "играет ставки"
     help_texts = [
-        "- играет ставки",
-        "f - играет независимо от количества игроков. Только для админов конфы"
+        "- играет ставки"
     ]
 
     conversation = True
@@ -30,18 +29,11 @@ class Rates(Command):
 
     def start(self) -> ResponseMessage:
         with lock:
-            # min_gamers = int(len(Profile.objects.filter(chats=self.event.chat)) / 3)
-            # if min_gamers < 2:
             min_gamers = 2
 
             gamers = RateModel.objects.filter(chat=self.event.chat).order_by("date")
-            if self.event.message.args and self.event.message.args[0] == 'f':
-                self.check_sender(Role.CONFERENCE_ADMIN)
-                if len(gamers) < 2:
-                    raise PWarning("Ну ты ваще обалдел? Хотя бы два игрока-то пусть будет")
-            else:
-                if len(gamers) < min_gamers:
-                    raise PWarning(f"Минимальное количество игроков - {min_gamers}")
+            if len(gamers) < min_gamers:
+                raise PWarning(f"Минимальное количество игроков - {min_gamers}")
             rmi1 = ResponseMessageItem("Ставки сделаны, ставок больше нет.")
 
             rnd = get_random_int(1, 100)

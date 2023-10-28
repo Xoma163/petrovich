@@ -25,9 +25,6 @@ class Roles(Command):
             raise PWarning("Нет прав")
 
         answer = "\n".join(roles)
-
-        if self.event.chat and self.event.chat.admin == user:
-            answer += "\nадмин конфы (в этой)"
         return ResponseMessage(ResponseMessageItem(text=answer))
 
     @staticmethod

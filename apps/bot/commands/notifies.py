@@ -1,6 +1,6 @@
 from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import Command
-from apps.bot.classes.const.consts import Role, Platform
+from apps.bot.classes.const.consts import Platform
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.utils.utils import localize_datetime, remove_tz
@@ -13,7 +13,7 @@ class Notifies(Command):
     help_text = "список напоминаний"
     help_texts = [
         "- список напоминаний. Отправляет в лс все напоминания, когда-либо созданные, в группу - только напоминания внутри группы",
-        "удалить (текст напоминания) - удаляет напоминания. (Админ конфы может удалять любые напоминания в конфе)",
+        "удалить (текст напоминания) - удаляет напоминания.",
         "конфа - выводит все напоминания по конфе",
         "(имя, фамилия, логин/id, никнейм) - напоминания пользователя по конфе",
     ]
@@ -42,7 +42,6 @@ class Notifies(Command):
         notifies = Notify.objects.filter(user=self.event.user).order_by("date")
         if self.event.chat:
             try:
-                self.check_sender(Role.CONFERENCE_ADMIN)
                 notifies = Notify.objects.filter(chat=self.event.chat).order_by("date")
             except PWarning:
                 notifies = notifies.filter(chat=self.event.chat)
@@ -69,6 +68,7 @@ class Notifies(Command):
         answer = self.get_notifies_from_object(notifies, self.event.sender.city.timezone.name, True)
         return ResponseMessageItem(text=answer)
 
+    # ToDo: rm?
     def menu_get_for_user(self) -> ResponseMessageItem:
         self.check_conversation()
         profile = self.bot.get_profile_by_name(self.event.message.args_str, self.event.chat)

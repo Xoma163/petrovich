@@ -23,8 +23,8 @@ class Chat(Platform):
     id = models.AutoField(primary_key=True)
     chat_id = models.CharField('ID чата', max_length=20, default="")
     name = models.CharField('Название', max_length=40, default="", blank=True)
-    admin = models.ForeignKey('Profile', models.SET_NULL, verbose_name='Админ', blank=True, null=True)
 
+    # Настройки
     need_reaction = models.BooleanField('Реагировать на неверные команды в конфе', default=True)
     mentioning = models.BooleanField('Работа без упоминания в конфе', default=False)
     need_meme = models.BooleanField('Слать мемы по точному названию', default=False)
@@ -32,6 +32,9 @@ class Chat(Platform):
     is_banned = models.BooleanField('Забанен', default=False)
     need_turett = models.BooleanField('Слать туреттные сообщения', default=False)
     use_swear = models.BooleanField("Использовать ругательства", default=True)
+
+    # Для статистики
+    kicked = models.BooleanField("Бота кикнули", default=False)
 
     class Meta:
         verbose_name = "Чат"
