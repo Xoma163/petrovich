@@ -12,10 +12,8 @@ class Notifies(Command):
     name_tg = "notifies"
     help_text = "список напоминаний"
     help_texts = [
-        "- список напоминаний. Отправляет в лс все напоминания, когда-либо созданные, в группу - только напоминания внутри группы",
-        "удалить (текст напоминания) - удаляет напоминания.",
-        "конфа - выводит все напоминания по конфе",
-        "(имя, фамилия, логин/id, никнейм) - напоминания пользователя по конфе",
+        "- список активных напоминаний в лс, если в конфе, то только общие в конфе",
+        "удалить (текст напоминания) - удаляет напоминание"
     ]
     platforms = [Platform.TG]
     city = True
@@ -23,19 +21,19 @@ class Notifies(Command):
     bot: TgBot
 
     def start(self) -> ResponseMessage:
-
-        if not self.event.message.args:
-            rmi = self.menu_notifications()
-        else:
-            arg0 = self.event.message.args[0]
-            menu = [
-                [["удалить", "удали"], self.menu_delete],
-                [["конфа", "беседе", "конфы", "беседы"], self.menu_conference],
-                [['default'], self.menu_get_for_user],
-            ]
-            method = self.handle_menu(menu, arg0)
-            rmi = method()
+        arg0 = self.event.message.args[0] if self.event.message.args else None
+        menu = [
+            [["удалить", "удали"], self.menu_delete],
+            [['default'], self.menu_get_notifies],
+        ]
+        method = self.handle_menu(menu, arg0)
+        rmi = method()
         return ResponseMessage(rmi)
+
+    def menu_get_notifies(self) -> ResponseMessageItem:
+        notifies = self.get_filtered_notifies()
+        rmi = ResponseMessageItem(text=self.get_notifies_str(notifies, self.event.sender.city.timezone.name))
+        return rmi
 
     def menu_delete(self) -> ResponseMessageItem:
         self.check_args(2)
@@ -62,30 +60,7 @@ class Notifies(Command):
         answer = "Удалил"
         return ResponseMessageItem(text=answer)
 
-    def menu_conference(self) -> ResponseMessageItem:
-        self.check_conversation()
-        notifies = Notify.objects.filter(chat=self.event.chat)
-        answer = self.get_notifies_from_object(notifies, self.event.sender.city.timezone.name, True)
-        return ResponseMessageItem(text=answer)
-
-    # ToDo: rm?
-    def menu_get_for_user(self) -> ResponseMessageItem:
-        self.check_conversation()
-        profile = self.bot.get_profile_by_name(self.event.message.args_str, self.event.chat)
-        user = profile.get_tg_user()
-        notifies = Notify.objects.filter(user=user, chat=self.event.chat)
-        answer = self.get_notifies_from_object(notifies, self.event.sender.city.timezone.name, True)
-        return ResponseMessageItem(text=answer)
-
-    def menu_notifications(self) -> ResponseMessageItem:
-        notifies = Notify.objects.filter(user=self.event.user).order_by("date")
-        if self.event.chat:
-            notifies = notifies.filter(chat=self.event.chat)
-        answer = self.get_notifies_from_object(notifies, self.event.sender.city.timezone.name)
-        return ResponseMessageItem(text=answer)
-
-    @staticmethod
-    def get_notifies_from_object(notifies_obj, timezone, print_username=False):
+    def get_notifies_str(self, notifies_obj, timezone):
         if len(notifies_obj) == 0:
             raise PWarning("Нет напоминаний")
         result = ""
@@ -96,18 +71,26 @@ class Notifies(Command):
             else:
                 notify_datetime = notify.crontab
 
-            if print_username:
-                result += f"{notify.user}\n"
+            result += f"{notify.user}\n"
             if notify.repeat:
                 if notify.crontab:
-                    result += f"{notify_datetime} - Постоянное"
+                    result += f"{self.bot.get_formatted_text_line(notify_datetime)} - Постоянное"
                 else:
-                    result += f"{str(notify_datetime.strftime('%H:%M'))} - Постоянное"
+                    result += f"{self.bot.get_formatted_text_line(notify_datetime.strftime('%H:%M'))} - Постоянное"
             else:
-                result += f"{str(notify_datetime.strftime('%d.%m.%Y %H:%M'))} - Постоянное"
+                result += f"{self.bot.get_formatted_text_line(notify_datetime.strftime('%d.%m.%Y %H:%M'))} - Постоянное"
             if notify.chat:
                 result += f" (Конфа - {notify.chat.name})"
-            result += f"\n{notify.text}\n\n"
+            result += f"\n{self.bot.get_formatted_text_line(notify.text)}\n\n"
 
         result_without_mentions = result.replace('@', '@_')
         return result_without_mentions
+
+    def get_filtered_notifies(self) -> Notify.objects:
+        if self.event.chat:
+            notifies = Notify.objects.filter(chat=self.event.chat)
+        else:
+            notifies = Notify.objects.filter(user=self.event.user)
+        if notifies.count() == 0:
+            raise PWarning("Нет активных напоминаний")
+        return notifies.order_by("date")

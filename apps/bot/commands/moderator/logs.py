@@ -116,6 +116,9 @@ class Logs(Command):
             item_json = json.loads(file_rows[i])
             if filter_level and item_json['levelname'] not in filter_level:
                 continue
+            if 'event' in item_json:
+                item_json['event'].pop('raw')
+
             self.transform_logs_by_values(item_json)
             self.wrap_long_texts(item_json)
             item_str = json.dumps(item_json, indent=2, ensure_ascii=False).replace('\\n', '\n')
