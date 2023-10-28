@@ -6,10 +6,12 @@ class SubscribeService:
 
         return {
             'channel_id': str,
-            'title': str,
-            'last_video_id':str,
             'playlist_id': str
+            'channel_title': str,
+            'playlist_title': str,
+            'last_video_id':str,
         }
+
         """
         raise NotImplementedError
 

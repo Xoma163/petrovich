@@ -38,9 +38,10 @@ class TheHole(SubscribeService):
         bs4 = BeautifulSoup(content, 'html.parser')
         return {
             'channel_id': url.split('/')[-1],
-            'title': bs4.find('meta', attrs={'name': 'og:title'}).attrs['content'],
+            'playlist_id': None,
+            'channel_title': bs4.find('meta', attrs={'name': 'og:title'}).attrs['content'],
+            'playlist_title': None,
             'last_video_id': bs4.select_one('a[href*=episodes]').attrs['href'],
-            'playlist_id': None
         }
 
     def get_filtered_new_videos(self, channel_id: str, last_video_id: str, **kwargs) -> dict:

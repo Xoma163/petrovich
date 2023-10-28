@@ -97,9 +97,10 @@ class Premier(SubscribeService):
         if videos:
             return {
                 'channel_id': show_id,
-                'title': trailers[0].get('title') if trailers else show_id,
+                'playlist_id': None,
+                'channel_title': trailers[0].get('title') if trailers else show_id,
+                'playlist_title': None,
                 'last_video_id': videos[-1]['id'],
-                'playlist_id': None
             }
 
     def get_filtered_new_videos(self, channel_id: str, last_video_id: str, **kwargs) -> dict:

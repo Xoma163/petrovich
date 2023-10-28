@@ -102,12 +102,11 @@ class YoutubeVideo(SubscribeService):
         if not r['items']:
             raise PWarning("Не нашёл канал")
         return {
-            "title": r['items'][0]['snippet']['title']
+            "author": r['items'][0]['snippet']['title']
         }
 
     @staticmethod
     def _get_channel_videos(channel_id: str) -> list:
-        # 100 cost
 
         r = requests.get(f"https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}")
         if r.status_code != 200:
@@ -115,6 +114,7 @@ class YoutubeVideo(SubscribeService):
         bsop = BeautifulSoup(r.content, 'lxml')
         videos = [{'id': {'videoId': x.find('yt:videoid').text}} for x in bsop.find_all('entry')]
 
+        # 100 cost
         # url = "https://www.googleapis.com/youtube/v3/search"
         # params = {
         #     "channelId": channel_id,
@@ -138,8 +138,12 @@ class YoutubeVideo(SubscribeService):
         r = requests.get(url, params=params).json()
         if not r['items']:
             raise PWarning("Не нашёл плейлист")
+
+        snippet = r['items'][0]['snippet']
         return {
-            "title": r['items'][0]['snippet']['title']
+            "title": snippet['title'],
+            "author": snippet['channelTitle'],
+            "channel_id": snippet['channelId']
         }
 
     @staticmethod
@@ -167,25 +171,30 @@ class YoutubeVideo(SubscribeService):
         href = bs4.find_all('link', {'rel': 'canonical'})[0].attrs['href']
         get_params = dict(parse.parse_qsl(parse.urlsplit(href).query))
 
-        channel_id = None
         playlist_id = None
+        playlist_title = None
 
         if get_params.get('list'):
             playlist_id = get_params.get('list')
             last_video = self._get_playlist_videos(playlist_id)[-1]
             last_video_id = last_video['snippet']['resourceId']['videoId']
-            title = self._get_playlist_info(playlist_id)['title']
+
+            playlist_info = self._get_playlist_info(playlist_id)
+
+            channel_id = playlist_info['channel_id']
+            playlist_title = playlist_info['title']
+            channel_title = playlist_info['author']
         else:
             channel_id = href.split('/')[-1]
             last_video = self._get_channel_videos(channel_id)[-1]
             last_video_id = last_video['id']['videoId']
-            title = self._get_channel_info(channel_id)['title']
-
+            channel_title = self._get_channel_info(channel_id)['author']
         return {
             'channel_id': channel_id,
-            'title': title,
+            'playlist_id': playlist_id,
+            'channel_title': channel_title,
+            'playlist_title': playlist_title,
             'last_video_id': last_video_id,
-            'playlist_id': playlist_id
         }
 
     def get_filtered_new_videos(self, channel_id: str, last_video_id: str, **kwargs) -> dict:

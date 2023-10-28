@@ -41,7 +41,7 @@ class Chat(Platform):
         unique_together = ('chat_id', 'platform',)
 
     def __str__(self):
-        return str(self.name)
+        return str(self.name) if self.name else f"id:{self.id}"
 
 
 class Profile(models.Model):

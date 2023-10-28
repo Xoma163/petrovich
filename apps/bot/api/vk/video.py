@@ -118,26 +118,28 @@ class VKVideo(SubscribeService):
     def get_data_to_add_new_subscribe(self, url: str) -> dict:
         content = requests.get(url, headers=self.headers).content
         bs4 = BeautifulSoup(content, "html.parser")
-        title = bs4.select_one(".VideoCard__ownerLink").text
+        channel_id = bs4.select_one('.VideoCard__additionalInfo a').attrs['href'].split('/')[-1]
+        channel_title = bs4.select_one(".VideoCard__ownerLink").text
         if 'playlist' in url:
             _playlist_id = url.rsplit('_', 1)[1]
             videos = bs4.find('div', {'id': f"video_subtab_pane_playlist_{_playlist_id}"}) \
                 .find_all('div', {'class': 'VideoCard__info'})
-            show_name = bs4.find("title").text.split(" | ", 1)[0]
-            title = f"{title} | {show_name}"
+            playlist_title = bs4.find("title").text.split(" | ", 1)[0]
+            playlist_id = urlparse(url).path.split('/', 2)[2]
         else:
             videos = bs4.find('div', {'id': "video_subtab_pane_all"}).find_all('div', {'class': 'VideoCard__info'})
+            playlist_id = None
+            playlist_title = None
         last_video = videos[0]
         last_video_id = last_video.find("a", {"class": "VideoCard__title"}).attrs['data-id']
 
-        channel_id = bs4.select_one('.VideoCard__additionalInfo a').attrs['href'].split('/')[-1]
-        playlist_id = urlparse(url).path.split('/', 2)[2]
 
         return {
             'channel_id': channel_id,
-            'title': title,
+            'playlist_id': playlist_id,
+            'channel_title': channel_title,
+            'playlist_title': playlist_title,
             'last_video_id': last_video_id,
-            'playlist_id': playlist_id if channel_id != playlist_id else None
         }
 
     def get_filtered_new_videos(self, channel_id: str, last_video_id: str, **kwargs) -> dict:

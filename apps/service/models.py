@@ -159,7 +159,8 @@ class Subscribe(models.Model):
 
     channel_id = models.CharField("ID канала", max_length=100, blank=True, null=True)
     playlist_id = models.CharField("ID плейлиста", max_length=100, blank=True, null=True)
-    title = models.CharField("Название канала", max_length=100)
+    channel_title = models.CharField("Название канала", max_length=100)
+    playlist_title = models.CharField("Название плейлиста", max_length=100, blank=True, null=True)
     last_video_id = models.CharField("ID последнего видео", max_length=100, null=True, blank=True)
     service = models.SmallIntegerField("Сервис", blank=True, choices=SERVICE_CHOICES, default=SERVICE_YOUTUBE)
 
@@ -172,10 +173,12 @@ class Subscribe(models.Model):
     class Meta:
         verbose_name = "Подписка"
         verbose_name_plural = "Подписки"
-        ordering = ['title']
+        ordering = ['channel_title']
 
     def __str__(self):
-        return self.title
+        if self.playlist_title:
+            return f"{self.channel_title} | {self.playlist_title}"
+        return self.channel_title
 
 
 class VideoCache(models.Model):
