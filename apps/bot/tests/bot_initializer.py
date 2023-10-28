@@ -46,8 +46,7 @@ class BotInitializer(TestCase):
         profile.groups.set(all_groups)
         chat = Chat.objects.create(
             name="Чат Васька",
-            chat_id=2,
-            admin=profile
+            chat_id=2
         )
         profile.chats.add(chat)
         User.objects.create(
