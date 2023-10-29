@@ -17,7 +17,6 @@ from apps.bot.classes.messages.attachments.video import VideoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.utils.utils import localize_datetime, normalize_datetime, remove_tz
 from apps.service.models import Notify
-from apps.service.models import Notify as NotifyModel
 
 DELTA_WEEKDAY = {
     'сегодня': 0,
@@ -94,7 +93,7 @@ class Notifies(Command):
         if not (data['text'] or tg_att_flag):
             raise PWarning("В напоминании должны быть текст или вложения(tg)")
 
-        notify = NotifyModel(**data)
+        notify = Notify(**data)
         notify.save()
 
         if notify.crontab:

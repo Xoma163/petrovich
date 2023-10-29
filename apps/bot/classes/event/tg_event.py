@@ -1,5 +1,6 @@
 import json
 
+from apps.bot.classes.const.consts import Platform
 from apps.bot.classes.event.event import Event
 from apps.bot.classes.messages.attachments.audio import AudioAttachment
 from apps.bot.classes.messages.attachments.gif import GifAttachment
@@ -16,8 +17,11 @@ from petrovich.settings import env
 
 class TgEvent(Event):
 
-    def __init__(self, raw_event=None, bot=None):
-        super().__init__(raw_event, bot)
+    def __init__(self, raw_event=None):
+        from apps.bot.classes.bots.tg_bot import TgBot
+        super().__init__(raw_event)
+        self.bot = TgBot()
+        self.platform = Platform.TG
 
         self.inline_mode: bool = False
 
@@ -236,7 +240,7 @@ class TgEvent(Event):
         if fwd:
             if fwd.get('message_id') == fwd.get('message_thread_id'):
                 return
-            fwd_event = TgEvent(fwd, self.bot)
+            fwd_event = TgEvent(fwd)
             fwd_event.setup_event(is_fwd=True)
             self.fwd = [fwd_event]
 

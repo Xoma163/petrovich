@@ -74,7 +74,7 @@ class BotInitializer(TestCase):
 
     def setUp(self):
         self.bot = TgBot()
-        self.event = TgEvent(bot=self.bot)
+        self.event = TgEvent()
         self.cmd = self.Command(self.bot, self.event)
         self.setup_event()
 

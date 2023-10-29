@@ -6,7 +6,7 @@ from apps.bot.classes.const.consts import Role, Platform
 from apps.bot.classes.event.event import Event
 from apps.bot.classes.event.tg_event import TgEvent
 from apps.bot.classes.messages.response_message import ResponseMessage
-from apps.bot.commands.trusted.gpt import GPT
+from apps.bot.commands.trusted.gpt.chatgpt import ChatGPT
 from apps.bot.utils.cache import MessagesCache
 
 
@@ -32,7 +32,7 @@ class WTF(Command):
 
         messages = self.get_conversation(n, promt)
 
-        gpt = GPT()
+        gpt = ChatGPT()
         gpt.bot = self.bot
         gpt.event = self.event
         return gpt.text_chat(messages, model=gpt.GPT_3)
@@ -77,7 +77,7 @@ class WTF(Command):
             # не <= потому что не берём последнее сообщение, которым зашли в эту команду :)
             if mid - message_id < n:
                 try:
-                    event = TgEvent({'message': message_body}, self.bot)
+                    event = TgEvent({'message': message_body})
                     event.setup_event()
                 except:
                     continue

@@ -427,6 +427,14 @@ def replace_markdown_code(text: str, bot) -> str:
     return text
 
 
+def replace_markdown(text, bot):
+    text = replace_markdown_links(text, bot)
+    text = replace_markdown_bolds(text, bot)
+    text = replace_markdown_quotes(text, bot)
+    text = replace_markdown_code(text, bot)
+    return text
+
+
 def split_text_by_n_symbols(text: str, n: int, split_on: Optional[List[str]] = None) -> List[str]:
     """
     Разбивает текст на чанки с делением по спецсимволам указанным в split_on

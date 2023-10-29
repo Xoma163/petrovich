@@ -1,5 +1,6 @@
 import re
 import time
+from typing import Optional
 
 import openai
 
@@ -7,18 +8,18 @@ from apps.bot.classes.command import Command
 from apps.bot.classes.const.activities import ActivitiesEnum
 from apps.bot.classes.const.consts import Role, Platform
 from apps.bot.classes.const.exceptions import PWarning
+from apps.bot.classes.event.event import Event
 from apps.bot.classes.event.tg_event import TgEvent
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.utils.cache import MessagesCache
-from apps.bot.utils.utils import replace_markdown_links, replace_markdown_bolds, replace_markdown_quotes, \
-    replace_markdown_code
+from apps.bot.utils.utils import replace_markdown
 from petrovich.settings import env
 
 
-class GPT(Command):
+class ChatGPT(Command):
     name = "gpt"
     names = ["гпт", "chatgpt", "чатгпт"]
-    name_tg = 'gpt'
+
     help_text = "чат GPT"
     help_texts = [
         "(фраза) - общение с ботом",
@@ -26,7 +27,7 @@ class GPT(Command):
     ]
     help_texts_extra = \
         "Если отвечать на сообщения бота через кнопку \"Ответить\" то будет продолжаться непрерывный диалог.\n" \
-        "В кэше хранится только 1 час переписок"
+        "В таком случае необязательно писать команду, можно просто текст"
     access = Role.TRUSTED
     args = 1
     platforms = [Platform.TG]
@@ -34,10 +35,22 @@ class GPT(Command):
     GPT_4 = 'gpt-4'
     GPT_3 = 'gpt-3.5-turbo-16k-0613'
 
+    def accept(self, event: Event):
+        accept = super().accept(event)
+        if accept:
+            return True
+
+        if first_event := self.get_first_event_in_replies(event):
+            accept = super().accept(first_event)
+            if accept:
+                return True
+        return False
+
     def start(self) -> ResponseMessage:
         if self.event.message.args[0] == "нарисуй":
             return self.draw_image()
-        messages = self.get_dialog()
+        self.event: TgEvent
+        messages = self.get_dialog(self.event)
         return self.text_chat(messages)
 
     def draw_image(self) -> ResponseMessage:
@@ -98,22 +111,20 @@ class GPT(Command):
             raise PWarning("Какая-то непредвиденная ошибка. Попробуйте ещё раз")
 
         answer = response.choices[0].message.content
-        answer = replace_markdown_links(answer, self.bot)
-        answer = replace_markdown_bolds(answer, self.bot)
-        answer = replace_markdown_quotes(answer, self.bot)
-        answer = replace_markdown_code(answer, self.bot)
+        answer = replace_markdown(answer, self.bot)
         return ResponseMessage(ResponseMessageItem(text=answer, reply_to=self.event.message.id))
 
-    def get_dialog(self):
-        mc = MessagesCache(self.event.peer_id)
+    @staticmethod
+    def get_dialog(event: TgEvent):
+        mc = MessagesCache(event.peer_id)
         data = mc.get_messages()
-        if not self.event.fwd:
-            return {'role': "user", 'content': self.event.message.args_str_case},
-        reply_to_id = self.event.fwd[0].message.id
+        if not event.fwd:
+            return [{'role': "user", 'content': event.message.args_str_case}]
+        reply_to_id = event.fwd[0].message.id
         history = []
         while True:
             raw = data.get(reply_to_id)
-            tg_event = TgEvent({"message": raw}, self.bot)
+            tg_event = TgEvent({"message": raw})
             tg_event.setup_event()
             is_me = str(tg_event.from_id) == env.str("TG_BOT_GROUP_ID")
             if is_me:
@@ -124,5 +135,23 @@ class GPT(Command):
             if not reply_to_id:
                 break
         history = list(reversed(history))
-        history.append({'role': "user", 'content': self.event.message.args_str_case})
+        if event.message.args_str_case:
+            history.append({'role': "user", 'content': event.message.args_str_case})
+        else:
+            history.append({'role': "user", 'content': event.message.command})
         return history
+
+    @staticmethod
+    def get_first_event_in_replies(event) -> Optional[TgEvent]:
+        mc = MessagesCache(event.peer_id)
+        data = mc.get_messages()
+        if not event.fwd:
+            return None
+        reply_to_id = event.fwd[0].message.id
+        while True:
+            raw = data.get(reply_to_id)
+            tg_event = TgEvent({"message": raw})
+            tg_event.setup_event()
+            reply_to_id = data.get(reply_to_id, {}).get('reply_to_message', {}).get('message_id')
+            if not reply_to_id:
+                return tg_event

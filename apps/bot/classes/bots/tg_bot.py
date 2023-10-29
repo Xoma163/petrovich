@@ -60,7 +60,7 @@ class TgBot(Bot):
         return super().run()
 
     def parse(self, raw_event):
-        tg_event = TgEvent(raw_event, self)
+        tg_event = TgEvent(raw_event)
         threading.Thread(target=self.handle_event, args=(tg_event,)).start()
 
     def route(self, event: Event) -> ResponseMessage:

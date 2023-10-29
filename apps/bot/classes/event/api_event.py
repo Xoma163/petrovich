@@ -1,3 +1,4 @@
+from apps.bot.classes.const.consts import Platform
 from apps.bot.classes.event.event import Event
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 
@@ -12,6 +13,10 @@ class APIEvent(Event):
         self.set_message(text)
         attachments = self.raw.get('attachments', [])
         self.setup_attachments(attachments)
+
+        from apps.bot.classes.bots.api_bot import APIBot
+        self.bot = APIBot()
+        self.platform = Platform.API
 
     def setup_attachments(self, attachments: list):
         for att_type in attachments:

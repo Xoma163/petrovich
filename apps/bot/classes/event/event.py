@@ -19,13 +19,13 @@ from apps.bot.utils.cache import MessagesCache
 
 class Event:
     # None тк иногда требуется вручную создать инстанс Event
-    def __init__(self, raw_event=None, bot=None, peer_id=None):
+    def __init__(self, raw_event=None, peer_id=None):
         from apps.bot.classes.command import Command
 
         if not raw_event:
             raw_event = {}
+        self.bot = None
         self.raw = raw_event  # json
-        self.bot = bot
 
         self.is_from_user: bool = False
         self.is_from_bot: bool = False
@@ -38,7 +38,7 @@ class Event:
         self.chat: Optional[Chat] = None
         self.peer_id: int = peer_id  # Куда слать ответ
         self.from_id: Optional[int] = None  # От кого пришло сообщение
-        self.platform: Platform = bot.platform
+        self.platform: Platform = None
 
         self.payload: dict = {}
         self.action: dict = {}
