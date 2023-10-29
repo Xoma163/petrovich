@@ -1,10 +1,11 @@
 import logging
+import os
 import random
 import uuid
 
 import requests
 
-from petrovich.settings import env
+from petrovich.settings import env, BASE_DIR
 
 logger = logging.getLogger('responses')
 
@@ -13,6 +14,7 @@ class GigaChat:
     AUTH_DATA = env.str("GIGACHAT_AUTH_DATA")
 
     BASE_URL = "https://gigachat.devices.sberbank.ru/api/v1/chat"
+    GOSUSLUGI_CERT_PATH = os.path.join(BASE_DIR, "secrets/certs/russian_trusted_root_ca_pem.crt")
 
     def __init__(self):
         self.access_token = None
@@ -27,7 +29,7 @@ class GigaChat:
             "https://ngw.devices.sberbank.ru:9443/api/v2/oauth",
             data={'scope': "GIGACHAT_API_PERS"},
             headers=headers,
-            verify=False
+            verify=self.GOSUSLUGI_CERT_PATH
         )
         r_json = r.json()
         if r.status_code != 200:
@@ -57,6 +59,6 @@ class GigaChat:
             f"{self.BASE_URL}/completions",
             json=data,
             headers=headers,
-            verify=False
+            verify=self.GOSUSLUGI_CERT_PATH
         )
         return r.json()['choices'][0]['message']['content']
