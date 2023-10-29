@@ -4,11 +4,11 @@ from apps.bot.api.timezonedb import TimezoneDB
 from apps.bot.api.yandex.geo import YandexGeo
 from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import Command
-from apps.bot.classes.const.consts import Platform
+from apps.bot.classes.const.consts import Platform, Role
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
-from apps.bot.models import Profile
+from apps.bot.models import Profile as ProfileModel
 from apps.service.models import City, TimeZone
 
 
@@ -155,7 +155,7 @@ class Profile(Command):
         profile = self.event.sender
         return self.get_profile_info(profile)
 
-    def get_profile_info(self, profile: Profile) -> ResponseMessageItem:
+    def get_profile_info(self, profile: ProfileModel) -> ResponseMessageItem:
         not_defined = "Не установлено"
 
         _city = profile.city or not_defined
@@ -173,18 +173,28 @@ class Profile(Command):
         _nickname = profile.nickname_real or not_defined
         _name = profile.name or not_defined
         _surname = profile.surname or not_defined
-        answer = f"Имя - {_name}\n" \
-                 f"Фамилия - {_surname}\n" \
-                 f"Никнейм - {_nickname}\n" \
-                 f"Дата рождения - {_bd}\n" \
-                 f"Город - {_city}\n" \
-                 f"Пол - {profile.get_gender_display().capitalize()}"
+
+        roles = []
+        for group in self.event.sender.groups.all():
+            roles.append(Role[group.name].value)
+        roles = sorted(roles)
+        roles_str = ", ".join(roles)
+
+        answer = \
+            f"Имя: {_name}\n" \
+            f"Фамилия: {_surname}\n" \
+            f"Никнейм: {_nickname}\n" \
+            f"Дата рождения: {_bd}\n" \
+            f"Город: {_city}\n" \
+            f"Пол: {profile.get_gender_display().capitalize()}\n\n" \
+            f"Роли: {roles_str}"
         rmi = ResponseMessageItem(text=answer)
 
         if profile.avatar:
             attachment = self.bot.get_photo_attachment(profile.avatar.path, peer_id=self.event.peer_id,
                                                        filename="petrovich_user_avatar.png")
             rmi.attachments = [attachment]
+
         return rmi
 
     @staticmethod
