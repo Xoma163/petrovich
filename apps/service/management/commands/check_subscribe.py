@@ -68,10 +68,10 @@ class Command(BaseCommand):
     def send_notify(sub, title, link, media_message: ResponseMessageItem):
         bot = TgBot()
 
-        if sub.playlist_id:
-            answer = f"Новое видео в плейлисте {sub.title}"
+        if sub.playlist_title:
+            answer = f"Новое видео в плейлисте {sub.playlist_title} канала {sub.channel_title}"
         else:
-            answer = f"Новое видео на канале {sub.title}"
+            answer = f"Новое видео на канале {sub.channel_title}"
 
         answer += f"\n\n{media_message.text}"
         answer = answer.replace(title, bot.get_formatted_url(title, link))
@@ -111,7 +111,7 @@ class Command(BaseCommand):
 
                 if sub.save_to_plex:
                     cache = VideoCache.objects.get(channel_id=sub.channel_id, video_id=ids[i])
-                    self._save_to_plex(cache, sub.title, titles[i])
+                    self._save_to_plex(cache, str(sub), titles[i])
 
                 time.sleep(1)
             sub.last_video_id = ids[-1]
