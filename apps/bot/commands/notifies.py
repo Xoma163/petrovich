@@ -37,12 +37,8 @@ class Notifies(Command):
 
     def menu_delete(self) -> ResponseMessageItem:
         self.check_args(2)
-        notifies = Notify.objects.filter(user=self.event.user).order_by("date")
-        if self.event.chat:
-            try:
-                notifies = Notify.objects.filter(chat=self.event.chat).order_by("date")
-            except PWarning:
-                notifies = notifies.filter(chat=self.event.chat)
+        notifies = self.get_filtered_notifies()
+
         filter_list = self.event.message.args[1:]
         for _filter in filter_list:
             notifies = notifies.filter(text_for_filter__icontains=_filter)
@@ -50,11 +46,8 @@ class Notifies(Command):
         if len(notifies) == 0:
             raise PWarning("Не нашёл напоминаний по такому тексту")
         if len(notifies) > 1:
-            notifies10 = notifies[:10]
-            notifies_texts = [str(notify.user) + " " + notify.text_for_filter for notify in notifies10]
-            notifies_texts_str = "\n".join(notifies_texts)
-            raise PWarning(f"Нашёл сразу несколько. Уточните:\n"
-                           f"{notifies_texts_str}")
+            raise PWarning(f"Нашёл сразу несколько. Уточните:\n\n"
+                           f"{self.get_notifies_str(notifies, self.event.sender.city.timezone.name)}")
 
         notifies.delete()
         answer = "Удалил"
