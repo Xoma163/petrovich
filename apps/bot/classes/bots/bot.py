@@ -6,6 +6,7 @@ from threading import Thread
 from typing import List, Optional
 
 from django.contrib.auth.models import Group
+from django.db.models import Q
 
 from apps.bot.classes.bot_response import BotResponse
 from apps.bot.classes.const.activities import ActivitiesEnum
@@ -92,7 +93,7 @@ class Bot(Thread):
                 message_thread_id=event.message_thread_id,
             )
             if event.sender.check_role(Role.TRUSTED):
-                button = self.get_button('/логи', command="логи")
+                button = self.get_button('логи', command="логи")
                 keyboard = self.get_inline_keyboard([button])
                 rmi.keyboard = keyboard
             rm = ResponseMessage(rmi)
@@ -271,40 +272,26 @@ class Bot(Thread):
                 user.profile.groups.add(group_gamer)
         return user.profile
 
-    # ToDo: очень говнокод
-    # ToDo: capitalize
     @staticmethod
-    def get_profile_by_name(args, filter_chat=None) -> Profile:
+    def get_profile_by_name(filters: list, filter_chat=None) -> Profile:
         """
         Получение пользователя по имени/фамилии/имени и фамилии/никнейма/ид
         """
-        if not args:
-            raise PWarning("Отсутствуют аргументы")
-        if isinstance(args, str):
-            args = [args]
         users = Profile.objects
         if filter_chat:
             users = users.filter(chats=filter_chat)
-        if len(args) >= 2:
-            user = users.filter(name=args[0].capitalize(), surname=args[1].capitalize())
-            if not user:
-                user = users.filter(name=args[1].capitalize(), surname=args[0].capitalize())
 
-        else:
-            user = users.filter(nickname_real=args[0].capitalize())
-            if len(user) == 0:
-                user = users.filter(name=args[0].capitalize())
-                if len(user) == 0:
-                    user = users.filter(surname=args[0].capitalize())
+        for _filter in filters:
+            q = Q(name__icontains=_filter) | Q(surname__icontains=_filter) | Q(nickname_real__icontains=_filter)
+            users = users.filter(q)
 
-        if len(user) > 1:
+        if len(users) == 0:
+            filters_str = " ".join(filters)
+            raise PWarning(f"Пользователь {filters_str} не найден. Возможно опечатка или он мне ещё ни разу не писал")
+        elif len(users) > 1:
             raise PWarning("2 и более пользователей подходит под поиск")
 
-        if len(user) == 0:
-            args_str = " ".join(args)
-            raise PWarning(f"Пользователь {args_str} не найден. Возможно опечатка или он мне ещё ни разу не писал")
-
-        return user.first()
+        return users.first()
 
     def get_chat_by_id(self, chat_id: int) -> Chat:
         """

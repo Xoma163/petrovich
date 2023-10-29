@@ -304,7 +304,7 @@ class Roulette(Command):
             return ResponseMessageItem(text=answer)
 
     def get_gamer_by_name(self, username):
-        user = self.bot.get_profile_by_name(username, self.event.chat)
+        user = self.bot.get_profile_by_name([username], self.event.chat)
         user_gamer = self.bot.get_gamer_by_profile(user)
         if not user_gamer:
             raise PWarning("Не нашёл такого игрока")
