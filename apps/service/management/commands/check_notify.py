@@ -90,7 +90,7 @@ class Command(BaseCommand):
     @staticmethod
     def send_command_notify_message(bot, notify):
         # Если отложенная команда
-        event = Event(bot=bot)
+        event = Event()
         event.set_message(notify.text)
         event.sender = notify.user.profile
         event.is_from_user = True

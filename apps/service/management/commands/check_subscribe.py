@@ -87,7 +87,7 @@ class Command(BaseCommand):
     @staticmethod
     def get_media_result_msg(link, method) -> ResponseMessageItem:
         bot = TgBot()
-        event = Event(bot=bot)
+        event = Event()
         event.message = Message()
         media_command = Media(bot, event)
         media_command.has_command_name = True
