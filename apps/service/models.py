@@ -110,7 +110,6 @@ class Notify(models.Model):
     text = models.CharField("Текст/команда", max_length=1000, default="", blank=True)
     chat = models.ForeignKey(Chat, models.CASCADE, verbose_name='Чат', null=True, blank=True)
     user = models.ForeignKey(User, models.CASCADE, verbose_name="Пользователь", null=True, blank=True)
-    repeat = models.BooleanField("Повторять", default=False)
     mention_sender = models.BooleanField("Упоминать автора", default=True)
     attachments = JSONField("Вложения", blank=True, default=dict)
     message_thread_id = models.IntegerField("message_thread_id", blank=True, null=True, default=None)

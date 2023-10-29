@@ -1,7 +1,6 @@
 import logging
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta
 
-from crontab import CronTab
 from django.core.management.base import BaseCommand
 
 from apps.bot.classes.bots.tg_bot import TgBot
@@ -10,6 +9,7 @@ from apps.bot.classes.event.event import Event
 from apps.bot.classes.messages.response_message import ResponseMessageItem
 from apps.bot.utils.utils import remove_tz, localize_datetime
 from apps.service.models import Notify
+from crontab import CronTab
 
 logger = logging.getLogger('notifier')
 
@@ -34,8 +34,6 @@ class Command(BaseCommand):
                 self.send_notify_message(bot, notify)
                 if notify.text.startswith('/'):
                     self.send_command_notify_message(bot, notify)
-                if notify.repeat:
-                    self.extend_repeat_notify(notify)
                 else:
                     notify.delete()
             except Exception:
@@ -46,19 +44,13 @@ class Command(BaseCommand):
         if notify.user.profile.check_role(Role.BANNED):
             return False
 
-        if notify.repeat:
-            if notify.crontab:
-                timezone = notify.user.profile.city.timezone.name
-                localized_datetime = localize_datetime(remove_tz(self.dt_now), timezone)
+        if notify.crontab:
+            timezone = notify.user.profile.city.timezone.name
+            localized_datetime = localize_datetime(remove_tz(self.dt_now), timezone)
 
-                entry = CronTab(notify.crontab)
-                prev_seconds_delta = - entry.previous(localized_datetime, default_utc=True)
-                return prev_seconds_delta <= 60
-            else:
-                datetime1 = datetime.combine(date.min, remove_tz(notify.date).time())
-                datetime2 = datetime.combine(date.min, self.dt_now.time())
-                delta_time = datetime1 - datetime2 + timedelta(minutes=1)
-                return delta_time.seconds <= 60
+            entry = CronTab(notify.crontab)
+            prev_seconds_delta = - entry.previous(localized_datetime, default_utc=True)
+            return prev_seconds_delta <= 60
         else:
             delta_time = remove_tz(notify.date) - self.dt_now + timedelta(minutes=1)
             return delta_time.days == 0 and delta_time.seconds <= 60
@@ -112,12 +104,3 @@ class Command(BaseCommand):
             event.is_from_pm = True
 
         bot.handle_event(event)
-
-    def extend_repeat_notify(self, notify):
-        if notify.date:
-            # Для постоянных уведомлений дата должа быть на завтрашний день обязательно.
-            # Это важно для сортировки
-            new_datetime = datetime.combine(self.dt_now.date(), notify.date.time()) + timedelta(days=1)
-            new_datetime = localize_datetime(remove_tz(new_datetime), notify.user.profile.city.timezone.name)
-            notify.date = new_datetime
-            notify.save()
