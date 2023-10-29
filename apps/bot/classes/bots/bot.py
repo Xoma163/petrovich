@@ -27,7 +27,7 @@ lock = Lock()
 
 
 class Bot(Thread):
-    ERROR_MSG = "Непредвиденная ошибка. Сообщите разработчику. Команда /баг"
+    ERROR_MSG = "Непредвиденная ошибка. Сообщите разработчику."
 
     def __init__(self, platform, **kwargs):
         Thread.__init__(self)
@@ -86,13 +86,16 @@ class Bot(Thread):
         # Непредвиденная ошибка
         except Exception:
             self.log_event(event)
-            rm = ResponseMessage(
-                ResponseMessageItem(
-                    text=self.ERROR_MSG,
-                    peer_id=event.peer_id,
-                    message_thread_id=event.message_thread_id
-                )
+            rmi = ResponseMessageItem(
+                text=f"{self.ERROR_MSG}\nКоманда {self.get_formatted_text_line('/баг')}",
+                peer_id=event.peer_id,
+                message_thread_id=event.message_thread_id,
             )
+            if event.sender.check_role(Role.TRUSTED):
+                button = self.get_button('/логи', command="логи")
+                keyboard = self.get_inline_keyboard([button])
+                rmi.keyboard = keyboard
+            rm = ResponseMessage(rmi)
             self.log_message(rm, "exception")
         finally:
             self.stop_activity_thread()
