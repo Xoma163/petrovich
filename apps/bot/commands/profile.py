@@ -137,7 +137,7 @@ class Profile(Command):
         return ResponseMessageItem(text=answer)
 
     def menu_avatar(self) -> ResponseMessageItem:
-        images = self.event.get_all_attachments(PhotoAttachment)
+        images = self.event.get_all_attachments([PhotoAttachment])
         if len(images) > 0:
             self.event.sender.set_avatar(images[0])
         else:

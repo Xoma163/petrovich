@@ -221,6 +221,8 @@ class Meme(Command):
         if not self.event.sender.check_role(Role.MODERATOR) and meme.author != self.event.sender:
             raise PWarning("У вас нет прав на удаление мемов")
         # Если удаляем мем другого человека, шлём ему сообщением
+
+        rm = ResponseMessage()
         if meme.author and meme.author != self.event.sender:
             user_msg = f'Мем с названием "{meme.name}" удалён поскольку он не ' \
                        f'соответствует правилам, устарел или является дубликатом.'
@@ -230,11 +232,14 @@ class Meme(Command):
                 peer_id=user.user_id,
                 message_thread_id=self.event.message_thread_id)
             self.bot.send_response_message_item(rmi)
+            rmi.send = False
+            rm.messages.append(rmi)
 
         meme_name = meme.name
         meme.delete()
         answer = f'Удалил мем "{meme_name}"'
-        return ResponseMessage(ResponseMessageItem(text=answer))
+        rm.messages.append(ResponseMessageItem(text=answer))
+        return rm
 
     def menu_random(self) -> ResponseMessage:
         meme = MemeModel.objects.filter(approved=True).order_by('?').first()

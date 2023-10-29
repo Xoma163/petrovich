@@ -155,13 +155,13 @@ class Minecraft:
                 users_in_chat = self.event.chat.users.all()
                 profiles_notify = profiles_notify.exclude(pk__in=users_in_chat)
         bot = TgBot()
-        rm = ResponseMessage()
+        rm = ResponseMessage(thread=True, delay=1)
         for profile in profiles_notify:
             user = profile.get_tg_user()
             rmi_copy = copy(rmi)
             rmi_copy.peer_id = user.user_id
             rm.messages.append(rmi_copy)
-        bot.send_response_message_thread(rm)
+        bot.send_response_message(rm)
 
 
 minecraft_servers = [

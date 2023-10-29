@@ -40,7 +40,6 @@ class Wordle(Command):
     MAX_STEPS = 6
     WORDLE_WORDS_PATH = "static/bot/games/wordle/wordle.json"
 
-    # ToDo: self.session
     def start(self) -> ResponseMessage:
         if self.event.message.args:
             arg0 = self.event.message.args[0]
@@ -98,12 +97,13 @@ class Wordle(Command):
 
         self.get_current_state(session)
 
-    def get_current_state(self, session):
+    def get_current_state(self, session) -> ResponseMessage:
         image = self.get_keyboard_image(session)
         attachment = self.bot.get_photo_attachment(image)
         rmi = ResponseMessageItem(attachments=[attachment], peer_id=self.event.peer_id,
                                   message_thread_id=self.event.message_thread_id)
         send_message_session_or_edit(self.bot, self.event, session, rmi, max_delta=8)
+        return ResponseMessage(rmi, send=False)
 
     def get_random_word(self):
         with open(self.WORDLE_WORDS_PATH, 'r') as f:

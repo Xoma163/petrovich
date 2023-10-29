@@ -1,8 +1,7 @@
 import copy
-from typing import Optional, List
+from typing import Optional
 
 from apps.bot.classes.const.consts import Platform, Role
-from apps.bot.classes.messages.attachments.attachment import Attachment
 from apps.bot.classes.messages.attachments.audio import AudioAttachment
 from apps.bot.classes.messages.attachments.document import DocumentAttachment
 from apps.bot.classes.messages.attachments.gif import GifAttachment
@@ -38,7 +37,7 @@ class Event:
         self.chat: Optional[Chat] = None
         self.peer_id: int = peer_id  # Куда слать ответ
         self.from_id: Optional[int] = None  # От кого пришло сообщение
-        self.platform: Platform = None
+        self.platform: Optional[Platform] = None
 
         self.payload: dict = {}
         self.action: dict = {}
@@ -136,14 +135,12 @@ class Event:
         """
         self.message = Message(text, _id) if text else None
 
-    def get_all_attachments(self, types: Optional[List[Attachment]]):
+    def get_all_attachments(self, types: list):
         attachments = []
 
         if types is None:
             types = [AudioAttachment, DocumentAttachment, GifAttachment, LinkAttachment, PhotoAttachment,
                      StickerAttachment, VideoAttachment, VideoNoteAttachment]
-        if not isinstance(types, list):
-            types = [types]
         if self.attachments:
             for att in self.attachments:
                 if type(att) in types:

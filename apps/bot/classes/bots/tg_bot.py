@@ -288,7 +288,6 @@ class TgBot(Bot):
         Отправка ResponseMessageItem сообщения
         Возвращает {success:bool, response:Response.json()}
         """
-
         try:
             r = self._send_response_message_item(rmi)
         except (PWarning, PError) as e:

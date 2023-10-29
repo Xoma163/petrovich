@@ -1,7 +1,7 @@
 import logging
 
 import requests
-from aiohttp.web_response import Response
+from requests import Response
 
 from apps.bot.utils.cache import MessagesCache
 

@@ -1,5 +1,4 @@
 from datetime import datetime
-from time import sleep
 
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.exceptions import PWarning
@@ -103,18 +102,19 @@ class Horoscope(Command):
                 f"Или укажите дату рождения в профиле: {self.bot.get_formatted_text_line('/профиль др ДД.ММ.ГГГГ')}"
             )
 
-    def get_horoscope_for_all(self):
+    def get_horoscope_for_all(self) -> ResponseMessage:
         horoscope = HoroscopeModel.objects.first()
         self.check_horoscope(horoscope)
         signs = self.zodiac_signs.get_zodiac_signs()
+        rm = ResponseMessage(delay=1)
         for sign in signs:
             message = self.get_horoscope_by_zodiac_sign(sign)
             message.peer_id = self.event.peer_id
             message.message_thread_id = self.event.message_thread_id
-            self.bot.send_response_message_thread(ResponseMessage(message))
-            sleep(1)
+            rm.messages.append(message)
+        return rm
 
-    def get_horoscope_for_conference(self):
+    def get_horoscope_for_conference(self) -> ResponseMessage:
         self.check_conversation()
         chat_users = self.event.chat.users.all()
         signs = []
@@ -129,12 +129,13 @@ class Horoscope(Command):
                 "Ни у кого в конфе не проставлено ДР\n"
                 f"Укажите дату рождения в профиле: {self.bot.get_formatted_text_line('/профиль др ДД.ММ.ГГГГ')}"
             )
+        rm = ResponseMessage()
         for sign in signs:
             message = self.get_horoscope_by_zodiac_sign(sign)
             message.peer_id = self.event.peer_id
             message.message_thread_id = self.event.message_thread_id
-            self.bot.send_response_message_thread(ResponseMessage(message))
-            sleep(1)
+            rm.messages.append(message)
+        return rm
 
     def get_horoscope_info(self) -> ResponseMessage:
         self.check_args(2)

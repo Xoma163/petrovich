@@ -28,7 +28,7 @@ from apps.bot.classes.const.consts import Platform, Role
 from apps.bot.classes.const.exceptions import PWarning, PSkip
 from apps.bot.classes.event.event import Event
 from apps.bot.classes.messages.attachments.link import LinkAttachment
-from apps.bot.classes.messages.response_message import ResponseMessageItem
+from apps.bot.classes.messages.response_message import ResponseMessageItem, ResponseMessage
 from apps.bot.commands.trim_video import TrimVideo
 from apps.bot.utils.utils import get_urls_from_text, replace_markdown_links, replace_markdown_bolds, \
     replace_markdown_quotes
@@ -111,7 +111,7 @@ class Media(Command):
                     return True
         return False
 
-    def start(self):
+    def start(self) -> ResponseMessage:
         if self.event.message.command in self.full_names:
             if self.event.message.args or self.event.fwd:
                 source = self.event.get_all_attachments([LinkAttachment])[0].url
@@ -168,6 +168,7 @@ class Media(Command):
         br = self.bot.send_response_message_item(rmi)
         if br.success:
             self.bot.delete_message(self.event.peer_id, self.event.message.id)
+        return ResponseMessage(rmi, send=False)
 
     def get_method_and_chosen_url(self, source):
         media_translator = {
@@ -291,13 +292,7 @@ class Media(Command):
                         all_photos.append(link)
             text = replace_markdown_bolds(text, self.bot)
             text = replace_markdown_quotes(text, self.bot)
-
-            if all_photos:
-                atatchments = [self.bot.get_photo_attachment(x, filename=rs.filename) for x in all_photos]
-                rmi = ResponseMessageItem(attachments=atatchments, peer_id=self.event.peer_id,
-                                          message_thread_id=self.event.message_thread_id)
-                self.bot.send_response_message_item(rmi)
-            return [], f"{rs.title}\n\n{text}"
+            return all_photos, f"{rs.title}\n\n{text}"
         else:
             raise PWarning("Я хз чё за контент")
         return attachments, rs.title

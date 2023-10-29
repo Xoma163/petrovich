@@ -10,7 +10,7 @@ from apps.service.models import Tag as TagModel
 
 class Tag(Command):
     name = "тег"
-    names = ["менш", "меншон", "вызов", "клич", "tag", "группа"]
+    names = ["менш", "меншон", "вызов", "клич", "tag", "группа", "теги"]
     help_text = "тегает людей в конфе"
     help_texts = [
         "создать (название) - добавляет новую группу",
@@ -41,6 +41,9 @@ class Tag(Command):
         return False
 
     def start(self) -> ResponseMessage:
+        if self.event.message.command.lower() == "теги":
+            rmi = self.menu_list(skip_arg_check=True)
+            return ResponseMessage(rmi)
         arg0 = self.event.message.args[0] if self.event.message.args else None
 
         menu = [
@@ -115,8 +118,9 @@ class Tag(Command):
     def _get_tag_name(self, name):
         return self.bot.get_formatted_text_line(name)
 
-    def menu_list(self) -> ResponseMessageItem:
-        self.check_args(1)
+    def menu_list(self, skip_arg_check=False) -> ResponseMessageItem:
+        if not skip_arg_check:
+            self.check_args(1)
         tags = TagModel.objects.filter(chat=self.event.chat)
         if not tags:
             answer = "Тегов нет"

@@ -1,6 +1,4 @@
 import random
-from threading import Lock
-from typing import Optional
 
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role, Platform
@@ -8,8 +6,6 @@ from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.messages.response_message import ResponseMessageItem, ResponseMessage
 from apps.bot.utils.utils import decl_of_num, send_message_session_or_edit
 from apps.games.models import BullsAndCowsSession
-
-lock = Lock()
 
 DIGITS_IN_GAME = 4
 
@@ -26,20 +22,19 @@ class BullsAndCows(Command):
     access = Role.GAMER
 
     def start(self) -> ResponseMessage:
-        with lock:
-            if self.event.chat:
-                session = BullsAndCowsSession.objects.filter(chat=self.event.chat).first()
-            else:
-                session = BullsAndCowsSession.objects.filter(profile=self.event.sender).first()
-            if not self.event.message.args:
-                return self.start_game(session)
-            else:
-                return self.play_game(session)
+        if self.event.chat:
+            session = BullsAndCowsSession.objects.filter(chat=self.event.chat).first()
+        else:
+            session = BullsAndCowsSession.objects.filter(profile=self.event.sender).first()
 
-    def start_game(self, session) -> Optional[ResponseMessage]:
+        if not self.event.message.args:
+            return self.start_game(session)
+        else:
+            return self.play_game(session)
+
+    def start_game(self, session) -> ResponseMessage:
         if session:
-            self._send_message(session)
-            return
+            return self._send_message(session)
         digits = [str(x) for x in range(10)]
         random.shuffle(digits)
         new_obj = {
@@ -51,17 +46,19 @@ class BullsAndCows(Command):
             new_obj['profile'] = self.event.sender
         bacs = BullsAndCowsSession.objects.create(**new_obj)
 
-        answer = "Я создал, погнали"
+        rmi = ResponseMessageItem(
+            text="Я создал, погнали",
+            peer_id=self.event.peer_id,
+            message_thread_id=self.event.message_thread_id
+        )
         if self.event.platform == Platform.TG:
-            rmi = ResponseMessageItem(text=answer, peer_id=self.event.peer_id,
-                                      message_thread_id=self.event.message_thread_id)
             br = self.bot.send_response_message_item(rmi)
             message_id = br.response['result']['message_id']
-            bacs.message_body = "Я создал, погнали"
+            bacs.message_body = rmi.text
             bacs.message_id = message_id
             bacs.save()
-            return
-        return ResponseMessage(ResponseMessageItem(text=answer))
+            return ResponseMessage(rmi, send=False)
+        return ResponseMessage(rmi)
 
     def play_game(self, session) -> ResponseMessage:
         if not session:
@@ -120,10 +117,11 @@ class BullsAndCows(Command):
         session.message_body += f"\n\n{new_msg}"
         session.save()
 
-        self._send_message(session)
+        return self._send_message(session)
 
-    def _send_message(self, session):
+    def _send_message(self, session) -> ResponseMessage:
         message_without_duplications = "\n\n".join(list(dict.fromkeys(session.message_body.split('\n\n'))))
         rmi = ResponseMessageItem(text=message_without_duplications, peer_id=self.event.peer_id,
                                   message_thread_id=self.event.message_thread_id)
         send_message_session_or_edit(self.bot, self.event, session, rmi, 8)
+        return ResponseMessage(rmi, send=False)

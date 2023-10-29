@@ -19,7 +19,7 @@ class Uyu(Command):
 
         msgs = [x.message.raw for x in self.event.fwd if x.message]
         if not msgs:
-            return add_word
+            return ResponseMessage(ResponseMessageItem(add_word))
         answer = "\n\n".join(msgs).strip()
 
         if not answer:

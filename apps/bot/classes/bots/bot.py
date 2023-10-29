@@ -101,13 +101,9 @@ class Bot(Thread):
         finally:
             self.stop_activity_thread()
 
-        if rm and send:
+        if rm and send and rm.send:
             self.send_response_message(rm)
         return rm
-
-    def send_response_message_thread(self, rm: ResponseMessage):
-        for rmi in rm.messages:
-            Thread(target=self.send_response_message_item, args=(rmi,)).start()
 
     def send_response_message(self, rm: ResponseMessage) -> List[BotResponse]:
         """
@@ -115,11 +111,19 @@ class Bot(Thread):
         Вовзращает список результатов отправки в формате
         [{success:bool, response:Response}]
         """
+
         results = []
 
         for rmi in rm.messages:
-            br = self.send_response_message_item(rmi)
-            results.append(br)
+            if not rmi.send:
+                continue
+            if rm.thread:
+                Thread(target=self.send_response_message_item, args=(rmi,)).start()
+            else:
+                br = self.send_response_message_item(rmi)
+                results.append(br)
+            if rm.delay:
+                time.sleep(rm.delay)
         return results
 
     def send_response_message_item(self, rmi: ResponseMessageItem) -> BotResponse:
