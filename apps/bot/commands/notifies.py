@@ -1,3 +1,5 @@
+from django.db.models import Q
+
 from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Platform
@@ -13,7 +15,7 @@ class Notifies(Command):
     help_text = "список напоминаний"
     help_texts = [
         "- список активных напоминаний в лс, если в конфе, то только общие в конфе",
-        "удалить (текст напоминания) - удаляет напоминание"
+        "удалить (текст/дата/crontab/id) - удаляет напоминание"
     ]
     platforms = [Platform.TG]
     city = True
@@ -37,21 +39,33 @@ class Notifies(Command):
 
     def menu_delete(self) -> ResponseMessageItem:
         self.check_args(2)
-        notifies = self.get_filtered_notifies()
 
-        filter_list = self.event.message.args[1:]
-        for _filter in filter_list:
-            notifies = notifies.filter(text_for_filter__icontains=_filter)
+        channel_filter = self.event.message.args[1:]
+        notifie = self.get_notifie(channel_filter)
 
-        if len(notifies) == 0:
-            raise PWarning("Не нашёл напоминаний по такому тексту")
-        if len(notifies) > 1:
-            raise PWarning(f"Нашёл сразу несколько. Уточните:\n\n"
-                           f"{self.get_notifies_str(notifies, self.event.sender.city.timezone.name)}")
-
-        notifies.delete()
+        notifie.delete()
         answer = "Удалил"
         return ResponseMessageItem(text=answer)
+
+    def get_notifie(self, filters: list) -> Notify:
+        notifies = self.get_filtered_notifies()
+
+        try:
+            pk = int(filters[0])
+            notifies = notifies.filter(pk=pk)
+        except ValueError:
+            for _filter in filters:
+                q = Q(text__icontains=_filter) | Q(date__icontains=_filter) | Q(crontab__icontains=_filter)
+                notifies = notifies.filter(q)
+
+        notifies_count = notifies.count()
+        if notifies_count == 0:
+            raise PWarning("Не нашёл напоминаний по такому тексту")
+        elif notifies_count > 1:
+            raise PWarning(f"Нашёл сразу {notifies_count}. Уточните:\n\n"
+                           f"{self.get_notifies_str(notifies, self.event.sender.city.timezone.name)}")
+
+        return notifies.first()
 
     def get_notifies_str(self, notifies_obj, timezone):
         if len(notifies_obj) == 0:
@@ -65,13 +79,15 @@ class Notifies(Command):
                 notify_datetime = notify.crontab
 
             result += f"{notify.user}\n"
+            result += f"[id:{self.bot.get_formatted_text_line(notify.pk)}] "
+
             if notify.repeat:
                 if notify.crontab:
                     result += f"{self.bot.get_formatted_text_line(notify_datetime)} - Постоянное"
                 else:
                     result += f"{self.bot.get_formatted_text_line(notify_datetime.strftime('%H:%M'))} - Постоянное"
             else:
-                result += f"{self.bot.get_formatted_text_line(notify_datetime.strftime('%d.%m.%Y %H:%M'))} - Постоянное"
+                result += f"{self.bot.get_formatted_text_line(notify_datetime.strftime('%d.%m.%Y %H:%M'))}"
             if notify.chat:
                 result += f" (Конфа - {notify.chat.name})"
             result += f"\n{self.bot.get_formatted_text_line(notify.text)}\n\n"

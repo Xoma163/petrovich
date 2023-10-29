@@ -97,7 +97,6 @@ class Notify(Command):
             date=date,
             user=self.event.user,
             chat=self.event.chat,
-            text_for_filter=notify_datetime.strftime("%d.%m.%Y %H:%M"),
             message_thread_id=self.event.message_thread_id
         )
 
@@ -109,12 +108,9 @@ class Notify(Command):
             raise PWarning("В напоминании должны быть текст или вложения(tg)")
         if text:
             notify.text = text
-            notify.text_for_filter += f" {text}"
         if tg_att_flag:
             notify.attachments = [{x.type: x.file_id} for x in attachments]
 
-        notify.save()
-        notify.text_for_filter += f" ({notify.id})"
         notify.save()
 
         answer = f'Сохранил на дату {str(notify_datetime.strftime("%d.%m.%Y %H:%M"))}'

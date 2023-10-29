@@ -85,12 +85,10 @@ class NotifyRepeat(Command):
         }
         if crontab:
             notify_dict['crontab'] = crontab
-            notify_dict['text_for_filter'] = crontab
             answer = 'Добавил напоминание'
         else:
             notify_datetime = localize_datetime(remove_tz(date), timezone)
             notify_dict['date'] = date
-            notify_dict['text_for_filter'] = notify_datetime.strftime("%H:%M")
             answer = f'Следующее выполнение - {str(notify_datetime.strftime("%d.%m.%Y %H:%M"))}'
         notify = NotifyModel(**notify_dict)
 
@@ -100,12 +98,9 @@ class NotifyRepeat(Command):
             raise PWarning("В напоминании должны быть текст или вложения(tg)")
         if text:
             notify.text = text
-            notify.text_for_filter += f" {text}"
         if attachments:
             notify.attachments = [{x.type: x.file_id} for x in attachments]
 
-        notify.save()
-        notify.text_for_filter += f" ({notify.id})"
         notify.save()
 
         return ResponseMessageItem(text=answer)

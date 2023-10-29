@@ -157,12 +157,12 @@ class Subscribe(Command):
         subs_count = subs.count()
         if subs_count == 0:
             raise PWarning("Не нашёл :(")
-        elif subs_count == 1:
-            return subs.first()
-        else:
+        elif subs_count > 1:
             msg = f"Нашёл сразу {subs_count}. уточните:\n\n" \
                   f"{self.get_subs_str(subs)}"
             raise PWarning(msg)
+
+        return subs.first()
 
     def get_subs_str(self, subs) -> str:
         subs_titles_str = ""
