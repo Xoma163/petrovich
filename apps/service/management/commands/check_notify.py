@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from django.core.management.base import BaseCommand
 
 from apps.bot.classes.bots.tg_bot import TgBot
-from apps.bot.classes.const.consts import Role, ATTACHMENT_TYPE_TRANSLATOR
+from apps.bot.classes.const.consts import Role, ATTACHMENT_TYPE_TRANSLATOR, Platform
 from apps.bot.classes.event.event import Event
 from apps.bot.classes.messages.response_message import ResponseMessageItem
 from apps.bot.utils.utils import remove_tz, localize_datetime
@@ -91,6 +91,7 @@ class Command(BaseCommand):
     def send_command_notify_message(bot, notify):
         # Если отложенная команда
         event = Event()
+        event.platform = Platform.TG
         event.set_message(notify.text)
         event.sender = notify.user.profile
         event.is_from_user = True
