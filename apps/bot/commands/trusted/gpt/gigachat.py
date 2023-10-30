@@ -17,7 +17,13 @@ class GigaChat(ChatGPT):
 
     def start(self) -> ResponseMessage:
         self.event: TgEvent
-        messages = self.get_dialog(self.event)
+
+        if self.event.message.command in self.full_names:
+            user_message = self.event.message.args_str_case
+        else:
+            user_message = self.event.message.raw
+
+        messages = self.get_dialog(self.event, user_message)
         return self.text_chat(messages)
 
     def text_chat(self, messages, model=None) -> ResponseMessage:

@@ -29,7 +29,6 @@ class ChatGPT(Command):
         "Если отвечать на сообщения бота через кнопку \"Ответить\" то будет продолжаться непрерывный диалог.\n" \
         "В таком случае необязательно писать команду, можно просто текст"
     access = Role.TRUSTED
-    args = 1
     platforms = [Platform.TG]
 
     GPT_4 = 'gpt-4'
@@ -47,10 +46,17 @@ class ChatGPT(Command):
         return False
 
     def start(self) -> ResponseMessage:
-        if self.event.message.args[0] == "нарисуй":
+        if self.event.message.args and self.event.message.args[0] == "нарисуй":
             return self.draw_image()
+
         self.event: TgEvent
-        messages = self.get_dialog(self.event)
+        if self.event.message.command in self.full_names:
+            user_message = self.event.message.args_str_case
+        else:
+            user_message = self.event.message.raw
+
+        messages = self.get_dialog(self.event, user_message)
+
         return self.text_chat(messages)
 
     def draw_image(self) -> ResponseMessage:
@@ -115,7 +121,7 @@ class ChatGPT(Command):
         return ResponseMessage(ResponseMessageItem(text=answer, reply_to=self.event.message.id))
 
     @staticmethod
-    def get_dialog(event: TgEvent):
+    def get_dialog(event: TgEvent, user_message):
         mc = MessagesCache(event.peer_id)
         data = mc.get_messages()
         if not event.fwd:
@@ -135,10 +141,7 @@ class ChatGPT(Command):
             if not reply_to_id:
                 break
         history = list(reversed(history))
-        if event.message.args_str_case:
-            history.append({'role': "user", 'content': event.message.args_str_case})
-        else:
-            history.append({'role': "user", 'content': event.message.command})
+        history.append({'role': "user", 'content': user_message})
         return history
 
     @staticmethod
