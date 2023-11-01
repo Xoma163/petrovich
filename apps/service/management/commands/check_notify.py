@@ -34,7 +34,7 @@ class Command(BaseCommand):
                 self.send_notify_message(bot, notify)
                 if notify.text.startswith('/'):
                     self.send_command_notify_message(bot, notify)
-                else:
+                if notify.date:
                     notify.delete()
             except Exception:
                 logger.exception("Ошибка в проверке/отправке оповещения")
