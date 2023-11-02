@@ -1,4 +1,5 @@
 import json
+import logging
 
 from apps.bot.classes.const.consts import Platform
 from apps.bot.classes.event.event import Event
@@ -68,6 +69,9 @@ class TgEvent(Event):
         self.from_id = message['from']['id']
 
         if message['chat']['id'] != message['from']['id']:
+            if message['chat']['id'] > 0:
+                logger = logging.getLogger('bot')
+                logger.debug({"strange_things": self.raw})
             self.chat = self.bot.get_chat_by_id(message['chat']['id'])
             self.is_from_chat = True
         else:
