@@ -4,7 +4,10 @@ from typing import List
 
 
 class ResponseMessageItem:
-    TG_TAGS = ['pre', 'code', 'i', 'b', 'u']
+    TG_TAGS = ['pre', 'code', 'span', 'i', 'b', 'u', 'a', 's']
+
+    URLS_REGEXP = r"(http|ftp|https|tg)(:\/\/)([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-])"
+    HTML_TAGS_REGEXP = r'<([^>]*)>'
 
     def __init__(
             self, text: str = None, attachments: list = None, reply_to: str = None, keyboard: dict = None,
@@ -56,41 +59,61 @@ class ResponseMessageItem:
         return dict_self
 
     def set_telegram_html(self):
-        urls_regexp = r"(http|ftp|https|tg)(:\/\/)([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-])"
-        if self.text:
-            p = re.compile(urls_regexp)  # Ссылки
-            if p.search(self.text):
-                self.kwargs['parse_mode'] = "html"
-            else:
-                for tag in self.TG_TAGS:
-                    p = re.compile(f"<{tag}>[\s\S]*</{tag}>")
-                    if p.search(self.text):
-                        self.kwargs['parse_mode'] = "html"
-                        break
+        if not self.text:
+            return
+        p = re.compile(self.URLS_REGEXP)  # Ссылки
+        if p.search(self.text):
+            self.kwargs['parse_mode'] = "html"
+        else:
+            for tag in self.TG_TAGS:
+                p = re.compile(f"<{tag}>[\s\S]*</{tag}>")
+                if p.search(self.text):
+                    self.kwargs['parse_mode'] = "html"
+                    break
 
-            if self.kwargs.get('parse_mode'):
-                # Врапим ссылки без явного их врапа если у нас уже html
-                url_poss = re.finditer(urls_regexp, self.text)  # Ссылки не в скобках
-                url_poss = reversed(list(url_poss))  # Заменяем всё в строке с конца, чтобы были корректные позиции
-                for url_pos in url_poss:
-                    start_pos = url_pos.start()
-                    end_pos = url_pos.end()
+        if self.kwargs.get('parse_mode'):
+            self.wrap_links()
 
-                    url = self.text[start_pos:end_pos]
+        self.wrap_symbols()
 
-                    # Если ссылка уже враплена, то продолжаем просто дальше
-                    left_part = None
-                    right_part = None
-                    if start_pos >= 9:
-                        left_part = self.text[start_pos - 9:start_pos]
-                    if len(self.text) > end_pos:
-                        right_part = self.text[end_pos:end_pos + 2]
-                    if left_part == '<a href="' and right_part == '">':
-                        continue
+    def wrap_links(self):
+        # Врапим ссылки без явного их врапа если у нас уже html
+        url_poss = re.finditer(self.URLS_REGEXP, self.text)  # Ссылки не в скобках
+        url_poss = reversed(list(url_poss))  # Заменяем всё в строке с конца, чтобы были корректные позиции
+        for url_pos in url_poss:
+            start_pos = url_pos.start()
+            end_pos = url_pos.end()
 
-                    if len(self.attachments) < 2:
-                        from apps.bot.classes.bots.tg_bot import TgBot
-                        self.text = self.text[:start_pos] + TgBot.get_formatted_url(url, url) + self.text[end_pos:]
+            url = self.text[start_pos:end_pos]
+
+            # Если ссылка уже враплена, то продолжаем просто дальше
+            left_part = None
+            right_part = None
+            if start_pos >= 9:
+                left_part = self.text[start_pos - 9:start_pos]
+            if len(self.text) > end_pos:
+                right_part = self.text[end_pos:end_pos + 2]
+            if left_part == '<a href="' and right_part == '">':
+                continue
+
+            if len(self.attachments) < 2:
+                from apps.bot.classes.bots.tg_bot import TgBot
+                self.text = self.text[:start_pos] + TgBot.get_formatted_url(url, url) + self.text[end_pos:]
+
+    def wrap_symbols(self):
+        url_poss = re.finditer(self.HTML_TAGS_REGEXP, self.text)  # HTML Теги
+        url_poss = reversed(list(url_poss))  # Заменяем всё в строке с конца, чтобы были корректные позиции
+        for url_pos in url_poss:
+            start_pos = url_pos.start()
+            end_pos = url_pos.end()
+            group_start_pos = url_pos.regs[1][0]
+            group_end_pos = url_pos.regs[1][1]
+            tag = self.text[group_start_pos:group_end_pos].split(' ', 1)[0].strip('/').lower()
+            if tag in self.TG_TAGS:
+                continue
+            self.text = self.text[:end_pos - 1] + "&gt;" + self.text[end_pos:]
+            self.text = self.text[:start_pos] + "&lt;" + self.text[start_pos + 1:]
+        print
 
     def __str__(self):
         return self.text if self.text else ""
