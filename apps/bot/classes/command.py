@@ -75,8 +75,8 @@ class Command:
         if self.hidden:
             if self.suggest_for_similar:
                 raise RuntimeError("Поле hidden=True и suggest_for_similar=True не могут быть переданы вместе")
-            if self.access == Role.USER:
-                raise RuntimeError("Поле hidden=True и self.access=Role.USER не могут быть переданы вместе")
+            # if self.access == Role.USER:
+            #     raise RuntimeError("Поле hidden=True и self.access=Role.USER не могут быть переданы вместе")
 
     def accept(self, event: Event) -> bool:
         """
