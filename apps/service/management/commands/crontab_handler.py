@@ -1,11 +1,11 @@
 import threading
 from datetime import datetime
 
+from crontab import CronTab
 from django.core.management import call_command
 from django.core.management.base import BaseCommand
 
 from apps.bot.utils.utils import localize_datetime
-from crontab import CronTab
 from petrovich.settings import TIME_ZONE
 
 

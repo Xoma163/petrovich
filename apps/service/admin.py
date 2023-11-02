@@ -54,8 +54,9 @@ class DonationsAdmin(admin.ModelAdmin):
 
 @admin.register(Subscribe)
 class SubscribeAdmin(admin.ModelAdmin):
-    list_display = ('author', 'chat', 'channel_title', 'playlist_title', 'service',)
-    list_filter = (('author', admin.RelatedOnlyFieldListFilter), ('chat', admin.RelatedOnlyFieldListFilter),)
+    list_display = ('author', 'chat', 'channel_title', 'playlist_title', 'service', 'save_to_plex')
+    list_filter = (
+    ('author', admin.RelatedOnlyFieldListFilter), ('chat', admin.RelatedOnlyFieldListFilter), 'save_to_plex')
 
 
 @admin.register(VideoCache)

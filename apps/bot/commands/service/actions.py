@@ -65,8 +65,8 @@ class Actions(Command):
         return "Успешно изменил id вашей группы в базе данных"
 
     def group_chat_created(self):
-        return f"Задайте имя конфы:\n" \
-               f"{self.bot.get_formatted_text_line('/конфа')} {{Название конфы}}"
+        self.edit_chat_title(self.event.raw['message']['chat']['title'])
+        return "Привет!"
 
     def edit_chat_title(self, new_chat_title):
         self.event.chat.name = new_chat_title
