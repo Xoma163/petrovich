@@ -29,5 +29,7 @@ class GigaChat(ChatGPT):
     def text_chat(self, messages, model=None) -> ResponseMessage:
         gc_api = GigaChatAPI()
         answer = gc_api.completions(messages, model)
+        answer = answer.replace(">", "&gt;").replace("<", "&lt;").replace("&lt;pre&gt;", "<pre>").replace(
+            "&lt;/pre&gt;", "</pre>")
         answer = replace_markdown(answer, self.bot)
         return ResponseMessage(ResponseMessageItem(text=answer, reply_to=self.event.message.id))

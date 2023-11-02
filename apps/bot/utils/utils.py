@@ -406,13 +406,24 @@ def replace_markdown_bolds(text: str, bot) -> str:
 
 
 def replace_markdown_quotes(text: str, bot) -> str:
-    p = re.compile(r'&gt;(.*)\n')  # markdown quote
+    p = re.compile(r'^\&gt;\s(.*(?:$)?)', re.MULTILINE)  # markdown quote
     for item in reversed(list(p.finditer(text))):
         start_pos = item.start()
         end_pos = item.end()
         quote_text = text[item.regs[1][0]:item.regs[1][1]]
         tg_quote_text = bot.get_formatted_text_line(quote_text)
         text = text[:start_pos] + tg_quote_text + text[end_pos:]
+    return text
+
+
+def replace_markdown_line_code(text: str, bot) -> str:
+    p = re.compile(r'`(.*)`', re.MULTILINE)  # markdown formatting
+    for item in reversed(list(p.finditer(text))):
+        start_pos = item.start()
+        end_pos = item.end()
+        code_text = text[item.regs[1][0]:item.regs[1][1]]
+        tg_code_text = bot.get_formatted_text_line(code_text)
+        text = text[:start_pos] + tg_code_text + text[end_pos:]
     return text
 
 
@@ -431,6 +442,7 @@ def replace_markdown(text, bot):
     text = replace_markdown_links(text, bot)
     text = replace_markdown_bolds(text, bot)
     text = replace_markdown_quotes(text, bot)
+    text = replace_markdown_line_code(text, bot)
     text = replace_markdown_code(text, bot)
     return text
 

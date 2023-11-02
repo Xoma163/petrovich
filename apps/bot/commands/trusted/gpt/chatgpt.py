@@ -117,6 +117,8 @@ class ChatGPT(Command):
             raise PWarning("Какая-то непредвиденная ошибка. Попробуйте ещё раз")
 
         answer = response.choices[0].message.content
+        answer = answer.replace(">", "&gt;").replace("<", "&lt;").replace("&lt;pre&gt;", "<pre>").replace(
+            "&lt;/pre&gt;", "</pre>")
         answer = replace_markdown(answer, self.bot)
         return ResponseMessage(ResponseMessageItem(text=answer, reply_to=self.event.message.id))
 

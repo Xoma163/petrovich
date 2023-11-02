@@ -568,7 +568,7 @@ class TgBot(Bot):
         """
         Форматированный текст
         """
-        return f"<pre>{text}</pre>"
+        return f"<pre>{text.replace('&', '&amp;').replace('>', '&gt;').replace('<', '&lt;')}</pre>"
 
     @classmethod
     def get_formatted_text_line(cls, text: str) -> str:
@@ -614,6 +614,6 @@ class TgBot(Bot):
         """
         Спойлер-текст
         """
-        return f'<span class="tg-spoiler">{text}</span>'
+        return f'<tg-spoiler">{text}</tg-spoiler>'
 
     # END EXTRA
