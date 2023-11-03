@@ -354,6 +354,8 @@ class Command:
         """
         if self.event.is_from_pm:
             return
+        if self.event.payload and self.event.payload.get('c') in self.full_names:
+            return
         if not self.event.message.mentioned:
             raise PSkip()
 

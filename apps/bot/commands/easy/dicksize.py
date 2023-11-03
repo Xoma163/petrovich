@@ -10,12 +10,17 @@ class DickSize(Command):
     name = "член"
 
     mentioned = True
-    hidden = True
-    suggest_for_similar = False
 
     def start(self) -> ResponseMessage:
         seed = int(datetime.datetime.now().strftime("%d%m%Y")) + self.event.sender.pk
         size = np.random.default_rng(seed=seed).normal(10, 2.2) + 3.21
         size = round(size, 1)
-        answer = f"Ваш член сегодня - {size}см"
-        return ResponseMessage(ResponseMessageItem(text=answer))
+
+        if self.event.is_from_chat:
+            button = self.bot.get_button("Член", self.name)
+            keyboard = self.bot.get_inline_keyboard([button])
+            answer = f"{self.event.sender.name}, ваш член сегодня - {size}см"
+        else:
+            keyboard = None
+            answer = f"Ваш член сегодня - {size}см"
+        return ResponseMessage(ResponseMessageItem(text=answer, keyboard=keyboard))
