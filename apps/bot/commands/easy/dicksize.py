@@ -3,6 +3,7 @@ import datetime
 import numpy as np
 
 from apps.bot.classes.command import Command
+from apps.bot.classes.const.exceptions import PSkip
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 
 
@@ -20,6 +21,12 @@ class DickSize(Command):
             button = self.bot.get_button("Член", self.name)
             keyboard = self.bot.get_inline_keyboard([button])
             answer = f"{self.event.sender.name}, ваш член сегодня - {size}см"
+
+            if dicks := self.event.raw.get('callback_query', {}).get('message', {}).get('text'):
+                if answer not in dicks:
+                    answer = f"{dicks}\n{answer}"
+                else:
+                    raise PSkip()
         else:
             keyboard = None
             answer = f"Ваш член сегодня - {size}см"
