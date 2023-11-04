@@ -13,6 +13,8 @@ class Actions(Command):
         return bool(event.action)
 
     def start(self) -> ResponseMessage:
+        my_chat_member = self.event.action.get('my_chat_member')
+        chat_member = self.event.action.get('chat_member')
         new_chat_members = self.event.action.get('new_chat_members')
         left_chat_member = self.event.action.get('left_chat_member')
         migrate_from_chat_id = self.event.action.get('migrate_from_chat_id')
@@ -26,13 +28,15 @@ class Actions(Command):
             answer = answers[0] if answers else None
 
         elif left_chat_member:
-            self.setup_left_chat_member(left_chat_member['id'], is_bot=left_chat_member['is_bot'])
+            self.setup_left_chat_member(left_chat_member)
         elif migrate_from_chat_id:
             answer = self.setup_new_chat_id(migrate_from_chat_id)
         elif group_chat_created:
             answer = self.group_chat_created()
         elif new_chat_title:
             self.edit_chat_title(new_chat_title)
+        elif my_chat_member or chat_member:
+            self.chat_member(my_chat_member or chat_member)
 
         if answer:
             return ResponseMessage(ResponseMessageItem(text=answer))
@@ -48,13 +52,16 @@ class Actions(Command):
             profile = self.bot.get_profile_by_user_id(member_id)
             self.bot.add_chat_to_profile(profile, self.event.chat)
 
-    def setup_left_chat_member(self, member_id, is_bot):
+    def setup_left_chat_member(self, left_chat_member):
+        is_bot = left_chat_member['is_bot']
+        user_id = left_chat_member['id']
+
         if is_bot:
             bot_group_id = env.int('TG_BOT_GROUP_ID')
-            if member_id == bot_group_id:
+            if user_id == bot_group_id:
                 self._set_kicked_state(True)
         if not is_bot:
-            profile = self.bot.get_profile_by_user_id(member_id)
+            profile = self.bot.get_profile_by_user_id(user_id)
             self.bot.remove_chat_from_profile(profile, self.event.chat)
 
     def setup_new_chat_id(self, chat_id):
@@ -73,5 +80,14 @@ class Actions(Command):
         self.event.chat.save()
 
     def _set_kicked_state(self, state: bool):
+        # status kicked в my_chat_member == бота забанили
+        if not self.event.chat:
+            return
         self.event.chat.kicked = state
         self.event.chat.save()
+
+    def chat_member(self, chat_member):
+        chat_member = chat_member['new_chat_member']
+        status = chat_member['status']
+        if status in ["left", "kicked"]:
+            self.setup_left_chat_member(chat_member['user'])

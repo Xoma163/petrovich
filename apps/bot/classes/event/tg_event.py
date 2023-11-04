@@ -125,21 +125,17 @@ class TgEvent(Event):
         super().setup_event(**kwargs)
 
     def setup_action(self, message):
-        new_chat_members = message.get('new_chat_members')
-        left_chat_member = message.get('left_chat_member')
-        migrate_from_chat_id = message.get('migrate_from_chat_id')
-        group_chat_created = message.get('group_chat_created')
-        new_chat_title = message.get('new_chat_title')
-        if new_chat_members:
-            self.action = {'new_chat_members': new_chat_members}
-        elif left_chat_member:
-            self.action = {'left_chat_member': left_chat_member}
-        elif migrate_from_chat_id:
-            self.action = {'migrate_from_chat_id': migrate_from_chat_id}
-        elif group_chat_created:
-            self.action = {'group_chat_created': group_chat_created}
-        elif new_chat_title:
-            self.action = {'new_chat_title': new_chat_title}
+        actions = [
+            'new_chat_members', "left_chat_member", "migrate_from_chat_id", "group_chat_created", "new_chat_title"
+        ]
+        for action in actions:
+            if action in message:
+                self.action[action] = message[action]
+
+        actions_raw = ["my_chat_member", "chat_member"]
+        for action in actions_raw:
+            if action in self.raw:
+                self.action[action] = self.raw[action]
 
     def setup_payload(self, payload, first_button_text):
         self.message = Message()
