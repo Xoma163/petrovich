@@ -211,7 +211,10 @@ class YoutubeVideo(SubscribeService):
 
         data = {"ids": [], "titles": [], "urls": []}
         for i, url in enumerate(urls):
-            video_info = self._get_video_info(url)
+            try:
+                video_info = self._get_video_info(url)
+            except PWarning:
+                continue
             if video_info['duration'] <= 60:
                 continue
             data['ids'].append(ids[i])
