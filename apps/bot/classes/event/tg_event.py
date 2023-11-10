@@ -1,5 +1,4 @@
 import json
-import logging
 
 from apps.bot.classes.const.consts import Platform
 from apps.bot.classes.event.event import Event
@@ -68,19 +67,17 @@ class TgEvent(Event):
         self.peer_id = message['chat']['id']
         self.from_id = message['from']['id']
 
-        if message['chat']['id'] != message['from']['id']:
-            if message['chat']['id'] > 0:
-                logger = logging.getLogger('bot')
-                logger.debug({"strange_things": self.raw})
+        if message['chat']['type'] == 'private':
+            self.is_from_pm = True
+        elif message['chat']['type'] in ["group", "supergroup", "channel"]:
             self.chat = self.bot.get_chat_by_id(message['chat']['id'])
             self.is_from_chat = True
-        else:
-            self.is_from_pm = True
 
         if self.is_fwd:
             _from = message.get('forward_from', message['from'])
         else:
             _from = message['from']
+
         if _from['is_bot']:
             self.is_from_bot = True
         else:
