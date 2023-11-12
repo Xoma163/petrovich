@@ -31,7 +31,7 @@ class ChatGPT(Command):
     access = Role.TRUSTED
     platforms = [Platform.TG]
 
-    GPT_4 = 'gpt-4'
+    GPT_4 = 'gpt-4-1106-preview'
     GPT_3 = 'gpt-3.5-turbo-16k-0613'
 
     def accept(self, event: Event):

@@ -35,7 +35,7 @@ class WTF(Command):
         gpt = ChatGPT()
         gpt.bot = self.bot
         gpt.event = self.event
-        return gpt.text_chat(messages, model=gpt.GPT_3)
+        return gpt.text_chat(messages, model=gpt.GPT_4)
 
     def get_conversation(self, n: int, promt) -> list:
         events = self.get_last_messages_as_events(n)
