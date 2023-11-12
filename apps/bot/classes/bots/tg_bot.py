@@ -2,7 +2,6 @@ import json
 import threading
 from copy import copy
 
-import requests
 from numpy import inf
 
 from apps.bot.classes.bot_response import BotResponse
@@ -92,22 +91,36 @@ class TgBot(Bot):
         Отправка множества вложений. Ссылки
         """
         params = copy(default_params)
-        media = []
+        media_list = []
         files = []
         for i, attachment in enumerate(rmi.attachments):
+
             if attachment.file_id:
-                media.append({'type': attachment.type, 'media': attachment.file_id})
+                media = {'type': attachment.type, 'media': attachment.file_id}
             elif attachment.public_download_url:
-                media.append({'type': attachment.type, 'media': attachment.public_download_url})
+                media = {'type': attachment.type, 'media': attachment.public_download_url}
             else:
                 filename = attachment.name if attachment.name else str(i)
                 files.append((filename, attachment.content))
-                media.append({'type': attachment.type, "media": f"attach://{filename}"})
+                media = {'type': attachment.type, "media": f"attach://{filename}"}
 
-        media[0]['caption'] = default_params['caption']
+            if attachment.artist:
+                media['performer'] = attachment.artist
+            if attachment.title:
+                media['title'] = attachment.title
+
+            if attachment.thumb:
+                thumb_file = self.get_photo_attachment(attachment.thumb, guarantee_url=True)
+                thumb_filename = f"thumb_{str(i)}"
+                files.append((thumb_filename, thumb_file.get_bytes_io_content()))
+                media['thumbnail'] = f"attach://{thumb_filename}"
+
+            media_list.append(media)
+
+        media_list[0]['caption'] = default_params['caption']
 
         del params['caption']
-        params['media'] = json.dumps(media)
+        params['media'] = json.dumps(media_list)
         if not files:
             r = self.requests.get('sendMediaGroup', params).json()
         else:
@@ -148,7 +161,7 @@ class TgBot(Bot):
         else:
             files = {'document': document.content}
             try:
-                files['thumb'] = get_thumbnail_for_image(document, size=320)
+                files['thumbnail'] = get_thumbnail_for_image(document, size=320)
             except Exception:
                 pass
             r = self.requests.get('sendDocument', params, files=files).json()
@@ -174,7 +187,8 @@ class TgBot(Bot):
                     f"Нельзя загружать видео более {self.MAX_VIDEO_SIZE_MB} мб в телеграмм. Ваше видео {round(video.get_size_mb(), 2)} мб")
             files = {'video': video.content}
             if video.thumb:
-                files['thumb'] = requests.get(video.thumb).content
+                thumb_file = self.get_photo_attachment(video.thumb, guarantee_url=True)
+                files['thumbnail'] = thumb_file.get_bytes_io_content()
             r = self.requests.get('sendVideo', params, files=files).json()
         return r
 
@@ -207,7 +221,7 @@ class TgBot(Bot):
             files = {'audio': audio.content}
             if audio.thumb:
                 thumb_file = self.get_photo_attachment(audio.thumb, guarantee_url=True)
-                files['thumb'] = thumb_file.get_bytes_io_content(params['chat_id'])
+                files['thumbnail'] = thumb_file.get_bytes_io_content()
             r = self.requests.get('sendAudio', params, files=files).json()
         return r
 

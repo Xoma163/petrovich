@@ -18,7 +18,7 @@ from apps.bot.api.thehole import TheHole
 from apps.bot.api.tiktok import TikTok
 from apps.bot.api.twitter import Twitter
 from apps.bot.api.vk.video import VKVideo
-from apps.bot.api.yandex.music import YandexMusic
+from apps.bot.api.yandex.music import YandexMusicAPI, YandexAlbum, YandexTrack
 from apps.bot.api.youtube.music import YoutubeMusic
 from apps.bot.api.youtube.video import YoutubeVideo
 from apps.bot.classes.bots.tg_bot import TgBot
@@ -301,7 +301,7 @@ class Media(Command):
         try:
             self.check_sender(Role.TRUSTED)
         except PWarning:
-            raise PWarning("медиа инстаграмм доступен только для доверенных пользователей")
+            raise PWarning("Медиа инстаграмм доступен только для доверенных пользователей")
 
         i_api = Instagram()
         data = i_api.get_post_data(url)
@@ -318,7 +318,7 @@ class Media(Command):
         try:
             self.check_sender(Role.TRUSTED)
         except PWarning:
-            raise PWarning("медиа твиттер доступен только для доверенных пользователей")
+            raise PWarning("Медиа твиттер доступен только для доверенных пользователей")
 
         t_api = Twitter()
         with_threads = self.event.message.keys and self.event.message.keys[0] in ['thread', 'threads', 'with-threads',
@@ -379,18 +379,34 @@ class Media(Command):
         return attachments, msg
 
     def get_yandex_music(self, url) -> (list, str):
-        track = YandexMusic(url)
-        audiofile = track.download()
-        title = f"{track.artists} - {track.title}"
-        audio = self.bot.get_audio_attachment(
-            audiofile,
-            peer_id=self.event.peer_id,
-            filename=f"{title}.{track.format}",
-            thumb=track.cover_url,
-            artist=track.artists,
-            title=track.title
-        )
-        return [audio], ""
+        ym_api = YandexMusicAPI()
+        res = ym_api.parse_album_and_track_ids(url)
+        if res['album_id'] and not res['track_id']:
+            try:
+                self.check_sender(Role.TRUSTED)
+            except PWarning:
+                raise PWarning("Скачивание альбомов Yandex Music доступно только для доверенных пользователей")
+            ya = YandexAlbum(res['album_id'])
+            ya.set_tracks()
+            tracks = ya.tracks
+        else:
+            yt = YandexTrack(res['track_id'])
+            tracks = [yt]
+
+        audios = []
+        for track in tracks:
+            audiofile = track.download()
+            title = f"{track.artists} - {track.title}"
+            audio = self.bot.get_audio_attachment(
+                audiofile,
+                peer_id=self.event.peer_id,
+                filename=f"{title}.{track.format}",
+                thumb=track.cover_url,
+                artist=track.artists,
+                title=track.title
+            )
+            audios.append(audio)
+        return audios, ""
 
     def get_pinterest_attachment(self, url) -> (list, str):
         p_api = Pinterest()
