@@ -166,7 +166,7 @@ class TgEvent(Event):
         if voice:
             self.setup_voice(voice)
         elif photo:
-            self.setup_photo(photo[-1])
+            self.setup_photo(photo)
             message_text = message.get('caption')
         elif video:
             self.setup_video(video)
@@ -196,9 +196,12 @@ class TgEvent(Event):
         self.message = TgMessage(message_text, message.get('message_id'), entities)
 
     def setup_photo(self, photo_event):
-        tg_photo = PhotoAttachment()
-        tg_photo.parse_tg(photo_event)
-        self.attachments.append(tg_photo)
+        if not isinstance(photo_event, list):
+            photo_event = [photo_event]
+        for photo in photo_event:
+            tg_photo = PhotoAttachment()
+            tg_photo.parse_tg(photo)
+            self.attachments.append(tg_photo)
 
     def setup_video(self, video_event):
         tg_video = VideoAttachment()

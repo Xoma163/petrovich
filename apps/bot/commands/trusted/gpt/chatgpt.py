@@ -1,15 +1,12 @@
-import re
-import time
 from typing import Optional
 
-import openai
-
+from apps.bot.api.gpt.chatgpt import ChatGPTAPI
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.activities import ActivitiesEnum
 from apps.bot.classes.const.consts import Role, Platform
-from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.event.event import Event
 from apps.bot.classes.event.tg_event import TgEvent
+from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.utils.cache import MessagesCache
 from apps.bot.utils.utils import replace_markdown
@@ -23,6 +20,7 @@ class ChatGPT(Command):
     help_text = "чат GPT"
     help_texts = [
         "(фраза) - общение с ботом",
+        "(фраза) [картинка] - общение с ботом с учётом пересланной картинки",
         "нарисуй (фраза) - генерация картинки",
     ]
     help_texts_extra = \
@@ -30,9 +28,6 @@ class ChatGPT(Command):
         "В таком случае необязательно писать команду, можно просто текст"
     access = Role.TRUSTED
     platforms = [Platform.TG]
-
-    GPT_4 = 'gpt-4-1106-preview'
-    GPT_3 = 'gpt-3.5-turbo-16k-0613'
 
     def accept(self, event: Event):
         accept = super().accept(event)
@@ -59,66 +54,51 @@ class ChatGPT(Command):
 
         return self.text_chat(messages)
 
-    def draw_image(self) -> ResponseMessage:
-        openai.api_key = env.str("OPENAI_KEY")
-        openai.api_base = "https://api.openai.com/v1"
+    def draw_image(self, model=None) -> ResponseMessage:
+        if model is None:
+            model = ChatGPTAPI.DALLE_3
 
         request_text = " ".join(self.event.message.args_case[1:])
+        chat_gpt_api = ChatGPTAPI(model)
+
         try:
             self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.UPLOAD_PHOTO)
-            response = openai.Image.create(
-                prompt=request_text,
-                n=5,  # images count
-                size="1024x1024"
-            )
-        except openai.error.APIError:
-            raise PWarning("Какая-то непредвиденная ошибка. Попробуйте ещё раз")
+            images_url = chat_gpt_api.draw(request_text)
         finally:
             self.bot.stop_activity_thread()
 
-        attachments = [self.bot.get_photo_attachment(x['url']) for x in response["data"]]
+        attachments = []
+        for url in images_url:
+            att = self.bot.get_photo_attachment(url)
+            att.download_content()
+            att.public_download_url = None
+            attachments.append(att)
+
         answer = f'Результат генерации по запросу "{request_text}"'
         return ResponseMessage(
             ResponseMessageItem(text=answer, attachments=attachments, reply_to=self.event.message.id))
 
     def text_chat(self, messages, model=None) -> ResponseMessage:
         if model is None:
-            model = self.GPT_4
-        openai.api_key = env.str("OPENAI_KEY")
-        openai.api_base = "https://api.openai.com/v1"
+            photos = self.event.get_all_attachments([PhotoAttachment])
+            if photos:
+                model = ChatGPTAPI.GPT_4_VISION
+            else:
+                model = ChatGPTAPI.GPT_4
 
-        tries = 0
-        response = None
+        chat_gpt_api = ChatGPTAPI(model)
 
-        while not response and tries < 1:
-            try:
-                self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.TYPING)
-                response = openai.ChatCompletion.create(
-                    model=model,
-                    messages=messages
-                )
-            except (openai.error.RateLimitError, openai.error.InvalidRequestError) as e:
-                if e.user_message.startswith("Rate limit reached"):
-                    raise PWarning("Ограничение на количество токенов.")
-                elif e.user_message.startswith("This model's maximum context length"):
-                    r = r"This model's maximum context length is (.*) tokens. However, your messages resulted in (.*) tokens. Please reduce the length of the messages."
-                    re.findall(r, e.user_message)
-                    k = round(int(re.findall(r, e.user_message)[0][1]) / int(re.findall(r, e.user_message)[0][0]), 2)
-                    raise PWarning(f"Ограничение на количество токенов. Уменьшите запрос в {k} раз")
-                time.sleep(5)
-            except openai.error.APIError:
-                time.sleep(2)
-            except openai.error.PermissionError:
-                raise PWarning("Не смогу дать ответ на этот запрос")
-            finally:
-                tries += 1
-                self.bot.stop_activity_thread()
-        if not response:
-            raise PWarning("Какая-то непредвиденная ошибка. Попробуйте ещё раз")
+        try:
+            self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.TYPING)
+            answer = chat_gpt_api.completions(messages)
+        finally:
+            self.bot.stop_activity_thread()
 
-        answer = response.choices[0].message.content
-        answer = answer.replace(">", "&gt;").replace("<", "&lt;").replace("&lt;pre&gt;", "<pre>").replace(
-            "&lt;/pre&gt;", "</pre>")
+        answer = answer \
+            .replace(">", "&gt;") \
+            .replace("<", "&lt;") \
+            .replace("&lt;pre&gt;", "<pre>") \
+            .replace("&lt;/pre&gt;", "</pre>")
         answer = replace_markdown(answer, self.bot)
         return ResponseMessage(ResponseMessageItem(text=answer, reply_to=self.event.message.id))
 
@@ -127,7 +107,18 @@ class ChatGPT(Command):
         mc = MessagesCache(event.peer_id)
         data = mc.get_messages()
         if not event.fwd:
-            return [{'role': "user", 'content': event.message.args_str_case}]
+            photos = event.get_all_attachments([PhotoAttachment])
+            if photos:
+                photos_data = []
+                for photo in photos:
+                    base64 = photo.base64()
+                    photos_data.append({"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64}"}})
+                messages = [{'role': "user", "content": [{"type": "text", "text": user_message}]}]
+                messages[0]['content'] += photos_data
+                return messages
+            else:
+                return [{'role': "user", 'content': event.message.args_str_case}]
+
         reply_to_id = event.fwd[0].message.id
         history = []
         while True:

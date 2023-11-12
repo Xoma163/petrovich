@@ -1,4 +1,4 @@
-from apps.bot.api.gigachat import GigaChat as GigaChatAPI
+from apps.bot.api.gpt.gigachat import GigaChat as GigaChatAPI
 from apps.bot.classes.event.tg_event import TgEvent
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.commands.trusted.gpt.chatgpt import ChatGPT
@@ -27,8 +27,10 @@ class GigaChat(ChatGPT):
         return self.text_chat(messages)
 
     def text_chat(self, messages, model=None) -> ResponseMessage:
-        gc_api = GigaChatAPI()
-        answer = gc_api.completions(messages, model)
+        if model is None:
+            model = GigaChatAPI.LATEST_MODEL
+        gc_api = GigaChatAPI(model)
+        answer = gc_api.completions(messages, )
         answer = answer.replace(">", "&gt;").replace("<", "&lt;").replace("&lt;pre&gt;", "<pre>").replace(
             "&lt;/pre&gt;", "</pre>")
         answer = replace_markdown(answer, self.bot)

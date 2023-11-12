@@ -6,17 +6,23 @@ import uuid
 import requests
 
 from petrovich.settings import env, BASE_DIR
+from .gpt import GPT
 
 logger = logging.getLogger('responses')
 
 
-class GigaChat:
+class GigaChat(GPT):
     AUTH_DATA = env.str("GIGACHAT_AUTH_DATA")
 
-    BASE_URL = "https://gigachat.devices.sberbank.ru/api/v1/chat"
+    BASE_URL = "https://gigachat.devices.sberbank.ru/api/v1"
+    COMPLETIONS_URL = f"{BASE_URL}/chat/completions"
+
     GOSUSLUGI_CERT_PATH = os.path.join(BASE_DIR, "secrets/certs/russian_trusted_root_ca_pem.crt")
 
-    def __init__(self):
+    LATEST_MODEL = "GigaChat:latest"
+
+    def __init__(self, model):
+        super().__init__(model)
         self.access_token = None
 
     def set_access_token(self):
@@ -42,21 +48,19 @@ class GigaChat:
             self.set_access_token()
         return self.access_token
 
-    def completions(self, messages, model=None) -> str:
-        if model is None:
-            model = "GigaChat:latest"
+    def completions(self, messages) -> str:
         headers = {
             "Authorization": f"Bearer {self.get_access_token()}"
         }
 
         data = {
-            "model": model,
+            "model": self.model,
             "max_tokens": 2048,
             "messages": messages
         }
 
         r = requests.post(
-            f"{self.BASE_URL}/completions",
+            f"{self.COMPLETIONS_URL}",
             json=data,
             headers=headers,
             verify=self.GOSUSLUGI_CERT_PATH
