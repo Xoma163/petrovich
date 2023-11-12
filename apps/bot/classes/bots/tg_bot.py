@@ -94,7 +94,6 @@ class TgBot(Bot):
         media_list = []
         files = []
         for i, attachment in enumerate(rmi.attachments):
-
             if attachment.file_id:
                 media = {'type': attachment.type, 'media': attachment.file_id}
             elif attachment.public_download_url:
@@ -104,12 +103,11 @@ class TgBot(Bot):
                 files.append((filename, attachment.content))
                 media = {'type': attachment.type, "media": f"attach://{filename}"}
 
-            if attachment.artist:
+            if getattr(attachment, 'artist', None):
                 media['performer'] = attachment.artist
-            if attachment.title:
+            if getattr(attachment, 'title', None):
                 media['title'] = attachment.title
-
-            if attachment.thumb:
+            if getattr(attachment, 'thumb', None):
                 thumb_file = self.get_photo_attachment(attachment.thumb, guarantee_url=True)
                 thumb_filename = f"thumb_{str(i)}"
                 files.append((thumb_filename, thumb_file.get_bytes_io_content()))

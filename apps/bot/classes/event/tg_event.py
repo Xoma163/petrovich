@@ -48,18 +48,18 @@ class TgEvent(Event):
             callback_query = self.raw.get('callback_query')
             my_chat_member = self.raw.get('my_chat_member')
             edited_message = self.raw.get('edited_message')
+
             if callback_query:
                 message = callback_query['message']
                 message['from'] = callback_query['from']
                 message['payload'] = callback_query['data']
             elif edited_message:
-                # self.force_response = False
-                # return
                 message = edited_message
             elif my_chat_member:
                 message = my_chat_member
             else:
                 message = self.raw.get('message')
+
         is_topic_message = message.get('is_topic_message')
         if is_topic_message:
             self.message_thread_id = message.get('message_thread_id')
@@ -105,6 +105,10 @@ class TgEvent(Event):
             self.setup_fwd(message.get('reply_to_message'))
             if message.get('forward_from_chat'):
                 self.is_fwd = True
+
+        forward_from_chat = message.get('forward_from_chat')
+        if forward_from_chat:
+            self.force_response = False
 
         via_bot = message.get('via_bot')
         if via_bot and via_bot['username'] == env.str("TG_BOT_LOGIN"):
