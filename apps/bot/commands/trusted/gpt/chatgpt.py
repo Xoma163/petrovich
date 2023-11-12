@@ -51,6 +51,13 @@ class ChatGPT(Command):
             user_message = self.event.message.raw
 
         messages = self.get_dialog(self.event, user_message)
+        photos = self.event.get_all_attachments([PhotoAttachment])
+        photos_data = []
+        for photo in photos:
+            base64 = photo.base64()
+            photos_data.append({"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64}"}})
+        messages[-1]['content'] = [{"type": "text", "text": messages[-1]['content']}]
+        messages[-1]['content'] += photos_data
 
         return self.text_chat(messages)
 
@@ -107,17 +114,7 @@ class ChatGPT(Command):
         mc = MessagesCache(event.peer_id)
         data = mc.get_messages()
         if not event.fwd:
-            photos = event.get_all_attachments([PhotoAttachment])
-            if photos:
-                photos_data = []
-                for photo in photos:
-                    base64 = photo.base64()
-                    photos_data.append({"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64}"}})
-                messages = [{'role': "user", "content": [{"type": "text", "text": user_message}]}]
-                messages[0]['content'] += photos_data
-                return messages
-            else:
-                return [{'role': "user", 'content': event.message.args_str_case}]
+            return [{'role': "user", 'content': event.message.args_str_case}]
 
         reply_to_id = event.fwd[0].message.id
         history = []
