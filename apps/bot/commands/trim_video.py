@@ -98,7 +98,8 @@ class TrimVideo(Command):
             if symbol == ".":
                 dot_in_timecode = True
                 numbers.append(int(timecode[last_save_index:i]))
-                ms = int(timecode[i + 1:len(timecode)])
+
+                ms = timecode[i + 1:len(timecode)]
                 break
         if not dot_in_timecode:
             n = int(timecode[last_save_index:len(timecode)])
