@@ -86,4 +86,4 @@ xmltodict==0.13.0
 yandex-music==2.1.1
 yarl==1.9.2
 youtube-dl==2021.12.17
-yt-dlp==2023.10.13
+yt-dlp==2023.11.14
