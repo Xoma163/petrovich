@@ -292,7 +292,9 @@ class Media(Command):
                         all_photos.append(link)
             text = replace_markdown_bolds(text, self.bot)
             text = replace_markdown_quotes(text, self.bot)
-            return all_photos, f"{rs.title}\n\n{text}"
+            attachments = [self.bot.get_photo_attachment(photo, peer_id=self.event.peer_id, filename=rs.filename) for
+                           photo in all_photos]
+            return attachments, f"{rs.title}\n\n{text}"
         else:
             raise PWarning("Я хз чё за контент")
         return attachments, rs.title
