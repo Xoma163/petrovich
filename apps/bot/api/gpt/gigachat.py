@@ -39,7 +39,7 @@ class GigaChat(GPT):
         )
         r_json = r.json()
         if r.status_code != 200:
-            logger.debug({"response": r_json})
+            logger.error({"response": r_json})
 
         self.access_token = r_json['access_token']
 

@@ -1,7 +1,9 @@
 import logging
+from json import JSONDecodeError
 
 import requests
 
+from apps.bot.classes.const.exceptions import PWarning
 from petrovich.settings import env
 from .gpt import GPT
 
@@ -35,11 +37,7 @@ class ChatGPTAPI(GPT):
         if self.model == self.GPT_4_VISION:
             payload['max_tokens'] = 1024
 
-        r = requests.post(self.COMPLETIONS_URL, headers=self.HEADERS, json=payload)
-        if r.status_code != 200:
-            logger.debug({"response": r.text})
-        r_json = r.json()
-
+        r_json = self._do_request(self.COMPLETIONS_URL, payload)
         answer = r_json['choices'][0]['message']['content']
         return answer
 
@@ -54,10 +52,18 @@ class ChatGPTAPI(GPT):
             "size": "1792x1024",
             "quality": "hd"
         }
-
-        r = requests.post(self.IMAGE_GEN_URL, headers=self.HEADERS, json=payload)
-        if r.status_code != 200:
-            logger.debug({"response": r.text})
-        r_json = r.json()
-
+        r_json = self._do_request(self.IMAGE_GEN_URL, payload)
         return [x['url'] for x in r_json['data']]
+
+    def _do_request(self, url, payload):
+        proxies = {"https": env.str("SOCKS5_PROXY"), "http": env.str("SOCKS5_PROXY")}
+        r = requests.post(url, headers=self.HEADERS, json=payload, proxies=proxies)
+        if r.status_code != 200:
+            try:
+                r_json = r.json()
+                logger.error({"response": r.text})
+                return r_json
+            except JSONDecodeError:
+                logger.error({"response": r.text})
+                raise PWarning("Ошибка. Не получилось обработать запрос.")
+        return r.json()
