@@ -36,9 +36,9 @@ class ChatGPTAPI(GPT):
             payload['max_tokens'] = 1024
 
         r = requests.post(self.COMPLETIONS_URL, headers=self.HEADERS, json=payload)
-        r_json = r.json()
         if r.status_code != 200:
-            logger.debug({"response": r_json})
+            logger.debug({"response": r.text})
+        r_json = r.json()
 
         answer = r_json['choices'][0]['message']['content']
         return answer
@@ -56,8 +56,8 @@ class ChatGPTAPI(GPT):
         }
 
         r = requests.post(self.IMAGE_GEN_URL, headers=self.HEADERS, json=payload)
-        r_json = r.json()
         if r.status_code != 200:
-            logger.debug({"response": r_json})
+            logger.debug({"response": r.text})
+        r_json = r.json()
 
         return [x['url'] for x in r_json['data']]
