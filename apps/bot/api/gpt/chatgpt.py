@@ -3,7 +3,7 @@ from json import JSONDecodeError
 
 import requests
 
-from apps.bot.classes.const.exceptions import PWarning
+from apps.bot.classes.const.exceptions import PWarning, PError
 from petrovich.settings import env
 from .gpt import GPT
 
@@ -62,8 +62,16 @@ class ChatGPTAPI(GPT):
             try:
                 r_json = r.json()
                 logger.error({"response": r_json})
-                return r_json
             except JSONDecodeError:
                 logger.error({"response": r.text})
                 raise PWarning("Ошибка. Не получилось обработать запрос.")
-        return r.json()
+        else:
+            r_json = r.json()
+
+        if error := r_json.get('error'):
+            if code := error.get('code') == 'content_policy_violation':
+                raise PWarning("ChatGPT не может обработать запрос по политикам безопасности")
+            # elif code == "":
+            #     pass
+            raise PError("Какая-то ошибка API ChatGPT")
+        return r_json
