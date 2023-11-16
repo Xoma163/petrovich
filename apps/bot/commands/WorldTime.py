@@ -2,6 +2,7 @@ import datetime
 from collections import Counter
 
 from apps.bot.classes.command import Command
+from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.utils.utils import localize_datetime
 from apps.service.models import City
@@ -15,7 +16,10 @@ class WorldTime(Command):
     def start(self) -> ResponseMessage:
         # args
         if self.event.message.args:
-            city = City.objects.filter(synonyms__icontains=self.event.message.args[0]).first()
+            city_name = self.event.message.args[0]
+            city = City.objects.filter(synonyms__icontains=city_name).first()
+            if not city:
+                raise PWarning(f"Не знаю такого города - {city_name}")
             answer = self._get_city_time_str(city)
         # pm
         elif self.event.is_from_pm:
