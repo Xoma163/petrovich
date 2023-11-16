@@ -21,7 +21,7 @@ class DickSize(Command):
 
         button = self.bot.get_button("Член", self.name)
         keyboard = self.bot.get_inline_keyboard([button])
-        answer = f"Максим, ваш член сегодня - 8.6см"
+        answer = f"{self.event.sender.name}, ваш член сегодня - {self.get_dick_size()}см"
 
         # Не была нажата кнопка
         message = self.event.raw.get('callback_query', {}).get('message', {})
