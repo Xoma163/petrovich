@@ -21,7 +21,7 @@ class DickSize(Command):
 
         button = self.bot.get_button("Член", self.name)
         keyboard = self.bot.get_inline_keyboard([button])
-        answer = f"{self.event.sender.name}, ваш член сегодня - {self.get_dick_size()}см"
+        answer = f"Максим, ваш член сегодня - 8.6см"
 
         # Не была нажата кнопка
         message = self.event.raw.get('callback_query', {}).get('message', {})
@@ -49,6 +49,6 @@ class DickSize(Command):
     def sort_message(message: str):
         dicksize_re = re.compile(r"(.*),.*- (.*)см")
         dicks = re.findall(dicksize_re, message)
-        sorted_dicks = list(sorted(dicks, key=lambda x: x[1]))
+        sorted_dicks = list(sorted(dicks, key=lambda x: float(x[1])))
         answer = "\n".join([f"{dick[0]}, ваш член сегодня - {dick[1]}см" for dick in sorted_dicks])
         return answer
