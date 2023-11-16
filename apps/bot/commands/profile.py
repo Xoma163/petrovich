@@ -175,7 +175,7 @@ class Profile(Command):
         _surname = profile.surname or not_defined
 
         roles = []
-        for group in self.event.sender.groups.all():
+        for group in profile.groups.all():
             roles.append(Role[group.name].value)
         roles = sorted(roles)
         roles_str = ", ".join(roles)
