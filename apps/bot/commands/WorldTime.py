@@ -1,10 +1,11 @@
 import datetime
-from collections import Counter
+from itertools import groupby
+from typing import List
 
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
-from apps.bot.utils.utils import localize_datetime
+from apps.bot.utils.utils import localize_datetime, remove_tz
 from apps.service.models import City
 
 
@@ -27,18 +28,37 @@ class WorldTime(Command):
             answer = self._get_city_time_str(self.event.sender.city)
         # chat
         else:
+            dt_now = datetime.datetime.utcnow()
             cities = [x.city for x in self.event.chat.users.all() if x.city]
-            x = Counter(cities)
-            answers = []
-            for city, _ in x.most_common():
-                answers.append(self._get_city_time_str(city))
-            answer = "\n".join(answers)
+            if not cities:
+                self.check_city()
+                answer = self._get_city_time_str(self.event.sender.city)
+            else:
+                cities = sorted(cities, key=lambda x: self._group_key(dt_now, x))
+                answers = []
+                for _, items in groupby(cities, key=lambda x: self._group_key(dt_now, x)):
+                    answers.append(self._get_cities_group_time_str(list(items)))
+                answer = "\n".join(answers)
 
         return ResponseMessage(ResponseMessageItem(text=answer))
+
+    # Господи помилуй эту сортировку
+    @staticmethod
+    def _group_key(dt_now, x):
+        return remove_tz(localize_datetime(dt_now, x.timezone.name))
 
     @staticmethod
     def _get_city_time_str(city: City) -> str:
         new_date = localize_datetime(datetime.datetime.utcnow(), city.timezone.name)
         dt_str = new_date.strftime("%H:%M:%S")
-        answer = f"Время в городе {city} — {dt_str}"
+        answer = f"{city} — {dt_str}"
+        return answer
+
+    def _get_cities_group_time_str(self, cities: List[City]) -> str:
+        if len(cities) == 1:
+            return self._get_city_time_str(cities[0])
+        new_date = localize_datetime(datetime.datetime.utcnow(), cities[0].timezone.name)
+        dt_str = new_date.strftime("%H:%M:%S")
+        cities_str = ", ".join([x.name for x in cities])
+        answer = f"{cities_str} — {dt_str}"
         return answer
