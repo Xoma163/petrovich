@@ -53,7 +53,7 @@ class ChatGPTAPI(GPT):
             "quality": "hd"
         }
         r_json = self._do_request(self.IMAGE_GEN_URL, payload)
-        return [x['url'] for x in r_json['data']]
+        return [(x['url'], x['revised_prompt']) for x in r_json['data']]
 
     def _do_request(self, url, payload):
         proxies = {"https": env.str("SOCKS5_PROXY"), "http": env.str("SOCKS5_PROXY")}
@@ -61,7 +61,7 @@ class ChatGPTAPI(GPT):
         if r.status_code != 200:
             try:
                 r_json = r.json()
-                logger.error({"response": r.text})
+                logger.error({"response": r_json})
                 return r_json
             except JSONDecodeError:
                 logger.error({"response": r.text})

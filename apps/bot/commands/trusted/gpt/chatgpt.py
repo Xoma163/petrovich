@@ -70,18 +70,20 @@ class ChatGPT(Command):
 
         try:
             self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.UPLOAD_PHOTO)
-            images_url = chat_gpt_api.draw(request_text)
+            images = chat_gpt_api.draw(request_text)
         finally:
             self.bot.stop_activity_thread()
 
         attachments = []
-        for url in images_url:
+        for image in images:
+            url = image[0]
+            real_promt = image[1]
             att = self.bot.get_photo_attachment(url)
             att.download_content()
             att.public_download_url = None
             attachments.append(att)
 
-        answer = f'Результат генерации по запросу "{request_text}"'
+        answer = f'Результат генерации по запросу "{real_promt}"'
         return ResponseMessage(
             ResponseMessageItem(text=answer, attachments=attachments, reply_to=self.event.message.id))
 
