@@ -29,7 +29,7 @@ class WorldTime(Command):
         # chat
         else:
             dt_now = datetime.datetime.utcnow()
-            cities = [x.city for x in self.event.chat.users.all() if x.city]
+            cities = set([x.city for x in self.event.chat.users.all() if x.city])
             if not cities:
                 self.check_city()
                 answer = self._get_city_time_str(self.event.sender.city)
