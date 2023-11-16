@@ -1,3 +1,4 @@
+import re
 from datetime import datetime
 
 import numpy as np
@@ -36,9 +37,18 @@ class DickSize(Command):
                 message_id = message['message_id']
             else:
                 raise PSkip()
+        answer = self.sort_message(answer)
         return ResponseMessage(ResponseMessageItem(text=answer, keyboard=keyboard, message_id=message_id))
 
     def get_dick_size(self) -> float:
         seed = int(datetime.now().strftime("%d%m%Y")) + self.event.sender.pk
         size = np.random.default_rng(seed=seed).normal(10, 2.2) + 3.21
         return round(size, 1)
+
+    @staticmethod
+    def sort_message(message: str):
+        dicksize_re = re.compile(r"(.*),.*- (.*)см")
+        dicks = re.findall(dicksize_re, message)
+        sorted_dicks = list(sorted(dicks, key=lambda x: x[1]))
+        answer = "\n".join([f"{dick[0]}, ваш член сегодня - {dick[1]}см" for dick in sorted_dicks])
+        return answer
