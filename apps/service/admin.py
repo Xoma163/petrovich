@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from apps.service.models import Service, Meme, Notify, City, Donations, TimeZone, Subscribe, WakeOnLanUserData, \
-    Horoscope, Words, TaxiInfo, Tag, VideoCache, Promocode
+    Horoscope, Words, Tag, VideoCache, Promocode
 
 
 @admin.register(Service)
@@ -56,7 +56,7 @@ class DonationsAdmin(admin.ModelAdmin):
 class SubscribeAdmin(admin.ModelAdmin):
     list_display = ('author', 'chat', 'channel_title', 'playlist_title', 'service', 'save_to_plex')
     list_filter = (
-    ('author', admin.RelatedOnlyFieldListFilter), ('chat', admin.RelatedOnlyFieldListFilter), 'save_to_plex')
+        ('author', admin.RelatedOnlyFieldListFilter), ('chat', admin.RelatedOnlyFieldListFilter), 'save_to_plex')
 
 
 @admin.register(VideoCache)
@@ -81,11 +81,6 @@ class WordsAdmin(admin.ModelAdmin):
     list_display = ('id', 'm1', 'f1', 'n1', 'mm', 'fm', 'type')
     list_filter = ('type',)
     search_fields = ['id', 'm1', 'f1', 'n1', 'mm', 'fm', 'type']
-
-
-@admin.register(TaxiInfo)
-class TaxiInfoAdmin(admin.ModelAdmin):
-    pass
 
 
 @admin.register(Tag)

@@ -196,11 +196,12 @@ class VideoCache(models.Model):
 
 
 @receiver(models.signals.post_delete, sender=VideoCache)
-def auto_delete_file_on_delete(_, instance, **kwargs):
+def auto_delete_file_on_delete(*args, **kwargs):
     """
     Deletes file from filesystem
     when corresponding `MediaFile` object is deleted.
     """
+    instance = kwargs['instance']
     if instance.video and os.path.isfile(instance.video.path):
         os.remove(instance.video.path)
 
@@ -267,18 +268,6 @@ class Words(models.Model):
 
     def __str__(self):
         return str(self.m1)
-
-
-class TaxiInfo(models.Model):
-    data = JSONField("Данные", default=dict)
-    created = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return str(self.created)
-
-    class Meta:
-        verbose_name = "Инфо о такси"
-        verbose_name_plural = "Инфо о такси"
 
 
 class Tag(models.Model):

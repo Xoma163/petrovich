@@ -25,8 +25,6 @@ class Command(BaseCommand):
             ScheduleItem("*/30 * * * *", "check_subscribe"),
             # Получение гороскопа
             ScheduleItem("0 1 * * *", "get_horoscope"),
-            # Сбор данных с яндекс такси
-            ScheduleItem("* * * * *", "get_yandex_taxi_info"),
             # Отправка новостей Паше
             ScheduleItem("0 */6 * * *", "check_pasha_news", "130"),
         ]

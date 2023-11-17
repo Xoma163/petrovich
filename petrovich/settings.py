@@ -93,17 +93,9 @@ WSGI_APPLICATION = 'petrovich.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
-DEFAULT_DB = 'default'
-TAXI_DB = 'taxi'
-
 DATABASES = {
-    DEFAULT_DB: env.db('DATABASE_URL', default='postgres:///petrovich'),
-    TAXI_DB: env.db('DATABASE_TAXI_URL', default='postgres:///petrovich_taxi')
+    'default': env.db('DATABASE_URL', default='postgres:///petrovich')
 }
-
-DATABASE_ROUTERS = (
-    'apps.service.dbrouters.TaxiDBRouter',
-)
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
