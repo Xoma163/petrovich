@@ -38,10 +38,9 @@ class Command(BaseCommand):
 
         r = re.compile(r'\| (\d{4,}) MMR')
 
-        if existed_mmr := r.finditer(chat_title):
-            match = list(existed_mmr)[0]
-            chat_mmr = chat_title[match.regs[1][0]:match.regs[1][1]]
-            if chat_mmr == str(mmr):
+        if chat_mmr := r.findall(chat_title):
+            match = list(r.finditer(chat_title))[0]
+            if chat_mmr[0] == str(mmr):
                 return
             new_chat_title = chat_title[:match.regs[1][0]] + str(mmr) + chat_title[match.regs[1][1]:]
         else:
