@@ -559,6 +559,21 @@ class TgBot(Bot):
         }).json()
         return r
 
+    def get_chat(self, chat_id) -> dict:
+        r = self.requests.get('getChat', json={
+            'chat_id': chat_id
+        }).json()
+        return r
+
+    def set_chat_title(self, chat_id, title) -> dict:
+        if len(title) > 128:
+            raise PWarning("Максимальная длина названия чата - 128 символов")
+        r = self.requests.get('setChatTitle', json={
+            'chat_id': chat_id,
+            'title': title
+        }).json()
+        return r
+
     def get_file_id(self, attachment):
         uploading_chat = Chat.objects.get(pk=env.str("TG_PHOTO_UPLOADING_CHAT_PK"))
         rmi = ResponseMessageItem(attachments=[attachment], peer_id=uploading_chat.chat_id)
