@@ -49,7 +49,7 @@ class Twitter:
             video = self._get_video(tweet_data['extended_entities']['media'][0].get("video_info", {}).get("variants"))
             attachments = [{self.CONTENT_TYPE_VIDEO: video}]
         elif tweet_data.get('media_url'):
-            photos = self._get_photos(tweet_data['media_url'])
+            photos = self._get_photos(tweet_data['extended_entities']['media'])
             attachments = [{self.CONTENT_TYPE_IMAGE: x} for x in photos]
         return {'text': text, "attachments": attachments}
 
@@ -97,11 +97,11 @@ class Twitter:
         return text
 
     @staticmethod
-    def _get_photos(photo_info: dict) -> dict:
-        return photo_info
+    def _get_photos(photo_info: dict) -> list:
+        return [x['media_url_https'] for x in photo_info if x['type'] == 'photo']
 
     @staticmethod
     def _get_video(video_info: list) -> str:
-        videos = filter(lambda x: x.get('bitrate') and x['content_type'] == 'video/mp4', video_info)
+        videos = filter(lambda x: x.get('bitrate') is not None and x['content_type'] == 'video/mp4', video_info)
         best_video = sorted(videos, key=lambda x: x['bitrate'], reverse=True)[0]['url']
         return best_video
