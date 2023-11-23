@@ -142,6 +142,8 @@ class ChatGPT(Command):
         data = mc.get_messages()
         if not event.fwd:
             return None
+        if not event.fwd[0].is_from_bot_me:
+            return None
         reply_to_id = event.fwd[0].message.id
         while True:
             raw = data.get(reply_to_id)

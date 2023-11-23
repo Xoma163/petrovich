@@ -80,6 +80,9 @@ class TgEvent(Event):
 
         if _from['is_bot']:
             self.is_from_bot = True
+            if _from['id'] == env.int('TG_BOT_GROUP_ID'):
+                self.is_from_bot_me = True
+
         else:
             defaults = {
                 'name': _from.get('first_name'),

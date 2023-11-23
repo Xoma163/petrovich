@@ -28,6 +28,7 @@ class Event:
 
         self.is_from_user: bool = False
         self.is_from_bot: bool = False
+        self.is_from_bot_me: bool = False  # Сообщение от этого бота
         self.is_from_chat: bool = False
         self.is_from_pm: bool = False
 
