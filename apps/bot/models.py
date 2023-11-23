@@ -32,6 +32,7 @@ class Chat(Platform):
     is_banned = models.BooleanField('Забанен', default=False)
     need_turett = models.BooleanField('Слать туреттные сообщения', default=False)
     use_swear = models.BooleanField("Использовать ругательства", default=True)
+    gpt_prepromt = models.CharField("ChatGPT prepromt", default="", max_length=500)
 
     # Для статистики
     kicked = models.BooleanField("Бота кикнули", default=False)
@@ -69,8 +70,11 @@ class Profile(models.Model):
     groups = models.ManyToManyField(Group, verbose_name="Группы")
     chats = models.ManyToManyField(Chat, verbose_name="Чаты", blank=True, related_name="users")
 
+    # Настройки
     celebrate_bday = models.BooleanField('Поздравлять с Днём рождения', default=True)
     show_birthday_year = models.BooleanField('Показывать год', default=True)
+    gpt_prepromt = models.CharField("ChatGPT prepromt", default="", max_length=500)
+
 
     api_token = models.CharField("Токен для API", max_length=100, blank=True)
 

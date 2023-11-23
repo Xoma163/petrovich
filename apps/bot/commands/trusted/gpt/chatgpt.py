@@ -115,8 +115,19 @@ class ChatGPT(Command):
     def get_dialog(event: TgEvent, user_message):
         mc = MessagesCache(event.peer_id)
         data = mc.get_messages()
+
+        prepromt = None
+        if event.sender.gpt_prepromt:
+            prepromt = event.sender.gpt_prepromt
+        elif event.chat and event.chat.gpt_prepromt:
+            prepromt = event.chat.gpt_prepromt
+
         if not event.fwd:
-            return [{'role': "user", 'content': event.message.args_str_case}]
+            history = []
+            if prepromt:
+                history.append({"role": "system", "content": prepromt})
+            history.append({'role': "user", 'content': event.message.args_str_case})
+            return history
 
         reply_to_id = event.fwd[0].message.id
         history = []
@@ -132,6 +143,9 @@ class ChatGPT(Command):
             reply_to_id = data.get(reply_to_id, {}).get('reply_to_message', {}).get('message_id')
             if not reply_to_id:
                 break
+
+        if prepromt:
+            history.append({"role": "system", "content": prepromt})
         history = list(reversed(history))
         history.append({'role': "user", 'content': user_message})
         return history

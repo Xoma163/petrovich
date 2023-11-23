@@ -21,7 +21,9 @@ class Settings(Command):
         "голосовые (вкл/выкл) - определяет, будет ли бот автоматически распознавать голосовые",
         "майнкрафт (вкл/выкл) - определяет, будет ли бот присылать информацию о серверах майна. (для доверенных)",
         "др (вкл/выкл) - определяет, будет ли бот поздравлять с Днём рождения и будет ли ДР отображаться в /профиль",
-        "ругаться (вкл/выкл) - определяет будет ли бот использовать ругательные команды"
+        "ругаться (вкл/выкл) - определяет будет ли бот использовать ругательные команды",
+        "gpt [конфа] (prepromt) - определяет system promt для дальнейшего общения с ботом"
+        "gpt [конфа] сбросить - сбрасывает system promt"
     ]
 
     ON_OFF_TRANSLATOR = {
@@ -66,6 +68,7 @@ class Settings(Command):
             [['голосовые', 'голос', 'голосовухи', 'голосовуха', 'голосовое'], self.menu_voice],
             [['туретт', 'туррет', 'турретт', 'турет'], self.menu_turett],
             [['ругаться'], self.menu_swear],
+            [['gpt', 'chatgpt'], self.menu_gpt],
             [['default'], self.menu_default],
         ]
         method = self.handle_menu(menu, arg0)
@@ -121,6 +124,34 @@ class Settings(Command):
     def menu_swear(self) -> ResponseMessageItem:
         return self.setup_default_chat_setting("use_swear")
 
+    def menu_gpt(self) -> ResponseMessageItem:
+        self.check_sender(Role.TRUSTED)
+        self.check_args(2)
+        if self.event.message.args[1] in ["чат", "конфа"]:
+            self.check_conversation()
+            self.check_args(3)
+            if self.event.message.args[2] in ["сбросить", "удалить", "очистить"]:
+                prepromt = ""
+            else:
+                prepromt = " ".join(self.event.message.args_case[2:])
+            self.event.chat.gpt_prepromt = prepromt
+            self.event.chat.save()
+            save_for = "чата"
+        else:
+            if self.event.message.args[1] in ["сбросить", "удалить", "очистить"]:
+                prepromt = ""
+            else:
+                prepromt = " ".join(self.event.message.args_case[1:])
+            self.event.sender.gpt_prepromt = prepromt
+            self.event.sender.save()
+            save_for = "пользователя"
+
+        if not prepromt:
+            answer = f'Очистил GPT prepromt для {save_for}'
+        else:
+            answer = f'Сохранил GPT prepromt для {save_for}: "{prepromt}"'
+        return ResponseMessageItem(text=answer)
+
     def menu_default(self) -> ResponseMessageItem:
         answer = ""
         if self.event.chat:
@@ -140,6 +171,9 @@ class Settings(Command):
             answer += f"Синдром Туретта - {self.TRUE_FALSE_TRANSLATOR[turett]}\n"
             answer += f"Использовать ругательные команды - {self.TRUE_FALSE_TRANSLATOR[use_swear]}\n"
 
+            if self.event.sender.check_role(Role.TRUSTED):
+                answer += f"GPT prepromt - {self.bot.get_formatted_text_line(self.event.chat.gpt_prepromt)}\n"
+
             answer += "\n"
 
         answer += "Настройки пользователя:\n"
@@ -149,6 +183,8 @@ class Settings(Command):
             answer += f"Уведомления по майну - {self.TRUE_FALSE_TRANSLATOR[minecraft_notify]}\n"
         celebrate_bday = self.event.sender.celebrate_bday
         answer += f"Поздравлять с днём рождения - {self.TRUE_FALSE_TRANSLATOR[celebrate_bday]}\n"
+        if self.event.sender.check_role(Role.TRUSTED):
+            answer += f"GPT prepromt - {self.bot.get_formatted_text_line(self.event.chat.gpt_prepromt)}\n"
         return ResponseMessageItem(text=answer)
 
     def setup_default_chat_setting(self, name) -> ResponseMessageItem:
