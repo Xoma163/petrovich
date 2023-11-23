@@ -69,9 +69,10 @@ class ChatGPTAPI(GPT):
             r_json = r.json()
 
         if error := r_json.get('error'):
-            if code := error.get('code') == 'content_policy_violation':
+            code = error.get('code')
+            if code == 'content_policy_violation':
                 raise PWarning("ChatGPT не может обработать запрос по политикам безопасности")
-            # elif code == "":
-            #     pass
+            elif code == 503:
+                raise PWarning("ChatGPT недоступен")
             raise PError("Какая-то ошибка API ChatGPT")
         return r_json

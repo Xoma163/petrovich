@@ -639,6 +639,10 @@ class Meme(Command):
 
         memes = memes[:max_count]
         memes = self.get_tanimoto_memes(memes, filter_list)
+        if filter_list:
+            for meme in memes:
+                meme.inline_uses += 1
+                meme.save()
 
         att_types = [
             VoiceAttachment.TYPE,

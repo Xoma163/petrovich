@@ -22,7 +22,9 @@ def set_type_link(modeladmin, request, queryset):
 @admin.register(Meme)
 class MemeAdmin(admin.ModelAdmin):
     list_display = (
-        'id', 'name', 'preview_image', 'preview_link', 'author', 'approved', 'type', 'uses', 'link', 'tg_file_id')
+        'id', 'name', 'preview_image', 'preview_link', 'author', 'approved', 'type', 'uses', 'inline_uses', 'link',
+        'tg_file_id'
+    )
     search_fields = ('name', 'link')
     list_filter = (('author', admin.RelatedOnlyFieldListFilter), 'type', 'approved',)
     actions = [set_type_video, set_type_link]
