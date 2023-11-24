@@ -1,5 +1,6 @@
 from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import Command
+from apps.bot.classes.const.consts import Role
 from apps.bot.classes.event.event import Event
 from apps.bot.classes.event.tg_event import TgEvent
 from apps.bot.classes.messages.attachments.sticker import StickerAttachment
@@ -15,7 +16,7 @@ class Turett(Command):
 
     # ACCEPT CHANCES
     MENTIONED_CHANCE = 1
-    NOT_MENTIONED_CHANCE = 0.3
+    NOT_MENTIONED_CHANCE = 110.3
 
     # WEIGHTS
     STICKER_CHANCE = 15
@@ -47,6 +48,7 @@ class Turett(Command):
     STICKER_SET_ID = "SamPriFle"
 
     # GPT SETTINGS
+    MIN_TEXT_LEN = 10
     GPT_PROMTS = [
         "Придумай мем в ответ на сообщение",
         "Расскажи анекдот в ответ на сообщение",
@@ -81,7 +83,7 @@ class Turett(Command):
     def handle_tg_event(self):
         events = [self.get_text, self.get_sticker, self.get_gpt_text, self.get_gpt_wtf_text]
         weights = [self.TEXT_CHANCE, self.STICKER_CHANCE, self.GPT_CHANCE, self.GPT_WTF_CHANCE]
-        if len(self.event.message.clear_case) < 10:
+        if len(self.event.message.clear_case) < self.MIN_TEXT_LEN and self.event.sender.check_role(Role.TRUSTED):
             events = [self.get_text, self.get_sticker]
             weights = [self.TEXT_CHANCE, self.STICKER_CHANCE]
         method = random_event(events, weights)
@@ -107,7 +109,7 @@ class Turett(Command):
         promt = random_event(self.GPT_PROMTS)
         new_promt = f"{promt}:\n{self.event.message.clear}"
 
-        messages = ChatGPT.get_dialog(self.event, new_promt, use_prepromt=False)
+        messages = ChatGPT.get_dialog(self.event, new_promt, use_prepromt=True)
         return self._get_gpt_answer(messages)
 
     def get_gpt_wtf_text(self) -> ResponseMessageItem:
@@ -118,7 +120,7 @@ class Turett(Command):
         wtf = WTF()
         wtf.bot = self.bot
         wtf.event = self.event
-        messages = wtf.get_conversation(self.WTF_MESSAGES_COUNT, promt, use_prepromt=False)
+        messages = wtf.get_conversation(self.WTF_MESSAGES_COUNT, promt, use_prepromt=True)
 
         return self._get_gpt_answer(messages)
 
