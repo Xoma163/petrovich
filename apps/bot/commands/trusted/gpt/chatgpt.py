@@ -77,13 +77,13 @@ class ChatGPT(Command):
         attachments = []
         for image in images:
             url = image[0]
-            real_promt = image[1]
+            real_prompt = image[1]
             att = self.bot.get_photo_attachment(url)
             att.download_content()
             att.public_download_url = None
             attachments.append(att)
 
-        answer = f'Результат генерации по запросу "{real_promt}"'
+        answer = f'Результат генерации по запросу "{real_prompt}"'
         return ResponseMessage(
             ResponseMessageItem(text=answer, attachments=attachments, reply_to=self.event.message.id))
 
@@ -112,21 +112,21 @@ class ChatGPT(Command):
         return ResponseMessage(ResponseMessageItem(text=answer, reply_to=self.event.message.id))
 
     @staticmethod
-    def get_dialog(event: TgEvent, user_message, use_prepromt=True):
+    def get_dialog(event: TgEvent, user_message, use_preprompt=True):
         mc = MessagesCache(event.peer_id)
         data = mc.get_messages()
 
-        prepromt = None
-        if use_prepromt:
-            if event.sender.gpt_prepromt:
-                prepromt = event.sender.gpt_prepromt
-            elif event.chat and event.chat.gpt_prepromt:
-                prepromt = event.chat.gpt_prepromt
+        preprompt = None
+        if use_preprompt:
+            if event.sender.gpt_preprompt:
+                preprompt = event.sender.gpt_preprompt
+            elif event.chat and event.chat.gpt_preprompt:
+                preprompt = event.chat.gpt_preprompt
 
         if not event.fwd:
             history = []
-            if prepromt:
-                history.append({"role": "system", "content": prepromt})
+            if preprompt:
+                history.append({"role": "system", "content": preprompt})
             history.append({'role': "user", 'content': user_message})
             return history
 
@@ -145,8 +145,8 @@ class ChatGPT(Command):
             if not reply_to_id:
                 break
 
-        if prepromt:
-            history.append({"role": "system", "content": prepromt})
+        if preprompt:
+            history.append({"role": "system", "content": preprompt})
         history = list(reversed(history))
         history.append({'role': "user", 'content': user_message})
         return history

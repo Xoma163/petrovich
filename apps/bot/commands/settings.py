@@ -22,8 +22,8 @@ class Settings(Command):
         "майнкрафт (вкл/выкл) - определяет, будет ли бот присылать информацию о серверах майна. (для доверенных)",
         "др (вкл/выкл) - определяет, будет ли бот поздравлять с Днём рождения и будет ли ДР отображаться в /профиль",
         "ругаться (вкл/выкл) - определяет будет ли бот использовать ругательные команды",
-        "gpt [конфа] (prepromt) - определяет system promt для дальнейшего общения с ботом"
-        "gpt [конфа] сбросить - сбрасывает system promt"
+        "gpt [конфа] (preprompt) - определяет system prompt для дальнейшего общения с ботом"
+        "gpt [конфа] сбросить - сбрасывает system prompt"
     ]
 
     ON_OFF_TRANSLATOR = {
@@ -131,25 +131,25 @@ class Settings(Command):
             self.check_conversation()
             self.check_args(3)
             if self.event.message.args[2] in ["сбросить", "удалить", "очистить"]:
-                prepromt = ""
+                preprompt = ""
             else:
-                prepromt = " ".join(self.event.message.args_case[2:])
-            self.event.chat.gpt_prepromt = prepromt
+                preprompt = " ".join(self.event.message.args_case[2:])
+            self.event.chat.gpt_preprompt = preprompt
             self.event.chat.save()
             save_for = "чата"
         else:
             if self.event.message.args[1] in ["сбросить", "удалить", "очистить"]:
-                prepromt = ""
+                preprompt = ""
             else:
-                prepromt = " ".join(self.event.message.args_case[1:])
-            self.event.sender.gpt_prepromt = prepromt
+                preprompt = " ".join(self.event.message.args_case[1:])
+            self.event.sender.gpt_preprompt = preprompt
             self.event.sender.save()
             save_for = "пользователя"
 
-        if not prepromt:
-            answer = f'Очистил GPT prepromt для {save_for}'
+        if not preprompt:
+            answer = f'Очистил GPT preprompt для {save_for}'
         else:
-            answer = f'Сохранил GPT prepromt для {save_for}: "{prepromt}"'
+            answer = f'Сохранил GPT preprompt для {save_for}: "{preprompt}"'
         return ResponseMessageItem(text=answer)
 
     def menu_default(self) -> ResponseMessageItem:
@@ -172,7 +172,7 @@ class Settings(Command):
             answer += f"Использовать ругательные команды - {self.TRUE_FALSE_TRANSLATOR[use_swear]}\n"
 
             if self.event.sender.check_role(Role.TRUSTED):
-                answer += f"GPT prepromt - {self.bot.get_formatted_text_line(self.event.chat.gpt_prepromt)}\n"
+                answer += f"GPT preprompt - {self.bot.get_formatted_text_line(self.event.chat.gpt_preprompt)}\n"
 
             answer += "\n"
 
@@ -184,7 +184,7 @@ class Settings(Command):
         celebrate_bday = self.event.sender.celebrate_bday
         answer += f"Поздравлять с днём рождения - {self.TRUE_FALSE_TRANSLATOR[celebrate_bday]}\n"
         if self.event.sender.check_role(Role.TRUSTED):
-            answer += f"GPT prepromt - {self.bot.get_formatted_text_line(self.event.sender.gpt_prepromt)}\n"
+            answer += f"GPT preprompt - {self.bot.get_formatted_text_line(self.event.sender.gpt_preprompt)}\n"
         return ResponseMessageItem(text=answer)
 
     def setup_default_chat_setting(self, name) -> ResponseMessageItem:

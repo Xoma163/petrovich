@@ -50,7 +50,7 @@ class Turett(Command):
 
     # GPT SETTINGS
     MIN_TEXT_LEN = 10
-    GPT_PROMTS = [
+    GPT_PROMPTS = [
         "Придумай мем в ответ на сообщение",
         "Расскажи анекдот в ответ на сообщение",
         "Перепиши сообщение в виде стихотворения",
@@ -59,7 +59,7 @@ class Turett(Command):
     ]
 
     # WTF SETTINGS
-    WTF_PROMTS = [
+    WTF_PROMPTS = [
         "Опиши переписку одной смешной или мемной фразой",
         "Подразни участников переписки",
         "Придумай шуточные диагнозы участникам переписки",
@@ -109,21 +109,21 @@ class Turett(Command):
     def get_gpt_text(self) -> ResponseMessageItem:
         self.event: TgEvent
 
-        promt = random_event(self.GPT_PROMTS)
-        new_promt = f"{promt}:\n{self.event.message.clear}"
+        prompt = random_event(self.GPT_PROMPTS)
+        new_prompt = f"{prompt}:\n{self.event.message.clear}"
 
-        messages = ChatGPT.get_dialog(self.event, new_promt, use_prepromt=True)
+        messages = ChatGPT.get_dialog(self.event, new_prompt, use_preprompt=True)
         return self._get_gpt_answer(messages)
 
     def get_gpt_wtf_text(self) -> ResponseMessageItem:
         self.event: TgEvent
 
-        promt = random_event(self.WTF_PROMTS)
+        prompt = random_event(self.WTF_PROMPTS)
 
         wtf = WTF()
         wtf.bot = self.bot
         wtf.event = self.event
-        messages = wtf.get_conversation(self.WTF_MESSAGES_COUNT, promt, use_prepromt=True)
+        messages = wtf.get_conversation(self.WTF_MESSAGES_COUNT, prompt, use_preprompt=True)
 
         return self._get_gpt_answer(messages)
 

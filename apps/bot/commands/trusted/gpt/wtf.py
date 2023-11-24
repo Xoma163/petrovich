@@ -15,7 +15,7 @@ class WTF(Command):
 
     help_text = "обрабатывает сообщения в конфе через ChatGPT"
     help_texts = [
-        "(promt) [N=50] - обрабатывает последние N сообщений в конфе через ChatGPT по указанному promt"
+        "(prompt) [N=50] - обрабатывает последние N сообщений в конфе через ChatGPT по указанному prompt"
     ]
     args = 1
     access = Role.TRUSTED
@@ -25,19 +25,19 @@ class WTF(Command):
         last_arg = self.event.message.args[-1]
         try:
             n = int(last_arg)
-            promt = " ".join(self.event.message.args_case[:-1])
+            prompt = " ".join(self.event.message.args_case[:-1])
         except ValueError:
             n = 50
-            promt = self.event.message.args_str_case
+            prompt = self.event.message.args_str_case
 
-        messages = self.get_conversation(n, promt)
+        messages = self.get_conversation(n, prompt)
 
         gpt = ChatGPT()
         gpt.bot = self.bot
         gpt.event = self.event
         return gpt.text_chat(messages)
 
-    def get_conversation(self, n: int, promt: str, use_prepromt: bool = True) -> list:
+    def get_conversation(self, n: int, prompt: str, use_preprompt: bool = True) -> list:
         events = self.get_last_messages_as_events(n)
         result_message = []
 
@@ -61,15 +61,15 @@ class WTF(Command):
             messages_from_one_user.append(text)
 
         messages = []
-        prepromt = None
-        if use_prepromt:
-            if self.event.sender.gpt_prepromt:
-                prepromt = self.event.sender.gpt_prepromt
-            elif self.event.chat and self.event.chat.gpt_prepromt:
-                prepromt = self.event.chat.gpt_prepromt
-        if prepromt:
-            messages.append({"role": "system", "content": prepromt})
-        messages.append({'role': "user", 'content': promt})
+        preprompt = None
+        if use_preprompt:
+            if self.event.sender.gpt_preprompt:
+                preprompt = self.event.sender.gpt_preprompt
+            elif self.event.chat and self.event.chat.gpt_preprompt:
+                preprompt = self.event.chat.gpt_preprompt
+        if preprompt:
+            messages.append({"role": "system", "content": preprompt})
+        messages.append({'role': "user", 'content': prompt})
         messages.append({'role': "user", 'content': "\n".join(result_message)})
         return messages
 

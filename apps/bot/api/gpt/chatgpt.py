@@ -41,13 +41,13 @@ class ChatGPTAPI(GPT):
         answer = r_json['choices'][0]['message']['content']
         return answer
 
-    def draw(self, promt: str, count=5):
+    def draw(self, prompt: str, count=5):
         if self.model == self.DALLE_3:
             count = 1
 
         payload = {
             "model": self.model,
-            "prompt": promt,
+            "prompt": prompt,
             "n": count,
             "size": "1792x1024",
             "quality": "hd"
