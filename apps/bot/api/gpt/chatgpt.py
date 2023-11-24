@@ -61,6 +61,7 @@ class ChatGPTAPI(GPT):
         if r.status_code != 200:
             try:
                 r_json = r.json()
+                r_json['payload'] = payload
                 logger.error({"response": r_json})
             except JSONDecodeError:
                 logger.error({"response": r.text})

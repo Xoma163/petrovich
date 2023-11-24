@@ -37,7 +37,7 @@ class WTF(Command):
         gpt.event = self.event
         return gpt.text_chat(messages)
 
-    def get_conversation(self, n: int, promt) -> list:
+    def get_conversation(self, n: int, promt: str, use_prepromt: bool = True) -> list:
         events = self.get_last_messages_as_events(n)
         result_message = []
 
@@ -60,10 +60,18 @@ class WTF(Command):
 
             messages_from_one_user.append(text)
 
-        return [
-            {'role': "user", 'content': promt},
-            {'role': "user", 'content': "\n".join(result_message)},
-        ]
+        messages = []
+        prepromt = None
+        if use_prepromt:
+            if self.event.sender.gpt_prepromt:
+                prepromt = self.event.sender.gpt_prepromt
+            elif self.event.chat and self.event.chat.gpt_prepromt:
+                prepromt = self.event.chat.gpt_prepromt
+        if prepromt:
+            messages.append({"role": "system", "content": prepromt})
+        messages.append({'role': "user", 'content': promt})
+        messages.append({'role': "user", 'content': "\n".join(result_message)})
+        return messages
 
     def get_last_messages_as_events(self, n: int) -> List[Event]:
         mid = self.event.message.id
