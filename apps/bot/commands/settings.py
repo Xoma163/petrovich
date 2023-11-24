@@ -184,7 +184,7 @@ class Settings(Command):
         celebrate_bday = self.event.sender.celebrate_bday
         answer += f"Поздравлять с днём рождения - {self.TRUE_FALSE_TRANSLATOR[celebrate_bday]}\n"
         if self.event.sender.check_role(Role.TRUSTED):
-            answer += f"GPT prepromt - {self.bot.get_formatted_text_line(self.event.chat.gpt_prepromt)}\n"
+            answer += f"GPT prepromt - {self.bot.get_formatted_text_line(self.event.sender.gpt_prepromt)}\n"
         return ResponseMessageItem(text=answer)
 
     def setup_default_chat_setting(self, name) -> ResponseMessageItem:
