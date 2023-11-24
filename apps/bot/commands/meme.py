@@ -1,15 +1,14 @@
 import threading
 from typing import List
-from urllib.parse import urlparse, parse_qsl
+from urllib.parse import urlparse
 
 import requests
-from django.db.models import Q
 
 from apps.bot.api.youtube.video import YoutubeVideo
 from apps.bot.classes.bots.bot import send_message_to_moderator_chat
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role, Platform, ATTACHMENT_TYPE_TRANSLATOR
-from apps.bot.classes.const.exceptions import PWarning, PSkip
+from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.event.event import Event
 from apps.bot.classes.messages.attachments.gif import GifAttachment
 from apps.bot.classes.messages.attachments.link import LinkAttachment
@@ -52,13 +51,12 @@ class Meme(Command):
         "в любой чат. После этого вы сможете быстро находить бота через @ и выбирать его"
     priority = 70
 
-    YOUTUBE_URLS = ['youtu.be', 'youtube.com']
-    ALLOWED_URLS = YOUTUBE_URLS + ['coub.com']
-
     ALLOWED_ATTACHMENTS = [
         PhotoAttachment, VideoAttachment, StickerAttachment, GifAttachment, VoiceAttachment, VideoNoteAttachment,
         LinkAttachment
     ]
+
+    platforms = [Platform.TG]
 
     @staticmethod
     def accept_extra(event: Event) -> bool:
@@ -103,26 +101,20 @@ class Meme(Command):
 
         meme_name_list = self.event.message.args[1:]
         if isinstance(attachment, LinkAttachment):
-            self._check_allowed_url(attachment.url)
+            self._check_allowed_url(attachment)
             att_url_lower = attachment.url.lower()
             if not self.event.fwd and att_url_lower in meme_name_list:
                 meme_name_list = meme_name_list[:meme_name_list.index(att_url_lower)]
 
-        self.check_meme_name_is_no_digits(meme_name_list)
         meme_name = " ".join(meme_name_list)
+        self.check_meme_name(meme_name_list)
 
         new_meme = {
             'name': meme_name,
             'type': attachment.type,
             'author': self.event.sender,
-            'approved': self.event.sender.check_role(Role.MODERATOR) or
-                        self.event.sender.check_role(Role.TRUSTED)
+            'approved': self.event.sender.check_role(Role.MODERATOR) or self.event.sender.check_role(Role.TRUSTED)
         }
-
-        ban_list = ['добавить', 'обновить', 'удалить', 'конфа', 'рандом', 'р', 'подтвердить', 'принять', '+',
-                    'отклонить', 'отменить', '-', 'переименовать', 'правка', 'инфо']
-        if new_meme['name'] in ban_list:
-            raise PWarning("Мем с таким названием нельзя создать")
 
         try:
             MemeModel.objects.get(name=new_meme['name'])
@@ -166,7 +158,7 @@ class Meme(Command):
         id_name_list = self.event.message.args[1:]
 
         if isinstance(attachment, LinkAttachment):
-            self._check_allowed_url(attachment.url)
+            self._check_allowed_url(attachment)
             att_url_lower = attachment.url.lower()
             if not self.event.fwd and att_url_lower in id_name_list:
                 id_name_list = id_name_list[:id_name_list.index(att_url_lower)]
@@ -190,8 +182,8 @@ class Meme(Command):
 
         for attr, value in fields.items():
             setattr(meme, attr, value)
-        # Кэш
 
+        # Кэш
         if self.event.sender.check_role(Role.MODERATOR) or \
                 self.event.sender.check_role(Role.TRUSTED):
             meme.save()
@@ -303,8 +295,8 @@ class Meme(Command):
         meme = self.get_meme(_id=self.event.message.args[1])
 
         new_name_list = self.event.message.args[2:]
-        self.check_meme_name_is_no_digits(new_name_list)
         new_name = " ".join(new_name_list)
+        self.check_meme_name(new_name)
 
         try:
             MemeModel.objects.get(name=new_name)
@@ -409,29 +401,12 @@ class Meme(Command):
 
     def prepare_meme_to_send(self, meme, print_name=False, send_keyboard=False) -> ResponseMessageItem:
         rmi = ResponseMessageItem()
-        if self.event.platform == Platform.TG:
-            if meme.type == LinkAttachment.TYPE:
-                if meme.tg_file_id:
-                    att = VideoAttachment()
-                    att.file_id = meme.tg_file_id
-                    rmi.attachments = [att]
-                else:
-                    yt_api = YoutubeVideo()
-                    try:
-                        data = yt_api.get_video_info(meme.link)
-                        video_content = requests.get(data['download_url']).content
-                        rmi.attachments = [self.bot.get_video_attachment(video_content, peer_id=self.event.peer_id)]
-                        rmi.text = yt_api.get_timecode_str(meme.link)
-                    except PSkip:
-                        rmi.text = meme.link
-                    except Exception as e:
-                        raise e
-            elif meme.tg_file_id:
-                att = ATTACHMENT_TYPE_TRANSLATOR[meme.type]()
-                att.file_id = meme.tg_file_id
-                rmi.attachments = [att]
-            else:
-                rmi.text = meme.link
+        if meme.tg_file_id:
+            att = ATTACHMENT_TYPE_TRANSLATOR[meme.type]()
+            att.file_id = meme.tg_file_id
+            rmi.attachments = [att]
+        else:
+            rmi.text = meme.link
 
         if print_name and rmi.text:
             rmi.text += f"\n{meme.name}"
@@ -441,13 +416,10 @@ class Meme(Command):
             rmi.keyboard = self.bot.get_inline_keyboard([button])
         return rmi
 
-    def _check_allowed_url(self, url):
-        parsed_url = urlparse(url)
-        if not parsed_url.hostname:
-            raise PWarning("Не нашёл ссылку на youtube видео")
-
-        if parsed_url.hostname.replace('www.', '').lower() not in self.ALLOWED_URLS:
-            raise PWarning("Это ссылка не на youtube/coub видео")
+    @staticmethod
+    def _check_allowed_url(attachment):
+        if not attachment.is_youtube_link:
+            raise PWarning("Это ссылка не на youtube видео")
 
     def set_youtube_file_id(self, meme):
         thread = threading.Thread(target=self._set_youtube_file_id, args=(meme,))
@@ -472,8 +444,9 @@ class Meme(Command):
             parsed_url = urlparse(meme.link)
             video_id = parsed_url.path.strip('/')
             video.thumb = f"https://img.youtube.com/vi/{video_id}/default.jpg"
-            video.set_file_id()
-            meme.tg_file_id = video.file_id
+
+            meme.tg_file_id = video.get_file_id()
+            meme.type = VideoAttachment.TYPE
             meme.save()
             return
         except Exception:
@@ -537,9 +510,14 @@ class Meme(Command):
         return meme_filter
 
     @staticmethod
-    def check_meme_name_is_no_digits(meme_name_list):
+    def check_meme_name(name):
+        ban_list = ['добавить', 'обновить', 'удалить', 'конфа', 'рандом', 'р', 'подтвердить', 'принять', '+',
+                    'отклонить', 'отменить', '-', 'переименовать', 'правка', 'инфо']
+        if name in ban_list:
+            raise PWarning("Мем с таким названием нельзя создать")
+
         try:
-            _ = [int(x) for x in meme_name_list]
+            _ = [int(x) for x in name]
             raise PWarning("Название мема не может состоять только из цифр")
         except ValueError:
             pass
@@ -547,74 +525,26 @@ class Meme(Command):
     @staticmethod
     def _get_inline_qrs(memes):
         _inline_qr = []
+
+        att_type_map = {
+            PhotoAttachment.TYPE: 'photo_file_id',
+            StickerAttachment.TYPE: 'sticker_file_id',
+            VideoAttachment.TYPE: 'video_file_id',
+            GifAttachment.TYPE: 'gif_file_id',
+            VoiceAttachment.TYPE: 'voice_file_id',
+        }
+
         for meme in memes:
-            # Todo: send sticker as sticker
             qr = {
                 'id': meme.pk,
-                'type': meme.type
+                'type': meme.type,
+                att_type_map[meme.type]: meme.tg_file_id
             }
-            if meme.type in [PhotoAttachment.TYPE]:
+            if meme.type in [VideoAttachment.TYPE, GifAttachment.TYPE, VoiceAttachment.TYPE]:
                 qr.update({
-                    'photo_file_id': meme.tg_file_id
-                })
-            elif meme.type in [StickerAttachment.TYPE]:
-                qr.update({
-                    'sticker_file_id': meme.tg_file_id
-                })
-            elif meme.type in [VideoAttachment.TYPE]:
-                if meme.tg_file_id:
-                    qr.update({
-                        'video_file_id': meme.tg_file_id,
-                        'title': meme.name,
-                    })
-                else:
-                    continue
-
-            elif meme.type in [GifAttachment.TYPE]:
-                qr.update({
-                    'gif_file_id': meme.tg_file_id,
                     'title': meme.name,
                 })
-            elif meme.type in [VoiceAttachment.TYPE]:
-                qr.update({
-                    'voice_file_id': meme.tg_file_id,
-                    'title': meme.name,
-                })
-            elif meme.type == LinkAttachment.TYPE:
-                if meme.tg_file_id:
-                    qr.update({
-                        'id': meme.pk,
-                        'type': 'video',
-                        'video_file_id': meme.tg_file_id,
-                        'title': meme.name,
-                    })
-                else:
-                    parsed_url = urlparse(meme.link)
-                    video_id = parsed_url.path.strip('/')
-                    if parsed_url.query:
-                        # dict cast
-                        query_dict = {x[0]: x[1] for x in parse_qsl(parsed_url.query)}
-                        v = query_dict.get('v', None)
-                        if v:
-                            video_id = v
-                    yt_api = YoutubeVideo()
-                    ts = yt_api.get_timecode_str(meme.link)
-                    qr = {
-                        'id': meme.pk,
-                        'type': "video",
-                        'video_url': meme.link,
-                        'mime_type': "text/html",
-                        'title': meme.name,
-                        'thumb_url': f"https://img.youtube.com/vi/{video_id}/default.jpg",
-                        'input_message_content': {
-                            'message_text': meme.link
-                        },
-                        'caption': ts
-                    }
-            else:
-                raise RuntimeError()
             _inline_qr.append(qr)
-
         return _inline_qr
 
     def get_tg_inline_memes(self, filter_list, max_count=10):
@@ -623,10 +553,7 @@ class Meme(Command):
         else:
             filtered_memes = MemeModel.objects.all().order_by('-uses')
 
-        q = Q(approved=True) & (
-                Q(type='link', link__icontains="youtu") |
-                Q(type__in=['photo', 'sticker', 'video', 'voice', 'gif']))
-        memes = filtered_memes.filter(q)
+        memes = filtered_memes.filter(type__in=['photo', 'sticker', 'video', 'voice', 'gif'], approved=True)
 
         all_memes_qr = []
         try:
@@ -646,7 +573,6 @@ class Meme(Command):
 
         att_types = [
             VoiceAttachment.TYPE,
-            LinkAttachment.TYPE,
             VideoAttachment.TYPE,
             GifAttachment.TYPE,
             StickerAttachment.TYPE,

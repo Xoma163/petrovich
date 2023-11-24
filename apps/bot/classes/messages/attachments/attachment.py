@@ -171,3 +171,8 @@ class Attachment:
         from apps.bot.classes.bots.tg_bot import TgBot
         tg_bot = TgBot()
         self.file_id = tg_bot.get_file_id(self)
+
+    def get_file_id(self):
+        if not self.file_id:
+            self.set_file_id()
+        return self.file_id
