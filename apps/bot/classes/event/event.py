@@ -109,9 +109,10 @@ class Event:
         from apps.bot.commands.meme import Meme as MemeCommand
         from apps.bot.commands.trusted.media import Media
         from apps.bot.commands.voice_recognition import VoiceRecognition
+        from apps.bot.commands.WorldTime import WorldTime
 
         # ToDo: get automatically
-        extra_commands = [Tag, MemeCommand, Media, VoiceRecognition]
+        extra_commands = [Tag, MemeCommand, Media, VoiceRecognition, WorldTime]
 
         for e_command in extra_commands:
             if e_command.accept_extra(self):
