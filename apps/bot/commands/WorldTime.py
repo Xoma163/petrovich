@@ -16,17 +16,18 @@ class WorldTime(Command):
     help_text = "текущее время в городе"
     help_texts = ["[город=из профиля] - текущее время в городе"]
 
-    TIME_RE = r"\d\d:\d\d"
+    help_texts_extra = \
+        "Если в сообщении будет указание времени, а у пользователя будет проставлен город в профиле, то бот автоматически проставит соответствующее время для остальных городов в чате"
 
     @staticmethod
     def accept_extra(event: Event) -> bool:
         if not event.chat:
             return False
 
-        if not event.message and not event.message.raw:
+        if not event.message or not event.message.raw:
             return False
 
-        if not event.sender and not event.sender.city:
+        if not event.sender or not event.sender.city:
             return False
 
         r = re.compile(r"\d\d:\d\d")
