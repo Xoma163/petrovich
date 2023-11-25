@@ -81,16 +81,16 @@ class Turett(Command):
             rmi = self.handle_event()
         return ResponseMessage(rmi)
 
-    def handle_tg_event(self):
+    def handle_tg_event(self) -> ResponseMessageItem:
         events = [self.get_text, self.get_sticker, self.get_gpt_text, self.get_gpt_wtf_text]
         weights = [self.TEXT_CHANCE, self.STICKER_CHANCE, self.GPT_CHANCE, self.GPT_WTF_CHANCE]
         if len(self.event.message.clear_case) < self.MIN_TEXT_LEN and self.event.sender.check_role(Role.TRUSTED):
-            events = [self.get_text, self.get_sticker]
-            weights = [self.TEXT_CHANCE, self.STICKER_CHANCE]
+            events = [self.get_text, self.get_sticker, self.get_gpt_wtf_text]
+            weights = [self.TEXT_CHANCE, self.STICKER_CHANCE, self.GPT_WTF_CHANCE]
         method = random_event(events, weights)
         return method()
 
-    def handle_event(self):
+    def handle_event(self) -> ResponseMessageItem:
         return self.get_text()
 
     def get_sticker(self) -> ResponseMessageItem:
@@ -112,7 +112,10 @@ class Turett(Command):
         prompt = random_event(self.GPT_PROMPTS)
         new_prompt = f"{prompt}:\n{self.event.message.clear}"
 
-        messages = ChatGPT.get_dialog(self.event, new_prompt, use_preprompt=True)
+        chat_gpt = ChatGPT()
+        chat_gpt.bot = self.bot
+        chat_gpt.event = self.event
+        messages = chat_gpt.get_dialog(new_prompt, use_preprompt=True)
         return self._get_gpt_answer(messages)
 
     def get_gpt_wtf_text(self) -> ResponseMessageItem:
@@ -127,7 +130,7 @@ class Turett(Command):
 
         return self._get_gpt_answer(messages)
 
-    def _get_gpt_answer(self, messages: list):
+    def _get_gpt_answer(self, messages: list) -> ResponseMessageItem:
         chat_gpt = ChatGPT()
         chat_gpt.bot = self.bot
         chat_gpt.event = self.event

@@ -4,6 +4,7 @@ from apps.bot.api.gpt.chatgpt import ChatGPTAPI
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.activities import ActivitiesEnum
 from apps.bot.classes.const.consts import Role, Platform
+from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.event.event import Event
 from apps.bot.classes.event.tg_event import TgEvent
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
@@ -19,13 +20,13 @@ class ChatGPT(Command):
 
     help_text = "чат GPT"
     help_texts = [
-        "(фраза) - общение с ботом",
+        "(фраза/пересланное сообщение) - общение с ботом",
         "(фраза) [картинка] - общение с ботом с учётом пересланной картинки",
-        "нарисуй (фраза) - генерация картинки",
+        "нарисуй (фраза/пересланное сообщение) - генерация картинки",
     ]
     help_texts_extra = \
         "Если отвечать на сообщения бота через кнопку \"Ответить\" то будет продолжаться непрерывный диалог.\n" \
-        "В таком случае необязательно писать команду, можно просто текст"
+        "В таком случае необязательно писать команду, можно просто текст\n\n"
     access = Role.TRUSTED
     platforms = [Platform.TG]
 
@@ -34,23 +35,15 @@ class ChatGPT(Command):
         if accept:
             return True
 
-        if first_event := self.get_first_event_in_replies(event):
-            accept = super().accept(first_event)
-            if accept:
-                return True
-        return False
+        return bool(self.get_first_gpt_event_in_replies(event))
 
     def start(self) -> ResponseMessage:
         if self.event.message.args and self.event.message.args[0] == "нарисуй":
             return self.draw_image()
 
         self.event: TgEvent
-        if self.event.message.command in self.full_names:
-            user_message = self.event.message.args_str_case
-        else:
-            user_message = self.event.message.raw
-
-        messages = self.get_dialog(self.event, user_message)
+        user_message = self.get_user_msg(self.event)
+        messages = self.get_dialog(user_message)
         photos = self.event.get_all_attachments([PhotoAttachment])
         photos_data = []
         for photo in photos:
@@ -65,7 +58,12 @@ class ChatGPT(Command):
         if model is None:
             model = ChatGPTAPI.DALLE_3
 
-        request_text = " ".join(self.event.message.args_case[1:])
+        if len(self.event.message.args) > 1:
+            request_text = " ".join(self.event.message.args_case[1:])
+        elif self.event.fwd:
+            request_text = self.event.fwd[0].message.raw
+        else:
+            raise PWarning("Должен быть текст или пересланное сообщение")
         chat_gpt_api = ChatGPTAPI(model)
 
         try:
@@ -74,10 +72,13 @@ class ChatGPT(Command):
         finally:
             self.bot.stop_activity_thread()
 
+        if not images:
+            raise PWarning("Не смог сгенерировать :(")
+
+        real_prompt = images[0][1]
         attachments = []
         for image in images:
             url = image[0]
-            real_prompt = image[1]
             att = self.bot.get_photo_attachment(url)
             att.download_content()
             att.public_download_url = None
@@ -111,39 +112,41 @@ class ChatGPT(Command):
         answer = replace_markdown(answer, self.bot)
         return ResponseMessage(ResponseMessageItem(text=answer, reply_to=self.event.message.id))
 
-    @staticmethod
-    def get_dialog(event: TgEvent, user_message, use_preprompt=True):
-        mc = MessagesCache(event.peer_id)
+    def get_dialog(self, user_message, use_preprompt=True):
+        mc = MessagesCache(self.event.peer_id)
         data = mc.get_messages()
-
         preprompt = None
         if use_preprompt:
-            if event.sender.gpt_preprompt:
-                preprompt = event.sender.gpt_preprompt
-            elif event.chat and event.chat.gpt_preprompt:
-                preprompt = event.chat.gpt_preprompt
+            if self.event.sender.gpt_preprompt:
+                preprompt = self.event.sender.gpt_preprompt
+            elif self.event.chat and self.event.chat.gpt_preprompt:
+                preprompt = self.event.chat.gpt_preprompt
 
-        if not event.fwd:
-            history = []
+        history = []
+        if not self.event.fwd:
             if preprompt:
                 history.append({"role": "system", "content": preprompt})
             history.append({'role': "user", 'content': user_message})
             return history
 
-        reply_to_id = event.fwd[0].message.id
+        reply_to_id = self.event.fwd[0].message.id
         history = []
-        while True:
-            raw = data.get(reply_to_id)
-            tg_event = TgEvent({"message": raw})
-            tg_event.setup_event()
-            is_me = str(tg_event.from_id) == env.str("TG_BOT_GROUP_ID")
-            if is_me:
-                history.append({'role': 'assistant', 'content': tg_event.message.raw})
-            else:
-                history.append({'role': "user", 'content': tg_event.message.args_str_case})
-            reply_to_id = data.get(reply_to_id, {}).get('reply_to_message', {}).get('message_id')
-            if not reply_to_id:
-                break
+        if first_event := self.get_first_gpt_event_in_replies(self.event):
+            while True:
+                raw = data.get(reply_to_id)
+                tg_event = TgEvent({"message": raw})
+                tg_event.setup_event()
+                is_me = str(tg_event.from_id) == env.str("TG_BOT_GROUP_ID")
+                if is_me:
+                    history.append({'role': 'assistant', 'content': tg_event.message.raw})
+                else:
+                    msg = self.get_user_msg(tg_event)
+                    history.append({'role': "user", 'content': msg})
+                reply_to_id = data.get(reply_to_id, {}).get('reply_to_message', {}).get('message_id')
+                if not reply_to_id or tg_event.message.id == first_event.message.id:
+                    break
+        else:
+            history.append({'role': "user", 'content': self.event.fwd[0].message.raw})
 
         if preprompt:
             history.append({"role": "system", "content": preprompt})
@@ -151,8 +154,7 @@ class ChatGPT(Command):
         history.append({'role': "user", 'content': user_message})
         return history
 
-    @staticmethod
-    def get_first_event_in_replies(event) -> Optional[TgEvent]:
+    def get_first_gpt_event_in_replies(self, event) -> Optional[TgEvent]:
         mc = MessagesCache(event.peer_id)
         data = mc.get_messages()
         if not event.fwd:
@@ -164,6 +166,14 @@ class ChatGPT(Command):
             raw = data.get(reply_to_id)
             tg_event = TgEvent({"message": raw})
             tg_event.setup_event()
+            if tg_event.message and tg_event.message.command in self.full_names:
+                return tg_event
             reply_to_id = data.get(reply_to_id, {}).get('reply_to_message', {}).get('message_id')
             if not reply_to_id:
-                return tg_event
+                return None
+
+    def get_user_msg(self, event: TgEvent):
+        if event.message.command in self.full_names:
+            return event.message.args_str_case
+        else:
+            return event.message.raw
