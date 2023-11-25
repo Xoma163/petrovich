@@ -145,6 +145,8 @@ class ChatGPT(Command):
                 reply_to_id = data.get(reply_to_id, {}).get('reply_to_message', {}).get('message_id')
                 if not reply_to_id or tg_event.message.id == first_event.message.id:
                     break
+            if first_event.fwd:
+                history.append({'role': "user", 'content': first_event.fwd[0].message.raw})
         else:
             history.append({'role': "user", 'content': self.event.fwd[0].message.raw})
 
@@ -162,15 +164,17 @@ class ChatGPT(Command):
         if not event.fwd[0].is_from_bot_me:
             return None
         reply_to_id = event.fwd[0].message.id
+        find_accept_event = None
         while True:
             raw = data.get(reply_to_id)
             tg_event = TgEvent({"message": raw})
             tg_event.setup_event()
             if tg_event.message and tg_event.message.command in self.full_names:
-                return tg_event
+                find_accept_event = tg_event
             reply_to_id = data.get(reply_to_id, {}).get('reply_to_message', {}).get('message_id')
             if not reply_to_id:
-                return None
+                break
+        return find_accept_event
 
     def get_user_msg(self, event: TgEvent):
         if event.message.command in self.full_names:
