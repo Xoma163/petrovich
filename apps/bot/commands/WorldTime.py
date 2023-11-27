@@ -30,15 +30,24 @@ class WorldTime(Command):
         if not event.sender or not event.sender.city:
             return False
 
-        r = re.compile(r"\d\d:\d\d")
+        r = re.compile(r"(^|\D)(\d\d[:.]\d\d)($|\D)")
         return bool(r.findall(event.message.raw))
 
     def start(self) -> ResponseMessage:
         # args
 
-        r = re.compile(r"\d\d:\d\d")
+        r = re.compile(r"(^|\D)(\d\d[:.]\d\d)($|\D)")
         if res := r.findall(self.event.message.raw):
-            return self._get_time_in_cities_in_text(res)
+            new_res = []
+            for item in res:
+                h, m = re.split('[:.]', item[1])
+                h = int(h)
+                m = int(m)
+                if h > 24 or m > 60:
+                    continue
+                new_res.append(f"{h}:{m}")
+            new_res = list(set(new_res))
+            return self._get_time_in_cities_in_text(new_res)
         if self.event.message.args:
             city_name = self.event.message.args[0]
             city = City.objects.filter(synonyms__icontains=city_name).first()
@@ -57,7 +66,6 @@ class WorldTime(Command):
         return ResponseMessage(ResponseMessageItem(text=answer))
 
     def _get_time_in_cities_in_text(self, times_str):
-
         answer = []
         for item in times_str:
             dt = datetime.datetime.strptime(item, "%H:%M")
