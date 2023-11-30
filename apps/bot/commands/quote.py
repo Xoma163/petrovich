@@ -26,17 +26,23 @@ class Quote(Command):
     def start(self) -> ResponseMessage:
         if self.event.fwd:
             messages = self.event.fwd
-        else:
+        elif self.event.payload:
             time.sleep(2)
             mc = MessagesCache(self.event.peer_id)
             all_messages = mc.get_messages()
             sorted_messages = {x: all_messages[x] for x in all_messages if x > self.event.message.id}
             messages = [TgEvent(x[1]) for x in sorted(sorted_messages.items(), key=lambda x: x[0])]
             [x.setup_event(is_fwd=True) for x in messages]
+        else:
+            button = self.bot.get_button("Цитата", command=self.name)
+            keyboard = self.bot.get_inline_keyboard([button])
+            answer = "Перешлите сообщения после моего и нажмите кнопку, чтобы сделать цитату"
+            return ResponseMessage(ResponseMessageItem(text=answer, keyboard=keyboard))
+
         msgs = self.parse_fwd(messages)
 
         qg = QuotesGenerator()
-        pil_image = qg.build(msgs, "Сохры")
+        pil_image = qg.build(msgs, "Цитата")
         bytes_io = BytesIO()
         pil_image.save(bytes_io, format='PNG')
         if pil_image.height > 1500:
@@ -84,8 +90,8 @@ class Quote(Command):
                 if 'photo' in message:
                     next_append = True
 
-            if msg.fwd:
-                msgs[-1]['fwd'] = self.parse_fwd(msg.fwd)
-                next_append = True
+            # if msg.fwd:
+            #     msgs[-1]['fwd'] = self.parse_fwd(msg.fwd)
+            #     next_append = True
 
         return msgs
