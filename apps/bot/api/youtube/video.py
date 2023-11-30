@@ -162,7 +162,7 @@ class YoutubeVideo(SubscribeService):
             if not r.get('nextPageToken'):
                 break
             params['pageToken'] = r['nextPageToken']
-        videos = [x for x in r['items'] if x['snippet']['resourceId'].get('videoId')]
+        videos = [x for x in videos if x['snippet']['resourceId'].get('videoId')]
         return videos
 
     def get_data_to_add_new_subscribe(self, url: str) -> dict:
