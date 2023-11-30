@@ -41,9 +41,7 @@ class WorldTime(Command):
             new_res = []
             for item in res:
                 h, m = re.split('[:.]', item[1])
-                h = int(h)
-                m = int(m)
-                if h > 24 or m > 60:
+                if int(h) > 24 or int(m) > 60:
                     continue
                 new_res.append(f"{h}:{m}")
             new_res = list(set(new_res))
