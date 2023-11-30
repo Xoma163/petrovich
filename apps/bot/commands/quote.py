@@ -1,10 +1,13 @@
+import time
 from io import BytesIO
 
 from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Platform
+from apps.bot.classes.event.tg_event import TgEvent
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
+from apps.bot.utils.cache import MessagesCache
 from apps.bot.utils.quotes_generator import QuotesGenerator
 
 
@@ -14,13 +17,23 @@ class Quote(Command):
     name = "цитата"
     help_text = "генерирует картинку с цитатой"
     help_texts = ["(Пересылаемые сообщение) - генерирует картинку с цитатой"]
-    fwd = True
     platforms = [Platform.TG]
 
     bot: TgBot
 
+    SPECIAL_SYMBOLS = "▲ ▲"
+
     def start(self) -> ResponseMessage:
-        msgs = self.parse_fwd(self.event.fwd)
+        if self.event.fwd:
+            messages = self.event.fwd
+        else:
+            time.sleep(2)
+            mc = MessagesCache(self.event.peer_id)
+            all_messages = mc.get_messages()
+            sorted_messages = {x: all_messages[x] for x in all_messages if x > self.event.message.id}
+            messages = [TgEvent(x[1]) for x in sorted(sorted_messages.items(), key=lambda x: x[0])]
+            [x.setup_event(is_fwd=True) for x in messages]
+        msgs = self.parse_fwd(messages)
 
         qg = QuotesGenerator()
         pil_image = qg.build(msgs, "Сохры")
@@ -37,8 +50,8 @@ class Quote(Command):
         msgs = []
         next_append = False
         for msg in fwd_messages:
-            message = {'text': msg.message.raw.replace('\n', '▲ ▲') if msg.message and isinstance(msg.message.raw,
-                                                                                                  str) else ''}
+            message = {'text': msg.message.raw.replace('\n', self.SPECIAL_SYMBOLS) if msg.message and isinstance(
+                msg.message.raw, str) else ''}
 
             if msg.is_from_user:
                 username = str(msg.sender)
@@ -61,10 +74,10 @@ class Quote(Command):
                     next_append = 'photo' in message
                 elif 'photo' in message:
                     msgs[-1]['message']['photo'] = message['photo']
-                    msgs[-1]['message']['text'] += f"▲ ▲{message['text']}"
+                    msgs[-1]['message']['text'] += f"{self.SPECIAL_SYMBOLS}{message['text']}"
                     next_append = True
                 else:
-                    msgs[-1]['message']['text'] += f"▲ ▲{message['text']}"
+                    msgs[-1]['message']['text'] += f"{self.SPECIAL_SYMBOLS}{message['text']}"
             else:
                 next_append = False
                 msgs.append({'username': username, 'message': message, 'avatar': avatar})

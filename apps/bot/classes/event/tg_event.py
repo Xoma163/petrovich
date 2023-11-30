@@ -60,6 +60,9 @@ class TgEvent(Event):
             else:
                 message = self.raw.get('message')
 
+            # if not message:
+            #     message = self.raw
+
         is_topic_message = message.get('is_topic_message')
         if is_topic_message:
             self.message_thread_id = message.get('message_thread_id')
@@ -124,7 +127,6 @@ class TgEvent(Event):
             need_a_response_extra = self.need_a_response_extra()
             if not need_a_response_extra:
                 self.force_response = False
-                return
 
         super().setup_event(**kwargs)
 
