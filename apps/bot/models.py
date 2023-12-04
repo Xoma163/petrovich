@@ -32,7 +32,7 @@ class Chat(Platform):
     is_banned = models.BooleanField('Забанен', default=False)
     need_turett = models.BooleanField('Слать туреттные сообщения', default=False)
     use_swear = models.BooleanField("Использовать ругательства", default=True)
-    gpt_preprompt = models.CharField("ChatGPT preprompt", default="", max_length=500)
+    gpt_preprompt = models.TextField("ChatGPT preprompt", default="")
 
     # Для статистики
     kicked = models.BooleanField("Бота кикнули", default=False)
