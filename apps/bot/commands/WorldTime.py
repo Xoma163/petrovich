@@ -19,23 +19,24 @@ class WorldTime(Command):
     help_texts_extra = \
         "Если в сообщении будет указание времени, а у пользователя будет проставлен город в профиле, то бот автоматически проставит соответствующее время для остальных городов в чате"
 
-    priority = 10
+    priority = -5
 
     def accept(self, event: Event) -> bool:
+        super_res = super().accept(event)
         if not event.chat:
-            return False
+            return super_res
 
         if not event.message or not event.message.raw:
-            return False
+            return super_res
 
         if not event.sender or not event.sender.city:
-            return False
+            return super_res
 
         r = re.compile(r"(^|\D)(\d?\d[:.]\d\d)($|\D)")
         res = bool(r.findall(event.message.raw))
         if res:
             return True
-        return super().accept(event)
+        return super_res
 
     def start(self) -> ResponseMessage:
         # args
