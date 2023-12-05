@@ -35,6 +35,8 @@ class TrimVideo(Command):
     attachments = [LinkAttachment, VideoAttachment]
     args = 1
 
+    TIMECODE_FORMAT = "%H:%M:%S.%f"
+
     def start(self) -> ResponseMessage:
         att = self.event.get_all_attachments([LinkAttachment, VideoAttachment])[0]
         try:
@@ -61,7 +63,8 @@ class TrimVideo(Command):
     def trim_link_pos(self, link, start_pos, end_pos=None) -> bytes:
         delta = None
         if end_pos:
-            delta = (datetime.strptime(end_pos, "%H:%M:%S.%f") - datetime.strptime(start_pos, "%H:%M:%S.%f")).seconds
+            delta = (datetime.strptime(end_pos, self.TIMECODE_FORMAT) - datetime.strptime(start_pos,
+                                                                                          self.TIMECODE_FORMAT)).seconds
         max_filesize_mb = self.bot.MAX_VIDEO_SIZE_MB if isinstance(self.bot, TgBot) else None
         yt_api = YoutubeVideo()
         data = yt_api.get_video_info(link, _timedelta=delta, max_filesize_mb=max_filesize_mb)
@@ -74,6 +77,7 @@ class TrimVideo(Command):
         end_pos = None
         if len(self.event.message.args) > 1:
             end_pos = self.parse_timecode(self.event.message.args[1])
+        self.check_positions(start_pos, end_pos)
         video = video.download_content(self.event.peer_id)
         return self.trim(video, start_pos, end_pos)
 
@@ -149,4 +153,10 @@ class TrimVideo(Command):
                 return None, None
         else:
             return None, None
+        cls.check_positions(start_pos, end_pos)
         return start_pos, end_pos
+
+    @classmethod
+    def check_positions(cls, start_pos, end_pos):
+        if datetime.strptime(start_pos, cls.TIMECODE_FORMAT) > datetime.strptime(end_pos, cls.TIMECODE_FORMAT):
+            raise PWarning("Первый таймкод больше второго")
