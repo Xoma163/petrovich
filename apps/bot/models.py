@@ -73,7 +73,7 @@ class Profile(models.Model):
     # Настройки
     celebrate_bday = models.BooleanField('Поздравлять с Днём рождения', default=True)
     show_birthday_year = models.BooleanField('Показывать год', default=True)
-    gpt_preprompt = models.CharField("ChatGPT preprompt", default="", max_length=500)
+    gpt_preprompt = models.TextField("ChatGPT preprompt", default="")
 
     api_token = models.CharField("Токен для API", max_length=100, blank=True)
 
