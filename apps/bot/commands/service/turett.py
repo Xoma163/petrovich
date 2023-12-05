@@ -116,7 +116,9 @@ class Turett(Command):
         chat_gpt.bot = self.bot
         chat_gpt.event = self.event
         messages = chat_gpt.get_dialog(new_prompt, use_preprompt=True)
-        return self._get_gpt_answer(messages)
+        rmi = self._get_gpt_answer(messages)
+        rmi.reply_to = self.event.message.id
+        return rmi
 
     def get_gpt_wtf_text(self) -> ResponseMessageItem:
         self.event: TgEvent
@@ -134,6 +136,4 @@ class Turett(Command):
         chat_gpt = ChatGPT()
         chat_gpt.bot = self.bot
         chat_gpt.event = self.event
-        rmi = chat_gpt.text_chat(messages).messages[0]
-        rmi.reply_to = self.event.message.id
-        return rmi
+        return chat_gpt.text_chat(messages).messages[0]
