@@ -200,7 +200,10 @@ class Notifies(Command):
             .replace(hour=9, minute=0, second=0, microsecond=0)
         try:
             if arg1.count('.') == 1:
-                arg1 = f"{arg1}.{default_datetime.year}"
+                if datetime.strptime(f"{arg1}.{default_datetime.year}", '%d.%m.%Y') < datetime.utcnow():
+                    arg1 = f"{arg1}.{default_datetime.year + 1}"
+                else:
+                    arg1 = f"{arg1}.{default_datetime.year}"
             date_str = f"{arg1} {arg2}"
 
             return parser.parse(date_str, default=default_datetime, dayfirst=True), 2, exact_datetime_flag
