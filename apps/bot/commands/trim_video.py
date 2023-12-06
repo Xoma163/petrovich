@@ -158,5 +158,6 @@ class TrimVideo(Command):
 
     @classmethod
     def check_positions(cls, start_pos, end_pos):
-        if datetime.strptime(start_pos, cls.TIMECODE_FORMAT) > datetime.strptime(end_pos, cls.TIMECODE_FORMAT):
+        if start_pos and end_pos and \
+                datetime.strptime(start_pos, cls.TIMECODE_FORMAT) > datetime.strptime(end_pos, cls.TIMECODE_FORMAT):
             raise PWarning("Первый таймкод больше второго")
