@@ -10,7 +10,7 @@ from apps.bot.classes.event.tg_event import TgEvent
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.utils.cache import MessagesCache
-from apps.bot.utils.utils import replace_markdown
+from apps.bot.utils.utils import markdown_to_html
 from petrovich.settings import env
 
 
@@ -104,12 +104,7 @@ class ChatGPT(Command):
         finally:
             self.bot.stop_activity_thread()
 
-        answer = answer \
-            .replace(">", "&gt;") \
-            .replace("<", "&lt;") \
-            .replace("&lt;pre&gt;", "<pre>") \
-            .replace("&lt;/pre&gt;", "</pre>")
-        answer = replace_markdown(answer, self.bot)
+        answer = markdown_to_html(answer, self.bot)
         return ResponseMessage(ResponseMessageItem(text=answer, reply_to=self.event.message.id))
 
     def get_dialog(self, user_message, use_preprompt=True):

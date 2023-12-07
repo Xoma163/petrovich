@@ -30,6 +30,15 @@ lock = Lock()
 class Bot(Thread):
     ERROR_MSG = "Непредвиденная ошибка. Сообщите разработчику."
 
+    CODE_TAG = None
+    PRE_TAG = None
+    SPOILER_TAG = None
+    BOLD_TAG = None
+    ITALIC_TAG = None
+    LINK_TAG = None
+    STROKE_TAG = None
+    UNDERLINE_TAG = None
+
     def __init__(self, platform, **kwargs):
         Thread.__init__(self)
 

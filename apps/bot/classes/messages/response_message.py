@@ -59,6 +59,10 @@ class ResponseMessageItem:
 
         return dict_self
 
+    @property
+    def text_has_html_code(self):
+        return self.kwargs.get('parse_mode') == 'html'
+
     def set_telegram_html(self):
         if not self.text:
             return

@@ -42,6 +42,15 @@ class TgBot(Bot):
     MAX_MESSAGE_TEXT_LENGTH = 4096
     MAX_MESSAGE_TEXT_CAPTION = 1024
 
+    CODE_TAG = "code"
+    PRE_TAG = "pre"
+    SPOILER_TAG = "tg-spoiler"
+    BOLD_TAG = "b"
+    ITALIC_TAG = "i"
+    LINK_TAG = "a"
+    STROKE_TAG = "s"
+    UNDERLINE_TAG = "u"
+
     def __init__(self):
         Bot.__init__(self, Platform.TG)
         self.token = env.str("TG_TOKEN")
@@ -387,11 +396,18 @@ class TgBot(Bot):
         if params.get('caption'):
             # Шлём длинные сообщения чанками.
             if rmi.attachments and len(params['caption']) > self.MAX_MESSAGE_TEXT_CAPTION:
-                chunks = split_text_by_n_symbols(params['caption'], self.MAX_MESSAGE_TEXT_CAPTION)
-                first_chunk = chunks[0]
-                text = params['caption'][len(first_chunk):]
-                chunks = split_text_by_n_symbols(text, self.MAX_MESSAGE_TEXT_LENGTH)
-                chunks = [first_chunk] + chunks
+                # Если у нас есть форматирование, в таком случае все сначала шлём все медиа, а потом уже форматированный текст
+                # Телега не умеет в send_media_group + parse_mode
+                if rmi.text_has_html_code and len(rmi.attachments) > 1:
+                    chunks = split_text_by_n_symbols(params['caption'], self.MAX_MESSAGE_TEXT_LENGTH)
+                    chunks = [""] + chunks
+                # Иначё бьём на 1024 символа первое сообщение и на 4096 остальные (ограничения телеги)
+                else:
+                    chunks = split_text_by_n_symbols(params['caption'], self.MAX_MESSAGE_TEXT_CAPTION)
+                    first_chunk = chunks[0]
+                    text = params['caption'][len(first_chunk):]
+                    chunks = split_text_by_n_symbols(text, self.MAX_MESSAGE_TEXT_LENGTH)
+                    chunks = [first_chunk] + chunks
                 params['caption'] = chunks[0]
             elif len(params['caption']) > self.MAX_MESSAGE_TEXT_LENGTH:
                 chunks = split_text_by_n_symbols(params['caption'], self.MAX_MESSAGE_TEXT_LENGTH)
@@ -602,45 +618,45 @@ class TgBot(Bot):
         """
         Форматированный текст в одну линию
         """
-        return f"<code>{text}</code>"
+        return f"<{cls.CODE_TAG}>{text}</{cls.CODE_TAG}>"
 
     @classmethod
     def get_formatted_url(cls, name, url) -> str:
-        return f'<a href="{url}">{name}</a>'
+        return f'<{cls.LINK_TAG} href="{url}">{name}</{cls.LINK_TAG}>'
 
     @classmethod
     def get_underline_text(cls, text: str) -> str:
         """
         Текст с нижним подчёркиванием
         """
-        return f"<u>{text}</u>"
+        return f"<{cls.UNDERLINE_TAG}>{text}</{cls.UNDERLINE_TAG}>"
 
     @classmethod
     def get_italic_text(cls, text: str) -> str:
         """
         Наклонный текст
         """
-        return f"<i>{text}</i>"
+        return f"<{cls.ITALIC_TAG}>{text}</{cls.ITALIC_TAG}>"
 
     @classmethod
     def get_bold_text(cls, text: str) -> str:
         """
         Жирный текст
         """
-        return f"<b>{text}</b>"
+        return f"<{cls.BOLD_TAG}>{text}</{cls.BOLD_TAG}>"
 
     @classmethod
     def get_strike_text(cls, text: str) -> str:
         """
-        Жирный текст
+        Зачёрнутый текст
         """
-        return f"<s>{text}</s>"
+        return f"<{cls.STROKE_TAG}>{text}</{cls.STROKE_TAG}>"
 
     @classmethod
     def get_spoiler_text(cls, text: str) -> str:
         """
         Спойлер-текст
         """
-        return f'<tg-spoiler">{text}</tg-spoiler>'
+        return f'<{cls.SPOILER_TAG}">{text}</{cls.SPOILER_TAG}>'
 
     # END EXTRA

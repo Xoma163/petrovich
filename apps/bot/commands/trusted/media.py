@@ -30,8 +30,7 @@ from apps.bot.classes.event.event import Event
 from apps.bot.classes.messages.attachments.link import LinkAttachment
 from apps.bot.classes.messages.response_message import ResponseMessageItem, ResponseMessage
 from apps.bot.commands.trim_video import TrimVideo
-from apps.bot.utils.utils import get_urls_from_text, replace_markdown_links, replace_markdown_bolds, \
-    replace_markdown_quotes
+from apps.bot.utils.utils import get_urls_from_text, markdown_to_html
 from apps.bot.utils.video.trimmer import VideoTrimmer
 from apps.service.models import VideoCache
 from petrovich.settings import MAIN_SITE
@@ -142,10 +141,7 @@ class Media(Command):
             answer += f"\nОт {self.event.sender}"
 
         source_hostname = str(urlparse(chosen_url).hostname).lstrip('www.')
-        if len(attachments) <= 1:
-            answer += f'\nИсточник: {self.bot.get_formatted_url(source_hostname, chosen_url)}'
-        else:
-            answer += f'\nИсточник: {chosen_url}'
+        answer += f'\nИсточник: {self.bot.get_formatted_url(source_hostname, chosen_url)}'
 
         extra_text = source[:chosen_url_pos].strip() + "\n" + source[chosen_url_pos + len(chosen_url):].strip()
         for key in self.event.message.keys:
@@ -273,10 +269,13 @@ class Media(Command):
         elif rs.is_text or rs.is_link:
             text = reddit_data
             all_photos = []
-            text = text.replace("&#x200B;", "").replace("&amp;#x200B;", "").replace("&amp;", "&").replace(" ",
-                                                                                                          " ").strip()
-            text = replace_markdown_links(text, self.bot)
-
+            text = text \
+                .replace("&#x200B;", "") \
+                .replace("&amp;#x200B;", "") \
+                .replace("&amp;", "&") \
+                .replace(" ", " ") \
+                .strip()
+            text = markdown_to_html(text, self.bot)
             regexps_with_static = ((r"https.*player", "Видео"), (r"https://preview\.redd\.it/.*", "Фото"))
             for regexp, _text in regexps_with_static:
                 p = re.compile(regexp)
@@ -290,10 +289,9 @@ class Media(Command):
                     text = text[:start_pos] + tg_url + text[end_pos:]
                     if _text == "Фото":
                         all_photos.append(link)
-            text = replace_markdown_bolds(text, self.bot)
-            text = replace_markdown_quotes(text, self.bot)
-            attachments = [self.bot.get_photo_attachment(photo, peer_id=self.event.peer_id, filename=rs.filename) for
-                           photo in all_photos]
+            all_photos = reversed(all_photos)
+            attachments = [self.bot.get_photo_attachment(photo, peer_id=self.event.peer_id, filename=rs.filename)
+                           for photo in all_photos]
             return attachments, f"{rs.title}\n\n{text}"
         else:
             raise PWarning("Я хз чё за контент")

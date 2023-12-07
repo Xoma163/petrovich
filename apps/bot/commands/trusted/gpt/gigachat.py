@@ -1,8 +1,9 @@
 from apps.bot.api.gpt.gigachat import GigaChat as GigaChatAPI
+from apps.bot.classes.const.activities import ActivitiesEnum
 from apps.bot.classes.event.tg_event import TgEvent
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.commands.trusted.gpt.chatgpt import ChatGPT
-from apps.bot.utils.utils import replace_markdown
+from apps.bot.utils.utils import markdown_to_html
 
 
 class GigaChat(ChatGPT):
@@ -26,8 +27,12 @@ class GigaChat(ChatGPT):
         if model is None:
             model = GigaChatAPI.LATEST_MODEL
         gc_api = GigaChatAPI(model)
-        answer = gc_api.completions(messages, )
-        answer = answer.replace(">", "&gt;").replace("<", "&lt;").replace("&lt;pre&gt;", "<pre>").replace(
-            "&lt;/pre&gt;", "</pre>")
-        answer = replace_markdown(answer, self.bot)
+
+        try:
+            self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.TYPING)
+            answer = gc_api.completions(messages)
+        finally:
+            self.bot.stop_activity_thread()
+
+        answer = markdown_to_html(answer, self.bot)
         return ResponseMessage(ResponseMessageItem(text=answer, reply_to=self.event.message.id))

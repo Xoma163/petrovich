@@ -75,5 +75,7 @@ class ChatGPTAPI(GPT):
                 raise PWarning("ChatGPT не может обработать запрос по политикам безопасности")
             elif code == 503:
                 raise PWarning("ChatGPT недоступен")
+            elif code == 'insufficient_quota':
+                raise PWarning("Закончились деньги((")
             raise PError("Какая-то ошибка API ChatGPT")
         return r_json

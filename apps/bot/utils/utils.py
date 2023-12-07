@@ -394,56 +394,47 @@ def replace_markdown_links(text: str, bot) -> str:
     return text
 
 
-def replace_markdown_bolds(text: str, bot) -> str:
-    p = re.compile(r'\*\*(.*)\*\*')  # markdown bold
-    for item in reversed(list(p.finditer(text))):
-        start_pos = item.start()
-        end_pos = item.end()
-        bold_text = text[item.regs[1][0]:item.regs[1][1]]
-        tg_bold_text = bot.get_bold_text(bold_text).replace("**", '')
-        text = text[:start_pos] + tg_bold_text + text[end_pos:]
+def markdown_to_html(text: str, bot) -> str:
+    text = text \
+        .replace(">", "&gt;") \
+        .replace("<", "&lt;") \
+        .replace("&lt;pre&gt;", "<pre>") \
+        .replace("&lt;/pre&gt;", "</pre>")
+
+    if bot.PRE_TAG:
+        text = replace_tag(text, '```', '```', f"<{bot.PRE_TAG}>", f"</{bot.PRE_TAG}>")
+    if bot.CODE_TAG:
+        text = replace_tag(text, '`', '`', f"<{bot.CODE_TAG}>", f"</{bot.CODE_TAG}>")
+    if bot.BOLD_TAG:
+        text = replace_tag(text, '**', '**', f"<{bot.BOLD_TAG}>", f"</{bot.BOLD_TAG}>")
+    if bot.ITALIC_TAG:
+        text = replace_tag(text, '*', '*', f"<{bot.ITALIC_TAG}>", f"</{bot.ITALIC_TAG}>")
+    if bot.CODE_TAG:
+        text = replace_tag(text, '\n&gt;', '\n', f"\n<{bot.CODE_TAG}>", f"</{bot.CODE_TAG}>\n")
+    if bot.LINK_TAG:
+        text = replace_markdown_links(text, bot)
     return text
 
 
-def replace_markdown_quotes(text: str, bot) -> str:
-    p = re.compile(r'^\&gt;\s(.*(?:$)?)', re.MULTILINE)  # markdown quote
-    for item in reversed(list(p.finditer(text))):
-        start_pos = item.start()
-        end_pos = item.end()
-        quote_text = text[item.regs[1][0]:item.regs[1][1]]
-        tg_quote_text = bot.get_formatted_text_line(quote_text)
-        text = text[:start_pos] + tg_quote_text + text[end_pos:]
-    return text
+def replace_tag(text, start_tag, end_tag, new_start_tag, new_end_tag):
+    start_tag_len = len(start_tag)
+    end_tag_len = len(end_tag)
 
+    start_tag_pos = 0
+    while True:
+        start_tag_pos = text.find(start_tag, start_tag_pos)
+        end_tag_pos = text.find(end_tag, start_tag_pos + 1)
 
-def replace_markdown_line_code(text: str, bot) -> str:
-    p = re.compile(r'`(.*)`', re.MULTILINE)  # markdown formatting
-    for item in reversed(list(p.finditer(text))):
-        start_pos = item.start()
-        end_pos = item.end()
-        code_text = text[item.regs[1][0]:item.regs[1][1]]
-        tg_code_text = bot.get_formatted_text_line(code_text)
-        text = text[:start_pos] + tg_code_text + text[end_pos:]
-    return text
+        if start_tag_pos == -1 or end_tag_pos == -1:
+            break
 
+        text = text.replace(
+            text[start_tag_pos:end_tag_pos + end_tag_len],
+            new_start_tag + text[start_tag_pos + start_tag_len:end_tag_pos] + new_end_tag
+        )
 
-def replace_markdown_code(text: str, bot) -> str:
-    p = re.compile(r'```([\S\s]*)```')  # markdown formatting
-    for item in reversed(list(p.finditer(text))):
-        start_pos = item.start()
-        end_pos = item.end()
-        code_text = text[item.regs[1][0]:item.regs[1][1]]
-        tg_code_text = bot.get_formatted_text(code_text).replace("**", '')
-        text = text[:start_pos] + tg_code_text + text[end_pos:]
-    return text
+        start_tag_pos = end_tag_pos + end_tag_len
 
-
-def replace_markdown(text, bot):
-    text = replace_markdown_links(text, bot)
-    text = replace_markdown_bolds(text, bot)
-    text = replace_markdown_quotes(text, bot)
-    text = replace_markdown_line_code(text, bot)
-    text = replace_markdown_code(text, bot)
     return text
 
 
