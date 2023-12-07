@@ -478,7 +478,7 @@ class Bot(Thread):
         """
 
     @classmethod
-    def get_formatted_text(cls, text: str) -> str:
+    def get_formatted_text(cls, text: str, language: str = None) -> str:
         """
         Форматированный текст
         """

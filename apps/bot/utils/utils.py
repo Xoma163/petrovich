@@ -402,7 +402,11 @@ def markdown_to_html(text: str, bot) -> str:
         .replace("&lt;/pre&gt;", "</pre>")
 
     if bot.PRE_TAG:
-        text = replace_tag(text, '```', '```', f"<{bot.PRE_TAG}>", f"</{bot.PRE_TAG}>")
+        if bot.CODE_TAG:
+            text = replace_pre_tag(text, bot, '```', '```')
+        else:
+            text = replace_tag(text, '```', '```', f"<{bot.PRE_TAG}>", f"</{bot.PRE_TAG}>")
+
     if bot.CODE_TAG:
         text = replace_tag(text, '`', '`', f"<{bot.CODE_TAG}>", f"</{bot.CODE_TAG}>")
     if bot.BOLD_TAG:
@@ -416,7 +420,7 @@ def markdown_to_html(text: str, bot) -> str:
     return text
 
 
-def replace_tag(text, start_tag, end_tag, new_start_tag, new_end_tag):
+def replace_tag(text: str, start_tag: str, end_tag: str, new_start_tag: str, new_end_tag: str):
     start_tag_len = len(start_tag)
     end_tag_len = len(end_tag)
 
@@ -428,13 +432,41 @@ def replace_tag(text, start_tag, end_tag, new_start_tag, new_end_tag):
         if start_tag_pos == -1 or end_tag_pos == -1:
             break
 
-        text = text.replace(
-            text[start_tag_pos:end_tag_pos + end_tag_len],
-            new_start_tag + text[start_tag_pos + start_tag_len:end_tag_pos] + new_end_tag
-        )
+        inner_to_replace = text[start_tag_pos:end_tag_pos + end_tag_len]
+        # strip - экспериментально
+        inner_text = text[start_tag_pos + start_tag_len:end_tag_pos].strip()
+        new_inner = new_start_tag + inner_text + new_end_tag
+        text = text.replace(inner_to_replace, new_inner)
 
-        start_tag_pos = end_tag_pos + end_tag_len
+        start_tag_pos = start_tag_pos + len(new_inner)
+    return text
 
+
+def replace_pre_tag(text: str, bot, start_tag: str, end_tag: str):
+    start_tag_len = len(start_tag)
+    end_tag_len = len(end_tag)
+
+    start_tag_pos = 0
+    while True:
+        start_tag_pos = text.find(start_tag, start_tag_pos)
+        end_tag_pos = text.find(end_tag, start_tag_pos + 1)
+
+        if start_tag_pos == -1 or end_tag_pos == -1:
+            break
+
+        start_language_pos = start_tag_pos + start_tag_len
+        end_language_pos = text.find('\n', start_tag_pos)
+        language = text[start_language_pos:end_language_pos]
+        if '`' in language or ' ' in language:
+            language = ""
+
+        inner_to_replace = text[start_tag_pos:end_tag_pos + end_tag_len]
+        # strip - экспериментально
+        inner_text = text[start_tag_pos + start_tag_len + 1 + len(language):end_tag_pos].strip()
+        new_inner = bot.get_formatted_text(inner_text, language)
+        text = text.replace(inner_to_replace, new_inner)
+
+        start_tag_pos = start_tag_pos + len(new_inner)
     return text
 
 

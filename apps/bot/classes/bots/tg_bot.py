@@ -607,11 +607,16 @@ class TgBot(Bot):
         return file_id
 
     @classmethod
-    def get_formatted_text(cls, text: str) -> str:
+    def get_formatted_text(cls, text: str, language: str = None) -> str:
         """
         Форматированный текст
         """
-        return f"<pre>{text.replace('&', '&amp;').replace('>', '&gt;').replace('<', '&lt;')}</pre>"
+        # text = text.replace('&', '&amp;').replace('>', '&gt;').replace('<', '&lt;')
+        if language:
+            pre_inner = f"<{cls.CODE_TAG} class='language-{language}'>{text}</{cls.CODE_TAG}>"
+        else:
+            pre_inner = text
+        return f"<{cls.PRE_TAG}>{pre_inner}</{cls.PRE_TAG}>"
 
     @classmethod
     def get_formatted_text_line(cls, text: str) -> str:
