@@ -15,4 +15,3 @@ __pycache__
 apps/bot/migrations
 apps/games/migrations
 apps/service/migrations
-apps/web/migrations
