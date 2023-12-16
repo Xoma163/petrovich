@@ -132,16 +132,9 @@ secrets/
 
 cloc.exe
 
-static/
+/static
 media/
 node_modules/
-
-config/nginx/conf/andrewsha-ssl.conf
-config/nginx/conf/petrovich-default-config.conf
-config/nginx/conf/petrovich-default-locations.conf
-config/nginx/petrovich_nginx.conf
-config/systemd/petrovich.service
-config/systemd/petrovich_site.service
 
 # pid
 config/petrovich.pid

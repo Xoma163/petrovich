@@ -27,7 +27,7 @@ class Command(BaseCommand):
             ScheduleItem("0 1 * * *", "get_horoscope"),
             # Отправка новостей Паше
             ScheduleItem("0 */6 * * *", "check_pasha_news", "130"),
-            # Отправка новостей Паше
+            # Set cs rating
             ScheduleItem("0 9 * * *", "set_cs_rating", "112"),
         ]
 

@@ -28,19 +28,19 @@ class Taxi(Command):
         return ResponseMessage(rmi)
 
     def menu_econom(self):
-        return self.get_attachment_by_path(f"{STATIC_ROOT}/bot/img/taxi/econom.png")
+        return self.get_attachment_by_path(f"{STATIC_ROOT}/service/img/taxi/econom.png")
 
     def menu_comfort(self):
-        return self.get_attachment_by_path(f"{STATIC_ROOT}/bot/img/taxi/comfort.png")
+        return self.get_attachment_by_path(f"{STATIC_ROOT}/service/img/taxi/comfort.png")
 
     def menu_comfortplus(self):
-        return self.get_attachment_by_path(f"{STATIC_ROOT}/bot/img/taxi/comfortplus.png")
+        return self.get_attachment_by_path(f"{STATIC_ROOT}/service/img/taxi/comfortplus.png")
 
     def menu_express(self):
-        return self.get_attachment_by_path(f"{STATIC_ROOT}/bot/img/taxi/express.png")
+        return self.get_attachment_by_path(f"{STATIC_ROOT}/service/img/taxi/express.png")
 
     def menu_courier(self):
-        return self.get_attachment_by_path(f"{STATIC_ROOT}/bot/img/taxi/courier.png")
+        return self.get_attachment_by_path(f"{STATIC_ROOT}/service/img/taxi/courier.png")
 
     def get_attachment_by_path(self, path) -> ResponseMessageItem:
         attachment = self.bot.get_photo_attachment(path, peer_id=self.event.peer_id, filename="petrovich_taxi.png")

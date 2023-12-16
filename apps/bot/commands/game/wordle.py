@@ -38,7 +38,7 @@ class Wordle(Command):
     bot: TgBot
 
     MAX_STEPS = 6
-    WORDLE_WORDS_PATH = "static/bot/games/wordle/wordle.json"
+    WORDLE_WORDS_PATH = "static/games/wordle/wordle.json"
 
     def start(self) -> ResponseMessage:
         if self.event.message.args:
