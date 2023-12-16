@@ -51,8 +51,7 @@ VENDORS_APPS = [
 PROJECT_APPS = [
     'apps.bot',
     'apps.service',
-    'apps.games',
-    'apps.web',
+    'apps.games'
 ]
 
 INSTALLED_APPS = DJANGO_APPS + VENDORS_APPS + PROJECT_APPS
