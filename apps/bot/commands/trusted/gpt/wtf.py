@@ -2,6 +2,7 @@ from collections import OrderedDict
 from typing import List
 
 from apps.bot.classes.command import Command
+from apps.bot.classes.const.activities import ActivitiesEnum
 from apps.bot.classes.const.consts import Role, Platform
 from apps.bot.classes.event.event import Event
 from apps.bot.classes.event.tg_event import TgEvent
@@ -35,7 +36,13 @@ class WTF(Command):
         gpt = ChatGPT()
         gpt.bot = self.bot
         gpt.event = self.event
-        return gpt.text_chat(messages)
+
+        try:
+            self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.TYPING)
+            answer = gpt.text_chat(messages)
+        finally:
+            self.bot.stop_activity_thread()
+        return answer
 
     def get_conversation(self, n: int, prompt: str, use_preprompt: bool = True) -> list:
         events = self.get_last_messages_as_events(n)
