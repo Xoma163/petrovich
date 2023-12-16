@@ -23,5 +23,8 @@ cloc.exe
 /static
 media/
 
+# log
+/logs
+
 # uwsgi pid
 config/petrovich.pid
