@@ -210,19 +210,6 @@ LOGGING = {
 if DEBUG:
     LOGGING['loggers']['bot']['handlers'].append('console-debug')
 
-WEBPACK_DEV_SERVER = DEBUG
-
-WEBPACK_LOADER = {
-    'DEFAULT': {
-        'CACHE': not DEBUG,
-        'BUNDLE_DIR_NAME': '/',  # must end with slash
-        'STATS_FILE': str(os.path.join(BASE_DIR, 'frontend/webpack-stats.json')),
-        'POLL_INTERVAL': 0.1,
-        'TIMEOUT': None,
-        'IGNORE': ['.+\.hot-update.js', '.+\.map'],
-    }
-}
-
 REST_FRAMEWORK = {
     'COERCE_DECIMAL_TO_STRING': False
 }
