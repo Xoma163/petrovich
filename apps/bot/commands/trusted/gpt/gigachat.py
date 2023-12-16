@@ -25,7 +25,7 @@ class GigaChat(ChatGPT):
 
     def text_chat(self, messages, model=None) -> ResponseMessage:
         if model is None:
-            model = GigaChatAPI.LATEST_MODEL
+            model = GigaChatAPI.PRO_MODEL
         gc_api = GigaChatAPI(model)
 
         try:
