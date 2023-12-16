@@ -32,7 +32,7 @@ class WorldTime(Command):
         if not event.sender or not event.sender.city:
             return super_res
 
-        r = re.compile(r"(^|\D)(\d?\d[:.]\d\d)($|\D)")
+        r = re.compile(r"(^|\D)(\d?\d:\d\d)($|\D)")
         res = bool(r.findall(event.message.raw))
         if res:
             return True
@@ -41,7 +41,7 @@ class WorldTime(Command):
     def start(self) -> ResponseMessage:
         # args
 
-        r = re.compile(r"(^|\D)(\d?\d[:.]\d\d)($|\D)")
+        r = re.compile(r"(^|\D)(\d?\d:\d\d)($|\D)")
         if res := r.findall(self.event.message.raw):
             new_res = []
             for item in res:
