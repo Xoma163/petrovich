@@ -20,18 +20,19 @@ class HappyNewYear(Command):
 
     def start(self) -> ResponseMessage:
         messages = [
-            ResponseMessageItem(text="И ваc тоже, и вам тогоже"),
+            ResponseMessageItem(text="И ваc тоже, и вам того же"),
             ResponseMessageItem(text="УРААААААААААА"),
             [
                 ResponseMessageItem(text="ННОООООВВЫЫЫЫЙ ГОД К НАМ МЧИТСЯ"),
                 ResponseMessageItem(text="СКООООРААА ВСЁ СЛУЧИТСЯ"),
                 ResponseMessageItem(text="СБУУДЕТСЯ ЧТО СНИТСЯ"),
                 ResponseMessageItem(text="ЧТО ОПЯТЬ НАС ОБМАНУТ, НИЧЕГО НЕ ДАДУТ"),
-                ResponseMessageItem(text="https://youtu.be/xviBEvbxgZ0", attachments=[
-                    self.bot.get_photo_attachment(f"{STATIC_ROOT}/bot/img/sng.jpg", peer_id=self.event.peer_id,
-                                                  filename="petrovich_hny.jpg")])
+                ResponseMessageItem(text="https://youtu.be/xviBEvbxgZ0")
             ],
-            ResponseMessageItem(text="https://youtu.be/8PzPHKGpNXs"),
+            ResponseMessageItem(attachments=[
+                self.bot.get_photo_attachment(
+                    f"{STATIC_ROOT}/bot/img/sng.jpg", peer_id=self.event.peer_id, filename="petrovich_hny.jpg")]),
+            ResponseMessageItem(text="https://youtu.be/5MPmOQOJHiQ"),
             ResponseMessageItem(text="https://youtu.be/pESX7mQwTNU")
         ]
         rmis = random_event(messages)
