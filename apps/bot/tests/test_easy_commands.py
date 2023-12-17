@@ -4,12 +4,10 @@ from apps.bot.commands.easy.clear import Clear
 from apps.bot.commands.easy.documentation import Documentation
 from apps.bot.commands.easy.donate import Donate
 from apps.bot.commands.easy.git import Git
-from apps.bot.commands.easy.google import Google
 from apps.bot.commands.easy.hi import Hi
 from apps.bot.commands.easy.issues import Issues
 from apps.bot.commands.easy.ping import Ping
 from apps.bot.commands.easy.sho import Sho
-from apps.bot.commands.easy.sorry_me import SorryMe
 from apps.bot.commands.easy.start_lada import StartLada
 from apps.bot.commands.easy.thanks import Thanks
 from apps.bot.tests.bot_initializer import BotInitializer
@@ -58,17 +56,6 @@ class CommandGitTestCase(BotInitializer):
         return self.check_correct_answer()
 
 
-class CommandGoogleTestCase(BotInitializer):
-    Command = Google
-
-    def test_no_args(self):
-        self.check_correct_pwarning()
-
-    def test_google_link(self):
-        self.event.set_message("гугл привет")
-        self.check_correct_answer()
-
-
 class CommandHiTestCase(BotInitializer):
     Command = Hi
 
@@ -101,13 +88,6 @@ class CommandPingTestCase(BotInitializer):
 
 class CommandShoTestCase(BotInitializer):
     Command = Sho
-
-    def test_no_args(self):
-        return self.check_correct_answer()
-
-
-class CommandSorryMeTestCase(BotInitializer):
-    Command = SorryMe
 
     def test_no_args(self):
         return self.check_correct_answer()
