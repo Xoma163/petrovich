@@ -18,16 +18,8 @@ MAIN_DOMAIN = "andrewsha.net"
 MAIN_SITE = f'{MAIN_PROTOCOL}://{MAIN_DOMAIN}'
 DOMAINS_IPS = ['192.168.1.10']
 DOMAINS = [MAIN_DOMAIN]
-SUBDOMAINS = [None, 'api', 'www']
-SUBDOMAINS_DOMAINS = []
-for subdomain in SUBDOMAINS:
-    for domain in DOMAINS:
-        if subdomain:
-            SUBDOMAINS_DOMAINS.append(f"{subdomain}.{domain}")
-        else:
-            SUBDOMAINS_DOMAINS.append(domain)
 
-ALLOWED_HOSTS = DOMAINS_IPS + SUBDOMAINS_DOMAINS
+ALLOWED_HOSTS = DOMAINS_IPS + [f'petrovich.{MAIN_DOMAIN}']
 
 # Application definition
 
