@@ -20,7 +20,7 @@ crontab==1.0.1
 cryptography==41.0.5
 cycler==0.11.0
 distlib==0.3.6
-Django==5.0
+Django==4.2.8
 django-environ==0.10.0
 django-extensions==3.2.1
 django-hosts==5.2
