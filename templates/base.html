@@ -1,6 +1,5 @@
 {# ToDo: legacy ?#}
 {% load static %}
-{% load render_bundle from webpack_loader %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -10,7 +9,6 @@
 
   <link rel="icon" type="image/png" href="{% static "favicon_256.png" %}"/>
   <title>andrewsha.net{% if title %} | {% endif %}{% block title %}{% endblock %}</title>
-  {% render_bundle 'app' 'css' %}
 
   {% block css %}
   {% endblock %}
@@ -20,7 +18,6 @@
 {% block body %}
 {% endblock %}
 <footer>
-  {% render_bundle 'app' 'js' %}
   {% block js %}
   {% endblock %}
 </footer>

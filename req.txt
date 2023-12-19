@@ -1,13 +1,12 @@
+async_timeout # no auto install ?
 beautifulsoup4
 boto3
-crontab
 colorlog
-Django==3.2.23
+crontab
+Django
 django-environ
 django-extensions
-django-hosts
-django-webpack-loader
-djangorestframework
+django-redis
 gspread
 lxml
 m3u8
@@ -24,9 +23,11 @@ pytz
 requests
 SpeechRecognition
 transliterate
+twitch-dl
 uWSGI
 virtualenv
 wakeonlan
+xmltodict
 yandex-music
-youtube_dl
 yt-dlp
+

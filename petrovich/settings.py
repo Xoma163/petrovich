@@ -42,9 +42,6 @@ DJANGO_APPS = [
 ]
 
 VENDORS_APPS = [
-    'django_hosts',
-    'webpack_loader',
-    'rest_framework',
     "django_extensions"
 ]
 
@@ -57,7 +54,6 @@ PROJECT_APPS = [
 INSTALLED_APPS = DJANGO_APPS + VENDORS_APPS + PROJECT_APPS
 
 MIDDLEWARE = [
-    'django_hosts.middleware.HostsRequestMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -65,7 +61,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django_hosts.middleware.HostsResponseMiddleware',
 ]
 DEFAULT_HOST = 'www'
 ROOT_HOSTCONF = 'petrovich.hosts'
@@ -209,9 +204,6 @@ LOGGING = {
 if DEBUG:
     LOGGING['loggers']['bot']['handlers'].append('console-debug')
 
-REST_FRAMEWORK = {
-    'COERCE_DECIMAL_TO_STRING': False
-}
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
