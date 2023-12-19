@@ -14,15 +14,17 @@ SECRET_KEY = env.str('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool('DEBUG')
 MAIN_PROTOCOL = 'https'
-MAIN_DOMAIN = "andrewsha.net"
-MAIN_SITE = f'{MAIN_PROTOCOL}://{MAIN_DOMAIN}'
-DOMAINS_IPS = ['192.168.1.10']
-DOMAINS = [MAIN_DOMAIN]
+MAIN_DOMAIN = "petrovich.andrewsha.net"
+LOCAL_DOMAIN = "192.168.1.10"
 
-ALLOWED_HOSTS = DOMAINS_IPS + [f'petrovich.{MAIN_DOMAIN}']
+ALLOWED_HOSTS = [MAIN_DOMAIN, LOCAL_DOMAIN]
+
+if DEBUG:
+    MAIN_SITE = f'https://{LOCAL_DOMAIN}'
+else:
+    MAIN_SITE = f'https://{MAIN_DOMAIN}'
 
 # Application definition
-
 DJANGO_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -195,7 +197,6 @@ LOGGING = {
 }
 if DEBUG:
     LOGGING['loggers']['bot']['handlers'].append('console-debug')
-
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
