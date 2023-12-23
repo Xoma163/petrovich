@@ -394,21 +394,22 @@ class TgBot(Bot):
         # Разбиение длинных сообщений на чанки
         chunks = None
         if params.get('caption'):
+            # Если у нас есть форматирование, в таком случае все сначала шлём все медиа, а потом уже форматированный текст
+            # Телега не умеет в send_media_group + parse_mode
+            if rmi.text_has_html_code and len(rmi.attachments) > 1:
+                chunks = split_text_by_n_symbols(params['caption'], self.MAX_MESSAGE_TEXT_LENGTH)
+                chunks = [""] + chunks
+                params['caption'] = chunks[0]
             # Шлём длинные сообщения чанками.
             if rmi.attachments and len(params['caption']) > self.MAX_MESSAGE_TEXT_CAPTION:
-                # Если у нас есть форматирование, в таком случае все сначала шлём все медиа, а потом уже форматированный текст
-                # Телега не умеет в send_media_group + parse_mode
-                if rmi.text_has_html_code and len(rmi.attachments) > 1:
-                    chunks = split_text_by_n_symbols(params['caption'], self.MAX_MESSAGE_TEXT_LENGTH)
-                    chunks = [""] + chunks
                 # Иначё бьём на 1024 символа первое сообщение и на 4096 остальные (ограничения телеги)
-                else:
-                    chunks = split_text_by_n_symbols(params['caption'], self.MAX_MESSAGE_TEXT_CAPTION)
-                    first_chunk = chunks[0]
-                    text = params['caption'][len(first_chunk):]
-                    chunks = split_text_by_n_symbols(text, self.MAX_MESSAGE_TEXT_LENGTH)
-                    chunks = [first_chunk] + chunks
+                chunks = split_text_by_n_symbols(params['caption'], self.MAX_MESSAGE_TEXT_CAPTION)
+                first_chunk = chunks[0]
+                text = params['caption'][len(first_chunk):]
+                chunks = split_text_by_n_symbols(text, self.MAX_MESSAGE_TEXT_LENGTH)
+                chunks = [first_chunk] + chunks
                 params['caption'] = chunks[0]
+            # Обычные длинные текстовые сообщения шлём чанками
             elif len(params['caption']) > self.MAX_MESSAGE_TEXT_LENGTH:
                 chunks = split_text_by_n_symbols(params['caption'], self.MAX_MESSAGE_TEXT_LENGTH)
                 params['caption'] = chunks[0]
