@@ -61,6 +61,8 @@ class TelegramView(CSRFExemptMixin, View):
 
 
 class GithubView(CSRFExemptMixin, View):
+    NO_FIX_LABEL = 'Не пофикшу'
+
     @staticmethod
     def send_notify_to_user(data, text):
         issue = data['issue']
@@ -79,7 +81,7 @@ class GithubView(CSRFExemptMixin, View):
     def closed_issue(self, data):
         issue = data['issue']
 
-        not_fixed = any(x['name'] for x in issue['labels'] if x['name'] == 'Не пофикшу')
+        not_fixed = any(x['name'] for x in issue['labels'] if x['name'] == self.NO_FIX_LABEL)
         if not_fixed:
             text = f"Проблема была закрыта с меткой \"Не пофикшу\"\n{issue['html_url']}"
         else:
