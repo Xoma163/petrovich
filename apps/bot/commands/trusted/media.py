@@ -226,6 +226,9 @@ class Media(Command):
                         "Видосы до 2х минут не парсятся без упоминания. Если в этом есть нужда - жми на кнопку",
                         keyboard=keyboard)
                 video_content = requests.get(data['download_url']).content
+                if data['start_pos']:
+                    tm = TrimVideo()
+                    video_content = tm.trim(video_content, data['start_pos'], data['end_pos'])
                 text = data['title']
         finally:
             self.bot.stop_activity_thread()

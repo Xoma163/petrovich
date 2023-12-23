@@ -87,7 +87,9 @@ class YoutubeVideo(SubscribeService):
             "download_url": url,
             "filesize": chosen_video_filesize,
             "title": video_info['title'],
-            "duration": video_info.get('duration')
+            "duration": video_info.get('duration'),
+            "start_pos": str(video_info.get('section_start')),
+            "end_pos": str(video_info.get('section_end'))
         }
 
     @staticmethod
