@@ -54,8 +54,6 @@ jobs:
           script: |
             cd ${{ secrets.SSH_PRODUCTION_FOLDER }}
             ./update_production.sh
-          timeout: 10m
-          command_timeout: 10m
 
 #      - name: Send telegram message
 #        uses: appleboy/telegram-action@master
