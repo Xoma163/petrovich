@@ -28,3 +28,4 @@ media/
 
 # uwsgi pid
 config/petrovich.pid
+config/petrovich.sock
