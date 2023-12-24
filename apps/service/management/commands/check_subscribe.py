@@ -11,6 +11,7 @@ from apps.bot.api.thehole import TheHole
 from apps.bot.api.vk.video import VKVideo
 from apps.bot.api.youtube.video import YoutubeVideo
 from apps.bot.classes.bots.tg_bot import TgBot
+from apps.bot.classes.const.exceptions import PSubscribeIndexError
 from apps.bot.classes.event.event import Event
 from apps.bot.classes.messages.message import Message
 from apps.bot.classes.messages.response_message import ResponseMessageItem, ResponseMessage
@@ -43,16 +44,26 @@ class Command(BaseCommand):
             sub_class = self.SERVICE_CLASS[service]
             media_method = self.SERVICE_MEDIA_METHOD[service]
             subs = list(subs)
-            try:
-                self.check_video(subs, sub_class, media_method)
-            except Exception:
-                logger.exception({"message": "Ошибка в проверке/отправке подписки", "notify_enitity": subs[0].__dict__})
+            # try:
+            self.check_video(subs, sub_class, media_method)
+            # except Exception:
+            #     logger.exception({"message": "Ошибка в проверке/отправке подписки", "notify_enitity": subs[0].__dict__})
 
     def check_video(self, subs, sub_class, media_method):
-        if len(set(x.last_video_id for x in subs)) == 1:
+        if len(set(x.last_videos_id[-1] for x in subs)) == 1:
             api = sub_class()
-            res = api.get_filtered_new_videos(subs[0].channel_id, subs[0].last_video_id,
-                                              playlist_id=subs[0].playlist_id)
+            try:
+                res = api.get_filtered_new_videos(
+                    subs[0].channel_id,
+                    subs[0].last_videos_id,
+                    playlist_id=subs[0].playlist_id
+                )
+            except PSubscribeIndexError as e:
+                for sub in subs:
+                    sub.last_videos_id = e.args
+                    sub.save()
+                raise
+
             if not res['ids']:
                 return
 
@@ -111,7 +122,7 @@ class Command(BaseCommand):
                     self._save_to_plex(cache, str(sub), titles[i])
 
                 time.sleep(1)
-            sub.last_video_id = ids[-1]
+            sub.last_videos_id = sub.last_videos_id + ids
             sub.save()
 
     @staticmethod

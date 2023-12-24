@@ -1,4 +1,5 @@
 from datetime import timedelta
+from typing import List
 from urllib import parse
 from urllib.parse import urlparse, parse_qsl
 
@@ -88,8 +89,8 @@ class YoutubeVideo(SubscribeService):
             "filesize": chosen_video_filesize,
             "title": video_info['title'],
             "duration": video_info.get('duration'),
-            "start_pos": str(video_info.get('section_start')),
-            "end_pos": str(video_info.get('section_end'))
+            "start_pos": str(video_info['section_start']) if video_info.get('section_start') else None,
+            "end_pos": str(video_info['section_end']) if video_info.get('section_end') else None
         }
 
     @staticmethod
@@ -110,23 +111,12 @@ class YoutubeVideo(SubscribeService):
     @staticmethod
     def _get_channel_videos(channel_id: str) -> list:
 
-        r = requests.get(f"https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}")
+        r = requests.get(f"https://www.scriptbarrel.com/xml.cgi?channel_id={channel_id}")
         if r.status_code != 200:
             raise PWarning("Не нашёл такого канала")
         bsop = BeautifulSoup(r.content, 'lxml')
-        videos = [{'id': {'videoId': x.find('yt:videoid').text}} for x in bsop.find_all('entry')]
+        videos = [x.find('yt:videoid').text for x in bsop.find_all('entry')]
 
-        # 100 cost
-        # url = "https://www.googleapis.com/youtube/v3/search"
-        # params = {
-        #     "channelId": channel_id,
-        #     "part": "snippet",
-        #     "maxResults": 50,
-        #     "key": env.str('GOOGLE_API_KEY'),
-        #     "order": "date"
-        # }
-        # r = requests.get(url, params=params).json()
-        # videos = [x for x in r['items'] if x['id'].get('videoId')]
         return list(reversed(videos))
 
     @staticmethod
@@ -178,8 +168,8 @@ class YoutubeVideo(SubscribeService):
 
         if get_params.get('list'):
             playlist_id = get_params.get('list')
-            last_video = self._get_playlist_videos(playlist_id)[-1]
-            last_video_id = last_video['snippet']['resourceId']['videoId']
+            last_videos = self._get_playlist_videos(playlist_id)
+            last_videos_id = [x['snippet']['resourceId']['videoId'] for x in last_videos]
 
             playlist_info = self._get_playlist_info(playlist_id)
 
@@ -188,25 +178,24 @@ class YoutubeVideo(SubscribeService):
             channel_title = playlist_info['author']
         else:
             channel_id = href.split('/')[-1]
-            last_video = self._get_channel_videos(channel_id)[-1]
-            last_video_id = last_video['id']['videoId']
+            last_videos_id = self._get_channel_videos(channel_id)
             channel_title = self._get_channel_info(channel_id)['author']
         return {
             'channel_id': channel_id,
             'playlist_id': playlist_id,
             'channel_title': channel_title,
             'playlist_title': playlist_title,
-            'last_video_id': last_video_id,
+            'last_videos_id': last_videos_id,
         }
 
-    def get_filtered_new_videos(self, channel_id: str, last_video_id: str, **kwargs) -> dict:
+    def get_filtered_new_videos(self, channel_id: str, last_videos_id: List[str], **kwargs) -> dict:
         if kwargs.get('playlist_id'):
             videos = self._get_playlist_videos(kwargs.get('playlist_id'))
             ids = [x['snippet']['resourceId']['videoId'] for x in videos]
         else:
-            videos = self._get_channel_videos(channel_id)
-            ids = [x['id']['videoId'] for x in videos]
-        index = ids.index(last_video_id) + 1
+            ids = self._get_channel_videos(channel_id)
+
+        index = self.filter_by_id(ids, last_videos_id)
 
         ids = ids[index:]
         urls = [f"https://www.youtube.com/watch?v={x}" for x in ids]

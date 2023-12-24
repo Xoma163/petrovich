@@ -25,3 +25,7 @@ class PWarning(PetrovichException):
 
 class PError(PetrovichException):
     level = 'error'
+
+
+class PSubscribeIndexError(Exception):
+    pass

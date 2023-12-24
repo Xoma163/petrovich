@@ -1,3 +1,5 @@
+from typing import List
+
 import requests
 from bs4 import BeautifulSoup
 
@@ -41,17 +43,17 @@ class TheHole(SubscribeService):
             'playlist_id': None,
             'channel_title': bs4.find('meta', attrs={'name': 'og:title'}).attrs['content'],
             'playlist_title': None,
-            'last_video_id': bs4.select_one('a[href*=episodes]').attrs['href'],
+            'last_videos_id': [x.attrs['href'] for x in bs4.select('a[href*=episodes]')]
         }
 
-    def get_filtered_new_videos(self, channel_id: str, last_video_id: str, **kwargs) -> dict:
+    def get_filtered_new_videos(self, channel_id: str, last_videos_id: List[str], **kwargs) -> dict:
         content = requests.get(f"{self.URL}/shows/{channel_id}").content
         bs4 = BeautifulSoup(content, 'html.parser')
         videos = reversed(bs4.select('a[href*=episodes]'))
         ids = [x.attrs['href'] for x in videos]
         titles = [x.nextSibling.nextSibling.text for x in videos]
 
-        index = ids.index(last_video_id) + 1
+        index = self.filter_by_id(ids, last_videos_id)
 
         ids = ids[index:]
         titles = titles[index:]

@@ -1,5 +1,6 @@
 import logging
 import re
+from typing import List
 
 import requests
 
@@ -100,10 +101,10 @@ class Premier(SubscribeService):
                 'playlist_id': None,
                 'channel_title': trailers[0].get('title') if trailers else show_id,
                 'playlist_title': None,
-                'last_video_id': videos[-1]['id'],
+                'last_videos_id': [x['id'] for x in videos],
             }
 
-    def get_filtered_new_videos(self, channel_id: str, last_video_id: str, **kwargs) -> dict:
+    def get_filtered_new_videos(self, channel_id: str, last_videos_id: List[str], **kwargs) -> dict:
         params = {'limit': 100}
         results = self._get_videos(channel_id, params, log_results=False)
 
@@ -113,7 +114,7 @@ class Premier(SubscribeService):
         titles = [x['title'] for x in videos]
         urls = [f"https://premier.one/show/{channel_id}/season/{x['season']}/episode/{x['episode']}" for x in videos]
 
-        index = ids.index(last_video_id) + 1
+        index = self.filter_by_id(ids, last_videos_id)
 
         ids = ids[index:]
         titles = titles[index:]

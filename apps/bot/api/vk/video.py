@@ -1,6 +1,6 @@
 import json
 import re
-from typing import Tuple, Optional
+from typing import Tuple, Optional, List
 from urllib.parse import urlparse
 
 import requests
@@ -130,8 +130,7 @@ class VKVideo(SubscribeService):
             videos = bs4.find('div', {'id': "video_subtab_pane_all"}).find_all('div', {'class': 'VideoCard__info'})
             playlist_id = None
             playlist_title = None
-        last_video = videos[0]
-        last_video_id = last_video.find("a", {"class": "VideoCard__title"}).attrs['data-id']
+        last_videos_id = list(reversed([x.find("a", {"class": "VideoCard__title"}).attrs['data-id'] for x in videos]))
 
 
         return {
@@ -139,10 +138,10 @@ class VKVideo(SubscribeService):
             'playlist_id': playlist_id,
             'channel_title': channel_title,
             'playlist_title': playlist_title,
-            'last_video_id': last_video_id,
+            'last_videos_id': last_videos_id,
         }
 
-    def get_filtered_new_videos(self, channel_id: str, last_video_id: str, **kwargs) -> dict:
+    def get_filtered_new_videos(self, channel_id: str, last_videos_id: List[str], **kwargs) -> dict:
         if kwargs.get('playlist_id'):
             channel_id = kwargs['playlist_id']
         url = f"{self.URL}/{channel_id}"
@@ -161,7 +160,7 @@ class VKVideo(SubscribeService):
         ids = [video.find('a', {'class': 'VideoCard__title'}).attrs['data-id'] for video in videos]
         titles = [video.find('a', {'class': 'VideoCard__title'}).text.strip() for video in videos]
 
-        index = ids.index(last_video_id) + 1
+        index = self.filter_by_id(ids, last_videos_id)
 
         ids = ids[index:]
         titles = titles[index:]
