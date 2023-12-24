@@ -161,6 +161,7 @@ class Subscribe(models.Model):
     channel_title = models.CharField("Название канала", max_length=100)
     playlist_title = models.CharField("Название плейлиста", max_length=100, blank=True, null=True)
     last_video_id = models.CharField("ID последнего видео", max_length=100, null=True, blank=True)
+    last_videos_id = models.JSONField("ID последних видео", max_length=100, null=True, blank=True)
     service = models.SmallIntegerField("Сервис", blank=True, choices=SERVICE_CHOICES, default=SERVICE_YOUTUBE)
 
     save_to_plex = models.BooleanField("Сохранять в plex", default=False)

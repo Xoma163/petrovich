@@ -59,7 +59,7 @@ class SubscribeAdmin(admin.ModelAdmin):
     list_display = ('author', 'chat', 'channel_title', 'playlist_title', 'service', 'save_to_plex')
     list_filter = (
         ('author', admin.RelatedOnlyFieldListFilter), ('chat', admin.RelatedOnlyFieldListFilter), 'save_to_plex')
-    search_fields = ('channel_title', 'playlist_title', 'last_video_id')
+    search_fields = ('channel_title', 'playlist_title', 'last_video_id', 'last_videos_id')
 
 
 @admin.register(VideoCache)
