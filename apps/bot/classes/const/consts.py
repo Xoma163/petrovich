@@ -15,7 +15,6 @@ class Role(Enum):
     ADMIN = "администратор"
     MODERATOR = "модератор"
     MINECRAFT = "майнкрафт"
-    MINECRAFT_NOTIFY = "уведомления майна"
     USER = "пользователь"
     BANNED = "забанен"
     TRUSTED = "доверенный"

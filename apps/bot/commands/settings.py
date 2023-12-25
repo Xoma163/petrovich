@@ -1,5 +1,3 @@
-from django.contrib.auth.models import Group
-
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
@@ -24,9 +22,6 @@ class Settings(Command):
                 "голосовые (вкл/выкл) - определяет, будет ли бот автоматически распознавать голосовые",
                 "др (вкл/выкл) - определяет, будет ли бот поздравлять с Днём рождения и будет ли ДР отображаться в /профиль",
                 "ругаться (вкл/выкл) - определяет будет ли бот использовать ругательные команды",
-            ]),
-            HelpTextItem(Role.MINECRAFT, [
-                "майнкрафт (вкл/выкл) - определяет, будет ли бот присылать информацию о серверах майна"
             ]),
             HelpTextItem(Role.TRUSTED, [
                 "gpt [конфа] (preprompt) - определяет system prompt для дальнейшего общения с ботом",
@@ -71,7 +66,6 @@ class Settings(Command):
         menu = [
             [['реагировать', 'реагируй', 'реагирование'], self.menu_reaction],
             [['упоминание', 'упоминания', 'триггериться', 'тригериться'], self.menu_mentioning],
-            [['майнкрафт', 'майн', 'minecraft', 'mine'], self.menu_minecraft_notify],
             [['мемы', 'мем'], self.menu_memes],
             [['др', 'днюха'], self.menu_bd],
             [['голосовые', 'голос', 'голосовухи', 'голосовуха', 'голосовое'], self.menu_voice],
@@ -105,23 +99,6 @@ class Settings(Command):
         self.event.sender.celebrate_bday = value
         self.event.sender.save()
         answer = "Сохранил настройку"
-        return ResponseMessageItem(text=answer)
-
-    def menu_minecraft_notify(self) -> ResponseMessageItem:
-        self.check_sender(Role.MINECRAFT)
-        self.check_args(2)
-
-        value = self.get_on_or_off(self.event.message.args[1])
-
-        group_minecraft_notify = Group.objects.get(name=Role.MINECRAFT_NOTIFY.name)
-        if value:
-            self.event.sender.groups.add(group_minecraft_notify)
-            self.event.sender.save()
-            answer = "Подписал на рассылку о сервере майна"
-        else:
-            self.event.sender.groups.remove(group_minecraft_notify)
-            self.event.sender.save()
-            answer = "Отписал от рассылки о сервере майна"
         return ResponseMessageItem(text=answer)
 
     def menu_voice(self) -> ResponseMessageItem:
@@ -187,9 +164,6 @@ class Settings(Command):
 
         answer += "Настройки пользователя:\n"
 
-        if self.event.sender.check_role(Role.TRUSTED):
-            minecraft_notify = self.event.sender.check_role(Role.MINECRAFT_NOTIFY)
-            answer += f"Уведомления по майну - {self.TRUE_FALSE_TRANSLATOR[minecraft_notify]}\n"
         celebrate_bday = self.event.sender.celebrate_bday
         answer += f"Поздравлять с днём рождения - {self.TRUE_FALSE_TRANSLATOR[celebrate_bday]}\n"
         if self.event.sender.check_role(Role.TRUSTED):

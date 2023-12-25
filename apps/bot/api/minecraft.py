@@ -1,13 +1,9 @@
 import json
-from copy import copy
 
 from mcrcon import MCRcon
 
-from apps.bot.classes.bots.tg_bot import TgBot
-from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
-from apps.bot.classes.messages.response_message import ResponseMessageItem, ResponseMessage
-from apps.bot.models import Profile
+from apps.bot.classes.messages.response_message import ResponseMessageItem
 from apps.bot.utils.do_the_linux_command import do_the_linux_command
 from apps.bot.utils.utils import check_command_time
 from petrovich.settings import env, BASE_DIR, MAIN_DOMAIN
@@ -37,8 +33,10 @@ class Minecraft:
     @staticmethod
     def send_rcon(command):
         try:
-            with MCRcon(env.str("MINECRAFT_1_12_2_IP"),
-                        env.str("MINECRAFT_1_12_2_RCON_PASSWORD")) as mcr:
+            with MCRcon(
+                    env.str("MINECRAFT_1_12_2_IP"),
+                    env.str("MINECRAFT_1_12_2_RCON_PASSWORD")
+            ) as mcr:
                 resp = mcr.command(command)
                 if resp:
                     return resp
@@ -60,25 +58,15 @@ class Minecraft:
     def _start_local(self):
         do_the_linux_command(f'sudo systemctl start {self._get_service_name()}')
 
-    def start(self, send_notify=True):
+    def start(self):
         check_command_time(self._get_service_name(), self.delay)
-
         self._start_local()
-
-        if send_notify:
-            message = self._prepare_message("start")
-            self.send_notify(message)
 
     def _stop_local(self):
         do_the_linux_command(f'sudo systemctl stop {self._get_service_name()}')
 
-    def stop(self, send_notify=True):
+    def stop(self):
         check_command_time(self._get_service_name(), self.delay)
-
-        self._stop_local()
-        if send_notify:
-            message = self._prepare_message("stop")
-            self.send_notify(message)
 
     # Only if online
     def parse_server_info(self):
@@ -146,22 +134,6 @@ class Minecraft:
             if self.map_url:
                 result += f"\nКарта - {self.map_url}"
         return result
-
-    def send_notify(self, rmi: ResponseMessageItem):
-        profiles_notify = Profile.objects.filter(groups__name=Role.MINECRAFT_NOTIFY.name)
-        if self.event:
-            profiles_notify = profiles_notify.exclude(id=self.event.sender.id)
-            if self.event.chat:
-                users_in_chat = self.event.chat.users.all()
-                profiles_notify = profiles_notify.exclude(pk__in=users_in_chat)
-        bot = TgBot()
-        rm = ResponseMessage(thread=True, delay=1)
-        for profile in profiles_notify:
-            user = profile.get_tg_user()
-            rmi_copy = copy(rmi)
-            rmi_copy.peer_id = user.user_id
-            rm.messages.append(rmi_copy)
-        bot.send_response_message(rm)
 
 
 minecraft_servers = [

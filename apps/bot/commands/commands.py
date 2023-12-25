@@ -30,7 +30,6 @@ class Commands(Command):
             {"role": Role.MODERATOR, "text": "команды для модераторов"},
             {"role": Role.MINECRAFT, "text": "команды для игроков майнкрафта"},
             {"role": Role.TRUSTED, "text": "команды для доверенных пользователей"},
-            {"role": Role.MINECRAFT_NOTIFY, "text": "команды для уведомлённых майнкрафтеров"},
             {"role": Role.MRAZ, "text": "команды для мразей"},
             {"role": Role.FLAIVA, "text": "команды для флейвы"},
             {"role": Role.GAMER, "text": "команды для игроков"},
