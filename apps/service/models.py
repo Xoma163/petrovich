@@ -1,5 +1,4 @@
 import os
-
 from django.db import models
 from django.db.models import JSONField
 from django.dispatch import receiver
@@ -71,10 +70,10 @@ class BaseMeme(models.Model):
 
     def get_info(self):
         info = f"Название: {self.name}\n" \
-               f"Тип: {self.get_type_display()}\n" \
                f"ID: {self.pk}\n" \
                f"Автор: {self.author}\n" \
-               f"Использований: {self.uses}"
+               f"Использований: {self.uses}\n" \
+               f"Использований в inline: {self.inline_uses}"
         if self.link:
             info += f"\nСсылка: {self.link}"
         return info
