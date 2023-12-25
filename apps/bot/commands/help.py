@@ -1,6 +1,7 @@
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.event.event import Event
+from apps.bot.classes.help_text import HelpText
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.utils.utils import get_help_texts_for_command
 
@@ -8,7 +9,10 @@ from apps.bot.utils.utils import get_help_texts_for_command
 class Help(Command):
     name = "помощь"
     names = ["хелп", "ман", "помоги", "памаги", "спаси", "хелб", "манул", "help", "start"]
-    help_text = "помощь по командам и боту"
+
+    help_text = HelpText(
+        commands_text="помощь по командам и боту",
+    )
 
     def accept(self, event: Event) -> bool:
         # Самая первая кнопка клавы у бота
@@ -20,7 +24,7 @@ class Help(Command):
         if self.event.message.args:
             command = self.find_command_by_name(self.event.message.args[0])
             self.check_sender(command.access)
-            answer = get_help_texts_for_command(command, self.event.platform)
+            answer = get_help_texts_for_command(command, self.event.platform, self.event.sender.get_roles())
             return ResponseMessage(ResponseMessageItem(text=answer))
 
         answer = \

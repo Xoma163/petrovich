@@ -1,6 +1,8 @@
 from apps.bot.api.yandex.weather import YandexWeather
 from apps.bot.classes.command import Command
+from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
+from apps.bot.classes.help_text import HelpText, HelpTextItem
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.service.models import City
 
@@ -8,10 +10,15 @@ from apps.service.models import City
 class Weather(Command):
     name = "погода"
     name_tg = "weather"
-    help_text = "прогноз погоды"
-    help_texts = [
-        "[город=из профиля] - прогноз погоды"
-    ]
+
+    help_text = HelpText(
+        commands_text="прогноз погоды",
+        help_texts=[
+            HelpTextItem(Role.USER, [
+                "[город=из профиля] - прогноз погоды"
+            ])
+        ]
+    )
 
     def start(self) -> ResponseMessage:
         if self.event.message.args:

@@ -4,6 +4,7 @@ from apps.bot.classes.bots.bot import Bot
 from apps.bot.classes.const.consts import Role, Platform
 from apps.bot.classes.const.exceptions import PWarning, PSkip, PIDK
 from apps.bot.classes.event.event import Event
+from apps.bot.classes.help_text import HelpText
 from apps.bot.classes.messages.attachments.audio import AudioAttachment
 from apps.bot.classes.messages.attachments.document import DocumentAttachment
 from apps.bot.classes.messages.attachments.link import LinkAttachment
@@ -18,13 +19,11 @@ from apps.bot.utils.utils import get_help_texts_for_command, transform_k
 
 class Command:
     # Основные поля команды
-    name: str = ""  # Имя команды,
+    name: str = ""  # Имя команды
     names: list = []  # Вспопогательные имена команды
     name_tg: str = ""  # Имя команды для списка команд в тг
 
-    help_text: str = ""  # Текст в /команды
-    help_texts: list = []  # Текст в детальной помощи по команде /помощь (название команды)
-    help_texts_extra: str = ""  # Текст в детальной помощи по команде /помощь (название команды), который будет выводиться после основного текста
+    help_text: HelpText = None  # текст для команды /команды и для /помощь
 
     enabled: bool = True  # Включена ли команда
     suggest_for_similar: bool = True  # предлагать ли команду в выдаче похожих команд при ошибке пользователя в вводе

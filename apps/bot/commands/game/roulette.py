@@ -4,6 +4,7 @@ from threading import Lock
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
+from apps.bot.classes.help_text import HelpTextItem, HelpText
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.utils.utils import random_event, localize_datetime, remove_tz, decl_of_num, \
     get_random_int
@@ -110,22 +111,28 @@ TRANSLATOR = generate_translator()
 
 class Roulette(Command):
     name = "рулетка"
-    help_text = "игра рулетка"
-    help_texts = [
-        "- запуск рулетки",
-        "(аргументы) (ставка) - ставка рулетки",
-        f"0-{MAX_NUMBERS} (ставка) - ставка на число",
-        "столбец (1,2,3) (ставка) - ставка на столбец",
-        "строка (1,2,3) (ставка) - ставка на строку",
-        "красное/чёрное (ставка) - ставка на цвет",
-        "чётное/нечётное (ставка) - ставка на кратность",
-        "первая/вторая (ставка) - ставка на 1/2 части стола",
-        "баланс [игрок] - баланс",
-        "ставки - текущие ставки игроков",
-        "картинка - картинка рулетки",
-        "бонус - получение пособия по безработице",
-        "передать (игрок) (очки) - передача очков другому игроку"
-    ]
+
+    help_text = HelpText(
+        commands_text="игра рулетка",
+        help_texts=[
+            HelpTextItem(Role.USER, [
+                "- запуск рулетки",
+                "(аргументы) (ставка) - ставка рулетки",
+                f"0-{MAX_NUMBERS} (ставка) - ставка на число",
+                "столбец (1,2,3) (ставка) - ставка на столбец",
+                "строка (1,2,3) (ставка) - ставка на строку",
+                "красное/чёрное (ставка) - ставка на цвет",
+                "чётное/нечётное (ставка) - ставка на кратность",
+                "первая/вторая (ставка) - ставка на 1/2 части стола",
+                "баланс [игрок] - баланс",
+                "ставки - текущие ставки игроков",
+                "картинка - картинка рулетки",
+                "бонус - получение пособия по безработице",
+                "передать (игрок) (очки) - передача очков другому игроку"
+            ])
+        ]
+    )
+
     access = Role.GAMER
 
     def __init__(self, *args, **kwargs):

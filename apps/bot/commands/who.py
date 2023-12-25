@@ -1,7 +1,8 @@
 from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import Command
-from apps.bot.classes.const.consts import Platform
+from apps.bot.classes.const.consts import Platform, Role
 from apps.bot.classes.const.exceptions import PWarning
+from apps.bot.classes.help_text import HelpText, HelpTextItem
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.models import Profile
 from apps.bot.utils.utils import get_role_by_str
@@ -9,14 +10,20 @@ from apps.bot.utils.utils import get_role_by_str
 
 class Who(Command):
     name = "кто"
-    help_text = "присылает список людей с определённой ролью в конфе"
-    help_texts = [
-        "(N) - присылает список людей с ролью N в данной конфе",
-    ]
-    help_texts_extra = (
-        "Доступные роли: админ, доверенный, модератор, майнкрафт, майнкрафт уведомления, террария, забанен\n"
-        "Чтобы узнать свои права существует команда /права"
+
+    help_text = HelpText(
+        commands_text="присылает список людей с определённой ролью в конфе",
+        extra_text=(
+            "Доступные роли: админ, доверенный, модератор, майнкрафт, майнкрафт уведомления, террария, забанен\n"
+            "Чтобы узнать свои права существует команда /права"
+        ),
+        help_texts=[
+            HelpTextItem(Role.USER, [
+                "(N) - присылает список людей с ролью N в данной конфе"
+            ])
+        ]
     )
+
     conversation = True
     args = 1
     platforms = [Platform.TG]

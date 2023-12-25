@@ -6,6 +6,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
+from apps.bot.classes.help_text import HelpText
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.service.models import Words as WordsModel
 from petrovich.settings import BASE_DIR
@@ -13,7 +14,10 @@ from petrovich.settings import BASE_DIR
 
 class Words(Command):
     name = "слова"
-    help_text = "принудительно затягивает слова с Google Drive"
+
+    help_text = HelpText(
+        commands_text="принудительно затягивает слова с Google Drive"
+    )
     access = Role.MODERATOR
     mentioned = True
 

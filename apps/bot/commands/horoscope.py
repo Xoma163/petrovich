@@ -1,7 +1,9 @@
 from datetime import datetime
 
 from apps.bot.classes.command import Command
+from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
+from apps.bot.classes.help_text import HelpText, HelpTextItem
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.commands.meme import Meme
 from apps.service.models import Horoscope as HoroscopeModel
@@ -51,13 +53,18 @@ class Horoscope(Command):
     name = "гороскоп"
     name_tg = "horoscope"
 
-    help_text = "мемный гороскоп"
-    help_texts = [
-        "[знак зодиака = по др в профиле] - пришлёт мемный гороскоп на день для знака зодиака",
-        "все - пришлёт мемный гороскоп для всех знаков зодиака",
-        "инфо (знак зодиака) - пришлёт информацию о мемасе в гороскопе по знаку зодиака",
-        "конфа - пришлёт гороскоп для всех участников конфы"
-    ]
+    help_text = HelpText(
+        commands_text="мемный гороскоп",
+        help_texts=[
+            HelpTextItem(Role.USER, [
+                "[знак зодиака = по др в профиле] - пришлёт мемный гороскоп на день для знака зодиака",
+                "все - пришлёт мемный гороскоп для всех знаков зодиака",
+                "инфо (знак зодиака) - пришлёт информацию о мемасе в гороскопе по знаку зодиака",
+                "конфа - пришлёт гороскоп для всех участников конфы"
+            ])
+        ]
+    )
+
     zodiac_signs = ZodiacSigns([
         ZodiacSign("водолей", ['♒', "♒️"], "21.01"),
         ZodiacSign("рыбы", ["♓", "♓️"], "19.02"),

@@ -1,6 +1,8 @@
 from apps.bot.api.amazon_translate import AmazonTranslate
 from apps.bot.classes.command import Command
+from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
+from apps.bot.classes.help_text import HelpText, HelpTextItem
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.utils.utils import has_cyrillic
 
@@ -8,10 +10,15 @@ from apps.bot.utils.utils import has_cyrillic
 class Translate(Command):
     name = "перевод"
     names = ["переведи"]
-    help_text = "автоматический переводчик"
-    help_texts = [
-        "(Текст/Пересылаемые сообщения) - в зависимости от текста переводит на нужный язык (английский или русский)"
-    ]
+
+    help_text = HelpText(
+        commands_text="автоматический переводчик",
+        help_texts=[
+            HelpTextItem(Role.USER, [
+                "(Текст/Пересылаемые сообщения) - в зависимости от текста переводит на нужный язык (английский или русский)"
+            ])
+        ]
+    )
     args_or_fwd = True
 
     def start(self) -> ResponseMessage:

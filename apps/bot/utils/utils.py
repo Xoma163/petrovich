@@ -119,11 +119,14 @@ def decl_of_num(number, titles: List[str]) -> str:
         return titles[cases[5]]
 
 
-def get_help_texts_for_command(command, platform=None) -> str:
+def get_help_texts_for_command(command, platform=None, roles: List[Role] = None) -> str:
     """
     Получает help_texts для команды
     """
     from apps.bot.classes.bots.tg_bot import TgBot
+
+    if roles is None:
+        roles = [Role.USER]
 
     result = ""
     if len(command.full_names) > 1:
@@ -132,9 +135,13 @@ def get_help_texts_for_command(command, platform=None) -> str:
         result += f"Необходимый уровень прав - {command.access.value}\n"
     if result:
         result += '\n'
-    if command.help_texts:
+    if command.help_text:
         if platform == Platform.TG:
-            lines = command.help_texts
+            lines = []
+            for role in roles:
+                res = command.help_text.get_help_text_item(role)
+                if res:
+                    lines += res.texts
             full_help_texts_list = []
             for line in lines:
                 dash_pos = line.find(" - ")
@@ -146,9 +153,9 @@ def get_help_texts_for_command(command, platform=None) -> str:
                 else:
                     new_line = TgBot.get_formatted_text_line(f"/{command.name} {line[:dash_pos]}") + line[dash_pos:]
                 full_help_texts_list.append(new_line)
-            if command.help_texts_extra:
+            if command.help_text.extra_text:
                 full_help_texts_list.append("")
-                full_help_texts_list.append(command.help_texts_extra)
+                full_help_texts_list.append(command.help_text.extra_text)
             full_help_texts = "\n".join(full_help_texts_list)
             result += full_help_texts
         else:

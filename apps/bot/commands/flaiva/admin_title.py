@@ -2,19 +2,26 @@ from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Platform, Role
 from apps.bot.classes.const.exceptions import PWarning
+from apps.bot.classes.help_text import HelpText, HelpTextItem
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 
 
 class AdminTitle(Command):
     name = "должность"
     names = ['title']
-    help_text = "меняет должность в чате флейвы"
-    help_texts = [
-        "- сбрасывает вашу должность",
-        "(должность) - меняет вашу должность",
-        "(пользователь) (должность) - меняет должность участнику",
-        "(пользователь) - - сбрасывает должность участнику"
-    ]
+
+    help_text = HelpText(
+        commands_text="меняет должность в чате флейвы",
+        help_texts=[
+            HelpTextItem(Role.FLAIVA, [
+                "- сбрасывает вашу должность",
+                "(должность) - меняет вашу должность",
+                "(пользователь) (должность) - меняет должность участнику",
+                "(пользователь) - - сбрасывает должность участнику"
+            ])
+        ]
+    )
+
     access = Role.FLAIVA
     platforms = [Platform.TG]
     conversation = True

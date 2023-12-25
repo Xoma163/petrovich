@@ -1,9 +1,11 @@
+from typing import List
+
 from django.contrib.auth.models import Group
 from django.core.files import File
 from django.db import models
 from django.utils.html import format_html
 
-from apps.bot.classes.const.consts import Platform as PlatformEnum
+from apps.bot.classes.const.consts import Platform as PlatformEnum, Role
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 
 
@@ -81,13 +83,12 @@ class Profile(models.Model):
         image = att.get_bytes_io_content()
         self.avatar.save(f"avatar_{str(self)}.{att.ext}", File(image))
 
-    def check_role(self, role):
+    def check_role(self, role: Role):
         group = self.groups.filter(name=role.name)
         return group.exists()
 
-    def get_list_of_role_names(self):
-        groups = self.groups.all().values()
-        return [group['name'] for group in groups]
+    def get_roles(self) -> List[Role]:
+        return [getattr(Role, x['name']) for x in self.groups.all().values()]
 
     def get_tg_user(self):
         return self.user.get(platform=PlatformEnum.TG.name)

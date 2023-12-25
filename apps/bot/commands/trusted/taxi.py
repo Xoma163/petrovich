@@ -1,5 +1,6 @@
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role
+from apps.bot.classes.help_text import HelpText, HelpTextItem
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from petrovich.settings import STATIC_ROOT
 
@@ -8,9 +9,18 @@ class Taxi(Command):
     name = "такси"
     name_tg = "taxi"
 
-    help_text = "график отношения цены ко времени"
-    help_texts = ["[класс=эконом] график отношения цены ко времени"]
-    help_texts_extra = "Доступные классы - эконом, комфорт, комфорт+, экспресс, курьер"
+    help_text = HelpText(
+        commands_text="график отношения цены ко времени",
+        extra_text=(
+            "Доступные классы - эконом, комфорт, комфорт+, экспресс, курьер"
+        ),
+        help_texts=[
+            HelpTextItem(Role.TRUSTED, [
+                "[класс=эконом] график отношения цены ко времени"
+            ])
+        ]
+    )
+
     access = Role.TRUSTED
 
     def start(self) -> ResponseMessage:

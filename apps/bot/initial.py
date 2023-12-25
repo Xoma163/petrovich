@@ -41,30 +41,16 @@ def generate_commands():
 
 
 def generate_help_text():
-    def append_to_list(_list):
-        text_for = text['for'].name
-        if text_for in _list:
-            _list[text_for].append(text['text'])
-        else:
-            print(f"Warn: Ошибка в генерации help_text. Ключ {text_for} не найден")
-
     groups = [x['name'] for x in Group.objects.all().values('name')]
     help_text_generated = {platform: {group: "" for group in groups} for platform in list(Platform)}
     help_text_list = {platform: {group: [] for group in groups} for platform in list(Platform)}
 
     for command in COMMANDS:
-        if command.help_text:
-            help_text = command.help_text
-            if isinstance(help_text, str):
-                help_text = {'for': command.access, 'text': f"{command.name.capitalize()} - {help_text}"}
-            if isinstance(help_text, dict):
-                help_text = [help_text]
-
-            if isinstance(help_text, list):
-                for text in help_text:
-                    if command.enabled:
-                        for platform in command.platforms:
-                            append_to_list(help_text_list[platform])
+        if command.help_text and command.enabled:
+            text = f"{command.name.capitalize()} - {command.help_text.commands_text}"
+            for platform in command.platforms:
+                text_for = command.access.name
+                help_text_list[platform][text_for].append(text)
 
     for platform in list(Platform):
         for group in groups:

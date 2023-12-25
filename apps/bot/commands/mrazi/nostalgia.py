@@ -8,6 +8,7 @@ from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role, Platform
 from apps.bot.classes.const.exceptions import PWarning
+from apps.bot.classes.help_text import HelpText, HelpTextItem
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.models import Profile, Bot
 from apps.bot.utils.quotes_generator import QuotesGenerator
@@ -16,14 +17,20 @@ from apps.bot.utils.utils import get_urls_from_text
 
 class Nostalgia(Command):
     name = "ностальгия"
-    help_text = "генерирует картинку с сообщениями из конфы беседки мразей"
-    help_texts = [
-        "- присылает 10 случайных сообщений",
-        "(N,M=10) - присылает сообщения с позиции N до M. Максимальная разница между N и M - 200",
-        "(вложения) - присылает вложения со скриншота",
-        "(фраза) - ищет фразу по переписке",
-        "поиск (фраза) [N=1] - ищет фразу по переписке. N - номер страницы"
-    ]
+
+    help_text = HelpText(
+        commands_text="генерирует картинку с сообщениями из конфы беседки мразей",
+        help_texts=[
+            HelpTextItem(Role.MRAZ, [
+                "- присылает 10 случайных сообщений",
+                "(N,M=10) - присылает сообщения с позиции N до M. Максимальная разница между N и M - 200",
+                "(вложения) - присылает вложения со скриншота",
+                "(фраза) - ищет фразу по переписке",
+                "поиск (фраза) [N=1] - ищет фразу по переписке. N - номер страницы"
+            ])
+        ]
+    )
+
     access = Role.MRAZ
 
     platforms = [Platform.TG]

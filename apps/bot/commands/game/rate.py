@@ -4,6 +4,7 @@ from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Platform, Role
 from apps.bot.classes.const.exceptions import PWarning
+from apps.bot.classes.help_text import HelpText, HelpTextItem
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.utils.utils import random_event
 from apps.games.models import Rate as RateModel
@@ -15,9 +16,17 @@ class Rate(Command):
     name = "ставка"
     name_tg = 'rate'
 
-    help_text = "игра, определяющая, кто ближе угадал загаданное число"
-    help_texts = ["[ставка=рандом] - делает ставку"]
-    help_texts_extra = "Ставка может быть от 1 до 100"
+    help_text = HelpText(
+        commands_text="игра, определяющая, кто ближе угадал загаданное число",
+        extra_text=(
+            "Ставка может быть от 1 до 100"
+        ),
+        help_texts=[
+            HelpTextItem(Role.USER, [
+                "[ставка=рандом] - делает ставку"
+            ])
+        ]
+    )
 
     int_args = [0]
     conversation = True

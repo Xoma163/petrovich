@@ -2,18 +2,24 @@ from apps.bot.api.minecraft import get_minecraft_version_by_args
 from apps.bot.api.minecraft import minecraft_servers
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role
+from apps.bot.classes.help_text import HelpText, HelpTextItem
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 
 
 class Minecraft(Command):
     name = "майнкрафт"
     names = ["майн", "mine", "minecraft"]
-    help_text = "действия с сервером майнкрафта"
-    help_texts = [
-        "- статус по всем серверам",
-        "старт [версия=1.19.2] - стартует сервер майнкрафта",
-        "стоп [версия=1.19.2] - стопит сервер майнкрафта"
-    ]
+
+    help_text = HelpText(
+        commands_text="действия с сервером майнкрафта",
+        help_texts=[
+            HelpTextItem(Role.MINECRAFT, [
+                "- статус по всем серверам",
+                "старт [версия=1.19.2] - стартует сервер майнкрафта",
+                "стоп [версия=1.19.2] - стопит сервер майнкрафта"
+            ])
+        ]
+    )
 
     access = Role.MINECRAFT
 

@@ -1,4 +1,5 @@
 from apps.bot.classes.command import Command
+from apps.bot.classes.help_text import HelpText
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from petrovich.settings import STATIC_ROOT
 
@@ -6,7 +7,10 @@ from petrovich.settings import STATIC_ROOT
 class Donate(Command):
     name = "донат"
     name_tg = 'donate'
-    help_text = "ссылка на донат"
+
+    help_text = HelpText(
+        commands_text="ссылка на донат",
+    )
 
     def start(self) -> ResponseMessage:
         url = 'https://www.donationalerts.com/r/xoma163'

@@ -1,16 +1,26 @@
 from apps.bot.api.ocr import OCR
 from apps.bot.classes.command import Command
+from apps.bot.classes.const.consts import Role
+from apps.bot.classes.help_text import HelpTextItem, HelpText
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 
 
 class Text(Command):
     name = "текст"
-    help_text = "распознаёт текст на изображении"
-    help_texts = [
-        "Текст (Изображения/Пересылаемое сообщение с изображением) [язык=rus] - распознаёт текст на изображении"
-    ]
-    help_texts_extra = 'Язык нужно указывать в 3 символа. Пример - "eng", "rus", "fre", "ger" и так далее'
+
+    help_text = HelpText(
+        commands_text="распознаёт текст на изображении",
+        extra_text=(
+            'Язык нужно указывать в 3 символа. Пример - "eng", "rus", "fre", "ger" и так далее'
+        ),
+        help_texts=[
+            HelpTextItem(Role.USER, [
+                "Текст (Изображения/Пересылаемое сообщение с изображением) [язык=rus] - распознаёт текст на изображении"
+            ])
+        ]
+    )
+
     attachments = [PhotoAttachment]
 
     def start(self) -> ResponseMessage:

@@ -1,6 +1,8 @@
 from apps.bot.api.meme_arsenal import MemeArsenal as MemeArsenalAPI
 from apps.bot.classes.command import Command
+from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
+from apps.bot.classes.help_text import HelpText, HelpTextItem
 from apps.bot.classes.messages.response_message import ResponseMessageItem, ResponseMessage
 
 
@@ -8,10 +10,14 @@ class MemeArsenal(Command):
     name = "мемарсенал"
     names = ["арсенал"]
 
-    help_text = "ищет мемы по названию"
-    help_texts = [
-        "(текст) - ищет мемы по названию и присылает топ-5"
-    ]
+    help_text = HelpText(
+        commands_text="ищет мемы по названию",
+        help_texts=[
+            HelpTextItem(Role.USER, [
+                "(текст) - ищет мемы по названию и присылает топ-5"
+            ])
+        ]
+    )
 
     def start(self) -> ResponseMessage:
         ma_api = MemeArsenalAPI()

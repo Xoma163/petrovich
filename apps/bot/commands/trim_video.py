@@ -7,6 +7,7 @@ from apps.bot.classes.command import Command
 from apps.bot.classes.const.activities import ActivitiesEnum
 from apps.bot.classes.const.consts import Platform, Role
 from apps.bot.classes.const.exceptions import PWarning
+from apps.bot.classes.help_text import HelpTextItem, HelpText
 from apps.bot.classes.messages.attachments.link import LinkAttachment
 from apps.bot.classes.messages.attachments.video import VideoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
@@ -19,16 +20,23 @@ class TrimVideo(Command):
     names = ["обрежь", "обрез", "обрезание", "отрежь", "отрезание", "crop", "cut", "trim", "обрезать", "отрезать"]
     name_tg = "trim"
 
-    help_text = "обрезание видео"
-    help_texts = [
-        "(вложенное видео) (таймкод начала) - обрезает видео с таймкода и до конца",
-        "(вложенное видео) (таймкод начала) (таймкод конца) - обрезает видео по таймкодам",
-        "(youtube ссылка) (таймкод начала) - обрезает с таймкода и до конца",
-        "(youtube ссылка) (таймкод начала) (таймкод конца) - обрезает по таймкодам",
-        "(youtube ссылка с таймкодом) - обрезает с таймкода и до конца",
-        "(youtube ссылка с таймкодом) (таймкод конца) - обрезает по таймкодам",
-    ]
-    help_texts_extra = "Формат для таймкодов: [%H:]%M:%S[.%MS], т.е. валидные таймкоды: 09:04, 9:04, 09:4, 9:4, 01:09:04, 9:04.123"
+    help_text = HelpText(
+        commands_text="обрезание видео",
+        extra_text=(
+            "Формат для таймкодов: [%H:]%M:%S[.%MS], т.е. валидные таймкоды: 09:04, 9:04, 09:4, 9:4, 01:09:04, 9:04.123"
+        ),
+        help_texts=[
+            HelpTextItem(Role.USER, [
+                "(вложенное видео) (таймкод начала) - обрезает видео с таймкода и до конца",
+                "(вложенное видео) (таймкод начала) (таймкод конца) - обрезает видео по таймкодам",
+                "(youtube ссылка) (таймкод начала) - обрезает с таймкода и до конца",
+                "(youtube ссылка) (таймкод начала) (таймкод конца) - обрезает по таймкодам",
+                "(youtube ссылка с таймкодом) - обрезает с таймкода и до конца",
+                "(youtube ссылка с таймкодом) (таймкод конца) - обрезает по таймкодам",
+            ])
+        ]
+    )
+
     platforms = [Platform.TG]
     bot: TgBot
 

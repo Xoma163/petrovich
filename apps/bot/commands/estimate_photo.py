@@ -1,5 +1,7 @@
 from apps.bot.api.everypixel import EveryPixel
 from apps.bot.classes.command import Command
+from apps.bot.classes.const.consts import Role
+from apps.bot.classes.help_text import HelpTextItem, HelpText
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 
@@ -7,8 +9,16 @@ from apps.bot.classes.messages.response_message import ResponseMessage, Response
 class EstimatePhoto(Command):
     name = "оцени"
     names = ["оценить"]
-    help_text = "оценить качество фотографии"
-    help_texts = ["(Изображение/Пересылаемое сообщение с изображением) - оценивает качество изображения"]
+
+    help_text = HelpText(
+        commands_text="оценить качество фотографии",
+        help_texts=[
+            HelpTextItem(Role.USER, [
+                "(Изображение/Пересылаемое сообщение с изображением) - оценивает качество изображения"
+            ])
+        ]
+    )
+
     attachments = [PhotoAttachment]
 
     def start(self) -> ResponseMessage:

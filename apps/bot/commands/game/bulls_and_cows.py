@@ -3,6 +3,7 @@ import random
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role, Platform
 from apps.bot.classes.const.exceptions import PWarning
+from apps.bot.classes.help_text import HelpText, HelpTextItem
 from apps.bot.classes.messages.response_message import ResponseMessageItem, ResponseMessage
 from apps.bot.utils.utils import decl_of_num, send_message_session_or_edit
 from apps.games.models import BullsAndCowsSession
@@ -13,12 +14,17 @@ DIGITS_IN_GAME = 4
 class BullsAndCows(Command):
     name = "бк"
     names = ["бик", "быкиикоровы", "быки", "коровы"]
-    help_text = "быки и коровы. Игра, где нужно угадать загаданное число."
-    help_texts = [
-        "- создаёт новую игру",
-        "[число] - проверяет гипотезу",
-        "сдаться - закончить игру",
-    ]
+
+    help_text = HelpText(
+        commands_text="быки и коровы. Игра, где нужно угадать загаданное число.",
+        help_texts=[
+            HelpTextItem(Role.USER, [
+                "- создаёт новую игру",
+                "[число] - проверяет гипотезу",
+                "сдаться - закончить игру",
+            ])
+        ]
+    )
     access = Role.GAMER
 
     def start(self) -> ResponseMessage:

@@ -9,6 +9,7 @@ from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Platform, Role
 from apps.bot.classes.const.exceptions import PSkip
+from apps.bot.classes.help_text import HelpTextItem, HelpText
 from apps.bot.classes.messages.response_message import ResponseMessageItem, ResponseMessage
 from apps.bot.utils.utils import random_event
 
@@ -23,8 +24,15 @@ class Minesweeper(Command):
     EMPTY = 0
 
     name = "сапер"
-    help_text = "игра сапёр"
-    help_texts = ["[кол-во мин=10] - запускает игру в сапёра"]
+
+    help_text = HelpText(
+        commands_text="игра сапёр",
+        help_texts=[
+            HelpTextItem(Role.USER, [
+                "[кол-во мин=10] - запускает игру в сапёра"
+            ])
+        ]
+    )
     platforms = [Platform.TG]
     access = Role.GAMER
 

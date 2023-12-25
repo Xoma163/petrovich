@@ -176,7 +176,6 @@ class Bot(Thread):
         """
         Получение похожей команды по неправильно введённой
         """
-        user_groups = event.sender.get_list_of_role_names()
         if not event.message or not event.message.raw:
             idk_what_you_want = "Я не понял, что вы от меня хотите(("
             return idk_what_you_want, {}
@@ -191,7 +190,7 @@ class Bot(Thread):
 
         for command in commands:
             command_has_not_full_names = not command.full_names
-            user_has_not_access = command.access.name not in user_groups
+            user_has_not_access = not event.sender.check_role(command.access)
             command_is_not_suggested = not command.suggest_for_similar
 
             if command_has_not_full_names or user_has_not_access or command_is_not_suggested:

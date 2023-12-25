@@ -1,4 +1,5 @@
 from apps.bot.classes.command import Command
+from apps.bot.classes.help_text import HelpText
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 
 
@@ -7,7 +8,9 @@ class Git(Command):
     names = ["гитхаб"]
     name_tg = 'github'
 
-    help_text = "ссылка на гитхаб"
+    help_text = HelpText(
+        commands_text="ссылка на гитхаб",
+    )
 
     def start(self) -> ResponseMessage:
         url = 'https://github.com/Xoma163/petrovich/'

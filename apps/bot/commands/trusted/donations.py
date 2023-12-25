@@ -1,6 +1,7 @@
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
+from apps.bot.classes.help_text import HelpText
 from apps.bot.classes.messages.response_message import ResponseMessageItem, ResponseMessage
 from apps.service.models import Donations as DonationsModel
 
@@ -8,7 +9,9 @@ from apps.service.models import Donations as DonationsModel
 class Donations(Command):
     name = "донаты"
     name_tg = 'donations'
-    help_text = "список всех донатов"
+    help_text = HelpText(
+        commands_text="список всех донатов"
+    )
     access = Role.TRUSTED
 
     def start(self) -> ResponseMessage:

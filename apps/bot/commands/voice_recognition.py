@@ -5,9 +5,10 @@ from pydub import AudioSegment
 
 from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import Command
-from apps.bot.classes.const.consts import Platform
+from apps.bot.classes.const.consts import Platform, Role
 from apps.bot.classes.const.exceptions import PWarning, PSkip
 from apps.bot.classes.event.event import Event
+from apps.bot.classes.help_text import HelpText, HelpTextItem
 from apps.bot.classes.messages.attachments.audio import AudioAttachment
 from apps.bot.classes.messages.attachments.videonote import VideoNoteAttachment
 from apps.bot.classes.messages.attachments.voice import VoiceAttachment
@@ -17,9 +18,19 @@ from apps.bot.classes.messages.response_message import ResponseMessage, Response
 class VoiceRecognition(Command):
     name = 'распознай'
     names = ["голос", "голосовое"]
-    help_text = "распознаёт голосовое сообщение"
-    help_texts = ["(Пересланное сообщение с голосовым сообщением) - распознаёт голосовое сообщение"]
-    help_texts_extra = "Если дан доступ к переписке, то распознает автоматически"
+
+    help_text = HelpText(
+        commands_text="распознаёт голосовое сообщение",
+        extra_text=(
+            "Если дан доступ к переписке, то распознает автоматически"
+        ),
+        help_texts=[
+            HelpTextItem(Role.USER, [
+                "(Пересланное сообщение с голосовым сообщением) - распознаёт голосовое сообщение"
+            ])
+        ]
+    )
+
     platforms = [Platform.TG]
     attachments = [VoiceAttachment, VideoNoteAttachment, AudioAttachment]
     priority = -100

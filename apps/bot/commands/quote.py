@@ -3,8 +3,9 @@ from io import BytesIO
 
 from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import Command
-from apps.bot.classes.const.consts import Platform
+from apps.bot.classes.const.consts import Platform, Role
 from apps.bot.classes.event.tg_event import TgEvent
+from apps.bot.classes.help_text import HelpText, HelpTextItem
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.utils.cache import MessagesCache
@@ -15,8 +16,15 @@ from apps.bot.utils.quotes_generator import QuotesGenerator
 # https://www.figma.com/file/yOqhSHOtYX76GcEJ3yB4oH/Bot?node-id=33%3A15
 class Quote(Command):
     name = "цитата"
-    help_text = "генерирует картинку с цитатой"
-    help_texts = ["(Пересылаемые сообщение) - генерирует картинку с цитатой"]
+
+    help_text = HelpText(
+        commands_text="генерирует картинку с цитатой",
+        help_texts=[
+            HelpTextItem(Role.USER, [
+                "(Пересылаемые сообщение) - генерирует картинку с цитатой"
+            ])
+        ]
+    )
     platforms = [Platform.TG]
 
     bot: TgBot

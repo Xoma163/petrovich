@@ -1,13 +1,22 @@
 from apps.bot.classes.command import Command
+from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
+from apps.bot.classes.help_text import HelpTextItem, HelpText
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 
 
 class Uyu(Command):
-    name = "уъу"
-    names = ["ъуъ"]
-    help_text = "добавляет слово в текст (уъуфикация)"
-    help_texts = ["(Пересланные сообщения) [новое слово=бля] - добавляет слово в текст (уъуфикация)"]
+    name = "ъуъ"
+    names = ["уъу"]
+
+    help_text = HelpText(
+        commands_text="добавляет слово в текст (уъуфикация)",
+        help_texts=[
+            HelpTextItem(Role.USER, [
+                "(Пересланные сообщения) [новое слово=бля] - добавляет слово в текст (уъуфикация)"
+            ])
+        ]
+    )
 
     def start(self) -> ResponseMessage:
         if self.event.chat and not self.event.chat.use_swear:

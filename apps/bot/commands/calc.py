@@ -1,6 +1,8 @@
 from apps.bot.classes.command import Command
+from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.event.event import Event
+from apps.bot.classes.help_text import HelpTextItem, HelpText
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 
 MAX_OPERATIONS = 20
@@ -10,8 +12,15 @@ ACCURACY = 15
 class Calc(Command):
     name = "="
     names = ["калькулятор", "кальк"]
-    help_text = "калькулятор"
-    help_texts = ["(выражение) - калькулятор выражений. Умеет работать с + - * / ^ ( )"]
+
+    help_text = HelpText(
+        commands_text="калькулятор",
+        help_texts=[
+            HelpTextItem(Role.USER, [
+                "(выражение) - калькулятор выражений. Умеет работать с + - * / ^ ( )"
+            ])
+        ]
+    )
 
     def accept(self, event: Event) -> bool:
         if event.message and event.message.clear and event.message.clear[0] == '=':

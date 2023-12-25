@@ -1,6 +1,8 @@
 from apps.bot.api.github import Github
 from apps.bot.api.imgur import Imgur
 from apps.bot.classes.command import Command
+from apps.bot.classes.const.consts import Role
+from apps.bot.classes.help_text import HelpTextItem, HelpText
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 
@@ -8,9 +10,19 @@ from apps.bot.classes.messages.response_message import ResponseMessage, Response
 class Issue(Command):
     name = "баг"
     names = ["ошибка", "ишю", "ишью"]
-    help_text = "добавляет проблему Петровича, которую нужно решить"
-    help_texts = ["(проблема)\\n[описание проблемы]\\n[теги] - добавляет проблему Петровича, которую нужно решить"]
-    help_texts_extra = "Возможные теги: #Баг #Фича #Говнокод #Документация #Тест #хелп"
+
+    help_text = HelpText(
+        commands_text="добавляет проблему Петровича, которую нужно решить",
+        extra_text=(
+            "Возможные теги: #Баг #Фича #Говнокод #Документация #Тест #хелп"
+        ),
+        help_texts=[
+            HelpTextItem(Role.USER, [
+                "(проблема)\\n[описание проблемы]\\n[теги] - добавляет проблему Петровича, которую нужно решить"
+            ])
+        ]
+    )
+
     args = 1
     mentioned = True
 

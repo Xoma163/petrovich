@@ -1,16 +1,23 @@
 from apps.bot.api.cbr import CBRAPI
 from apps.bot.classes.command import Command
+from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
+from apps.bot.classes.help_text import HelpText, HelpTextItem
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 
 
 class ExchangeRates(Command):
     name = "курс"
-    help_text = "курс валют"
-    help_texts = [
-        "- курс валют",
-        "[количество=1] (валюта) - перевод в другие валюты конкретное количество валюты"
-    ]
+
+    help_text = HelpText(
+        commands_text="курс валют",
+        help_texts=[
+            HelpTextItem(Role.USER, [
+                "- курс валют",
+                "[количество=1] (валюта) - перевод в другие валюты конкретное количество валюты"
+            ])
+        ]
+    )
 
     def start(self) -> ResponseMessage:
         filters_list = ["USD", "EUR", "NOK", "JPY", "GBP", "KZT", "UAH", "AMD", "UZS"]

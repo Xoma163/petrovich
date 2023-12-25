@@ -6,6 +6,7 @@ from django.db.models import QuerySet, Q
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
+from apps.bot.classes.help_text import HelpText, HelpTextItem
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.utils.utils import localize_datetime
 from apps.service.models import Promocode as PromocodeModel
@@ -15,18 +16,23 @@ from petrovich.settings import DEFAULT_TIME_ZONE
 class Promocode(Command):
     name = "промокод"
     names = ["промокоды", "промик", "промики", "пром", "промы"]
-    help_text = "промокоды различных сервисов"
-    help_texts = [
-        "- список промокодов",
-        "(название сервиса) - список промокодов по сервису",
-        "добавить (название сервиса) (промокод) [срок действия=бессрочно] [описание] - добавляет промокод",
-        "удалить (название сервиса) (промокод) - удаляет промокод",
-        "удалить (промокод) - удаляет промокод"
-    ]
-    help_texts_extra = (
-        "Срок действия в добавлении промокода указывается в формате ДД.ММ.ГГГГ\n"
-        "Если промокод добавлен в ЛС - он считается личным и будет выводиться только в лс\n"
-        "Если промокод добавлен в чате - он считается публичным и будет выводиться во всех чатах"
+
+    help_text = HelpText(
+        commands_text="промокоды различных сервисов",
+        extra_text=(
+            "Срок действия в добавлении промокода указывается в формате ДД.ММ.ГГГГ\n"
+            "Если промокод добавлен в ЛС - он считается личным и будет выводиться только в лс\n"
+            "Если промокод добавлен в чате - он считается публичным и будет выводиться во всех чатах"
+        ),
+        help_texts=[
+            HelpTextItem(Role.USER, [
+                "- список промокодов",
+                "(название сервиса) - список промокодов по сервису",
+                "добавить (название сервиса) (промокод) [срок действия=бессрочно] [описание] - добавляет промокод",
+                "удалить (название сервиса) (промокод) - удаляет промокод",
+                "удалить (промокод) - удаляет промокод"
+            ])
+        ]
     )
 
     def start(self) -> ResponseMessage:

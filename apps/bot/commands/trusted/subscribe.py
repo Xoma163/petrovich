@@ -8,6 +8,7 @@ from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role, Platform
 from apps.bot.classes.const.exceptions import PWarning
+from apps.bot.classes.help_text import HelpTextItem, HelpText
 from apps.bot.classes.messages.attachments.link import LinkAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.service.models import Subscribe as SubscribeModel
@@ -18,15 +19,20 @@ MAX_USER_SUBS_COUNT = 3
 class Subscribe(Command):
     name = "подписка"
     names = ['подписки']
-    help_text = "создаёт подписку на каналы. Доступные: YouTube, The-Hole, WAST, VK, Premier. Бот пришлёт тебе новое видео с канала когда оно выйдет"
-    help_texts = [
-        "- список активных подписок в лс, если в конфе, то только общие в конфе",
-        "добавить (ссылка на канал/плейлист) - создаёт подписку на канал.",
-        "удалить (название канала/плейлиста/id) - удаляет вашу подписку на канал (если в конфе, то любую в конфе)",
-    ]
-    help_texts_extra = (
-        "Проверка новых видео проходит каждые 30 минут\n"
-        "Для вк нужно перейти в 'Показать все' и скопировать ссылку оттуда. Также поддерживаются ссылки на плейлисты для VK/Youtube"
+
+    help_text = HelpText(
+        commands_text="создаёт подписку на каналы. Доступные: YouTube, The-Hole, WAST, VK, Premier. Бот пришлёт тебе новое видео с канала когда оно выйдет",
+        extra_text=(
+            "Проверка новых видео проходит каждые 30 минут\n"
+            "Для вк нужно перейти в 'Показать все' и скопировать ссылку оттуда. Также поддерживаются ссылки на плейлисты для VK/Youtube"
+        ),
+        help_texts=[
+            HelpTextItem(Role.TRUSTED, [
+                "- список активных подписок в лс, если в конфе, то только общие в конфе",
+                "добавить (ссылка на канал/плейлист) - создаёт подписку на канал.",
+                "удалить (название канала/плейлиста/id) - удаляет вашу подписку на канал (если в конфе, то любую в конфе)",
+            ])
+        ]
     )
 
     platforms = [Platform.TG]

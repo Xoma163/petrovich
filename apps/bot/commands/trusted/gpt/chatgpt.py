@@ -7,6 +7,7 @@ from apps.bot.classes.const.consts import Role, Platform
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.event.event import Event
 from apps.bot.classes.event.tg_event import TgEvent
+from apps.bot.classes.help_text import HelpText, HelpTextItem
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.utils.cache import MessagesCache
@@ -18,15 +19,21 @@ class ChatGPT(Command):
     name = "gpt"
     names = ["гпт", "chatgpt", "чатгпт"]
 
-    help_text = "чат GPT"
-    help_texts = [
-        "(фраза/пересланное сообщение) - общение с ботом",
-        "(фраза) [картинка] - общение с ботом с учётом пересланной картинки",
-        "нарисуй (фраза/пересланное сообщение) - генерация картинки",
-    ]
-    help_texts_extra = \
-        "Если отвечать на сообщения бота через кнопку \"Ответить\" то будет продолжаться непрерывный диалог.\n" \
-        "В таком случае необязательно писать команду, можно просто текст\n\n"
+    help_text = HelpText(
+        commands_text="чат GPT",
+        extra_text=(
+            "Если отвечать на сообщения бота через кнопку \"Ответить\" то будет продолжаться непрерывный диалог.\n"
+            "В таком случае необязательно писать команду, можно просто текст\n\n"
+        ),
+        help_texts=[
+            HelpTextItem(Role.TRUSTED, [
+                "(фраза/пересланное сообщение) - общение с ботом",
+                "(фраза) [картинка] - общение с ботом с учётом пересланной картинки",
+                "нарисуй (фраза/пересланное сообщение) - генерация картинки",
+            ])
+        ]
+    )
+
     access = Role.TRUSTED
     platforms = [Platform.TG]
 

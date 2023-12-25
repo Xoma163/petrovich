@@ -4,8 +4,10 @@ from itertools import groupby
 from typing import List
 
 from apps.bot.classes.command import Command
+from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.event.event import Event
+from apps.bot.classes.help_text import HelpTextItem, HelpText
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.utils.utils import localize_datetime, remove_tz, normalize_datetime
 from apps.service.models import City
@@ -13,11 +15,19 @@ from apps.service.models import City
 
 class Time(Command):
     name = "время"
-    help_text = "текущее время в городе"
-    help_texts = ["[город=из профиля] - текущее время в городе"]
 
-    help_texts_extra = \
-        "Если в сообщении будет указание времени, а у пользователя будет проставлен город в профиле, то бот автоматически проставит соответствующее время для остальных городов в чате"
+    help_text = HelpText(
+        commands_text="текущее время в городе",
+        extra_text=(
+            "Если в сообщении будет указание времени, а у пользователя будет проставлен город в профиле, то бот "
+            "автоматически проставит соответствующее время для остальных городов в чате"
+        ),
+        help_texts=[
+            HelpTextItem(Role.USER, [
+                "[город=из профиля] - текущее время в городе"
+            ])
+        ]
+    )
 
     priority = -5
 

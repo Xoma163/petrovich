@@ -1,5 +1,7 @@
 from apps.bot.classes.command import Command
+from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
+from apps.bot.classes.help_text import HelpText, HelpTextItem
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.service.models import Words
 
@@ -83,13 +85,20 @@ class Praise(Command):
     name = 'похвалить'
     names = ["похвали", "хвалить"]
     name_tg = 'praise'
-    help_text = "рандомная похвала"
-    help_texts = ["Похвалить [кто-то] [род+число] - рандомная похвала"]
-    help_texts_extra = (
-        "Род и число указываются через последний аргумент: Мужской м, Женский ж, Средний с. Число: единственное *1, множественное *м\n"
-        "Т.е. доступные сочетания аргументов могут быть следующими: [м ж с м1 ж1 с1 мм жм]\n"
-        "Если в качестве параметра передаётся имя, фамилия, логин/id, никнейм, то род выберется из БД\n"
-        "Пример. /похвалить бабушка ж"
+
+    help_text = HelpText(
+        commands_text="рандомная похвала",
+        extra_text=(
+            "Род и число указываются через последний аргумент: Мужской м, Женский ж, Средний с. Число: единственное *1, множественное *м\n"
+            "Т.е. доступные сочетания аргументов могут быть следующими: [м ж с м1 ж1 с1 мм жм]\n"
+            "Если в качестве параметра передаётся имя, фамилия, логин/id, никнейм, то род выберется из БД\n"
+            "Пример. /похвалить бабушка ж"
+        ),
+        help_texts=[
+            HelpTextItem(Role.USER, [
+                "Похвалить [кто-то] [род+число] - рандомная похвала"
+            ])
+        ]
     )
 
     def start(self) -> ResponseMessage:

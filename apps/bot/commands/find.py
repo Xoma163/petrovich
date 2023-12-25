@@ -2,8 +2,9 @@ from apps.bot.api.google_custom_search import GoogleCustomSearch
 from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.activities import ActivitiesEnum
-from apps.bot.classes.const.consts import Platform
+from apps.bot.classes.const.consts import Platform, Role
 from apps.bot.classes.const.exceptions import PWarning
+from apps.bot.classes.help_text import HelpTextItem, HelpText
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 
@@ -11,8 +12,16 @@ from apps.bot.classes.messages.response_message import ResponseMessage, Response
 class Find(Command):
     name = "найди"
     names = ["поиск", "найти", "ищи", "искать", "хуизфакинг", "вхуизфакинг"]
-    help_text = "ищет информацию по картинкам в гугле"
-    help_texts = ["(запрос) - ищет информацию по картинкам в гугле"]
+
+    help_text = HelpText(
+        commands_text="ищет информацию по картинкам в гугле",
+        help_texts=[
+            HelpTextItem(Role.USER, [
+                "(запрос) - ищет информацию по картинкам в гугле"
+            ])
+        ]
+    )
+
     args = 1
     platforms = [Platform.TG]
 

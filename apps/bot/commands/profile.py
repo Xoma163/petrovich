@@ -6,6 +6,7 @@ from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Platform, Role
 from apps.bot.classes.const.exceptions import PWarning
+from apps.bot.classes.help_text import HelpText, HelpTextItem
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.models import Profile as ProfileModel
@@ -15,20 +16,25 @@ from apps.service.models import City, TimeZone
 class Profile(Command):
     name = "профиль"
     name_tg = "profile"
-    help_text = "позволяет управлять вашим профилем"
-    help_texts = [
-        "- присылает информацию по вашему профилю",
-        "(имя, фамилия, логин/id, никнейм) - присылает информацию по профилю человека в конфе",
-        "город (название города) - устанавливает новый город",
-        "город добавить (название города) - добавляет новый город в базу",
-        "др (дата) - устанавливает новый др",
-        "имя (имя) - устанавливает новое имя",
-        "фамилия (фамилия) - устанавливает новую фамилию",
-        "никнейм (никнейм) - устанавливает новый никнейм",
-        "пол (мужской/женский) - устанавливает новый пол",
-        "аватар - обновляет аватар",
-        "аватар (изображение) - обновляет аватар из вложения",
-    ]
+
+    help_text = HelpText(
+        commands_text="позволяет управлять вашим профилем",
+        help_texts=[
+            HelpTextItem(Role.USER, [
+                "- присылает информацию по вашему профилю",
+                "(имя, фамилия, логин/id, никнейм) - присылает информацию по профилю человека в конфе",
+                "город (название города) - устанавливает новый город",
+                "город добавить (название города) - добавляет новый город в базу",
+                "др (дата) - устанавливает новый др",
+                "имя (имя) - устанавливает новое имя",
+                "фамилия (фамилия) - устанавливает новую фамилию",
+                "никнейм (никнейм) - устанавливает новый никнейм",
+                "пол (мужской/женский) - устанавливает новый пол",
+                "аватар - обновляет аватар",
+                "аватар (изображение) - обновляет аватар из вложения",
+            ])
+        ]
+    )
 
     platforms = [Platform.TG]
 

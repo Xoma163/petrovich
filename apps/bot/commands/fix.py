@@ -1,5 +1,7 @@
 from apps.bot.classes.command import Command
+from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
+from apps.bot.classes.help_text import HelpTextItem, HelpText
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.utils.utils import fix_layout
 
@@ -7,11 +9,17 @@ from apps.bot.utils.utils import fix_layout
 class Fix(Command):
     name = "фикс"
     names = ["раскладка"]
-    help_text = "исправляет раскладку текста"
-    help_texts = [
-        "(Пересылаемые сообщения) - исправляет раскладку текста",
-        "(текст) - исправляет раскладку текста"
-    ]
+
+    help_text = HelpText(
+        commands_text="исправляет раскладку текста",
+        help_texts=[
+            HelpTextItem(Role.USER, [
+                "(Пересылаемые сообщения) - исправляет раскладку текста",
+                "(текст) - исправляет раскладку текста"
+            ])
+        ]
+    )
+
     args_or_fwd = True
 
     def start(self) -> ResponseMessage:

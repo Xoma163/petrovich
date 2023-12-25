@@ -8,6 +8,7 @@ from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Platform, Role, rus_alphabet
 from apps.bot.classes.const.exceptions import PWarning, PSkip
+from apps.bot.classes.help_text import HelpText, HelpTextItem
 from apps.bot.classes.messages.response_message import ResponseMessageItem, ResponseMessage
 from apps.bot.utils.utils import random_event, send_message_session_or_edit
 from apps.games.models import Wordle as WordleModel
@@ -21,15 +22,18 @@ class Wordle(Command):
     names = ['вордле']
     name_tg = 'wordle'
 
-    help_text = "игра wordle"
-    help_texts = [
-        "- запуск сессии игры",
-        "сдаться - удаление сессии",
-        "(слово из 5 букв) - попытка угадать слово"
-    ]
-    help_texts_extra = (
-        "[] означает, что буква стоит на месте\n"
-        "() означает, что буква присутствует в слове"
+    help_text = HelpText(
+        commands_text="игра wordle",
+        extra_text=(
+            "[] означает, что буква стоит на месте\n() означает, что буква присутствует в слове"
+        ),
+        help_texts=[
+            HelpTextItem(Role.USER, [
+                "- запуск сессии игры",
+                "сдаться - удаление сессии",
+                "(слово из 5 букв) - попытка угадать слово"
+            ])
+        ]
     )
 
     platforms = [Platform.TG]

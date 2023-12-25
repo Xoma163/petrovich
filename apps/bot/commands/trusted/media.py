@@ -27,6 +27,7 @@ from apps.bot.classes.const.activities import ActivitiesEnum
 from apps.bot.classes.const.consts import Platform, Role
 from apps.bot.classes.const.exceptions import PWarning, PSkip
 from apps.bot.classes.event.event import Event
+from apps.bot.classes.help_text import HelpText, HelpTextItem
 from apps.bot.classes.messages.attachments.link import LinkAttachment
 from apps.bot.classes.messages.response_message import ResponseMessageItem, ResponseMessage
 from apps.bot.commands.trim_video import TrimVideo
@@ -75,17 +76,25 @@ MEDIA_URLS = tuple(
 class Media(Command):
     name = "медиа"
     names = ["media"]
-    help_text = "скачивает видео из соцсетей и присылает его"
-    help_texts = ["(ссылка на видео/пост) - скачивает видео из соцсетей и присылает его"]
-    help_texts_extra = (
-        "Поддерживаемые соцсети: Youtube/Youtube Music/Reddit/TikTok/Instagram/Twitter/Pikabu/"
-        "The Hole/Yandex Music/Pinterest/Coub/VK Video/ScopeGG/TwitchClips/Facebook video/Premier\n\n"
-        "Ключ --nomedia позволяет не запускать команду\n"
-        "Ключ --audio позволяет скачивать аудиодорожку для видео с ютуба\n"
-        "Ключ --thread позволяет скачивать пост с комментариями автора для твиттера\n\n"
-        "Видосы из ютуба качаются автоматически только если длина ролика менее 2 минут. \n"
-        "Вручную с указанием команды - скачается"
+
+    help_text = HelpText(
+        commands_text="скачивает видео/фото из соцсетей и присылает его",
+        extra_text=(
+            "Поддерживаемые соцсети: Youtube/Youtube Music/Reddit/TikTok/Instagram/Twitter/Pikabu/"
+            "The Hole/Yandex Music/Pinterest/Coub/VK Video/ScopeGG/TwitchClips/Facebook video/Premier\n\n"
+            "Ключ --nomedia позволяет не запускать команду\n"
+            "Ключ --audio позволяет скачивать аудиодорожку для видео с ютуба\n"
+            "Ключ --thread позволяет скачивать пост с комментариями автора для твиттера\n\n"
+            "Видосы из ютуба качаются автоматически только если длина ролика менее 2 минут. \n"
+            "Вручную с указанием команды - скачается"
+        ),
+        help_texts=[
+            HelpTextItem(Role.TRUSTED, [
+                "(ссылка на видео/пост) - скачивает видео из соцсетей и присылает его",
+            ])
+        ]
     )
+
     platforms = [Platform.TG]
     attachments = [LinkAttachment]
 

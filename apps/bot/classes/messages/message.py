@@ -3,9 +3,8 @@ import re
 
 
 class Message:
-    COMMAND_SYMBOLS = ['/', '!']
-    KEYS_SYMBOL = "—"
-    KEYS_STR = "--"
+    COMMAND_SYMBOLS = ['/']
+    KEYS_SYMBOLS = ["—", "--"]
     SPACE_REGEX = r' |\n'
 
     def __init__(self, raw_str=None, _id=None):
@@ -79,11 +78,10 @@ class Message:
             if not arg:
                 continue
             key = None
-            if arg.startswith(self.KEYS_STR):
-                key = arg[2:].lower()
-            if arg.startswith(self.KEYS_SYMBOL):
-                key = arg[1:].lower()
-
+            for key_symbol in self.KEYS_SYMBOLS:
+                if arg.startswith(key_symbol):
+                    key = arg[len(key_symbol):].lower()
+                    break
             if key:
                 index = args_str.find(arg)
                 self.keys.append(key)

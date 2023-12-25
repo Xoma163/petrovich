@@ -1,12 +1,16 @@
 from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Platform
+from apps.bot.classes.help_text import HelpText
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 
 
 class KeyboardHide(Command):
     name = "скрыть"
-    help_text = "убирает клавиатуру"
+
+    help_text = HelpText(
+        commands_text="убирает клавиатуру",
+    )
 
     platforms = [Platform.TG]
 

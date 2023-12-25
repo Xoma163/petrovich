@@ -6,6 +6,7 @@ from apps.bot.classes.const.activities import ActivitiesEnum
 from apps.bot.classes.const.consts import Role, Platform
 from apps.bot.classes.event.event import Event
 from apps.bot.classes.event.tg_event import TgEvent
+from apps.bot.classes.help_text import HelpText, HelpTextItem
 from apps.bot.classes.messages.response_message import ResponseMessage
 from apps.bot.commands.trusted.gpt.chatgpt import ChatGPT
 from apps.bot.utils.cache import MessagesCache
@@ -14,10 +15,15 @@ from apps.bot.utils.cache import MessagesCache
 class WTF(Command):
     name = "wtf"
 
-    help_text = "обрабатывает сообщения в конфе через ChatGPT"
-    help_texts = [
-        "(prompt) [N=50] - обрабатывает последние N сообщений в конфе через ChatGPT по указанному prompt"
-    ]
+    help_text = HelpText(
+        commands_text="обрабатывает сообщения в конфе через ChatGPT",
+        help_texts=[
+            HelpTextItem(Role.TRUSTED, [
+                "(prompt) [N=50] - обрабатывает последние N сообщений в конфе через ChatGPT по указанному prompt",
+            ])
+        ]
+    )
+
     args = 1
     access = Role.TRUSTED
     platforms = [Platform.TG]

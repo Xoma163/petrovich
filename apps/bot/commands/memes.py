@@ -1,7 +1,9 @@
 from django.core.paginator import Paginator
 
 from apps.bot.classes.command import Command
+from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
+from apps.bot.classes.help_text import HelpText, HelpTextItem
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.commands.meme import Meme
 from apps.service.models import Meme as MemeModel
@@ -9,11 +11,16 @@ from apps.service.models import Meme as MemeModel
 
 class Memes(Command):
     name = "мемы"
-    help_text = "список мемов"
-    help_texts = [
-        "[страница=1] - присылает список мемов на странице",
-        "(поисковая фраза) - присылает список мемов, подходящих поисковому запросу"
-    ]
+
+    help_text = HelpText(
+        commands_text="список мемов",
+        help_texts=[
+            HelpTextItem(Role.USER, [
+                "[страница=1] - присылает список мемов на странице",
+                "(поисковая фраза) - присылает список мемов, подходящих поисковому запросу"
+            ])
+        ]
+    )
 
     def start(self) -> ResponseMessage:
         try:

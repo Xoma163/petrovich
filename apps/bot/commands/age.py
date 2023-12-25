@@ -3,17 +3,25 @@ import numpy as np
 
 from apps.bot.api.everypixel import EveryPixel
 from apps.bot.classes.command import Command
+from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
+from apps.bot.classes.help_text import HelpText, HelpTextItem
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 
 
 class Age(Command):
     name = "возраст"
-    help_text = "оценивает возраст людей на фотографии"
-    help_texts = [
-        "(Изображения/Пересылаемое сообщение с изображением) - оценивает возраст людей на фотографии"
-    ]
+
+    help_text = HelpText(
+        commands_text="оценивает возраст людей на фотографии",
+        help_texts=[
+            HelpTextItem(Role.USER, [
+                "(Изображения/Пересылаемое сообщение с изображением) - оценивает возраст людей на фотографии"
+            ])
+        ]
+    )
+
     attachments = [PhotoAttachment]
 
     def start(self) -> ResponseMessage:
