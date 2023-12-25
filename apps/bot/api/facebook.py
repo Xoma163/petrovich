@@ -1,14 +1,9 @@
-import logging
-
-import requests
-
+from apps.bot.api.handler import API
 from apps.bot.classes.const.exceptions import PWarning
 from petrovich.settings import env
 
-logger = logging.getLogger('responses')
 
-
-class Facebook:
+class Facebook(API):
     _HOST = "facebook-reel-and-video-downloader.p.rapidapi.com"
     HEADERS = {
         "X-RapidAPI-Host": _HOST,
@@ -17,8 +12,7 @@ class Facebook:
     URL = f"https://{_HOST}/app/main.php"
 
     def get_video_info(self, url):
-        r = requests.get(self.URL, headers=self.HEADERS, params={"url": url}).json()
-        logger.debug({"response": r})
+        r = self.requests.get(self.URL, headers=self.HEADERS, params={"url": url}).json()
 
         video_url = None
         if r['links']:

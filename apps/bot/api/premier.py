@@ -1,17 +1,13 @@
-import logging
 import re
 from typing import List
 
-import requests
-
+from apps.bot.api.handler import API
 from apps.bot.api.subscribe_service import SubscribeService
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.utils.video.downloader import VideoDownloader
 
-logger = logging.getLogger('responses')
 
-
-class Premier(SubscribeService):
+class Premier(SubscribeService, API):
     def parse_video(self, url: str) -> dict:
         url = self._prepare_url(url)
 
@@ -54,12 +50,12 @@ class Premier(SubscribeService):
             "title": result['title_for_player'] or result['title_for_card']
         }
 
-    @staticmethod
-    def _get_download_url(video_id: str, url: str, log_results: bool = True):
-        r = requests.get(
-            f"https://premier.one/api/play/options/{video_id}/?format=json&no_404=true&referer={url}").json()
-        if log_results:
-            logger.debug({"response": r})
+    def _get_download_url(self, video_id: str, url: str, log_results: bool = True):
+        r = self.requests.get(
+            f"https://premier.one/api/play/options/{video_id}/?format=json&no_404=true&referer={url}",
+            log=log_results,
+        ).json()
+
         if 'video_balancer' not in r:
             raise PWarning("Не могу скачать это видео. Либо оно платное, либо чёт ещё...")
         return r['video_balancer']['default']

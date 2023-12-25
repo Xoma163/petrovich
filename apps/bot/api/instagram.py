@@ -1,21 +1,18 @@
-import logging
 from urllib.parse import urlparse
 
-import requests
-
+from apps.bot.api.handler import API
 from apps.bot.classes.const.exceptions import PWarning
 from petrovich.settings import env
 
-logger = logging.getLogger('responses')
 
-
-class Instagram:
+class Instagram(API):
     CONTENT_TYPE_IMAGE = 'image'
     CONTENT_TYPE_VIDEO = 'video'
 
     RAPID_API_KEY = env.str("RAPID_API_KEY")
 
     def __init__(self):
+        super().__init__()
         self.content_type = None
         self.caption = ""
 
@@ -41,9 +38,7 @@ class Instagram:
         _id = urlparse(instagram_link).path.strip('/').split('/')[-1]
         data = {"id": _id}
 
-        r = requests.post(url, json=data, headers=headers).json()
-        logger.debug({"response": r})
-
+        r = self.requests.post(url, json=data, headers=headers).json()
         return self._parse_photo_or_video(r['response']['body']['items'][0])
 
     def _get_post_data(self, instagram_link) -> dict:
@@ -55,9 +50,7 @@ class Instagram:
         url = f"https://{host}/postdetail"
 
         post_id = urlparse(instagram_link).path.strip('/').split('/')[1]
-        r = requests.get(f"{url}/{post_id}", headers=headers).json()
-        logger.debug({"response": r})
-
+        r = self.requests.get(f"{url}/{post_id}", headers=headers).json()
         return self._parse_photo_or_video(r['data'])
 
     def _parse_photo_or_video(self, data) -> dict:

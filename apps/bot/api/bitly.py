@@ -1,13 +1,8 @@
-import logging
-
-import requests
-
+from apps.bot.api.handler import API
 from petrovich.settings import env
 
-logger = logging.getLogger('responses')
 
-
-class BitLy:
+class BitLy(API):
     URL = "https://api-ssl.bitly.com/v4/shorten/"
     HEADERS = {
         "Authorization": f"Bearer {env.str('BITLY_TOKEN')}",
@@ -19,7 +14,6 @@ class BitLy:
             "domain": "bit.ly",
             "long_url": long_url
         }
-        r = requests.post(self.URL, json=params, headers=self.HEADERS).json()
-        logger.debug({"response": r})
+        r = self.requests.post(self.URL, json=params, headers=self.HEADERS).json()
 
         return r['link']

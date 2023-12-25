@@ -1,15 +1,10 @@
-import logging
-
-import requests
-
+from apps.bot.api.handler import API
 from apps.bot.classes.const.exceptions import PWarning
 from apps.service.models import City
 from petrovich.settings import env
 
-logger = logging.getLogger('responses')
 
-
-class YandexWeather:
+class YandexWeather(API):
     URL = "https://api.weather.yandex.ru/v1/informers"
     TOKEN = env.str("YANDEX_WEATHER_TOKEN")
     HEADERS = {
@@ -73,8 +68,7 @@ class YandexWeather:
             'lon': city.lon,
             'lang': 'ru_RU'
         }
-        r = requests.get(self.URL, params, headers=self.HEADERS).json()
-        logger.debug({"response": r})
+        r = self.requests.get(self.URL, params, headers=self.HEADERS).json()
 
         if 'status' in r:
             if r['status'] == 403:

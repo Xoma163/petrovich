@@ -1,13 +1,8 @@
-import logging
-
-import requests
-
+from apps.bot.api.handler import API
 from petrovich.settings import env
 
-logger = logging.getLogger('responses')
 
-
-class TimezoneDB:
+class TimezoneDB(API):
     URL = "https://api.timezonedb.com/v2.1/get-time-zone"
     API_KEY = env.str("TIMEZONEDB_API_KEY")
 
@@ -19,7 +14,6 @@ class TimezoneDB:
             'lat': lat,
             'lng': lon
         }
-        r = requests.get(self.URL, params=params).json()
-        logger.debug({"response": r})
+        r = self.requests.get(self.URL, params=params).json()
 
         return r['zoneName']

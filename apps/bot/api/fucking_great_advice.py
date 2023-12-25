@@ -1,15 +1,10 @@
-import logging
-
-import requests
-
-logger = logging.getLogger('responses')
+from apps.bot.api.handler import API
 
 
-class FuckingGreatAdvice:
+class FuckingGreatAdvice(API):
     URL = "https://fucking-great-advice.ru/api/random"
 
     def get_advice(self) -> str:
-        r = requests.get(self.URL).json()
-        logger.debug({"response": r})
+        r = self.requests.get(self.URL).json()
 
         return r['text']

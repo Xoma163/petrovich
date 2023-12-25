@@ -1,13 +1,8 @@
-import logging
-
-import requests
-
+from apps.bot.api.handler import API
 from petrovich.settings import env
 
-logger = logging.getLogger('responses')
 
-
-class Imgur:
+class Imgur(API):
     ACCESS_TOKEN = env.str("IMGUR_ACCESS_TOKEN")
 
     HOST = "https://api.imgur.com"
@@ -19,7 +14,6 @@ class Imgur:
         files = {
             "image": image
         }
-        r = requests.post(self.URL_UPLOAD, files=files, headers=self.HEADERS).json()
-        logger.debug({"response": r})
+        r = self.requests.post(self.URL_UPLOAD, files=files, headers=self.HEADERS).json()
 
         return r['data']['link']

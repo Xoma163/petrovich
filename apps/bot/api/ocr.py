@@ -1,14 +1,9 @@
-import logging
-
-import requests
-
+from apps.bot.api.handler import API
 from apps.bot.classes.const.exceptions import PError, PWarning
 from petrovich.settings import env
 
-logger = logging.getLogger('responses')
 
-
-class OCR:
+class OCR(API):
     URL = 'https://api.ocr.space/parse/image'
     API_KEY = env.str("OCR_API_KEY")
 
@@ -20,8 +15,7 @@ class OCR:
             'apikey': self.API_KEY,
             'language': lang,
         }
-        r = requests.post(self.URL, files={'filename.jpg': file}, data=payload).json()
-        logger.debug({"response": r})
+        r = self.requests.post(self.URL, files={'filename.jpg': file}, data=payload).json()
 
         if 'OCRExitCode' in r and r['OCRExitCode'] == self.ERROR_CODE:
             raise PError("Ошибка API")

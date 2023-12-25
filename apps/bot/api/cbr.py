@@ -1,23 +1,24 @@
 import logging
 
-import requests
 from bs4 import BeautifulSoup
 
-logger = logging.getLogger('responses')
+from apps.bot.api.handler import API
+
+logger = logging.getLogger('api')
 
 
-class CBRAPI:
+class CBRAPI(API):
     URL = "https://www.cbr-xml-daily.ru/daily.xml"
 
     def __init__(self, filters_list):
+        super().__init__()
         self.filters = {x: {
             'name': None,
-            'value': 0
+            'value': 0.0
         } for x in filters_list}
 
     def get_ex_rates(self) -> dict:
-        r = requests.get(self.URL, stream=True)
-        logger.debug({"response": r.content})
+        r = self.requests.get(self.URL, stream=True)
         elements = BeautifulSoup(r.content, 'xml').find('ValCurs').find_all("Valute")
 
         for elem in elements:

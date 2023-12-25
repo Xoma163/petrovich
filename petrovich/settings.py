@@ -1,5 +1,6 @@
-import environ
 import os
+
+import environ
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -142,8 +143,8 @@ LOGGING = {
             '()': 'colorlog.ColoredFormatter',
             'format': '%(log_color)s%(levelname)-8s %(name)-10s %(filename)s:%(lineno)d\n%(message)s',
             'log_colors': {
-                'DEBUG': 'cyan',
                 'INFO': 'green',
+                'DEBUG': 'cyan',
                 'WARNING': 'yellow',
                 'ERROR': 'red',
                 'CRITICAL': 'red,bg_white',
@@ -177,7 +178,7 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': False,
         },
-        'responses': {
+        'api': {
             'handlers': ['file-debug', 'file-error'],
             'level': 'DEBUG',
             'propagate': False,
@@ -195,7 +196,8 @@ LOGGING = {
     }
 }
 if DEBUG:
-    LOGGING['loggers']['bot']['handlers'].append('console-debug')
+    for logger in LOGGING['loggers']:
+        LOGGING['loggers'][logger]['handlers'].append('console-debug')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 

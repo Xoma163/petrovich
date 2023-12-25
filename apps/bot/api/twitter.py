@@ -1,17 +1,13 @@
-import logging
 import re
 import time
 from urllib.parse import urlparse
 
-import requests
-
+from apps.bot.api.handler import API
 from apps.bot.classes.const.exceptions import PWarning
 from petrovich.settings import env
 
-logger = logging.getLogger('responses')
 
-
-class Twitter:
+class Twitter(API):
     CONTENT_TYPE_IMAGE = 'image'
     CONTENT_TYPE_VIDEO = 'video'
     CONTENT_TYPE_TEXT = 'text'
@@ -26,10 +22,9 @@ class Twitter:
 
     def get_post_data(self, url, with_threads=False):
         tweet_id = urlparse(url).path.strip('/').split('/')[-1]
-        r = requests.get(self.URL_TWEET_INFO, headers=self.HEADERS, params={'tweet_id': tweet_id}).json()
+        r = self.requests.get(self.URL_TWEET_INFO, headers=self.HEADERS, params={'tweet_id': tweet_id}).json()
         if r.get('detail') == 'Error while parsing tweet':
             raise PWarning("Ошибка на стороне API")
-        logger.debug({"response": r})
 
         if with_threads:
             try:
@@ -58,8 +53,7 @@ class Twitter:
         tweet_id = tweet_data["tweet_id"]
         user_id = tweet_data['user']['user_id']
 
-        r = requests.get(self.URL_TWEET_REPLIES, headers=self.HEADERS, params={'tweet_id': tweet_id}).json()
-        logger.debug({"response": r})
+        r = self.requests.get(self.URL_TWEET_REPLIES, headers=self.HEADERS, params={'tweet_id': tweet_id}).json()
         replies = list(filter(lambda x: x['user']['user_id'] == user_id, r['replies']))
 
         replies_tweet_reply_id_dict = {x['in_reply_to_status_id']: x for x in replies}

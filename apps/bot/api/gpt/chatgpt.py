@@ -1,16 +1,12 @@
-import logging
 from json import JSONDecodeError
 
-import requests
-
+from apps.bot.api.gpt.gpt import GPT
+from apps.bot.api.handler import API
 from apps.bot.classes.const.exceptions import PWarning, PError
 from petrovich.settings import env
-from .gpt import GPT
-
-logger = logging.getLogger('responses')
 
 
-class ChatGPTAPI(GPT):
+class ChatGPTAPI(GPT, API):
     API_KEY = env.str("OPENAI_KEY")
 
     GPT_4 = 'gpt-4-1106-preview'
@@ -57,14 +53,12 @@ class ChatGPTAPI(GPT):
 
     def _do_request(self, url, payload):
         proxies = {"https": env.str("SOCKS5_PROXY"), "http": env.str("SOCKS5_PROXY")}
-        r = requests.post(url, headers=self.HEADERS, json=payload, proxies=proxies)
+        r = self.requests.post(url, headers=self.HEADERS, json=payload, proxies=proxies)
         if r.status_code != 200:
             try:
                 r_json = r.json()
                 r_json['payload'] = payload
-                logger.error({"response": r_json})
             except JSONDecodeError:
-                logger.error({"response": r.text})
                 raise PWarning("Ошибка. Не получилось обработать запрос.")
         else:
             r_json = r.json()

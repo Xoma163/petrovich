@@ -1,13 +1,8 @@
-import logging
-
-import requests
-
+from apps.bot.api.handler import API
 from petrovich.settings import env
 
-logger = logging.getLogger('responses')
 
-
-class YandexGeo:
+class YandexGeo(API):
     URL = "https://geocode-maps.yandex.ru/1.x/"
     API_KEY = env.str("YANDEX_GEO_TOKEN")
 
@@ -19,8 +14,7 @@ class YandexGeo:
             'result': '1',
             'lang': 'ru_RU'
         }
-        r = requests.get(self.URL, params).json()
-        logger.debug({"response": r})
+        r = self.requests.get(self.URL, params).json()
 
         result = r['response']['GeoObjectCollection']['featureMember']
         if len(result) == 0:

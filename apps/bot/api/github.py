@@ -1,16 +1,12 @@
 import json
-import logging
 from typing import List
 
-import requests
-
+from apps.bot.api.handler import API
 from apps.bot.classes.const.exceptions import PError
 from petrovich.settings import env
 
-logger = logging.getLogger('responses')
 
-
-class Github:
+class Github(API):
     REPO_OWNER = 'Xoma163'
     REPO_NAME = 'petrovich'
     ISSUES_URL = f'https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/issues'
@@ -33,9 +29,8 @@ class Github:
             'labels': labels
         }
 
-        r = requests.post(self.ISSUES_URL, json.dumps(issue_data), headers=self.HEADERS)
+        r = self.requests.post(self.ISSUES_URL, json.dumps(issue_data), headers=self.HEADERS)
         r_json = r.json()
-        logger.debug({"response": r_json})
 
         if r.status_code != 201:
             raise PError("Не удалось создать issue на github")
@@ -46,15 +41,13 @@ class Github:
             "state": "closed",
             "labels": ["Не пофикшу"]
         }
-        r = requests.post(f"{self.ISSUES_URL}/{_id}", json.dumps(issue_data), headers=self.HEADERS)
+        r = self.requests.post(f"{self.ISSUES_URL}/{_id}", json.dumps(issue_data), headers=self.HEADERS)
         r_json = r.json()
-        logger.debug({"response": r_json})
 
         if r.status_code != 200:
             raise PError("Не удалось закрыть issue на github")
         return r_json
 
     def get_all_labels(self) -> List[str]:
-        r = requests.get(self.LABELS_URL, json.dumps({}), headers=self.HEADERS).json()
-        logger.debug({"response": r})
+        r = self.requests.get(self.LABELS_URL, json.dumps({}), headers=self.HEADERS).json()
         return [x['name'] for x in r]
