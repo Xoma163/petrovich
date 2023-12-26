@@ -127,8 +127,8 @@ LOGS_DIR = os.path.join(BASE_DIR, 'logs')
 if not os.path.exists(LOGS_DIR):
     os.mkdir(LOGS_DIR)
 
-DEBUG_FILE = os.path.join(LOGS_DIR, 'commands-debug.log')
-ERROR_FILE = os.path.join(LOGS_DIR, 'commands-error.log')
+DEBUG_FILE = os.path.join(LOGS_DIR, 'debug.log')
+ERROR_FILE = os.path.join(LOGS_DIR, 'error.log')
 
 LOGGING = {
     'version': 1,
@@ -143,8 +143,8 @@ LOGGING = {
             '()': 'colorlog.ColoredFormatter',
             'format': '%(log_color)s%(levelname)-8s %(name)-10s %(filename)s:%(lineno)d\n%(message)s',
             'log_colors': {
-                'INFO': 'green',
                 'DEBUG': 'cyan',
+                'INFO': 'green',
                 'WARNING': 'yellow',
                 'ERROR': 'red',
                 'CRITICAL': 'red,bg_white',
