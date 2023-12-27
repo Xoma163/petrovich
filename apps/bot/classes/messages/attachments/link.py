@@ -16,10 +16,6 @@ class LinkAttachment(Attachment):
         return self._check_link(['youtu.be', 'youtube.com'])
 
     @property
-    def is_the_hole_link(self):
-        return self._check_link(["the-hole.tv"])
-
-    @property
     def is_vk_link(self):
         return self._check_link(["vk.com"])
 

@@ -1,4 +1,5 @@
 import os
+
 from django.db import models
 from django.db.models import JSONField
 from django.dispatch import receiver
@@ -141,12 +142,10 @@ class Donations(models.Model):
 
 class Subscribe(models.Model):
     SERVICE_YOUTUBE = 1
-    SERVICE_THE_HOLE = 2
     SERVICE_VK = 4
     SERVICE_PREMIERE = 5
     SERVICE_CHOICES = (
         (SERVICE_YOUTUBE, 'YouTube'),
-        (SERVICE_THE_HOLE, 'The Hole'),
         (SERVICE_VK, 'VK'),
         (SERVICE_PREMIERE, 'Premiere'),
     )

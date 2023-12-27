@@ -1,7 +1,6 @@
 from django.db.models import Q
 
 from apps.bot.api.premier import Premier
-from apps.bot.api.thehole import TheHole
 from apps.bot.api.vk.video import VKVideo
 from apps.bot.api.youtube.video import YoutubeVideo
 from apps.bot.classes.bots.tg_bot import TgBot
@@ -21,7 +20,7 @@ class Subscribe(Command):
     names = ['подписки']
 
     help_text = HelpText(
-        commands_text="создаёт подписку на каналы. Доступные: YouTube, The-Hole, WAST, VK, Premier. Бот пришлёт тебе новое видео с канала когда оно выйдет",
+        commands_text="создаёт подписку на каналы. Доступные: YouTube, VK video, Premier. Бот пришлёт тебе новое видео с канала когда оно выйдет",
         extra_text=(
             "Проверка новых видео проходит каждые 30 минут\n"
             "Для вк нужно перейти в 'Показать все' и скопировать ссылку оттуда. Также поддерживаются ссылки на плейлисты для VK/Youtube"
@@ -59,14 +58,12 @@ class Subscribe(Command):
 
         if attachment.is_youtube_link:
             data = self.add_youtube(attachment.url)
-        elif attachment.is_the_hole_link:
-            data = self.add_the_hole(attachment.url)
         elif attachment.is_vk_link:
             data = self.add_vk(attachment.url)
         elif attachment.is_premier_link:
             data = self.add_premiere(attachment.url)
         else:
-            raise PWarning("Незнакомый сервис. Доступные: \nYouTube, The-Hole, VK, Premier")
+            raise PWarning("Незнакомый сервис. Доступные: \nYouTube, VK video, Premier")
 
         if self.event.chat:
             existed_sub = SubscribeModel.objects.filter(
@@ -106,13 +103,6 @@ class Subscribe(Command):
         yt_api = YoutubeVideo()
         parsed = yt_api.get_data_to_add_new_subscribe(url)
         parsed['service'] = SubscribeModel.SERVICE_YOUTUBE
-        return parsed
-
-    @staticmethod
-    def add_the_hole(url):
-        the_hole_api = TheHole()
-        parsed = the_hole_api.get_data_to_add_new_subscribe(url)
-        parsed['service'] = SubscribeModel.SERVICE_THE_HOLE
         return parsed
 
     @staticmethod

@@ -14,7 +14,6 @@ from apps.bot.api.pikabu import Pikabu
 from apps.bot.api.pinterest import Pinterest
 from apps.bot.api.premier import Premier
 from apps.bot.api.reddit import Reddit
-from apps.bot.api.thehole import TheHole
 from apps.bot.api.tiktok import TikTok
 from apps.bot.api.twitter import Twitter
 from apps.bot.api.vk.video import VKVideo
@@ -43,7 +42,6 @@ TIKTOK_URLS = ("www.tiktok.com", 'vm.tiktok.com', 'm.tiktok.com', 'vt.tiktok.com
 INSTAGRAM_URLS = ('www.instagram.com', 'instagram.com')
 TWITTER_URLS = ('www.twitter.com', 'twitter.com', 'x.com')
 PIKABU_URLS = ('www.pikabu.ru', 'pikabu.ru')
-THE_HOLE_URLS = ('www.the-hole.tv', 'the-hole.tv')
 YANDEX_MUSIC_URLS = ('music.yandex.ru',)
 PINTEREST_URLS = ('pinterest.com', 'ru.pinterest.com', 'www.pinterest.com', 'pin.it')
 COUB_URLS = ('coub.com',)
@@ -61,7 +59,6 @@ MEDIA_URLS = tuple(
     INSTAGRAM_URLS +
     TWITTER_URLS +
     PIKABU_URLS +
-    THE_HOLE_URLS +
     YANDEX_MUSIC_URLS +
     PINTEREST_URLS +
     COUB_URLS +
@@ -81,7 +78,7 @@ class Media(Command):
         commands_text="скачивает видео/фото из соцсетей и присылает его",
         extra_text=(
             "Поддерживаемые соцсети: Youtube/Youtube Music/Reddit/TikTok/Instagram/Twitter/Pikabu/"
-            "The Hole/Yandex Music/Pinterest/Coub/VK Video/ScopeGG/TwitchClips/Facebook video/Premier\n\n"
+            "Yandex Music/Pinterest/Coub/VK Video/ScopeGG/TwitchClips/Facebook video/Premier\n\n"
             "Ключ --nomedia позволяет не запускать команду\n"
             "Ключ --audio позволяет скачивать аудиодорожку для видео с ютуба\n"
             "Ключ --thread позволяет скачивать пост с комментариями автора для твиттера\n\n"
@@ -184,7 +181,6 @@ class Media(Command):
             INSTAGRAM_URLS: self.get_instagram_attachment,
             TWITTER_URLS: self.get_twitter_content,
             PIKABU_URLS: self.get_pikabu_video,
-            THE_HOLE_URLS: self.get_the_hole_video,
             YANDEX_MUSIC_URLS: self.get_yandex_music,
             PINTEREST_URLS: self.get_pinterest_attachment,
             COUB_URLS: self.get_coub_video,
@@ -360,35 +356,6 @@ class Media(Command):
         video = self.bot.get_video_attachment(data['download_url'], peer_id=self.event.peer_id,
                                               filename=data['filename'])
         return [video], data['title']
-
-    def get_the_hole_video(self, url) -> (list, str):
-        the_hole_api = TheHole()
-        data = the_hole_api.parse_video(url)
-
-        try:
-            cache = VideoCache.objects.get(channel_id=data['channel_id'], video_id=data['video_id'])
-        except VideoCache.DoesNotExist:
-            try:
-                self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.UPLOAD_VIDEO)
-                video = the_hole_api.download_video(data["m3u8_url"])
-            finally:
-                self.bot.stop_activity_thread()
-
-            filename = f"{data['channel_title']}_{data['video_title']}"
-
-            cache = self._save_video_to_media_cache(
-                data['channel_id'],
-                data['video_id'],
-                filename,
-                video
-            )
-
-        filesize_mb = len(cache.video) / 1024 / 1024
-        attachments = []
-        if filesize_mb < self.bot.MAX_VIDEO_SIZE_MB:
-            attachments = [self.bot.get_video_attachment(cache.video, peer_id=self.event.peer_id)]
-        msg = f"{data['video_title']}\nCкачать можно здесь {self.bot.get_formatted_url('здесь', MAIN_SITE + cache.video.url)}"
-        return attachments, msg
 
     def get_yandex_music(self, url) -> (list, str):
         ym_api = YandexMusicAPI()

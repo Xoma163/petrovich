@@ -7,7 +7,6 @@ from itertools import groupby
 from django.core.management import BaseCommand
 
 from apps.bot.api.premier import Premier
-from apps.bot.api.thehole import TheHole
 from apps.bot.api.vk.video import VKVideo
 from apps.bot.api.youtube.video import YoutubeVideo
 from apps.bot.classes.bots.tg_bot import TgBot
@@ -25,13 +24,11 @@ logger = logging.getLogger('subscribe_notifier')
 class Command(BaseCommand):
     SERVICE_CLASS = {
         Subscribe.SERVICE_YOUTUBE: YoutubeVideo,
-        Subscribe.SERVICE_THE_HOLE: TheHole,
         Subscribe.SERVICE_VK: VKVideo,
         Subscribe.SERVICE_PREMIERE: Premier
     }
     SERVICE_MEDIA_METHOD = {
         Subscribe.SERVICE_YOUTUBE: "get_youtube_video",
-        Subscribe.SERVICE_THE_HOLE: "get_the_hole_video",
         Subscribe.SERVICE_VK: "get_vk_video",
         Subscribe.SERVICE_PREMIERE: "get_premiere_video"
     }
