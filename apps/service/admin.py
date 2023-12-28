@@ -58,7 +58,8 @@ class DonationsAdmin(admin.ModelAdmin):
 class SubscribeAdmin(admin.ModelAdmin):
     list_display = ('author', 'chat', 'channel_title', 'playlist_title', 'service', 'save_to_plex')
     list_filter = (
-        ('author', admin.RelatedOnlyFieldListFilter), ('chat', admin.RelatedOnlyFieldListFilter), 'save_to_plex')
+        ('author', admin.RelatedOnlyFieldListFilter), ('chat', admin.RelatedOnlyFieldListFilter), 'save_to_plex',
+        'service')
     search_fields = ('channel_title', 'playlist_title', 'last_videos_id')
 
 

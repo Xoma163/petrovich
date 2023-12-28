@@ -57,7 +57,7 @@ class Command(BaseCommand):
                 )
             except PSubscribeIndexError as e:
                 for sub in subs:
-                    sub.last_videos_id = e.args
+                    sub.last_videos_id = e.args[0]
                     sub.save()
                 raise
 

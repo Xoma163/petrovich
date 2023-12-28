@@ -8,7 +8,7 @@ import yt_dlp
 from bs4 import BeautifulSoup
 
 from apps.bot.api.subscribe_service import SubscribeService
-from apps.bot.classes.const.exceptions import PWarning, PSkip
+from apps.bot.classes.const.exceptions import PWarning, PSkip, PError
 from apps.bot.utils.nothing_logger import NothingLogger
 from petrovich.settings import env
 
@@ -115,6 +115,8 @@ class YoutubeVideo(SubscribeService):
         if r.status_code != 200:
             raise PWarning("Не нашёл такого канала")
         bsop = BeautifulSoup(r.content, 'lxml')
+        if bsop.find("h2").text.startswith("API Quota Exceeded"):
+            raise PError("API Quota Exceeded")
         videos = [x.find('yt:videoid').text for x in bsop.find_all('entry')]
 
         return list(reversed(videos))
