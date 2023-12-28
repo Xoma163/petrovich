@@ -13,16 +13,17 @@ env.read_env(os.path.join(BASE_DIR, 'secrets/.env'))
 SECRET_KEY = env.str('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool('DEBUG')
-MAIN_PROTOCOL = 'https'
-MAIN_DOMAIN = "petrovich.andrewsha.net"
+
+MAIN_DOMAIN = "andrewsha.net"
+PETROVICH_DOMAIN = f"petrovich.{MAIN_DOMAIN}"
 LOCAL_DOMAIN = "192.168.1.10"
 
-ALLOWED_HOSTS = [MAIN_DOMAIN, LOCAL_DOMAIN]
+ALLOWED_HOSTS = [PETROVICH_DOMAIN, LOCAL_DOMAIN]
 
 if DEBUG:
     MAIN_SITE = f'https://{LOCAL_DOMAIN}'
 else:
-    MAIN_SITE = f'https://{MAIN_DOMAIN}'
+    MAIN_SITE = f'https://{PETROVICH_DOMAIN}'
 
 # Application definition
 DJANGO_APPS = [

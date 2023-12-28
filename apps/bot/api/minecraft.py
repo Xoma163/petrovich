@@ -1,17 +1,16 @@
-import json
-
 from mcrcon import MCRcon
+from mcstatus import JavaServer
 
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.messages.response_message import ResponseMessageItem
 from apps.bot.utils.do_the_linux_command import do_the_linux_command
 from apps.bot.utils.utils import check_command_time
-from petrovich.settings import env, BASE_DIR, MAIN_DOMAIN
+from petrovich.settings import env, MAIN_DOMAIN
 
 
 class Minecraft:
 
-    def __init__(self, ip, port=25565, event=None, delay=None, names=None, map_url=None, auto_off=False):
+    def __init__(self, ip, port=25565, event=None, delay=None, names=None, map_url=None):
         self.ip = ip
         self.port = port
         self.event = event
@@ -21,7 +20,6 @@ class Minecraft:
         self.map_url = map_url
 
         self.server_info = None
-        self.auto_off = auto_off
 
     def get_version(self):
         return self.names[0]
@@ -68,71 +66,38 @@ class Minecraft:
     def stop(self):
         check_command_time(self._get_service_name(), self.delay)
 
-    # Only if online
-    def parse_server_info(self):
-        """
-        Порой json метод не срабатывает и приходится парсить руками
-        """
-        command = f"{BASE_DIR}/venv/bin/mcstatus {self.ip}:{self.port} status"
-        response = do_the_linux_command(command)
-        response_lines = response.split('\n')
-
-        players_range_start_phrase = 'players: '
-        players_range_end_phrase = ' '
-
-        players_range_start_pos = response_lines[2].find(players_range_start_phrase) + len(players_range_start_phrase)
-        players_range_end_pos = response_lines[2].find(players_range_end_phrase, players_range_start_pos)
-        players_range = response_lines[2][players_range_start_pos:players_range_end_pos]
-        players_range_split = players_range.split('/')
-        server_info = {
-            'version': response_lines[0][
-                       response_lines[0].find('version: v') + len('version: v'):response_lines[0].find('(') - 1],
-            'player_count': int(players_range_split[0]),
-            'player_max': int(players_range_split[1]),
-            'online': True,
-            'players': '',
-        }
-        players_list_pos = response_lines[2].find('[')
-        if players_list_pos != -1:
-            players_list = response_lines[2][players_list_pos:].replace("[\'", '').replace('\']', '').split(',')
-            server_info['players'] = [{
-                'name': x[:x.find(' ')]
-            } for x in players_list]
-        return server_info
-
     def get_server_info(self):
-        command = f"{BASE_DIR}/venv/bin/mcstatus {self.ip}:{self.port} json"
-        server_info_json = json.loads(do_the_linux_command(command))
-        server_is_online = server_info_json['online']
-        server_is_send_bad_response = 'player_count' not in server_info_json and 'players' not in server_info_json
-        if server_is_online and server_is_send_bad_response:
-            server_info_json = self.parse_server_info()
-        self.server_info = server_info_json
+        server = JavaServer.lookup(f"{self.ip}:{self.port}")
+        try:
+            status = server.status()
+            self.server_info = {
+                'version': status.version.name,
+                'player_max': status.players.max,
+                'online': True,
+                'players': [x.name for x in status.players.sample],
+            }
+        except ConnectionRefusedError:
+            self.server_info = {
+                'online': False
+            }
 
     def get_server_info_str(self):
         if not self.server_info['online']:
-            result = f"Майн {self.get_version()} - остановлен ⛔"
-        else:
+            return f"Майн {self.get_version()} - остановлен ⛔"
 
-            version = self.server_info.get('version', self.names[0])
+        version = self.server_info['version']
+        player_max = self.server_info['player_max']
+        player_range = f"({len(self.server_info['players'])}/{player_max})"
 
-            player_count = self.server_info.get('player_count', 0)
-            player_max = self.server_info.get('player_max', None)
+        result = f"Майн {version} - запущен ✅ {player_range} - {self.ip}:{self.port}"
 
-            player_range = ''
-            if player_max:
-                player_range = f"({player_count}/{player_max})"
-
-            result = f"Майн {version} - запущен ✅ {player_range} - {self.ip}:{self.port}"
-
-            players = self.server_info.get('players', None)
-            if players:
-                players_list = [x['name'] for x in players]
-                players_list.sort(key=str.lower)
-                players_str = ", ".join(players_list)
-                result += f"\nИгроки: {players_str}"
-            if self.map_url:
-                result += f"\nКарта - {self.map_url}"
+        players = self.server_info['players']
+        if players:
+            players.sort(key=str.lower)
+            players_str = ", ".join(players)
+            result += f"\nИгроки: {players_str}"
+        if self.map_url:
+            result += f"\nКарта - {self.map_url}"
         return result
 
 
@@ -142,10 +107,9 @@ minecraft_servers = [
             'ip': MAIN_DOMAIN,
             'port': 25565,
             'event': None,
-            'delay': 30,
-            'names': ['1.19.2', "1.19"],
-            # 'map_url': f"http://{MAIN_DOMAIN}:8123/?worldname=WTTF#",
-            'auto_off': False
+            'delay': 60,
+            'names': ['1.20.1', "1.20"],
+            # 'map_url': f"http://{MAIN_DOMAIN}:8123/?worldname=world#",
         }
     ),
 ]
