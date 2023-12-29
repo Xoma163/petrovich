@@ -115,7 +115,7 @@ class YoutubeVideo(SubscribeService):
         if r.status_code != 200:
             raise PWarning("Не нашёл такого канала")
         bsop = BeautifulSoup(r.content, 'lxml')
-        if bsop.find("h2").text.startswith("API Quota Exceeded"):
+        if bsop.find("h2") and bsop.find("h2").text.startswith("API Quota Exceeded"):
             raise PError("API Quota Exceeded")
         videos = [x.find('yt:videoid').text for x in bsop.find_all('entry')]
 
