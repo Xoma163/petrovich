@@ -34,6 +34,9 @@ class Command(BaseCommand):
     }
 
     def handle(self, *args, **kwargs):
+        logger.debug({
+            "message": "handle"
+        })
         subs = Subscribe.objects.all()
         groupped_subs = groupby(subs.order_by("channel_id"), lambda x: (x.service, x.channel_id, x.playlist_id))
 
@@ -48,8 +51,15 @@ class Command(BaseCommand):
                     "message": "Ошибка в проверке/отправке подписки",
                     "notify_enitity": subs[0].__dict__,
                 })
+        logger.debug({
+            "message": "end handle"
+        })
 
     def check_video(self, subs, sub_class, media_method):
+        logger.debug({
+            "message": "check_video",
+            "notify_enitity": subs[0].__dict__,
+        })
         if len(set(x.last_videos_id[-1] for x in subs)) == 1:
             api = sub_class()
             try:
@@ -72,9 +82,17 @@ class Command(BaseCommand):
         else:
             for sub in subs:
                 self.check_video([sub], sub_class, media_method)
+        logger.debug({
+            "message": "end check_video",
+            "notify_enitity": subs[0].__dict__,
+        })
 
     @staticmethod
     def send_notify(sub, title, link, media_message: ResponseMessageItem):
+        logger.debug({
+            "message": "send_notify",
+            "notify_enitity": link,
+        })
         bot = TgBot()
 
         if sub.playlist_title:
@@ -92,9 +110,17 @@ class Command(BaseCommand):
         )
         bot.send_response_message_item(rmi)
         logger.info(f"Отправил уведомление по подписке с id={sub.pk}")
+        logger.debug({
+            "message": "end send_notify",
+            "notify_enitity": link,
+        })
 
     @staticmethod
     def get_media_result_msg(link, method) -> ResponseMessageItem:
+        logger.debug({
+            "message": "get_media_result_msg",
+            "notify_enitity": link,
+        })
         bot = TgBot()
         event = Event()
         event.message = Message()
@@ -102,9 +128,17 @@ class Command(BaseCommand):
         media_command.has_command_name = True
         att, title = getattr(media_command, method)(link)
         rmi = ResponseMessageItem(text=title, attachments=att)
+        logger.debug({
+            "message": "end get_media_result_msg",
+            "notify_enitity": link,
+        })
         return rmi
 
     def send_file_or_video(self, subs, ids, urls, titles, method):
+        logger.debug({
+            "message": "send_file_or_video",
+            "notify_enitity": subs[0].__dict__,
+        })
         rm = ResponseMessage()
         for i, url in enumerate(urls):
             media_message = self.get_media_result_msg(url, method)
@@ -126,8 +160,18 @@ class Command(BaseCommand):
             sub.last_videos_id = sub.last_videos_id + ids
             sub.save()
 
+        logger.debug({
+            "message": "end send_file_or_video",
+            "notify_enitity": subs[0].__dict__,
+        })
+
     @staticmethod
     def _save_to_plex(cache, show_name, series_name):
+        logger.debug({
+            "message": "_save_to_plex",
+            "notify_enitity": show_name,
+        })
+
         path = env.str('PLEX_SAVE_PATH')
         show_name = show_name.replace(" |", '.').replace("|", ".")
         series_name = series_name.replace(" |", '.').replace("|", ".")
@@ -136,3 +180,8 @@ class Command(BaseCommand):
         if not os.path.exists(show_folder):
             os.makedirs(show_folder)
         shutil.copyfile(cache.video.path, os.path.join(str(show_folder), f"{series_name}.mp4"))
+
+        logger.debug({
+            "message": "end _save_to_plex",
+            "notify_enitity": show_name,
+        })
