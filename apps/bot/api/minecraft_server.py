@@ -1,14 +1,10 @@
-from mcrcon import MCRcon
 from mcstatus import JavaServer
 
-from apps.bot.classes.const.exceptions import PWarning
-from apps.bot.classes.messages.response_message import ResponseMessageItem
 from apps.bot.utils.do_the_linux_command import do_the_linux_command
 from apps.bot.utils.utils import check_command_time
-from petrovich.settings import env, MAIN_DOMAIN
 
 
-class Minecraft:
+class MinecraftServer:
 
     def __init__(self, ip, port=25565, event=None, delay=None, names=None, map_url=None):
         self.ip = ip
@@ -27,45 +23,13 @@ class Minecraft:
     def _get_service_name(self):
         return f'minecraft_{self.get_version()}'
 
-    # ToDo: hardcode
-    @staticmethod
-    def send_rcon(command):
-        try:
-            with MCRcon(
-                    env.str("MINECRAFT_1_12_2_IP"),
-                    env.str("MINECRAFT_1_12_2_RCON_PASSWORD")
-            ) as mcr:
-                resp = mcr.command(command)
-                if resp:
-                    return resp
-                else:
-                    return False
-        except Exception:
-            return False
-
-    def _prepare_message(self, action) -> ResponseMessageItem:
-        translator = {
-            'start': 'Стартуем',
-            'stop': "Финишируем"
-        }
-
-        answer = f"{translator[action]} майн {self.get_version()}!" \
-                 f"\nИнициатор - {self.event.sender}"
-        return ResponseMessageItem(text=answer)
-
-    def _start_local(self):
-        do_the_linux_command(f'sudo systemctl start {self._get_service_name()}')
-
     def start(self):
         check_command_time(self._get_service_name(), self.delay)
-        self._start_local()
-
-    def _stop_local(self):
-        do_the_linux_command(f'sudo systemctl stop {self._get_service_name()}')
+        do_the_linux_command(f'sudo systemctl start {self._get_service_name()}')
 
     def stop(self):
         check_command_time(self._get_service_name(), self.delay)
-        self._stop_local()
+        do_the_linux_command(f'sudo systemctl stop {self._get_service_name()}')
 
     def get_server_info(self):
         server = JavaServer.lookup(f"{self.ip}:{self.port}")
@@ -100,26 +64,3 @@ class Minecraft:
         if self.map_url:
             result += f"\nКарта - {self.map_url}"
         return result
-
-
-minecraft_servers = [
-    Minecraft(
-        **{
-            'ip': MAIN_DOMAIN,
-            'port': 25565,
-            'event': None,
-            'delay': 60,
-            'names': ['1.20.1', "1.20"],
-            # 'map_url': f"http://{MAIN_DOMAIN}:8123/?worldname=world#",
-        }
-    ),
-]
-
-
-def get_minecraft_version_by_args(version):
-    if version is None:
-        return minecraft_servers[0]
-    for minecraft_server in minecraft_servers:
-        if version in minecraft_server.names:
-            return minecraft_server
-    raise PWarning("Я не знаю такой версии")

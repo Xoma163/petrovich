@@ -1,9 +1,10 @@
-from apps.bot.api.minecraft import get_minecraft_version_by_args
-from apps.bot.api.minecraft import minecraft_servers
+from apps.bot.api.minecraft_server import MinecraftServer
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role
+from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.help_text import HelpText, HelpTextItem
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
+from petrovich.settings import MAIN_DOMAIN
 
 
 class Minecraft(Command):
@@ -15,13 +16,26 @@ class Minecraft(Command):
         help_texts=[
             HelpTextItem(Role.MINECRAFT, [
                 "- статус по всем серверам",
-                "старт [версия=1.19.2] - стартует сервер майнкрафта",
-                "стоп [версия=1.19.2] - стопит сервер майнкрафта"
+                "старт [версия=1.20.1] - стартует сервер майнкрафта",
+                "стоп [версия=1.20.1] - стопит сервер майнкрафта"
             ])
         ]
     )
 
     access = Role.MINECRAFT
+
+    servers = [
+        MinecraftServer(
+            **{
+                'ip': MAIN_DOMAIN,
+                'port': 25565,
+                'event': None,
+                'delay': 60,
+                'names': ['1.20.1', "1.20"],
+                # 'map_url': f"http://{MAIN_DOMAIN}:8123/?worldname=world#",
+            }
+        ),
+    ]
 
     def start(self) -> ResponseMessage:
         if self.event.message.args:
@@ -40,9 +54,17 @@ class Minecraft(Command):
         rmi = method()
         return ResponseMessage(rmi)
 
+    def _get_minecraft_server_by_version(self, version):
+        if version is None:
+            return self.servers[0]
+        for minecraft_server in self.servers:
+            if version in minecraft_server.names:
+                return minecraft_server
+        raise PWarning("Я не знаю такой версии")
+
     def get_minecraft_server(self):
         version = self.event.message.args[1] if len(self.event.message.args) > 1 else None
-        minecraft_server = get_minecraft_version_by_args(version)
+        minecraft_server = self._get_minecraft_server_by_version(version)
         minecraft_server.event = self.event
         return minecraft_server
 
@@ -64,10 +86,9 @@ class Minecraft(Command):
         answer = f"Финишируем майн {version}"
         return ResponseMessageItem(text=answer)
 
-    @staticmethod
-    def menu_status() -> ResponseMessageItem:
+    def menu_status(self) -> ResponseMessageItem:
         minecraft_result = ""
-        for server in minecraft_servers:
+        for server in self.servers:
             server.get_server_info()
             result = server.get_server_info_str()
             minecraft_result += f"{result}\n\n"
