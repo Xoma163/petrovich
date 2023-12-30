@@ -65,6 +65,7 @@ class Minecraft:
 
     def stop(self):
         check_command_time(self._get_service_name(), self.delay)
+        self._stop_local()
 
     def get_server_info(self):
         server = JavaServer.lookup(f"{self.ip}:{self.port}")

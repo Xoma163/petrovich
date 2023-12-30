@@ -17,7 +17,7 @@ class APIHandler:
 
     def _do(self, url, method, params=None, **kwargs) -> Response:
         log = kwargs.pop('log', True)
-        r: Response = getattr(requests, method)(url, params, **kwargs)
+        r: Response = getattr(requests, method)(url, params=params, **kwargs)
 
         if not log:
             return r
