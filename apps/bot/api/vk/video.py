@@ -1,11 +1,12 @@
 import json
 import re
-from typing import Tuple, Optional, List
+from typing import Tuple, Optional, List, Union
 from urllib.parse import urlparse
 
 import requests
 import xmltodict
 from bs4 import BeautifulSoup
+from requests import Response
 
 from apps.bot.api.subscribe_service import SubscribeService
 from apps.bot.classes.const.exceptions import PWarning
@@ -52,7 +53,7 @@ class VKVideo(SubscribeService):
         player_url = bs4.find("meta", property="og:video").attrs['content']
         return player_url
 
-    def _get_content(self, player_url: str) -> Tuple[Optional[requests.Response], Optional[requests.Response]]:
+    def _get_content(self, player_url: str) -> Tuple[Optional[Union[bytes, Response]], Optional[Response]]:
         r = requests.get(player_url, headers=self.headers)
         js_code = re.findall('var playerParams = (\{.*\})', r.text)[0]
         info = json.loads(js_code)
