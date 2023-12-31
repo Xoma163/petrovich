@@ -6,7 +6,7 @@ from apps.bot.utils.do_the_linux_command import do_the_linux_command
 
 class VideoDownloader:
     @staticmethod
-    def download(m3u8_url: str, threads: int = 1):
+    def download(m3u8_url: str, threads: int = 1) -> bytes:
         tmp_video_file = NamedTemporaryFile().name
         try:
             do_the_linux_command(f"yt-dlp -N {threads} -o {tmp_video_file} {m3u8_url}")

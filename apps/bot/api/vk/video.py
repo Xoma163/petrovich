@@ -36,7 +36,7 @@ class VKVideo(SubscribeService):
 
     def get_video(self, url) -> bytes:
         player_url = self._get_player_url(url)
-        video_content, audio_content = self._get_download_urls(player_url)
+        video_content, audio_content = self._get_content(player_url)
         if audio_content is not None:
             avm = AudioVideoMuxer()
             return avm.mux(video_content, audio_content)
@@ -52,7 +52,7 @@ class VKVideo(SubscribeService):
         player_url = bs4.find("meta", property="og:video").attrs['content']
         return player_url
 
-    def _get_download_urls(self, player_url: str) -> Tuple[bytes, Optional[bytes]]:
+    def _get_content(self, player_url: str) -> Tuple[Optional[requests.Response], Optional[requests.Response]]:
         r = requests.get(player_url, headers=self.headers)
         js_code = re.findall('var playerParams = (\{.*\})', r.text)[0]
         info = json.loads(js_code)
@@ -67,7 +67,7 @@ class VKVideo(SubscribeService):
         else:
             return self._get_video_hls(hls)
 
-    def _get_video_audio_dash(self, dash_webm_url) -> Tuple[bytes, bytes]:
+    def _get_video_audio_dash(self, dash_webm_url) -> Tuple[requests.Response, requests.Response]:
         parsed_url = urlparse(dash_webm_url)
 
         r = requests.get(dash_webm_url, headers=self.headers).content
@@ -83,8 +83,8 @@ class VKVideo(SubscribeService):
         audio_url = f"{parsed_url.scheme}://{parsed_url.hostname}/{audio_representations[-1]['BaseURL']}"
         video_url = f"{parsed_url.scheme}://{parsed_url.hostname}/{video_representations[-1]['BaseURL']}"
 
-        video_content = requests.get(video_url, headers=self.headers).content
-        audio_content = requests.get(audio_url, headers=self.headers).content
+        video_content = requests.get(video_url, headers=self.headers, stream=True)
+        audio_content = requests.get(audio_url, headers=self.headers, stream=True)
         return video_content, audio_content
 
     @staticmethod
@@ -131,7 +131,6 @@ class VKVideo(SubscribeService):
             playlist_id = None
             playlist_title = None
         last_videos_id = list(reversed([x.find("a", {"class": "VideoCard__title"}).attrs['data-id'] for x in videos]))
-
 
         return {
             'channel_id': channel_id,
