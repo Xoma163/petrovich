@@ -38,6 +38,7 @@ class Bot(Thread):
     LINK_TAG = None
     STROKE_TAG = None
     UNDERLINE_TAG = None
+    QUOTE_TAG = None
 
     def __init__(self, platform, **kwargs):
         Thread.__init__(self)
@@ -526,6 +527,13 @@ class Bot(Thread):
     def get_spoiler_text(cls, text: str) -> str:
         """
         Спойлер-текст
+        """
+        return text
+
+    @classmethod
+    def get_quote_text(cls, text: str) -> str:
+        """
+        Цитата текст
         """
         return text
 

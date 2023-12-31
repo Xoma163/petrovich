@@ -11,4 +11,5 @@ class Hi(Command):
 
     def start(self) -> ResponseMessage:
         answer = random_event(self.full_names)
+        answer = self.bot.get_quote_text(answer)
         return ResponseMessage(ResponseMessageItem(text=answer))

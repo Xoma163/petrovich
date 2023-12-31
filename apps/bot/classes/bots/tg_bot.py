@@ -50,6 +50,7 @@ class TgBot(Bot):
     LINK_TAG = "a"
     STROKE_TAG = "s"
     UNDERLINE_TAG = "u"
+    QUOTE_TAG = "blockquote"
 
     def __init__(self):
         Bot.__init__(self, Platform.TG)
@@ -663,6 +664,13 @@ class TgBot(Bot):
         """
         Спойлер-текст
         """
-        return f'<{cls.SPOILER_TAG}">{text}</{cls.SPOILER_TAG}>'
+        return f'<{cls.SPOILER_TAG}>{text}</{cls.SPOILER_TAG}>'
+
+    @classmethod
+    def get_quote_text(cls, text: str) -> str:
+        """
+        Цитата текст
+        """
+        return f'<{cls.QUOTE_TAG}>{text}</{cls.QUOTE_TAG}>'
 
     # END EXTRA

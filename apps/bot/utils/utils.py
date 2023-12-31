@@ -419,7 +419,9 @@ def markdown_to_html(text: str, bot) -> str:
         text = replace_tag(text, '**', '**', f"<{bot.BOLD_TAG}>", f"</{bot.BOLD_TAG}>")
     if bot.ITALIC_TAG:
         text = replace_tag(text, '*', '*', f"<{bot.ITALIC_TAG}>", f"</{bot.ITALIC_TAG}>")
-    if bot.CODE_TAG:
+    if bot.QUOTE_TAG:
+        text = replace_tag(text, '\n&gt;', '\n', f"\n<{bot.QUOTE_TAG}>", f"</{bot.QUOTE_TAG}>\n")
+    elif bot.CODE_TAG:
         text = replace_tag(text, '\n&gt;', '\n', f"\n<{bot.CODE_TAG}>", f"</{bot.CODE_TAG}>\n")
     if bot.LINK_TAG:
         text = replace_markdown_links(text, bot)
