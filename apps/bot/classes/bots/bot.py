@@ -472,7 +472,7 @@ class Bot(Thread):
         Получение меншона пользователя
         """
 
-    def delete_message(self, peer_id, message_id):
+    def delete_messages(self, peer_id, message_id):
         """
         Удаление сообщения
         """

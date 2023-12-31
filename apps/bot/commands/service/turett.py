@@ -20,10 +20,11 @@ class Turett(Command):
     NOT_MENTIONED_CHANCE = 0.3
 
     # WEIGHTS
-    STICKER_CHANCE = 15
-    TEXT_CHANCE = 15
-    GPT_CHANCE = 35
-    GPT_WTF_CHANCE = 35
+    STICKER_CHANCE = 10
+    TEXT_CHANCE = 10
+    GPT_CHANCE = 30
+    GPT_WTF_CHANCE = 30
+    REACTION_CHANCE = 20
 
     # TEXT SETTINGS
     TURETT_WORDS = [
@@ -82,11 +83,11 @@ class Turett(Command):
         return ResponseMessage(rmi)
 
     def handle_tg_event(self) -> ResponseMessageItem:
-        events = [self.get_text, self.get_sticker, self.get_gpt_text, self.get_gpt_wtf_text]
-        weights = [self.TEXT_CHANCE, self.STICKER_CHANCE, self.GPT_CHANCE, self.GPT_WTF_CHANCE]
+        events = [self.get_text, self.get_sticker, self.get_gpt_text, self.get_gpt_wtf_text, self.set_reaction]
+        weights = [self.TEXT_CHANCE, self.STICKER_CHANCE, self.GPT_CHANCE, self.GPT_WTF_CHANCE, self.REACTION_CHANCE]
         if len(self.event.message.clear_case) < self.MIN_TEXT_LEN and self.event.sender.check_role(Role.TRUSTED):
-            events = [self.get_text, self.get_sticker, self.get_gpt_wtf_text]
-            weights = [self.TEXT_CHANCE, self.STICKER_CHANCE, self.GPT_WTF_CHANCE]
+            events = [self.get_text, self.get_sticker, self.get_gpt_wtf_text, self.set_reaction]
+            weights = [self.TEXT_CHANCE, self.STICKER_CHANCE, self.GPT_WTF_CHANCE, self.REACTION_CHANCE]
         method = random_event(events, weights)
         return method()
 
@@ -137,3 +138,11 @@ class Turett(Command):
         chat_gpt.bot = self.bot
         chat_gpt.event = self.event
         return chat_gpt.text_chat(messages).messages[0]
+
+    def set_reaction(self):
+        self.event: TgEvent
+        self.bot: TgBot
+        reactions = ["💩", "🤡"]
+        reaction = random_event(reactions)
+        self.bot.set_message_reaction(self.event.chat.chat_id, self.event.message.id, reaction)
+        raise PSkip()

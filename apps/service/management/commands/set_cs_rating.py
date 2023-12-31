@@ -47,12 +47,12 @@ class Command(BaseCommand):
             new_chat_title = f"{chat_title} | {mmr} MMR"
 
         message_id = tg_bot._send_text({'chat_id': chat.chat_id, 'caption': 'test'})['result']['message_id']
-        tg_bot.delete_message(chat.chat_id, message_id)
+        tg_bot.delete_messages(chat.chat_id, message_id)
         mc = MessagesCache(int(chat.chat_id))
         data = mc.get_messages()
         tg_bot.set_chat_title(chat.chat_id, new_chat_title)
         if message_id + 1 not in data:
-            tg_bot.delete_message(chat.chat_id, message_id + 1)
+            tg_bot.delete_messages(chat.chat_id, message_id + 1)
 
     def add_arguments(self, parser):
         parser.add_argument('chat_id', nargs='+', type=str, help='chat_id')

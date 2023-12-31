@@ -354,7 +354,7 @@ def send_message_session_or_edit(bot, event, session, rmi: ResponseMessageItem, 
         message_id = br.response['result']['message_id']
         session.message_id = message_id
         session.save()
-        bot.delete_message(event.peer_id, old_msg_id)
+        bot.delete_messages(event.peer_id, old_msg_id)
     else:
         rmi.message_id = session.message_id
         br = bot.send_response_message_item(rmi)
@@ -365,7 +365,7 @@ def send_message_session_or_edit(bot, event, session, rmi: ResponseMessageItem, 
         message_id = br.response['result']['message_id']
         session.message_id = message_id
         session.save()
-    bot.delete_message(event.peer_id, event.message.id)
+    bot.delete_messages(event.peer_id, event.message.id)
 
 
 def prepend_symbols(string: str, symbol: str, n: int) -> str:

@@ -1,6 +1,7 @@
 import json
 import threading
 from copy import copy
+from typing import Union, List
 
 from numpy import inf
 
@@ -510,7 +511,7 @@ class TgBot(Bot):
             'inline_keyboard': keyboard
         }
 
-    def set_activity(self, peer_id, activity: ActivitiesEnum):
+    def set_activity(self, chat_id: Union[int, str], activity: ActivitiesEnum):
         """
         Метод позволяет указать пользователю, что бот набирает сообщение или записывает голосовое
         Используется при длительном выполнении команд, чтобы был фидбек пользователю, что его запрос принят
@@ -523,7 +524,7 @@ class TgBot(Bot):
             args=(
                 'sendChatAction',
                 {
-                    'chat_id': peer_id,
+                    'chat_id': chat_id,
                     'action': tg_activity
                 }
             )
@@ -536,11 +537,16 @@ class TgBot(Bot):
         user = profile.get_tg_user()
         return self.get_formatted_url(str(profile), f"tg://user?id={user.user_id}")
 
-    def delete_message(self, peer_id, message_id) -> dict:
+    def delete_messages(self, chat_id: Union[int, str], message_ids: Union[List[int], int]) -> dict:
         """
         Удаление одного сообщения
         """
-        r = self.requests.get('deleteMessage', params={'chat_id': peer_id, 'message_id': message_id}).json()
+        if not isinstance(message_ids, list):
+            message_ids = [message_ids]
+        r = self.requests.get(
+            'deleteMessages',
+            params={'chat_id': chat_id, 'message_ids': json.dumps(message_ids)}
+        ).json()
         return r
 
     def update_help_texts(self):
@@ -560,7 +566,7 @@ class TgBot(Bot):
         r = self.requests.get('getStickerSet', json={'name': name}).json()
         return r['result']['stickers']
 
-    def set_chat_admin_title(self, chat_id, user_id, title) -> dict:
+    def set_chat_admin_title(self, chat_id: Union[int, str], user_id, title) -> dict:
         r = self.requests.get('setChatAdministratorCustomTitle', json={
             'chat_id': chat_id,
             'user_id': user_id,
@@ -568,7 +574,7 @@ class TgBot(Bot):
         }).json()
         return r
 
-    def promote_chat_member(self, chat_id, user_id) -> dict:
+    def promote_chat_member(self, chat_id: Union[int, str], user_id) -> dict:
         r = self.requests.get('promoteChatMember', json={
             'chat_id': chat_id,
             'user_id': user_id,
@@ -577,13 +583,13 @@ class TgBot(Bot):
         }).json()
         return r
 
-    def get_chat(self, chat_id) -> dict:
+    def get_chat(self, chat_id: Union[int, str]) -> dict:
         r = self.requests.get('getChat', json={
             'chat_id': chat_id
         }).json()
         return r
 
-    def set_chat_title(self, chat_id, title) -> dict:
+    def set_chat_title(self, chat_id: Union[int, str], title) -> dict:
         if len(title) > 128:
             raise PWarning("Максимальная длина названия чата - 128 символов")
         r = self.requests.get('setChatTitle', json={
@@ -592,12 +598,26 @@ class TgBot(Bot):
         }).json()
         return r
 
+    def set_message_reaction(
+            self, chat_id: Union[int, str], message_id: int, reactions: Union[list, List[str]], is_big: bool = False
+    ):
+        if not isinstance(reactions, list):
+            reactions = [reactions]
+        reactions = [{"type": "emoji", "emoji": x} for x in reactions]
+        r = self.requests.get('setMessageReaction', json={
+            'chat_id': chat_id,
+            'message_id': message_id,
+            'reaction': json.dumps(reactions),
+            'is_big': is_big
+        }).json()
+        return r
+
     def get_file_id(self, attachment):
         uploading_chat = Chat.objects.get(pk=env.str("TG_PHOTO_UPLOADING_CHAT_PK"))
         rmi = ResponseMessageItem(attachments=[attachment], peer_id=uploading_chat.chat_id)
         br = self.send_response_message_item(rmi)
         r = br.response
-        self.delete_message(uploading_chat.chat_id, r['result']['message_id'])
+        self.delete_messages(uploading_chat.chat_id, r['result']['message_id'])
 
         try:
             att = r['result'][attachment.type]
