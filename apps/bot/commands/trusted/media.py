@@ -92,6 +92,7 @@ class Media(Command):
         ]
     )
 
+    access = Role.TRUSTED
     platforms = [Platform.TG]
     attachments = [LinkAttachment]
 

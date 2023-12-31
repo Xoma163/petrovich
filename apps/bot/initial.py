@@ -6,6 +6,7 @@ from django.contrib.auth.models import Group
 
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Platform, Role
+from apps.bot.utils.utils import get_flat_list
 from petrovich.settings import BASE_DIR
 
 
@@ -67,24 +68,60 @@ COMMANDS = generate_commands()
 HELP_TEXTS = generate_help_text()
 
 
-def get_text_for_documentation(commands):
-    nl = '\n'
-    left_quote_new = '\['
-    right_quote_new = '\]'
+def get_text_for_documentation():
+    NL = '\n'
+    LEFT_QUOTE_NEW = '\['
+    RIGHT_QUOTE_NEW = '\]'
+    BR = "<br>"
+    BR_NL = f"{BR}\n"
+    INS = "<ins>"
+    INS_END = "</ins>"
+    BOLD = "**"
+    ITALIC = "_"
 
-    doc_commands = sorted(
-        [x for x in commands if x.access == Role.USER and x.name and x.suggest_for_similar and x.help_text],
-        key=lambda y: y.name)
+    allowed_roles = {
+        Role.USER: "всех пользователей",
+        Role.MINECRAFT: "майнкрафтеров",
+        Role.TRUSTED: "доверенных пользователей",
+        Role.MODERATOR: "модераторов",
+        Role.ADMIN: "админа"
+    }
+
     documentation = []
-    for doc_command in doc_commands:
-        command_text = f"**/{doc_command.name.capitalize()}** - {doc_command.help_text}\n"
-        if doc_command.help_texts:
-            command_text = command_text + "<br>\n" + "<br>\n".join(
-                [
-                    f"**/{doc_command.name.capitalize()}** "
-                    f"{x.replace(nl, '<br>').replace('[', left_quote_new).replace(']', right_quote_new)}{nl}"
-                    for x in doc_command.help_texts
-                ]
-            )
-        documentation.append(command_text)
-    return "\n".join(documentation)
+    for role in allowed_roles:
+        commands = filter(
+            lambda x: x.access == role and x.name and x.suggest_for_similar and x.help_text and not x.hidden,
+            COMMANDS
+        )
+        commands = sorted(commands, key=lambda y: y.name)
+        documentation.append(f"### Команды {allowed_roles[role]}{NL}")
+        for cmd in commands:
+            cmd: Command
+            command_text = f"{BOLD}{INS}{cmd.name.capitalize()}{INS_END}{BOLD} - {cmd.help_text.commands_text}{NL}{BR_NL}"
+            if not cmd.help_text.items:
+                continue
+            help_texts = get_flat_list([
+                cmd.help_text.items.get(_role).texts for _role in cmd.help_text.items if _role in allowed_roles
+            ])
+            help_text_items = []
+            for help_text in help_texts:
+                args, description = help_text.split('- ', 1)
+                if args:
+                    command = f"{BOLD}/{cmd.name.capitalize()} {args.strip()}{BOLD}"
+                else:
+                    command = f"{BOLD}/{cmd.name.capitalize()}{BOLD}"
+
+                help_text_item = f"{command} - {description}{NL}"
+
+                help_text_item = help_text_item \
+                    .replace('[', LEFT_QUOTE_NEW) \
+                    .replace(']', RIGHT_QUOTE_NEW)
+
+                help_text_items.append(help_text_item)
+
+            command_text += BR_NL.join([x for x in help_text_items])
+            if cmd.help_text.extra_text:
+                command_text += f"{BR_NL}{ITALIC}{cmd.help_text.extra_text.replace(NL + NL, NL).replace(NL, BR_NL)}{ITALIC}{NL}"
+            documentation.append(command_text)
+    documentation = "\n".join(documentation)
+    return documentation
