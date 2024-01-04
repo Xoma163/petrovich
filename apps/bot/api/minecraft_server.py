@@ -39,7 +39,7 @@ class MinecraftServer:
                 'version': status.version.name,
                 'player_max': status.players.max,
                 'online': True,
-                'players': [x.name for x in status.players.sample],
+                'players': [x.name for x in status.players.sample] if status.players.sample else [],
             }
         except ConnectionRefusedError:
             self.server_info = {
