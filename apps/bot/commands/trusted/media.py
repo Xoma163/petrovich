@@ -319,6 +319,7 @@ class Media(Command):
             attachment = self.bot.get_photo_attachment(data['download_url'], peer_id=self.event.peer_id)
         elif data['content_type'] == i_api.CONTENT_TYPE_VIDEO:
             attachment = self.bot.get_video_attachment(data['download_url'], peer_id=self.event.peer_id)
+            # attachment.download_content(use_proxy=True)
         else:
             raise PWarning("Ссылка на инстаграмм не является видео/фото")
         return [attachment], data['caption']

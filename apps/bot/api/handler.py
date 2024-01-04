@@ -9,15 +9,15 @@ class APIHandler:
     def __init__(self):
         self._logger = logging.getLogger('api')
 
-    def get(self, url, params=None, **kwargs) -> Response:
-        return self._do(url, "get", params, **kwargs)
+    def get(self, url, *args, **kwargs) -> Response:
+        return self._do(url, "get", *args, **kwargs)
 
-    def post(self, url, params=None, **kwargs) -> Response:
-        return self._do(url, "post", params, **kwargs)
+    def post(self, url, *args, **kwargs) -> Response:
+        return self._do(url, "post", *args, **kwargs)
 
-    def _do(self, url, method, params=None, **kwargs) -> Response:
+    def _do(self, url, method, *args, **kwargs) -> Response:
         log = kwargs.pop('log', True)
-        r: Response = getattr(requests, method)(url, params=params, **kwargs)
+        r: Response = getattr(requests, method)(url, *args, **kwargs)
 
         if not log:
             return r
