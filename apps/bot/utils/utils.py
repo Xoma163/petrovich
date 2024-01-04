@@ -520,7 +520,7 @@ def retry(times, exceptions, sleep_time=0):
                     return func(*args, **kwargs)
                 except exceptions:
                     attempt += 1
-                    if sleep:
+                    if sleep_time:
                         time.sleep(sleep_time)
             return func(*args, **kwargs)
 
