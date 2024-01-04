@@ -2,6 +2,7 @@ import io
 import os
 import random
 import re
+import time
 from datetime import datetime
 from io import BytesIO
 from typing import List, Optional
@@ -498,3 +499,31 @@ def split_text_by_n_symbols(text: str, n: int, split_on: Optional[List[str]] = N
             break
     texts.append(text)
     return texts
+
+
+def retry(times, exceptions, sleep_time=0):
+    """
+    Retry Decorator
+    Retries the wrapped function/method `times` times if the exceptions listed
+    in ``exceptions`` are thrown
+    :param times: The number of times to repeat the wrapped function/method
+    :type times: Int
+    :param Exceptions: Lists of exceptions that trigger a retry attempt
+    :type Exceptions: Tuple of Exceptions
+    """
+
+    def decorator(func):
+        def newfn(*args, **kwargs):
+            attempt = 0
+            while attempt < times:
+                try:
+                    return func(*args, **kwargs)
+                except exceptions:
+                    attempt += 1
+                    if sleep:
+                        time.sleep(sleep_time)
+            return func(*args, **kwargs)
+
+        return newfn
+
+    return decorator

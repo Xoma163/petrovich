@@ -30,7 +30,7 @@ from apps.bot.classes.help_text import HelpText, HelpTextItem
 from apps.bot.classes.messages.attachments.link import LinkAttachment
 from apps.bot.classes.messages.response_message import ResponseMessageItem, ResponseMessage
 from apps.bot.commands.trim_video import TrimVideo
-from apps.bot.utils.utils import get_urls_from_text, markdown_to_html
+from apps.bot.utils.utils import get_urls_from_text, markdown_to_html, retry
 from apps.bot.utils.video.trimmer import VideoTrimmer
 from apps.service.models import VideoCache
 from petrovich.settings import MAIN_SITE
@@ -203,6 +203,7 @@ class Media(Command):
 
         raise PWarning("Не медиа ссылка")
 
+    @retry(3, Exception, sleep_time=2)
     def get_youtube_video(self, url) -> (list, str):
         if 'audio' in self.event.message.keys:
             return self.get_youtube_audio(url)
@@ -251,6 +252,7 @@ class Media(Command):
                                                   thumb=data['cover_url'], artist=data['artists'], title=data['title'])
         return [audio_att], ""
 
+    @retry(3, Exception, sleep_time=2)
     def get_tiktok_video(self, url) -> (list, str):
         ttd_api = TikTok()
         try:
