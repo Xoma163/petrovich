@@ -131,7 +131,9 @@ class Turett(Command):
         wtf.event = self.event
         messages = wtf.get_conversation(self.WTF_MESSAGES_COUNT, prompt, use_preprompt=True)
 
-        return self._get_gpt_answer(messages)
+        answer = self._get_gpt_answer(messages)
+        answer.reply_to = None
+        return answer
 
     def _get_gpt_answer(self, messages: list) -> ResponseMessageItem:
         chat_gpt = ChatGPT()
