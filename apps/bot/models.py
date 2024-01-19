@@ -67,7 +67,7 @@ class Chat(Platform):
         # auto create settings model
         is_new = self.id is None
         if is_new:
-            cs = ChatSettings.objects.create(thing=self)
+            cs = ChatSettings.objects.create()
             cs.save()
             self.settings = cs
         super(Chat, self).save(*args, **kwargs)
@@ -107,7 +107,7 @@ class Profile(models.Model):
         # auto create settings model
         is_new = self.id is None
         if is_new:
-            us = UserSettings.objects.create(thing=self)
+            us = UserSettings.objects.create()
             us.save()
             self.settings = us
         super(Profile, self).save(*args, **kwargs)
