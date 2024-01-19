@@ -53,14 +53,6 @@ class Chat(Platform):
     # Настройки
     settings = models.OneToOneField(ChatSettings, verbose_name="Настройки", on_delete=models.CASCADE, null=True)
 
-    need_reaction = models.BooleanField('Реагировать на неверные команды в конфе', default=True)
-    mentioning = models.BooleanField('Работа без упоминания в конфе', default=False)
-    need_meme = models.BooleanField('Слать мемы по точному названию', default=False)
-    recognize_voice = models.BooleanField('Распозновать голосовые автоматически', default=True)
-    need_turett = models.BooleanField('Слать туреттные сообщения', default=False)
-    use_swear = models.BooleanField("Использовать ругательства", default=True)
-    gpt_preprompt = models.TextField("ChatGPT preprompt", default="")
-
     # Для статистики
     kicked = models.BooleanField("Бота кикнули", default=False)
 
@@ -108,10 +100,6 @@ class Profile(models.Model):
 
     # Настройки
     settings = models.OneToOneField(UserSettings, verbose_name="Настройки", on_delete=models.CASCADE, null=True)
-
-    celebrate_bday = models.BooleanField('Поздравлять с Днём рождения', default=True)
-    show_birthday_year = models.BooleanField('Показывать год', default=True)
-    gpt_preprompt = models.TextField("ChatGPT preprompt", default="")
 
     api_token = models.CharField("Токен для API", max_length=100, blank=True)
 
