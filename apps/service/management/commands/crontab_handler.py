@@ -14,9 +14,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         schedule = [
             # Проверка на др
-            ScheduleItem("0 9 * * *", "check_birthday", "46"),
-            # Автоостановка серверов по майну
-            # ScheduleItem("*/30 * * * *", "auto_stop_servers"),
+            ScheduleItem("0 9 * * *", "check_birthday"),
             # Проверка донатов
             ScheduleItem("*/30 * * * *", "check_donations", "46"),
             # Проверка оповещений
