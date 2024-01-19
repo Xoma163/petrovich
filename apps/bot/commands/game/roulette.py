@@ -140,8 +140,6 @@ class Roulette(Command):
         self.gamer = None
 
     def start(self) -> ResponseMessage:
-        gamer = self.event.sender.gamer
-
         if not self.event.message.args:
             rmi = self.menu_play()
             return ResponseMessage(rmi)
