@@ -200,6 +200,6 @@ class Settings(Command):
         self.check_args(2)
         value = self.get_on_or_off(self.event.message.args[1])
         setattr(entity.settings, name, value)
-        self.event.chat.settings.save()
+        entity.settings.save()
         answer = "Сохранил настройку"
         return ResponseMessageItem(text=answer)
