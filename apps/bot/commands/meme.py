@@ -9,6 +9,7 @@ from apps.bot.classes.bots.bot import send_message_to_moderator_chat
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role, Platform, ATTACHMENT_TYPE_TRANSLATOR
 from apps.bot.classes.const.exceptions import PWarning
+from apps.bot.classes.event.event import Event
 from apps.bot.classes.help_text import HelpText, HelpTextItem
 from apps.bot.classes.messages.attachments.gif import GifAttachment
 from apps.bot.classes.messages.attachments.link import LinkAttachment
@@ -65,16 +66,17 @@ class Meme(Command):
 
     platforms = [Platform.TG]
 
-    # @staticmethod
-    # def accept_extra(event: Event) -> bool:
-    #     if event.is_fwd:
-    #         return False
-    #     if event.message and not event.message.mentioned:
-    #         if (event.is_from_chat and event.chat.need_meme and not event.message.mentioned) or event.is_from_user:
-    #             message_is_exact_meme_name = MemeModel.objects.filter(name=event.message.clear, approved=True).exists()
-    #             if message_is_exact_meme_name:
-    #                 return True
-    #     return False
+    @staticmethod
+    def accept_extra(event: Event) -> bool:
+        if event.is_fwd:
+            return False
+        if event.message and not event.message.mentioned:
+            if (
+                    event.is_from_chat and event.sender.settings.need_meme and not event.message.mentioned) or event.is_from_user:
+                message_is_exact_meme_name = MemeModel.objects.filter(name=event.message.clear, approved=True).exists()
+                if message_is_exact_meme_name:
+                    return True
+        return False
 
     def start(self) -> ResponseMessage:
         if self.event.command == self.__class__:

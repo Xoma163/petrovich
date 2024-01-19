@@ -19,10 +19,11 @@ class Uyu(Command):
     )
 
     def start(self) -> ResponseMessage:
-        if self.event.chat and not self.event.chat.use_swear:
-            add_word = "ня"
-        else:
+        if self.event.sender.settings.use_swear:
             add_word = "бля"
+        else:
+            add_word = "ня"
+
         if self.event.message.args_str:
             add_word = self.event.message.args_str
 

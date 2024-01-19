@@ -24,10 +24,11 @@ class Settings(Command):
                 "ругаться (вкл/выкл) - определяет будет ли бот использовать ругательные команды",
             ]),
             HelpTextItem(Role.TRUSTED, [
-                "gpt [конфа] (preprompt) - определяет system prompt для дальнейшего общения с ботом",
-                "gpt [конфа] сбросить - сбрасывает system prompt"
+                "gpt (preprompt) - определяет system prompt для дальнейшего общения с ботом",
+                "gpt сбросить - сбрасывает system prompt"
             ]),
-        ]
+        ],
+        extra_text="Если команда запускается в чате, то общие настройки (поздравления с др, GPT будут указываться для текущего чата"
     )
 
     ON_OFF_TRANSLATOR = {
@@ -84,53 +85,57 @@ class Settings(Command):
         else:
             raise PWarning("Не понял, включить или выключить?")
 
-    def menu_reaction(self) -> ResponseMessageItem:
-        return self.setup_default_chat_setting('need_reaction')
+    # CHAT
 
     def menu_mentioning(self) -> ResponseMessageItem:
         return self.setup_default_chat_setting('mentioning')
 
-    def menu_memes(self) -> ResponseMessageItem:
-        return self.setup_default_chat_setting('need_meme')
-
-    def menu_bd(self) -> ResponseMessageItem:
-        self.check_args(2)
-        value = self.get_on_or_off(self.event.message.args[1])
-        self.event.sender.celebrate_bday = value
-        self.event.sender.save()
-        answer = "Сохранил настройку"
-        return ResponseMessageItem(text=answer)
-
-    def menu_voice(self) -> ResponseMessageItem:
-        return self.setup_default_chat_setting('recognize_voice')
-
     def menu_turett(self) -> ResponseMessageItem:
         return self.setup_default_chat_setting("need_turett")
 
+    # END CHAT
+
+    # PROFILE
+
+    def menu_memes(self) -> ResponseMessageItem:
+        return self.setup_default_profile_setting('need_meme')
+
+    def menu_reaction(self) -> ResponseMessageItem:
+        return self.setup_default_profile_setting('need_reaction')
+
     def menu_swear(self) -> ResponseMessageItem:
-        return self.setup_default_chat_setting("use_swear")
+        return self.setup_default_profile_setting("use_swear")
+
+    def menu_voice(self) -> ResponseMessageItem:
+        return self.setup_default_profile_setting('recognize_voice')
+
+    # END PROFILE
+
+    # COMMON
+
+    def menu_bd(self) -> ResponseMessageItem:
+        if self.event.is_from_chat:
+            return self.setup_default_chat_setting('celebrate_bday')
+        else:
+            return self.setup_default_profile_setting('celebrate_bday')
 
     def menu_gpt(self) -> ResponseMessageItem:
         self.check_sender(Role.TRUSTED)
         self.check_args(2)
-        if self.event.message.args[1] in ["чат", "конфа"]:
-            self.check_conversation()
-            self.check_args(3)
-            if self.event.message.args[2] in ["сбросить", "удалить", "очистить"]:
-                preprompt = ""
-            else:
-                preprompt = " ".join(self.event.message.args_case[2:])
-            self.event.chat.gpt_preprompt = preprompt
-            self.event.chat.save()
+        if self.event.message.args[1] in ["сбросить", "удалить", "очистить", "удалить"]:
+            preprompt = ""
+        else:
+            preprompt = " ".join(self.event.message.args_case[1:])
+
+        if self.event.is_from_chat:
+            settings = self.event.chat.settings
             save_for = "чата"
         else:
-            if self.event.message.args[1] in ["сбросить", "удалить", "очистить"]:
-                preprompt = ""
-            else:
-                preprompt = " ".join(self.event.message.args_case[1:])
-            self.event.sender.gpt_preprompt = preprompt
-            self.event.sender.save()
+            settings = settings.gpt_preprompt = preprompt
             save_for = "пользователя"
+
+        settings.gpt_preprompt = preprompt
+        settings.save()
 
         if not preprompt:
             answer = f'Очистил GPT preprompt для {save_for}'
@@ -138,44 +143,63 @@ class Settings(Command):
             answer = f'Сохранил GPT preprompt для {save_for}: "{preprompt}"'
         return ResponseMessageItem(text=answer)
 
+    # END COMMON
+
     def menu_default(self) -> ResponseMessageItem:
         answer = ""
         if self.event.chat:
             answer = "Настройки чата:\n"
 
-            reaction = self.event.chat.need_reaction
-            need_meme = self.event.chat.need_meme
-            mentioning = self.event.chat.mentioning
-            turett = self.event.chat.need_turett
-            recognize_voice = self.event.chat.recognize_voice
-            use_swear = self.event.chat.use_swear
+            settings = self.event.chat.settings
+            # chat settings
+            mentioning = settings.mentioning
+            need_turett = settings.need_turett
+            # common settings
+            celebrate_bday = settings.celebrate_bday
+            gpt_preprompt = settings.gpt_preprompt if settings.gpt_preprompt else '""'
 
-            answer += f"Реагировать на неправильные команды - {self.TRUE_FALSE_TRANSLATOR[reaction]}\n"
-            answer += f"Присылать мемы по точным названиям - {self.TRUE_FALSE_TRANSLATOR[need_meme]}\n"
             answer += f"Триггериться на команды без упоминания - {self.TRUE_FALSE_TRANSLATOR[mentioning]}\n"
-            answer += f"Автоматически распознавать голосовые - {self.TRUE_FALSE_TRANSLATOR[recognize_voice]}\n"
-            answer += f"Синдром Туретта - {self.TRUE_FALSE_TRANSLATOR[turett]}\n"
-            answer += f"Использовать ругательные команды - {self.TRUE_FALSE_TRANSLATOR[use_swear]}\n"
+            answer += f"Синдром Туретта - {self.TRUE_FALSE_TRANSLATOR[need_turett]}\n"
+            answer += f"Поздравлять с днём рождения - {self.TRUE_FALSE_TRANSLATOR[celebrate_bday]}\n"
 
             if self.event.sender.check_role(Role.TRUSTED):
-                answer += f"GPT preprompt - {self.bot.get_formatted_text_line(self.event.chat.gpt_preprompt)}\n"
+                answer += f"GPT preprompt - {self.bot.get_formatted_text_line(gpt_preprompt)}\n"
 
             answer += "\n"
 
         answer += "Настройки пользователя:\n"
 
-        celebrate_bday = self.event.sender.celebrate_bday
+        settings = self.event.sender.settings
+        # user settings
+        need_meme = settings.need_meme
+        need_reaction = settings.need_reaction
+        use_swear = settings.use_swear
+        recognize_voice = settings.recognize_voice
+        # common settings
+        celebrate_bday = settings.celebrate_bday
+        gpt_preprompt = settings.gpt_preprompt if settings.gpt_preprompt else '""'
+
+        answer += f"Присылать мемы по точным названиям - {self.TRUE_FALSE_TRANSLATOR[need_meme]}\n"
+        answer += f"Реагировать на неправильные команды - {self.TRUE_FALSE_TRANSLATOR[need_reaction]}\n"
+        answer += f"Использовать ругательные команды - {self.TRUE_FALSE_TRANSLATOR[use_swear]}\n"
+        answer += f"Автоматически распознавать голосовые - {self.TRUE_FALSE_TRANSLATOR[recognize_voice]}\n"
         answer += f"Поздравлять с днём рождения - {self.TRUE_FALSE_TRANSLATOR[celebrate_bday]}\n"
+
         if self.event.sender.check_role(Role.TRUSTED):
-            answer += f"GPT preprompt - {self.bot.get_formatted_text_line(self.event.sender.gpt_preprompt)}\n"
+            answer += f"GPT preprompt - {self.bot.get_formatted_text_line(gpt_preprompt)}\n"
         return ResponseMessageItem(text=answer)
 
     def setup_default_chat_setting(self, name) -> ResponseMessageItem:
         self.check_conversation()
-        self.check_args(2)
+        return self._setup_default_settings(name, self.event.chat)
 
+    def setup_default_profile_setting(self, name) -> ResponseMessageItem:
+        return self._setup_default_settings(name, self.event.sender)
+
+    def _setup_default_settings(self, name, entity) -> ResponseMessageItem:
+        self.check_args(2)
         value = self.get_on_or_off(self.event.message.args[1])
-        setattr(self.event.chat, name, value)
-        self.event.chat.save()
+        setattr(entity.settings, name, value)
+        self.event.chat.settings.save()
         answer = "Сохранил настройку"
         return ResponseMessageItem(text=answer)

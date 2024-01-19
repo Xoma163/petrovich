@@ -21,17 +21,42 @@ class Platform(models.Model):
         abstract = True
 
 
+class BaseSettings(models.Model):
+    gpt_preprompt = models.TextField("ChatGPT preprompt", default="")
+
+    class Meta:
+        abstract = True
+
+
+class ChatSettings(BaseSettings):
+    mentioning = models.BooleanField('Работа без упоминания в конфе', default=False)
+    need_turett = models.BooleanField('Слать туреттные сообщения', default=False)
+    celebrate_bday = models.BooleanField('Поздравлять с Днём рождения', default=False)
+
+
+class UserSettings(BaseSettings):
+    need_meme = models.BooleanField('Слать мемы по точному названию', default=False)
+    need_reaction = models.BooleanField('Реагировать на неверные команды', default=True)
+    use_swear = models.BooleanField("Использовать ругательства", default=True)
+    recognize_voice = models.BooleanField('Распозновать голосовые автоматически', default=True)
+
+    celebrate_bday = models.BooleanField('Поздравлять с Днём рождения', default=True)
+    show_birthday_year = models.BooleanField('Показывать год', default=True)
+
+
 class Chat(Platform):
     id = models.AutoField(primary_key=True)
     chat_id = models.CharField('ID чата', max_length=20, default="")
     name = models.CharField('Название', max_length=256, default="", blank=True)
+    is_banned = models.BooleanField('Забанен', default=False)
 
     # Настройки
+    settings = models.OneToOneField(ChatSettings, verbose_name="Настройки", on_delete=models.CASCADE, null=True)
+
     need_reaction = models.BooleanField('Реагировать на неверные команды в конфе', default=True)
     mentioning = models.BooleanField('Работа без упоминания в конфе', default=False)
     need_meme = models.BooleanField('Слать мемы по точному названию', default=False)
     recognize_voice = models.BooleanField('Распозновать голосовые автоматически', default=True)
-    is_banned = models.BooleanField('Забанен', default=False)
     need_turett = models.BooleanField('Слать туреттные сообщения', default=False)
     use_swear = models.BooleanField("Использовать ругательства", default=True)
     gpt_preprompt = models.TextField("ChatGPT preprompt", default="")
@@ -45,6 +70,15 @@ class Chat(Platform):
         ordering = ["name"]
 
         unique_together = ('chat_id', 'platform',)
+
+    def save(self, *args, **kwargs):
+        # auto create settings model
+        is_new = self.id is None
+        if is_new:
+            cs = ChatSettings.objects.create(thing=self)
+            cs.save()
+            self.settings = cs
+        super(Chat, self).save(*args, **kwargs)
 
     def __str__(self):
         return str(self.name) if self.name else f"id:{self.id}"
@@ -73,11 +107,22 @@ class Profile(models.Model):
     chats = models.ManyToManyField(Chat, verbose_name="Чаты", blank=True, related_name="users")
 
     # Настройки
+    settings = models.OneToOneField(UserSettings, verbose_name="Настройки", on_delete=models.CASCADE, null=True)
+
     celebrate_bday = models.BooleanField('Поздравлять с Днём рождения', default=True)
     show_birthday_year = models.BooleanField('Показывать год', default=True)
     gpt_preprompt = models.TextField("ChatGPT preprompt", default="")
 
     api_token = models.CharField("Токен для API", max_length=100, blank=True)
+
+    def save(self, *args, **kwargs):
+        # auto create settings model
+        is_new = self.id is None
+        if is_new:
+            us = UserSettings.objects.create(thing=self)
+            us.save()
+            self.settings = us
+        super(Profile, self).save(*args, **kwargs)
 
     def set_avatar(self, att: PhotoAttachment = None):
         image = att.get_bytes_io_content()

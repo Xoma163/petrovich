@@ -155,12 +155,12 @@ class Bot(Thread):
                 return command.__class__().check_and_start(self, event)
 
         # Если указана настройка не реагировать на неверные команды, то скипаем
-        if event.chat and not event.chat.need_reaction:
+        if not event.sender.settings.need_reaction:
             raise PSkip()
 
         # Если указана настройка реагировать на команды без слеша, но команду мы не нашли, то скипаем
         # Но только в случае если нет явного упоминания нас, тогда точно даём ответ
-        if event.chat and event.chat.mentioning and event.message and not event.message.mentioned:
+        if event.sender.settings.mentioning and event.message and not event.message.mentioned:
             raise PSkip()
 
         similar_command, keyboard = self.get_similar_command(event, COMMANDS)

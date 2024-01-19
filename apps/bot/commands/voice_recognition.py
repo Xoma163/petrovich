@@ -40,9 +40,7 @@ class VoiceRecognition(Command):
     @staticmethod
     def accept_extra(event: Event) -> bool:
         if event.has_voice_message:
-            if event.is_from_chat and event.chat.recognize_voice:
-                return True
-            elif event.is_from_pm:
+            if event.sender.settings.recognize_voice:
                 return True
             else:
                 raise PSkip()

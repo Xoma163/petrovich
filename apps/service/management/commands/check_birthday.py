@@ -11,7 +11,8 @@ tg_bot = TgBot()
 
 
 class Command(BaseCommand):
-
+    # ToDo: check chats with settings celebrate_bday and send to them
+    # ToDo: + show_birthday_year + кол-во лет
     def handle(self, *args, **options):
         chat_pks = options['chat_id'][0].split(',')
         for chat_pk in chat_pks:
@@ -28,7 +29,7 @@ class Command(BaseCommand):
                 if gamer:
                     gamer.roulette_points += 100000
                     gamer.save()
-                    if profile.celebrate_bday:
+                    if profile.settings.celebrate_bday:
                         rmi1 = ResponseMessageItem(f"С Днём рождения, {tg_bot.get_mention(profile)}!",
                                                    peer_id=chat.chat_id)
                         rmi2 = ResponseMessageItem("На ваш счет зачислено 100 000 бонусных очков.",

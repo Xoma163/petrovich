@@ -69,8 +69,8 @@ class Turett(Command):
     WTF_MESSAGES_COUNT = 50
 
     def accept(self, event: Event) -> bool:
-        if event.chat and event.chat.need_turett:
-            chance = self.NOT_MENTIONED_CHANCE if event.chat.mentioning else self.MENTIONED_CHANCE
+        if event.chat and event.chat.settings.need_turett:
+            chance = self.NOT_MENTIONED_CHANCE if event.chat.settings.mentioning else self.MENTIONED_CHANCE
             if random_probability(chance):
                 return True
         return False
@@ -102,7 +102,7 @@ class Turett(Command):
         return ResponseMessageItem(attachments=[tg_sticker])
 
     def get_text(self) -> ResponseMessageItem:
-        if not self.event.chat.use_swear:
+        if not self.event.sender.settings.use_swear:
             raise PSkip()
         answer = random_event(self.TURETT_WORDS)
         return ResponseMessageItem(text=answer)

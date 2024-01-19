@@ -95,7 +95,7 @@ class Profile(Command):
             raise PWarning("Не смог распарсить дату. Формат ДД.ММ.ГГГГ")
 
         self.event.sender.birthday = date_time_obj.date()
-        self.event.sender.show_birthday_year = show_birthday_year
+        self.event.sender.settings.show_birthday_year = show_birthday_year
         self.event.sender.save()
 
         new_bday = self.event.sender.birthday.strftime(
@@ -166,7 +166,7 @@ class Profile(Command):
 
         _city = profile.city or not_defined
         _bd = profile.birthday
-        if profile.celebrate_bday:
+        if profile.settings.celebrate_bday:
             if _bd:
                 if not profile.show_birthday_year:
                     _bd = _bd.strftime('%d.%m')
