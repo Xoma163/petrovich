@@ -93,6 +93,9 @@ class Settings(Command):
     def menu_turett(self) -> ResponseMessageItem:
         return self.setup_default_chat_setting("need_turett")
 
+    def menu_voice(self) -> ResponseMessageItem:
+        return self.setup_default_chat_setting('recognize_voice')
+
     # END CHAT
 
     # PROFILE
@@ -105,9 +108,6 @@ class Settings(Command):
 
     def menu_swear(self) -> ResponseMessageItem:
         return self.setup_default_profile_setting("use_swear")
-
-    def menu_voice(self) -> ResponseMessageItem:
-        return self.setup_default_profile_setting('recognize_voice')
 
     # END PROFILE
 
@@ -154,12 +154,14 @@ class Settings(Command):
             # chat settings
             mentioning = settings.mentioning
             need_turett = settings.need_turett
+            recognize_voice = settings.recognize_voice
             # common settings
             celebrate_bday = settings.celebrate_bday
             gpt_preprompt = settings.gpt_preprompt if settings.gpt_preprompt else '""'
 
             answer += f"Триггериться на команды без упоминания - {self.TRUE_FALSE_TRANSLATOR[mentioning]}\n"
             answer += f"Синдром Туретта - {self.TRUE_FALSE_TRANSLATOR[need_turett]}\n"
+            answer += f"Автоматически распознавать голосовые - {self.TRUE_FALSE_TRANSLATOR[recognize_voice]}\n"
             answer += f"Поздравлять с днём рождения - {self.TRUE_FALSE_TRANSLATOR[celebrate_bday]}\n"
 
             if self.event.sender.check_role(Role.TRUSTED):
@@ -174,7 +176,6 @@ class Settings(Command):
         need_meme = settings.need_meme
         need_reaction = settings.need_reaction
         use_swear = settings.use_swear
-        recognize_voice = settings.recognize_voice
         # common settings
         celebrate_bday = settings.celebrate_bday
         gpt_preprompt = settings.gpt_preprompt if settings.gpt_preprompt else '""'
@@ -182,7 +183,6 @@ class Settings(Command):
         answer += f"Присылать мемы по точным названиям - {self.TRUE_FALSE_TRANSLATOR[need_meme]}\n"
         answer += f"Реагировать на неправильные команды - {self.TRUE_FALSE_TRANSLATOR[need_reaction]}\n"
         answer += f"Использовать ругательные команды - {self.TRUE_FALSE_TRANSLATOR[use_swear]}\n"
-        answer += f"Автоматически распознавать голосовые - {self.TRUE_FALSE_TRANSLATOR[recognize_voice]}\n"
         answer += f"Поздравлять с днём рождения - {self.TRUE_FALSE_TRANSLATOR[celebrate_bday]}\n"
 
         if self.event.sender.check_role(Role.TRUSTED):

@@ -32,13 +32,13 @@ class ChatSettings(BaseSettings):
     mentioning = models.BooleanField('Работа без упоминания в конфе', default=False)
     need_turett = models.BooleanField('Слать туреттные сообщения', default=False)
     celebrate_bday = models.BooleanField('Поздравлять с Днём рождения', default=False)
+    recognize_voice = models.BooleanField('Распозновать голосовые автоматически', default=True)
 
 
 class UserSettings(BaseSettings):
     need_meme = models.BooleanField('Слать мемы по точному названию', default=False)
     need_reaction = models.BooleanField('Реагировать на неверные команды', default=True)
     use_swear = models.BooleanField("Использовать ругательства", default=True)
-    recognize_voice = models.BooleanField('Распозновать голосовые автоматически', default=True)
 
     celebrate_bday = models.BooleanField('Поздравлять с Днём рождения', default=True)
     show_birthday_year = models.BooleanField('Показывать год', default=True)
