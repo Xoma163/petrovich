@@ -34,6 +34,13 @@ class ChatSettings(BaseSettings):
     celebrate_bday = models.BooleanField('Поздравлять с Днём рождения', default=False)
     recognize_voice = models.BooleanField('Распозновать голосовые автоматически', default=True)
 
+    class Meta:
+        verbose_name = "Настройка чата"
+        verbose_name_plural = "Настройки чатов"
+
+    def __str__(self):
+        return str(self.chat)
+
 
 class UserSettings(BaseSettings):
     need_meme = models.BooleanField('Слать мемы по точному названию', default=False)
@@ -43,6 +50,12 @@ class UserSettings(BaseSettings):
     celebrate_bday = models.BooleanField('Поздравлять с Днём рождения', default=True)
     show_birthday_year = models.BooleanField('Показывать год', default=True)
 
+    class Meta:
+        verbose_name = "Настройка профиля"
+        verbose_name_plural = "Настройки профилей"
+
+    def __str__(self):
+        return str(self.profile)
 
 class Chat(Platform):
     id = models.AutoField(primary_key=True)
@@ -51,7 +64,8 @@ class Chat(Platform):
     is_banned = models.BooleanField('Забанен', default=False)
 
     # Настройки
-    settings = models.OneToOneField(ChatSettings, verbose_name="Настройки", on_delete=models.CASCADE, null=True)
+    settings = models.OneToOneField(ChatSettings, verbose_name="Настройки", on_delete=models.CASCADE, null=True,
+                                    related_name="chat")
 
     # Для статистики
     kicked = models.BooleanField("Бота кикнули", default=False)
@@ -70,6 +84,7 @@ class Chat(Platform):
             cs = ChatSettings.objects.create()
             cs.save()
             self.settings = cs
+
         super(Chat, self).save(*args, **kwargs)
 
     def __str__(self):
@@ -99,7 +114,8 @@ class Profile(models.Model):
     chats = models.ManyToManyField(Chat, verbose_name="Чаты", blank=True, related_name="users")
 
     # Настройки
-    settings = models.OneToOneField(UserSettings, verbose_name="Настройки", on_delete=models.CASCADE, null=True)
+    settings = models.OneToOneField(UserSettings, verbose_name="Настройки", on_delete=models.CASCADE, null=True,
+                                    related_name="profile")
 
     api_token = models.CharField("Токен для API", max_length=100, blank=True)
 
@@ -111,6 +127,12 @@ class Profile(models.Model):
             us.save()
             self.settings = us
         super(Profile, self).save(*args, **kwargs)
+
+        if is_new:
+            # auto create gamer
+            from apps.games.models import Gamer
+            Gamer.objects.create(profile=self)
+
 
     def set_avatar(self, att: PhotoAttachment = None):
         image = att.get_bytes_io_content()

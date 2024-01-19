@@ -168,7 +168,7 @@ class Profile(Command):
         _bd = profile.birthday
         if profile.settings.celebrate_bday:
             if _bd:
-                if not profile.show_birthday_year:
+                if not profile.settings.show_birthday_year:
                     _bd = _bd.strftime('%d.%m')
                 else:
                     _bd = _bd.strftime('%d.%m.%Y')

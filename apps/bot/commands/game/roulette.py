@@ -140,7 +140,7 @@ class Roulette(Command):
         self.gamer = None
 
     def start(self) -> ResponseMessage:
-        self.gamer = self.bot.get_gamer_by_profile(self.event.sender)
+        gamer = self.event.sender.gamer
 
         if not self.event.message.args:
             rmi = self.menu_play()
@@ -312,10 +312,9 @@ class Roulette(Command):
 
     def get_gamer_by_name(self, username):
         user = self.bot.get_profile_by_name([username], self.event.chat)
-        user_gamer = self.bot.get_gamer_by_profile(user)
-        if not user_gamer:
+        if not user.gamer:
             raise PWarning("Не нашёл такого игрока")
-        return user_gamer
+        return user.gamer
 
     def get_active_rates(self):
         if self.event.is_from_chat:

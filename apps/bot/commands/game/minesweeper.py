@@ -256,7 +256,7 @@ class Minesweeper(Command):
                  "Не повезло в сапёре - повезёт в любви"]
             )
             text += "\nДержи 500 утешительных очков"
-            gamer = self.bot.get_gamer_by_profile(self.event.sender)
+            gamer = self.event.sender.gamer
             gamer.roulette_points += 500
             gamer.save()
         else:
@@ -289,7 +289,7 @@ class Minesweeper(Command):
         inline_keyboard_copy[-1] = [button, button2, button3]
         if mines_count >= 10:
             prize = self.mines * 300
-            gamer = self.bot.get_gamer_by_profile(self.event.sender)
+            gamer = self.event.sender.gamer
             gamer.roulette_points += prize
             gamer.save()
             text += f"\nНачислил {prize} очков"

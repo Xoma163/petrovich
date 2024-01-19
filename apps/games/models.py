@@ -6,7 +6,7 @@ from apps.bot.models import Profile, Chat
 
 
 class Gamer(models.Model):
-    profile = models.ForeignKey(Profile, models.CASCADE, verbose_name="Игрок", null=True)
+    profile = models.OneToOneField(Profile, models.CASCADE, verbose_name="Игрок", null=True, related_name="gamer")
     points = models.IntegerField("Очки ставок", default=0)
     roulette_points = models.IntegerField("Очки рулетки", default=500)
     bk_points = models.IntegerField("Очки быки и коровы", default=0)

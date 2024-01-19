@@ -96,7 +96,7 @@ class BullsAndCows(Command):
             if self.event.platform == Platform.TG:
                 self.bot.delete_messages(self.event.peer_id, self.event.message.id)
             decl = decl_of_num(session.steps, ['попытку', 'попытки', 'попыток'])
-            gamer = self.bot.get_gamer_by_profile(self.event.sender)
+            gamer = self.event.sender.gamer
             gamer.roulette_points += 1000
             gamer.bk_points += 1
             gamer.save()

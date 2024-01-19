@@ -162,7 +162,7 @@ class Wordle(Command):
         session = self.get_session()
         word = session.word
 
-        gamer = self.bot.get_gamer_by_profile(self.event.sender)
+        gamer = self.event.sender.gamer
         gamer.roulette_points += 1000
         gamer.wordle_points += 1
         gamer.save()

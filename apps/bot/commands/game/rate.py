@@ -37,7 +37,7 @@ class Rate(Command):
 
     def start(self) -> ResponseMessage:
         with lock:
-            gamer = self.bot.get_gamer_by_profile(self.event.sender)
+            gamer = self.event.sender.gamer
 
             min_gamers = 2
             rates_gamers = RateModel.objects.filter(chat=self.event.chat)

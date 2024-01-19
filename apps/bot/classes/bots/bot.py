@@ -21,7 +21,6 @@ from apps.bot.classes.messages.attachments.video import VideoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.models import Profile, Chat, Bot as BotModel, User
 from apps.bot.utils.utils import tanimoto, get_chunks, fix_layout, get_flat_list, has_cyrillic
-from apps.games.models import Gamer
 from petrovich.settings import env
 
 lock = Lock()
@@ -327,15 +326,6 @@ class Bot(Thread):
                 bot_id=bot_id, platform=self.platform.name
             )
         return bot
-
-    @staticmethod
-    def get_gamer_by_profile(profile: Profile) -> Gamer:
-        """
-        Получение игрока по модели пользователя
-        """
-        with lock:
-            gamer, _ = Gamer.objects.get_or_create(profile=profile)
-        return gamer
 
     @staticmethod
     def add_chat_to_profile(profile: Profile, chat: Chat):
