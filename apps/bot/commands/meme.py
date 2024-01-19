@@ -71,8 +71,7 @@ class Meme(Command):
         if event.is_fwd:
             return False
         if event.message and not event.message.mentioned:
-            if (
-                    event.is_from_chat and event.sender.settings.need_meme and not event.message.mentioned) or event.is_from_user:
+            if event.sender.settings.need_meme and not event.message.mentioned:
                 message_is_exact_meme_name = MemeModel.objects.filter(name=event.message.clear, approved=True).exists()
                 if message_is_exact_meme_name:
                     return True
