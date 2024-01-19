@@ -10,7 +10,8 @@ tg_bot = TgBot()
 class Command(BaseCommand):
     def handle(self, *args, **options):
         for profile in Profile.objects.all():
-            if profile.gamer:
-                continue
-            gamer = Gamer(profile=profile)
-            gamer.save()
+            try:
+                profile.gamer
+            except:
+                gamer = Gamer(profile=profile)
+                gamer.save()
