@@ -14,19 +14,21 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         schedule = [
             # Проверка на др
-            ScheduleItem("0 9 * * *", "check_birthday"),
+            ScheduleItem("0 10 * * *", "check_birthday"),
             # Проверка донатов
             ScheduleItem("*/30 * * * *", "check_donations", "46"),
             # Проверка оповещений
             ScheduleItem("*/1 * * * *", "check_notify"),
             # Проверка подписок
-            ScheduleItem("*/30 * * * *", "check_subscribe"),
+            ScheduleItem("*/10 * * * *", "check_subscribe"),
             # Получение гороскопа
             ScheduleItem("0 1 * * *", "get_horoscope"),
             # Отправка новостей Паше
             ScheduleItem("0 */6 * * *", "check_pasha_news", "130"),
             # Set cs rating
             ScheduleItem("0 9 * * *", "set_cs_rating", "112"),
+            # Set cs rating
+            ScheduleItem("0 9 * * *", "check_promocode_expiration"),
         ]
 
         dt_now = localize_datetime(datetime.utcnow(), TIME_ZONE).replace(second=0, microsecond=0)

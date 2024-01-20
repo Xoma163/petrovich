@@ -29,8 +29,7 @@ class Promocode(Command):
                 "- список промокодов",
                 "(название сервиса) - список промокодов по сервису",
                 "добавить (название сервиса) (промокод) [срок действия=бессрочно] [описание] - добавляет промокод",
-                "удалить (название сервиса) (промокод) - удаляет промокод",
-                "удалить (промокод) - удаляет промокод"
+                "удалить (id) - удаляет промокод",
             ])
         ]
     )
@@ -100,20 +99,13 @@ class Promocode(Command):
     def menu_remove(self) -> ResponseMessageItem:
         self.check_args(2)
         data = {
-            "code": self.event.message.args_case[1]
+            "pk": self.event.message.args_case[1]
         }
-        if len(self.event.message.args) > 2:
-            data['name__iexact'] = data['code']
-            data['code'] = self.event.message.args_case[2]
 
         try:
             promocode = PromocodeModel.objects.get(**data)
         except PromocodeModel.DoesNotExist:
             return ResponseMessageItem("Промокод не найден")
-        except PromocodeModel.MultipleObjectsReturned:
-            if not data['name']:
-                raise PWarning("Под запрос подходят два и более промокода. Уточните название сервиса")
-            raise PWarning("Под запрос подходят два и более промокода")
 
         # Удалять могут только trusted users или сами авторы своих промокодов
         if not self.event.sender.check_role(Role.TRUSTED) and promocode.author != self.event.sender:
@@ -136,6 +128,7 @@ class Promocode(Command):
 
     def _get_promocode_str(self, promocode: PromocodeModel) -> str:
         result = [
+            f"id:{self.bot.get_formatted_text_line(promocode.pk)}",
             f"{self.bot.get_underline_text(promocode.name)}",
             f"{self.bot.get_formatted_text_line(promocode.code)}"
         ]
