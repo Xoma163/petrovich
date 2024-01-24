@@ -56,10 +56,10 @@ class Command(BaseCommand):
         })
 
     def check_video(self, subs, sub_class, media_method):
-        logger.debug({
-            "message": "check_video",
-            "notify_enitity": subs[0].__dict__,
-        })
+        # logger.debug({
+        #     "message": "check_video",
+        #     "notify_enitity": subs[0].__dict__,
+        # })
         if len(set(x.last_videos_id[-1] for x in subs)) == 1:
             api = sub_class()
             try:
@@ -82,10 +82,10 @@ class Command(BaseCommand):
         else:
             for sub in subs:
                 self.check_video([sub], sub_class, media_method)
-        logger.debug({
-            "message": "end check_video",
-            "notify_enitity": subs[0].__dict__,
-        })
+        # logger.debug({
+        #     "message": "end check_video",
+        #     "notify_enitity": subs[0].__dict__,
+        # })
 
     @staticmethod
     def send_notify(sub, title, link, media_message: ResponseMessageItem):
