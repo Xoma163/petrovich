@@ -9,7 +9,7 @@ class HappyNewYear(Command):
     name = "с"
     names = ["с"]
     suggest_for_similar = False
-    enabled = True
+    enabled = False
 
     def accept(self, event: Event) -> bool:
         hny_phrases = [
