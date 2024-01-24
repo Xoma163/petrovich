@@ -152,8 +152,8 @@ class Media(Command):
 
         extra_text = source[:chosen_url_pos].strip() + "\n" + source[chosen_url_pos + len(chosen_url):].strip()
         for key in self.event.message.keys:
-            extra_text = extra_text.replace(self.event.message.KEYS_STR + key, "")
-            extra_text = extra_text.replace(self.event.message.KEYS_SYMBOL + key, "")
+            for key_symbol in self.event.message.KEYS_SYMBOLS:
+                extra_text = extra_text.replace(key_symbol + key, "")
         extra_text = extra_text.strip()
         # Костыль, чтобы видосы которые шарятся с мобилы с реддита не дублировали title
         if extra_text and extra_text != title:
