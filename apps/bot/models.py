@@ -133,6 +133,9 @@ class Profile(models.Model):
             from apps.games.models import Gamer
             Gamer.objects.create(profile=self)
 
+            group_user = Group.objects.get(name=Role.USER.name)
+            self.groups.add(group_user)
+
 
     def set_avatar(self, att: PhotoAttachment = None):
         image = att.get_bytes_io_content()

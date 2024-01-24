@@ -34,7 +34,6 @@ class Petrovich(Command):
 
     conversation = True
     platforms = [Platform.TG]
-    access = Role.GAMER
 
     bot: TgBot
 

@@ -31,8 +31,7 @@ class Commands(Command):
             {"role": Role.MINECRAFT, "text": "команды для игроков майнкрафта"},
             {"role": Role.TRUSTED, "text": "команды для доверенных пользователей"},
             {"role": Role.MRAZ, "text": "команды для мразей"},
-            {"role": Role.FLAIVA, "text": "команды для флейвы"},
-            {"role": Role.GAMER, "text": "команды для игроков"},
+            {"role": Role.FLAIVA, "text": "команды для флейвы"}
         ]
 
         if self.event.message.args:

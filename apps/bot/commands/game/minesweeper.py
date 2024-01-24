@@ -34,8 +34,6 @@ class Minesweeper(Command):
         ]
     )
     platforms = [Platform.TG]
-    access = Role.GAMER
-
     bot: TgBot
 
     def __init__(self, *args, **kwargs):

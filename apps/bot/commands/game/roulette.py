@@ -133,8 +133,6 @@ class Roulette(Command):
         ]
     )
 
-    access = Role.GAMER
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.gamer = None
@@ -144,6 +142,8 @@ class Roulette(Command):
             rmi = self.menu_play()
             return ResponseMessage(rmi)
         arg0 = self.event.message.args[0]
+
+        self.gamer = self.event.sender.gamer
 
         menu = [
             [['баланс'], self.menu_balance],

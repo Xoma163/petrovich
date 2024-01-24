@@ -131,7 +131,7 @@ if not os.path.exists(LOGS_DIR):
 DEBUG_FILE = os.path.join(LOGS_DIR, 'debug.log')
 ERROR_FILE = os.path.join(LOGS_DIR, 'error.log')
 
-GB_1 = 1024 * 1024 * 1024  # 1 gb
+GB_1 = 2 ** 30  # 1 gb
 
 LOGGING = {
     'version': 1,
@@ -158,8 +158,8 @@ LOGGING = {
         'file-debug': {
             'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
-            'backupCount': 5,  # keep at most 10 log files
-            'maxBytes': GB_1,  # 100*1024*1024 bytes (10MB)
+            'backupCount': 5,  # keep at most 5 log files
+            'maxBytes': GB_1,
             'filename': DEBUG_FILE,
             'formatter': 'json',
         },

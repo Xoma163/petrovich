@@ -5,7 +5,6 @@ from threading import Lock
 from threading import Thread
 from typing import List, Optional
 
-from django.contrib.auth.models import Group
 from django.db.models import Q
 
 from apps.bot.classes.bot_response import BotResponse
@@ -257,7 +256,7 @@ class Bot(Thread):
         return profile
 
     @staticmethod
-    def get_profile_by_user(user: User, is_new=False, _defaults: dict = None) -> Profile:
+    def get_profile_by_user(user: User, _defaults: dict = None) -> Profile:
         """
         Возвращает профиль по пользователю
         """
@@ -272,16 +271,7 @@ class Bot(Thread):
                 profile.save()
                 user.profile = profile
                 user.save()
-                is_new = True
 
-        if is_new:
-            with lock:
-                user.profile.save()
-
-                group_user = Group.objects.get(name=Role.USER.name)
-                group_gamer = Group.objects.get(name=Role.GAMER.name)
-                user.profile.groups.add(group_user)
-                user.profile.groups.add(group_gamer)
         return user.profile
 
     @staticmethod

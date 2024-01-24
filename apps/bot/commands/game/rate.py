@@ -31,7 +31,6 @@ class Rate(Command):
     int_args = [0]
     conversation = True
     platforms = [Platform.TG]
-    access = Role.GAMER
 
     bot: TgBot
 

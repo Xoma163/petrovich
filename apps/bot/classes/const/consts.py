@@ -19,7 +19,6 @@ class Role(Enum):
     BANNED = "забанен"
     TRUSTED = "доверенный"
     MRAZ = "мразь"
-    GAMER = "игрок"
     FLAIVA = "флейва"
 
     @classmethod

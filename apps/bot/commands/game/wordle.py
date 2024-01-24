@@ -37,7 +37,6 @@ class Wordle(Command):
     )
 
     platforms = [Platform.TG]
-    access = Role.GAMER
 
     bot: TgBot
 

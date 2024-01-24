@@ -25,7 +25,6 @@ class BullsAndCows(Command):
             ])
         ]
     )
-    access = Role.GAMER
 
     def start(self) -> ResponseMessage:
         if self.event.chat:
