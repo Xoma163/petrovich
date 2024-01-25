@@ -131,7 +131,7 @@ class Settings(Command):
             settings = self.event.chat.settings
             save_for = "чата"
         else:
-            settings = settings.gpt_preprompt = preprompt
+            settings = self.event.sender.settings
             save_for = "пользователя"
 
         settings.gpt_preprompt = preprompt
