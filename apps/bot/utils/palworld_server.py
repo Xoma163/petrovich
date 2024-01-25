@@ -25,7 +25,7 @@ class PalworldServer:
 
     def stop(self):
         check_command_time('palworld', self.DELAY)
-        self.do_rcon("shutdown 2 SERVER_SHUTDOWN")
+        do_the_linux_command("sudo systemctl stop palworld")
 
     def get_server_info(self):
         try:
