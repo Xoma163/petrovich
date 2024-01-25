@@ -46,7 +46,7 @@ class Palworld(Command):
         server = PalworldServer()
         server.start()
 
-        answer = f"Стартуем сервер"
+        answer = "Стартуем сервер"
         return ResponseMessageItem(text=answer)
 
     def menu_stop(self) -> ResponseMessageItem:
@@ -54,7 +54,7 @@ class Palworld(Command):
         server = PalworldServer()
         server.stop()
 
-        answer = f"Финишируем сервер"
+        answer = "Финишируем сервер"
         return ResponseMessageItem(text=answer)
 
     def menu_status(self) -> ResponseMessageItem:
@@ -65,7 +65,7 @@ class Palworld(Command):
 
     def get_server_info_str(self, server, server_info):
         if not server_info['online']:
-            return f"Palworld ⛔"
+            return "Palworld ⛔"
 
         player_range = f"({len(server_info['players'])}/{server_info['player_max']})"
 

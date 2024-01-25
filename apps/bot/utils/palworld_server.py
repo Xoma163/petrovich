@@ -21,7 +21,7 @@ class PalworldServer:
 
     def start(self):
         check_command_time('palworld', self.DELAY)
-        do_the_linux_command(f'sudo systemctl start palworld')
+        do_the_linux_command('sudo systemctl start palworld')
 
     def stop(self):
         check_command_time('palworld', self.DELAY)
