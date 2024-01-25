@@ -44,9 +44,9 @@ class Minecraft(Command):
             arg0 = None
 
         menu = [
-            [["старт"], self.menu_start],
-            [["стоп"], self.menu_stop],
-            [["статус"], self.menu_status],
+            [["старт", "start"], self.menu_start],
+            [["стоп", "stop"], self.menu_stop],
+            [["статус", "status"], self.menu_status],
             [['default'], self.menu_status]
 
         ]

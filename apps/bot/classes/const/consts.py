@@ -20,6 +20,7 @@ class Role(Enum):
     TRUSTED = "доверенный"
     MRAZ = "мразь"
     FLAIVA = "флейва"
+    PALWORLD = "palworld"
 
     @classmethod
     def has_value(cls, value):
