@@ -17,7 +17,7 @@ class Palworld(Command):
             HelpTextItem(Role.PALWORLD, [
                 "- статус сервера",
                 "старт - стартует сервер palworld",
-                "стоп- стопит сервер palworld"
+                "стоп - стопит сервер palworld"
             ])
         ]
     )
