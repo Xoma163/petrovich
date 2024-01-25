@@ -19,7 +19,8 @@ class Palworld(Command):
                 "старт - стартует сервер palworld",
                 "стоп - стопит сервер palworld"
             ])
-        ]
+        ],
+        extra_text="Автоматические бэкапы раз в час. Автоматические рестарты в 2/10/18 часов."
     )
 
     access = Role.PALWORLD
