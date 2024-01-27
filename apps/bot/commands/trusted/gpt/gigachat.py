@@ -1,4 +1,4 @@
-from apps.bot.api.gpt.gigachatgptapi import GigaChatGPTAPI as GigaChatAPI, GigaChatGPTAPI
+from apps.bot.api.gpt.gigachatgptapi import GigaChatGPTAPI
 from apps.bot.classes.const.activities import ActivitiesEnum
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
@@ -32,15 +32,14 @@ class GigaChat(ChatGPT):
             return self.draw_image()
 
         self.event: TgEvent
-
         user_message = self.get_user_msg(self.event)
         messages = self.get_dialog(user_message)
         return self.text_chat(messages)
 
     def text_chat(self, messages, model=None) -> ResponseMessage:
         if model is None:
-            model = GigaChatAPI.PRO_MODEL
-        gc_api = GigaChatAPI(model)
+            model = GigaChatGPTAPI.PRO_MODEL
+        gc_api = GigaChatGPTAPI(model)
 
         try:
             self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.TYPING)
@@ -53,7 +52,7 @@ class GigaChat(ChatGPT):
 
     def draw_image(self, model=None) -> ResponseMessage:
         if model is None:
-            model = GigaChatAPI.PRO_MODEL
+            model = GigaChatGPTAPI.PRO_MODEL
         if len(self.event.message.args) > 1:
             request_text = " ".join(self.event.message.args_case[1:])
         elif self.event.fwd:
