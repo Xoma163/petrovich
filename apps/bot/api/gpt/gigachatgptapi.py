@@ -6,6 +6,7 @@ import uuid
 from petrovich.settings import env, BASE_DIR
 from .gpt import GPT
 from ..handler import API
+from ...classes.const.exceptions import PWarning
 
 
 class GigaChatGPTAPI(GPT, API):
@@ -75,7 +76,10 @@ class GigaChatGPTAPI(GPT, API):
         src_regexp = r'src\s*=\s*"(.+?)"'
         r = re.compile(src_regexp)
 
-        file_id = r.findall(res)[0]
+        try:
+            file_id = r.findall(res)[0]
+        except:
+            raise PWarning(res)
         return self._get_file_by_id(file_id)
 
     def _get_file_by_id(self, file_id):
