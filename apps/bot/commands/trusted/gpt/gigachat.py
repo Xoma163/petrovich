@@ -64,7 +64,7 @@ class GigaChat(ChatGPT):
 
         try:
             self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.UPLOAD_PHOTO)
-            image = chat_gpt_api.draw(request_text)
+            image = chat_gpt_api.draw(self.event.message.args_str_case)
         finally:
             self.bot.stop_activity_thread()
 

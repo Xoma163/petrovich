@@ -90,5 +90,6 @@ class GigaChatGPTAPI(GPT, API):
         return self.requests.get(
             f"{self.BASE_URL}/files/{file_id}/content",
             headers=headers,
-            verify=self.GOSUSLUGI_CERT_PATH
+            verify=self.GOSUSLUGI_CERT_PATH,
+            log=False
         ).content
