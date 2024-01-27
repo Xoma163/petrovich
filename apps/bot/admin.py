@@ -16,7 +16,7 @@ class ProfileAdmin(admin.ModelAdmin):
         (
             'Прочее',
             {
-                'fields': ('groups', 'chats')
+                'fields': ('groups', 'chats', 'settings')
             }
         ),
         (
