@@ -77,7 +77,7 @@ class Chat(Platform):
 
         unique_together = ('chat_id', 'platform',)
 
-    def save(self, *args, **kwargs):
+    def save(self, **kwargs):
         # auto create settings model
         is_new = self.id is None
         if is_new:
@@ -85,7 +85,7 @@ class Chat(Platform):
             cs.save()
             self.settings = cs
 
-        super(Chat, self).save(*args, **kwargs)
+        super(Chat, self).save(**kwargs)
 
     def __str__(self):
         return str(self.name) if self.name else f"id:{self.id}"
@@ -119,14 +119,14 @@ class Profile(models.Model):
 
     api_token = models.CharField("Токен для API", max_length=100, blank=True)
 
-    def save(self, *args, **kwargs):
+    def save(self, **kwargs):
         # auto create settings model
         is_new = self.id is None
         if is_new:
             us = UserSettings.objects.create()
             us.save()
             self.settings = us
-        super(Profile, self).save(*args, **kwargs)
+        super(Profile, self).save(**kwargs)
 
         if is_new:
             # auto create gamer

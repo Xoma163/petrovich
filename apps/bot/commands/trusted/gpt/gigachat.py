@@ -28,10 +28,10 @@ class GigaChat(ChatGPT):
     )
 
     def start(self) -> ResponseMessage:
+        self.event: TgEvent
         if self.event.message.args and self.event.message.args[0] == "нарисуй":
             return self.draw_image()
 
-        self.event: TgEvent
         user_message = self.get_user_msg(self.event)
         messages = self.get_dialog(user_message)
         return self.text_chat(messages)

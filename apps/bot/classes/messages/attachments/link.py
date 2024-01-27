@@ -28,7 +28,7 @@ class LinkAttachment(Attachment):
         return parsed_url.hostname.replace('www.', '').lower() in urls
 
     @classmethod
-    def parse(cls, text):
+    def parse_link(cls, text):
         regexp = "(http|ftp|https|tg)(:\/\/)([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-])"
         r = re.compile(regexp)
         res = r.findall(text)

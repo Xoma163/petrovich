@@ -101,7 +101,7 @@ class WTF(Command):
                 try:
                     event = TgEvent({'message': message_body})
                     event.setup_event()
-                except:
+                except Exception:
                     continue
                 events.append(event)
         events = list(reversed(events))

@@ -31,7 +31,7 @@ class PalworldServer:
         try:
             players = [x.split(',')[0].replace("\x1b[0m", "") for x in self.do_rcon("ShowPlayers").split('\n')[2:-2]]
             self.server_info['players'] = players
-        except:
+        except Exception:
             self.server_info['online'] = False
         return self.server_info
 

@@ -155,7 +155,7 @@ class TgEvent(Event):
             elif first_button_text:
                 self.message.parse_raw(first_button_text)
 
-        except:
+        except Exception:
             self.message.parse_raw(payload)
 
     def setup_attachments(self, message, payload_message_text=None):
@@ -236,7 +236,7 @@ class TgEvent(Event):
         self.attachments.append(tg_audio)
 
     def setup_link(self, text):
-        res = LinkAttachment.parse(text)
+        res = LinkAttachment.parse_link(text)
         for url in res:
             link = LinkAttachment()
             link.url = url

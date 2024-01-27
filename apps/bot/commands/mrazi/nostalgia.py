@@ -278,7 +278,7 @@ class Nostalgia(Command):
                         user = Bot.objects.filter(name=msg['author']).first()
                     else:
                         user = Profile.objects.filter(name=name, surname=surname).first()
-                except:
+                except Exception:
                     user = None
                 if user:
                     users_avatars[msg['author']] = user.avatar

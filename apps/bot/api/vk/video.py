@@ -113,7 +113,7 @@ class VKVideo(SubscribeService):
                 'channel_title': a_tag.text,
                 'video_title': bs4.find('meta', property="og:title").attrs['content'],
             }
-        except:
+        except Exception:
             return {}
 
     def get_data_to_add_new_subscribe(self, url: str) -> dict:

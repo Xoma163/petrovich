@@ -3,7 +3,7 @@ import threading
 import time
 from threading import Lock
 from threading import Thread
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from django.db.models import Q
 
@@ -408,7 +408,7 @@ class Bot(Thread):
     # END ATTACHMENTS
 
     # EXTRA
-    def set_activity(self, peer_id, activity: ActivitiesEnum):
+    def set_activity(self, chat_id: Union[int, str], activity: ActivitiesEnum):
         """
         Проставление активности боту (например, отправка сообщения)
         """
@@ -452,7 +452,7 @@ class Bot(Thread):
         Получение меншона пользователя
         """
 
-    def delete_messages(self, peer_id, message_id):
+    def delete_messages(self, chat_id: Union[int, str], message_ids: Union[List[int], int]) -> dict:
         """
         Удаление сообщения
         """

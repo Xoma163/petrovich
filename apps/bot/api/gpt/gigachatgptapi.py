@@ -78,7 +78,7 @@ class GigaChatGPTAPI(GPT, API):
 
         try:
             file_id = r.findall(res)[0]
-        except:
+        except Exception:
             raise PWarning(res)
         return self._get_file_by_id(file_id)
 

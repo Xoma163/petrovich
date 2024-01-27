@@ -40,7 +40,8 @@ class Quote(Command):
             all_messages = mc.get_messages()
             sorted_messages = {x: all_messages[x] for x in all_messages if x > self.event.message.id}
             messages = [TgEvent(x[1]) for x in sorted(sorted_messages.items(), key=lambda x: x[0])]
-            [x.setup_event(is_fwd=True) for x in messages]
+            for event in messages:
+                event.setup_event(is_fwd=True)
         else:
             button = self.bot.get_button("Цитата", command=self.name)
             keyboard = self.bot.get_inline_keyboard([button])

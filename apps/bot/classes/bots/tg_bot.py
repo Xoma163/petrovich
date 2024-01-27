@@ -611,7 +611,7 @@ class TgBot(Bot):
             if isinstance(att, list):
                 att = att[0]
             file_id = att['file_id']
-        except:
+        except Exception:
             raise PError()
         return file_id
 

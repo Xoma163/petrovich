@@ -65,11 +65,12 @@ class Premier(SubscribeService, API):
         vd = VideoDownloader()
         return vd.download(master_m3u8_url, threads=10)
 
-    @staticmethod
-    def _get_videos(channel_id: str, params: dict, log_results: bool = True) -> dict:
-        r = requests.get(f"https://premier.one/uma-api/metainfo/tv/{channel_id}/video/", params=params).json()
-        if log_results:
-            logger.debug({"response": r})
+    def _get_videos(self, channel_id: str, params: dict, log_results: bool = True) -> dict:
+        r = self.requests.get(
+            f"https://premier.one/uma-api/metainfo/tv/{channel_id}/video/",
+            params=params,
+            log=log_results
+        ).json()
         results = r['results']
         return results
 

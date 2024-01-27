@@ -27,7 +27,7 @@ class Pinterest:
             image_data = json.loads(bs4.find("script", {'data-test-id': 'leaf-snippet'}).text)
             title = image_data['headline']
             image_url = image_data['image']
-        except:
+        except Exception:
             title = None
             image_url = bs4.find("meta", {"name": "og:image"}).attrs['content']
 

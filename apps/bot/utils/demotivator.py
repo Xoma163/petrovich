@@ -27,13 +27,6 @@ class DemotivatorText:
         return tw.get_wrapped_lines()
 
     def _get_height(self):
-        drawing = ImageDraw.Draw(
-            Image.new(
-                mode='RGB',
-                size=(100, 100)
-            )
-        )
-
         total_height = 0
         for line in self.lines:
             total_height += get_image_size_by_text(line, self.font)[1] + self.padding
