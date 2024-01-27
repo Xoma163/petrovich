@@ -7,7 +7,6 @@ from petrovich.settings import STATIC_ROOT
 
 class Taxi(Command):
     name = "такси"
-    name_tg = "taxi"
 
     help_text = HelpText(
         commands_text="график отношения цены ко времени",

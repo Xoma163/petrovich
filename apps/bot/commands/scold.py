@@ -8,7 +8,6 @@ from apps.bot.commands.praise import get_praise_or_scold
 class Scold(Command):
     name = "обосрать"
     names = ["обосри", "поругать", "поругай"]
-    name_tg = 'scold'
 
     help_text = HelpText(
         commands_text="рандомное оскорбление",

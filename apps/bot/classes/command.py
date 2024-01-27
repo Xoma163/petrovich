@@ -21,7 +21,6 @@ class Command:
     # Основные поля команды
     name: str = ""  # Имя команды
     names: list = []  # Вспопогательные имена команды
-    name_tg: str = ""  # Имя команды для списка команд в тг
 
     help_text: HelpText = None  # текст для команды /команды и для /помощь
 
@@ -62,14 +61,9 @@ class Command:
         self.event: Event = event
 
         self.full_names: str = ""  # Полный список имён команды (основное имя, дополнительное, имя в тг)
-        self.full_help_texts_tg: str = ""  # Сгенерированный хелп текст для списка команд в телеграме
 
         if self.name:
             self.full_names = [self.name] + self.names
-        if self.name_tg:
-            self.full_names.append(self.name_tg)
-            self.full_names = list(set(self.full_names))
-            self.full_help_texts_tg = f"{self.name_tg.lower()} - {self.help_text}"
 
         if self.hidden:
             if self.suggest_for_similar:

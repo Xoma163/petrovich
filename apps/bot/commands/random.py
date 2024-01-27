@@ -8,7 +8,6 @@ from apps.bot.utils.utils import get_random_int
 class Random(Command):
     name = "рандом"
     names = ["ранд"]
-    name_tg = 'random'
 
     help_text = HelpText(
         commands_text="рандомное число в заданном диапазоне",

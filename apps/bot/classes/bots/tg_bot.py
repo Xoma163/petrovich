@@ -549,19 +549,6 @@ class TgBot(Bot):
         ).json()
         return r
 
-    def update_help_texts(self):
-        """
-        Обновление списка команд в телеграме
-        """
-
-        from apps.bot.initial import COMMANDS
-        commands_with_tg_name = list(filter(lambda x: x.name_tg, COMMANDS))
-        help_texts_tg = [x.full_help_texts_tg.split(' - ') for x in commands_with_tg_name]
-        help_texts_tg = [{'command': x[0], 'description': x[1]} for x in help_texts_tg]
-        help_texts_tg.sort(key=lambda x: x['command'])
-        r = self.requests.get('setMyCommands', json={'commands': help_texts_tg}).json()
-        return r
-
     def get_sticker_set(self, name) -> list:
         r = self.requests.get('getStickerSet', json={'name': name}).json()
         return r['result']['stickers']

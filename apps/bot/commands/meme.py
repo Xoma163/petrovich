@@ -25,7 +25,6 @@ from apps.service.models import Meme as MemeModel
 
 class Meme(Command):
     name = "мем"
-    name_tg = "meme"
 
     help_text = HelpText(
         commands_text="присылает мем",

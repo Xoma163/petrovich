@@ -8,7 +8,6 @@ from apps.bot.classes.messages.response_message import ResponseMessage, Response
 class Settings(Command):
     name = "настройки"
     names = ["настройка"]
-    name_tg = 'settings'
 
     help_text = HelpText(
         commands_text="устанавливает некоторые настройки пользователя/чата",

@@ -7,7 +7,6 @@ from apps.bot.classes.messages.response_message import ResponseMessage, Response
 
 class Advice(Command):
     name = "совет"
-    name_tg = "advice"
 
     help_text = HelpText(
         commands_text="даёт случайный совет",

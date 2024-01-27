@@ -51,7 +51,6 @@ class ZodiacSigns:
 
 class Horoscope(Command):
     name = "гороскоп"
-    name_tg = "horoscope"
 
     help_text = HelpText(
         commands_text="мемный гороскоп",

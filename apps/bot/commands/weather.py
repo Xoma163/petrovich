@@ -9,7 +9,6 @@ from apps.service.models import City
 
 class Weather(Command):
     name = "погода"
-    name_tg = "weather"
 
     help_text = HelpText(
         commands_text="прогноз погоды",

@@ -8,7 +8,6 @@ from apps.service.models import Donations as DonationsModel
 
 class Donations(Command):
     name = "донаты"
-    name_tg = 'donations'
     help_text = HelpText(
         commands_text="список всех донатов"
     )

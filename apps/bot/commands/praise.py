@@ -84,7 +84,6 @@ def get_praise_or_scold_self(event, _type) -> str:
 class Praise(Command):
     name = 'похвалить'
     names = ["похвали", "хвалить"]
-    name_tg = 'praise'
 
     help_text = HelpText(
         commands_text="рандомная похвала",

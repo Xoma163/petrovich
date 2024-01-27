@@ -20,7 +20,6 @@ class Logs(Command):
 
     name = "логи"
     names = ["лог"]
-    name_tg = 'logs'
 
     help_text = HelpText(
         commands_text="логи бота",

@@ -6,7 +6,6 @@ from petrovich.settings import STATIC_ROOT
 
 class Donate(Command):
     name = "донат"
-    name_tg = 'donate'
 
     help_text = HelpText(
         commands_text="ссылка на донат",

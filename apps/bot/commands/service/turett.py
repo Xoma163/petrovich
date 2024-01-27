@@ -146,5 +146,5 @@ class Turett(Command):
         self.bot: TgBot
         reactions = ["💩", "🤡"]
         reaction = random_event(reactions)
-        self.bot.set_message_reaction(self.event.chat.chat_id, self.event.message.id, reaction)
+        self.bot.set_message_reaction(self.event.chat.chat_id, self.event.message.id, reaction, True)
         raise PSkip()

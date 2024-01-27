@@ -15,7 +15,6 @@ from apps.service.models import City, TimeZone
 
 class Profile(Command):
     name = "профиль"
-    name_tg = "profile"
 
     help_text = HelpText(
         commands_text="позволяет управлять вашим профилем",

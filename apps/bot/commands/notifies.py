@@ -39,7 +39,6 @@ WEEK_TRANSLATOR = {
 class Notifies(Command):
     name = "напоминания"
     names = ["напоминание", "напомни", "напоминай"]
-    name_tg = "notifies"
 
     help_text = HelpText(
         commands_text="список напоминаний",

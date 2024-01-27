@@ -20,7 +20,6 @@ lock = Lock()
 class Wordle(Command):
     name = "wordle"
     names = ['вордле']
-    name_tg = 'wordle'
 
     help_text = HelpText(
         commands_text="игра wordle",

@@ -15,7 +15,6 @@ lock = Lock()
 
 class Rates(Command):
     name = 'ставки'
-    name_tg = 'rates'
 
     help_text = HelpText(
         commands_text="играет ставки",

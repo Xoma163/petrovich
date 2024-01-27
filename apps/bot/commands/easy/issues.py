@@ -5,7 +5,6 @@ from apps.bot.classes.messages.response_message import ResponseMessage, Response
 
 class Issues(Command):
     name = "баги"
-    name_tg = 'issues'
     names = ["ишюс", "ишьюс", "иши"]
 
     help_text = HelpText(

@@ -7,7 +7,6 @@ from apps.bot.classes.messages.response_message import ResponseMessageItem, Resp
 class Discord(Command):
     name = "дискорд"
     names = ["диск"]
-    name_tg = 'discord'
 
     help_text = HelpText(
         commands_text="ссылка на канал в дискорде"

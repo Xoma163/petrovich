@@ -8,7 +8,6 @@ from apps.bot.utils.utils import get_role_by_str
 
 class Commands(Command):
     name = "команды"
-    name_tg = "commands"
 
     help_text = HelpText(
         commands_text="список всех команд",

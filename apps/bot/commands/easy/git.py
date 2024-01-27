@@ -6,7 +6,6 @@ from apps.bot.classes.messages.response_message import ResponseMessage, Response
 class Git(Command):
     name = "гит"
     names = ["гитхаб"]
-    name_tg = 'github'
 
     help_text = HelpText(
         commands_text="ссылка на гитхаб",

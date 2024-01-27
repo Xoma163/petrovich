@@ -19,7 +19,6 @@ lock = Lock()
 class Petrovich(Command):
     name = "петрович"
     names = ['петровна']
-    name_tg = 'petrovich'
 
     help_text = HelpText(
         commands_text="мини-игра, определяющая кто Петрович Дня",

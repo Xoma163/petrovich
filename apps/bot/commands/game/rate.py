@@ -14,7 +14,6 @@ lock = Lock()
 
 class Rate(Command):
     name = "ставка"
-    name_tg = 'rate'
 
     help_text = HelpText(
         commands_text="игра, определяющая, кто ближе угадал загаданное число",

@@ -8,7 +8,6 @@ from apps.bot.utils.utils import get_random_int
 
 class Waifu(Command):
     name = "вайфу"
-    name_tg = 'waifu'
 
     help_text = HelpText(
         commands_text="присылает несуществующую вайфу",
