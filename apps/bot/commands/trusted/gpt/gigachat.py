@@ -1,6 +1,7 @@
-from apps.bot.api.gpt.gigachat import GigaChat as GigaChatAPI
+from apps.bot.api.gpt.gigachatgptapi import GigaChatGPTAPI as GigaChatAPI, GigaChatGPTAPI
 from apps.bot.classes.const.activities import ActivitiesEnum
 from apps.bot.classes.const.consts import Role
+from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.event.tg_event import TgEvent
 from apps.bot.classes.help_text import HelpText, HelpTextItem
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
@@ -20,12 +21,16 @@ class GigaChat(ChatGPT):
         ),
         help_texts=[
             HelpTextItem(Role.TRUSTED, [
-                "(фраза) - общение с ботом",
+                "(фраза/пересланное сообщение) - общение с ботом",
+                "нарисуй (фраза/пересланное сообщение) - генерация картинки"
             ])
         ]
     )
 
     def start(self) -> ResponseMessage:
+        if self.event.message.args and self.event.message.args[0] == "нарисуй":
+            return self.draw_image()
+
         self.event: TgEvent
 
         user_message = self.get_user_msg(self.event)
@@ -45,3 +50,30 @@ class GigaChat(ChatGPT):
 
         answer = markdown_to_html(answer, self.bot)
         return ResponseMessage(ResponseMessageItem(text=answer, reply_to=self.event.message.id))
+
+    def draw_image(self, model=None) -> ResponseMessage:
+        if model is None:
+            model = GigaChatAPI.PRO_MODEL
+        if len(self.event.message.args) > 1:
+            request_text = " ".join(self.event.message.args_case[1:])
+        elif self.event.fwd:
+            request_text = self.event.fwd[0].message.raw
+        else:
+            raise PWarning("Должен быть текст или пересланное сообщение")
+
+        chat_gpt_api = GigaChatGPTAPI(model)
+
+        try:
+            self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.UPLOAD_PHOTO)
+            image = chat_gpt_api.draw(request_text)
+        finally:
+            self.bot.stop_activity_thread()
+
+        if not image:
+            raise PWarning("Не смог сгенерировать :(")
+
+        attachments = [self.bot.get_photo_attachment(image)]
+
+        answer = f'Результат генерации по запросу "{request_text}"'
+        return ResponseMessage(
+            ResponseMessageItem(text=answer, attachments=attachments, reply_to=self.event.message.id))
