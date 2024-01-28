@@ -1,7 +1,6 @@
 from django.contrib import admin
 
 from apps.bot.models import Profile, Chat, Bot, User, ChatSettings, UserSettings
-from apps.service.models import GPTPrePrompt
 
 
 @admin.register(Profile)
@@ -65,12 +64,3 @@ class UserSettingsAdmin(admin.ModelAdmin):
 @admin.register(ChatSettings)
 class ChatSettingsAdmin(admin.ModelAdmin):
     pass
-
-
-@admin.register(GPTPrePrompt)
-class GPTPrepromptAdmin(admin.ModelAdmin):
-    list_display = ('author', 'chat',)
-    list_filter = (
-        ('author', admin.RelatedOnlyFieldListFilter),
-        ('chat', admin.RelatedOnlyFieldListFilter)
-    )

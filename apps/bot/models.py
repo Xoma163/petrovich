@@ -22,6 +22,7 @@ class Platform(models.Model):
 
 
 class BaseSettings(models.Model):
+    # celebrate_bday
     class Meta:
         abstract = True
 

@@ -7,6 +7,7 @@ from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemComma
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.commands.trusted.gpt.chatgpt import ChatGPT
 from apps.bot.utils.utils import markdown_to_html
+from apps.service.models import GPTPrePrompt
 
 
 class GigaChat(ChatGPT):
@@ -19,18 +20,30 @@ class GigaChat(ChatGPT):
             HelpTextItem(Role.TRUSTED, [
                 HelpTextItemCommand("(фраза/пересланное сообщение)", "общение с ботом"),
                 HelpTextItemCommand("нарисуй (фраза/пересланное сообщение)", "генерация картинки"),
+                HelpTextItemCommand("препромпт [конфа]", "посмотреть текущий препромпт"),
+                HelpTextItemCommand("препромпт [конфа] (текст)", "добавить препромпт"),
+                HelpTextItemCommand("препромпт [конфа] удалить", "удаляет препромпт"),
             ])
         ],
         extra_text=(
             "Если отвечать на сообщения бота через кнопку \"Ответить\" то будет продолжаться непрерывный диалог.\n"
-            "В таком случае необязательно писать команду, можно просто текст"
+            "В таком случае необязательно писать команду, можно просто текст\n\n"
+            "Порядок использования препромптов в конфах:\n"
+            "1) Ваш персональный препромт конфы\n"
+            "2) Ваш персональный препромт\n"
+            "3) Препромпт конфы"
         )
     )
+
+    PREPROMPT_PROVIDER = GPTPrePrompt.GIGACHAT
 
     def start(self) -> ResponseMessage:
         self.event: TgEvent
         if self.event.message.args and self.event.message.args[0] == "нарисуй":
             return self.draw_image()
+        if self.event.message.args and self.event.message.args[0] in ["препромпт", "препромт", "промпт", "промт",
+                                                                      "preprompt", "prepromp", "prompt", "promt"]:
+            return self.preprompt()
 
         user_message = self.get_user_msg(self.event)
         messages = self.get_dialog(user_message)

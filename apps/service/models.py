@@ -318,4 +318,4 @@ class GPTPrePrompt(models.Model):
     class Meta:
         verbose_name = "GPT препромпт"
         verbose_name_plural = "GPT препромпты"
-        unique_together = ('author', 'chat')
+        unique_together = ('author', 'chat', 'provider')

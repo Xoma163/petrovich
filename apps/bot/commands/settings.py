@@ -38,21 +38,7 @@ class Settings(Command):
                 HelpTextItemCommand(
                     "ругаться (вкл/выкл)",
                     "определяет будет ли бот использовать ругательные команды"),
-            ]),
-            HelpTextItem(Role.TRUSTED, [
-                HelpTextItemCommand(
-                    "gpt (preprompt)",
-                    "определяет system prompt для дальнейшего общения с ботом"),
-                HelpTextItemCommand(
-                    "gpt сбросить",
-                    "сбрасывает system prompt"),
-                HelpTextItemCommand(
-                    "gpt конфа (preprompt)",
-                    "определяет system prompt для дальнейшего общения с ботом в конфе"),
-                HelpTextItemCommand(
-                    "gpt конфа сбросить",
-                    "сбрасывает system prompt")
-            ]),
+            ])
         ],
         extra_text="Если команда запускается в чате, то общие настройки (поздравления с др) будут указываться для текущего чата"
     )
@@ -202,16 +188,11 @@ class Settings(Command):
             recognize_voice = settings.recognize_voice
             # common settings
             celebrate_bday = settings.celebrate_bday
-            gpt_preprompt = settings.gpt_preprompt if settings.gpt_preprompt else '""'
 
             answer += f"Триггериться на команды без упоминания - {self.TRUE_FALSE_TRANSLATOR[mentioning]}\n"
             answer += f"Синдром Туретта - {self.TRUE_FALSE_TRANSLATOR[need_turett]}\n"
             answer += f"Автоматически распознавать голосовые - {self.TRUE_FALSE_TRANSLATOR[recognize_voice]}\n"
             answer += f"Поздравлять с днём рождения - {self.TRUE_FALSE_TRANSLATOR[celebrate_bday]}\n"
-
-            if self.event.sender.check_role(Role.TRUSTED):
-                answer += f"GPT preprompt - {self.bot.get_formatted_text_line(gpt_preprompt)}\n"
-
             answer += "\n"
 
         answer += "Настройки пользователя:\n"
@@ -223,15 +204,12 @@ class Settings(Command):
         use_swear = settings.use_swear
         # common settings
         celebrate_bday = settings.celebrate_bday
-        gpt_preprompt = settings.gpt_preprompt if settings.gpt_preprompt else '""'
 
         answer += f"Присылать мемы по точным названиям - {self.TRUE_FALSE_TRANSLATOR[need_meme]}\n"
         answer += f"Реагировать на неправильные команды - {self.TRUE_FALSE_TRANSLATOR[need_reaction]}\n"
         answer += f"Использовать ругательные команды - {self.TRUE_FALSE_TRANSLATOR[use_swear]}\n"
         answer += f"Поздравлять с днём рождения - {self.TRUE_FALSE_TRANSLATOR[celebrate_bday]}\n"
 
-        if self.event.sender.check_role(Role.TRUSTED):
-            answer += f"GPT preprompt - {self.bot.get_formatted_text_line(gpt_preprompt)}\n"
         return ResponseMessageItem(text=answer)
 
     def setup_default_chat_setting(self, name) -> ResponseMessageItem:

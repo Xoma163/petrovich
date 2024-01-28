@@ -1,5 +1,7 @@
 from typing import Optional
 
+from django.db.models import Q
+
 from apps.bot.api.gpt.chatgpt import ChatGPTAPI
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.activities import ActivitiesEnum
@@ -10,8 +12,10 @@ from apps.bot.classes.event.tg_event import TgEvent
 from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
+from apps.bot.models import Profile, Chat
 from apps.bot.utils.cache import MessagesCache
 from apps.bot.utils.utils import markdown_to_html
+from apps.service.models import GPTPrePrompt
 from petrovich.settings import env
 
 
@@ -21,21 +25,31 @@ class ChatGPT(Command):
 
     help_text = HelpText(
         commands_text="чат GPT",
-        extra_text=(
-            "Если отвечать на сообщения бота через кнопку \"Ответить\" то будет продолжаться непрерывный диалог.\n"
-            "В таком случае необязательно писать команду, можно просто текст"
-        ),
         help_texts=[
             HelpTextItem(Role.TRUSTED, [
                 HelpTextItemCommand("(фраза/пересланное сообщение)", "общение с ботом"),
                 HelpTextItemCommand("(фраза) [картинка]", "общение с ботом с учётом пересланной картинки"),
                 HelpTextItemCommand("нарисуй (фраза/пересланное сообщение)", "генерация картинки"),
+                HelpTextItemCommand("препромпт [конфа]", "посмотреть текущий препромпт"),
+                HelpTextItemCommand("препромпт [конфа] (текст)", "добавить препромпт"),
+                HelpTextItemCommand("препромпт [конфа] удалить", "удаляет препромпт"),
+
             ])
-        ]
+        ],
+        extra_text=(
+            "Если отвечать на сообщения бота через кнопку \"Ответить\" то будет продолжаться непрерывный диалог.\n"
+            "В таком случае необязательно писать команду, можно просто текст\n\n"
+            "Порядок использования препромптов в конфах:\n"
+            "1) Ваш персональный препромт конфы\n"
+            "2) Ваш персональный препромт\n"
+            "3) Препромпт конфы"
+        )
     )
 
     access = Role.TRUSTED
     platforms = [Platform.TG]
+
+    PREPROMPT_PROVIDER = GPTPrePrompt.CHATGPT
 
     def accept(self, event: Event):
         accept = super().accept(event)
@@ -46,8 +60,11 @@ class ChatGPT(Command):
 
     def start(self) -> ResponseMessage:
         self.event: TgEvent
-        if self.event.message.args and self.event.message.args[0] == "нарисуй":
+        if self.event.message.args and self.event.message.args[0] in ["нарисуй", "draw"]:
             return self.draw_image()
+        if self.event.message.args and self.event.message.args[0] in ["препромпт", "препромт", "промпт", "промт",
+                                                                      "preprompt", "prepromp", "prompt", "promt"]:
+            return self.preprompt()
 
         user_message = self.get_user_msg(self.event)
         messages = self.get_dialog(user_message)
@@ -119,10 +136,7 @@ class ChatGPT(Command):
         data = mc.get_messages()
         preprompt = None
         if use_preprompt:
-            if self.event.sender.settings.gpt_preprompt:
-                preprompt = self.event.sender.settings.gpt_preprompt
-            elif self.event.chat and self.event.chat.settings.gpt_preprompt:
-                preprompt = self.event.chat.settings.gpt_preprompt
+            preprompt = self.get_preprompt(self.event.sender, self.event.chat, self.PREPROMPT_PROVIDER)
 
         history = []
         if not self.event.fwd:
@@ -183,3 +197,58 @@ class ChatGPT(Command):
             return event.message.args_str_case
         else:
             return event.message.raw
+
+    def preprompt(self) -> ResponseMessage:
+        self.check_args(2)
+
+        if self.event.message.args[1] in ["chat", "conference", "конфа", "чат"]:
+            self.check_conversation()
+            q = Q(chat=self.event.chat, author=None)
+            return self._preprompt_works(2, q, 'препромпт конфы')
+        else:
+            if self.event.is_from_pm:
+                q = Q(chat=None, author=self.event.sender)
+                return self._preprompt_works(1, q, 'персональный препромпт')
+            else:
+                q = Q(chat=self.event.chat, author=self.event.sender)
+                return self._preprompt_works(1, q, 'персональный препромпт конфы')
+
+    def _preprompt_works(self, args_slice_index: int, q: Q, is_for: str):
+        q &= Q(provider=self.PREPROMPT_PROVIDER)
+
+        if len(self.event.message.args) > args_slice_index:
+            # удалить
+            if self.event.message.args[args_slice_index] == "удалить":
+                GPTPrePrompt.objects.filter(q).delete()
+                rmi = ResponseMessageItem(f"Удалил {is_for}")
+            # обновить/создать
+            else:
+                preprompt = " ".join(self.event.message.args_case[args_slice_index:])
+                preprompt_obj, _ = GPTPrePrompt.objects.update_or_create(
+                    defaults={'text': preprompt},
+                    **dict(q.children)
+                )
+                rmi = ResponseMessageItem(f"Обновил {is_for}: {preprompt_obj.text}")
+        # посмотреть
+        else:
+            try:
+                preprompt = GPTPrePrompt.objects.get(q).text
+                rmi = ResponseMessageItem(f"Текущий {is_for}: {preprompt}")
+            except GPTPrePrompt.DoesNotExist:
+                rmi = ResponseMessageItem(f"Текущий {is_for} не задан")
+        return ResponseMessage(rmi)
+
+    @staticmethod
+    def get_preprompt(sender: Profile, chat: Chat, provider):
+        variants = [
+            Q(author=sender, chat=chat, provider=provider),
+            Q(author=sender, chat=None, provider=provider),
+            Q(author=None, chat=chat, provider=provider),
+        ]
+
+        for q in variants:
+            try:
+                return GPTPrePrompt.objects.get(q).text
+            except GPTPrePrompt.DoesNotExist:
+                continue
+        return None
