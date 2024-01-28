@@ -41,6 +41,7 @@ class Command(BaseCommand):
             for file in files:
                 os.remove(os.path.join(migrations_dir, file))
 
+    # ToDo: add args for prod/local
     def handle(self, *args, **options):
         apps = options['apps']
         self.stdout.write("Reseting APP %s" % apps)
