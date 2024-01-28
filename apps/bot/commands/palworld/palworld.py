@@ -70,7 +70,8 @@ class Palworld(Command):
 
         player_range = f"({len(server_info['players'])}/{server_info['player_max']})"
 
-        result = f"Palworld ✅ {player_range} - {server.HOST}:{server.PORT}"
+        server_address = f'{server.HOST}:{server.PORT}'
+        result = f"Palworld ✅ {player_range} - {self.bot.get_formatted_text_line(server_address)}"
 
         players = server_info['players']
         if players:

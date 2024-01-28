@@ -45,22 +45,4 @@ class MinecraftServer:
             self.server_info = {
                 'online': False
             }
-
-    def get_server_info_str(self):
-        if not self.server_info['online']:
-            return f"Майн {self.get_version()} ⛔"
-
-        version = self.server_info['version']
-        player_max = self.server_info['player_max']
-        player_range = f"({len(self.server_info['players'])}/{player_max})"
-
-        result = f"Майн {version} ✅ {player_range} - {self.ip}:{self.port}"
-
-        players = self.server_info['players']
-        if players:
-            players.sort(key=str.lower)
-            players_str = ", ".join(players)
-            result += f"\nИгроки: {players_str}"
-        if self.map_url:
-            result += f"\nКарта - {self.map_url}"
-        return result
+        return self.server_info

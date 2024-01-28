@@ -90,8 +90,29 @@ class Minecraft(Command):
         minecraft_result = ""
         for server in self.servers:
             server.get_server_info()
-            result = server.get_server_info_str()
+            result = self.get_server_info_str(server)
             minecraft_result += f"{result}\n\n"
 
         answer = minecraft_result
         return ResponseMessageItem(text=answer)
+
+    def get_server_info_str(self, server):
+        if not server.server_info['online']:
+            return f"Майн {server.get_version()} ⛔"
+
+        version = server.server_info['version']
+        player_max = server.server_info['player_max']
+        player_range = f"({len(server.server_info['players'])}/{player_max})"
+
+        server_address = f'{server.ip}:{server.port}'
+        result = f"Майн {version} ✅ {player_range} - {self.bot.get_formatted_text_line(server_address)}"
+
+        players = server.server_info['players']
+        if players:
+            players.sort(key=str.lower)
+            players = [self.bot.get_formatted_text_line(player) for player in players]
+            players_str = ", ".join(players)
+            result += f"\nИгроки: {players_str}"
+        if server.map_url:
+            result += f"\nКарта - {server.map_url}"
+        return result
