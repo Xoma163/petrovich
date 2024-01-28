@@ -1,22 +1,12 @@
 from django.contrib import admin
 
 from apps.service.models import Service, Meme, Notify, City, Donations, TimeZone, Subscribe, WakeOnLanUserData, \
-    Horoscope, Words, Tag, VideoCache, Promocode
+    Words, Tag, VideoCache, Promocode
 
 
 @admin.register(Service)
 class ServiceAdmin(admin.ModelAdmin):
     list_display = ('name', 'value', 'update_datetime')
-
-
-@admin.action(description="Проставить тип: видео")
-def set_type_video(modeladmin, request, queryset):
-    queryset.update(type="video")
-
-
-@admin.action(description="Проставить тип: ссылка")
-def set_type_link(modeladmin, request, queryset):
-    queryset.update(type="link")
 
 
 @admin.register(Meme)
@@ -27,7 +17,6 @@ class MemeAdmin(admin.ModelAdmin):
     )
     search_fields = ('name', 'link')
     list_filter = (('author', admin.RelatedOnlyFieldListFilter), 'type', 'approved',)
-    actions = [set_type_video, set_type_link]
 
 
 @admin.register(Notify)
@@ -58,7 +47,9 @@ class DonationsAdmin(admin.ModelAdmin):
 class SubscribeAdmin(admin.ModelAdmin):
     list_display = ('author', 'chat', 'channel_title', 'playlist_title', 'service', 'save_to_plex')
     list_filter = (
-        ('author', admin.RelatedOnlyFieldListFilter), ('chat', admin.RelatedOnlyFieldListFilter), 'save_to_plex',
+        ('author', admin.RelatedOnlyFieldListFilter),
+        ('chat', admin.RelatedOnlyFieldListFilter),
+        'save_to_plex',
         'service')
     search_fields = ('channel_title', 'playlist_title', 'last_videos_id')
 
@@ -74,12 +65,6 @@ class WakeOnLanUserDataAdmin(admin.ModelAdmin):
     list_filter = (('author', admin.RelatedOnlyFieldListFilter),)
 
 
-@admin.register(Horoscope)
-class HoroscopeAdmin(admin.ModelAdmin):
-    list_display = ('pk',)
-    filter_horizontal = ('memes',)
-
-
 @admin.register(Words)
 class WordsAdmin(admin.ModelAdmin):
     list_display = ('id', 'm1', 'f1', 'n1', 'mm', 'fm', 'type')
@@ -89,6 +74,7 @@ class WordsAdmin(admin.ModelAdmin):
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
+    list_display = ('name', 'chat')
     list_filter = (('chat', admin.RelatedOnlyFieldListFilter), ('users', admin.RelatedOnlyFieldListFilter))
 
 

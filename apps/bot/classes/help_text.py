@@ -4,7 +4,7 @@ from apps.bot.classes.const.consts import Role
 
 
 class HelpTextItemCommand:
-    def __init__(self, args: str, description: str):
+    def __init__(self, args: Optional[str], description: str):
         self.args: str = args
         self.description: str = description
 

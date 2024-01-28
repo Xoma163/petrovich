@@ -57,6 +57,7 @@ class UserSettings(BaseSettings):
     def __str__(self):
         return str(self.profile)
 
+
 class Chat(Platform):
     id = models.AutoField(primary_key=True)
     chat_id = models.CharField('ID чата', max_length=20, default="")
@@ -118,6 +119,8 @@ class Profile(models.Model):
                                     related_name="profile")
 
     api_token = models.CharField("Токен для API", max_length=100, blank=True)
+    gamer2 = models.OneToOneField("games.Gamer", models.CASCADE, verbose_name="Игрок", null=True,
+                                  related_name="profile2")
 
     def save(self, **kwargs):
         # auto create settings model
@@ -135,7 +138,6 @@ class Profile(models.Model):
 
             group_user = Group.objects.get(name=Role.USER.name)
             self.groups.add(group_user)
-
 
     def set_avatar(self, att: PhotoAttachment = None):
         image = att.get_bytes_io_content()

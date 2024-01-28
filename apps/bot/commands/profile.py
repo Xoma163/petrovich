@@ -21,8 +21,9 @@ class Profile(Command):
         help_texts=[
             HelpTextItem(Role.USER, [
                 HelpTextItemCommand(None, "присылает информацию по вашему профилю"),
-                HelpTextItemCommand("(имя, фамилия, логин/id, никнейм)",
-                                    "присылает информацию по профилю человека в конфе"),
+                HelpTextItemCommand(
+                    "(имя, фамилия, логин/id, никнейм)",
+                    "присылает информацию по профилю человека в конфе"),
                 HelpTextItemCommand("город (название города)", "устанавливает новый город"),
                 HelpTextItemCommand("город добавить (название города)", "добавляет новый город в базу"),
                 HelpTextItemCommand("др (дата)", "устанавливает новый др"),

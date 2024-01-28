@@ -18,8 +18,8 @@ class Gamer(models.Model):
         verbose_name_plural = "Игроки"
         ordering = ["profile"]
 
-    def __str__(self):
-        return str(self.profile)
+    # def __str__(self):
+    #     return str(self.profile)
 
 
 class Rate(models.Model):

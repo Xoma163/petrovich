@@ -1,13 +1,6 @@
 from django.contrib import admin
 
-from apps.games.models import Rate, Gamer, PetrovichUser, PetrovichGames, RouletteRate, BullsAndCowsSession, Wordle
-
-
-@admin.register(Gamer)
-class GamerAdmin(admin.ModelAdmin):
-    search_fields = ('profile__name', 'profile__surname', 'profile__nickname_real')
-    list_display = ('profile', 'points', 'roulette_points')
-    list_editable = ('points', 'roulette_points')
+from apps.games.models import Rate, PetrovichUser, PetrovichGames, RouletteRate, BullsAndCowsSession, Wordle
 
 
 @admin.register(Rate)
