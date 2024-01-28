@@ -22,8 +22,6 @@ class Platform(models.Model):
 
 
 class BaseSettings(models.Model):
-    gpt_preprompt = models.TextField("ChatGPT preprompt", default="")
-
     class Meta:
         abstract = True
 
