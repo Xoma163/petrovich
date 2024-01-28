@@ -124,6 +124,9 @@ def get_help_texts_for_command(command, platform=None, roles: List[Role] = None)
     """
     Получает help_texts для команды
     """
+
+    DASH = "—"
+
     from apps.bot.classes.bots.tg_bot import TgBot
     from apps.bot.classes.help_text import HelpTextItemCommand
 
@@ -134,7 +137,7 @@ def get_help_texts_for_command(command, platform=None, roles: List[Role] = None)
     if len(command.full_names) > 1:
         result += f"Названия команды: {', '.join(command.full_names)}\n"
     if command.access != Role.USER:
-        result += f"Необходимый уровень прав - {command.access.value}\n"
+        result += f"Необходимый уровень прав {DASH} {command.access.value}\n"
     if result:
         result += '\n'
     if command.help_text:
@@ -147,14 +150,14 @@ def get_help_texts_for_command(command, platform=None, roles: List[Role] = None)
         for item in items:
             if platform == Platform.TG:
                 if item.args:
-                    line = TgBot.get_formatted_text_line(f"/{command.name} {item.args}") + f" — {item.description}"
+                    line = TgBot.get_formatted_text_line(f"/{command.name} {item.args}") + f" {DASH} {item.description}"
                 else:
-                    line = TgBot.get_formatted_text_line(f"/{command.name}") + f" — {item.description}"
+                    line = TgBot.get_formatted_text_line(f"/{command.name}") + f" {DASH} {item.description}"
             else:
                 if item.args:
-                    line = f"/{command.name} {item.args} — {item.description}"
+                    line = f"/{command.name} {item.args} {DASH} {item.description}"
                 else:
-                    line = f"/{command.name} — {item.description}"
+                    line = f"/{command.name} {DASH} {item.description}"
             full_help_texts_list.append(line)
 
         if command.help_text.extra_text:
