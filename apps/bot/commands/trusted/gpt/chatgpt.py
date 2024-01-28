@@ -199,9 +199,7 @@ class ChatGPT(Command):
             return event.message.raw
 
     def preprompt(self) -> ResponseMessage:
-        self.check_args(2)
-
-        if self.event.message.args[1] in ["chat", "conference", "конфа", "чат"]:
+        if len(self.event.message.args) > 1 and self.event.message.args[1] in ["chat", "conference", "конфа", "чат"]:
             self.check_conversation()
             q = Q(chat=self.event.chat, author=None)
             return self._preprompt_works(2, q, 'препромпт конфы')
