@@ -300,3 +300,22 @@ class Promocode(models.Model):
 
     def __str__(self):
         return str(self.name)
+
+
+class GPTPrePrompt(models.Model):
+    CHATGPT = 'chatgpt'
+    GIGACHAT = 'gigachat'
+    PROVIDER_CHOICES = (
+        (CHATGPT, 'СhatGPT'),
+        (GIGACHAT, 'Gigachat')
+    )
+
+    author = models.ForeignKey(Profile, models.CASCADE, verbose_name="Пользователь", null=True)
+    chat = models.ForeignKey(Chat, models.CASCADE, verbose_name="Чат", null=True)
+    text = models.TextField("ChatGPT preprompt", default="", blank=True)
+    provider = models.CharField('Провайдер', max_length=10, blank=True, choices=PROVIDER_CHOICES)
+
+    class Meta:
+        verbose_name = "GPT препромпт"
+        verbose_name_plural = "GPT препромпты"
+        unique_together = ('author', 'chat')
