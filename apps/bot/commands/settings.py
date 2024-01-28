@@ -3,7 +3,7 @@ from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
-from apps.service.models import GPTPreprompt
+from apps.service.models import GPTPrePrompt
 
 
 class Settings(Command):
@@ -177,7 +177,7 @@ class Settings(Command):
         else:
             preprompt = " ".join(self.event.message.args_case[1:])
 
-        GPTPreprompt.objects.update_or_create(
+        GPTPrePrompt.objects.update_or_create(
             author=self.event.sender, chat=self.event.chat,
             defaults={"gpt_preprompt": preprompt}
         )
