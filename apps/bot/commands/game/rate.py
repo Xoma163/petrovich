@@ -17,14 +17,14 @@ class Rate(Command):
 
     help_text = HelpText(
         commands_text="игра, определяющая, кто ближе угадал загаданное число",
-        extra_text=(
-            "Ставка может быть от 1 до 100"
-        ),
         help_texts=[
             HelpTextItem(Role.USER, [
                 HelpTextItemCommand("[ставка=рандом]", "делает ставку")
             ])
-        ]
+        ],
+        extra_text=(
+            "Ставка может быть от 1 до 100"
+        )
     )
 
     int_args = [0]

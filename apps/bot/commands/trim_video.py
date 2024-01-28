@@ -21,9 +21,6 @@ class TrimVideo(Command):
 
     help_text = HelpText(
         commands_text="обрезание видео",
-        extra_text=(
-            "Формат для таймкодов: [%H:]%M:%S[.%MS], т.е. валидные таймкоды: 09:04, 9:04, 09:4, 9:4, 01:09:04, 9:04.123"
-        ),
         help_texts=[
             HelpTextItem(Role.USER, [
                 HelpTextItemCommand(
@@ -45,7 +42,10 @@ class TrimVideo(Command):
                     "(youtube ссылка с таймкодом) (таймкод конца)",
                     "обрезает по таймкодам"),
             ])
-        ]
+        ],
+        extra_text=(
+            "Формат для таймкодов: [%H:]%M:%S[.%MS], т.е. валидные таймкоды: 09:04, 9:04, 09:4, 9:4, 01:09:04, 9:04.123"
+        )
     )
 
     platforms = [Platform.TG]

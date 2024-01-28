@@ -11,14 +11,14 @@ class YesNo(Command):
 
     help_text = HelpText(
         commands_text="вернёт да или нет",
-        extra_text=(
-            "Для вызова команды просто в конце нужно написать знак вопроса"
-        ),
         help_texts=[
             HelpTextItem(Role.USER, [
                 HelpTextItemCommand(None, "вернёт да или нет")
             ])
-        ]
+        ],
+        extra_text=(
+            "Для вызова команды просто в конце нужно написать знак вопроса"
+        )
     )
 
     priority = -10

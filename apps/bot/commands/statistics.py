@@ -19,15 +19,15 @@ class Statistics(Command):
 
     help_text = HelpText(
         commands_text="статистика по победителям игр или по кол-ву созданных мемов",
-        extra_text=(
-            "Модули: петрович, ставки, бк, wordle, рулетка, мемы"
-        ),
         help_texts=[
             HelpTextItem(Role.USER, [
                 HelpTextItemCommand("[модуль=все]", "статистика по победителям игр или по кол-ву созданных мемов"),
                 HelpTextItemCommand("(петрович) [год=текущий]", "статистика по победителям петровича")
             ])
-        ]
+        ],
+        extra_text=(
+            "Модули: петрович, ставки, бк, wordle, рулетка, мемы"
+        ),
     )
 
     conversation = True

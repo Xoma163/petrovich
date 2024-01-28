@@ -76,6 +76,11 @@ class Media(Command):
 
     help_text = HelpText(
         commands_text="скачивает видео/фото из соцсетей и присылает его",
+        help_texts=[
+            HelpTextItem(Role.USER, [
+                HelpTextItemCommand("(ссылка на видео/пост)", "скачивает видео из соцсетей и присылает его")
+            ])
+        ],
         extra_text=(
             "Поддерживаемые соцсети: Youtube/Youtube Music/Reddit/TikTok/Instagram/Twitter/Pikabu/"
             "Yandex Music/Pinterest/Coub/VK Video/ScopeGG/TwitchClips/Facebook video/Premier\n\n"
@@ -85,12 +90,7 @@ class Media(Command):
             "Видосы из ютуба качаются автоматически только если длина ролика менее 2 минут. \n"
             "Вручную с указанием команды - скачается\n\n"
             "Некоторые сервисы доступны только доверенным пользователям: Twitter/Instagram/Yandex Music"
-        ),
-        help_texts=[
-            HelpTextItem(Role.USER, [
-                HelpTextItemCommand("(ссылка на видео/пост)", "скачивает видео из соцсетей и присылает его")
-            ])
-        ]
+        )
     )
 
     platforms = [Platform.TG]

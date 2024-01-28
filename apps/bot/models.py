@@ -59,7 +59,6 @@ class UserSettings(BaseSettings):
 
 
 class Chat(Platform):
-    id = models.AutoField(primary_key=True)
     chat_id = models.CharField('ID чата', max_length=20, default="")
     name = models.CharField('Название', max_length=256, default="", blank=True)
     is_banned = models.BooleanField('Забанен', default=False)
@@ -101,7 +100,6 @@ class Profile(models.Model):
         (GENDER_MALE, 'мужской'),
         (GENDER_NONE, 'не указан'))
 
-    id = models.AutoField(primary_key=True)
     name = models.CharField('Имя', max_length=40, blank=True, null=True)
     surname = models.CharField('Фамилия', max_length=40, blank=True, null=True)
     nickname_real = models.CharField("Прозвище", max_length=40, blank=True)
@@ -203,7 +201,6 @@ class User(Platform):
 
 
 class Bot(Platform):
-    id = models.AutoField(primary_key=True)
     bot_id = models.CharField('ID бота', max_length=20)
     name = models.CharField('Имя', max_length=40)
     avatar = models.ImageField('Аватар', blank=True, upload_to="bot/bot/avatar/")

@@ -10,14 +10,14 @@ class Taxi(Command):
 
     help_text = HelpText(
         commands_text="график отношения цены ко времени",
-        extra_text=(
-            "Доступные классы - эконом, комфорт, комфорт+, экспресс, курьер"
-        ),
         help_texts=[
             HelpTextItem(Role.TRUSTED, [
                 HelpTextItemCommand("[класс=эконом]", "график отношения цены ко времени")
             ])
-        ]
+        ],
+        extra_text=(
+            "Доступные классы - эконом, комфорт, комфорт+, экспресс, курьер"
+        )
     )
 
     access = Role.TRUSTED

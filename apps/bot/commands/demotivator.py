@@ -17,16 +17,16 @@ class Demotivator(Command):
 
     help_text = HelpText(
         commands_text="создаёт демотиватор",
-        extra_text=(
-            "Разделитель текста - перенос строки"
-        ),
         help_texts=[
             HelpTextItem(Role.USER, [
                 HelpTextItemCommand(
                     "(Изображения/Пересылаемое сообщение с изображением) (большой текст)[\\nмаленький текст]",
                     "создаёт демотиватор")
             ])
-        ]
+        ],
+        extra_text=(
+            "Разделитель текста - перенос строки"
+        )
     )
 
     args = 1

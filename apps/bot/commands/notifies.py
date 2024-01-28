@@ -42,9 +42,6 @@ class Notifies(Command):
 
     help_text = HelpText(
         commands_text="список напоминаний",
-        extra_text=(
-            "Максимум можно добавить 5 напоминаний\n\nПомощник для добавления crontab: https://crontab.guru/"
-        ),
         help_texts=[
             HelpTextItem(Role.USER, [
                 HelpTextItemCommand(None, "список активных напоминаний в лс, если в конфе, то только общие в конфе"),
@@ -54,7 +51,10 @@ class Notifies(Command):
                                     "добавляет постоянное напоминание"),
                 HelpTextItemCommand("удалить (текст/дата/crontab/id)", "удаляет напоминание")
             ])
-        ]
+        ],
+        extra_text=(
+            "Максимум можно добавить 5 напоминаний\n\nПомощник для добавления crontab: https://crontab.guru/"
+        )
     )
 
     platforms = [Platform.TG]

@@ -21,14 +21,14 @@ class VoiceRecognition(Command):
 
     help_text = HelpText(
         commands_text="распознаёт голосовое сообщение",
-        extra_text=(
-            "Если дан доступ к переписке, то распознает автоматически"
-        ),
         help_texts=[
             HelpTextItem(Role.USER, [
                 HelpTextItemCommand("(Пересланное сообщение с голосовым сообщением)", "распознаёт голосовое сообщение")
             ])
-        ]
+        ],
+        extra_text=(
+            "Если дан доступ к переписке, то распознает автоматически"
+        )
     )
 
     platforms = [Platform.TG]

@@ -11,15 +11,15 @@ class Text(Command):
 
     help_text = HelpText(
         commands_text="распознаёт текст на изображении",
-        extra_text=(
-            'Язык нужно указывать в 3 символа. Пример - "eng", "rus", "fre", "ger" и так далее'
-        ),
         help_texts=[
             HelpTextItem(Role.USER, [
                 HelpTextItemCommand("Текст (Изображения/Пересылаемое сообщение с изображением) [язык=rus]",
                                     "распознаёт текст на изображении")
             ])
-        ]
+        ],
+        extra_text=(
+            'Язык нужно указывать в 3 символа. Пример - "eng", "rus", "fre", "ger" и так далее'
+        )
     )
 
     attachments = [PhotoAttachment]

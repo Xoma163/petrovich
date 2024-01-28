@@ -23,16 +23,16 @@ class Wordle(Command):
 
     help_text = HelpText(
         commands_text="игра wordle",
-        extra_text=(
-            "[] означает, что буква стоит на месте\n() означает, что буква присутствует в слове"
-        ),
         help_texts=[
             HelpTextItem(Role.USER, [
                 HelpTextItemCommand(None, "запуск сессии игры"),
                 HelpTextItemCommand("сдаться", "удаление сессии"),
                 HelpTextItemCommand("(слово из 5 букв)", "попытка угадать слово")
             ])
-        ]
+        ],
+        extra_text=(
+            "[] означает, что буква стоит на месте\n() означает, что буква присутствует в слове"
+        )
     )
 
     platforms = [Platform.TG]
