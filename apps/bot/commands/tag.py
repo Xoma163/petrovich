@@ -4,7 +4,7 @@ from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.event.event import Event
-from apps.bot.classes.help_text import HelpTextItem, HelpText
+from apps.bot.classes.help_text import HelpTextItem, HelpText, HelpTextItemCommand
 from apps.bot.classes.messages.message import Message
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.service.models import Tag as TagModel
@@ -18,12 +18,13 @@ class Tag(Command):
         commands_text="тегает людей в конфе",
         help_texts=[
             HelpTextItem(Role.USER, [
-                "создать (название) - добавляет новую группу",
-                "удалить (название) - удаляет группу",
-                "добавить (название) (имя пользователя/никнейм) - добавляет пользователя в группу",
-                "убрать (название) (имя пользователя/никнейм) - удаляет пользователя из группы",
-                "список - выводит список всех тегов",
-                "(название) - тегает всех пользователей в группе",
+                HelpTextItemCommand("создать (название)", "добавляет новую группу"),
+                HelpTextItemCommand("удалить (название)", "удаляет группу"),
+                HelpTextItemCommand("добавить (название) (имя пользователя/никнейм)",
+                                    "добавляет пользователя в группу"),
+                HelpTextItemCommand("убрать (название) (имя пользователя/никнейм)", "удаляет пользователя из группы"),
+                HelpTextItemCommand("список", "выводит список всех тегов"),
+                HelpTextItemCommand("(название)", "тегает всех пользователей в группе")
             ])
         ]
     )

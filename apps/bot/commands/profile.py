@@ -6,7 +6,7 @@ from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Platform, Role
 from apps.bot.classes.const.exceptions import PWarning
-from apps.bot.classes.help_text import HelpText, HelpTextItem
+from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.models import Profile as ProfileModel
@@ -20,17 +20,18 @@ class Profile(Command):
         commands_text="позволяет управлять вашим профилем",
         help_texts=[
             HelpTextItem(Role.USER, [
-                "- присылает информацию по вашему профилю",
-                "(имя, фамилия, логин/id, никнейм) - присылает информацию по профилю человека в конфе",
-                "город (название города) - устанавливает новый город",
-                "город добавить (название города) - добавляет новый город в базу",
-                "др (дата) - устанавливает новый др",
-                "имя (имя) - устанавливает новое имя",
-                "фамилия (фамилия) - устанавливает новую фамилию",
-                "никнейм (никнейм) - устанавливает новый никнейм",
-                "пол (мужской/женский) - устанавливает новый пол",
-                "аватар - обновляет аватар",
-                "аватар (изображение) - обновляет аватар из вложения",
+                HelpTextItemCommand(None, "присылает информацию по вашему профилю"),
+                HelpTextItemCommand("(имя, фамилия, логин/id, никнейм)",
+                                    "присылает информацию по профилю человека в конфе"),
+                HelpTextItemCommand("город (название города)", "устанавливает новый город"),
+                HelpTextItemCommand("город добавить (название города)", "добавляет новый город в базу"),
+                HelpTextItemCommand("др (дата)", "устанавливает новый др"),
+                HelpTextItemCommand("имя (имя)", "устанавливает новое имя"),
+                HelpTextItemCommand("фамилия (фамилия)", "устанавливает новую фамилию"),
+                HelpTextItemCommand("никнейм (никнейм)", "устанавливает новый никнейм"),
+                HelpTextItemCommand("пол (мужской/женский)", "устанавливает новый пол"),
+                HelpTextItemCommand("аватар", "обновляет аватар"),
+                HelpTextItemCommand("аватар (изображение)", "обновляет аватар из вложения")
             ])
         ]
     )

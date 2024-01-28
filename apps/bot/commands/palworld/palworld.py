@@ -1,6 +1,6 @@
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role
-from apps.bot.classes.help_text import HelpText, HelpTextItem
+from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.utils.palworld_server import PalworldServer
 
@@ -15,9 +15,9 @@ class Palworld(Command):
         commands_text="действия с сервером Palworld",
         help_texts=[
             HelpTextItem(Role.PALWORLD, [
-                "- статус сервера",
-                "старт - стартует сервер palworld",
-                "стоп - стопит сервер palworld"
+                HelpTextItemCommand(None, "статус сервера"),
+                HelpTextItemCommand("старт", "стартует сервер"),
+                HelpTextItemCommand("стоп", "останавливает сервер")
             ])
         ],
         extra_text="Автоматические бэкапы раз в час. Автоматические рестарты в 2/10/18 часов."

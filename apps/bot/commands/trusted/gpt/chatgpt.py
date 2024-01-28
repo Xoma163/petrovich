@@ -7,7 +7,7 @@ from apps.bot.classes.const.consts import Role, Platform
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.event.event import Event
 from apps.bot.classes.event.tg_event import TgEvent
-from apps.bot.classes.help_text import HelpText, HelpTextItem
+from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.utils.cache import MessagesCache
@@ -27,9 +27,9 @@ class ChatGPT(Command):
         ),
         help_texts=[
             HelpTextItem(Role.TRUSTED, [
-                "(фраза/пересланное сообщение) - общение с ботом",
-                "(фраза) [картинка] - общение с ботом с учётом пересланной картинки",
-                "нарисуй (фраза/пересланное сообщение) - генерация картинки",
+                HelpTextItemCommand("(фраза/пересланное сообщение)", "общение с ботом"),
+                HelpTextItemCommand("(фраза) [картинка]", "общение с ботом с учётом пересланной картинки"),
+                HelpTextItemCommand("нарисуй (фраза/пересланное сообщение)", "генерация картинки"),
             ])
         ]
     )

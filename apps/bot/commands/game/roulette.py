@@ -4,7 +4,7 @@ from threading import Lock
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
-from apps.bot.classes.help_text import HelpTextItem, HelpText
+from apps.bot.classes.help_text import HelpTextItem, HelpText, HelpTextItemCommand
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.utils.utils import random_event, localize_datetime, remove_tz, decl_of_num, \
     get_random_int
@@ -116,19 +116,19 @@ class Roulette(Command):
         commands_text="игра рулетка",
         help_texts=[
             HelpTextItem(Role.USER, [
-                "- запуск рулетки",
-                "(аргументы) (ставка) - ставка рулетки",
-                f"0-{MAX_NUMBERS} (ставка) - ставка на число",
-                "столбец (1,2,3) (ставка) - ставка на столбец",
-                "строка (1,2,3) (ставка) - ставка на строку",
-                "красное/чёрное (ставка) - ставка на цвет",
-                "чётное/нечётное (ставка) - ставка на кратность",
-                "первая/вторая (ставка) - ставка на 1/2 части стола",
-                "баланс [игрок] - баланс",
-                "ставки - текущие ставки игроков",
-                "картинка - картинка рулетки",
-                "бонус - получение пособия по безработице",
-                "передать (игрок) (очки) - передача очков другому игроку"
+                HelpTextItemCommand(None, "запуск рулетки"),
+                HelpTextItemCommand("(аргументы) (ставка)", "ставка рулетки"),
+                HelpTextItemCommand(f"0-{MAX_NUMBERS} (ставка)", "ставка на число"),
+                HelpTextItemCommand("столбец (1,2,3) (ставка)", "ставка на столбец"),
+                HelpTextItemCommand("строка (1,2,3) (ставка)", "ставка на строку"),
+                HelpTextItemCommand("красное/чёрное (ставка)", "ставка на цвет"),
+                HelpTextItemCommand("чётное/нечётное (ставка)", "ставка на кратность"),
+                HelpTextItemCommand("первая/вторая (ставка)", "ставка на 1/2 части стола"),
+                HelpTextItemCommand("баланс [игрок]", "баланс"),
+                HelpTextItemCommand("ставки", "текущие ставки игроков"),
+                HelpTextItemCommand("картинка", "картинка рулетки"),
+                HelpTextItemCommand("бонус", "получение пособия по безработице"),
+                HelpTextItemCommand("передать (игрок) (очки)", "передача очков другому игроку")
             ])
         ]
     )

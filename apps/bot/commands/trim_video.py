@@ -7,7 +7,7 @@ from apps.bot.classes.command import Command
 from apps.bot.classes.const.activities import ActivitiesEnum
 from apps.bot.classes.const.consts import Platform, Role
 from apps.bot.classes.const.exceptions import PWarning
-from apps.bot.classes.help_text import HelpTextItem, HelpText
+from apps.bot.classes.help_text import HelpTextItem, HelpText, HelpTextItemCommand
 from apps.bot.classes.messages.attachments.link import LinkAttachment
 from apps.bot.classes.messages.attachments.video import VideoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
@@ -26,12 +26,24 @@ class TrimVideo(Command):
         ),
         help_texts=[
             HelpTextItem(Role.USER, [
-                "(вложенное видео) (таймкод начала) - обрезает видео с таймкода и до конца",
-                "(вложенное видео) (таймкод начала) (таймкод конца) - обрезает видео по таймкодам",
-                "(youtube ссылка) (таймкод начала) - обрезает с таймкода и до конца",
-                "(youtube ссылка) (таймкод начала) (таймкод конца) - обрезает по таймкодам",
-                "(youtube ссылка с таймкодом) - обрезает с таймкода и до конца",
-                "(youtube ссылка с таймкодом) (таймкод конца) - обрезает по таймкодам",
+                HelpTextItemCommand(
+                    "(вложенное видео) (таймкод начала)",
+                    "обрезает видео с таймкода и до конца"),
+                HelpTextItemCommand(
+                    "(вложенное видео) (таймкод начала) (таймкод конца)",
+                    "обрезает видео по таймкодам"),
+                HelpTextItemCommand(
+                    "(youtube ссылка) (таймкод начала)",
+                    "обрезает с таймкода и до конца"),
+                HelpTextItemCommand(
+                    "(youtube ссылка) (таймкод начала) (таймкод конца)",
+                    "обрезает по таймкодам"),
+                HelpTextItemCommand(
+                    "(youtube ссылка с таймкодом)",
+                    "обрезает с таймкода и до конца"),
+                HelpTextItemCommand(
+                    "(youtube ссылка с таймкодом) (таймкод конца)",
+                    "обрезает по таймкодам"),
             ])
         ]
     )

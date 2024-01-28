@@ -3,7 +3,7 @@ from datetime import datetime
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
-from apps.bot.classes.help_text import HelpText, HelpTextItem
+from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.commands.meme import Meme
 from apps.service.models import Horoscope as HoroscopeModel
@@ -56,10 +56,11 @@ class Horoscope(Command):
         commands_text="мемный гороскоп",
         help_texts=[
             HelpTextItem(Role.USER, [
-                "[знак зодиака = по др в профиле] - пришлёт мемный гороскоп на день для знака зодиака",
-                "все - пришлёт мемный гороскоп для всех знаков зодиака",
-                "инфо (знак зодиака) - пришлёт информацию о мемасе в гороскопе по знаку зодиака",
-                "конфа - пришлёт гороскоп для всех участников конфы"
+                HelpTextItemCommand("[знак зодиака = по др в профиле]",
+                                    "пришлёт мемный гороскоп на день для знака зодиака"),
+                HelpTextItemCommand("все", "пришлёт мемный гороскоп для всех знаков зодиака"),
+                HelpTextItemCommand("инфо (знак зодиака)", "пришлёт информацию о мемасе в гороскопе по знаку зодиака"),
+                HelpTextItemCommand("конфа", "пришлёт гороскоп для всех участников конфы")
             ])
         ]
     )

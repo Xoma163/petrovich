@@ -8,7 +8,7 @@ from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Platform, Role, rus_alphabet
 from apps.bot.classes.const.exceptions import PWarning, PSkip
-from apps.bot.classes.help_text import HelpText, HelpTextItem
+from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
 from apps.bot.classes.messages.response_message import ResponseMessageItem, ResponseMessage
 from apps.bot.utils.utils import random_event, send_message_session_or_edit
 from apps.games.models import Wordle as WordleModel
@@ -28,9 +28,9 @@ class Wordle(Command):
         ),
         help_texts=[
             HelpTextItem(Role.USER, [
-                "- запуск сессии игры",
-                "сдаться - удаление сессии",
-                "(слово из 5 букв) - попытка угадать слово"
+                HelpTextItemCommand(None, "запуск сессии игры"),
+                HelpTextItemCommand("сдаться", "удаление сессии"),
+                HelpTextItemCommand("(слово из 5 букв)", "попытка угадать слово")
             ])
         ]
     )

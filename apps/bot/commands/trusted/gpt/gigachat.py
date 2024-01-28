@@ -3,7 +3,7 @@ from apps.bot.classes.const.activities import ActivitiesEnum
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.event.tg_event import TgEvent
-from apps.bot.classes.help_text import HelpText, HelpTextItem
+from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.commands.trusted.gpt.chatgpt import ChatGPT
 from apps.bot.utils.utils import markdown_to_html
@@ -15,16 +15,16 @@ class GigaChat(ChatGPT):
 
     help_text = HelpText(
         commands_text="чат GigaChat",
+        help_texts=[
+            HelpTextItem(Role.TRUSTED, [
+                HelpTextItemCommand("(фраза/пересланное сообщение)", "общение с ботом"),
+                HelpTextItemCommand("нарисуй (фраза/пересланное сообщение)", "генерация картинки"),
+            ])
+        ],
         extra_text=(
             "Если отвечать на сообщения бота через кнопку \"Ответить\" то будет продолжаться непрерывный диалог.\n"
             "В таком случае необязательно писать команду, можно просто текст"
-        ),
-        help_texts=[
-            HelpTextItem(Role.TRUSTED, [
-                "(фраза/пересланное сообщение) - общение с ботом",
-                "нарисуй (фраза/пересланное сообщение) - генерация картинки"
-            ])
-        ]
+        )
     )
 
     def start(self) -> ResponseMessage:

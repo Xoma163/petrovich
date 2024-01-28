@@ -3,7 +3,7 @@ from wakeonlan import send_magic_packet
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
-from apps.bot.classes.help_text import HelpText, HelpTextItem
+from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.service.models import WakeOnLanUserData
 
@@ -16,8 +16,8 @@ class WOL(Command):
         commands_text="пробуждает ваше устройство",
         help_texts=[
             HelpTextItem(Role.TRUSTED, [
-                "- пробуждает ваше устройство",
-                "(название) - пробуждает ваше устройство"
+                HelpTextItemCommand(None, "пробуждает ваше устройство"),
+                HelpTextItemCommand("(название)", "пробуждает ваше устройство")
             ])
         ]
     )

@@ -2,7 +2,7 @@ from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Platform, Role
 from apps.bot.classes.const.exceptions import PWarning
-from apps.bot.classes.help_text import HelpText, HelpTextItem
+from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.models import Profile
 from apps.bot.utils.utils import get_role_by_str
@@ -19,7 +19,7 @@ class Who(Command):
         ),
         help_texts=[
             HelpTextItem(Role.USER, [
-                "(N) - присылает список людей с ролью N в данной конфе"
+                HelpTextItemCommand("(N)", "присылает список людей с ролью N в данной конфе")
             ])
         ]
     )

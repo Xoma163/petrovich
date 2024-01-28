@@ -5,7 +5,7 @@ from PIL import Image
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
-from apps.bot.classes.help_text import HelpText, HelpTextItem
+from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 from apps.bot.classes.messages.attachments.sticker import StickerAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
@@ -22,7 +22,9 @@ class Demotivator(Command):
         ),
         help_texts=[
             HelpTextItem(Role.USER, [
-                "(Изображения/Пересылаемое сообщение с изображением) (большой текст)[\\nмаленький текст] - создаёт демотиватор"
+                HelpTextItemCommand(
+                    "(Изображения/Пересылаемое сообщение с изображением) (большой текст)[\\nмаленький текст]",
+                    "создаёт демотиватор")
             ])
         ]
     )

@@ -1,12 +1,18 @@
-from typing import List, Optional
+from typing import List, Optional, Dict
 
 from apps.bot.classes.const.consts import Role
 
 
+class HelpTextItemCommand:
+    def __init__(self, args: str, description: str):
+        self.args: str = args
+        self.description: str = description
+
+
 class HelpTextItem:
-    def __init__(self, role: Role, texts: List[str]):
-        self.role = role
-        self.texts = texts
+    def __init__(self, role: Role, texts: List[HelpTextItemCommand]):
+        self.role: role = role
+        self.texts: List[HelpTextItemCommand] = texts
 
 
 class HelpText:
@@ -18,15 +24,15 @@ class HelpText:
     extra_text: Текст который также будет выводиться для команды /помощь {название команды} отдельно внизу
     """
 
-    def __init__(self, commands_text, extra_text=None, help_texts: List[HelpTextItem] = None):
+    def __init__(self, commands_text: str, extra_text: str = None, help_texts: List[HelpTextItem] = None):
 
         if help_texts is None:
             help_texts = []
 
-        self.commands_text = commands_text
-        self.extra_text = extra_text
+        self.commands_text: str = commands_text
+        self.extra_text: str = extra_text
 
-        self.items = {}
+        self.items: Dict[Role, HelpTextItem] = {}
         for hti in help_texts:
             hti: HelpTextItem
             self.items[hti.role] = hti

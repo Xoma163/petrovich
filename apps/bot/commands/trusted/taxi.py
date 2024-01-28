@@ -1,6 +1,6 @@
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role
-from apps.bot.classes.help_text import HelpText, HelpTextItem
+from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from petrovich.settings import STATIC_ROOT
 
@@ -15,7 +15,7 @@ class Taxi(Command):
         ),
         help_texts=[
             HelpTextItem(Role.TRUSTED, [
-                "[класс=эконом] - график отношения цены ко времени"
+                HelpTextItemCommand("[класс=эконом]", "график отношения цены ко времени")
             ])
         ]
     )

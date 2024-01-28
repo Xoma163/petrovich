@@ -8,7 +8,7 @@ from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Platform, Role
 from apps.bot.classes.const.exceptions import PWarning, PSkip
 from apps.bot.classes.event.event import Event
-from apps.bot.classes.help_text import HelpText, HelpTextItem
+from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
 from apps.bot.classes.messages.attachments.audio import AudioAttachment
 from apps.bot.classes.messages.attachments.videonote import VideoNoteAttachment
 from apps.bot.classes.messages.attachments.voice import VoiceAttachment
@@ -26,7 +26,7 @@ class VoiceRecognition(Command):
         ),
         help_texts=[
             HelpTextItem(Role.USER, [
-                "(Пересланное сообщение с голосовым сообщением) - распознаёт голосовое сообщение"
+                HelpTextItemCommand("(Пересланное сообщение с голосовым сообщением)", "распознаёт голосовое сообщение")
             ])
         ]
     )

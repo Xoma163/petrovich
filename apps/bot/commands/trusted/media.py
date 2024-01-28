@@ -26,7 +26,7 @@ from apps.bot.classes.const.activities import ActivitiesEnum
 from apps.bot.classes.const.consts import Platform, Role
 from apps.bot.classes.const.exceptions import PWarning, PSkip
 from apps.bot.classes.event.event import Event
-from apps.bot.classes.help_text import HelpText, HelpTextItem
+from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
 from apps.bot.classes.messages.attachments.link import LinkAttachment
 from apps.bot.classes.messages.response_message import ResponseMessageItem, ResponseMessage
 from apps.bot.commands.trim_video import TrimVideo
@@ -88,7 +88,7 @@ class Media(Command):
         ),
         help_texts=[
             HelpTextItem(Role.USER, [
-                "(ссылка на видео/пост) - скачивает видео из соцсетей и присылает его",
+                HelpTextItemCommand("(ссылка на видео/пост)", "скачивает видео из соцсетей и присылает его")
             ])
         ]
     )

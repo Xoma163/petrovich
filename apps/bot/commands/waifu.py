@@ -1,7 +1,7 @@
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
-from apps.bot.classes.help_text import HelpText, HelpTextItem
+from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.utils.utils import get_random_int
 
@@ -13,8 +13,8 @@ class Waifu(Command):
         commands_text="присылает несуществующую вайфу",
         help_texts=[
             HelpTextItem(Role.USER, [
-                "[номер=рандом] - присылает несуществующую вайфу по номеру (0-100000)",
-                "(слово) - присылает несуществующую вайфу вычисляя её номер"
+                HelpTextItemCommand("[номер=рандом]", "присылает несуществующую вайфу по номеру (0-100000)"),
+                HelpTextItemCommand("(слово)", "присылает несуществующую вайфу вычисляя её номер")
             ])
         ]
     )

@@ -1,7 +1,7 @@
 from apps.bot.api.everypixel import EveryPixel
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role
-from apps.bot.classes.help_text import HelpTextItem, HelpText
+from apps.bot.classes.help_text import HelpTextItem, HelpText, HelpTextItemCommand
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 
@@ -14,7 +14,8 @@ class EstimatePhoto(Command):
         commands_text="оценить качество фотографии",
         help_texts=[
             HelpTextItem(Role.USER, [
-                "(Изображение/Пересылаемое сообщение с изображением) - оценивает качество изображения"
+                HelpTextItemCommand("(Изображение/Пересылаемое сообщение с изображением)",
+                                    "оценивает качество изображения")
             ])
         ]
     )

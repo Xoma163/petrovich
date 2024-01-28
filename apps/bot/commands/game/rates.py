@@ -4,7 +4,7 @@ from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role, Platform
 from apps.bot.classes.const.exceptions import PWarning
-from apps.bot.classes.help_text import HelpText, HelpTextItem
+from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
 from apps.bot.classes.messages.response_message import ResponseMessageItem, ResponseMessage
 from apps.bot.utils.utils import get_random_int
 from apps.games.models import Rate as RateModel
@@ -20,7 +20,7 @@ class Rates(Command):
         commands_text="играет ставки",
         help_texts=[
             HelpTextItem(Role.USER, [
-                "- играет ставки"
+                HelpTextItemCommand(None, "играет ставки")
             ])
         ]
     )

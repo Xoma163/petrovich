@@ -2,7 +2,7 @@ from apps.bot.api.github import Github
 from apps.bot.api.imgur import Imgur
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role
-from apps.bot.classes.help_text import HelpTextItem, HelpText
+from apps.bot.classes.help_text import HelpTextItem, HelpText, HelpTextItemCommand
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 
@@ -14,11 +14,16 @@ class Issue(Command):
     help_text = HelpText(
         commands_text="добавляет проблему Петровича, которую нужно решить",
         extra_text=(
-            "Возможные теги: #Баг #Фича #Говнокод #Документация #Тест #хелп"
+            "Возможные теги: #Баг #Фича #Говнокод #Документация #Тест #хелп\n\n"
+            "Просьба по возможности указывать проблемы в следующем формате:\n"
+            "[Название команды/сервиса] Краткое описание проблемы\n"
+            "Описание проблемы в любом формате. Чем подробнее - тем лучше. Если есть логи и скриншоты - отлично\n"
+            "Теги"
         ),
         help_texts=[
             HelpTextItem(Role.USER, [
-                "(проблема)\\n[описание проблемы]\\n[теги] - добавляет проблему Петровича, которую нужно решить"
+                HelpTextItemCommand("(проблема)\\n[описание проблемы]\\n[теги]",
+                                    "добавляет проблему Петровича, которую нужно решить")
             ])
         ]
     )

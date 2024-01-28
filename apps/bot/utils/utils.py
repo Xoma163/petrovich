@@ -125,6 +125,7 @@ def get_help_texts_for_command(command, platform=None, roles: List[Role] = None)
     Получает help_texts для команды
     """
     from apps.bot.classes.bots.tg_bot import TgBot
+    from apps.bot.classes.help_text import HelpTextItemCommand
 
     if roles is None:
         roles = [Role.USER]
@@ -137,30 +138,30 @@ def get_help_texts_for_command(command, platform=None, roles: List[Role] = None)
     if result:
         result += '\n'
     if command.help_text:
-        if platform == Platform.TG:
-            lines = []
-            for role in roles:
-                res = command.help_text.get_help_text_item(role)
-                if res:
-                    lines += res.texts
-            full_help_texts_list = []
-            for line in lines:
-                dash_pos = line.find(" - ")
-                if dash_pos == -1:
-                    if line.startswith("- "):
-                        new_line = TgBot.get_formatted_text_line(f"/{command.name}") + f" {line[0:]}"
-                    else:
-                        new_line = f"/{command.name} {line}"
+        items: list[HelpTextItemCommand] = []
+        for role in roles:
+            if res := command.help_text.get_help_text_item(role):
+                items += res.texts
+        full_help_texts_list = []
+
+        for item in items:
+            if platform == Platform.TG:
+                if item.args:
+                    line = TgBot.get_formatted_text_line(f"/{command.name} {item.args}") + f" — {item.description}"
                 else:
-                    new_line = TgBot.get_formatted_text_line(f"/{command.name} {line[:dash_pos]}") + line[dash_pos:]
-                full_help_texts_list.append(new_line)
-            if command.help_text.extra_text:
-                full_help_texts_list.append("")
-                full_help_texts_list.append(command.help_text.extra_text)
+                    line = TgBot.get_formatted_text_line(f"/{command.name}") + f" — {item.description}"
+            else:
+                if item.args:
+                    line = f"/{command.name} {item.args} — {item.description}"
+                else:
+                    line = f"/{command.name} — {item.description}"
+            full_help_texts_list.append(line)
+
+        if command.help_text.extra_text:
+            full_help_texts_list.append("")
+            full_help_texts_list.append(command.help_text.extra_text)
             full_help_texts = "\n".join(full_help_texts_list)
             result += full_help_texts
-        else:
-            result += command.full_help_texts
     else:
         result += "У данной команды нет подробного описания"
     return result

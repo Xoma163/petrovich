@@ -9,7 +9,7 @@ from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role, Platform
 from apps.bot.classes.const.exceptions import PWarning
-from apps.bot.classes.help_text import HelpText, HelpTextItem
+from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
 from apps.bot.classes.messages.attachments.audio import AudioAttachment
 from apps.bot.classes.messages.attachments.document import DocumentAttachment
 from apps.bot.classes.messages.attachments.gif import GifAttachment
@@ -47,10 +47,12 @@ class Notifies(Command):
         ),
         help_texts=[
             HelpTextItem(Role.USER, [
-                "- список активных напоминаний в лс, если в конфе, то только общие в конфе",
-                "добавить (дата/дата и время/день недели) (сообщение/команда) [вложения] - добавляет напоминание",
-                "добавить (crontab) (сообщение/команда) [вложения] - добавляет постоянное напоминание",
-                "удалить (текст/дата/crontab/id) - удаляет напоминание"
+                HelpTextItemCommand(None, "список активных напоминаний в лс, если в конфе, то только общие в конфе"),
+                HelpTextItemCommand("добавить (дата/дата и время/день недели) (сообщение/команда) [вложения]",
+                                    "добавляет напоминание"),
+                HelpTextItemCommand("добавить (crontab) (сообщение/команда) [вложения]",
+                                    "добавляет постоянное напоминание"),
+                HelpTextItemCommand("удалить (текст/дата/crontab/id)", "удаляет напоминание")
             ])
         ]
     )

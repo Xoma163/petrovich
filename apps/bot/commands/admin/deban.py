@@ -2,7 +2,7 @@ from django.contrib.auth.models import Group
 
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role
-from apps.bot.classes.help_text import HelpTextItem, HelpText
+from apps.bot.classes.help_text import HelpTextItem, HelpText, HelpTextItemCommand
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 
 
@@ -13,7 +13,7 @@ class DeBan(Command):
         commands_text="разбан пользователя",
         help_texts=[
             HelpTextItem(Role.ADMIN, [
-                "(N) - разбан пользователя, где N - имя, фамилия, логин/id, никнейм"
+                HelpTextItemCommand("(N)", "разбан пользователя, где N - имя, фамилия, логин/id, никнейм")
             ])
         ]
     )

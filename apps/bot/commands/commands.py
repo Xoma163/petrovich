@@ -1,7 +1,7 @@
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
-from apps.bot.classes.help_text import HelpText, HelpTextItem
+from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.utils.utils import get_role_by_str
 
@@ -13,8 +13,8 @@ class Commands(Command):
         commands_text="список всех команд",
         help_texts=[
             HelpTextItem(Role.USER, [
-                "- список всех команд",
-                "(название роли) - список команд для роли"
+                HelpTextItemCommand(None, "список всех команд"),
+                HelpTextItemCommand("(название роли)", "список команд для роли")
             ])
         ]
     )

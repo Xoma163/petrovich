@@ -5,7 +5,7 @@ from django.db.models import Count
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
-from apps.bot.classes.help_text import HelpText, HelpTextItem
+from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.models import Profile
 from apps.games.models import Gamer
@@ -24,8 +24,8 @@ class Statistics(Command):
         ),
         help_texts=[
             HelpTextItem(Role.USER, [
-                "[модуль=все] - статистика по победителям игр или по кол-ву созданных мемов",
-                "(петрович) [год=текущий] - статистика по победителям петровича"
+                HelpTextItemCommand("[модуль=все]", "статистика по победителям игр или по кол-ву созданных мемов"),
+                HelpTextItemCommand("(петрович) [год=текущий]", "статистика по победителям петровича")
             ])
         ]
     )

@@ -1,7 +1,7 @@
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.event.event import Event
-from apps.bot.classes.help_text import HelpTextItem, HelpText
+from apps.bot.classes.help_text import HelpTextItem, HelpText, HelpTextItemCommand
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.utils.utils import random_event, replace_similar_letters
 
@@ -16,7 +16,7 @@ class YesNo(Command):
         ),
         help_texts=[
             HelpTextItem(Role.USER, [
-                "- вернёт да или нет"
+                HelpTextItemCommand(None, "вернёт да или нет")
             ])
         ]
     )

@@ -106,13 +106,12 @@ def get_text_for_documentation():
             ])
             help_text_items = []
             for help_text in help_texts:
-                args, description = help_text.split('- ', 1)
-                if args:
-                    command = f"{BOLD}/{cmd.name.capitalize()} {args.strip()}{BOLD}"
+                if help_text.args:
+                    command = f"{BOLD}/{cmd.name.capitalize()} {help_text.args}{BOLD}"
                 else:
                     command = f"{BOLD}/{cmd.name.capitalize()}{BOLD}"
 
-                help_text_item = f"{command} - {description}{NL}"
+                help_text_item = f"{command} - {help_text.description}{NL}"
 
                 help_text_item = help_text_item \
                     .replace('[', LEFT_QUOTE_NEW) \
@@ -126,3 +125,7 @@ def get_text_for_documentation():
             documentation.append(command_text)
     documentation = "\n".join(documentation)
     return documentation
+
+
+res = get_text_for_documentation()
+print()
