@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from apps.bot.models import Profile, Chat, Bot, User
+from apps.bot.models import Profile, Chat, Bot, User, ChatSettings, UserSettings
 
 
 @admin.register(Profile)
@@ -16,7 +16,7 @@ class ProfileAdmin(admin.ModelAdmin):
         (
             'Прочее',
             {
-                'fields': ('groups', 'chats', 'settings')
+                'fields': ('groups', 'chats', 'settings', 'gamer')
             }
         ),
         (
@@ -54,3 +54,13 @@ class ChatAdmin(admin.ModelAdmin):
 class BotAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'platform',)
     list_filter = ('platform',)
+
+
+@admin.register(UserSettings)
+class UserSettingsAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(ChatSettings)
+class ChatSettingsAdmin(admin.ModelAdmin):
+    pass

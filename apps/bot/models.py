@@ -110,7 +110,6 @@ class Profile(models.Model):
     # Здесь такой странный ForeignKey потому что проблема импортов
     city = models.ForeignKey('service.City', models.SET_NULL, verbose_name='Город', null=True, blank=True)
     avatar = models.ImageField('Аватар', blank=True, upload_to="bot/users/avatar/")
-
     groups = models.ManyToManyField(Group, verbose_name="Группы")
     chats = models.ManyToManyField(Chat, verbose_name="Чаты", blank=True, related_name="users")
 
@@ -119,8 +118,8 @@ class Profile(models.Model):
                                     related_name="profile")
 
     api_token = models.CharField("Токен для API", max_length=100, blank=True)
-    gamer2 = models.OneToOneField("games.Gamer", models.CASCADE, verbose_name="Игрок", null=True,
-                                  related_name="profile2")
+    gamer = models.OneToOneField("games.Gamer", models.CASCADE, verbose_name="Игрок", null=True,
+                                 related_name="profile")
 
     def save(self, **kwargs):
         # auto create settings model
