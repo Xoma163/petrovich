@@ -3,7 +3,6 @@ from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
-from apps.service.models import GPTPrePrompt
 
 
 class Settings(Command):
@@ -84,7 +83,6 @@ class Settings(Command):
             [['голосовые', 'голос', 'голосовухи', 'голосовуха', 'голосовое'], self.menu_voice],
             [['туретт', 'туррет', 'турретт', 'турет'], self.menu_turett],
             [['ругаться'], self.menu_swear],
-            [['gpt', 'chatgpt'], self.menu_gpt],
             [['default'], self.menu_default],
         ]
         method = self.handle_menu(menu, arg0)
@@ -130,49 +128,6 @@ class Settings(Command):
             return self.setup_default_chat_setting('celebrate_bday')
         else:
             return self.setup_default_profile_setting('celebrate_bday')
-
-    def menu_gpt(self) -> ResponseMessageItem:
-        self.check_sender(Role.TRUSTED)
-        self.check_args(2)
-
-        if self.event.is_from_chat:
-            if self.event.message.args[1] in ["конфа", "чат", "chat"]:
-                return self._gpt_common_conference_pm(self.event.chat.settings, "чата", 2)
-            return self._gpt_profile_conferece()
-        else:
-            return self._gpt_common_conference_pm(self.event.sender.settings, "лс", 1)
-
-    def _gpt_common_conference_pm(self, settings, save_for: str, arg_index_slice: int) -> ResponseMessageItem:
-        if self.event.message.args[arg_index_slice] in ["сбросить", "удалить", "очистить", "удалить"]:
-            preprompt = ""
-        else:
-            preprompt = " ".join(self.event.message.args_case[arg_index_slice:])
-
-        settings.gpt_preprompt = preprompt
-        settings.save()
-
-        if not preprompt:
-            answer = f'Очистил GPT preprompt для {save_for}'
-        else:
-            answer = f'Сохранил GPT preprompt для  {save_for}: "{preprompt}"'
-        return ResponseMessageItem(text=answer)
-
-    def _gpt_profile_conferece(self) -> ResponseMessageItem:
-        if self.event.message.args[1] in ["сбросить", "удалить", "очистить", "удалить"]:
-            preprompt = ""
-        else:
-            preprompt = " ".join(self.event.message.args_case[1:])
-
-        GPTPrePrompt.objects.update_or_create(
-            author=self.event.sender, chat=self.event.chat,
-            defaults={"gpt_preprompt": preprompt}
-        )
-
-        if not preprompt:
-            answer = f'Очистил ваш персональный GPT preprompt для чата'
-        else:
-            answer = f'Сохранил ваш персональный GPT preprompt для чата: "{preprompt}"'
-        return ResponseMessageItem(text=answer)
 
     # END COMMON
 
