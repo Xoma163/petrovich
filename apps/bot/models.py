@@ -125,16 +125,19 @@ class Profile(models.Model):
         # auto create settings model
         is_new = self.id is None
         if is_new:
+            # auto create settings
             us = UserSettings.objects.create()
-            us.save()
             self.settings = us
+
+            # auto create gamer
+            from apps.games.models import Gamer
+            gamer = Gamer.objects.create()
+            self.gamer = gamer
+
         super(Profile, self).save(**kwargs)
 
         if is_new:
-            # auto create gamer
-            from apps.games.models import Gamer
-            Gamer.objects.create(profile=self)
-
+            # auto add user group
             group_user = Group.objects.get(name=Role.USER.name)
             self.groups.add(group_user)
 
