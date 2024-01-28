@@ -125,7 +125,3 @@ def get_text_for_documentation():
             documentation.append(command_text)
     documentation = "\n".join(documentation)
     return documentation
-
-
-res = get_text_for_documentation()
-print()
