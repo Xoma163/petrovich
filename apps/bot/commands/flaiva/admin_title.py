@@ -17,7 +17,7 @@ class AdminTitle(Command):
                 HelpTextItemCommand(None, "сбрасывает вашу должность"),
                 HelpTextItemCommand("(должность)", "меняет вашу должность"),
                 HelpTextItemCommand("(пользователь) (должность)", "меняет должность участнику"),
-                HelpTextItemCommand("(пользователь)", "- сбрасывает должность участнику")
+                HelpTextItemCommand("(пользователь) -", "сбрасывает должность участнику")
             ])
         ]
     )
@@ -32,29 +32,30 @@ class AdminTitle(Command):
 
     def start(self) -> ResponseMessage:
         if not self.event.message.args:
-            self.bot.set_chat_admin_title(self.event.chat.chat_id, self.event.user.user_id, self.EMPTY)
+            self.change_title(self.event.sender, self.EMPTY)
             answer = "Сбросил вашу должность"
             return ResponseMessage(ResponseMessageItem(text=answer))
 
         if len(self.event.message.args) == 1:
             title = self.event.message.raw.split(' ', 1)[1]
-            self.bot.set_chat_admin_title(self.event.chat.chat_id, self.event.user.user_id, title)
-            answer = f"Поменял вашу должность на {title}"
+            self.change_title(self.event.sender, title)
+            answer = f"Поменял вашу должность на \"{title}\""
         else:
             self.check_args(2)
             name = self.event.message.args[0]
+            profile = self.bot.get_profile_by_name([name], self.event.chat)
             title = self.event.message.raw.split(' ', 2)[2]
             if title == '-':
                 title = self.EMPTY
-            if len(title) > 16:
-                raise PWarning(f"Максимальная длина должности - 16 символов, у вас - {len(title)}")
-
-            profile = self.bot.get_profile_by_name([name], self.event.chat)
-            user_id = profile.get_tg_user().user_id
-            self.bot.set_chat_admin_title(self.event.chat.chat_id, user_id, title)
+            self.change_title(profile, title)
             if title == self.EMPTY:
                 answer = f"Сбросил должность пользователю {self.bot.get_mention(profile)}"
             else:
-                answer = f"Поменял должность пользователю {self.bot.get_mention(profile)} на {title}"
+                answer = f"Поменял должность пользователю {self.bot.get_mention(profile)} на \"{title}\""
 
         return ResponseMessage(ResponseMessageItem(text=answer))
+
+    def change_title(self, profile, title):
+        if len(title) > 16:
+            raise PWarning(f"Максимальная длина должности - 16 символов, у вас - {len(title)}")
+        self.bot.set_chat_admin_title(self.event.chat.chat_id, profile.user.user_id, title)

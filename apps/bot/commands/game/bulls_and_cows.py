@@ -8,8 +8,6 @@ from apps.bot.classes.messages.response_message import ResponseMessageItem, Resp
 from apps.bot.utils.utils import decl_of_num, send_message_session_or_edit
 from apps.games.models import BullsAndCowsSession
 
-DIGITS_IN_GAME = 4
-
 
 class BullsAndCows(Command):
     name = "бк"
@@ -26,6 +24,8 @@ class BullsAndCows(Command):
         ]
     )
 
+    DIGITS_IN_GAME = 4
+
     def start(self) -> ResponseMessage:
         if self.event.chat:
             session = BullsAndCowsSession.objects.filter(chat=self.event.chat).first()
@@ -40,10 +40,9 @@ class BullsAndCows(Command):
     def start_game(self, session) -> ResponseMessage:
         if session:
             return self._send_message(session)
-        digits = [str(x) for x in range(10)]
-        random.shuffle(digits)
+
         new_obj = {
-            'number': "".join(digits[:DIGITS_IN_GAME]),
+            'number': self.get_random_number()
         }
         if self.event.is_from_chat:
             new_obj['chat'] = self.event.chat
@@ -65,6 +64,11 @@ class BullsAndCows(Command):
             return ResponseMessage(rmi, send=False)
         return ResponseMessage(rmi)
 
+    def get_random_number(self):
+        digits = [str(x) for x in range(10)]
+        random.shuffle(digits)
+        return "".join(digits[:self.DIGITS_IN_GAME])
+
     def play_game(self, session) -> ResponseMessage:
         if not session:
             button = self.bot.get_button('Начать игру', self.name)
@@ -77,14 +81,16 @@ class BullsAndCows(Command):
         arg0 = self.event.message.args[0]
         if arg0 in ['сдаться', 'сдаюсь', 'ойвсё', 'пощади', 'надоело']:
             correct_number_str = str(session.number)
-            correct_number_str = "0" * (DIGITS_IN_GAME - len(correct_number_str)) + correct_number_str
+            correct_number_str = "0" * (self.DIGITS_IN_GAME - len(correct_number_str)) + correct_number_str
             session.delete()
 
             answer = f"В следующий раз повезёт :(\nЗагаданное число - {correct_number_str}"
             return ResponseMessage(ResponseMessageItem(text=answer))
 
-        if len(arg0) != DIGITS_IN_GAME:
-            raise PWarning(f"В отгадываемом числе должно быть {DIGITS_IN_GAME} цифр")
+        if len(arg0) != self.DIGITS_IN_GAME:
+            decl = decl_of_num(self.DIGITS_IN_GAME, ['цифра', 'цифры', 'цифр'])
+            raise PWarning(f"В отгадываемом числе должно быть {self.DIGITS_IN_GAME} {decl}")
+
         self.int_args = [0]
         self.parse_int()
 
@@ -111,7 +117,7 @@ class BullsAndCows(Command):
         cows = 0
         correct_number_str = str(session.number)
         # Добиваем нулями если число начинается с нулей
-        correct_number_str = "0" * (DIGITS_IN_GAME - len(correct_number_str)) + correct_number_str
+        correct_number_str = "0" * (self.DIGITS_IN_GAME - len(correct_number_str)) + correct_number_str
         for i, argi in enumerate(arg0):
             if argi == correct_number_str[i]:
                 bulls += 1
@@ -126,7 +132,10 @@ class BullsAndCows(Command):
 
     def _send_message(self, session) -> ResponseMessage:
         message_without_duplications = "\n\n".join(list(dict.fromkeys(session.message_body.split('\n\n'))))
-        rmi = ResponseMessageItem(text=message_without_duplications, peer_id=self.event.peer_id,
-                                  message_thread_id=self.event.message_thread_id)
+        rmi = ResponseMessageItem(
+            text=message_without_duplications,
+            peer_id=self.event.peer_id,
+            message_thread_id=self.event.message_thread_id
+        )
         send_message_session_or_edit(self.bot, self.event, session, rmi, 8)
         return ResponseMessage(rmi, send=False)

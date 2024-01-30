@@ -11,7 +11,6 @@ class Apologize(Command):
     non_mentioned = True
 
     def start(self) -> ResponseMessage:
-        phrases = ["Извини", "Нет", "Сам извинись", "за что?", "КАВО", "Ты уверен?", "а может быть ты извинишься?",
-                   "ок"]
+        phrases = ["Извини", "Не", "Сам извинись", "за что?", "КАВО", "Ты уверен?", "а может быть ты извинишься?", "ок"]
         phrase = random_event(phrases)
         return ResponseMessage(ResponseMessageItem(text=phrase))

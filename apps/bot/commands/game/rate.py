@@ -65,8 +65,7 @@ class Rate(Command):
                 for rate_entity in rates:
                     available_list.pop(available_list.index(rate_entity.rate))
                 if len(available_list) == 0:
-                    raise PWarning(
-                        "Какая-то жесть, 100 игроков в ставке, я не могу больше придумать чисел, играйте((")
+                    raise PWarning("Какая-то жесть, 100 игроков в ставке, я не могу больше придумать чисел, играйте((")
                 arg = random_event(available_list)
 
             existed_another_rate = RateModel.objects.filter(chat=self.event.chat, rate=arg)

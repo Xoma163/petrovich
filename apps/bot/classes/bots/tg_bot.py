@@ -530,7 +530,7 @@ class TgBot(Bot):
             )
         ).start()
 
-    def get_mention(self, profile: Profile, name=None):
+    def get_mention(self, profile: Profile):
         """
         Получение меншона пользователя
         """

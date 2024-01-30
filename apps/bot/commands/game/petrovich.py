@@ -107,22 +107,53 @@ class Petrovich(Command):
 
             winner_petrovich = PetrovichGames(profile=winner, chat=self.event.chat)
             winner_petrovich.save()
-            if winner.gender and winner.gender == '1':
-                winner_gender = "Наша сегодняшняя Петровна дня"
-            else:
-                winner_gender = "Наш сегодняшний Петрович дня"
 
-            first_answer = random_event(
-                [
-                    "Такс такс такс, кто тут у нас",
-                    "*барабанная дробь*",
-                    "Вы готовы узнать победителя голодных игр?",
-                    "Ну шо, погнали",
-                    "Вы не поверите...",
-                    "Опять вы в игрульки свои играете да? Ну ладно"
-                ]
-            )
-            second_answer = f"{winner_gender} - {self.bot.get_mention(winner, str(winner))}"
+            winner_gender = "петровна" if winner.is_female else "петрович"
+
+            first_answer = random_event([
+                "Такс такс такс, кто тут у нас",
+                "*барабанная дробь*",
+                "Вы готовы узнать победителя голодных игр?",
+                "Ну шо, погнали",
+                "Вы не поверите...",
+                "Опять вы в игрульки свои играете да? Ну ладно",
+                "А КТО ЭТО У НАС ТУТ ТАКОЙ СЕГОДНЯ",
+                "Определяем обладателя бесплатного проездного на один день в метро",
+                "Ой, кто это тут у нас такой? Петрович дня, конечно же!",
+                "О, смотрите, кто тут у нас! Петрович дня, выходи!",
+                "Сканирую базу... Оп, нашел Петровича дня!",
+                "Кто просил Рандомную Справедливость™? Держите своего Петровича дня!",
+                "Магический шар говорит: 'Это он, Петрович дня!'",
+                "Внимание! Система выбрала жертву дня",
+                "Есть контакт! Приземляемся... И вот, на радость нам всем!",
+                "Дамы и господа, вашему вниманию представляется эксклюзивный Петрович дня!",
+                "Итак, кого из вас сегодня почитать?",
+                "Колесо фортуны вращается... останавливается...",
+                "Бинго! Нашлась особь для титула 'Петрович дня:",
+                "Опа! Сюрприз-мороженое сегодня без очереди получает:",
+                "Свечи гаснут... а suspense растет!",
+                "Ваши ставки, господа. Пора вскрыть карты.",
+                "И звезды ночи сегодня замигают для...",
+                "Чей это кристалл судьбы блестит ярче всех сегодня?",
+                "Так, стоп, хватит держать вас в напряжении!"
+            ])
+            second_answer = random_event([
+                f"{winner_gender} дня - {self.bot.get_mention(winner)}"
+                f"НЕВЕРОЯТНО, НО {winner_gender} дня - {self.bot.get_mention(winner)}",
+                f"Сначала я не поверил, что {winner_gender} дня - {self.bot.get_mention(winner)}, но куда деваться",
+                f"Мда, и этот человек - {self.bot.get_mention(winner)} сегодня {winner_gender} дня",
+                f"И вот он, крем нашего пирожного — {self.bot.get_mention(winner)}!",
+                f"Аплодируем стоя: {winner_gender} дня — {self.bot.get_mention(winner)}!",
+                f"Игра окончена. Победитель — {self.bot.get_mention(winner)}. Принимайте поздравления, {winner_gender} дня!",
+                f"Кто здесь {winner_gender} дня? Правильно, {self.bot.get_mention(winner)}!",
+                f"Как в казино, только без денег. {winner_gender} дня — {self.bot.get_mention(winner)}, поздравляем!",
+                f"На волне случайности выносится вердикт: {winner_gender} дня — {self.bot.get_mention(winner)}.",
+                f"Все путем, {self.bot.get_mention(winner)}. Сегодня ты — звезда, {winner_gender} дня!",
+                f"Забудьте о зодиаках, настоящий {winner_gender} дня здесь — {self.bot.get_mention(winner)}.",
+                f"Собаки лают, караван идет, а {winner_gender} дня всё тот же — {self.bot.get_mention(winner)}"
+                f"Расклад таков: {winner_gender} дня почетно присваивается {self.bot.get_mention(winner)}. Ну что, парад готовим?"
+                f"Ладно, примем как данность: {winner_gender} дня – это {self.bot.get_mention(winner)}"
+            ])
 
             return ResponseMessage([
                 ResponseMessageItem(text=first_answer),

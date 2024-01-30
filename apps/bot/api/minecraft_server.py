@@ -6,10 +6,9 @@ from apps.bot.utils.utils import check_command_time
 
 class MinecraftServer:
 
-    def __init__(self, ip, port=25565, event=None, delay=None, names=None, map_url=None):
+    def __init__(self, ip, port=25565, delay=None, names=None, map_url=None):
         self.ip = ip
         self.port = port
-        self.event = event
 
         self.delay = delay
         self.names = names

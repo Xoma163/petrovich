@@ -1,5 +1,3 @@
-from django.contrib.auth.models import Group
-
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
@@ -23,16 +21,13 @@ class Ban(Command):
 
     def start(self) -> ResponseMessage:
         profile = self.bot.get_profile_by_name(self.event.message.args, self.event.chat)
-
         if profile.check_role(Role.ADMIN):
             raise PWarning("Нельзя банить админа")
-        group_banned = Group.objects.get(name=Role.BANNED.name)
-        profile.groups.add(group_banned)
-        profile.save()
+        profile.add_role(Role.BANNED)
 
-        if profile.gender == profile.GENDER_FEMALE:
-            answer = "Забанена"
+        if profile.is_female:
+            answer = f"{profile} забанена"
         else:
-            answer = "Забанен"
+            answer = f"{profile} забанен"
 
         return ResponseMessage(ResponseMessageItem(text=answer))

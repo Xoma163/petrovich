@@ -26,6 +26,8 @@ class Role(Enum):
     def has_value(cls, value):
         return value in cls._value2member_map_
 
+    def __str__(self):
+        return self.value
 
 class Platform(Enum):
     TG = 'tg'

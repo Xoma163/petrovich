@@ -45,6 +45,8 @@ class Github(API):
         r_json = r.json()
 
         if r.status_code != 200:
+            if r.status_code == 404:
+                raise PError(f"Иша с id {_id} не найдена")
             raise PError("Не удалось закрыть issue на github")
         return r_json
 

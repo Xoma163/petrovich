@@ -25,5 +25,5 @@ class DeIssue(Command):
         _id = self.event.message.args[0]
         github_api = Github()
         github_api.delete_issue(_id)
-        answer = "Ишю закрыта"
+        answer = f"Проблема \"{_id}\" закрыта"
         return ResponseMessage(ResponseMessageItem(text=answer))

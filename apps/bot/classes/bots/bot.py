@@ -158,7 +158,7 @@ class Bot(Thread):
 
         # Если указана настройка реагировать на команды без слеша, но команду мы не нашли, то скипаем
         # Но только в случае если нет явного упоминания нас, тогда точно даём ответ
-        if event.chat.settings.mentioning and event.message and not event.message.mentioned:
+        if event.chat and event.chat.settings.mentioning and event.message and not event.message.mentioned:
             raise PSkip()
 
         similar_command, keyboard = self.get_similar_command(event, COMMANDS)
@@ -447,7 +447,7 @@ class Bot(Thread):
         keyboard = list(buttons_chunks)
         return keyboard
 
-    def get_mention(self, profile: Profile, name=None):
+    def get_mention(self, profile: Profile):
         """
         Получение меншона пользователя
         """

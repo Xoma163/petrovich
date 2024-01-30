@@ -14,8 +14,9 @@ class EstimatePhoto(Command):
         commands_text="оценить качество фотографии",
         help_texts=[
             HelpTextItem(Role.USER, [
-                HelpTextItemCommand("(Изображение/Пересылаемое сообщение с изображением)",
-                                    "оценивает качество изображения")
+                HelpTextItemCommand(
+                    "(Изображение/Пересылаемое сообщение с изображением)",
+                    "оценивает качество изображения")
             ])
         ]
     )

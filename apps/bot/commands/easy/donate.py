@@ -13,10 +13,10 @@ class Donate(Command):
 
     def start(self) -> ResponseMessage:
         url = 'https://www.donationalerts.com/r/xoma163'
-        attachment = self.bot.get_photo_attachment(
+        photo = self.bot.get_photo_attachment(
             f"{STATIC_ROOT}/bot/img/donate.jpg",
             peer_id=self.event.peer_id,
             filename="petrovich_donate.jpg"
         )
         answer = self.bot.get_formatted_url("Задонатить", url)
-        return ResponseMessage(ResponseMessageItem(text=answer, attachments=[attachment]))
+        return ResponseMessage(ResponseMessageItem(text=answer, attachments=[photo]))

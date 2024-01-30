@@ -13,5 +13,5 @@ class Issues(Command):
 
     def start(self) -> ResponseMessage:
         url = "https://github.com/Xoma163/petrovich/issues"
-        answer = self.bot.get_formatted_url("Ишюс", url)
+        answer = self.bot.get_formatted_url("Ишюсы", url)
         return ResponseMessage(ResponseMessageItem(text=answer))

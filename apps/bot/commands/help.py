@@ -46,12 +46,12 @@ class Help(Command):
         return ResponseMessage(ResponseMessageItem(text=answer))
 
     @staticmethod
-    def find_command_by_name(command_name: str):
+    def find_command_by_name(name: str):
         """
         Ищет команду по имени
         """
         from apps.bot.initial import COMMANDS
         for command in COMMANDS:
-            if command_name == command.name or (command.names and command_name in command.names):
+            if name == command.name or (command.names and name in command.names):
                 return command
         raise PWarning("Я не знаю такой команды")

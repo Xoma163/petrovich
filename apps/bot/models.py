@@ -142,6 +142,14 @@ class Profile(models.Model):
         image = att.get_bytes_io_content()
         self.avatar.save(f"avatar_{str(self)}.{att.ext}", File(image))
 
+    def add_role(self, role: Role):
+        group = Group.objects.get(name=role.name)
+        self.groups.add(group)
+
+    def remove_role(self, role: Role):
+        group = Group.objects.get(name=role.name)
+        self.groups.remove(group)
+
     def check_role(self, role: Role):
         group = self.groups.filter(name=role.name)
         return group.exists()
@@ -151,6 +159,14 @@ class Profile(models.Model):
 
     def get_tg_user(self):
         return self.user.get(platform=PlatformEnum.TG.name)
+
+    @property
+    def is_female(self):
+        return self.gender == self.GENDER_FEMALE
+
+    @property
+    def is_male(self):
+        return self.gender == self.GENDER_MALE
 
     class Meta:
         verbose_name = "Профиль"

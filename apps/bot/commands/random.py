@@ -14,8 +14,8 @@ class Random(Command):
         help_texts=[
             HelpTextItem(Role.USER, [
                 HelpTextItemCommand(None, "рандомное число в диапазоне[0:1]"),
-                HelpTextItemCommand("N", "рандомное число в заданном диапазоне[1:N]"),
-                HelpTextItemCommand("N,M", "рандомное число в заданном диапазоне[N:M]")
+                HelpTextItemCommand("[N]", "рандомное число в заданном диапазоне[1:N]"),
+                HelpTextItemCommand("[N,M]", "рандомное число в заданном диапазоне[N:M]")
             ])
         ]
     )

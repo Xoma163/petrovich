@@ -81,8 +81,8 @@ class Subscribe(Command):
         if existed_sub.exists():
             if data['playlist_id']:
                 raise PWarning(
-                    f"Ты уже и так подписан на плейлист {existed_sub.first().playlist_title} канала {existed_sub.first().channel_title}")
-            raise PWarning(f"Ты уже и так подписан на канал {existed_sub.first().channel_title}")
+                    f"Ты уже и так подписан на плейлист \"{existed_sub.first().playlist_title}\" канала \"{existed_sub.first().channel_title}\"")
+            raise PWarning(f"Ты уже и так подписан на канал \"{existed_sub.first().channel_title}\"")
 
         data.update({
             "author": self.event.user,
@@ -93,9 +93,9 @@ class Subscribe(Command):
         sub = SubscribeModel(**data)
         sub.save()
         if sub.playlist_id:
-            answer = f'Подписал на плейлист {data["playlist_title"]} канала {data["channel_title"]}'
+            answer = f"Подписал на плейлист \"{data['playlist_title']}\" канала \"{data['channel_title']}\""
         else:
-            answer = f'Подписал на канал {data["channel_title"]}'
+            answer = f"Подписал на канал \"{data['channel_title']}\""
         return ResponseMessageItem(text=answer)
 
     @staticmethod
@@ -134,9 +134,9 @@ class Subscribe(Command):
         playlist_title = sub.playlist_title
         sub.delete()
         if playlist_title:
-            answer = f"Удалил подписку на плейлист {playlist_title} канала {sub_title}"
+            answer = f"Удалил подписку на плейлист \"{playlist_title}\" канала \"{sub_title}\""
         else:
-            answer = f"Удалил подписку на канал {sub_title}"
+            answer = f"Удалил подписку на канал \"{sub_title}\""
         return ResponseMessageItem(text=answer)
 
     def get_sub(self, filters) -> SubscribeModel:

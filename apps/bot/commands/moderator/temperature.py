@@ -18,8 +18,13 @@ class Temperature(Command):
     def start(self) -> ResponseMessage:
         command = "sensors"
         output = do_the_linux_command(command)
+        answer = []
 
-        find_text = 'Adapter: ISA adapter\nPackage id 0:'
-        answer = f"AVG:{output[output.find(find_text) + len(find_text):].replace('(high = +80.0°C, crit = +100.0°C)', '')}"
+        for row in output.split('\n'):
+            index = row.find('(')
+            if index != -1:
+                row = row[:index].strip()
+            answer.append(row)
+        answer = "\n".join(answer)
 
         return ResponseMessage(ResponseMessageItem(text=answer))

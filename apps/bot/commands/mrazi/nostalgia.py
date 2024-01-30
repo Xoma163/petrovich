@@ -153,7 +153,7 @@ class Nostalgia(Command):
             if all(y in item['text'].lower() for y in search_list):
                 searched_indexes.append(i)
         if len(searched_indexes) == 0:
-            answer = f'Ничего не нашёл по запросу "{search_query}"'
+            answer = f"Ничего не нашёл по запросу \"{search_query}\""
             return ResponseMessage(ResponseMessageItem(text=answer))
         total_pages = (len(searched_indexes) - 1) // self.MAX_PER_PAGE + 1
         if page * self.MAX_PER_PAGE > len(searched_indexes):
@@ -167,7 +167,7 @@ class Nostalgia(Command):
             button = self.bot.get_button(f"{author}: {data[index]['text']}", self.name, [index + 1], )
             buttons.append(button)
         keyboard = self.bot.get_inline_keyboard(buttons)
-        answer = f"Результаты по запросу {search_query}.\n\nСтраница {page}/{total_pages}"
+        answer = f"Результаты по запросу \"{search_query}\".\n\nСтраница {page}/{total_pages}"
         return ResponseMessage(ResponseMessageItem(text=answer, keyboard=keyboard))
 
     def menu_range(self, index_from: int = None, index_to: int = None) -> ResponseMessage:

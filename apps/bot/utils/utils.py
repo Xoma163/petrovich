@@ -11,7 +11,7 @@ from urllib.parse import urlparse
 import pytz
 from PIL import Image, ImageDraw, ImageFont
 
-from apps.bot.classes.const.consts import Role, Platform
+from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.messages.attachments.attachment import Attachment
 from apps.bot.classes.messages.response_message import ResponseMessageItem
@@ -148,16 +148,10 @@ def get_help_texts_for_command(command, platform=None, roles: List[Role] = None)
         full_help_texts_list = []
 
         for item in items:
-            if platform == Platform.TG:
-                if item.args:
-                    line = TgBot.get_formatted_text_line(f"/{command.name} {item.args}") + f" {DASH} {item.description}"
-                else:
-                    line = TgBot.get_formatted_text_line(f"/{command.name}") + f" {DASH} {item.description}"
+            if item.args:
+                line = TgBot.get_formatted_text_line(f"/{command.name} {item.args}") + f" {DASH} {item.description}"
             else:
-                if item.args:
-                    line = f"/{command.name} {item.args} {DASH} {item.description}"
-                else:
-                    line = f"/{command.name} {DASH} {item.description}"
+                line = TgBot.get_formatted_text_line(f"/{command.name}") + f" {DASH} {item.description}"
             full_help_texts_list.append(line)
 
         if command.help_text.extra_text:
@@ -222,6 +216,7 @@ def get_role_by_str(role_str: str):
         ('администрация', 'администратор', 'админы', 'админ', 'главный', 'власть', 'господин', 'хозяин'): Role.ADMIN,
         ('moderators', 'moderator', 'модераторы', 'модератор', 'модеры', 'модер'): Role.MODERATOR,
         ('майнкрафт', 'майн'): Role.MINECRAFT,
+        ('палворлд', 'пал'): Role.PALWORLD,
         ('забанен', 'бан'): Role.BANNED,
         ('доверенный', 'проверенный'): Role.TRUSTED,
         ('мразь', 'мразота', 'мрази'): Role.MRAZ,

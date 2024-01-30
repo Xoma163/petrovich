@@ -1,5 +1,3 @@
-from django.contrib.auth.models import Group
-
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.help_text import HelpTextItem, HelpText, HelpTextItemCommand
@@ -22,13 +20,11 @@ class DeBan(Command):
 
     def start(self) -> ResponseMessage:
         profile = self.bot.get_profile_by_name(self.event.message.args, self.event.chat)
-        group_banned = Group.objects.get(name=Role.BANNED.name)
-        profile.groups.remove(group_banned)
-        profile.save()
+        profile.remove_role(Role.BANNED)
 
-        if profile.gender == profile.GENDER_FEMALE:
-            answer = "Разбанена"
+        if profile.is_female:
+            answer = f"{profile} разбанена"
         else:
-            answer = "Разбанен"
+            answer = f"{profile} разбанен"
 
         return ResponseMessage(ResponseMessageItem(text=answer))
