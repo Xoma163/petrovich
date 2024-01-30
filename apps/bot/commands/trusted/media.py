@@ -14,6 +14,7 @@ from apps.bot.api.pikabu import Pikabu
 from apps.bot.api.pinterest import Pinterest
 from apps.bot.api.premier import Premier
 from apps.bot.api.reddit import Reddit
+from apps.bot.api.spotify import Spotify
 from apps.bot.api.tiktok import TikTok
 from apps.bot.api.twitter import Twitter
 from apps.bot.api.vk.video import VKVideo
@@ -50,6 +51,7 @@ SCOPE_GG_URLS = ('app.scope.gg',)
 CLIPS_TWITCH_URLS = ('clips.twitch.tv',)
 FACEBOOK_URLS = ('www.facebook.com', 'facebook.com', 'fb.watch')
 PREMIERE_URLS = ('premier.one',)
+SPOTIFY_URLS = ('open.spotify.com',)
 
 MEDIA_URLS = tuple(
     YOUTUBE_URLS +
@@ -66,7 +68,8 @@ MEDIA_URLS = tuple(
     SCOPE_GG_URLS +
     CLIPS_TWITCH_URLS +
     FACEBOOK_URLS +
-    PREMIERE_URLS
+    PREMIERE_URLS +
+    SPOTIFY_URLS
 )
 
 
@@ -83,7 +86,7 @@ class Media(Command):
         ],
         extra_text=(
             "Поддерживаемые соцсети: Youtube/Youtube Music/Reddit/TikTok/Instagram/Twitter/Pikabu/"
-            "Yandex Music/Pinterest/Coub/VK Video/ScopeGG/TwitchClips/Facebook video/Premier\n\n"
+            "Yandex Music/Pinterest/Coub/VK Video/ScopeGG/TwitchClips/Facebook video/Premier/Spotify\n\n"
             "Ключ --nomedia позволяет не запускать команду\n"
             "Ключ --audio позволяет скачивать аудиодорожку для видео с ютуба\n"
             "Ключ --thread позволяет скачивать пост с комментариями автора для твиттера\n\n"
@@ -190,6 +193,7 @@ class Media(Command):
             CLIPS_TWITCH_URLS: self.get_clips_twitch_video,
             FACEBOOK_URLS: self.get_facebook_video,
             PREMIERE_URLS: self.get_premiere_video,
+            SPOTIFY_URLS: self.get_spotify_music,
         }
 
         urls = get_urls_from_text(source)
@@ -247,9 +251,14 @@ class Media(Command):
         ytm_api = YoutubeMusic()
         data = ytm_api.get_info(url)
         title = f"{data['artists']} - {data['title']}"
-        audio_att = self.bot.get_audio_attachment(data['content'], peer_id=self.event.peer_id,
-                                                  filename=f"{title}.{data['format']}",
-                                                  thumb=data['cover_url'], artist=data['artists'], title=data['title'])
+        audio_att = self.bot.get_audio_attachment(
+            data['content'],
+            peer_id=self.event.peer_id,
+            filename=f"{title}.{data['format']}",
+            thumb=data['cover_url'],
+            artist=data['artists'],
+            title=data['title']
+        )
         return [audio_att], ""
 
     @retry(3, Exception, sleep_time=2)
@@ -520,6 +529,24 @@ class Media(Command):
             attachments = [self.bot.get_video_attachment(cache.video, peer_id=self.event.peer_id)]
         msg = f"{data['title']}\nCкачать можно здесь {self.bot.get_formatted_url('здесь', MAIN_SITE + cache.video.url)}"
         return attachments, msg
+
+    def get_spotify_music(self, url):
+
+        track_id = re.findall(r'track\/(\w*)', url)[0]
+
+        s = Spotify()
+        data = s.get_info(track_id)
+
+        title = f"{data['artists']} - {data['title']}"
+        audio_att = self.bot.get_audio_attachment(
+            data['content'],
+            peer_id=self.event.peer_id,
+            filename=f"{title}.{data['format']}",
+            thumb=data['cover_url'],
+            artist=data['artists'],
+            title=data['title']
+        )
+        return [audio_att], ""
 
     @staticmethod
     def _save_video_to_media_cache(channel_id: str, video_id: str, name: str, content: bytes):
