@@ -49,13 +49,13 @@ class Minecraft(Command):
         self.check_args(1)
         self.server.start()
 
-        answer = f"Стартуем майн"
+        answer = "Стартуем майн"
         return ResponseMessageItem(text=answer)
 
     def menu_stop(self) -> ResponseMessageItem:
         self.check_args(1)
         self.server.stop()
-        answer = f"Финишируем майн"
+        answer = "Финишируем майн"
         return ResponseMessageItem(text=answer)
 
     def menu_status(self) -> ResponseMessageItem:
