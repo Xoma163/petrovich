@@ -283,6 +283,9 @@ class ChatGPT(Command):
             answer = "\n\n".join(results)
         else:
             answer = self._get_stat_for_user(self.event.sender)
+            if not answer:
+                raise PWarning("Ещё не было использований GPT")
+
         return ResponseMessage(ResponseMessageItem(answer))
 
     # ToDo учитывать timezone

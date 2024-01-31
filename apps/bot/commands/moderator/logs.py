@@ -124,6 +124,8 @@ class Logs(Command):
             item_json = json.loads(file_rows[i])
             if filter_level and item_json['levelname'] not in filter_level:
                 continue
+            if 'action' in item_json and item_json['action'] == 'sendChatAction':
+                continue
             if 'event' in item_json and 'raw' in item_json['event']:
                 item_json['event'].pop('raw')
 
