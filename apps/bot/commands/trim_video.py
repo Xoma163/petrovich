@@ -8,6 +8,7 @@ from apps.bot.classes.const.activities import ActivitiesEnum
 from apps.bot.classes.const.consts import Platform, Role
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.help_text import HelpTextItem, HelpText, HelpTextItemCommand
+from apps.bot.classes.messages.attachments.audio import AudioAttachment
 from apps.bot.classes.messages.attachments.link import LinkAttachment
 from apps.bot.classes.messages.attachments.video import VideoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
@@ -20,14 +21,14 @@ class TrimVideo(Command):
     names = ["обрежь", "обрез", "обрезание", "отрежь", "отрезание", "crop", "cut", "trim", "обрезать", "отрезать"]
 
     help_text = HelpText(
-        commands_text="обрезание видео",
+        commands_text="обрезание видео/аудио",
         help_texts=[
             HelpTextItem(Role.USER, [
                 HelpTextItemCommand(
-                    "(вложенное видео) (таймкод начала)",
+                    "(вложенное видео/аудио) (таймкод начала)",
                     "обрезает видео с таймкода и до конца"),
                 HelpTextItemCommand(
-                    "(вложенное видео) (таймкод начала) (таймкод конца)",
+                    "(вложенное видео/аудио) (таймкод начала) (таймкод конца)",
                     "обрезает видео по таймкодам"),
                 HelpTextItemCommand(
                     "(youtube ссылка) (таймкод начала)",
@@ -51,13 +52,13 @@ class TrimVideo(Command):
     platforms = [Platform.TG]
     bot: TgBot
 
-    attachments = [LinkAttachment, VideoAttachment]
+    attachments = [LinkAttachment, VideoAttachment, AudioAttachment]
     args = 1
 
     TIMECODE_FORMAT = "%H:%M:%S.%f"
 
     def start(self) -> ResponseMessage:
-        att = self.event.get_all_attachments([LinkAttachment, VideoAttachment])[0]
+        att = self.event.get_all_attachments([LinkAttachment, VideoAttachment, AudioAttachment])[0]
         try:
             self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.UPLOAD_VIDEO)
             if isinstance(att, LinkAttachment):
@@ -69,8 +70,11 @@ class TrimVideo(Command):
         finally:
             self.bot.stop_activity_thread()
 
-        video = self.bot.get_video_attachment(video_bytes, peer_id=self.event.peer_id)
-        return ResponseMessage(ResponseMessageItem(attachments=[video]))
+        if isinstance(att, AudioAttachment):
+            attachment = self.bot.get_audio_attachment(video_bytes, peer_id=self.event.peer_id)
+        else:
+            attachment = self.bot.get_video_attachment(video_bytes, peer_id=self.event.peer_id)
+        return ResponseMessage(ResponseMessageItem(attachments=[attachment]))
 
     def trim_att_by_link(self, att) -> bytes:
         args = [x for x in self.event.message.args]

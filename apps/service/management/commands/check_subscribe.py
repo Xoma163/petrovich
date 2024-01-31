@@ -14,7 +14,7 @@ from apps.bot.classes.const.exceptions import PSubscribeIndexError
 from apps.bot.classes.event.event import Event
 from apps.bot.classes.messages.message import Message
 from apps.bot.classes.messages.response_message import ResponseMessageItem, ResponseMessage
-from apps.bot.commands.trusted.media import Media
+from apps.bot.commands.media import Media
 from apps.service.models import Subscribe, VideoCache
 from petrovich.settings import env
 

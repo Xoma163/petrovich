@@ -372,14 +372,14 @@ class Bot(Thread):
         """
         try:
             self.set_activity_thread(peer_id, ActivitiesEnum.UPLOAD_AUDIO)
-            va = AudioAttachment()
-            va.parse(audio, filename=filename)
-            va.thumb = thumb
-            va.title = title
-            va.artist = artist
+            aa = AudioAttachment()
+            aa.parse(audio, filename=filename)
+            aa.thumb = thumb
+            aa.title = title
+            aa.artist = artist
         finally:
             self.stop_activity_thread()
-        return va
+        return aa
 
     def get_video_attachment(self, document, peer_id=None, filename=None):
         """

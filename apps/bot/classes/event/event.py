@@ -107,7 +107,7 @@ class Event:
         """
         from apps.bot.commands.tag import Tag
         from apps.bot.commands.meme import Meme as MemeCommand
-        from apps.bot.commands.trusted.media import Media
+        from apps.bot.commands.media import Media
         from apps.bot.commands.voice_recognition import VoiceRecognition
 
         # ToDo: get automatically

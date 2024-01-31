@@ -113,7 +113,7 @@ class Attachment:
             self.get_file(peer_id)
         return self.private_download_url
 
-    def download_content(self, peer_id=None, use_proxy=False) -> bytes:
+    def download_content(self, peer_id=None, use_proxy=False, stream=False) -> bytes:
         if not self.content:
             download_url = self._get_download_url(peer_id)
             if self.private_download_path:
@@ -124,7 +124,7 @@ class Attachment:
                     self.delete_download_path_file()
             else:
                 proxies = {"https": env.str("SOCKS5_PROXY"), "http": env.str("SOCKS5_PROXY")} if use_proxy else {}
-                self.content = requests.get(download_url, proxies=proxies).content
+                self.content = requests.get(download_url, proxies=proxies, stream=stream).content
         return self.content
 
     def get_bytes_io_content(self, peer_id=None) -> BytesIO:
