@@ -1,6 +1,7 @@
 import datetime
 from typing import Optional
 
+import pytz
 from django.db.models import Q, Sum
 
 from apps.bot.api.gpt.chatgpt import ChatGPTAPI
@@ -17,7 +18,7 @@ from apps.bot.models import Profile, Chat
 from apps.bot.utils.cache import MessagesCache
 from apps.bot.utils.utils import markdown_to_html
 from apps.service.models import GPTPrePrompt, GPTUsage
-from petrovich.settings import env
+from petrovich.settings import env, DEFAULT_TIME_ZONE
 
 
 class ChatGPT(Command):
@@ -274,26 +275,33 @@ class ChatGPT(Command):
             profiles = Profile.objects.filter(chats=self.event.chat)
             results = []
             for profile in profiles:
-                results.append(self._get_stat_for_user(profile))
+                res = self._get_stat_for_user(profile)
+                if res:
+                    results.append(self._get_stat_for_user(profile))
             answer = "\n\n".join(results)
         else:
             answer = self._get_stat_for_user(self.event.sender)
         return ResponseMessage(ResponseMessageItem(answer))
 
     # ToDo учитывать timezone
-    @staticmethod
-    def _get_stat_for_user(profile: Profile) -> str:
-        dt_now = datetime.datetime.utcnow()
-        stats_today = GPTUsage.objects.filter(author=profile, created_at__date=dt_now.date()) \
-            .aggregate(Sum('cost'))['cost__sum']
-        stats_week = GPTUsage.objects.filter(author=profile, created_at__gte=dt_now - datetime.timedelta(days=7)) \
-            .aggregate(Sum('cost'))['cost__sum']
-        stats_month = GPTUsage.objects.filter(author=profile, created_at__gte=dt_now - datetime.timedelta(days=30)) \
-            .aggregate(Sum('cost'))['cost__sum']
-        stats_all = GPTUsage.objects.filter(author=profile) \
-            .aggregate(Sum('cost'))['cost__sum']
+    def _get_stat_for_user(self, profile: Profile) -> Optional[str]:
+        dt_now = datetime.datetime.now(pytz.timezone(DEFAULT_TIME_ZONE))
+        stats_today = self._get_stat_db_profile(Q(author=profile, created_at__date=dt_now.date()))
+        stats_week = self._get_stat_db_profile(Q(author=profile, created_at__gte=dt_now - datetime.timedelta(days=7)))
+        stats_month = self._get_stat_db_profile(Q(author=profile, created_at__gte=dt_now - datetime.timedelta(days=30)))
+        stats_all = self._get_stat_db_profile(Q(author=profile))
+        if not stats_all:
+            return None
+
         return f"{profile}:\n" \
                f"Сегодня - $ {round(stats_today, 3)}\n" \
                f"Неделя - $ {round(stats_week, 3)}\n" \
                f"Месяц - $ {round(stats_month, 3)}\n" \
                f"Всего - $ {round(stats_all, 3)}\n"
+
+    @staticmethod
+    def _get_stat_db_profile(q):
+        res = GPTUsage.objects.filter(q).aggregate(Sum('cost')).get('cost__sum', 0)
+        if res is None:
+            res = 0
+        return res
