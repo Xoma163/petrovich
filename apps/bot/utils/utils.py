@@ -525,3 +525,13 @@ def retry(times, exceptions, sleep_time=0):
         return newfn
 
     return decorator
+
+#
+# def read_in_chunks(file_object, chunk_size=2 ** 26):
+#     """Lazy function (generator) to read a file piece by piece.
+#     Default chunk size: 1k."""
+#     while True:
+#         data = file_object.read(chunk_size)
+#         if not data:
+#             file_object.close()
+#         yield data

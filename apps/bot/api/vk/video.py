@@ -81,10 +81,10 @@ class VKVideo(SubscribeService):
 
         aa = AudioAttachment()
         aa.public_download_url = f"{parsed_url.scheme}://{parsed_url.hostname}/{audio_representations[-1]['BaseURL']}"
-        aa.download_content(headers=self.headers)
+        aa.download_content(headers=self.headers, stream=True)
         va = VideoAttachment()
         va.public_download_url = f"{parsed_url.scheme}://{parsed_url.hostname}/{video_representations[-1]['BaseURL']}"
-        va.download_content(headers=self.headers)
+        va.download_content(headers=self.headers, stream=True)
 
         return va, aa
 
