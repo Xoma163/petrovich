@@ -157,8 +157,8 @@ def get_help_texts_for_command(command, platform=None, roles: List[Role] = None)
         if command.help_text.extra_text:
             full_help_texts_list.append("")
             full_help_texts_list.append(command.help_text.extra_text)
-            full_help_texts = "\n".join(full_help_texts_list)
-            result += full_help_texts
+        full_help_texts = "\n".join(full_help_texts_list)
+        result += full_help_texts
     else:
         result += "У данной команды нет подробного описания"
     return result
@@ -290,12 +290,14 @@ def get_thumbnail_for_image(image: Attachment, size) -> bytes:
     """
     Получение thumbnail для изображения
     """
+    # ToDo: #657
     content = image.download_content()
     _image = Image.open(BytesIO(content))
     _image.thumbnail((size, size))
     thumb_byte_arr = io.BytesIO()
     _image.save(thumb_byte_arr, format="PNG")
     thumb_byte_arr.seek(0)
+    # ToDo: #657
     return thumb_byte_arr.read()
 
 
