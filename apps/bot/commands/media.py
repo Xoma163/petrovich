@@ -29,10 +29,11 @@ from apps.bot.classes.const.exceptions import PWarning, PSkip
 from apps.bot.classes.event.event import Event
 from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
 from apps.bot.classes.messages.attachments.link import LinkAttachment
+from apps.bot.classes.messages.attachments.video import VideoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessageItem, ResponseMessage
 from apps.bot.commands.trim_video import TrimVideo
 from apps.bot.utils.utils import get_urls_from_text, markdown_to_html, retry
-from apps.bot.utils.video.trimmer import VideoTrimmer
+from apps.bot.utils.video.video_handler import VideoHandler
 from apps.service.models import VideoCache
 from petrovich.settings import MAIN_SITE
 
@@ -227,6 +228,7 @@ class Media(Command):
             if start_pos:
                 tm = TrimVideo()
                 video_content = tm.trim_link_pos(url, start_pos, end_pos)
+                va = self.bot.get_video_attachment(video_content, peer_id=self.event.peer_id)
                 text = None
             else:
                 data = yt_api.get_video_info(url, max_filesize_mb=max_filesize_mb)
@@ -236,16 +238,16 @@ class Media(Command):
                     raise PWarning(
                         "Видосы до 2х минут не парсятся без упоминания. Если в этом есть нужда - жми на кнопку",
                         keyboard=keyboard)
-                video_content = requests.get(data['download_url']).content
+                va = VideoAttachment()
+                va.public_download_url = data['download_url']
                 if data['start_pos']:
                     tm = TrimVideo()
-                    video_content = tm.trim(video_content, data['start_pos'], data['end_pos'])
+                    video_content = tm.trim(va, data['start_pos'], data['end_pos'])
+                    va = self.bot.get_video_attachment(video_content, peer_id=self.event.peer_id)
                 text = data['title']
         finally:
             self.bot.stop_activity_thread()
-        video = self.bot.get_video_attachment(video_content, peer_id=self.event.peer_id)
-
-        return [video], text
+        return [va], text
 
     def get_youtube_audio(self, url) -> (list, str):
         ytm_api = YoutubeMusic()
@@ -270,10 +272,11 @@ class Media(Command):
             button = self.bot.get_button("Повторить", command=self.name, args=[url])
             keyboard = self.bot.get_inline_keyboard([button])
             raise PWarning(e.msg, keyboard=keyboard)
-        video_content = requests.get(video_url).content
+        va = VideoAttachment()
+        va.public_download_url = video_url
 
-        video = self.bot.get_video_attachment(video_content, peer_id=self.event.peer_id, filename="tiktok.mp4")
-        return [video], None
+        video = self.bot.get_video_attachment(video_url, peer_id=self.event.peer_id, filename="tiktok.mp4")
+        return [va], None
 
     def get_reddit_content(self, url) -> (list, str):
         rs = Reddit()
@@ -330,7 +333,6 @@ class Media(Command):
             attachment = self.bot.get_photo_attachment(data['download_url'], peer_id=self.event.peer_id)
         elif data['content_type'] == i_api.CONTENT_TYPE_VIDEO:
             attachment = self.bot.get_video_attachment(data['download_url'], peer_id=self.event.peer_id)
-            # attachment.download_content(use_proxy=True)
         else:
             raise PWarning("Ссылка на инстаграмм не является видео/фото")
         return [attachment], data['caption']
@@ -477,10 +479,10 @@ class Media(Command):
         url = f"https://media.allstar.gg/{first_id}/clips/{clip_id}.mp4"
 
         video = self.bot.get_video_attachment(url, peer_id=self.event.peer_id)
-        vt = VideoTrimmer()
+        vh = VideoHandler(video)
         try:
             self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.UPLOAD_VIDEO)
-            trimmed_video = vt.trim(video.download_content(), 0, clip_length)
+            trimmed_video = vh.trim(0, clip_length)
         finally:
             self.bot.stop_activity_thread()
 

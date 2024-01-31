@@ -1,55 +1,30 @@
-from tempfile import NamedTemporaryFile
-
-from requests import Response
-
+from apps.bot.classes.messages.attachments.audio import AudioAttachment
+from apps.bot.classes.messages.attachments.video import VideoAttachment
 from apps.bot.utils.do_the_linux_command import do_the_linux_command
+from apps.bot.utils.video.video_common import VideoCommon
 
 
-class AudioVideoMuxer:
-    CHUNK_SIZE = 2 ** 26  # 64mb
+class AudioVideoMuxer(VideoCommon):
 
-    def __init__(self):
-        self.tmp_video_file = NamedTemporaryFile()
-        self.tmp_audio_file = NamedTemporaryFile()
-        self.tmp_output_file = NamedTemporaryFile()
+    def __init__(self, video: VideoAttachment, audio: AudioAttachment):
+        super().__init__()
+        self.video: VideoAttachment = video
+        self.audio: AudioAttachment = audio
 
-    def mux(self, video_content, audio_content):
+    def mux(self):
         try:
-            self._place_files(video_content, audio_content)
-            self._mux_video_and_audio()
+            self._place_file(self.tmp_video_file, self.video)
+            self._place_file(self.tmp_audio_file, self.audio)
+
+            self._mux()
         finally:
-            self._delete_video_audio_files()
-        return self._get_video_bytes()
+            self.close_file(self.tmp_video_file)
+            self.close_file(self.tmp_audio_file)
+        video = self._get_video_bytes(self.tmp_output_file)
+        self.close_all()
+        return video
 
-    def _place_files(self, video_content, audio_content):
-        self._place_file(self.tmp_video_file.name, video_content)
-        self._place_file(self.tmp_audio_file.name, audio_content)
-
-    def _place_file(self, path, content):
-        with open(path, 'wb') as file:
-            if isinstance(content, Response):
-                response = content
-                file.write(next(response.iter_content(chunk_size=self.CHUNK_SIZE)))
-                for chunk in response.iter_content(chunk_size=self.CHUNK_SIZE):
-                    file.write(chunk)
-            else:
-                file.write(content)
-
-    def _mux_video_and_audio(self):
+    def _mux(self):
         do_the_linux_command(
-            f"ffmpeg6 -i {self.tmp_video_file.name} -i {self.tmp_audio_file.name} -c:v copy -c:a copy -strict -2 -f mp4 -y {self.tmp_output_file.name}")
-
-    def _delete_video_audio_files(self):
-        self.tmp_video_file.close()
-        self.tmp_audio_file.close()
-
-    def _delete_output_file(self):
-        self.tmp_output_file.close()
-
-    def _get_video_bytes(self):
-        try:
-            with open(self.tmp_output_file.name, 'rb') as file:
-                file_bytes = file.read()
-        finally:
-            self._delete_output_file()
-        return file_bytes
+            f"ffmpeg6 -i {self.tmp_video_file.name} -i {self.tmp_audio_file.name} -c:v copy -c:a copy -strict -2 -f mp4 -y {self.tmp_output_file.name}"
+        )

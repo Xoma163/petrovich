@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Tuple, Optional
+from typing import Tuple, Optional, Union
 
 from apps.bot.api.youtube.video import YoutubeVideo
 from apps.bot.classes.bots.tg_bot import TgBot
@@ -13,7 +13,7 @@ from apps.bot.classes.messages.attachments.link import LinkAttachment
 from apps.bot.classes.messages.attachments.video import VideoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.utils.utils import prepend_symbols, append_symbols
-from apps.bot.utils.video.trimmer import VideoTrimmer
+from apps.bot.utils.video.video_handler import VideoHandler
 
 
 class TrimVideo(Command):
@@ -93,7 +93,9 @@ class TrimVideo(Command):
         data = yt_api.get_video_info(link, _timedelta=delta, max_filesize_mb=max_filesize_mb)
         if data['filesize'] > 100 and not self.event.sender.check_role(Role.TRUSTED):
             raise PWarning("Нельзя грузить отрезки из ютуба больше 100мб")
-        return self.trim(data['download_url'], start_pos, end_pos)
+        la = LinkAttachment()
+        la.public_download_url = data['download_url']
+        return self.trim(la, start_pos, end_pos)
 
     def trim_video(self, video: VideoAttachment) -> bytes:
         start_pos = self.parse_timecode(self.event.message.args[0])
@@ -101,13 +103,12 @@ class TrimVideo(Command):
         if len(self.event.message.args) > 1:
             end_pos = self.parse_timecode(self.event.message.args[1])
         self.check_positions(start_pos, end_pos)
-        video = video.download_content(self.event.peer_id)
         return self.trim(video, start_pos, end_pos)
 
     @staticmethod
-    def trim(video, start_pos: str, end_pos: str) -> bytes:
-        vt = VideoTrimmer()
-        return vt.trim(video, start_pos, end_pos)
+    def trim(video: Optional[Union[VideoAttachment, LinkAttachment]], start_pos: str, end_pos: str) -> bytes:
+        vh = VideoHandler(video)
+        return vh.trim(start_pos, end_pos)
 
     @classmethod
     def parse_timecode(cls, timecode: str) -> str:

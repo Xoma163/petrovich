@@ -14,6 +14,7 @@ from petrovich.settings import env
 
 
 class Attachment:
+    # CHUNK_SIZE = 2 ** 26  # 64mb
 
     def __init__(self, _type):
         self.type = _type
@@ -105,6 +106,8 @@ class Attachment:
             self.content = img_byte_arr.read()
         elif isinstance(file_like_object, FieldFile):
             self.content = file_like_object.file.read()
+        # elif isinstance(file_like_object, types.GeneratorType):
+        #     self.content = file_like_object
 
     def _get_download_url(self, peer_id=None):
         if self.public_download_url:
@@ -113,18 +116,21 @@ class Attachment:
             self.get_file(peer_id)
         return self.private_download_url
 
-    def download_content(self, peer_id=None, use_proxy=False, stream=False) -> bytes:
-        if not self.content:
-            download_url = self._get_download_url(peer_id)
-            if self.private_download_path:
-                try:
-                    with open(self.private_download_path, 'rb') as file:
-                        self.content = file.read()
-                finally:
-                    self.delete_download_path_file()
-            else:
-                proxies = {"https": env.str("SOCKS5_PROXY"), "http": env.str("SOCKS5_PROXY")} if use_proxy else {}
-                self.content = requests.get(download_url, proxies=proxies, stream=stream).content
+    def download_content(self, peer_id=None, use_proxy=False, headers=None) -> bytes:
+        if self.content:
+            return self.content
+
+        download_url = self._get_download_url(peer_id)
+        if self.private_download_path:
+            try:
+                with open(self.private_download_path, 'rb') as file:
+                    self.content = file.read()
+            finally:
+                self.delete_download_path_file()
+        else:
+            proxies = {"https": env.str("SOCKS5_PROXY"), "http": env.str("SOCKS5_PROXY")} if use_proxy else {}
+            # self.content = requests.get(download_url, proxies=proxies, headers=headers, stream=True).iter_content(self.CHUNK_SIZE)
+            self.content = requests.get(download_url, proxies=proxies, headers=headers, stream=True).content
         return self.content
 
     def get_bytes_io_content(self, peer_id=None) -> BytesIO:

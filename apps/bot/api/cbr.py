@@ -18,7 +18,7 @@ class CBRAPI(API):
         } for x in filters_list}
 
     def get_ex_rates(self) -> dict:
-        r = self.requests.get(self.URL, stream=True)
+        r = self.requests.get(self.URL)
         elements = BeautifulSoup(r.content, 'xml').find('ValCurs').find_all("Valute")
 
         for elem in elements:

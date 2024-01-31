@@ -1,39 +1,28 @@
-from tempfile import NamedTemporaryFile
+from typing import Optional, Union
 
+from apps.bot.classes.messages.attachments.link import LinkAttachment
+from apps.bot.classes.messages.attachments.video import VideoAttachment
 from apps.bot.utils.do_the_linux_command import do_the_linux_command
+from apps.bot.utils.video.video_common import VideoCommon
 
 
-class VideoTrimmer:
-    def __init__(self):
-        self.tmp_file_in = None
-        self.tmp_file_out = None
+class VideoTrimmer(VideoCommon):
+    def __init__(self, video: Optional[Union[VideoAttachment, LinkAttachment]]):
+        super().__init__()
+        self.video = video
 
-    def trim(self, content_or_link, start_pos, end_pos=None) -> bytes:
-        content = None
-        url = None
-
-        if isinstance(content_or_link, bytes):
-            content = content_or_link
-        else:
-            url = content_or_link
-
+    def trim(self, start_pos, end_pos=None) -> bytes:
         try:
-            self.tmp_file_in = NamedTemporaryFile()
-            self.tmp_file_out = NamedTemporaryFile()
-            if url:
-                do_the_linux_command(f"curl -o {self.tmp_file_in.name} {url}")
-            else:
-                with open(self.tmp_file_in.name, 'wb') as file:
-                    file.write(content)
-            cmd = [f"ffmpeg6 -i {self.tmp_file_in.name} -ss {start_pos}"]
+            self._place_file(self.tmp_video_file, self.video)
+
+            cmd = [f"ffmpeg6 -i {self.tmp_video_file.name} -ss {start_pos}"]
             if end_pos:
                 cmd.append(f"-to {end_pos}")
-            cmd.append(f"-f mp4 -y {self.tmp_file_out.name}")
+            cmd.append(f"-f mp4 -y {self.tmp_output_file.name}")
             cmd = " ".join(cmd)
             do_the_linux_command(cmd)
-            with open(self.tmp_file_out.name, 'rb') as file:
-                file_bytes = file.read()
+
+            file_bytes = self._get_video_bytes(self.tmp_output_file)
         finally:
-            self.tmp_file_out.close()
-            self.tmp_file_out.close()
+            self.close_all()
         return file_bytes

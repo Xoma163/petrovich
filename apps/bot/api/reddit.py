@@ -5,8 +5,10 @@ import requests
 from bs4 import BeautifulSoup
 
 from apps.bot.classes.const.exceptions import PWarning
+from apps.bot.classes.messages.attachments.audio import AudioAttachment
+from apps.bot.classes.messages.attachments.video import VideoAttachment
 from apps.bot.utils.utils import get_url_file_ext
-from apps.bot.utils.video.muxer import AudioVideoMuxer
+from apps.bot.utils.video.video_handler import VideoHandler
 
 
 class Reddit:
@@ -75,11 +77,15 @@ class Reddit:
         # Нет нужды делать временные файлы для джоина видео и аудио, если аудио нет, то просто кидаем видео и всё
         if not audio_url:
             return video_url
-        avm = AudioVideoMuxer()
-        video_content = requests.get(video_url).content
-        audio_content = requests.get(audio_url).content
-        video = avm.mux(video_content, audio_content)
-        return video
+
+        va = VideoAttachment()
+        va.public_download_url = video_url
+
+        aa = AudioAttachment()
+        aa.public_download_url = audio_url
+
+        vh = VideoHandler(video=va, audio=aa)
+        return vh.mux()
 
     def _get_text_from_post(self) -> str:
         return self.data['selftext']

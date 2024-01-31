@@ -4,7 +4,8 @@ from typing import List
 from apps.bot.api.handler import API
 from apps.bot.api.subscribe_service import SubscribeService
 from apps.bot.classes.const.exceptions import PWarning
-from apps.bot.utils.video.downloader import VideoDownloader
+from apps.bot.classes.messages.attachments.video import VideoAttachment
+from apps.bot.utils.video.video_handler import VideoHandler
 
 
 class Premier(SubscribeService, API):
@@ -62,8 +63,11 @@ class Premier(SubscribeService, API):
 
     def download_video(self, video_id: str, url: str) -> bytes:
         master_m3u8_url = self._get_download_url(url, video_id)
-        vd = VideoDownloader()
-        return vd.download(master_m3u8_url, threads=10)
+        va = VideoAttachment()
+        va.m3u8_url = master_m3u8_url
+
+        vh = VideoHandler(video=va)
+        return vh.download()
 
     def _get_videos(self, channel_id: str, params: dict, log_results: bool = True) -> dict:
         r = self.requests.get(

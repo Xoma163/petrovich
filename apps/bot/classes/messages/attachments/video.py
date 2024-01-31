@@ -13,6 +13,8 @@ class VideoAttachment(Attachment):
         self.thumb = None
         self.activity = ActivitiesEnum.UPLOAD_VIDEO
 
+        self.m3u8_url = None
+
     def parse_tg(self, event):
         self.duration = event.get('duration')
         self.width = event.get('width')

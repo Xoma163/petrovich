@@ -1,17 +1,17 @@
 import json
 import re
-from typing import Tuple, Optional, List, Union
+from typing import Tuple, Optional, List
 from urllib.parse import urlparse
 
 import requests
 import xmltodict
 from bs4 import BeautifulSoup
-from requests import Response
 
 from apps.bot.api.subscribe_service import SubscribeService
 from apps.bot.classes.const.exceptions import PWarning
-from apps.bot.utils.video.downloader import VideoDownloader
-from apps.bot.utils.video.muxer import AudioVideoMuxer
+from apps.bot.classes.messages.attachments.audio import AudioAttachment
+from apps.bot.classes.messages.attachments.video import VideoAttachment
+from apps.bot.utils.video.video_handler import VideoHandler
 
 
 class VKVideo(SubscribeService):
@@ -37,11 +37,11 @@ class VKVideo(SubscribeService):
 
     def get_video(self, url) -> bytes:
         player_url = self._get_player_url(url)
-        video_content, audio_content = self._get_content(player_url)
-        if audio_content is not None:
-            avm = AudioVideoMuxer()
-            return avm.mux(video_content, audio_content)
-        return video_content
+        va, aa = self._get_video_audio(player_url)
+        if aa is not None:
+            vh = VideoHandler(video=va, audio=aa)
+            return vh.mux()
+        return va.download_content(headers=self.headers)
 
     def _get_player_url(self, url: str) -> str:
         r = requests.get(url, headers=self.headers)
@@ -53,22 +53,20 @@ class VKVideo(SubscribeService):
         player_url = bs4.find("meta", property="og:video").attrs['content']
         return player_url
 
-    def _get_content(self, player_url: str) -> Tuple[Optional[Union[bytes, Response]], Optional[Response]]:
+    def _get_video_audio(self, player_url: str) -> Tuple[VideoAttachment, Optional[AudioAttachment]]:
         r = requests.get(player_url, headers=self.headers)
         js_code = re.findall('var playerParams = (\{.*\})', r.text)[0]
         info = json.loads(js_code)
         info = info.get('params')[0]
-        dash_webm = info.get('dash_webm')
-        dash_sep = info.get('dash_sep')
-        hls = info.get('hls')
-        if dash_webm:
+
+        if dash_webm := info.get('dash_webm'):
             return self._get_video_audio_dash(dash_webm)
-        elif dash_sep:
+        elif dash_sep := info.get('dash_sep'):
             return self._get_video_audio_dash(dash_sep)
-        else:
+        elif hls := info.get('hls'):
             return self._get_video_hls(hls)
 
-    def _get_video_audio_dash(self, dash_webm_url) -> Tuple[requests.Response, requests.Response]:
+    def _get_video_audio_dash(self, dash_webm_url) -> Tuple[VideoAttachment, AudioAttachment]:
         parsed_url = urlparse(dash_webm_url)
 
         r = requests.get(dash_webm_url, headers=self.headers).content
@@ -81,17 +79,20 @@ class VKVideo(SubscribeService):
         audio_representations = adaptation_sets[1]['Representation']
         audio_representations = list(sorted(audio_representations, key=lambda x: int(x['@bandwidth'])))
 
-        audio_url = f"{parsed_url.scheme}://{parsed_url.hostname}/{audio_representations[-1]['BaseURL']}"
-        video_url = f"{parsed_url.scheme}://{parsed_url.hostname}/{video_representations[-1]['BaseURL']}"
+        aa = AudioAttachment()
+        aa.public_download_url = f"{parsed_url.scheme}://{parsed_url.hostname}/{audio_representations[-1]['BaseURL']}"
+        aa.download_content(headers=self.headers)
+        va = VideoAttachment()
+        va.public_download_url = f"{parsed_url.scheme}://{parsed_url.hostname}/{video_representations[-1]['BaseURL']}"
+        va.download_content(headers=self.headers)
 
-        video_content = requests.get(video_url, headers=self.headers, stream=True)
-        audio_content = requests.get(audio_url, headers=self.headers, stream=True)
-        return video_content, audio_content
+        return va, aa
 
     @staticmethod
-    def _get_video_hls(hls_url) -> tuple[bytes, None]:
-        vd = VideoDownloader()
-        return vd.download(hls_url, threads=10), None
+    def _get_video_hls(hls_url) -> Tuple[VideoAttachment, None]:
+        va = VideoAttachment()
+        va.m3u8_url = hls_url
+        return va, None
 
     def get_video_info(self, url) -> dict:
         content = requests.get(url, headers=self.headers).content

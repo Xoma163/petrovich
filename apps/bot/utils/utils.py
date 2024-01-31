@@ -290,14 +290,12 @@ def get_thumbnail_for_image(image: Attachment, size) -> bytes:
     """
     Получение thumbnail для изображения
     """
-    # ToDo: #657
     content = image.download_content()
     _image = Image.open(BytesIO(content))
     _image.thumbnail((size, size))
     thumb_byte_arr = io.BytesIO()
     _image.save(thumb_byte_arr, format="PNG")
     thumb_byte_arr.seek(0)
-    # ToDo: #657
     return thumb_byte_arr.read()
 
 
