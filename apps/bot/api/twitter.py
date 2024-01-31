@@ -37,15 +37,14 @@ class Twitter(API):
     def _get_text_and_attachments(self, tweet_data) -> dict:
         text = self._get_text_without_tco_links(tweet_data.get('text', ""))
         attachments = []
-        if tweet_data.get('video_url'):
-            video = self._get_video(tweet_data['video_url'])
-            attachments = [{self.CONTENT_TYPE_VIDEO: video}]
-        elif tweet_data.get('extended_entities') and tweet_data['extended_entities']['media'][0].get("video_info"):
-            video = self._get_video(tweet_data['extended_entities']['media'][0].get("video_info", {}).get("variants"))
-            attachments = [{self.CONTENT_TYPE_VIDEO: video}]
-        elif tweet_data.get('media_url'):
-            photos = self._get_photos(tweet_data['extended_entities']['media'])
-            attachments = [{self.CONTENT_TYPE_IMAGE: x} for x in photos]
+
+        for entity in tweet_data['extended_entities']['media']:
+            if entity['type'] == 'video':
+                video = self._get_video(entity['video_info']['variants'])
+                attachments.append({self.CONTENT_TYPE_VIDEO: video})
+            elif entity['type'] == 'photo':
+                photo = entity['media_url_https']
+                attachments.append({self.CONTENT_TYPE_IMAGE: photo})
         return {'text': text, "attachments": attachments}
 
     def _get_post_with_replies(self, tweet_data) -> dict:
@@ -92,7 +91,7 @@ class Twitter(API):
 
     @staticmethod
     def _get_photos(photo_info: dict) -> list:
-        return [x['media_url_https'] for x in photo_info if x['type'] == 'photo']
+        return x['media_url_https']
 
     @staticmethod
     def _get_video(video_info: list) -> str:
