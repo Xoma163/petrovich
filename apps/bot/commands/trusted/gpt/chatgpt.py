@@ -278,6 +278,8 @@ class ChatGPT(Command):
                 res = self._get_stat_for_user(profile)
                 if res:
                     results.append(self._get_stat_for_user(profile))
+            if not results:
+                raise PWarning("Ещё не было использований GPT среди участников чата")
             answer = "\n\n".join(results)
         else:
             answer = self._get_stat_for_user(self.event.sender)
