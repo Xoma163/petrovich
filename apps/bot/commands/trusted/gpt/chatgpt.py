@@ -1,7 +1,6 @@
 import datetime
 from typing import Optional
 
-import pytz
 from django.db.models import Q, Sum
 
 from apps.bot.api.gpt.chatgpt import ChatGPTAPI
@@ -18,7 +17,7 @@ from apps.bot.models import Profile, Chat
 from apps.bot.utils.cache import MessagesCache
 from apps.bot.utils.utils import markdown_to_html
 from apps.service.models import GPTPrePrompt, GPTUsage
-from petrovich.settings import env, DEFAULT_TIME_ZONE
+from petrovich.settings import env
 
 
 class ChatGPT(Command):
@@ -288,10 +287,9 @@ class ChatGPT(Command):
 
         return ResponseMessage(ResponseMessageItem(answer))
 
-    # ToDo учитывать timezone
     def _get_stat_for_user(self, profile: Profile) -> Optional[str]:
-        dt_now = datetime.datetime.now(pytz.timezone(DEFAULT_TIME_ZONE))
-        stats_today = self._get_stat_db_profile(Q(author=profile, created_at__date=dt_now.date()))
+        dt_now = datetime.datetime.now()
+        stats_today = self._get_stat_db_profile(Q(author=profile, created_at__gte=dt_now - datetime.timedelta(days=1)))
         stats_week = self._get_stat_db_profile(Q(author=profile, created_at__gte=dt_now - datetime.timedelta(days=7)))
         stats_month = self._get_stat_db_profile(Q(author=profile, created_at__gte=dt_now - datetime.timedelta(days=30)))
         stats_all = self._get_stat_db_profile(Q(author=profile))
@@ -306,7 +304,7 @@ class ChatGPT(Command):
 
     @staticmethod
     def _get_stat_db_profile(q):
-        res = GPTUsage.objects.filter(q).aggregate(Sum('cost')).get('cost__sum', 0)
+        res = GPTUsage.objects.filter(q).aggregate(Sum('cost')).get('cost__sum')
         if res is None:
             res = 0
         return res
