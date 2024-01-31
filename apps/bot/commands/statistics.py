@@ -23,6 +23,9 @@ class Statistics(Command):
             HelpTextItem(Role.USER, [
                 HelpTextItemCommand("[модуль=все]", "статистика по победителям игр или по кол-ву созданных мемов"),
                 HelpTextItemCommand("(петрович) [год=текущий]", "статистика по победителям петровича")
+            ]),
+            HelpTextItem(Role.USER, [
+                HelpTextItemCommand("(gpt)", "статистика по использованию chatgpt")
             ])
         ],
         extra_text=(
@@ -45,6 +48,7 @@ class Statistics(Command):
                 [['wordle', 'вордле'], self.menu_wordle],
                 [['рулетка'], self.menu_roulettes],
                 [['мемы'], self.menu_memes]
+                [['gpt'], self.menu_gpt]
             ]
             method = self.handle_menu(menu, arg0)
             answer = method()
@@ -117,6 +121,10 @@ class Statistics(Command):
             raise PWarning(msg + "Нет статистики")
         result_list_str = "\n".join([f"{profiles.get(id=x['author'])} - {x['total']}" for x in result_list])
         return msg + result_list_str
+
+    def menu_gpt(self) -> str:
+        profiles = Profile.objects.filter(chats=self.event.chat)
+
 
     def menu_all(self):
 

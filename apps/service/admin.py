@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from apps.service.models import Service, Meme, Notify, City, Donations, TimeZone, Subscribe, WakeOnLanUserData, \
-    Words, Tag, VideoCache, Promocode, GPTPrePrompt
+    Words, Tag, VideoCache, Promocode, GPTPrePrompt, GPTUsage
 
 
 @admin.register(Service)
@@ -92,4 +92,12 @@ class GPTPrepromptAdmin(admin.ModelAdmin):
         ('author', admin.RelatedOnlyFieldListFilter),
         ('chat', admin.RelatedOnlyFieldListFilter),
         'provider'
+    )
+
+
+@admin.register(GPTUsage)
+class GPTUsageAdmin(admin.ModelAdmin):
+    list_display = ('created_at', 'author', 'cost',)
+    list_filter = (
+        ('author', admin.RelatedOnlyFieldListFilter),
     )

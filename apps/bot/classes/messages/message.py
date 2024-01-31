@@ -1,4 +1,3 @@
-import copy
 import re
 
 
@@ -128,5 +127,11 @@ class Message:
         return self.has_command_symbols or self.has_mention
 
     def to_log(self) -> dict:
-        dict_self = copy.copy(self.__dict__)
-        return dict_self
+        return {
+            'id': self.id,
+            'raw': self.raw,
+            'command': self.command,
+            'args_str': self.args_str,
+            'keys': self.keys,
+            'kwargs': self.kwargs
+        }

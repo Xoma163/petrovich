@@ -139,7 +139,7 @@ class Turett(Command):
         chat_gpt = ChatGPT()
         chat_gpt.bot = self.bot
         chat_gpt.event = self.event
-        return chat_gpt.text_chat(messages).messages[0]
+        return chat_gpt.text_chat(messages, use_stats=False).messages[0]
 
     def set_reaction(self):
         self.event: TgEvent

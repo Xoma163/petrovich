@@ -309,3 +309,17 @@ class GPTPrePrompt(models.Model):
         verbose_name = "GPT препромпт"
         verbose_name_plural = "GPT препромпты"
         unique_together = ('author', 'chat', 'provider')
+
+
+class GPTUsage(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    author = models.ForeignKey(Profile, models.CASCADE, verbose_name="Пользователь", null=True, db_index=True)
+    prompt_tokens = models.PositiveSmallIntegerField("Входные токены", default=0)
+    completion_tokens = models.PositiveSmallIntegerField("Выходные токены", default=0)
+    images_tokens = models.PositiveSmallIntegerField("Генерация картинок", default=0)
+    cost = models.FloatField("Стоимость запроса", default=0)
+
+    class Meta:
+        verbose_name = "GPT использование"
+        verbose_name_plural = "GPT использования"

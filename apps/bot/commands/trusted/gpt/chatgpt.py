@@ -1,6 +1,7 @@
+import datetime
 from typing import Optional
 
-from django.db.models import Q
+from django.db.models import Q, Sum
 
 from apps.bot.api.gpt.chatgpt import ChatGPTAPI
 from apps.bot.classes.command import Command
@@ -15,7 +16,7 @@ from apps.bot.classes.messages.response_message import ResponseMessage, Response
 from apps.bot.models import Profile, Chat
 from apps.bot.utils.cache import MessagesCache
 from apps.bot.utils.utils import markdown_to_html
-from apps.service.models import GPTPrePrompt
+from apps.service.models import GPTPrePrompt, GPTUsage
 from petrovich.settings import env
 
 
@@ -33,7 +34,7 @@ class ChatGPT(Command):
                 HelpTextItemCommand("препромпт [конфа]", "посмотреть текущий препромпт"),
                 HelpTextItemCommand("препромпт [конфа] (текст)", "добавить препромпт"),
                 HelpTextItemCommand("препромпт [конфа] удалить", "удаляет препромпт"),
-
+                HelpTextItemCommand("стата", "статистика по использованию"),
             ])
         ],
         extra_text=(
@@ -60,11 +61,14 @@ class ChatGPT(Command):
 
     def start(self) -> ResponseMessage:
         self.event: TgEvent
-        if self.event.message.args and self.event.message.args[0] in ["нарисуй", "draw"]:
-            return self.draw_image()
-        if self.event.message.args and self.event.message.args[0] in ["препромпт", "препромт", "промпт", "промт",
-                                                                      "preprompt", "prepromp", "prompt", "promt"]:
-            return self.preprompt()
+        if self.event.message.args:
+            arg0 = self.event.message.args[0]
+            if arg0 in ["нарисуй", "draw"]:
+                return self.draw_image()
+            elif arg0 in ["стата", "статистика", "stat"]:
+                return self.statistics()
+            elif arg0 in ["препромпт", "препромт", "промпт", "промт", "preprompt", "prepromp", "prompt", "promt"]:
+                return self.preprompt()
 
         user_message = self.get_user_msg(self.event)
         messages = self.get_dialog(user_message)
@@ -78,7 +82,7 @@ class ChatGPT(Command):
 
         return self.text_chat(messages)
 
-    def draw_image(self, model=None) -> ResponseMessage:
+    def draw_image(self, model=None, use_stats=True) -> ResponseMessage:
         if model is None:
             model = ChatGPTAPI.DALLE_3
 
@@ -108,11 +112,17 @@ class ChatGPT(Command):
             att.public_download_url = None
             attachments.append(att)
 
+        if use_stats:
+            GPTUsage(
+                author=self.event.sender,
+                images_tokens=chat_gpt_api.usage['images_tokens'],
+                cost=chat_gpt_api.usage['image_cost'] * chat_gpt_api.usage['images_tokens']
+            ).save()
         answer = f'Результат генерации по запросу "{real_prompt}"'
         return ResponseMessage(
             ResponseMessageItem(text=answer, attachments=attachments, reply_to=self.event.message.id))
 
-    def text_chat(self, messages, model=None) -> ResponseMessage:
+    def text_chat(self, messages, model=None, use_stats=True) -> ResponseMessage:
         if model is None:
             photos = self.event.get_all_attachments([PhotoAttachment])
             if photos:
@@ -128,10 +138,18 @@ class ChatGPT(Command):
         finally:
             self.bot.stop_activity_thread()
 
+        if use_stats:
+            GPTUsage(
+                author=self.event.sender,
+                prompt_tokens=chat_gpt_api.usage['prompt_tokens'],
+                completion_tokens=chat_gpt_api.usage['completion_tokens'],
+                cost=chat_gpt_api.usage['prompt_tokens'] * chat_gpt_api.usage['prompt_token_cost'] +
+                     chat_gpt_api.usage['completion_tokens'] * chat_gpt_api.usage['completion_token_cost']
+            ).save()
         answer = markdown_to_html(answer, self.bot)
         return ResponseMessage(ResponseMessageItem(text=answer, reply_to=self.event.message.id))
 
-    def get_dialog(self, user_message, use_preprompt=True):
+    def get_dialog(self, user_message, use_preprompt=True) -> list:
         mc = MessagesCache(self.event.peer_id)
         data = mc.get_messages()
         preprompt = None
@@ -192,7 +210,7 @@ class ChatGPT(Command):
                 break
         return find_accept_event
 
-    def get_user_msg(self, event: TgEvent):
+    def get_user_msg(self, event: TgEvent) -> str:
         if event.message.command in self.full_names:
             return event.message.args_str_case
         else:
@@ -211,7 +229,7 @@ class ChatGPT(Command):
                 q = Q(chat=self.event.chat, author=self.event.sender)
                 return self._preprompt_works(1, q, 'персональный препромпт конфы')
 
-    def _preprompt_works(self, args_slice_index: int, q: Q, is_for: str):
+    def _preprompt_works(self, args_slice_index: int, q: Q, is_for: str) -> ResponseMessage:
         q &= Q(provider=self.PREPROMPT_PROVIDER)
 
         if len(self.event.message.args) > args_slice_index:
@@ -237,7 +255,7 @@ class ChatGPT(Command):
         return ResponseMessage(rmi)
 
     @staticmethod
-    def get_preprompt(sender: Profile, chat: Chat, provider):
+    def get_preprompt(sender: Profile, chat: Chat, provider) -> Optional[str]:
         variants = [
             Q(author=sender, chat=chat, provider=provider),
             Q(author=sender, chat=None, provider=provider),
@@ -250,3 +268,32 @@ class ChatGPT(Command):
             except GPTPrePrompt.DoesNotExist:
                 continue
         return None
+
+    def statistics(self) -> ResponseMessage:
+        if self.event.is_from_chat:
+            profiles = Profile.objects.filter(chats=self.event.chat)
+            results = []
+            for profile in profiles:
+                results.append(self._get_stat_for_user(profile))
+            answer = "\n\n".join(results)
+        else:
+            answer = self._get_stat_for_user(self.event.sender)
+        return ResponseMessage(ResponseMessageItem(answer))
+
+    # ToDo учитывать timezone
+    @staticmethod
+    def _get_stat_for_user(profile: Profile) -> str:
+        dt_now = datetime.datetime.utcnow()
+        stats_today = GPTUsage.objects.filter(author=profile, created_at__date=dt_now.date()) \
+            .aggregate(Sum('cost'))['cost__sum']
+        stats_week = GPTUsage.objects.filter(author=profile, created_at__gte=dt_now - datetime.timedelta(days=7)) \
+            .aggregate(Sum('cost'))['cost__sum']
+        stats_month = GPTUsage.objects.filter(author=profile, created_at__gte=dt_now - datetime.timedelta(days=30)) \
+            .aggregate(Sum('cost'))['cost__sum']
+        stats_all = GPTUsage.objects.filter(author=profile) \
+            .aggregate(Sum('cost'))['cost__sum']
+        return f"{profile}:\n" \
+               f"Сегодня - $ {round(stats_today, 3)}\n" \
+               f"Неделя - $ {round(stats_week, 3)}\n" \
+               f"Месяц - $ {round(stats_month, 3)}\n" \
+               f"Всего - $ {round(stats_all, 3)}\n"

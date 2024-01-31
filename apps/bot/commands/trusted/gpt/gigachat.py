@@ -39,17 +39,18 @@ class GigaChat(ChatGPT):
 
     def start(self) -> ResponseMessage:
         self.event: TgEvent
-        if self.event.message.args and self.event.message.args[0] == "нарисуй":
-            return self.draw_image()
-        if self.event.message.args and self.event.message.args[0] in ["препромпт", "препромт", "промпт", "промт",
-                                                                      "preprompt", "prepromp", "prompt", "promt"]:
-            return self.preprompt()
+        if self.event.message.args:
+            arg0 = self.event.message.args[0]
+            if arg0 in ["нарисуй", "draw"]:
+                return self.draw_image()
+            elif arg0 in ["препромпт", "препромт", "промпт", "промт", "preprompt", "prepromp", "prompt", "promt"]:
+                return self.preprompt()
 
         user_message = self.get_user_msg(self.event)
         messages = self.get_dialog(user_message)
         return self.text_chat(messages)
 
-    def text_chat(self, messages, model=None) -> ResponseMessage:
+    def text_chat(self, messages, model=None, **kwargs) -> ResponseMessage:
         if model is None:
             model = GigaChatGPTAPI.PRO_MODEL
         gc_api = GigaChatGPTAPI(model)
@@ -63,7 +64,7 @@ class GigaChat(ChatGPT):
         answer = markdown_to_html(answer, self.bot)
         return ResponseMessage(ResponseMessageItem(text=answer, reply_to=self.event.message.id))
 
-    def draw_image(self, model=None) -> ResponseMessage:
+    def draw_image(self, model=None, **kwargs) -> ResponseMessage:
         if model is None:
             model = GigaChatGPTAPI.PRO_MODEL
         if len(self.event.message.args) > 1:

@@ -90,10 +90,6 @@ class Twitter(API):
         return text
 
     @staticmethod
-    def _get_photos(photo_info: dict) -> list:
-        return x['media_url_https']
-
-    @staticmethod
     def _get_video(video_info: list) -> str:
         videos = filter(lambda x: x.get('bitrate') is not None and x['content_type'] == 'video/mp4', video_info)
         best_video = sorted(videos, key=lambda x: x['bitrate'], reverse=True)[0]['url']
