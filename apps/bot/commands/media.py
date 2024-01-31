@@ -109,7 +109,7 @@ class Media(Command):
     @staticmethod
     def accept_extra(event: Event) -> bool:
         if event.message and not event.message.mentioned:
-            if "nomedia" in event.message.keys:
+            if "nomedia" in event.message.keys or "no-media" in event.message.keys:
                 return False
             all_urls = get_urls_from_text(event.message.clear_case)
             has_fwd_with_message = event.fwd and event.fwd[0].message and event.fwd[0].message.clear_case
