@@ -28,7 +28,7 @@ class VideoHandler:
         return avm.mux()
 
     def trim(self, start_pos, end_pos=None) -> bytes:
-        if not self.video or self.audio:
+        if not self.video or not self.audio:
             raise RuntimeError("video or audio must be provided")
 
         att = self.video if self.video else self.audio

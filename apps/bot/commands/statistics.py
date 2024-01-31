@@ -45,7 +45,6 @@ class Statistics(Command):
                 [['wordle', 'вордле'], self.menu_wordle],
                 [['рулетка'], self.menu_roulettes],
                 [['мемы'], self.menu_memes]
-                [['gpt'], self.menu_gpt]
             ]
             method = self.handle_menu(menu, arg0)
             answer = method()
