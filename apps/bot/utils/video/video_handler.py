@@ -31,7 +31,8 @@ class VideoHandler:
         if not self.video or self.audio:
             raise RuntimeError("video or audio must be provided")
 
-        vt = VideoTrimmer(self.video if self.video else self.audio)
+        att = self.video if self.video else self.audio
+        vt = VideoTrimmer(att)
         return vt.trim(start_pos, end_pos)
 
     def get_audio_track(self) -> bytes:
