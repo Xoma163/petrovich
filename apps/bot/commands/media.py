@@ -244,6 +244,8 @@ class Media(Command):
                     tm = TrimVideo()
                     video_content = tm.trim(va, data['start_pos'], data['end_pos'])
                     va = self.bot.get_video_attachment(video_content, peer_id=self.event.peer_id)
+                else:
+                    va.download_content()
                 text = data['title']
         finally:
             self.bot.stop_activity_thread()
@@ -496,7 +498,6 @@ class Media(Command):
         video_url = get_clip_authenticated_url(slug, "source")
         video = self.bot.get_video_attachment(video_url, peer_id=self.event.peer_id)
         video.download_content()
-        video.public_download_url = None
         return [video], title
 
     def get_facebook_video(self, url) -> (list, str):

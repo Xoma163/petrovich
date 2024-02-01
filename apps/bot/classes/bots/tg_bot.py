@@ -186,7 +186,7 @@ class TgBot(Bot):
         if video.file_id:
             params['video'] = video.file_id
             r = self.requests.get('sendVideo', params).json()
-        elif video.public_download_url:
+        elif video.public_download_url and not video.content:
             params['video'] = video.public_download_url
             r = self.requests.get('sendVideo', params).json()
         else:
