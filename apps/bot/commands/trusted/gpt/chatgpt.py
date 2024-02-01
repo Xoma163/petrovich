@@ -13,9 +13,10 @@ from apps.bot.classes.event.tg_event import TgEvent
 from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
+from apps.bot.commands.easy.donate import Donate
 from apps.bot.models import Profile, Chat
 from apps.bot.utils.cache import MessagesCache
-from apps.bot.utils.utils import markdown_to_html
+from apps.bot.utils.utils import markdown_to_html, decl_of_num
 from apps.service.models import GPTPrePrompt, GPTUsage
 from petrovich.settings import env
 
@@ -112,13 +113,16 @@ class ChatGPT(Command):
             att.public_download_url = None
             attachments.append(att)
 
+        answer = f'Результат генерации по запросу "{real_prompt}"'
         if use_stats:
+            cost = chat_gpt_api.usage['image_cost'] * chat_gpt_api.usage['images_tokens']
             GPTUsage(
                 author=self.event.sender,
                 images_tokens=chat_gpt_api.usage['images_tokens'],
-                cost=chat_gpt_api.usage['image_cost'] * chat_gpt_api.usage['images_tokens']
+                cost=cost
             ).save()
-        answer = f'Результат генерации по запросу "{real_prompt}"'
+            answer += self.get_answer_cost_str(cost)
+
         return ResponseMessage(
             ResponseMessageItem(text=answer, attachments=attachments, reply_to=self.event.message.id))
 
@@ -138,16 +142,43 @@ class ChatGPT(Command):
         finally:
             self.bot.stop_activity_thread()
 
+        answer = markdown_to_html(answer, self.bot)
         if use_stats:
+            cost = chat_gpt_api.usage['prompt_tokens'] * chat_gpt_api.usage['prompt_token_cost'] + \
+                   chat_gpt_api.usage['completion_tokens'] * chat_gpt_api.usage['completion_token_cost']
             GPTUsage(
                 author=self.event.sender,
                 prompt_tokens=chat_gpt_api.usage['prompt_tokens'],
                 completion_tokens=chat_gpt_api.usage['completion_tokens'],
-                cost=chat_gpt_api.usage['prompt_tokens'] * chat_gpt_api.usage['prompt_token_cost'] +
-                     chat_gpt_api.usage['completion_tokens'] * chat_gpt_api.usage['completion_token_cost']
+                cost=cost
             ).save()
-        answer = markdown_to_html(answer, self.bot)
+            answer += self.get_answer_cost_str(cost)
+
         return ResponseMessage(ResponseMessageItem(text=answer, reply_to=self.event.message.id))
+
+    def get_answer_cost_str(self, cost) -> str:
+        if self.event.sender.pk in [92, 91, 5]:
+            return ""
+
+        # Курс рубля
+        cost *= 100
+        rubles, kopecks = str(cost).split('.')
+        rubles = int(rubles)
+        try:
+            kopecks = int(kopecks[:2].lstrip('0'))
+        except ValueError:
+            kopecks = 0
+        kopecks_decl = decl_of_num(kopecks, ['копейку', 'копейки', 'копеек'])
+        rubles_decl = decl_of_num(rubles, ['рубль', 'рубля', 'рублей'])
+        if not rubles:
+            answer = f"\n\n----------\nЭтот запрос стоил {kopecks} {kopecks_decl}"
+        elif rubles and kopecks:
+            answer = f"\n\n----------\nЭтот запрос стоил {rubles} {rubles_decl} {kopecks} {kopecks_decl}"
+        else:
+            answer = f"\n\n----------\nЭтот запрос стоил {rubles} {rubles_decl}"
+
+        answer += f"\n{self.bot.get_formatted_url('Донат', Donate.URL)}"
+        return answer
 
     def get_dialog(self, user_message, use_preprompt=True) -> list:
         mc = MessagesCache(self.event.peer_id)
