@@ -132,7 +132,7 @@ class Petrovich(Command):
                 "Бинго! Нашлась особь для титула 'Петрович дня:",
                 "Опа! Сюрприз-мороженое сегодня без очереди получает:",
                 "Свечи гаснут... а suspense растет!",
-                "Ваши ставки, господа. Пора вскрыть карты.",
+                "Ваши ставки, господа. Пора вскрыть карты",
                 "И звезды ночи сегодня замигают для...",
                 "Чей это кристалл судьбы блестит ярче всех сегодня?",
                 "Так, стоп, хватит держать вас в напряжении!"
@@ -147,9 +147,9 @@ class Petrovich(Command):
                 f"Игра окончена. Победитель — {self.bot.get_mention(winner)}. Принимайте поздравления, {winner_gender} дня!",
                 f"Кто здесь {winner_gender} дня? Правильно, {self.bot.get_mention(winner)}!",
                 f"Как в казино, только без денег. {winner_gender} дня — {self.bot.get_mention(winner)}, поздравляем!",
-                f"На волне случайности выносится вердикт: {winner_gender} дня — {self.bot.get_mention(winner)}.",
+                f"На волне случайности выносится вердикт: {winner_gender} дня — {self.bot.get_mention(winner)}",
                 f"Все путем, {self.bot.get_mention(winner)}. Сегодня ты — звезда, {winner_gender} дня!",
-                f"Забудьте о зодиаках, {winner_gender} дня здесь — {self.bot.get_mention(winner)}.",
+                f"Забудьте о зодиаках, {winner_gender} дня здесь — {self.bot.get_mention(winner)}",
                 f"Собаки лают, караван идет, а {winner_gender} дня — {self.bot.get_mention(winner)}"
                 f"Расклад таков: {winner_gender} дня почетно присваивается {self.bot.get_mention(winner)}. Ну что, парад готовим?"
                 f"Ладно, примем как данность: {winner_gender} дня – это {self.bot.get_mention(winner)}"
