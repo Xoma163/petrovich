@@ -108,7 +108,7 @@ class Petrovich(Command):
             winner_petrovich = PetrovichGames(profile=winner, chat=self.event.chat)
             winner_petrovich.save()
 
-            winner_gender = "петровна" if winner.is_female else "петрович"
+            winner_gender = "Петровна" if winner.is_female else "Петрович"
 
             first_answer = random_event([
                 "Такс такс такс, кто тут у нас",
@@ -138,7 +138,7 @@ class Petrovich(Command):
                 "Так, стоп, хватит держать вас в напряжении!"
             ])
             second_answer = random_event([
-                f"{winner_gender} дня - {self.bot.get_mention(winner)}"
+                f"{winner_gender} дня - {self.bot.get_mention(winner)}",
                 f"НЕВЕРОЯТНО, НО {winner_gender} дня - {self.bot.get_mention(winner)}",
                 f"Сначала я не поверил, что {winner_gender} дня - {self.bot.get_mention(winner)}, но куда деваться",
                 f"Мда, и этот человек - {self.bot.get_mention(winner)} сегодня {winner_gender} дня",
@@ -149,8 +149,8 @@ class Petrovich(Command):
                 f"Как в казино, только без денег. {winner_gender} дня — {self.bot.get_mention(winner)}, поздравляем!",
                 f"На волне случайности выносится вердикт: {winner_gender} дня — {self.bot.get_mention(winner)}.",
                 f"Все путем, {self.bot.get_mention(winner)}. Сегодня ты — звезда, {winner_gender} дня!",
-                f"Забудьте о зодиаках, настоящий {winner_gender} дня здесь — {self.bot.get_mention(winner)}.",
-                f"Собаки лают, караван идет, а {winner_gender} дня всё тот же — {self.bot.get_mention(winner)}"
+                f"Забудьте о зодиаках, {winner_gender} дня здесь — {self.bot.get_mention(winner)}.",
+                f"Собаки лают, караван идет, а {winner_gender} дня — {self.bot.get_mention(winner)}"
                 f"Расклад таков: {winner_gender} дня почетно присваивается {self.bot.get_mention(winner)}. Ну что, парад готовим?"
                 f"Ладно, примем как данность: {winner_gender} дня – это {self.bot.get_mention(winner)}"
             ])
