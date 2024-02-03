@@ -66,7 +66,8 @@ class BaseMeme(models.Model):
     uses = models.PositiveIntegerField("Использований", default=0)
     inline_uses = models.PositiveIntegerField("Рекомендаций в inline", default=0)
     approved = models.BooleanField("Разрешённый", default=False)
-
+    for_trusted = models.BooleanField("Для доверенных пользователей", default=False)
+    
     tg_file_id = models.CharField("file_id в tg", max_length=128, blank=True)
 
     def get_info(self):

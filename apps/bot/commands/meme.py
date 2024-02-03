@@ -184,6 +184,8 @@ class Meme(Command):
             meme_filter['filter_list'] = id_name.split(' ')
         if not (self.event.sender.check_role(Role.MODERATOR) or self.event.sender.check_role(Role.TRUSTED)):
             meme_filter['filter_user'] = self.event.sender
+        if not self.event.sender.check_role(Role.TRUSTED):
+            meme_filter['exclude_trusted'] = True
 
         meme = self.get_meme(**meme_filter)
 
@@ -221,6 +223,8 @@ class Meme(Command):
         meme_filter = self.get_default_meme_filter_by_args(self.event.message.args[1:])
         if not self.event.sender.check_role(Role.MODERATOR):
             meme_filter['filter_user'] = self.event.sender
+        if not self.event.sender.check_role(Role.TRUSTED):
+            meme_filter['exclude_trusted'] = True
         meme = self.get_meme(**meme_filter)
 
         if not self.event.sender.check_role(Role.MODERATOR) and meme.author != self.event.sender:
@@ -247,7 +251,10 @@ class Meme(Command):
         return rm
 
     def menu_random(self) -> ResponseMessage:
-        meme = MemeModel.objects.filter(approved=True).order_by('?').first()
+        memes = MemeModel.objects.filter(approved=True)
+        if not self.event.sender.check_role(Role.TRUSTED):
+            memes = memes.exclude(for_trusted=True)
+        meme = memes.order_by('?').first()
         rmi = self.prepare_meme_to_send(meme, print_name=True, send_keyboard=True)
         return ResponseMessage(rmi)
 
@@ -305,7 +312,10 @@ class Meme(Command):
         self.check_args(3)
         self.int_args = [1]
         self.parse_int()
-        meme = self.get_meme(_id=self.event.message.args[1])
+        exclude_trusted = False
+        if not self.event.sender.check_role(Role.TRUSTED):
+            exclude_trusted = True
+        meme = self.get_meme(_id=self.event.message.args[1], exclude_trusted=exclude_trusted)
 
         new_name_list = self.event.message.args[2:]
         new_name = " ".join(new_name_list)
@@ -337,18 +347,25 @@ class Meme(Command):
     def menu_info(self) -> ResponseMessage:
         self.check_args(2)
         meme_filter = self.get_default_meme_filter_by_args(self.event.message.args[1:])
-        meme = self.get_meme(**meme_filter)
+        exclude_trusted = False
+        if not self.event.sender.check_role(Role.TRUSTED):
+            exclude_trusted = True
+        meme = self.get_meme(**meme_filter, exclude_trusted=exclude_trusted)
         answer = meme.get_info()
         return ResponseMessage(ResponseMessageItem(text=answer))
 
     def menu_default(self) -> ResponseMessage:
         warning_message = None
 
+        exclude_trusted = False
+        if not self.event.sender.check_role(Role.TRUSTED):
+            exclude_trusted = True
+
         id_name = self.get_id_or_meme_name(self.event.message.args)
         if isinstance(id_name, int):
-            meme = self.get_meme(_id=id_name)
+            meme = self.get_meme(_id=id_name, exclude_trusted=exclude_trusted)
         else:
-            memes = self.get_filtered_memes(self.event.message.args)
+            memes = self.get_filtered_memes(self.event.message.args, exclude_trusted=exclude_trusted)
             try:
                 meme = self.get_one_meme(memes, self.event.message.args)
             except PWarning:
@@ -367,8 +384,11 @@ class Meme(Command):
         return rm
 
     @staticmethod
-    def get_filtered_memes(filter_list=None, filter_user=None, approved=True, _id=None):
+    def get_filtered_memes(filter_list=None, filter_user=None, exclude_trusted=False, approved=True, _id=None):
         memes = MemeModel.objects
+        if exclude_trusted:
+            memes = memes.exclude(for_trusted=True)
+
         if _id:
             memes = memes.filter(id=_id)
         else:
@@ -404,11 +424,11 @@ class Meme(Command):
                     return meme
             raise PWarning("Под запрос подходит 2 и более мема")
 
-    def get_meme(self, filter_list=None, filter_user=None, approved=True, _id=None) -> MemeModel:
+    def get_meme(self, filter_list=None, filter_user=None, exclude_trusted=False, approved=True, _id=None) -> MemeModel:
         """
         :return: 1 мем. Если передан параметр use_tanimoto, то список мемов отсортированных по коэфф. Танимото
         """
-        memes = self.get_filtered_memes(filter_list, filter_user, approved, _id)
+        memes = self.get_filtered_memes(filter_list, filter_user, exclude_trusted, approved, _id)
         meme = self.get_one_meme(memes, filter_list, approved)
         return meme
 
@@ -567,6 +587,8 @@ class Meme(Command):
             filtered_memes = MemeModel.objects.all().order_by('-uses')
 
         memes = filtered_memes.filter(type__in=['photo', 'sticker', 'video', 'voice', 'gif'], approved=True)
+        if not self.event.sender.check_role(Role.TRUSTED):
+            memes = memes.exclude(for_trusted=True)
 
         all_memes_qr = []
         try:

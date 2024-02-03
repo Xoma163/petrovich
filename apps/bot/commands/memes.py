@@ -42,7 +42,10 @@ class Memes(Command):
         else:
             page = 1
 
-        memes = MemeModel.objects.filter(approved=True).filter(q)
+        q_exclude = Q()
+        if not self.event.sender.check_role(Role.TRUSTED):
+            q_exclude &= Q(for_trusted=True)
+        memes = MemeModel.objects.filter(approved=True).filter(q).exclude(q_exclude)
         if len(memes) == 0:
             raise PWarning("Не нашёл мемов по заданному запросу")
 
