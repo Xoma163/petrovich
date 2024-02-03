@@ -281,7 +281,7 @@ class ChatGPT(Command):
             profiles = Profile.objects.filter(chats=self.event.chat)
             results = []
             for profile in profiles:
-                if profile.pk in [92, 91, 5]:
+                if profile.pk in [92, 91]:
                     continue
                 res = self._get_stat_for_user(profile)
                 if res:
