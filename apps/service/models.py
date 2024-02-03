@@ -67,7 +67,7 @@ class BaseMeme(models.Model):
     inline_uses = models.PositiveIntegerField("Рекомендаций в inline", default=0)
     approved = models.BooleanField("Разрешённый", default=False)
     for_trusted = models.BooleanField("Для доверенных пользователей", default=False)
-    
+
     tg_file_id = models.CharField("file_id в tg", max_length=128, blank=True)
 
     def get_info(self):
@@ -78,6 +78,8 @@ class BaseMeme(models.Model):
                f"Использований в inline: {self.inline_uses}"
         if self.link:
             info += f"\nСсылка: {self.link}"
+        if self.for_trusted:
+            info += f"\nДля доверенных: Да"
         return info
 
     def preview_image(self):
@@ -229,7 +231,7 @@ class Horoscope(models.Model):
 class WakeOnLanUserData(models.Model):
     author = models.ForeignKey(Profile, models.CASCADE, verbose_name="Пользователь", null=True)
     name = models.CharField("Название", max_length=100)
-    ip = models.CharField("IP", max_length=16)
+    ip = models.TextField("IP")
     port = models.SmallIntegerField("Порт")
     mac = models.CharField("MAC адрес", max_length=17)
 
