@@ -278,7 +278,7 @@ class ChatGPT(Command):
             profiles = Profile.objects.filter(chats=self.event.chat)
             results = []
             for profile in profiles:
-                if self.event.sender.pk in [92, 91, 5]:
+                if profile.pk in [92, 91, 5]:
                     continue
                 res = self._get_stat_for_user(profile)
                 if res:
@@ -294,23 +294,21 @@ class ChatGPT(Command):
         return ResponseMessage(ResponseMessageItem(answer))
 
     def _get_stat_for_user(self, profile: Profile) -> Optional[str]:
+        stats_all = self._get_stat_db_profile(Q(author=profile))
+        if not stats_all:
+            return None
         dt_now = datetime.datetime.now()
         stats_today = self._get_stat_db_profile(Q(author=profile, created_at__gte=dt_now - datetime.timedelta(days=1)))
         stats_week = self._get_stat_db_profile(Q(author=profile, created_at__gte=dt_now - datetime.timedelta(days=7)))
         stats_month = self._get_stat_db_profile(Q(author=profile, created_at__gte=dt_now - datetime.timedelta(days=30)))
-        stats_all = self._get_stat_db_profile(Q(author=profile))
-        if not stats_all:
-            return None
 
         return f"{profile}:\n" \
-               f"Сегодня - $ {round(stats_today, 3)}\n" \
-               f"Неделя - $ {round(stats_week, 3)}\n" \
-               f"Месяц - $ {round(stats_month, 3)}\n" \
-               f"Всего - $ {round(stats_all, 3)}\n"
+               f"Сегодня - $ {round(stats_today, 2)}\n" \
+               f"Неделя - $ {round(stats_week, 2)}\n" \
+               f"Месяц - $ {round(stats_month, 2)}\n" \
+               f"Всего - $ {round(stats_all, 2)}\n"
 
     @staticmethod
     def _get_stat_db_profile(q):
         res = GPTUsage.objects.filter(q).aggregate(Sum('cost')).get('cost__sum')
-        if res is None:
-            res = 0
-        return res
+        return res if res else 0
