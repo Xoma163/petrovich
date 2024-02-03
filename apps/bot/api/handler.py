@@ -8,6 +8,7 @@ from requests.exceptions import HTTPError, JSONDecodeError
 class APIHandler:
     def __init__(self):
         self._logger = logging.getLogger('api')
+        self.headers = None
 
     def get(self, url, *args, **kwargs) -> Response:
         return self._do(url, "get", *args, **kwargs)
@@ -17,6 +18,9 @@ class APIHandler:
 
     def _do(self, url, method, *args, **kwargs) -> Response:
         log = kwargs.pop('log', True)
+        if not kwargs.get('headers') and self.headers:
+            kwargs['headers'] = self.headers
+
         r: Response = getattr(requests, method)(url, *args, **kwargs)
 
         if not log:

@@ -1,15 +1,14 @@
 import json
-import re
 
 from django.http import JsonResponse, HttpResponse
 from django.views import View
 
+from apps.bot.api.github.issue import GithubIssueAPI
 from apps.bot.classes.bots.api_bot import APIBot
 from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.const.exceptions import PError
 from apps.bot.classes.messages.response_message import ResponseMessageItem
 from apps.bot.mixins import CSRFExemptMixin
-from apps.bot.models import Profile
 
 
 class APIView(CSRFExemptMixin, View):
@@ -61,44 +60,36 @@ class TelegramView(CSRFExemptMixin, View):
 
 
 class GithubView(CSRFExemptMixin, View):
-    NO_FIX_LABEL = 'Не пофикшу'
 
     @staticmethod
-    def send_notify_to_user(data, text):
-        issue = data['issue']
-        issue_body = issue['body']
-        r = re.compile(r"Ишю от пользователя .* \(id=(.*)\)")
-        match = r.findall(issue_body)
-        if not match:
-            return HttpResponse('ok', status=200)
-        profile_pk = match[-1]
-        profile = Profile.objects.get(pk=profile_pk)
-        user = profile.get_tg_user()
+    def send_notify_to_user(issue: GithubIssueAPI, text):
+        user = issue.author.get_tg_user()
         bot = TgBot()
-        rmi = ResponseMessageItem(text=text, peer_id=user.peer_id)
+        rmi = ResponseMessageItem(text=text, peer_id=user.user_id)
         bot.send_response_message_item(rmi)
 
-    def closed_issue(self, data):
-        issue = data['issue']
-
-        not_fixed = any(x['name'] for x in issue['labels'] if x['name'] == self.NO_FIX_LABEL)
-        if not_fixed:
-            text = f"Проблема была закрыта с меткой \"Не пофикшу\"\n{issue['html_url']}"
+    def closed_issue(self, issue: GithubIssueAPI):
+        if issue.has_no_fix_label:
+            text = f"Проблема была закрыта с меткой \"Не пофикшу\"\n{issue.remote_url}"
         else:
-            text = f"Проблема была закрыта\n{issue['html_url']}"
-        self.send_notify_to_user(data, text)
+            text = f"Проблема была закрыта\n{issue.remote_url}"
+        self.send_notify_to_user(issue, text)
 
-    def created_comment(self, data):
-        issue = data['issue']
+    def created_comment(self, data, issue: GithubIssueAPI):
         comment = data['comment']['body']
-        text = f"Новый комментарий от разработчика под вашей проблемой\n{issue['html_url']}\n\n{comment}"
-        self.send_notify_to_user(data, text)
+        text = f"Новый комментарий от разработчика под вашей проблемой\n{issue.remote_url}\n\n{comment}"
+        self.send_notify_to_user(issue, text)
 
     def post(self, request):
         data = json.loads(request.body)
+
+        issue = GithubIssueAPI()
+        issue.parse_response(data['issue'])
+
         if data['action'] == 'closed':
-            self.closed_issue(data)
-        elif data['action'] == 'created' and 'comment' in data and data['comment']['user']['id'] == \
-                data['issue']['user']['id']:
-            self.created_comment(data)
+            self.closed_issue(issue)
+        elif data['action'] == 'created' and \
+                data.get('comment') and \
+                data['comment']['user']['id'] == data['issue']['user']['id']:
+            self.created_comment(data, issue)
         return HttpResponse('ok', status=200)

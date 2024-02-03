@@ -1,4 +1,4 @@
-from apps.bot.api.github import Github
+from apps.bot.api.github.issue import GithubIssueAPI
 from apps.bot.api.imgur import Imgur
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role
@@ -63,10 +63,13 @@ class Issue(Command):
             for x in tags.split(" ") if x
         ] if tags else []
 
-        github_api = Github()
-        labels_in_github = [x for x in github_api.get_all_labels() if x.lower() in tags] if tags else []
+        issue = GithubIssueAPI()
+        labels_in_github = [x for x in issue.get_all_labels() if x.lower() in tags] if tags else []
+        issue.title = title
+        issue.body = body
+        issue.assignee = GithubIssueAPI.REPO_OWNER
+        issue.labels = labels_in_github
+        issue.create_in_github()
 
-        r = github_api.create_issue(title, body, Github.REPO_OWNER, labels=labels_in_github)
-        answer = f"Отслеживать созданное ишю можно по {self.bot.get_formatted_url('ссылке', r['html_url'])}"
-
+        answer = f"Отслеживать созданное ишю можно по {self.bot.get_formatted_url('ссылке', issue.remote_url)}"
         return ResponseMessage(ResponseMessageItem(text=answer))
