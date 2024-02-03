@@ -5,15 +5,19 @@ from petrovich.settings import env
 class TgMessage(Message):
     MENTION = env.str('TG_BOT_LOGIN')
 
-    def __init__(self, raw_str=None, _id=None, entities=None):
+    def __init__(self, raw_str=None, _id=None, entities=None, quote=None):
         self._mention_entities = []
         self.has_mention = False
         text = self.setup_message_with_entities(raw_str, entities)
+
         # save state before super
         has_mention = self.has_mention
         super().__init__(text, _id)
         self.has_mention = has_mention
         self.raw = raw_str
+
+        if quote:
+            self.quote = quote['text']
 
     @property
     def mentioned(self) -> bool:

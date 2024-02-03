@@ -28,7 +28,8 @@ class ChatGPT(Command):
         commands_text="чат GPT",
         help_texts=[
             HelpTextItem(Role.TRUSTED, [
-                HelpTextItemCommand("(фраза/пересланное сообщение)", "общение с ботом"),
+                HelpTextItemCommand("(фраза)", "общение с ботом"),
+                HelpTextItemCommand("(пересланное сообщение)", "общение с ботом"),
                 HelpTextItemCommand("(фраза) [картинка]", "общение с ботом с учётом пересланной картинки"),
                 HelpTextItemCommand("нарисуй (фраза/пересланное сообщение)", "генерация картинки"),
                 HelpTextItemCommand("препромпт [конфа]", "посмотреть текущий препромпт"),
@@ -88,6 +89,8 @@ class ChatGPT(Command):
 
         if len(self.event.message.args) > 1:
             request_text = " ".join(self.event.message.args_case[1:])
+        elif self.event.message.quote:
+            request_text = self.event.message.quote
         elif self.event.fwd:
             request_text = self.event.fwd[0].message.raw
         else:

@@ -43,6 +43,9 @@ class Message:
 
         self.id = _id
 
+        # Выделенное сообщение пользователя
+        self.quote: str = ""
+
         if not raw_str:
             return
 

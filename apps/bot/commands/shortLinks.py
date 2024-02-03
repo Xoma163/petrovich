@@ -22,10 +22,14 @@ class ShortLinks(Command):
     )
 
     attachments = [LinkAttachment]
+    args_or_fwd = True
 
     def start(self) -> ResponseMessage:
         if self.event.fwd:
-            long_link = self.event.fwd[0].attachments[0].url
+            if self.event.message.quote:
+                long_link = self.event.message.quote
+            else:
+                long_link = self.event.fwd[0].attachments[0].url
         else:
             long_link = self.event.attachments[0].url
         try:

@@ -199,7 +199,7 @@ class TgEvent(Event):
         if message_text:
             self.setup_link(message_text)
         entities = message.get('entities')
-        self.message = TgMessage(message_text, message.get('message_id'), entities)
+        self.message = TgMessage(message_text, message.get('message_id'), entities, quote=message.get('quote'))
 
     def setup_photo(self, photo_event):
         tg_photo = PhotoAttachment()

@@ -17,18 +17,26 @@ class Find(Command):
         commands_text="ищет информацию по картинкам в гугле",
         help_texts=[
             HelpTextItem(Role.USER, [
-                HelpTextItemCommand("(запрос)", "ищет информацию по картинкам в гугле")
+                HelpTextItemCommand("(запрос)", "ищет информацию по картинкам в гугле"),
+                HelpTextItemCommand("(пересланное сообщение)", "ищет информацию по картинкам в гугле")
             ])
         ]
     )
 
-    args = 1
+    args_or_fwd = True
     platforms = [Platform.TG]
 
     bot: TgBot
 
     def start(self) -> ResponseMessage:
-        query = self.event.message.args_str
+        if self.event.message.args:
+            query = self.event.message.args_str
+        elif self.event.message.quote:
+            query = self.event.message.quote
+        elif self.event.fwd:
+            query = self.event.fwd[0].message.raw
+        else:
+            raise PWarning("Должен быть запрос или пересланное сообщение")
 
         count = 5
 

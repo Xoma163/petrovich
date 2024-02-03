@@ -18,7 +18,8 @@ class GigaChat(ChatGPT):
         commands_text="чат GigaChat",
         help_texts=[
             HelpTextItem(Role.TRUSTED, [
-                HelpTextItemCommand("(фраза/пересланное сообщение)", "общение с ботом"),
+                HelpTextItemCommand("(фраза)", "общение с ботом"),
+                HelpTextItemCommand("(пересланное сообщение)", "общение с ботом"),
                 HelpTextItemCommand("нарисуй (фраза/пересланное сообщение)", "генерация картинки"),
                 HelpTextItemCommand("препромпт [конфа]", "посмотреть текущий препромпт"),
                 HelpTextItemCommand("препромпт [конфа] (текст)", "добавить препромпт"),
@@ -69,6 +70,8 @@ class GigaChat(ChatGPT):
             model = GigaChatGPTAPI.PRO_MODEL
         if len(self.event.message.args) > 1:
             request_text = " ".join(self.event.message.args_case[1:])
+        elif self.event.message.quote:
+            request_text = self.event.message.quote
         elif self.event.fwd:
             request_text = self.event.fwd[0].message.raw
         else:

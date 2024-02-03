@@ -14,7 +14,8 @@ class Fix(Command):
         commands_text="исправляет раскладку текста",
         help_texts=[
             HelpTextItem(Role.USER, [
-                HelpTextItemCommand("(Пересылаемые сообщения/текст)", "исправляет раскладку текста")
+                HelpTextItemCommand("(текст)", "исправляет раскладку текста"),
+                HelpTextItemCommand("(Пересылаемые сообщения)", "исправляет раскладку текста")
             ])
         ]
     )
@@ -24,6 +25,8 @@ class Fix(Command):
     def start(self) -> ResponseMessage:
         if self.event.message.args:
             msgs = fix_layout(self.event.message.args_str)
+        elif self.event.message.quote:
+            msgs = self.event.message.quote
         else:
             msgs = ""
             for fwd in self.event.fwd:

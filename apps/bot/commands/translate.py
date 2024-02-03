@@ -26,6 +26,8 @@ class Translate(Command):
         fwd = self.event.fwd
         if not fwd:
             text = self.event.message.args_str
+        elif self.event.message.quote:
+            text = self.event.message.quote
         else:
             text = ""
             for msg in fwd:
