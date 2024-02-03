@@ -261,6 +261,15 @@ class TgEvent(Event):
         self.inline_data['id'] = inline_query['id']
         self.inline_data['offset'] = inline_query['offset']
 
+        _from = inline_query['from']
+        defaults = {
+            'name': _from.get('first_name'),
+            'surname': _from.get('last_name')
+        }
+        self.user = self.bot.get_user_by_id(_from['id'], {'nickname': _from.get('username')})
+        self.sender = self.bot.get_profile_by_user(self.user, _defaults=defaults)
+        self.is_from_user = True
+
     def need_a_response(self):
         """
         Проверка, нужен ли пользователю ответ
