@@ -37,6 +37,8 @@ class Twitter(API):
     def _get_text_and_attachments(self, tweet_data) -> dict:
         text = self._get_text_without_tco_links(tweet_data.get('text', ""))
         attachments = []
+        if not tweet_data['extended_entities']:
+            return {'text': text, "attachments": attachments}
 
         for entity in tweet_data['extended_entities']['media']:
             if entity['type'] == 'video':
