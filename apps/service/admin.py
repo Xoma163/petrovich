@@ -16,7 +16,7 @@ class MemeAdmin(admin.ModelAdmin):
         'tg_file_id', "for_trusted"
     )
     search_fields = ('name', 'link')
-    list_filter = (('author', admin.RelatedOnlyFieldListFilter), 'type', 'approved',)
+    list_filter = (('author', admin.RelatedOnlyFieldListFilter), 'type', 'approved', 'for_trusted')
 
 
 @admin.register(Notify)

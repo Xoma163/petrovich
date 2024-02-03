@@ -79,7 +79,7 @@ class BaseMeme(models.Model):
         if self.link:
             info += f"\nСсылка: {self.link}"
         if self.for_trusted:
-            info += f"\nДля доверенных: Да"
+            info += "\nДля доверенных: Да"
         return info
 
     def preview_image(self):
@@ -231,7 +231,7 @@ class Horoscope(models.Model):
 class WakeOnLanUserData(models.Model):
     author = models.ForeignKey(Profile, models.CASCADE, verbose_name="Пользователь", null=True)
     name = models.CharField("Название", max_length=100)
-    ip = models.TextField("IP")
+    ip = models.CharField("IP", max_length=16)
     port = models.SmallIntegerField("Порт")
     mac = models.CharField("MAC адрес", max_length=17)
 
