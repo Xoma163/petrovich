@@ -40,6 +40,7 @@ class Command(BaseCommand):
             files = list(filter(lambda x: x != '__init__.py', files))
             for file in files:
                 os.remove(os.path.join(migrations_dir, file))
+        self.stdout.write("APP (%s) deleted with success" % app)
 
     # ToDo: add args for prod/local
     def handle(self, *args, **options):
