@@ -13,10 +13,9 @@ from apps.bot.classes.event.tg_event import TgEvent
 from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
-from apps.bot.commands.easy.donate import Donate
 from apps.bot.models import Profile, Chat
 from apps.bot.utils.cache import MessagesCache
-from apps.bot.utils.utils import markdown_to_html, decl_of_num
+from apps.bot.utils.utils import markdown_to_html
 from apps.service.models import GPTPrePrompt, GPTUsage
 from petrovich.settings import env
 
@@ -121,7 +120,6 @@ class ChatGPT(Command):
                 images_tokens=chat_gpt_api.usage['images_tokens'],
                 cost=cost
             ).save()
-            answer += self.get_answer_cost_str(cost)
 
         return ResponseMessage(
             ResponseMessageItem(text=answer, attachments=attachments, reply_to=self.event.message.id))
@@ -152,33 +150,8 @@ class ChatGPT(Command):
                 completion_tokens=chat_gpt_api.usage['completion_tokens'],
                 cost=cost
             ).save()
-            answer += self.get_answer_cost_str(cost)
 
         return ResponseMessage(ResponseMessageItem(text=answer, reply_to=self.event.message.id))
-
-    def get_answer_cost_str(self, cost) -> str:
-        if self.event.sender.pk in [92, 91, 5]:
-            return ""
-
-        # Курс рубля
-        cost *= 100
-        rubles, kopecks = str(cost).split('.')
-        rubles = int(rubles)
-        try:
-            kopecks = int(kopecks[:2].lstrip('0'))
-        except ValueError:
-            kopecks = 0
-        kopecks_decl = decl_of_num(kopecks, ['копейку', 'копейки', 'копеек'])
-        rubles_decl = decl_of_num(rubles, ['рубль', 'рубля', 'рублей'])
-        if not rubles:
-            answer = f"\n\n----------\nЭтот запрос стоил {kopecks} {kopecks_decl}"
-        elif rubles and kopecks:
-            answer = f"\n\n----------\nЭтот запрос стоил {rubles} {rubles_decl} {kopecks} {kopecks_decl}"
-        else:
-            answer = f"\n\n----------\nЭтот запрос стоил {rubles} {rubles_decl}"
-
-        answer += f"\n{self.bot.get_formatted_url('Донат', Donate.URL)}"
-        return answer
 
     def get_dialog(self, user_message, use_preprompt=True) -> list:
         mc = MessagesCache(self.event.peer_id)
@@ -305,6 +278,8 @@ class ChatGPT(Command):
             profiles = Profile.objects.filter(chats=self.event.chat)
             results = []
             for profile in profiles:
+                if self.event.sender.pk in [92, 91, 5]:
+                    continue
                 res = self._get_stat_for_user(profile)
                 if res:
                     results.append(self._get_stat_for_user(profile))
