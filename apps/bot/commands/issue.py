@@ -2,6 +2,7 @@ from apps.bot.api.github.issue import GithubIssueAPI
 from apps.bot.api.imgur import Imgur
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role
+from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.help_text import HelpTextItem, HelpText, HelpTextItemCommand
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
@@ -17,6 +18,9 @@ class Issue(Command):
             HelpTextItem(Role.USER, [
                 HelpTextItemCommand(
                     "(проблема)\\n[описание проблемы]\\n[теги]",
+                    "добавляет проблему Петровича, которую нужно решить"),
+                HelpTextItemCommand(
+                    "(пересылаемое сообщение)",
                     "добавляет проблему Петровича, которую нужно решить")
             ])
         ],
@@ -29,11 +33,18 @@ class Issue(Command):
         )
     )
 
-    args = 1
+    args_or_fwd = True
     mentioned = True
 
     def start(self) -> ResponseMessage:
-        msg = self.event.message.args_str_case
+        if self.event.message.args:
+            msg = self.event.message.args_str_case
+        elif self.event.message.quote:
+            msg = self.event.message.quote
+        elif self.event.fwd:
+            msg = self.event.fwd[0].message.raw
+        else:
+            raise PWarning("В сообщении должны быть аргументы или пересылаемое сообщение")
 
         body = ""
         tags = ""

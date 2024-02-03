@@ -36,7 +36,7 @@ class Find(Command):
         elif self.event.fwd:
             query = self.event.fwd[0].message.raw
         else:
-            raise PWarning("Должен быть запрос или пересланное сообщение")
+            raise PWarning("В сообщении должны быть аргументы или пересылаемое сообщение")
 
         count = 5
 
