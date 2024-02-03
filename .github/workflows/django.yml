@@ -42,6 +42,7 @@ jobs:
           DATABASE_URL: 'postgres://postgres:postgres@localhost:5432/postgres'
           TIMEZONEDB_API_KEY: ''
           YANDEX_GEO_TOKEN: ''
+          GITHUB_TOKEN: ''
         run: |
           python manage.py test
       - name: Deploy on production
