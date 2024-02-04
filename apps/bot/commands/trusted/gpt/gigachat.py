@@ -1,4 +1,5 @@
 from apps.bot.api.gpt.gigachatgptapi import GigaChatGPTAPI
+from apps.bot.api.gpt.response import GPTAPIResponse
 from apps.bot.classes.const.activities import ActivitiesEnum
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
@@ -58,16 +59,17 @@ class GigaChat(ChatGPT):
 
         try:
             self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.TYPING)
-            answer = gc_api.completions(messages)
+            response: GPTAPIResponse = gc_api.completions(messages)
         finally:
             self.bot.stop_activity_thread()
 
-        answer = markdown_to_html(answer, self.bot)
+        answer = markdown_to_html(response.text, self.bot)
         return ResponseMessage(ResponseMessageItem(text=answer, reply_to=self.event.message.id))
 
     def draw_image(self, model=None, **kwargs) -> ResponseMessage:
         if model is None:
             model = GigaChatGPTAPI.PRO_MODEL
+
         if len(self.event.message.args) > 1:
             request_text = " ".join(self.event.message.args_case[1:])
         elif self.event.message.quote:
@@ -81,14 +83,14 @@ class GigaChat(ChatGPT):
 
         try:
             self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.UPLOAD_PHOTO)
-            image = chat_gpt_api.draw(self.event.message.args_str_case)
+            response: GPTAPIResponse = chat_gpt_api.draw(self.event.message.args_str_case)
         finally:
             self.bot.stop_activity_thread()
 
-        if not image:
+        if not response.images_bytes:
             raise PWarning("Не смог сгенерировать :(")
 
-        attachments = [self.bot.get_photo_attachment(image)]
+        attachments = [self.bot.get_photo_attachment(x) for x in response.images_bytes]
 
         answer = f'Результат генерации по запросу "{request_text}"'
         return ResponseMessage(

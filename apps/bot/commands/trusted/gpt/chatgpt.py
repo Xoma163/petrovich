@@ -4,6 +4,7 @@ from typing import Optional
 from django.db.models import Q, Sum
 
 from apps.bot.api.gpt.chatgpt import ChatGPTAPI
+from apps.bot.api.gpt.response import GPTAPIResponse
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.activities import ActivitiesEnum
 from apps.bot.classes.const.consts import Role, Platform
@@ -99,23 +100,20 @@ class ChatGPT(Command):
 
         try:
             self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.UPLOAD_PHOTO)
-            images = chat_gpt_api.draw(request_text)
+            response: GPTAPIResponse = chat_gpt_api.draw(request_text)
         finally:
             self.bot.stop_activity_thread()
 
-        if not images:
+        if not response.images_url:
             raise PWarning("Не смог сгенерировать :(")
 
-        real_prompt = images[0][1]
         attachments = []
-        for image in images:
-            url = image[0]
-            att = self.bot.get_photo_attachment(url)
+        for image_url in response.images_url:
+            att = self.bot.get_photo_attachment(image_url)
             att.download_content()
-            att.public_download_url = None
             attachments.append(att)
 
-        answer = f'Результат генерации по запросу "{real_prompt}"'
+        answer = f'Результат генерации по запросу "{response.images_prompt}"'
         if use_stats:
             cost = chat_gpt_api.usage['image_cost'] * chat_gpt_api.usage['images_tokens']
             GPTUsage(
@@ -139,11 +137,11 @@ class ChatGPT(Command):
 
         try:
             self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.TYPING)
-            answer = chat_gpt_api.completions(messages)
+            response: GPTAPIResponse = chat_gpt_api.completions(messages)
         finally:
             self.bot.stop_activity_thread()
 
-        answer = markdown_to_html(answer, self.bot)
+        answer = markdown_to_html(response.text, self.bot)
         if use_stats:
             cost = chat_gpt_api.usage['prompt_tokens'] * chat_gpt_api.usage['prompt_token_cost'] + \
                    chat_gpt_api.usage['completion_tokens'] * chat_gpt_api.usage['completion_token_cost']

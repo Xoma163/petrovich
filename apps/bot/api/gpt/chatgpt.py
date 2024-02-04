@@ -1,6 +1,7 @@
 from json import JSONDecodeError
 
 from apps.bot.api.gpt.gpt import GPT
+from apps.bot.api.gpt.response import GPTAPIResponse
 from apps.bot.api.handler import API
 from apps.bot.classes.const.exceptions import PWarning, PError
 from petrovich.settings import env
@@ -37,7 +38,7 @@ class ChatGPTAPI(GPT, API):
         super().__init__(model)
         self.usage: dict = {}
 
-    def completions(self, messages: list):
+    def completions(self, messages: list) -> GPTAPIResponse:
         payload = {
             "model": self.model,
             "messages": messages
@@ -63,9 +64,11 @@ class ChatGPTAPI(GPT, API):
         })
 
         answer = r_json['choices'][0]['message']['content']
-        return answer
+        r = GPTAPIResponse()
+        r.text = answer
+        return r
 
-    def draw(self, prompt: str):
+    def draw(self, prompt: str) -> GPTAPIResponse:
         if self.model == self.DALLE_3:
             count = 1
             size = "1792x1024"
@@ -86,7 +89,10 @@ class ChatGPTAPI(GPT, API):
         }
         r_json = self._do_request(self.IMAGE_GEN_URL, payload)
         self.usage = {'images_tokens': count, 'image_cost': cost}
-        return [(x['url'], x['revised_prompt']) for x in r_json['data']]
+        r = GPTAPIResponse()
+        r.images_url = [x['url'] for x in r_json['data']]
+        r.images_prompt = r_json['data'][0]['revised_prompt']
+        return r
 
     def _do_request(self, url, payload):
         proxies = {"https": env.str("SOCKS5_PROXY"), "http": env.str("SOCKS5_PROXY")}

@@ -3,10 +3,11 @@ import random
 import re
 import uuid
 
+from apps.bot.api.gpt.gpt import GPT
+from apps.bot.api.gpt.response import GPTAPIResponse
+from apps.bot.api.handler import API
+from apps.bot.classes.const.exceptions import PWarning
 from petrovich.settings import env, BASE_DIR
-from .gpt import GPT
-from ..handler import API
-from ...classes.const.exceptions import PWarning
 
 
 class GigaChatGPTAPI(GPT, API):
@@ -43,7 +44,7 @@ class GigaChatGPTAPI(GPT, API):
             self.set_access_token()
         return self.access_token
 
-    def completions(self, messages) -> str:
+    def completions(self, messages) -> GPTAPIResponse:
         headers = {
             "Authorization": f"Bearer {self.get_access_token()}"
         }
@@ -60,9 +61,11 @@ class GigaChatGPTAPI(GPT, API):
             headers=headers,
             verify=self.GOSUSLUGI_CERT_PATH
         )
-        return r.json()['choices'][0]['message']['content']
+        response = GPTAPIResponse()
+        response.text = r.json()['choices'][0]['message']['content']
+        return response
 
-    def draw(self, prompt) -> bytes:
+    def draw(self, prompt) -> GPTAPIResponse:
         messages = [{
             "role": "system",
             "content": "Если тебя просят создать изображение, ты должен сгенерировать специальный блок: "
@@ -77,10 +80,12 @@ class GigaChatGPTAPI(GPT, API):
         r = re.compile(src_regexp)
 
         try:
-            file_id = r.findall(res)[0]
+            file_id = r.findall(res.text)[0]
         except Exception:
             raise PWarning(res)
-        return self._get_file_by_id(file_id)
+        response = GPTAPIResponse()
+        response.images_bytes = [self._get_file_by_id(file_id)]
+        return response
 
     def _get_file_by_id(self, file_id):
         headers = {

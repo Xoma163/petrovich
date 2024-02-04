@@ -107,7 +107,7 @@ class TgBot(Bot):
         for i, attachment in enumerate(rmi.attachments):
             if attachment.file_id:
                 media = {'type': attachment.type, 'media': attachment.file_id}
-            elif attachment.public_download_url:
+            elif attachment.public_download_url and not attachment.content:
                 media = {'type': attachment.type, 'media': attachment.public_download_url}
             else:
                 filename = attachment.name if attachment.name else str(i)
@@ -145,7 +145,7 @@ class TgBot(Bot):
         if photo.file_id:
             params['photo'] = photo.file_id
             r = self.requests.get('sendPhoto', params).json()
-        elif photo.public_download_url:
+        elif photo.public_download_url and not photo.content:
             params['photo'] = photo.public_download_url
             r = self.requests.get('sendPhoto', params).json()
         else:
@@ -164,7 +164,7 @@ class TgBot(Bot):
         if document.file_id:
             params['document'] = document.file_id
             r = self.requests.get('sendDocument', params).json()
-        elif document.public_download_url:
+        elif document.public_download_url and not document.content:
             params['document'] = document.public_download_url
             r = self.requests.get('sendDocument', params).json()
         else:
