@@ -9,7 +9,7 @@ from twitchdl import twitch
 from twitchdl.commands.download import get_clip_authenticated_url
 
 from apps.bot.api.facebook import Facebook
-from apps.bot.api.instagram import Instagram
+from apps.bot.api.instagram import InstagramAPI, InstagramAPIData, InstagramAPIDataItem
 from apps.bot.api.pikabu import Pikabu
 from apps.bot.api.pinterest import Pinterest
 from apps.bot.api.premier import Premier
@@ -32,7 +32,7 @@ from apps.bot.classes.messages.attachments.link import LinkAttachment
 from apps.bot.classes.messages.attachments.video import VideoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessageItem, ResponseMessage
 from apps.bot.commands.trim_video import TrimVideo
-from apps.bot.utils.utils import get_urls_from_text, markdown_to_html, retry
+from apps.bot.utils.utils import get_urls_from_text, markdown_to_html, retry, markdown_wrap_symbols
 from apps.bot.utils.video.video_handler import VideoHandler
 from apps.service.models import VideoCache
 from petrovich.settings import MAIN_SITE
@@ -147,21 +147,23 @@ class Media(Command):
 
         answer = ""
         if title:
-            answer = f"{title}\n"
+            # ToDo: check!
+            answer = f"{markdown_wrap_symbols(title)}\n"
         if self.event.is_from_chat:
             answer += f"\nОт {self.event.sender}"
 
         source_hostname = str(urlparse(chosen_url).hostname).lstrip('www.')
         answer += f'\nИсточник: {self.bot.get_formatted_url(source_hostname, chosen_url)}'
 
-        extra_text = source[:chosen_url_pos].strip() + "\n" + source[chosen_url_pos + len(chosen_url):].strip()
-        for key in self.event.message.keys:
-            for key_symbol in self.event.message.KEYS_SYMBOLS:
-                extra_text = extra_text.replace(key_symbol + key, "")
-        extra_text = extra_text.strip()
         # Костыль, чтобы видосы которые шарятся с мобилы с реддита не дублировали title
-        if extra_text and extra_text != title:
-            answer += f"\n\n{extra_text}"
+        # ToDo: check!
+        # extra_text = source[:chosen_url_pos].strip() + "\n" + source[chosen_url_pos + len(chosen_url):].strip()
+        # for key in self.event.message.keys:
+        #     for key_symbol in self.event.message.KEYS_SYMBOLS:
+        #         extra_text = extra_text.replace(key_symbol + key, "")
+        # extra_text = extra_text.strip()
+        # if extra_text and extra_text != title:
+        #     answer += f"\n\n{extra_text}"
 
         reply_to = self.event.fwd[0].message.id if self.event.fwd else None
 
@@ -328,16 +330,18 @@ class Media(Command):
         except PWarning:
             raise PWarning("Медиа инстаграмм доступен только для доверенных пользователей")
 
-        i_api = Instagram()
-        data = i_api.get_post_data(url)
+        i_api = InstagramAPI()
+        data: InstagramAPIData = i_api.get_post_data(url)
 
-        if data['content_type'] == i_api.CONTENT_TYPE_IMAGE:
-            attachment = self.bot.get_photo_attachment(data['download_url'], peer_id=self.event.peer_id)
-        elif data['content_type'] == i_api.CONTENT_TYPE_VIDEO:
-            attachment = self.bot.get_video_attachment(data['download_url'], peer_id=self.event.peer_id)
-        else:
-            raise PWarning("Ссылка на инстаграмм не является видео/фото")
-        return [attachment], data['caption']
+        attachments = []
+        for item in data.items:
+            if item.content_type == InstagramAPIDataItem.CONTENT_TYPE_IMAGE:
+                attachment = self.bot.get_photo_attachment(item.download_url, peer_id=self.event.peer_id)
+                attachments.append(attachment)
+            elif item.content_type == InstagramAPIDataItem.CONTENT_TYPE_VIDEO:
+                attachment = self.bot.get_video_attachment(item.download_url, peer_id=self.event.peer_id)
+                attachments.append(attachment)
+        return attachments, data.caption
 
     def get_twitter_content(self, url) -> (list, str):
         try:

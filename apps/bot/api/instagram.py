@@ -5,18 +5,29 @@ from apps.bot.classes.const.exceptions import PWarning
 from petrovich.settings import env
 
 
-class Instagram(API):
+class InstagramAPIDataItem:
     CONTENT_TYPE_IMAGE = 'image'
     CONTENT_TYPE_VIDEO = 'video'
 
-    RAPID_API_KEY = env.str("RAPID_API_KEY")
+    def __init__(self, content_type, download_url):
+        self.content_type = content_type
+        self.download_url = download_url
 
+
+class InstagramAPIData:
     def __init__(self):
-        super().__init__()
-        self.content_type = None
-        self.caption = ""
+        self.items: list[InstagramAPIDataItem] = []
+        self.caption: str = ""
 
-    def get_post_data(self, instagram_link) -> dict:
+    def add_item(self, item: InstagramAPIDataItem):
+        self.items.append(item)
+
+
+class InstagramAPI(API):
+    RAPID_API_KEY = env.str("RAPID_API_KEY")
+    ERROR_MSG = "Ссылка на инстаграмм не является видео/фото"
+
+    def get_post_data(self, instagram_link) -> InstagramAPIData:
         if '/stories/' in instagram_link:
             return self._get_story_data(instagram_link)
         elif '/reel/' in instagram_link:
@@ -24,9 +35,9 @@ class Instagram(API):
         elif '/p/' in instagram_link:
             return self._get_post_data(instagram_link)
         else:
-            raise PWarning("Ссылка на инстаграмм не является видео/фото")
+            raise PWarning(self.ERROR_MSG)
 
-    def _get_story_data(self, instagram_link) -> dict:
+    def _get_story_data(self, instagram_link) -> InstagramAPIData:
         host = "rocketapi-for-instagram.p.rapidapi.com"
         headers = {
             "content-type": "application/json",
@@ -39,9 +50,9 @@ class Instagram(API):
         data = {"id": _id}
 
         r = self.requests.post(url, json=data, headers=headers).json()
-        return self._parse_photo_or_video(r['response']['body']['items'][0])
+        return self._parse_response(r['response']['body']['items'][0])
 
-    def _get_post_data(self, instagram_link) -> dict:
+    def _get_post_data(self, instagram_link) -> InstagramAPIData:
         host = "instagram-scraper-20231.p.rapidapi.com"
         headers = {
             "X-RapidAPI-Host": host,
@@ -51,23 +62,31 @@ class Instagram(API):
 
         post_id = urlparse(instagram_link).path.strip('/').split('/')[1]
         r = self.requests.get(f"{url}/{post_id}", headers=headers).json()
-        return self._parse_photo_or_video(r['data'])
+        return self._parse_response(r['data'])
 
-    def _parse_photo_or_video(self, data) -> dict:
-        caption = data.get('caption')
+    def _parse_response(self, response) -> InstagramAPIData:
+        data = InstagramAPIData()
+
+        caption = response.get('caption')
         if caption:
-            caption = caption.get("text", "").strip()
-        if 'video_versions' in data:
-            return {
-                "download_url": data['video_versions'][0]['url'],
-                "content_type": self.CONTENT_TYPE_VIDEO,
-                "caption": caption
-            }
-        elif 'image_versions2' in data:
-            return {
-                "download_url": data['image_versions2']['candidates'][0]['url'],
-                "content_type": self.CONTENT_TYPE_IMAGE,
-                "caption": caption
-            }
+            data.caption = caption.get("text", "").strip()
+
+        if 'carousel_media' in response:
+            for item in response['carousel_media']:
+                data.add_item(self._parse_photo_or_video(item))
         else:
-            raise PWarning("Ссылка на инстаграмм не является видео/фото")
+            data.add_item(self._parse_photo_or_video(response))
+
+        return data
+
+    def _parse_photo_or_video(self, item) -> InstagramAPIDataItem:
+        if 'video_versions' in item:
+            return InstagramAPIDataItem(
+                InstagramAPIDataItem.CONTENT_TYPE_VIDEO,
+                item['video_versions'][0]['url'])
+        elif 'image_versions2' in item:
+            return InstagramAPIDataItem(
+                InstagramAPIDataItem.CONTENT_TYPE_IMAGE,
+                item['image_versions2']['candidates'][0]['url'])
+        else:
+            raise PWarning(self.ERROR_MSG)

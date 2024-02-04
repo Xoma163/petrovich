@@ -399,13 +399,16 @@ def replace_markdown_links(text: str, bot) -> str:
     return text
 
 
-def markdown_to_html(text: str, bot) -> str:
-    text = text \
+def markdown_wrap_symbols(text):
+    return text \
         .replace(">", "&gt;") \
         .replace("<", "&lt;") \
         .replace("&lt;pre&gt;", "<pre>") \
         .replace("&lt;/pre&gt;", "</pre>")
 
+
+def markdown_to_html(text: str, bot) -> str:
+    text = markdown_wrap_symbols(text)
     if bot.PRE_TAG:
         if bot.CODE_TAG:
             text = replace_pre_tag(text, bot, '```', '```')
