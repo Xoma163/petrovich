@@ -266,7 +266,7 @@ class Media(Command):
         va = VideoAttachment()
         va.public_download_url = video_url
 
-        video = self.bot.get_video_attachment(video_url, peer_id=self.event.peer_id, filename="tiktok.mp4")
+        # video = self.bot.get_video_attachment(video_url, peer_id=self.event.peer_id, filename="tiktok.mp4")
         return [va], None
 
     def get_reddit_content(self, url) -> (list, str):
