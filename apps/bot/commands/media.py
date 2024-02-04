@@ -11,7 +11,7 @@ from twitchdl.commands.download import get_clip_authenticated_url
 from apps.bot.api.facebook import Facebook
 from apps.bot.api.instagram import Instagram, InstagramAPIData, InstagramAPIDataItem
 from apps.bot.api.pikabu import Pikabu
-from apps.bot.api.pinterest import Pinterest
+from apps.bot.api.pinterest import Pinterest, PinterestDataItem
 from apps.bot.api.premier import Premier
 from apps.bot.api.reddit import Reddit
 from apps.bot.api.spotify import Spotify
@@ -265,8 +265,6 @@ class Media(Command):
             raise PWarning(e.msg, keyboard=keyboard)
         va = VideoAttachment()
         va.public_download_url = video_url
-
-        # video = self.bot.get_video_attachment(video_url, peer_id=self.event.peer_id, filename="tiktok.mp4")
         return [va], None
 
     def get_reddit_content(self, url) -> (list, str):
@@ -394,20 +392,18 @@ class Media(Command):
 
     def get_pinterest_attachment(self, url) -> (list, str):
         p_api = Pinterest()
-        data = p_api.get_post_data(url)
-        if data['content_type'] == p_api.CONTENT_TYPE_VIDEO:
-            attachment = self.bot.get_video_attachment(data['download_url'], peer_id=self.event.peer_id,
-                                                       filename=data['filename'])
-        elif data['content_type'] == p_api.CONTENT_TYPE_IMAGE:
-            attachment = self.bot.get_photo_attachment(data['download_url'], peer_id=self.event.peer_id,
-                                                       filename=data['filename'])
-        elif data['content_type'] == p_api.CONTENT_TYPE_GIF:
-            attachment = self.bot.get_gif_attachment(data['download_url'], peer_id=self.event.peer_id,
-                                                     filename=data['filename'])
-        else:
-            raise PWarning("Я хз чё за контент")
+        data: PinterestDataItem = p_api.get_post_data(url)
 
-        return [attachment], data['title']
+        if data.content_type == PinterestDataItem.CONTENT_TYPE_VIDEO:
+            attachment = self.bot.get_video_attachment(data.download_url, peer_id=self.event.peer_id)
+        elif data.content_type == PinterestDataItem.CONTENT_TYPE_IMAGE:
+            attachment = self.bot.get_photo_attachment(data.download_url, peer_id=self.event.peer_id)
+        elif data.content_type == PinterestDataItem.CONTENT_TYPE_GIF:
+            attachment = self.bot.get_gif_attachment(data.download_url, peer_id=self.event.peer_id)
+        else:
+            raise PWarning(Pinterest.ERROR_MSG)
+
+        return [attachment], data.caption
 
     def get_coub_video(self, url) -> (list, str):
         headers = {

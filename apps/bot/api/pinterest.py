@@ -3,15 +3,29 @@ import json
 import requests
 from bs4 import BeautifulSoup
 
+from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.utils.utils import get_url_file_ext
 
 
-class Pinterest:
+class PinterestDataItem:
     CONTENT_TYPE_IMAGE = "image"
     CONTENT_TYPE_VIDEO = "video"
     CONTENT_TYPE_GIF = "gif"
 
-    def get_post_data(self, url):
+    def __init__(self, content_type, download_url, caption=""):
+        if content_type not in (self.CONTENT_TYPE_IMAGE, self.CONTENT_TYPE_VIDEO, self.CONTENT_TYPE_GIF):
+            raise RuntimeError(
+                f"content_type must be {self.CONTENT_TYPE_IMAGE} or {self.CONTENT_TYPE_VIDEO} or {self.CONTENT_TYPE_GIF}")
+
+        self.content_type: str = content_type
+        self.download_url: str = download_url
+        self.caption: str = caption if caption else ""
+
+
+class Pinterest:
+    ERROR_MSG = "Ссылка на pinterest не является видео/фото/gif"
+
+    def get_post_data(self, url) -> PinterestDataItem:
         content = requests.get(url).content
         bs4 = BeautifulSoup(content, 'html.parser')
 
@@ -20,33 +34,25 @@ class Pinterest:
         elif bs4.find("meta", {"name": "og:image"}):
             return self._get_photo(bs4)
 
-        return None
+        raise PWarning(self.ERROR_MSG)
 
-    def _get_photo(self, bs4: BeautifulSoup):
+    @staticmethod
+    def _get_photo(bs4: BeautifulSoup) -> PinterestDataItem:
         try:
             image_data = json.loads(bs4.find("script", {'data-test-id': 'leaf-snippet'}).text)
-            title = image_data['headline']
+            caption = image_data['headline']
             image_url = image_data['image']
         except Exception:
-            title = None
+            caption = None
             image_url = bs4.find("meta", {"name": "og:image"}).attrs['content']
 
         ext = get_url_file_ext(image_url)
+        content_type = PinterestDataItem.CONTENT_TYPE_GIF if ext in ['gif',
+                                                                     'gifv'] else PinterestDataItem.CONTENT_TYPE_IMAGE
+        return PinterestDataItem(content_type, image_url, caption)
 
-        return {
-            "download_url": image_url,
-            "content_type": self.CONTENT_TYPE_GIF if ext in ['gif', 'gifv'] else self.CONTENT_TYPE_IMAGE,
-            "title": title,
-            "filename": f"{title.replace(' ', '_')}.{ext}"
-        }
-
-    def _get_video(self, bs4: BeautifulSoup) -> dict:
+    @staticmethod
+    def _get_video(bs4: BeautifulSoup) -> PinterestDataItem:
         video_url = json.loads(bs4.find("script", {'data-test-id': 'video-snippet'}).text)['contentUrl']
-        ext = get_url_file_ext(video_url)
-        title = bs4.find("meta", {"name": "og:title"}).attrs['content']
-        return {
-            "download_url": video_url,
-            "content_type": self.CONTENT_TYPE_VIDEO,
-            "title": title,
-            "filename": f"{title.replace(' ', '_')}.{ext}"
-        }
+        caption = bs4.find("meta", {"name": "og:title"}).attrs['content']
+        return PinterestDataItem(PinterestDataItem.CONTENT_TYPE_VIDEO, video_url, caption)
