@@ -9,7 +9,7 @@ from twitchdl import twitch
 from twitchdl.commands.download import get_clip_authenticated_url
 
 from apps.bot.api.facebook import Facebook
-from apps.bot.api.instagram import InstagramAPI, InstagramAPIData, InstagramAPIDataItem
+from apps.bot.api.instagram import Instagram, InstagramAPIData, InstagramAPIDataItem
 from apps.bot.api.pikabu import Pikabu
 from apps.bot.api.pinterest import Pinterest
 from apps.bot.api.premier import Premier
@@ -143,27 +143,14 @@ class Media(Command):
             else:
                 raise PSkip()
 
-        chosen_url_pos = source.find(chosen_url)
-
         answer = ""
         if title:
-            # ToDo: check!
             answer = f"{markdown_wrap_symbols(title)}\n"
         if self.event.is_from_chat:
             answer += f"\nОт {self.event.sender}"
 
         source_hostname = str(urlparse(chosen_url).hostname).lstrip('www.')
         answer += f'\nИсточник: {self.bot.get_formatted_url(source_hostname, chosen_url)}'
-
-        # Костыль, чтобы видосы которые шарятся с мобилы с реддита не дублировали title
-        # ToDo: check!
-        # extra_text = source[:chosen_url_pos].strip() + "\n" + source[chosen_url_pos + len(chosen_url):].strip()
-        # for key in self.event.message.keys:
-        #     for key_symbol in self.event.message.KEYS_SYMBOLS:
-        #         extra_text = extra_text.replace(key_symbol + key, "")
-        # extra_text = extra_text.strip()
-        # if extra_text and extra_text != title:
-        #     answer += f"\n\n{extra_text}"
 
         reply_to = self.event.fwd[0].message.id if self.event.fwd else None
 
@@ -330,7 +317,7 @@ class Media(Command):
         except PWarning:
             raise PWarning("Медиа инстаграмм доступен только для доверенных пользователей")
 
-        i_api = InstagramAPI()
+        i_api = Instagram()
         data: InstagramAPIData = i_api.get_post_data(url)
 
         attachments = []
@@ -353,23 +340,20 @@ class Media(Command):
         with_threads = self.event.message.keys and self.event.message.keys[0] in ['thread', 'threads', 'with-threads',
                                                                                   'тред', 'треды']
         data = t_api.get_post_data(url, with_threads=with_threads)
-        text = data['text']
 
-        if not data["attachments"]:
-            return [], text
+        if not data.items:
+            return [], data.caption
 
         attachments = []
-        for att in data["attachments"]:
-            if t_api.CONTENT_TYPE_VIDEO in att:
-                att_link = att[t_api.CONTENT_TYPE_VIDEO]
-                video = self.bot.get_video_attachment(att_link, peer_id=self.event.peer_id)
+        for att in data.items:
+            if att.content_type == att.CONTENT_TYPE_VIDEO:
+                video = self.bot.get_video_attachment(att.download_url, peer_id=self.event.peer_id)
                 attachments.append(video)
-            elif t_api.CONTENT_TYPE_IMAGE in att:
-                att_link = att[t_api.CONTENT_TYPE_IMAGE]
-                photo = self.bot.get_photo_attachment(att_link, peer_id=self.event.peer_id)
+            if att.content_type == att.CONTENT_TYPE_IMAGE:
+                photo = self.bot.get_photo_attachment(att.download_url, peer_id=self.event.peer_id)
                 attachments.append(photo)
 
-        return attachments, text
+        return attachments, data.caption
 
     def get_pikabu_video(self, url) -> (list, str):
         p_api = Pikabu()

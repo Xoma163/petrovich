@@ -10,6 +10,9 @@ class InstagramAPIDataItem:
     CONTENT_TYPE_VIDEO = 'video'
 
     def __init__(self, content_type, download_url):
+        if content_type not in (self.CONTENT_TYPE_IMAGE, self.CONTENT_TYPE_VIDEO):
+            raise RuntimeError(f"content_type must be {self.CONTENT_TYPE_IMAGE} or {self.CONTENT_TYPE_VIDEO}")
+
         self.content_type = content_type
         self.download_url = download_url
 
@@ -23,7 +26,7 @@ class InstagramAPIData:
         self.items.append(item)
 
 
-class InstagramAPI(API):
+class Instagram(API):
     RAPID_API_KEY = env.str("RAPID_API_KEY")
     ERROR_MSG = "Ссылка на инстаграмм не является видео/фото"
 
