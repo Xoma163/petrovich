@@ -150,8 +150,8 @@ class Petrovich(Command):
                 f"На волне случайности выносится вердикт: {winner_gender} дня — {self.bot.get_mention(winner)}",
                 f"Все путем, {self.bot.get_mention(winner)}. Сегодня ты — звезда, {winner_gender} дня!",
                 f"Забудьте о зодиаках, {winner_gender} дня здесь — {self.bot.get_mention(winner)}",
-                f"Собаки лают, караван идет, а {winner_gender} дня — {self.bot.get_mention(winner)}"
-                f"Расклад таков: {winner_gender} дня почетно присваивается {self.bot.get_mention(winner)}. Ну что, парад готовим?"
+                f"Собаки лают, караван идет, а {winner_gender} дня — {self.bot.get_mention(winner)}",
+                f"Расклад таков: {winner_gender} дня почетно присваивается {self.bot.get_mention(winner)}. Ну что, парад готовим?",
                 f"Ладно, примем как данность: {winner_gender} дня – это {self.bot.get_mention(winner)}"
             ])
 
