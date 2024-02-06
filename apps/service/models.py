@@ -216,6 +216,16 @@ class HoroscopeMeme(BaseMeme):
         verbose_name_plural = "мемы гороскопа"
         ordering = ["name"]
 
+    def get_info(self):
+        info = f"Название: {self.name}\n" \
+               f"ID: {self.meme_pk}\n" \
+               f"Автор: {self.author}\n" \
+               f"Использований: {self.uses}\n" \
+               f"Использований в inline: {self.inline_uses}"
+        if self.link:
+            info += f"\nСсылка: {self.link}"
+        return info
+
 
 class Horoscope(models.Model):
     memes = models.ManyToManyField(HoroscopeMeme)
