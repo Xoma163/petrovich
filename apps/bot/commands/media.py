@@ -322,10 +322,12 @@ class Media(Command):
         for item in data.items:
             if item.content_type == InstagramAPIDataItem.CONTENT_TYPE_IMAGE:
                 attachment = self.bot.get_photo_attachment(item.download_url, peer_id=self.event.peer_id)
-                attachments.append(attachment)
             elif item.content_type == InstagramAPIDataItem.CONTENT_TYPE_VIDEO:
                 attachment = self.bot.get_video_attachment(item.download_url, peer_id=self.event.peer_id)
-                attachments.append(attachment)
+            else:
+                continue
+            attachments.append(attachment)
+            attachment.download_content()
         return attachments, data.caption
 
     def get_twitter_content(self, url) -> (list, str):
