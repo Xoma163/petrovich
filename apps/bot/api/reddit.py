@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.messages.attachments.audio import AudioAttachment
 from apps.bot.classes.messages.attachments.video import VideoAttachment
-from apps.bot.utils.utils import get_url_file_ext
+from apps.bot.utils.utils import get_url_file_ext, get_default_headers
 from apps.bot.utils.video.video_handler import VideoHandler
 
 
@@ -137,10 +137,7 @@ class Reddit:
 
     def _get_post_data(self):
         # use UA headers to prevent 429 error
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.106 Safari/537.36 OPR/38.0.2220.41',
-            # 'From': 'testyouremail@domain.com'
-        }
+        headers = get_default_headers()
         post_url = requests.get(self.post_url, headers=headers).history[-1].url
         self.post_url = post_url
         urlparsed = urlparse(post_url)

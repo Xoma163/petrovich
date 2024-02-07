@@ -2,13 +2,11 @@ import requests
 from bs4 import BeautifulSoup
 
 from apps.bot.classes.const.exceptions import PWarning
-from apps.bot.utils.utils import get_url_file_ext
+from apps.bot.utils.utils import get_url_file_ext, get_default_headers
 
 
 class Pikabu:
-    HEADERS = {
-        'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
-    }
+    HEADERS = get_default_headers()
 
     def get_video_data(self, url) -> dict:
         r = requests.get(url, headers=self.HEADERS)

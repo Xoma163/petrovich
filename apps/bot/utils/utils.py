@@ -16,7 +16,6 @@ from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.messages.attachments.attachment import Attachment
 from apps.bot.classes.messages.response_message import ResponseMessageItem
 from apps.service.models import Service
-from petrovich.settings import STATIC_ROOT
 
 
 def random_probability(probability) -> bool:
@@ -192,6 +191,8 @@ def draw_text_on_image(text: str):
     Рисование текста на изображении
     :return: bytearray Image
     """
+    from petrovich.settings import STATIC_ROOT
+
     fontsize = 16
 
     text_color = "black"
@@ -528,6 +529,12 @@ def retry(times, exceptions, sleep_time=0):
         return newfn
 
     return decorator
+
+
+def get_default_headers():
+    return {
+        'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+    }
 
 #
 # def read_in_chunks(file_object, chunk_size=2 ** 26):

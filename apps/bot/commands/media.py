@@ -32,7 +32,7 @@ from apps.bot.classes.messages.attachments.link import LinkAttachment
 from apps.bot.classes.messages.attachments.video import VideoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessageItem, ResponseMessage
 from apps.bot.commands.trim_video import TrimVideo
-from apps.bot.utils.utils import get_urls_from_text, markdown_to_html, retry, markdown_wrap_symbols
+from apps.bot.utils.utils import get_urls_from_text, markdown_to_html, retry, markdown_wrap_symbols, get_default_headers
 from apps.bot.utils.video.video_handler import VideoHandler
 from apps.service.models import VideoCache
 from petrovich.settings import MAIN_SITE
@@ -327,7 +327,7 @@ class Media(Command):
             else:
                 continue
             attachments.append(attachment)
-            attachment.download_content()
+            # attachment.download_content(use_proxy=True, headers={"Host":urlparse(attachment.public_download_url).hostname})
         return attachments, data.caption
 
     def get_twitter_content(self, url) -> (list, str):
@@ -408,9 +408,7 @@ class Media(Command):
         return [attachment], data.caption
 
     def get_coub_video(self, url) -> (list, str):
-        headers = {
-            'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
-        }
+        headers = get_default_headers()
         content = requests.get(url, headers=headers).content
         bs4 = BeautifulSoup(content, "html.parser")
         data = json.loads(bs4.find("script", {'id': 'coubPageCoubJson'}).text)

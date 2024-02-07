@@ -120,6 +120,11 @@ class Attachment:
         if self.content:
             return self.content
 
+        from apps.bot.utils.utils import get_default_headers
+        _headers = get_default_headers()
+        if headers:
+            _headers.update(headers)
+
         download_url = self._get_download_url(peer_id)
         if self.private_download_path:
             try:
@@ -130,10 +135,10 @@ class Attachment:
         else:
             proxies = {"https": env.str("SOCKS5_PROXY"), "http": env.str("SOCKS5_PROXY")} if use_proxy else {}
             if stream:
-                self.content = requests.get(download_url, proxies=proxies, headers=headers, stream=True) \
+                self.content = requests.get(download_url, proxies=proxies, headers=_headers, stream=True) \
                     .iter_content(self.CHUNK_SIZE)
             else:
-                self.content = requests.get(download_url, proxies=proxies, headers=headers, stream=True).content
+                self.content = requests.get(download_url, proxies=proxies, headers=_headers).content
         return self.content
 
     def get_bytes_io_content(self, peer_id=None) -> BytesIO:
