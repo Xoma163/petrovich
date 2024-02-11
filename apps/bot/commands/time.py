@@ -31,6 +31,8 @@ class Time(Command):
 
     priority = -5
 
+    REGEXP = r"(^|\D)(\d?\d:\d\d)($|\D)"
+
     def accept(self, event: Event) -> bool:
         super_res = super().accept(event)
         if not event.chat:
@@ -42,7 +44,7 @@ class Time(Command):
         if not event.sender or not event.sender.city:
             return super_res
 
-        r = re.compile(r"(^|\D)(\d?\d:\d\d)($|\D)")
+        r = re.compile(self.REGEXP)
         res = bool(r.findall(event.message.raw))
         if res:
             return True
@@ -51,7 +53,7 @@ class Time(Command):
     def start(self) -> ResponseMessage:
         # args
 
-        r = re.compile(r"(^|\D)(\d?\d:\d\d)($|\D)")
+        r = re.compile(self.REGEXP)
         if res := r.findall(self.event.message.raw):
             new_res = []
             for item in res:

@@ -20,8 +20,10 @@ class Sin(Command):
 
     def start(self) -> Optional[ResponseMessage]:
         sins = self.get_sins()
-        sin = random_event(sins)
-        return ResponseMessage(ResponseMessageItem(text=sin))
+        answer = random_event(sins)
+        button = self.bot.get_button("Ещё", self.name)
+        keyboard = self.bot.get_inline_keyboard([button])
+        return ResponseMessage(ResponseMessageItem(text=answer, keyboard=keyboard))
 
     def get_sins(self) -> list[str]:
         r = requests.get(self.URL)
