@@ -178,13 +178,11 @@ class Settings(Command):
     def get_str_chat_tg_settings(self) -> str:
         self.bot: TgBot
         chat_admins = self.bot.get_chat_administrators(self.event.chat.chat_id)
-        me_admin = [x for x in chat_admins if x['user']['id'] == env.int('TG_BOT_GROUP_ID')]
-        if not me_admin:
-            me_admin = {}
-        else:
-            me_admin = me_admin[0]
-        can_manage_chat = me_admin.get('can_manage_chat', False)
-        can_delete_messages = me_admin.get('can_delete_messages', False)
+        permissions = [x for x in chat_admins if x['user']['id'] == env.int('TG_BOT_GROUP_ID')]
+        permissions = permissions[0] if permissions else {}
+
+        can_manage_chat = permissions.get('can_manage_chat', False)
+        can_delete_messages = permissions.get('can_delete_messages', False)
 
         answer = [
             "Права бота в чате:",
