@@ -28,7 +28,7 @@ class BaseSettings(models.Model):
 
 
 class ChatSettings(BaseSettings):
-    mentioning = models.BooleanField('Работа без упоминания в конфе', default=False)
+    no_mention = models.BooleanField('Работа без упоминания в конфе', default=False)
     need_turett = models.BooleanField('Слать туреттные сообщения', default=False)
     celebrate_bday = models.BooleanField('Поздравлять с Днём рождения', default=False)
     recognize_voice = models.BooleanField('Распозновать голосовые автоматически', default=True)
@@ -48,6 +48,7 @@ class UserSettings(BaseSettings):
 
     celebrate_bday = models.BooleanField('Поздравлять с Днём рождения', default=True)
     show_birthday_year = models.BooleanField('Показывать год', default=True)
+    use_mention = models.BooleanField('Использовать упоминания', default=True)
 
     class Meta:
         verbose_name = "Настройка профиля"

@@ -90,7 +90,7 @@ class Event:
         if self.message is None:
             return False
 
-        if self.chat and self.chat.settings.mentioning:
+        if self.chat and self.chat.settings.no_mention:
             return True
 
         if self.is_from_chat and not self.message.mentioned:

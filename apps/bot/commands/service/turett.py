@@ -70,7 +70,7 @@ class Turett(Command):
 
     def accept(self, event: Event) -> bool:
         if event.chat and event.chat.settings.need_turett:
-            chance = self.NOT_MENTIONED_CHANCE if event.chat.settings.mentioning else self.MENTIONED_CHANCE
+            chance = self.NOT_MENTIONED_CHANCE if event.chat.settings.no_mention else self.MENTIONED_CHANCE
             if random_probability(chance):
                 return True
         return False

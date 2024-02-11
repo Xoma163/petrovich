@@ -534,12 +534,14 @@ class TgBot(Bot):
             )
         ).start()
 
-    def get_mention(self, profile: Profile):
+    def get_mention(self, profile: Profile) -> str:
         """
         Получение меншона пользователя
         """
         user = profile.get_tg_user()
-        return self.get_formatted_url(str(profile), f"tg://user?id={user.user_id}")
+        if profile.settings.use_mention:
+            return self.get_formatted_url(str(profile), f"tg://user?id={user.user_id}")
+        return super().get_mention(profile)
 
     def delete_messages(self, chat_id: Union[int, str], message_ids: Union[List[int], int]) -> dict:
         """

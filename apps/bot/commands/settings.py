@@ -20,7 +20,7 @@ class Settings(Command):
                     None,
                     "присылает текущие настройки"),
                 HelpTextItemCommand(
-                    "упоминание (вкл/выкл)",
+                    "триггериться (вкл/выкл)",
                     "определяет будет ли бот триггериться на команды без упоминания в конфе(требуются админские права)"),
                 HelpTextItemCommand(
                     "реагировать (вкл/выкл)",
@@ -40,6 +40,9 @@ class Settings(Command):
                 HelpTextItemCommand(
                     "ругаться (вкл/выкл)",
                     "определяет будет ли бот использовать ругательные команды"),
+                HelpTextItemCommand(
+                    "упоминания (вкл/выкл)",
+                    "определяет будет ли бот использовать упоминания вас"),
             ])
         ],
         extra_text="Если команда запускается в чате, то общие настройки (поздравления с др) будут указываться для текущего чата"
@@ -80,12 +83,13 @@ class Settings(Command):
 
         menu = [
             [['реагировать', 'реагируй', 'реагирование'], self.menu_reaction],
-            [['упоминание', 'упоминания', 'триггериться', 'тригериться'], self.menu_mentioning],
+            [['триггериться', 'тригериться', 'триггер', 'тригер'], self.menu_no_mention],
             [['мемы', 'мем'], self.menu_memes],
             [['др', 'днюха'], self.menu_bd],
             [['голосовые', 'голос', 'голосовухи', 'голосовуха', 'голосовое'], self.menu_voice],
             [['туретт', 'туррет', 'турретт', 'турет'], self.menu_turett],
             [['ругаться'], self.menu_swear],
+            [['упоминание', 'упоминания', ], self.menu_use_mention],
             [['default'], self.menu_default],
         ]
         method = self.handle_menu(menu, arg0)
@@ -100,8 +104,8 @@ class Settings(Command):
 
     # CHAT
 
-    def menu_mentioning(self) -> ResponseMessageItem:
-        return self.setup_default_chat_setting('mentioning')
+    def menu_no_mention(self) -> ResponseMessageItem:
+        return self.setup_default_chat_setting('no_mention')
 
     def menu_turett(self) -> ResponseMessageItem:
         return self.setup_default_chat_setting("need_turett")
@@ -121,6 +125,9 @@ class Settings(Command):
 
     def menu_swear(self) -> ResponseMessageItem:
         return self.setup_default_profile_setting("use_swear")
+
+    def menu_use_mention(self) -> ResponseMessageItem:
+        return self.setup_default_profile_setting("use_mention")
 
     # END PROFILE
 
@@ -149,26 +156,28 @@ class Settings(Command):
         need_reaction = settings.need_reaction
         use_swear = settings.use_swear
         celebrate_bday = settings.celebrate_bday
+        use_mention = settings.use_mention
 
         answer = [
             "Настройки пользователя:",
             f"Присылать мемы по точным названиям - {self.TRUE_FALSE_TRANSLATOR[need_meme]}",
             f"Реагировать на неправильные команды - {self.TRUE_FALSE_TRANSLATOR[need_reaction]}",
             f"Использовать ругательные команды - {self.TRUE_FALSE_TRANSLATOR[use_swear]}",
-            f"Поздравлять с днём рождения - {self.TRUE_FALSE_TRANSLATOR[celebrate_bday]}"
+            f"Поздравлять с днём рождения - {self.TRUE_FALSE_TRANSLATOR[celebrate_bday]}",
+            f"Использовать упоминания в сообщениях - {self.TRUE_FALSE_TRANSLATOR[use_mention]}",
         ]
         return "\n".join(answer)
 
     def _get_str_chat_settings(self) -> str:
         settings = self.event.chat.settings
-        mentioning = settings.mentioning
+        no_mention = settings.no_mention
         need_turett = settings.need_turett
         recognize_voice = settings.recognize_voice
         celebrate_bday = settings.celebrate_bday
 
         answer = [
             "Настройки чата:",
-            f"Триггериться на команды без упоминания - {self.TRUE_FALSE_TRANSLATOR[mentioning]}",
+            f"Триггериться на команды без упоминания - {self.TRUE_FALSE_TRANSLATOR[no_mention]}",
             f"Синдром Туретта - {self.TRUE_FALSE_TRANSLATOR[need_turett]}",
             f"Автоматически распознавать голосовые - {self.TRUE_FALSE_TRANSLATOR[recognize_voice]}",
             f"Поздравлять с днём рождения - {self.TRUE_FALSE_TRANSLATOR[celebrate_bday]}",
