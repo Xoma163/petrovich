@@ -123,14 +123,14 @@ class Media(Command):
 
     def start(self) -> ResponseMessage:
         if self.event.message.command in self.full_names:
+            self.has_command_name = True
             if self.event.message.args or self.event.fwd:
                 source = self.event.get_all_attachments([LinkAttachment])[0].url
             else:
                 raise PWarning("Для работы команды требуются аргументы или пересылаемые сообщения")
-            self.has_command_name = True
         else:
-            source = self.event.get_all_attachments([LinkAttachment])[0].url
             self.has_command_name = False
+            source = self.event.get_all_attachments([LinkAttachment])[0].url
 
         method, chosen_url = self.get_method_and_chosen_url(source)
 
@@ -146,6 +146,10 @@ class Media(Command):
         answer = ""
         if title:
             answer = f"{markdown_wrap_symbols(title)}\n"
+
+        if extra_text := self.get_extra_text(chosen_url):
+            answer += f"\n{extra_text}\n"
+
         if self.event.is_from_chat:
             answer += f"\nОт {self.event.sender}"
 
@@ -165,6 +169,30 @@ class Media(Command):
         if br.success:
             self.bot.delete_messages(self.event.peer_id, self.event.message.id)
         return ResponseMessage(rmi, send=False)
+
+    def get_extra_text(self, chosen_url) -> str:
+        if self.has_command_name:
+            args_str = " ".join(self.event.message.args[1:])
+        else:
+            args_str = self.event.message.raw
+
+        chosen_url_pos = args_str.find(chosen_url)
+        extra_text_before = args_str[:chosen_url_pos].strip()
+        extra_text_after = args_str[chosen_url_pos + len(chosen_url):].strip()
+
+        extra_text = ""
+        if extra_text_before:
+            extra_text += extra_text_before
+        if extra_text_after:
+            if extra_text:
+                extra_text += "\n"
+            extra_text += extra_text_after
+
+        for key in self.event.message.keys:
+            for key_symbol in self.event.message.KEYS_SYMBOLS:
+                extra_text = extra_text.replace(key_symbol + key, "")
+
+        return extra_text
 
     def get_method_and_chosen_url(self, source):
         media_translator = {
