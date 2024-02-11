@@ -176,21 +176,13 @@ class Media(Command):
         else:
             args_str = self.event.message.raw
 
-        chosen_url_pos = args_str.find(chosen_url)
-        extra_text_before = args_str[:chosen_url_pos].strip()
-        extra_text_after = args_str[chosen_url_pos + len(chosen_url):].strip()
-
-        extra_text = ""
-        if extra_text_before:
-            extra_text += extra_text_before
-        if extra_text_after:
-            if extra_text:
-                extra_text += "\n"
-            extra_text += extra_text_after
-
+        index = args_str.find(chosen_url)
+        extra_text = f"{args_str[:index].strip()}\n{args_str[index + len(chosen_url):].strip()}"
         for key in self.event.message.keys:
             for key_symbol in self.event.message.KEYS_SYMBOLS:
-                extra_text = extra_text.replace(key_symbol + key, "")
+                full_key = key_symbol + key
+                if (index := extra_text.find(full_key)) != -1:
+                    extra_text = f"{extra_text[:index].strip()}\n{extra_text[index + len(full_key):].strip()}"
 
         return extra_text
 
