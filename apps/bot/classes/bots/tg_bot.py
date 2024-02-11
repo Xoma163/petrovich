@@ -474,6 +474,10 @@ class TgBot(Bot):
         profile.set_avatar(pa)
         return r
 
+    def get_chat_administrators(self, chat_id) -> dict:
+        r = self.requests.get('getChatAdministrators', {'chat_id': chat_id}).json()
+        return r['result']
+
     # END USERS GROUPS BOTS
 
     # EXTRA

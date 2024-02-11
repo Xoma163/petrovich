@@ -1,8 +1,11 @@
+from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
+from apps.bot.classes.event.tg_event import TgEvent
 from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
+from petrovich.settings import env
 
 
 class Settings(Command):
@@ -134,38 +137,61 @@ class Settings(Command):
     def menu_default(self) -> ResponseMessageItem:
         answer = ""
         if self.event.chat:
-            answer = "Настройки чата:\n"
+            answer += self._get_str_chat_settings() + "\n\n"
+            if isinstance(self.event, TgEvent):
+                answer += self.get_str_chat_tg_settings() + "\n\n"
+        answer += self._get_str_user_settings()
+        return ResponseMessageItem(text=answer)
 
-            settings = self.event.chat.settings
-            # chat settings
-            mentioning = settings.mentioning
-            need_turett = settings.need_turett
-            recognize_voice = settings.recognize_voice
-            # common settings
-            celebrate_bday = settings.celebrate_bday
-
-            answer += f"Триггериться на команды без упоминания - {self.TRUE_FALSE_TRANSLATOR[mentioning]}\n"
-            answer += f"Синдром Туретта - {self.TRUE_FALSE_TRANSLATOR[need_turett]}\n"
-            answer += f"Автоматически распознавать голосовые - {self.TRUE_FALSE_TRANSLATOR[recognize_voice]}\n"
-            answer += f"Поздравлять с днём рождения - {self.TRUE_FALSE_TRANSLATOR[celebrate_bday]}\n"
-            answer += "\n"
-
-        answer += "Настройки пользователя:\n"
-
+    def _get_str_user_settings(self) -> str:
         settings = self.event.sender.settings
-        # user settings
         need_meme = settings.need_meme
         need_reaction = settings.need_reaction
         use_swear = settings.use_swear
-        # common settings
         celebrate_bday = settings.celebrate_bday
 
-        answer += f"Присылать мемы по точным названиям - {self.TRUE_FALSE_TRANSLATOR[need_meme]}\n"
-        answer += f"Реагировать на неправильные команды - {self.TRUE_FALSE_TRANSLATOR[need_reaction]}\n"
-        answer += f"Использовать ругательные команды - {self.TRUE_FALSE_TRANSLATOR[use_swear]}\n"
-        answer += f"Поздравлять с днём рождения - {self.TRUE_FALSE_TRANSLATOR[celebrate_bday]}\n"
+        answer = [
+            "Настройки пользователя:",
+            f"Присылать мемы по точным названиям - {self.TRUE_FALSE_TRANSLATOR[need_meme]}",
+            f"Реагировать на неправильные команды - {self.TRUE_FALSE_TRANSLATOR[need_reaction]}",
+            f"Использовать ругательные команды - {self.TRUE_FALSE_TRANSLATOR[use_swear]}",
+            f"Поздравлять с днём рождения - {self.TRUE_FALSE_TRANSLATOR[celebrate_bday]}"
+        ]
+        return "\n".join(answer)
 
-        return ResponseMessageItem(text=answer)
+    def _get_str_chat_settings(self) -> str:
+        settings = self.event.chat.settings
+        mentioning = settings.mentioning
+        need_turett = settings.need_turett
+        recognize_voice = settings.recognize_voice
+        celebrate_bday = settings.celebrate_bday
+
+        answer = [
+            "Настройки чата:",
+            f"Триггериться на команды без упоминания - {self.TRUE_FALSE_TRANSLATOR[mentioning]}",
+            f"Синдром Туретта - {self.TRUE_FALSE_TRANSLATOR[need_turett]}",
+            f"Автоматически распознавать голосовые - {self.TRUE_FALSE_TRANSLATOR[recognize_voice]}",
+            f"Поздравлять с днём рождения - {self.TRUE_FALSE_TRANSLATOR[celebrate_bday]}",
+        ]
+        return "\n".join(answer)
+
+    def get_str_chat_tg_settings(self) -> str:
+        self.bot: TgBot
+        chat_admins = self.bot.get_chat_administrators(self.event.chat.chat_id)
+        me_admin = [x for x in chat_admins if x['user']['id'] == env.int('TG_BOT_GROUP_ID')]
+        if not me_admin:
+            me_admin = {}
+        else:
+            me_admin = me_admin[0]
+        can_manage_chat = me_admin.get('can_manage_chat', False)
+        can_delete_messages = me_admin.get('can_delete_messages', False)
+
+        answer = [
+            "Права бота в чате:",
+            f"Читать все сообщения - {self.TRUE_FALSE_TRANSLATOR[can_manage_chat]}",
+            f"Удалять сообщения - {self.TRUE_FALSE_TRANSLATOR[can_delete_messages]}",
+        ]
+        return "\n".join(answer)
 
     def setup_default_chat_setting(self, name) -> ResponseMessageItem:
         self.check_conversation()
