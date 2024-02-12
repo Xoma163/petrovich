@@ -54,7 +54,7 @@ class GigaChat(ChatGPT):
 
     def text_chat(self, messages, model=None, **kwargs) -> ResponseMessage:
         if model is None:
-            model = GigaChatGPTAPI.PRO_MODEL
+            model = GigaChatGPTAPI.LATEST_MODEL
         gc_api = GigaChatGPTAPI(model)
 
         try:
@@ -68,7 +68,7 @@ class GigaChat(ChatGPT):
 
     def draw_image(self, model=None, **kwargs) -> ResponseMessage:
         if model is None:
-            model = GigaChatGPTAPI.PRO_MODEL
+            model = GigaChatGPTAPI.LATEST_MODEL
 
         if len(self.event.message.args) > 1:
             request_text = " ".join(self.event.message.args_case[1:])

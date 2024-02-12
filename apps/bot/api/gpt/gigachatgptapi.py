@@ -19,7 +19,6 @@ class GigaChatGPTAPI(GPT, API):
     GOSUSLUGI_CERT_PATH = os.path.join(BASE_DIR, "secrets/certs/russian_trusted_root_ca_pem.crt")
 
     LATEST_MODEL = "GigaChat:latest"
-    PRO_MODEL = "GigaChat-Pro"
 
     def __init__(self, model):
         super().__init__(model)
