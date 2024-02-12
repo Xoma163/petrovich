@@ -278,7 +278,7 @@ class Media(Command):
 
     @retry(3, Exception, sleep_time=2)
     def get_tiktok_video(self, url) -> (list, str):
-        ttd_api = TikTok()
+        ttd_api = TikTok(log_filter=self.event.log_filter)
         try:
             video_url = ttd_api.get_video_url(url)
         except PWarning as e:
@@ -337,7 +337,7 @@ class Media(Command):
         except PWarning:
             raise PWarning("Медиа инстаграмм доступен только для доверенных пользователей")
 
-        i_api = Instagram()
+        i_api = Instagram(log_filter=self.event.log_filter)
         data: InstagramAPIData = i_api.get_post_data(url)
 
         attachments = []
@@ -358,7 +358,7 @@ class Media(Command):
         except PWarning:
             raise PWarning("Медиа твиттер доступен только для доверенных пользователей")
 
-        t_api = Twitter()
+        t_api = Twitter(log_filter=self.event.log_filter)
         with_threads = self.event.message.keys and self.event.message.keys[0] in ['thread', 'threads', 'with-threads',
                                                                                   'тред', 'треды']
         data = t_api.get_post_data(url, with_threads=with_threads)
@@ -507,14 +507,14 @@ class Media(Command):
         return [video], title
 
     def get_facebook_video(self, url) -> (list, str):
-        f_api = Facebook()
+        f_api = Facebook(log_filter=self.event.log_filter)
         data = f_api.get_video_info(url)
 
         video = self.bot.get_video_attachment(data['download_url'], peer_id=self.event.peer_id)
         return [video], data['caption']
 
     def get_premiere_video(self, url) -> (list, str):
-        p_api = Premier()
+        p_api = Premier(log_filter=self.event.log_filter)
         data = p_api.parse_video(url)
 
         try:

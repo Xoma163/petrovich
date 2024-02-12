@@ -26,7 +26,7 @@ class EstimatePhoto(Command):
     def start(self) -> ResponseMessage:
         image = self.event.get_all_attachments([PhotoAttachment])[0]
 
-        everypixel_api = EveryPixel()
+        everypixel_api = EveryPixel(log_filter=self.event.log_filter)
         image_bytes = image.download_content(self.event.peer_id)
         image_quality = everypixel_api.get_image_quality(image_bytes)
         answer = f"Качество картинки - {image_quality}"

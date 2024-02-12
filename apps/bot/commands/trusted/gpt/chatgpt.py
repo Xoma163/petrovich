@@ -96,7 +96,7 @@ class ChatGPT(Command):
             request_text = self.event.fwd[0].message.raw
         else:
             raise PWarning("Должен быть текст или пересланное сообщение")
-        chat_gpt_api = ChatGPTAPI(model)
+        chat_gpt_api = ChatGPTAPI(model, log_filter=self.event.log_filter)
 
         try:
             self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.UPLOAD_PHOTO)
@@ -133,7 +133,7 @@ class ChatGPT(Command):
             else:
                 model = ChatGPTAPI.GPT_4
 
-        chat_gpt_api = ChatGPTAPI(model)
+        chat_gpt_api = ChatGPTAPI(model, log_filter=self.event.log_filter)
 
         try:
             self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.TYPING)

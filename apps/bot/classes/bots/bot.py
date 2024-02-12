@@ -40,6 +40,7 @@ class Bot(Thread):
 
     def __init__(self, platform, **kwargs):
         Thread.__init__(self)
+        self.log_filter = {}
 
         self.platform = platform
 
@@ -60,6 +61,10 @@ class Bot(Thread):
         Получение новых событий и их обработка
         """
 
+    # Костыль (?)
+    def init_requests(self):
+        pass
+
     def handle_event(self, event: Event, send=True) -> Optional[ResponseMessage]:
         """
         Обработка входящего ивента
@@ -68,6 +73,9 @@ class Bot(Thread):
             event.setup_event()
             if not event.need_a_response():
                 return
+
+            self.log_filter = event.log_filter
+            self.init_requests()
 
             rm = self.route(event)
             # Если мы попали в команду и не вылетели по exception
@@ -224,10 +232,16 @@ class Bot(Thread):
     # LOGGING
 
     def log_event(self, event: Event):
-        self.logger.debug({"event": event.to_log()})
+        log_data = {"event": event.to_log()}
+        if self.log_filter:
+            log_data.update({'log_filter': self.log_filter})
+        self.logger.debug(log_data)
 
     def log_message(self, message, level="debug"):
-        getattr(self.logger, level)({"message": message.to_log()})
+        log_data = {"message": message.to_log()}
+        if self.log_filter:
+            log_data.update({'log_filter': self.log_filter})
+        getattr(self.logger, level)(log_data)
 
     # END LOGGING
 

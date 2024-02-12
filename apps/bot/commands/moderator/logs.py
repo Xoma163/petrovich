@@ -15,8 +15,8 @@ from petrovich.settings import DEBUG_FILE
 class Logs(Command):
     DEFAULT_LEVEL = logging.DEBUG
     DEFAULT_LEVEL_NAME = "DEBUG"
-    DEFAULT_COUNT = 3
-    MAX_LOGS_COUNT = 50
+    DEFAULT_COUNT = 2
+    MAX_LOGS_COUNT = 15
 
     name = "логи"
     names = ["лог"]
@@ -37,11 +37,9 @@ class Logs(Command):
 
     def start(self) -> ResponseMessage:
         count = self.DEFAULT_COUNT
-
         level = self.DEFAULT_LEVEL
-        level_name = self.DEFAULT_LEVEL_NAME
         if self.event.message.args:
-            level = logging._nameToLevel.get(self.event.message.args[0].upper(), logging._nameToLevel[level_name])
+            level = logging.getLevelNamesMapping().get(self.event.message.args[0].upper(), level)
 
             self.int_args = [-1]
             try:
@@ -51,12 +49,12 @@ class Logs(Command):
             except PWarning:
                 pass
 
-        filter_levels = [logging._levelToName[x] for x in logging._levelToName if x >= level]
-        separator = "-" * 150
-
+        filter_levels = [x[0] for x in logging.getLevelNamesMapping().items() if x[1] >= level]
         logs_list = self.get_bot_logs(count, filter_levels)
-        for b in range(0, len(logs_list)):
-            logs_list.insert(b * 2 + 1, separator)
+
+        separator = "-" * 150
+        for i in range(0, len(logs_list)):
+            logs_list.insert(i * 2 + 1, separator)
         logs_txt = "\n".join(logs_list)
         img = draw_text_on_image(logs_txt)
         img_byte_arr = io.BytesIO()
@@ -120,33 +118,58 @@ class Logs(Command):
     def get_bot_logs(self, count, filter_level=None):
         file_rows = self.read_file(DEBUG_FILE)
         res = []
-        for i in range(len(file_rows) - 2, -1, -1):
+        found_logs = 0
+        last_message_id = 0
+        for i in range(len(file_rows) - 1, -1, -1):
             item_json = json.loads(file_rows[i])
-            if filter_level and item_json['levelname'] not in filter_level:
+            if not item_json.get('log_filter'):
                 continue
-            if 'action' in item_json and item_json['action'] == 'sendChatAction':
+
+            log_filter = item_json.pop('log_filter')
+
+            item_json = self.filter_row(item_json, log_filter, filter_level)
+            if not item_json:
                 continue
-            if 'event' in item_json and 'raw' in item_json['event']:
-                item_json['event'].pop('raw')
+
+            if log_filter['message_id'] != last_message_id:
+                found_logs += 1
+                res.append("")
+
+            last_message_id = log_filter['message_id']
+
+            if found_logs > count:
+                break
 
             self.transform_logs_by_values(item_json)
             self.wrap_long_texts(item_json)
             item_str = json.dumps(item_json, indent=2, ensure_ascii=False).replace('\\n', '\n')
             res.append(item_str)
+        return list(reversed(res))
 
-            if len(res) >= count:
-                break
-        res = list(reversed(res))
-        return res
+    def filter_row(self, item_json, log_filter, filter_level):
+        # filter by chat/user
+        if self.event.chat:
+            if log_filter['chat_id'] != self.event.chat.chat_id:
+                return
+        else:
+            if log_filter['chat_id'] is not None:
+                return
+            if log_filter['user_id'] != self.event.user.user_id:
+                return
 
-    def get_count(self, default, max_count):
-        if self.event.message.args:
-            try:
-                count = int(self.event.message.args[-1])
-                return min(count, max_count)
-            except ValueError:
-                pass
-        return default
+        # filter by level
+        if filter_level and item_json['levelname'] not in filter_level:
+            return
+
+        # filter by content
+        if 'action' in item_json and item_json['action'] == 'sendChatAction':
+            return
+
+        # drop trash
+        if 'event' in item_json and 'raw' in item_json['event']:
+            item_json['event'].pop('raw')
+
+        return item_json
 
     @staticmethod
     def read_file(path):

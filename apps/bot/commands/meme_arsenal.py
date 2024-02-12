@@ -22,7 +22,7 @@ class MemeArsenal(Command):
     args = 1
 
     def start(self) -> ResponseMessage:
-        ma_api = MemeArsenalAPI()
+        ma_api = MemeArsenalAPI(log_filter=self.event.log_filter)
         memes = ma_api.get_memes(self.event.message.args_str)
         if not memes:
             raise PWarning("Не нашёл :(")

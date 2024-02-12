@@ -36,8 +36,8 @@ class Twitter(API):
     URL_TWEET_INFO = f"https://{_HOST}/tweet/details"
     URL_TWEET_REPLIES = f"https://{_HOST}/tweet/replies"
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
         self.requests.headers = self.HEADERS
 

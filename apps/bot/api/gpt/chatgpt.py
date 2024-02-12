@@ -34,8 +34,9 @@ class ChatGPTAPI(GPT, API):
     COMPLETIONS_URL = f"{BASE_URL}/chat/completions"
     IMAGE_GEN_URL = f"{BASE_URL}/images/generations"
 
-    def __init__(self, model):
-        super().__init__(model)
+    def __init__(self, model, **kwargs):
+        super(GPT).__init__(model)
+        super(API).__init__(**kwargs)
         self.usage: dict = {}
 
     def completions(self, messages: list) -> GPTAPIResponse:

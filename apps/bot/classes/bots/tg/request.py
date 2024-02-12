@@ -12,9 +12,10 @@ class Request:
 
     LOG_IGNORE_ACTIONS = ['sendChatAction']
 
-    def __init__(self, token):
+    def __init__(self, token, log_filter=None):
         self.token = token
         self.logger = logging.getLogger('bot')
+        self.log_filter = log_filter
 
     def get(self, action, params=None, **kwargs) -> Response:
         return self._do(action, "post", params, **kwargs)
@@ -34,7 +35,10 @@ class Request:
         # if action in self.LOG_IGNORE_ACTIONS:
         #     return
         level = "debug" if response['ok'] else "error"
-        getattr(self.logger, level)({"response": response, "action": action})
+        log_data = {"response": response, "action": action}
+        if self.log_filter:
+            log_data.update({'log_filter': self.log_filter})
+        getattr(self.logger, level)(log_data)
 
     @staticmethod
     def _cache(response: dict):

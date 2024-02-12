@@ -14,7 +14,7 @@ class Advice(Command):
 
     def start(self) -> ResponseMessage:
         try:
-            fga = FuckingGreatAdvice()
+            fga = FuckingGreatAdvice(log_filter=self.event.log_filter)
             answer = fga.get_advice()
             button = self.bot.get_button("Ещё", self.name)
             keyboard = self.bot.get_inline_keyboard([button])

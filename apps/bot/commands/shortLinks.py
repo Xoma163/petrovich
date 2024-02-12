@@ -33,7 +33,7 @@ class ShortLinks(Command):
         else:
             long_link = self.event.attachments[0].url
         try:
-            bl_api = BitLy()
+            bl_api = BitLy(log_filter=self.event.log_filter)
             answer = bl_api.get_short_link(long_link)
             return ResponseMessage(ResponseMessageItem(text=answer))
         except Exception:

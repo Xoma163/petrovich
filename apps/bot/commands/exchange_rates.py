@@ -22,7 +22,7 @@ class ExchangeRates(Command):
     def start(self) -> ResponseMessage:
         filters_list = ["USD", "EUR", "NOK", "JPY", "GBP", "KZT", "UAH", "AMD", "UZS"]
 
-        cbr_api = CBRAPI(filters_list)
+        cbr_api = CBRAPI(filters_list, log_filter=self.event.log_filter)
         ex_rates = cbr_api.get_ex_rates()
 
         if self.event.message.args:

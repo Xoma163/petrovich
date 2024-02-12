@@ -6,9 +6,10 @@ from requests.exceptions import HTTPError, JSONDecodeError
 
 
 class APIHandler:
-    def __init__(self):
+    def __init__(self, log_filter=None):
         self._logger = logging.getLogger('api')
         self.headers = None
+        self.log_filter = log_filter
 
     def get(self, url, *args, **kwargs) -> Response:
         return self._do(url, "get", *args, **kwargs)
@@ -35,9 +36,12 @@ class APIHandler:
         return r
 
     def _log(self, response):
-        self._logger.debug({"response": response})
+        log_data = {"response": response}
+        if self.log_filter:
+            log_data.update({'log_filter': self.log_filter})
+        self._logger.debug(log_data)
 
 
 class API:
-    def __init__(self):
-        self.requests = APIHandler()
+    def __init__(self, **kwargs):
+        self.requests = APIHandler(**kwargs)

@@ -174,3 +174,11 @@ class Event:
     def _cache(self):
         mc = MessagesCache(self.peer_id)
         mc.add_message(self.message.id, self.raw.get('message', self.raw))
+
+    @property
+    def log_filter(self) -> dict:
+        return {
+            'user_id': self.user.user_id if self.user else None,
+            'chat_id': self.chat.chat_id if self.chat else None,
+            'message_id': self.message.id if self.message else None
+        }

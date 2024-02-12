@@ -1,17 +1,13 @@
-import logging
-
 from bs4 import BeautifulSoup
 
 from apps.bot.api.handler import API
-
-logger = logging.getLogger('api')
 
 
 class CBRAPI(API):
     URL = "https://www.cbr-xml-daily.ru/daily.xml"
 
-    def __init__(self, filters_list):
-        super().__init__()
+    def __init__(self, filters_list, **kwargs):
+        super().__init__(**kwargs)
         self.filters = {x: {
             'name': None,
             'value': 0.0

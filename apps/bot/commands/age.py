@@ -28,7 +28,7 @@ class Age(Command):
 
     def start(self) -> ResponseMessage:
         image = self.event.get_all_attachments([PhotoAttachment])[0]
-        everypixel_api = EveryPixel()
+        everypixel_api = EveryPixel(log_filter=self.event.log_filter)
         faces = everypixel_api.get_faces_on_photo(image.download_content(self.event.peer_id))
 
         if len(faces) == 0:

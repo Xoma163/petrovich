@@ -40,7 +40,7 @@ class Find(Command):
 
         count = 5
 
-        gcs_api = GoogleCustomSearch()
+        gcs_api = GoogleCustomSearch(log_filter=self.event.log_filter)
         urls = gcs_api.get_images_urls(query)
         if len(urls) == 0:
             raise PWarning("Ничего не нашёл по картинкам")

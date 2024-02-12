@@ -24,7 +24,7 @@ class DeIssue(Command):
 
     def start(self) -> ResponseMessage:
         _id = self.event.message.args[0]
-        issue = GithubIssueAPI()
+        issue = GithubIssueAPI(log_filter=self.event.log_filter)
         issue.number = _id
         issue.get_from_github()
 

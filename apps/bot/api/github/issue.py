@@ -13,8 +13,8 @@ class GithubIssueAPI(GithubAPI):
     USER_PK_RE = re.compile(r"Ишю от пользователя .* \(id=(.*)\)")
     NO_FIX_LABEL = 'Не пофикшу'
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.requests.headers = self.HEADERS
 
         self.id: str = ""

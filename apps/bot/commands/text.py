@@ -29,7 +29,7 @@ class Text(Command):
         if self.event.message.args:
             lang = self.event.message.args[0]
 
-        ocr_api = OCR()
+        ocr_api = OCR(log_filter=self.event.log_filter)
         image = self.event.get_all_attachments([PhotoAttachment])[0]
         content = image.download_content(self.event.peer_id)
         answer = ocr_api.recognize(content, lang)

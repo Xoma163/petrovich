@@ -112,9 +112,8 @@ class Subscribe(Command):
         parsed['service'] = SubscribeModel.SERVICE_VK
         return parsed
 
-    @staticmethod
-    def add_premiere(url):
-        p_api = Premier()
+    def add_premiere(self, url):
+        p_api = Premier(log_filter=self.event.log_filter)
         parsed = p_api.get_data_to_add_new_subscribe(url)
         parsed['service'] = SubscribeModel.SERVICE_PREMIERE
         if not parsed:

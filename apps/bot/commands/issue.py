@@ -66,7 +66,7 @@ class Issue(Command):
         photos = self.event.get_all_attachments([PhotoAttachment])
         if photos:
             for photo in photos:
-                i_api = Imgur()
+                i_api = Imgur(log_filter=self.event.log_filter)
                 image_url = i_api.upload_image(photo.download_content())
                 body += f"\n![image]({image_url})"
         body += f"\n\nИшю от пользователя {self.event.sender} (id={self.event.sender.pk})\n" \
@@ -77,7 +77,7 @@ class Issue(Command):
             for x in tags.split(" ") if x
         ] if tags else []
 
-        issue = GithubIssueAPI()
+        issue = GithubIssueAPI(log_filter=self.event.log_filter)
         labels_in_github = [x for x in issue.get_all_labels() if x.lower() in tags] if tags else []
         issue.author = self.event.sender
         issue.title = title

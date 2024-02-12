@@ -55,7 +55,7 @@ class GigaChat(ChatGPT):
     def text_chat(self, messages, model=None, **kwargs) -> ResponseMessage:
         if model is None:
             model = GigaChatGPTAPI.LATEST_MODEL
-        gc_api = GigaChatGPTAPI(model)
+        gc_api = GigaChatGPTAPI(model, log_filter=self.event.log_filter)
 
         try:
             self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.TYPING)
@@ -79,7 +79,7 @@ class GigaChat(ChatGPT):
         else:
             raise PWarning("Должен быть текст или пересланное сообщение")
 
-        chat_gpt_api = GigaChatGPTAPI(model)
+        chat_gpt_api = GigaChatGPTAPI(model, log_filter=self.event.log_filter)
 
         try:
             self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.UPLOAD_PHOTO)

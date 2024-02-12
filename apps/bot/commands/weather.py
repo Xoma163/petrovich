@@ -28,6 +28,6 @@ class Weather(Command):
             city = self.event.sender.city
         self.check_city(city)
 
-        yandexweather_api = YandexWeather()
+        yandexweather_api = YandexWeather(log_filter=self.event.log_filter)
         answer = yandexweather_api.get_weather_str(city)
         return ResponseMessage(ResponseMessageItem(text=answer))

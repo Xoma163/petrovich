@@ -56,12 +56,17 @@ class TgBot(Bot):
     def __init__(self):
         Bot.__init__(self, Platform.TG)
         self.token = env.str("TG_TOKEN")
-        if self.MODE == self.TG_SERVER:
-            self.requests = Request(self.token)
-        else:
-            self.requests = RequestLocal(self.token)
+
+        self.requests = None
+        self.init_requests()
 
     # MAIN ROUTING AND MESSAGING
+
+    def init_requests(self):
+        if self.MODE == self.TG_SERVER:
+            self.requests = Request(self.token, log_filter=self.log_filter)
+        else:
+            self.requests = RequestLocal(self.token, log_filter=self.log_filter)
 
     def run(self):
         """

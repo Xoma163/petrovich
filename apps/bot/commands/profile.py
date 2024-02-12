@@ -204,10 +204,9 @@ class Profile(Command):
 
         return rmi
 
-    @staticmethod
-    def add_city_to_db(city_name: str):
+    def add_city_to_db(self, city_name: str):
         city_name = city_name.capitalize()
-        yandexgeo_api = YandexGeo()
+        yandexgeo_api = YandexGeo(log_filter=self.event.log_filter)
         city_info = yandexgeo_api.get_city_info_by_name(city_name)
         if not city_info:
             raise PWarning("Не смог найти координаты для города")
@@ -216,7 +215,7 @@ class Profile(Command):
         if len(city) != 0:
             return city.first()
         city_info['synonyms'] = city_info['name'].lower()
-        timezonedb_api = TimezoneDB()
+        timezonedb_api = TimezoneDB(log_filter=self.event.log_filter)
         timezone_name = timezonedb_api.get_timezone_by_coordinates(city_info['lat'], city_info['lon'])
         if not timezone_name:
             raise PWarning("Не смог найти таймзону для города")
