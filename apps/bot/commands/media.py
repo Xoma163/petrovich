@@ -178,12 +178,14 @@ class Media(Command):
 
         index = args_str.find(chosen_url)
         extra_text = f"{args_str[:index].strip()}\n{args_str[index + len(chosen_url):].strip()}"
+        extra_text = extra_text if extra_text.strip() else ""
         for key in self.event.message.keys:
             for key_symbol in self.event.message.KEYS_SYMBOLS:
                 full_key = key_symbol + key
                 if (index := extra_text.find(full_key)) != -1:
                     extra_text = f"{extra_text[:index].strip()}\n{extra_text[index + len(full_key):].strip()}"
 
+        extra_text = extra_text if extra_text.strip() else ""
         return extra_text
 
     def get_method_and_chosen_url(self, source):
