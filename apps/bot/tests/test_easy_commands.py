@@ -78,7 +78,6 @@ class CommandIssuesTestCase(BotInitializer):
         return self.check_correct_answer()
 
 
-
 class CommandPingTestCase(BotInitializer):
     Command = Ping
 
