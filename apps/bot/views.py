@@ -68,28 +68,48 @@ class GithubView(CSRFExemptMixin, View):
         rmi = ResponseMessageItem(text=text, peer_id=user.user_id)
         bot.send_response_message_item(rmi)
 
+    def reopen_issue(self, issue: GithubIssueAPI):
+        problem_str = TgBot.get_formatted_url('Проблема #' + str(issue.number), issue.remote_url)
+        text = f"{problem_str} была переоткрыта"
+        self.send_notify_to_user(issue, text)
+
     def closed_issue(self, issue: GithubIssueAPI):
-        if issue.has_no_fix_label:
-            text = f"Проблема была закрыта с меткой \"Не пофикшу\"\n{issue.remote_url}"
-        else:
-            text = f"Проблема была закрыта\n{issue.remote_url}"
+        problem_str = TgBot.get_formatted_url('Проблема #' + str(issue.number), issue.remote_url)
+        text = f"{problem_str} была закрыта"
+        self.send_notify_to_user(issue, text)
+
+    def delete_issue(self, issue: GithubIssueAPI):
+        problem_str = TgBot.get_formatted_url('Проблема #' + str(issue.number), issue.remote_url)
+        text = f"{problem_str} была удалена"
         self.send_notify_to_user(issue, text)
 
     def created_comment(self, data, issue: GithubIssueAPI):
         comment = data['comment']['body']
-        text = f"Новый комментарий от разработчика под вашей проблемой\n{issue.remote_url}\n\n{comment}"
+        problem_str = TgBot.get_formatted_url('проблемой #' + str(issue.number), issue.remote_url)
+        text = f"Новый комментарий от разработчика под вашей {problem_str}\n\n{comment}"
+        self.send_notify_to_user(issue, text)
+
+    def new_label(self, data, issue: GithubIssueAPI):
+        label_name = data['label']['name']
+        problem_str = TgBot.get_formatted_url('проблемой #' + str(issue.number), issue.remote_url)
+        text = f"Новый тег от разработчика под вашей {problem_str}\n\n{label_name}"
         self.send_notify_to_user(issue, text)
 
     def post(self, request):
         data = json.loads(request.body)
-
         issue = GithubIssueAPI()
         issue.parse_response(data['issue'])
 
         if data['action'] == 'closed':
             self.closed_issue(issue)
+        elif data['action'] == 'reopened':
+            self.reopen_issue(issue)
+        elif data['action'] == 'deleted':
+            self.delete_issue(issue)
         elif data['action'] == 'created' and \
                 data.get('comment') and \
                 data['comment']['user']['id'] == data['issue']['user']['id']:
             self.created_comment(data, issue)
+        elif data['action'] == 'labeled':
+            self.new_label(data, issue)
         return HttpResponse('ok', status=200)
