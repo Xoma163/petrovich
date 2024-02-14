@@ -2,7 +2,7 @@ from apps.bot.api.gpt.response import GPTAPIResponse
 
 
 class GPT:
-    def __init__(self, model):
+    def __init__(self, model, **kwargs):
         self.model = model
         super().__init__()
 

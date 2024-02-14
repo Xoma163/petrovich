@@ -21,8 +21,8 @@ class GigaChatGPTAPI(GPT, API):
     LATEST_MODEL = "GigaChat:latest"
 
     def __init__(self, model, **kwargs):
-        super(GPT).__init__(model)
-        super(API).__init__(**kwargs)
+        super(GigaChatGPTAPI, self).__init__(model, **kwargs)
+        super().__init__(model)
         self.access_token = None
 
     def set_access_token(self):
