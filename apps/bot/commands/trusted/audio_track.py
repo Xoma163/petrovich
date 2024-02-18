@@ -6,8 +6,9 @@ from apps.bot.classes.messages.response_message import ResponseMessageItem, Resp
 from apps.bot.utils.video.video_handler import VideoHandler
 
 
-class AudioTrackCommand(Command):
+class AudioTrack(Command):
     name = "аудиодорожка"
+    names = ["аудио"]
 
     help_text = HelpText(
         commands_text="Вырезает аудиодорожку из видео",
