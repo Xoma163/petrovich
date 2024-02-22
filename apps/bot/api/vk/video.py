@@ -48,8 +48,7 @@ class VKVideo(SubscribeService):
         bs4 = BeautifulSoup(r.text, 'html.parser')
         og_video = bs4.find("meta", property="og:video")
         if not og_video:
-            raise PWarning("К сожалению видео старое и скачать его не получится. "
-                           "Поддерживаются видео с апреля-мая 2023 года")
+            raise PWarning("К сожалению видео не получится скачать :(")
         player_url = bs4.find("meta", property="og:video").attrs['content']
         return player_url
 
@@ -98,21 +97,33 @@ class VKVideo(SubscribeService):
         content = requests.get(url, headers=self.headers).content
         bs4 = BeautifulSoup(content, 'html.parser')
         try:
-            if "clip-" in url:
-                a_tag = bs4.select_one('.ui_crumb')
-                return {
-                    'channel_id': f"@{a_tag.attrs['href'].split('/')[-1]}",
-                    'video_id': urlparse(url).path.split('clip')[1],
-                    'channel_title': a_tag.text,
-                    'video_title': bs4.find('meta', property="og:title").attrs['content'],
-                }
 
-            a_tag = bs4.select_one(".VideoCard__additionalInfo a")
+            og_title = bs4.find('meta', property="og:title")
+            video_title = ""
+            if og_title:
+                video_title = og_title.attrs['content']
+
+            if "clip-" in url:
+                video_id = urlparse(url).path.split('clip')[1]
+                try:
+                    a_tag = bs4.select_one('.ui_crumb')
+                    channel_id = f"@{a_tag.attrs['href'].split('/')[-1]}"
+                    channel_title = a_tag.te
+                except:
+                    channel_id = bs4.select_one('title').text.split(" | ")[0].lstrip("Клипы ")
+                    channel_title = channel_id
+            else:
+                a_tag = bs4.select_one(".VideoCard__additionalInfo a")
+
+                video_id = urlparse(url).path.split('video')[1]
+                channel_id = a_tag.attrs['href'].split('/')[-1]
+                channel_title = a_tag.text
+
             return {
-                'channel_id': a_tag.attrs['href'].split('/')[-1],
-                'video_id': urlparse(url).path.split('video')[1],
-                'channel_title': a_tag.text,
-                'video_title': bs4.find('meta', property="og:title").attrs['content'],
+                'channel_id': channel_id,
+                'video_id': video_id,
+                'channel_title': channel_title,
+                'video_title': video_title
             }
         except Exception:
             return {}

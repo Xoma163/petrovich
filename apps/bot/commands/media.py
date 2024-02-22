@@ -145,7 +145,10 @@ class Media(Command):
 
         answer = ""
         if title:
-            answer = f"{markdown_wrap_symbols(title)}\n"
+            if method not in [self.get_vk_video]:
+                answer = f"{markdown_wrap_symbols(title)}\n"
+            else:
+                answer = title
 
         if extra_text := self.get_extra_text(chosen_url):
             answer += f"\n{extra_text}\n"
@@ -454,6 +457,8 @@ class Media(Command):
 
         try:
             cache = VideoCache.objects.get(channel_id=video_info['channel_id'], video_id=video_info['video_id'])
+            attachments = []
+            msg = f"{title}\nCкачать можно здесь {self.bot.get_formatted_url('здесь', MAIN_SITE + cache.video.url)}"
         except VideoCache.DoesNotExist:
             try:
                 self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.UPLOAD_VIDEO)
@@ -461,18 +466,20 @@ class Media(Command):
             finally:
                 self.bot.stop_activity_thread()
 
-            filename = f"{video_info['channel_title']}_{title}"
-            cache = self._save_video_to_media_cache(
-                video_info['channel_id'],
-                video_info['video_id'],
-                filename,
-                video
-            )
-        filesize_mb = len(cache.video) / 1024 / 1024
-        attachments = []
-        if filesize_mb < self.bot.MAX_VIDEO_SIZE_MB:
-            attachments = [self.bot.get_video_attachment(cache.video, peer_id=self.event.peer_id)]
-        msg = f"{title}\nCкачать можно здесь {self.bot.get_formatted_url('здесь', MAIN_SITE + cache.video.url)}"
+            filesize_mb = len(video) / 1024 / 1024
+            if filesize_mb > self.bot.MAX_VIDEO_SIZE_MB:
+                filename = f"{video_info['channel_title']}_{title}"
+                cache = self._save_video_to_media_cache(
+                    video_info['channel_id'],
+                    video_info['video_id'],
+                    filename,
+                    video
+                )
+                attachments = []
+                msg = f"{title}\nCкачать можно здесь {self.bot.get_formatted_url('здесь', MAIN_SITE + cache.video.url)}"
+            else:
+                attachments = [self.bot.get_video_attachment(video, peer_id=self.event.peer_id)]
+                msg = title
         return attachments, msg
 
     def get_scope_gg_video(self, url) -> (list, str):
@@ -519,6 +526,8 @@ class Media(Command):
 
         try:
             cache = VideoCache.objects.get(channel_id=data['show_id'], video_id=data['video_id'])
+            attachments = []
+            msg = f"{data['title']}\nCкачать можно здесь {self.bot.get_formatted_url('здесь', MAIN_SITE + cache.video.url)}"
         except VideoCache.DoesNotExist:
             try:
                 self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.UPLOAD_VIDEO)
@@ -526,17 +535,20 @@ class Media(Command):
             finally:
                 self.bot.stop_activity_thread()
 
-            cache = self._save_video_to_media_cache(
-                data['show_id'],
-                data['video_id'],
-                data['filename'],
-                video
-            )
-        filesize_mb = len(cache.video) / 1024 / 1024
-        attachments = []
-        if filesize_mb < self.bot.MAX_VIDEO_SIZE_MB:
-            attachments = [self.bot.get_video_attachment(cache.video, peer_id=self.event.peer_id)]
-        msg = f"{data['title']}\nCкачать можно здесь {self.bot.get_formatted_url('здесь', MAIN_SITE + cache.video.url)}"
+            filesize_mb = len(video) / 1024 / 1024
+            if filesize_mb > self.bot.MAX_VIDEO_SIZE_MB:
+                filename = data['filename']
+                cache = self._save_video_to_media_cache(
+                    data['show_id'],
+                    data['video_id'],
+                    filename,
+                    video
+                )
+                attachments = []
+                msg = f"{data['title']}\nCкачать можно здесь {self.bot.get_formatted_url('здесь', MAIN_SITE + cache.video.url)}"
+            else:
+                attachments = [self.bot.get_video_attachment(video, peer_id=self.event.peer_id)]
+                msg = data['title']
         return attachments, msg
 
     def get_spotify_music(self, url):
