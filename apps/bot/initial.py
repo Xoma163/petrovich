@@ -23,7 +23,7 @@ def import_all_commands():
 
 
 def generate_commands(base_class=Command):
-    commands = [x for x in base_class.__subclasses__() if x.__module__.startswith('apps.bot.commands')]
+    commands = base_class.__subclasses__()
     new_commands = commands
     flag = True
     while flag:
@@ -36,7 +36,8 @@ def generate_commands(base_class=Command):
             new_commands = _new_commands
         else:
             flag = False
-    commands = [cls() for cls in commands if cls.enabled]
+    commands = [x() for x in commands if x.__module__.startswith('apps.bot.commands') and x.enabled]
+    # commands = [cls for cls in commands if cls.enabled]
     commands.sort(key=lambda x: x.priority, reverse=True)
     return commands
 
