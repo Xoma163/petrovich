@@ -22,7 +22,7 @@ from apps.bot.api.yandex.music import YandexMusicAPI, YandexAlbum, YandexTrack
 from apps.bot.api.youtube.music import YoutubeMusic
 from apps.bot.api.youtube.video import YoutubeVideo
 from apps.bot.classes.bots.tg_bot import TgBot
-from apps.bot.classes.command import Command
+from apps.bot.classes.command import AcceptExtraCommand
 from apps.bot.classes.const.activities import ActivitiesEnum
 from apps.bot.classes.const.consts import Platform, Role
 from apps.bot.classes.const.exceptions import PWarning, PSkip
@@ -74,7 +74,7 @@ MEDIA_URLS = tuple(
 )
 
 
-class Media(Command):
+class Media(AcceptExtraCommand):
     name = "медиа"
     names = ["media"]
 

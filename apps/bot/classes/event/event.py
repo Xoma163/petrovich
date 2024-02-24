@@ -105,15 +105,9 @@ class Event:
         """
         Проверка, нужен ли пользователю ответ c учётом особенностей команд
         """
-        from apps.bot.commands.tag import Tag
-        from apps.bot.commands.meme import Meme as MemeCommand
-        from apps.bot.commands.media import Media
-        from apps.bot.commands.voice_recognition import VoiceRecognition
+        from apps.bot.initial import EXTRA_COMMANDS
 
-        # ToDo: get automatically
-        extra_commands = [Tag, MemeCommand, Media, VoiceRecognition]
-
-        for e_command in extra_commands:
+        for e_command in EXTRA_COMMANDS:
             if e_command.accept_extra(self):
                 self.command = e_command
                 return True

@@ -387,3 +387,12 @@ class Command:
 
     def __str__(self):
         return self.name
+
+
+class AcceptExtraCommand(Command):
+    @staticmethod
+    def accept_extra(event):
+        """
+        Метод, определяющий нужно ли отреагировать команде вне обычных условий
+        """
+        raise NotImplementedError

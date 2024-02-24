@@ -6,7 +6,7 @@ import requests
 
 from apps.bot.api.youtube.video import YoutubeVideo
 from apps.bot.classes.bots.bot import send_message_to_moderator_chat
-from apps.bot.classes.command import Command
+from apps.bot.classes.command import AcceptExtraCommand
 from apps.bot.classes.const.consts import Role, Platform, ATTACHMENT_TYPE_TRANSLATOR
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.event.event import Event
@@ -23,7 +23,7 @@ from apps.bot.utils.utils import tanimoto
 from apps.service.models import Meme as MemeModel
 
 
-class Meme(Command):
+class Meme(AcceptExtraCommand):
     name = "мем"
 
     help_text = HelpText(

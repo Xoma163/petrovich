@@ -4,7 +4,7 @@ import pkgutil
 
 from django.contrib.auth.models import Group
 
-from apps.bot.classes.command import Command
+from apps.bot.classes.command import Command, AcceptExtraCommand
 from apps.bot.classes.const.consts import Platform, Role
 from apps.bot.utils.utils import get_flat_list
 from petrovich.settings import BASE_DIR
@@ -22,8 +22,8 @@ def import_all_commands():
         importlib.import_module('.' + name, package)
 
 
-def generate_commands():
-    commands = Command.__subclasses__()
+def generate_commands(base_class=Command):
+    commands = base_class.__subclasses__()
     new_commands = commands
     flag = True
     while flag:
@@ -63,7 +63,9 @@ def generate_help_text():
 
 import_all_commands()
 
-COMMANDS = generate_commands()
+COMMANDS = generate_commands(Command)
+
+EXTRA_COMMANDS = generate_commands(AcceptExtraCommand)
 
 HELP_TEXTS = generate_help_text()
 

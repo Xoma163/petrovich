@@ -4,7 +4,7 @@ import speech_recognition as sr
 from pydub import AudioSegment
 
 from apps.bot.classes.bots.tg_bot import TgBot
-from apps.bot.classes.command import Command
+from apps.bot.classes.command import AcceptExtraCommand
 from apps.bot.classes.const.consts import Platform, Role
 from apps.bot.classes.const.exceptions import PWarning, PSkip
 from apps.bot.classes.event.event import Event
@@ -15,7 +15,7 @@ from apps.bot.classes.messages.attachments.voice import VoiceAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 
 
-class VoiceRecognition(Command):
+class VoiceRecognition(AcceptExtraCommand):
     name = 'распознай'
     names = ["голос", "голосовое"]
 
