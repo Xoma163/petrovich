@@ -23,7 +23,7 @@ def import_all_commands():
 
 
 def generate_commands(base_class=Command):
-    commands = base_class.__subclasses__()
+    commands = [x for x in base_class.__subclasses__() if x.__module__.startswith('apps.bot.commands')]
     new_commands = commands
     flag = True
     while flag:
