@@ -246,7 +246,7 @@ class Media(AcceptExtraCommand):
                 text = None
             else:
                 data = yt_api.get_video_info(url, max_filesize_mb=max_filesize_mb)
-                if not self.has_command_name and data['duration'] > 120:
+                if not self.has_command_name and data['duration'] > 120 and not self.event.is_from_pm:
                     button = self.bot.get_button(f"{self.event.message.COMMAND_SYMBOLS[0]}{self.name} {url}")
                     keyboard = self.bot.get_inline_keyboard([button])
                     raise PWarning(

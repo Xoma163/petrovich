@@ -109,7 +109,7 @@ class Event:
 
         for e_command in EXTRA_COMMANDS:
             if e_command.accept_extra(self):
-                self.command = e_command
+                self.command = e_command.__class__
                 return True
 
         return False
