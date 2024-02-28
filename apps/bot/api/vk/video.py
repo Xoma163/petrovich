@@ -131,19 +131,29 @@ class VKVideo(SubscribeService):
     def get_data_to_add_new_subscribe(self, url: str) -> dict:
         content = requests.get(url, headers=self.headers).content
         bs4 = BeautifulSoup(content, "html.parser")
-        channel_id = bs4.select_one('.VideoCard__additionalInfo a').attrs['href'].split('/')[-1]
-        channel_title = bs4.select_one(".VideoCard__ownerLink").text
         if 'playlist' in url:
+            data = self._get_playlist_data(bs4)
             _playlist_id = url.rsplit('_', 1)[1]
-            videos = bs4.find('div', {'id': f"video_subtab_pane_playlist_{_playlist_id}"}) \
-                .find_all('div', {'class': 'VideoCard__info'})
-            playlist_title = bs4.find("title").text.split(" | ", 1)[0]
-            playlist_id = urlparse(url).path.split('/', 2)[2]
+            owner_id = data['apiPrefetchCache'][1]['response']['owner_id']
+            playlist_id = f"playlist/{owner_id}_{_playlist_id}"
+            playlist_title = data['apiPrefetchCache'][1]['response']['title']
+
+            videos = data['apiPrefetchCache'][0]['response']['items']
+            videos = list(reversed(videos))
+            last_videos_id = [f"{x['owner_id']}_{x['id']}" for x in videos]
+
+            video_info = self.get_video_info(f"https://vk.com/video{last_videos_id[-1]}")
+
+            channel_id = video_info['channel_id']
+            channel_title = video_info['channel_title']
         else:
+            channel_id = bs4.select_one('.VideoCard__additionalInfo a').attrs['href'].split('/')[-1]
+            channel_title = bs4.select_one(".VideoCard__ownerLink").text
             videos = bs4.find('div', {'id': "video_subtab_pane_all"}).find_all('div', {'class': 'VideoCard__info'})
             playlist_id = None
             playlist_title = None
-        last_videos_id = list(reversed([x.find("a", {"class": "VideoCard__title"}).attrs['data-id'] for x in videos]))
+            last_videos_id = list(
+                reversed([x.find("a", {"class": "VideoCard__title"}).attrs['data-id'] for x in videos]))
 
         return {
             'channel_id': channel_id,
@@ -161,16 +171,17 @@ class VKVideo(SubscribeService):
         bs4 = BeautifulSoup(content, "html.parser")
 
         if 'playlist' in url:
-            playlist_id = url.rsplit('_', 1)[1]
-            videos = bs4.find('div', {'id': f"video_subtab_pane_playlist_{playlist_id}"}) \
-                .find_all('div', {'class': 'VideoCard__info'})
+            data = self._get_playlist_data(bs4)
+            videos = data['apiPrefetchCache'][0]['response']['items']
+            videos = list(reversed(videos))
+
+            ids = [f"{x['owner_id']}_{x['id']}" for x in videos]
+            titles = [x['title'] for x in videos]
         else:
             videos = bs4.find('div', {'id': "video_subtab_pane_all"}).find_all('div', {'class': 'VideoCard__info'})
-
-        videos = list(reversed(videos))
-
-        ids = [video.find('a', {'class': 'VideoCard__title'}).attrs['data-id'] for video in videos]
-        titles = [video.find('a', {'class': 'VideoCard__title'}).text.strip() for video in videos]
+            videos = list(reversed(videos))
+            ids = [video.find('a', {'class': 'VideoCard__title'}).attrs['data-id'] for video in videos]
+            titles = [video.find('a', {'class': 'VideoCard__title'}).text.strip() for video in videos]
 
         index = self.filter_by_id(ids, last_videos_id)
 
@@ -178,3 +189,13 @@ class VKVideo(SubscribeService):
         titles = titles[index:]
         urls = [f"{self.URL}{x}" for x in ids]
         return {"ids": ids, "titles": titles, "urls": urls}
+
+    @staticmethod
+    def _get_playlist_data(bs4):
+        bs4_str = str(bs4)
+        pos1_text = "extend(window.cur || {}, "
+        pos2_text = ");Promise"
+        pos1 = bs4_str.find(pos1_text)
+        pos2 = bs4_str.find(pos2_text, pos1)
+        data = json.loads(bs4_str[pos1 + len(pos1_text):pos2])
+        return data
