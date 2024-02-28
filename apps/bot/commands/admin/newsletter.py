@@ -48,7 +48,8 @@ class Newsletter(Command):
             rmi = ResponseMessageItem(
                 text=text,
                 entities=entities,
-                peer_id=subscriber.get_tg_user().user_id
+                disable_web_page_preview=True,
+                peer_id=subscriber.get_tg_user().user_id,
             )
             rm.messages.append(rmi)
 
@@ -66,7 +67,8 @@ class Newsletter(Command):
         rmi1 = ResponseMessageItem(
             text=answer,
             entities=entities,
-            keyboard=keyboard
+            disable_web_page_preview=True,
+            keyboard=keyboard,
         )
 
         subscribers = Profile.objects.filter(settings__is_newsletter_subscriber=True)

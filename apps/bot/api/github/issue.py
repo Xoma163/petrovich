@@ -25,7 +25,7 @@ class GithubIssueAPI(GithubAPI):
         self.assignee: str = ""
 
         self.remote_url: str = ""
-        self.created_at: str = ""
+        self.created_at: datetime = ""
 
         self.author: Optional[Profile] = None
 
