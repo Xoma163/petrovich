@@ -281,16 +281,16 @@ class Media(AcceptExtraCommand):
 
     @retry(3, Exception, sleep_time=2)
     def get_tiktok_video(self, url) -> (list, str):
-        ttd_api = TikTok(log_filter=self.event.log_filter)
+        tt_api = TikTok(log_filter=self.event.log_filter)
         try:
-            video_url = ttd_api.get_video_url(url)
+            ttd = tt_api.get_video(url)
         except PWarning as e:
             button = self.bot.get_button("Повторить", command=self.name, args=[url])
             keyboard = self.bot.get_inline_keyboard([button])
             raise PWarning(e.msg, keyboard=keyboard)
         va = VideoAttachment()
-        va.public_download_url = video_url
-        return [va], None
+        va.public_download_url = ttd.video_url
+        return [va], ttd.description
 
     def get_reddit_content(self, url) -> (list, str):
         rs = Reddit()

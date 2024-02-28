@@ -57,7 +57,7 @@ class Newsletter(Command):
         return rm
 
     def prepare_message(self) -> ResponseMessage:
-        answer = f"Новостная рассылка.\n\n"
+        answer = "Новостная рассылка.\n\n"
         text, entities = self._get_text(len(answer))
         button = self.bot.get_button("Подтвердить", self.name, ["подтвердить"])
         keyboard = self.bot.get_inline_keyboard([button])
