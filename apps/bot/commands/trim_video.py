@@ -167,12 +167,18 @@ class TrimVideo(Command):
         if start_yt_timecode:
             start_pos = TrimVideo.parse_timecode(start_yt_timecode)
             if args:
-                end_pos = TrimVideo.parse_timecode(args[0])
+                try:
+                    end_pos = TrimVideo.parse_timecode(args[0])
+                except ValueError:
+                    end_pos = None
         elif args:
             try:
                 start_pos = TrimVideo.parse_timecode(args[0])
                 if len(args) > 1:
-                    end_pos = TrimVideo.parse_timecode(args[1])
+                    try:
+                        end_pos = TrimVideo.parse_timecode(args[1])
+                    except ValueError:
+                        end_pos = None
             except ValueError:
                 return None, None
         else:
