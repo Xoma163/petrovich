@@ -50,6 +50,8 @@ class UserSettings(BaseSettings):
     show_birthday_year = models.BooleanField('Показывать год', default=True)
     use_mention = models.BooleanField('Использовать упоминания', default=True)
 
+    is_newsletter_subscriber = models.BooleanField('Подписчик новостной рассылки', default=False)
+
     class Meta:
         verbose_name = "Настройка профиля"
         verbose_name_plural = "Настройки профилей"

@@ -13,7 +13,7 @@ class ResponseMessageItem:
     def __init__(
             self, text: str = None, attachments: list = None, reply_to: str = None, keyboard: dict = None,
             message_id: str = None, message_thread_id: str = None, peer_id: int = None, log_level='debug',
-            exc_info=None, disable_web_page_preview=False, send=True
+            exc_info=None, disable_web_page_preview=False, entities=None, send=True
     ):
         self.text = text if text is not None else ""
         self.attachments = attachments if attachments else []
@@ -29,6 +29,7 @@ class ResponseMessageItem:
         self.exc_info = exc_info
 
         self.disable_web_page_preview = disable_web_page_preview
+        self.entities = entities
 
         self.kwargs = {}
 

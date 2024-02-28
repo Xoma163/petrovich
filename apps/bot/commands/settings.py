@@ -43,6 +43,9 @@ class Settings(Command):
                 HelpTextItemCommand(
                     "упоминания (вкл/выкл)",
                     "определяет будет ли бот использовать упоминания вас"),
+                HelpTextItemCommand(
+                    "рассылка (вкл/выкл)",
+                    "определяет будет ли бот отправлять вам новостную рассылку"),
             ])
         ],
         extra_text="Если команда запускается в чате, то общие настройки (поздравления с др) будут указываться для текущего чата"
@@ -89,7 +92,8 @@ class Settings(Command):
             [['голосовые', 'голос', 'голосовухи', 'голосовуха', 'голосовое'], self.menu_voice],
             [['туретт', 'туррет', 'турретт', 'турет'], self.menu_turett],
             [['ругаться'], self.menu_swear],
-            [['упоминание', 'упоминания', ], self.menu_use_mention],
+            [['упоминание', 'упоминания'], self.menu_use_mention],
+            [['рассылка', 'подписка'], self.menu_use_newsletter],
             [['default'], self.menu_default],
         ]
         method = self.handle_menu(menu, arg0)
@@ -129,6 +133,9 @@ class Settings(Command):
     def menu_use_mention(self) -> ResponseMessageItem:
         return self.setup_default_profile_setting("use_mention")
 
+    def menu_use_newsletter(self) -> ResponseMessageItem:
+        return self.setup_default_profile_setting("is_newsletter_subscriber")
+
     # END PROFILE
 
     # COMMON
@@ -157,14 +164,16 @@ class Settings(Command):
         use_swear = settings.use_swear
         celebrate_bday = settings.celebrate_bday
         use_mention = settings.use_mention
+        is_newsletter_subscriber = settings.is_newsletter_subscriber
 
         answer = [
             "Настройки пользователя:",
-            f"Присылать мемы по точным названиям - {self.TRUE_FALSE_TRANSLATOR[need_meme]}",
-            f"Реагировать на неправильные команды - {self.TRUE_FALSE_TRANSLATOR[need_reaction]}",
-            f"Использовать ругательные команды - {self.TRUE_FALSE_TRANSLATOR[use_swear]}",
-            f"Поздравлять с днём рождения - {self.TRUE_FALSE_TRANSLATOR[celebrate_bday]}",
-            f"Использовать упоминания в сообщениях - {self.TRUE_FALSE_TRANSLATOR[use_mention]}",
+            f"Присылать мемы по точным названиям — {self.TRUE_FALSE_TRANSLATOR[need_meme]}",
+            f"Реагировать на неправильные команды — {self.TRUE_FALSE_TRANSLATOR[need_reaction]}",
+            f"Использовать ругательные команды — {self.TRUE_FALSE_TRANSLATOR[use_swear]}",
+            f"Поздравлять с днём рождения — {self.TRUE_FALSE_TRANSLATOR[celebrate_bday]}",
+            f"Использовать упоминания в сообщениях — {self.TRUE_FALSE_TRANSLATOR[use_mention]}",
+            f"Присылать новостную рассылку — {self.TRUE_FALSE_TRANSLATOR[is_newsletter_subscriber]}",
         ]
         return "\n".join(answer)
 
@@ -177,10 +186,10 @@ class Settings(Command):
 
         answer = [
             "Настройки чата:",
-            f"Триггериться на команды без упоминания - {self.TRUE_FALSE_TRANSLATOR[no_mention]}",
-            f"Синдром Туретта - {self.TRUE_FALSE_TRANSLATOR[need_turett]}",
-            f"Автоматически распознавать голосовые - {self.TRUE_FALSE_TRANSLATOR[recognize_voice]}",
-            f"Поздравлять с днём рождения - {self.TRUE_FALSE_TRANSLATOR[celebrate_bday]}",
+            f"Триггериться на команды без упоминания — {self.TRUE_FALSE_TRANSLATOR[no_mention]}",
+            f"Синдром Туретта — {self.TRUE_FALSE_TRANSLATOR[need_turett]}",
+            f"Автоматически распознавать голосовые — {self.TRUE_FALSE_TRANSLATOR[recognize_voice]}",
+            f"Поздравлять с днём рождения — {self.TRUE_FALSE_TRANSLATOR[celebrate_bday]}",
         ]
         return "\n".join(answer)
 
@@ -195,8 +204,8 @@ class Settings(Command):
 
         answer = [
             "Права бота в чате:",
-            f"Читать все сообщения - {self.TRUE_FALSE_TRANSLATOR[can_manage_chat]}",
-            f"Удалять сообщения - {self.TRUE_FALSE_TRANSLATOR[can_delete_messages]}",
+            f"Читать все сообщения — {self.TRUE_FALSE_TRANSLATOR[can_manage_chat]}",
+            f"Удалять сообщения — {self.TRUE_FALSE_TRANSLATOR[can_delete_messages]}",
         ]
         return "\n".join(answer)
 

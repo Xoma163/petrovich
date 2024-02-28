@@ -8,6 +8,7 @@ class TgMessage(Message):
     def __init__(self, raw_str=None, _id=None, entities=None, quote=None):
         self._mention_entities = []
         self.has_mention = False
+        self.entities = entities
         text = self.setup_message_with_entities(raw_str, entities)
 
         # save state before super

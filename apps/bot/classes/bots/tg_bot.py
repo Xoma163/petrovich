@@ -389,6 +389,8 @@ class TgBot(Bot):
             params['disable_web_page_preview'] = True
         if rmi.message_thread_id:
             params['message_thread_id'] = rmi.message_thread_id
+        if rmi.entities:
+            params['entities'] = json.dumps(rmi.entities)
 
         if rmi.message_id:
             params['message_id'] = rmi.message_id
