@@ -46,6 +46,9 @@ class Twitter(API):
         r = self.requests.get(self.URL_TWEET_INFO, params={'tweet_id': tweet_id}).json()
         if r.get('detail') == 'Error while parsing tweet':
             raise PWarning("Ошибка на стороне API")
+        elif r.get(
+                'detail') == 'You’re unable to view this Post because this account owner limits who can view their Posts. Learn more':
+            raise PWarning("Пользователь ограничил круг лиц, которые могут видеть этот пост")
 
         if with_threads:
             try:
