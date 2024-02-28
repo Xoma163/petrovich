@@ -1,5 +1,6 @@
 import json
 import re
+from datetime import datetime
 from typing import Optional
 
 from requests import HTTPError
@@ -11,7 +12,6 @@ from apps.bot.models import Profile
 
 class GithubIssueAPI(GithubAPI):
     USER_PK_RE = re.compile(r"Ишю от пользователя .* \(id=(.*)\)")
-    NO_FIX_LABEL = 'Не пофикшу'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -25,6 +25,7 @@ class GithubIssueAPI(GithubAPI):
         self.assignee: str = ""
 
         self.remote_url: str = ""
+        self.created_at: str = ""
 
         self.author: Optional[Profile] = None
 
@@ -36,6 +37,7 @@ class GithubIssueAPI(GithubAPI):
         self.body: str = response['body']
         self.assignee: str = response['assignee']
         self.remote_url: str = response['html_url']
+        self.created_at: datetime = datetime.strptime(response['created_at'], '%Y-%m-%dT%H:%M:%SZ')
 
         self.author: Optional[Profile] = None
         match = self.USER_PK_RE.findall(self.body)
@@ -92,7 +94,3 @@ class GithubIssueAPI(GithubAPI):
     def get_all_labels(self) -> list[str]:
         r = self.requests.get(self.LABELS_URL, json.dumps({})).json()
         return [x['name'] for x in r]
-
-    @property
-    def has_no_fix_label(self):
-        return any(x for x in self.labels if x == self.NO_FIX_LABEL)

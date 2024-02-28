@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 
 from django.http import JsonResponse, HttpResponse
 from django.views import View
@@ -90,6 +91,10 @@ class GithubView(CSRFExemptMixin, View):
         self.send_notify_to_user(issue, text)
 
     def new_label(self, data, issue: GithubIssueAPI):
+        # Github при создании иши присылает вебхук, типа он пометил её label'ами. Такое скипаем
+        if (datetime.utcnow() - issue.created_at).seconds < 10:
+            return
+
         label_name = data['label']['name']
         problem_str = TgBot.get_formatted_url('проблемой #' + str(issue.number), issue.remote_url)
         text = f"Новый тег от разработчика под вашей {problem_str}\n\n{label_name}"
