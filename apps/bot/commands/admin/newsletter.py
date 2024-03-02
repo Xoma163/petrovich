@@ -15,7 +15,7 @@ class Newsletter(Command):
         commands_text="запускает рассылку по подписчикам",
         help_texts=[
             HelpTextItem(Role.ADMIN, [
-                HelpTextItemCommand("(команда)", "запускает любую команду на сервере")
+                HelpTextItemCommand("\n(текст рассылки)", "запускает рассылку подписчикам")
             ])
         ]
     )
@@ -83,7 +83,7 @@ class Newsletter(Command):
 
     def _get_text(self, entities_offset=0) -> Tuple[str, list]:
         text = self.event.message.raw
-        entities = self.event.message.entities
+        entities = self.event.message.entities if self.event.message.entities else []
 
         total_delete_len = 0
         if self.event.message.has_command_symbols:
@@ -94,6 +94,8 @@ class Newsletter(Command):
         len_text_to_delete = len(text_to_delete)
         index = text.find(text_to_delete)
         if index != 0:
+            if "\n" not in text:
+                raise PError("Ошибка. Текст рассылки должен быть на новой строке")
             raise PError("Ошибка. Не смог вырезать сообщение для рассылки")
         text = text[len_text_to_delete:]
         total_delete_len += len_text_to_delete
