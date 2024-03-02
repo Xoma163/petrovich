@@ -2,11 +2,13 @@ from datetime import datetime
 
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role
-from apps.bot.classes.const.exceptions import PWarning
+from apps.bot.classes.const.exceptions import PWarning, PError
 from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
-from apps.bot.commands.meme import Meme
-from apps.service.models import Horoscope as HoroscopeModel
+from apps.bot.commands.meme import Meme as MemeCommand
+from apps.bot.utils.utils import localize_datetime
+from apps.service.models import Horoscope as HoroscopeModel, HoroscopeMeme, Meme
+from petrovich.settings import DEFAULT_TIME_ZONE
 
 
 class ZodiacSign:
@@ -110,8 +112,6 @@ class Horoscope(Command):
             )
 
     def get_horoscope_for_all(self) -> ResponseMessage:
-        horoscope = HoroscopeModel.objects.first()
-        self.check_horoscope(horoscope)
         signs = self.zodiac_signs.get_zodiac_signs()
         rm = ResponseMessage(delay=1)
         for sign in signs:
@@ -152,20 +152,18 @@ class Horoscope(Command):
             zodiac_sign_index = self.zodiac_signs.get_zodiac_sign_index(zodiac_sign)
         except Exception:
             raise PWarning("Не знаю такого знака зодиака")
-        horoscope = HoroscopeModel.objects.first()
-        self.check_horoscope(horoscope)
+        horoscope = self.get_or_create_horoscope()
         meme = horoscope.memes.all()[zodiac_sign_index]
         answer = f"{zodiac_sign.name.capitalize()}\n{meme.get_info()}"
         return ResponseMessage(ResponseMessageItem(text=answer))
 
     def get_horoscope_by_zodiac_sign(self, zodiac_sign) -> ResponseMessageItem:
-        horoscope = HoroscopeModel.objects.first()
-        self.check_horoscope(horoscope)
+        horoscope = self.get_or_create_horoscope()
         zodiac_sign_index = self.zodiac_signs.get_zodiac_sign_index(zodiac_sign)
         zodiac_sign_name = zodiac_sign.name.capitalize()
         meme = horoscope.memes.all()[zodiac_sign_index]
 
-        meme_command = Meme(bot=self.bot, event=self.event)
+        meme_command = MemeCommand(bot=self.bot, event=self.event)
         prepared_meme = meme_command.prepare_meme_to_send(meme)
         if prepared_meme.text:
             prepared_meme.text = f"{zodiac_sign_name}\n{prepared_meme.text}"
@@ -181,6 +179,32 @@ class Horoscope(Command):
         return ResponseMessage(rmi)
 
     @staticmethod
-    def check_horoscope(horoscope: HoroscopeModel):
-        if not horoscope:
-            raise PWarning("На сегодня ещё нет гороскопа")
+    def get_or_create_horoscope() -> HoroscopeModel:
+        d_now = localize_datetime(datetime.utcnow(), DEFAULT_TIME_ZONE).date()
+
+        try:
+            horoscope = HoroscopeModel.objects.get(date=d_now)
+        except HoroscopeModel.DoesNotExist:
+            MEMES_COUNT = 12
+
+            HoroscopeMeme.objects.all().delete()
+            HoroscopeModel.objects.all().delete()
+
+            random_memes = Meme.objects \
+                               .exclude(type='audio', approved=False, for_trusted=True) \
+                               .order_by('?')[:MEMES_COUNT]
+            if len(random_memes) != MEMES_COUNT:
+                raise PError("Невозможно составить гороскоп")
+
+            horoscope = HoroscopeModel(date=d_now)
+            horoscope.save()
+
+            for meme in random_memes:
+                meme_dict = meme.__dict__
+                del meme_dict['_state']
+                pk = meme_dict.pop('id')
+                hm = HoroscopeMeme(**meme_dict)
+                hm.meme_pk = pk
+                hm.save()
+                horoscope.memes.add(hm)
+        return horoscope

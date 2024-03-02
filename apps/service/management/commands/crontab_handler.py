@@ -21,8 +21,6 @@ class Command(BaseCommand):
             ScheduleItem("*/1 * * * *", "check_notify"),
             # Проверка подписок
             ScheduleItem("*/10 * * * *", "check_subscribe"),
-            # Получение гороскопа
-            ScheduleItem("0 1 * * *", "get_horoscope"),
             # Отправка новостей Паше
             ScheduleItem("0 */6 * * *", "check_pasha_news", "130"),
             # check promocode expiration

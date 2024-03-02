@@ -229,6 +229,7 @@ class HoroscopeMeme(BaseMeme):
 
 class Horoscope(models.Model):
     memes = models.ManyToManyField(HoroscopeMeme)
+    date = models.DateField("Дата", null=True)
 
     class Meta:
         verbose_name = "Гороскоп"
