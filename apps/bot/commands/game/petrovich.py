@@ -2,6 +2,7 @@ import datetime
 from threading import Lock
 
 from django.contrib.auth.models import Group
+from django.db.models import QuerySet
 
 from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import Command
@@ -26,7 +27,8 @@ class Petrovich(Command):
             HelpTextItem(Role.USER, [
                 HelpTextItemCommand(None, "мини-игра, определяющая кто Петрович дня"),
                 HelpTextItemCommand("рег", "регистрация в игре"),
-                HelpTextItemCommand("дерег", "дерегистрация в игре")
+                HelpTextItemCommand("дерег", "дерегистрация в игре"),
+                HelpTextItemCommand("игроки", "список зарегистрированных участников")
             ])
         ]
     )
@@ -44,6 +46,7 @@ class Petrovich(Command):
         menu = [
             [['рег', 'регистрация'], self.menu_reg],
             [['дерег'], self.menu_dereg],
+            [['игроки'], self.menu_gamers],
             [['default'], self.menu_play]
         ]
         method = self.handle_menu(menu, arg0)
@@ -64,7 +67,7 @@ class Petrovich(Command):
         answer = "Регистрация прошла успешно"
         return ResponseMessage(ResponseMessageItem(text=answer))
 
-    def menu_dereg(self):
+    def menu_dereg(self) -> ResponseMessage:
         p_user = PetrovichUser.objects.filter(profile=self.event.sender, chat=self.event.chat).first()
         if p_user is not None and p_user.active:
             p_user.active = False
@@ -72,6 +75,15 @@ class Petrovich(Command):
             answer = "Ок"
         else:
             answer = "А ты и не зареган"
+        return ResponseMessage(ResponseMessageItem(text=answer))
+
+    def menu_gamers(self) -> ResponseMessage:
+        petrovich_gamers = self._get_petrovich_gamers()
+        if petrovich_gamers.count() == 0:
+            answer = "Нет зарегистрированных игроков"
+        else:
+            gamers_str = "\n".join([str(x) for x in petrovich_gamers])
+            answer = f"Список игроков:\n{gamers_str}"
         return ResponseMessage(ResponseMessageItem(text=answer))
 
     def menu_play(self) -> ResponseMessage:
@@ -88,13 +100,8 @@ class Petrovich(Command):
                     answer = f"{winner_gender} дня - {winner_today.profile}"
                     return ResponseMessage(ResponseMessageItem(text=answer))
 
-            group_banned = Group.objects.get(name=Role.BANNED.name)
-            winner = PetrovichUser.objects \
-                .filter(chat=self.event.chat, active=True) \
-                .exclude(profile__groups=group_banned) \
-                .filter(profile__chats=self.event.chat) \
-                .order_by("?") \
-                .first()
+            petrovich_gamers = self._get_petrovich_gamers()
+            winner = petrovich_gamers.order_by("?").first()
             if winner:
                 winner = winner.profile
             else:
@@ -159,3 +166,11 @@ class Petrovich(Command):
                 ResponseMessageItem(text=first_answer),
                 ResponseMessageItem(text=second_answer)
             ])
+
+    def _get_petrovich_gamers(self) -> QuerySet[PetrovichUser]:
+        group_banned = Group.objects.get(name=Role.BANNED.name)
+        gamers = PetrovichUser.objects \
+            .filter(chat=self.event.chat, active=True) \
+            .exclude(profile__groups=group_banned) \
+            .filter(profile__chats=self.event.chat)
+        return gamers
