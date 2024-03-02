@@ -5,6 +5,7 @@ from threading import Lock
 from threading import Thread
 from typing import List, Optional, Union
 
+from django.core.cache import cache
 from django.db.models import Q
 
 from apps.bot.classes.bot_response import BotResponse
@@ -46,7 +47,6 @@ class Bot(Thread):
 
         self.logger = logging.getLogger('bot')
 
-        self.activity_thread_flag = False
 
     # MAIN ROUTING AND MESSAGING
 
@@ -69,6 +69,7 @@ class Bot(Thread):
         """
         Обработка входящего ивента
         """
+        rm = None
         try:
             event.setup_event()
             if not event.need_a_response():
@@ -115,7 +116,8 @@ class Bot(Thread):
             rm = ResponseMessage(rmi)
             self.log_message(rm, "exception")
         finally:
-            self.stop_activity_thread()
+            if rm:
+                self.stop_activity_thread(rm.messages[0].peer_id)
 
         if rm and send and rm.send:
             self.send_response_message(rm)
@@ -365,7 +367,7 @@ class Bot(Thread):
             pa = PhotoAttachment()
             pa.parse(image, allowed_exts_url, guarantee_url=guarantee_url, filename=filename)
         finally:
-            self.stop_activity_thread()
+            self.stop_activity_thread(peer_id)
         return pa
 
     def get_document_attachment(self, document, peer_id=None, filename=None):
@@ -377,7 +379,7 @@ class Bot(Thread):
             da = DocumentAttachment()
             da.parse(document, filename=filename)
         finally:
-            self.stop_activity_thread()
+            self.stop_activity_thread(peer_id)
         return da
 
     def get_audio_attachment(self, audio, peer_id=None, title=None, artist=None, filename=None, thumb=None):
@@ -392,7 +394,7 @@ class Bot(Thread):
             aa.title = title
             aa.artist = artist
         finally:
-            self.stop_activity_thread()
+            self.stop_activity_thread(peer_id)
         return aa
 
     def get_video_attachment(self, document, peer_id=None, filename=None):
@@ -404,7 +406,7 @@ class Bot(Thread):
             va = VideoAttachment()
             va.parse(document, filename=filename)
         finally:
-            self.stop_activity_thread()
+            self.stop_activity_thread(peer_id)
         return va
 
     def get_gif_attachment(self, gif, peer_id=None, filename=None):
@@ -416,7 +418,7 @@ class Bot(Thread):
             ga = GifAttachment()
             ga.parse(gif, filename=filename)
         finally:
-            self.stop_activity_thread()
+            self.stop_activity_thread(peer_id)
         return ga
 
     # END ATTACHMENTS
@@ -430,17 +432,21 @@ class Bot(Thread):
     def set_activity_thread(self, peer_id, activity: ActivitiesEnum):
         if not peer_id or not activity:
             return
-        self.activity_thread_flag = True
+        if cache.get(f"activity_{peer_id}"):
+            return
+
+        cache.set(f"activity_{peer_id}", True)
         threading.Thread(
             target=self._set_activity_thread,
             args=(peer_id, activity)
         ).start()
 
-    def stop_activity_thread(self):
-        self.activity_thread_flag = False
+    @staticmethod
+    def stop_activity_thread(peer_id):
+        cache.delete(f"activity_{peer_id}")
 
     def _set_activity_thread(self, peer_id, activity):
-        while self.activity_thread_flag:
+        while cache.get(f"activity_{peer_id}"):
             self.set_activity(peer_id, activity)
             time.sleep(5)
 

@@ -59,7 +59,7 @@ class Find(Command):
                 if len(attachments) == count:
                     break
         finally:
-            self.bot.stop_activity_thread()
+            self.bot.stop_activity_thread(self.event.peer_id)
         if len(attachments) == 0:
             raise PWarning("Ничего не нашёл по картинкам")
         answer = f"Результаты по запросу '{query}'"

@@ -61,7 +61,7 @@ class GigaChat(ChatGPT):
             self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.TYPING)
             response: GPTAPIResponse = gc_api.completions(messages)
         finally:
-            self.bot.stop_activity_thread()
+            self.bot.stop_activity_thread(self.event.peer_id)
 
         answer = markdown_to_html(response.text, self.bot)
         return ResponseMessage(ResponseMessageItem(text=answer, reply_to=self.event.message.id))
@@ -85,7 +85,7 @@ class GigaChat(ChatGPT):
             self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.UPLOAD_PHOTO)
             response: GPTAPIResponse = chat_gpt_api.draw(self.event.message.args_str_case)
         finally:
-            self.bot.stop_activity_thread()
+            self.bot.stop_activity_thread(self.event.peer_id)
 
         if not response.images_bytes:
             raise PWarning("Не смог сгенерировать :(")

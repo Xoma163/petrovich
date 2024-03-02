@@ -331,7 +331,7 @@ class TgBot(Bot):
             r = self._send_response_message_item(error_rmi)
             return BotResponse(False, r)
         finally:
-            self.stop_activity_thread()
+            self.stop_activity_thread(rmi.peer_id)
 
         if r['ok']:
             return BotResponse(True, r)
@@ -368,7 +368,7 @@ class TgBot(Bot):
         try:
             r = self._send_response_message_item(error_rmi)
         finally:
-            self.stop_activity_thread()
+            self.stop_activity_thread(error_rmi.peer_id)
 
         return BotResponse(False, r)
 
@@ -452,7 +452,7 @@ class TgBot(Bot):
                 else:
                     r = att_map[rmi.attachments[0].__class__](rmi, params)
             finally:
-                self.stop_activity_thread()
+                self.stop_activity_thread(rmi.peer_id)
         else:
             r = self._send_text(params)
 

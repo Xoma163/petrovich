@@ -52,7 +52,7 @@ class Attachment:
                 self.private_download_url = f'https://{tg_bot.requests.API_TELEGRAM_URL}/file/bot{tg_bot.token}/{file_path}'
             self.ext = file_path.rsplit('.')[-1]
         finally:
-            tg_bot.stop_activity_thread()
+            tg_bot.stop_activity_thread(peer_id)
 
     def parse(self, file_like_object, allowed_exts_url=None, filename=None, guarantee_url=False):
         """

@@ -49,7 +49,7 @@ class WTF(Command):
             self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.TYPING)
             answer = gpt.text_chat(messages)
         finally:
-            self.bot.stop_activity_thread()
+            self.bot.stop_activity_thread(self.event.peer_id)
         return answer
 
     def get_conversation(self, n: int, prompt: str, use_preprompt: bool = True) -> list:

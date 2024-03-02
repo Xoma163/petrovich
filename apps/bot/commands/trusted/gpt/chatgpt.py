@@ -102,7 +102,7 @@ class ChatGPT(Command):
             self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.UPLOAD_PHOTO)
             response: GPTAPIResponse = chat_gpt_api.draw(request_text)
         finally:
-            self.bot.stop_activity_thread()
+            self.bot.stop_activity_thread(self.event.peer_id)
 
         if not response.images_url:
             raise PWarning("Не смог сгенерировать :(")
@@ -139,7 +139,7 @@ class ChatGPT(Command):
             self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.TYPING)
             response: GPTAPIResponse = chat_gpt_api.completions(messages)
         finally:
-            self.bot.stop_activity_thread()
+            self.bot.stop_activity_thread(self.event.peer_id)
 
         answer = markdown_to_html(response.text, self.bot)
         if use_stats:

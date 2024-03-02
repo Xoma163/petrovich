@@ -68,7 +68,7 @@ class TrimVideo(Command):
             else:
                 video_bytes = self.trim_video(att)
         finally:
-            self.bot.stop_activity_thread()
+            self.bot.stop_activity_thread(self.event.peer_id)
 
         if isinstance(att, AudioAttachment):
             attachment = self.bot.get_audio_attachment(video_bytes, peer_id=self.event.peer_id)

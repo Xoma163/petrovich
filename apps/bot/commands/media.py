@@ -262,7 +262,7 @@ class Media(AcceptExtraCommand):
                     va.download_content()
                 text = data['title']
         finally:
-            self.bot.stop_activity_thread()
+            self.bot.stop_activity_thread(self.event.peer_id)
         return [va], text
 
     def get_youtube_audio(self, url) -> (list, str):
@@ -464,7 +464,7 @@ class Media(AcceptExtraCommand):
                 self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.UPLOAD_VIDEO)
                 video = vk_api.get_video(url)
             finally:
-                self.bot.stop_activity_thread()
+                self.bot.stop_activity_thread(self.event.peer_id)
 
             filesize_mb = len(video) / 1024 / 1024
             if filesize_mb > self.bot.MAX_VIDEO_SIZE_MB:
@@ -499,7 +499,7 @@ class Media(AcceptExtraCommand):
             self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.UPLOAD_VIDEO)
             trimmed_video = vh.trim(0, clip_length)
         finally:
-            self.bot.stop_activity_thread()
+            self.bot.stop_activity_thread(self.event.peer_id)
 
         video = self.bot.get_video_attachment(trimmed_video, peer_id=self.event.peer_id)
         return [video], None
@@ -533,7 +533,7 @@ class Media(AcceptExtraCommand):
                 self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.UPLOAD_VIDEO)
                 video = p_api.download_video(url, data['video_id'])
             finally:
-                self.bot.stop_activity_thread()
+                self.bot.stop_activity_thread(self.event.peer_id)
 
             filesize_mb = len(video) / 1024 / 1024
             if filesize_mb > self.bot.MAX_VIDEO_SIZE_MB:
