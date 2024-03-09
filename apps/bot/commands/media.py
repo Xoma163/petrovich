@@ -341,12 +341,13 @@ class Media(AcceptExtraCommand):
             raise PWarning("Медиа инстаграмм доступен только для доверенных пользователей")
 
         i_api = Instagram(log_filter=self.event.log_filter)
-        data: InstagramAPIData = i_api.get_post_data(url)
+        data: InstagramAPIData = i_api.get_data(url)
 
         attachments = []
         for item in data.items:
             if item.content_type == InstagramAPIDataItem.CONTENT_TYPE_IMAGE:
-                attachment = self.bot.get_photo_attachment(item.download_url, peer_id=self.event.peer_id)
+                attachment = self.bot.get_photo_attachment(item.download_url, peer_id=self.event.peer_id,
+                                                           guarantee_url=True)
             elif item.content_type == InstagramAPIDataItem.CONTENT_TYPE_VIDEO:
                 attachment = self.bot.get_video_attachment(item.download_url, peer_id=self.event.peer_id)
             else:

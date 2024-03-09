@@ -1,5 +1,3 @@
-from urllib.parse import urlparse
-
 from apps.bot.api.handler import API
 from apps.bot.classes.const.exceptions import PWarning
 from petrovich.settings import env
@@ -28,68 +26,39 @@ class InstagramAPIData:
 
 class Instagram(API):
     RAPID_API_KEY = env.str("RAPID_API_KEY")
-    ERROR_MSG = "Ссылка на инстаграмм не является видео/фото"
 
-    def get_post_data(self, instagram_link) -> InstagramAPIData:
-        if '/stories/' in instagram_link:
-            return self._get_story_data(instagram_link)
-        elif '/reel/' in instagram_link:
-            return self._get_post_data(instagram_link)
-        elif '/p/' in instagram_link:
-            return self._get_post_data(instagram_link)
-        else:
-            raise PWarning(self.ERROR_MSG)
+    HOST = "instagram-post-reels-stories-downloader.p.rapidapi.com"
+    URL = f'https://{HOST}/instagram/'
+    HEADERS = {
+        "X-RapidAPI-Key": RAPID_API_KEY,
+        "X-RapidAPI-Host": HOST
+    }
 
-    def _get_story_data(self, instagram_link) -> InstagramAPIData:
-        host = "rocketapi-for-instagram.p.rapidapi.com"
-        headers = {
-            "content-type": "application/json",
-            "X-RapidAPI-Key": self.RAPID_API_KEY,
-            "X-RapidAPI-Host": host,
-        }
-        url = f"https://{host}/instagram/media/get_info"
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.requests.headers = self.HEADERS
 
-        _id = urlparse(instagram_link).path.strip('/').split('/')[-1]
-        data = {"id": _id}
-
-        r = self.requests.post(url, json=data, headers=headers).json()
-        return self._parse_response(r['response']['body']['items'][0])
-
-    def _get_post_data(self, instagram_link) -> InstagramAPIData:
-        host = "instagram-scraper-20231.p.rapidapi.com"
-        headers = {
-            "X-RapidAPI-Host": host,
-            "X-RapidAPI-Key": self.RAPID_API_KEY,
-        }
-        url = f"https://{host}/postdetail"
-
-        post_id = urlparse(instagram_link).path.strip('/').split('/')[1]
-        r = self.requests.get(f"{url}/{post_id}", headers=headers).json()
-        return self._parse_response(r['data'])
+    def get_data(self, instagram_link) -> InstagramAPIData:
+        params = {"url": instagram_link}
+        r = self.requests.get(self.URL, params=params).json()
+        if not r.get('result'):
+            raise PWarning("Ошибка API")
+        return self._parse_response(r['result'])
 
     def _parse_response(self, response) -> InstagramAPIData:
         data = InstagramAPIData()
+        # data.caption = response[0]['title']
+        for item in response:
+            print(item['type'])
+            if item['type'] == "video/mp4":
+                content_type = InstagramAPIDataItem.CONTENT_TYPE_VIDEO
+            else:
+                content_type = InstagramAPIDataItem.CONTENT_TYPE_IMAGE
 
-        caption = response.get('caption')
-        if caption:
-            data.caption = caption.get("text", "").strip()
-
-        if 'carousel_media' in response:
-            for item in response['carousel_media']:
-                data.add_item(self._parse_photo_or_video(item))
-        else:
-            data.add_item(self._parse_photo_or_video(response))
+            data_item = InstagramAPIDataItem(
+                content_type,
+                item['url']
+            )
+            data.add_item(data_item)
 
         return data
-
-    def _parse_photo_or_video(self, item) -> InstagramAPIDataItem:
-        if 'video_versions' in item:
-            return InstagramAPIDataItem(
-                InstagramAPIDataItem.CONTENT_TYPE_VIDEO,
-                item['video_versions'][0]['url'])
-        elif 'image_versions2' in item:
-            return InstagramAPIDataItem(
-                InstagramAPIDataItem.CONTENT_TYPE_IMAGE,
-                item['image_versions2']['candidates'][0]['url'])
-        else:
-            raise PWarning(self.ERROR_MSG)
