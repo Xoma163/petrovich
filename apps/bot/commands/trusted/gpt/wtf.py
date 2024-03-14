@@ -94,8 +94,8 @@ class WTF(Command):
         events = []
 
         for message_id, message_body in messages.items():
-            # не <= потому что не берём последнее сообщение, которым зашли в эту команду :)
-            if mid - message_id < n:
+            # не берём последнее сообщение, которым зашли в эту команду :)
+            if 1 <= mid - message_id < n + 1:
                 try:
                     event = TgEvent({'message': message_body})
                     event.setup_event()
