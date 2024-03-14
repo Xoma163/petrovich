@@ -43,8 +43,7 @@ class Meme(AcceptExtraCommand):
                     "обновляет созданный вами мем."),
                 HelpTextItemCommand("обновить (название/id) (ссылка на youtube/coub)", "обновляет созданный вами мем"),
                 HelpTextItemCommand("удалить (название/id)", "удаляет созданный вами мем"),
-                HelpTextItemCommand("инфо (название/id)", "присылает информацию по мему"),
-                HelpTextItemCommand("инфо (вложение)", "присылает информацию по мему")
+                HelpTextItemCommand("инфо (название/id)", "присылает информацию по мему")
             ]),
             HelpTextItem(Role.MODERATOR, [
                 HelpTextItemCommand("подтвердить", "присылает мем на подтверждение"),
@@ -346,24 +345,12 @@ class Meme(AcceptExtraCommand):
         return rm
 
     def menu_info(self) -> ResponseMessage:
+        self.check_args(2)
+        meme_filter = self.get_default_meme_filter_by_args(self.event.message.args[1:])
         exclude_trusted = False
         if not self.event.sender.check_role(Role.TRUSTED):
             exclude_trusted = True
-
-        try:
-            self.check_args(2)
-            meme_filter = self.get_default_meme_filter_by_args(self.event.message.args[1:])
-            meme = self.get_meme(**meme_filter, exclude_trusted=exclude_trusted)
-        except PWarning:
-            atts = self.event.get_all_attachments()
-            if not atts:
-                raise PWarning("Пришлите вложение")
-            meme = MemeModel.objects.filter(tg_file_id=atts[0].file_id)
-            if exclude_trusted:
-                meme = meme.exclude(for_trusted=True)
-            if not meme:
-                raise PWarning("Это вложение не мем в моей базе")
-            meme = meme.first()
+        meme = self.get_meme(**meme_filter, exclude_trusted=exclude_trusted)
         answer = meme.get_info()
         return ResponseMessage(ResponseMessageItem(text=answer))
 
@@ -459,7 +446,8 @@ class Meme(AcceptExtraCommand):
 
         if send_keyboard:
             button = self.bot.get_button("Ещё", self.name)
-            rmi.keyboard = self.bot.get_inline_keyboard([button])
+            button2 = self.bot.get_button("Инфо", self.name, args=["инфо", meme.pk])
+            rmi.keyboard = self.bot.get_inline_keyboard([button, button2], cols=2)
         return rmi
 
     @staticmethod
