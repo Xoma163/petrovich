@@ -68,7 +68,7 @@ class GigaChatGPTAPI(GPT, API):
     def draw(self, prompt) -> GPTAPIResponse:
         messages = [{
             "role": "system",
-            "content": "Если тебя просят создать изображение, ты должен сгенерировать специальный блок: "
+            "content": "Если тебя просят создать изображение или нарисовать изображение, ты должен сгенерировать специальный блок: "
                        "<fuse>text2image(query: str, style: str)</fuse>,\nгде query — текстовое описание желаемого "
                        "изображения, style — опциональный параметр, управляющий стилем генерации."
         },
@@ -82,7 +82,7 @@ class GigaChatGPTAPI(GPT, API):
         try:
             file_id = r.findall(res.text)[0]
         except Exception:
-            raise PWarning(res)
+            raise PWarning(res.text)
         response = GPTAPIResponse()
         response.images_bytes = [self._get_file_by_id(file_id)]
         return response
