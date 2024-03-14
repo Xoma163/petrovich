@@ -356,7 +356,8 @@ class Bot(Thread):
     # END USERS GROUPS BOTS
 
     # ATTACHMENTS
-    def get_photo_attachment(self, image, peer_id=None, allowed_exts_url=None, guarantee_url=False, filename=None):
+    def get_photo_attachment(self, image, peer_id=None, allowed_exts_url=None, guarantee_url=False,
+                             filename=None) -> PhotoAttachment:
         """
         Получение фото
         """
@@ -370,7 +371,7 @@ class Bot(Thread):
             self.stop_activity_thread(peer_id)
         return pa
 
-    def get_document_attachment(self, document, peer_id=None, filename=None):
+    def get_document_attachment(self, document, peer_id=None, filename=None) -> DocumentAttachment:
         """
         Получение документа
         """
@@ -382,7 +383,8 @@ class Bot(Thread):
             self.stop_activity_thread(peer_id)
         return da
 
-    def get_audio_attachment(self, audio, peer_id=None, title=None, artist=None, filename=None, thumb=None):
+    def get_audio_attachment(self, audio, peer_id=None, title=None, artist=None, filename=None,
+                             thumb=None) -> AudioAttachment:
         """
         Получение аудио
         """
@@ -397,7 +399,7 @@ class Bot(Thread):
             self.stop_activity_thread(peer_id)
         return aa
 
-    def get_video_attachment(self, document, peer_id=None, filename=None):
+    def get_video_attachment(self, document, peer_id=None, filename=None) -> VideoAttachment:
         """
         Получение видео
         """
@@ -409,7 +411,7 @@ class Bot(Thread):
             self.stop_activity_thread(peer_id)
         return va
 
-    def get_gif_attachment(self, gif, peer_id=None, filename=None):
+    def get_gif_attachment(self, gif, peer_id=None, filename=None) -> GifAttachment:
         """
         Получение гифки
         """

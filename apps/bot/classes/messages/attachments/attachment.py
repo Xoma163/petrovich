@@ -59,8 +59,8 @@ class Attachment:
         Подготовка объектов(в основном картинок) для загрузки.
         То есть метод позволяет преобразовывать почти из любого формата
         """
-        # url
         self.name = filename
+        # url
         parsed_url = None
         if isinstance(file_like_object, str):
             parsed_url = urlparse(file_like_object)
@@ -69,9 +69,7 @@ class Attachment:
         elif parsed_url and parsed_url.hostname:
             if allowed_exts_url:
                 extension = parsed_url.path.split('.')[-1].lower()
-                is_default_extension = extension not in allowed_exts_url
-                is_vk_image = 'userapi.com' in parsed_url.hostname
-                if is_default_extension and not is_vk_image:
+                if extension not in allowed_exts_url:
                     raise PWarning(f"Загрузка по URL доступна только для {' '.join(allowed_exts_url)}")
             self.public_download_url = file_like_object
         elif isinstance(file_like_object, bytes):

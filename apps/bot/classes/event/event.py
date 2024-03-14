@@ -130,7 +130,7 @@ class Event:
         """
         self.message = Message(text, _id) if text else None
 
-    def get_all_attachments(self, types: list):
+    def get_all_attachments(self, types: Optional[list] = None):
         attachments = []
 
         if types is None:
