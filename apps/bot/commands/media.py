@@ -308,7 +308,8 @@ class Media(AcceptExtraCommand):
         if rs.is_gif:
             attachments = [self.bot.get_gif_attachment(reddit_data, peer_id=self.event.peer_id, filename=rs.filename)]
         elif rs.is_image or rs.is_images or rs.is_gallery:
-            attachments = [self.bot.get_photo_attachment(att, peer_id=self.event.peer_id, filename=rs.filename) for att
+            attachments = [self.bot.get_photo_attachment(att, peer_id=self.event.peer_id, filename=rs.filename,
+                                                         send_chat_action=False) for att
                            in reddit_data]
         elif rs.is_video:
             attachments = [self.bot.get_video_attachment(reddit_data, peer_id=self.event.peer_id, filename=rs.filename)]
@@ -337,7 +338,8 @@ class Media(AcceptExtraCommand):
                     if _text == "Фото":
                         all_photos.append(link)
             all_photos = reversed(all_photos)
-            attachments = [self.bot.get_photo_attachment(photo, peer_id=self.event.peer_id, filename=rs.filename)
+            attachments = [self.bot.get_photo_attachment(photo, peer_id=self.event.peer_id, filename=rs.filename,
+                                                         send_chat_action=False)
                            for photo in all_photos]
             return attachments, f"{rs.title}\n\n{text}"
         else:
@@ -357,7 +359,7 @@ class Media(AcceptExtraCommand):
         for item in data.items:
             if item.content_type == InstagramAPIDataItem.CONTENT_TYPE_IMAGE:
                 attachment = self.bot.get_photo_attachment(item.download_url, peer_id=self.event.peer_id,
-                                                           guarantee_url=True)
+                                                           guarantee_url=True, send_chat_action=False)
             elif item.content_type == InstagramAPIDataItem.CONTENT_TYPE_VIDEO:
                 attachment = self.bot.get_video_attachment(item.download_url, peer_id=self.event.peer_id)
             else:
@@ -386,7 +388,8 @@ class Media(AcceptExtraCommand):
                 video = self.bot.get_video_attachment(att.download_url, peer_id=self.event.peer_id)
                 attachments.append(video)
             if att.content_type == att.CONTENT_TYPE_IMAGE:
-                photo = self.bot.get_photo_attachment(att.download_url, peer_id=self.event.peer_id)
+                photo = self.bot.get_photo_attachment(att.download_url, peer_id=self.event.peer_id,
+                                                      send_chat_action=False)
                 attachments.append(photo)
 
         return attachments, data.caption
@@ -435,7 +438,8 @@ class Media(AcceptExtraCommand):
         if data.content_type == PinterestDataItem.CONTENT_TYPE_VIDEO:
             attachment = self.bot.get_video_attachment(data.download_url, peer_id=self.event.peer_id)
         elif data.content_type == PinterestDataItem.CONTENT_TYPE_IMAGE:
-            attachment = self.bot.get_photo_attachment(data.download_url, peer_id=self.event.peer_id)
+            attachment = self.bot.get_photo_attachment(data.download_url, peer_id=self.event.peer_id,
+                                                       send_chat_action=False)
         elif data.content_type == PinterestDataItem.CONTENT_TYPE_GIF:
             attachment = self.bot.get_gif_attachment(data.download_url, peer_id=self.event.peer_id)
         else:
