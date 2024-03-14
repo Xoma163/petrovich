@@ -443,10 +443,28 @@ def replace_tag(text: str, start_tag: str, end_tag: str, new_start_tag: str, new
         if start_tag_pos == -1 or end_tag_pos == -1:
             break
 
-        inner_to_replace = text[start_tag_pos:end_tag_pos + end_tag_len]
+        # Не трогаем то, что внутри <code>
+        # костыльненько
+        to_replace_and_next = text[start_tag_pos:]
+        close_code_block_pos = to_replace_and_next.find("</code>")
+        open_code_block_pos = to_replace_and_next.find("<code")
+
+        escape_tag = False
+        if close_code_block_pos != -1:
+            if open_code_block_pos != -1:
+                if close_code_block_pos < open_code_block_pos:
+                    escape_tag = True
+            else:
+                escape_tag = True
+
+        if escape_tag:
+            start_tag_pos += len(start_tag)
+            continue
+
         # strip - экспериментально
         inner_text = text[start_tag_pos + start_tag_len:end_tag_pos].strip()
         new_inner = new_start_tag + inner_text + new_end_tag
+        inner_to_replace = text[start_tag_pos:end_tag_pos + end_tag_len]
         text = text.replace(inner_to_replace, new_inner)
 
         start_tag_pos = start_tag_pos + len(new_inner)
