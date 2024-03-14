@@ -7,6 +7,7 @@ from numpy import inf
 
 from apps.bot.classes.bot_response import BotResponse
 from apps.bot.classes.bots.bot import Bot
+from apps.bot.classes.bots.chat_activity import ChatActivity
 from apps.bot.classes.bots.tg.request import Request, RequestLocal
 from apps.bot.classes.const.activities import ActivitiesEnum, TG_ACTIVITIES
 from apps.bot.classes.const.consts import Platform
@@ -195,15 +196,16 @@ class TgBot(Bot):
             params['video'] = video.public_download_url
             r = self.requests.get('sendVideo', params).json()
         else:
-            if video.get_size_mb() > self.MAX_VIDEO_SIZE_MB:
-                rmi.attachments = []
-                raise PError(
-                    f"Нельзя загружать видео более {self.MAX_VIDEO_SIZE_MB} мб в телеграмм. Ваше видео {round(video.get_size_mb(), 2)} мб")
-            files = {'video': video.content}
-            if video.thumb:
-                thumb_file = self.get_photo_attachment(video.thumb, guarantee_url=True)
-                files['thumbnail'] = thumb_file.get_bytes_io_content()
-            r = self.requests.get('sendVideo', params, files=files).json()
+            with ChatActivity(self, ActivitiesEnum.UPLOAD_VIDEO, params['chat_id']):
+                if video.get_size_mb() > self.MAX_VIDEO_SIZE_MB:
+                    rmi.attachments = []
+                    raise PError(
+                        f"Нельзя загружать видео более {self.MAX_VIDEO_SIZE_MB} мб в телеграмм. Ваше видео {round(video.get_size_mb(), 2)} мб")
+                files = {'video': video.content}
+                if video.thumb:
+                    thumb_file = self.get_photo_attachment(video.thumb, guarantee_url=True)
+                    files['thumbnail'] = thumb_file.get_bytes_io_content()
+                r = self.requests.get('sendVideo', params, files=files).json()
         return r
 
     def _send_video_note(self, rmi: ResponseMessageItem, default_params) -> dict:
@@ -330,8 +332,8 @@ class TgBot(Bot):
 
             r = self._send_response_message_item(error_rmi)
             return BotResponse(False, r)
-        finally:
-            self.stop_activity_thread(rmi.peer_id)
+        # finally:
+        #     self.stop_activity_thread(rmi.peer_id)
 
         if r['ok']:
             return BotResponse(True, r)
@@ -365,10 +367,10 @@ class TgBot(Bot):
         )
         self.log_message(error_rmi, log_level)
 
-        try:
-            r = self._send_response_message_item(error_rmi)
-        finally:
-            self.stop_activity_thread(error_rmi.peer_id)
+        # try:
+        r = self._send_response_message_item(error_rmi)
+        # finally:
+        #     self.stop_activity_thread(error_rmi.peer_id)
 
         return BotResponse(False, r)
 
@@ -435,8 +437,7 @@ class TgBot(Bot):
         }
 
         if rmi.attachments:
-            try:
-                self.set_activity_thread(params['chat_id'], rmi.attachments[0].activity)
+            with ChatActivity(self, rmi.attachments[0].activity, params['chat_id']):
                 # Отправка многих вложениями чанками: сначала вложения, потом текст
                 if len(rmi.attachments) > 10:
                     rmi_copy = copy(rmi)
@@ -451,8 +452,6 @@ class TgBot(Bot):
                     r = self._send_media_group(rmi, params)
                 else:
                     r = att_map[rmi.attachments[0].__class__](rmi, params)
-            finally:
-                self.stop_activity_thread(rmi.peer_id)
         else:
             r = self._send_text(params)
 

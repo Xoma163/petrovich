@@ -9,6 +9,7 @@ from django.core.cache import cache
 from django.db.models import Q
 
 from apps.bot.classes.bot_response import BotResponse
+from apps.bot.classes.bots.chat_activity import ChatActivity
 from apps.bot.classes.const.activities import ActivitiesEnum
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning, PError, PSkip, PIDK
@@ -46,7 +47,6 @@ class Bot(Thread):
         self.platform = platform
 
         self.logger = logging.getLogger('bot')
-
 
     # MAIN ROUTING AND MESSAGING
 
@@ -115,9 +115,9 @@ class Bot(Thread):
                 rmi.keyboard = keyboard
             rm = ResponseMessage(rmi)
             self.log_message(rm, "exception")
-        finally:
-            if rm:
-                self.stop_activity_thread(rm.messages[0].peer_id)
+        # finally:
+        #     if rm:
+        #         self.stop_activity_thread(rm.messages[0].peer_id)
 
         if rm and send and rm.send:
             self.send_response_message(rm)
@@ -356,71 +356,61 @@ class Bot(Thread):
     # END USERS GROUPS BOTS
 
     # ATTACHMENTS
-    def get_photo_attachment(self, image, peer_id=None, allowed_exts_url=None, guarantee_url=False,
-                             filename=None) -> PhotoAttachment:
+    def get_photo_attachment(
+            self, image, peer_id=None, allowed_exts_url=None, guarantee_url=False, filename=None,
+            send_chat_action: bool = True
+    ) -> PhotoAttachment:
         """
         Получение фото
         """
         if allowed_exts_url is None:
             allowed_exts_url = ['jpg', 'jpeg', 'png', 'webp', 'heic']
-        try:
-            self.set_activity_thread(peer_id, ActivitiesEnum.UPLOAD_PHOTO)
-            pa = PhotoAttachment()
+        pa = PhotoAttachment()
+        with ChatActivity(self, ActivitiesEnum.UPLOAD_PHOTO, peer_id, send_chat_action=send_chat_action):
             pa.parse(image, allowed_exts_url, guarantee_url=guarantee_url, filename=filename)
-        finally:
-            self.stop_activity_thread(peer_id)
         return pa
 
-    def get_document_attachment(self, document, peer_id=None, filename=None) -> DocumentAttachment:
+    def get_document_attachment(
+            self, document, peer_id=None, filename=None, send_chat_action: bool = True
+    ) -> DocumentAttachment:
         """
         Получение документа
         """
-        try:
-            self.set_activity_thread(peer_id, ActivitiesEnum.UPLOAD_DOCUMENT)
-            da = DocumentAttachment()
+        da = DocumentAttachment()
+        with ChatActivity(self, ActivitiesEnum.UPLOAD_DOCUMENT, peer_id, send_chat_action=send_chat_action):
             da.parse(document, filename=filename)
-        finally:
-            self.stop_activity_thread(peer_id)
         return da
 
-    def get_audio_attachment(self, audio, peer_id=None, title=None, artist=None, filename=None,
-                             thumb=None) -> AudioAttachment:
+    def get_audio_attachment(self, audio, peer_id=None, title=None, artist=None, filename=None, thumb=None,
+                             send_chat_action: bool = True) -> AudioAttachment:
         """
         Получение аудио
         """
-        try:
-            self.set_activity_thread(peer_id, ActivitiesEnum.UPLOAD_AUDIO)
-            aa = AudioAttachment()
+        aa = AudioAttachment()
+        with ChatActivity(self, ActivitiesEnum.UPLOAD_AUDIO, peer_id, send_chat_action=send_chat_action):
             aa.parse(audio, filename=filename)
-            aa.thumb = thumb
-            aa.title = title
-            aa.artist = artist
-        finally:
-            self.stop_activity_thread(peer_id)
+        aa.thumb = thumb
+        aa.title = title
+        aa.artist = artist
         return aa
 
-    def get_video_attachment(self, document, peer_id=None, filename=None) -> VideoAttachment:
+    def get_video_attachment(self, document, peer_id=None, filename=None, send_chat_action: bool = True
+                             ) -> VideoAttachment:
         """
         Получение видео
         """
-        try:
-            self.set_activity_thread(peer_id, ActivitiesEnum.UPLOAD_VIDEO)
-            va = VideoAttachment()
+        va = VideoAttachment()
+        with ChatActivity(self, ActivitiesEnum.UPLOAD_VIDEO, peer_id, send_chat_action=send_chat_action):
             va.parse(document, filename=filename)
-        finally:
-            self.stop_activity_thread(peer_id)
         return va
 
-    def get_gif_attachment(self, gif, peer_id=None, filename=None) -> GifAttachment:
+    def get_gif_attachment(self, gif, peer_id=None, filename=None, send_chat_action: bool = True) -> GifAttachment:
         """
         Получение гифки
         """
-        try:
-            self.set_activity_thread(peer_id, ActivitiesEnum.UPLOAD_VIDEO)
-            ga = GifAttachment()
+        ga = GifAttachment()
+        with ChatActivity(self, ActivitiesEnum.UPLOAD_VIDEO, peer_id, send_chat_action=send_chat_action):
             ga.parse(gif, filename=filename)
-        finally:
-            self.stop_activity_thread(peer_id)
         return ga
 
     # END ATTACHMENTS

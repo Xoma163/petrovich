@@ -21,6 +21,7 @@ from apps.bot.api.vk.video import VKVideo
 from apps.bot.api.yandex.music import YandexMusicAPI, YandexAlbum, YandexTrack
 from apps.bot.api.youtube.music import YoutubeMusic
 from apps.bot.api.youtube.video import YoutubeVideo
+from apps.bot.classes.bots.chat_activity import ChatActivity
 from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import AcceptExtraCommand
 from apps.bot.classes.const.activities import ActivitiesEnum
@@ -237,8 +238,7 @@ class Media(AcceptExtraCommand):
         except ValueError:
             start_pos = None
 
-        try:
-            self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.UPLOAD_VIDEO)
+        with ChatActivity(self.bot, ActivitiesEnum.UPLOAD_VIDEO, self.event.peer_id):
             if start_pos:
                 tm = TrimVideo()
                 video_content = tm.trim_link_pos(url, start_pos, end_pos)
@@ -266,8 +266,6 @@ class Media(AcceptExtraCommand):
                 else:
                     va.download_content()
                 text = data['title']
-        finally:
-            self.bot.stop_activity_thread(self.event.peer_id)
         return [va], text
 
     def get_youtube_audio(self, url) -> (list, str):
@@ -473,11 +471,8 @@ class Media(AcceptExtraCommand):
             attachments = []
             msg = f"{title}\nCкачать можно здесь {self.bot.get_formatted_url('здесь', MAIN_SITE + cache.video.url)}"
         except VideoCache.DoesNotExist:
-            try:
-                self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.UPLOAD_VIDEO)
+            with ChatActivity(self.bot, ActivitiesEnum.UPLOAD_VIDEO, self.event.peer_id):
                 video = vk_api.get_video(url)
-            finally:
-                self.bot.stop_activity_thread(self.event.peer_id)
 
             filesize_mb = len(video) / 1024 / 1024
             if filesize_mb > self.bot.MAX_VIDEO_SIZE_MB:
@@ -508,11 +503,8 @@ class Media(AcceptExtraCommand):
 
         video = self.bot.get_video_attachment(url, peer_id=self.event.peer_id)
         vh = VideoHandler(video)
-        try:
-            self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.UPLOAD_VIDEO)
+        with ChatActivity(self.bot, ActivitiesEnum.UPLOAD_VIDEO, self.event.peer_id):
             trimmed_video = vh.trim(0, clip_length)
-        finally:
-            self.bot.stop_activity_thread(self.event.peer_id)
 
         video = self.bot.get_video_attachment(trimmed_video, peer_id=self.event.peer_id)
         return [video], None
@@ -542,11 +534,8 @@ class Media(AcceptExtraCommand):
             attachments = []
             msg = f"{data['title']}\nCкачать можно здесь {self.bot.get_formatted_url('здесь', MAIN_SITE + cache.video.url)}"
         except VideoCache.DoesNotExist:
-            try:
-                self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.UPLOAD_VIDEO)
+            with ChatActivity(self.bot, ActivitiesEnum.UPLOAD_VIDEO, self.event.peer_id):
                 video = p_api.download_video(url, data['video_id'])
-            finally:
-                self.bot.stop_activity_thread(self.event.peer_id)
 
             filesize_mb = len(video) / 1024 / 1024
             if filesize_mb > self.bot.MAX_VIDEO_SIZE_MB:

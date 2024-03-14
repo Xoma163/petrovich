@@ -9,6 +9,7 @@ import requests
 from PIL.Image import Image as PILImage
 from django.db.models.fields.files import FieldFile
 
+from apps.bot.classes.bots.chat_activity import ChatActivity
 from apps.bot.classes.const.exceptions import PWarning
 from petrovich.settings import env
 
@@ -40,8 +41,8 @@ class Attachment:
 
         if self.get_size_mb() > tg_bot.MAX_ATTACHMENT_SIZE_MB:
             return
-        try:
-            tg_bot.set_activity_thread(peer_id, self.activity)
+
+        with ChatActivity(tg_bot, self.activity, peer_id):
             r = tg_bot.requests.get('getFile', params={'file_id': self.file_id})
             if r.status_code != 200:
                 return
@@ -51,8 +52,6 @@ class Attachment:
             else:
                 self.private_download_url = f'https://{tg_bot.requests.API_TELEGRAM_URL}/file/bot{tg_bot.token}/{file_path}'
             self.ext = file_path.rsplit('.')[-1]
-        finally:
-            tg_bot.stop_activity_thread(peer_id)
 
     def parse(self, file_like_object, allowed_exts_url=None, filename=None, guarantee_url=False):
         """

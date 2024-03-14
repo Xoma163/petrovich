@@ -5,6 +5,7 @@ from django.db.models import Q, Sum
 
 from apps.bot.api.gpt.chatgpt import ChatGPTAPI
 from apps.bot.api.gpt.response import GPTAPIResponse
+from apps.bot.classes.bots.chat_activity import ChatActivity
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.activities import ActivitiesEnum
 from apps.bot.classes.const.consts import Role, Platform
@@ -98,11 +99,8 @@ class ChatGPT(Command):
             raise PWarning("Должен быть текст или пересланное сообщение")
         chat_gpt_api = ChatGPTAPI(model, log_filter=self.event.log_filter)
 
-        try:
-            self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.UPLOAD_PHOTO)
+        with ChatActivity(self.bot, ActivitiesEnum.UPLOAD_PHOTO, self.event.peer_id):
             response: GPTAPIResponse = chat_gpt_api.draw(request_text)
-        finally:
-            self.bot.stop_activity_thread(self.event.peer_id)
 
         if not response.images_url:
             raise PWarning("Не смог сгенерировать :(")
@@ -135,11 +133,8 @@ class ChatGPT(Command):
 
         chat_gpt_api = ChatGPTAPI(model, log_filter=self.event.log_filter)
 
-        try:
-            self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.TYPING)
+        with ChatActivity(self.bot, ActivitiesEnum.TYPING, self.event.peer_id):
             response: GPTAPIResponse = chat_gpt_api.completions(messages)
-        finally:
-            self.bot.stop_activity_thread(self.event.peer_id)
 
         answer = markdown_to_html(response.text, self.bot)
         if use_stats:

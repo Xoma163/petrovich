@@ -1,4 +1,5 @@
 from apps.bot.api.google_custom_search import GoogleCustomSearch
+from apps.bot.classes.bots.chat_activity import ChatActivity
 from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.activities import ActivitiesEnum
@@ -46,8 +47,7 @@ class Find(Command):
             raise PWarning("Ничего не нашёл по картинкам")
 
         attachments = []
-        try:
-            self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.UPLOAD_PHOTO)
+        with ChatActivity(self.bot, ActivitiesEnum.UPLOAD_PHOTO, self.event.peer_id):
             for url in urls:
                 try:
                     att = PhotoAttachment()
@@ -58,8 +58,6 @@ class Find(Command):
                     continue
                 if len(attachments) == count:
                     break
-        finally:
-            self.bot.stop_activity_thread(self.event.peer_id)
         if len(attachments) == 0:
             raise PWarning("Ничего не нашёл по картинкам")
         answer = f"Результаты по запросу '{query}'"

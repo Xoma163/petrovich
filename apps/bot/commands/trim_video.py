@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Tuple, Optional, Union
 
 from apps.bot.api.youtube.video import YoutubeVideo
+from apps.bot.classes.bots.chat_activity import ChatActivity
 from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.activities import ActivitiesEnum
@@ -59,16 +60,13 @@ class TrimVideo(Command):
 
     def start(self) -> ResponseMessage:
         att = self.event.get_all_attachments([LinkAttachment, VideoAttachment, AudioAttachment])[0]
-        try:
-            self.bot.set_activity_thread(self.event.peer_id, ActivitiesEnum.UPLOAD_VIDEO)
+        with ChatActivity(self.bot, ActivitiesEnum.UPLOAD_VIDEO, self.event.peer_id):
             if isinstance(att, LinkAttachment):
                 if not att.is_youtube_link:
                     raise PWarning("Обрезка по ссылке доступна только для YouTube")
                 video_bytes = self.trim_att_by_link(att)
             else:
                 video_bytes = self.trim_video(att)
-        finally:
-            self.bot.stop_activity_thread(self.event.peer_id)
 
         if isinstance(att, AudioAttachment):
             attachment = self.bot.get_audio_attachment(video_bytes, peer_id=self.event.peer_id)
