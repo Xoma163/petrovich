@@ -222,7 +222,7 @@ class Media(AcceptExtraCommand):
 
         raise PWarning("Не медиа ссылка")
 
-    @retry(3, Exception, sleep_time=2)
+    @retry(3, Exception, [PSkip], sleep_time=2)
     def get_youtube_video(self, url) -> (list, str):
         if 'audio' in self.event.message.keys:
             return self.get_youtube_audio(url)
@@ -245,7 +245,12 @@ class Media(AcceptExtraCommand):
                 va = self.bot.get_video_attachment(video_content, peer_id=self.event.peer_id)
                 text = None
             else:
-                data = yt_api.get_video_info(url, max_filesize_mb=max_filesize_mb)
+                try:
+                    data = yt_api.get_video_info(url, max_filesize_mb=max_filesize_mb)
+                except PWarning as e:
+                    if e.msg == 'Ссылка должна быть на видео, не на канал':
+                        raise PSkip()
+                    raise e
                 if not self.has_command_name and data['duration'] > 120 and not self.event.is_from_pm:
                     button = self.bot.get_button(f"{self.event.message.COMMAND_SYMBOLS[0]}{self.name} {url}")
                     keyboard = self.bot.get_inline_keyboard([button])
@@ -267,7 +272,14 @@ class Media(AcceptExtraCommand):
 
     def get_youtube_audio(self, url) -> (list, str):
         ytm_api = YoutubeMusic()
-        data = ytm_api.get_info(url)
+
+        try:
+            data = ytm_api.get_info(url)
+        except PWarning as e:
+            if e.msg == 'Ссылка должна быть на видео, не на канал':
+                raise PSkip()
+            raise e
+
         title = f"{data['artists']} - {data['title']}"
         audio_att = self.bot.get_audio_attachment(
             data['content'],

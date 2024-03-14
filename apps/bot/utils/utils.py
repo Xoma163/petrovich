@@ -503,7 +503,7 @@ def split_text_by_n_symbols(text: str, n: int, split_on: Optional[List[str]] = N
     return texts
 
 
-def retry(times, exceptions, sleep_time=0):
+def retry(times, exceptions, except_exceptions=None, sleep_time=0):
     """
     Retry Decorator
     Retries the wrapped function/method `times` times if the exceptions listed
@@ -520,8 +520,10 @@ def retry(times, exceptions, sleep_time=0):
             while attempt < times:
                 try:
                     return func(*args, **kwargs)
-                except exceptions:
+                except exceptions as e:
                     attempt += 1
+                    if any([isinstance(e, x) for x in except_exceptions]):
+                        raise e
                     if sleep_time:
                         time.sleep(sleep_time)
             return func(*args, **kwargs)
