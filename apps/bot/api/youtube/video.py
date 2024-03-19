@@ -43,7 +43,7 @@ class YoutubeVideo(SubscribeService):
 
     @staticmethod
     def check_url_is_video(url):
-        r = r"(youtube.com\/watch\?v=|youtu.be\/)"
+        r = r"((youtube.com\/watch\?v=)|(youtu.be\/)|(youtube.com\/shorts\/))"
         return re.findall(r, url)
     def _get_video_info(self, url) -> dict:
         ydl_params = {
