@@ -77,16 +77,14 @@ class VoiceRecognition(AcceptExtraCommand):
             raise PWarning("Ничего не понял((", reply_to=reply_to)
         except sr.RequestError as e:
             print(str(e))
-            raise PWarning("Проблема с форматом")
+            raise PWarning("Проблема с форматом", reply_to=reply_to)
 
         spoiler_text = "спойлер"
-        if spoiler_text not in answer.lower():
-            return ResponseMessage(ResponseMessageItem(text=answer))
+        if spoiler_text in answer.lower():
+            spoiler_index = answer.lower().index(spoiler_text)
+            text_before_spoiler = answer[:spoiler_index]
+            text_after_spoiler = answer[spoiler_index + len(spoiler_text):]
 
-        spoiler_index = answer.lower().index(spoiler_text)
-        text_before_spoiler = answer[:spoiler_index]
-        text_after_spoiler = answer[spoiler_index + len(spoiler_text):]
-
-        answer = text_before_spoiler + self.bot.get_bold_text(spoiler_text) + self.bot.get_spoiler_text(
-            text_after_spoiler)
-        return ResponseMessage(ResponseMessageItem(text=answer))
+            answer = text_before_spoiler + self.bot.get_bold_text(spoiler_text) + self.bot.get_spoiler_text(
+                text_after_spoiler)
+        return ResponseMessage(ResponseMessageItem(text=answer, reply_to=reply_to))
