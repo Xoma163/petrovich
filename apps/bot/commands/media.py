@@ -278,7 +278,7 @@ class Media(AcceptExtraCommand):
                 raise PSkip()
             raise e
 
-        title = f"{data['artists']} - {data['title']}"
+        title = f"{data['artists']} - {data['title']}" if data['artists'] else data['title']
         audio_att = self.bot.get_audio_attachment(
             data['content'],
             peer_id=self.event.peer_id,

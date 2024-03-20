@@ -533,7 +533,7 @@ def retry(times, exceptions, except_exceptions=None, sleep_time=0):
     """
 
     def decorator(func):
-        def newfn(*args, **kwargs):
+        def wrapper(*args, **kwargs):
             attempt = 0
             while attempt < times:
                 try:
@@ -547,7 +547,7 @@ def retry(times, exceptions, except_exceptions=None, sleep_time=0):
                         time.sleep(sleep_time)
             return func(*args, **kwargs)
 
-        return newfn
+        return wrapper
 
     return decorator
 

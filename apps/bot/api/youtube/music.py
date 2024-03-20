@@ -30,12 +30,18 @@ class YoutubeMusic:
             'format': 'bestaudio/best',
             'title': True,
             'logger': NothingLogger(),
-            'outtmpl': '/tmp/yt_dlp_%(title)s-%(id)s.%(ext)s'
+            'outtmpl': '/tmp/yt_dlp_%(title)s-%(id)s.%(ext)s',
+            'postprocessors': [{
+                'key': 'FFmpegExtractAudio',
+                'preferredcodec': 'mp3',
+                'preferredquality': '320',
+            }],
+
         })
         url = self.clear_url(url)
 
         info = ytdl.extract_info(url, download=True)
-        self._temp_file_path = info['requested_downloads'][0]['_filename']
+        self._temp_file_path = info['requested_downloads'][0]['filepath']
         artist = info.get('artist')
         if artist:
             artist = artist.split(',')[0]
@@ -62,7 +68,7 @@ class YoutubeMusic:
             "title": title,
             "duration": info.get('duration'),
             "cover_url": f"https://i.ytimg.com/vi/{info['id']}/mqdefault.jpg",
-            "format": info.get('ext'),
+            "format": info['requested_downloads'][0]['ext'],
             "content": content
         }
 
