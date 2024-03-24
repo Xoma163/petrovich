@@ -77,10 +77,11 @@ class Command:
         :param event: событие
         :return: bool
         """
-        if event.message and event.message.command in self.full_names:
-            return True
-        if event.payload and event.payload['c'] in self.full_names:
-            return True
+        if self.full_names:
+            if event.message.command in self.full_names:
+                return True
+            if event.payload and event.payload['c'] in self.full_names:
+                return True
         return False
 
     def check_and_start(self, bot: Bot, event: Event) -> ResponseMessage:
