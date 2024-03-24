@@ -39,7 +39,8 @@ class TgEvent(Event):
             return
 
         fwd_message_without_voice = False
-        if not self.is_fwd and self.raw.get('message', {}).get('forward_from') and 'voice' not in self.raw['message']:
+        if not self.is_fwd and self.raw.get('message', {}).get('forward_from') and 'voice' not in self.raw.get(
+                'message', {}):
             fwd_message_without_voice = True
 
         if self.is_fwd:
@@ -48,6 +49,8 @@ class TgEvent(Event):
             callback_query = self.raw.get('callback_query')
             my_chat_member = self.raw.get('my_chat_member')
             edited_message = self.raw.get('edited_message')
+            poll_answer = self.raw.get('poll_answer')
+            poll = self.raw.get('poll')
 
             if callback_query:
                 message = callback_query['message']
@@ -58,8 +61,14 @@ class TgEvent(Event):
                 # message = edited_message
             elif my_chat_member:
                 message = my_chat_member
+            elif poll_answer:
+                return
+            elif poll:
+                return
             else:
                 message = self.raw.get('message')
+        if not message:
+            return
 
             # if not message:
             #     message = self.raw

@@ -69,7 +69,6 @@ class Bot(Thread):
         """
         Обработка входящего ивента
         """
-        rm = None
         try:
             event.setup_event()
             if not event.need_a_response():

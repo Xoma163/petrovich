@@ -20,7 +20,7 @@ class Issue(Command):
         help_texts=[
             HelpTextItem(Role.USER, [
                 HelpTextItemCommand(
-                    "(проблема)\\n[описание проблемы]\\n[теги]",
+                    "(проблема)\n[описание проблемы]\n[теги]",
                     "добавляет проблему Петровича, которую нужно решить"),
                 HelpTextItemCommand(
                     "(пересылаемое сообщение)",
