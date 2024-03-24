@@ -1,6 +1,7 @@
 import datetime
+from decimal import Decimal
 
-from django.db.models import Count
+from django.db.models import Count, F, ExpressionWrapper, FloatField
 
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role
@@ -26,7 +27,7 @@ class Statistics(Command):
             ])
         ],
         extra_text=(
-            "Модули: петрович, ставки, бк, wordle, рулетка, мемы"
+            "Модули: петрович, ставки, бк, wordle, рулетка, мемы, quiz"
         ),
     )
 
@@ -44,7 +45,8 @@ class Statistics(Command):
                 [['быки', 'коровы', 'бк'], self.menu_bk],
                 [['wordle', 'вордле'], self.menu_wordle],
                 [['рулетка'], self.menu_roulettes],
-                [['мемы'], self.menu_memes]
+                [['мемы'], self.menu_memes],
+                [['quiz', "викторина"], self.menu_quiz]
             ]
             method = self.handle_menu(menu, arg0)
             answer = method()
@@ -117,6 +119,22 @@ class Statistics(Command):
             raise PWarning(msg + "Нет статистики")
         result_list_str = "\n".join([f"{profiles.get(id=x['author'])} - {x['total']}" for x in result_list])
         return msg + result_list_str
+
+    def menu_quiz(self) -> str:
+        gamers = Gamer.objects.filter(profile__chats=self.event.chat) \
+            .annotate(total_games=F('quiz_correct_answer_count') + F('quiz_wrong_answer_count')) \
+            .annotate(winrate=ExpressionWrapper((
+                F('quiz_correct_answer_count') * Decimal('1.0') / F('total_games')
+        ), output_field=FloatField())) \
+            .exclude(total_games=0) \
+            .order_by('-winrate')
+        msg = "Очки quiz:\n"
+        if gamers.count() == 0:
+            raise PWarning(msg + "Нет статистики")
+        gamers_str = "\n".join(
+            [f"{gamer} - {round(gamer.winrate * 100, 1)}% ({gamer.quiz_correct_answer_count}/{gamer.total_games})" for
+             gamer in gamers])
+        return msg + gamers_str
 
     def menu_all(self):
 

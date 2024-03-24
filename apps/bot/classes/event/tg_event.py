@@ -6,12 +6,15 @@ from apps.bot.classes.messages.attachments.audio import AudioAttachment
 from apps.bot.classes.messages.attachments.gif import GifAttachment
 from apps.bot.classes.messages.attachments.link import LinkAttachment
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
+from apps.bot.classes.messages.attachments.poll import PollAttachment
+from apps.bot.classes.messages.attachments.poll_answer import PollAnswerAttachment
 from apps.bot.classes.messages.attachments.sticker import StickerAttachment
 from apps.bot.classes.messages.attachments.video import VideoAttachment
 from apps.bot.classes.messages.attachments.videonote import VideoNoteAttachment
 from apps.bot.classes.messages.attachments.voice import VoiceAttachment
 from apps.bot.classes.messages.message import Message
 from apps.bot.classes.messages.tg.message import TgMessage
+from apps.bot.utils.cache import PollCache
 from petrovich.settings import env
 
 
@@ -58,54 +61,44 @@ class TgEvent(Event):
                 message['payload'] = callback_query['data']
             elif edited_message:
                 return
-                # message = edited_message
             elif my_chat_member:
                 message = my_chat_member
             elif poll_answer:
-                return
+                message = self.raw
             elif poll:
-                return
+                message = self.raw
+                self._cache_poll(poll)
             else:
                 message = self.raw.get('message')
         if not message:
             return
 
-            # if not message:
-            #     message = self.raw
-
         is_topic_message = message.get('is_topic_message')
         if is_topic_message:
             self.message_thread_id = message.get('message_thread_id')
 
-        self.peer_id = message['chat']['id']
-        self.from_id = message['from']['id']
+        chat = message.get('chat', {})
 
-        if message['chat']['type'] == 'private':
+        self.peer_id = chat.get('id')
+        self.from_id = message.get('from', {}).get('id')
+
+        if chat.get('type') == 'private':
             self.is_from_pm = True
-        elif message['chat']['type'] in ["group", "supergroup", "channel"]:
-            self.chat = self.bot.get_chat_by_id(message['chat']['id'])
+        elif chat.get('type') in ["group", "supergroup", "channel"]:
+            self.chat = self.bot.get_chat_by_id(chat.get('id'))
             self.is_from_chat = True
 
+        _from = None
         if self.is_fwd:
             _from = message.get('forward_from', message['from'])
-        else:
+        elif 'from' in message:
             _from = message['from']
-
-        if _from['is_bot']:
-            self.is_from_bot = True
-            if _from['id'] == env.int('TG_BOT_GROUP_ID'):
-                self.is_from_bot_me = True
-
-        else:
-            defaults = {
-                'name': _from.get('first_name'),
-                'surname': _from.get('last_name'),
-                'nickname': _from.get('username'),
-            }
-            self.user = self.bot.get_user_by_id(_from['id'], {'nickname': _from.get('username')})
-            defaults.pop('nickname')
-            self.sender = self.bot.get_profile_by_user(self.user, _defaults=defaults)
-            self.is_from_user = True
+        if not _from:
+            if message.get('poll'):
+                _from = None
+            elif message.get('poll_answer'):
+                _from = message.get('poll_answer')['user']
+        self.setup_user(_from)
 
         self.setup_action(message)
         payload = message.get('payload')
@@ -139,6 +132,26 @@ class TgEvent(Event):
                 self.force_response = False
 
         super().setup_event(**kwargs)
+
+    def setup_user(self, _from):
+        if _from is None:
+            return
+
+        if _from['is_bot']:
+            self.is_from_bot = True
+            if _from['id'] == env.int('TG_BOT_GROUP_ID'):
+                self.is_from_bot_me = True
+
+        else:
+            defaults = {
+                'name': _from.get('first_name'),
+                'surname': _from.get('last_name'),
+                'nickname': _from.get('username'),
+            }
+            self.user = self.bot.get_user_by_id(_from['id'], {'nickname': _from.get('username')})
+            defaults.pop('nickname')
+            self.sender = self.bot.get_profile_by_user(self.user, _defaults=defaults)
+            self.is_from_user = True
 
     def setup_action(self, message):
         actions = [
@@ -177,6 +190,8 @@ class TgEvent(Event):
         document = message.get('document')
         sticker = message.get('sticker')
         audio = message.get('audio')
+        poll = message.get('poll')
+        poll_answer = message.get('poll_answer')
         message_text = None
         if voice:
             self.setup_voice(voice)
@@ -199,6 +214,10 @@ class TgEvent(Event):
             self.setup_sticker(sticker)
         elif audio:
             self.setup_audio(audio)
+        elif poll:
+            self.setup_poll(poll)
+        elif poll_answer:
+            self.setup_poll_answer(poll_answer)
         else:
             message_text = message.get('text')
 
@@ -245,6 +264,16 @@ class TgEvent(Event):
         tg_audio.parse_tg(audio_event)
         self.attachments.append(tg_audio)
 
+    def setup_poll(self, poll_event):
+        tg_poll = PollAttachment()
+        tg_poll.parse_tg(poll_event)
+        self.attachments.append(tg_poll)
+
+    def setup_poll_answer(self, poll_answer_event):
+        tg_poll_answer = PollAnswerAttachment()
+        tg_poll_answer.parse_tg(poll_answer_event)
+        self.attachments.append(tg_poll_answer)
+
     def setup_link(self, text):
         res = LinkAttachment.parse_link(text)
         for url in res:
@@ -286,3 +315,8 @@ class TgEvent(Event):
         if self.inline_mode:
             return True
         return super().need_a_response()
+
+    @staticmethod
+    def _cache_poll(poll):
+        pc = PollCache(poll['id'])
+        pc.add_poll(poll)

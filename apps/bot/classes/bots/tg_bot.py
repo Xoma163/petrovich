@@ -292,6 +292,8 @@ class TgBot(Bot):
         params['is_anonymous'] = poll.is_anonymous
         params['type'] = poll.type
         params['allows_multiple_answers'] = poll.allows_multiple_answers
+        if poll.correct_option_id is not None:
+            params['correct_option_id'] = poll.correct_option_id
         r = self.requests.get('sendPoll', params).json()
         return r
 

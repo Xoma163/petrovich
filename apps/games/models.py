@@ -11,6 +11,8 @@ class Gamer(models.Model):
     bk_points = models.IntegerField("Очки быки и коровы", default=0)
     wordle_points = models.IntegerField("Очки Wordle", default=0)
     roulette_points_today = models.DateTimeField("Дата получения очков", auto_now_add=True)
+    quiz_correct_answer_count = models.PositiveIntegerField("Количество правильных ответов квиза", default=0)
+    quiz_wrong_answer_count = models.PositiveIntegerField("Количество неправильных ответов квиза", default=0)
 
     class Meta:
         verbose_name = "Игрок"
