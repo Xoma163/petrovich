@@ -152,7 +152,8 @@ class Media(AcceptExtraCommand):
                 answer = title
 
         if extra_text := self.get_extra_text(chosen_url):
-            answer += f"\n{extra_text}\n"
+            if title != extra_text.strip():
+                answer += f"\n{extra_text}\n"
 
         if self.event.is_from_chat:
             answer += f"\nОт {self.event.sender}"
