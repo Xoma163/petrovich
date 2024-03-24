@@ -3,9 +3,9 @@ from threading import Lock
 from apps.bot.api.bazaotvetov import BazaOtvetov
 from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import Command
-from apps.bot.classes.const.consts import Platform
+from apps.bot.classes.const.consts import Platform, Role
 from apps.bot.classes.const.exceptions import PWarning
-from apps.bot.classes.help_text import HelpText
+from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
 from apps.bot.classes.messages.attachments.poll import PollAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 
@@ -17,7 +17,12 @@ class Quiz(Command):
     names = ["викторина"]
 
     help_text = HelpText(
-        commands_text="начать викторину"
+        commands_text="начать викторину",
+        help_texts=[
+            HelpTextItem(Role.USER, [
+                HelpTextItemCommand(None, "мини-игра, позволяющая проверить ваши знания в различных областях")
+            ])
+        ]
     )
 
     platforms = [Platform.TG]
