@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from itertools import groupby
 from typing import List
 
 from apps.bot.classes.bots.chat_activity import ChatActivity
@@ -51,28 +52,24 @@ class WTF(Command):
             answer = gpt.text_chat(messages)
         return answer
 
+    @staticmethod
+    def _format_groupped_messages(last_user, messages_from_one_user):
+        message_header = f"[{last_user.name}]"
+        message_body = "\n".join(messages_from_one_user)
+        message = f"{message_header}\n{message_body}"
+        return message
+
     def get_conversation(self, n: int, prompt: str, use_preprompt: bool = True) -> list:
         events = self.get_last_messages_as_events(n)
         result_message = []
 
         events = list(filter(lambda x: x.is_from_user and x.message.raw, events))
-
-        last_user = events[0].sender
-        messages_from_one_user = []
-
-        len_events = len(events)
-        for i, event in enumerate(events):
-            text = event.message.raw
-            if last_user != event.sender or i == len_events - 1:
-                message_header = f"[{last_user.name}]"
-                message_body = "\n".join(messages_from_one_user)
-                message = f"{message_header}\n{message_body}"
-                result_message.append(message)
-
-                messages_from_one_user = []
-                last_user = event.sender
-
-            messages_from_one_user.append(text)
+        for sender, events in groupby(events, key=lambda x: x.sender):
+            messages_from_one_user = []
+            for event in events:
+                messages_from_one_user.append(event.message.raw)
+            message = self._format_groupped_messages(sender, messages_from_one_user)
+            result_message.append(message)
 
         messages = []
         preprompt = None
