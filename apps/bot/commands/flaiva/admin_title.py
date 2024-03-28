@@ -58,4 +58,4 @@ class AdminTitle(Command):
     def change_title(self, profile, title):
         if len(title) > 16:
             raise PWarning(f"Максимальная длина должности - 16 символов, у вас - {len(title)}")
-        self.bot.set_chat_admin_title(self.event.chat.chat_id, profile.user.user_id, title)
+        self.bot.set_chat_admin_title(self.event.chat.chat_id, profile.get_tg_user().user_id, title)
