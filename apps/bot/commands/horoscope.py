@@ -191,7 +191,9 @@ class Horoscope(Command):
             HoroscopeModel.objects.all().delete()
 
             random_memes = Meme.objects \
-                               .exclude(type='audio', approved=False, for_trusted=True) \
+                               .exclude(type='audio') \
+                               .exclude(approved=False) \
+                               .exclude(for_trusted=True) \
                                .order_by('?')[:MEMES_COUNT]
             if len(random_memes) != MEMES_COUNT:
                 raise PError("Невозможно составить гороскоп")
