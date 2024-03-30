@@ -31,6 +31,7 @@ from apps.bot.classes.event.event import Event
 from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
 from apps.bot.classes.messages.attachments.link import LinkAttachment
 from apps.bot.classes.messages.attachments.video import VideoAttachment
+from apps.bot.classes.messages.message import Message
 from apps.bot.classes.messages.response_message import ResponseMessageItem, ResponseMessage
 from apps.bot.commands.trim_video import TrimVideo
 from apps.bot.utils.utils import get_urls_from_text, markdown_to_html, retry, markdown_wrap_symbols, get_default_headers
@@ -177,7 +178,7 @@ class Media(AcceptExtraCommand):
 
     def get_extra_text(self, chosen_url) -> str:
         if self.has_command_name:
-            args_str = " ".join(self.event.message.args[1:])
+            args_str = " ".join(self.event.message.args_case[1:])
         else:
             args_str = self.event.message.raw
 
@@ -245,6 +246,7 @@ class Media(AcceptExtraCommand):
                 video_content = tm.trim_link_pos(url, start_pos, end_pos)
                 va = self.bot.get_video_attachment(video_content, peer_id=self.event.peer_id)
                 text = None
+                self.remove_trim_args(url, end_pos)
             else:
                 try:
                     data = yt_api.get_video_info(url, max_filesize_mb=max_filesize_mb)
@@ -268,6 +270,26 @@ class Media(AcceptExtraCommand):
                     va.download_content()
                 text = data['title']
         return [va], text
+
+    def remove_trim_args(self, url, end_pos):
+        yt_api = YoutubeVideo()
+        raw_list = self.event.message.raw.split(' ')
+
+        index = 1
+        if self.has_command_name:
+            index += 1
+
+        if yt_api.get_timecode_str(url):
+            if end_pos:
+                del raw_list[index]
+        else:
+            if end_pos:
+                del raw_list[index + 1]
+                del raw_list[index]
+            else:
+                del raw_list[index]
+        raw = " ".join(raw_list)
+        self.event.message = Message(raw)
 
     def get_youtube_audio(self, url) -> (list, str):
         ytm_api = YoutubeMusic()
