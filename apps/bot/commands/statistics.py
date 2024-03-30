@@ -101,7 +101,7 @@ class Statistics(Command):
             .annotate(total=Count('author')) \
             .order_by('-total')
 
-        msg = f"Созданных мемов:"
+        msg = "Созданных мемов:"
         if self.event.is_from_pm:
             return f"{msg} {result_list[0]['total']}"
 
@@ -126,7 +126,7 @@ class Statistics(Command):
             .exclude(total_games=0) \
             .order_by('-winrate')
 
-        msg = f"Винрейт quiz:"
+        msg = "Винрейт quiz:"
         if self.event.is_from_pm:
             gamer = gamers[0]
             gamer_str = self._quiz_get_gamer_str(gamer)
