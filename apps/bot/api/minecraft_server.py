@@ -5,14 +5,18 @@ from apps.bot.utils.utils import check_command_time
 
 
 class MinecraftServer:
+    DEFAULT_PORT = 25565
 
-    def __init__(self, ip, port=25565, delay=None, names=None, map_url=None):
+    def __init__(self, ip, port=None, delay=None, names=None, map_url=None, service_name=None):
         self.ip = ip
+        if port is None:
+            port = self.DEFAULT_PORT
         self.port = port
 
         self.delay = delay
         self.names = names
         self.map_url = map_url
+        self.service_name = service_name
 
         self.server_info = None
 
@@ -20,6 +24,8 @@ class MinecraftServer:
         return self.names[0]
 
     def _get_service_name(self):
+        if self.service_name:
+            return self.service_name
         return f'minecraft_{self.get_version()}'
 
     def start(self):

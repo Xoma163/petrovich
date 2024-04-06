@@ -246,7 +246,7 @@ class Media(AcceptExtraCommand):
                 video_content = tm.trim_link_pos(url, start_pos, end_pos)
                 va = self.bot.get_video_attachment(video_content, peer_id=self.event.peer_id)
                 text = None
-                self.remove_trim_args(url, end_pos)
+                self._remove_trim_args(url, end_pos)
             else:
                 try:
                     data = yt_api.get_video_info(url, max_filesize_mb=max_filesize_mb)
@@ -271,7 +271,7 @@ class Media(AcceptExtraCommand):
                 text = data['title']
         return [va], text
 
-    def remove_trim_args(self, url, end_pos):
+    def _remove_trim_args(self, url, end_pos):
         yt_api = YoutubeVideo()
         raw_list = self.event.message.raw.split(' ')
 

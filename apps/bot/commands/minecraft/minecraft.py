@@ -28,6 +28,7 @@ class Minecraft(Command):
         port=25565,
         delay=60,
         names=['1.20.1', "1.20"],
+        service_name="minecraft"
         # map_url=f"http://{MAIN_DOMAIN}:8123/?worldname=world#",
     )
 
@@ -71,7 +72,7 @@ class Minecraft(Command):
         player_max = server.server_info['player_max']
         player_range = f"({len(server.server_info['players'])}/{player_max})"
 
-        server_address = f'{server.ip}:{server.port}'
+        server_address = server.ip if server.port == server.DEFAULT_PORT else f'{server.ip}:{server.port}'
         result = f"Майн {version} ✅ {player_range} - {self.bot.get_formatted_text_line(server_address)}"
 
         players = server.server_info['players']
