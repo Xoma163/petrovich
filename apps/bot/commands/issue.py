@@ -50,7 +50,9 @@ class Issue(Command):
             raise PWarning("В сообщении должны быть аргументы или пересылаемое сообщение")
 
         body = ""
-        tags = ""
+        labels_in_github = []
+
+        issue = GithubIssueAPI(log_filter=self.event.log_filter)
 
         if msg.count('\n') == 0:
             title = msg
@@ -59,12 +61,17 @@ class Issue(Command):
             title, body = msg_split
             tags = self._get_tags(body)
             if tags:
+                labels_in_github = [x for x in issue.get_all_labels() if x.lower() in tags] if tags else []
                 body = ""
         else:
             msg_split = msg.split('\n')
             title = msg_split[0]
             body = "\n".join(msg_split[1:-1])
             tags = self._get_tags(msg_split[-1])
+            labels_in_github = [x for x in issue.get_all_labels() if x.lower() in tags] if tags else []
+
+            if not labels_in_github:
+                body = "\n".join(msg_split[1:])
 
         photos = self.event.get_all_attachments([PhotoAttachment])
         if photos:
@@ -76,8 +83,6 @@ class Issue(Command):
                 f"Данное ишю сгенерировано автоматически"
         body = body.lstrip("\n")
 
-        issue = GithubIssueAPI(log_filter=self.event.log_filter)
-        labels_in_github = [x for x in issue.get_all_labels() if x.lower() in tags] if tags else []
         issue.author = self.event.sender
         issue.title = title
         issue.body = body
