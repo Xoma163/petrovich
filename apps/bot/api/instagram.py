@@ -1,3 +1,5 @@
+from urllib.parse import urlparse
+
 from apps.bot.api.handler import API
 from apps.bot.classes.const.exceptions import PWarning
 from petrovich.settings import env
@@ -50,7 +52,8 @@ class Instagram(API):
         # data.caption = response[0]['title']
         for item in response:
             print(item['type'])
-            if item['type'] == "video/mp4":
+            real_ext = urlparse(item['url']).path.rsplit('.', 1)[-1]
+            if item['type'] == "video/mp4" or real_ext == 'mp4':
                 content_type = InstagramAPIDataItem.CONTENT_TYPE_VIDEO
             else:
                 content_type = InstagramAPIDataItem.CONTENT_TYPE_IMAGE
