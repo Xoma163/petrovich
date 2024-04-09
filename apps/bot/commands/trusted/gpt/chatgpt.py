@@ -256,11 +256,15 @@ class ChatGPT(Command):
 
     @staticmethod
     def get_preprompt(sender: Profile, chat: Chat, provider) -> Optional[str]:
-        variants = [
-            Q(author=sender, chat=chat, provider=provider),
-            Q(author=sender, chat=None, provider=provider),
-            Q(author=None, chat=chat, provider=provider),
-        ]
+        if chat:
+            variants = [
+                Q(author=sender, chat=chat, provider=provider),
+                Q(author=None, chat=chat, provider=provider),
+            ]
+        else:
+            variants = [
+                Q(author=sender, chat=None, provider=provider),
+            ]
 
         for q in variants:
             try:
