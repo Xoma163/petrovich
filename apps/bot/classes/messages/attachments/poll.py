@@ -30,7 +30,7 @@ class PollAttachment(Attachment):
         self.is_anonymous = event['is_anonymous']
         self.type = event['type']
         self.allows_multiple_answers = event['allows_multiple_answers']
-        self.correct_option_id = event['correct_option_id']
+        self.correct_option_id = event.get('correct_option_id')
 
     def set_by_tg_id(self, tg_id):
         pc = PollCache(tg_id)
