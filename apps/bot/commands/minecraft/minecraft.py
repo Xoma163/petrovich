@@ -40,7 +40,6 @@ class Minecraft(Command):
             [["стоп", "stop"], self.menu_stop],
             [["статус", "status"], self.menu_status],
             [['default'], self.menu_status]
-
         ]
         method = self.handle_menu(menu, arg0)
         rmi = method()
@@ -62,7 +61,11 @@ class Minecraft(Command):
     def menu_status(self) -> ResponseMessageItem:
         self.server.get_server_info()
         answer = self.get_server_info_str(self.server)
-        return ResponseMessageItem(text=answer)
+
+        button = self.bot.get_button("Обновить", self.name, args=['статус'])
+        keyboard = self.bot.get_inline_keyboard([button])
+        mid = self.event.raw.get('callback_query', {}).get('message', {}).get('message_id')
+        return ResponseMessageItem(text=answer, keyboard=keyboard, message_id=mid)
 
     def get_server_info_str(self, server):
         if not server.server_info['online']:

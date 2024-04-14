@@ -109,7 +109,7 @@ class Bot(Thread):
                 message_thread_id=event.message_thread_id,
             )
             if event.sender.check_role(Role.TRUSTED):
-                button = self.get_button('логи', command="логи")
+                button = self.get_button('Логи', command="логи")
                 keyboard = self.get_inline_keyboard([button])
                 rmi.keyboard = keyboard
             rm = ResponseMessage(rmi)
