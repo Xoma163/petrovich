@@ -231,7 +231,10 @@ class TgBot(Bot):
         if audio.title:
             params['title'] = audio.title
 
+        # ToDo: Через public url плохо работает - не тянется название и thumb
         if audio.public_download_url:
+            if audio.thumb:
+                params['thumbnail'] = audio.thumb
             params['audio'] = audio.public_download_url
             r = self.requests.get('sendAudio', params).json()
         else:

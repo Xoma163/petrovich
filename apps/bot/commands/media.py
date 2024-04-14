@@ -15,6 +15,7 @@ from apps.bot.api.pinterest import Pinterest, PinterestDataItem
 from apps.bot.api.premier import Premier
 from apps.bot.api.reddit import Reddit
 from apps.bot.api.spotify import Spotify
+from apps.bot.api.sunoai import SunoAI
 from apps.bot.api.tiktok import TikTok
 from apps.bot.api.twitter import Twitter
 from apps.bot.api.vk.video import VKVideo
@@ -55,6 +56,7 @@ CLIPS_TWITCH_URLS = ('clips.twitch.tv',)
 FACEBOOK_URLS = ('www.facebook.com', 'facebook.com', 'fb.watch')
 PREMIERE_URLS = ('premier.one',)
 SPOTIFY_URLS = ('open.spotify.com',)
+SUNO_AI_URLS = ('suno.ai', 'suno.com')
 
 MEDIA_URLS = tuple(
     YOUTUBE_URLS +
@@ -72,7 +74,8 @@ MEDIA_URLS = tuple(
     CLIPS_TWITCH_URLS +
     FACEBOOK_URLS +
     PREMIERE_URLS +
-    SPOTIFY_URLS
+    SPOTIFY_URLS +
+    SUNO_AI_URLS
 )
 
 
@@ -212,6 +215,7 @@ class Media(AcceptExtraCommand):
             FACEBOOK_URLS: self.get_facebook_video,
             PREMIERE_URLS: self.get_premiere_video,
             SPOTIFY_URLS: self.get_spotify_music,
+            SUNO_AI_URLS: self.get_suno_ai_music,
         }
 
         urls = get_urls_from_text(source)
@@ -581,7 +585,6 @@ class Media(AcceptExtraCommand):
         return attachments, msg
 
     def get_spotify_music(self, url):
-
         track_id = re.findall(r'track\/(\w*)', url)[0]
 
         s = Spotify()
@@ -597,6 +600,24 @@ class Media(AcceptExtraCommand):
             title=data['title']
         )
         return [audio_att], ""
+
+    def get_suno_ai_music(self, url):
+        suno = SunoAI()
+        data = suno.get_info(url)
+
+        title = f"{data.author} - {data.title}"
+        audio_att = self.bot.get_audio_attachment(
+            data.download_url,
+            peer_id=self.event.peer_id,
+            filename=f"{title}.{data.format}",
+            thumb=data.cover_url,
+            artist=data.author,
+            title=data.title
+        )
+        audio_att.download_content()
+        audio_att.public_download_url = None
+
+        return [audio_att], data.song_text
 
     @staticmethod
     def _save_video_to_media_cache(channel_id: str, video_id: str, name: str, content: bytes):
