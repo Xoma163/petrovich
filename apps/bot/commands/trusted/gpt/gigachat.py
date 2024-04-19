@@ -4,7 +4,6 @@ from apps.bot.classes.bots.chat_activity import ChatActivity
 from apps.bot.classes.const.activities import ActivitiesEnum
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
-from apps.bot.classes.event.tg_event import TgEvent
 from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.commands.trusted.gpt.chatgpt import ChatGPT
@@ -41,36 +40,32 @@ class GigaChat(ChatGPT):
     PREPROMPT_PROVIDER = GPTPrePrompt.GIGACHAT
 
     def start(self) -> ResponseMessage:
-        self.event: TgEvent
-        if self.event.message.args:
-            arg0 = self.event.message.args[0]
-            if arg0 in ["нарисуй", "draw"]:
-                return self.draw_image()
-            elif arg0 in ["препромпт", "препромт", "промпт", "промт", "preprompt", "prepromp", "prompt", "promt"]:
-                return self.preprompt()
+        arg0 = self.event.message.args[0] if self.event.message.args else None
+        menu = [
+            [["нарисуй", "draw"], self.draw_image],
+            [["препромпт", "препромт", "промпт", "preprompt", "prepromp", "prompt"], self.preprompt],
+            [['default'], self.default]
+        ]
+        method = self.handle_menu(menu, arg0)
+        answer = method()
+        return ResponseMessage(answer)
 
+    def default(self) -> ResponseMessageItem:
         user_message = self.get_user_msg(self.event)
         messages = self.get_dialog(user_message)
         return self.text_chat(messages)
 
-    def text_chat(self, messages, **kwargs) -> ResponseMessage:
+    def text_chat(self, messages, **kwargs) -> ResponseMessageItem:
         gc_api = GigaChatGPTAPI(log_filter=self.event.log_filter)
 
         with ChatActivity(self.bot, ActivitiesEnum.TYPING, self.event.peer_id):
             response: GPTAPIResponse = gc_api.completions(messages)
 
         answer = markdown_to_html(response.text, self.bot)
-        return ResponseMessage(ResponseMessageItem(text=answer, reply_to=self.event.message.id))
+        return ResponseMessageItem(text=answer, reply_to=self.event.message.id)
 
-    def draw_image(self, **kwargs) -> ResponseMessage:
-        if len(self.event.message.args) > 1:
-            request_text = " ".join(self.event.message.args_case[1:])
-        elif self.event.message.quote:
-            request_text = self.event.message.quote
-        elif self.event.fwd:
-            request_text = self.event.fwd[0].message.raw
-        else:
-            raise PWarning("Должен быть текст или пересланное сообщение")
+    def draw_image(self, **kwargs) -> ResponseMessageItem:
+        request_text = self._get_draw_image_request_text()
 
         chat_gpt_api = GigaChatGPTAPI(log_filter=self.event.log_filter)
 
@@ -83,5 +78,4 @@ class GigaChat(ChatGPT):
         attachments = [self.bot.get_photo_attachment(x) for x in response.images_bytes]
 
         answer = f'Результат генерации по запросу "{request_text}"'
-        return ResponseMessage(
-            ResponseMessageItem(text=answer, attachments=attachments, reply_to=self.event.message.id))
+        return ResponseMessageItem(text=answer, attachments=attachments, reply_to=self.event.message.id)

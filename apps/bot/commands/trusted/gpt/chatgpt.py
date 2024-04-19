@@ -93,18 +93,18 @@ class ChatGPT(Command):
 
         return self.text_chat(messages)
 
-    def draw_image(self, model=None, use_stats=True) -> ResponseMessageItem:
-        if model is None:
-            model = ChatGPTAPI.DALLE_3
-
+    def _get_draw_image_request_text(self):
         if len(self.event.message.args) > 1:
-            request_text = " ".join(self.event.message.args_case[1:])
+            return " ".join(self.event.message.args_case[1:])
         elif self.event.message.quote:
-            request_text = self.event.message.quote
+            return self.event.message.quote
         elif self.event.fwd:
-            request_text = self.event.fwd[0].message.raw
+            return self.event.fwd[0].message.raw
         else:
             raise PWarning("Должен быть текст или пересланное сообщение")
+
+    def draw_image(self, use_stats=True) -> ResponseMessageItem:
+        request_text = self._get_draw_image_request_text()
         chat_gpt_api = ChatGPTAPI(log_filter=self.event.log_filter, sender=self.event.sender)
 
         with ChatActivity(self.bot, ActivitiesEnum.UPLOAD_PHOTO, self.event.peer_id):
