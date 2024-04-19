@@ -38,6 +38,10 @@ class ChatGPT(Command):
                 HelpTextItemCommand("препромпт [конфа] (текст)", "добавить препромпт"),
                 HelpTextItemCommand("препромпт [конфа] удалить", "удаляет препромпт"),
                 HelpTextItemCommand("стата", "статистика по использованию"),
+                HelpTextItemCommand("ключ (ключ)", "добавляет персональный API ключ"),
+                HelpTextItemCommand("ключ", "удаляет персональный API ключ"),
+                HelpTextItemCommand("модель (GPT-4/GPT-3.5)", "указывает какую модель использовать"),
+
             ])
         ],
         extra_text=(
@@ -63,16 +67,20 @@ class ChatGPT(Command):
         return bool(self.get_first_gpt_event_in_replies(event))
 
     def start(self) -> ResponseMessage:
-        self.event: TgEvent
-        if self.event.message.args:
-            arg0 = self.event.message.args[0]
-            if arg0 in ["нарисуй", "draw"]:
-                return self.draw_image()
-            elif arg0 in ["стата", "статистика", "stat"]:
-                return self.statistics()
-            elif arg0 in ["препромпт", "препромт", "промпт", "промт", "preprompt", "prepromp", "prompt", "promt"]:
-                return self.preprompt()
+        arg0 = self.event.message.args[0] if self.event.message.args else None
+        menu = [
+            [["нарисуй", "draw"], self.draw_image],
+            [["стата", "статистика", "stat"], self.statistics],
+            [["препромпт", "препромт", "промпт", "preprompt", "prepromp", "prompt"], self.preprompt],
+            [["ключ", "key"], self.key],
+            [["модель", "model"], self.model],
+            [['default'], self.default]
+        ]
+        method = self.handle_menu(menu, arg0)
+        answer = method()
+        return ResponseMessage(answer)
 
+    def default(self) -> ResponseMessageItem:
         user_message = self.get_user_msg(self.event)
         messages = self.get_dialog(user_message)
         photos = self.event.get_all_attachments([PhotoAttachment])
@@ -85,7 +93,7 @@ class ChatGPT(Command):
 
         return self.text_chat(messages)
 
-    def draw_image(self, model=None, use_stats=True) -> ResponseMessage:
+    def draw_image(self, model=None, use_stats=True) -> ResponseMessageItem:
         if model is None:
             model = ChatGPTAPI.DALLE_3
 
@@ -97,7 +105,7 @@ class ChatGPT(Command):
             request_text = self.event.fwd[0].message.raw
         else:
             raise PWarning("Должен быть текст или пересланное сообщение")
-        chat_gpt_api = ChatGPTAPI(model, log_filter=self.event.log_filter)
+        chat_gpt_api = ChatGPTAPI(log_filter=self.event.log_filter, sender=self.event.sender)
 
         with ChatActivity(self.bot, ActivitiesEnum.UPLOAD_PHOTO, self.event.peer_id):
             response: GPTAPIResponse = chat_gpt_api.draw(request_text)
@@ -120,21 +128,14 @@ class ChatGPT(Command):
                 cost=cost
             ).save()
 
-        return ResponseMessage(
-            ResponseMessageItem(text=answer, attachments=attachments, reply_to=self.event.message.id))
+        return ResponseMessageItem(text=answer, attachments=attachments, reply_to=self.event.message.id)
 
-    def text_chat(self, messages, model=None, use_stats=True) -> ResponseMessage:
-        if model is None:
-            photos = self.event.get_all_attachments([PhotoAttachment])
-            if photos:
-                model = ChatGPTAPI.GPT_4_VISION
-            else:
-                model = ChatGPTAPI.GPT_4
-
-        chat_gpt_api = ChatGPTAPI(model, log_filter=self.event.log_filter)
+    def text_chat(self, messages, use_stats=True) -> ResponseMessageItem:
+        chat_gpt_api = ChatGPTAPI(log_filter=self.event.log_filter, sender=self.event.sender)
 
         with ChatActivity(self.bot, ActivitiesEnum.TYPING, self.event.peer_id):
-            response: GPTAPIResponse = chat_gpt_api.completions(messages)
+            photos = self.event.get_all_attachments([PhotoAttachment])
+            response: GPTAPIResponse = chat_gpt_api.completions(messages, use_image=bool(photos))
 
         answer = markdown_to_html(response.text, self.bot)
         if use_stats:
@@ -147,7 +148,7 @@ class ChatGPT(Command):
                 cost=cost
             ).save()
 
-        return ResponseMessage(ResponseMessageItem(text=answer, reply_to=self.event.message.id))
+        return ResponseMessageItem(text=answer, reply_to=self.event.message.id)
 
     def get_dialog(self, user_message, use_preprompt=True) -> list:
         mc = MessagesCache(self.event.peer_id)
@@ -216,7 +217,7 @@ class ChatGPT(Command):
         else:
             return event.message.raw
 
-    def preprompt(self) -> ResponseMessage:
+    def preprompt(self) -> ResponseMessageItem:
         if len(self.event.message.args) > 1 and self.event.message.args[1] in ["chat", "conference", "конфа", "чат"]:
             self.check_conversation()
             q = Q(chat=self.event.chat, author=None)
@@ -229,7 +230,7 @@ class ChatGPT(Command):
                 q = Q(chat=self.event.chat, author=self.event.sender)
                 return self._preprompt_works(1, q, 'персональный препромпт конфы')
 
-    def _preprompt_works(self, args_slice_index: int, q: Q, is_for: str) -> ResponseMessage:
+    def _preprompt_works(self, args_slice_index: int, q: Q, is_for: str) -> ResponseMessageItem:
         q &= Q(provider=self.PREPROMPT_PROVIDER)
 
         if len(self.event.message.args) > args_slice_index:
@@ -252,7 +253,7 @@ class ChatGPT(Command):
                 rmi = ResponseMessageItem(f"Текущий {is_for}: {preprompt}")
             except GPTPrePrompt.DoesNotExist:
                 rmi = ResponseMessageItem(f"Текущий {is_for} не задан")
-        return ResponseMessage(rmi)
+        return rmi
 
     @staticmethod
     def get_preprompt(sender: Profile, chat: Chat, provider) -> Optional[str]:
@@ -273,7 +274,7 @@ class ChatGPT(Command):
                 continue
         return None
 
-    def statistics(self) -> ResponseMessage:
+    def statistics(self) -> ResponseMessageItem:
         if self.event.is_from_chat:
             profiles = Profile.objects.filter(chats=self.event.chat)
             results = []
@@ -291,7 +292,44 @@ class ChatGPT(Command):
             if not answer:
                 raise PWarning("Ещё не было использований GPT")
 
-        return ResponseMessage(ResponseMessageItem(answer))
+        return ResponseMessageItem(answer)
+
+    def key(self) -> ResponseMessageItem:
+        args = self.event.message.args_case[1:]
+        if len(args) == 0:
+            settings = self.event.sender.settings
+            settings.gpt_key = ""
+            settings.save()
+            rmi = ResponseMessageItem(text="Удалил ваш ключ")
+        else:
+            if self.event.is_from_chat:
+                self.bot.delete_messages(self.event.chat.chat_id, self.event.message.id)
+                raise PWarning(
+                    "Держите свой ключ в секрете. Я удалил ваше сообщение с ключом (или удалите сами если у меня нет прав). Добавьте его в личных сообщениях")
+            settings = self.event.sender.settings
+            settings.gpt_key = args[0]
+            settings.save()
+            rmi = ResponseMessageItem(text="Добавил новый ключ")
+
+        return rmi
+
+    def model(self) -> ResponseMessageItem:
+        self.check_args(2)
+        new_model = " ".join(self.event.message.args_case[1:])
+        new_model = new_model.replace("-", "").replace(" ", "")
+        settings = self.event.sender.settings
+
+        if new_model in ['gpt4', '4']:
+            model = settings.GPT_MODEL_4
+        elif new_model in ['gpt3', 'gpt3.5', '3', '3.5']:
+            model = settings.GPT_MODEL_3_5
+        else:
+            raise PWarning("Не понял какая модель. Введите GPT-4 или GPT-3.5")
+
+        settings.gpt_model = model
+        settings.save()
+        rmi = ResponseMessageItem(text=f"Поменял модель на {settings.get_gpt_model_display()}")
+        return rmi
 
     def _get_stat_for_user(self, profile: Profile) -> Optional[str]:
         stats_all = self._get_stat_db_profile(Q(author=profile))

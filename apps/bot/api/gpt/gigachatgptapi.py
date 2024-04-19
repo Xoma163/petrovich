@@ -19,10 +19,10 @@ class GigaChatGPTAPI(GPT, API):
     GOSUSLUGI_CERT_PATH = os.path.join(BASE_DIR, "secrets/certs/russian_trusted_root_ca_pem.crt")
 
     LATEST_MODEL = "GigaChat:latest"
+    DEFAULT_MODEL = LATEST_MODEL
 
-    def __init__(self, model, **kwargs):
-        super(GigaChatGPTAPI, self).__init__(model, **kwargs)
-        super().__init__(model)
+    def __init__(self, **kwargs):
+        super(GigaChatGPTAPI, self).__init__(**kwargs)
         self.access_token = None
 
     def set_access_token(self):
@@ -44,13 +44,16 @@ class GigaChatGPTAPI(GPT, API):
             self.set_access_token()
         return self.access_token
 
+    def _get_model(self, use_image=False):
+        return self.DEFAULT_MODEL
+
     def completions(self, messages) -> GPTAPIResponse:
         headers = {
             "Authorization": f"Bearer {self.get_access_token()}"
         }
 
         data = {
-            "model": self.model,
+            "model": self._get_model(),
             "max_tokens": 2048,
             "messages": messages
         }

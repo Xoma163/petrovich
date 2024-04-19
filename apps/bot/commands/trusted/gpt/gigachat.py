@@ -53,10 +53,8 @@ class GigaChat(ChatGPT):
         messages = self.get_dialog(user_message)
         return self.text_chat(messages)
 
-    def text_chat(self, messages, model=None, **kwargs) -> ResponseMessage:
-        if model is None:
-            model = GigaChatGPTAPI.LATEST_MODEL
-        gc_api = GigaChatGPTAPI(model, log_filter=self.event.log_filter)
+    def text_chat(self, messages, **kwargs) -> ResponseMessage:
+        gc_api = GigaChatGPTAPI(log_filter=self.event.log_filter)
 
         with ChatActivity(self.bot, ActivitiesEnum.TYPING, self.event.peer_id):
             response: GPTAPIResponse = gc_api.completions(messages)
@@ -64,10 +62,7 @@ class GigaChat(ChatGPT):
         answer = markdown_to_html(response.text, self.bot)
         return ResponseMessage(ResponseMessageItem(text=answer, reply_to=self.event.message.id))
 
-    def draw_image(self, model=None, **kwargs) -> ResponseMessage:
-        if model is None:
-            model = GigaChatGPTAPI.LATEST_MODEL
-
+    def draw_image(self, **kwargs) -> ResponseMessage:
         if len(self.event.message.args) > 1:
             request_text = " ".join(self.event.message.args_case[1:])
         elif self.event.message.quote:
@@ -77,7 +72,7 @@ class GigaChat(ChatGPT):
         else:
             raise PWarning("Должен быть текст или пересланное сообщение")
 
-        chat_gpt_api = GigaChatGPTAPI(model, log_filter=self.event.log_filter)
+        chat_gpt_api = GigaChatGPTAPI(log_filter=self.event.log_filter)
 
         with ChatActivity(self.bot, ActivitiesEnum.UPLOAD_PHOTO, self.event.peer_id):
             response: GPTAPIResponse = chat_gpt_api.draw(self.event.message.args_str_case)

@@ -22,8 +22,9 @@ class WTF(Command):
         help_texts=[
             HelpTextItem(
                 Role.TRUSTED, [
-                    HelpTextItemCommand("(prompt) [N=50]",
-                                        "обрабатывает последние N сообщений в конфе через ChatGPT по указанному prompt")
+                    HelpTextItemCommand(
+                        "(prompt) [N=50]",
+                        "обрабатывает последние N сообщений в конфе через ChatGPT по указанному prompt")
                 ])
         ]
     )

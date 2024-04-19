@@ -4,6 +4,7 @@ from apps.bot.api.gpt.gpt import GPT
 from apps.bot.api.gpt.response import GPTAPIResponse
 from apps.bot.api.handler import API
 from apps.bot.classes.const.exceptions import PWarning, PError
+from apps.bot.models import Profile
 from petrovich.settings import env
 
 
@@ -25,35 +26,60 @@ class ChatGPTAPI(GPT, API):
     GPT_3_PROMPT_TOKEN_COST = 0.000003
     GPT_3_COMPLETION_TOKEN_COST = 0.000004
 
-    HEADERS = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {API_KEY}"
-    }
-
     BASE_URL = "https://api.openai.com/v1"
     COMPLETIONS_URL = f"{BASE_URL}/chat/completions"
     IMAGE_GEN_URL = f"{BASE_URL}/images/generations"
 
-    def __init__(self, model, **kwargs):
-        super(ChatGPTAPI, self).__init__(model, **kwargs)
-        self.usage: dict = {}
+    DEFAULT_MODEL = GPT_4
+    DEFAULT_DRAW_MODEL = DALLE_3
 
-    def completions(self, messages: list) -> GPTAPIResponse:
+    def __init__(self, sender: Profile = None, **kwargs):
+        super(ChatGPTAPI, self).__init__(**kwargs)
+        self.usage: dict = {}
+        self.sender: Profile = sender
+
+    def _get_api_key(self):
+        user_key = self.sender.settings.gpt_key
+        return user_key if user_key else self.API_KEY
+
+    def _get_model(self, use_image=False):
+        if use_image:
+            return self.GPT_4_VISION
+
+        settings = self.sender.settings
+        user_model = settings.gpt_model
+        if user_model == settings.GPT_MODEL_4:
+            return self.GPT_4
+        elif user_model == settings.GPT_MODEL_3_5:
+            return self.GPT_3
+        return self.DEFAULT_MODEL
+
+    def _get_draw_model(self):
+        return self.DEFAULT_DRAW_MODEL
+
+    def _get_headers(self):
+        return {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self._get_api_key()}"
+        }
+
+    def completions(self, messages: list, use_image=False) -> GPTAPIResponse:
+        model = self._get_model(use_image=use_image)
         payload = {
-            "model": self.model,
+            "model": model,
             "messages": messages
         }
 
-        if self.model in [self.GPT_4, self.GPT_4_VISION]:
+        if model in [self.GPT_4, self.GPT_4_VISION]:
             prompt_token_cost = self.GPT_4_PROMPT_TOKEN_COST
             completion_token_cost = self.GPT_4_COMPLETION_TOKEN_COST
-        elif self.model == self.GPT_3:
+        elif model == self.GPT_3:
             prompt_token_cost = self.GPT_3_PROMPT_TOKEN_COST
             completion_token_cost = self.GPT_3_COMPLETION_TOKEN_COST
         else:
             raise RuntimeError()
 
-        if self.model == self.GPT_4_VISION:
+        if model == self.GPT_4_VISION:
             payload['max_tokens'] = 1024
 
         r_json = self._do_request(self.COMPLETIONS_URL, payload)
@@ -69,11 +95,12 @@ class ChatGPTAPI(GPT, API):
         return r
 
     def draw(self, prompt: str) -> GPTAPIResponse:
-        if self.model == self.DALLE_3:
+        model = self._get_draw_model()
+        if model == self.DALLE_3:
             count = 1
             size = "1792x1024"
             cost = self.DALLE_3_IMAGE_COST
-        elif self.model == self.DALLE_2:
+        elif model == self.DALLE_2:
             count = 3
             size = "1024×1024"
             cost = self.DALLE_2_IMAGE_COST
@@ -81,7 +108,7 @@ class ChatGPTAPI(GPT, API):
             raise RuntimeError()
 
         payload = {
-            "model": self.model,
+            "model": model,
             "prompt": prompt,
             "n": count,
             "size": size,
@@ -96,7 +123,7 @@ class ChatGPTAPI(GPT, API):
 
     def _do_request(self, url, payload):
         proxies = {"https": env.str("SOCKS5_PROXY"), "http": env.str("SOCKS5_PROXY")}
-        r = self.requests.post(url, headers=self.HEADERS, json=payload, proxies=proxies)
+        r = self.requests.post(url, headers=self._get_headers(), json=payload, proxies=proxies)
         if r.status_code != 200:
             try:
                 r_json = r.json()
@@ -114,5 +141,7 @@ class ChatGPTAPI(GPT, API):
                 raise PWarning("ChatGPT недоступен")
             elif code == 'insufficient_quota':
                 raise PWarning("Закончились деньги((")
+            elif code == 'invalid_api_key':
+                raise PWarning("Некорректный api key")
             raise PError("Какая-то ошибка API ChatGPT")
         return r_json

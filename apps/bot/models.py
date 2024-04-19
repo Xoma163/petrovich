@@ -42,6 +42,14 @@ class ChatSettings(BaseSettings):
 
 
 class UserSettings(BaseSettings):
+    GPT_MODEL_4 = "4"
+    GPT_MODEL_3_5 = "3.5"
+
+    GPT_MODEL_CHOICES = (
+        (GPT_MODEL_4, "GPT-4"),
+        (GPT_MODEL_3_5, "GPT-3.5")
+    )
+
     need_meme = models.BooleanField('Слать мемы по точному названию', default=False)
     need_reaction = models.BooleanField('Реагировать на неверные команды', default=True)
     use_swear = models.BooleanField("Использовать ругательства", default=True)
@@ -51,6 +59,10 @@ class UserSettings(BaseSettings):
     use_mention = models.BooleanField('Использовать упоминания', default=True)
 
     is_newsletter_subscriber = models.BooleanField('Подписчик новостной рассылки', default=False)
+
+    # Если указан, то будет использоваться он, иначе - общий
+    gpt_key = models.CharField("Ключ GPT", max_length=64, blank=True)
+    gpt_model = models.CharField("модель GPT", max_length=5, choices=GPT_MODEL_CHOICES, default=GPT_MODEL_4)
 
     class Meta:
         verbose_name = "Настройка профиля"
