@@ -148,6 +148,7 @@ class Bot(Thread):
         Отправка ResponseMessageItem сообщения
         Возвращает BotResponse
         """
+        raise NotImplementedError
 
     def route(self, event: Event) -> Optional[ResponseMessage]:
         """
