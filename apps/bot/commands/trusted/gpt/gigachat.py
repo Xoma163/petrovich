@@ -55,7 +55,7 @@ class GigaChat(ChatGPT):
         messages = self.get_dialog(user_message)
         return self.text_chat(messages)
 
-    def text_chat(self, messages, **kwargs) -> ResponseMessageItem:
+    def text_chat(self, messages, use_stats=True) -> ResponseMessageItem:
         gc_api = GigaChatGPTAPI(log_filter=self.event.log_filter)
 
         with ChatActivity(self.bot, ActivitiesEnum.TYPING, self.event.peer_id):
@@ -64,7 +64,7 @@ class GigaChat(ChatGPT):
         answer = markdown_to_html(response.text, self.bot)
         return ResponseMessageItem(text=answer, reply_to=self.event.message.id)
 
-    def draw_image(self, **kwargs) -> ResponseMessageItem:
+    def draw_image(self, use_stats=True) -> ResponseMessageItem:
         request_text = self._get_draw_image_request_text()
 
         chat_gpt_api = GigaChatGPTAPI(log_filter=self.event.log_filter)
