@@ -69,6 +69,8 @@ class Turett(Command):
     WTF_MESSAGES_COUNT = 50
 
     def accept(self, event: Event) -> bool:
+        if event.is_notify:
+            return False
         if event.chat and event.chat.settings.need_turett:
             chance = self.NOT_MENTIONED_CHANCE if event.chat.settings.no_mention else self.MENTIONED_CHANCE
             if random_probability(chance):

@@ -52,6 +52,9 @@ class Event:
 
         self.is_fwd: bool = False
 
+        # Если это crontab notifier
+        self.is_notify: bool = False
+
         # Tg
         self.message_thread_id: Optional[int] = None
 
