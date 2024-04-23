@@ -56,7 +56,6 @@ class ChatGPT(Command):
         )
     )
 
-    access = Role.TRUSTED
     platforms = [Platform.TG]
 
     PREPROMPT_PROVIDER = GPTPrePrompt.CHATGPT
@@ -69,6 +68,14 @@ class ChatGPT(Command):
         return bool(self.get_first_gpt_event_in_replies(event))
 
     def start(self) -> ResponseMessage:
+        if not self.event.sender.check_role(Role.TRUSTED) and not self.event.sender.settings.gpt_key:
+            if self.event.message.args[0] == "ключ":
+                return ResponseMessage(self.key())
+            else:
+                raise PWarning(
+                    f"Для использования ChatGPT укажите свой ключ (API_KEY) {self.bot.get_formatted_text_line(f'/{self.name} ключ (ключ)')}")
+
+
         arg0 = self.event.message.args[0] if self.event.message.args else None
         menu = [
             [["нарисуй", "draw"], self.draw_image],

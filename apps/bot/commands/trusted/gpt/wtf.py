@@ -6,16 +6,19 @@ from apps.bot.classes.bots.chat_activity import ChatActivity
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.activities import ActivitiesEnum
 from apps.bot.classes.const.consts import Role, Platform
+from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.event.event import Event
 from apps.bot.classes.event.tg_event import TgEvent
 from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
 from apps.bot.classes.messages.response_message import ResponseMessage
-from apps.bot.commands.trusted.gpt.chatgpt import ChatGPT
+from apps.bot.commands.chatgpt import ChatGPT
 from apps.bot.utils.cache import MessagesCache
 
 
 class WTF(Command):
     name = "wtf"
+
+    DEFAULT_PROMPT = "Я пришлю тебе переписку участников группы. Суммаризируй её, опиши, что произошло, о чём общались люди?"
 
     help_text = HelpText(
         commands_text="обрабатывает сообщения в конфе через ChatGPT",
@@ -26,14 +29,19 @@ class WTF(Command):
                         "(prompt) [N=50]",
                         "обрабатывает последние N сообщений в конфе через ChatGPT по указанному prompt")
                 ])
-        ]
+        ],
+        extra_text=f"prompt по умолчанию:\n{DEFAULT_PROMPT}"
+
     )
 
     args = 1
-    access = Role.TRUSTED
     platforms = [Platform.TG]
 
     def start(self) -> ResponseMessage:
+        if not self.event.sender.check_role(Role.TRUSTED) and not self.event.sender.settings.gpt_key:
+            raise PWarning(
+                f"Для использования ChatGPT укажите свой ключ (API_KEY) {self.bot.get_formatted_text_line(f'/{self.name} ключ (ключ)')}")
+
         last_arg = self.event.message.args[-1]
         try:
             n = int(last_arg)
@@ -41,6 +49,9 @@ class WTF(Command):
         except ValueError:
             n = 50
             prompt = self.event.message.args_str_case
+
+        if not prompt:
+            prompt = self.DEFAULT_PROMPT
 
         with ChatActivity(self.bot, ActivitiesEnum.TYPING, self.event.peer_id):
             messages = self.get_conversation(n, prompt)
@@ -51,7 +62,7 @@ class WTF(Command):
 
         with ChatActivity(self.bot, ActivitiesEnum.TYPING, self.event.peer_id):
             answer = gpt.text_chat(messages)
-        return answer
+        return ResponseMessage(answer)
 
     @staticmethod
     def _format_groupped_messages(last_user, messages_from_one_user):

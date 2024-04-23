@@ -55,6 +55,7 @@ class UserSettings(BaseSettings):
 
     is_newsletter_subscriber = models.BooleanField('Подписчик новостной рассылки', default=False)
 
+    # GPT
     # Если указан, то будет использоваться он, иначе - общий
     gpt_key = models.CharField("Ключ GPT", max_length=64, blank=True)
     gpt_model = models.CharField("модель GPT", max_length=64, choices=GPT_MODEL_CHOICES, blank=True)

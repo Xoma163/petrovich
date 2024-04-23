@@ -6,7 +6,7 @@ from apps.bot.classes.event.event import Event
 from apps.bot.classes.event.tg_event import TgEvent
 from apps.bot.classes.messages.attachments.sticker import StickerAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
-from apps.bot.commands.trusted.gpt.chatgpt import ChatGPT
+from apps.bot.commands.chatgpt import ChatGPT
 from apps.bot.commands.trusted.gpt.wtf import WTF
 from apps.bot.utils.utils import random_probability, random_event
 

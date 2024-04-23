@@ -6,7 +6,7 @@ from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
-from apps.bot.commands.trusted.gpt.chatgpt import ChatGPT
+from apps.bot.commands.chatgpt import ChatGPT
 from apps.bot.utils.utils import markdown_to_html
 from apps.service.models import GPTPrePrompt
 

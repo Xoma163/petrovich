@@ -3,6 +3,7 @@ from json import JSONDecodeError
 from apps.bot.api.gpt.gpt import GPT
 from apps.bot.api.gpt.response import GPTAPIResponse
 from apps.bot.api.handler import API
+from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning, PError
 from petrovich.settings import env
 
@@ -94,7 +95,11 @@ class ChatGPTAPI(GPT, API):
 
     def _get_api_key(self) -> str:
         user_key = self.sender.settings.gpt_key
-        return user_key if user_key else self.API_KEY
+        if user_key:
+            return user_key
+        if self.sender.check_role(Role.TRUSTED):
+            return self.API_KEY
+        raise PWarning("Нет доступа")
 
     def _get_model(self, use_image=False) -> GPTModel:
         if use_image:
@@ -120,7 +125,7 @@ class ChatGPTAPI(GPT, API):
             "messages": messages
         }
 
-        if model == GPTModels.GPT_4_VISION:
+        if use_image:
             payload['max_tokens'] = self.GPT_4_VISION_MAX_TOKENS
 
         r_json = self._do_request(self.COMPLETIONS_URL, payload)
