@@ -75,7 +75,7 @@ class GPTModels:
         return [cls.DALLE_3, cls.DALLE_2]
 
     @classmethod
-    def get_model_by_name(cls, name):
+    def get_model_by_name(cls, name) -> GPTModel:
         models = cls.get_all_models()
         for model in models:
             if model.name == name:
@@ -116,7 +116,10 @@ class ChatGPTAPI(GPT, API):
 
         from apps.bot.models import UserSettings
         settings: UserSettings = self.sender.settings
-        return settings.get_gpt_model() if settings.get_gpt_model else self.DEFAULT_MODEL
+        try:
+            return settings.get_gpt_model()
+        except ValueError:
+            return self.DEFAULT_MODEL
 
     def _get_draw_model(self):
         return self.DEFAULT_DRAW_MODEL
