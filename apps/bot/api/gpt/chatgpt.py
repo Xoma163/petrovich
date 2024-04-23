@@ -15,12 +15,21 @@ class GPTModel:
         prompt_token_cost и completion_token_cost указываются для 1М tokens
         image_cost для 1 картинки
         """
+
         self.name = name
         self.verbose_name = verbose_name
-        self.prompt_token_cost: float = prompt_token_cost / 1000000 if prompt_token_cost else None
-        self.completion_token_cost: float = completion_token_cost / 1000000 if completion_token_cost else None
+        self.prompt_1m_token_cost: float = prompt_token_cost
+        self.completion_1m_token_cost: float = completion_token_cost
         self.image_cost: float = image_cost
         self.whisper_cost: float = whisper_cost
+
+    @property
+    def prompt_token_cost(self):
+        return self.prompt_1m_token_cost / 1000000 if self.prompt_1m_token_cost else None
+
+    @property
+    def completion_token_cost(self):
+        return self.completion_1m_token_cost / 1000000 if self.completion_1m_token_cost else None
 
     def __eq__(self, other) -> bool:
         return self.name == other.name

@@ -351,7 +351,10 @@ class ChatGPT(Command):
 
     def models(self) -> ResponseMessageItem:
         gpt_models = GPTModels.get_completions_models()
-        models_str = "\n".join([self.bot.get_formatted_text_line(x.name) for x in gpt_models])
+        models_list = [
+            f"{self.bot.get_formatted_text_line(x.name)}\n${x.prompt_1m_token_cost} / 1M входных токенов\n${x.completion_1m_token_cost} / 1M выходных токенов"
+            for x in gpt_models]
+        models_str = "\n\n".join(models_list)
         answer = f"Список доступных моделей:\n{models_str}"
         return ResponseMessageItem(answer)
 
