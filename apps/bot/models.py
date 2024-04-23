@@ -42,13 +42,8 @@ class ChatSettings(BaseSettings):
 
 
 class UserSettings(BaseSettings):
-    GPT_MODEL_4 = "4"
-    GPT_MODEL_3_5 = "3.5"
-
-    GPT_MODEL_CHOICES = (
-        (GPT_MODEL_4, "GPT-4"),
-        (GPT_MODEL_3_5, "GPT-3.5")
-    )
+    from apps.bot.api.gpt.chatgpt import GPTModels
+    GPT_MODEL_CHOICES = [(x.name, x.verbose_name) for x in GPTModels.get_completions_models()]
 
     need_meme = models.BooleanField('Слать мемы по точному названию', default=False)
     need_reaction = models.BooleanField('Реагировать на неверные команды', default=True)
@@ -62,7 +57,11 @@ class UserSettings(BaseSettings):
 
     # Если указан, то будет использоваться он, иначе - общий
     gpt_key = models.CharField("Ключ GPT", max_length=64, blank=True)
-    gpt_model = models.CharField("модель GPT", max_length=5, choices=GPT_MODEL_CHOICES, default=GPT_MODEL_4)
+    gpt_model = models.CharField("модель GPT", max_length=64, choices=GPT_MODEL_CHOICES, blank=True)
+
+    def get_gpt_model(self):
+        from apps.bot.api.gpt.chatgpt import GPTModels
+        return GPTModels.get_model_by_name(self.gpt_model)
 
     class Meta:
         verbose_name = "Настройка профиля"

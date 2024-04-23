@@ -3,7 +3,7 @@ from typing import Optional
 
 from django.db.models import Q, Sum
 
-from apps.bot.api.gpt.chatgpt import ChatGPTAPI
+from apps.bot.api.gpt.chatgpt import ChatGPTAPI, GPTModels
 from apps.bot.api.gpt.response import GPTAPIResponse
 from apps.bot.classes.bots.chat_activity import ChatActivity
 from apps.bot.classes.command import Command
@@ -39,8 +39,10 @@ class ChatGPT(Command):
                 HelpTextItemCommand("препромпт [конфа] удалить", "удаляет препромпт"),
                 HelpTextItemCommand("стата", "статистика по использованию"),
                 HelpTextItemCommand("ключ (ключ)", "добавляет персональный API ключ"),
-                HelpTextItemCommand("ключ", "удаляет персональный API ключ"),
-                HelpTextItemCommand("модель (GPT-4/GPT-3.5)", "указывает какую модель использовать"),
+                HelpTextItemCommand("ключ удалить", "удаляет персональный API ключ"),
+                HelpTextItemCommand("модели", "выводит список доступных моделей"),
+                HelpTextItemCommand("модель", "выведет текущую модель"),
+                HelpTextItemCommand("модель (название модели)", "указывает какую модель использовать"),
 
             ])
         ],
@@ -73,6 +75,7 @@ class ChatGPT(Command):
             [["стата", "статистика", "stat"], self.statistics],
             [["препромпт", "препромт", "промпт", "preprompt", "prepromp", "prompt"], self.preprompt],
             [["ключ", "key"], self.key],
+            [["модели", "models"], self.models],
             [["модель", "model"], self.model],
             [['default'], self.default]
         ]
@@ -295,8 +298,10 @@ class ChatGPT(Command):
         return ResponseMessageItem(answer)
 
     def key(self) -> ResponseMessageItem:
-        args = self.event.message.args_case[1:]
-        if len(args) == 0:
+        self.check_args(2)
+        arg = self.event.message.args_case[1]
+
+        if arg.lower() == "удалить":
             settings = self.event.sender.settings
             settings.gpt_key = ""
             settings.save()
@@ -307,29 +312,41 @@ class ChatGPT(Command):
                 raise PWarning(
                     "Держите свой ключ в секрете. Я удалил ваше сообщение с ключом (или удалите сами если у меня нет прав). Добавьте его в личных сообщениях")
             settings = self.event.sender.settings
-            settings.gpt_key = args[0]
+            settings.gpt_key = arg
             settings.save()
             rmi = ResponseMessageItem(text="Добавил новый ключ")
 
         return rmi
 
     def model(self) -> ResponseMessageItem:
-        self.check_args(2)
-        new_model = " ".join(self.event.message.args_case[1:])
-        new_model = new_model.replace("-", "").replace(" ", "")
+        if len(self.event.message.args) < 2:
+            settings = self.event.sender.settings
+            if settings.gpt_model:
+                answer = f"Текущая модель - {self.bot.get_formatted_text_line(settings.get_gpt_model().name)}"
+            else:
+                answer = f"Модель не установлена. Используется модель по умолчанию - {self.bot.get_formatted_text_line(ChatGPTAPI.DEFAULT_MODEL.name)}"
+            return ResponseMessageItem(answer)
+
+        new_model = self.event.message.args[1]
         settings = self.event.sender.settings
 
-        if new_model in ['gpt4', '4']:
-            model = settings.GPT_MODEL_4
-        elif new_model in ['gpt3', 'gpt3.5', '3', '3.5']:
-            model = settings.GPT_MODEL_3_5
-        else:
-            raise PWarning("Не понял какая модель. Введите GPT-4 или GPT-3.5")
+        try:
+            gpt_model = GPTModels.get_model_by_name(new_model)
+        except ValueError:
+            button = self.bot.get_button('Список моделей', command=self.name, args=['модели'])
+            keyboard = self.bot.get_inline_keyboard([button])
+            raise PWarning("Не понял какая модель", keyboard=keyboard)
 
-        settings.gpt_model = model
+        settings.gpt_model = gpt_model.name
         settings.save()
-        rmi = ResponseMessageItem(text=f"Поменял модель на {settings.get_gpt_model_display()}")
+        rmi = ResponseMessageItem(text=f"Поменял модель на {self.bot.get_formatted_text_line(settings.gpt_model)}")
         return rmi
+
+    def models(self) -> ResponseMessageItem:
+        gpt_models = GPTModels.get_completions_models()
+        models_str = "\n".join([self.bot.get_formatted_text_line(x.name) for x in gpt_models])
+        answer = f"Список доступных моделей:\n{models_str}"
+        return ResponseMessageItem(answer)
 
     def _get_stat_for_user(self, profile: Profile) -> Optional[str]:
         stats_all = self._get_stat_db_profile(Q(author=profile))
