@@ -52,6 +52,7 @@ jobs:
           TIMEZONEDB_API_KEY: ''
           YANDEX_GEO_TOKEN: ''
           GITHUB_TOKEN: ''
+          OPENAI_KEY: ''
         run: |
           python manage.py test
       - name: Deploy on production

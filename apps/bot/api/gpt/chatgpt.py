@@ -46,7 +46,6 @@ class GPTModels:
     # older models
     GPT_4_0125 = GPTModel("gpt-4-0125-preview", "GPT-4 0125", 10, 30)
     GPT_4_1106 = GPTModel("gpt-4-1106-preview", "GPT-4 1106", 10, 30)
-    GPT_4_VISION = GPTModel("gpt-4-vision-preview", "GPT-4 VISION", 10, 30)
     GPT_3_5_TURBO_1106 = GPTModel("gpt-3.5-turbo-1106", "GPT-3.5 TURBO 1106", 1, 2)
     GPT_3_5_TURBO_0613 = GPTModel("gpt-3.5-turbo-0613", "GPT-3.5 TURBO 0613", 1.5, 2)
     GPT_3_5_TURBO_16K_0613 = GPTModel("gpt-3.5-turbo-16k-0613", "GPT-3.5 TURBO 16K 0613", 3, 4)
@@ -59,8 +58,7 @@ class GPTModels:
     @classmethod
     def get_completions_models(cls) -> list:
         return [cls.GPT_4_TURBO, cls.GPT_4, cls.GPT_4_32K, cls.GPT_3_5_TURBO_0125, cls.GPT_4_0125, cls.GPT_4_1106,
-                cls.GPT_4_VISION, cls.GPT_3_5_TURBO_1106, cls.GPT_3_5_TURBO_0613, cls.GPT_3_5_TURBO_16K_0613,
-                cls.GPT_3_5_TURBO_0301]
+                cls.GPT_3_5_TURBO_1106, cls.GPT_3_5_TURBO_0613, cls.GPT_3_5_TURBO_16K_0613, cls.GPT_3_5_TURBO_0301]
 
     @classmethod
     def get_image_models(cls) -> list:
