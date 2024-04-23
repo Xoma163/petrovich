@@ -37,7 +37,8 @@ class VoiceRecognition(AcceptExtraCommand):
     bot: TgBot
     gpt_key = True
 
-    def accept_extra(self, event: Event) -> bool:
+    @staticmethod
+    def accept_extra(event: Event) -> bool:
         if event.has_voice_message or event.has_video_note:
             # check gpt key
             if not event.sender.check_role(Role.TRUSTED) and not event.sender.settings.gpt_key:

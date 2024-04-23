@@ -21,7 +21,6 @@ pydub
 python-json-logger
 pytz
 requests
-SpeechRecognition
 transliterate
 twitch-dl
 uWSGI
