@@ -557,12 +557,3 @@ def get_default_headers():
         'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
     }
 
-#
-# def read_in_chunks(file_object, chunk_size=2 ** 26):
-#     """Lazy function (generator) to read a file piece by piece.
-#     Default chunk size: 1k."""
-#     while True:
-#         data = file_object.read(chunk_size)
-#         if not data:
-#             file_object.close()
-#         yield data

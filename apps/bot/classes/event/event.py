@@ -127,6 +127,16 @@ class Event:
                 return True
         return False
 
+    @property
+    def has_video_note(self):
+        """
+        Есть ли кружочек во вложениях
+        """
+        for att in self.attachments:
+            if isinstance(att, VideoNoteAttachment):
+                return True
+        return False
+
     def set_message(self, text, _id=None):
         """
         Проставление сообщения

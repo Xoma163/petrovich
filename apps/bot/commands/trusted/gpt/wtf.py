@@ -6,7 +6,6 @@ from apps.bot.classes.bots.chat_activity import ChatActivity
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.activities import ActivitiesEnum
 from apps.bot.classes.const.consts import Role, Platform
-from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.event.event import Event
 from apps.bot.classes.event.tg_event import TgEvent
 from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
@@ -36,11 +35,9 @@ class WTF(Command):
 
     args = 1
     platforms = [Platform.TG]
+    gpt_key = True
 
     def start(self) -> ResponseMessage:
-        if not self.event.sender.check_role(Role.TRUSTED) and not self.event.sender.settings.gpt_key:
-            raise PWarning(
-                f"Для использования ChatGPT укажите свой ключ (API_KEY) {self.bot.get_formatted_text_line(f'/{self.name} ключ (ключ)')}")
 
         last_arg = self.event.message.args[-1]
         try:

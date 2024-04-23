@@ -5,12 +5,14 @@ from apps.bot.api.gpt.response import GPTAPIResponse
 from apps.bot.api.handler import API
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning, PError
+from apps.bot.classes.messages.attachments.audio import AudioAttachment
+from apps.bot.utils.proxy import get_proxies
 from petrovich.settings import env
 
 
 class GPTModel:
     def __init__(self, name: str, verbose_name: str = None, prompt_token_cost: float = None,
-                 completion_token_cost: float = None, image_cost: float = None, whisper_cost=None):
+                 completion_token_cost: float = None, image_cost: float = None, voice_recognition_cost=None):
         """
         prompt_token_cost и completion_token_cost указываются для 1М tokens
         image_cost для 1 картинки
@@ -21,7 +23,7 @@ class GPTModel:
         self.prompt_1m_token_cost: float = prompt_token_cost
         self.completion_1m_token_cost: float = completion_token_cost
         self.image_cost: float = image_cost
-        self.whisper_cost: float = whisper_cost
+        self.voice_recognition_1_min_cost: float = voice_recognition_cost
 
     @property
     def prompt_token_cost(self):
@@ -30,6 +32,10 @@ class GPTModel:
     @property
     def completion_token_cost(self):
         return self.completion_1m_token_cost / 1000000 if self.completion_1m_token_cost else None
+
+    @property
+    def voice_recognition_cost(self):
+        return self.voice_recognition_1_min_cost / 60 if self.voice_recognition_1_min_cost else None
 
     def __eq__(self, other) -> bool:
         return self.name == other.name
@@ -51,7 +57,7 @@ class GPTModels:
     DALLE_2 = GPTModel("dall-e-2", "DALLE 2", image_cost=0.2)
 
     # Audio models
-    WHISPER = GPTModel("Whisper", whisper_cost=0.006)
+    WHISPER = GPTModel("whisper-1", voice_recognition_cost=0.006)
 
     # older models
     GPT_4_0125 = GPTModel("gpt-4-0125-preview", "GPT-4 0125", 10, 30)
@@ -89,6 +95,7 @@ class ChatGPTAPI(GPT, API):
     BASE_URL = "https://api.openai.com/v1"
     COMPLETIONS_URL = f"{BASE_URL}/chat/completions"
     IMAGE_GEN_URL = f"{BASE_URL}/images/generations"
+    VOICE_RECOGNITION_URL = f"{BASE_URL}/audio/transcriptions"
 
     DEFAULT_MODEL = GPTModels.GPT_4_TURBO
     DEFAULT_DRAW_MODEL = GPTModels.DALLE_3
@@ -126,7 +133,6 @@ class ChatGPTAPI(GPT, API):
 
     def _get_headers(self):
         return {
-            "Content-Type": "application/json",
             "Authorization": f"Bearer {self._get_api_key()}"
         }
 
@@ -140,7 +146,7 @@ class ChatGPTAPI(GPT, API):
         if use_image:
             payload['max_tokens'] = self.GPT_4_VISION_MAX_TOKENS
 
-        r_json = self._do_request(self.COMPLETIONS_URL, payload)
+        r_json = self._do_request(self.COMPLETIONS_URL, json=payload)
         self.usage = r_json.get('usage')
         self.usage.update({
             'prompt_token_cost': model.prompt_token_cost,
@@ -170,22 +176,34 @@ class ChatGPTAPI(GPT, API):
             "size": size,
             "quality": "hd"
         }
-        r_json = self._do_request(self.IMAGE_GEN_URL, payload)
+        r_json = self._do_request(self.IMAGE_GEN_URL, json=payload)
         self.usage = {'images_tokens': count, 'image_cost': model.image_cost}
         r = GPTAPIResponse()
         r.images_url = [x['url'] for x in r_json['data']]
         r.images_prompt = r_json['data'][0]['revised_prompt']
         return r
 
-    def _do_request(self, url, payload):
-        proxies = {"https": env.str("SOCKS5_PROXY"), "http": env.str("SOCKS5_PROXY")}
-        r = self.requests.post(url, headers=self._get_headers(), json=payload, proxies=proxies)
+    def recognize_voice(self, audio: AudioAttachment) -> str:
+        model = self.DEFAULT_VOICE_RECOGNITION_MODEL
+        data = {
+            "model": model.name
+        }
+        r_json = self._do_request(self.VOICE_RECOGNITION_URL, data=data, files={'file': audio.content})
+        self.usage = {
+            'duration': audio.duration,
+            'voice_recognition_cost': model.voice_recognition_cost
+        }
+
+        answer = r_json['text']
+        return answer
+
+    def _do_request(self, url, **kwargs):
+        r = self.requests.post(url, headers=self._get_headers(), proxies=get_proxies(), **kwargs)
         if r.status_code != 200:
             try:
                 r_json = r.json()
-                r_json['payload'] = payload
-            except JSONDecodeError:
-                raise PWarning("Ошибка. Не получилось обработать запрос.")
+            except JSONDecodeError as e:
+                raise PWarning("Ошибка. Не получилось обработать запрос.") from e
         else:
             r_json = r.json()
 

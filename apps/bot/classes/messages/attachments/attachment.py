@@ -11,7 +11,7 @@ from django.db.models.fields.files import FieldFile
 
 from apps.bot.classes.bots.chat_activity import ChatActivity
 from apps.bot.classes.const.exceptions import PWarning
-from petrovich.settings import env
+from apps.bot.utils.proxy import get_proxies
 
 
 class Attachment:
@@ -130,7 +130,7 @@ class Attachment:
             finally:
                 self.delete_download_path_file()
         else:
-            proxies = {"https": env.str("SOCKS5_PROXY"), "http": env.str("SOCKS5_PROXY")} if use_proxy else {}
+            proxies = get_proxies() if use_proxy else {}
             if stream:
                 self.content = requests.get(download_url, proxies=proxies, headers=_headers, stream=True) \
                     .iter_content(self.CHUNK_SIZE)

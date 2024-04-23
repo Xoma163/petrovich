@@ -332,6 +332,7 @@ class GPTUsage(models.Model):
     prompt_tokens = models.PositiveSmallIntegerField("Входные токены", default=0)
     completion_tokens = models.PositiveSmallIntegerField("Выходные токены", default=0)
     images_tokens = models.PositiveSmallIntegerField("Генерация картинок", default=0)
+    voice_recognition_seconds = models.PositiveSmallIntegerField("Секунды распознования", default=0)
     cost = models.FloatField("Стоимость запроса", default=0)
 
     class Meta:

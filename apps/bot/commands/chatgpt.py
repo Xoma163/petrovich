@@ -72,8 +72,7 @@ class ChatGPT(Command):
             if self.event.message.args[0] == "ключ":
                 return ResponseMessage(self.key())
             else:
-                raise PWarning(
-                    f"Для использования ChatGPT укажите свой ключ (API_KEY) {self.bot.get_formatted_text_line(f'/{self.name} ключ (ключ)')}")
+                self.check_gpt_key()
 
 
         arg0 = self.event.message.args[0] if self.event.message.args else None
