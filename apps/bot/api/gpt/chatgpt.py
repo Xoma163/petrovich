@@ -183,7 +183,7 @@ class ChatGPTAPI(GPT, API):
         r.images_prompt = r_json['data'][0]['revised_prompt']
         return r
 
-    def recognize_voice(self, audio: AudioAttachment) -> str:
+    def recognize_voice(self, audio: AudioAttachment) -> GPTAPIResponse:
         model = self.DEFAULT_VOICE_RECOGNITION_MODEL
         data = {
             "model": model.name
@@ -194,8 +194,9 @@ class ChatGPTAPI(GPT, API):
             'voice_recognition_cost': model.voice_recognition_cost
         }
 
-        answer = r_json['text']
-        return answer
+        r = GPTAPIResponse()
+        r.text = r_json['text']
+        return r
 
     def _do_request(self, url, **kwargs):
         r = self.requests.post(url, headers=self._get_headers(), proxies=get_proxies(), **kwargs)

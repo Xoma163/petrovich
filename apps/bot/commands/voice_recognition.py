@@ -1,4 +1,5 @@
 from apps.bot.api.gpt.chatgpt import ChatGPTAPI
+from apps.bot.api.gpt.response import GPTAPIResponse
 from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import AcceptExtraCommand
 from apps.bot.classes.const.consts import Platform, Role
@@ -59,7 +60,8 @@ class VoiceRecognition(AcceptExtraCommand):
         audio_message.content = audio_mp3
 
         chat_gpt_api = ChatGPTAPI(sender=self.event.sender)
-        answer: str = chat_gpt_api.recognize_voice(audio_message)
+        response: GPTAPIResponse = chat_gpt_api.recognize_voice(audio_message)
+        answer = response.text
 
         GPTUsage(
             author=self.event.sender,
