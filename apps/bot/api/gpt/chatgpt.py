@@ -170,7 +170,7 @@ class ChatGPTAPI(GPT, API):
             raise RuntimeError()
 
         payload = {
-            "model": model,
+            "model": model.name,
             "prompt": prompt,
             "n": count,
             "size": size,
