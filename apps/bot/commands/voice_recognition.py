@@ -1,7 +1,9 @@
 from apps.bot.api.gpt.chatgpt import ChatGPTAPI
 from apps.bot.api.gpt.response import GPTAPIResponse
+from apps.bot.classes.bots.chat_activity import ChatActivity
 from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import AcceptExtraCommand
+from apps.bot.classes.const.activities import ActivitiesEnum
 from apps.bot.classes.const.consts import Platform, Role
 from apps.bot.classes.const.exceptions import PSkip
 from apps.bot.classes.event.event import Event
@@ -22,8 +24,10 @@ class VoiceRecognition(AcceptExtraCommand):
         commands_text="распознаёт голосовое сообщение",
         help_texts=[
             HelpTextItem(Role.USER, [
-                HelpTextItemCommand("(Пересланное сообщение с голосовым сообщением)",
-                                    "распознаёт голосовое сообщение на основе ChatGPT")
+                HelpTextItemCommand(
+                    "(Пересланное сообщение с голосовым сообщением)",
+                    "распознаёт голосовое сообщение на основе ChatGPT"
+                )
             ])
         ],
         extra_text=(
@@ -60,7 +64,8 @@ class VoiceRecognition(AcceptExtraCommand):
         audio_message.content = audio_mp3
 
         chat_gpt_api = ChatGPTAPI(sender=self.event.sender)
-        response: GPTAPIResponse = chat_gpt_api.recognize_voice(audio_message)
+        with ChatActivity(self.bot, ActivitiesEnum.UPLOAD_AUDIO, self.event.peer_id):
+            response: GPTAPIResponse = chat_gpt_api.recognize_voice(audio_message)
         answer = response.text
 
         GPTUsage(
@@ -76,11 +81,14 @@ class VoiceRecognition(AcceptExtraCommand):
     def spoiler_text(self, answer: str) -> str:
         spoiler_text = "спойлер"
 
-        if spoiler_text in answer.lower():
-            spoiler_index = answer.lower().index(spoiler_text)
-            text_before_spoiler = answer[:spoiler_index]
-            text_after_spoiler = answer[spoiler_index + len(spoiler_text):]
+        if spoiler_text not in answer.lower():
+            return answer
 
-            answer = text_before_spoiler + self.bot.get_bold_text(spoiler_text) + self.bot.get_spoiler_text(
-                text_after_spoiler)
+        spoiler_index = answer.lower().index(spoiler_text)
+        text_before_spoiler = answer[:spoiler_index]
+        text_after_spoiler = answer[spoiler_index + len(spoiler_text):]
+
+        answer = text_before_spoiler + \
+                 self.bot.get_bold_text(spoiler_text) + \
+                 self.bot.get_spoiler_text(text_after_spoiler)
         return answer
