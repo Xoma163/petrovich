@@ -490,8 +490,8 @@ def replace_pre_tag(text: str, bot, start_tag: str, end_tag: str):
             language = ""
 
         inner_to_replace = text[start_tag_pos:end_tag_pos + end_tag_len]
-        # strip - экспериментально
-        inner_text = text[start_tag_pos + start_tag_len + 1 + len(language):end_tag_pos].strip()
+        # strip - плохо режет слева, rstrip - экспериментально
+        inner_text = text[start_tag_pos + start_tag_len + 1 + len(language):end_tag_pos].rstrip()
         new_inner = bot.get_formatted_text(inner_text, language)
         text = text.replace(inner_to_replace, new_inner)
 
