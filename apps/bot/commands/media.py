@@ -293,7 +293,7 @@ class Media(AcceptExtraCommand):
             else:
                 del raw_list[index]
         raw = " ".join(raw_list)
-        self.event.message = Message(raw)
+        self.event.message = Message(raw, _id=self.event.message.id)
 
     def get_youtube_audio(self, url) -> (list, str):
         ytm_api = YoutubeMusic()
