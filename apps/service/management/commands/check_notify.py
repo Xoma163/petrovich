@@ -32,8 +32,9 @@ class Command(BaseCommand):
                 bot = TgBot()
 
                 self.send_notify_message(bot, notify)
-                if notify.text.startswith('/'):
-                    self.send_command_notify_message(bot, notify)
+                # TEST
+                # if notify.text.startswith('/'):
+                self.send_command_notify_message(bot, notify)
                 if notify.date:
                     notify.delete()
             except Exception:

@@ -135,8 +135,8 @@ class Notifies(Command):
 
         try:
             pk = int(filters[0])
-            notifies = notifies.filter(pk=pk)
-        except ValueError:
+            notifies = notifies.get(pk=pk)
+        except (ValueError, Notify.DoesNotExist):
             for _filter in filters:
                 q = Q(text__icontains=_filter) | Q(date__icontains=_filter) | Q(crontab__icontains=_filter)
                 notifies = notifies.filter(q)
