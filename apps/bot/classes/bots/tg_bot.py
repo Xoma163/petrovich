@@ -1,7 +1,6 @@
 import json
 import threading
 from copy import copy
-from typing import Union, List
 
 from numpy import inf
 
@@ -542,7 +541,7 @@ class TgBot(Bot):
             'inline_keyboard': keyboard
         }
 
-    def set_activity(self, chat_id: Union[int, str], activity: ActivitiesEnum):
+    def set_activity(self, chat_id: int | str, activity: ActivitiesEnum):
         """
         Метод позволяет указать пользователю, что бот набирает сообщение или записывает голосовое
         Используется при длительном выполнении команд, чтобы был фидбек пользователю, что его запрос принят
@@ -570,7 +569,7 @@ class TgBot(Bot):
             return self.get_formatted_url(str(profile), f"tg://user?id={user.user_id}")
         return super().get_mention(profile)
 
-    def delete_messages(self, chat_id: Union[int, str], message_ids: Union[List[int], int]) -> dict:
+    def delete_messages(self, chat_id: int | str, message_ids: list[int] | int) -> dict:
         """
         Удаление одного сообщения
         """
@@ -582,11 +581,11 @@ class TgBot(Bot):
         ).json()
         return r
 
-    def get_sticker_set(self, name) -> list:
+    def get_sticker_set(self, name: str) -> list:
         r = self.requests.get('getStickerSet', json={'name': name}).json()
         return r['result']['stickers']
 
-    def set_chat_admin_title(self, chat_id: Union[int, str], user_id, title) -> dict:
+    def set_chat_admin_title(self, chat_id: int | str, user_id: int | str, title: str) -> dict:
         r = self.requests.get('setChatAdministratorCustomTitle', json={
             'chat_id': chat_id,
             'user_id': user_id,
@@ -594,7 +593,7 @@ class TgBot(Bot):
         }).json()
         return r
 
-    def promote_chat_member(self, chat_id: Union[int, str], user_id) -> dict:
+    def promote_chat_member(self, chat_id: int | str, user_id: int | str) -> dict:
         r = self.requests.get('promoteChatMember', json={
             'chat_id': chat_id,
             'user_id': user_id,
@@ -603,13 +602,13 @@ class TgBot(Bot):
         }).json()
         return r
 
-    def get_chat(self, chat_id: Union[int, str]) -> dict:
+    def get_chat(self, chat_id: int | str) -> dict:
         r = self.requests.get('getChat', json={
             'chat_id': chat_id
         }).json()
         return r
 
-    def set_chat_title(self, chat_id: Union[int, str], title) -> dict:
+    def set_chat_title(self, chat_id: int | str, title: str) -> dict:
         if len(title) > 128:
             raise PWarning("Максимальная длина названия чата - 128 символов")
         r = self.requests.get('setChatTitle', json={
@@ -619,7 +618,7 @@ class TgBot(Bot):
         return r
 
     def set_message_reaction(
-            self, chat_id: Union[int, str], message_id: int, reactions: Union[list, List[str]], is_big: bool = False
+            self, chat_id: int | str, message_id: int, reactions: list[str], is_big: bool = False
     ):
         if not isinstance(reactions, list):
             reactions = [reactions]
@@ -632,7 +631,7 @@ class TgBot(Bot):
         }).json()
         return r
 
-    def get_file_id(self, attachment):
+    def get_file_id(self, attachment: Attachment):
         uploading_chat = Chat.objects.get(pk=env.str("TG_PHOTO_UPLOADING_CHAT_PK"))
         rmi = ResponseMessageItem(attachments=[attachment], peer_id=uploading_chat.chat_id)
         br = self.send_response_message_item(rmi)
@@ -668,7 +667,7 @@ class TgBot(Bot):
         return f"<{cls.CODE_TAG}>{text}</{cls.CODE_TAG}>"
 
     @classmethod
-    def get_formatted_url(cls, name, url) -> str:
+    def get_formatted_url(cls, name: str, url: str) -> str:
         return f'<{cls.LINK_TAG} href="{url}">{name}</{cls.LINK_TAG}>'
 
     @classmethod

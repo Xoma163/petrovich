@@ -1,6 +1,5 @@
 import json
 import re
-from typing import Tuple, Optional, List
 from urllib.parse import urlparse
 
 import requests
@@ -52,7 +51,7 @@ class VKVideo(SubscribeService):
         player_url = bs4.find("meta", property="og:video").attrs['content']
         return player_url
 
-    def _get_video_audio(self, player_url: str) -> Tuple[VideoAttachment, Optional[AudioAttachment]]:
+    def _get_video_audio(self, player_url: str) -> tuple[VideoAttachment, AudioAttachment | None]:
         r = requests.get(player_url, headers=self.headers)
         js_code = re.findall('var playerParams = (\{.*\})', r.text)[0]
         info = json.loads(js_code)
@@ -65,7 +64,7 @@ class VKVideo(SubscribeService):
         elif hls := info.get('hls'):
             return self._get_video_hls(hls)
 
-    def _get_video_audio_dash(self, dash_webm_url) -> Tuple[VideoAttachment, AudioAttachment]:
+    def _get_video_audio_dash(self, dash_webm_url) -> tuple[VideoAttachment, AudioAttachment]:
         parsed_url = urlparse(dash_webm_url)
 
         r = requests.get(dash_webm_url, headers=self.headers).content
@@ -88,7 +87,7 @@ class VKVideo(SubscribeService):
         return va, aa
 
     @staticmethod
-    def _get_video_hls(hls_url) -> Tuple[VideoAttachment, None]:
+    def _get_video_hls(hls_url) -> tuple[VideoAttachment, None]:
         va = VideoAttachment()
         va.m3u8_url = hls_url
         return va, None
@@ -163,7 +162,7 @@ class VKVideo(SubscribeService):
             'last_videos_id': last_videos_id,
         }
 
-    def get_filtered_new_videos(self, channel_id: str, last_videos_id: List[str], **kwargs) -> dict:
+    def get_filtered_new_videos(self, channel_id: str, last_videos_id: list[str], **kwargs) -> dict:
         if kwargs.get('playlist_id'):
             channel_id = kwargs['playlist_id']
         url = f"{self.URL}/{channel_id}"

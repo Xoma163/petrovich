@@ -5,7 +5,6 @@ import re
 import time
 from datetime import datetime
 from io import BytesIO
-from typing import List, Optional
 from urllib.parse import urlparse
 
 import pytz
@@ -104,7 +103,7 @@ def normalize_datetime(dt: datetime, tz: str) -> datetime:
     return pytz.utc.normalize(localized_time).astimezone(tz_utc)
 
 
-def decl_of_num(number, titles: List[str]) -> str:
+def decl_of_num(number, titles: list[str]) -> str:
     """
     Склоняет существительное после числительного
     number: число
@@ -119,7 +118,7 @@ def decl_of_num(number, titles: List[str]) -> str:
         return titles[cases[5]]
 
 
-def get_help_texts_for_command(command, platform=None, roles: List[Role] = None) -> str:
+def get_help_texts_for_command(command, platform=None, roles: list[Role] = None) -> str:
     """
     Получает help_texts для команды
     """
@@ -314,7 +313,7 @@ def get_chunks(lst: list, n: int):
         yield lst[i:i + n]
 
 
-def get_flat_list(_list: List[List]) -> list:
+def get_flat_list(_list: list[list]) -> list:
     """
     Получение списка размерностью 1 из списка размерностью 2
     """
@@ -499,7 +498,7 @@ def replace_pre_tag(text: str, bot, start_tag: str, end_tag: str):
     return text
 
 
-def split_text_by_n_symbols(text: str, n: int, split_on: Optional[List[str]] = None) -> List[str]:
+def split_text_by_n_symbols(text: str, n: int, split_on: list[str] | None = None) -> list[str]:
     """
     Разбивает текст на чанки с делением по спецсимволам указанным в split_on
     """
@@ -528,8 +527,8 @@ def retry(times, exceptions, except_exceptions=None, sleep_time=0):
     in ``exceptions`` are thrown
     :param times: The number of times to repeat the wrapped function/method
     :type times: Int
-    :param Exceptions: Lists of exceptions that trigger a retry attempt
-    :type Exceptions: Tuple of Exceptions
+    :param Exceptions: lists of exceptions that trigger a retry attempt
+    :type Exceptions: tuple of Exceptions
     """
 
     def decorator(func):

@@ -1,6 +1,5 @@
 from collections import OrderedDict
 from itertools import groupby
-from typing import List
 
 from apps.bot.classes.bots.chat_activity import ChatActivity
 from apps.bot.classes.command import Command
@@ -90,7 +89,7 @@ class WTF(Command):
         messages.append({'role': "user", 'content': "\n".join(result_message)})
         return messages
 
-    def get_last_messages_as_events(self, n: int) -> List[Event]:
+    def get_last_messages_as_events(self, n: int) -> list[Event]:
         mid = self.event.message.id
         peer_id = self.event.peer_id
 

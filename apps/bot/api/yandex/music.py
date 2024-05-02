@@ -1,6 +1,5 @@
 import logging
 import re
-from typing import List, Optional
 from urllib.parse import urlparse
 
 from yandex_music import Client, Track
@@ -17,7 +16,7 @@ class YandexMusicAPI:
     ACCESS_TOKEN = env.str("YANDEX_MUSIC_ACCESS_TOKEN")
 
     def __init__(self):
-        self._client: Optional[Client] = None
+        self._client: Client | None = None
 
     def get_client(self):
         if not self._client:
@@ -60,7 +59,7 @@ class YandexTrack(YandexMusicAPI):
         if _id is None and track is None:
             raise RuntimeError("id or track must be provided")
 
-        self.track: Optional[Track] = None
+        self.track: Track | None = None
 
         if track:
             self.track: Track = track
@@ -96,11 +95,11 @@ class YandexAlbum(YandexMusicAPI):
         super().__init__()
 
         self.id: str = _id
-        self.tracks: List[YandexTrack] = []
+        self.tracks: list[YandexTrack] = []
 
     def set_tracks(self):
         client = self.get_client()
-        tracks: List[Track] = client.albums_with_tracks(self.id).volumes[0]
+        tracks: list[Track] = client.albums_with_tracks(self.id).volumes[0]
         self.tracks = [YandexTrack(track=x) for x in tracks]
 
 

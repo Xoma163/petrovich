@@ -3,7 +3,6 @@ import threading
 import time
 from threading import Lock
 from threading import Thread
-from typing import List, Optional, Union
 
 from django.core.cache import cache
 from django.db.models import Q
@@ -65,7 +64,7 @@ class Bot(Thread):
     def init_requests(self):
         pass
 
-    def handle_event(self, event: Event, send=True) -> Optional[ResponseMessage]:
+    def handle_event(self, event: Event, send=True) -> ResponseMessage | None:
         """
         Обработка входящего ивента
         """
@@ -122,7 +121,7 @@ class Bot(Thread):
             self.send_response_message(rm)
         return rm
 
-    def send_response_message(self, rm: ResponseMessage) -> List[BotResponse]:
+    def send_response_message(self, rm: ResponseMessage) -> BotResponse | None:
         """
         Отправка ResponseMessage сообщения
         Вовзращает список результатов отправки в формате
@@ -150,7 +149,7 @@ class Bot(Thread):
         """
         raise NotImplementedError
 
-    def route(self, event: Event) -> Optional[ResponseMessage]:
+    def route(self, event: Event) -> ResponseMessage | None:
         """
         Выбор команды
         Если в Event есть команда, поиск не требуется
@@ -416,7 +415,7 @@ class Bot(Thread):
     # END ATTACHMENTS
 
     # EXTRA
-    def set_activity(self, chat_id: Union[int, str], activity: ActivitiesEnum):
+    def set_activity(self, chat_id: int | str, activity: ActivitiesEnum):
         """
         Проставление активности боту (например, отправка сообщения)
         """
@@ -465,7 +464,7 @@ class Bot(Thread):
         """
         return str(profile)
 
-    def delete_messages(self, chat_id: Union[int, str], message_ids: Union[List[int], int]) -> dict:
+    def delete_messages(self, chat_id: int | str, message_ids: list[int] | int) -> dict:
         """
         Удаление сообщения
         """

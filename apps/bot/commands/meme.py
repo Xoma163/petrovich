@@ -1,5 +1,4 @@
 import threading
-from typing import List
 from urllib.parse import urlparse
 
 import requests
@@ -487,7 +486,7 @@ class Meme(AcceptExtraCommand):
             return
 
     @staticmethod
-    def get_tanimoto_memes(memes, filter_list) -> List[MemeModel]:
+    def get_tanimoto_memes(memes, filter_list) -> list[MemeModel]:
         query = " ".join(filter_list)
         memes_list = []
         for meme in memes:

@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Tuple, Optional, Union
 
 from apps.bot.api.youtube.video import YoutubeVideo
 from apps.bot.classes.bots.chat_activity import ChatActivity
@@ -104,7 +103,7 @@ class TrimVideo(Command):
         return self.trim(video, start_pos, end_pos)
 
     @staticmethod
-    def trim(video: Optional[Union[VideoAttachment, LinkAttachment]], start_pos: str, end_pos: str) -> bytes:
+    def trim(video: VideoAttachment | LinkAttachment | None, start_pos: str, end_pos: str) -> bytes:
         vh = VideoHandler(video)
         return vh.trim(start_pos, end_pos)
 
@@ -154,7 +153,7 @@ class TrimVideo(Command):
         return res
 
     @classmethod
-    def get_timecodes(cls, url: str, args: list) -> Tuple[Optional[str], Optional[str]]:
+    def get_timecodes(cls, url: str, args: list) -> tuple[str | None, str | None]:
         """
         Метод вытаскивает таймкоды для команды Trim
         """

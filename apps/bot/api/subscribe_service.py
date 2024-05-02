@@ -1,5 +1,3 @@
-from typing import List
-
 from apps.bot.classes.const.exceptions import PSubscribeIndexError
 
 
@@ -20,7 +18,7 @@ class SubscribeService:
         """
         raise NotImplementedError
 
-    def get_filtered_new_videos(self, channel_id: str, last_videos_id: List[str], **kwargs) -> dict:
+    def get_filtered_new_videos(self, channel_id: str, last_videos_id: list[str], **kwargs) -> dict:
         """
         Метод по выдаче новых видео
         Используется в проверке новых подписок

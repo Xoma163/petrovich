@@ -1,5 +1,3 @@
-from typing import Tuple
-
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role, Platform
 from apps.bot.classes.const.exceptions import PError
@@ -81,7 +79,7 @@ class Newsletter(Command):
 
         return ResponseMessage([rmi1, rmi2])
 
-    def _get_text(self, entities_offset=0) -> Tuple[str, list]:
+    def _get_text(self, entities_offset: int = 0) -> tuple[str, list]:
         text = self.event.message.raw
         entities = self.event.message.entities if self.event.message.entities else []
 

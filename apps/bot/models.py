@@ -1,5 +1,3 @@
-from typing import List
-
 from django.contrib.auth.models import Group
 from django.core.files import File
 from django.db import models
@@ -169,7 +167,7 @@ class Profile(models.Model):
         group = self.groups.filter(name=role.name)
         return group.exists()
 
-    def get_roles(self) -> List[Role]:
+    def get_roles(self) -> list[Role]:
         return [getattr(Role, x['name']) for x in self.groups.all().values()]
 
     def get_tg_user(self):

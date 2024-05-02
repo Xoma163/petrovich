@@ -1,6 +1,5 @@
 import re
 from datetime import timedelta
-from typing import List
 from urllib import parse
 from urllib.parse import urlparse, parse_qsl
 
@@ -193,7 +192,7 @@ class YoutubeVideo(SubscribeService):
             'last_videos_id': last_videos_id,
         }
 
-    def get_filtered_new_videos(self, channel_id: str, last_videos_id: List[str], **kwargs) -> dict:
+    def get_filtered_new_videos(self, channel_id: str, last_videos_id: list[str], **kwargs) -> dict:
         if kwargs.get('playlist_id'):
             videos = self._get_playlist_videos(kwargs.get('playlist_id'))
             ids = [x['snippet']['resourceId']['videoId'] for x in videos]

@@ -1,4 +1,3 @@
-from typing import List, Tuple, Optional
 from urllib.parse import urlparse
 
 import requests
@@ -29,7 +28,7 @@ class Reddit:
         self.filename = None
 
     @staticmethod
-    def _parse_mpd_audio_filename(url) -> Optional[str]:
+    def _parse_mpd_audio_filename(url) -> str | None:
         """
         Достаём имя файла на сервере реддита. Если его нет, то по умолчанию это "audio"
         Если нашли имя файла, то также проставляем формат файла
@@ -50,7 +49,7 @@ class Reddit:
             except Exception:
                 return None
 
-    def _get_reddit_video_audio_urls(self) -> Tuple[str, str]:
+    def _get_reddit_video_audio_urls(self) -> tuple[str, str]:
         audio_url = None
 
         if self.media_data and self.media_data.get('type') == 'gfycat.com':
@@ -100,7 +99,7 @@ class Reddit:
         self.filename = f"{self.title.replace(' ', '_')}.{ext}"
         return photo_url
 
-    def _get_photos_from_post(self) -> List[str]:
+    def _get_photos_from_post(self) -> list[str]:
         gallery_data_items = self.data['gallery_data']['items']
         first_url = \
             self.data["media_metadata"][self.data['gallery_data']['items'][0]["media_id"]]["s"]["u"].partition("?")[0]

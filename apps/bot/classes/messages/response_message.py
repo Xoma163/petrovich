@@ -1,6 +1,5 @@
 import re
 from copy import copy
-from typing import List
 
 
 class ResponseMessageItem:
@@ -116,10 +115,7 @@ class ResponseMessage:
 
         if messages is None:
             messages = []
-        if isinstance(messages, list):
-            self.messages: List[ResponseMessageItem] = messages
-        else:
-            self.messages: List[ResponseMessageItem] = [messages]
+        self.messages: list[ResponseMessageItem] = messages if isinstance(messages, list) else [messages]
 
     def to_log(self) -> dict:
         """

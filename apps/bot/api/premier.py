@@ -1,5 +1,4 @@
 import re
-from typing import List
 
 from apps.bot.api.handler import API
 from apps.bot.api.subscribe_service import SubscribeService
@@ -105,7 +104,7 @@ class Premier(SubscribeService, API):
                 'last_videos_id': [x['id'] for x in videos],
             }
 
-    def get_filtered_new_videos(self, channel_id: str, last_videos_id: List[str], **kwargs) -> dict:
+    def get_filtered_new_videos(self, channel_id: str, last_videos_id: list[str], **kwargs) -> dict:
         params = {'limit': 100}
         results = self._get_videos(channel_id, params, log_results=False)
 

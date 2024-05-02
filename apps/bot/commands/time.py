@@ -1,7 +1,6 @@
 import datetime
 import re
 from itertools import groupby
-from typing import List
 
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role
@@ -117,7 +116,7 @@ class Time(Command):
         answer = f"{city} — {dt_str}"
         return answer
 
-    def _get_cities_group_time_str(self, cities: List[City], dt, strf_format) -> str:
+    def _get_cities_group_time_str(self, cities: list[City], dt, strf_format) -> str:
         if len(cities) == 1:
             return self._get_city_time_str(cities[0], strf_format, dt)
         new_date = localize_datetime(dt, cities[0].timezone.name)

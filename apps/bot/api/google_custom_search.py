@@ -1,5 +1,3 @@
-from typing import List
-
 from apps.bot.api.handler import API
 from petrovich.settings import env
 
@@ -7,7 +5,7 @@ from petrovich.settings import env
 class GoogleCustomSearch(API):
     URL = "https://customsearch.googleapis.com/customsearch/v1?"
 
-    def get_images_urls(self, query) -> List[str]:
+    def get_images_urls(self, query) -> list[str]:
         querystring = {
             "key": env.str("GOOGLE_API_KEY"),
             "cx": env.str("GOOGLE_SEARCH_ENGINE_ID"),
