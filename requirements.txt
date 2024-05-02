@@ -38,7 +38,7 @@ iso8601==2.1.0
 jmespath==1.0.1
 kiwisolver==1.4.5
 lxml==5.2.1
-m3u8==4.1.0
+m3u8==4.0.0
 matplotlib==3.8.4
 mcrcon==0.7.0
 mcstatus==11.1.1
