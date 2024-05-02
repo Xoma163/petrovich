@@ -1,5 +1,3 @@
-from typing import Optional
-
 import requests
 from bs4 import BeautifulSoup
 
@@ -18,7 +16,7 @@ class Sin(Command):
 
     URL = "https://pravera.ru/index/spisok_grekhov_dlja_ispovedi_podgotovka_v_pravoslavii/0-2381"
 
-    def start(self) -> Optional[ResponseMessage]:
+    def start(self) -> ResponseMessage:
         sins = self.get_sins()
         answer = random_event(sins)
         button = self.bot.get_button("Ещё", self.name)

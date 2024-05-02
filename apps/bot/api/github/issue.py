@@ -1,7 +1,6 @@
 import json
 import re
 from datetime import datetime
-from typing import Optional
 
 from requests import HTTPError
 
@@ -25,9 +24,9 @@ class GithubIssueAPI(GithubAPI):
         self.assignee: str = ""
 
         self.remote_url: str = ""
-        self.created_at: Optional[datetime] = None
+        self.created_at: datetime | None = None
 
-        self.author: Optional[Profile] = None
+        self.author: Profile | None = None
 
     def parse_response(self, response: dict):
         self.id: str = response['id']
@@ -39,7 +38,7 @@ class GithubIssueAPI(GithubAPI):
         self.remote_url: str = response['html_url']
         self.created_at: datetime = datetime.strptime(response['created_at'], '%Y-%m-%dT%H:%M:%SZ')
 
-        self.author: Optional[Profile] = None
+        self.author: Profile | None = None
         match = self.USER_PK_RE.findall(self.body)
         if match:
             profile_pk = match[-1]

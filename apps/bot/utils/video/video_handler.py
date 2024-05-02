@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Union
 
 from apps.bot.classes.messages.attachments.audio import AudioAttachment
 from apps.bot.classes.messages.attachments.link import LinkAttachment
@@ -12,10 +12,10 @@ from apps.bot.utils.video.trimmer import VideoTrimmer
 class VideoHandler:
     def __init__(
             self,
-            video: Optional[Union[VideoAttachment, LinkAttachment]] = None,
+            video: Union[VideoAttachment, LinkAttachment] | None = None,
             audio: AudioAttachment = None
     ):
-        self.video: Optional[Union[VideoAttachment, LinkAttachment]] = video
+        self.video: Union[VideoAttachment, LinkAttachment] | None = video
         self.audio: AudioAttachment = audio
 
     def mux(self) -> bytes:

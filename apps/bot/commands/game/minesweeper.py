@@ -3,7 +3,6 @@ import json
 import random
 from copy import deepcopy
 from threading import Lock
-from typing import Optional
 
 from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import Command
@@ -207,7 +206,7 @@ class Minesweeper(Command):
         keyboard = {"inline_keyboard": inline_keyboard}
         return ResponseMessage(ResponseMessageItem(keyboard=keyboard, message_id=self.message_id))
 
-    def press_button_in_mines_mode(self, i, j, opened, inline_keyboard) -> Optional[ResponseMessage]:
+    def press_button_in_mines_mode(self, i, j, opened, inline_keyboard) -> ResponseMessage | None:
         if opened:
             return
         callback_data = json.loads(inline_keyboard[i][j]['callback_data'])
@@ -267,7 +266,7 @@ class Minesweeper(Command):
         keyboard = {"inline_keyboard": inline_keyboard}
         return ResponseMessage(ResponseMessageItem(text=text, keyboard=keyboard, message_id=self.message_id))
 
-    def check_win(self, inline_keyboard) -> Optional[ResponseMessage]:
+    def check_win(self, inline_keyboard) -> ResponseMessage | None:
         inline_keyboard_copy = deepcopy(inline_keyboard)
         mines_count = 0
         for i in range(self.height):

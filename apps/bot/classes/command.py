@@ -1,5 +1,3 @@
-from typing import Optional
-
 from apps.bot.classes.bots.bot import Bot
 from apps.bot.classes.const.consts import Role, Platform
 from apps.bot.classes.const.exceptions import PWarning, PSkip, PIDK
@@ -143,7 +141,7 @@ class Command:
         if self.gpt_key:
             self.check_gpt_key()
 
-    def start(self) -> Optional[ResponseMessage]:
+    def start(self) -> ResponseMessage | None:
         """
         Обработка самой команды
         :return: result (см. документацию)

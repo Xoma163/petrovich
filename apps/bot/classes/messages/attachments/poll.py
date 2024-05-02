@@ -1,5 +1,3 @@
-from typing import Optional
-
 from apps.bot.classes.messages.attachments.attachment import Attachment
 from apps.bot.utils.cache import PollCache
 
@@ -12,7 +10,7 @@ class PollAttachment(Attachment):
 
     def __init__(self):
         super().__init__(self.TYPE)
-        self.tg_id: Optional[str] = None
+        self.tg_id: str | None = None
         self.question: str = ""
         self.options: list[str] = []
         self.options_with_votes: list[str] = []
@@ -20,7 +18,7 @@ class PollAttachment(Attachment):
         self.type: str = self.POLL_TYPE_REGULAR
         self.allows_multiple_answers: bool = False
 
-        self.correct_option_id: Optional[int] = None
+        self.correct_option_id: int | None = None
 
     def parse_tg(self, event):
         self.tg_id = event['id']

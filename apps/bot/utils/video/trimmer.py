@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Union
 
 from apps.bot.classes.messages.attachments.link import LinkAttachment
 from apps.bot.classes.messages.attachments.video import VideoAttachment
@@ -7,7 +7,7 @@ from apps.bot.utils.video.video_common import VideoCommon
 
 
 class VideoTrimmer(VideoCommon):
-    def __init__(self, video: Optional[Union[VideoAttachment, LinkAttachment]]):
+    def __init__(self, video: Union[VideoAttachment, LinkAttachment] | None):
         super().__init__()
         self.video = video
 

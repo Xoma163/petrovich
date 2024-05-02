@@ -1,5 +1,4 @@
 import copy
-from typing import Optional
 
 from apps.bot.classes.const.consts import Platform, Role
 from apps.bot.classes.messages.attachments.audio import AudioAttachment
@@ -32,23 +31,23 @@ class Event:
         self.is_from_chat: bool = False
         self.is_from_pm: bool = False
 
-        self.user: Optional[User] = None
-        self.sender: Optional[Profile] = None
+        self.user: User | None = None
+        self.sender: Profile | None = None
 
-        self.chat: Optional[Chat] = None
+        self.chat: Chat | None = None
         self.peer_id: int = peer_id  # Куда слать ответ
-        self.from_id: Optional[int] = None  # От кого пришло сообщение
-        self.platform: Optional[Platform] = None
+        self.from_id: int | None = None  # От кого пришло сообщение
+        self.platform: Platform | None = None
 
         self.payload: dict = {}
         self.action: dict = {}
 
-        self.message: Optional[Message] = None
+        self.message: Message | None = None
         self.fwd: list = []
         self.attachments: list = []
 
-        self.force_response: Optional[bool] = None
-        self.command: Optional[Command] = None
+        self.force_response: bool | None = None
+        self.command: Command | None = None
 
         self.is_fwd: bool = False
 
@@ -56,7 +55,7 @@ class Event:
         self.is_notify: bool = False
 
         # Tg
-        self.message_thread_id: Optional[int] = None
+        self.message_thread_id: int | None = None
 
     def setup_event(self, **kwargs):
         """
@@ -143,7 +142,7 @@ class Event:
         """
         self.message = Message(text, _id) if text else None
 
-    def get_all_attachments(self, types: Optional[list] = None):
+    def get_all_attachments(self, types: list | None = None):
         attachments = []
 
         if types is None:

@@ -1,5 +1,4 @@
 import datetime
-from typing import Optional
 
 from django.db.models import Q, Sum
 
@@ -73,7 +72,6 @@ class ChatGPT(Command):
                 return ResponseMessage(self.key())
             else:
                 self.check_gpt_key()
-
 
         arg0 = self.event.message.args[0] if self.event.message.args else None
         menu = [
@@ -200,7 +198,7 @@ class ChatGPT(Command):
         history.append({'role': "user", 'content': user_message})
         return history
 
-    def get_first_gpt_event_in_replies(self, event) -> Optional[TgEvent]:
+    def get_first_gpt_event_in_replies(self, event) -> TgEvent | None:
         mc = MessagesCache(event.peer_id)
         data = mc.get_messages()
         if not event.fwd:
@@ -265,7 +263,7 @@ class ChatGPT(Command):
         return rmi
 
     @staticmethod
-    def get_preprompt(sender: Profile, chat: Chat, provider) -> Optional[str]:
+    def get_preprompt(sender: Profile, chat: Chat, provider) -> str | None:
         if chat:
             variants = [
                 Q(author=sender, chat=chat, provider=provider),
@@ -357,7 +355,7 @@ class ChatGPT(Command):
         answer = f"Список доступных моделей:\n{models_str}"
         return ResponseMessageItem(answer)
 
-    def _get_stat_for_user(self, profile: Profile) -> Optional[str]:
+    def _get_stat_for_user(self, profile: Profile) -> str | None:
         stats_all = self._get_stat_db_profile(Q(author=profile))
         if not stats_all:
             return None
