@@ -3,7 +3,7 @@ from apps.bot.api.gpt.response import GPTAPIResponse
 
 class GPT:
     def __init__(self, **kwargs):
-        super().__init__()
+        super(GPT, self).__init__(**kwargs)
 
     def _get_model(self, use_image=False):
         raise NotImplementedError

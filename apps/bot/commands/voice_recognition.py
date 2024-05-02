@@ -63,7 +63,7 @@ class VoiceRecognition(AcceptExtraCommand):
         audio_mp3 = AudioConverter.convert(audio_message, 'mp3')
         audio_message.content = audio_mp3
 
-        chat_gpt_api = ChatGPTAPI(sender=self.event.sender)
+        chat_gpt_api = ChatGPTAPI(log_filter=self.event.log_filter, sender=self.event.sender)
         with ChatActivity(self.bot, ActivitiesEnum.UPLOAD_AUDIO, self.event.peer_id):
             response: GPTAPIResponse = chat_gpt_api.recognize_voice(audio_message)
         answer = response.text

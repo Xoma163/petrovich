@@ -44,4 +44,5 @@ class APIHandler:
 
 class API:
     def __init__(self, **kwargs):
+        super(API, self).__init__()
         self.requests = APIHandler(**kwargs)
