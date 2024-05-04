@@ -586,7 +586,10 @@ class Media(AcceptExtraCommand):
         return attachments, msg
 
     def get_spotify_music(self, url):
-        track_id = re.findall(r'track\/(\w*)', url)[0]
+        tracks = re.findall(r'track\/(\w*)', url)
+        if not tracks:
+            raise PWarning("Я могу обрабатывать только ссылки на треки")
+        track_id = tracks[0]
 
         s = Spotify()
         data = s.get_info(track_id)
