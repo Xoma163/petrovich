@@ -24,7 +24,7 @@ class Sin(Command):
         return ResponseMessage(ResponseMessageItem(text=answer, keyboard=keyboard))
 
     def get_sins(self) -> list[str]:
-        r = requests.get(self.URL)
+        r = requests.get(self.URL, verify=False)
         bs4 = BeautifulSoup(r.content)
         sins = bs4.select(".main-table p")[10].text.split('\n')
         return sins
