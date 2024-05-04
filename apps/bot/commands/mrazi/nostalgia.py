@@ -166,9 +166,24 @@ class Nostalgia(Command):
             author = data[index]['author'].split(' ')[0]
             button = self.bot.get_button(f"{author}: {data[index]['text']}", self.name, [index + 1], )
             buttons.append(button)
+
+        buttons_nav = []
+        if page != 1:
+            prev_button = self.bot.get_button("←", self.name, [search_query, page - 1], )
+            buttons_nav.append(prev_button)
+
+        if page != total_pages:
+            next_button = self.bot.get_button("→", self.name, [search_query, page + 1], )
+            buttons_nav.append(next_button)
+
         keyboard = self.bot.get_inline_keyboard(buttons)
+        if buttons_nav:
+            keyboard_nav = self.bot.get_inline_keyboard(buttons_nav, cols=2)
+            keyboard['inline_keyboard'].append(keyboard_nav['inline_keyboard'][0])
+
         answer = f"Результаты по запросу \"{search_query}\".\n\nСтраница {page}/{total_pages}"
-        return ResponseMessage(ResponseMessageItem(text=answer, keyboard=keyboard))
+        message_id = self.event.message.id if self.event.payload else None
+        return ResponseMessage(ResponseMessageItem(text=answer, keyboard=keyboard, message_id=message_id))
 
     def menu_range(self, index_from: int = None, index_to: int = None) -> ResponseMessage:
         data = self._load_file()
@@ -222,7 +237,14 @@ class Nostalgia(Command):
 
         keyboard = self.bot.get_inline_keyboard(buttons)
 
-        return ResponseMessage(ResponseMessageItem(text=answer, attachments=[image], keyboard=keyboard))
+        message_id = self.event.message.id if self.event.attachments else None
+        rmi = ResponseMessageItem(text=answer, attachments=[image], keyboard=keyboard)
+        if message_id:
+            self.bot.edit_media(rmi, {'chat_id': self.event.peer_id, 'message_id': message_id})
+            self.bot.edit_caption({'chat_id': self.event.peer_id, 'message_id': message_id, 'caption': answer,
+                                   "reply_markup": json.dumps(keyboard)})
+        else:
+            return ResponseMessage(rmi)
 
     def _load_file(self) -> list:
         with open(self.FILE, 'r') as file:

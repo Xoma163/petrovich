@@ -312,15 +312,20 @@ class TgBot(Bot):
         r = self.requests.get('editMessageText', params=params).json()
         return r
 
+    def edit_caption(self, default_params) -> dict:
+        params = copy(default_params)
+        r = self.requests.get('editMessageCaption', params=params).json()
+        return r
+
     def edit_keyboard(self, default_params) -> dict:
         params = copy(default_params)
         del params['caption']
         r = self.requests.get('editMessageReplyMarkup', params=params).json()
         return r
 
-    def edit_media(self, rm, default_params) -> dict:
+    def edit_media(self, rmi: ResponseMessageItem, default_params) -> dict:
         params = copy(default_params)
-        att: Attachment = rm.attachments[0]
+        att: Attachment = rmi.attachments[0]
         params['media'] = {'type': att.type}
         if att.file_id:
             params['media']['media'] = att.file_id

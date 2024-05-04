@@ -178,12 +178,13 @@ class QuotesGenerator:
 
         img = Image.new('RGB', (self.WIDTH, total_height), self.BACKGROUND_COLOR)
         if avatar:
-            avatar_image = Image.open(avatar)
-            avatar_image = self.get_centered_rounded_image(avatar_image)
-
-            avatar_start_pos = (margin_left, margin_top)
-
-            img.paste(avatar_image, avatar_start_pos)
+            try:
+                avatar_image = Image.open(avatar)
+                avatar_image = self.get_centered_rounded_image(avatar_image)
+                avatar_start_pos = (margin_left, margin_top)
+                img.paste(avatar_image, avatar_start_pos)
+            except:
+                pass
 
         d = ImageDraw.Draw(img)
         d.text((username_start_pos[0], username_start_pos[1]), username, fill=text_color, font=font_username)
