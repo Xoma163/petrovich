@@ -32,17 +32,16 @@ class WTF(Command):
 
     )
 
-    args = 1
     platforms = [Platform.TG]
     gpt_key = True
 
     def start(self) -> ResponseMessage:
 
-        last_arg = self.event.message.args[-1]
         try:
+            last_arg = self.event.message.args[-1]
             n = int(last_arg)
             prompt = " ".join(self.event.message.args_case[:-1])
-        except ValueError:
+        except (ValueError, IndexError):
             n = 50
             prompt = self.event.message.args_str_case
 
