@@ -373,6 +373,7 @@ class Media(AcceptExtraCommand):
             raise PWarning("Я хз чё за контент")
         return attachments, rs.title
 
+    @retry(3, Exception, sleep_time=2)
     def get_instagram_attachment(self, url) -> (list, str):
         try:
             self.check_sender(Role.TRUSTED)
@@ -391,8 +392,8 @@ class Media(AcceptExtraCommand):
                 attachment = self.bot.get_video_attachment(item.download_url, peer_id=self.event.peer_id)
             else:
                 continue
+            attachment.download_content()
             attachments.append(attachment)
-            # attachment.download_content(use_proxy=True, headers={"Host":urlparse(attachment.public_download_url).hostname})
         return attachments, data.caption
 
     def get_twitter_content(self, url) -> (list, str):
