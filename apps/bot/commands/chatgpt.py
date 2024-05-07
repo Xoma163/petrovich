@@ -117,23 +117,18 @@ class ChatGPT(Command):
         with ChatActivity(self.bot, ActivitiesEnum.UPLOAD_PHOTO, self.event.peer_id):
             response: GPTAPIResponse = chat_gpt_api.draw(request_text)
 
-        if not response.images_url:
-            raise PWarning("Не смог сгенерировать :(")
+            if not response.images_url:
+                raise PWarning("Не смог сгенерировать :(")
 
-        attachments = []
-        for image_url in response.images_url:
-            att = self.bot.get_photo_attachment(image_url)
-            att.download_content()
-            attachments.append(att)
+            attachments = []
+            for image_url in response.images_url:
+                att = self.bot.get_photo_attachment(image_url)
+                att.download_content()
+                attachments.append(att)
 
         answer = f'Результат генерации по запросу "{response.images_prompt}"'
         if use_stats:
-            cost = chat_gpt_api.usage['image_cost'] * chat_gpt_api.usage['images_tokens']
-            GPTUsage(
-                author=self.event.sender,
-                images_tokens=chat_gpt_api.usage['images_tokens'],
-                cost=cost
-            ).save()
+            self._add_statistics_image(chat_gpt_api.usage)
 
         return ResponseMessageItem(text=answer, attachments=attachments, reply_to=self.event.message.id)
 
@@ -144,16 +139,9 @@ class ChatGPT(Command):
             photos = self.event.get_all_attachments([PhotoAttachment])
             response: GPTAPIResponse = chat_gpt_api.completions(messages, use_image=bool(photos))
 
-        answer = markdown_to_html(response.text, self.bot)
+            answer = markdown_to_html(response.text, self.bot)
         if use_stats:
-            cost = chat_gpt_api.usage['prompt_tokens'] * chat_gpt_api.usage['prompt_token_cost'] + \
-                   chat_gpt_api.usage['completion_tokens'] * chat_gpt_api.usage['completion_token_cost']
-            GPTUsage(
-                author=self.event.sender,
-                prompt_tokens=chat_gpt_api.usage['prompt_tokens'],
-                completion_tokens=chat_gpt_api.usage['completion_tokens'],
-                cost=cost
-            ).save()
+            self._add_statistics_completions(chat_gpt_api.usage)
 
         return ResponseMessageItem(text=answer, reply_to=self.event.message.id)
 
@@ -374,3 +362,21 @@ class ChatGPT(Command):
     def _get_stat_db_profile(q):
         res = GPTUsage.objects.filter(q).aggregate(Sum('cost')).get('cost__sum')
         return res if res else 0
+
+    def _add_statistics_completions(self, usage):
+        cost = usage['prompt_tokens'] * usage['prompt_token_cost'] + \
+               usage['completion_tokens'] * usage['completion_token_cost']
+        GPTUsage(
+            author=self.event.sender,
+            prompt_tokens=usage['prompt_tokens'],
+            completion_tokens=usage['completion_tokens'],
+            cost=cost
+        ).save()
+
+    def _add_statistics_image(self, usage):
+        cost = usage['image_cost'] * usage['images_tokens']
+        GPTUsage(
+            author=self.event.sender,
+            images_tokens=usage['images_tokens'],
+            cost=cost
+        ).save()

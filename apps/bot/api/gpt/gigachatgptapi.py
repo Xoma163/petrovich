@@ -71,9 +71,9 @@ class GigaChatGPTAPI(GPT, API):
     def draw(self, prompt) -> GPTAPIResponse:
         messages = [{
             "role": "system",
-            "content": "Если тебя просят создать изображение или нарисовать изображение, ты должен сгенерировать специальный блок: "
-                       "<fuse>text2image(query: str, style: str)</fuse>,\nгде query — текстовое описание желаемого "
-                       "изображения, style — опциональный параметр, управляющий стилем генерации."
+            "content": "Если тебя просят создать изображение, ты должен сгенерировать специальный блок: "
+                       "<fuse>text2image(query: str, style: str)</fuse>, где query — текстовое описание желаемого "
+                       "изображения, style — необязательный параметр, задающий стиль изображения."
         },
             {'role': "user", 'content': prompt}
         ]
