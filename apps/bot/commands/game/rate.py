@@ -34,7 +34,7 @@ class Rate(Command):
 
     bot: TgBot
 
-    MIN_GAMERS = 2
+    MIN_GAMERS = Rates.MIN_GAMERS
 
     def start(self) -> ResponseMessage:
         with lock:
@@ -52,7 +52,8 @@ class Rate(Command):
 
             buttons = [self.bot.get_button("Ставка", self.name)]
             if rates.count() + 1 >= self.MIN_GAMERS:
-                rates_button = self.bot.get_button(Rates.name, Rates.name)
+                command_name = Rates.name.capitalize()
+                rates_button = self.bot.get_button(command_name, command_name)
                 buttons.append(rates_button)
             keyboard = self.bot.get_inline_keyboard(buttons, cols=2)
 
