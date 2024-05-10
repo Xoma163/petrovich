@@ -6,6 +6,7 @@ from apps.bot.classes.const.consts import Platform, Role
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
+from apps.bot.commands.game.rates import Rates
 from apps.bot.utils.utils import random_event
 from apps.games.models import Rate as RateModel
 
@@ -33,57 +34,63 @@ class Rate(Command):
 
     bot: TgBot
 
+    MIN_GAMERS = 2
+
     def start(self) -> ResponseMessage:
         with lock:
-            gamer = self.event.sender.gamer
-
-            min_gamers = 2
-            rates_gamers = RateModel.objects.filter(chat=self.event.chat)
-            existed_rate = rates_gamers.filter(gamer=gamer)
-
-            rate_gamer_str = ""
-            for rate_gamer in rates_gamers:
-                if rate_gamer.random:
-                    rate_gamer_str += f"{str(rate_gamer.gamer)} - {rate_gamer.rate} (R)\n"
-                else:
-                    rate_gamer_str += f"{str(rate_gamer.gamer)} - {rate_gamer.rate}\n"
-
+            rates = RateModel.objects.filter(chat=self.event.chat)
+            existed_rate = rates.filter(gamer=self.event.sender.gamer)
             if len(existed_rate) > 0:
-                raise PWarning(
-                    f"Ставка уже поставлена\n"
-                    f"Игроки {rates_gamers.count()}/{min_gamers}:\n"
-                    f"{rate_gamer_str}",
-                    reply_to=self.event.message.id)
-            if self.event.message.args:
-                random = False
-                arg = self.event.message.args[0]
-                self.check_number_arg_range(arg, 1, 100)
-            else:
-                random = True
-                available_list = [x for x in range(1, 101)]
-                rates = RateModel.objects.filter(chat=self.event.chat)
-                for rate_entity in rates:
-                    available_list.pop(available_list.index(rate_entity.rate))
-                if len(available_list) == 0:
-                    raise PWarning("Какая-то жесть, 100 игроков в ставке, я не могу больше придумать чисел, играйте((")
-                arg = random_event(available_list)
+                rates_str = self._get_rates_gamer_str(rates)
+                warning_msg = f"Ставка уже поставлена\n" \
+                              f"Игроки {rates.count()}/{self.MIN_GAMERS}:\n" \
+                              f"{rates_str}"
+                raise PWarning(warning_msg, reply_to=self.event.message.id)
 
-            existed_another_rate = RateModel.objects.filter(chat=self.event.chat, rate=arg)
-            if len(existed_another_rate) > 0:
-                raise PWarning("Эта ставка уже поставлена другим игроком")
-
-            RateModel(
-                **{'gamer': gamer, 'chat': self.event.chat, 'rate': arg, 'random': random}).save()
-            if random:
-                rate_gamer_str += f"{gamer} - {arg} (R)\n"
-            else:
-                rate_gamer_str += f"{gamer} - {arg}\n"
+            new_rate = self.create_new_rate(rates)
+            rates_str = self._get_rate_gamer_str(new_rate)
 
             buttons = [self.bot.get_button("Ставка", self.name)]
-            if rates_gamers.count() + 1 >= min_gamers:
-                buttons.append(self.bot.get_button("Ставки", "Ставки"))
+            if rates.count() + 1 >= self.MIN_GAMERS:
+                rates_button = self.bot.get_button(Rates.name, Rates.name)
+                buttons.append(rates_button)
             keyboard = self.bot.get_inline_keyboard(buttons, cols=2)
-            answer = f"Игроки {rates_gamers.count() + 1}/{min_gamers}:\n" \
-                     f"{rate_gamer_str}"
+
+            answer = f"Игроки {rates.count() + 1}/{self.MIN_GAMERS}:\n" \
+                     f"{rates_str}"
 
             return ResponseMessage(ResponseMessageItem(text=answer, keyboard=keyboard))
+
+    def create_new_rate(self, rates_gamers) -> RateModel:
+        if self.event.message.args:
+            random = False
+            new_rate = self.event.message.args[0]
+            self.check_number_arg_range(new_rate, 1, 100)
+        else:
+            random = True
+            _rates = [rate_gamer.rate for rate_gamer in rates_gamers]
+            available_list = [x for x in range(1, 101) if x not in _rates]
+            if len(available_list) == 0:
+                raise PWarning("Какая-то жесть, 100 игроков в ставке, я не могу больше придумать чисел, играйте((")
+            new_rate = random_event(available_list)
+
+        new_rate_gamer = RateModel(
+            gamer=self.event.sender.gamer,
+            chat=self.event.chat,
+            rate=new_rate,
+            random=random
+        )
+        new_rate_gamer.save()
+
+        return new_rate_gamer
+
+    def _get_rates_gamer_str(self, rates_gamers):
+        rate_gamers = [self._get_rate_gamer_str(rate_gamer) for rate_gamer in rates_gamers]
+        return "\n".join(rate_gamers)
+
+    @staticmethod
+    def _get_rate_gamer_str(rate_gamer):
+        if rate_gamer.random:
+            return f"{str(rate_gamer.gamer)} - {rate_gamer.rate} (R)"
+        else:
+            return f"{str(rate_gamer.gamer)} - {rate_gamer.rate}"
