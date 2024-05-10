@@ -43,9 +43,6 @@ class Settings(Command):
                 HelpTextItemCommand(
                     "упоминания (вкл/выкл)",
                     "определяет будет ли бот использовать упоминания вас"),
-                HelpTextItemCommand(
-                    "рассылка (вкл/выкл)",
-                    "определяет будет ли бот отправлять вам новостную рассылку"),
             ])
         ],
         extra_text="Если команда запускается в чате, то общие настройки (поздравления с др) будут указываться для текущего чата"
@@ -93,7 +90,6 @@ class Settings(Command):
             [['туретт', 'туррет', 'турретт', 'турет'], self.menu_turett],
             [['ругаться'], self.menu_swear],
             [['упоминание', 'упоминания'], self.menu_use_mention],
-            [['рассылка', 'подписка'], self.menu_use_newsletter],
             [['default'], self.menu_default],
         ]
         method = self.handle_menu(menu, arg0)
@@ -133,8 +129,6 @@ class Settings(Command):
     def menu_use_mention(self) -> ResponseMessageItem:
         return self.setup_default_profile_setting("use_mention")
 
-    def menu_use_newsletter(self) -> ResponseMessageItem:
-        return self.setup_default_profile_setting("is_newsletter_subscriber")
 
     # END PROFILE
 
@@ -164,7 +158,6 @@ class Settings(Command):
         use_swear = settings.use_swear
         celebrate_bday = settings.celebrate_bday
         use_mention = settings.use_mention
-        is_newsletter_subscriber = settings.is_newsletter_subscriber
 
         answer = [
             "Настройки пользователя:",
@@ -173,7 +166,6 @@ class Settings(Command):
             f"Использовать ругательные команды — {self.TRUE_FALSE_TRANSLATOR[use_swear]}",
             f"Поздравлять с днём рождения — {self.TRUE_FALSE_TRANSLATOR[celebrate_bday]}",
             f"Использовать упоминания в сообщениях — {self.TRUE_FALSE_TRANSLATOR[use_mention]}",
-            f"Присылать новостную рассылку — {self.TRUE_FALSE_TRANSLATOR[is_newsletter_subscriber]}",
         ]
         return "\n".join(answer)
 
