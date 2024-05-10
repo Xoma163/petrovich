@@ -25,9 +25,5 @@ class Ban(Command):
             raise PWarning("Нельзя банить админа")
         profile.add_role(Role.BANNED)
 
-        if profile.is_female:
-            answer = f"{profile} забанена"
-        else:
-            answer = f"{profile} забанен"
-
+        answer = f"{profile} забанена" if profile.is_female else f"{profile} забанен"
         return ResponseMessage(ResponseMessageItem(text=answer))

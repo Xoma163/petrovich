@@ -28,8 +28,8 @@ class Minecraft(Command):
         port=25565,
         delay=60,
         names=['1.20.1', "1.20"],
-        service_name="minecraft"
-        # map_url=f"http://{MAIN_DOMAIN}:8123/?worldname=world#",
+        service_name="minecraft",
+        map_url=f"https://minecraft-map.{MAIN_DOMAIN}/",
     )
 
     def start(self) -> ResponseMessage:
@@ -85,5 +85,6 @@ class Minecraft(Command):
             players_str = ", ".join(players)
             result += f"\nИгроки: {players_str}"
         if server.map_url:
-            result += f"\nКарта - {server.map_url}"
+            map_url = self.bot.get_formatted_url("Карта", server.map_url)
+            result += f"\n{map_url}"
         return result

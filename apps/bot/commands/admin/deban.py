@@ -6,7 +6,6 @@ from apps.bot.classes.messages.response_message import ResponseMessage, Response
 
 class DeBan(Command):
     name = "разбан"
-
     help_text = HelpText(
         commands_text="разбан пользователя",
         help_texts=[
@@ -22,9 +21,5 @@ class DeBan(Command):
         profile = self.bot.get_profile_by_name(self.event.message.args, self.event.chat)
         profile.remove_role(Role.BANNED)
 
-        if profile.is_female:
-            answer = f"{profile} разбанена"
-        else:
-            answer = f"{profile} разбанен"
-
+        answer = f"{profile} разбанена" if profile.is_female else f"{profile} разбанен"
         return ResponseMessage(ResponseMessageItem(text=answer))

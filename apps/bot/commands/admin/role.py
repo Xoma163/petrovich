@@ -36,7 +36,7 @@ class Roles(Command):
         if action == "добавить":
             rmi = self.add_role(profile, role)
         elif action == "удалить":
-            rmi = self.add_role(profile, role)
+            rmi = self.remove_role(profile, role)
         else:
             raise PWarning(f"Неизвестное действие - \"{action}\"")
         return ResponseMessage(rmi)

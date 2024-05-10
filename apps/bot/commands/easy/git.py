@@ -11,7 +11,8 @@ class Git(Command):
         commands_text="ссылка на гитхаб",
     )
 
+    URL = 'https://github.com/Xoma163/petrovich/'
+
     def start(self) -> ResponseMessage:
-        url = 'https://github.com/Xoma163/petrovich/'
-        answer = self.bot.get_formatted_url("Гитхаб", url)
+        answer = self.bot.get_formatted_url("Гитхаб", self.URL)
         return ResponseMessage(ResponseMessageItem(text=answer))

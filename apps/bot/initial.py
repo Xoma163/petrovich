@@ -84,7 +84,6 @@ def get_text_for_documentation():
     allowed_roles = {
         Role.USER: "всех пользователей",
         Role.MINECRAFT: "майнкрафтеров",
-        Role.PALWORLD: "палворлдеров",
         Role.TRUSTED: "доверенных пользователей",
         Role.MODERATOR: "модераторов",
         Role.ADMIN: "админа"

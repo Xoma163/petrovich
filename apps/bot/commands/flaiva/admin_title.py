@@ -17,7 +17,7 @@ class AdminTitle(Command):
                 HelpTextItemCommand(None, "сбрасывает вашу должность"),
                 HelpTextItemCommand("(должность)", "меняет вашу должность"),
                 HelpTextItemCommand("(пользователь) (должность)", "меняет должность участнику"),
-                HelpTextItemCommand("(пользователь) -", "сбрасывает должность участнику")
+                HelpTextItemCommand("(пользователь)", "сбрасывает должность участнику")
             ])
         ]
     )

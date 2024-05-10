@@ -62,7 +62,7 @@ class Logs(Command):
 
         attachment = self.bot.get_document_attachment(img_byte_arr, peer_id=self.event.peer_id,
                                                       filename='petrovich_logs.png')
-        return ResponseMessage(ResponseMessageItem(attachments=attachment))
+        return ResponseMessage(ResponseMessageItem(attachments=[attachment]))
 
     def transform_logs_by_values(self, items):
         if isinstance(items, dict):

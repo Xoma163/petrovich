@@ -11,8 +11,8 @@ class Documentation(Command):
         commands_text="ссылка на документацию",
     )
 
-    def start(self) -> ResponseMessage:
-        url = 'https://github.com/Xoma163/petrovich/wiki/1.1-Документация-для-пользователей'
-        answer = self.bot.get_formatted_url("Документация", url)
+    URL = 'https://github.com/Xoma163/petrovich/wiki/1.1-Документация-для-пользователей'
 
+    def start(self) -> ResponseMessage:
+        answer = self.bot.get_formatted_url("Документация", self.URL)
         return ResponseMessage(ResponseMessageItem(text=answer))
