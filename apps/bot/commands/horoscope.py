@@ -136,6 +136,8 @@ class Horoscope(Command):
                 "Ни у кого в конфе не проставлено ДР\n"
                 f"Укажите дату рождения в профиле: {self.bot.get_formatted_text_line('/профиль др ДД.ММ.ГГГГ')}"
             )
+        signs = self._reorder_signs(signs)
+
         rm = ResponseMessage()
         for sign in signs:
             message = self.get_horoscope_by_zodiac_sign(sign)
@@ -210,3 +212,14 @@ class Horoscope(Command):
                 hm.save()
                 horoscope.memes.add(hm)
         return horoscope
+
+    def _reorder_signs(self, signs: list[ZodiacSign]) -> list[ZodiacSign]:
+        """
+        Сортировка в хронологическом порядке
+        """
+        _signs = []
+        all_signs = self.zodiac_signs.get_zodiac_signs()
+        for sign in all_signs:
+            if sign in signs:
+                _signs.append(sign)
+        return _signs
