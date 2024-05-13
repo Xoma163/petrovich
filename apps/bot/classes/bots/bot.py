@@ -161,6 +161,10 @@ class Bot(Thread):
             if command.accept(event):
                 return command.__class__().check_and_start(self, event)
 
+        # Если это нотификация, то это ок
+        if event.is_notify:
+            raise PSkip()
+
         # Если указана настройка не реагировать на неверные команды, то скипаем
         if not event.sender.settings.need_reaction:
             raise PSkip()
