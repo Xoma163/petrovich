@@ -42,14 +42,13 @@ class GPTModel:
 
 
 class GPTModels:
-    # GPT-4 Turbo
-    GPT_4_TURBO = GPTModel("gpt-4-turbo-2024-04-09", "GPT-4 TURBO", 10, 30)
-
     # GPT-4
+    GPT_4_OMNI = GPTModel("gpt-4o", "GPT-4 OMNI", 5, 15)
+    GPT_4_TURBO = GPTModel("gpt-4-turbo-2024-04-09", "GPT-4 TURBO", 10, 30)
     GPT_4 = GPTModel("gpt-4", "GPT-4", 30, 60)
     GPT_4_32K = GPTModel("gpt-4-32k", "GPT-4 32K", 60, 120)
 
-    # GPT-3.5 Turbo
+    # GPT-3.5
     GPT_3_5_TURBO_0125 = GPTModel("gpt-3.5-turbo-0125", "GPT-3.5 TURBO 0125", 0.5, 1.5)
 
     # image models
@@ -73,7 +72,8 @@ class GPTModels:
 
     @classmethod
     def get_completions_models(cls) -> list:
-        return [cls.GPT_4_TURBO, cls.GPT_4, cls.GPT_4_32K, cls.GPT_3_5_TURBO_0125, cls.GPT_4_0125, cls.GPT_4_1106,
+        return [cls.GPT_4_OMNI, cls.GPT_4_TURBO, cls.GPT_4, cls.GPT_4_32K, cls.GPT_3_5_TURBO_0125, cls.GPT_4_0125,
+                cls.GPT_4_1106,
                 cls.GPT_3_5_TURBO_1106, cls.GPT_3_5_TURBO_0613, cls.GPT_3_5_TURBO_16K_0613, cls.GPT_3_5_TURBO_0301]
 
     @classmethod
@@ -97,9 +97,9 @@ class ChatGPTAPI(GPT, API):
     IMAGE_GEN_URL = f"{BASE_URL}/images/generations"
     VOICE_RECOGNITION_URL = f"{BASE_URL}/audio/transcriptions"
 
-    DEFAULT_MODEL = GPTModels.GPT_4_TURBO
+    DEFAULT_MODEL = GPTModels.GPT_4_OMNI
     DEFAULT_DRAW_MODEL = GPTModels.DALLE_3
-    DEFAULT_VISION_MODEL = GPTModels.GPT_4_TURBO
+    DEFAULT_VISION_MODEL = GPTModels.GPT_4_OMNI
     DEFAULT_VOICE_RECOGNITION_MODEL = GPTModels.WHISPER
 
     GPT_4_VISION_MAX_TOKENS = 1024
