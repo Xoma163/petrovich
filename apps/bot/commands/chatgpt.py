@@ -178,7 +178,8 @@ class ChatGPT(Command):
             if first_event.fwd:
                 history.append({'role': "user", 'content': first_event.fwd[0].message.raw})
         else:
-            history.append({'role': "user", 'content': self.event.fwd[0].message.raw})
+            if self.event.fwd[0].message.raw:
+                history.append({'role': "user", 'content': self.event.fwd[0].message.raw})
 
         if preprompt:
             history.append({"role": "system", "content": preprompt})
