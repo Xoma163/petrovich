@@ -55,7 +55,8 @@ class GigaChatGPTAPI(GPT, API):
         data = {
             "model": self._get_model(),
             "max_tokens": 2048,
-            "messages": messages
+            "messages": messages,
+            "function_call": "auto"
         }
 
         r = self.requests.post(
