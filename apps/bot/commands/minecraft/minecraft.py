@@ -68,19 +68,18 @@ class Minecraft(Command):
         return ResponseMessageItem(text=answer, keyboard=keyboard, message_id=mid)
 
     def get_server_info_str(self, server):
-        if not server.server_info['online']:
+        if not server.server_info.online:
             return f"Майн {server.get_version()} ⛔"
 
-        version = server.server_info['version']
-        player_max = server.server_info['player_max']
-        player_range = f"({len(server.server_info['players'])}/{player_max})"
+        version = server.server_info.version
+        player_range = f"({server.server_info.players_online}/{server.server_info.players_max})"
 
         server_address = server.ip if server.port == server.DEFAULT_PORT else f'{server.ip}:{server.port}'
         result = f"Майн {version} ✅ {player_range} - {self.bot.get_formatted_text_line(server_address)}"
 
-        players = server.server_info['players']
+        players = server.server_info.players
         if players:
-            players.sort(key=str.lower)
+            players.sort(key=lambda x: x.name)
             players = [self.bot.get_formatted_text_line(player) for player in players]
             players_str = ", ".join(players)
             result += f"\nИгроки: {players_str}"

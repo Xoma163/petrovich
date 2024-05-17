@@ -12,7 +12,6 @@ lxml
 m3u8
 matplotlib
 mcrcon
-mcstatus
 oauth2client
 opencv-python
 Pillow

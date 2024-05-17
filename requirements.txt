@@ -42,7 +42,6 @@ lxml==5.2.1
 m3u8==3.6.0
 matplotlib==3.8.4
 mcrcon==0.7.0
-mcstatus==11.1.1
 multidict==6.0.4
 mutagen==1.47.0
 numpy==1.26.4
