@@ -5,6 +5,7 @@ from apps.bot.classes.bots.chat_activity import ChatActivity
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.activities import ActivitiesEnum
 from apps.bot.classes.const.consts import Role, Platform
+from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.event.event import Event
 from apps.bot.classes.event.tg_event import TgEvent
 from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
@@ -15,6 +16,7 @@ from apps.bot.utils.cache import MessagesCache
 
 class WTF(Command):
     name = "wtf"
+    names = ['саммари', 'суммаризируй']
 
     DEFAULT_PROMPT = "Я пришлю тебе переписку участников группы. Суммаризируй её, опиши, что произошло, о чём общались люди?"
 
@@ -24,8 +26,11 @@ class WTF(Command):
             HelpTextItem(
                 Role.TRUSTED, [
                     HelpTextItemCommand(
-                        "(prompt) [N=50]",
-                        "обрабатывает последние N сообщений в конфе через ChatGPT по указанному prompt")
+                        "[prompt] [N=50]",
+                        "обрабатывает последние N сообщений в конфе через ChatGPT по указанному prompt"),
+                    HelpTextItemCommand(
+                        "(пересланное сообщение)",
+                        "обрабатывает последние сообщения до пересланного в конфе через ChatGPT по указанному prompt")
                 ])
         ],
         extra_text=f"prompt по умолчанию:\n{DEFAULT_PROMPT}"
@@ -36,14 +41,21 @@ class WTF(Command):
     gpt_key = True
 
     def start(self) -> ResponseMessage:
-
+        n = None
         try:
-            last_arg = self.event.message.args[-1]
-            n = int(last_arg)
-            prompt = " ".join(self.event.message.args_case[:-1])
-        except (ValueError, IndexError):
-            n = 50
+            self.check_fwd()
+            last_message_id = self.event.fwd[0].message.id
+            current_message_id = self.event.message.id
+            n = current_message_id - last_message_id
             prompt = self.event.message.args_str_case
+        except PWarning:
+            try:
+                last_arg = self.event.message.args[-1]
+                n = int(last_arg)
+                prompt = " ".join(self.event.message.args_case[:-1])
+            except (ValueError, IndexError):
+                n = 50
+                prompt = self.event.message.args_str_case
 
         if not prompt:
             prompt = self.DEFAULT_PROMPT
