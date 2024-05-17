@@ -32,8 +32,8 @@ class Request:
         return r
 
     def _log(self, response: dict, action):
-        # if action in self.LOG_IGNORE_ACTIONS:
-        #     return
+        if action in self.LOG_IGNORE_ACTIONS:
+            return
         level = "debug" if response['ok'] else "error"
         log_data = {"response": response, "action": action}
         if self.log_filter:
