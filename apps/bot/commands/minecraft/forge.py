@@ -122,7 +122,7 @@ class ForgeData:
         mods_size = data_types.read_next_byte(data_package_decoded)
 
         # Массив модов:
-        for i in range(mods_size):
+        for _ in range(mods_size):
             channel_size_and_version_flag = data_types.read_next_varint(data_package_decoded)
             channel_size = channel_size_and_version_flag >> 1
 
