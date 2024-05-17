@@ -35,7 +35,8 @@ class GigaChatGPTAPI(GPT, API):
             "https://ngw.devices.sberbank.ru:9443/api/v2/oauth",
             data={'scope': "GIGACHAT_API_PERS"},
             headers=headers,
-            verify=self.GOSUSLUGI_CERT_PATH
+            verify=self.GOSUSLUGI_CERT_PATH,
+            log=False
         )
         self.access_token = r.json()['access_token']
 
