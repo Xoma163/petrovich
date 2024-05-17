@@ -12,6 +12,7 @@ from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.event.event import Event
 from apps.bot.classes.event.tg_event import TgEvent
 from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
+from apps.bot.classes.messages.attachments.document import DocumentAttachment
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.models import Profile, Chat
@@ -142,8 +143,14 @@ class ChatGPT(Command):
             answer = markdown_to_html(response.text, self.bot)
         if use_stats:
             self._add_statistics_completions(chat_gpt_api.usage)
-
-        return ResponseMessageItem(text=answer, reply_to=self.event.message.id)
+        if len(answer) > self.bot.MAX_MESSAGE_TEXT_LENGTH:
+            document = DocumentAttachment()
+            document.parse(answer.encode('utf-8'), filename='answer.html')
+            answer = "Твой запрос получился слишком большой. Положил ответ в файл"
+            rmi = ResponseMessageItem(text=answer, attachments=[document], reply_to=self.event.message.id)
+        else:
+            rmi = ResponseMessageItem(text=answer, reply_to=self.event.message.id)
+        return rmi
 
     def get_dialog(self, user_message, use_preprompt=True) -> list:
         mc = MessagesCache(self.event.peer_id)

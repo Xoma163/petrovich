@@ -1,6 +1,7 @@
 import logging
 import threading
 import time
+from math import inf
 from threading import Lock
 from threading import Thread
 
@@ -38,6 +39,9 @@ class Bot(Thread):
     STROKE_TAG = None
     UNDERLINE_TAG = None
     QUOTE_TAG = None
+
+    MAX_MESSAGE_TEXT_LENGTH = inf
+
 
     def __init__(self, platform, **kwargs):
         Thread.__init__(self)
