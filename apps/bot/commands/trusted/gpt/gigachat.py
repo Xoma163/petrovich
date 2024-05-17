@@ -1,5 +1,5 @@
 from apps.bot.api.gpt.gigachatgptapi import GigaChatGPTAPI
-from apps.bot.api.gpt.response import GPTAPIResponse
+from apps.bot.api.gpt.response import GPTAPICompletionsResponse, GPTAPIImageDrawResponse
 from apps.bot.classes.bots.chat_activity import ChatActivity
 from apps.bot.classes.const.activities import ActivitiesEnum
 from apps.bot.classes.const.consts import Role
@@ -42,8 +42,8 @@ class GigaChat(ChatGPT):
     def start(self) -> ResponseMessage:
         arg0 = self.event.message.args[0] if self.event.message.args else None
         menu = [
-            [["нарисуй", "draw"], self.draw_image],
-            [["препромпт", "препромт", "промпт", "preprompt", "prepromp", "prompt"], self.preprompt],
+            [["нарисуй", "draw"], self.menu_draw_image],
+            [["препромпт", "препромт", "промпт", "preprompt", "prepromp", "prompt"], self.menu_preprompt],
             [['default'], self.default]
         ]
         method = self.handle_menu(menu, arg0)
@@ -53,29 +53,29 @@ class GigaChat(ChatGPT):
     def default(self) -> ResponseMessageItem:
         user_message = self.get_user_msg(self.event)
         messages = self.get_dialog(user_message)
-        return self.text_chat(messages)
+        return self.completions(messages)
 
-    def text_chat(self, messages, use_stats=True) -> ResponseMessageItem:
-        gc_api = GigaChatGPTAPI(log_filter=self.event.log_filter)
-
-        with ChatActivity(self.bot, ActivitiesEnum.TYPING, self.event.peer_id):
-            response: GPTAPIResponse = gc_api.completions(messages)
-
-        answer = markdown_to_html(response.text, self.bot)
-        return ResponseMessageItem(text=answer, reply_to=self.event.message.id)
-
-    def draw_image(self, use_stats=True) -> ResponseMessageItem:
+    def menu_draw_image(self) -> ResponseMessageItem:
         request_text = self._get_draw_image_request_text()
 
         chat_gpt_api = GigaChatGPTAPI(log_filter=self.event.log_filter)
 
         with ChatActivity(self.bot, ActivitiesEnum.UPLOAD_PHOTO, self.event.peer_id):
-            response: GPTAPIResponse = chat_gpt_api.draw(self.event.message.args_str_case)
+            response: GPTAPIImageDrawResponse = chat_gpt_api.draw(self.event.message.args_str_case)
 
         if not response.images_bytes:
             raise PWarning("Не смог сгенерировать :(")
 
-        attachments = [self.bot.get_photo_attachment(x) for x in response.images_bytes]
+        attachments = [self.bot.get_photo_attachment(response.images_bytes)]
 
         answer = f'Результат генерации по запросу "{request_text}"'
         return ResponseMessageItem(text=answer, attachments=attachments, reply_to=self.event.message.id)
+
+    def completions(self, messages, use_stats=True) -> ResponseMessageItem:
+        gc_api = GigaChatGPTAPI(log_filter=self.event.log_filter)
+
+        with ChatActivity(self.bot, ActivitiesEnum.TYPING, self.event.peer_id):
+            response: GPTAPICompletionsResponse = gc_api.completions(messages)
+
+        answer = markdown_to_html(response.text, self.bot)
+        return ResponseMessageItem(text=answer, reply_to=self.event.message.id)

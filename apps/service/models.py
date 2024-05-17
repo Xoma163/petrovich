@@ -1,10 +1,9 @@
-import os
 
 from django.db import models
 from django.db.models import JSONField
-from django.dispatch import receiver
 from django.utils.html import format_html
 
+from apps.bot.api.gpt.usage import GPTAPIUsage
 from apps.bot.models import Chat, Profile, User
 
 
@@ -197,15 +196,6 @@ class VideoCache(models.Model):
         return self.filename
 
 
-@receiver(models.signals.post_delete, sender=VideoCache)
-def auto_delete_file_on_delete(*args, **kwargs):
-    """
-    Deletes file from filesystem
-    when corresponding `MediaFile` object is deleted.
-    """
-    instance = kwargs['instance']
-    if instance.video and os.path.isfile(instance.video.path):
-        os.remove(instance.video.path)
 
 
 class HoroscopeMeme(BaseMeme):
@@ -329,12 +319,15 @@ class GPTUsage(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     author = models.ForeignKey(Profile, models.CASCADE, verbose_name="Пользователь", null=True, db_index=True)
-    prompt_tokens = models.PositiveSmallIntegerField("Входные токены", default=0)
-    completion_tokens = models.PositiveSmallIntegerField("Выходные токены", default=0)
-    images_tokens = models.PositiveSmallIntegerField("Генерация картинок", default=0)
-    voice_recognition_seconds = models.PositiveSmallIntegerField("Секунды распознования", default=0)
     cost = models.FloatField("Стоимость запроса", default=0)
 
     class Meta:
         verbose_name = "GPT использование"
         verbose_name_plural = "GPT использования"
+
+    @classmethod
+    def add_statistics(cls, sender: Profile, usage: GPTAPIUsage):
+        GPTUsage(
+            author=sender,
+            cost=usage.total_cost
+        ).save()

@@ -4,7 +4,7 @@ import re
 import uuid
 
 from apps.bot.api.gpt.gpt import GPT
-from apps.bot.api.gpt.response import GPTAPIResponse
+from apps.bot.api.gpt.response import GPTAPICompletionsResponse, GPTAPIImageDrawResponse
 from apps.bot.api.handler import API
 from apps.bot.classes.const.exceptions import PWarning
 from petrovich.settings import env, BASE_DIR
@@ -25,32 +25,9 @@ class GigaChatGPTAPI(GPT, API):
         super(GigaChatGPTAPI, self).__init__(**kwargs)
         self.access_token = None
 
-    def set_access_token(self):
+    def completions(self, messages) -> GPTAPICompletionsResponse:
         headers = {
-            "Authorization": f"Bearer {self.AUTH_DATA}",
-            "RqUID": str(uuid.uuid1(random.randint(0, 281474976710655)))  # 2^48-1
-        }
-
-        r = self.requests.post(
-            "https://ngw.devices.sberbank.ru:9443/api/v2/oauth",
-            data={'scope': "GIGACHAT_API_PERS"},
-            headers=headers,
-            verify=self.GOSUSLUGI_CERT_PATH,
-            log=False
-        )
-        self.access_token = r.json()['access_token']
-
-    def get_access_token(self) -> str:
-        if not self.access_token:
-            self.set_access_token()
-        return self.access_token
-
-    def _get_model(self, use_image=False):
-        return self.DEFAULT_MODEL
-
-    def completions(self, messages) -> GPTAPIResponse:
-        headers = {
-            "Authorization": f"Bearer {self.get_access_token()}"
+            "Authorization": f"Bearer {self._get_access_token()}"
         }
 
         data = {
@@ -66,11 +43,12 @@ class GigaChatGPTAPI(GPT, API):
             headers=headers,
             verify=self.GOSUSLUGI_CERT_PATH
         )
-        response = GPTAPIResponse()
-        response.text = r.json()['choices'][0]['message']['content']
+        response = GPTAPICompletionsResponse(
+            text=r.json()['choices'][0]['message']['content']
+        )
         return response
 
-    def draw(self, prompt) -> GPTAPIResponse:
+    def draw(self, prompt) -> GPTAPIImageDrawResponse:
         messages = [{
             "role": "system",
             "content": "Если тебя просят создать изображение, ты должен сгенерировать специальный блок: "
@@ -88,13 +66,37 @@ class GigaChatGPTAPI(GPT, API):
             file_id = r.findall(res.text)[0]
         except Exception:
             raise PWarning(res.text)
-        response = GPTAPIResponse()
-        response.images_bytes = [self._get_file_by_id(file_id)]
+        response = GPTAPIImageDrawResponse(
+            images_bytes=self._get_file_by_id(file_id)
+        )
         return response
+
+    def _set_access_token(self):
+        headers = {
+            "Authorization": f"Bearer {self.AUTH_DATA}",
+            "RqUID": str(uuid.uuid1(random.randint(0, 281474976710655)))  # 2^48-1
+        }
+
+        r = self.requests.post(
+            "https://ngw.devices.sberbank.ru:9443/api/v2/oauth",
+            data={'scope': "GIGACHAT_API_PERS"},
+            headers=headers,
+            verify=self.GOSUSLUGI_CERT_PATH,
+            log=False
+        )
+        self.access_token = r.json()['access_token']
+
+    def _get_access_token(self) -> str:
+        if not self.access_token:
+            self._set_access_token()
+        return self.access_token
+
+    def _get_model(self, use_image=False):
+        return self.DEFAULT_MODEL
 
     def _get_file_by_id(self, file_id):
         headers = {
-            "Authorization": f"Bearer {self.get_access_token()}"
+            "Authorization": f"Bearer {self._get_access_token()}"
         }
 
         return self.requests.get(

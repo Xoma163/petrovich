@@ -56,7 +56,7 @@ class WTF(Command):
         gpt.event = self.event
 
         with ChatActivity(self.bot, ActivitiesEnum.TYPING, self.event.peer_id):
-            answer = gpt.text_chat(messages)
+            answer = gpt.completions(messages)
         return ResponseMessage(answer)
 
     @staticmethod

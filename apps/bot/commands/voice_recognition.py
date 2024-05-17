@@ -1,5 +1,5 @@
-from apps.bot.api.gpt.chatgpt import ChatGPTAPI
-from apps.bot.api.gpt.response import GPTAPIResponse
+from apps.bot.api.gpt.chatgptapi import ChatGPTAPI
+from apps.bot.api.gpt.response import GPTAPIVoiceRecognitionResponse
 from apps.bot.classes.bots.chat_activity import ChatActivity
 from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import AcceptExtraCommand
@@ -65,14 +65,9 @@ class VoiceRecognition(AcceptExtraCommand):
 
         chat_gpt_api = ChatGPTAPI(log_filter=self.event.log_filter, sender=self.event.sender)
         with ChatActivity(self.bot, ActivitiesEnum.UPLOAD_AUDIO, self.event.peer_id):
-            response: GPTAPIResponse = chat_gpt_api.recognize_voice(audio_message)
+            response: GPTAPIVoiceRecognitionResponse = chat_gpt_api.recognize_voice(audio_message)
         answer = response.text
-
-        GPTUsage(
-            author=self.event.sender,
-            voice_recognition_seconds=chat_gpt_api.usage['duration'],
-            cost=chat_gpt_api.usage['voice_recognition_cost'] * chat_gpt_api.usage['duration']
-        ).save()
+        GPTUsage.add_statistics(self.event.sender, response.usage)
 
         answer = self.spoiler_text(answer)
 

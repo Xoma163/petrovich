@@ -2,8 +2,8 @@ import datetime
 
 from django.db.models import Q, Sum
 
-from apps.bot.api.gpt.chatgpt import ChatGPTAPI, GPTModels
-from apps.bot.api.gpt.response import GPTAPIResponse
+from apps.bot.api.gpt.chatgptapi import ChatGPTAPI, GPTModels
+from apps.bot.api.gpt.response import GPTAPICompletionsResponse, GPTAPIImageDrawResponse
 from apps.bot.classes.bots.chat_activity import ChatActivity
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.activities import ActivitiesEnum
@@ -70,18 +70,18 @@ class ChatGPT(Command):
     def start(self) -> ResponseMessage:
         if not self.event.sender.check_role(Role.TRUSTED) and not self.event.sender.settings.gpt_key:
             if self.event.message.args[0] == "ключ":
-                return ResponseMessage(self.key())
+                return ResponseMessage(self.menu_key())
             else:
                 self.check_gpt_key()
 
         arg0 = self.event.message.args[0] if self.event.message.args else None
         menu = [
-            [["нарисуй", "draw"], self.draw_image],
-            [["стата", "статистика", "stat"], self.statistics],
-            [["препромпт", "препромт", "промпт", "preprompt", "prepromp", "prompt"], self.preprompt],
-            [["ключ", "key"], self.key],
-            [["модели", "models"], self.models],
-            [["модель", "model"], self.model],
+            [["нарисуй", "draw"], self.menu_draw_image],
+            [["стата", "статистика", "stat"], self.menu_statistics],
+            [["препромпт", "препромт", "промпт", "preprompt", "prepromp", "prompt"], self.menu_preprompt],
+            [["ключ", "key"], self.menu_key],
+            [["модели", "models"], self.menu_models],
+            [["модель", "model"], self.menu_model],
             [['default'], self.default]
         ]
         method = self.handle_menu(menu, arg0)
@@ -99,24 +99,14 @@ class ChatGPT(Command):
         messages[-1]['content'] = [{"type": "text", "text": messages[-1]['content']}]
         messages[-1]['content'] += photos_data
 
-        return self.text_chat(messages)
+        return self.completions(messages)
 
-    def _get_draw_image_request_text(self):
-        if len(self.event.message.args) > 1:
-            return " ".join(self.event.message.args_case[1:])
-        elif self.event.message.quote:
-            return self.event.message.quote
-        elif self.event.fwd:
-            return self.event.fwd[0].message.raw
-        else:
-            raise PWarning("Должен быть текст или пересланное сообщение")
-
-    def draw_image(self, use_stats=True) -> ResponseMessageItem:
+    def menu_draw_image(self) -> ResponseMessageItem:
         request_text = self._get_draw_image_request_text()
         chat_gpt_api = ChatGPTAPI(log_filter=self.event.log_filter, sender=self.event.sender)
 
         with ChatActivity(self.bot, ActivitiesEnum.UPLOAD_PHOTO, self.event.peer_id):
-            response: GPTAPIResponse = chat_gpt_api.draw(request_text)
+            response: GPTAPIImageDrawResponse = chat_gpt_api.draw(request_text)
 
             if not response.images_url:
                 raise PWarning("Не смог сгенерировать :(")
@@ -128,21 +118,117 @@ class ChatGPT(Command):
                 attachments.append(att)
 
         answer = f'Результат генерации по запросу "{response.images_prompt}"'
-        if use_stats:
-            self._add_statistics_image(chat_gpt_api.usage)
+        GPTUsage.add_statistics(self.event.sender, response.usage)
 
         return ResponseMessageItem(text=answer, attachments=attachments, reply_to=self.event.message.id)
 
-    def text_chat(self, messages, use_stats=True) -> ResponseMessageItem:
+    def menu_statistics(self) -> ResponseMessageItem:
+        if self.event.is_from_chat:
+            profiles = Profile.objects.filter(chats=self.event.chat)
+            results = []
+            for profile in profiles:
+                if profile.pk in [92, 91]:
+                    continue
+                res = self._get_stat_for_user(profile)
+                if res:
+                    results.append(self._get_stat_for_user(profile))
+            if not results:
+                raise PWarning("Ещё не было использований GPT среди участников чата")
+            answer = "\n\n".join(results)
+        else:
+            answer = self._get_stat_for_user(self.event.sender)
+            if not answer:
+                raise PWarning("Ещё не было использований GPT")
+
+        return ResponseMessageItem(answer)
+
+    def menu_preprompt(self) -> ResponseMessageItem:
+        if len(self.event.message.args) > 1 and self.event.message.args[1] in ["chat", "conference", "конфа", "чат"]:
+            self.check_conversation()
+            q = Q(chat=self.event.chat, author=None)
+            return self._preprompt_works(2, q, 'препромпт конфы')
+        else:
+            if self.event.is_from_pm:
+                q = Q(chat=None, author=self.event.sender)
+                return self._preprompt_works(1, q, 'персональный препромпт')
+            else:
+                q = Q(chat=self.event.chat, author=self.event.sender)
+                return self._preprompt_works(1, q, 'персональный препромпт конфы')
+
+    def menu_key(self) -> ResponseMessageItem:
+        self.check_args(2)
+        arg = self.event.message.args_case[1]
+
+        if arg.lower() == "удалить":
+            settings = self.event.sender.settings
+            settings.gpt_key = ""
+            settings.save()
+            rmi = ResponseMessageItem(text="Удалил ваш ключ")
+        else:
+            if self.event.is_from_chat:
+                self.bot.delete_messages(self.event.chat.chat_id, self.event.message.id)
+                raise PWarning(
+                    "Держите свой ключ в секрете. Я удалил ваше сообщение с ключом (или удалите сами если у меня нет прав). Добавьте его в личных сообщениях")
+            settings = self.event.sender.settings
+            settings.gpt_key = arg
+            settings.save()
+            rmi = ResponseMessageItem(text="Добавил новый ключ")
+
+        return rmi
+
+    def menu_models(self) -> ResponseMessageItem:
+        gpt_models = GPTModels.get_completions_models()
+        models_list = [
+            f"{self.bot.get_formatted_text_line(x.name)}\n${x.prompt_1m_token_cost} / 1M входных токенов\n${x.completion_1m_token_cost} / 1M выходных токенов"
+            for x in gpt_models]
+        models_str = "\n\n".join(models_list)
+        answer = f"Список доступных моделей:\n{models_str}"
+        return ResponseMessageItem(answer)
+
+    def menu_model(self) -> ResponseMessageItem:
+        if len(self.event.message.args) < 2:
+            settings = self.event.sender.settings
+            if settings.gpt_model:
+                answer = f"Текущая модель - {self.bot.get_formatted_text_line(settings.get_gpt_model().name)}"
+            else:
+                answer = f"Модель не установлена. Используется модель по умолчанию - {self.bot.get_formatted_text_line(ChatGPTAPI.DEFAULT_COMPLETIONS_MODEL.name)}"
+            return ResponseMessageItem(answer)
+
+        new_model = self.event.message.args[1]
+        settings = self.event.sender.settings
+
+        try:
+            gpt_model = GPTModels.get_model_by_name(new_model)
+        except ValueError:
+            button = self.bot.get_button('Список моделей', command=self.name, args=['модели'])
+            keyboard = self.bot.get_inline_keyboard([button])
+            raise PWarning("Не понял какая модель", keyboard=keyboard)
+
+        settings.gpt_model = gpt_model.name
+        settings.save()
+        rmi = ResponseMessageItem(text=f"Поменял модель на {self.bot.get_formatted_text_line(settings.gpt_model)}")
+        return rmi
+
+    def _get_draw_image_request_text(self):
+        if len(self.event.message.args) > 1:
+            return " ".join(self.event.message.args_case[1:])
+        elif self.event.message.quote:
+            return self.event.message.quote
+        elif self.event.fwd:
+            return self.event.fwd[0].message.raw
+        else:
+            raise PWarning("Должен быть текст или пересланное сообщение")
+
+    def completions(self, messages, use_stats=True) -> ResponseMessageItem:
         chat_gpt_api = ChatGPTAPI(log_filter=self.event.log_filter, sender=self.event.sender)
 
         with ChatActivity(self.bot, ActivitiesEnum.TYPING, self.event.peer_id):
             photos = self.event.get_all_attachments([PhotoAttachment])
-            response: GPTAPIResponse = chat_gpt_api.completions(messages, use_image=bool(photos))
+            response: GPTAPICompletionsResponse = chat_gpt_api.completions(messages, use_image=bool(photos))
 
             answer = markdown_to_html(response.text, self.bot)
         if use_stats:
-            self._add_statistics_completions(chat_gpt_api.usage)
+            GPTUsage.add_statistics(self.event.sender, response.usage)
         if len(answer) > self.bot.MAX_MESSAGE_TEXT_LENGTH:
             document = DocumentAttachment()
             document.parse(answer.encode('utf-8'), filename='answer.html')
@@ -220,19 +306,6 @@ class ChatGPT(Command):
         else:
             return event.message.raw
 
-    def preprompt(self) -> ResponseMessageItem:
-        if len(self.event.message.args) > 1 and self.event.message.args[1] in ["chat", "conference", "конфа", "чат"]:
-            self.check_conversation()
-            q = Q(chat=self.event.chat, author=None)
-            return self._preprompt_works(2, q, 'препромпт конфы')
-        else:
-            if self.event.is_from_pm:
-                q = Q(chat=None, author=self.event.sender)
-                return self._preprompt_works(1, q, 'персональный препромпт')
-            else:
-                q = Q(chat=self.event.chat, author=self.event.sender)
-                return self._preprompt_works(1, q, 'персональный препромпт конфы')
-
     def _preprompt_works(self, args_slice_index: int, q: Q, is_for: str) -> ResponseMessageItem:
         q &= Q(provider=self.PREPROMPT_PROVIDER)
 
@@ -277,80 +350,6 @@ class ChatGPT(Command):
                 continue
         return None
 
-    def statistics(self) -> ResponseMessageItem:
-        if self.event.is_from_chat:
-            profiles = Profile.objects.filter(chats=self.event.chat)
-            results = []
-            for profile in profiles:
-                if profile.pk in [92, 91]:
-                    continue
-                res = self._get_stat_for_user(profile)
-                if res:
-                    results.append(self._get_stat_for_user(profile))
-            if not results:
-                raise PWarning("Ещё не было использований GPT среди участников чата")
-            answer = "\n\n".join(results)
-        else:
-            answer = self._get_stat_for_user(self.event.sender)
-            if not answer:
-                raise PWarning("Ещё не было использований GPT")
-
-        return ResponseMessageItem(answer)
-
-    def key(self) -> ResponseMessageItem:
-        self.check_args(2)
-        arg = self.event.message.args_case[1]
-
-        if arg.lower() == "удалить":
-            settings = self.event.sender.settings
-            settings.gpt_key = ""
-            settings.save()
-            rmi = ResponseMessageItem(text="Удалил ваш ключ")
-        else:
-            if self.event.is_from_chat:
-                self.bot.delete_messages(self.event.chat.chat_id, self.event.message.id)
-                raise PWarning(
-                    "Держите свой ключ в секрете. Я удалил ваше сообщение с ключом (или удалите сами если у меня нет прав). Добавьте его в личных сообщениях")
-            settings = self.event.sender.settings
-            settings.gpt_key = arg
-            settings.save()
-            rmi = ResponseMessageItem(text="Добавил новый ключ")
-
-        return rmi
-
-    def model(self) -> ResponseMessageItem:
-        if len(self.event.message.args) < 2:
-            settings = self.event.sender.settings
-            if settings.gpt_model:
-                answer = f"Текущая модель - {self.bot.get_formatted_text_line(settings.get_gpt_model().name)}"
-            else:
-                answer = f"Модель не установлена. Используется модель по умолчанию - {self.bot.get_formatted_text_line(ChatGPTAPI.DEFAULT_MODEL.name)}"
-            return ResponseMessageItem(answer)
-
-        new_model = self.event.message.args[1]
-        settings = self.event.sender.settings
-
-        try:
-            gpt_model = GPTModels.get_model_by_name(new_model)
-        except ValueError:
-            button = self.bot.get_button('Список моделей', command=self.name, args=['модели'])
-            keyboard = self.bot.get_inline_keyboard([button])
-            raise PWarning("Не понял какая модель", keyboard=keyboard)
-
-        settings.gpt_model = gpt_model.name
-        settings.save()
-        rmi = ResponseMessageItem(text=f"Поменял модель на {self.bot.get_formatted_text_line(settings.gpt_model)}")
-        return rmi
-
-    def models(self) -> ResponseMessageItem:
-        gpt_models = GPTModels.get_completions_models()
-        models_list = [
-            f"{self.bot.get_formatted_text_line(x.name)}\n${x.prompt_1m_token_cost} / 1M входных токенов\n${x.completion_1m_token_cost} / 1M выходных токенов"
-            for x in gpt_models]
-        models_str = "\n\n".join(models_list)
-        answer = f"Список доступных моделей:\n{models_str}"
-        return ResponseMessageItem(answer)
-
     def _get_stat_for_user(self, profile: Profile) -> str | None:
         stats_all = self._get_stat_db_profile(Q(author=profile))
         if not stats_all:
@@ -370,21 +369,3 @@ class ChatGPT(Command):
     def _get_stat_db_profile(q):
         res = GPTUsage.objects.filter(q).aggregate(Sum('cost')).get('cost__sum')
         return res if res else 0
-
-    def _add_statistics_completions(self, usage):
-        cost = usage['prompt_tokens'] * usage['prompt_token_cost'] + \
-               usage['completion_tokens'] * usage['completion_token_cost']
-        GPTUsage(
-            author=self.event.sender,
-            prompt_tokens=usage['prompt_tokens'],
-            completion_tokens=usage['completion_tokens'],
-            cost=cost
-        ).save()
-
-    def _add_statistics_image(self, usage):
-        cost = usage['image_cost'] * usage['images_tokens']
-        GPTUsage(
-            author=self.event.sender,
-            images_tokens=usage['images_tokens'],
-            cost=cost
-        ).save()

@@ -3,6 +3,7 @@ from django.core.files import File
 from django.db import models
 from django.utils.html import format_html
 
+from apps.bot.api.gpt.models import GPTModels
 from apps.bot.classes.const.consts import Platform as PlatformEnum, Role
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 
@@ -40,7 +41,6 @@ class ChatSettings(BaseSettings):
 
 
 class UserSettings(BaseSettings):
-    from apps.bot.api.gpt.chatgpt import GPTModels
     GPT_MODEL_CHOICES = [(x.name, x.verbose_name) for x in GPTModels.get_completions_models()]
 
     need_meme = models.BooleanField('Слать мемы по точному названию', default=False)
@@ -57,7 +57,6 @@ class UserSettings(BaseSettings):
     gpt_model = models.CharField("модель GPT", max_length=64, choices=GPT_MODEL_CHOICES, blank=True)
 
     def get_gpt_model(self):
-        from apps.bot.api.gpt.chatgpt import GPTModels
         return GPTModels.get_model_by_name(self.gpt_model)
 
     class Meta:

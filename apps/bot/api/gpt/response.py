@@ -1,6 +1,32 @@
+from dataclasses import dataclass
+
+from apps.bot.api.gpt.usage import (
+    GPTAPICompletionsUsage,
+    GPTAPIImageDrawUsage,
+    GPTAPIVoiceRecognitionUsage
+)
+
+
+@dataclass
 class GPTAPIResponse:
-    def __init__(self):
-        self.text: str
-        self.images_url: list[str]
-        self.images_prompt: str
-        self.images_bytes: list[bytes]
+    pass
+
+
+@dataclass
+class GPTAPICompletionsResponse(GPTAPIResponse):
+    text: str
+    usage: GPTAPICompletionsUsage | None = None
+
+
+@dataclass
+class GPTAPIImageDrawResponse(GPTAPIResponse):
+    images_url: list[str] | None = None
+    images_prompt: str | None = None
+    images_bytes: list[bytes] | None = None
+    usage: GPTAPIImageDrawUsage | None = None
+
+
+@dataclass
+class GPTAPIVoiceRecognitionResponse(GPTAPIResponse):
+    text: str
+    usage: GPTAPIVoiceRecognitionUsage | None = None

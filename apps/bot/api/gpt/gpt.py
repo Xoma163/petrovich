@@ -1,4 +1,4 @@
-from apps.bot.api.gpt.response import GPTAPIResponse
+from apps.bot.api.gpt.response import GPTAPICompletionsResponse
 
 
 class GPT:
@@ -8,5 +8,5 @@ class GPT:
     def _get_model(self, use_image=False):
         raise NotImplementedError
 
-    def completions(self, messages: list) -> GPTAPIResponse:
+    def completions(self, messages: list) -> GPTAPICompletionsResponse:
         raise NotImplementedError
