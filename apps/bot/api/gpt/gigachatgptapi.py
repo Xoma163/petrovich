@@ -3,6 +3,8 @@ import random
 import re
 import uuid
 
+import requests
+
 from apps.bot.api.gpt.gpt import GPT
 from apps.bot.api.gpt.response import GPTAPICompletionsResponse, GPTAPIImageDrawResponse
 from apps.bot.api.handler import API
@@ -34,7 +36,7 @@ class GigaChatGPTAPI(GPT, API):
             "function_call": "auto"
         }
 
-        r = self._do_request(self.COMPLETIONS_URL, json=data)
+        r = self._do_request(self.COMPLETIONS_URL, json=data).json()
         response = GPTAPICompletionsResponse(
             text=r['choices'][0]['message']['content']
         )
@@ -63,35 +65,39 @@ class GigaChatGPTAPI(GPT, API):
         )
         return response
 
-    def _do_request(self, url, **kwargs) -> dict:
-        r = self.requests.post(
+    def _do_request(self, url, **kwargs) -> requests.Response:
+        headers = kwargs.pop('headers', None)
+        if not headers:
+            headers = self._headers
+
+        return self.requests._do(
             url,
-            headers=kwargs['headers'] if kwargs.get('headers') else self._headers,
+            method=kwargs.pop('method', 'post'),
+            headers=headers,
             verify=self.GOSUSLUGI_CERT_PATH,
             **kwargs
         )
 
-        return r.json()
-
     def _set_access_token(self):
-        r = self.requests.post(
+        r = self._do_request(
             self.ACCESS_TOKEN_URL,
             data={'scope': "GIGACHAT_API_PERS"},
             headers=self._auth_data_headers,
-            verify=self.GOSUSLUGI_CERT_PATH,
             log=False
-        )
-        self.access_token = r.json()['access_token']
+        ).json()
+        self.access_token = r['access_token']
 
     def _get_access_token(self) -> str:
-        return self.access_token if self.access_token else self._set_access_token()
+        if not self.access_token:
+            self._set_access_token()
+        return self.access_token
 
     def _get_model(self, use_image=False):
         return self.DEFAULT_MODEL
 
     def _get_file_by_id(self, file_id):
         get_file_content_url = f"{self.BASE_URL}/files/{file_id}/content"
-        self._do_request(get_file_content_url, log=False)
+        return self._do_request(get_file_content_url, log=False, method='get').content
 
     @property
     def _headers(self):
