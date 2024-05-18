@@ -1,4 +1,3 @@
-
 from django.db import models
 from django.db.models import JSONField
 from django.utils.html import format_html
@@ -196,8 +195,6 @@ class VideoCache(models.Model):
         return self.filename
 
 
-
-
 class HoroscopeMeme(BaseMeme):
     meme_pk = models.PositiveIntegerField(verbose_name="ID мема", blank=True, default=0)
 
@@ -299,9 +296,11 @@ class Promocode(models.Model):
 class GPTPrePrompt(models.Model):
     CHATGPT = 'chatgpt'
     GIGACHAT = 'gigachat'
+    GEMINI = 'gemini'
     PROVIDER_CHOICES = (
         (CHATGPT, 'СhatGPT'),
-        (GIGACHAT, 'Gigachat')
+        (GIGACHAT, 'Gigachat'),
+        (GEMINI, 'Gemini')
     )
 
     author = models.ForeignKey(Profile, models.CASCADE, verbose_name="Пользователь", null=True)

@@ -91,13 +91,13 @@ class ChatGPT(Command):
     def default(self) -> ResponseMessageItem:
         user_message = self.get_user_msg(self.event)
         messages = self.get_dialog(user_message)
-        photos = self.event.get_all_attachments([PhotoAttachment])
-        photos_data = []
-        for photo in photos:
-            base64 = photo.base64()
-            photos_data.append({"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64}"}})
-        messages[-1]['content'] = [{"type": "text", "text": messages[-1]['content']}]
-        messages[-1]['content'] += photos_data
+        if photos := self.event.get_all_attachments([PhotoAttachment]):
+            photos_data = []
+            for photo in photos:
+                base64 = photo.base64()
+                photos_data = [({"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64}"}})]
+            messages[-1]['content'] = [{"type": "text", "text": messages[-1]['content']}]
+            messages[-1]['content'] += photos_data
 
         return self.completions(messages)
 
