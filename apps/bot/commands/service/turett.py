@@ -7,6 +7,8 @@ from apps.bot.classes.event.tg_event import TgEvent
 from apps.bot.classes.messages.attachments.sticker import StickerAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.commands.chatgpt import ChatGPT
+from apps.bot.commands.trusted.gemini import Gemini
+from apps.bot.commands.trusted.gpt.gwtf import GWTF
 from apps.bot.commands.trusted.gpt.wtf import WTF
 from apps.bot.utils.utils import random_probability, random_event
 
@@ -16,8 +18,8 @@ class Turett(Command):
     priority = 85
 
     # ACCEPT CHANCES
-    MENTIONED_CHANCE = 1
-    NOT_MENTIONED_CHANCE = 0.3
+    MENTIONED_CHANCE = 99991
+    NOT_MENTIONED_CHANCE = 99990.3
 
     # WEIGHTS
     STICKER_CHANCE = 10
@@ -68,6 +70,12 @@ class Turett(Command):
     ]
     WTF_MESSAGES_COUNT = 50
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.gpt_class = None
+        self.wtf_class = None
+
     def accept(self, event: Event) -> bool:
         if event.is_notify:
             return False
@@ -111,24 +119,26 @@ class Turett(Command):
 
     def get_gpt_text(self) -> ResponseMessageItem:
         self.event: TgEvent
+        self._set_random_gpt_wtf_classes()
 
         prompt = random_event(self.GPT_PROMPTS)
         new_prompt = f"{prompt}:\n{self.event.message.clear}"
 
-        chat_gpt = ChatGPT()
-        chat_gpt.bot = self.bot
-        chat_gpt.event = self.event
-        messages = chat_gpt.get_dialog(new_prompt, use_preprompt=True)
+        gpt = self.gpt_class()
+        gpt.bot = self.bot
+        gpt.event = self.event
+        messages = gpt.get_dialog(new_prompt, use_preprompt=True)
         rmi = self._get_gpt_answer(messages)
         rmi.reply_to = self.event.message.id
         return rmi
 
     def get_gpt_wtf_text(self) -> ResponseMessageItem:
         self.event: TgEvent
+        self._set_random_gpt_wtf_classes()
 
         prompt = random_event(self.WTF_PROMPTS)
 
-        wtf = WTF()
+        wtf = self.wtf_class()
         wtf.bot = self.bot
         wtf.event = self.event
         messages = wtf.get_conversation(self.WTF_MESSAGES_COUNT, prompt, use_preprompt=True)
@@ -138,10 +148,10 @@ class Turett(Command):
         return answer
 
     def _get_gpt_answer(self, messages: list) -> ResponseMessageItem:
-        chat_gpt = ChatGPT()
-        chat_gpt.bot = self.bot
-        chat_gpt.event = self.event
-        return chat_gpt.completions(messages, use_stats=False)
+        gpt = self.gpt_class()
+        gpt.bot = self.bot
+        gpt.event = self.event
+        return gpt.completions(messages, use_stats=False)
 
     def set_reaction(self):
         self.event: TgEvent
@@ -150,3 +160,12 @@ class Turett(Command):
         reaction = random_event(reactions)
         self.bot.set_message_reaction(self.event.chat.chat_id, self.event.message.id, reaction, True)
         raise PSkip()
+
+    def _set_random_gpt_wtf_classes(self):
+        classes = [
+            [ChatGPT, WTF],
+            [Gemini, GWTF]
+        ]
+        gpt_class, wtf_class = random_event(classes)
+        self.gpt_class = gpt_class
+        self.wtf_class = wtf_class

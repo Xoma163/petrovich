@@ -40,6 +40,8 @@ class WTF(Command):
     platforms = [Platform.TG]
     gpt_key = True
 
+    GPT_COMMAND_CLASS = ChatGPT
+
     def start(self) -> ResponseMessage:
         n = None
         try:
@@ -63,7 +65,7 @@ class WTF(Command):
         with ChatActivity(self.bot, ActivitiesEnum.TYPING, self.event.peer_id):
             messages = self.get_conversation(n, prompt)
 
-        gpt = ChatGPT()
+        gpt = self.GPT_COMMAND_CLASS()
         gpt.bot = self.bot
         gpt.event = self.event
 
@@ -93,7 +95,8 @@ class WTF(Command):
         messages = []
         preprompt = None
         if use_preprompt:
-            preprompt = ChatGPT.get_preprompt(self.event.sender, self.event.chat, ChatGPT.PREPROMPT_PROVIDER)
+            preprompt = self.GPT_COMMAND_CLASS.get_preprompt(self.event.sender, self.event.chat,
+                                                             self.GPT_COMMAND_CLASS.PREPROMPT_PROVIDER)
         if preprompt:
             messages.append({"role": "system", "content": preprompt})
         messages.append({'role': "user", 'content': prompt})
