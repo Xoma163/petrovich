@@ -1,9 +1,9 @@
 from json import JSONDecodeError
 
 from apps.bot.api.gpt.gpt import GPT
-from apps.bot.api.gpt.models import GPTModels
-from apps.bot.api.gpt.response import *
-from apps.bot.api.gpt.usage import *
+from apps.bot.api.gpt.models import GPTModels, GPTCompletionModel, GPTImageDrawModel, GPTVoiceRecognitionModel
+from apps.bot.api.gpt.response import GPTAPICompletionsResponse, GPTAPIImageDrawResponse, GPTAPIVoiceRecognitionResponse
+from apps.bot.api.gpt.usage import GPTAPIImageDrawUsage, GPTAPIVoiceRecognitionUsage, GPTAPICompletionsUsage
 from apps.bot.api.handler import API
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning, PError

@@ -17,7 +17,7 @@ class GigaChatGPTAPI(GPT, API):
 
     BASE_URL = "https://gigachat.devices.sberbank.ru/api/v1"
     COMPLETIONS_URL = f"{BASE_URL}/chat/completions"
-    ACCESS_TOKEN_URL = f"https://ngw.devices.sberbank.ru:9443/api/v2/oauth"
+    ACCESS_TOKEN_URL = "https://ngw.devices.sberbank.ru:9443/api/v2/oauth"
 
     GOSUSLUGI_CERT_PATH = os.path.join(BASE_DIR, "secrets/certs/russian_trusted_root_ca_pem.crt")
 
