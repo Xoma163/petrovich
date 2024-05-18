@@ -15,15 +15,15 @@ from petrovich.settings import env
 class ChatGPTAPI(GPT, API):
     API_KEY = env.str("OPENAI_KEY")
 
-    BASE_URL = "https://api.openai.com/v1"
-    COMPLETIONS_URL = f"{BASE_URL}/chat/completions"
-    IMAGE_GEN_URL = f"{BASE_URL}/images/generations"
-    VOICE_RECOGNITION_URL = f"{BASE_URL}/audio/transcriptions"
+    BASE_URL: str = "https://api.openai.com/v1"
+    COMPLETIONS_URL: str = f"{BASE_URL}/chat/completions"
+    IMAGE_GEN_URL: str = f"{BASE_URL}/images/generations"
+    VOICE_RECOGNITION_URL: str = f"{BASE_URL}/audio/transcriptions"
 
-    DEFAULT_COMPLETIONS_MODEL = GPTModels.GPT_4_OMNI
-    DEFAULT_DRAW_MODEL = GPTModels.DALLE_3
-    DEFAULT_VISION_MODEL = GPTModels.GPT_4_OMNI
-    DEFAULT_VOICE_RECOGNITION_MODEL = GPTModels.WHISPER
+    DEFAULT_COMPLETIONS_MODEL: GPTCompletionModel = GPTModels.GPT_4_OMNI
+    DEFAULT_DRAW_MODEL: GPTImageDrawModel = GPTModels.DALLE_3
+    DEFAULT_VISION_MODEL: GPTCompletionModel = GPTModels.GPT_4_OMNI
+    DEFAULT_VOICE_RECOGNITION_MODEL: GPTVoiceRecognitionModel = GPTModels.WHISPER
 
     GPT_4_VISION_MAX_TOKENS = 1024
 
@@ -114,7 +114,7 @@ class ChatGPTAPI(GPT, API):
         return r
 
     def _do_request(self, url, **kwargs):
-        r = self.requests.post(url, headers=self._get_headers(), proxies=get_proxies(), **kwargs)
+        r = self.requests.post(url, headers=self._headers, proxies=get_proxies(), **kwargs)
         if r.status_code != 200:
             try:
                 r_json = r.json()
@@ -124,9 +124,8 @@ class ChatGPTAPI(GPT, API):
             r_json = r.json()
 
         if error := r_json.get('error'):
-            if error_str := self.ERRORS_MAP.get(error.get('code')):
-                raise PWarning(error_str)
-            raise PError("Какая-то ошибка API ChatGPT")
+            error_str = self.ERRORS_MAP.get(error.get('code'), "Какая-то ошибка API ChatGPT")
+            raise PError(error_str)
 
         return r_json
 
@@ -152,7 +151,8 @@ class ChatGPTAPI(GPT, API):
     def _get_draw_model(self):
         return self.DEFAULT_DRAW_MODEL
 
-    def _get_headers(self):
+    @property
+    def _headers(self):
         return {
             "Authorization": f"Bearer {self._get_api_key()}"
         }

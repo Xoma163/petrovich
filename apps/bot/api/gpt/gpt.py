@@ -10,3 +10,7 @@ class GPT:
 
     def completions(self, messages: list) -> GPTAPICompletionsResponse:
         raise NotImplementedError
+
+    @property
+    def _headers(self) -> dict:
+        raise NotImplementedError

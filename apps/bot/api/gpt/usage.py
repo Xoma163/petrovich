@@ -1,6 +1,6 @@
 import dataclasses
 
-from apps.bot.api.gpt.models import GPTCompletionModel, GPTImageDrawModel, GPTVoiceModel
+from apps.bot.api.gpt.models import GPTCompletionModel, GPTImageDrawModel, GPTVoiceRecognitionModel
 
 
 @dataclasses.dataclass
@@ -47,7 +47,7 @@ class GPTAPIImageDrawUsage(GPTAPIUsage):
 
 @dataclasses.dataclass
 class GPTAPIVoiceRecognitionUsage(GPTAPIUsage):
-    model: GPTVoiceModel
+    model: GPTVoiceRecognitionModel
     voice_duration: float
 
     @property

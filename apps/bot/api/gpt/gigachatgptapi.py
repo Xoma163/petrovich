@@ -15,6 +15,7 @@ class GigaChatGPTAPI(GPT, API):
 
     BASE_URL = "https://gigachat.devices.sberbank.ru/api/v1"
     COMPLETIONS_URL = f"{BASE_URL}/chat/completions"
+    ACCESS_TOKEN_URL = f"https://ngw.devices.sberbank.ru:9443/api/v2/oauth"
 
     GOSUSLUGI_CERT_PATH = os.path.join(BASE_DIR, "secrets/certs/russian_trusted_root_ca_pem.crt")
 
@@ -26,10 +27,6 @@ class GigaChatGPTAPI(GPT, API):
         self.access_token = None
 
     def completions(self, messages) -> GPTAPICompletionsResponse:
-        headers = {
-            "Authorization": f"Bearer {self._get_access_token()}"
-        }
-
         data = {
             "model": self._get_model(),
             "max_tokens": 2048,
@@ -37,14 +34,9 @@ class GigaChatGPTAPI(GPT, API):
             "function_call": "auto"
         }
 
-        r = self.requests.post(
-            f"{self.COMPLETIONS_URL}",
-            json=data,
-            headers=headers,
-            verify=self.GOSUSLUGI_CERT_PATH
-        )
+        r = self._do_request(self.COMPLETIONS_URL, json=data)
         response = GPTAPICompletionsResponse(
-            text=r.json()['choices'][0]['message']['content']
+            text=r['choices'][0]['message']['content']
         )
         return response
 
@@ -71,37 +63,45 @@ class GigaChatGPTAPI(GPT, API):
         )
         return response
 
-    def _set_access_token(self):
-        headers = {
-            "Authorization": f"Bearer {self.AUTH_DATA}",
-            "RqUID": str(uuid.uuid1(random.randint(0, 281474976710655)))  # 2^48-1
-        }
-
+    def _do_request(self, url, **kwargs) -> dict:
         r = self.requests.post(
-            "https://ngw.devices.sberbank.ru:9443/api/v2/oauth",
+            url,
+            headers=kwargs['headers'] if kwargs.get('headers') else self._headers,
+            verify=self.GOSUSLUGI_CERT_PATH,
+            **kwargs
+        )
+
+        return r.json()
+
+    def _set_access_token(self):
+        r = self.requests.post(
+            self.ACCESS_TOKEN_URL,
             data={'scope': "GIGACHAT_API_PERS"},
-            headers=headers,
+            headers=self._auth_data_headers,
             verify=self.GOSUSLUGI_CERT_PATH,
             log=False
         )
         self.access_token = r.json()['access_token']
 
     def _get_access_token(self) -> str:
-        if not self.access_token:
-            self._set_access_token()
-        return self.access_token
+        return self.access_token if self.access_token else self._set_access_token()
 
     def _get_model(self, use_image=False):
         return self.DEFAULT_MODEL
 
     def _get_file_by_id(self, file_id):
-        headers = {
+        get_file_content_url = f"{self.BASE_URL}/files/{file_id}/content"
+        self._do_request(get_file_content_url, log=False)
+
+    @property
+    def _headers(self):
+        return {
             "Authorization": f"Bearer {self._get_access_token()}"
         }
 
-        return self.requests.get(
-            f"{self.BASE_URL}/files/{file_id}/content",
-            headers=headers,
-            verify=self.GOSUSLUGI_CERT_PATH,
-            log=False
-        ).content
+    @property
+    def _auth_data_headers(self):
+        return {
+            "Authorization": f"Bearer {self.AUTH_DATA}",
+            "RqUID": str(uuid.uuid1(random.randint(0, 281474976710655)))  # 2^48-1
+        }

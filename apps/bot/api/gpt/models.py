@@ -30,7 +30,7 @@ class GPTImageDrawModel(GPTModel):
 
 
 @dataclass
-class GPTVoiceModel(GPTModel):
+class GPTVoiceRecognitionModel(GPTModel):
     voice_recognition_1_min_cost: float | None = None
 
     @property
@@ -53,7 +53,7 @@ class GPTModels:
     DALLE_2 = GPTImageDrawModel("dall-e-2", "DALLE 2", image_cost=0.2)
 
     # Audio models
-    WHISPER = GPTVoiceModel("whisper-1", None, voice_recognition_1_min_cost=0.006)
+    WHISPER = GPTVoiceRecognitionModel("whisper-1", None, voice_recognition_1_min_cost=0.006)
 
     # older models
     GPT_4_0125 = GPTCompletionModel("gpt-4-0125-preview", "GPT-4 0125", 10, 30)
