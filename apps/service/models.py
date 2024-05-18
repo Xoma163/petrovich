@@ -303,8 +303,8 @@ class GPTPrePrompt(models.Model):
         (GEMINI, 'Gemini')
     )
 
-    author = models.ForeignKey(Profile, models.CASCADE, verbose_name="Пользователь", null=True)
-    chat = models.ForeignKey(Chat, models.CASCADE, verbose_name="Чат", null=True)
+    author = models.ForeignKey(Profile, models.CASCADE, verbose_name="Пользователь", null=True, blank=True)
+    chat = models.ForeignKey(Chat, models.CASCADE, verbose_name="Чат", null=True, blank=True)
     text = models.TextField("ChatGPT preprompt", default="", blank=True)
     provider = models.CharField('Провайдер', max_length=10, blank=True, choices=PROVIDER_CHOICES)
 
