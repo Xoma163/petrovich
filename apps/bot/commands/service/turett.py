@@ -18,8 +18,8 @@ class Turett(Command):
     priority = 85
 
     # ACCEPT CHANCES
-    MENTIONED_CHANCE = 99991
-    NOT_MENTIONED_CHANCE = 99990.3
+    MENTIONED_CHANCE = 1
+    NOT_MENTIONED_CHANCE = 0.3
 
     # WEIGHTS
     STICKER_CHANCE = 10
