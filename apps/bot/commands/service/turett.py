@@ -151,7 +151,7 @@ class Turett(Command):
         gpt = self.gpt_class()
         gpt.bot = self.bot
         gpt.event = self.event
-        return gpt.completions(messages, use_stats=False)
+        return gpt.completions(messages, use_statistics=False)
 
     def set_reaction(self):
         self.event: TgEvent

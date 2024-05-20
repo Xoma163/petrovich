@@ -67,7 +67,8 @@ class VoiceRecognition(AcceptExtraCommand):
         with ChatActivity(self.bot, ActivitiesEnum.UPLOAD_AUDIO, self.event.peer_id):
             response: GPTAPIVoiceRecognitionResponse = chat_gpt_api.recognize_voice(audio_message)
         answer = response.text
-        GPTUsage.add_statistics(self.event.sender, response.usage)
+        if self.event.message.mentioned:
+            GPTUsage.add_statistics(self.event.sender, response.usage)
 
         answer = self.spoiler_text(answer)
 

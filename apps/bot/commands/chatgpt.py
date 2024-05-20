@@ -232,7 +232,7 @@ class ChatGPT(Command):
         rmi = ResponseMessageItem(text=f"Поменял модель на {self.bot.get_formatted_text_line(settings.gpt_model)}")
         return rmi
 
-    def completions(self, messages, use_stats=True) -> ResponseMessageItem:
+    def completions(self, messages, use_statistics=True) -> ResponseMessageItem:
         """
         Стандартное общение с моделью
         """
@@ -243,7 +243,7 @@ class ChatGPT(Command):
             photos = self.event.get_all_attachments([PhotoAttachment])
             response: GPTAPICompletionsResponse = gpt_api.completions(messages, use_image=bool(photos))
 
-        if use_stats:
+        if use_statistics:
             GPTUsage.add_statistics(self.event.sender, response.usage)
 
         return self._get_completions_rm(response.text)

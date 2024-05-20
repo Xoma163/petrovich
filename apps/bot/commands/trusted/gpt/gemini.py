@@ -45,12 +45,12 @@ class Gemini(ChatGPT):
         answer = method()
         return ResponseMessage(answer)
 
-    def completions(self, messages, use_stats=True) -> ResponseMessageItem:
+    def completions(self, messages, use_statistics=True) -> ResponseMessageItem:
         new_messages = self._transform_messages(messages)
         # Если картинка, то просто игнорируем препромпт
         if len(new_messages[-1]['parts']) == 2:
             new_messages = [new_messages[-1]]
-        return super().completions(new_messages, use_stats=False)
+        return super().completions(new_messages, use_statistics=False)
 
     def default(self, with_vision=True):
         return super().default(with_vision=True)

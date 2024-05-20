@@ -49,8 +49,8 @@ class GigaChat(ChatGPT):
     def menu_draw_image(self, use_statistics=True) -> ResponseMessageItem:
         return super().menu_draw_image(use_statistics=False)
 
-    def completions(self, messages, use_stats=True) -> ResponseMessageItem:
-        return super().completions(messages, use_stats=False)
+    def completions(self, messages, use_statistics=True) -> ResponseMessageItem:
+        return super().completions(messages, use_statistics=False)
 
     def default(self, with_vision=True):
         return super().default(with_vision=False)
