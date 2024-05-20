@@ -93,8 +93,9 @@ class WTF(Command):
             result_message.append(message)
 
         messages = []
-        preprompt = self.GPT_COMMAND_CLASS.get_preprompt(self.event.sender, self.event.chat,
-                                                         self.GPT_COMMAND_CLASS.PREPROMPT_PROVIDER)
+        preprompt = self.GPT_COMMAND_CLASS.get_preprompt(
+            self.event.sender, self.event.chat, self.GPT_COMMAND_CLASS.PREPROMPT_PROVIDER
+        )
         if preprompt:
             messages.append({"role": "system", "content": preprompt})
         messages.append({'role': "user", 'content': prompt})

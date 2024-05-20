@@ -47,6 +47,9 @@ class Gemini(ChatGPT):
 
     def completions(self, messages, use_stats=True) -> ResponseMessageItem:
         new_messages = self._transform_messages(messages)
+        # Если картинка, то просто игнорируем препромпт
+        if len(new_messages[-1]['parts']) == 2:
+            new_messages = [new_messages[-1]]
         return super().completions(new_messages, use_stats=False)
 
     def default(self, with_vision=True):
@@ -66,6 +69,7 @@ class Gemini(ChatGPT):
             # image
             if isinstance(content, list):
                 text = content[0]['text']
+                text = text if text else ""
                 image = content[1]['image_url']['url'].replace('data:image/jpeg;base64,', '')
                 new_messages.append({
                     'role': roles_map[message['role']],
@@ -84,6 +88,9 @@ class Gemini(ChatGPT):
                 continue
 
             text = content
+            if not text:
+                continue
+
             if message['role'] == 'system':
                 text = f"System prompt: {text}"
             new_messages.append({

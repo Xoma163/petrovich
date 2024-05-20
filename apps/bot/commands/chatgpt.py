@@ -67,7 +67,7 @@ class ChatGPT(Command):
         """
 
         # Стандартный обработчик
-        accept = super().accept(event)
+        accept = super(ChatGPT, self).accept(event)
         if accept:
             return True
 
