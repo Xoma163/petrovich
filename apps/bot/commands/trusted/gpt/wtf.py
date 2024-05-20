@@ -80,7 +80,7 @@ class WTF(Command):
         message = f"{message_header}\n{message_body}"
         return message
 
-    def get_conversation(self, n: int, prompt: str, use_preprompt: bool = True) -> list:
+    def get_conversation(self, n: int, prompt: str) -> list:
         events = self.get_last_messages_as_events(n)
         result_message = []
 
@@ -93,10 +93,8 @@ class WTF(Command):
             result_message.append(message)
 
         messages = []
-        preprompt = None
-        if use_preprompt:
-            preprompt = self.GPT_COMMAND_CLASS.get_preprompt(self.event.sender, self.event.chat,
-                                                             self.GPT_COMMAND_CLASS.PREPROMPT_PROVIDER)
+        preprompt = self.GPT_COMMAND_CLASS.get_preprompt(self.event.sender, self.event.chat,
+                                                         self.GPT_COMMAND_CLASS.PREPROMPT_PROVIDER)
         if preprompt:
             messages.append({"role": "system", "content": preprompt})
         messages.append({'role': "user", 'content': prompt})

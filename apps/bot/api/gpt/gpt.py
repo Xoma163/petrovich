@@ -8,7 +8,7 @@ class GPT:
     def _get_model(self, use_image=False):
         raise NotImplementedError
 
-    def completions(self, messages: list) -> GPTAPICompletionsResponse:
+    def completions(self, messages: list, use_image=False) -> GPTAPICompletionsResponse:
         raise NotImplementedError
 
     @property

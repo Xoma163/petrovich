@@ -6,7 +6,7 @@ from requests.exceptions import HTTPError, JSONDecodeError
 
 
 class APIHandler:
-    def __init__(self, log_filter=None):
+    def __init__(self, log_filter=None, **kwargs):
         self._logger = logging.getLogger('api')
         self.headers = None
         self.log_filter = log_filter

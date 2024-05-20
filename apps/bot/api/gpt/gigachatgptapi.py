@@ -28,7 +28,7 @@ class GigaChatGPTAPI(GPT, API):
         super(GigaChatGPTAPI, self).__init__(**kwargs)
         self.access_token = None
 
-    def completions(self, messages) -> GPTAPICompletionsResponse:
+    def completions(self, messages: list, use_image=False) -> GPTAPICompletionsResponse:
         data = {
             "model": self._get_model(),
             "max_tokens": 2048,
@@ -61,7 +61,7 @@ class GigaChatGPTAPI(GPT, API):
         except Exception:
             raise PWarning(res.text)
         response = GPTAPIImageDrawResponse(
-            images_bytes=self._get_file_by_id(file_id)
+            images_bytes=[self._get_file_by_id(file_id)]
         )
         return response
 

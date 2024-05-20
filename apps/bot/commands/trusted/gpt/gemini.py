@@ -1,13 +1,8 @@
 from apps.bot.api.gpt.geminigptapi import GeminiGPTAPI
-from apps.bot.api.gpt.response import GPTAPICompletionsResponse
-from apps.bot.classes.bots.chat_activity import ChatActivity
-from apps.bot.classes.const.activities import ActivitiesEnum
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
-from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.commands.chatgpt import ChatGPT
-from apps.bot.utils.utils import markdown_to_html
 from apps.service.models import GPTPrePrompt
 
 
@@ -37,6 +32,8 @@ class Gemini(ChatGPT):
     )
 
     PREPROMPT_PROVIDER = GPTPrePrompt.GEMINI
+    GPT_API_CLASS = GeminiGPTAPI
+
 
     def start(self) -> ResponseMessage:
         arg0 = self.event.message.args[0] if self.event.message.args else None
@@ -49,15 +46,11 @@ class Gemini(ChatGPT):
         return ResponseMessage(answer)
 
     def completions(self, messages, use_stats=True) -> ResponseMessageItem:
-        gemini_api = GeminiGPTAPI(log_filter=self.event.log_filter)
+        new_messages = self._transform_messages(messages)
+        return super().completions(new_messages, use_stats=False)
 
-        with ChatActivity(self.bot, ActivitiesEnum.TYPING, self.event.peer_id):
-            new_messages = self._transform_messages(messages)
-            photos = self.event.get_all_attachments([PhotoAttachment])
-            response: GPTAPICompletionsResponse = gemini_api.completions(new_messages, bool(photos))
-
-        answer = markdown_to_html(response.text, self.bot)
-        return ResponseMessageItem(text=answer, reply_to=self.event.message.id)
+    def default(self, with_vision=True):
+        return super().default(with_vision=True)
 
     @staticmethod
     def _transform_messages(messages: list[dict]) -> list[dict]:
@@ -70,6 +63,7 @@ class Gemini(ChatGPT):
         for message in messages:
             content = message['content']
 
+            # image
             if isinstance(content, list):
                 text = content[0]['text']
                 image = content[1]['image_url']['url'].replace('data:image/jpeg;base64,', '')

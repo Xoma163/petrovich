@@ -7,7 +7,7 @@ from apps.bot.classes.event.tg_event import TgEvent
 from apps.bot.classes.messages.attachments.sticker import StickerAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.commands.chatgpt import ChatGPT
-from apps.bot.commands.trusted.gemini import Gemini
+from apps.bot.commands.trusted.gpt.gemini import Gemini
 from apps.bot.commands.trusted.gpt.gwtf import GWTF
 from apps.bot.commands.trusted.gpt.wtf import WTF
 from apps.bot.utils.utils import random_probability, random_event
@@ -127,7 +127,7 @@ class Turett(Command):
         gpt = self.gpt_class()
         gpt.bot = self.bot
         gpt.event = self.event
-        messages = gpt.get_dialog(new_prompt, use_preprompt=True)
+        messages = gpt.get_dialog(new_prompt)
         rmi = self._get_gpt_answer(messages)
         rmi.reply_to = self.event.message.id
         return rmi
@@ -141,7 +141,7 @@ class Turett(Command):
         wtf = self.wtf_class()
         wtf.bot = self.bot
         wtf.event = self.event
-        messages = wtf.get_conversation(self.WTF_MESSAGES_COUNT, prompt, use_preprompt=True)
+        messages = wtf.get_conversation(self.WTF_MESSAGES_COUNT, prompt)
 
         answer = self._get_gpt_answer(messages)
         answer.reply_to = None

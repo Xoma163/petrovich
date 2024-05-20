@@ -2,7 +2,7 @@ import datetime
 
 from django.db.models import Q, Sum
 
-from apps.bot.api.gpt.chatgptapi import ChatGPTAPI, GPTModels
+from apps.bot.api.gpt.chatgptapi import GPTModels, ChatGPTAPI
 from apps.bot.api.gpt.response import GPTAPICompletionsResponse, GPTAPIImageDrawResponse
 from apps.bot.classes.bots.chat_activity import ChatActivity
 from apps.bot.classes.command import Command
@@ -59,13 +59,21 @@ class ChatGPT(Command):
     platforms = [Platform.TG]
 
     PREPROMPT_PROVIDER = GPTPrePrompt.CHATGPT
+    GPT_API_CLASS = ChatGPTAPI
 
     def accept(self, event: Event):
+        """
+        Обрабатывать ли боту команду или нет
+        """
+
+        # Стандартный обработчик
         accept = super().accept(event)
         if accept:
             return True
 
-        return bool(self.get_first_gpt_event_in_replies(event))
+        # Проверка, является ли это сообщение реплаем на другое сообщение, которое в свою очередь может быть реплаем на
+        # обращение к gpt
+        return bool(self._get_first_gpt_event_in_replies(event))
 
     def start(self) -> ResponseMessage:
         if not self.event.sender.check_role(Role.TRUSTED) and not self.event.sender.settings.gpt_key:
@@ -88,41 +96,51 @@ class ChatGPT(Command):
         answer = method()
         return ResponseMessage(answer)
 
-    def default(self) -> ResponseMessageItem:
-        user_message = self.get_user_msg(self.event)
-        messages = self.get_dialog(user_message)
-        if photos := self.event.get_all_attachments([PhotoAttachment]):
-            photos_data = []
-            for photo in photos:
-                base64 = photo.base64()
-                photos_data = [({"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64}"}})]
-            messages[-1]['content'] = [{"type": "text", "text": messages[-1]['content']}]
-            messages[-1]['content'] += photos_data
+    # DEFAILT MENU
+
+    def default(self, with_vision=True) -> ResponseMessageItem:
+        """
+        Дефолтное поведение при обращении к команде.
+        Вызов истории и если нужно использовть vision модель, добавление картинок
+        """
+        messages = self.get_dialog()
+
+        if with_vision:
+            if photos := self.event.get_all_attachments([PhotoAttachment]):
+                photos_data = []
+                for photo in photos:
+                    base64 = photo.base64()
+                    photos_data = [({"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64}"}})]
+                messages[-1]['content'] = [{"type": "text", "text": messages[-1]['content']}]
+                messages[-1]['content'] += photos_data
 
         return self.completions(messages)
 
-    def menu_draw_image(self) -> ResponseMessageItem:
+    # MENU
+    def menu_draw_image(self, use_statistics=True) -> ResponseMessageItem:
+        """
+        Рисование изображения
+        """
         request_text = self._get_draw_image_request_text()
-        chat_gpt_api = ChatGPTAPI(log_filter=self.event.log_filter, sender=self.event.sender)
-
+        gpt_api = self.GPT_API_CLASS(log_filter=self.event.log_filter, sender=self.event.sender)
         with ChatActivity(self.bot, ActivitiesEnum.UPLOAD_PHOTO, self.event.peer_id):
-            response: GPTAPIImageDrawResponse = chat_gpt_api.draw(request_text)
-
-            if not response.images_url:
-                raise PWarning("Не смог сгенерировать :(")
+            response: GPTAPIImageDrawResponse = gpt_api.draw(request_text)
+            if use_statistics:
+                GPTUsage.add_statistics(self.event.sender, response.usage)
 
             attachments = []
-            for image_url in response.images_url:
-                att = self.bot.get_photo_attachment(image_url)
+            for image in response.get_images():
+                att = self.bot.get_photo_attachment(image, send_chat_action=False)
                 att.download_content()
                 attachments.append(att)
-
-        answer = f'Результат генерации по запросу "{response.images_prompt}"'
-        GPTUsage.add_statistics(self.event.sender, response.usage)
-
+        image_prompt = response.images_prompt if response.images_prompt else request_text
+        answer = f'Результат генерации по запросу "{image_prompt}"'
         return ResponseMessageItem(text=answer, attachments=attachments, reply_to=self.event.message.id)
 
     def menu_statistics(self) -> ResponseMessageItem:
+        """
+        Просмотр статистики по использованию
+        """
         if self.event.is_from_chat:
             profiles = Profile.objects.filter(chats=self.event.chat)
             results = []
@@ -143,6 +161,10 @@ class ChatGPT(Command):
         return ResponseMessageItem(answer)
 
     def menu_preprompt(self) -> ResponseMessageItem:
+        """
+        Установка/удаление препромпта
+        """
+
         if len(self.event.message.args) > 1 and self.event.message.args[1] in ["chat", "conference", "конфа", "чат"]:
             self.check_conversation()
             q = Q(chat=self.event.chat, author=None)
@@ -156,6 +178,10 @@ class ChatGPT(Command):
                 return self._preprompt_works(1, q, 'персональный препромпт конфы')
 
     def menu_key(self) -> ResponseMessageItem:
+        """
+        Установка/удаление персонального ключа ChatGPT
+        """
+
         self.check_args(2)
         arg = self.event.message.args_case[1]
 
@@ -177,6 +203,10 @@ class ChatGPT(Command):
         return rmi
 
     def menu_models(self) -> ResponseMessageItem:
+        """
+        Просмотр списка моделей
+        """
+
         gpt_models = GPTModels.get_completions_models()
         models_list = [
             f"{self.bot.get_formatted_text_line(x.name)}\n${x.prompt_1m_token_cost} / 1M входных токенов\n${x.completion_1m_token_cost} / 1M выходных токенов"
@@ -186,12 +216,17 @@ class ChatGPT(Command):
         return ResponseMessageItem(answer)
 
     def menu_model(self) -> ResponseMessageItem:
+        """
+        Установка модели
+        """
+
         if len(self.event.message.args) < 2:
             settings = self.event.sender.settings
             if settings.gpt_model:
                 answer = f"Текущая модель - {self.bot.get_formatted_text_line(settings.get_gpt_model().name)}"
             else:
-                answer = f"Модель не установлена. Используется модель по умолчанию - {self.bot.get_formatted_text_line(ChatGPTAPI.DEFAULT_COMPLETIONS_MODEL.name)}"
+                default_model = self.bot.get_formatted_text_line(self.GPT_API_CLASS.DEFAULT_COMPLETIONS_MODEL.name)
+                answer = f"Модель не установлена. Используется модель по умолчанию - {default_model}"
             return ResponseMessageItem(answer)
 
         new_model = self.event.message.args[1]
@@ -209,41 +244,34 @@ class ChatGPT(Command):
         rmi = ResponseMessageItem(text=f"Поменял модель на {self.bot.get_formatted_text_line(settings.gpt_model)}")
         return rmi
 
-    def _get_draw_image_request_text(self):
-        if len(self.event.message.args) > 1:
-            return " ".join(self.event.message.args_case[1:])
-        elif self.event.message.quote:
-            return self.event.message.quote
-        elif self.event.fwd:
-            return self.event.fwd[0].message.raw
-        else:
-            raise PWarning("Должен быть текст или пересланное сообщение")
-
     def completions(self, messages, use_stats=True) -> ResponseMessageItem:
-        chat_gpt_api = ChatGPTAPI(log_filter=self.event.log_filter, sender=self.event.sender)
+        """
+        Стандартное общение с моделью
+        """
+
+        gpt_api = self.GPT_API_CLASS(log_filter=self.event.log_filter, sender=self.event.sender)
 
         with ChatActivity(self.bot, ActivitiesEnum.TYPING, self.event.peer_id):
             photos = self.event.get_all_attachments([PhotoAttachment])
-            response: GPTAPICompletionsResponse = chat_gpt_api.completions(messages, use_image=bool(photos))
+            response: GPTAPICompletionsResponse = gpt_api.completions(messages, use_image=bool(photos))
 
-            answer = markdown_to_html(response.text, self.bot)
         if use_stats:
             GPTUsage.add_statistics(self.event.sender, response.usage)
-        if len(answer) > self.bot.MAX_MESSAGE_TEXT_LENGTH:
-            document = DocumentAttachment()
-            document.parse(answer.encode('utf-8'), filename='answer.html')
-            answer = "Твой запрос получился слишком большой. Положил ответ в файл"
-            rmi = ResponseMessageItem(text=answer, attachments=[document], reply_to=self.event.message.id)
-        else:
-            rmi = ResponseMessageItem(text=answer, reply_to=self.event.message.id)
-        return rmi
 
-    def get_dialog(self, user_message, use_preprompt=True) -> list:
+        return self._get_completions_rm(response.text)
+
+    # MESSAGES / DIALOG
+
+    def get_dialog(self) -> list:
+        """
+        Получение списка всех сообщений с пользователем
+        """
+
+        self.event: TgEvent
+        user_message = self._get_user_msg(self.event)
         mc = MessagesCache(self.event.peer_id)
         data = mc.get_messages()
-        preprompt = None
-        if use_preprompt:
-            preprompt = self.get_preprompt(self.event.sender, self.event.chat, self.PREPROMPT_PROVIDER)
+        preprompt = self.get_preprompt(self.event.sender, self.event.chat, self.PREPROMPT_PROVIDER)
 
         history = []
         if not self.event.fwd:
@@ -254,7 +282,7 @@ class ChatGPT(Command):
 
         reply_to_id = self.event.fwd[0].message.id
         history = []
-        if first_event := self.get_first_gpt_event_in_replies(self.event):
+        if first_event := self._get_first_gpt_event_in_replies(self.event):
             while True:
                 raw = data.get(reply_to_id)
                 tg_event = TgEvent({"message": raw})
@@ -263,7 +291,7 @@ class ChatGPT(Command):
                 if is_me:
                     history.append({'role': 'assistant', 'content': tg_event.message.raw})
                 else:
-                    msg = self.get_user_msg(tg_event)
+                    msg = self._get_user_msg(tg_event)
                     history.append({'role': "user", 'content': msg})
                 reply_to_id = data.get(reply_to_id, {}).get('reply_to_message', {}).get('message_id')
                 if not reply_to_id or tg_event.message.id == first_event.message.id:
@@ -280,7 +308,11 @@ class ChatGPT(Command):
         history.append({'role': "user", 'content': user_message})
         return history
 
-    def get_first_gpt_event_in_replies(self, event) -> TgEvent | None:
+    def _get_first_gpt_event_in_replies(self, event) -> TgEvent | None:
+        """
+        Получение первого сообщении в серии reply сообщений
+        """
+
         mc = MessagesCache(event.peer_id)
         data = mc.get_messages()
         if not event.fwd:
@@ -300,13 +332,23 @@ class ChatGPT(Command):
                 break
         return find_accept_event
 
-    def get_user_msg(self, event: TgEvent) -> str:
+    def _get_user_msg(self, event: TgEvent) -> str:
+        """
+        Получение текста от пользователя
+        """
+
         if event.message.command in self.full_names:
             return event.message.args_str_case
         else:
             return event.message.raw
 
+    # PREPROMPT
+
     def _preprompt_works(self, args_slice_index: int, q: Q, is_for: str) -> ResponseMessageItem:
+        """
+        Обработка препромптов
+        """
+
         q &= Q(provider=self.PREPROMPT_PROVIDER)
 
         if len(self.event.message.args) > args_slice_index:
@@ -333,6 +375,10 @@ class ChatGPT(Command):
 
     @staticmethod
     def get_preprompt(sender: Profile, chat: Chat, provider) -> str | None:
+        """
+        Получить препромпт под текущую ситуацию (персональный в чате,в чате,в лс)
+        """
+
         if chat:
             variants = [
                 Q(author=sender, chat=chat, provider=provider),
@@ -350,7 +396,13 @@ class ChatGPT(Command):
                 continue
         return None
 
+    # STATISTICS
+
     def _get_stat_for_user(self, profile: Profile) -> str | None:
+        """
+        Получение статистики
+        """
+
         stats_all = self._get_stat_db_profile(Q(author=profile))
         if not stats_all:
             return None
@@ -367,5 +419,41 @@ class ChatGPT(Command):
 
     @staticmethod
     def _get_stat_db_profile(q):
+        """
+        Получение статистики в БД
+        """
+
         res = GPTUsage.objects.filter(q).aggregate(Sum('cost')).get('cost__sum')
         return res if res else 0
+
+    # OTHER
+
+    def _get_completions_rm(self, answer: str):
+        """
+        Пост-обработка сообщения в completions
+        """
+
+        answer = markdown_to_html(answer, self.bot)
+
+        if len(answer) > self.bot.MAX_MESSAGE_TEXT_LENGTH:
+            document = DocumentAttachment()
+            document.parse(answer.encode('utf-8'), filename='answer.html')
+            answer = "Твой запрос получился слишком большой. Положил ответ в файл"
+            rmi = ResponseMessageItem(text=answer, attachments=[document], reply_to=self.event.message.id)
+        else:
+            rmi = ResponseMessageItem(text=answer, reply_to=self.event.message.id)
+        return rmi
+
+    def _get_draw_image_request_text(self):
+        """
+        Получение текста, который хочет нарисовать пользователь
+        """
+
+        if len(self.event.message.args) > 1:
+            return " ".join(self.event.message.args_case[1:])
+        elif self.event.message.quote:
+            return self.event.message.quote
+        elif self.event.fwd:
+            return self.event.fwd[0].message.raw
+        else:
+            raise PWarning("Должен быть текст или пересланное сообщение")

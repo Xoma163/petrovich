@@ -1,6 +1,6 @@
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
-from apps.bot.commands.trusted.gemini import Gemini
+from apps.bot.commands.trusted.gpt.gemini import Gemini
 from apps.bot.commands.trusted.gpt.wtf import WTF
 
 

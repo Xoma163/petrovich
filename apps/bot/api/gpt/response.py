@@ -25,6 +25,12 @@ class GPTAPIImageDrawResponse(GPTAPIResponse):
     images_bytes: list[bytes] | None = None
     usage: GPTAPIImageDrawUsage | None = None
 
+    def get_images(self) -> list:
+        if self.images_bytes:
+            return self.images_bytes
+        if self.images_url:
+            return self.images_url
+        return []
 
 @dataclass
 class GPTAPIVoiceRecognitionResponse(GPTAPIResponse):
