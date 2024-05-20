@@ -85,7 +85,7 @@ class ChatGPT(Command):
         arg0 = self.event.message.args[0] if self.event.message.args else None
         menu = [
             [["нарисуй", "draw"], self.menu_draw_image],
-            [["стата", "статистика", "stat"], self.menu_statistics],
+            [["стат", "стата", "статистика", "stat", "stats", "statistics"], self.menu_statistics],
             [["препромпт", "препромт", "промпт", "preprompt", "prepromp", "prompt"], self.menu_preprompt],
             [["ключ", "key"], self.menu_key],
             [["модели", "models"], self.menu_models],
@@ -141,22 +141,10 @@ class ChatGPT(Command):
         """
         Просмотр статистики по использованию
         """
-        if self.event.is_from_chat:
-            profiles = Profile.objects.filter(chats=self.event.chat)
-            results = []
-            for profile in profiles:
-                if profile.pk in [92, 91]:
-                    continue
-                res = self._get_stat_for_user(profile)
-                if res:
-                    results.append(self._get_stat_for_user(profile))
-            if not results:
-                raise PWarning("Ещё не было использований GPT среди участников чата")
-            answer = "\n\n".join(results)
-        else:
-            answer = self._get_stat_for_user(self.event.sender)
-            if not answer:
-                raise PWarning("Ещё не было использований GPT")
+        self.check_pm()
+        answer = self._get_stat_for_user(self.event.sender)
+        if not answer:
+            raise PWarning("Ещё не было использований GPT")
 
         return ResponseMessageItem(answer)
 
@@ -406,15 +394,33 @@ class ChatGPT(Command):
         stats_all = self._get_stat_db_profile(Q(author=profile))
         if not stats_all:
             return None
+
+        # Начало и конец предыдущего месяца
         dt_now = datetime.datetime.now()
-        stats_today = self._get_stat_db_profile(Q(author=profile, created_at__gte=dt_now - datetime.timedelta(days=1)))
-        stats_week = self._get_stat_db_profile(Q(author=profile, created_at__gte=dt_now - datetime.timedelta(days=7)))
-        stats_month = self._get_stat_db_profile(Q(author=profile, created_at__gte=dt_now - datetime.timedelta(days=30)))
+        first_day_of_current_month = dt_now.replace(day=1)
+        last_day_of_last_month = first_day_of_current_month - datetime.timedelta(days=1)
+        first_day_of_last_month = last_day_of_last_month.replace(day=1)
+
+        stats_today = self._get_stat_db_profile(
+            Q(author=profile, created_at__gte=dt_now - datetime.timedelta(days=1))
+        )
+        stats_7_day = self._get_stat_db_profile(
+            Q(author=profile, created_at__gte=dt_now - datetime.timedelta(days=7))
+        )
+
+        last_month = self._get_stat_db_profile(
+            Q(author=profile, created_at__gte=first_day_of_last_month, created_at__lt=first_day_of_current_month)
+        )
+
+        current_month = self._get_stat_db_profile(
+            Q(author=profile, created_at__gte=first_day_of_current_month, created_at__lt=dt_now)
+        )
 
         return f"{profile}:\n" \
                f"Сегодня - $ {round(stats_today, 2)}\n" \
-               f"Неделя - $ {round(stats_week, 2)}\n" \
-               f"Месяц - $ {round(stats_month, 2)}\n" \
+               f"7 дней - $ {round(stats_7_day, 2)}\n" \
+               f"Прошлый месяц- $ {round(last_month, 2)}\n" \
+               f"Текущий месяц- $ {round(current_month, 2)}\n" \
                f"Всего - $ {round(stats_all, 2)}\n"
 
     @staticmethod
