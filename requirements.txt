@@ -62,7 +62,7 @@ python-dateutil==2.8.2
 python-json-logger==2.0.7
 pytz==2024.1
 redis==5.0.4
-requests==2.31.0
+requests==2.32.0
 requests-oauthlib==2.0.0
 rsa==4.9
 s3transfer==0.9.0
