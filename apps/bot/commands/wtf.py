@@ -1,17 +1,20 @@
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.help_text import HelpText, HelpTextItem
 from apps.bot.commands.abstract.wtf_command import WTFCommand
-from apps.bot.commands.trusted.gpt.gemini import Gemini
+from apps.bot.commands.chatgpt import ChatGPT
 
 
-class GWTF(WTFCommand):
-    name = "gwtf"
+class WTF(WTFCommand):
+    name = "wtf"
+    names = ['саммари', 'суммаризируй']
 
     abstract = False
-    access = Role.TRUSTED
+
+    access = Role.USER
+    gpt_key = True
 
     help_text = HelpText(
-        commands_text="обрабатывает сообщения в конфе через Gemini",
+        commands_text="обрабатывает сообщения в конфе через ChatGPT",
         help_texts=[
             HelpTextItem(
                 access,
@@ -21,4 +24,4 @@ class GWTF(WTFCommand):
         extra_text=f"prompt по умолчанию:\n{WTFCommand.DEFAULT_PROMPT}"
     )
 
-    GPT_COMMAND_CLASS = Gemini
+    GPT_COMMAND_CLASS = ChatGPT

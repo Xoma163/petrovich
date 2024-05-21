@@ -1,39 +1,32 @@
 from apps.bot.api.gpt.geminigptapi import GeminiGPTAPI
 from apps.bot.classes.const.consts import Role
-from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
+from apps.bot.classes.help_text import HelpText, HelpTextItem
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
-from apps.bot.commands.chatgpt import ChatGPT
+from apps.bot.commands.abstract.gpt_command import GPTCommand
 from apps.service.models import GPTPrePrompt
 
 
-class Gemini(ChatGPT):
+class Gemini(GPTCommand):
     name = "gemini"
     names = ["гемини"]
+    access = Role.TRUSTED
+    abstract = False
 
     help_text = HelpText(
-        commands_text="чат GigaChat",
+        commands_text="чат Gemini",
         help_texts=[
-            HelpTextItem(Role.TRUSTED, [
-                HelpTextItemCommand("(фраза)", "общение с ботом"),
-                HelpTextItemCommand("(пересланное сообщение)", "общение с ботом"),
-                HelpTextItemCommand("препромпт [конфа]", "посмотреть текущий препромпт"),
-                HelpTextItemCommand("препромпт [конфа] (текст)", "добавить препромпт"),
-                HelpTextItemCommand("препромпт [конфа] удалить", "удаляет препромпт"),
-            ])
+            HelpTextItem(
+                access,
+                GPTCommand.DEFAULT_HELP_TEXT_ITEMS + \
+                [GPTCommand.VISION_HELP_TEXT_ITEM] + \
+                GPTCommand.PREPROMPT_HELP_TEXT_ITEMS
+            )
         ],
-        extra_text=(
-            "Если отвечать на сообщения бота через кнопку \"Ответить\" то будет продолжаться непрерывный диалог.\n"
-            "В таком случае необязательно писать команду, можно просто текст\n\n"
-            "Порядок использования препромптов в конфах:\n"
-            "1) Персональный препромт конфы\n"
-            "2) Персональный препромт\n"
-            "3) Препромпт конфы"
-        )
+        extra_text=GPTCommand.DEFAULT_EXTRA_TEXT
     )
 
     PREPROMPT_PROVIDER = GPTPrePrompt.GEMINI
     GPT_API_CLASS = GeminiGPTAPI
-
 
     def start(self) -> ResponseMessage:
         arg0 = self.event.message.args[0] if self.event.message.args else None

@@ -36,7 +36,7 @@ def generate_commands(base_class=Command):
             new_commands = _new_commands
         else:
             flag = False
-    commands = [x() for x in commands if x.__module__.startswith('apps.bot.commands') and x.enabled]
+    commands = [x() for x in commands if x.__module__.startswith('apps.bot.commands') and x.enabled and not x.abstract]
     commands.sort(key=lambda x: x.priority, reverse=True)
     return commands
 

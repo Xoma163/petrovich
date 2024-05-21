@@ -7,10 +7,11 @@ from apps.bot.commands.mrazi.nostalgia import Nostalgia
 class Flaiva(Nostalgia):
     name = "флейва"
 
+    access = Role.FLAIVA
     help_text = HelpText(
         commands_text="генерирует картинку с сообщениями из конфы флейвы",
         help_texts=[
-            HelpTextItem(Role.FLAIVA, [
+            HelpTextItem(access, [
                 HelpTextItemCommand(None, "присылает 10 случайных сообщений"),
                 HelpTextItemCommand(
                     "(N,M=10)",
@@ -22,7 +23,6 @@ class Flaiva(Nostalgia):
         ]
     )
 
-    access = Role.FLAIVA
 
     KEY = "flaiva"
     FILE = "secrets/flaiva_chats/flaiva.json"

@@ -9,7 +9,7 @@ from apps.bot.classes.messages.response_message import ResponseMessage, Response
 from apps.bot.commands.chatgpt import ChatGPT
 from apps.bot.commands.trusted.gpt.gemini import Gemini
 from apps.bot.commands.trusted.gpt.gwtf import GWTF
-from apps.bot.commands.trusted.gpt.wtf import WTF
+from apps.bot.commands.wtf import WTF
 from apps.bot.utils.utils import random_probability, random_event
 
 

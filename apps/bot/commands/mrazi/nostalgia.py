@@ -18,10 +18,11 @@ from apps.bot.utils.utils import get_urls_from_text
 class Nostalgia(Command):
     name = "ностальгия"
 
+    access = Role.MRAZ
     help_text = HelpText(
         commands_text="генерирует картинку с сообщениями из конфы беседки мразей",
         help_texts=[
-            HelpTextItem(Role.MRAZ, [
+            HelpTextItem(access, [
                 HelpTextItemCommand(None, "присылает 10 случайных сообщений"),
                 HelpTextItemCommand("(N,M=10)",
                                     "присылает сообщения с позиции N до M. Максимальная разница между N и M - 200"),
@@ -32,7 +33,6 @@ class Nostalgia(Command):
         ]
     )
 
-    access = Role.MRAZ
 
     platforms = [Platform.TG]
 

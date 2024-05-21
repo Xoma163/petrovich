@@ -20,10 +20,13 @@ class VoiceRecognition(AcceptExtraCommand):
     name = 'распознай'
     names = ["голос", "голосовое"]
 
+    access = Role.USER
+    gpt_key = True
+
     help_text = HelpText(
         commands_text="распознаёт голосовое сообщение",
         help_texts=[
-            HelpTextItem(Role.USER, [
+            HelpTextItem(access, [
                 HelpTextItemCommand(
                     "(Пересланное сообщение с голосовым сообщением)",
                     "распознаёт голосовое сообщение на основе ChatGPT"
@@ -40,7 +43,6 @@ class VoiceRecognition(AcceptExtraCommand):
     priority = -100
 
     bot: TgBot
-    gpt_key = True
 
     @staticmethod
     def accept_extra(event: Event) -> bool:

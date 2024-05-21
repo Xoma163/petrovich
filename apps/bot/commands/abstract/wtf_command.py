@@ -8,42 +8,48 @@ from apps.bot.classes.const.consts import Role, Platform
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.event.event import Event
 from apps.bot.classes.event.tg_event import TgEvent
-from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
+from apps.bot.classes.help_text import HelpTextItemCommand
 from apps.bot.classes.messages.response_message import ResponseMessage
-from apps.bot.commands.chatgpt import ChatGPT
 from apps.bot.utils.cache import MessagesCache
 
 
-class WTF(Command):
+class WTFCommand(Command):
     name = "wtf"
     names = ['саммари', 'суммаризируй']
+    access = Role.TRUSTED
+    abstract = True
+    platforms = [Platform.TG]
 
     DEFAULT_PROMPT = "Я пришлю тебе переписку участников группы. Суммаризируй её, опиши, что произошло, о чём общались люди?"
+    DEFAULT_N = 50
+    DEFAULT_HELP_TEXT_ITEMS = [
+        HelpTextItemCommand(
+            f"[prompt] [N={DEFAULT_N}]",
+            "обрабатывает последние N сообщений в конфе через ChatGPT по указанному prompt"
+        ),
+        HelpTextItemCommand(
+            "(пересланное сообщение)",
+            "обрабатывает последние сообщения до пересланного в конфе через ChatGPT по указанному prompt"
+        )
+    ]
 
-    help_text = HelpText(
-        commands_text="обрабатывает сообщения в конфе через ChatGPT",
-        help_texts=[
-            HelpTextItem(
-                Role.TRUSTED, [
-                    HelpTextItemCommand(
-                        "[prompt] [N=50]",
-                        "обрабатывает последние N сообщений в конфе через ChatGPT по указанному prompt"),
-                    HelpTextItemCommand(
-                        "(пересланное сообщение)",
-                        "обрабатывает последние сообщения до пересланного в конфе через ChatGPT по указанному prompt")
-                ])
-        ],
-        extra_text=f"prompt по умолчанию:\n{DEFAULT_PROMPT}"
-
-    )
-
-    platforms = [Platform.TG]
-    gpt_key = True
-
-    GPT_COMMAND_CLASS = ChatGPT
+    GPT_COMMAND_CLASS = None
 
     def start(self) -> ResponseMessage:
-        n = None
+        n, prompt = self._get_n_and_prompt()
+
+        with ChatActivity(self.bot, ActivitiesEnum.TYPING, self.event.peer_id):
+            messages = self.get_conversation(n, prompt)
+
+        gpt = self.GPT_COMMAND_CLASS()
+        gpt.bot = self.bot
+        gpt.event = self.event
+
+        with ChatActivity(self.bot, ActivitiesEnum.TYPING, self.event.peer_id):
+            answer = gpt.completions(messages)
+        return ResponseMessage(answer)
+
+    def _get_n_and_prompt(self) -> tuple[int, str]:
         try:
             self.check_fwd()
             last_message_id = self.event.fwd[0].message.id
@@ -56,22 +62,12 @@ class WTF(Command):
                 n = int(last_arg)
                 prompt = " ".join(self.event.message.args_case[:-1])
             except (ValueError, IndexError):
-                n = 50
+                n = self.DEFAULT_N
                 prompt = self.event.message.args_str_case
 
         if not prompt:
             prompt = self.DEFAULT_PROMPT
-
-        with ChatActivity(self.bot, ActivitiesEnum.TYPING, self.event.peer_id):
-            messages = self.get_conversation(n, prompt)
-
-        gpt = self.GPT_COMMAND_CLASS()
-        gpt.bot = self.bot
-        gpt.event = self.event
-
-        with ChatActivity(self.bot, ActivitiesEnum.TYPING, self.event.peer_id):
-            answer = gpt.completions(messages)
-        return ResponseMessage(answer)
+        return n, prompt
 
     @staticmethod
     def _format_groupped_messages(last_user, messages_from_one_user):
@@ -94,7 +90,9 @@ class WTF(Command):
 
         messages = []
         preprompt = self.GPT_COMMAND_CLASS.get_preprompt(
-            self.event.sender, self.event.chat, self.GPT_COMMAND_CLASS.PREPROMPT_PROVIDER
+            self.event.sender,
+            self.event.chat,
+            self.GPT_COMMAND_CLASS.PREPROMPT_PROVIDER
         )
         if preprompt:
             messages.append({"role": "system", "content": preprompt})
