@@ -8,7 +8,7 @@ from apps.service.models import GPTPrePrompt
 
 class Gemini(GPTCommand):
     name = "gemini"
-    names = ["гемини"]
+    names = ["гемини", "гмн", "gmn"]
     access = Role.TRUSTED
     abstract = False
 
