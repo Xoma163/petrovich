@@ -126,7 +126,7 @@ class Notify(models.Model):
 
 
 class Donations(models.Model):
-    username = models.CharField("Имя", max_length=100, blank=True)
+    username = models.CharField("Имя", max_length=100, blank=True, null=True)
     amount = models.CharField("Количество", max_length=10, blank=True)
     currency = models.CharField("Валюта", max_length=30, blank=True)
     message = models.CharField("Сообщение", max_length=1000, blank=True)
@@ -138,7 +138,8 @@ class Donations(models.Model):
         ordering = ['-date']
 
     def __str__(self):
-        return f"{self.username}. {self.amount}"
+        username = self.username if self.username else "Аноним"
+        return f"{username}. {self.amount}"
 
 
 class Subscribe(models.Model):

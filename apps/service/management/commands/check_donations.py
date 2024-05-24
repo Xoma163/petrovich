@@ -17,6 +17,7 @@ class Command(BaseCommand):
         headers = {'Authorization': 'Bearer ' + env.str('DONATIONALERT_ACCESS_TOKEN')}
         r = requests.get(url, headers=headers).json()
         donations, created = Service.objects.get_or_create(name='donations')
+
         if created:
             donations.value = r['meta']['total']
             donations.save()
@@ -32,12 +33,15 @@ class Command(BaseCommand):
                 answer = 'Новые донаты!\n\n'
             for i in range(new_donation_count):
                 donation = r['data'][i]
-                new_donation = Donations(username=donation['username'],
-                                         amount=donation['amount'],
-                                         currency=donation['currency'],
-                                         message=donation['message'])
+                new_donation = Donations(
+                    username=donation['username'],
+                    amount=donation['amount'],
+                    currency=donation['currency'],
+                    message=donation['message']
+                )
                 new_donation.save()
-                answer += f"{donation['username']} - {donation['amount']} {donation['currency']}:\n" \
+                username = donation['username'] if donation['username'] else "Аноним"
+                answer += f"{username} - {donation['amount']} {donation['currency']}:\n" \
                           f"{donation['message']}\n\n"
             chat_pks = options['chat_id'][0].split(',')
             for chat_pk in chat_pks:
