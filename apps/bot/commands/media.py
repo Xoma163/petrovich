@@ -392,7 +392,6 @@ class Media(AcceptExtraCommand):
                 attachment = self.bot.get_video_attachment(item.download_url, peer_id=self.event.peer_id)
             else:
                 continue
-            attachment.download_content()
             attachments.append(attachment)
         return attachments, data.caption
 

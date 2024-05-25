@@ -125,7 +125,7 @@ class Notify(models.Model):
         return str(self.text)
 
 
-class Donations(models.Model):
+class Donation(models.Model):
     username = models.CharField("Имя", max_length=100, blank=True, null=True)
     amount = models.CharField("Количество", max_length=10, blank=True)
     currency = models.CharField("Валюта", max_length=30, blank=True)

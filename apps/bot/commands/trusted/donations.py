@@ -3,7 +3,7 @@ from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.help_text import HelpText
 from apps.bot.classes.messages.response_message import ResponseMessageItem, ResponseMessage
-from apps.service.models import Donations as DonationsModel
+from apps.service.models import Donation
 
 
 class Donations(Command):
@@ -14,7 +14,7 @@ class Donations(Command):
     access = Role.TRUSTED
 
     def start(self) -> ResponseMessage:
-        donations = DonationsModel.objects.all()
+        donations = Donation.objects.all()
         if len(donations) == 0:
             raise PWarning("Нема :(")
         msg = ""

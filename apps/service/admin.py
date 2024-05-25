@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from apps.service.models import Service, Meme, Notify, City, Donations, TimeZone, Subscribe, WakeOnLanUserData, \
+from apps.service.models import Service, Meme, Notify, City, Donation, TimeZone, Subscribe, WakeOnLanUserData, \
     Words, Tag, VideoCache, Promocode, GPTPrePrompt, GPTUsage
 
 
@@ -38,7 +38,7 @@ class TimeZoneAdmin(admin.ModelAdmin):
     list_display = ('name',)
 
 
-@admin.register(Donations)
+@admin.register(Donation)
 class DonationsAdmin(admin.ModelAdmin):
     list_display = ('username', 'amount', 'currency', 'message', 'date')
 

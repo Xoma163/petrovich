@@ -140,7 +140,7 @@ class GPTCommand(Command):
 
     # MESSAGES / DIALOG
 
-    def get_dialog(self) -> list:
+    def get_dialog(self, extra_message: str | None = None) -> list:
         """
         Получение списка всех сообщений с пользователем
         """
@@ -156,6 +156,8 @@ class GPTCommand(Command):
             if preprompt:
                 history.append({"role": "system", "content": preprompt})
             history.append({'role': "user", 'content': user_message})
+            if extra_message:
+                history.append({'role': "user", 'content': extra_message})
             return history
 
         reply_to_id = self.event.fwd[0].message.id
@@ -184,6 +186,8 @@ class GPTCommand(Command):
             history.append({"role": "system", "content": preprompt})
         history = list(reversed(history))
         history.append({'role': "user", 'content': user_message})
+        if extra_message:
+            history.append({'role': "user", 'content': extra_message})
         return history
 
     def _get_first_gpt_event_in_replies(self, event) -> TgEvent | None:

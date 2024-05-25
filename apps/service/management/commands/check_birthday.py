@@ -19,8 +19,6 @@ class Command(BaseCommand):
             birthday__month=today.month
         )
         for profile in profiles:
-            profile.gamer.roulette_points += 100000
-            profile.gamer.save()
             if not profile.settings.celebrate_bday:
                 continue
 

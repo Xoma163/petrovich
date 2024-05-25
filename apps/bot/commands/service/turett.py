@@ -128,6 +128,7 @@ class Turett(Command):
         gpt.bot = self.bot
         gpt.event = self.event
         messages = gpt.get_dialog(new_prompt)
+        messages.append({})
         rmi = self._get_gpt_answer(messages)
         rmi.reply_to = self.event.message.id
         return rmi

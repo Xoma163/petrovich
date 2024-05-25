@@ -4,7 +4,7 @@ from django.core.management.base import BaseCommand
 from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.messages.response_message import ResponseMessageItem
 from apps.bot.models import Chat
-from apps.service.models import Service, Donations
+from apps.service.models import Service, Donation
 from petrovich.settings import env
 
 tg_bot = TgBot()
@@ -33,7 +33,7 @@ class Command(BaseCommand):
                 answer = 'Новые донаты!\n\n'
             for i in range(new_donation_count):
                 donation = r['data'][i]
-                new_donation = Donations(
+                new_donation = Donation(
                     username=donation['username'],
                     amount=donation['amount'],
                     currency=donation['currency'],

@@ -33,7 +33,7 @@ class ProfileAdmin(admin.ModelAdmin):
         ('city', admin.RelatedOnlyFieldListFilter),
         ('groups', admin.RelatedOnlyFieldListFilter),
         'chats__name',)
-    search_fields = ['name', 'surname', 'nickname_real']
+    search_fields = ['name', 'surname', 'nickname_real', 'user_id']
 
 
 @admin.register(User)
@@ -45,7 +45,7 @@ class UserAdmin(admin.ModelAdmin):
 
 @admin.register(Chat)
 class ChatAdmin(admin.ModelAdmin):
-    search_fields = ('name',)
+    search_fields = ('name', 'chat_id')
     list_display = ('id', 'name', 'platform', 'is_banned', 'kicked')
     list_filter = ('platform', 'kicked')
 
