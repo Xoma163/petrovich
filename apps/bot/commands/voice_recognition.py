@@ -30,12 +30,13 @@ class VoiceRecognition(AcceptExtraCommand):
             HelpTextItem(access, [
                 HelpTextItemCommand(
                     "(Пересланное сообщение с голосовым сообщением)",
-                    "распознаёт голосовое сообщение на основе ChatGPT"
+                    "распознаёт голосовое сообщение/кружок/аудиофайл на основе ChatGPT"
                 )
             ])
         ],
         extra_text=(
-            "Если дан доступ к переписке и указан gpt api key, то распознает автоматически"
+            "Если дан доступ к переписке и указан gpt api key, то распознает автоматически\n"
+            "Поддерживаются форматы: flac, m4a, mp3, mp4, mpeg, mpga, oga, ogg, wav, webm"
         )
     )
 

@@ -31,7 +31,8 @@ class GPTCommand(Command):
 
     DEFAULT_HELP_TEXT_ITEMS = [
         HelpTextItemCommand("(фраза)", "общение с ботом"),
-        HelpTextItemCommand("(пересланное сообщение)", "общение с ботом")
+        HelpTextItemCommand("(пересланное сообщение)", "общение с ботом с учётом пересланного сообщения"),
+        HelpTextItemCommand("(текстовый файл)", "общение с ботом с учётом текстового файла")
     ]
     VISION_HELP_TEXT_ITEM = HelpTextItemCommand("(фраза) [картинка]", "общение с ботом с учётом пересланной картинки")
     DRAW_HELP_TEXT_ITEM = HelpTextItemCommand("нарисуй (фраза/пересланное сообщение)", "генерация картинки")
