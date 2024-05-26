@@ -92,7 +92,7 @@ class Petrovich(Command):
             winner_today = PetrovichGame.objects.filter(chat=self.event.chat).first()
 
             if winner_today:
-                datetime_last = localize_datetime(remove_tz(winner_today.created_dt), DEFAULT_TIME_ZONE)
+                datetime_last = localize_datetime(remove_tz(winner_today.created_at), DEFAULT_TIME_ZONE)
                 if (datetime_now.date() - datetime_last.date()).days <= 0:
                     winner_gender = "Петровна" if winner_today.profile.gender == '1' else "Петрович"
                     answer = f"{winner_gender} дня - {winner_today.profile}"
