@@ -3,9 +3,10 @@ from django.db import models
 from django.db.models import JSONField
 
 from apps.bot.models import Profile, Chat
+from apps.service.mixins import TimeStampModelMixin
 
 
-class Gamer(models.Model):
+class Gamer(TimeStampModelMixin):
     points = models.IntegerField("Очки ставок", default=0)
     roulette_points = models.IntegerField("Очки рулетки", default=500)
     bk_points = models.IntegerField("Очки быки и коровы", default=0)
@@ -23,7 +24,7 @@ class Gamer(models.Model):
         return str(self.profile)
 
 
-class Rate(models.Model):
+class Rate(TimeStampModelMixin):
     gamer = models.ForeignKey(Gamer, models.CASCADE, verbose_name="Пользователь", null=True)
     chat = models.ForeignKey(Chat, models.CASCADE, verbose_name="Чат", null=True)
     rate = models.IntegerField("Ставка")
@@ -39,7 +40,7 @@ class Rate(models.Model):
         return str(self.chat) + " " + str(self.gamer)
 
 
-class PetrovichUser(models.Model):
+class PetrovichUser(TimeStampModelMixin):
     profile = models.ForeignKey(Profile, models.CASCADE, verbose_name="Пользователь", null=True)
     chat = models.ForeignKey(Chat, models.CASCADE, verbose_name='Чат', null=True, blank=True)
     active = models.BooleanField("Активность", default=True)
@@ -60,7 +61,7 @@ class PetrovichUser(models.Model):
         return str(self.profile)
 
 
-class PetrovichGames(models.Model):
+class PetrovichGames(TimeStampModelMixin):
     profile = models.ForeignKey(Profile, models.CASCADE, verbose_name="Пользователь", null=True)
     chat = models.ForeignKey(Chat, models.CASCADE, verbose_name='Чат', null=True, blank=True)
     date = models.DateTimeField("Дата", auto_now_add=True, editable=True)
@@ -78,7 +79,7 @@ def get_default_board():
     return [['', '', ''], ['', '', ''], ['', '', '']]
 
 
-class RouletteRate(models.Model):
+class RouletteRate(TimeStampModelMixin):
     gamer = models.ForeignKey(Gamer, models.CASCADE, verbose_name="Игрок", null=True)
     chat = models.ForeignKey(Chat, models.CASCADE, verbose_name="Чат", null=True)
 
@@ -94,7 +95,7 @@ class RouletteRate(models.Model):
         return str(self.pk)
 
 
-class BullsAndCowsSession(models.Model):
+class BullsAndCowsSession(TimeStampModelMixin):
     profile = models.ForeignKey(Profile, models.CASCADE, verbose_name="Пользователь", null=True)
     chat = models.ForeignKey(Chat, models.CASCADE, verbose_name="Чат", null=True)
     number = models.PositiveIntegerField("Загаданное число")
@@ -111,7 +112,7 @@ class BullsAndCowsSession(models.Model):
         return str(self.pk)
 
 
-class Wordle(models.Model):
+class Wordle(TimeStampModelMixin):
     profile = models.ForeignKey(Profile, models.CASCADE, verbose_name="Пользователь", null=True)
     chat = models.ForeignKey(Chat, models.CASCADE, verbose_name="Чат", null=True)
     word = models.CharField(max_length=5)

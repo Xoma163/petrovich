@@ -6,6 +6,7 @@ from django.utils.html import format_html
 from apps.bot.api.gpt.models import GPTModels
 from apps.bot.classes.const.consts import Platform as PlatformEnum, Role
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
+from apps.service.mixins import TimeStampModelMixin
 
 
 class Platform(models.Model):
@@ -26,7 +27,7 @@ class BaseSettings(models.Model):
         abstract = True
 
 
-class ChatSettings(BaseSettings):
+class ChatSettings(BaseSettings, TimeStampModelMixin):
     no_mention = models.BooleanField('Работа без упоминания в конфе', default=False)
     need_turett = models.BooleanField('Слать туреттные сообщения', default=False)
     celebrate_bday = models.BooleanField('Поздравлять с Днём рождения', default=False)
@@ -40,7 +41,7 @@ class ChatSettings(BaseSettings):
         return str(self.chat)
 
 
-class UserSettings(BaseSettings):
+class UserSettings(BaseSettings, TimeStampModelMixin):
     GPT_MODEL_CHOICES = [(x.name, x.verbose_name) for x in GPTModels.get_completions_models()]
 
     need_meme = models.BooleanField('Слать мемы по точному названию', default=False)
@@ -67,7 +68,7 @@ class UserSettings(BaseSettings):
         return str(self.profile)
 
 
-class Chat(Platform):
+class Chat(Platform, TimeStampModelMixin):
     chat_id = models.CharField('ID чата', max_length=20, default="")
     name = models.CharField('Название', max_length=256, default="", blank=True)
     is_banned = models.BooleanField('Забанен', default=False)
@@ -100,7 +101,7 @@ class Chat(Platform):
         return str(self.name) if self.name else f"id:{self.id}"
 
 
-class Profile(models.Model):
+class Profile(TimeStampModelMixin):
     GENDER_FEMALE = '1'
     GENDER_MALE = '2'
     GENDER_NONE = ''
@@ -192,7 +193,7 @@ class Profile(models.Model):
             return "Незарегистрированный пользователь"
 
 
-class User(Platform):
+class User(Platform, TimeStampModelMixin):
     user_id = models.CharField('ID пользователя', max_length=127)
     profile = models.ForeignKey(Profile, verbose_name="Профиль", related_name='user', null=True,
                                 blank=True, on_delete=models.SET_NULL)
@@ -225,7 +226,7 @@ class User(Platform):
         return f"{self.profile} ({self.platform})"
 
 
-class Bot(Platform):
+class Bot(Platform, TimeStampModelMixin):
     bot_id = models.CharField('ID бота', max_length=20)
     name = models.CharField('Имя', max_length=40)
     avatar = models.ImageField('Аватар', blank=True, upload_to="bot/bot/avatar/")

@@ -1,16 +1,17 @@
 from django.contrib import admin
 
+from apps.service.mixins import TimeStampAdminMixin
 from apps.service.models import Service, Meme, Notify, City, Donation, TimeZone, Subscribe, WakeOnLanUserData, \
     Words, Tag, VideoCache, Promocode, GPTPrePrompt, GPTUsage
 
 
 @admin.register(Service)
-class ServiceAdmin(admin.ModelAdmin):
+class ServiceAdmin(TimeStampAdminMixin):
     list_display = ('name', 'value', 'update_datetime')
 
 
 @admin.register(Meme)
-class MemeAdmin(admin.ModelAdmin):
+class MemeAdmin(TimeStampAdminMixin):
     list_display = (
         'id', 'name', 'preview_image', 'preview_link', 'author', 'approved', 'type', 'uses', 'inline_uses', 'link',
         'tg_file_id', "for_trusted"
@@ -20,7 +21,7 @@ class MemeAdmin(admin.ModelAdmin):
 
 
 @admin.register(Notify)
-class NotifyAdmin(admin.ModelAdmin):
+class NotifyAdmin(TimeStampAdminMixin):
     list_display = ('id', 'date', 'crontab', 'text', 'user', 'chat')
     search_fields = ['date', 'crontab', 'text']
     list_filter = (('user', admin.RelatedOnlyFieldListFilter), ('chat', admin.RelatedOnlyFieldListFilter),)
@@ -39,12 +40,12 @@ class TimeZoneAdmin(admin.ModelAdmin):
 
 
 @admin.register(Donation)
-class DonationsAdmin(admin.ModelAdmin):
+class DonationsAdmin(TimeStampAdminMixin):
     list_display = ('username', 'amount', 'currency', 'message', 'date')
 
 
 @admin.register(Subscribe)
-class SubscribeAdmin(admin.ModelAdmin):
+class SubscribeAdmin(TimeStampAdminMixin):
     list_display = ('author', 'chat', 'channel_title', 'playlist_title', 'service', 'save_to_plex')
     list_filter = (
         ('author', admin.RelatedOnlyFieldListFilter),
@@ -55,7 +56,7 @@ class SubscribeAdmin(admin.ModelAdmin):
 
 
 @admin.register(VideoCache)
-class VideoCacheAdmin(admin.ModelAdmin):
+class VideoCacheAdmin(TimeStampAdminMixin):
     list_display = ('filename',)
 
 
@@ -73,20 +74,20 @@ class WordsAdmin(admin.ModelAdmin):
 
 
 @admin.register(Tag)
-class TagAdmin(admin.ModelAdmin):
+class TagAdmin(TimeStampAdminMixin):
     list_display = ('name', 'chat')
     list_filter = (('chat', admin.RelatedOnlyFieldListFilter), ('users', admin.RelatedOnlyFieldListFilter))
 
 
 @admin.register(Promocode)
-class Promocode(admin.ModelAdmin):
+class Promocode(TimeStampAdminMixin):
     list_display = ('name', 'code', 'author', 'expiration', 'description', "is_personal")
     list_filter = ('name', 'author', "is_personal")
     search_fields = ('name', 'code', 'description')
 
 
 @admin.register(GPTPrePrompt)
-class GPTPrepromptAdmin(admin.ModelAdmin):
+class GPTPrepromptAdmin(TimeStampAdminMixin):
     list_display = ('author', 'chat', 'provider', 'text')
     list_filter = (
         ('author', admin.RelatedOnlyFieldListFilter),
@@ -96,7 +97,7 @@ class GPTPrepromptAdmin(admin.ModelAdmin):
 
 
 @admin.register(GPTUsage)
-class GPTUsageAdmin(admin.ModelAdmin):
+class GPTUsageAdmin(TimeStampAdminMixin):
     list_display = ('created_at', 'author', 'cost',)
     list_filter = (
         ('author', admin.RelatedOnlyFieldListFilter),

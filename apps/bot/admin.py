@@ -1,10 +1,11 @@
 from django.contrib import admin
 
 from apps.bot.models import Profile, Chat, Bot, User, ChatSettings, UserSettings
+from apps.service.mixins import TimeStampAdminMixin
 
 
 @admin.register(Profile)
-class ProfileAdmin(admin.ModelAdmin):
+class ProfileAdmin(TimeStampAdminMixin):
     list_display = ('name', 'surname', 'nickname_real', 'gender', 'birthday', 'city')
     fieldsets = (
         (
@@ -37,30 +38,30 @@ class ProfileAdmin(admin.ModelAdmin):
 
 
 @admin.register(User)
-class UserAdmin(admin.ModelAdmin):
+class UserAdmin(TimeStampAdminMixin):
     search_fields = ('profile__name', 'profile__surname', 'profile__nickname_real', 'nickname', 'user_id')
     list_display = ('show_user_id', 'show_url', 'platform', 'profile', 'nickname')
     list_filter = ('platform',)
 
 
 @admin.register(Chat)
-class ChatAdmin(admin.ModelAdmin):
+class ChatAdmin(TimeStampAdminMixin):
     search_fields = ('name', 'chat_id')
     list_display = ('id', 'name', 'platform', 'is_banned', 'kicked')
     list_filter = ('platform', 'kicked')
 
 
 @admin.register(Bot)
-class BotAdmin(admin.ModelAdmin):
+class BotAdmin(TimeStampAdminMixin):
     list_display = ('name', 'platform',)
     list_filter = ('platform',)
 
 
 @admin.register(UserSettings)
-class UserSettingsAdmin(admin.ModelAdmin):
+class UserSettingsAdmin(TimeStampAdminMixin):
     pass
 
 
 @admin.register(ChatSettings)
-class ChatSettingsAdmin(admin.ModelAdmin):
+class ChatSettingsAdmin(TimeStampAdminMixin):
     pass

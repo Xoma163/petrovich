@@ -4,6 +4,7 @@ from django.utils.html import format_html
 
 from apps.bot.api.gpt.usage import GPTAPIUsage
 from apps.bot.models import Chat, Profile, User
+from apps.service.mixins import TimeStampModelMixin
 
 
 class TimeZone(models.Model):
@@ -34,7 +35,7 @@ class City(models.Model):
         return str(self.name)
 
 
-class Service(models.Model):
+class Service(TimeStampModelMixin):
     name = models.CharField(primary_key=True, verbose_name="Имя", max_length=50)
     value = models.CharField("Значение", max_length=5000, default="", null=True)
     update_datetime = models.DateTimeField("Дата создания", auto_now=True)
@@ -47,7 +48,7 @@ class Service(models.Model):
         return self.name
 
 
-class BaseMeme(models.Model):
+class BaseMeme(TimeStampModelMixin):
     ATTACHMENT_NAMES = [
         ('photo', 'Фото'),
         ('video', 'Видео'),
@@ -106,7 +107,7 @@ class Meme(BaseMeme):
         ordering = ["name"]
 
 
-class Notify(models.Model):
+class Notify(TimeStampModelMixin):
     date = models.DateTimeField("Дата напоминания", null=True, blank=True)
     crontab = models.CharField("Crontab", max_length=100, null=True, blank=True)
     text = models.CharField("Текст/команда", max_length=1000, default="", blank=True)
@@ -125,7 +126,7 @@ class Notify(models.Model):
         return str(self.text)
 
 
-class Donation(models.Model):
+class Donation(TimeStampModelMixin):
     username = models.CharField("Имя", max_length=100, blank=True, null=True)
     amount = models.CharField("Количество", max_length=10, blank=True)
     currency = models.CharField("Валюта", max_length=30, blank=True)
@@ -142,7 +143,7 @@ class Donation(models.Model):
         return f"{username}. {self.amount}"
 
 
-class Subscribe(models.Model):
+class Subscribe(TimeStampModelMixin):
     SERVICE_YOUTUBE = 1
     SERVICE_VK = 4
     SERVICE_PREMIERE = 5
@@ -180,7 +181,7 @@ class Subscribe(models.Model):
         return self.channel_title
 
 
-class VideoCache(models.Model):
+class VideoCache(TimeStampModelMixin):
     channel_id = models.CharField("ID канала", max_length=100)
     video_id = models.CharField("ID видео", max_length=100, null=True)
     filename = models.CharField('Название файла', max_length=256)
@@ -261,7 +262,7 @@ class Words(models.Model):
         return str(self.m1)
 
 
-class Tag(models.Model):
+class Tag(TimeStampModelMixin):
     name = models.CharField("Название", max_length=100)
     users = models.ManyToManyField(Profile, verbose_name="Пользователи", blank=True)
     chat = models.ForeignKey(Chat, models.CASCADE, verbose_name="Чат")
@@ -276,7 +277,7 @@ class Tag(models.Model):
         return str(self.name)
 
 
-class Promocode(models.Model):
+class Promocode(TimeStampModelMixin):
     name = models.CharField("Название", max_length=100)
     author = models.ForeignKey(Profile, models.SET_NULL, verbose_name="Пользователь", null=True)
     code = models.CharField("Код", max_length=50)
@@ -294,7 +295,7 @@ class Promocode(models.Model):
         return str(self.name)
 
 
-class GPTPrePrompt(models.Model):
+class GPTPrePrompt(TimeStampModelMixin):
     CHATGPT = 'chatgpt'
     GIGACHAT = 'gigachat'
     GEMINI = 'gemini'
@@ -315,9 +316,7 @@ class GPTPrePrompt(models.Model):
         unique_together = ('author', 'chat', 'provider')
 
 
-class GPTUsage(models.Model):
-    created_at = models.DateTimeField(auto_now_add=True)
-
+class GPTUsage(TimeStampModelMixin):
     author = models.ForeignKey(Profile, models.CASCADE, verbose_name="Пользователь", null=True, db_index=True)
     cost = models.FloatField("Стоимость запроса", default=0)
 

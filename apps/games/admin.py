@@ -1,46 +1,47 @@
 from django.contrib import admin
 
 from apps.games.models import Gamer, Rate, PetrovichUser, PetrovichGames, RouletteRate, BullsAndCowsSession, Wordle
+from apps.service.mixins import TimeStampAdminMixin
 
 
 @admin.register(Gamer)
-class GamerAdmin(admin.ModelAdmin):
+class GamerAdmin(TimeStampAdminMixin):
     search_fields = ('profile__name', 'profile__surname', 'profile__nickname_real')
     list_display = ('profile', 'points', 'roulette_points')
     list_editable = ('points', 'roulette_points')
 
 
 @admin.register(Rate)
-class RateAdmin(admin.ModelAdmin):
+class RateAdmin(TimeStampAdminMixin):
     list_display = ('gamer', 'chat', 'rate')
     ordering = ('-chat',)
 
 
 @admin.register(PetrovichUser)
-class PetrovichUserAdmin(admin.ModelAdmin):
+class PetrovichUserAdmin(TimeStampAdminMixin):
     search_fields = ('profile__name', 'profile__surname', 'profile__nickname_real')
     list_display = ('profile', 'chat', 'wins', 'active',)
     list_filter = (('profile', admin.RelatedOnlyFieldListFilter), ('chat', admin.RelatedOnlyFieldListFilter),)
 
 
 @admin.register(PetrovichGames)
-class PetrovichGamesAdmin(admin.ModelAdmin):
+class PetrovichGamesAdmin(TimeStampAdminMixin):
     search_fields = ('profile__name', 'profile__surname', 'profile__nickname_real')
     list_display = ('profile', 'date', 'chat',)
     list_filter = (('profile', admin.RelatedOnlyFieldListFilter), ('chat', admin.RelatedOnlyFieldListFilter),)
 
 
 @admin.register(RouletteRate)
-class RouletteRateAdmin(admin.ModelAdmin):
+class RouletteRateAdmin(TimeStampAdminMixin):
     list_display = ('gamer', 'chat', 'rate_on', 'rate',)
 
 
 @admin.register(BullsAndCowsSession)
-class BullsAndCowsSessionAdmin(admin.ModelAdmin):
+class BullsAndCowsSessionAdmin(TimeStampAdminMixin):
     search_fields = ('profile__name', 'profile__surname', 'profile__nickname_real')
     list_display = ('profile', 'chat', 'number', 'steps',)
 
 
 @admin.register(Wordle)
-class WordleAdmin(admin.ModelAdmin):
+class WordleAdmin(TimeStampAdminMixin):
     list_display = ('profile', 'chat', 'word', 'steps', 'hypotheses')
