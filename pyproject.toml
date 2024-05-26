@@ -35,6 +35,7 @@ xmltodict = "^0.13.0"
 yandex-music = "^2.2.0"
 yt-dlp = "^2024.4.9"
 spotipy = "^2.23.0"
+numpy = "^1.26.4"
 
 [tool.poetry.dev-dependencies]
 
