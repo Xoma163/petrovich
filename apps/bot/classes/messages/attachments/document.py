@@ -18,6 +18,10 @@ class DocumentMimeType:
     def is_text(self):
         return self._check_value('text')
 
+    @property
+    def is_audio(self):
+        return self._check_value('audio')
+
     def _check_value(self, _type):
         return self.type.startswith(f'{_type}/')
 

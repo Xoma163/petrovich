@@ -7,8 +7,9 @@ class VoiceAttachment(Attachment):
 
     def __init__(self):
         super().__init__(self.TYPE)
-        self.duration = None  # sec
+        self.duration: float | None = None  # sec
         self.activity = ActivitiesEnum.UPLOAD_AUDIO
+        self.ext = 'ogg'
 
     def parse_tg(self, event):
         self.duration = event['duration']

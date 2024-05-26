@@ -5,14 +5,14 @@ from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import AcceptExtraCommand
 from apps.bot.classes.const.activities import ActivitiesEnum
 from apps.bot.classes.const.consts import Platform, Role
-from apps.bot.classes.const.exceptions import PSkip
+from apps.bot.classes.const.exceptions import PSkip, PWarning
 from apps.bot.classes.event.event import Event
 from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
 from apps.bot.classes.messages.attachments.audio import AudioAttachment
 from apps.bot.classes.messages.attachments.videonote import VideoNoteAttachment
 from apps.bot.classes.messages.attachments.voice import VoiceAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
-from apps.bot.utils.audio_converter import AudioConverter
+from apps.bot.utils.audio.converter import AudioConverter
 from apps.service.models import GPTUsage
 
 
@@ -44,6 +44,8 @@ class VoiceRecognition(AcceptExtraCommand):
 
     bot: TgBot
 
+    MAX_FILE_SIZE_MB = 24
+
     @staticmethod
     def accept_extra(event: Event) -> bool:
         if event.has_voice_message or event.has_video_note:
@@ -60,33 +62,32 @@ class VoiceRecognition(AcceptExtraCommand):
         return False
 
     def start(self) -> ResponseMessage:
-        audio_messages = self.event.get_all_attachments([VoiceAttachment, VideoNoteAttachment, AudioAttachment])
-        audio_message = audio_messages[0]
-        audio_mp3 = AudioConverter.convert(audio_message, 'mp3')
-        audio_message.content = audio_mp3
+        with ChatActivity(self.bot, ActivitiesEnum.TYPING, self.event.peer_id):
+            audio_message = self.event.get_all_attachments(self.attachments)[0]
+            if not audio_message.ext:
+                raise PWarning("Для вложения не указано расширение (mp3/oga/wav). Укажите его для корректной работы")
 
-        chat_gpt_api = ChatGPTAPI(log_filter=self.event.log_filter, sender=self.event.sender)
-        with ChatActivity(self.bot, ActivitiesEnum.UPLOAD_AUDIO, self.event.peer_id):
-            response: GPTAPIVoiceRecognitionResponse = chat_gpt_api.recognize_voice(audio_message)
-        answer = response.text
-        if self.event.message.mentioned:
-            GPTUsage.add_statistics(self.event.sender, response.usage)
+            if audio_message.size / 1024 / 1024 > self.MAX_FILE_SIZE_MB:
+                chunks = AudioConverter.split_audio(audio_message, self.MAX_FILE_SIZE_MB)
 
-        answer = self.spoiler_text(answer)
+                attachments = []
+                for chunk in chunks:
+                    audio = AudioAttachment()
+                    audio.content = chunk
+                    audio.ext = audio_message.ext
+                    attachments.append(audio)
+            else:
+                attachments = [audio_message]
+
+            answers = []
+            for attachment in attachments:
+                chat_gpt_api = ChatGPTAPI(log_filter=self.event.log_filter, sender=self.event.sender)
+                response: GPTAPIVoiceRecognitionResponse = chat_gpt_api.recognize_voice(attachment)
+                answer = response.text
+                if self.event.message.mentioned:
+                    GPTUsage.add_statistics(self.event.sender, response.usage)
+
+                answers.append(answer)
+            answer = "\n\n".join(answers)
 
         return ResponseMessage(ResponseMessageItem(text=answer, reply_to=self.event.message.id))
-
-    def spoiler_text(self, answer: str) -> str:
-        spoiler_text = "спойлер"
-
-        if spoiler_text not in answer.lower():
-            return answer
-
-        spoiler_index = answer.lower().index(spoiler_text)
-        text_before_spoiler = answer[:spoiler_index]
-        text_after_spoiler = answer[spoiler_index + len(spoiler_text):]
-
-        answer = text_before_spoiler + \
-                 self.bot.get_bold_text(spoiler_text) + \
-                 self.bot.get_spoiler_text(text_after_spoiler)
-        return answer

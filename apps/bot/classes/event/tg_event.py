@@ -211,6 +211,9 @@ class TgEvent(Event):
             if DocumentMimeType(document['mime_type']).is_image:
                 self.setup_photo(document)
                 message_text = message.get('caption')
+            elif DocumentMimeType(document['mime_type']).is_audio:
+                self.setup_audio(document)
+                message_text = message.get('caption')
             else:
                 self.setup_document(document)
         elif sticker:

@@ -98,13 +98,16 @@ class ChatGPTAPI(GPT, API):
     def recognize_voice(self, audio: AudioAttachment) -> GPTAPIVoiceRecognitionResponse:
         model = self.DEFAULT_VOICE_RECOGNITION_MODEL
         data = {
-            "model": model.name
+            "model": model.name,
+            "response_format": "verbose_json",
         }
-        r_json = self._do_request(self.VOICE_RECOGNITION_URL, data=data, files={'file': audio.content})
+
+        file = (f"audio.{audio.ext}", audio.download_content())
+        r_json = self._do_request(self.VOICE_RECOGNITION_URL, data=data, files={'file': file})
 
         usage = GPTAPIVoiceRecognitionUsage(
             model=model,
-            voice_duration=audio.duration
+            voice_duration=r_json['duration']
         )
 
         r = GPTAPIVoiceRecognitionResponse(
