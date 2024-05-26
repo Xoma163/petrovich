@@ -1,16 +1,14 @@
-import os
+from PIL import Image, ImageDraw
 
-from PIL import Image, ImageDraw, ImageFont
-
-from apps.bot.utils.utils import get_image_size_by_text
-from petrovich.settings import STATIC_ROOT
+from apps.bot.utils.utils import get_image_size_by_text, get_font_by_path
 
 
 class DemotivatorText:
     def __init__(self, text, font_size, color, padding, margin, available_width):
         self.text = text
-        font_path = os.path.join(STATIC_ROOT, 'fonts/TimesNewRoman.ttf')
-        self.font = ImageFont.truetype(font_path, font_size)
+        font_name = "TimesNewRoman.ttf"
+        self.font = get_font_by_path(font_name, font_size)
+
         self.color = color
         self.padding = padding
         self.margin = margin

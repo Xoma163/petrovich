@@ -31,8 +31,7 @@ class Words(Command):
             'https://www.googleapis.com/auth/drive'
         ]
 
-        creds = ServiceAccountCredentials.from_json_keyfile_name(f"{BASE_DIR}/secrets/Petrovich-google.json",
-                                                                 scopes)
+        creds = ServiceAccountCredentials.from_json_keyfile_name(f"{BASE_DIR}/secrets/Petrovich-google.json", scopes)
         client = gspread.authorize(creds)
         worksheets = client.open('Петрович').worksheets()
 

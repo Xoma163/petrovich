@@ -15,6 +15,7 @@ from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.messages.attachments.attachment import Attachment
 from apps.bot.classes.messages.response_message import ResponseMessageItem
 from apps.service.models import Service
+from petrovich.settings import STATIC_ROOT
 
 
 def random_probability(probability) -> bool:
@@ -174,7 +175,7 @@ def tanimoto(s1: str, s2: str) -> float:
     return c / (a + b - c)
 
 
-def get_image_size_by_text(txt: str, font) -> (int, int):
+def get_image_size_by_text(txt: str, font) -> tuple[int, int]:
     """
     Вычисление размеро текста если оно будет изображением
     """
@@ -191,14 +192,14 @@ def draw_text_on_image(text: str):
     Рисование текста на изображении
     :return: bytearray Image
     """
-    from petrovich.settings import STATIC_ROOT
 
     fontsize = 16
 
     text_color = "black"
     background_color = "white"
 
-    font = ImageFont.truetype(os.path.join(STATIC_ROOT, 'fonts/consolas.ttf'), fontsize, encoding="unic")
+    font = get_font_by_path("consolas.ttf", fontsize)
+
     width, height = get_image_size_by_text(text, font)
     width += 10
     height += 10
@@ -551,7 +552,11 @@ def retry(times, exceptions, except_exceptions=None, sleep_time=0):
     return decorator
 
 
-def get_default_headers():
+def get_default_headers() -> dict:
     return {
         'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
     }
+
+
+def get_font_by_path(font_path: str, size: int) -> ImageFont:
+    return ImageFont.truetype(os.path.join(STATIC_ROOT, f'fonts/{font_path}'), size, encoding="unic")

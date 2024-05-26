@@ -1,8 +1,7 @@
 import json
-import os
 from threading import Lock
 
-from PIL import ImageFont, Image, ImageDraw
+from PIL import Image, ImageDraw
 
 from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import Command
@@ -10,9 +9,8 @@ from apps.bot.classes.const.consts import Platform, Role, rus_alphabet
 from apps.bot.classes.const.exceptions import PWarning, PSkip
 from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
 from apps.bot.classes.messages.response_message import ResponseMessageItem, ResponseMessage
-from apps.bot.utils.utils import random_event, send_message_session_or_edit
+from apps.bot.utils.utils import random_event, send_message_session_or_edit, get_font_by_path
 from apps.games.models import Wordle as WordleModel
-from petrovich.settings import STATIC_ROOT
 
 lock = Lock()
 
@@ -229,7 +227,7 @@ class WordleImageGenerator:
 
     PADDING = 25
 
-    FONT_PATH = os.path.join(STATIC_ROOT, 'fonts/Intro.otf')
+    FONT_NAME = "Intro.otf"
 
     def generate(self, words, correct_letters, exactly_correct_letters, wrong_letters, secret_word):
         image_words = self.generate_words(words, secret_word)
@@ -246,7 +244,8 @@ class WordleImageGenerator:
     def generate_words(self, words: list, secret_word):
         image = Image.new("RGBA", (self.MAIN_WINDOW_WIDTH, self.MAIN_WINDOW_HEIGHT), self.COLOR_BACKGROUND)
         draw = ImageDraw.Draw(image)
-        font = ImageFont.truetype(self.FONT_PATH, self.MAIN_WINDOW_CELL_WIDTH - 10, encoding="unic")
+        font = get_font_by_path(self.FONT_NAME, self.MAIN_WINDOW_CELL_WIDTH - 10)
+
 
         for i in range(0, self.MAIN_WINDOW_CELLS_COUNT):
             word = None
@@ -289,7 +288,7 @@ class WordleImageGenerator:
 
         image = Image.new("RGBA", (self.KEYBOARD_WIDTH, self.KEYBOARD_HEIGHT), self.COLOR_BACKGROUND)
         draw = ImageDraw.Draw(image)
-        font = ImageFont.truetype(self.FONT_PATH, self.KEYBOARD_CELL_WIDTH, encoding="unic")
+        font = get_font_by_path(self.FONT_NAME, self.KEYBOARD_CELL_WIDTH)
 
         for i, row in enumerate(layouts):
 

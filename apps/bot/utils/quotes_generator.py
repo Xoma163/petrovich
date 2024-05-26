@@ -1,11 +1,9 @@
-import os
 import textwrap
 from io import BytesIO
 
-from PIL import ImageFont, Image, ImageDraw, ImageFilter
+from PIL import Image, ImageDraw, ImageFilter
 
-from apps.bot.utils.utils import get_image_size_by_text
-from petrovich.settings import STATIC_ROOT
+from apps.bot.utils.utils import get_image_size_by_text, get_font_by_path
 
 
 class QuotesGenerator:
@@ -68,7 +66,8 @@ class QuotesGenerator:
         line_width = 200
         text_color = "#333333"
         text = title
-        font = ImageFont.truetype(os.path.join(STATIC_ROOT, 'fonts/Alegreya-Regular.ttf'), fontsize, encoding="unic")
+        font = get_font_by_path("Alegreya-Regular.ttf", fontsize)
+
         width, _ = get_image_size_by_text(text, font)
         img = Image.new('RGB', (self.WIDTH, margin_top * 2 + 2), self.BACKGROUND_COLOR)
         d = ImageDraw.Draw(img)
@@ -89,7 +88,8 @@ class QuotesGenerator:
         line_width_2 = 77
         text_color = "#333333"
         text = "© Петрович"
-        font = ImageFont.truetype(os.path.join(STATIC_ROOT, 'fonts/Alegreya-Regular.ttf'), fontsize, encoding="unic")
+        font = get_font_by_path("Alegreya-Regular.ttf", fontsize)
+
         width, _ = get_image_size_by_text(text, font)
         img = Image.new('RGB', (self.WIDTH, margin_top * 2 + 2), self.BACKGROUND_COLOR)
         d = ImageDraw.Draw(img)
@@ -124,10 +124,8 @@ class QuotesGenerator:
             max_text_width = 215
 
         username_start_pos = (margin_left + avatar_size[0] + text_margin_left, margin_top)
-        font_username = ImageFont.truetype(os.path.join(STATIC_ROOT, 'fonts/Roboto-Regular.ttf'), name_font_size,
-                                           encoding="unic")
-        font_message = ImageFont.truetype(os.path.join(STATIC_ROOT, 'fonts/Roboto-Regular.ttf'), message_font_size,
-                                          encoding="unic")
+        font_username = get_font_by_path("Roboto-Regular.ttf", name_font_size)
+        font_message = get_font_by_path("Roboto-Regular.ttf", message_font_size)
 
         _, username_height = get_image_size_by_text(username, font_username)
         msg_start_pos = (username_start_pos[0], username_start_pos[1] + username_height + text_margin_top)
