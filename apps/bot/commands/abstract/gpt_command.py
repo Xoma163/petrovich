@@ -1,5 +1,6 @@
 import datetime
 import logging
+from abc import ABC
 
 from django.db.models import Q, Sum
 
@@ -25,7 +26,7 @@ from petrovich.settings import env
 logger = logging.getLogger()
 
 
-class GPTCommand(Command):
+class GPTCommand(ABC, Command):
     platforms = [Platform.TG]
     priority = 90
     abstract = True

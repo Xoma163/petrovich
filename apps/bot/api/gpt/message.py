@@ -1,4 +1,5 @@
 import dataclasses
+from abc import ABC
 from enum import Enum
 
 
@@ -9,7 +10,7 @@ class GPTMessageRole(Enum):
 
 
 @dataclasses.dataclass
-class GPTMessage:
+class GPTMessage(ABC):
     role: GPTMessageRole
     text: str
     images: list[str] = None
@@ -79,7 +80,7 @@ class GeminiGPTMessage(GPTMessage):
         return f"System prompt: {self.text}" if self.role == GPTMessageRole.SYSTEM else self.text
 
 
-class GPTMessages:
+class GPTMessages(ABC):
     MESSAGE_CLASS = GPTMessage
     MESSAGE_ROLE = GPTMessageRole
 
