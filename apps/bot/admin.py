@@ -34,7 +34,9 @@ class ProfileAdmin(TimeStampAdminMixin):
         ('city', admin.RelatedOnlyFieldListFilter),
         ('groups', admin.RelatedOnlyFieldListFilter),
         'chats__name',)
-    search_fields = ['name', 'surname', 'nickname_real', 'user_id']
+    search_fields = ['name', 'surname', 'nickname_real', 'user__user_id']
+
+    ordering = ["name", "surname"]
 
 
 @admin.register(User)
@@ -43,6 +45,8 @@ class UserAdmin(TimeStampAdminMixin):
     list_display = ('show_user_id', 'show_url', 'platform', 'profile', 'nickname')
     list_filter = ('platform',)
 
+    ordering = ["profile"]
+
 
 @admin.register(Chat)
 class ChatAdmin(TimeStampAdminMixin):
@@ -50,11 +54,14 @@ class ChatAdmin(TimeStampAdminMixin):
     list_display = ('id', 'name', 'platform', 'is_banned', 'kicked')
     list_filter = ('platform', 'kicked')
 
+    ordering = ["name"]
+
 
 @admin.register(Bot)
 class BotAdmin(TimeStampAdminMixin):
     list_display = ('name', 'platform',)
     list_filter = ('platform',)
+    ordering = ["id"]
 
 
 @admin.register(UserSettings)

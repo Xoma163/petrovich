@@ -11,7 +11,7 @@ from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.help_text import HelpTextItem, HelpText, HelpTextItemCommand
 from apps.bot.classes.messages.response_message import ResponseMessageItem, ResponseMessage
 from apps.bot.utils.utils import localize_datetime, remove_tz, random_event
-from apps.games.models import PetrovichGames, PetrovichUser
+from apps.games.models import PetrovichGame, PetrovichUser
 from petrovich.settings import DEFAULT_TIME_ZONE
 
 lock = Lock()
@@ -89,34 +89,31 @@ class Petrovich(Command):
     def menu_play(self) -> ResponseMessage:
         with lock:
             datetime_now = localize_datetime(datetime.datetime.utcnow(), DEFAULT_TIME_ZONE)
-            winner_today = PetrovichGames.objects.filter(chat=self.event.chat).first()
+            winner_today = PetrovichGame.objects.filter(chat=self.event.chat).first()
+
             if winner_today:
                 datetime_last = localize_datetime(remove_tz(winner_today.date), DEFAULT_TIME_ZONE)
                 if (datetime_now.date() - datetime_last.date()).days <= 0:
-                    if winner_today.profile.gender and winner_today.profile.gender == '1':
-                        winner_gender = "Петровна"
-                    else:
-                        winner_gender = "Петрович"
+                    winner_gender = "Петровна" if winner_today.profile.gender == '1' else "Петрович"
                     answer = f"{winner_gender} дня - {winner_today.profile}"
                     return ResponseMessage(ResponseMessageItem(text=answer))
 
             petrovich_gamers = self._get_petrovich_gamers()
             winner = petrovich_gamers.order_by("?").first()
-            if winner:
-                winner = winner.profile
-            else:
+
+            if not winner:
                 button = self.bot.get_button('Зарегистрироваться', self.name, ['рег'])
                 keyboard = self.bot.get_inline_keyboard([button])
                 raise PWarning(
                     f"Нет участников игры. Зарегистрируйтесь! {self.bot.get_formatted_text_line('/петрович рег')}",
                     keyboard=keyboard
                 )
+            winner_profile = winner.profile
 
-            winner_petrovich = PetrovichGames(profile=winner, chat=self.event.chat)
+            winner_petrovich = PetrovichGame(profile=winner_profile, chat=self.event.chat)
             winner_petrovich.save()
 
-            winner_gender = "Петровна" if winner.is_female else "Петрович"
-
+            winner_gender = "Петровна" if winner_profile.gender == '1' else "Петрович"
             first_answer = random_event([
                 "Такс такс такс, кто тут у нас",
                 "*барабанная дробь*",
@@ -145,21 +142,21 @@ class Petrovich(Command):
                 "Так, стоп, хватит держать вас в напряжении!"
             ])
             second_answer = random_event([
-                f"{winner_gender} дня - {self.bot.get_mention(winner)}",
-                f"НЕВЕРОЯТНО, НО {winner_gender} дня - {self.bot.get_mention(winner)}",
-                f"Сначала я не поверил, что {winner_gender} дня - {self.bot.get_mention(winner)}, но куда деваться",
-                f"Мда, и этот человек - {self.bot.get_mention(winner)} сегодня {winner_gender} дня",
-                f"И вот он, крем нашего пирожного — {self.bot.get_mention(winner)}!",
-                f"Аплодируем стоя: {winner_gender} дня — {self.bot.get_mention(winner)}!",
-                f"Игра окончена. Победитель — {self.bot.get_mention(winner)}. Принимайте поздравления, {winner_gender} дня!",
-                f"Кто здесь {winner_gender} дня? Правильно, {self.bot.get_mention(winner)}!",
-                f"Как в казино, только без денег. {winner_gender} дня — {self.bot.get_mention(winner)}, поздравляем!",
-                f"На волне случайности выносится вердикт: {winner_gender} дня — {self.bot.get_mention(winner)}",
-                f"Все путем, {self.bot.get_mention(winner)}. Сегодня ты — звезда, {winner_gender} дня!",
-                f"Забудьте о зодиаках, {winner_gender} дня здесь — {self.bot.get_mention(winner)}",
-                f"Собаки лают, караван идет, а {winner_gender} дня — {self.bot.get_mention(winner)}",
-                f"Расклад таков: {winner_gender} дня почетно присваивается {self.bot.get_mention(winner)}. Ну что, парад готовим?",
-                f"Ладно, примем как данность: {winner_gender} дня – это {self.bot.get_mention(winner)}"
+                f"{winner_gender} дня - {self.bot.get_mention(winner_profile)}",
+                f"НЕВЕРОЯТНО, НО {winner_gender} дня - {self.bot.get_mention(winner_profile)}",
+                f"Сначала я не поверил, что {winner_gender} дня - {self.bot.get_mention(winner_profile)}, но куда деваться",
+                f"Мда, и этот человек - {self.bot.get_mention(winner_profile)} сегодня {winner_gender} дня",
+                f"И вот он, крем нашего пирожного — {self.bot.get_mention(winner_profile)}!",
+                f"Аплодируем стоя: {winner_gender} дня — {self.bot.get_mention(winner_profile)}!",
+                f"Игра окончена. Победитель — {self.bot.get_mention(winner_profile)}. Принимайте поздравления, {winner_gender} дня!",
+                f"Кто здесь {winner_gender} дня? Правильно, {self.bot.get_mention(winner_profile)}!",
+                f"Как в казино, только без денег. {winner_gender} дня — {self.bot.get_mention(winner_profile)}, поздравляем!",
+                f"На волне случайности выносится вердикт: {winner_gender} дня — {self.bot.get_mention(winner_profile)}",
+                f"Все путем, {self.bot.get_mention(winner_profile)}. Сегодня ты — звезда, {winner_gender} дня!",
+                f"Забудьте о зодиаках, {winner_gender} дня здесь — {self.bot.get_mention(winner_profile)}",
+                f"Собаки лают, караван идет, а {winner_gender} дня — {self.bot.get_mention(winner_profile)}",
+                f"Расклад таков: {winner_gender} дня почетно присваивается {self.bot.get_mention(winner_profile)}. Ну что, парад готовим?",
+                f"Ладно, примем как данность: {winner_gender} дня – это {self.bot.get_mention(winner_profile)}"
             ])
 
             return ResponseMessage([

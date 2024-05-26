@@ -13,7 +13,6 @@ class TimeZone(models.Model):
     class Meta:
         verbose_name = "таймзона"
         verbose_name_plural = "таймзоны"
-        ordering = ["name"]
 
     def __str__(self):
         return str(self.name)
@@ -29,7 +28,6 @@ class City(models.Model):
     class Meta:
         verbose_name = "город"
         verbose_name_plural = "города"
-        ordering = ["name"]
 
     def __str__(self):
         return str(self.name)
@@ -104,7 +102,6 @@ class Meme(BaseMeme):
     class Meta:
         verbose_name = "мем"
         verbose_name_plural = "мемы"
-        ordering = ["name"]
 
 
 class Notify(TimeStampModelMixin):
@@ -120,7 +117,6 @@ class Notify(TimeStampModelMixin):
     class Meta:
         verbose_name = "напоминание"
         verbose_name_plural = "напоминания"
-        ordering = ["user"]
 
     def __str__(self):
         return str(self.text)
@@ -173,7 +169,6 @@ class Subscribe(TimeStampModelMixin):
     class Meta:
         verbose_name = "Подписка"
         verbose_name_plural = "Подписки"
-        ordering = ['channel_title']
 
     def __str__(self):
         if self.playlist_title:
@@ -191,7 +186,6 @@ class VideoCache(TimeStampModelMixin):
         unique_together = ('channel_id', 'video_id')
         verbose_name = "Кэш видео"
         verbose_name_plural = "Кэши видео"
-        ordering = ['filename']
 
     def __str__(self):
         return self.filename
@@ -203,7 +197,6 @@ class HoroscopeMeme(BaseMeme):
     class Meta:
         verbose_name = "мем гороскопа"
         verbose_name_plural = "мемы гороскопа"
-        ordering = ["name"]
 
     def get_info(self):
         info = f"Название: {self.name}\n" \
@@ -256,7 +249,6 @@ class Words(models.Model):
     class Meta:
         verbose_name = "Слово"
         verbose_name_plural = "Слова"
-        ordering = ['type', 'id']
 
     def __str__(self):
         return str(self.m1)
@@ -270,7 +262,6 @@ class Tag(TimeStampModelMixin):
     class Meta:
         verbose_name = "Тег"
         verbose_name_plural = "Теги"
-        ordering = ['name']
         unique_together = ('name', 'chat')
 
     def __str__(self):

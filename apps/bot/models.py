@@ -83,8 +83,6 @@ class Chat(Platform, TimeStampModelMixin):
     class Meta:
         verbose_name = "Чат"
         verbose_name_plural = "Чаты"
-        ordering = ["name"]
-
         unique_together = ('chat_id', 'platform',)
 
     def save(self, **kwargs):
@@ -218,7 +216,6 @@ class User(Platform, TimeStampModelMixin):
     class Meta:
         verbose_name = "Пользователь"
         verbose_name_plural = "Пользователи"
-        ordering = ["profile"]
 
         unique_together = ('user_id', 'platform',)
 
@@ -234,7 +231,6 @@ class Bot(Platform, TimeStampModelMixin):
     class Meta:
         verbose_name = "Бот"
         verbose_name_plural = "Боты"
-        ordering = ["id"]
 
         unique_together = ('bot_id', 'platform',)
 

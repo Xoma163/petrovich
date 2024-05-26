@@ -18,7 +18,6 @@ class Gamer(TimeStampModelMixin):
     class Meta:
         verbose_name = "Игрок"
         verbose_name_plural = "Игроки"
-        ordering = ["profile"]
 
     def __str__(self):
         return str(self.profile)
@@ -28,13 +27,11 @@ class Rate(TimeStampModelMixin):
     gamer = models.ForeignKey(Gamer, models.CASCADE, verbose_name="Пользователь", null=True)
     chat = models.ForeignKey(Chat, models.CASCADE, verbose_name="Чат", null=True)
     rate = models.IntegerField("Ставка")
-    date = models.DateTimeField("Дата", auto_now_add=True, blank=True)
     random = models.BooleanField("Случайная", default=False)
 
     class Meta:
         verbose_name = "Ставка"
         verbose_name_plural = "Ставки"
-        ordering = ["chat", "date"]
 
     def __str__(self):
         return str(self.chat) + " " + str(self.gamer)
@@ -47,29 +44,26 @@ class PetrovichUser(TimeStampModelMixin):
 
     @property
     def wins(self):
-        return PetrovichGames.objects.filter(profile=self.profile, chat=self.chat).count()
+        return PetrovichGame.objects.filter(profile=self.profile, chat=self.chat).count()
 
     def wins_by_year(self, year):
-        return PetrovichGames.objects.filter(profile=self.profile, chat=self.chat, date__year=year).count()
+        return PetrovichGame.objects.filter(profile=self.profile, chat=self.chat, date__year=year).count()
 
     class Meta:
         verbose_name = "Петрович игрок"
         verbose_name_plural = "Петрович игроки"
-        ordering = ["profile"]
 
     def __str__(self):
         return str(self.profile)
 
 
-class PetrovichGames(TimeStampModelMixin):
+class PetrovichGame(TimeStampModelMixin):
     profile = models.ForeignKey(Profile, models.CASCADE, verbose_name="Пользователь", null=True)
     chat = models.ForeignKey(Chat, models.CASCADE, verbose_name='Чат', null=True, blank=True)
-    date = models.DateTimeField("Дата", auto_now_add=True, editable=True)
 
     class Meta:
         verbose_name = "Петровича игра"
         verbose_name_plural = "Петрович игры"
-        ordering = ['-date']
 
     def __str__(self):
         return str(self.profile)
@@ -106,7 +100,6 @@ class BullsAndCowsSession(TimeStampModelMixin):
     class Meta:
         verbose_name = 'Сессия "Быки и коровы"'
         verbose_name_plural = 'Сессии "Быки и коровы"'
-        ordering = ["chat"]
 
     def __str__(self):
         return str(self.pk)
@@ -124,7 +117,6 @@ class Wordle(TimeStampModelMixin):
     class Meta:
         verbose_name = 'Сессия "Wordle"'
         verbose_name_plural = 'Сессии "Wordle"'
-        ordering = ["chat"]
 
     def __str__(self):
         return str(self.pk)
