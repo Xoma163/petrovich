@@ -149,57 +149,41 @@ class GPTCommand(Command):
         """
 
         self.event: TgEvent
-        user_message = self._get_user_msg(self.event)
         mc = MessagesCache(self.event.peer_id)
-        data = mc.get_messages()
-        preprompt = self.get_preprompt(self.event.sender, self.event.chat, self.PREPROMPT_PROVIDER)
 
-        history = []
-        if not self.event.fwd:
-            if preprompt:
-                history.append({"role": "system", "content": preprompt})
-            history.append({'role': "user", 'content': user_message})
-            if extra_message:
-                history.append({'role': "user", 'content': extra_message})
-            return history
-
-        reply_to_id = self.event.fwd[0].message.id
         history = []
         if first_event := self._get_first_gpt_event_in_replies(self.event):
+            data = mc.get_messages()
+            reply_to_id = self.event.fwd[0].message.id
+
             while True:
                 raw = data.get(reply_to_id)
                 tg_event = TgEvent({"message": raw})
                 tg_event.setup_event()
                 is_me = str(tg_event.from_id) == env.str("TG_BOT_GROUP_ID")
                 if is_me:
-                    if not tg_event.message.raw:
-                        documents: list[DocumentAttachment] = tg_event.get_all_attachments([DocumentAttachment])
-                        if documents and documents[0].mime_type.is_text:
-                            content = documents[0].read_text()
-                        else:
-                            logger.warning({
-                                "message": "Формирование сообщений для GPT наткнулось на сообщение, где у бота message.text = None"
-                            })
-                            continue
-                    else:
-                        content = tg_event.message.raw
-                    history.append({'role': 'assistant', 'content': content})
-
+                    if msg := self._get_bot_msg(tg_event):
+                        history.append({'role': 'assistant', 'content': msg})
                 else:
-                    msg = self._get_user_msg(tg_event)
-                    history.append({'role': "user", 'content': msg})
+                    if msg := self._get_user_msg(tg_event):
+                        history.append({'role': "user", 'content': msg})
                 reply_to_id = data.get(reply_to_id, {}).get('reply_to_message', {}).get('message_id')
                 if not reply_to_id or tg_event.message.id == first_event.message.id:
                     break
             if first_event.fwd:
+                # unreach?
+                logger.debug({"message": "gpt:175 unreach"})
                 history.append({'role': "user", 'content': first_event.fwd[0].message.raw})
-        else:
-            if self.event.fwd[0].message.raw:
-                history.append({'role': "user", 'content': self.event.fwd[0].message.raw})
+        # Ответ на сообщение
+        elif self.event.fwd and self.event.fwd[0].message.raw:
+            history.append({'role': "user", 'content': self.event.fwd[0].message.raw})
 
+        preprompt = self.get_preprompt(self.event.sender, self.event.chat, self.PREPROMPT_PROVIDER)
         if preprompt:
             history.append({"role": "system", "content": preprompt})
         history = list(reversed(history))
+
+        user_message = self._get_user_msg(self.event)
         history.append({'role': "user", 'content': user_message})
         if extra_message:
             history.append({'role': "user", 'content': extra_message})
@@ -210,12 +194,12 @@ class GPTCommand(Command):
         Получение первого сообщении в серии reply сообщений
         """
 
-        mc = MessagesCache(event.peer_id)
-        data = mc.get_messages()
         if not event.fwd:
             return None
         if not event.fwd[0].is_from_bot_me:
             return None
+        mc = MessagesCache(event.peer_id)
+        data = mc.get_messages()
         reply_to_id = event.fwd[0].message.id
         find_accept_event = None
         while True:
@@ -229,15 +213,36 @@ class GPTCommand(Command):
                 break
         return find_accept_event
 
-    def _get_user_msg(self, event: TgEvent) -> str:
+    def _get_user_msg(self, event: TgEvent) -> str | None:
         """
         Получение текста от пользователя
         """
 
         if event.message.command in self.full_names:
-            return event.message.args_str_case
+            return self._get_common_msg(event, event.message.args_str_case)
         else:
-            return event.message.raw
+            return self._get_common_msg(event, event.message.raw)
+
+    def _get_bot_msg(self, event: TgEvent) -> str | None:
+        return self._get_common_msg(event, event.message.raw)
+
+    @staticmethod
+    def _get_common_msg(event, text: str | None):
+        documents: list[DocumentAttachment] = event.get_all_attachments([DocumentAttachment])
+        text = text if text else ""
+        if documents and documents[0].mime_type.is_text:
+            doc_txt = documents[0].read_text()
+            doc_txt_str = f"Содержимое файла: {doc_txt}"
+            if not text:
+                return doc_txt_str
+            return f"{text}\n{doc_txt_str}"
+        elif event.message.raw:
+            return text
+        else:
+            logger.warning({
+                "message": "Формирование сообщений для GPT наткнулось на сообщение, где message.text = None"
+            })
+            return None
 
     # PREPROMPT
 

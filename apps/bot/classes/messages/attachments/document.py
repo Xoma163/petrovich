@@ -42,6 +42,6 @@ class DocumentAttachment(Attachment):
             self.file_name, self.ext = event['file_name'].rsplit('.', 1)
         except:
             self.file_name = event.get('file_name')
-
+        self.mime_type = DocumentMimeType(event['mime_type'])
     def read_text(self):
         return self.download_content().decode('utf-8')
