@@ -23,8 +23,8 @@ class Command(BaseCommand):
             ScheduleItem("*/10 * * * *", "check_subscribe"),
             # Отправка новостей Паше
             ScheduleItem("0 */6 * * *", "check_pasha_news", "130"),
-            # check promocode expiration
-            ScheduleItem("0 9 * * *", "check_promocode_expiration"),
+            # Удаление сущностей которые должны быть удалены со временем
+            ScheduleItem("0 9 * * *", "auto_delete"),
         ]
 
         dt_now = localize_datetime(datetime.utcnow(), TIME_ZONE).replace(second=0, microsecond=0)
