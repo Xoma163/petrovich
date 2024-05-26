@@ -4,10 +4,13 @@ git reset HEAD --hard
 git clean -fd
 git pull
 
-#npm run build
-venv/bin/python -m pip install --upgrade pip setuptools wheel  | grep -v 'Requirement already satisfied'
+source venv/bin/activate
+
+python -m pip install --upgrade pip setuptools wheel  | grep -v 'Requirement already satisfied'
 poetry install # venv/bin/pip install -r requirements.txt | grep -v 'Requirement already satisfied'
-venv/bin/python manage.py migrate
-venv/bin/python manage.py collectstatic --noinput
+python manage.py migrate
+python manage.py collectstatic --noinput
 
 sudo systemctl restart petrovich
+
+deactivate
