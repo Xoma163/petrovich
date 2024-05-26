@@ -44,6 +44,7 @@ pycryptodomex==3.20.0
 pydub==0.25.1
 pyparsing==3.1.2
 PySocks==1.7.1
+python-dateutil==2.9.0.post0
 python-json-logger==2.0.7
 pytz==2024.1
 redis==5.0.4
