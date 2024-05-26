@@ -20,7 +20,7 @@ clikit==0.6.2
 colorama==0.4.4
 command-not-found==0.3
 crashtest==0.3.1
-cryptography==3.4.8
+cryptography==42.0.4
 dbus-python==1.2.18
 distlib==0.3.4
 distro==1.7.0
