@@ -98,7 +98,7 @@ ubuntu-drivers-common==0.0.0
 ubuntu-pro-client==8001
 ufw==0.36.1
 unattended-upgrades==0.1
-urllib3==1.26.15
+urllib3==1.26.18
 userpath==1.8.0
 virtualenv==20.13.0+ds
 webencodings==0.5.1
