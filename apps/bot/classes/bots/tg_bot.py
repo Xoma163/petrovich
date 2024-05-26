@@ -1,8 +1,7 @@
 import json
 import threading
 from copy import copy
-
-from numpy import inf
+from math import inf
 
 from apps.bot.classes.bot_response import BotResponse
 from apps.bot.classes.bots.bot import Bot
