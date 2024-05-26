@@ -9,10 +9,11 @@ from apps.bot.classes.const.exceptions import PSkip, PWarning
 from apps.bot.classes.event.event import Event
 from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
 from apps.bot.classes.messages.attachments.audio import AudioAttachment
-from apps.bot.classes.messages.attachments.videonote import VideoNoteAttachment
+from apps.bot.classes.messages.attachments.document import DocumentAttachment
+from apps.bot.classes.messages.attachments.video_note import VideoNoteAttachment
 from apps.bot.classes.messages.attachments.voice import VoiceAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
-from apps.bot.utils.audio.converter import AudioConverter
+from apps.bot.utils.audio.splitter import AudioSplitter
 from apps.service.models import GPTUsage
 
 
@@ -68,7 +69,7 @@ class VoiceRecognition(AcceptExtraCommand):
                 raise PWarning("Для вложения не указано расширение (mp3/oga/wav). Укажите его для корректной работы")
 
             if audio_message.size / 1024 / 1024 > self.MAX_FILE_SIZE_MB:
-                chunks = AudioConverter.split_audio(audio_message, self.MAX_FILE_SIZE_MB)
+                chunks = AudioSplitter.split(audio_message, self.MAX_FILE_SIZE_MB)
 
                 attachments = []
                 for chunk in chunks:
@@ -89,5 +90,22 @@ class VoiceRecognition(AcceptExtraCommand):
 
                 answers.append(answer)
             answer = "\n\n".join(answers)
+        return self._get_rm(answer, audio_message.file_name_full)
 
-        return ResponseMessage(ResponseMessageItem(text=answer, reply_to=self.event.message.id))
+    def _get_rm(self, answer: str, filename: str):
+        """
+        Пост-обработка сообщения
+        """
+        answer = answer if answer else "{пустой ответ}"
+
+        rm = ResponseMessage()
+        rmi = ResponseMessageItem(text=answer, reply_to=self.event.message.id)
+        rm.messages.append(rmi)
+        if len(answer) > self.bot.MAX_MESSAGE_TEXT_LENGTH:
+            answer = answer.replace("\n", "<br>")
+            document = DocumentAttachment()
+            document.parse(answer.encode('utf-8'), filename=f'Транскрибация {filename} файла.html')
+            answer = "Полная транскрибация в одном файле"
+            rmi = ResponseMessageItem(text=answer, attachments=[document], reply_to=self.event.message.id)
+            rm.messages.append(rmi)
+        return rm

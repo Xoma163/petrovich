@@ -50,8 +50,6 @@ class GPTCommand(Command):
         "3) Препромпт конфы"
     )
 
-    ANSWER_IS_TOO_BIG_USE_HTML_FILE = "Твой запрос получился слишком большой. Положил ответ в файл"
-
     PREPROMPT_PROVIDER = None
     GPT_API_CLASS = None
 
@@ -356,7 +354,7 @@ class GPTCommand(Command):
             answer = answer.replace("\n", "<br>")
             document = DocumentAttachment()
             document.parse(answer.encode('utf-8'), filename='answer.html')
-            answer = self.ANSWER_IS_TOO_BIG_USE_HTML_FILE
+            answer = "Твой запрос получился слишком большой. Положил ответ в файл"
             rmi = ResponseMessageItem(text=answer, attachments=[document], reply_to=self.event.message.id)
         else:
             rmi = ResponseMessageItem(text=answer, reply_to=self.event.message.id)

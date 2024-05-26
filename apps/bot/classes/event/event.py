@@ -8,7 +8,7 @@ from apps.bot.classes.messages.attachments.link import LinkAttachment
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 from apps.bot.classes.messages.attachments.sticker import StickerAttachment
 from apps.bot.classes.messages.attachments.video import VideoAttachment
-from apps.bot.classes.messages.attachments.videonote import VideoNoteAttachment
+from apps.bot.classes.messages.attachments.video_note import VideoNoteAttachment
 from apps.bot.classes.messages.attachments.voice import VoiceAttachment
 from apps.bot.classes.messages.message import Message
 from apps.bot.models import Profile, Chat, User

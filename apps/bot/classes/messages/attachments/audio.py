@@ -14,16 +14,16 @@ class AudioAttachment(Attachment):
         self.title = None
 
         self.activity = ActivitiesEnum.UPLOAD_AUDIO
-        self.ext: str | None = None
 
     def parse_tg(self, event):
         self.duration = event.get('duration')
         self.size = event['file_size']
 
         self.file_id = event['file_id']
-
+        self.filename_full = event.get('file_name')
         try:
-            self.ext = event['file_name'].rsplit('.')[-1]
+            self.file_name, self.ext = event['file_name'].rsplit('.', 1)
         except:
+            self.file_name = event.get('file_name')
             if event['mime_type'] == 'audio/mpeg':
                 self.ext = 'mp3'

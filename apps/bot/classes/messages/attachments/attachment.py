@@ -28,9 +28,11 @@ class Attachment:
         self.size = 0
         # bytes
         self.content = None
-        self.ext = None
+        self.ext: str | None = None
         # tg
-        self.file_id = None
+        self.file_id: str | None = None
+        self.file_name: str | None = None
+        self.file_name_full: str | None = None
 
         self.name = None
         self.activity = None

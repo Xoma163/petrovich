@@ -11,7 +11,8 @@ class VideoNoteAttachment(Attachment):
         self.thumb = None
         self.activity = ActivitiesEnum.UPLOAD_VIDEO_NOTE
         self.ext = 'oga'
-
+        self.file_name = 'Кружочек'
+        self.file_name_full = f'{self.file_name}.{self.ext}'
 
     def parse_tg(self, event):
         self.duration = event.get('duration')

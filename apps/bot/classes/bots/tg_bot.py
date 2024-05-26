@@ -20,7 +20,7 @@ from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 from apps.bot.classes.messages.attachments.poll import PollAttachment
 from apps.bot.classes.messages.attachments.sticker import StickerAttachment
 from apps.bot.classes.messages.attachments.video import VideoAttachment
-from apps.bot.classes.messages.attachments.videonote import VideoNoteAttachment
+from apps.bot.classes.messages.attachments.video_note import VideoNoteAttachment
 from apps.bot.classes.messages.attachments.voice import VoiceAttachment
 from apps.bot.classes.messages.response_message import ResponseMessageItem, ResponseMessage
 from apps.bot.commands.meme import Meme

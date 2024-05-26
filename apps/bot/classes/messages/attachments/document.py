@@ -33,13 +33,15 @@ class DocumentAttachment(Attachment):
         super().__init__(self.TYPE)
         self.activity = ActivitiesEnum.UPLOAD_DOCUMENT
 
-        self.file_name: str | None = None
         self.mime_type: DocumentMimeType | None = None
 
     def parse_tg(self, event):
         self.file_id = event['file_id']
-        self.file_name = event.get('file_name')
-        self.mime_type = DocumentMimeType(event['mime_type'])
+        self.file_name_full = event.get('file_name')
+        try:
+            self.file_name, self.ext = event['file_name'].rsplit('.', 1)
+        except:
+            self.file_name = event.get('file_name')
 
     def read_text(self):
         return self.download_content().decode('utf-8')

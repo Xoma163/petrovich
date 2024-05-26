@@ -11,7 +11,7 @@ from apps.bot.classes.messages.attachments.poll import PollAttachment
 from apps.bot.classes.messages.attachments.poll_answer import PollAnswerAttachment
 from apps.bot.classes.messages.attachments.sticker import StickerAttachment
 from apps.bot.classes.messages.attachments.video import VideoAttachment
-from apps.bot.classes.messages.attachments.videonote import VideoNoteAttachment
+from apps.bot.classes.messages.attachments.video_note import VideoNoteAttachment
 from apps.bot.classes.messages.attachments.voice import VoiceAttachment
 from apps.bot.classes.messages.message import Message
 from apps.bot.classes.messages.tg.message import TgMessage
