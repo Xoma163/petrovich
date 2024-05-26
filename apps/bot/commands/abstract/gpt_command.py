@@ -332,7 +332,7 @@ class GPTCommand(Command):
         """
         Пост-обработка сообщения в completions
         """
-
+        answer = answer if answer else "{пустой ответ}"
         answer = markdown_to_html(answer, self.bot)
 
         if len(answer) > self.bot.MAX_MESSAGE_TEXT_LENGTH:
