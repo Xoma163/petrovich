@@ -2,7 +2,7 @@ from apps.bot.classes.const.activities import ActivitiesEnum
 
 
 class ChatActivity:
-    def __init__(self, bot: "Bot", activity: ActivitiesEnum, peer_id, send_chat_action=True):
+    def __init__(self, bot, activity: ActivitiesEnum, peer_id, send_chat_action=True):
         self.bot = bot
         self.activity = activity
         self.peer_id = peer_id

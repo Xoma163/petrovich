@@ -35,9 +35,9 @@ class ChatGPTAPI(GPT, API):
         'invalid_api_key': "Некорректный API KEY. Проверьте свой ключ",
     }
 
-    def __init__(self, sender: "Profile" = None, **kwargs):
+    def __init__(self, sender=None, **kwargs):
         super(ChatGPTAPI, self).__init__(**kwargs)
-        self.sender: "Profile" = sender
+        self.sender = sender
 
     def completions(self, messages: GPTMessages, use_image=False) -> GPTAPICompletionsResponse:
         model = self._get_model(use_image=use_image)

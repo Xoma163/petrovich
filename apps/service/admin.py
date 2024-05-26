@@ -88,7 +88,7 @@ class TagAdmin(TimeStampAdminMixin):
 
 
 @admin.register(Promocode)
-class Promocode(TimeStampAdminMixin):
+class PromocodeAdmin(TimeStampAdminMixin):
     list_display = ('name', 'code', 'author', 'expiration', 'description', "is_personal")
     list_filter = ('name', 'author', "is_personal")
     search_fields = ('name', 'code', 'description')
