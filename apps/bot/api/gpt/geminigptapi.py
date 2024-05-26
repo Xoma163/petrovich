@@ -2,6 +2,7 @@ import requests
 from requests import HTTPError
 
 from apps.bot.api.gpt.gpt import GPT
+from apps.bot.api.gpt.message import GPTMessages
 from apps.bot.api.gpt.response import GPTAPICompletionsResponse
 from apps.bot.api.handler import API
 from apps.bot.classes.const.exceptions import PWarning
@@ -22,9 +23,9 @@ class GeminiGPTAPI(GPT, API):
     def __init__(self, **kwargs):
         super(GeminiGPTAPI, self).__init__(**kwargs)
 
-    def completions(self, messages: list, use_image=False) -> GPTAPICompletionsResponse:
+    def completions(self, messages: GPTMessages, use_image=False) -> GPTAPICompletionsResponse:
         data = {
-            "contents": messages,
+            "contents": messages.get_messages(),
             "safetySettings": self._safety_settings
         }
         url = self.VISION_URL if use_image else self.URL

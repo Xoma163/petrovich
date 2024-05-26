@@ -1,6 +1,7 @@
 from collections import OrderedDict
 from itertools import groupby
 
+from apps.bot.api.gpt.message import GPTMessages, GPTMessageRole
 from apps.bot.classes.bots.chat_activity import ChatActivity
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.activities import ActivitiesEnum
@@ -76,7 +77,7 @@ class WTFCommand(Command):
         message = f"{message_header}\n{message_body}"
         return message
 
-    def get_conversation(self, n: int, prompt: str) -> list:
+    def get_conversation(self, n: int, prompt: str) -> GPTMessages:
         events = self.get_last_messages_as_events(n)
         result_message = []
 
@@ -88,17 +89,17 @@ class WTFCommand(Command):
             message = self._format_groupped_messages(sender, messages_from_one_user)
             result_message.append(message)
 
-        messages = []
         preprompt = self.GPT_COMMAND_CLASS.get_preprompt(
             self.event.sender,
             self.event.chat,
-            self.GPT_COMMAND_CLASS.PREPROMPT_PROVIDER
+            self.GPT_COMMAND_CLASS.GPT_PREPROMPT_PROVIDER
         )
+        history: GPTMessages = self.GPT_COMMAND_CLASS.GPT_MESSAGES()
         if preprompt:
-            messages.append({"role": "system", "content": preprompt})
-        messages.append({'role': "user", 'content': prompt})
-        messages.append({'role': "user", 'content': "\n".join(result_message)})
-        return messages
+            history.add_message(GPTMessageRole.SYSTEM, preprompt)
+        history.add_message(GPTMessageRole.USER, prompt)
+        history.add_message(GPTMessageRole.USER, "\n".join(result_message))
+        return history
 
     def get_last_messages_as_events(self, n: int) -> list[Event]:
         mid = self.event.message.id

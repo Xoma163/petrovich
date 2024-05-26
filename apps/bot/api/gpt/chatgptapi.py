@@ -1,6 +1,7 @@
 from json import JSONDecodeError
 
 from apps.bot.api.gpt.gpt import GPT
+from apps.bot.api.gpt.message import GPTMessages
 from apps.bot.api.gpt.models import GPTModels, GPTCompletionModel, GPTImageDrawModel, GPTVoiceRecognitionModel
 from apps.bot.api.gpt.response import GPTAPICompletionsResponse, GPTAPIImageDrawResponse, GPTAPIVoiceRecognitionResponse
 from apps.bot.api.gpt.usage import GPTAPIImageDrawUsage, GPTAPIVoiceRecognitionUsage, GPTAPICompletionsUsage
@@ -38,11 +39,11 @@ class ChatGPTAPI(GPT, API):
         super(ChatGPTAPI, self).__init__(**kwargs)
         self.sender: "Profile" = sender
 
-    def completions(self, messages: list, use_image=False) -> GPTAPICompletionsResponse:
+    def completions(self, messages: GPTMessages, use_image=False) -> GPTAPICompletionsResponse:
         model = self._get_model(use_image=use_image)
         payload = {
             "model": model.name,
-            "messages": messages
+            "messages": messages.get_messages()
         }
 
         if use_image:

@@ -6,6 +6,7 @@ import uuid
 import requests
 
 from apps.bot.api.gpt.gpt import GPT
+from apps.bot.api.gpt.message import GPTMessages, GigachatGPTMessages, GPTMessageRole
 from apps.bot.api.gpt.response import GPTAPICompletionsResponse, GPTAPIImageDrawResponse
 from apps.bot.api.handler import API
 from apps.bot.classes.const.exceptions import PWarning
@@ -28,12 +29,11 @@ class GigaChatGPTAPI(GPT, API):
         super(GigaChatGPTAPI, self).__init__(**kwargs)
         self.access_token = None
 
-    def completions(self, messages: list, use_image=False) -> GPTAPICompletionsResponse:
+    def completions(self, messages: GPTMessages, use_image=False) -> GPTAPICompletionsResponse:
         data = {
             "model": self._get_model(),
             "max_tokens": 2048,
-            "messages": messages,
-            "function_call": "auto"
+            "messages": messages.get_messages(),
         }
 
         r = self._do_request(self.COMPLETIONS_URL, json=data).json()
@@ -43,23 +43,30 @@ class GigaChatGPTAPI(GPT, API):
         return response
 
     def draw(self, prompt) -> GPTAPIImageDrawResponse:
-        messages = [{
-            "role": "system",
-            "content": "Если тебя просят создать изображение, ты должен сгенерировать специальный блок: "
-                       "<fuse>text2image(query: str, style: str)</fuse>, где query — текстовое описание желаемого "
-                       "изображения, style — необязательный параметр, задающий стиль изображения."
-        },
-            {'role': "user", 'content': prompt}
-        ]
-        res = self.completions(messages)
+        messages = GigachatGPTMessages()
+        preprompt = "Если тебя просят создать изображение, ты должен сгенерировать специальный блок: " \
+                    "<fuse>text2image(query: str, style: str)</fuse>, где query — текстовое описание желаемого " \
+                    "изображения, style — необязательный параметр, задающий стиль изображения."
+        messages.add_message(GPTMessageRole.SYSTEM, preprompt)
+        messages.add_message(GPTMessageRole.USER, prompt)
+
+        data = {
+            "model": self._get_model(),
+            "max_tokens": 2048,
+            "messages": messages.get_messages(),
+            "function_call": "auto"
+        }
+        r = self._do_request(self.COMPLETIONS_URL, json=data).json()
+        text = r['choices'][0]['message']['content']
+
 
         src_regexp = r'src\s*=\s*"(.+?)"'
         r = re.compile(src_regexp)
 
         try:
-            file_id = r.findall(res.text)[0]
+            file_id = r.findall(text)[0]
         except Exception:
-            raise PWarning(res.text)
+            raise PWarning(text)
         response = GPTAPIImageDrawResponse(
             images_bytes=[self._get_file_by_id(file_id)]
         )

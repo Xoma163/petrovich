@@ -1,3 +1,4 @@
+from apps.bot.api.gpt.message import GPTMessages
 from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role
@@ -128,7 +129,6 @@ class Turett(Command):
         gpt.bot = self.bot
         gpt.event = self.event
         messages = gpt.get_dialog(new_prompt)
-        messages.append({})
         rmi = self._get_gpt_answer(messages)
         rmi.reply_to = self.event.message.id
         return rmi
@@ -148,7 +148,7 @@ class Turett(Command):
         answer.reply_to = None
         return answer
 
-    def _get_gpt_answer(self, messages: list) -> ResponseMessageItem:
+    def _get_gpt_answer(self, messages: GPTMessages) -> ResponseMessageItem:
         gpt = self.gpt_class()
         gpt.bot = self.bot
         gpt.event = self.event

@@ -3,6 +3,7 @@ import logging
 
 from django.db.models import Q, Sum
 
+from apps.bot.api.gpt.message import GPTMessages, GPTMessageRole
 from apps.bot.api.gpt.response import GPTAPICompletionsResponse, GPTAPIImageDrawResponse
 from apps.bot.classes.bots.chat_activity import ChatActivity
 from apps.bot.classes.command import Command
@@ -52,8 +53,9 @@ class GPTCommand(Command):
         "3) Препромпт конфы"
     )
 
-    PREPROMPT_PROVIDER = None
+    GPT_PREPROMPT_PROVIDER = None
     GPT_API_CLASS = None
+    GPT_MESSAGES = None
 
     def accept(self, event: Event):
         """
@@ -80,12 +82,8 @@ class GPTCommand(Command):
 
         if with_vision:
             if photos := self.event.get_all_attachments([PhotoAttachment]):
-                photos_data = []
-                for photo in photos:
-                    base64 = photo.base64()
-                    photos_data = [({"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64}"}})]
-                messages[-1]['content'] = [{"type": "text", "text": messages[-1]['content']}]
-                messages[-1]['content'] += photos_data
+                base64_photos = [photo.base64() for photo in photos]
+                messages.last_message.images = base64_photos
 
         return self.completions(messages)
 
@@ -127,7 +125,7 @@ class GPTCommand(Command):
                 q = Q(chat=self.event.chat, author=self.event.sender)
                 return self._preprompt_works(1, q, 'персональный препромпт конфы')
 
-    def completions(self, messages, use_statistics=True) -> ResponseMessageItem:
+    def completions(self, messages: GPTMessages, use_statistics=True) -> ResponseMessageItem:
         """
         Стандартное общение с моделью
         """
@@ -145,7 +143,7 @@ class GPTCommand(Command):
 
     # MESSAGES / DIALOG
 
-    def get_dialog(self, extra_message: str | None = None) -> list:
+    def get_dialog(self, extra_message: str | None = None) -> GPTMessages:
         """
         Получение списка всех сообщений с пользователем
         """
@@ -153,7 +151,7 @@ class GPTCommand(Command):
         self.event: TgEvent
         mc = MessagesCache(self.event.peer_id)
 
-        history = []
+        history = self.GPT_MESSAGES()
         if first_event := self._get_first_gpt_event_in_replies(self.event):
             data = mc.get_messages()
             reply_to_id = self.event.fwd[0].message.id
@@ -165,30 +163,30 @@ class GPTCommand(Command):
                 is_me = str(tg_event.from_id) == env.str("TG_BOT_GROUP_ID")
                 if is_me:
                     if msg := self._get_bot_msg(tg_event):
-                        history.append({'role': 'assistant', 'content': msg})
+                        history.add_message(GPTMessageRole.ASSISTANT, msg)
                 else:
                     if msg := self._get_user_msg(tg_event):
-                        history.append({'role': "user", 'content': msg})
+                        history.add_message(GPTMessageRole.USER, msg)
                 reply_to_id = data.get(reply_to_id, {}).get('reply_to_message', {}).get('message_id')
                 if not reply_to_id or tg_event.message.id == first_event.message.id:
                     break
             if first_event.fwd:
                 # unreach?
                 logger.debug({"message": "gpt:175 unreach"})
-                history.append({'role': "user", 'content': first_event.fwd[0].message.raw})
+                history.add_message(GPTMessageRole.USER, first_event.fwd[0].message.raw)
         # Ответ на сообщение
         elif self.event.fwd and self.event.fwd[0].message.raw:
-            history.append({'role': "user", 'content': self.event.fwd[0].message.raw})
+            history.add_message(GPTMessageRole.USER, self.event.fwd[0].message.raw)
 
-        preprompt = self.get_preprompt(self.event.sender, self.event.chat, self.PREPROMPT_PROVIDER)
+        preprompt = self.get_preprompt(self.event.sender, self.event.chat, self.GPT_PREPROMPT_PROVIDER)
         if preprompt:
-            history.append({"role": "system", "content": preprompt})
-        history = list(reversed(history))
+            history.add_message(GPTMessageRole.SYSTEM, preprompt)
+        history.reverse()
 
         user_message = self._get_user_msg(self.event)
-        history.append({'role': "user", 'content': user_message})
+        history.add_message(GPTMessageRole.USER, user_message)
         if extra_message:
-            history.append({'role': "user", 'content': extra_message})
+            history.add_message(GPTMessageRole.USER, extra_message)
         return history
 
     def _get_first_gpt_event_in_replies(self, event) -> TgEvent | None:
@@ -253,7 +251,7 @@ class GPTCommand(Command):
         Обработка препромптов
         """
 
-        q &= Q(provider=self.PREPROMPT_PROVIDER)
+        q &= Q(provider=self.GPT_PREPROMPT_PROVIDER)
 
         if len(self.event.message.args) > args_slice_index:
             # удалить

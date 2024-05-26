@@ -1,4 +1,5 @@
 from apps.bot.api.gpt.gigachatgptapi import GigaChatGPTAPI
+from apps.bot.api.gpt.message import GigachatGPTMessages, GPTMessages
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.help_text import HelpText, HelpTextItem
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
@@ -27,6 +28,7 @@ class GigaChat(GPTCommand):
 
     PREPROMPT_PROVIDER = GPTPrePrompt.GIGACHAT
     GPT_API_CLASS = GigaChatGPTAPI
+    GPT_MESSAGES = GigachatGPTMessages
 
     def start(self) -> ResponseMessage:
         arg0 = self.event.message.args[0] if self.event.message.args else None
@@ -42,7 +44,7 @@ class GigaChat(GPTCommand):
     def menu_draw_image(self, use_statistics=True) -> ResponseMessageItem:
         return super().menu_draw_image(use_statistics=False)
 
-    def completions(self, messages, use_statistics=True) -> ResponseMessageItem:
+    def completions(self, messages: GPTMessages, use_statistics=True) -> ResponseMessageItem:
         return super().completions(messages, use_statistics=False)
 
     def default(self, with_vision=True):
