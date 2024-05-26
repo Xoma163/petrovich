@@ -26,6 +26,7 @@ logger = logging.getLogger()
 
 class GPTCommand(Command):
     platforms = [Platform.TG]
+    priority = 90
     abstract = True
 
     DEFAULT_HELP_TEXT_ITEMS = [
