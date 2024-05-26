@@ -3,6 +3,7 @@ import json
 from apps.bot.classes.const.consts import Platform
 from apps.bot.classes.event.event import Event
 from apps.bot.classes.messages.attachments.audio import AudioAttachment
+from apps.bot.classes.messages.attachments.document import DocumentAttachment, DocumentMimeType
 from apps.bot.classes.messages.attachments.gif import GifAttachment
 from apps.bot.classes.messages.attachments.link import LinkAttachment
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
@@ -207,9 +208,11 @@ class TgEvent(Event):
             self.setup_gif(gif)
             message_text = message.get('caption')
         elif document:
-            if document['mime_type'] in ['image/png', 'image/jpg', 'image/jpeg']:
+            if DocumentMimeType(document['mime_type']).is_image:
                 self.setup_photo(document)
                 message_text = message.get('caption')
+            else:
+                self.setup_document(document)
         elif sticker:
             self.setup_sticker(sticker)
         elif audio:
@@ -273,6 +276,12 @@ class TgEvent(Event):
         tg_poll_answer = PollAnswerAttachment()
         tg_poll_answer.parse_tg(poll_answer_event)
         self.attachments.append(tg_poll_answer)
+
+    def setup_document(self, document):
+        tg_document = DocumentAttachment()
+        tg_document.parse_tg(document)
+        self.attachments.append(tg_document)
+
 
     def setup_link(self, text):
         res = LinkAttachment.parse_link(text)

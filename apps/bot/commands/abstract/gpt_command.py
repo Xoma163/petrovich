@@ -1,4 +1,5 @@
 import datetime
+import logging
 
 from django.db.models import Q, Sum
 
@@ -19,6 +20,8 @@ from apps.bot.utils.cache import MessagesCache
 from apps.bot.utils.utils import markdown_to_html
 from apps.service.models import GPTPrePrompt, GPTUsage
 from petrovich.settings import env
+
+logger = logging.getLogger()
 
 
 class GPTCommand(Command):
@@ -46,6 +49,8 @@ class GPTCommand(Command):
         "2) Персональный препромт\n"
         "3) Препромпт конфы"
     )
+
+    ANSWER_IS_TOO_BIG_USE_HTML_FILE = "Твой запрос получился слишком большой. Положил ответ в файл"
 
     PREPROMPT_PROVIDER = None
     GPT_API_CLASS = None
@@ -169,7 +174,19 @@ class GPTCommand(Command):
                 tg_event.setup_event()
                 is_me = str(tg_event.from_id) == env.str("TG_BOT_GROUP_ID")
                 if is_me:
-                    history.append({'role': 'assistant', 'content': tg_event.message.raw})
+                    if not tg_event.message.raw:
+                        documents: list[DocumentAttachment] = tg_event.get_all_attachments([DocumentAttachment])
+                        if documents and documents[0].mime_type.is_text:
+                            content = documents[0].read_text()
+                        else:
+                            logger.warning({
+                                "message": "Формирование сообщений для GPT наткнулось на сообщение, где у бота message.text = None"
+                            })
+                            continue
+                    else:
+                        content = tg_event.message.raw
+                    history.append({'role': 'assistant', 'content': content})
+
                 else:
                     msg = self._get_user_msg(tg_event)
                     history.append({'role': "user", 'content': msg})
@@ -336,9 +353,10 @@ class GPTCommand(Command):
         answer = markdown_to_html(answer, self.bot)
 
         if len(answer) > self.bot.MAX_MESSAGE_TEXT_LENGTH:
+            answer = answer.replace("\n", "<br>")
             document = DocumentAttachment()
             document.parse(answer.encode('utf-8'), filename='answer.html')
-            answer = "Твой запрос получился слишком большой. Положил ответ в файл"
+            answer = self.ANSWER_IS_TOO_BIG_USE_HTML_FILE
             rmi = ResponseMessageItem(text=answer, attachments=[document], reply_to=self.event.message.id)
         else:
             rmi = ResponseMessageItem(text=answer, reply_to=self.event.message.id)
