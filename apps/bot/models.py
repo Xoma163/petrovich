@@ -54,11 +54,11 @@ class UserSettings(BaseSettings, TimeStampModelMixin):
 
     # GPT
     # Если указан, то будет использоваться он, иначе - общий
-    gpt_key = models.CharField("Ключ GPT", max_length=64, blank=True)
-    gpt_model = models.CharField("модель GPT", max_length=64, choices=GPT_MODEL_CHOICES, blank=True)
+    chat_gpt_key = models.CharField("Ключ GPT", max_length=256, blank=True)
+    chat_gpt_model = models.CharField("модель GPT", max_length=64, choices=GPT_MODEL_CHOICES, blank=True)
 
     def get_gpt_model(self):
-        return GPTModels.get_model_by_name(self.gpt_model)
+        return GPTModels.get_model_by_name(self.chat_gpt_model)
 
     class Meta:
         verbose_name = "Настройка профиля"

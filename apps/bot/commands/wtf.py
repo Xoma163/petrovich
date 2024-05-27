@@ -11,7 +11,7 @@ class WTF(WTFCommand):
     abstract = False
 
     access = Role.USER
-    gpt_key = True
+    chat_gpt_key = True
 
     help_text = HelpText(
         commands_text="обрабатывает сообщения в конфе через ChatGPT",

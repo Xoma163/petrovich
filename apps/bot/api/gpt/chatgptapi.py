@@ -134,7 +134,7 @@ class ChatGPTAPI(GPT, API):
         return r_json
 
     def _get_api_key(self) -> str:
-        user_key = self.sender.settings.gpt_key
+        user_key = self.sender.settings.chat_gpt_key
         if user_key:
             return user_key
         if self.sender.check_role(Role.TRUSTED):

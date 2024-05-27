@@ -14,7 +14,7 @@ class ChatGPT(GPTCommand):
     abstract = False
 
     access = Role.USER
-    gpt_key = True
+    chat_gpt_key = True
 
     help_text = HelpText(
         commands_text="чат ChatGPT",
@@ -44,11 +44,11 @@ class ChatGPT(GPTCommand):
     GPT_MESSAGES = ChatGPTMessages
 
     def start(self) -> ResponseMessage:
-        if not self.event.sender.check_role(Role.TRUSTED) and not self.event.sender.settings.gpt_key:
+        if not self.event.sender.check_role(Role.TRUSTED) and not self.event.sender.settings.chat_gpt_key:
             if self.event.message.args[0] == "ключ":
                 return ResponseMessage(self.menu_key())
             else:
-                self.check_gpt_key()
+                self.check_chat_gpt_key()
 
         arg0 = self.event.message.args[0] if self.event.message.args else None
         menu = [
@@ -88,7 +88,7 @@ class ChatGPT(GPTCommand):
 
         if arg.lower() == "удалить":
             settings = self.event.sender.settings
-            settings.gpt_key = ""
+            settings.chat_gpt_key = ""
             settings.save()
             rmi = ResponseMessageItem(text="Удалил ваш ключ")
         else:
@@ -97,7 +97,7 @@ class ChatGPT(GPTCommand):
                 raise PWarning(
                     "Держите свой ключ в секрете. Я удалил ваше сообщение с ключом (или удалите сами если у меня нет прав). Добавьте его в личных сообщениях")
             settings = self.event.sender.settings
-            settings.gpt_key = arg
+            settings.chat_gpt_key = arg
             settings.save()
             rmi = ResponseMessageItem(text="Добавил новый ключ")
 
@@ -123,7 +123,7 @@ class ChatGPT(GPTCommand):
 
         if len(self.event.message.args) < 2:
             settings = self.event.sender.settings
-            if settings.gpt_model:
+            if settings.chat_gpt_model:
                 answer = f"Текущая модель - {self.bot.get_formatted_text_line(settings.get_gpt_model().name)}"
             else:
                 default_model = self.bot.get_formatted_text_line(self.GPT_API_CLASS.DEFAULT_COMPLETIONS_MODEL.name)
@@ -140,7 +140,7 @@ class ChatGPT(GPTCommand):
             keyboard = self.bot.get_inline_keyboard([button])
             raise PWarning("Не понял какая модель", keyboard=keyboard)
 
-        settings.gpt_model = gpt_model.name
+        settings.chat_gpt_model = gpt_model.name
         settings.save()
-        rmi = ResponseMessageItem(text=f"Поменял модель на {self.bot.get_formatted_text_line(settings.gpt_model)}")
+        rmi = ResponseMessageItem(text=f"Поменял модель на {self.bot.get_formatted_text_line(settings.chat_gpt_model)}")
         return rmi

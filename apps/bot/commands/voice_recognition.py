@@ -22,7 +22,7 @@ class VoiceRecognition(AcceptExtraCommand):
     names = ["голос", "голосовое"]
 
     access = Role.USER
-    gpt_key = True
+    chat_gpt_key = True
 
     help_text = HelpText(
         commands_text="распознаёт голосовое сообщение",
@@ -52,7 +52,7 @@ class VoiceRecognition(AcceptExtraCommand):
     def accept_extra(event: Event) -> bool:
         if event.has_voice_message or event.has_video_note:
             # check gpt key
-            if not event.sender.check_role(Role.TRUSTED) and not event.sender.settings.gpt_key:
+            if not event.sender.check_role(Role.TRUSTED) and not event.sender.settings.chat_gpt_key:
                 return False
 
             if event.is_from_chat and event.chat.settings.recognize_voice:
