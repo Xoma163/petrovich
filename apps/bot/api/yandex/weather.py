@@ -5,7 +5,7 @@ from petrovich.settings import env
 
 
 class YandexWeather(API):
-    URL = "https://api.weather.yandex.ru/v1/informers"
+    URL = "https://api.weather.yandex.ru/v2/informers"
     TOKEN = env.str("YANDEX_WEATHER_TOKEN")
     HEADERS = {
         'X-Yandex-API-Key': TOKEN
@@ -54,13 +54,12 @@ class YandexWeather(API):
     def get_weather_str(self, city: City) -> str:
         data = self._get_weather(city)
 
-        now_str = self._get_weather_part_str(data['fact'])
+        parts = [data['fact']] + data['forecast']['parts']
 
-        forecasts = [self._get_weather_part_str(x) for x in data['forecast']['parts']]
-        forecasts_str = "\n\n".join(forecasts)
-        return f"Погода в {city.name} сейчас:\n" \
-               f"{now_str}\n\n" \
-               f"{forecasts_str}"
+        weather_list = [self._get_weather_part_str(x) for x in parts]
+        weather_str = "\n\n".join(weather_list)
+        return f"Погода. {city.name}.\n\n" \
+               f"{weather_str}"
 
     def _get_weather(self, city: City) -> dict:
         params = {
@@ -77,7 +76,15 @@ class YandexWeather(API):
         return r
 
     def _get_weather_part_str(self, data: dict) -> str:
-        res = [f"{self.WEATHER_TRANSLATOR[data['condition']]}"]
+        res = []
+        # self.DAY_TRANSLATOR
+
+        if 'part_name' in data:
+            res.append(f"Прогноз на {self.DAY_TRANSLATOR[data['part_name']]}:")
+        else:
+            res.append(f"Сейчас:")
+
+        res.append(f"{self.WEATHER_TRANSLATOR[data['condition']]}")
 
         if 'temp_max' in data:
             if data['temp_min'] != data['temp_max']:
