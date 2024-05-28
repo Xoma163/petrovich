@@ -89,7 +89,7 @@ class Petrovich(Command):
     def menu_play(self) -> ResponseMessage:
         with lock:
             datetime_now = localize_datetime(datetime.datetime.utcnow(), DEFAULT_TIME_ZONE)
-            winner_today = PetrovichGame.objects.filter(chat=self.event.chat).first()
+            winner_today = PetrovichGame.objects.filter(chat=self.event.chat).order_by('-created_at').first()
 
             if winner_today:
                 datetime_last = localize_datetime(remove_tz(winner_today.created_at), DEFAULT_TIME_ZONE)
