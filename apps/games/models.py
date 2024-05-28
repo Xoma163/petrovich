@@ -47,7 +47,7 @@ class PetrovichUser(TimeStampModelMixin):
         return PetrovichGame.objects.filter(profile=self.profile, chat=self.chat).count()
 
     def wins_by_year(self, year):
-        return PetrovichGame.objects.filter(profile=self.profile, chat=self.chat, date__year=year).count()
+        return PetrovichGame.objects.filter(profile=self.profile, chat=self.chat, created_at__year=year).count()
 
     class Meta:
         verbose_name = "Петрович игрок"
