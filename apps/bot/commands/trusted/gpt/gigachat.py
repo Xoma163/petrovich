@@ -26,7 +26,7 @@ class GigaChat(GPTCommand):
         extra_text=GPTCommand.DEFAULT_EXTRA_TEXT
     )
 
-    PREPROMPT_PROVIDER = GPTPrePrompt.GIGACHAT
+    GPT_PREPROMPT_PROVIDER = GPTPrePrompt.GIGACHAT
     GPT_API_CLASS = GigaChatGPTAPI
     GPT_MESSAGES = GigachatGPTMessages
 

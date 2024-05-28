@@ -40,7 +40,7 @@ class ChatGPT(GPTCommand):
     )
 
     GPT_API_CLASS = ChatGPTAPI
-    PREPROMPT_PROVIDER = GPTPrePrompt.CHATGPT
+    GPT_PREPROMPT_PROVIDER = GPTPrePrompt.CHATGPT
     GPT_MESSAGES = ChatGPTMessages
 
     def start(self) -> ResponseMessage:
