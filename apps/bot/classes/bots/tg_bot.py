@@ -373,9 +373,23 @@ class TgBot(Bot):
             'Bad Request: failed to get HTTP URL content': "Ссылка не понравилась серверу телеграмм. Внутренняя ошибка.",
             'Bad Request: wrong file identifier/HTTP URL specified': "Ссылка не понравилась серверу телеграмм. Внутренняя ошибка."
         }
+        catch_errors_starts_with = {
+            "Bad Request: can\'t parse entities": "Не смог распарсить markdown/html сущности. Внутренняя ошибка."
+        }
+
         error = r['description']
+
+        catch_errors_start_error = None
+        for key in catch_errors_starts_with:
+            if key in error:
+                catch_errors_start_error = catch_errors_starts_with[key]
+                break
+
         if error in skip_errors:
             return BotResponse(False, r)
+        elif catch_errors_start_error:
+            msg = catch_errors_start_error
+            log_level = "warning"
         elif error in catch_errors:
             msg = catch_errors[error]
             log_level = "warning"
