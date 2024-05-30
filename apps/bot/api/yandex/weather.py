@@ -82,7 +82,7 @@ class YandexWeather(API):
         if 'part_name' in data:
             res.append(f"Прогноз на {self.DAY_TRANSLATOR[data['part_name']]}:")
         else:
-            res.append(f"Сейчас:")
+            res.append("Сейчас:")
 
         res.append(f"{self.WEATHER_TRANSLATOR[data['condition']]}")
 

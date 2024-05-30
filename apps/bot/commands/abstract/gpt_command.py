@@ -5,7 +5,7 @@ from abc import ABC
 from django.db.models import Q, Sum
 
 from apps.bot.api.gpt.message import GPTMessages, GPTMessageRole
-from apps.bot.api.gpt.response import GPTAPICompletionsResponse, GPTAPIImageDrawResponse
+from apps.bot.api.gpt.response import GPTAPIImageDrawResponse, GPTAPICompletionsResponse
 from apps.bot.classes.bots.chat_activity import ChatActivity
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.activities import ActivitiesEnum
@@ -74,7 +74,7 @@ class GPTCommand(ABC, Command):
 
     # DEFAILT MENU
 
-    def default(self, with_vision=True) -> ResponseMessageItem:
+    def default(self, with_vision=True) -> ResponseMessageItem | None:
         """
         Дефолтное поведение при обращении к команде.
         Вызов истории и если нужно использовть vision модель, добавление картинок
@@ -86,7 +86,16 @@ class GPTCommand(ABC, Command):
                 base64_photos = [photo.base64() for photo in photos]
                 messages.last_message.images = base64_photos
 
-        return self.completions(messages)
+        rmi = self.completions(messages)
+
+        r = self.bot.send_response_message_item(rmi)
+        if r.success:
+            return None
+
+        document = self._wrap_text_in_document(rmi.text)
+        rmi.attachments = [document]
+        rmi.text = "Ответ GPT содержит в себе очень много тегов, которые не распарсились. Положил ответ в файл"
+        return rmi
 
     # MENU
     def menu_draw_image(self, use_statistics=True) -> ResponseMessageItem:
@@ -357,14 +366,19 @@ class GPTCommand(ABC, Command):
         answer = markdown_to_html(answer, self.bot)
 
         if len(answer) > self.bot.MAX_MESSAGE_TEXT_LENGTH:
-            answer = answer.replace("\n", "<br>")
-            document = DocumentAttachment()
-            document.parse(answer.encode('utf-8'), filename='answer.html')
+            document = self._wrap_text_in_document(answer)
             answer = "Твой запрос получился слишком большой. Положил ответ в файл"
             rmi = ResponseMessageItem(text=answer, attachments=[document], reply_to=self.event.message.id)
         else:
             rmi = ResponseMessageItem(text=answer, reply_to=self.event.message.id)
         return rmi
+
+    @staticmethod
+    def _wrap_text_in_document(text) -> DocumentAttachment:
+        text = text.replace("\n", "<br>")
+        document = DocumentAttachment()
+        document.parse(text.encode('utf-8'), filename='answer.html')
+        return document
 
     def _get_draw_image_request_text(self):
         """
