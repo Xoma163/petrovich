@@ -17,13 +17,14 @@ from apps.bot.utils.cache import MessagesCache
 
 class Event:
     # None тк иногда требуется вручную создать инстанс Event
-    def __init__(self, raw_event=None, peer_id=None):
+    def __init__(self, raw_event=None, use_db=True):
         from apps.bot.classes.command import Command
 
         if not raw_event:
             raw_event = {}
         self.bot = None
-        self.raw = raw_event  # json
+        self.raw: dict = raw_event  # json
+        self.use_db: bool = use_db
 
         self.is_from_user: bool = False
         self.is_from_bot: bool = False
@@ -31,11 +32,13 @@ class Event:
         self.is_from_chat: bool = False
         self.is_from_pm: bool = False
 
+        self.user_id: int | None = None
         self.user: User | None = None
         self.sender: Profile | None = None
 
+        self.chat_id: int | None = None
         self.chat: Chat | None = None
-        self.peer_id: int = peer_id  # Куда слать ответ
+        self.peer_id: int | None = None  # Куда слать ответ
         self.from_id: int | None = None  # От кого пришло сообщение
         self.platform: Platform | None = None
 
@@ -61,8 +64,8 @@ class Event:
         """
         Метод по установке ивента у каждого бота. Переопределяется всегда
         """
-
-        self._cache()
+        if self.use_db:
+            self._cache()
 
     def need_a_response(self):
         """

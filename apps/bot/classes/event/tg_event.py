@@ -21,9 +21,10 @@ from petrovich.settings import env
 
 class TgEvent(Event):
 
-    def __init__(self, raw_event=None):
+    def __init__(self, raw_event=None, use_db=True):
         from apps.bot.classes.bots.tg_bot import TgBot
-        super().__init__(raw_event)
+        super().__init__(raw_event, use_db)
+
         self.bot = TgBot()
         self.platform = Platform.TG
 
@@ -86,8 +87,10 @@ class TgEvent(Event):
         if chat.get('type') == 'private':
             self.is_from_pm = True
         elif chat.get('type') in ["group", "supergroup", "channel"]:
-            self.chat = self.bot.get_chat_by_id(chat.get('id'))
+            self.chat_id = chat.get('id')
             self.is_from_chat = True
+            if self.use_db:
+                self.chat = self.bot.get_chat_by_id(chat.get('id'))
 
         _from = None
         if self.is_fwd:
@@ -124,14 +127,13 @@ class TgEvent(Event):
         if via_bot and via_bot['username'] == env.str("TG_BOT_LOGIN"):
             self.force_response = False
 
-        if self.sender and self.chat and not self.is_fwd:
+        if self.sender and self.chat and not self.is_fwd and self.use_db:
             self.bot.add_chat_to_profile(self.sender, self.chat)
 
-        if fwd_message_without_voice:
+        if fwd_message_without_voice and self.use_db:
             need_a_response_extra = self.need_a_response_extra()
             if not need_a_response_extra:
                 self.force_response = False
-
         super().setup_event(**kwargs)
 
     def setup_user(self, _from):
@@ -149,9 +151,12 @@ class TgEvent(Event):
                 'surname': _from.get('last_name'),
                 'nickname': _from.get('username'),
             }
-            self.user = self.bot.get_user_by_id(_from['id'], {'nickname': _from.get('username')})
+            self.user_id = _from['id']
+            if self.use_db:
+                self.user = self.bot.get_user_by_id(self.user_id, {'nickname': _from.get('username')})
             defaults.pop('nickname')
-            self.sender = self.bot.get_profile_by_user(self.user, _defaults=defaults)
+            if self.use_db:
+                self.sender = self.bot.get_profile_by_user(self.user, _defaults=defaults)
             self.is_from_user = True
 
     def setup_action(self, message):
@@ -284,7 +289,6 @@ class TgEvent(Event):
         tg_document.parse_tg(document)
         self.attachments.append(tg_document)
 
-
     def setup_link(self, text):
         res = LinkAttachment.parse_link(text)
         for url in res:
@@ -296,7 +300,7 @@ class TgEvent(Event):
         if fwd:
             if fwd.get('message_id') == fwd.get('message_thread_id'):
                 return
-            fwd_event = TgEvent(fwd)
+            fwd_event = TgEvent(fwd, use_db=self.use_db)
             fwd_event.setup_event(is_fwd=True)
             self.fwd = [fwd_event]
 
@@ -315,9 +319,11 @@ class TgEvent(Event):
             'name': _from.get('first_name'),
             'surname': _from.get('last_name')
         }
-        self.user = self.bot.get_user_by_id(_from['id'], {'nickname': _from.get('username')})
-        self.sender = self.bot.get_profile_by_user(self.user, _defaults=defaults)
+        self.user_id = _from['id']
         self.is_from_user = True
+        if self.use_db:
+            self.user = self.bot.get_user_by_id(self.user_id, {'nickname': _from.get('username')})
+            self.sender = self.bot.get_profile_by_user(self.user, _defaults=defaults)
 
     def need_a_response(self):
         """
@@ -327,7 +333,7 @@ class TgEvent(Event):
             return True
         return super().need_a_response()
 
-    @staticmethod
-    def _cache_poll(poll):
-        pc = PollCache(poll['id'])
-        pc.add_poll(poll)
+    def _cache_poll(self, poll):
+        if self.use_db:
+            pc = PollCache(poll['id'])
+            pc.add_poll(poll)

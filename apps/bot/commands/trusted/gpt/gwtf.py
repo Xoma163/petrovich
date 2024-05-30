@@ -6,6 +6,7 @@ from apps.bot.commands.trusted.gpt.gemini import Gemini
 
 class GWTF(WTFCommand):
     name = "gwtf"
+    names = ["гвтф"]
 
     abstract = False
     access = Role.TRUSTED

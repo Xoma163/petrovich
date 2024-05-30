@@ -20,11 +20,12 @@ class Logs(Command):
 
     name = "логи"
     names = ["лог"]
+    access = Role.MODERATOR
 
     help_text = HelpText(
         commands_text="логи бота",
         help_texts=[
-            HelpTextItem(Role.MODERATOR, [
+            HelpTextItem(access, [
                 HelpTextItemCommand(f"[уровень логов = {DEFAULT_LEVEL}] [кол-во записей = {DEFAULT_COUNT}]", "логи")
             ])
         ],
@@ -33,7 +34,6 @@ class Logs(Command):
         )
     )
 
-    access = Role.MODERATOR
 
     def start(self) -> ResponseMessage:
         count = self.DEFAULT_COUNT

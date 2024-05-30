@@ -11,6 +11,7 @@ from apps.bot.classes.event.event import Event
 from apps.bot.classes.event.tg_event import TgEvent
 from apps.bot.classes.help_text import HelpTextItemCommand
 from apps.bot.classes.messages.response_message import ResponseMessage
+from apps.bot.models import User
 from apps.bot.utils.cache import MessagesCache
 
 
@@ -45,7 +46,6 @@ class WTFCommand(Command):
         gpt = self.GPT_COMMAND_CLASS()
         gpt.bot = self.bot
         gpt.event = self.event
-
         with ChatActivity(self.bot, ActivitiesEnum.TYPING, self.event.peer_id):
             answer = gpt.completions(messages)
         return ResponseMessage(answer)
@@ -110,12 +110,23 @@ class WTFCommand(Command):
         messages = OrderedDict(sorted(data.items(), key=lambda x: x[0], reverse=True))
         events = []
 
+        users = {}
         for message_id, message_body in messages.items():
             # не берём последнее сообщение, которым зашли в эту команду :)
             if 1 <= mid - message_id < n + 1:
                 try:
-                    event = TgEvent({'message': message_body})
-                    event.setup_event()
+                    event = TgEvent({'message': message_body}, use_db=False)
+                    event.setup_event(use_db=False)
+
+                    user_id = event.user_id
+                    if user_id not in users:
+                        try:
+                            users[user_id] = User.objects.get(user_id=user_id).profile
+                        except User.DoesNotExist:
+                            users[user_id] = None
+
+                    event.sender = users[user_id]
+
                 except Exception:
                     continue
                 events.append(event)
