@@ -88,6 +88,7 @@ class GPTCommand(ABC, Command):
 
         rmi = self.completions(messages)
 
+        rmi.peer_id = self.event.peer_id
         r = self.bot.send_response_message_item(rmi)
         if r.success:
             return None
