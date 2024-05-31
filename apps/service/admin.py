@@ -107,7 +107,7 @@ class GPTPrepromptAdmin(TimeStampAdminMixin):
 
 @admin.register(GPTUsage)
 class GPTUsageAdmin(TimeStampAdminMixin):
-    list_display = ('created_at', 'author', 'cost',)
+    list_display = ('author', 'cost',)
     list_filter = (
         ('author', admin.RelatedOnlyFieldListFilter),
     )

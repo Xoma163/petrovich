@@ -724,10 +724,11 @@ class TgBot(Bot):
         return f'<{cls.SPOILER_TAG}>{text}</{cls.SPOILER_TAG}>'
 
     @classmethod
-    def get_quote_text(cls, text: str) -> str:
+    def get_quote_text(cls, text: str, expandable: bool = False) -> str:
         """
         Цитата текст
         """
-        return f'<{cls.QUOTE_TAG}>{text}</{cls.QUOTE_TAG}>'
+        expandable = " expandable" if expandable else ""
+        return f'<{cls.QUOTE_TAG}{expandable}>{text}</{cls.QUOTE_TAG}>'
 
     # END EXTRA

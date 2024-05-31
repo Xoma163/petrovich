@@ -42,7 +42,6 @@ class Bot(Thread):
 
     MAX_MESSAGE_TEXT_LENGTH = inf
 
-
     def __init__(self, platform, **kwargs):
         Thread.__init__(self)
         self.log_filter = {}
@@ -531,7 +530,7 @@ class Bot(Thread):
         return text
 
     @classmethod
-    def get_quote_text(cls, text: str) -> str:
+    def get_quote_text(cls, text: str, expandable: bool = False) -> str:
         """
         Цитата текст
         """

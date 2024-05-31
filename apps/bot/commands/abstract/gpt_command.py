@@ -365,6 +365,9 @@ class GPTCommand(ABC, Command):
         """
         answer = answer if answer else "{пустой ответ}"
         answer = markdown_to_html(answer, self.bot)
+        pre = f"<{self.bot.PRE_TAG}>"
+        if self.event.is_from_chat and pre not in answer:
+            answer = self.bot.get_quote_text(answer, expandable=True)
 
         if len(answer) > self.bot.MAX_MESSAGE_TEXT_LENGTH:
             document = self._wrap_text_in_document(answer)
