@@ -11,12 +11,12 @@ from apps.bot.classes.event.event import Event
 from apps.bot.classes.event.tg_event import TgEvent
 from apps.bot.classes.help_text import HelpTextItemCommand
 from apps.bot.classes.messages.response_message import ResponseMessage
+from apps.bot.commands.abstract.gpt_command import GPTCommand
 from apps.bot.models import User
 from apps.bot.utils.cache import MessagesCache
 
 
 class WTFCommand(Command):
-    name = "wtf"
     names = ['саммари', 'суммаризируй']
     access = Role.TRUSTED
     abstract = True
@@ -27,15 +27,14 @@ class WTFCommand(Command):
     DEFAULT_HELP_TEXT_ITEMS = [
         HelpTextItemCommand(
             f"[prompt] [N={DEFAULT_N}]",
-            "обрабатывает последние N сообщений в конфе через ChatGPT по указанному prompt"
+            f"обрабатывает последние N сообщений в конфе через GPT по указанному prompt"
         ),
         HelpTextItemCommand(
             "(пересланное сообщение)",
-            "обрабатывает последние сообщения до пересланного в конфе через ChatGPT по указанному prompt"
+            "обрабатывает последние сообщения до пересланного в конфе через GPT по указанному prompt"
         )
     ]
-
-    GPT_COMMAND_CLASS = None
+    GPT_COMMAND_CLASS: GPTCommand = GPTCommand
 
     def start(self) -> ResponseMessage:
         n, prompt = self._get_n_and_prompt()

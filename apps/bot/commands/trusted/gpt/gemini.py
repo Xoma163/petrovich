@@ -1,5 +1,6 @@
 from apps.bot.api.gpt.geminigptapi import GeminiGPTAPI
-from apps.bot.api.gpt.message import GPTMessages, GeminiGPTMessages
+from apps.bot.api.gpt.gpt import GPTAPI
+from apps.bot.api.gpt.message import GPTMessages, GeminiGPTMessages, GPTMessage
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.help_text import HelpText, HelpTextItem
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
@@ -26,9 +27,9 @@ class Gemini(GPTCommand):
         extra_text=GPTCommand.DEFAULT_EXTRA_TEXT
     )
 
-    GPT_PREPROMPT_PROVIDER = GPTPrePrompt.GEMINI
-    GPT_API_CLASS = GeminiGPTAPI
-    GPT_MESSAGES = GeminiGPTMessages
+    GPT_PREPROMPT_PROVIDER: str = GPTPrePrompt.GEMINI
+    GPT_API_CLASS: GPTAPI = GeminiGPTAPI
+    GPT_MESSAGES: GPTMessage = GeminiGPTMessages
 
     def start(self) -> ResponseMessage:
         arg0 = self.event.message.args[0] if self.event.message.args else None

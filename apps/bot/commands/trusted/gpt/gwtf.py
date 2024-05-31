@@ -1,5 +1,6 @@
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.help_text import HelpText, HelpTextItem
+from apps.bot.commands.abstract.gpt_command import GPTCommand
 from apps.bot.commands.abstract.wtf_command import WTFCommand
 from apps.bot.commands.trusted.gpt.gemini import Gemini
 
@@ -22,4 +23,4 @@ class GWTF(WTFCommand):
         extra_text=f"prompt по умолчанию:\n{WTFCommand.DEFAULT_PROMPT}"
     )
 
-    GPT_COMMAND_CLASS = Gemini
+    GPT_COMMAND_CLASS: GPTCommand = Gemini

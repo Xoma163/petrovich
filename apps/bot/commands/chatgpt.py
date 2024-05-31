@@ -1,5 +1,6 @@
 from apps.bot.api.gpt.chatgptapi import GPTModels, ChatGPTAPI
-from apps.bot.api.gpt.message import ChatGPTMessages
+from apps.bot.api.gpt.gpt import GPTAPI
+from apps.bot.api.gpt.message import ChatGPTMessages, GPTMessage
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
@@ -39,9 +40,9 @@ class ChatGPT(GPTCommand):
         extra_text=GPTCommand.DEFAULT_EXTRA_TEXT
     )
 
-    GPT_API_CLASS = ChatGPTAPI
-    GPT_PREPROMPT_PROVIDER = GPTPrePrompt.CHATGPT
-    GPT_MESSAGES = ChatGPTMessages
+    GPT_PREPROMPT_PROVIDER: str = GPTPrePrompt.CHATGPT
+    GPT_API_CLASS: GPTAPI = ChatGPTAPI
+    GPT_MESSAGES: GPTMessage = ChatGPTMessages
 
     def start(self) -> ResponseMessage:
         if not self.event.sender.check_role(Role.TRUSTED) and not self.event.sender.settings.chat_gpt_key:

@@ -4,7 +4,8 @@ from abc import ABC
 
 from django.db.models import Q, Sum
 
-from apps.bot.api.gpt.message import GPTMessages, GPTMessageRole
+from apps.bot.api.gpt.gpt import GPTAPI
+from apps.bot.api.gpt.message import GPTMessages, GPTMessageRole, GPTMessage
 from apps.bot.api.gpt.response import GPTAPIImageDrawResponse, GPTAPICompletionsResponse
 from apps.bot.classes.bots.chat_activity import ChatActivity
 from apps.bot.classes.command import Command
@@ -54,9 +55,9 @@ class GPTCommand(ABC, Command):
         "3) Препромпт конфы"
     )
 
-    GPT_PREPROMPT_PROVIDER = None
-    GPT_API_CLASS = None
-    GPT_MESSAGES = None
+    GPT_PREPROMPT_PROVIDER: str = None
+    GPT_API_CLASS: GPTAPI = None
+    GPT_MESSAGES: GPTMessage = None
 
     def accept(self, event: Event):
         """

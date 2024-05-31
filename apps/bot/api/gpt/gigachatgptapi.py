@@ -5,15 +5,14 @@ import uuid
 
 import requests
 
-from apps.bot.api.gpt.gpt import GPT
+from apps.bot.api.gpt.gpt import GPTAPI
 from apps.bot.api.gpt.message import GPTMessages, GigachatGPTMessages, GPTMessageRole
 from apps.bot.api.gpt.response import GPTAPICompletionsResponse, GPTAPIImageDrawResponse
-from apps.bot.api.handler import API
 from apps.bot.classes.const.exceptions import PWarning
 from petrovich.settings import env, BASE_DIR
 
 
-class GigaChatGPTAPI(GPT, API):
+class GigachatGPTAPI(GPTAPI):
     AUTH_DATA = env.str("GIGACHAT_AUTH_DATA")
 
     BASE_URL = "https://gigachat.devices.sberbank.ru/api/v1"
@@ -26,7 +25,7 @@ class GigaChatGPTAPI(GPT, API):
     DEFAULT_MODEL = LATEST_MODEL
 
     def __init__(self, **kwargs):
-        super(GigaChatGPTAPI, self).__init__(**kwargs)
+        super(GigachatGPTAPI, self).__init__(**kwargs)
         self.access_token = None
 
     def completions(self, messages: GPTMessages, use_image=False) -> GPTAPICompletionsResponse:
@@ -58,7 +57,6 @@ class GigaChatGPTAPI(GPT, API):
         }
         r = self._do_request(self.COMPLETIONS_URL, json=data).json()
         text = r['choices'][0]['message']['content']
-
 
         src_regexp = r'src\s*=\s*"(.+?)"'
         r = re.compile(src_regexp)

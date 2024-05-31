@@ -1,16 +1,15 @@
 import requests
 from requests import HTTPError
 
-from apps.bot.api.gpt.gpt import GPT
+from apps.bot.api.gpt.gpt import GPTAPI
 from apps.bot.api.gpt.message import GPTMessages
 from apps.bot.api.gpt.response import GPTAPICompletionsResponse
-from apps.bot.api.handler import API
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.utils.proxy import get_proxies
 from petrovich.settings import env
 
 
-class GeminiGPTAPI(GPT, API):
+class GeminiGPTAPI(GPTAPI):
     API_KEY = env.str("GEMINI_API_KEY")
 
     DEFAULT_COMPLETIONS_MODEL: str = "gemini-pro"

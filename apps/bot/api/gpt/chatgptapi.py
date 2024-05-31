@@ -1,12 +1,11 @@
 import re
 from json import JSONDecodeError
 
-from apps.bot.api.gpt.gpt import GPT
+from apps.bot.api.gpt.gpt import GPTAPI
 from apps.bot.api.gpt.message import GPTMessages
 from apps.bot.api.gpt.models import GPTModels, GPTCompletionModel, GPTImageDrawModel, GPTVoiceRecognitionModel
 from apps.bot.api.gpt.response import GPTAPICompletionsResponse, GPTAPIImageDrawResponse, GPTAPIVoiceRecognitionResponse
 from apps.bot.api.gpt.usage import GPTAPIImageDrawUsage, GPTAPIVoiceRecognitionUsage, GPTAPICompletionsUsage
-from apps.bot.api.handler import API
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning, PError
 from apps.bot.classes.messages.attachments.audio import AudioAttachment
@@ -14,7 +13,7 @@ from apps.bot.utils.proxy import get_proxies
 from petrovich.settings import env
 
 
-class ChatGPTAPI(GPT, API):
+class ChatGPTAPI(GPTAPI):
     API_KEY = env.str("OPENAI_KEY")
 
     BASE_URL: str = "https://api.openai.com/v1"
