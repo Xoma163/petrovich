@@ -1,3 +1,4 @@
+import re
 from json import JSONDecodeError
 
 from apps.bot.api.gpt.gpt import GPT
@@ -33,6 +34,7 @@ class ChatGPTAPI(GPT, API):
         503: "ChatGPT недоступен",
         'insufficient_quota': "Закончились деньги((",
         'invalid_api_key': "Некорректный API KEY. Проверьте свой ключ",
+        'rate_limit_exceeded': "Слишком большой запрос"
     }
 
     def __init__(self, sender=None, **kwargs):
@@ -128,7 +130,16 @@ class ChatGPTAPI(GPT, API):
             r_json = r.json()
 
         if error := r_json.get('error'):
-            error_str = self.ERRORS_MAP.get(error.get('code'), "Какая-то ошибка API ChatGPT")
+            code = error.get('code')
+            error_str = self.ERRORS_MAP.get(code, "Какая-то ошибка API ChatGPT")
+
+            if code == "rate_limit_exceeded":
+                message = error.get('message')
+                _r = re.compile(r'Limit (\d*), Requested (\d*)..*Visit (.*) to').findall(message)
+                if _r:
+                    _r = _r[0]
+                    error_str += f"\nЗапрошено токенов - {_r[1]}, доступно - {_r[0]}. Подробнее - {_r[2]}"
+
             raise PError(error_str)
 
         return r_json
