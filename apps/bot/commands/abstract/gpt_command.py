@@ -151,7 +151,7 @@ class GPTCommand(ABC, Command):
         if use_statistics:
             GPTUsage.add_statistics(self.event.sender, response.usage)
 
-        return self._get_completions_rm(response.text)
+        return self._get_completions_rmi(response.text)
 
     # MESSAGES / DIALOG
 
@@ -360,7 +360,7 @@ class GPTCommand(ABC, Command):
 
     # OTHER
 
-    def _get_completions_rm(self, answer: str):
+    def _get_completions_rmi(self, answer: str):
         """
         Пост-обработка сообщения в completions
         """

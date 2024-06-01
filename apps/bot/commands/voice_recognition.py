@@ -91,22 +91,29 @@ class VoiceRecognition(AcceptExtraCommand):
 
                 answers.append(answer)
             answer = "\n\n".join(answers)
-        return self._get_rm(answer, audio_message.file_name_full)
 
-    def _get_rm(self, answer: str, filename: str):
+        rmi = self._get_rmi(answer, audio_message.file_name_full)
+        return ResponseMessage(rmi)
+
+    def _get_rmi(self, answer: str, filename: str) -> ResponseMessageItem:
         """
         Пост-обработка сообщения
         """
         answer = answer if answer else "{пустой ответ}"
-
-        rm = ResponseMessage()
-        rmi = ResponseMessageItem(text=answer, reply_to=self.event.message.id)
-        rm.messages.append(rmi)
+        answer = self.bot.get_quote_text(answer, expandable=True)
+        # Если ответ слишком длинный - кладём в файл
         if len(answer) > self.bot.MAX_MESSAGE_TEXT_LENGTH:
-            answer = answer.replace("\n", "<br>")
-            document = DocumentAttachment()
-            document.parse(answer.encode('utf-8'), filename=f'Транскрибация {filename} файла.html')
+            document = self._wrap_text_in_document(answer, f'Транскрибация {filename} файла.html')
             answer = "Полная транскрибация в одном файле"
             rmi = ResponseMessageItem(text=answer, attachments=[document], reply_to=self.event.message.id)
-            rm.messages.append(rmi)
-        return rm
+        else:
+            rmi = ResponseMessageItem(text=answer, reply_to=self.event.message.id)
+
+        return rmi
+
+    @staticmethod
+    def _wrap_text_in_document(text, filename) -> DocumentAttachment:
+        text = text.replace("\n", "<br>")
+        document = DocumentAttachment()
+        document.parse(text.encode('utf-8'), filename=f'Транскрибация {filename} файла.html')
+        return document

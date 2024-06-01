@@ -27,7 +27,7 @@ class WTFCommand(Command):
     DEFAULT_HELP_TEXT_ITEMS = [
         HelpTextItemCommand(
             f"[prompt] [N={DEFAULT_N}]",
-            f"обрабатывает последние N сообщений в конфе через GPT по указанному prompt"
+            "обрабатывает последние N сообщений в конфе через GPT по указанному prompt"
         ),
         HelpTextItemCommand(
             "(пересланное сообщение)",
