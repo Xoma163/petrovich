@@ -21,16 +21,16 @@ class SunoAI:
     def get_info(url) -> SunoAIData:
         r = requests.post(url)
         bs4 = BeautifulSoup(r.content, 'html.parser')
-
         title = bs4.find('meta', attrs={'property': 'og:title'}).attrs['content'].replace(" | Suno", "")
         audio_url = bs4.find('meta', attrs={'property': 'og:audio'}).attrs['content']
         cover_url = bs4.find('meta', attrs={'property': 'og:image'}).attrs['content']
 
         author = re.findall(r'\\"display_name\\":\\"(.*)\\",\\"handle', r.text)
         author = author[0] if author else None
-
-        text = re.findall(r'"prompt\\":\\"(.*)\\",\\"gpt', r.text)
-        text = text[0].replace("\\\\", "\\").replace("\\n", "\n") if text else None
+        title = title.replace(f"by @{author.lower()}", '').strip()
+        text = None
+        # text = re.findall(r'"prompt\\":\\"(.*)\\",\\"gpt', r.text)
+        # text = text[0].replace("\\\\", "\\").replace("\\n", "\n") if text else None
 
         return SunoAIData(
             title,
