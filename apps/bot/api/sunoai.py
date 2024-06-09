@@ -29,8 +29,6 @@ class SunoAI:
         author = author[0] if author else None
         title = title.replace(f"by @{author.lower()}", '').strip()
         text = None
-        # text = re.findall(r'"prompt\\":\\"(.*)\\",\\"gpt', r.text)
-        # text = text[0].replace("\\\\", "\\").replace("\\n", "\n") if text else None
 
         return SunoAIData(
             title,

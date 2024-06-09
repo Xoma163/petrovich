@@ -1,6 +1,5 @@
 from apps.bot.api.gpt.geminigptapi import GeminiGPTAPI
-from apps.bot.api.gpt.gpt import GPTAPI
-from apps.bot.api.gpt.message import GPTMessages, GeminiGPTMessages, GPTMessage
+from apps.bot.api.gpt.message import GPTMessages, GeminiGPTMessages
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.help_text import HelpText, HelpTextItem
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
@@ -27,9 +26,8 @@ class Gemini(GPTCommand):
         extra_text=GPTCommand.DEFAULT_EXTRA_TEXT
     )
 
-    GPT_PREPROMPT_PROVIDER: str = GPTPrePrompt.GEMINI
-    GPT_API_CLASS: GPTAPI = GeminiGPTAPI
-    GPT_MESSAGES: GPTMessage = GeminiGPTMessages
+    def __init__(self):
+        super().__init__(GPTPrePrompt.GEMINI, GeminiGPTAPI, GeminiGPTMessages)
 
     def start(self) -> ResponseMessage:
         arg0 = self.event.message.args[0] if self.event.message.args else None
@@ -45,7 +43,7 @@ class Gemini(GPTCommand):
         # Если картинка, то просто игнорируем препромпт
         last_message = messages.last_message
         if last_message.images:
-            messages = self.GPT_MESSAGES()
+            messages = self.gpt_messages_class()
             messages.add_message(last_message.role, last_message.text, last_message.images)
         return super().completions(messages, use_statistics=False)
 

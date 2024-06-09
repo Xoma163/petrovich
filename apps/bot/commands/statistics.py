@@ -32,8 +32,6 @@ class Statistics(Command):
         ),
     )
 
-    # conversation = True
-
     def start(self) -> ResponseMessage:
         if not self.event.message.args:
             answer = self.menu_all()

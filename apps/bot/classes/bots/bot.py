@@ -124,7 +124,7 @@ class Bot(Thread):
             self.send_response_message(rm)
         return rm
 
-    def send_response_message(self, rm: ResponseMessage) -> BotResponse | None:
+    def send_response_message(self, rm: ResponseMessage) -> list[BotResponse] | None:
         """
         Отправка ResponseMessage сообщения
         Вовзращает список результатов отправки в формате

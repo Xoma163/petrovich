@@ -1,60 +1,86 @@
 import os
-from os import listdir
 from os.path import isfile, join
 
-from django.core.management import BaseCommand
 from django.core.management import call_command
+from django.core.management.base import BaseCommand, CommandError
 from django.db import connection
 
 
-# ToDo: add args (prod or local)
+# ToDo: test
 class Command(BaseCommand):
     """
-    Как пользоваться?
-    1) На локале запускаем скрипт, он удалит все старые файлы миграций и сотрёт их из django_migrations в БД
-    2) Коммитим новые миграции, удаляем из гита старые (не забываем)
-    3) Проверяем себя showmigrations
-    4) Заливаем и комментим строку с makemigrations
-    5) Запускаем скрипт на проде
-
-    Скрипт - сборная солянка из 3х других.
+    Пример запуска
+    reset_migrations dev --apps bot service games
     """
-    help = "Delete all migrations from one app, reset database and create one new migration"
+
+    help = 'Сброс миграций и "типа" squah их в одну миграцию'
+
+    PROD = "prod"
+    DEV = "dev"
+
+    MODE = "mode"
+    APPS = "apps"
 
     def __init__(self, *args, **kwargs):
         self.cursor = connection.cursor()
         super(Command, self).__init__(*args, **kwargs)
 
     def add_arguments(self, parser):
+        help_text = [
+            "1) Запускаем скрипт на dev, он удалит все старые файлы миграций и сотрёт их из django_migrations в БД",
+            "2) Коммитим новые миграции, удаляем из гита старые (не забываем)",
+            "3) Проверяем себя showmigrations",
+            "4) Заливаем и комментим строку с makemigrations",
+            "5) Запускаем скрипт на prod",
+        ]
+        parser.description = "\n".join(help_text)
+        parser.add_argument(
+            self.MODE,
+            type=str,
+            help='Стенд на котором запускается скрипт. "prod" для продакшена, "dev" для дев стенда и локальной разработки.'
+        )
         parser.add_argument('apps', nargs='+', type=str)
+        parser.add_argument(
+            f"--{self.APPS}",
+            type=str,
+            nargs='+',
+            help='Список приложений в котором нужно произвести сброс миграций'
+        )
 
-    def delete_django_migrations_db_app(self, app):
-        self.stdout.write("Deleting APP (%s) in database" % app)
-        self.cursor.execute("DELETE from django_migrations WHERE app = %s", [app])
+    def delete_django_migrations_db_app(self, app: str):
+        self.stdout.write(f'Сброс миграций приложения "{app}" в БД')
+        self.cursor.execute(f"DELETE from django_migrations WHERE app = {app}")
 
-    def delete_migrations_files_app(self, app):
-        self.stdout.write("Deleting APP (%s) migrations files" % app)
-        migrations_dir = os.path.join(f"apps/{app}", 'migrations')
+    def delete_migrations_files_app(self, app: str):
+        self.stdout.write(f'Удаление миграций приложения "{app}" в файлах')
+        migrations_dir = os.path.join(f"apps", app, 'migrations')
         if os.path.exists(migrations_dir):
-            files = [f for f in listdir(migrations_dir) if isfile(join(migrations_dir, f))]
+            files = [f for f in os.listdir(migrations_dir) if isfile(join(migrations_dir, f))]
             files = list(filter(lambda x: x != '__init__.py', files))
             for file in files:
                 os.remove(os.path.join(migrations_dir, file))
-        self.stdout.write("APP (%s) deleted with success" % app)
+        self.stdout.write(f'Удаление миграций приложения "{app}" выполнено успешно в файлах')
 
-    # ToDo: add args for prod/local
     def handle(self, *args, **options):
+        mode = options['mode']
+
+        if mode not in [self.PROD, self.DEV]:
+            raise CommandError(f'Некорректный "mode". Выберите "{self.PROD}" или "{self.DEV}"')
+
+        is_dev_mode = mode == self.DEV
+
         apps = options['apps']
-        self.stdout.write("Reseting APP %s" % apps)
+        apps_str = ", ".join(apps)
+        self.stdout.write(f'Сброс миграций приложений "{apps_str}" в БД')
         for app in apps:
             self.delete_django_migrations_db_app(app)
-            # uncomment on local. Comment on production
-            # self.delete_migrations_files_app(app)
-            # self.stdout.write("APP (%s) deleted with success" % app)
+            if is_dev_mode:
+                self.delete_migrations_files_app(app)
+                self.stdout.write(f'Миграции приложения "{app}" успешно удалены из БД')
 
-        # uncomment on local. Comment on production
-        # for app in apps:
-        #     call_command('makemigrations', app)
+        if is_dev_mode:
+            for app in apps:
+                call_command('makemigrations', app)
 
         for app in apps:
             call_command('migrate', app, '--fake')

@@ -99,8 +99,4 @@ class Quote(Command):
                 if 'photo' in message:
                     next_append = True
 
-            # if msg.fwd:
-            #     msgs[-1]['fwd'] = self.parse_fwd(msg.fwd)
-            #     next_append = True
-
         return msgs

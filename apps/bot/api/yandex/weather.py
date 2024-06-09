@@ -69,9 +69,9 @@ class YandexWeather(API):
         }
         r = self.requests.get(self.URL, params, headers=self.HEADERS).json()
 
-        if 'status' in r:
-            if r['status'] == 403:
-                raise PWarning("На сегодня я исчерпал все запросы к Yandex Weather :(")
+        status_code = r.get('status')
+        if status_code and status_code == 403:
+            raise PWarning("На сегодня я исчерпал все запросы к Yandex Weather :(")
 
         return r
 

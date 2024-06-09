@@ -1,6 +1,5 @@
 from apps.bot.api.gpt.chatgptapi import GPTModels, ChatGPTAPI
-from apps.bot.api.gpt.gpt import GPTAPI
-from apps.bot.api.gpt.message import ChatGPTMessages, GPTMessage
+from apps.bot.api.gpt.message import ChatGPTMessages
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
@@ -40,9 +39,8 @@ class ChatGPT(GPTCommand):
         extra_text=GPTCommand.DEFAULT_EXTRA_TEXT
     )
 
-    GPT_PREPROMPT_PROVIDER: str = GPTPrePrompt.CHATGPT
-    GPT_API_CLASS: GPTAPI = ChatGPTAPI
-    GPT_MESSAGES: GPTMessage = ChatGPTMessages
+    def __init__(self):
+        super().__init__(GPTPrePrompt.CHATGPT, ChatGPTAPI, ChatGPTMessages)
 
     def start(self) -> ResponseMessage:
         if not self.event.sender.check_role(Role.TRUSTED) and not self.event.sender.settings.chat_gpt_key:
@@ -127,7 +125,7 @@ class ChatGPT(GPTCommand):
             if settings.chat_gpt_model:
                 answer = f"Текущая модель - {self.bot.get_formatted_text_line(settings.get_gpt_model().name)}"
             else:
-                default_model = self.bot.get_formatted_text_line(self.GPT_API_CLASS.DEFAULT_COMPLETIONS_MODEL.name)
+                default_model = self.bot.get_formatted_text_line(self.gpt_api_class.DEFAULT_COMPLETIONS_MODEL.name)
                 answer = f"Модель не установлена. Используется модель по умолчанию - {default_model}"
             return ResponseMessageItem(answer)
 

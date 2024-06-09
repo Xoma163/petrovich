@@ -44,7 +44,6 @@ class MinecraftServer:
         minecraft_server_status = MinecraftServerStatus(self.ip, self.port)
         try:
             self.server_info = minecraft_server_status.get_server_data()
-        # ToDo: check
         except TimeoutError:
             self.server_info = MinecraftServerData()
             self.server_info.online = False

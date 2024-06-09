@@ -13,12 +13,16 @@ class GPTMessageRole(Enum):
 class GPTMessage(ABC):
     role: GPTMessageRole
     text: str
-    images: list[str] = None
+    images: list[str] | None = None
 
     def get_message(self) -> dict:
         raise NotImplementedError()
 
+    def add_message(self):
+        pass
 
+
+@dataclasses.dataclass
 class ChatGPTMessage(GPTMessage):
     def get_message(self) -> dict:
         message = {
@@ -41,6 +45,7 @@ class ChatGPTMessage(GPTMessage):
         return message
 
 
+@dataclasses.dataclass
 class GigachatGPTMessage(ChatGPTMessage):
     def get_message(self) -> dict:
         return {
@@ -49,8 +54,8 @@ class GigachatGPTMessage(ChatGPTMessage):
         }
 
 
+@dataclasses.dataclass
 class GeminiGPTMessage(GPTMessage):
-
     def get_message(self) -> dict:
         message = {
             'role': self._get_role(),
@@ -81,14 +86,13 @@ class GeminiGPTMessage(GPTMessage):
 
 
 class GPTMessages(ABC):
-    MESSAGE_CLASS = GPTMessage
-    MESSAGE_ROLE = GPTMessageRole
-
-    def __init__(self):
+    def __init__(self, gpt_message_class: type[GPTMessage]):
         self._messages: list[GPTMessage] = []
+        self.message_class: type[GPTMessage] = gpt_message_class
 
-    def add_message(self, role, text, images=None):
-        message = self.MESSAGE_CLASS(role, text, images)
+    def add_message(self, role: GPTMessageRole, text: str, images: list[str] | None = None):
+        # ToDo: непонятно почему здесь unexpected argument
+        message = self.message_class(role, text, images)
         self._messages.append(message)
 
     def get_messages(self) -> list[dict]:
@@ -98,20 +102,23 @@ class GPTMessages(ABC):
         self._messages.reverse()
 
     @property
-    def last_message(self) -> MESSAGE_CLASS:
+    def last_message(self) -> GPTMessage:
         return self._messages[-1]
 
 
 class ChatGPTMessages(GPTMessages):
-    MESSAGE_CLASS = ChatGPTMessage
+    def __init__(self):
+        super().__init__(ChatGPTMessage)
 
 
 class GigachatGPTMessages(GPTMessages):
-    MESSAGE_CLASS = GigachatGPTMessage
+    def __init__(self):
+        super().__init__(GigachatGPTMessage)
 
     def add_photo(self, role, text: str, images: list[str]):
         raise NotImplementedError()
 
 
 class GeminiGPTMessages(GPTMessages):
-    MESSAGE_CLASS = GeminiGPTMessage
+    def __init__(self):
+        super().__init__(GeminiGPTMessage)

@@ -239,8 +239,10 @@ class Node:
 
 
 class Grammar:
-    # splits expression by symbol
-    # for example, S->T+S. gram_from = "S", left = "T", symbol = "+", right = "S"
+    """
+    splits expression by symbol
+    for example, S->T+S. gram_from = "S", left = "T", symbol = "+", right = "S"
+    """
 
     def __init__(self):
         self.gram_from = None
@@ -294,7 +296,7 @@ for gram_raw in grams_raw:
     else:
         split = compiled_grammar.symbol.separations(gram_to)
         if len(split) != 1:
-            raise Exception("Grammar " + gram_raw + " is not correct")
+            raise ValueError("Grammar " + gram_raw + " is not correct")
         compiled_grammar.left = split[0][0]  # left_expr
         compiled_grammar.right = split[0][1]  # right_expr
     compiled_grammars.append(compiled_grammar)

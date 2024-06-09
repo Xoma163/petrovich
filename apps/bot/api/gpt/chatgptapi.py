@@ -134,7 +134,7 @@ class ChatGPTAPI(GPTAPI):
 
             if code == "rate_limit_exceeded":
                 message = error.get('message')
-                _r = re.compile(r'Limit (\d*), Requested (\d*)..*Visit (.*) to').findall(message)
+                _r = re.compile(r'Limit (\d*), Requested (\d+)Visit (.*) to').findall(message)
                 if _r:
                     _r = _r[0]
                     error_str += f"\nЗапрошено токенов - {_r[1]}, доступно - {_r[0]}. Подробнее - {_r[2]}"

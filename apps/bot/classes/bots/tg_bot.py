@@ -229,7 +229,7 @@ class TgBot(Bot):
         if audio.title:
             params['title'] = audio.title
 
-        # ToDo: Через public url плохо работает - не тянется название и thumb
+        # Через public url плохо работает - не тянется название и thumb
         if audio.public_download_url:
             if audio.thumb:
                 params['thumbnail'] = audio.thumb
@@ -670,7 +670,6 @@ class TgBot(Bot):
         """
         Форматированный текст
         """
-        # text = text.replace('&', '&amp;').replace('>', '&gt;').replace('<', '&lt;')
         if language:
             pre_inner = f"<{cls.CODE_TAG} class='language-{language}'>{text}</{cls.CODE_TAG}>"
         else:

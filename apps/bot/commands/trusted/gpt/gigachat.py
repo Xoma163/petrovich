@@ -1,6 +1,5 @@
 from apps.bot.api.gpt.gigachatgptapi import GigachatGPTAPI
-from apps.bot.api.gpt.gpt import GPTAPI
-from apps.bot.api.gpt.message import GigachatGPTMessages, GPTMessages, GPTMessage
+from apps.bot.api.gpt.message import GigachatGPTMessages, GPTMessages
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.help_text import HelpText, HelpTextItem
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
@@ -27,9 +26,8 @@ class Gigachat(GPTCommand):
         extra_text=GPTCommand.DEFAULT_EXTRA_TEXT
     )
 
-    GPT_PREPROMPT_PROVIDER: str = GPTPrePrompt.GIGACHAT
-    GPT_API_CLASS: GPTAPI = GigachatGPTAPI
-    GPT_MESSAGES: GPTMessage = GigachatGPTMessages
+    def __init__(self):
+        super().__init__(GPTPrePrompt.GIGACHAT, GigachatGPTAPI, GigachatGPTMessages)
 
     def start(self) -> ResponseMessage:
         arg0 = self.event.message.args[0] if self.event.message.args else None

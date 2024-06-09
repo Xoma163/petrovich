@@ -47,9 +47,9 @@ class Instagram(API):
             raise PWarning("Ошибка API")
         return self._parse_response(r['result'])
 
-    def _parse_response(self, response) -> InstagramAPIData:
+    @staticmethod
+    def _parse_response(response) -> InstagramAPIData:
         data = InstagramAPIData()
-        # data.caption = response[0]['title']
         for item in response:
             print(item['type'])
             real_ext = urlparse(item['url']).path.rsplit('.', 1)[-1]

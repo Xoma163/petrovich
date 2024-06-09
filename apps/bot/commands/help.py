@@ -24,7 +24,7 @@ class Help(Command):
         if self.event.message.args:
             command = self.find_command_by_name(self.event.message.args[0])
             self.check_sender(command.access)
-            answer = get_help_texts_for_command(command, self.event.platform, self.event.sender.get_roles())
+            answer = get_help_texts_for_command(command, self.event.sender.get_roles())
             return ResponseMessage(ResponseMessageItem(text=answer))
 
         answer = \

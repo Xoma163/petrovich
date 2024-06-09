@@ -5,7 +5,7 @@ from abc import ABC
 from django.db.models import Q, Sum
 
 from apps.bot.api.gpt.gpt import GPTAPI
-from apps.bot.api.gpt.message import GPTMessages, GPTMessageRole, GPTMessage
+from apps.bot.api.gpt.message import GPTMessages, GPTMessageRole
 from apps.bot.api.gpt.response import GPTAPIImageDrawResponse, GPTAPICompletionsResponse
 from apps.bot.classes.bots.chat_activity import ChatActivity
 from apps.bot.classes.command import Command
@@ -55,9 +55,12 @@ class GPTCommand(ABC, Command):
         "3) Препромпт конфы"
     )
 
-    GPT_PREPROMPT_PROVIDER: str = None
-    GPT_API_CLASS: GPTAPI = None
-    GPT_MESSAGES: GPTMessage = None
+    def __init__(self, gpt_preprompt_provider: str, gpt_api_class: type[GPTAPI], gpt_messages_class: type[GPTMessages]):
+        super().__init__()
+        self.abstract = False
+        self.gpt_preprompt_provider: str = gpt_preprompt_provider
+        self.gpt_api_class: type[GPTAPI] = gpt_api_class
+        self.gpt_messages_class: type[GPTMessages] = gpt_messages_class
 
     def accept(self, event: Event):
         """
@@ -105,7 +108,7 @@ class GPTCommand(ABC, Command):
         Рисование изображения
         """
         request_text = self._get_draw_image_request_text()
-        gpt_api = self.GPT_API_CLASS(log_filter=self.event.log_filter, sender=self.event.sender)
+        gpt_api = self.gpt_api_class(log_filter=self.event.log_filter, sender=self.event.sender)
         with ChatActivity(self.bot, ActivitiesEnum.UPLOAD_PHOTO, self.event.peer_id):
             response: GPTAPIImageDrawResponse = gpt_api.draw(request_text)
             if use_statistics:
@@ -142,7 +145,7 @@ class GPTCommand(ABC, Command):
         Стандартное общение с моделью
         """
 
-        gpt_api = self.GPT_API_CLASS(log_filter=self.event.log_filter, sender=self.event.sender)
+        gpt_api = self.gpt_api_class(log_filter=self.event.log_filter, sender=self.event.sender)
 
         with ChatActivity(self.bot, ActivitiesEnum.TYPING, self.event.peer_id):
             photos = self.event.get_all_attachments([PhotoAttachment])
@@ -163,7 +166,7 @@ class GPTCommand(ABC, Command):
         self.event: TgEvent
         mc = MessagesCache(self.event.peer_id)
 
-        history = self.GPT_MESSAGES()
+        history = self.gpt_messages_class()
         if first_event := self._get_first_gpt_event_in_replies(self.event):
             data = mc.get_messages()
             reply_to_id = self.event.fwd[0].message.id
@@ -190,7 +193,7 @@ class GPTCommand(ABC, Command):
         elif self.event.fwd and self.event.fwd[0].message.raw:
             history.add_message(GPTMessageRole.USER, self.event.fwd[0].message.raw)
 
-        preprompt = self.get_preprompt(self.event.sender, self.event.chat, self.GPT_PREPROMPT_PROVIDER)
+        preprompt = self.get_preprompt(self.event.sender, self.event.chat, self.gpt_preprompt_provider)
         if preprompt:
             history.add_message(GPTMessageRole.SYSTEM, preprompt)
         history.reverse()
@@ -263,7 +266,7 @@ class GPTCommand(ABC, Command):
         Обработка препромптов
         """
 
-        q &= Q(provider=self.GPT_PREPROMPT_PROVIDER)
+        q &= Q(provider=self.gpt_preprompt_provider)
 
         if len(self.event.message.args) > args_slice_index:
             # удалить

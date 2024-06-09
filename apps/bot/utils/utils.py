@@ -120,7 +120,7 @@ def decl_of_num(number, titles: list[str]) -> str:
         return titles[cases[5]]
 
 
-def get_help_texts_for_command(command, platform=None, roles: list[Role] = None) -> str:
+def get_help_texts_for_command(command, roles: list[Role] = None) -> str:
     """
     Получает help_texts для команды
     """

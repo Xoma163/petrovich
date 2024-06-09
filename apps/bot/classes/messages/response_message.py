@@ -7,8 +7,6 @@ class ResponseMessageItem:
 
     URLS_REGEXP = r"(http|ftp|https|tg)(:\/\/)([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-])"
 
-    # HTML_TAGS_REGEXP = r'<([^>]*)>'
-
     def __init__(
             self, text: str = None, attachments: list = None, reply_to: str = None, keyboard: dict = None,
             message_id: str = None, message_thread_id: str = None, peer_id: int = None, log_level='debug',

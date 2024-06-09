@@ -20,7 +20,7 @@ class Command:
     name: str = ""  # Имя команды
     names: list = []  # Вспопогательные имена команды
 
-    help_text: HelpText = None  # текст для команды /команды и для /помощь
+    help_text: HelpText | None = None  # текст для команды /команды и для /помощь
 
     enabled: bool = True  # Включена ли команда
     suggest_for_similar: bool = True  # предлагать ли команду в выдаче похожих команд при ошибке пользователя в вводе
@@ -69,8 +69,6 @@ class Command:
         if self.hidden:
             if self.suggest_for_similar:
                 raise RuntimeError("Поле hidden=True и suggest_for_similar=True не могут быть переданы вместе")
-            # if self.access == Role.USER:
-            #     raise RuntimeError("Поле hidden=True и self.access=Role.USER не могут быть переданы вместе")
 
     def accept(self, event: Event) -> bool:
         """
@@ -176,7 +174,7 @@ class Command:
                 return True
             else:
                 error = "Передано недостаточно аргументов"
-                error += f"\n\n{get_help_texts_for_command(self, self.event.platform)}"
+                error += f"\n\n{get_help_texts_for_command(self)}"
         else:
             error = "Для работы команды требуются аргументы"
         raise PWarning(error, keyboard=self._get_help_button_keyboard())
@@ -198,7 +196,7 @@ class Command:
             return True
 
         error = "Для работы команды требуются аргументы или пересылаемые сообщения"
-        error += f"\n\n{get_help_texts_for_command(self, self.event.platform)}"
+        error += f"\n\n{get_help_texts_for_command(self)}"
         raise PWarning(error, keyboard=self._get_help_button_keyboard())
 
     @staticmethod
@@ -364,7 +362,7 @@ class Command:
         """
         if not self.event.sender.check_role(Role.TRUSTED) and not self.event.sender.settings.chat_gpt_key:
             raise PWarning(
-                f"Для использования ChatGPT укажите свой ключ (API_KEY) {self.bot.get_formatted_text_line(f'/gpt ключ (ключ)')}")
+                f"Для использования ChatGPT укажите свой ключ (API_KEY) {self.bot.get_formatted_text_line('/gpt ключ (ключ)')}")
 
     def handle_menu(self, menu: list, arg: str):
         """
