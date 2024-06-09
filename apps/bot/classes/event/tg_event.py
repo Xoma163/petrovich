@@ -188,56 +188,48 @@ class TgEvent(Event):
             self.message.parse_raw(payload)
 
     def setup_attachments(self, message, payload_message_text=None):
-        photo = message.get('photo')
-        video = message.get('video')
-        video_note = message.get('video_note')
-        gif = message.get('animation')
-        voice = message.get('voice')
-        document = message.get('document')
-        sticker = message.get('sticker')
-        audio = message.get('audio')
-        poll = message.get('poll')
-        poll_answer = message.get('poll_answer')
-        message_text = None
-        if voice:
-            self.setup_voice(voice)
-        elif photo:
-            self.setup_photo(photo[-1])
-            message_text = message.get('caption')
-        elif video:
-            self.setup_video(video)
-            message_text = message.get('caption')
-        elif video_note:
-            self.setup_video_note(video_note)
-        elif gif:
-            self.setup_gif(gif)
-            message_text = message.get('caption')
-        elif document:
-            message_text = message.get('caption')
-            if DocumentMimeType(document['mime_type']).is_image:
-                self.setup_photo(document)
-            elif DocumentMimeType(document['mime_type']).is_audio:
-                self.setup_audio(document)
-            else:
-                self.setup_document(document)
-        elif sticker:
-            self.setup_sticker(sticker)
-        elif audio:
-            self.setup_audio(audio)
-        elif poll:
-            self.setup_poll(poll)
-        elif poll_answer:
-            self.setup_poll_answer(poll_answer)
+        attachment_map = {
+            'voice': self.setup_voice,
+            'photo': lambda x: self.setup_photo(x[-1]),
+            'video': self.setup_video,
+            'video_note': self.setup_video_note,
+            'animation': self.setup_gif,
+            'sticker': self.setup_sticker,
+            'audio': self.setup_audio,
+            'poll': self.setup_poll,
+            'poll_answer': self.setup_poll_answer,
+        }
+
+        for key, setup_function in attachment_map.items():
+            attachment = message.get(key)
+            if attachment:
+                setup_function(attachment)
+                message_text = message.get('caption')
+                break
         else:
-            message_text = message.get('text')
+            document = message.get('document')
+            if document:
+                message_text = message.get('caption')
+                mime_type = DocumentMimeType(document['mime_type'])
+                if mime_type.is_image:
+                    self.setup_photo(document)
+                elif mime_type.is_audio:
+                    self.setup_audio(document)
+                else:
+                    self.setup_document(document)
+            else:
+                message_text = message.get('text')
 
         if payload_message_text:
             message_text = payload_message_text
 
         if message_text:
             self.setup_link(message_text)
+
         entities = message.get('entities') or message.get('caption_entities')
-        self.message = TgMessage(message_text, message.get('message_id'), entities, quote=message.get('quote'))
+        self.message = TgMessage(
+            message_text, message.get('message_id'), entities, quote=message.get('quote')
+        )
 
     def setup_photo(self, photo_event):
         tg_photo = PhotoAttachment()

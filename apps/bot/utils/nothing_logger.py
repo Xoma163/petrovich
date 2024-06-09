@@ -5,12 +5,18 @@ class NothingLogger(object):
 
     @staticmethod
     def debug(msg):
-        pass
+        """
+        Не логировать debug
+        """
 
     @staticmethod
     def warning(msg):
-        pass
+        """
+        Не логировать warning
+        """
 
     @staticmethod
     def error(msg):
-        pass
+        """
+        Не логировать error
+        """

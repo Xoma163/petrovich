@@ -14,8 +14,8 @@ class Fix(Command):
         commands_text="исправляет раскладку текста",
         help_texts=[
             HelpTextItem(Role.USER, [
-                HelpTextItemCommand("(текст)", "исправляет раскладку текста"),
-                HelpTextItemCommand("(Пересылаемые сообщения)", "исправляет раскладку текста")
+                HelpTextItemCommand("(текст)", "присылает исправленный текст"),
+                HelpTextItemCommand("(Пересылаемые сообщения)", "присылает исправленный текст")
             ])
         ]
     )

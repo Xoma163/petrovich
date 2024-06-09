@@ -24,4 +24,6 @@ class GPTAPI(API):
         raise NotImplementedError
 
     def draw(self, prompt: str) -> GPTAPIImageDrawResponse:
-        pass
+        """
+        Метод для рисования GPTAPI, переопределяется не у всех наследников
+        """

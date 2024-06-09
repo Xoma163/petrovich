@@ -21,7 +21,7 @@ class PollAnswer(AcceptExtraCommand):
     def start(self):
         poll_answer = self.event.get_all_attachments([PollAnswerAttachment])[0]
         poll = poll_answer.poll
-        if poll.type != PollAttachment.POLL_TYPE_QUIZ:
+        if poll.poll_type != PollAttachment.POLL_TYPE_QUIZ:
             return
 
         correct_answer_id = poll.correct_option_id

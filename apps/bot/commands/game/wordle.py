@@ -246,7 +246,6 @@ class WordleImageGenerator:
         draw = ImageDraw.Draw(image)
         font = get_font_by_path(self.FONT_NAME, self.MAIN_WINDOW_CELL_WIDTH - 10)
 
-
         for i in range(0, self.MAIN_WINDOW_CELLS_COUNT):
             word = None
             if len(words) > i:
@@ -257,10 +256,11 @@ class WordleImageGenerator:
                     letter = word[j]
                 x1 = j * self.MAIN_WINDOW_CELL_WIDTH + j * self.MAIN_WINDOW_CELL_MARGIN
                 y1 = i * self.MAIN_WINDOW_CELL_HEIGHT + i * self.MAIN_WINDOW_CELL_MARGIN
-                x2 = j * self.MAIN_WINDOW_CELL_WIDTH + j * self.MAIN_WINDOW_CELL_MARGIN + self.MAIN_WINDOW_CELL_WIDTH
-                y2 = i * self.MAIN_WINDOW_CELL_HEIGHT + i * self.MAIN_WINDOW_CELL_MARGIN + self.MAIN_WINDOW_CELL_HEIGHT
+                x2 = x1 + self.MAIN_WINDOW_CELL_WIDTH
+                y2 = y1 + self.MAIN_WINDOW_CELL_HEIGHT
 
-                color = self.COLOR_DEFAULT
+                color = self._get_letter_color_field(letter, secret_word, secret_word[j])
+
                 if letter:
                     if letter == secret_word[j]:
                         color = self.COLOR_CORRECT_LETTER_POS
@@ -297,17 +297,10 @@ class WordleImageGenerator:
             for j, letter in enumerate(row):
                 x1 = j * self.KEYBOARD_CELL_WIDTH + j * self.KEYBOARD_CELL_MARGIN
                 y1 = i * self.KEYBOARD_CELL_HEIGHT + i * self.KEYBOARD_CELL_MARGIN
-                x2 = j * self.KEYBOARD_CELL_WIDTH + j * self.KEYBOARD_CELL_MARGIN + self.KEYBOARD_CELL_WIDTH
-                y2 = i * self.KEYBOARD_CELL_HEIGHT + i * self.KEYBOARD_CELL_MARGIN + self.KEYBOARD_CELL_HEIGHT
+                x2 = x1 + self.KEYBOARD_CELL_WIDTH
+                y2 = y1 + self.KEYBOARD_CELL_HEIGHT
 
-                color = self.COLOR_DEFAULT
-                if letter:
-                    if letter in exactly_correct_letters:
-                        color = self.COLOR_CORRECT_LETTER_POS
-                    elif letter in correct_letters:
-                        color = self.COLOR_CORRECT_LETTER
-                    elif letter in wrong_letters:
-                        color = self.COLOR_WRONG_LETTER
+                color = self._get_letter_color_keyboard(letter, exactly_correct_letters, correct_letters, wrong_letters)
 
                 draw.rectangle((x1 + left_margin, y1, x2 + left_margin, y2), color)
 
@@ -319,3 +312,27 @@ class WordleImageGenerator:
                         self.COLOR_BACKGROUND)
         dst.paste(image, (self.PADDING, self.PADDING))
         return dst
+
+    def _get_letter_color_keyboard(self, letter, exactly_correct_letters, correct_letters, wrong_letters):
+        if not letter:
+            return self.COLOR_DEFAULT
+
+        if letter in exactly_correct_letters:
+            return self.COLOR_CORRECT_LETTER_POS
+        elif letter in correct_letters:
+            return self.COLOR_CORRECT_LETTER
+        elif letter in wrong_letters:
+            return self.COLOR_WRONG_LETTER
+        return self.COLOR_DEFAULT
+
+    def _get_letter_color_field(self, letter, secret_word, current_secret_letter):
+        if not letter:
+            return self.COLOR_DEFAULT
+
+        if letter == current_secret_letter:
+            return self.COLOR_CORRECT_LETTER_POS
+        elif letter in secret_word:
+            return self.COLOR_CORRECT_LETTER
+        elif letter not in secret_word:
+            return self.COLOR_WRONG_LETTER
+        return self.COLOR_DEFAULT

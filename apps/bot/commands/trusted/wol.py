@@ -16,8 +16,8 @@ class WOL(Command):
         commands_text="пробуждает ваше устройство",
         help_texts=[
             HelpTextItem(Role.TRUSTED, [
-                HelpTextItemCommand(None, "пробуждает ваше устройство"),
-                HelpTextItemCommand("(название)", "пробуждает ваше устройство")
+                HelpTextItemCommand(None, "пробуждает устройство"),
+                HelpTextItemCommand("(название)", "пробуждает устройство")
             ])
         ]
     )

@@ -13,13 +13,12 @@ from apps.bot.classes.messages.response_message import ResponseMessage, Response
 class Find(Command):
     name = "найди"
     names = ["поиск", "найти", "ищи", "искать", "хуизфакинг", "вхуизфакинг"]
-
     help_text = HelpText(
         commands_text="ищет информацию по картинкам в гугле",
         help_texts=[
             HelpTextItem(Role.USER, [
-                HelpTextItemCommand("(запрос)", "ищет информацию по картинкам в гугле"),
-                HelpTextItemCommand("(пересланное сообщение)", "ищет информацию по картинкам в гугле")
+                HelpTextItemCommand("(запрос)", "присылает картинки по поиску в гугле"),
+                HelpTextItemCommand("(пересланное сообщение)", "присылает картинки по поиску в гугле")
             ])
         ]
     )

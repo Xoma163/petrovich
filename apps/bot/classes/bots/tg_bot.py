@@ -291,7 +291,7 @@ class TgBot(Bot):
         params['question'] = poll.question
         params['options'] = json.dumps(poll.options)
         params['is_anonymous'] = poll.is_anonymous
-        params['type'] = poll.type
+        params['type'] = poll.poll_type
         params['allows_multiple_answers'] = poll.allows_multiple_answers
         if poll.correct_option_id is not None:
             params['correct_option_id'] = poll.correct_option_id
@@ -417,11 +417,14 @@ class TgBot(Bot):
         Возвращает Response.json() платформы
         """
         rmi.set_telegram_html()
-        params = {'chat_id': rmi.peer_id, 'caption': rmi.text}
+        params = {
+            'chat_id': rmi.peer_id,
+            'caption': rmi.text,
+            **rmi.kwargs
+        }
+
         if rmi.keyboard:
             params['reply_markup'] = json.dumps(rmi.keyboard)
-        params.update(rmi.kwargs)
-
         if rmi.reply_to:
             params['reply_to_message_id'] = rmi.reply_to
         if rmi.disable_web_page_preview:
@@ -440,28 +443,7 @@ class TgBot(Bot):
             return self.edit_message(params)
 
         # Разбиение длинных сообщений на чанки
-        chunks = None
-        if params.get('caption'):
-            # Если у нас есть форматирование, в таком случае все сначала шлём все медиа, а потом уже форматированный текст
-            # Телега не умеет в send_media_group + parse_mode
-            if rmi.text_has_html_code and len(rmi.attachments) > 1:
-                chunks = split_text_by_n_symbols(params['caption'], self.MAX_MESSAGE_TEXT_LENGTH)
-                chunks = [""] + chunks
-                params['caption'] = chunks[0]
-            # Шлём длинные сообщения чанками.
-            if rmi.attachments and len(params['caption']) > self.MAX_MESSAGE_TEXT_CAPTION:
-                # Иначё бьём на 1024 символа первое сообщение и на 4096 остальные (ограничения телеги)
-                chunks = split_text_by_n_symbols(params['caption'], self.MAX_MESSAGE_TEXT_CAPTION)
-                first_chunk = chunks[0]
-                text = params['caption'][len(first_chunk):]
-                chunks = split_text_by_n_symbols(text, self.MAX_MESSAGE_TEXT_LENGTH)
-                chunks = [first_chunk] + chunks
-                params['caption'] = chunks[0]
-            # Обычные длинные текстовые сообщения шлём чанками
-            elif len(params['caption']) > self.MAX_MESSAGE_TEXT_LENGTH:
-                chunks = split_text_by_n_symbols(params['caption'], self.MAX_MESSAGE_TEXT_LENGTH)
-                params['caption'] = chunks[0]
-
+        chunks = self._get_text_chunks(rmi, params)
         att_map = {
             PhotoAttachment: self._send_photo,
             GifAttachment: self._send_gif,
@@ -493,12 +475,40 @@ class TgBot(Bot):
         else:
             r = self._send_text(params)
 
-        # Отправка чанков отдельно. Последний чанк через return
+        # Отправка чанков отдельно
         if chunks:
             for chunk in chunks[1:]:
                 params['caption'] = chunk
                 self._send_text(params)
         return r
+
+    def _get_text_chunks(self, rmi, params) -> list | None:
+        """
+        Разбивка сообщения на чанки
+        """
+
+        chunks = None
+        if not params.get('caption'):
+            return chunks
+        # Если у нас есть форматирование, в таком случае все сначала шлём все медиа, а потом уже форматированный текст
+        # Телега не умеет в send_media_group + parse_mode
+        if rmi.text_has_html_code and len(rmi.attachments) > 1:
+            chunks = [""] + split_text_by_n_symbols(params['caption'], self.MAX_MESSAGE_TEXT_LENGTH)
+            params['caption'] = chunks[0]
+        # Шлём длинные сообщения чанками.
+        if rmi.attachments and len(params['caption']) > self.MAX_MESSAGE_TEXT_CAPTION:
+            # Иначё бьём на 1024 символа первое сообщение и на 4096 остальные (ограничения телеги)
+            chunks = split_text_by_n_symbols(params['caption'], self.MAX_MESSAGE_TEXT_CAPTION)
+            first_chunk = chunks[0]
+            text = params['caption'][len(first_chunk):]
+            chunks = split_text_by_n_symbols(text, self.MAX_MESSAGE_TEXT_LENGTH)
+            chunks = [first_chunk] + chunks
+            params['caption'] = chunks[0]
+        # Обычные длинные текстовые сообщения шлём чанками
+        elif len(params['caption']) > self.MAX_MESSAGE_TEXT_LENGTH:
+            chunks = split_text_by_n_symbols(params['caption'], self.MAX_MESSAGE_TEXT_LENGTH)
+            params['caption'] = chunks[0]
+        return chunks
 
     # END  MAIN ROUTING AND MESSAGING
 

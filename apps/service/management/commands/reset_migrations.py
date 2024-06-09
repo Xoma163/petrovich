@@ -53,7 +53,7 @@ class Command(BaseCommand):
 
     def delete_migrations_files_app(self, app: str):
         self.stdout.write(f'Удаление миграций приложения "{app}" в файлах')
-        migrations_dir = os.path.join(f"apps", app, 'migrations')
+        migrations_dir = os.path.join("apps", app, 'migrations')
         if os.path.exists(migrations_dir):
             files = [f for f in os.listdir(migrations_dir) if isfile(join(migrations_dir, f))]
             files = list(filter(lambda x: x != '__init__.py', files))

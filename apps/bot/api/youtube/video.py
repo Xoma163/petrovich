@@ -44,6 +44,7 @@ class YoutubeVideo(SubscribeService):
     def check_url_is_video(url):
         r = r"((youtube.com\/watch\?v=)|(youtu.be\/)|(youtube.com\/shorts\/))"
         return re.findall(r, url)
+
     def _get_video_info(self, url) -> dict:
         ydl_params = {
             'logger': NothingLogger()
@@ -62,13 +63,42 @@ class YoutubeVideo(SubscribeService):
             raise PWarning("Не смог найти видео по этой ссылке")
         return video_info
 
-    def get_video_info(self, url, _timedelta=None, max_filesize_mb=None) -> dict:
+    def get_video_info(self, url, _timedelta: float | None = None, max_filesize_mb: int | None = None) -> dict:
         video_info = self._get_video_info(url)
         video_urls = [x for x in video_info['formats'] if x['ext'] == 'mp4' and x.get('asr')]
         if not video_urls:
             raise PWarning("Нет доступных ссылок для скачивания")
 
         videos = sorted(video_urls, key=lambda x: x['format_note'], reverse=True)
+
+        max_quality_video, chosen_video_filesize = self._calculate_max_size_video(
+            videos,
+            video_info,
+            _timedelta,
+            max_filesize_mb
+        )
+
+        url = max_quality_video['url']
+        return {
+            "download_url": url,
+            "filesize": chosen_video_filesize,
+            "title": video_info['title'],
+            "duration": video_info.get('duration'),
+            "start_pos": str(video_info['section_start']) if video_info.get('section_start') else None,
+            "end_pos": str(video_info['section_end']) if video_info.get('section_end') else None
+        }
+
+    @staticmethod
+    def _calculate_max_size_video(
+            videos: list,
+            video_info: dict,
+            _timedelta: float,
+            max_filesize_mb: int
+    ) -> tuple[dict, str]:
+        """
+        Метод ищет видео которое максимально может скачать с учётом ограничением платформы
+        return: max_quality_video, chosen_video_filesize
+        """
         chosen_video_filesize = 0
         if max_filesize_mb:  # for tg
             for video in videos:
@@ -88,16 +118,7 @@ class YoutubeVideo(SubscribeService):
                 raise PSkip()
         else:
             max_quality_video = videos[0]
-
-        url = max_quality_video['url']
-        return {
-            "download_url": url,
-            "filesize": chosen_video_filesize,
-            "title": video_info['title'],
-            "duration": video_info.get('duration'),
-            "start_pos": str(video_info['section_start']) if video_info.get('section_start') else None,
-            "end_pos": str(video_info['section_end']) if video_info.get('section_end') else None
-        }
+        return max_quality_video, chosen_video_filesize
 
     @staticmethod
     def _get_channel_info(channel_id: str) -> dict:

@@ -187,9 +187,7 @@ class Minesweeper(Command):
                 continue
             callback_data = json.loads(inline_keyboard[x][y]['callback_data'])
             _i, _j, _real_val, _flag_val, _opened = callback_data['a']
-            if _opened:
-                continue
-            if _real_val == self.MINE and _flag_val == 1:
+            if _opened or (_real_val == self.MINE and _flag_val == 1):
                 continue
             if _real_val == self.MINE:
                 return self.game_over(inline_keyboard)
@@ -199,8 +197,7 @@ class Minesweeper(Command):
         if not one_updated:
             raise PSkip()
 
-        win = self.check_win(inline_keyboard)
-        if win:
+        if win := self.check_win(inline_keyboard):
             return win
 
         keyboard = {"inline_keyboard": inline_keyboard}

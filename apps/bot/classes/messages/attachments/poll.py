@@ -15,7 +15,7 @@ class PollAttachment(Attachment):
         self.options: list[str] = []
         self.options_with_votes: list[str] = []
         self.is_anonymous: bool = False
-        self.type: str = self.POLL_TYPE_REGULAR
+        self.poll_type: str = self.POLL_TYPE_REGULAR
         self.allows_multiple_answers: bool = False
 
         self.correct_option_id: int | None = None
@@ -26,7 +26,7 @@ class PollAttachment(Attachment):
         self.options = [x['text'] for x in event['options']]
         self.options_with_votes = event['options']
         self.is_anonymous = event['is_anonymous']
-        self.type = event['type']
+        self.poll_type = event['type']
         self.allows_multiple_answers = event['allows_multiple_answers']
         self.correct_option_id = event.get('correct_option_id')
 

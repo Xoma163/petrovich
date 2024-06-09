@@ -107,10 +107,8 @@ def get_text_for_documentation():
             ])
             help_text_items = []
             for help_text in help_texts:
-                if help_text.args:
-                    command = f"{BOLD}/{cmd.name.capitalize()} {help_text.args}{BOLD}"
-                else:
-                    command = f"{BOLD}/{cmd.name.capitalize()}{BOLD}"
+                _command = f"{cmd.name.capitalize()} {help_text.args}" if help_text.args else cmd.name.capitalize()
+                command = f"{BOLD}/{_command}{BOLD}"
 
                 help_text_item = f"{command} - {help_text.description}{NL}"
 

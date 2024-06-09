@@ -44,7 +44,7 @@ class Quiz(Command):
         poll = PollAttachment()
         poll.question = bop.question
         poll.options = bop.answers
-        poll.type = PollAttachment.POLL_TYPE_QUIZ
+        poll.poll_type = PollAttachment.POLL_TYPE_QUIZ
         poll.correct_option_id = bop.correct_answer_index
 
         button = self.bot.get_button("Ещё", self.name, args=["ещё"])

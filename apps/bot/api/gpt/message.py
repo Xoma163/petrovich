@@ -18,9 +18,6 @@ class GPTMessage(ABC):
     def get_message(self) -> dict:
         raise NotImplementedError()
 
-    def add_message(self):
-        pass
-
 
 @dataclasses.dataclass
 class ChatGPTMessage(GPTMessage):

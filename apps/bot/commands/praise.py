@@ -46,10 +46,7 @@ def get_praise_or_scold(bot, event, _type) -> ResponseMessageItem:
     else:
         try:
             user = bot.get_profile_by_name(event.message.args, event.chat)
-            if user.gender == '1':
-                translator_key = 'ж1'
-            else:
-                translator_key = 'м1'
+            translator_key = 'ж1' if user.gender == '1' else 'м1'
         except PWarning:
             translator_key = 'м1'
         args_case = event.message.args_case

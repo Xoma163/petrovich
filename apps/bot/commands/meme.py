@@ -385,27 +385,24 @@ class Meme(AcceptExtraCommand):
     @staticmethod
     def get_filtered_memes(filter_list=None, filter_user=None, exclude_trusted=False, approved=True, _id=None):
         memes = MemeModel.objects
-        if exclude_trusted:
-            memes = memes.exclude(for_trusted=True)
-
-        if _id:
-            memes = memes.filter(id=_id)
-        else:
-            if filter_list is None:
-                filter_list = []
-            memes = memes.filter(approved=approved)
-            if filter_list:
-                filter_list = list(map(lambda x: x.lower(), filter_list))
-                for _filter in filter_list:
-                    if '*' in _filter:
-                        _filter = _filter.replace('*', '.')
-                        regex_filter = fr'.*{_filter}.*'
-                        memes = memes.filter(name__iregex=regex_filter)
-                    else:
-                        memes = memes.filter(name__contains=_filter)
-
         if filter_user:
             memes = memes.filter(author=filter_user)
+        if exclude_trusted:
+            memes = memes.exclude(for_trusted=True)
+        if _id:
+            return memes.filter(id=_id)
+        if filter_list is None:
+            filter_list = []
+        memes = memes.filter(approved=approved)
+        if filter_list:
+            filter_list = [x.lower() for x in filter_list]
+            for _filter in filter_list:
+                if '*' in _filter:
+                    _filter = _filter.replace('*', '.')
+                    regex_filter = fr'.*{_filter}.*'
+                    memes = memes.filter(name__iregex=regex_filter)
+                else:
+                    memes = memes.filter(name__contains=_filter)
         return memes
 
     @staticmethod

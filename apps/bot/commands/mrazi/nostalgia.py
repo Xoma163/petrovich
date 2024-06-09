@@ -33,7 +33,6 @@ class Nostalgia(Command):
         ]
     )
 
-
     platforms = [Platform.TG]
 
     bot: TgBot
@@ -96,16 +95,21 @@ class Nostalgia(Command):
                 all_urls += get_urls_from_text(msg['text'])
         atts = []
         texts = []
+        photo_exts = {"jpg", "png", "jpeg"}
+        gif_exts = {"gif", "gifv"}
+
         for url in all_urls:
             att = None
-            ext = urlparse(url).path.rsplit('.')[-1]
-            if ext in ["jpg", "png", "jpeg"]:
+            path = urlparse(url).path
+            ext = path.rsplit('.')[-1]
+
+            if ext in photo_exts:
                 link_name = "Фото"
                 att = self.bot.get_photo_attachment(url)
-            elif ext in ["gif", "gifv"]:
+            elif ext in gif_exts:
                 link_name = "Гиф"
                 att = self.bot.get_gif_attachment(url)
-            elif "youtu.be" in url or "youtube" in url:
+            elif any(service in url for service in ["youtu.be", "youtube"]):
                 link_name = "Ютуб"
             elif "vk.com/video" in url:
                 link_name = "Вк видео"
@@ -274,39 +278,55 @@ class Nostalgia(Command):
             file.write(json.dumps(result_file, ensure_ascii=False, indent=2))
         return result_file
 
-    @staticmethod
-    def prepare_msgs_for_quote_generator(msgs):
-        has_att_link = False
+    def prepare_msgs_for_quote_generator(self, msgs) -> tuple[list[dict], bool]:
+        """
+        Парсит сообщения
+        return: list[msg_dict], has_att_link
+        """
+
+        total_has_att_link = False
         new_msgs = []
         users_avatars = {}
         for msg in msgs:
-            message = {'text': msg['text']}
-            if get_urls_from_text(msg['text']):
-                has_att_link = True
-            for att in msg['attachments']:
-                if att['type'] == "Фотография":
-                    message['photo'] = att['link']
-                    has_att_link = True
-                elif att['type'] in ["Видеозапись", "Файл", "Ссылка", "Голосовое сообщение"]:
-                    message['text'] += f'\n{att["link"]}'
-                    has_att_link = True
-                message['text'] += f"\n({att['type']})\n"
-            if msg['fwd']:
-                message['text'] += '\n(Пересланные сообщения)\n'
-            message['text'] = message['text'].strip()
-            if msg['author'] not in users_avatars:
-                try:
-                    name, surname = msg['author'].split(' ', 1)
-                    if name == "Игорь" and surname == "Петрович":
-                        user = Bot.objects.filter(name=msg['author']).first()
-                    else:
-                        user = Profile.objects.filter(name=name, surname=surname).first()
-                except Exception:
-                    user = None
-                if user:
-                    users_avatars[msg['author']] = user.avatar
-            avatar = users_avatars.get(msg['author'], None)
-
-            new_msg = {'username': msg['author'], 'message': message, 'avatar': avatar}
+            new_msg, has_att_link = self._prepare_msg_for_quote_generator(msg, users_avatars)
+            if has_att_link:
+                total_has_att_link = True
             new_msgs.append(new_msg)
-        return new_msgs, has_att_link
+        return new_msgs, total_has_att_link
+
+    @staticmethod
+    def _prepare_msg_for_quote_generator(msg: dict, users_avatars) -> tuple[dict, bool]:
+        """
+        Парсит одно сообщение
+        return: msg_dict, has_att_link
+        """
+
+        message = {'text': msg['text']}
+        has_att_link = False
+        if get_urls_from_text(msg['text']):
+            has_att_link = True
+        for att in msg['attachments']:
+            if att['type'] == "Фотография":
+                message['photo'] = att['link']
+                has_att_link = True
+            elif att['type'] in ["Видеозапись", "Файл", "Ссылка", "Голосовое сообщение"]:
+                message['text'] += f'\n{att["link"]}'
+                has_att_link = True
+            message['text'] += f"\n({att['type']})\n"
+        if msg['fwd']:
+            message['text'] += '\n(Пересланные сообщения)\n'
+        message['text'] = message['text'].strip()
+        if msg['author'] not in users_avatars:
+            try:
+                name, surname = msg['author'].split(' ', 1)
+                if name == "Игорь" and surname == "Петрович":
+                    user = Bot.objects.filter(name=msg['author']).first()
+                else:
+                    user = Profile.objects.filter(name=name, surname=surname).first()
+            except Exception:
+                user = None
+            if user:
+                users_avatars[msg['author']] = user.avatar
+        avatar = users_avatars.get(msg['author'], None)
+        msg = {'username': msg['author'], 'message': message, 'avatar': avatar}
+        return msg, has_att_link

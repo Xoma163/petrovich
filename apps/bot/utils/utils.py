@@ -3,11 +3,11 @@ import os
 import random
 import re
 import time
+import zoneinfo
 from datetime import datetime
 from io import BytesIO
 from urllib.parse import urlparse
 
-import pytz
 from PIL import Image, ImageDraw, ImageFont
 
 from apps.bot.classes.const.consts import Role
@@ -88,21 +88,20 @@ def remove_tz(dt: datetime) -> datetime:
 def localize_datetime(dt: datetime, tz: str) -> datetime:
     """
     Локализация datetime
-
-    Переводит из datetime UTC в datetime UTC, но с учётом оффсета таймзоны
+    Переводит из datetime UTC в datetime UTC, но с учетом офсета таймзоны
     """
-    return pytz.utc.localize(dt, is_dst=None).astimezone(pytz.timezone(tz))
+    # Установим временную зону UTC и потом конвертируем в зону tz
+    dt = dt.replace(tzinfo=zoneinfo.ZoneInfo("UTC"))
+    return dt.astimezone(zoneinfo.ZoneInfo(tz))
 
 
 def normalize_datetime(dt: datetime, tz: str) -> datetime:
     """
     Нормализация datetime
     """
-    tz_obj = pytz.timezone(tz)
-    localized_time = tz_obj.localize(dt, is_dst=None)
-
-    tz_utc = pytz.timezone("UTC")
-    return pytz.utc.normalize(localized_time).astimezone(tz_utc)
+    tz_obj = zoneinfo.ZoneInfo(tz)
+    localized_time = dt.replace(tzinfo=tz_obj)
+    return localized_time.astimezone(zoneinfo.ZoneInfo("UTC"))
 
 
 def decl_of_num(number, titles: list[str]) -> str:

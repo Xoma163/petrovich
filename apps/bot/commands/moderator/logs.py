@@ -64,56 +64,16 @@ class Logs(Command):
                                                       filename='petrovich_logs.png')
         return ResponseMessage(ResponseMessageItem(attachments=[attachment]))
 
-    def transform_logs_by_values(self, items):
+    def wrap_long_texts(self, items, wrap_val=150):
         if isinstance(items, dict):
-            keys_to_del = []
-            for key in items:
-                item = items[key]
-                if not item:
-                    keys_to_del.append(key)
-                    continue
-                if isinstance(item, dict):
-                    self.transform_logs_by_values(item)
-                    if not item:
-                        keys_to_del.append(key)
-                elif isinstance(item, list):
-                    for _item in item:
-                        self.transform_logs_by_values(item)
-                        if not item:
-                            keys_to_del.append(key)
-                else:
-                    if item in ["null", "*****"]:
-                        keys_to_del.append(key)
-                    elif isinstance(item, str) and "\n" in item:
-                        items[key] = item.split('\n')
-            for key in keys_to_del:
-                del items[key]
-        elif isinstance(items, list):
-            for item in items:
-                self.transform_logs_by_values(item)
-
-    def wrap_long_texts(self, items, wrap_val=150) -> object:
-        if isinstance(items, dict):
-            for key in items:
-                item = items[key]
-                if isinstance(item, dict):
-                    items[key] = self.wrap_long_texts(item)
-                elif isinstance(item, list):
-                    for i, _item in enumerate(item):
-                        items[key][i] = self.wrap_long_texts(_item)
-                elif isinstance(item, str) and len(item) > wrap_val:
-                    items[key] = textwrap.fill(item, wrap_val).replace('\\n', '\n')
+            for key, item in items.items():
+                items[key] = self.wrap_long_texts(item, wrap_val)
             return items
         elif isinstance(items, list):
-            for i, item in enumerate(items):
-                items[i] = self.wrap_long_texts(item)
-            return items
-        elif isinstance(items, str):
-            if len(items) > wrap_val:
-                return textwrap.fill(items, wrap_val).replace('\\n', '\n')
-            return items
-        else:
-            return items
+            return [self.wrap_long_texts(item, wrap_val) for item in items]
+        elif isinstance(items, str) and len(items) > wrap_val:
+            return textwrap.fill(items, wrap_val).replace('\\n', '\n')
+        return items
 
     def get_bot_logs(self, count, filter_level=None):
         file_rows = self.read_file(DEBUG_FILE)

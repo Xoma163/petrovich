@@ -146,22 +146,19 @@ class Event:
         self.message = Message(text, _id) if text else None
 
     def get_all_attachments(self, types: list | None = None):
-        attachments = []
-
         if types is None:
-            types = [AudioAttachment, DocumentAttachment, GifAttachment, LinkAttachment, PhotoAttachment,
-                     StickerAttachment, VideoAttachment, VideoNoteAttachment]
+            types = [
+                AudioAttachment, DocumentAttachment, GifAttachment, LinkAttachment,
+                PhotoAttachment, StickerAttachment, VideoAttachment, VideoNoteAttachment
+            ]
+        attachments = []
         if self.attachments:
-            for att in self.attachments:
-                if type(att) in types:
-                    attachments.append(att)
+            attachments = [att for att in self.attachments if isinstance(att, tuple(types))]
+
         if self.fwd:
-            msgs = self.fwd
-            for msg in msgs:
-                if msg.attachments:
-                    for att in msg.attachments:
-                        if type(att) in types:
-                            attachments.append(att)
+            attachments_fwd = [att for msg in self.fwd for att in msg.attachments if isinstance(att, tuple(types))]
+            attachments.extend(attachments_fwd)
+
         return attachments
 
     def to_log(self) -> dict:

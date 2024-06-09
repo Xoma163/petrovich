@@ -75,26 +75,18 @@ class Message:
 
         new_args_split = []
         args_split = re.split(self.SPACE_REGEX, args_str)
-        # Проставление ключей, удаление их из строки, пропуск пустых аргументов
-        for arg in args_split:
-            if not arg:
-                continue
-            key = None
-            for key_symbol in self.KEYS_SYMBOLS:
-                if arg.startswith(key_symbol):
-                    key = arg[len(key_symbol):].lower()
-                    break
+
+        for arg in filter(None, args_split):
+            key = next((arg[len(ks):].lower() for ks in self.KEYS_SYMBOLS if arg.startswith(ks)), None)
             if key:
                 index = args_str.find(arg)
                 self.keys.append(key)
-
                 if index == 0:
                     args_str = args_str[:index]
-                    continue
-                elif index != -1:
+                else:
                     args_str = args_str[:index - 1] + args_str[index + len(arg):]
-                    continue
-            new_args_split.append(arg)
+            else:
+                new_args_split.append(arg)
 
         # Нет аргументов - выходим
         if len(new_args_split) == 0:
