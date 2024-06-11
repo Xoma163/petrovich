@@ -181,14 +181,14 @@ class Calculator:
         "F->(S)",
         "F->R"
     ]
-    COMPILED_GRAMMARS: list = []
+    _COMPILED_GRAMMARS: list = []
 
     # grammar compilation
     # compiled_grammar is class Grammar instance
     @classmethod
     def compiled_grammars(cls):
-        if cls.COMPILED_GRAMMARS:
-            return cls.COMPILED_GRAMMARS
+        if cls._COMPILED_GRAMMARS:
+            return cls._COMPILED_GRAMMARS
 
         compiled_grammars = []
         for gram_raw in cls.GRAMS_RAW:

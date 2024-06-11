@@ -34,7 +34,6 @@ class Logs(Command):
         )
     )
 
-
     def start(self) -> ResponseMessage:
         count = self.DEFAULT_COUNT
         level = self.DEFAULT_LEVEL
@@ -63,6 +62,34 @@ class Logs(Command):
         attachment = self.bot.get_document_attachment(img_byte_arr, peer_id=self.event.peer_id,
                                                       filename='petrovich_logs.png')
         return ResponseMessage(ResponseMessageItem(attachments=[attachment]))
+
+    def transform_logs_by_values(self, items):
+        if isinstance(items, dict):
+            keys_to_del = []
+            for key in items:
+                item = items[key]
+                if not item:
+                    keys_to_del.append(key)
+                    continue
+                if isinstance(item, dict):
+                    self.transform_logs_by_values(item)
+                    if not item:
+                        keys_to_del.append(key)
+                elif isinstance(item, list):
+                    for _item in item:
+                        self.transform_logs_by_values(item)
+                        if not item:
+                            keys_to_del.append(key)
+                else:
+                    if item in ["null", "*****"]:
+                        keys_to_del.append(key)
+                    elif isinstance(item, str) and "\n" in item:
+                        items[key] = item.split('\n')
+            for key in keys_to_del:
+                del items[key]
+        elif isinstance(items, list):
+            for item in items:
+                self.transform_logs_by_values(item)
 
     def wrap_long_texts(self, items, wrap_val=150):
         if isinstance(items, dict):
