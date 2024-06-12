@@ -1,5 +1,5 @@
 from apps.bot.api.gpt.chatgptapi import GPTModels, ChatGPTAPI
-from apps.bot.api.gpt.message import ChatGPTMessages
+from apps.bot.api.gpt.message import ChatGPTMessages, GPTMessageRole
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
@@ -57,6 +57,7 @@ class ChatGPT(GPTCommand):
             [["ключ", "key"], self.menu_key],
             [["модели", "models"], self.menu_models],
             [["модель", "model"], self.menu_model],
+            [["_summary"], self.menu__summary],
             [['default'], self.default]
         ]
         method = self.handle_menu(menu, arg0)
@@ -143,3 +144,20 @@ class ChatGPT(GPTCommand):
         settings.save()
         rmi = ResponseMessageItem(text=f"Поменял модель на {self.bot.get_formatted_text_line(settings.chat_gpt_model)}")
         return rmi
+
+    def menu__summary(self):
+        # message_id = self.event.message.id
+        message = self.event.raw['callback_query']['message']['text']
+        self.get_dialog()
+        history = self.gpt_messages_class()
+
+        preprompt = self.get_preprompt(self.event.sender, self.event.chat)
+        if preprompt:
+            history.add_message(GPTMessageRole.SYSTEM, preprompt)
+
+        history.add_message(GPTMessageRole.USER,
+                            "Я пришлю тебе голосовое сообщение. Сделай саммари по нему, сократи и донеси суть, но не теряй важных деталей")
+        history.add_message(GPTMessageRole.USER, message)
+
+        rmi = self.completions(history, use_statistics=True)
+        return self._send_rmi(rmi)

@@ -92,23 +92,35 @@ class VoiceRecognition(AcceptExtraCommand):
                 answers.append(answer)
             answer = "\n\n".join(answers)
 
-        rmi = self._get_rmi(answer, audio_message.file_name_full)
+        rmi = self._get_rmi(answer, audio_message.file_name_full, attachment)
         return ResponseMessage(rmi)
 
-    def _get_rmi(self, answer: str, filename: str) -> ResponseMessageItem:
+    def _get_rmi(
+            self,
+            answer: str,
+            filename: str,
+            voice: VoiceAttachment | VideoNoteAttachment | AudioAttachment
+    ) -> ResponseMessageItem:
         """
         Пост-обработка сообщения
         """
         answer = answer if answer else "{пустой ответ}"
-        answer = self.bot.get_quote_text(answer, expandable=True)
+        if len(answer) > 200:
+            answer = self.bot.get_quote_text(answer, expandable=True)
+
+        keyboard = None
+        if voice.duration > 30:
+            button = self.bot.get_button("Саммари", "gpt", ['_summary'])
+            keyboard = self.bot.get_inline_keyboard([button])
+
         # Если ответ слишком длинный - кладём в файл
         if len(answer) > self.bot.MAX_MESSAGE_TEXT_LENGTH:
             document = self._wrap_text_in_document(answer, f'Транскрибация {filename} файла.html')
             answer = "Полная транскрибация в одном файле"
-            rmi = ResponseMessageItem(text=answer, attachments=[document], reply_to=self.event.message.id)
+            rmi = ResponseMessageItem(text=answer, attachments=[document], reply_to=self.event.message.id,
+                                      keyboard=keyboard)
         else:
-            rmi = ResponseMessageItem(text=answer, reply_to=self.event.message.id)
-
+            rmi = ResponseMessageItem(text=answer, reply_to=self.event.message.id, keyboard=keyboard)
         return rmi
 
     @staticmethod

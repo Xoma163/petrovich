@@ -8,9 +8,19 @@ class ResponseMessageItem:
     URLS_REGEXP = r"(http|ftp|https|tg)(:\/\/)([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-])"
 
     def __init__(
-            self, text: str = None, attachments: list = None, reply_to: str = None, keyboard: dict = None,
-            message_id: str = None, message_thread_id: str = None, peer_id: int = None, log_level='debug',
-            exc_info=None, disable_web_page_preview=False, entities=None, send=True
+            self,
+            text: str | None = None,
+            attachments: list | None = None,
+            reply_to: str | None = None,
+            keyboard: dict | None = None,
+            message_id: str | None = None,
+            message_thread_id: str | None = None,
+            peer_id: int | None = None,
+            log_level: str = 'debug',
+            exc_info=None,
+            disable_web_page_preview: bool | None = False,
+            entities: list | None = None,
+            send: bool | None = True
     ):
         self.text = text if text is not None else ""
         self.attachments = attachments if attachments else []

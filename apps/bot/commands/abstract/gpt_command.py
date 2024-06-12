@@ -91,7 +91,9 @@ class GPTCommand(ABC, Command):
                 messages.last_message.images = base64_photos
 
         rmi = self.completions(messages)
+        return self._send_rmi(rmi)
 
+    def _send_rmi(self, rmi):
         rmi.peer_id = self.event.peer_id
         r = self.bot.send_response_message_item(rmi)
         if r.success:
