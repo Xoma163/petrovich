@@ -34,7 +34,10 @@ class WTFCommand(Command):
             "обрабатывает последние сообщения до пересланного в конфе через GPT по указанному prompt"
         )
     ]
-    GPT_COMMAND_CLASS: GPTCommand = GPTCommand
+
+    def __init__(self, gpt_command_class: type[GPTCommand]):
+        super().__init__()
+        self.gpt_command_class: type[GPTCommand] = gpt_command_class
 
     def start(self) -> ResponseMessage:
         n, prompt = self._get_n_and_prompt()
@@ -42,7 +45,7 @@ class WTFCommand(Command):
         with ChatActivity(self.bot, ActivitiesEnum.TYPING, self.event.peer_id):
             messages = self.get_conversation(n, prompt)
 
-        gpt = self.GPT_COMMAND_CLASS()
+        gpt = self.gpt_command_class()
         gpt.bot = self.bot
         gpt.event = self.event
         with ChatActivity(self.bot, ActivitiesEnum.TYPING, self.event.peer_id):
@@ -88,12 +91,12 @@ class WTFCommand(Command):
             message = self._format_groupped_messages(sender, messages_from_one_user)
             result_message.append(message)
 
-        preprompt = self.GPT_COMMAND_CLASS.get_preprompt(
+        gpt_command = self.gpt_command_class()
+        preprompt = gpt_command.get_preprompt(
             self.event.sender,
             self.event.chat,
-            self.GPT_COMMAND_CLASS.GPT_PREPROMPT_PROVIDER
         )
-        history: GPTMessages = self.GPT_COMMAND_CLASS.GPT_MESSAGES()
+        history: GPTMessages = gpt_command.gpt_messages_class()
         if preprompt:
             history.add_message(GPTMessageRole.SYSTEM, preprompt)
         history.add_message(GPTMessageRole.USER, prompt)

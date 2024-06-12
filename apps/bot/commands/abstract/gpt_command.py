@@ -193,7 +193,7 @@ class GPTCommand(ABC, Command):
         elif self.event.fwd and self.event.fwd[0].message.raw:
             history.add_message(GPTMessageRole.USER, self.event.fwd[0].message.raw)
 
-        preprompt = self.get_preprompt(self.event.sender, self.event.chat, self.gpt_preprompt_provider)
+        preprompt = self.get_preprompt(self.event.sender, self.event.chat)
         if preprompt:
             history.add_message(GPTMessageRole.SYSTEM, preprompt)
         history.reverse()
@@ -290,20 +290,19 @@ class GPTCommand(ABC, Command):
                 rmi = ResponseMessageItem(f"Текущий {is_for} не задан")
         return rmi
 
-    @staticmethod
-    def get_preprompt(sender: Profile, chat: Chat, provider) -> str | None:
+    def get_preprompt(self, sender: Profile, chat: Chat) -> str | None:
         """
         Получить препромпт под текущую ситуацию (персональный в чате,в чате,в лс)
         """
 
         if chat:
             variants = [
-                Q(author=sender, chat=chat, provider=provider),
-                Q(author=None, chat=chat, provider=provider),
+                Q(author=sender, chat=chat, provider=self.gpt_preprompt_provider),
+                Q(author=None, chat=chat, provider=self.gpt_preprompt_provider),
             ]
         else:
             variants = [
-                Q(author=sender, chat=None, provider=provider),
+                Q(author=sender, chat=None, provider=self.gpt_preprompt_provider),
             ]
 
         for q in variants:
