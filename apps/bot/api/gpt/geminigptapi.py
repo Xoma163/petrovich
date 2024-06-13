@@ -12,12 +12,10 @@ from petrovich.settings import env
 class GeminiGPTAPI(GPTAPI):
     API_KEY = env.str("GEMINI_API_KEY")
 
-    DEFAULT_COMPLETIONS_MODEL: str = "gemini-pro"
-    DEFAULT_VISION_MODEL: str = "gemini-pro-vision"
+    DEFAULT_COMPLETIONS_MODEL: str = "gemini-1.5-pro"
 
     BASE_URL = "https://generativelanguage.googleapis.com/v1/models"
     URL = f"{BASE_URL}/{DEFAULT_COMPLETIONS_MODEL}:generateContent"
-    VISION_URL = f"{BASE_URL}/{DEFAULT_VISION_MODEL}:generateContent"
 
     def __init__(self, **kwargs):
         super(GeminiGPTAPI, self).__init__(**kwargs)
@@ -27,8 +25,7 @@ class GeminiGPTAPI(GPTAPI):
             "contents": messages.get_messages(),
             "safetySettings": self._safety_settings
         }
-        url = self.VISION_URL if use_image else self.URL
-        r = self._do_request(url, json=data)
+        r = self._do_request(self.URL, json=data)
         answer = r.json()['candidates'][0]['content']['parts'][0]['text']
         r = GPTAPICompletionsResponse(
             text=answer
