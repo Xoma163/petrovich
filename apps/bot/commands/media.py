@@ -35,7 +35,13 @@ from apps.bot.classes.messages.attachments.video import VideoAttachment
 from apps.bot.classes.messages.message import Message
 from apps.bot.classes.messages.response_message import ResponseMessageItem, ResponseMessage
 from apps.bot.commands.trim_video import TrimVideo
-from apps.bot.utils.utils import get_urls_from_text, markdown_to_html, retry, markdown_wrap_symbols, get_default_headers
+from apps.bot.utils.utils import (
+    get_urls_from_text,
+    markdown_to_html,
+    retry,
+    markdown_wrap_symbols,
+    get_default_headers
+)
 from apps.bot.utils.video.video_handler import VideoHandler
 from apps.service.models import VideoCache
 from petrovich.settings import MAIN_SITE
@@ -266,6 +272,9 @@ class Media(AcceptExtraCommand):
                         keyboard=keyboard)
                 va = VideoAttachment()
                 va.public_download_url = data['download_url']
+                if thumbnail_url := data['thubmnail_url']:
+                    va.thumbnail_url = thumbnail_url
+
                 if data['start_pos']:
                     tm = TrimVideo()
                     video_content = tm.trim(va, data['start_pos'], data['end_pos'])
@@ -310,7 +319,7 @@ class Media(AcceptExtraCommand):
             data['content'],
             peer_id=self.event.peer_id,
             filename=f"{title}.{data['format']}",
-            thumb=data['cover_url'],
+            thumbnail_url=data['thumbnail_url'],
             artist=data['artists'],
             title=data['title']
         )
@@ -326,6 +335,8 @@ class Media(AcceptExtraCommand):
             keyboard = self.bot.get_inline_keyboard([button])
             raise PWarning(e.msg, keyboard=keyboard)
         va = VideoAttachment()
+        va.public_download_url = ttd.video_url
+        va.thumbnail_url = ttd.thumbnail_url
         va.public_download_url = ttd.video_url
         return [va], ttd.description
 
@@ -451,7 +462,7 @@ class Media(AcceptExtraCommand):
                 audiofile,
                 peer_id=self.event.peer_id,
                 filename=f"{title}.{track.format}",
-                thumb=track.cover_url,
+                thumbnail_url=track.thumbnail_url,
                 artist=track.artists,
                 title=track.title
             )
@@ -503,8 +514,9 @@ class Media(AcceptExtraCommand):
             msg = f"{title}\nCкачать можно здесь {self.bot.get_formatted_url('здесь', MAIN_SITE + cache.video.url)}"
         except VideoCache.DoesNotExist:
             with ChatActivity(self.bot, ActivitiesEnum.UPLOAD_VIDEO, self.event.peer_id):
-                video = vk_api.get_video(url)
+                video_data = vk_api.get_video(url)
 
+            video = video_data['video']
             filesize_mb = len(video) / 1024 / 1024
             if filesize_mb > self.bot.MAX_VIDEO_SIZE_MB:
                 filename = f"{video_info['channel_title']}_{title}"
@@ -517,7 +529,11 @@ class Media(AcceptExtraCommand):
                 attachments = []
                 msg = f"{title}\nCкачать можно здесь {self.bot.get_formatted_url('здесь', MAIN_SITE + cache.video.url)}"
             else:
-                attachments = [self.bot.get_video_attachment(video, peer_id=self.event.peer_id)]
+                video = self.bot.get_video_attachment(video, peer_id=self.event.peer_id)
+                if thumbnail_url := video_data['thumbnail_url']:
+                    video.thumbnail_url = thumbnail_url
+
+                attachments = [video]
                 msg = title
         return attachments, msg
 
@@ -598,7 +614,7 @@ class Media(AcceptExtraCommand):
             data['content'],
             peer_id=self.event.peer_id,
             filename=f"{title}.{data['format']}",
-            thumb=data['cover_url'],
+            thumbnail_url=data['thumbnail_url'],
             artist=data['artists'],
             title=data['title']
         )
@@ -613,7 +629,7 @@ class Media(AcceptExtraCommand):
             data.download_url,
             peer_id=self.event.peer_id,
             filename=f"{title}.{data.format}",
-            thumb=data.cover_url,
+            thumbnail_url=data.thumbnail_url,
             artist=data.author,
             title=data.title
         )

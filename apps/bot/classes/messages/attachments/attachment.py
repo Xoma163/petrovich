@@ -18,14 +18,14 @@ class Attachment:
     CHUNK_SIZE = 2 ** 26  # 64mb
 
     def __init__(self, _type):
-        self.type = _type
+        self.type: str | None = _type
         # Публичная ссылка для скачивания файла
-        self.public_download_url = None
+        self.public_download_url: str | None = None
         # Приватная ссылка для скачивания файла
-        self.private_download_url = None
+        self.private_download_url: str | None = None
         # Приватный путь для файла. Доступно только для локального сервера TgBot
-        self.private_download_path = None
-        self.size = 0
+        self.private_download_path: str | None = None
+        self.size: int | None = 0
         # bytes
         self.content = None
         self.ext: str | None = None
@@ -34,7 +34,7 @@ class Attachment:
         self.file_name: str | None = None
         self.file_name_full: str | None = None
 
-        self.name = None
+        self.name: str | None = None
         self.activity = None
 
     def get_file(self, peer_id=None):

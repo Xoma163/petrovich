@@ -9,7 +9,7 @@ class LinkAttachment(Attachment):
 
     def __init__(self):
         super().__init__(self.TYPE)
-        self.url = None
+        self.url: str | None = None
 
     @property
     def is_youtube_link(self):

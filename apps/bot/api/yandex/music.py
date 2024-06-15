@@ -70,7 +70,7 @@ class YandexTrack(YandexMusicAPI):
         self.albums: str = ""
         self.artists: str = ""
         self.title: str = ""
-        self.cover_url: str = ""
+        self.thumbnail_url: str = ""
 
         self.bitrate: int = 0
         self.format: str = ""
@@ -80,7 +80,7 @@ class YandexTrack(YandexMusicAPI):
         self.title = self.track.title
         self.artists = ", ".join([artist.name for artist in self.track.artists])
         if self.track.cover_uri:
-            self.cover_url = f'https://{self.track.cover_uri.replace("%%", "300x300")}'
+            self.thumbnail_url = f'https://{self.track.cover_uri.replace("%%", "300x300")}'
         info = self.track.get_download_info()[0]
         self.bitrate = info.bitrate_in_kbps
         self.format = info.codec

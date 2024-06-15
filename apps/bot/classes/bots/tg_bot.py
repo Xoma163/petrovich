@@ -123,8 +123,10 @@ class TgBot(Bot):
                 media['performer'] = attachment.artist
             if getattr(attachment, 'title', None):
                 media['title'] = attachment.title
-            if getattr(attachment, 'thumb', None):
-                thumb_file = self.get_photo_attachment(attachment.thumb, guarantee_url=True)
+            if getattr(attachment, 'thumbnail_url', None):
+                attachment.set_thumbnail()
+            if getattr(attachment, 'thumbnail', None):
+                thumb_file = attachment.thumbnail
                 thumb_filename = f"thumb_{str(i)}"
                 files.append((thumb_filename, thumb_file.get_bytes_io_content()))
                 media['thumbnail'] = f"attach://{thumb_filename}"
@@ -201,9 +203,10 @@ class TgBot(Bot):
                     raise PError(
                         f"Нельзя загружать видео более {self.MAX_VIDEO_SIZE_MB} мб в телеграмм. Ваше видео {round(video.get_size_mb(), 2)} мб")
                 files = {'video': video.content}
-                if video.thumb:
-                    thumb_file = self.get_photo_attachment(video.thumb, guarantee_url=True)
-                    files['thumbnail'] = thumb_file.get_bytes_io_content()
+                if video.thumbnail_url:
+                    video.set_thumbnail()
+                if video.thumbnail:
+                    files['thumbnail'] = video.thumbnail.get_bytes_io_content()
                 r = self.requests.get('sendVideo', params, files=files).json()
         return r
 
@@ -229,17 +232,18 @@ class TgBot(Bot):
         if audio.title:
             params['title'] = audio.title
 
-        # Через public url плохо работает - не тянется название и thumb
+        # Через public url плохо работает - не тянется название и thumbnail
         if audio.public_download_url:
-            if audio.thumb:
-                params['thumbnail'] = audio.thumb
+            if audio.thumbnail_url:
+                params['thumbnail'] = audio.thumbnail_url
             params['audio'] = audio.public_download_url
             r = self.requests.get('sendAudio', params).json()
         else:
             files = {'audio': audio.content}
-            if audio.thumb:
-                thumb_file = self.get_photo_attachment(audio.thumb, guarantee_url=True)
-                files['thumbnail'] = thumb_file.get_bytes_io_content()
+            if audio.thumbnail_url:
+                audio.set_thumbnail()
+            if audio.thumbnail:
+                files['thumbnail'] = audio.thumbnail.get_bytes_io_content()
             r = self.requests.get('sendAudio', params, files=files).json()
         return r
 

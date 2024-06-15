@@ -9,8 +9,8 @@ class PhotoAttachment(Attachment):
 
     def __init__(self):
         super().__init__(self.TYPE)
-        self.width = None
-        self.height = None
+        self.width: int | None = None
+        self.height: int | None = None
         self.activity = ActivitiesEnum.UPLOAD_PHOTO
 
     def parse_tg(self, event):

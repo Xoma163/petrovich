@@ -63,14 +63,25 @@ class YoutubeMusic:
 
         with open(self._temp_file_path, 'rb') as file:
             content = file.read()
+
         return {
             "artists": artists,
             "title": title,
             "duration": info.get('duration'),
-            "cover_url": f"https://i.ytimg.com/vi/{info['id']}/mqdefault.jpg",
+            "thumbnail_url": self._get_thumbnail(info),
             "format": info['requested_downloads'][0]['ext'],
             "content": content
         }
+
+    @staticmethod
+    def _get_thumbnail(info: dict) -> str | None:
+        try:
+            return list(filter(
+                lambda x: x['url'].endswith("mqdefault.jpg"),
+                info['thumbnails']
+            ))[0]['url']
+        except (IndexError, KeyError):
+            return None
 
     def delete_temp_file(self):
         os.remove(self._temp_file_path)

@@ -34,5 +34,5 @@ class Spotify:
         data = ytm_api.get_info(yt_url)
         data['artists'] = artists
         data['title'] = track['name']
-        data['cover_url'] = track['album']['images'][-1]['url']
+        data['thumbnail_url'] = track['album']['images'][-1]['url']
         return data

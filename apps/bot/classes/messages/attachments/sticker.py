@@ -6,10 +6,10 @@ class StickerAttachment(Attachment):
 
     def __init__(self):
         super().__init__(self.TYPE)
-        self.width = None
-        self.height = None
-        self.emoji = None
-        self.animated = False
+        self.width: int | None = None
+        self.height: int | None = None
+        self.emoji: str | None = None
+        self.animated: bool = False
 
     def parse_tg(self, event):
         attrs = ['width', 'height', 'file_id', 'file_size', 'emoji']

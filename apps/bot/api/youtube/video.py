@@ -79,14 +79,26 @@ class YoutubeVideo(SubscribeService):
         )
 
         url = max_quality_video['url']
+
         return {
             "download_url": url,
             "filesize": chosen_video_filesize,
             "title": video_info['title'],
             "duration": video_info.get('duration'),
             "start_pos": str(video_info['section_start']) if video_info.get('section_start') else None,
-            "end_pos": str(video_info['section_end']) if video_info.get('section_end') else None
+            "end_pos": str(video_info['section_end']) if video_info.get('section_end') else None,
+            "thubmnail_url": self._get_thumbnail(video_info)
         }
+
+    @staticmethod
+    def _get_thumbnail(info: dict) -> str | None:
+        try:
+            return list(filter(
+                lambda x: x['url'].endswith("mqdefault.jpg"),
+                info['thumbnails']
+            ))[0]['url']
+        except (IndexError, KeyError):
+            return None
 
     @staticmethod
     def _calculate_max_size_video(

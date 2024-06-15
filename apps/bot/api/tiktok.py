@@ -6,9 +6,15 @@ from petrovich.settings import env
 
 
 class TikTokData:
-    def __init__(self, video_url, description):
+    def __init__(
+            self,
+            video_url: str,
+            description: str | None = None,
+            thumbnail_url: str | None = None
+    ):
         self.video_url = video_url
         self.description = description if description else None
+        self.thumbnail_url = thumbnail_url if thumbnail_url else None
 
 
 class TikTok(API):
@@ -28,4 +34,4 @@ class TikTok(API):
 
         if r.get("messages") and r['messages'] == self.TRY_LATER_ERROR:
             raise PWarning("Ошибка на стороне API провайдера. Попробуйте позднее")
-        return TikTokData(video_url=r['video'][0], description=r['description'][0])
+        return TikTokData(video_url=r['video'][0], description=r['description'][0], thumbnail_url=r['cover'][0])

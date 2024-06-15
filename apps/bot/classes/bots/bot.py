@@ -373,7 +373,12 @@ class Bot(Thread):
 
     # ATTACHMENTS
     def get_photo_attachment(
-            self, image, peer_id=None, allowed_exts_url=None, guarantee_url=False, filename=None,
+            self,
+            image,
+            peer_id: str | int | None = None,
+            allowed_exts_url: list[str] | None = None,
+            guarantee_url: bool = False,
+            filename: str | None = None,
             send_chat_action: bool = True
     ) -> PhotoAttachment:
         """
@@ -387,7 +392,11 @@ class Bot(Thread):
         return pa
 
     def get_document_attachment(
-            self, document, peer_id=None, filename=None, send_chat_action: bool = True
+            self,
+            document,
+            peer_id: str | int | None = None,
+            filename: str = None,
+            send_chat_action: bool = True
     ) -> DocumentAttachment:
         """
         Получение документа
@@ -397,30 +406,55 @@ class Bot(Thread):
             da.parse(document, filename=filename)
         return da
 
-    def get_audio_attachment(self, audio, peer_id=None, title=None, artist=None, filename=None, thumb=None,
-                             send_chat_action: bool = True) -> AudioAttachment:
+    def get_audio_attachment(
+            self,
+            audio,
+            peer_id: str | int | None = None,
+            title: str | None = None,
+            artist: str | None = None,
+            filename: str | None = None,
+            thumbnail: PhotoAttachment | None = None,
+            thumbnail_url: str | None = None,
+            send_chat_action: bool = True
+    ) -> AudioAttachment:
         """
         Получение аудио
         """
         aa = AudioAttachment()
         with ChatActivity(self, ActivitiesEnum.UPLOAD_AUDIO, peer_id, send_chat_action=send_chat_action):
             aa.parse(audio, filename=filename)
-        aa.thumb = thumb
+        aa.thumbnail = thumbnail
+        aa.thumbnail_url = thumbnail_url
         aa.title = title
         aa.artist = artist
         return aa
 
-    def get_video_attachment(self, document, peer_id=None, filename=None, send_chat_action: bool = True
-                             ) -> VideoAttachment:
+    def get_video_attachment(
+            self,
+            document,
+            peer_id: str | int | None = None,
+            filename: str | None = None,
+            thumbnail: PhotoAttachment | None = None,
+            thumbnail_url: str | None = None,
+            send_chat_action: bool = True
+    ) -> VideoAttachment:
         """
         Получение видео
         """
         va = VideoAttachment()
         with ChatActivity(self, ActivitiesEnum.UPLOAD_VIDEO, peer_id, send_chat_action=send_chat_action):
             va.parse(document, filename=filename)
+        va.thumbnail = thumbnail
+        va.thumbnail_url = thumbnail_url
         return va
 
-    def get_gif_attachment(self, gif, peer_id=None, filename=None, send_chat_action: bool = True) -> GifAttachment:
+    def get_gif_attachment(
+            self,
+            gif,
+            peer_id: str | int | None = None,
+            filename: str | None = None,
+            send_chat_action: bool = True
+    ) -> GifAttachment:
         """
         Получение гифки
         """

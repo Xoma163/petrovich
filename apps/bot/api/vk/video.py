@@ -34,13 +34,19 @@ class VKVideo(SubscribeService):
     def __init__(self):
         super().__init__()
 
-    def get_video(self, url) -> bytes:
+    def get_video(self, url) -> dict:
         player_url = self._get_player_url(url)
         va, aa = self._get_video_audio(player_url)
         if aa is not None:
             vh = VideoHandler(video=va, audio=aa)
-            return vh.mux()
-        return va.download_content(headers=self.headers)
+            return {
+                'video': vh.mux(),
+                'thumbnail_url': va.thumbnail_url
+            }
+        return {
+            'video': va.download_content(headers=self.headers),
+            'thumbnail_url': va.thumbnail_url
+        }
 
     def _get_player_url(self, url: str) -> str:
         r = requests.get(url, headers=self.headers)
@@ -57,12 +63,18 @@ class VKVideo(SubscribeService):
         info = json.loads(js_code)
         info = info.get('params')[0]
 
+        # Если не будет работать, то можно попробовать через поля 'url2160/url1440/url1080/url720/url480/url360/url240'
+        va = None
+        aa = None
         if dash_webm := info.get('dash_webm'):
-            return self._get_video_audio_dash(dash_webm)
+            va, aa = self._get_video_audio_dash(dash_webm)
         elif dash_sep := info.get('dash_sep'):
-            return self._get_video_audio_dash(dash_sep)
+            va, aa = self._get_video_audio_dash(dash_sep)
         elif hls := info.get('hls'):
-            return self._get_video_hls(hls)
+            va, aa = self._get_video_hls(hls)
+        if va:
+            va.thumbnail_url = info['jpg']
+        return va, aa
 
     def _get_video_audio_dash(self, dash_webm_url) -> tuple[VideoAttachment, AudioAttachment]:
         parsed_url = urlparse(dash_webm_url)

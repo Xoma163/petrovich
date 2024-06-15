@@ -473,7 +473,7 @@ class Meme(AcceptExtraCommand):
             video = self.bot.get_video_attachment(video_content)
             parsed_url = urlparse(meme.link)
             video_id = parsed_url.path.strip('/')
-            video.thumb = f"https://img.youtube.com/vi/{video_id}/default.jpg"
+            video.thumbnail_url = f"https://img.youtube.com/vi/{video_id}/default.jpg"
 
             meme.tg_file_id = video.get_file_id()
             meme.type = VideoAttachment.TYPE
