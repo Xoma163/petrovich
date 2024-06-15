@@ -311,7 +311,7 @@ class Bot(Thread):
         """
         Получение пользователя по имени/фамилии/имени и фамилии/никнейма/ид
         """
-        users = Profile.objects
+        users = Profile.objects.all()
         if filter_chat:
             users = users.filter(chats=filter_chat)
 
