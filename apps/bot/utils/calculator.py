@@ -207,8 +207,8 @@ class Calculator:
                 compiled_grammar.left = split[0][0]  # left_expr
                 compiled_grammar.right = split[0][1]  # right_expr
             compiled_grammars.append(compiled_grammar)
-        cls.COMPILED_GRAMMARS = compiled_grammars
-        return cls.COMPILED_GRAMMARS
+        cls._COMPILED_GRAMMARS = compiled_grammars
+        return cls._COMPILED_GRAMMARS
 
     # searching arithmetic operation in grammar
     @classmethod

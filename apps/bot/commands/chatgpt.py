@@ -148,7 +148,6 @@ class ChatGPT(GPTCommand):
 
     def menu__summary(self):
         PROMPT = "Я пришлю тебе голосовое сообщение. Сделай саммари по нему, сократи и донеси суть, но не теряй важных деталей"
-        # message_id = self.event.message.id
         message = self.event.raw['callback_query']['message']
 
         documents: list[DocumentAttachment] = self.event.get_all_attachments([DocumentAttachment])

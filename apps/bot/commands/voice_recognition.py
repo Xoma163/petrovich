@@ -92,13 +92,12 @@ class VoiceRecognition(AcceptExtraCommand):
                 answers.append(answer)
             answer = "\n\n".join(answers)
 
-        rmi = self._get_rmi(answer, attachment)
+        rmi = self._get_rmi(answer)
         return ResponseMessage(rmi)
 
     def _get_rmi(
             self,
             answer: str,
-            voice: VoiceAttachment | VideoNoteAttachment | AudioAttachment
     ) -> ResponseMessageItem:
         """
         Пост-обработка сообщения
