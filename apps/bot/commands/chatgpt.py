@@ -3,6 +3,7 @@ from apps.bot.api.gpt.message import ChatGPTMessages, GPTMessageRole
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
+from apps.bot.classes.messages.attachments.document import DocumentAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.commands.abstract.gpt_command import GPTCommand
 from apps.service.models import GPTPrePrompt
@@ -146,18 +147,24 @@ class ChatGPT(GPTCommand):
         return rmi
 
     def menu__summary(self):
+        PROMPT = "Я пришлю тебе голосовое сообщение. Сделай саммари по нему, сократи и донеси суть, но не теряй важных деталей"
         # message_id = self.event.message.id
-        message = self.event.raw['callback_query']['message']['text']
-        self.get_dialog()
+        message = self.event.raw['callback_query']['message']
+
+        documents: list[DocumentAttachment] = self.event.get_all_attachments([DocumentAttachment])
+        if documents and documents[0].mime_type.is_text:
+            text = documents[0].read_text()
+        elif message_text := message.get('text'):
+            text = message_text
+        # self.get_dialog()
         history = self.gpt_messages_class()
 
         preprompt = self.get_preprompt(self.event.sender, self.event.chat)
         if preprompt:
             history.add_message(GPTMessageRole.SYSTEM, preprompt)
 
-        history.add_message(GPTMessageRole.USER,
-                            "Я пришлю тебе голосовое сообщение. Сделай саммари по нему, сократи и донеси суть, но не теряй важных деталей")
-        history.add_message(GPTMessageRole.USER, message)
+        history.add_message(GPTMessageRole.USER, PROMPT)
+        history.add_message(GPTMessageRole.USER, text)
 
         rmi = self.completions(history, use_statistics=True)
         return self._send_rmi(rmi)
