@@ -325,8 +325,12 @@ class Media(AcceptExtraCommand):
         )
         return [audio_att], ""
 
-    @retry(3, Exception, sleep_time=2)
+    @retry(3, Exception, except_exceptions=[PSkip], sleep_time=2)
     def get_tiktok_video(self, url) -> (list, str):
+        # Если ссылка на профиль
+        if urlparse(url).path.strip('/')[0] == "@":
+            raise PSkip()
+
         tt_api = TikTok(log_filter=self.event.log_filter)
         try:
             ttd = tt_api.get_video(url)

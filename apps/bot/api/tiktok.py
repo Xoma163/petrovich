@@ -32,6 +32,9 @@ class TikTok(API):
         except ReadTimeout:
             raise PWarning("Ошибка на стороне API провайдера. Попробуйте позднее")
 
+        if r.get('error'):
+            raise PWarning("Ошибка API")
+
         if r.get("messages") and r['messages'] == self.TRY_LATER_ERROR:
             raise PWarning("Ошибка на стороне API провайдера. Попробуйте позднее")
         return TikTokData(video_url=r['video'][0], description=r['description'][0], thumbnail_url=r['cover'][0])
