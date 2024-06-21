@@ -384,7 +384,7 @@ class Media(AcceptExtraCommand):
             raise PWarning("Я хз чё за контент")
         return attachments, rs.title
 
-    @retry(3, Exception, sleep_time=2)
+    # @retry(3, Exception, sleep_time=2)
     def get_instagram_attachment(self, url) -> (list, str):
         try:
             self.check_sender(Role.TRUSTED)

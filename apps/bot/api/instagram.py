@@ -1,5 +1,3 @@
-from urllib.parse import urlparse
-
 from apps.bot.api.handler import API
 from apps.bot.classes.const.exceptions import PWarning
 from petrovich.settings import env
@@ -29,8 +27,8 @@ class InstagramAPIData:
 class Instagram(API):
     RAPID_API_KEY = env.str("RAPID_API_KEY")
 
-    HOST = "instagram-post-reels-stories-downloader.p.rapidapi.com"
-    URL = f'https://{HOST}/instagram/'
+    HOST = "instagram-scraper-api2.p.rapidapi.com"
+    URL = f'https://{HOST}/v1/post_info'
     HEADERS = {
         "X-RapidAPI-Key": RAPID_API_KEY,
         "X-RapidAPI-Host": HOST
@@ -41,27 +39,33 @@ class Instagram(API):
         self.requests.headers = self.HEADERS
 
     def get_data(self, instagram_link) -> InstagramAPIData:
-        params = {"url": instagram_link}
+        params = {"code_or_id_or_url": instagram_link}
         r = self.requests.get(self.URL, params=params).json()
-        if not r.get('result'):
+        if not r.get('data'):
             raise PWarning("Ошибка API")
-        return self._parse_response(r['result'])
+        return self._parse_response(r['data'])
 
     @staticmethod
-    def _parse_response(response) -> InstagramAPIData:
+    def _parse_response(item) -> InstagramAPIData:
         data = InstagramAPIData()
-        for item in response:
-            print(item['type'])
-            real_ext = urlparse(item['url']).path.rsplit('.', 1)[-1]
-            if item['type'] == "video/mp4" or real_ext == 'mp4':
-                content_type = InstagramAPIDataItem.CONTENT_TYPE_VIDEO
-            else:
-                content_type = InstagramAPIDataItem.CONTENT_TYPE_IMAGE
 
-            data_item = InstagramAPIDataItem(
-                content_type,
-                item['url']
-            )
-            data.add_item(data_item)
+        # caption
+        caption_block = item.get('caption') if item else None
+        data.caption = caption_block.get('text') if caption_block else None
+
+        if carousel := item.get('carousel_media'):
+            for carousel_item in carousel:
+                if video_url := carousel_item.get('video_url'):
+                    data.add_item(InstagramAPIDataItem(InstagramAPIDataItem.CONTENT_TYPE_VIDEO, video_url))
+                elif image_versions := carousel_item.get('image_versions'):
+                    image_url = image_versions['items'][0]['url']
+                    data.add_item(InstagramAPIDataItem(InstagramAPIDataItem.CONTENT_TYPE_IMAGE, image_url))
+        elif video_url := item.get('video_url'):
+            data.add_item(InstagramAPIDataItem(InstagramAPIDataItem.CONTENT_TYPE_VIDEO, video_url))
+        elif display_url := item.get('display_url'):
+            data.add_item(InstagramAPIDataItem(InstagramAPIDataItem.CONTENT_TYPE_IMAGE, display_url))
+        elif image_versions := item.get('image_versions'):
+            image_url = image_versions['items'][0]['url']
+            data.add_item(InstagramAPIDataItem(InstagramAPIDataItem.CONTENT_TYPE_IMAGE, image_url))
 
         return data
