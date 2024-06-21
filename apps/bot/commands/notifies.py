@@ -223,6 +223,8 @@ class Notifies(Command):
                 return parser.parse(arg1, default=default_datetime, dayfirst=True), 1, exact_datetime_flag
             except ParserError:
                 return None, None, None
+        except ValueError:
+            raise PWarning("Ошибка парсинга даты")
 
     def _add_notify(self) -> dict:
         timezone = self.event.sender.city.timezone.name
