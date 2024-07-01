@@ -179,7 +179,7 @@ class Subscribe(TimeStampModelMixin):
 class VideoCache(TimeStampModelMixin):
     channel_id = models.CharField("ID канала", max_length=100)
     video_id = models.CharField("ID видео", max_length=100, null=True)
-    filename = models.CharField('Название файла', max_length=256)
+    filename = models.CharField('Название файла', max_length=1024)
     video = models.FileField('Видео', blank=True, upload_to="service/video/")
 
     class Meta:
