@@ -7,13 +7,14 @@ from itertools import groupby
 from django.core.management import BaseCommand
 
 from apps.bot.api.premier import Premier
+from apps.bot.api.subscribe_service import SubscribeServiceNewVideosData
 from apps.bot.api.vk.video import VKVideo
 from apps.bot.api.youtube.video import YoutubeVideo
 from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.const.exceptions import PSubscribeIndexError
 from apps.bot.classes.event.event import Event
 from apps.bot.classes.messages.message import Message
-from apps.bot.classes.messages.response_message import ResponseMessageItem, ResponseMessage
+from apps.bot.classes.messages.response_message import ResponseMessageItem
 from apps.bot.commands.media import Media
 from apps.service.models import Subscribe, VideoCache
 from petrovich.settings import env
@@ -56,10 +57,6 @@ class Command(BaseCommand):
         })
 
     def check_video(self, subs, sub_class, media_method):
-        # logger.debug({
-        #     "message": "check_video",
-        #     "notify_enitity": subs[0].__dict__,
-        # })
         if len(set(x.last_videos_id[-1] for x in subs)) == 1:
             api = sub_class()
             try:
@@ -75,17 +72,13 @@ class Command(BaseCommand):
                         sub.save()
                 raise
 
-            if not res['ids']:
+            if not res.videos:
                 return
 
-            self.send_file_or_video(subs, res["ids"], res["urls"], res["titles"], method=media_method)
+            self.send_file_or_video(subs, res, method=media_method)
         else:
             for sub in subs:
                 self.check_video([sub], sub_class, media_method)
-        # logger.debug({
-        #     "message": "end check_video",
-        #     "notify_enitity": subs[0].__dict__,
-        # })
 
     @staticmethod
     def send_notify(sub, title, link, media_message: ResponseMessageItem):
@@ -134,30 +127,31 @@ class Command(BaseCommand):
         })
         return rmi
 
-    def send_file_or_video(self, subs, ids, urls, titles, method):
+    def send_file_or_video(self, subs, videos: SubscribeServiceNewVideosData, method):
         logger.debug({
             "message": "send_file_or_video",
             "notify_enitity": subs[0].__dict__,
         })
-        rm = ResponseMessage()
-        for i, url in enumerate(urls):
-            media_message = self.get_media_result_msg(url, method)
+        # rm = ResponseMessage()
+        messages_with_att = []
+        for video in videos.videos:
+            media_message: ResponseMessageItem = self.get_media_result_msg(video.url, method)
             if media_message.attachments:
                 att = media_message.attachments[0]
                 if not att.file_id:
                     att.set_file_id()
-            rm.messages.append(media_message)
+            messages_with_att.append((media_message, video))
 
         for sub in subs:
-            for i, media_message in enumerate(rm.messages):
-                self.send_notify(sub, titles[i], urls[i], media_message)
+            for rmi, video in messages_with_att:
+                self.send_notify(sub, video.title, video.url, rmi)
 
                 if sub.save_to_plex:
-                    cache = VideoCache.objects.get(channel_id=sub.channel_id, video_id=ids[i])
-                    self._save_to_plex(cache, str(sub), titles[i])
+                    cache = VideoCache.objects.get(channel_id=sub.channel_id, video_id=video.id)
+                    self._save_to_plex(cache, str(sub), video.title)
 
                 time.sleep(1)
-            sub.last_videos_id = sub.last_videos_id + ids
+            sub.last_videos_id = sub.last_videos_id + videos.ids
             sub.save()
 
         logger.debug({

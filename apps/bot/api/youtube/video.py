@@ -7,7 +7,7 @@ import requests
 import yt_dlp
 from bs4 import BeautifulSoup
 
-from apps.bot.api.subscribe_service import SubscribeService
+from apps.bot.api.subscribe_service import SubscribeService, SubscribeServiceNewVideosData, SubscribeServiceNewVideoData
 from apps.bot.classes.const.exceptions import PWarning, PSkip
 from apps.bot.utils.nothing_logger import NothingLogger
 from petrovich.settings import env
@@ -226,7 +226,12 @@ class YoutubeVideo(SubscribeService):
             'last_videos_id': last_videos_id,
         }
 
-    def get_filtered_new_videos(self, channel_id: str, last_videos_id: list[str], **kwargs) -> dict:
+    def get_filtered_new_videos(
+            self,
+            channel_id: str,
+            last_videos_id: list[str],
+            **kwargs
+    ) -> SubscribeServiceNewVideosData:
         if kwargs.get('playlist_id'):
             videos = self._get_playlist_videos(kwargs.get('playlist_id'))
             ids = [x['snippet']['resourceId']['videoId'] for x in videos]
@@ -238,7 +243,7 @@ class YoutubeVideo(SubscribeService):
         ids = ids[index:]
         urls = [f"https://www.youtube.com/watch?v={x}" for x in ids]
 
-        data = {"ids": [], "titles": [], "urls": []}
+        data = SubscribeServiceNewVideosData(videos=[])
         for i, url in enumerate(urls):
             try:
                 video_info = self._get_video_info(url)
@@ -246,7 +251,10 @@ class YoutubeVideo(SubscribeService):
                 continue
             if video_info['duration'] <= 60:
                 continue
-            data['ids'].append(ids[i])
-            data['titles'].append(video_info['title'])
-            data['urls'].append(urls[i])
+            video = SubscribeServiceNewVideoData(
+                id=ids[i],
+                title=video_info['title'],
+                url=url
+            )
+            data.videos.append(video)
         return data

@@ -1,7 +1,7 @@
 import re
 
 from apps.bot.api.handler import API
-from apps.bot.api.subscribe_service import SubscribeService
+from apps.bot.api.subscribe_service import SubscribeService, SubscribeServiceNewVideosData, SubscribeServiceNewVideoData
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.messages.attachments.video import VideoAttachment
 from apps.bot.utils.video.video_handler import VideoHandler
@@ -104,7 +104,12 @@ class Premier(SubscribeService, API):
                 'last_videos_id': [x['id'] for x in videos],
             }
 
-    def get_filtered_new_videos(self, channel_id: str, last_videos_id: list[str], **kwargs) -> dict:
+    def get_filtered_new_videos(
+            self,
+            channel_id: str,
+            last_videos_id: list[str],
+            **kwargs
+    ) -> SubscribeServiceNewVideosData:
         params = {'limit': 100}
         results = self._get_videos(channel_id, params, log_results=False)
 
@@ -120,14 +125,18 @@ class Premier(SubscribeService, API):
         titles = titles[index:]
         urls = urls[index:]
 
-        data = {"ids": [], "titles": [], "urls": []}
+        data = SubscribeServiceNewVideosData(videos=[])
         for i, url in enumerate(urls):
             try:
                 self._get_download_url(ids[i], url, log_results=False)
 
-                data['ids'].append(ids[i])
-                data['titles'].append(titles[i])
-                data['urls'].append(urls[i])
+                data.videos.append(
+                    SubscribeServiceNewVideoData(
+                        id=ids[i],
+                        title=titles[i],
+                        url=url,
+                    )
+                )
             except PWarning:
                 continue
         return data

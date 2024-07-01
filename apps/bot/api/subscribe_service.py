@@ -1,33 +1,58 @@
+import dataclasses
+
 from apps.bot.classes.const.exceptions import PSubscribeIndexError
 
 
+@dataclasses.dataclass
+class SubscribeServiceData:
+    channel_id: str
+    playlist_id: str
+    channel_title: str
+    playlist_title: str
+    last_videos_id: list[str]
+
+
+@dataclasses.dataclass
+class SubscribeServiceNewVideoData:
+    id: str | int
+    title: str
+    url: str
+
+
+@dataclasses.dataclass
+class SubscribeServiceNewVideosData:
+    videos: list[SubscribeServiceNewVideoData]
+
+    @property
+    def ids(self):
+        return [x.id for x in self.videos]
+
+    @property
+    def titles(self):
+        return [x.title for x in self.videos]
+
+    @property
+    def urls(self):
+        return [x.url for x in self.videos]
+
+
 class SubscribeService:
-    def get_data_to_add_new_subscribe(self, url: str) -> dict:
+    def get_data_to_add_new_subscribe(self, url: str) -> SubscribeServiceData:
         """
         Метод по выдаче информации для добавления новой подписки
         Используется в команде для добавления подписок
-
-        return {
-            'channel_id': str,
-            'playlist_id': str
-            'channel_title': str,
-            'playlist_title': str,
-            'last_videos_id':List[str],
-        }
-
         """
         raise NotImplementedError
 
-    def get_filtered_new_videos(self, channel_id: str, last_videos_id: list[str], **kwargs) -> dict:
+    def get_filtered_new_videos(
+            self,
+            channel_id: str,
+            last_videos_id: list[str],
+            **kwargs
+    ) -> SubscribeServiceNewVideosData:
         """
         Метод по выдаче новых видео
         Используется в проверке новых подписок
-
-        return {
-            ids: list,
-            titles: list,
-            urls: list
-        }
         """
         raise NotImplementedError
 

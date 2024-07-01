@@ -6,7 +6,7 @@ import requests
 import xmltodict
 from bs4 import BeautifulSoup
 
-from apps.bot.api.subscribe_service import SubscribeService
+from apps.bot.api.subscribe_service import SubscribeService, SubscribeServiceNewVideosData, SubscribeServiceNewVideoData
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.messages.attachments.audio import AudioAttachment
 from apps.bot.classes.messages.attachments.video import VideoAttachment
@@ -174,7 +174,13 @@ class VKVideo(SubscribeService):
             'last_videos_id': last_videos_id,
         }
 
-    def get_filtered_new_videos(self, channel_id: str, last_videos_id: list[str], **kwargs) -> dict:
+    def get_filtered_new_videos(
+            self,
+            channel_id: str,
+            last_videos_id: list[str],
+            **kwargs
+    ) -> SubscribeServiceNewVideosData:
+
         if kwargs.get('playlist_id'):
             channel_id = kwargs['playlist_id']
         url = f"{self.URL}/{channel_id}"
@@ -198,8 +204,17 @@ class VKVideo(SubscribeService):
 
         ids = ids[index:]
         titles = titles[index:]
-        urls = [f"{self.URL}{x}" for x in ids]
-        return {"ids": ids, "titles": titles, "urls": urls}
+
+        data = SubscribeServiceNewVideosData(videos=[])
+        for i, _id in enumerate(ids):
+            data.videos.append(
+                SubscribeServiceNewVideoData(
+                    id=ids[i],
+                    title=titles[i],
+                    url=f"{self.URL}{_id}"
+                )
+            )
+        return data
 
     @staticmethod
     def _get_playlist_data(bs4):
