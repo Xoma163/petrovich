@@ -63,7 +63,7 @@ trio==0.25.1
 trio-websocket==0.11.1
 twitch-dl==2.3.1
 typing_extensions==4.12.2
-urllib3==2.2.1
+urllib3==2.2.2
 uWSGI==2.0.26
 virtualenv==20.26.2
 wakeonlan==3.1.0
