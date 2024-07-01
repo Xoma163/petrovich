@@ -253,6 +253,8 @@ class Media(AcceptExtraCommand):
         with ChatActivity(self.bot, ActivitiesEnum.UPLOAD_VIDEO, self.event.peer_id):
             if start_pos:
                 tm = TrimVideo()
+                tm.bot = self.bot
+                tm.event = self.event
                 video_content = tm.trim_link_pos(url, start_pos, end_pos)
                 va = self.bot.get_video_attachment(video_content, peer_id=self.event.peer_id)
                 text = None

@@ -115,17 +115,18 @@ class YoutubeVideo(SubscribeService):
         if max_filesize_mb:  # for tg
             for video in videos:
                 filesize = video.get('filesize') or video.get('filesize_approx')
-                if filesize:
-                    chosen_video_filesize = filesize / 1024 / 1024
+                if not filesize:
+                    continue
+                chosen_video_filesize = filesize / 1024 / 1024
 
-                    if chosen_video_filesize < max_filesize_mb:
+                if chosen_video_filesize < max_filesize_mb:
+                    max_quality_video = video
+                    break
+                if _timedelta:
+                    mbps = chosen_video_filesize / video_info.get('duration')
+                    if mbps * _timedelta < max_filesize_mb - 2:
                         max_quality_video = video
                         break
-                    if _timedelta:
-                        mbps = chosen_video_filesize / video_info.get('duration')
-                        if mbps * _timedelta < max_filesize_mb - 2:
-                            max_quality_video = video
-                            break
             else:
                 raise PSkip()
         else:
