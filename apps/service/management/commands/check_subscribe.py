@@ -132,7 +132,6 @@ class Command(BaseCommand):
             "message": "send_file_or_video",
             "notify_enitity": subs[0].__dict__,
         })
-        # rm = ResponseMessage()
         messages_with_att = []
         for video in videos.videos:
             media_message: ResponseMessageItem = self.get_media_result_msg(video.url, method)
