@@ -22,6 +22,7 @@ from apps.bot.api.vk.video import VKVideo
 from apps.bot.api.yandex.music import YandexMusicAPI, YandexAlbum, YandexTrack
 from apps.bot.api.youtube.music import YoutubeMusic
 from apps.bot.api.youtube.video import YoutubeVideo
+from apps.bot.api.zen import Zen
 from apps.bot.classes.bots.chat_activity import ChatActivity
 from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import AcceptExtraCommand
@@ -63,6 +64,7 @@ FACEBOOK_URLS = ('www.facebook.com', 'facebook.com', 'fb.watch')
 PREMIERE_URLS = ('premier.one',)
 SPOTIFY_URLS = ('open.spotify.com',)
 SUNO_AI_URLS = ('suno.ai', 'suno.com')
+DZEN_URLS = ('dzen.ru',)
 
 MEDIA_URLS = tuple(
     YOUTUBE_URLS +
@@ -81,7 +83,8 @@ MEDIA_URLS = tuple(
     FACEBOOK_URLS +
     PREMIERE_URLS +
     SPOTIFY_URLS +
-    SUNO_AI_URLS
+    SUNO_AI_URLS +
+    DZEN_URLS
 )
 
 
@@ -222,6 +225,7 @@ class Media(AcceptExtraCommand):
             PREMIERE_URLS: self.get_premiere_video,
             SPOTIFY_URLS: self.get_spotify_music,
             SUNO_AI_URLS: self.get_suno_ai_music,
+            DZEN_URLS: self.get_dzen_video,
         }
 
         urls = get_urls_from_text(source)
@@ -350,13 +354,24 @@ class Media(AcceptExtraCommand):
         rs = Reddit()
         reddit_data = rs.get_post_data(url)
         if rs.is_gif:
-            attachments = [self.bot.get_gif_attachment(reddit_data, peer_id=self.event.peer_id, filename=rs.filename)]
+            attachments = [self.bot.get_gif_attachment(
+                reddit_data,
+                peer_id=self.event.peer_id,
+                filename=rs.filename
+            )]
         elif rs.is_image or rs.is_images or rs.is_gallery:
-            attachments = [self.bot.get_photo_attachment(att, peer_id=self.event.peer_id, filename=rs.filename,
-                                                         send_chat_action=False) for att
-                           in reddit_data]
+            attachments = [self.bot.get_photo_attachment(
+                att,
+                peer_id=self.event.peer_id,
+                filename=rs.filename,
+                send_chat_action=False
+            ) for att in reddit_data]
         elif rs.is_video:
-            attachments = [self.bot.get_video_attachment(reddit_data, peer_id=self.event.peer_id, filename=rs.filename)]
+            attachments = [self.bot.get_video_attachment(
+                reddit_data,
+                peer_id=self.event.peer_id,
+                filename=rs.filename
+            )]
 
         elif rs.is_text or rs.is_link:
             text = reddit_data
@@ -382,9 +397,13 @@ class Media(AcceptExtraCommand):
                     if _text == "Фото":
                         all_photos.append(link)
             all_photos = reversed(all_photos)
-            attachments = [self.bot.get_photo_attachment(photo, peer_id=self.event.peer_id, filename=rs.filename,
-                                                         send_chat_action=False)
-                           for photo in all_photos]
+            attachments = [self.bot.get_photo_attachment(
+                photo,
+                peer_id=self.event.peer_id,
+                filename=rs.filename,
+                send_chat_action=False
+            )
+                for photo in all_photos]
             return attachments, f"{rs.title}\n\n{text}"
         else:
             raise PWarning("Я хз чё за контент")
@@ -403,8 +422,12 @@ class Media(AcceptExtraCommand):
         attachments = []
         for item in data.items:
             if item.content_type == InstagramAPIDataItem.CONTENT_TYPE_IMAGE:
-                attachment = self.bot.get_photo_attachment(item.download_url, peer_id=self.event.peer_id,
-                                                           guarantee_url=True, send_chat_action=False)
+                attachment = self.bot.get_photo_attachment(
+                    item.download_url,
+                    peer_id=self.event.peer_id,
+                    guarantee_url=True,
+                    send_chat_action=False
+                )
             elif item.content_type == InstagramAPIDataItem.CONTENT_TYPE_VIDEO:
                 attachment = self.bot.get_video_attachment(item.download_url, peer_id=self.event.peer_id)
             else:
@@ -432,8 +455,11 @@ class Media(AcceptExtraCommand):
                 video = self.bot.get_video_attachment(att.download_url, peer_id=self.event.peer_id)
                 attachments.append(video)
             if att.content_type == att.CONTENT_TYPE_IMAGE:
-                photo = self.bot.get_photo_attachment(att.download_url, peer_id=self.event.peer_id,
-                                                      send_chat_action=False)
+                photo = self.bot.get_photo_attachment(
+                    att.download_url,
+                    peer_id=self.event.peer_id,
+                    send_chat_action=False
+                )
                 attachments.append(photo)
 
         return attachments, data.caption
@@ -517,30 +543,18 @@ class Media(AcceptExtraCommand):
         try:
             cache = VideoCache.objects.get(channel_id=video_info['channel_id'], video_id=video_info['video_id'])
             attachments = []
-            msg = f"{title}\nCкачать можно здесь {self.bot.get_formatted_url('здесь', MAIN_SITE + cache.video.url)}"
+            msg = self._get_download_cache_text(title, cache.video.url)
         except VideoCache.DoesNotExist:
             with ChatActivity(self.bot, ActivitiesEnum.UPLOAD_VIDEO, self.event.peer_id):
                 video_data = vk_api.get_video(url)
-
             video = video_data['video']
-            filesize_mb = len(video) / 1024 / 1024
-            if filesize_mb > self.bot.MAX_VIDEO_SIZE_MB:
-                filename = f"{video_info['channel_title']}_{title}"
-                cache = self._save_video_to_media_cache(
-                    video_info['channel_id'],
-                    video_info['video_id'],
-                    filename,
-                    video
-                )
-                attachments = []
-                msg = f"{title}\nCкачать можно здесь {self.bot.get_formatted_url('здесь', MAIN_SITE + cache.video.url)}"
-            else:
-                video = self.bot.get_video_attachment(video, peer_id=self.event.peer_id)
-                if thumbnail_url := video_data['thumbnail_url']:
-                    video.thumbnail_url = thumbnail_url
-
-                attachments = [video]
-                msg = title
+            attachments, msg = self._get_cached_attachments_and_msg(
+                video,
+                video_info['channel_id'],
+                video_info['video_id'],
+                title,
+                video_data['thumbnail_url']
+            )
         return attachments, msg
 
     def get_scope_gg_video(self, url) -> (list, str):
@@ -581,29 +595,19 @@ class Media(AcceptExtraCommand):
     def get_premiere_video(self, url) -> (list, str):
         p_api = Premier(log_filter=self.event.log_filter)
         data = p_api.parse_video(url)
-
         try:
             cache = VideoCache.objects.get(channel_id=data['show_id'], video_id=data['video_id'])
             attachments = []
-            msg = f"{data['title']}\nCкачать можно здесь {self.bot.get_formatted_url('здесь', MAIN_SITE + cache.video.url)}"
+            msg = self._get_download_cache_text(data['title'], cache.video.url)
         except VideoCache.DoesNotExist:
             with ChatActivity(self.bot, ActivitiesEnum.UPLOAD_VIDEO, self.event.peer_id):
                 video = p_api.download_video(url, data['video_id'])
-
-            filesize_mb = len(video) / 1024 / 1024
-            if filesize_mb > self.bot.MAX_VIDEO_SIZE_MB:
-                filename = data['filename']
-                cache = self._save_video_to_media_cache(
-                    data['show_id'],
-                    data['video_id'],
-                    filename,
-                    video
-                )
-                attachments = []
-                msg = f"{data['title']}\nCкачать можно здесь {self.bot.get_formatted_url('здесь', MAIN_SITE + cache.video.url)}"
-            else:
-                attachments = [self.bot.get_video_attachment(video, peer_id=self.event.peer_id)]
-                msg = data['title']
+            attachments, msg = self._get_cached_attachments_and_msg(
+                video,
+                data['show_id'],
+                data['video_id'],
+                data['title']
+            )
         return attachments, msg
 
     def get_spotify_music(self, url):
@@ -644,6 +648,43 @@ class Media(AcceptExtraCommand):
 
         return [audio_att], data.song_text
 
+    def get_dzen_video(self, url):
+        zen = Zen()
+        data = zen.parse_video(url)
+        try:
+            cache = VideoCache.objects.get(channel_id=data.channel_id, video_id=data.video_id)
+            attachments = []
+            msg = self._get_download_cache_text(data.video_title, cache.video.url)
+        except VideoCache.DoesNotExist:
+            with ChatActivity(self.bot, ActivitiesEnum.UPLOAD_VIDEO, self.event.peer_id):
+                video = zen.download_video(data.m3u8_master_url)
+            attachments, msg = self._get_cached_attachments_and_msg(
+                video,
+                data.channel_id,
+                data.video_id,
+                data.video_title,
+                data.thumbnail_url
+            )
+        return attachments, msg
+
+    def _get_cached_attachments_and_msg(self, video, channel_id, video_id, video_title, thumbnail_url=None):
+        filesize_mb = len(video) / 1024 / 1024
+        if filesize_mb > self.bot.MAX_VIDEO_SIZE_MB:
+            cache = self._save_video_to_media_cache(
+                channel_id=channel_id,
+                video_id=video_id,
+                name=video_title,
+                content=video
+            )
+            attachments = []
+            msg = self._get_download_cache_text(video_title, cache.video.url)
+        else:
+            video_att = self.bot.get_video_attachment(video, peer_id=self.event.peer_id)
+            video_att.thumbnail_url = thumbnail_url if thumbnail_url else None
+            attachments = [video_att]
+            msg = video_title
+        return attachments, msg
+
     @staticmethod
     def _save_video_to_media_cache(channel_id: str, video_id: str, name: str, content: bytes):
         filename = f"{name}.mp4"
@@ -655,3 +696,6 @@ class Media(AcceptExtraCommand):
         cache.video.save(filename, content=BytesIO(content))
         cache.save()
         return cache
+
+    def _get_download_cache_text(self, title, cache_video_url):
+        return f"{title}\nСкачать можно здесь {self.bot.get_formatted_url('здесь', MAIN_SITE + cache_video_url)}"

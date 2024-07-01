@@ -36,6 +36,7 @@ yt-dlp = "^2024.4.9"
 spotipy = "^2.23.0"
 numpy = "^1.26.4"
 python-dateutil = "^2.9.0.post0"
+selenium = "^4.22.0"
 
 [tool.poetry.dev-dependencies]
 
