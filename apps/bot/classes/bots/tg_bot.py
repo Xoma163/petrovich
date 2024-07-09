@@ -372,10 +372,12 @@ class TgBot(Bot):
             "Forbidden: bot was blocked by the user",
             "Bad Request: message to edit not found",
         ]
-        catch_errors = {
-            'Bad Request: VOICE_MESSAGES_FORBIDDEN': "Не могу отправить голосовуху из-за ваших настроек безопасности",
+        bad_url_catch_errors = {
             'Bad Request: failed to get HTTP URL content': "Ссылка не понравилась серверу телеграмм. Внутренняя ошибка.",
             'Bad Request: wrong file identifier/HTTP URL specified': "Ссылка не понравилась серверу телеграмм. Внутренняя ошибка."
+        }
+        catch_errors = {
+            'Bad Request: VOICE_MESSAGES_FORBIDDEN': "Не могу отправить голосовуху из-за ваших настроек безопасности",
         }
         catch_errors_starts_with = {
             "Bad Request: can\'t parse entities": "Не смог распарсить markdown/html сущности. Внутренняя ошибка."
@@ -394,6 +396,17 @@ class TgBot(Bot):
         elif catch_errors_start_error:
             msg = catch_errors_start_error
             log_level = "warning"
+        elif error in bad_url_catch_errors:
+            msg = bad_url_catch_errors[error]
+            log_level = "warning"
+
+            links_str = []
+            for i, att in enumerate(rmi.attachments):
+                link = att.public_download_url
+                link_str = self.get_formatted_url(f"Ссылка #{i + 1}", link)
+                links_str.append(link_str)
+            links_str = "\n".join(links_str)
+            msg = f"{msg}\n\n{links_str}"
         elif error in catch_errors:
             msg = catch_errors[error]
             log_level = "warning"
@@ -407,12 +420,7 @@ class TgBot(Bot):
             message_thread_id=rmi.message_thread_id
         )
         self.log_message(error_rmi, log_level)
-
-        # try:
         r = self._send_response_message_item(error_rmi)
-        # finally:
-        #     self.stop_activity_thread(error_rmi.peer_id)
-
         return BotResponse(False, r)
 
     def _send_response_message_item(self, rmi: ResponseMessageItem) -> dict:

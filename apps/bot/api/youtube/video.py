@@ -65,11 +65,11 @@ class YoutubeVideo(SubscribeService):
 
     def get_video_info(self, url, _timedelta: float | None = None, max_filesize_mb: int | None = None) -> dict:
         video_info = self._get_video_info(url)
-        video_urls = [x for x in video_info['formats'] if x['ext'] == 'mp4' and x.get('asr')]
-        if not video_urls:
+        videos = [x for x in video_info['formats'] if x['ext'] == 'mp4' and x.get('asr')]
+        if not videos:
             raise PWarning("Нет доступных ссылок для скачивания")
 
-        videos = sorted(video_urls, key=lambda x: x['format_note'], reverse=True)
+        videos = sorted(videos, key=lambda x: x['format_note'], reverse=True)
 
         max_quality_video, chosen_video_filesize = self._calculate_max_size_video(
             videos,
