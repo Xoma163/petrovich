@@ -348,7 +348,7 @@ class Media(AcceptExtraCommand):
         va.public_download_url = ttd.video_url
         va.thumbnail_url = ttd.thumbnail_url
         va.public_download_url = ttd.video_url
-        return [va], ttd.description
+        return [va], ""
 
     def get_reddit_content(self, url) -> (list, str):
         rs = Reddit()
@@ -433,7 +433,9 @@ class Media(AcceptExtraCommand):
             else:
                 continue
             attachments.append(attachment)
-        return attachments, data.caption
+
+        caption = "" if "/reel/" in url else data.caption
+        return attachments, caption
 
     def get_twitter_content(self, url) -> (list, str):
         try:
