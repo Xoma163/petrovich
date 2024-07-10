@@ -24,3 +24,4 @@
 ## Отдельная благодарность
 
 <a href="https://www.jetbrains.com/?from=petrovich" title="JetBrains"><img src="readme/jetbrains_logo.png" width="140"></a>
+
