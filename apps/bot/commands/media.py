@@ -126,9 +126,6 @@ class Media(AcceptExtraCommand):
             if "nomedia" in event.message.keys or "no-media" in event.message.keys:
                 return False
             all_urls = get_urls_from_text(event.message.clear_case)
-            has_fwd_with_message = event.fwd and event.fwd[0].message and event.fwd[0].message.clear_case
-            if event.is_from_pm and has_fwd_with_message:
-                all_urls += get_urls_from_text(event.fwd[0].message.clear_case)
             for url in all_urls:
                 message_is_media_link = urlparse(url).hostname in MEDIA_URLS
                 if message_is_media_link:
