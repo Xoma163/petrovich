@@ -164,6 +164,9 @@ class YoutubeVideo(SubscribeService):
             if video_filesize < max_filesize_mb:
                 best_video_format = video_format
 
+        if not best_video_format:
+            raise ValueError()
+
         video_filesize = (best_video_format['filesize'] + best_audio_format['filesize']) / 1024 / 1024
         return best_video_format, best_audio_format, video_filesize
 
