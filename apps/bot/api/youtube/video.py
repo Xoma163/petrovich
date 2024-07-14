@@ -90,7 +90,7 @@ class YoutubeVideo(SubscribeService):
         video, audio, filesize = self._get_video_download_urls(video_info, max_filesize_mb, _timedelta)
 
         return YoutubeVideoData(
-            filesize=video_info['filesize_approx'] / 1024 / 1024,
+            filesize=filesize,
             video_download_url=video['url'] if video else None,
             audio_download_url=audio['url'],
             title=video_info['title'],
