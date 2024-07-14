@@ -286,7 +286,7 @@ class Media(AcceptExtraCommand):
                 if thumbnail_url := data.thubmnail_url:
                     va.thumbnail_url = thumbnail_url
 
-                text = data.title
+                text = data.title if data.duration > 60 else None
         return [va], text
 
     def _remove_trim_args(self, url, end_pos):
