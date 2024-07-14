@@ -1,3 +1,4 @@
+import dataclasses
 import re
 from datetime import timedelta
 from urllib import parse
@@ -8,9 +9,24 @@ import yt_dlp
 from bs4 import BeautifulSoup
 
 from apps.bot.api.subscribe_service import SubscribeService, SubscribeServiceNewVideosData, SubscribeServiceNewVideoData
-from apps.bot.classes.const.exceptions import PWarning, PSkip
+from apps.bot.classes.const.exceptions import PWarning
+from apps.bot.classes.messages.attachments.audio import AudioAttachment
+from apps.bot.classes.messages.attachments.video import VideoAttachment
 from apps.bot.utils.nothing_logger import NothingLogger
+from apps.bot.utils.video.video_handler import VideoHandler
 from petrovich.settings import env
+
+
+@dataclasses.dataclass
+class YoutubeVideoData:
+    video_download_url: str
+    audio_download_url: str
+    filesize: int
+    title: str
+    duration: int
+    start_pos: str
+    end_pos: str
+    thubmnail_url: str
 
 
 class YoutubeVideo(SubscribeService):
@@ -63,32 +79,45 @@ class YoutubeVideo(SubscribeService):
             raise PWarning("Не смог найти видео по этой ссылке")
         return video_info
 
-    def get_video_info(self, url, _timedelta: float | None = None, max_filesize_mb: int | None = None) -> dict:
+    def get_video_info(
+            self,
+            url,
+            max_filesize_mb: int | None = None,
+            _timedelta: float | None = None
+    ) -> YoutubeVideoData:
         video_info = self._get_video_info(url)
-        videos = [x for x in video_info['formats'] if x['ext'] == 'mp4' and x.get('asr')]
-        if not videos:
-            raise PWarning("Нет доступных ссылок для скачивания")
 
-        videos = sorted(videos, key=lambda x: x['format_note'], reverse=True)
+        video, audio, filesize = self._get_video_download_urls(video_info, max_filesize_mb, _timedelta)
 
-        max_quality_video, chosen_video_filesize = self._calculate_max_size_video(
-            videos,
-            video_info,
-            _timedelta,
-            max_filesize_mb
+        return YoutubeVideoData(
+            filesize=video_info['filesize_approx'] / 1024 / 1024,
+            video_download_url=video['url'] if video else None,
+            audio_download_url=audio['url'],
+            title=video_info['title'],
+            duration=video_info.get('duration'),
+            start_pos=str(video_info['section_start']) if video_info.get('section_start') else None,
+            end_pos=str(video_info['section_end']) if video_info.get('section_end') else None,
+            thubmnail_url=self._get_thumbnail(video_info)
         )
 
-        url = max_quality_video['url']
+    @staticmethod
+    def download_video(data: YoutubeVideoData) -> VideoAttachment:
+        if not data.video_download_url or not data.audio_download_url:
+            raise ValueError
 
-        return {
-            "download_url": url,
-            "filesize": chosen_video_filesize,
-            "title": video_info['title'],
-            "duration": video_info.get('duration'),
-            "start_pos": str(video_info['section_start']) if video_info.get('section_start') else None,
-            "end_pos": str(video_info['section_end']) if video_info.get('section_end') else None,
-            "thubmnail_url": self._get_thumbnail(video_info)
-        }
+        _va = VideoAttachment()
+        _va.public_download_url = data.video_download_url
+        _va.download_content(chunk_size=10 * 1024 * 1024)
+        _aa = AudioAttachment()
+        _aa.public_download_url = data.audio_download_url
+        _aa.download_content(chunk_size=10 * 1024 * 1024)
+
+        vh = VideoHandler(video=_va, audio=_aa)
+        content = vh.mux()
+
+        va = VideoAttachment()
+        va.content = content
+        return va
 
     @staticmethod
     def _get_thumbnail(info: dict) -> str | None:
@@ -101,37 +130,42 @@ class YoutubeVideo(SubscribeService):
             return None
 
     @staticmethod
-    def _calculate_max_size_video(
-            videos: list,
+    def _get_video_download_urls(
             video_info: dict,
-            _timedelta: float,
-            max_filesize_mb: int
-    ) -> tuple[dict, str]:
+            max_filesize_mb: int | None = None,
+            _timedelta: int | None = None,
+    ) -> tuple[dict, dict, int]:
         """
         Метод ищет видео которое максимально может скачать с учётом ограничением платформы
-        return: max_quality_video, chosen_video_filesize
+        return: max_quality_video, max_quality_audio
         """
-        chosen_video_filesize = 0
-        if max_filesize_mb:  # for tg
-            for video in videos:
-                filesize = video.get('filesize') or video.get('filesize_approx')
-                if not filesize:
-                    continue
-                chosen_video_filesize = filesize / 1024 / 1024
 
-                if chosen_video_filesize < max_filesize_mb:
-                    max_quality_video = video
-                    break
-                if _timedelta:
-                    mbps = chosen_video_filesize / video_info.get('duration')
-                    if mbps * _timedelta < max_filesize_mb - 2:
-                        max_quality_video = video
-                        break
-            else:
-                raise PSkip()
-        else:
-            max_quality_video = videos[0]
-        return max_quality_video, chosen_video_filesize
+        video_formats = sorted(
+            [x for x in video_info['formats'] if x.get('vcodec') == 'vp9'],
+            key=lambda x: x['filesize'],
+            reverse=True
+        )
+
+        audio_formats = sorted(
+            [x for x in video_info['formats'] if x.get('acodec') == 'opus'],
+            key=lambda x: x['filesize'],
+            reverse=True
+        )
+
+        best_audio_format = audio_formats[0]
+        best_video_format = video_formats[0] if max_filesize_mb is None else None
+
+        for video_format in video_formats:
+            if best_video_format:
+                break
+            video_filesize = (video_format['filesize'] + best_audio_format['filesize']) / 1024 / 1024
+            if _timedelta:
+                video_filesize = video_filesize * _timedelta / video_info.get('duration')
+            if video_filesize < max_filesize_mb:
+                best_video_format = video_format
+
+        video_filesize = (best_video_format['filesize'] + best_audio_format['filesize']) / 1024 / 1024
+        return best_video_format, best_audio_format, video_filesize
 
     @staticmethod
     def _get_channel_info(channel_id: str) -> dict:

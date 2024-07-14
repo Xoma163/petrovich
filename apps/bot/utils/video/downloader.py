@@ -9,10 +9,11 @@ class VideoDownloader:
 
     def __init__(self, video: VideoAttachment):
         self.video: VideoAttachment = video
+
+    def download_m3u8(self, threads: int = 1) -> bytes:
         if self.video.m3u8_url is None:
             raise RuntimeError("m3u8_url not set")
 
-    def download(self, threads: int = 1) -> bytes:
         tmp_video_file = NamedTemporaryFile().name
         try:
             do_the_linux_command(f"yt-dlp -N {threads} -o {tmp_video_file} {self.video.m3u8_url}")

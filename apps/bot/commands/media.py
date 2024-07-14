@@ -244,7 +244,6 @@ class Media(AcceptExtraCommand):
         if 'audio' in self.event.message.keys:
             return self.get_youtube_audio(url)
 
-        max_filesize_mb = self.bot.MAX_VIDEO_SIZE_MB if isinstance(self.bot, TgBot) else None
         yt_api = YoutubeVideo()
 
         args = self.event.message.args[1:] if self.event.message.command in self.full_names else self.event.message.args
@@ -265,29 +264,29 @@ class Media(AcceptExtraCommand):
                 self._remove_trim_args(url, end_pos)
             else:
                 try:
+                    max_filesize_mb = self.bot.MAX_VIDEO_SIZE_MB if isinstance(self.bot, TgBot) else None
                     data = yt_api.get_video_info(url, max_filesize_mb=max_filesize_mb)
                 except PWarning as e:
                     if e.msg == 'Ссылка должна быть на видео, не на канал':
                         raise PSkip()
                     raise e
-                if not self.has_command_name and data['duration'] > 120 and not self.event.is_from_pm:
+                if not self.has_command_name and data.duration > 120 and not self.event.is_from_pm:
                     button = self.bot.get_button(f"{self.event.message.COMMAND_SYMBOLS[0]}{self.name} {url}")
                     keyboard = self.bot.get_inline_keyboard([button])
                     raise PWarning(
                         "Видосы до 2х минут не парсятся без упоминания. Если в этом есть нужда - жми на кнопку",
                         keyboard=keyboard)
-                va = VideoAttachment()
-                va.public_download_url = data['download_url']
-                if thumbnail_url := data['thubmnail_url']:
+                va = yt_api.download_video(data)
+
+                if data.start_pos:
+                    tm = TrimVideo()
+                    video_content = tm.trim(va, data.start_pos, data.end_pos)
+                    va = self.bot.get_video_attachment(video_content, peer_id=self.event.peer_id)
+
+                if thumbnail_url := data.thubmnail_url:
                     va.thumbnail_url = thumbnail_url
 
-                if data['start_pos']:
-                    tm = TrimVideo()
-                    video_content = tm.trim(va, data['start_pos'], data['end_pos'])
-                    va = self.bot.get_video_attachment(video_content, peer_id=self.event.peer_id)
-                else:
-                    va.download_content()
-                text = data['title']
+                text = data.title
         return [va], text
 
     def _remove_trim_args(self, url, end_pos):

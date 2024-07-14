@@ -1,7 +1,4 @@
 import threading
-from urllib.parse import urlparse
-
-import requests
 
 from apps.bot.api.youtube.video import YoutubeVideo
 from apps.bot.classes.bots.bot import send_message_to_moderator_chat
@@ -461,19 +458,21 @@ class Meme(AcceptExtraCommand):
         lower_link_index = self.event.message.args.index(meme.link.lower())
         args = self.event.message.args[lower_link_index + 1:]
         start_pos, end_pos = TrimVideo.get_timecodes(meme.link, args)
+        yt_api = YoutubeVideo()
         try:
             # Если видео надо нарезать
+            from apps.bot.classes.bots.tg_bot import TgBot
+            max_filesize_mb = self.bot.MAX_VIDEO_SIZE_MB if isinstance(self.bot, TgBot) else None
+            data = yt_api.get_video_info(meme.link, max_filesize_mb)
+
             if start_pos:
                 tm = TrimVideo()
                 video_content = tm.trim_link_pos(meme.link, start_pos, end_pos)
             else:
-                yt_api = YoutubeVideo()
-                data = yt_api.get_video_info(meme.link)
-                video_content = requests.get(data['download_url']).content
+                va = yt_api.download_video(data)
+                video_content = va.content
             video = self.bot.get_video_attachment(video_content)
-            parsed_url = urlparse(meme.link)
-            video_id = parsed_url.path.strip('/')
-            video.thumbnail_url = f"https://img.youtube.com/vi/{video_id}/default.jpg"
+            video.thumbnail_url = data.thubmnail_url
 
             meme.tg_file_id = video.get_file_id()
             meme.type = VideoAttachment.TYPE

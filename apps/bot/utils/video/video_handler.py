@@ -47,4 +47,6 @@ class VideoHandler:
             raise RuntimeError(self.VIDEO_ERROR)
 
         vd = VideoDownloader(self.video)
-        return vd.download(threads=threads)
+        if self.video.m3u8_url:
+            return vd.download_m3u8(threads=threads)
+        raise ValueError

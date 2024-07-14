@@ -1,6 +1,7 @@
 import copy
 import io
 import os
+from concurrent.futures import ThreadPoolExecutor
 from io import BytesIO
 from tempfile import NamedTemporaryFile
 from urllib.parse import urlparse
@@ -115,7 +116,23 @@ class Attachment:
             self.get_file(peer_id)
         return self.private_download_url
 
-    def download_content(self, peer_id=None, use_proxy=False, headers=None, stream=False) -> bytes:
+    @staticmethod
+    def _download_chunk(url: str, start: int, end: int, proxies: dict | None = None,
+                        headers: dict | None = None) -> bytes:
+        _headers = {'Range': f'bytes={start}-{end}'}
+        _headers.update(headers)
+
+        response = requests.get(url, headers=_headers, stream=True, proxies=proxies)
+        return response.content
+
+    def download_content(
+            self,
+            peer_id: str | int = None,
+            use_proxy: bool = False,
+            headers: dict | None = None,
+            stream: bool = False,
+            chunk_size: int | None = None
+    ) -> bytes:
         if self.content:
             return self.content
 
@@ -133,9 +150,20 @@ class Attachment:
                 self.delete_download_path_file()
         else:
             proxies = get_proxies() if use_proxy else {}
-            if stream:
-                self.content = requests.get(download_url, proxies=proxies, headers=_headers, stream=True) \
-                    .iter_content(self.CHUNK_SIZE)
+            if chunk_size:
+                response = requests.head(download_url)
+                file_size = int(response.headers['Content-Length'])
+                ranges = [(i, min(i + chunk_size - 1, file_size - 1)) for i in range(0, file_size, chunk_size)]
+
+                with ThreadPoolExecutor() as executor:
+                    chunks = list(
+                        executor.map(lambda r: self._download_chunk(download_url, r[0], r[1], proxies, _headers),
+                                     ranges))
+                self.content = b''.join(chunks)
+
+            elif stream:
+                self.content = requests.get(download_url, proxies=proxies, headers=_headers, stream=True).iter_content(
+                    self.CHUNK_SIZE)
             else:
                 self.content = requests.get(download_url, proxies=proxies, headers=_headers).content
         return self.content
