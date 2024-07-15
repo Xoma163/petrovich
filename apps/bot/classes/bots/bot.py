@@ -76,6 +76,9 @@ class Bot(Thread):
             if not event.need_a_response():
                 return
 
+            if not event.sender.check_role(Role.TRUSTED):
+                raise PWarning("Обратитесь за доступом к создателю бота.")
+
             self.log_filter = event.log_filter
             self.init_requests()
 
