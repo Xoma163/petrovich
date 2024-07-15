@@ -1,8 +1,8 @@
 from django.contrib import admin
 
 from apps.service.mixins import TimeStampAdminMixin
-from apps.service.models import Service, Meme, Notify, City, Donation, TimeZone, Subscribe, WakeOnLanUserData, \
-    Words, Tag, VideoCache, Promocode, GPTPrePrompt, GPTUsage
+from apps.service.models import Service, Meme, Notify, City, Donation, TimeZone, Subscribe, Words, Tag, VideoCache, \
+    Promocode, GPTPrePrompt, GPTUsage
 
 
 @admin.register(Service)
@@ -64,12 +64,6 @@ class SubscribeAdmin(TimeStampAdminMixin):
 class VideoCacheAdmin(TimeStampAdminMixin):
     list_display = ('filename',)
     ordering = ['filename']
-
-
-@admin.register(WakeOnLanUserData)
-class WakeOnLanUserDataAdmin(admin.ModelAdmin):
-    list_display = ('name', 'author', 'ip', 'port', 'mac',)
-    list_filter = (('author', admin.RelatedOnlyFieldListFilter),)
 
 
 @admin.register(Words)

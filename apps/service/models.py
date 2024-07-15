@@ -221,20 +221,6 @@ class Horoscope(models.Model):
         return str(self.pk)
 
 
-class WakeOnLanUserData(models.Model):
-    author = models.ForeignKey(Profile, models.CASCADE, verbose_name="Пользователь", null=True)
-    name = models.CharField("Название", max_length=100)
-    ip = models.CharField("IP", max_length=16)
-    port = models.SmallIntegerField("Порт")
-    mac = models.CharField("MAC адрес", max_length=17)
-
-    class Meta:
-        verbose_name = "WOL устройство"
-        verbose_name_plural = "WOL устройства"
-
-    def __str__(self):
-        return f"{self.author}-{self.name} {self.ip}:{self.port}"
-
 
 class Words(models.Model):
     m1 = models.CharField("Мужской", max_length=500, null=True)
