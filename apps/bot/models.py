@@ -66,7 +66,8 @@ class UserSettings(BaseSettings, TimeStampModelMixin):
         verbose_name_plural = "Настройки профилей"
 
     def __str__(self) -> str:
-        return str(self.profile) if self.profile else ""
+        return ""
+        # return str(self.profile) if self.profile else ""
 
 
 class Chat(Platform, TimeStampModelMixin):
@@ -119,7 +120,6 @@ class Profile(TimeStampModelMixin):
     nickname_real = models.CharField("Прозвище", max_length=40, blank=True)
     gender = models.CharField('Пол', max_length=2, blank=True, choices=GENDER_CHOICES)
     birthday = models.DateField('Дата рождения', null=True, blank=True)
-    # Здесь такой странный ForeignKey потому что проблема импортов
     city = models.ForeignKey('service.City', models.SET_NULL, verbose_name='Город', null=True, blank=True)
     avatar = models.ImageField('Аватар', blank=True, upload_to="bot/users/avatar/")
     groups = models.ManyToManyField(Group, verbose_name="Группы")

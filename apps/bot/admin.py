@@ -1,8 +1,22 @@
 from django.contrib import admin
+from django.contrib.auth.models import Group
 
 from apps.bot.models import Profile, Chat, Bot, User, ChatSettings, UserSettings
 from apps.service.mixins import TimeStampAdminMixin
 
+
+class NoSpecificGroupFilter(admin.SimpleListFilter):
+    title = 'Нет группы'
+    parameter_name = 'no_specific_group'
+
+    def lookups(self, request, model_admin):
+        groups = Group.objects.all()
+        return [(group.id, group.name) for group in groups]
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.exclude(groups__id=self.value())
+        return queryset
 
 @admin.register(Profile)
 class ProfileAdmin(TimeStampAdminMixin):
@@ -33,7 +47,9 @@ class ProfileAdmin(TimeStampAdminMixin):
         'gender',
         ('city', admin.RelatedOnlyFieldListFilter),
         ('groups', admin.RelatedOnlyFieldListFilter),
-        'chats__name',)
+        NoSpecificGroupFilter,
+        'chats__name'
+    )
     search_fields = ['name', 'surname', 'nickname_real', 'user__user_id']
 
     ordering = ["name", "surname"]
