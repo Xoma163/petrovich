@@ -140,6 +140,12 @@ class Profile(TimeStampModelMixin):
             group_user = Group.objects.get(name=Role.USER.name)
             self.groups.add(group_user)
 
+    def delete(self, *args, **kwargs):
+        if self.settings:
+            self.settings.delete()
+        super(Profile, self).delete(*args, **kwargs)
+
+
     def set_avatar(self, att: PhotoAttachment = None):
         image = att.get_bytes_io_content()
         self.avatar.save(f"avatar_{str(self)}.{att.ext}", File(image))
