@@ -6,7 +6,7 @@ from apps.bot.commands.chatgpt import ChatGPT
 
 class WTF(WTFCommand):
     name = "wtf"
-    names = ['саммари', 'суммаризируй']
+    names = ['втф', 'саммари', 'суммаризируй']
 
     abstract = False
 
