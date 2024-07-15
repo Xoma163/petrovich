@@ -28,7 +28,7 @@ class Roles(Command):
 
     def start(self) -> ResponseMessage:
         action, username, role_str = self.event.message.args_str.split(' ', 3)
-        profile = self.bot.get_profile_by_name(username, self.event.chat)
+        profile = self.bot.get_profile_by_name([username], self.event.chat)
         role = get_role_by_str(role_str)
         if role in [Role.ADMIN, Role.BANNED, Role.USER]:
             raise PWarning(f"Нельзя добавлять/удалять роль \"{role}\"")
