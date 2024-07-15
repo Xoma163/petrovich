@@ -38,8 +38,7 @@ class ChatSettings(BaseSettings, TimeStampModelMixin):
         verbose_name_plural = "Настройки чатов"
 
     def __str__(self):
-        # return str(self.chat) if self.chat else ""
-        return ""
+        return str(self.chat) if self.chat else ""
 
 
 class UserSettings(BaseSettings, TimeStampModelMixin):
@@ -66,8 +65,7 @@ class UserSettings(BaseSettings, TimeStampModelMixin):
         verbose_name_plural = "Настройки профилей"
 
     def __str__(self) -> str:
-        return ""
-        # return str(self.profile) if self.profile else ""
+        return str(self.profile) if self.profile else ""
 
 
 class Chat(Platform, TimeStampModelMixin):
@@ -103,8 +101,7 @@ class Chat(Platform, TimeStampModelMixin):
         super(Chat, self).delete(*args, **kwargs)
 
     def __str__(self):
-        # return str(self.name) if self.name else f"id:{self.id}"
-        return ""
+        return str(self.name) if self.name else f"id:{self.id}"
 
 class Profile(TimeStampModelMixin):
     GENDER_FEMALE = '1'
