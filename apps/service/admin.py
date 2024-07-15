@@ -2,7 +2,7 @@ from django.contrib import admin
 
 from apps.service.mixins import TimeStampAdminMixin
 from apps.service.models import Service, Meme, Notify, City, Donation, TimeZone, Subscribe, Words, Tag, VideoCache, \
-    Promocode, GPTPrePrompt, GPTUsage
+    GPTPrePrompt, GPTUsage
 
 
 @admin.register(Service)
@@ -78,14 +78,6 @@ class WordsAdmin(admin.ModelAdmin):
 class TagAdmin(TimeStampAdminMixin):
     list_display = ('name', 'chat')
     list_filter = (('chat', admin.RelatedOnlyFieldListFilter), ('users', admin.RelatedOnlyFieldListFilter))
-    ordering = ['name']
-
-
-@admin.register(Promocode)
-class PromocodeAdmin(TimeStampAdminMixin):
-    list_display = ('name', 'code', 'author', 'expiration', 'description', "is_personal")
-    list_filter = ('name', 'author', "is_personal")
-    search_fields = ('name', 'code', 'description')
     ordering = ['name']
 
 

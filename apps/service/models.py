@@ -221,25 +221,6 @@ class Horoscope(models.Model):
         return str(self.pk)
 
 
-
-class Words(models.Model):
-    m1 = models.CharField("Мужской", max_length=500, null=True)
-    f1 = models.CharField("Женский", max_length=500, null=True)
-    n1 = models.CharField("Средний", max_length=500, null=True)
-    mm = models.CharField("Множественный мужской", max_length=500, null=True)
-    fm = models.CharField("Множественный женский", max_length=500, null=True)
-
-    type = models.CharField('Тип', choices=(('bad', 'Плохое'), ('good', 'Хорошее')), default="bad",
-                            max_length=10)
-
-    class Meta:
-        verbose_name = "Слово"
-        verbose_name_plural = "Слова"
-
-    def __str__(self):
-        return str(self.m1)
-
-
 class Tag(TimeStampModelMixin):
     name = models.CharField("Название", max_length=100)
     users = models.ManyToManyField(Profile, verbose_name="Пользователи", blank=True)
@@ -249,24 +230,6 @@ class Tag(TimeStampModelMixin):
         verbose_name = "Тег"
         verbose_name_plural = "Теги"
         unique_together = ('name', 'chat')
-
-    def __str__(self):
-        return str(self.name)
-
-
-class Promocode(TimeStampModelMixin):
-    name = models.CharField("Название", max_length=100)
-    author = models.ForeignKey(Profile, models.SET_NULL, verbose_name="Пользователь", null=True)
-    code = models.CharField("Код", max_length=50)
-    description = models.CharField("Описание", max_length=500, blank=True)
-    expiration = models.DateField('Окончание действия промокода', null=True, blank=True)
-    is_personal = models.BooleanField("Персональный", default=False)
-
-    class Meta:
-        verbose_name = "Промокод"
-        verbose_name_plural = "Промокоды"
-        ordering = ['name']
-        unique_together = ('name', 'code')
 
     def __str__(self):
         return str(self.name)
