@@ -193,8 +193,6 @@ class TgEvent(Event):
             'animation': self.setup_gif,
             'sticker': self.setup_sticker,
             'audio': self.setup_audio,
-            'poll': self.setup_poll,
-            'poll_answer': self.setup_poll_answer,
         }
 
         for key, setup_function in attachment_map.items():
