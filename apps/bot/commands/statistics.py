@@ -1,6 +1,6 @@
 import datetime
 
-from django.db.models import Count, Q, QuerySet
+from django.db.models import Count
 
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role
@@ -8,7 +8,6 @@ from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.models import Profile
-from apps.games.models import Gamer
 from apps.games.models import PetrovichUser
 from apps.service.models import Meme
 
@@ -21,7 +20,7 @@ class Statistics(Command):
         commands_text="статистика по победителям игр или по кол-ву созданных мемов",
         help_texts=[
             HelpTextItem(Role.USER, [
-                HelpTextItemCommand("[модуль=все]", "статистика по победителям игр или по кол-ву созданных мемов"),
+                HelpTextItemCommand("[модуль=все]", "статистика по победителям-петровичам и по кол-ву созданных мемов"),
                 HelpTextItemCommand("(петрович) [год=текущий]", "статистика по победителям петровича")
             ])
         ],
@@ -38,7 +37,6 @@ class Statistics(Command):
             arg0 = self.event.message.args[0]
             menu = [
                 [['петрович'], self.menu_petrovich],
-                [['wordle', 'вордле'], self.menu_wordle],
                 [['мемы'], self.menu_memes],
             ]
             method = self.handle_menu(menu, arg0)
@@ -70,9 +68,6 @@ class Statistics(Command):
         players_list_str = "\n".join([f"{player} - {player.wins_by_year(year)}" for player in players_list])
         return msg + players_list_str
 
-    def menu_wordle(self) -> str:
-        return self._get_str_game_stat("wordle_points", "Побед Wordle")
-
     def menu_memes(self) -> str:
         if self.event.is_from_chat:
             profiles = Profile.objects.filter(chats=self.event.chat)
@@ -96,7 +91,6 @@ class Statistics(Command):
     def menu_all(self):
         methods = [
             self.menu_petrovich,
-            self.menu_wordle,
             self.menu_memes,
         ]
         answer = ""
@@ -106,23 +100,3 @@ class Statistics(Command):
             except PWarning:
                 continue
         return answer
-
-    def _get_gamers(self, exclude, order_by) -> QuerySet:
-        if self.event.is_from_chat:
-            return Gamer.objects.filter(profile__chats=self.event.chat).exclude(exclude).order_by(order_by)
-        else:
-            return Gamer.objects.filter(pk=self.event.sender.gamer.pk).exclude(exclude)
-
-    def _get_str_game_stat(self, field: str, win_in_str: str):
-        gamers = self._get_gamers(exclude=Q(**{field: 0}), order_by=f"-{field}")
-        if gamers.count() == 0:
-            raise PWarning()
-
-        msg = f"{win_in_str}:"
-        if self.event.is_from_pm:
-            return f"{msg} {getattr(gamers[0], field)}"
-
-        if gamers.count() == 0:
-            raise PWarning(msg + "Нет статистики")
-        gamers_str = "\n".join([f"{gamer} - {getattr(gamer, field)}" for gamer in gamers])
-        return f"{msg}\n{gamers_str}"

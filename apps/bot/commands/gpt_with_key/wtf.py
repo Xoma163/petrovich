@@ -1,7 +1,7 @@
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.help_text import HelpText, HelpTextItem
 from apps.bot.commands.abstract.wtf_command import WTFCommand
-from apps.bot.commands.chatgpt import ChatGPT
+from apps.bot.commands.gpt_with_key.chatgpt import ChatGPT
 
 
 class WTF(WTFCommand):

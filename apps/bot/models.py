@@ -124,8 +124,6 @@ class Profile(TimeStampModelMixin):
                                     related_name="profile")
 
     api_token = models.CharField("Токен для API", max_length=100, blank=True)
-    gamer = models.OneToOneField("games.Gamer", models.CASCADE, verbose_name="Игрок", null=True,
-                                 related_name="profile")
 
     def save(self, **kwargs):
         # auto create settings model
@@ -134,11 +132,6 @@ class Profile(TimeStampModelMixin):
             # auto create settings
             us = UserSettings.objects.create()
             self.settings = us
-
-            # auto create gamer
-            from apps.games.models import Gamer
-            gamer = Gamer.objects.create()
-            self.gamer = gamer
 
         super(Profile, self).save(**kwargs)
 

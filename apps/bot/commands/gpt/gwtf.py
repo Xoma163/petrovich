@@ -1,7 +1,7 @@
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.help_text import HelpText, HelpTextItem
 from apps.bot.commands.abstract.wtf_command import WTFCommand
-from apps.bot.commands.trusted.gpt.gemini import Gemini
+from apps.bot.commands.gpt.gemini import Gemini
 
 
 class GWTF(WTFCommand):
@@ -9,7 +9,7 @@ class GWTF(WTFCommand):
     names = ["гвтф"]
 
     abstract = False
-    access = Role.TRUSTED
+    access = Role.GPT
 
     help_text = HelpText(
         commands_text="обрабатывает сообщения в конфе через Gemini",

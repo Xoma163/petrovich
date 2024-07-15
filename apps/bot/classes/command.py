@@ -359,7 +359,7 @@ class Command:
         """
         Проверяет наличие ключа для ChatGPT или роли TRUSTED
         """
-        if not self.event.sender.check_role(Role.TRUSTED) and not self.event.sender.settings.chat_gpt_key:
+        if not self.event.sender.check_role(Role.GPT) and not self.event.sender.settings.chat_gpt_key:
             raise PWarning(
                 f"Для использования ChatGPT укажите свой ключ (API_KEY) {self.bot.get_formatted_text_line('/gpt ключ (ключ)')}")
 

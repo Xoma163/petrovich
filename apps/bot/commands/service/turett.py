@@ -7,10 +7,10 @@ from apps.bot.classes.event.event import Event
 from apps.bot.classes.event.tg_event import TgEvent
 from apps.bot.classes.messages.attachments.sticker import StickerAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
-from apps.bot.commands.chatgpt import ChatGPT
-from apps.bot.commands.trusted.gpt.gemini import Gemini
-from apps.bot.commands.trusted.gpt.gwtf import GWTF
-from apps.bot.commands.wtf import WTF
+from apps.bot.commands.gpt.gemini import Gemini
+from apps.bot.commands.gpt.gwtf import GWTF
+from apps.bot.commands.gpt_with_key.chatgpt import ChatGPT
+from apps.bot.commands.gpt_with_key.wtf import WTF
 from apps.bot.utils.utils import random_probability, random_event
 
 

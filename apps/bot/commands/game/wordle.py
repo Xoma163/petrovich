@@ -158,11 +158,6 @@ class Wordle(Command):
         session = self.get_session()
         word = session.word
 
-        gamer = self.event.sender.gamer
-        gamer.roulette_points += 1000
-        gamer.wordle_points += 1
-        gamer.save()
-
         text = f"Вы победили! Загаданное слово - {word}\n" \
                f"Начислил 1000 очков рулетки"
 

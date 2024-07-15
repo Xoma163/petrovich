@@ -10,7 +10,7 @@ from apps.service.models import GPTPrePrompt
 class Gemini(GPTCommand):
     name = "gemini"
     names = ["гемини", "гмн", "gmn"]
-    access = Role.TRUSTED
+    access = Role.GPT
     abstract = False
 
     help_text = HelpText(

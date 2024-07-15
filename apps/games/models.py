@@ -5,17 +5,6 @@ from apps.bot.models import Profile, Chat
 from apps.service.mixins import TimeStampModelMixin
 
 
-class Gamer(TimeStampModelMixin):
-    wordle_points = models.IntegerField("Очки Wordle", default=0)
-
-    class Meta:
-        verbose_name = "Игрок"
-        verbose_name_plural = "Игроки"
-
-    def __str__(self):
-        return str(self.profile)
-
-
 class PetrovichUser(TimeStampModelMixin):
     profile = models.ForeignKey(Profile, models.CASCADE, verbose_name="Пользователь", null=True)
     chat = models.ForeignKey(Chat, models.CASCADE, verbose_name='Чат', null=True, blank=True)

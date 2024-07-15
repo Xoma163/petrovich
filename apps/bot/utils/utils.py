@@ -222,6 +222,7 @@ def get_role_by_str(role_str: str):
         ('доверенный', 'проверенный'): Role.TRUSTED,
         ('мразь', 'мразота', 'мрази'): Role.MRAZ,
         ('флейва',): Role.FLAIVA,
+        ('gpt', 'гпт'): Role.GPT,
         ('пользователь', 'юзер'): Role.USER
     }
     for k in roles_map:
