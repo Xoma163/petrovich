@@ -42,14 +42,6 @@ class ChatGPTMessage(GPTMessage):
         return message
 
 
-@dataclasses.dataclass
-class GigachatGPTMessage(ChatGPTMessage):
-    def get_message(self) -> dict:
-        return {
-            'role': self.role.value,
-            'content': self.text
-        }
-
 
 @dataclasses.dataclass
 class GeminiGPTMessage(GPTMessage):
@@ -106,14 +98,6 @@ class GPTMessages(ABC):
 class ChatGPTMessages(GPTMessages):
     def __init__(self):
         super().__init__(ChatGPTMessage)
-
-
-class GigachatGPTMessages(GPTMessages):
-    def __init__(self):
-        super().__init__(GigachatGPTMessage)
-
-    def add_photo(self, role, text: str, images: list[str]):
-        raise NotImplementedError()
 
 
 class GeminiGPTMessages(GPTMessages):

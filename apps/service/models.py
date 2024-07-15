@@ -286,6 +286,7 @@ class Promocode(TimeStampModelMixin):
         return str(self.name)
 
 
+# ToDo: remove gigachat
 class GPTPrePrompt(TimeStampModelMixin):
     CHATGPT = 'chatgpt'
     GIGACHAT = 'gigachat'
