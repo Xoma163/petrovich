@@ -64,8 +64,8 @@ class UserSettings(BaseSettings, TimeStampModelMixin):
         verbose_name = "Настройка профиля"
         verbose_name_plural = "Настройки профилей"
 
-    def __str__(self):
-        return str(self.profile)
+    # def __str__(self):
+    #     return str(self.profile)
 
 
 class Chat(Platform, TimeStampModelMixin):
