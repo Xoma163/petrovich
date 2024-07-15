@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from apps.bot.api.youtube.video import YoutubeVideo
+from apps.bot.api.media.youtube.video import YoutubeVideo
 from apps.bot.classes.bots.chat_activity import ChatActivity
 from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import Command

@@ -7,15 +7,12 @@ from apps.bot.classes.messages.attachments.document import DocumentAttachment, D
 from apps.bot.classes.messages.attachments.gif import GifAttachment
 from apps.bot.classes.messages.attachments.link import LinkAttachment
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
-from apps.bot.classes.messages.attachments.poll import PollAttachment
-from apps.bot.classes.messages.attachments.poll_answer import PollAnswerAttachment
 from apps.bot.classes.messages.attachments.sticker import StickerAttachment
 from apps.bot.classes.messages.attachments.video import VideoAttachment
 from apps.bot.classes.messages.attachments.video_note import VideoNoteAttachment
 from apps.bot.classes.messages.attachments.voice import VoiceAttachment
 from apps.bot.classes.messages.message import Message
 from apps.bot.classes.messages.tg.message import TgMessage
-from apps.bot.utils.cache import PollCache
 from petrovich.settings import env
 
 
@@ -266,16 +263,6 @@ class TgEvent(Event):
         tg_audio.parse_tg(audio_event)
         self.attachments.append(tg_audio)
 
-    def setup_poll(self, poll_event):
-        tg_poll = PollAttachment()
-        tg_poll.parse_tg(poll_event)
-        self.attachments.append(tg_poll)
-
-    def setup_poll_answer(self, poll_answer_event):
-        tg_poll_answer = PollAnswerAttachment()
-        tg_poll_answer.parse_tg(poll_answer_event)
-        self.attachments.append(tg_poll_answer)
-
     def setup_document(self, document):
         tg_document = DocumentAttachment()
         tg_document.parse_tg(document)
@@ -324,8 +311,3 @@ class TgEvent(Event):
         if self.inline_mode:
             return True
         return super().need_a_response()
-
-    def _cache_poll(self, poll):
-        if self.use_db:
-            pc = PollCache(poll['id'])
-            pc.add_poll(poll)

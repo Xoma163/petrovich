@@ -4,7 +4,7 @@ import socket
 import struct
 import time
 
-from apps.bot.commands.minecraft.forge import ForgeMod, ForgeData
+from apps.bot.utils.minecraft.forge import ForgeMod, ForgeData
 
 
 @dataclasses.dataclass

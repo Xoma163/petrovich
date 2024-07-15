@@ -8,21 +8,21 @@ from bs4 import BeautifulSoup
 from twitchdl import twitch
 from twitchdl.commands.download import get_clip_authenticated_url
 
-from apps.bot.api.facebook import Facebook
-from apps.bot.api.instagram import Instagram, InstagramAPIData, InstagramAPIDataItem
-from apps.bot.api.pikabu import Pikabu
-from apps.bot.api.pinterest import Pinterest, PinterestDataItem
-from apps.bot.api.premier import Premier
-from apps.bot.api.reddit import Reddit
-from apps.bot.api.spotify import Spotify
-from apps.bot.api.sunoai import SunoAI
-from apps.bot.api.tiktok import TikTok
-from apps.bot.api.twitter import Twitter
-from apps.bot.api.vk.video import VKVideo
-from apps.bot.api.yandex.music import YandexMusicAPI, YandexAlbum, YandexTrack
-from apps.bot.api.youtube.music import YoutubeMusic
-from apps.bot.api.youtube.video import YoutubeVideo
-from apps.bot.api.zen import Zen
+from apps.bot.api.media.facebook import Facebook
+from apps.bot.api.media.instagram import Instagram, InstagramAPIData, InstagramAPIDataItem
+from apps.bot.api.media.pikabu import Pikabu
+from apps.bot.api.media.pinterest import Pinterest, PinterestDataItem
+from apps.bot.api.media.premier import Premier
+from apps.bot.api.media.reddit import Reddit
+from apps.bot.api.media.spotify import Spotify
+from apps.bot.api.media.sunoai import SunoAI
+from apps.bot.api.media.tiktok import TikTok
+from apps.bot.api.media.twitter import Twitter
+from apps.bot.api.media.vk.video import VKVideo
+from apps.bot.api.media.yandex.music import YandexMusicAPI, YandexAlbum, YandexTrack
+from apps.bot.api.media.youtube.music import YoutubeMusic
+from apps.bot.api.media.youtube.video import YoutubeVideo
+from apps.bot.api.media.zen import Zen
 from apps.bot.classes.bots.chat_activity import ChatActivity
 from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import AcceptExtraCommand

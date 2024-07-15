@@ -17,7 +17,6 @@ from apps.bot.classes.messages.attachments.audio import AudioAttachment
 from apps.bot.classes.messages.attachments.document import DocumentAttachment
 from apps.bot.classes.messages.attachments.gif import GifAttachment
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
-from apps.bot.classes.messages.attachments.poll import PollAttachment
 from apps.bot.classes.messages.attachments.sticker import StickerAttachment
 from apps.bot.classes.messages.attachments.video import VideoAttachment
 from apps.bot.classes.messages.attachments.video_note import VideoNoteAttachment
@@ -286,22 +285,6 @@ class TgBot(Bot):
         r = self.requests.get('sendVoice', params).json()
         return r
 
-    def _send_poll(self, rmi: ResponseMessageItem, default_params) -> dict:
-        """
-        Отправка опроса
-        """
-        params = copy(default_params)
-        poll: PollAttachment = rmi.attachments[0]
-        params['question'] = poll.question
-        params['options'] = json.dumps(poll.options)
-        params['is_anonymous'] = poll.is_anonymous
-        params['type'] = poll.poll_type
-        params['allows_multiple_answers'] = poll.allows_multiple_answers
-        if poll.correct_option_id is not None:
-            params['correct_option_id'] = poll.correct_option_id
-        r = self.requests.get('sendPoll', params).json()
-        return r
-
     def _send_text(self, default_params) -> dict:
         params = copy(default_params)
         self.set_activity(params['chat_id'], ActivitiesEnum.TYPING)
@@ -465,7 +448,6 @@ class TgBot(Bot):
             DocumentAttachment: self._send_document,
             StickerAttachment: self._send_sticker,
             VoiceAttachment: self._send_voice,
-            PollAttachment: self._send_poll,
         }
 
         if rmi.attachments:

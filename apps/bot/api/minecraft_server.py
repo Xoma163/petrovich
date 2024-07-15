@@ -1,6 +1,6 @@
 from apps.bot.classes.const.exceptions import PError
-from apps.bot.commands.minecraft.server_data import MinecraftServerData, MinecraftServerStatus
 from apps.bot.utils.do_the_linux_command import do_the_linux_command
+from apps.bot.utils.minecraft.server_data import MinecraftServerStatus, MinecraftServerData
 from apps.bot.utils.utils import check_command_time
 
 

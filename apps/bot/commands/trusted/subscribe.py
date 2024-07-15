@@ -1,8 +1,8 @@
 from django.db.models import Q
 
-from apps.bot.api.premier import Premier
-from apps.bot.api.vk.video import VKVideo
-from apps.bot.api.youtube.video import YoutubeVideo
+from apps.bot.api.media.premier import Premier
+from apps.bot.api.media.vk.video import VKVideo
+from apps.bot.api.media.youtube.video import YoutubeVideo
 from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role, Platform

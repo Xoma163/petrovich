@@ -6,10 +6,10 @@ from itertools import groupby
 
 from django.core.management import BaseCommand
 
-from apps.bot.api.premier import Premier
+from apps.bot.api.media.premier import Premier
+from apps.bot.api.media.vk.video import VKVideo
+from apps.bot.api.media.youtube.video import YoutubeVideo
 from apps.bot.api.subscribe_service import SubscribeServiceNewVideosData
-from apps.bot.api.vk.video import VKVideo
-from apps.bot.api.youtube.video import YoutubeVideo
 from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.const.exceptions import PSubscribeIndexError
 from apps.bot.classes.event.event import Event

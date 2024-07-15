@@ -238,11 +238,9 @@ class Tag(TimeStampModelMixin):
 # ToDo: remove gigachat
 class GPTPrePrompt(TimeStampModelMixin):
     CHATGPT = 'chatgpt'
-    GIGACHAT = 'gigachat'
     GEMINI = 'gemini'
     PROVIDER_CHOICES = (
         (CHATGPT, 'СhatGPT'),
-        (GIGACHAT, 'Gigachat'),
         (GEMINI, 'Gemini')
     )
 

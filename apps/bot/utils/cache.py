@@ -43,25 +43,3 @@ class MessagesCache:
     def get_messages(self) -> dict:
         return self.cache.get(self._get_key(), {})
 
-
-class PollCache:
-    PRE_KEY = 'poll'
-
-    def _get_key(self):
-        return f"{self.PRE_KEY}_{self.poll_id}"
-
-    def __init__(self, poll_id):
-        self.poll_id = poll_id
-        self.cache = cache
-
-    def add_poll(self, data) -> None:
-        poll = self.get_poll()
-        if poll:
-            return
-        self.cache.set(self._get_key(), data, timeout=None)
-
-    def clear(self) -> None:
-        self.cache.clear()
-
-    def get_poll(self) -> dict:
-        return self.cache.get(self._get_key())

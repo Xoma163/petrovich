@@ -2,7 +2,7 @@ import spotipy
 import yt_dlp
 from spotipy import SpotifyClientCredentials
 
-from apps.bot.api.youtube.music import YoutubeMusic
+from apps.bot.api.media.youtube.music import YoutubeMusic
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.utils.nothing_logger import NothingLogger
 from petrovich.settings import env

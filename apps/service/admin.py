@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from apps.service.mixins import TimeStampAdminMixin
-from apps.service.models import Service, Meme, Notify, City, Donation, TimeZone, Subscribe, Words, Tag, VideoCache, \
+from apps.service.models import Service, Meme, Notify, City, Donation, TimeZone, Subscribe, Tag, VideoCache, \
     GPTPrePrompt, GPTUsage
 
 
@@ -64,14 +64,6 @@ class SubscribeAdmin(TimeStampAdminMixin):
 class VideoCacheAdmin(TimeStampAdminMixin):
     list_display = ('filename',)
     ordering = ['filename']
-
-
-@admin.register(Words)
-class WordsAdmin(admin.ModelAdmin):
-    list_display = ('id', 'm1', 'f1', 'n1', 'mm', 'fm', 'type')
-    list_filter = ('type',)
-    search_fields = ['id', 'm1', 'f1', 'n1', 'mm', 'fm', 'type']
-    ordering = ['type', 'id']
 
 
 @admin.register(Tag)

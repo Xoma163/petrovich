@@ -1,7 +1,6 @@
 import datetime
-from decimal import Decimal
 
-from django.db.models import Count, F, ExpressionWrapper, FloatField, Q, QuerySet
+from django.db.models import Count, Q, QuerySet
 
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role
@@ -27,7 +26,7 @@ class Statistics(Command):
             ])
         ],
         extra_text=(
-            "Модули: петрович, ставки, бк, wordle, рулетка, мемы, quiz.\n"
+            "Модули: петрович, мемы, \n"
             "Если выбран модуль петрович и передан ключ --all, то выведутся пользователи которые также покинули группу"
         ),
     )
@@ -39,13 +38,8 @@ class Statistics(Command):
             arg0 = self.event.message.args[0]
             menu = [
                 [['петрович'], self.menu_petrovich],
-                [['ставки'], self.menu_rates],
-                [['рулетка'], self.menu_roulettes],
-                [['быки', 'коровы', 'бк'], self.menu_bk],
                 [['wordle', 'вордле'], self.menu_wordle],
-                [['рулетка'], self.menu_roulettes],
                 [['мемы'], self.menu_memes],
-                [['quiz', "викторина"], self.menu_quiz]
             ]
             method = self.handle_menu(menu, arg0)
             answer = method()
@@ -76,17 +70,8 @@ class Statistics(Command):
         players_list_str = "\n".join([f"{player} - {player.wins_by_year(year)}" for player in players_list])
         return msg + players_list_str
 
-    def menu_rates(self) -> str:
-        return self._get_str_game_stat("points", "Побед в ставках")
-
-    def menu_bk(self) -> str:
-        return self._get_str_game_stat("bk_points", "Побед \"Быки и коровы\"")
-
     def menu_wordle(self) -> str:
         return self._get_str_game_stat("wordle_points", "Побед Wordle")
-
-    def menu_roulettes(self) -> str:
-        return self._get_str_game_stat("roulette_points", "Очки рулетки")
 
     def menu_memes(self) -> str:
         if self.event.is_from_chat:
@@ -108,46 +93,11 @@ class Statistics(Command):
         result_list_str = "\n".join([f"{profiles.get(id=x['author'])} - {x['total']}" for x in result_list])
         return f"{msg}\n{result_list_str}"
 
-    def menu_quiz(self) -> str:
-        if self.event.is_from_chat:
-            profiles_filter = Q(profile__chats=self.event.chat)
-        else:
-            profiles_filter = Q(profile=self.event.sender)
-
-        gamers = Gamer.objects.filter(profiles_filter) \
-            .annotate(total_games=F('quiz_correct_answer_count') + F('quiz_wrong_answer_count')) \
-            .annotate(
-            winrate=ExpressionWrapper(
-                (F('quiz_correct_answer_count') * Decimal('1.0') / F('total_games')),
-                output_field=FloatField()
-            )) \
-            .exclude(total_games=0) \
-            .order_by('-winrate')
-
-        msg = "Винрейт quiz:"
-        if self.event.is_from_pm:
-            gamer = gamers[0]
-            gamer_str = self._quiz_get_gamer_str(gamer)
-            return f"{msg} {gamer_str}"
-
-        if gamers.count() == 0:
-            raise PWarning(f"{msg} Нет статистики")
-        gamers_str = "\n".join([self._quiz_get_gamer_str(gamer) for gamer in gamers])
-        return f"{msg}\n{gamers_str}"
-
-    @staticmethod
-    def _quiz_get_gamer_str(gamer):
-        return f"{gamer} - {round(gamer.winrate * 100, 1)}% ({gamer.quiz_correct_answer_count}/{gamer.total_games})"
-
     def menu_all(self):
         methods = [
             self.menu_petrovich,
-            self.menu_rates,
-            self.menu_roulettes,
-            self.menu_bk,
             self.menu_wordle,
             self.menu_memes,
-            self.menu_quiz
         ]
         answer = ""
         for val in methods:
