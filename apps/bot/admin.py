@@ -17,7 +17,7 @@ class ProfileAdmin(TimeStampAdminMixin):
         (
             'Прочее',
             {
-                'fields': ('groups', 'chats', 'settings', 'gamer')
+                'fields': ('groups', 'chats', 'settings')
             }
         ),
         (
