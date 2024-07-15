@@ -639,6 +639,12 @@ class TgBot(Bot):
         }).json()
         return r
 
+    def leave_group(self, chat_id) -> dict:
+        r = self.requests.get('leaveChat', json={
+            'chat_id': chat_id,
+        }).json()
+        return r
+
     def set_message_reaction(
             self, chat_id: int | str, message_id: int, reactions: list[str], is_big: bool = False
     ):
