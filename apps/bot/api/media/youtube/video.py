@@ -170,7 +170,7 @@ class YoutubeVideo(SubscribeService):
         )
 
         audio_formats = sorted(
-            [x for x in video_info['formats'] if x.get('acodec') == 'opus'],
+            [x for x in video_info['formats'] if x.get('abr')],
             key=lambda x: x['filesize'],
             reverse=True
         )
