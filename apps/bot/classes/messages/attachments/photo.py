@@ -7,10 +7,10 @@ from apps.bot.classes.messages.attachments.mixins.sized_mixin import SizedMixin
 
 class PhotoAttachment(Attachment, SizedMixin):
     TYPE = "photo"
+    ACTIVITY = ActivitiesEnum.UPLOAD_PHOTO
 
     def __init__(self):
         super().__init__(self.TYPE)
-        self.activity = ActivitiesEnum.UPLOAD_PHOTO
 
     def parse_tg(self, event):
         self.width = event.get('width')

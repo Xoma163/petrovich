@@ -5,10 +5,10 @@ from apps.bot.classes.messages.attachments.mixins.duration_mixin import Duration
 
 class GifAttachment(Attachment, DurationMixin):
     TYPE = 'gif'
+    ACTIVITY = ActivitiesEnum.UPLOAD_VIDEO
 
     def __init__(self):
         super().__init__(self.TYPE)
-        self.activity = ActivitiesEnum.UPLOAD_VIDEO
 
     def parse_tg(self, event):
         self.duration = event.get('duration')

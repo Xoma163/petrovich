@@ -16,7 +16,8 @@ from apps.bot.utils.proxy import get_proxies
 
 
 class Attachment:
-    CHUNK_SIZE = 2 ** 26  # 64mb
+    CHUNK_SIZE = 2 ** 24  # 16mb
+    ACTIVITY = None
 
     def __init__(self, _type):
         self.type: str | None = _type
@@ -36,7 +37,6 @@ class Attachment:
         self.file_name_full: str | None = None
 
         self.name: str | None = None
-        self.activity = None
 
     def get_file(self, peer_id=None):
         from apps.bot.classes.bots.tg_bot import TgBot
@@ -45,7 +45,7 @@ class Attachment:
         if self.get_size_mb() > tg_bot.MAX_ATTACHMENT_SIZE_MB:
             return
 
-        with ChatActivity(tg_bot, self.activity, peer_id):
+        with ChatActivity(tg_bot, self.ACTIVITY, peer_id):
             r = tg_bot.requests.get('getFile', params={'file_id': self.file_id})
             if r.status_code != 200:
                 return

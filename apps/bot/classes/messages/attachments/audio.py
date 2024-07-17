@@ -6,13 +6,12 @@ from apps.bot.classes.messages.attachments.mixins.thumbnail_mixin import Thumbna
 
 class AudioAttachment(Attachment, ThumbnailMixin, DurationMixin):
     TYPE = "audio"
+    ACTIVITY = ActivitiesEnum.UPLOAD_AUDIO
 
     def __init__(self):
         super().__init__(self.TYPE)
         self.artist: str | None = None
         self.title: str | None = None
-
-        self.activity = ActivitiesEnum.UPLOAD_AUDIO
 
     def parse_tg(self, event):
         self.duration = event.get('duration')

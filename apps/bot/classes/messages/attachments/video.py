@@ -7,11 +7,10 @@ from apps.bot.classes.messages.attachments.mixins.thumbnail_mixin import Thumbna
 
 class VideoAttachment(Attachment, ThumbnailMixin, SizedMixin, DurationMixin):
     TYPE = 'video'
+    ACTIVITY = ActivitiesEnum.UPLOAD_VIDEO
 
     def __init__(self):
         super().__init__(self.TYPE)
-        self.activity = ActivitiesEnum.UPLOAD_VIDEO
-
         self.m3u8_url = None
 
     def parse_tg(self, event):

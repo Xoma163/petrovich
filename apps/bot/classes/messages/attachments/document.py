@@ -28,10 +28,10 @@ class DocumentMimeType:
 
 class DocumentAttachment(Attachment):
     TYPE = 'document'
+    ACTIVITY = ActivitiesEnum.UPLOAD_DOCUMENT
 
     def __init__(self):
         super().__init__(self.TYPE)
-        self.activity = ActivitiesEnum.UPLOAD_DOCUMENT
 
         self.mime_type: DocumentMimeType | None = None
 

@@ -5,10 +5,10 @@ from apps.bot.classes.messages.attachments.mixins.duration_mixin import Duration
 
 class VoiceAttachment(Attachment, DurationMixin):
     TYPE = "voice"
+    ACTIVITY = ActivitiesEnum.UPLOAD_AUDIO
 
     def __init__(self):
         super().__init__(self.TYPE)
-        self.activity = ActivitiesEnum.UPLOAD_AUDIO
         self.ext: str = 'ogg'
 
     def parse_tg(self, event):
