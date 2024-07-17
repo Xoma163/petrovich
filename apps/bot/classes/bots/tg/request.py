@@ -10,7 +10,7 @@ class Request:
     API_TELEGRAM_URL = 'api.telegram.org'
     PREFIX = "https"
 
-    LOG_IGNORE_ACTIONS = ['sendChatAction']
+    LOG_IGNORE_ACTIONS = []
 
     def __init__(self, token, log_filter=None):
         self.token = token

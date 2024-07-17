@@ -457,7 +457,7 @@ class TgBot(Bot):
         }
 
         if rmi.attachments:
-            with ChatActivity(self, rmi.attachments[0].activity, params['chat_id']):
+            with ChatActivity(self, rmi.attachments[0].ACTIVITY, params['chat_id']):
                 # Отправка многих вложениями чанками: сначала вложения, потом текст
                 if len(rmi.attachments) > 10:
                     rmi_copy = copy(rmi)
