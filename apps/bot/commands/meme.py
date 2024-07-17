@@ -33,7 +33,7 @@ class Meme(AcceptExtraCommand):
                 HelpTextItemCommand(
                     "добавить (название) (Вложение/Пересланное сообщение с вложением)",
                     "добавляет мем"),
-                HelpTextItemCommand("добавить (название) (ссылка на youtube/coub) ", "добавляет мем с youtube/coub"),
+                HelpTextItemCommand("добавить (название) (ссылка на youtube/coub)", "добавляет мем с youtube/coub"),
                 HelpTextItemCommand(
                     "обновить (название/id) (Вложение/Пересланное сообщение с вложением)",
                     "обновляет созданный вами мем."),
