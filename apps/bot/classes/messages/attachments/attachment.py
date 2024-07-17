@@ -19,8 +19,11 @@ class Attachment:
     CHUNK_SIZE = 2 ** 24  # 16mb
     ACTIVITY = None
 
-    def __init__(self, _type):
+    def __init__(self, _type, **kwargs):
         self.type: str | None = _type
+
+        super().__init__(**kwargs)
+
         # Публичная ссылка для скачивания файла
         self.public_download_url: str | None = None
         # Приватная ссылка для скачивания файла
