@@ -1,13 +1,13 @@
 from apps.bot.classes.const.activities import ActivitiesEnum
 from apps.bot.classes.messages.attachments.attachment import Attachment
+from apps.bot.classes.messages.attachments.mixins.duration_mixin import DurationMixin
 
 
-class VoiceAttachment(Attachment):
+class VoiceAttachment(Attachment, DurationMixin):
     TYPE = "voice"
 
     def __init__(self):
         super().__init__(self.TYPE)
-        self.duration: float | None = None  # sec
         self.activity = ActivitiesEnum.UPLOAD_AUDIO
         self.ext: str = 'ogg'
 

@@ -2,15 +2,14 @@ import base64
 
 from apps.bot.classes.const.activities import ActivitiesEnum
 from apps.bot.classes.messages.attachments.attachment import Attachment
+from apps.bot.classes.messages.attachments.mixins.sized_mixin import SizedMixin
 
 
-class PhotoAttachment(Attachment):
+class PhotoAttachment(Attachment, SizedMixin):
     TYPE = "photo"
 
     def __init__(self):
         super().__init__(self.TYPE)
-        self.width: int | None = None
-        self.height: int | None = None
         self.activity = ActivitiesEnum.UPLOAD_PHOTO
 
     def parse_tg(self, event):

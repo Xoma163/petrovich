@@ -1,21 +1,16 @@
-from apps.bot.classes.const.activities import ActivitiesEnum
 from apps.bot.classes.messages.attachments.attachment import Attachment
-from apps.bot.classes.messages.attachments.photo import PhotoAttachment
+from apps.bot.classes.messages.attachments.mixins.duration_mixin import DurationMixin
+from apps.bot.classes.messages.attachments.mixins.thumbnail_mixin import ThumbnailMixin
 
 
-class VideoNoteAttachment(Attachment):
+class VideoNoteAttachment(Attachment, DurationMixin, ThumbnailMixin):
     TYPE = 'video_note'
 
     def __init__(self):
         super().__init__(self.TYPE)
-        self.duration: float | None = None  # sec
-        self.activity = ActivitiesEnum.UPLOAD_VIDEO_NOTE
         self.ext: str = 'oga'
         self.file_name: str = 'Кружочек'
         self.file_name_full = f'{self.file_name}.{self.ext}'
-
-        self.thumbnail_url: str | None = None
-        self.thumbnail: PhotoAttachment | None = None
 
     def parse_tg(self, event):
         self.duration = event.get('duration')

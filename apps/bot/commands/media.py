@@ -170,6 +170,7 @@ class Media(AcceptExtraCommand):
 
         source_hostname = str(urlparse(chosen_url).hostname).lstrip('www.')
         answer += f'\nИсточник: {self.bot.get_formatted_url(source_hostname, chosen_url)}'
+        answer = answer.strip()
 
         reply_to = self.event.fwd[0].message.id if self.event.fwd else None
 

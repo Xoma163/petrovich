@@ -20,10 +20,14 @@ from petrovich.settings import env
 @dataclasses.dataclass
 class YoutubeVideoData:
     video_download_url: str
+    video_download_chunk_size: int | None
     audio_download_url: str
+    audio_download_chunk_size: int | None
     filesize: int
     title: str
-    duration: int
+    duration: int | None
+    width: int | None
+    height: int | None
     start_pos: str
     end_pos: str
     thubmnail_url: str
@@ -92,9 +96,13 @@ class YoutubeVideo(SubscribeService):
         return YoutubeVideoData(
             filesize=filesize,
             video_download_url=video['url'] if video else None,
+            video_download_chunk_size=video['downloader_options']['http_chunk_size'] if video else None,
             audio_download_url=audio['url'],
+            audio_download_chunk_size=audio['downloader_options']['http_chunk_size'],
             title=video_info['title'],
             duration=video_info.get('duration'),
+            width=video.get('width'),
+            height=video.get('height'),
             start_pos=str(video_info['section_start']) if video_info.get('section_start') else None,
             end_pos=str(video_info['section_end']) if video_info.get('section_end') else None,
             thubmnail_url=self._get_thumbnail(video_info)
@@ -107,16 +115,19 @@ class YoutubeVideo(SubscribeService):
 
         _va = VideoAttachment()
         _va.public_download_url = data.video_download_url
-        _va.download_content(chunk_size=10 * 1024 * 1024)
+        _va.download_content(chunk_size=data.video_download_chunk_size)
         _aa = AudioAttachment()
         _aa.public_download_url = data.audio_download_url
-        _aa.download_content(chunk_size=10 * 1024 * 1024)
+        _aa.download_content(chunk_size=data.audio_download_chunk_size)
 
         vh = VideoHandler(video=_va, audio=_aa)
         content = vh.mux()
 
         va = VideoAttachment()
         va.content = content
+        va.width = data.width
+        va.height = data.height
+        va.duration = data.duration
         return va
 
     @staticmethod
@@ -139,10 +150,22 @@ class YoutubeVideo(SubscribeService):
         Метод ищет видео которое максимально может скачать с учётом ограничением платформы
         return: max_quality_video, max_quality_audio
         """
-
+        video_formats = list(
+            filter(
+                lambda x: (
+                        x.get('vbr') and  # Это видео
+                        x.get('ext') == 'mp4' and  # С форматом mp4
+                        x.get('vcodec') not in ['vp9'] and  # С кодеками которые поддерживают все платформы
+                        x.get('dynamic_range') == 'SDR'  # В SDR качестве
+                ),
+                video_info['formats']
+            )
+        )
+        for _format in video_formats:
+            _format['filesize_approx_vbr'] = video_info['duration'] * _format.get('vbr')
         video_formats = sorted(
-            [x for x in video_info['formats'] if x.get('vcodec') == 'vp9'],
-            key=lambda x: x['filesize'],
+            video_formats,
+            key=lambda x: x.get('filesize') or x.get('filesize_approx') or x.get('filesize_approx_vbr'),
             reverse=True
         )
 

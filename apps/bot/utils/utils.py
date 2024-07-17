@@ -8,7 +8,7 @@ from datetime import datetime
 from io import BytesIO
 from urllib.parse import urlparse
 
-from PIL import Image, ImageDraw, ImageFont, ImageFilter
+from PIL import Image, ImageDraw, ImageFont
 
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
@@ -563,35 +563,30 @@ def get_font_by_path(font_path: str, size: int) -> ImageFont:
     return ImageFont.truetype(os.path.join(STATIC_ROOT, f'fonts/{font_path}'), size, encoding="unic")
 
 
-def center_with_blur_background(photo_attachment: PhotoAttachment, size=(320, 320), blur_radius=12) -> io.BytesIO:
+def center_with_blur_background(
+        photo_attachment: PhotoAttachment,
+) -> io.BytesIO:
     """
     Центрирование изображение с блюром в пустотах
     Используется для получения thumbnail
     Принудительно переводится в jpeg
     """
+
+    max_size = 320
+
     image_bytes = io.BytesIO(photo_attachment.download_content())
     image = Image.open(image_bytes).convert("RGB")
 
     # Проверяем, нужно ли уменьшить изображение
-    if image.width > size[0] or image.height > size[1]:
+    if image.width > max_size or image.height > max_size:
         # Вычисляем коэффициент уменьшения
-        ratio = min(size[0] / image.width, size[1] / image.height)
+        ratio = min(max_size / image.width, max_size / image.height)
         # Уменьшаем изображение пропорционально
         image = image.resize((int(image.width * ratio), int(image.height * ratio)), Image.Resampling.LANCZOS)
 
-    # Размываем изображение и растягиваем его до заданных размеров
-    blurred_img = image.filter(ImageFilter.GaussianBlur(blur_radius)).resize(size)
-
-    # Вычисляем позицию для центрирования изображения
-    x_offset = (size[0] - image.width) // 2
-    y_offset = (size[1] - image.height) // 2
-
-    # Вставляем исходное изображение в центр размытого изображения
-    blurred_img.paste(image, (x_offset, y_offset))
-
     # Преобразуем результат в JPEG
     jpeg_image_io = BytesIO()
-    blurred_img.save(jpeg_image_io, format='JPEG')
+    image.save(jpeg_image_io, format='JPEG')
     jpeg_image_io.seek(0)
 
     return jpeg_image_io

@@ -1,13 +1,12 @@
 from apps.bot.classes.messages.attachments.attachment import Attachment
+from apps.bot.classes.messages.attachments.mixins.sized_mixin import SizedMixin
 
 
-class StickerAttachment(Attachment):
+class StickerAttachment(Attachment, SizedMixin):
     TYPE = 'sticker'
 
     def __init__(self):
         super().__init__(self.TYPE)
-        self.width: int | None = None
-        self.height: int | None = None
         self.emoji: str | None = None
         self.animated: bool = False
 

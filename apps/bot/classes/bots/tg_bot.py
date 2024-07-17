@@ -41,6 +41,7 @@ class TgBot(Bot):
 
     MAX_MESSAGE_TEXT_LENGTH = 4096
     MAX_MESSAGE_TEXT_CAPTION = 1024
+    MAX_THUMBNAIL_SIZE = 320
 
     CODE_TAG = "code"
     PRE_TAG = "pre"
@@ -187,7 +188,12 @@ class TgBot(Bot):
         Отправка видео. Ссылка или файл
         """
         params = copy(default_params)
+
         video: VideoAttachment = rmi.attachments[0]
+        if video.width:
+            params['width'] = video.width
+        if video.height:
+            params['height'] = video.height
 
         if video.file_id:
             params['video'] = video.file_id
