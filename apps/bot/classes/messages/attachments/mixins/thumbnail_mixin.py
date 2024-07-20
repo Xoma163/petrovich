@@ -9,14 +9,14 @@ class ThumbnailMixin:
         self.thumbnail: PhotoAttachment | None = None
 
     def set_thumbnail(self):
-        from apps.bot.utils.utils import center_with_blur_background
+        from apps.bot.utils.utils import make_thumbnail
 
         if self.thumbnail_url is None:
             return
         thumb_file = PhotoAttachment()
         thumb_file.parse(self.thumbnail_url, guarantee_url=True)
 
-        thumbnail = center_with_blur_background(thumb_file)
+        thumbnail = make_thumbnail(thumb_file)
         thumbnail_att = PhotoAttachment()
         thumbnail_att.parse(thumbnail)
         self.thumbnail = thumbnail_att

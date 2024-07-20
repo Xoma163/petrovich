@@ -563,7 +563,7 @@ def get_font_by_path(font_path: str, size: int) -> ImageFont:
     return ImageFont.truetype(os.path.join(STATIC_ROOT, f'fonts/{font_path}'), size, encoding="unic")
 
 
-def center_with_blur_background(
+def make_thumbnail(
         photo_attachment: PhotoAttachment,
 ) -> io.BytesIO:
     """
@@ -576,7 +576,7 @@ def center_with_blur_background(
 
     image_bytes = io.BytesIO(photo_attachment.download_content())
     image = Image.open(image_bytes).convert("RGB")
-
+    image.save("image.jpg", "JPEG", quality=90)
     # Проверяем, нужно ли уменьшить изображение
     if image.width > max_size or image.height > max_size:
         # Вычисляем коэффициент уменьшения

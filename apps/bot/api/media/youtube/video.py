@@ -132,11 +132,25 @@ class YoutubeVideo(SubscribeService):
 
     @staticmethod
     def _get_thumbnail(info: dict) -> str | None:
-        try:
-            return list(filter(
+        video_scale = info['width'] / info['height']
+
+        # Вертикальное видео
+        if video_scale < 1:
+            thumbnails = list(filter(
+                lambda x: x.get('width') and x.get('height') and x.get('width') / x.get('height') == video_scale,
+                info['thumbnails']
+            ))
+        else:
+            thumbnails = list(filter(
                 lambda x: x['url'].endswith("mqdefault.jpg"),
                 info['thumbnails']
-            ))[0]['url']
+            ))
+
+        if not thumbnails:
+            return None
+
+        try:
+            return thumbnails[0]['url']
         except (IndexError, KeyError):
             return None
 
