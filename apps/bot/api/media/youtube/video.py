@@ -19,6 +19,8 @@ from petrovich.settings import env
 
 @dataclasses.dataclass
 class YoutubeVideoData:
+    DEFAULT_CHUNK_SIZE = 10 * 1024 * 1024
+
     video_download_url: str
     video_download_chunk_size: int | None
     audio_download_url: str
@@ -31,6 +33,12 @@ class YoutubeVideoData:
     start_pos: str
     end_pos: str
     thubmnail_url: str
+
+    def get_video_download_chunk_size(self):
+        return self.video_download_chunk_size if self.video_download_chunk_size is not None else self.DEFAULT_CHUNK_SIZE
+
+    def get_audio_download_chunk_size(self):
+        return self.audio_download_chunk_size if self.audio_download_chunk_size is not None else self.DEFAULT_CHUNK_SIZE
 
 
 class YoutubeVideo(SubscribeService):
@@ -115,10 +123,10 @@ class YoutubeVideo(SubscribeService):
 
         _va = VideoAttachment()
         _va.public_download_url = data.video_download_url
-        _va.download_content(chunk_size=data.video_download_chunk_size)
+        _va.download_content(chunk_size=data.get_video_download_chunk_size())
         _aa = AudioAttachment()
         _aa.public_download_url = data.audio_download_url
-        _aa.download_content(chunk_size=data.audio_download_chunk_size)
+        _aa.download_content(chunk_size=data.get_audio_download_chunk_size())
 
         vh = VideoHandler(video=_va, audio=_aa)
         content = vh.mux()
