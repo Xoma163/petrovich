@@ -65,10 +65,13 @@ class Actions(Command):
             self.bot.remove_chat_from_profile(profile, self.event.chat)
 
     def setup_new_chat_id(self, chat_id):
+        # Если новый чат каким-то чудом создался - удаляем его
+        self.event.chat.delete()
+
+        # Переносим вручную
         chat = Chat.objects.get(chat_id=chat_id)
         chat.chat_id = self.event.chat.chat_id
         chat.save()
-        self.event.chat.delete()
         return "Успешно изменил id вашей группы в базе данных"
 
     def group_chat_created(self):
