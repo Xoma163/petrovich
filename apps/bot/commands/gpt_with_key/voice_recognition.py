@@ -109,6 +109,8 @@ class VoiceRecognition(AcceptExtraCommand):
             button = self.bot.get_button("Саммари", "gpt", ['_summary'])
             keyboard = self.bot.get_inline_keyboard([button])
 
+        answer = "hello привет hello привет" * 200
+
         # Если ответ слишком длинный - кладём в файл
         if len(answer) > self.bot.MAX_MESSAGE_TEXT_LENGTH:
             document = self._wrap_text_in_document(answer, 'Транскрибация.html')
@@ -123,5 +125,5 @@ class VoiceRecognition(AcceptExtraCommand):
     def _wrap_text_in_document(text, filename) -> DocumentAttachment:
         text = text.replace("\n", "<br>")
         document = DocumentAttachment()
-        document.parse(text.encode('utf-8'), filename=f'Транскрибация {filename} файла.html')
+        document.parse(text.encode('cp1251'), filename=f'Транскрибация {filename} файла.html')
         return document
