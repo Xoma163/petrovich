@@ -360,6 +360,7 @@ class TgBot(Bot):
             "Bad Request: message is not modified: specified new message content and reply markup are exactly the same as a current content and reply markup of the message",
             "Forbidden: bot was blocked by the user",
             "Bad Request: message to edit not found",
+            "Bad Request: message can't be deleted for everyone"
         ]
         bad_url_catch_errors = {
             'Bad Request: failed to get HTTP URL content': "Ссылка не понравилась серверу телеграмм. Внутренняя ошибка.",
