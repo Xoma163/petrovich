@@ -20,7 +20,7 @@ class Command(BaseCommand):
             # Проверка оповещений
             ScheduleItem("*/1 * * * *", "check_notify"),
             # Проверка подписок
-            ScheduleItem("*/10 * * * *", "check_subscribe"),
+            ScheduleItem("*/30 * * * *", "check_subscribe"),
             # Отправка новостей Паше
             ScheduleItem("0 */6 * * *", "check_pasha_news", "130"),
             # Удаление сущностей которые должны быть удалены со временем
