@@ -124,11 +124,11 @@ class VKVideo(SubscribeService):
                     channel_id = bs4.select_one('title').text.split(" | ")[0].lstrip("Клипы ")
                     channel_title = channel_id
             else:
-                a_tag = bs4.select_one(".VideoCard__additionalInfo a")
-
-                video_id = urlparse(url).path.split('video')[1]
-                channel_id = a_tag.attrs['href'].split('/')[-1]
-                channel_title = a_tag.text
+                video_id, video_url, data = re.compile('showVideo\((.*)\);').findall(bs4.decode_contents())[1].split(
+                    ',', 2)
+                video_id = video_id.strip("'").strip('"')
+                channel_id = video_url.strip(' ').strip("'").strip('"').strip('/video/')
+                channel_title = re.compile(r"prevTitle\: 'Видеозаписи (\w*)\'").findall(data)[0]
 
             return {
                 'channel_id': channel_id,
@@ -137,7 +137,7 @@ class VKVideo(SubscribeService):
                 'video_title': video_title
             }
         except Exception:
-            return {}
+            raise PWarning("Не смог получить информацию о видео")
 
     def get_data_to_add_new_subscribe(self, url: str) -> dict:
         content = requests.get(url, headers=self.headers).content

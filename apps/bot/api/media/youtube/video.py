@@ -75,7 +75,8 @@ class YoutubeVideo(SubscribeService):
 
     def _get_video_info(self, url) -> dict:
         ydl_params = {
-            'logger': NothingLogger()
+            'logger': NothingLogger(),
+            # 'proxy': env.str("HTTP_PROXY")
         }
         ydl = yt_dlp.YoutubeDL(ydl_params)
         ydl.add_default_info_extractors()
@@ -123,9 +124,11 @@ class YoutubeVideo(SubscribeService):
 
         _va = VideoAttachment()
         _va.public_download_url = data.video_download_url
+        # maybe proxy here
         _va.download_content(chunk_size=data.get_video_download_chunk_size())
         _aa = AudioAttachment()
         _aa.public_download_url = data.audio_download_url
+        # maybe proxy here
         _aa.download_content(chunk_size=data.get_audio_download_chunk_size())
 
         vh = VideoHandler(video=_va, audio=_aa)

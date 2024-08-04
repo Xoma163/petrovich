@@ -139,6 +139,7 @@ class Command(BaseCommand):
                 att = media_message.attachments[0]
                 if not att.file_id:
                     att.set_file_id()
+                att.content = None
             messages_with_att.append((media_message, video))
 
         for sub in subs:
