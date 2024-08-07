@@ -554,6 +554,9 @@ class Media(AcceptExtraCommand):
                 title,
                 video_data['thumbnail_url']
             )
+            if attachments:
+                attachments[0].width = video_info['width']
+                attachments[0].height = video_info['height']
         return attachments, msg
 
     def get_scope_gg_video(self, url) -> (list, str):

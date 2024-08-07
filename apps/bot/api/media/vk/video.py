@@ -43,6 +43,12 @@ class VKVideo(SubscribeService):
                 'video': vh.mux(),
                 'thumbnail_url': va.thumbnail_url
             }
+        if va.m3u8_url:
+            vh = VideoHandler(video=va)
+            return {
+                'video': vh.download(),
+                'thumbnail_url': va.thumbnail_url
+            }
         return {
             'video': va.download_content(headers=self.headers),
             'thumbnail_url': va.thumbnail_url
@@ -66,14 +72,15 @@ class VKVideo(SubscribeService):
         # Если не будет работать, то можно попробовать через поля 'url2160/url1440/url1080/url720/url480/url360/url240'
         va = None
         aa = None
-        if dash_webm := info.get('dash_webm'):
-            va, aa = self._get_video_audio_dash(dash_webm)
-        elif dash_sep := info.get('dash_sep'):
+        # Iphone не умеют в WEBM
+        # if dash_webm := info.get('dash_webm'):
+        #     va, aa = self._get_video_audio_dash(dash_webm)
+        if dash_sep := info.get('dash_sep'):
             va, aa = self._get_video_audio_dash(dash_sep)
         elif hls := info.get('hls'):
             va, aa = self._get_video_hls(hls)
         if va:
-            va.thumbnail_url = info['jpg']
+            va.thumbnail_url = info.get('short_video_cover', info.get('jpg'))
         return va, aa
 
     def _get_video_audio_dash(self, dash_webm_url) -> tuple[VideoAttachment, AudioAttachment]:
@@ -128,13 +135,22 @@ class VKVideo(SubscribeService):
                     ',', 2)
                 video_id = video_id.strip("'").strip('"')
                 channel_id = video_url.strip(' ').strip("'").strip('"').strip('/video/')
-                channel_title = re.compile(r"prevTitle\: 'Видеозаписи (\w*)\'").findall(data)[0]
+                channel_title = re.compile(r"prevTitle:\s*'([^']*)'").findall(data)[0]
+
+            try:
+                width = bs4.find('meta', {'property': 'og:video:width'})['content']
+                height = bs4.find('meta', {'property': 'og:video:height'})['content']
+            except (AttributeError, KeyError):
+                width = None
+                height = None
 
             return {
                 'channel_id': channel_id,
                 'video_id': video_id,
                 'channel_title': channel_title,
-                'video_title': video_title
+                'video_title': video_title,
+                'width': width,
+                'height': height
             }
         except Exception:
             raise PWarning("Не смог получить информацию о видео")
