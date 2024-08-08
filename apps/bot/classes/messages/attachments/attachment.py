@@ -154,7 +154,7 @@ class Attachment:
         else:
             proxies = get_proxies() if use_proxy else {}
             if chunk_size:
-                response = requests.head(download_url)
+                response = requests.head(download_url, proxies=proxies)
                 file_size = int(response.headers['Content-Length'])
                 ranges = [(i, min(i + chunk_size - 1, file_size - 1)) for i in range(0, file_size, chunk_size)]
 

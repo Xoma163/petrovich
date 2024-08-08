@@ -125,11 +125,11 @@ class YoutubeVideo(SubscribeService):
         _va = VideoAttachment()
         _va.public_download_url = data.video_download_url
         # maybe proxy here
-        _va.download_content(chunk_size=data.get_video_download_chunk_size())
+        _va.download_content(chunk_size=data.get_video_download_chunk_size(), use_proxy=True)
         _aa = AudioAttachment()
         _aa.public_download_url = data.audio_download_url
         # maybe proxy here
-        _aa.download_content(chunk_size=data.get_audio_download_chunk_size())
+        _aa.download_content(chunk_size=data.get_audio_download_chunk_size(), use_proxy=True)
 
         vh = VideoHandler(video=_va, audio=_aa)
         content = vh.mux()
