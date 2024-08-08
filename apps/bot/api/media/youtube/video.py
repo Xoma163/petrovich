@@ -76,7 +76,7 @@ class YoutubeVideo(SubscribeService):
     def _get_video_info(self, url) -> dict:
         ydl_params = {
             'logger': NothingLogger(),
-            # 'proxy': env.str("HTTP_PROXY")
+            'proxy': env.str("PROXY_SOCKS5")
         }
         ydl = yt_dlp.YoutubeDL(ydl_params)
         ydl.add_default_info_extractors()
