@@ -13,6 +13,7 @@ from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.messages.attachments.audio import AudioAttachment
 from apps.bot.classes.messages.attachments.video import VideoAttachment
 from apps.bot.utils.nothing_logger import NothingLogger
+from apps.bot.utils.proxy import get_proxies
 from apps.bot.utils.video.video_handler import VideoHandler
 from petrovich.settings import env
 
@@ -42,8 +43,13 @@ class YoutubeVideoData:
 
 
 class YoutubeVideo(SubscribeService):
-    def __init__(self):
+    def __init__(self, use_proxy=True):
         super().__init__()
+
+        self.proxies = None
+        self.use_proxy = use_proxy
+        if self.use_proxy:
+            self.proxies = get_proxies()
 
     @staticmethod
     def get_timecode_str(url) -> str:
@@ -76,8 +82,9 @@ class YoutubeVideo(SubscribeService):
     def _get_video_info(self, url) -> dict:
         ydl_params = {
             'logger': NothingLogger(),
-            'proxy': env.str("PROXY_SOCKS5")
         }
+        if self.use_proxy:
+            ydl_params['proxy'] = self.proxies['https']
         ydl = yt_dlp.YoutubeDL(ydl_params)
         ydl.add_default_info_extractors()
 
@@ -117,19 +124,16 @@ class YoutubeVideo(SubscribeService):
             thubmnail_url=self._get_thumbnail(video_info)
         )
 
-    @staticmethod
-    def download_video(data: YoutubeVideoData) -> VideoAttachment:
+    def download_video(self, data: YoutubeVideoData) -> VideoAttachment:
         if not data.video_download_url or not data.audio_download_url:
             raise ValueError
 
         _va = VideoAttachment()
         _va.public_download_url = data.video_download_url
-        # maybe proxy here
-        _va.download_content(chunk_size=data.get_video_download_chunk_size(), use_proxy=True)
+        _va.download_content(chunk_size=data.get_video_download_chunk_size(), use_proxy=self.use_proxy)
         _aa = AudioAttachment()
         _aa.public_download_url = data.audio_download_url
-        # maybe proxy here
-        _aa.download_content(chunk_size=data.get_audio_download_chunk_size(), use_proxy=True)
+        _aa.download_content(chunk_size=data.get_audio_download_chunk_size(), use_proxy=self.use_proxy)
 
         vh = VideoHandler(video=_va, audio=_aa)
         content = vh.mux()
@@ -218,39 +222,36 @@ class YoutubeVideo(SubscribeService):
         video_filesize = (best_video_format['filesize'] + best_audio_format['filesize']) / 1024 / 1024
         return best_video_format, best_audio_format, video_filesize
 
-    @staticmethod
-    def _get_channel_info(channel_id: str) -> dict:
+    def _get_channel_info(self, channel_id: str) -> dict:
         url = "https://www.googleapis.com/youtube/v3/channels"
         params = {
             "id": channel_id,
             "key": env.str('GOOGLE_API_KEY'),
             "part": "snippet"
         }
-        r = requests.get(url, params=params).json()
+        r = requests.get(url, params=params, proxies=self.proxies).json()
         if not r['items']:
             raise PWarning("Не нашёл канал")
         return {
             "author": r['items'][0]['snippet']['title']
         }
 
-    @staticmethod
-    def _get_channel_videos(channel_id: str) -> list:
-        r = requests.get(f"https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}")
+    def _get_channel_videos(self, channel_id: str) -> list:
+        r = requests.get(f"https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}", proxies=self.proxies)
         if r.status_code != 200:
             raise PWarning("Не нашёл такого канала")
         bsop = BeautifulSoup(r.content, 'lxml')
         videos = [x.find('yt:videoid').text for x in bsop.find_all('entry')]
         return list(reversed(videos))
 
-    @staticmethod
-    def _get_playlist_info(channel_id: str) -> dict:
+    def _get_playlist_info(self, channel_id: str) -> dict:
         url = "https://www.googleapis.com/youtube/v3/playlists"
         params = {
             "id": channel_id,
             "key": env.str('GOOGLE_API_KEY'),
             "part": "snippet"
         }
-        r = requests.get(url, params=params).json()
+        r = requests.get(url, params=params, proxies=self.proxies).json()
         if not r['items']:
             raise PWarning("Не нашёл плейлист")
 
@@ -262,7 +263,7 @@ class YoutubeVideo(SubscribeService):
         }
 
     @staticmethod
-    def _get_playlist_videos(playlist_id: str) -> list:
+    def _get_playlist_videos(self, playlist_id: str) -> list:
         url = "https://www.googleapis.com/youtube/v3/playlistItems"
         params = {
             "playlistId": playlist_id,
@@ -272,7 +273,7 @@ class YoutubeVideo(SubscribeService):
         }
         videos = []
         while True:
-            r = requests.get(url, params=params).json()
+            r = requests.get(url, params=params, proxies=self.proxies).json()
             videos += r['items']
             if not r.get('nextPageToken'):
                 break
@@ -281,7 +282,7 @@ class YoutubeVideo(SubscribeService):
         return videos
 
     def get_data_to_add_new_subscribe(self, url: str) -> dict:
-        r = requests.get(url)
+        r = requests.get(url, proxies=self.proxies)
         bs4 = BeautifulSoup(r.content, 'lxml')
         href = bs4.find_all('link', {'rel': 'canonical'})[0].attrs['href']
         get_params = dict(parse.parse_qsl(parse.urlsplit(href).query))
