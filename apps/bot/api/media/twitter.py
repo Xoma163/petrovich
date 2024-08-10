@@ -36,6 +36,9 @@ class Twitter(API):
     URL_TWEET_INFO = f"https://{_HOST}/tweet/details"
     URL_TWEET_REPLIES = f"https://{_HOST}/tweet/replies"
 
+    API_ERROR = 'Error while parsing tweet'
+    TWITTER_ACCESS_ERROR = 'You’re unable to view this Post because this account owner limits who can view their Posts. Learn more'
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -44,10 +47,9 @@ class Twitter(API):
     def get_post_data(self, url, with_threads=False) -> TwitterAPIResponse:
         tweet_id = urlparse(url).path.strip('/').split('/')[-1]
         r = self.requests.get(self.URL_TWEET_INFO, params={'tweet_id': tweet_id}).json()
-        if r.get('detail') == 'Error while parsing tweet':
+        if error := r.get('detail') == self.API_ERROR:
             raise PWarning("Ошибка на стороне API")
-        elif r.get(
-                'detail') == 'You’re unable to view this Post because this account owner limits who can view their Posts. Learn more':
+        elif error == self.TWITTER_ACCESS_ERROR:
             raise PWarning("Пользователь ограничил круг лиц, которые могут видеть этот пост")
 
         if with_threads:

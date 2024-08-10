@@ -1,3 +1,4 @@
+import json
 import re
 from copy import copy
 
@@ -113,6 +114,28 @@ class ResponseMessageItem:
 
     def __str__(self):
         return self.text if self.text else ""
+
+    def get_tg_params(self) -> dict:
+        params = {
+            'chat_id': self.peer_id,
+            'caption': self.text,
+            **self.kwargs
+        }
+
+        if self.keyboard:
+            params['reply_markup'] = json.dumps(self.keyboard)
+        if self.reply_to:
+            params['reply_to_message_id'] = self.reply_to
+        if self.disable_web_page_preview:
+            params['disable_web_page_preview'] = True
+        if self.message_thread_id:
+            params['message_thread_id'] = self.message_thread_id
+        if self.entities:
+            params['entities'] = json.dumps(self.entities)
+
+        if self.message_id:
+            params['message_id'] = self.message_id
+        return params
 
 
 class ResponseMessage:

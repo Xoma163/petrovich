@@ -453,7 +453,7 @@ class Media(AcceptExtraCommand):
             if att.content_type == att.CONTENT_TYPE_VIDEO:
                 video = self.bot.get_video_attachment(att.download_url, peer_id=self.event.peer_id)
                 attachments.append(video)
-            if att.content_type == att.CONTENT_TYPE_IMAGE:
+            elif att.content_type == att.CONTENT_TYPE_IMAGE:
                 photo = self.bot.get_photo_attachment(
                     att.download_url,
                     peer_id=self.event.peer_id,

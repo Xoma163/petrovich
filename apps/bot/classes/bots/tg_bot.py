@@ -60,6 +60,17 @@ class TgBot(Bot):
         self.requests = None
         self.init_requests()
 
+        self.att_map = {
+            PhotoAttachment: self._send_photo,
+            GifAttachment: self._send_gif,
+            VideoAttachment: self._send_video,
+            VideoNoteAttachment: self._send_video_note,
+            AudioAttachment: self._send_audio,
+            DocumentAttachment: self._send_document,
+            StickerAttachment: self._send_sticker,
+            VoiceAttachment: self._send_voice,
+        }
+
     # MAIN ROUTING AND MESSAGING
 
     def init_requests(self):
@@ -102,10 +113,7 @@ class TgBot(Bot):
         r = self.requests.get('answerInlineQuery', params).json()
         return r
 
-    def _send_media_group(self, rmi: ResponseMessageItem, default_params) -> dict:
-        """
-        Отправка множества вложений. Ссылки
-        """
+    def _send_media_group_wrap(self, rmi: ResponseMessageItem, default_params) -> dict:
         params = copy(default_params)
         media_list = []
         files = []
@@ -141,6 +149,41 @@ class TgBot(Bot):
             r = self.requests.get('sendMediaGroup', params).json()
         else:
             r = self.requests.get('sendMediaGroup', params, files=files).json()
+        return r
+
+    def _send_media_group(self, rmi: ResponseMessageItem, default_params) -> dict:
+        """
+        Отправка множества вложений. Ссылки
+        """
+
+        responses = []
+        r = None
+        # Бьём на чанки если вложений больше 10
+        if len(rmi.attachments) > 10:
+            rmi_copy = copy(rmi)
+            params_copy = copy(default_params)
+            params_copy['caption'] = ""
+            for chunk in get_chunks(rmi.attachments, 10):
+                rmi_copy.attachments = chunk
+                r = self._send_media_group_wrap(rmi_copy, params_copy)
+                responses.append(r)
+            if default_params['caption']:
+                self._send_text(default_params)
+        # Отправка одного
+        else:
+            r = self._send_media_group_wrap(rmi, default_params)
+            responses.append(r)
+
+        # Если не получилось отправить media_group, то пытаемся отправить вложения по одному
+        for response in responses:
+            if response['ok']:
+                continue
+            rmi_copy = copy(rmi)
+            params_copy = copy(default_params)
+            params_copy['caption'] = ""
+            for chunk in get_chunks(rmi.attachments, 1):
+                rmi_copy.attachments = chunk
+                r = self._send_media_group_wrap(rmi_copy, params_copy)
         return r
 
     def _send_photo(self, rmi: ResponseMessageItem, default_params) -> dict:
@@ -419,25 +462,10 @@ class TgBot(Bot):
         Возвращает Response.json() платформы
         """
         rmi.set_telegram_html()
-        params = {
-            'chat_id': rmi.peer_id,
-            'caption': rmi.text,
-            **rmi.kwargs
-        }
 
-        if rmi.keyboard:
-            params['reply_markup'] = json.dumps(rmi.keyboard)
-        if rmi.reply_to:
-            params['reply_to_message_id'] = rmi.reply_to
-        if rmi.disable_web_page_preview:
-            params['disable_web_page_preview'] = True
-        if rmi.message_thread_id:
-            params['message_thread_id'] = rmi.message_thread_id
-        if rmi.entities:
-            params['entities'] = json.dumps(rmi.entities)
+        params = rmi.get_tg_params()
 
         if rmi.message_id:
-            params['message_id'] = rmi.message_id
             if rmi.attachments:
                 return self.edit_media(rmi, params)
             if rmi.keyboard and not rmi.text:
@@ -446,33 +474,14 @@ class TgBot(Bot):
 
         # Разбиение длинных сообщений на чанки
         chunks = self._get_text_chunks(rmi, params)
-        att_map = {
-            PhotoAttachment: self._send_photo,
-            GifAttachment: self._send_gif,
-            VideoAttachment: self._send_video,
-            VideoNoteAttachment: self._send_video_note,
-            AudioAttachment: self._send_audio,
-            DocumentAttachment: self._send_document,
-            StickerAttachment: self._send_sticker,
-            VoiceAttachment: self._send_voice,
-        }
 
         if rmi.attachments:
-            with ChatActivity(self, rmi.attachments[0].ACTIVITY, params['chat_id']):
+            with ChatActivity(self, rmi.attachments[0].ACTIVITY, rmi.peer_id):
                 # Отправка многих вложениями чанками: сначала вложения, потом текст
-                if len(rmi.attachments) > 10:
-                    rmi_copy = copy(rmi)
-                    params_copy = copy(params)
-                    params_copy['caption'] = ""
-                    for chunk in get_chunks(rmi.attachments, 10):
-                        rmi_copy.attachments = chunk
-                        r = self._send_media_group(rmi_copy, params_copy)
-                    if params['caption']:
-                        r = self._send_text(params)
-                elif len(rmi.attachments) > 1:
+                if len(rmi.attachments) > 1:
                     r = self._send_media_group(rmi, params)
                 else:
-                    r = att_map[rmi.attachments[0].__class__](rmi, params)
+                    r = self.att_map[rmi.attachments[0].__class__](rmi, params)
         else:
             r = self._send_text(params)
 
@@ -491,11 +500,13 @@ class TgBot(Bot):
         chunks = None
         if not params.get('caption'):
             return chunks
+
         # Если у нас есть форматирование, в таком случае все сначала шлём все медиа, а потом уже форматированный текст
         # Телега не умеет в send_media_group + parse_mode
         if rmi.text_has_html_code and len(rmi.attachments) > 1:
             chunks = [""] + split_text_by_n_symbols(params['caption'], self.MAX_MESSAGE_TEXT_LENGTH)
             params['caption'] = chunks[0]
+
         # Шлём длинные сообщения чанками.
         if rmi.attachments and len(params['caption']) > self.MAX_MESSAGE_TEXT_CAPTION:
             # Иначё бьём на 1024 символа первое сообщение и на 4096 остальные (ограничения телеги)
@@ -509,6 +520,7 @@ class TgBot(Bot):
         elif len(params['caption']) > self.MAX_MESSAGE_TEXT_LENGTH:
             chunks = split_text_by_n_symbols(params['caption'], self.MAX_MESSAGE_TEXT_LENGTH)
             params['caption'] = chunks[0]
+
         return chunks
 
     # END  MAIN ROUTING AND MESSAGING
