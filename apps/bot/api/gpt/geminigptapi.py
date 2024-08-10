@@ -5,7 +5,7 @@ from apps.bot.api.gpt.gpt import GPTAPI
 from apps.bot.api.gpt.message import GPTMessages
 from apps.bot.api.gpt.response import GPTAPICompletionsResponse
 from apps.bot.classes.const.exceptions import PWarning
-from apps.bot.utils.proxy import get_proxies
+from apps.bot.utils.proxy import get_proxies_sweden
 from petrovich.settings import env
 
 
@@ -42,7 +42,7 @@ class GeminiGPTAPI(GPTAPI):
     def _do_request(self, url, **kwargs) -> requests.Response:
         r = self.requests.post(
             url,
-            proxies=get_proxies(),
+            proxies=get_proxies_sweden(),
             headers=self._headers,
             **kwargs
         )
