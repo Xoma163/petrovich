@@ -262,7 +262,6 @@ class YoutubeVideo(SubscribeService):
             "channel_id": snippet['channelId']
         }
 
-    @staticmethod
     def _get_playlist_videos(self, playlist_id: str) -> list:
         url = "https://www.googleapis.com/youtube/v3/playlistItems"
         params = {
