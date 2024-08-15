@@ -271,7 +271,7 @@ class Media(AcceptExtraCommand):
                 if not self.has_command_name and data.duration > 120 and not self.event.is_from_pm:
                     button = self.bot.get_button(f"{self.event.message.COMMAND_SYMBOLS[0]}{self.name} {url}")
                     keyboard = self.bot.get_inline_keyboard([button])
-                    raise PWarning(
+                    raise PSkip(
                         "Видосы до 2х минут не парсятся без упоминания. Если в этом есть нужда - жми на кнопку",
                         keyboard=keyboard)
                 va = yt_api.download_video(data)
@@ -671,9 +671,6 @@ class Media(AcceptExtraCommand):
 
     def _get_cached_attachments_and_msg(self, video, channel_id, video_id, video_title, thumbnail_url=None):
         filesize_mb = len(video) / 1024 / 1024
-        bad_symbols = ["\\", "/", ":", "*", "?", "\"", "<", ">", "|", "+"]
-        for symbol in bad_symbols:
-            video_title = video_title.replace(symbol, "_")
         if filesize_mb > self.bot.MAX_VIDEO_SIZE_MB:
             cache = self._save_video_to_media_cache(
                 channel_id=channel_id,
@@ -692,6 +689,10 @@ class Media(AcceptExtraCommand):
 
     @staticmethod
     def _save_video_to_media_cache(channel_id: str, video_id: str, name: str, content: bytes):
+        bad_symbols = ["\\", "/", ":", "*", "?", "\"", "<", ">", "|", "+"]
+        for symbol in bad_symbols:
+            name = name.replace(symbol, "_")
+
         filename = f"{name}.mp4"
         cache = VideoCache(
             channel_id=channel_id,

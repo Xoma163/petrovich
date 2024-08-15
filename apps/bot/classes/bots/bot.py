@@ -1,11 +1,9 @@
 import logging
-import threading
 import time
 from math import inf
 from threading import Lock
 from threading import Thread
 
-from django.core.cache import cache
 from django.db.models import Q
 
 from apps.bot.classes.bot_response import BotResponse
@@ -473,27 +471,6 @@ class Bot(Thread):
         """
         Проставление активности боту (например, отправка сообщения)
         """
-
-    def set_activity_thread(self, peer_id, activity: ActivitiesEnum):
-        if not peer_id or not activity:
-            return
-        if cache.get(f"activity_{peer_id}"):
-            return
-
-        cache.set(f"activity_{peer_id}", True)
-        threading.Thread(
-            target=self._set_activity_thread,
-            args=(peer_id, activity)
-        ).start()
-
-    @staticmethod
-    def stop_activity_thread(peer_id):
-        cache.delete(f"activity_{peer_id}")
-
-    def _set_activity_thread(self, peer_id, activity):
-        while cache.get(f"activity_{peer_id}"):
-            self.set_activity(peer_id, activity)
-            time.sleep(5)
 
     # ToDo: А может лучше перенести в Event?
     @staticmethod
