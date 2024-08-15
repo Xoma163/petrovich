@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from enum import Enum
 
 
 @dataclass
@@ -27,6 +28,8 @@ class GPTCompletionModel(GPTModel):
 @dataclass
 class GPTImageDrawModel(GPTModel):
     image_cost: float | None = None
+    width: int | None = None
+    height: int | None = None
 
 
 @dataclass
@@ -54,8 +57,12 @@ class GPTModels:
     GPT_3_5_TURBO_0301 = GPTCompletionModel("gpt-3.5-turbo-0301", "GPT-3.5 TURBO 16K 0613", 1.5, 2)
 
     # image models
-    DALLE_3 = GPTImageDrawModel("dall-e-3", "DALLE 3", image_cost=0.12)
-    DALLE_2 = GPTImageDrawModel("dall-e-2", "DALLE 2", image_cost=0.02)
+    DALLE_3_ALBUM = GPTImageDrawModel("dall-e-3", "DALLE 3", image_cost=0.12, width=1792, height=1024)
+    DALLE_3_PORTAIR = GPTImageDrawModel("dall-e-3", "DALLE 3", image_cost=0.12, width=1024, height=1792)
+    DALLE_3_SQUARE = GPTImageDrawModel("dall-e-3", "DALLE 3", image_cost=0.08, width=1024, height=1024)
+    DALLE_2_BIG = GPTImageDrawModel("dall-e-2", "DALLE 2", image_cost=0.02, width=1024, height=1024)
+    DALLE_2_MEDIUM = GPTImageDrawModel("dall-e-2", "DALLE 2", image_cost=0.018, width=512, height=512)
+    DALLE_2_SMALL = GPTImageDrawModel("dall-e-2", "DALLE 2", image_cost=0.016, width=256, height=256)
 
     # Audio models
     WHISPER = GPTVoiceRecognitionModel("whisper-1", None, voice_recognition_1_min_cost=0.006)
@@ -71,7 +78,7 @@ class GPTModels:
         return cls.get_all_models(GPTCompletionModel)
 
     @classmethod
-    def get_image_models(cls) -> list[GPTImageDrawModel]:
+    def get_draw_models(cls) -> list[GPTImageDrawModel]:
         return cls.get_all_models(GPTImageDrawModel)
 
     @classmethod
@@ -81,3 +88,13 @@ class GPTModels:
             if model.name == name:
                 return model
         raise ValueError
+
+
+class GPTImageFormat(Enum):
+    ALBUM = "album"
+    PORTAIR = "portair"
+    SQUARE = "square"
+
+    BIG = "big"
+    MEDIUM = "medium"
+    LOW = "low"

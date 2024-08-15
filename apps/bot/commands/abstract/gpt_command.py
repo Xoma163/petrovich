@@ -6,6 +6,7 @@ from django.db.models import Q, Sum
 
 from apps.bot.api.gpt.gpt import GPTAPI
 from apps.bot.api.gpt.message import GPTMessages, GPTMessageRole
+from apps.bot.api.gpt.models import GPTImageFormat
 from apps.bot.api.gpt.response import GPTAPIImageDrawResponse, GPTAPICompletionsResponse
 from apps.bot.classes.bots.chat_activity import ChatActivity
 from apps.bot.classes.command import Command
@@ -38,7 +39,8 @@ class GPTCommand(ABC, Command):
         HelpTextItemCommand("(текстовый файл)", "общение с ботом с учётом текстового файла")
     ]
     VISION_HELP_TEXT_ITEM = HelpTextItemCommand("(фраза) [картинка]", "общение с ботом с учётом пересланной картинки")
-    DRAW_HELP_TEXT_ITEM = HelpTextItemCommand("нарисуй (фраза/пересланное сообщение)", "генерация картинки")
+    DRAW_HELP_TEXT_ITEM = HelpTextItemCommand("нарисуй [альбом/портрет/квадрат] (фраза/пересланное сообщение)",
+                                              "генерация картинки")
 
     PREPROMPT_HELP_TEXT_ITEMS = [
         HelpTextItemCommand("препромпт [конфа]", "посмотреть текущий препромпт"),
@@ -109,10 +111,10 @@ class GPTCommand(ABC, Command):
         """
         Рисование изображения
         """
-        request_text = self._get_draw_image_request_text()
+        request_text, image_format = self._get_draw_image_request_text()
         gpt_api = self.gpt_api_class(log_filter=self.event.log_filter, sender=self.event.sender)
         with ChatActivity(self.bot, ActivitiesEnum.UPLOAD_PHOTO, self.event.peer_id):
-            response: GPTAPIImageDrawResponse = gpt_api.draw(request_text)
+            response: GPTAPIImageDrawResponse = gpt_api.draw(request_text, image_format)
             if use_statistics:
                 GPTUsage.add_statistics(self.event.sender, response.usage)
 
@@ -389,16 +391,30 @@ class GPTCommand(ABC, Command):
         document.parse(text.encode('utf-8'), filename='answer.html')
         return document
 
-    def _get_draw_image_request_text(self):
+    def _get_draw_image_request_text(self) -> tuple[str, GPTImageFormat | None]:
         """
         Получение текста, который хочет нарисовать пользователь
         """
 
         if len(self.event.message.args) > 1:
-            return " ".join(self.event.message.args_case[1:])
+            msg_args = self.event.message.args_case[1:]
+
+            image_format = None
+            if len(self.event.message.args) > 2:
+                arg1 = msg_args[0].lower()
+                format_mapping = {
+                    "квадрат": GPTImageFormat.SQUARE,
+                    "портрет": GPTImageFormat.PORTAIR,
+                    "альбом": GPTImageFormat.ALBUM
+                }
+                if image_format := format_mapping.get(arg1, None):
+                    msg_args = msg_args[1:]
+
+            text = " ".join(msg_args)
+            return text, image_format
         elif self.event.message.quote:
-            return self.event.message.quote
+            return self.event.message.quote, None
         elif self.event.fwd:
-            return self.event.fwd[0].message.raw
+            return self.event.fwd[0].message.raw, None
         else:
             raise PWarning("Должен быть текст или пересланное сообщение")
