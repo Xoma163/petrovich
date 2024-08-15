@@ -671,6 +671,9 @@ class Media(AcceptExtraCommand):
 
     def _get_cached_attachments_and_msg(self, video, channel_id, video_id, video_title, thumbnail_url=None):
         filesize_mb = len(video) / 1024 / 1024
+        bad_symbols = ["\\", "/", ":", "*", "?", "\"", "<", ">", "|", "+"]
+        for symbol in bad_symbols:
+            video_title = video_title.replace(symbol, "_")
         if filesize_mb > self.bot.MAX_VIDEO_SIZE_MB:
             cache = self._save_video_to_media_cache(
                 channel_id=channel_id,
