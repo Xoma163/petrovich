@@ -99,10 +99,12 @@ class Issue(Command):
 
     @staticmethod
     def _get_tags(text):
-        tags = [
-            x[1:].lower().replace("_", " ") if x.startswith("#") else x.lower().replace("_", " ")
-            for x in text.split(" ") if x
-        ] if text else []
+        tags = []
+        if not text:
+            return tags
+        for x in text.split():
+            if x.startswith("#"):
+                tags.append(x[1:].lower().replace("_", " "))
         return tags
 
     def send_issue_info_to_admin(self, issue: GithubIssueAPI):
