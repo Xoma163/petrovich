@@ -4,11 +4,17 @@ from urllib.parse import urlparse, parse_qsl
 import yt_dlp
 
 from apps.bot.utils.nothing_logger import NothingLogger
+from apps.bot.utils.proxy import get_proxies
 
 
 class YoutubeMusic:
-    def __init__(self):
+    def __init__(self, use_proxy=True):
         self._temp_file_path = ""
+
+        self.proxies = None
+        self.use_proxy = use_proxy
+        if self.use_proxy:
+            self.proxies = get_proxies()
 
     @staticmethod
     def clear_url(url):
@@ -26,7 +32,7 @@ class YoutubeMusic:
             self.delete_temp_file()
 
     def _get_info(self, url) -> dict:
-        ytdl = yt_dlp.YoutubeDL({
+        ydl_params = {
             'format': 'bestaudio/best',
             'title': True,
             'logger': NothingLogger(),
@@ -36,8 +42,11 @@ class YoutubeMusic:
                 'preferredcodec': 'mp3',
                 'preferredquality': '320',
             }],
+        }
+        if self.use_proxy:
+            ydl_params['proxy'] = self.proxies['https']
 
-        })
+        ytdl = yt_dlp.YoutubeDL(ydl_params)
         url = self.clear_url(url)
 
         info = ytdl.extract_info(url, download=True)
