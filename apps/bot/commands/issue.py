@@ -43,7 +43,7 @@ class Issue(Command):
 
     def start(self) -> ResponseMessage:
         if self.event.message.args:
-            msg = self.event.message.args_str_case
+            msg = self.event.message.raw.split(' ', 1)[1]
         elif self.event.message.quote:
             msg = self.event.message.quote
         elif self.event.fwd:
