@@ -56,6 +56,7 @@ class Quote(Command):
         pil_image.save(bytes_io, format='PNG')
         if pil_image.height > 1500:
             attachment = self.bot.get_document_attachment(bytes_io, self.event.peer_id, filename="petrovich_quote.png")
+            attachment.set_thumbnail(attachment.content)
         else:
             attachment = self.bot.get_photo_attachment(bytes_io, peer_id=self.event.peer_id,
                                                        filename="petrovich_quote.png")

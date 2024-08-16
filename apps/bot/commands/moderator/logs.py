@@ -59,8 +59,12 @@ class Logs(Command):
         img_byte_arr = io.BytesIO()
         img.save(img_byte_arr, format='PNG')
 
-        attachment = self.bot.get_document_attachment(img_byte_arr, peer_id=self.event.peer_id,
-                                                      filename='petrovich_logs.png')
+        attachment = self.bot.get_document_attachment(
+            img_byte_arr,
+            peer_id=self.event.peer_id,
+            filename='petrovich_logs.png'
+        )
+        attachment.set_thumbnail(attachment.content)
         return ResponseMessage(ResponseMessageItem(attachments=[attachment]))
 
     def transform_logs_by_values(self, items):

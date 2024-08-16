@@ -3,7 +3,7 @@ import io
 import os
 from concurrent.futures import ThreadPoolExecutor
 from io import BytesIO
-from tempfile import NamedTemporaryFile
+from tempfile import NamedTemporaryFile, _TemporaryFileWrapper
 from urllib.parse import urlparse
 
 import requests
@@ -109,6 +109,9 @@ class Attachment:
             self.content = img_byte_arr.read()
         elif isinstance(file_like_object, FieldFile):
             self.content = file_like_object.file.read()
+        elif isinstance(file_like_object, _TemporaryFileWrapper):
+            self.content = file_like_object.file.read()
+            file_like_object.file.seek(0)
         # elif isinstance(file_like_object, types.GeneratorType):
         #     self.content = file_like_object
 
@@ -169,6 +172,13 @@ class Attachment:
                     self.CHUNK_SIZE)
             else:
                 self.content = requests.get(download_url, proxies=proxies, headers=_headers).content
+
+        if self.name:
+            tmp = NamedTemporaryFile()
+            tmp.write(self.content)
+            tmp.name = self.name
+            tmp.seek(0)
+            self.content = tmp
         return self.content
 
     def get_bytes_io_content(self, peer_id=None) -> BytesIO:

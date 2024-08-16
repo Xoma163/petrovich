@@ -8,15 +8,19 @@ class ThumbnailMixin:
         self.thumbnail_url: str | None = None
         self.thumbnail: PhotoAttachment | None = None
 
-    def set_thumbnail(self):
+    def set_thumbnail(self, content: bytes = None):
         from apps.bot.utils.utils import make_thumbnail
 
-        if self.thumbnail_url is None:
+        if self.thumbnail_url is None and content is None:
             return
-        thumb_file = PhotoAttachment()
-        thumb_file.parse(self.thumbnail_url, guarantee_url=True)
 
-        thumbnail = make_thumbnail(thumb_file)
+        thumb_file = PhotoAttachment()
+        if content:
+            thumb_file.parse(content)
+        else:
+            thumb_file.parse(self.thumbnail_url, guarantee_url=True)
+
+        thumbnail = make_thumbnail(thumb_file, max_size=320)
         thumbnail_att = PhotoAttachment()
         thumbnail_att.parse(thumbnail)
         self.thumbnail = thumbnail_att

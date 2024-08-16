@@ -12,7 +12,6 @@ from PIL import Image, ImageDraw, ImageFont
 
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
-from apps.bot.classes.messages.attachments.attachment import Attachment
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessageItem
 from apps.service.models import Service
@@ -288,19 +287,6 @@ def replace_similar_letters(text: str):
     return text
 
 
-def get_thumbnail_for_image(image: Attachment, size) -> bytes:
-    """
-    Получение thumbnail для изображения
-    """
-    content = image.download_content()
-    _image = Image.open(BytesIO(content))
-    _image.thumbnail_url((size, size))
-    thumb_byte_arr = io.BytesIO()
-    _image.save(thumb_byte_arr, format="PNG")
-    thumb_byte_arr.seek(0)
-    return thumb_byte_arr.read()
-
-
 def get_urls_from_text(text: str) -> list:
     """
     Поиск ссылок в тексте.
@@ -565,6 +551,7 @@ def get_font_by_path(font_path: str, size: int) -> ImageFont:
 
 def make_thumbnail(
         photo_attachment: PhotoAttachment,
+        max_size: int
 ) -> io.BytesIO:
     """
     Центрирование изображение с блюром в пустотах
@@ -572,11 +559,8 @@ def make_thumbnail(
     Принудительно переводится в jpeg
     """
 
-    max_size = 320
-
     image_bytes = io.BytesIO(photo_attachment.download_content())
     image = Image.open(image_bytes).convert("RGB")
-    image.save("image.jpg", "JPEG", quality=90)
     # Проверяем, нужно ли уменьшить изображение
     if image.width > max_size or image.height > max_size:
         # Вычисляем коэффициент уменьшения

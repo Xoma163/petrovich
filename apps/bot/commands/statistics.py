@@ -53,7 +53,8 @@ class Statistics(Command):
         else:
             year = datetime.datetime.now().year
 
-        if self.event.message.keys and "all" in self.event.message.keys:
+        keys_to_check = {"all", "все"}
+        if self.event.message.keys and keys_to_check.intersection(self.event.message.keys):
             players = PetrovichUser.objects.filter(chat=self.event.chat)
         else:
             players = PetrovichUser.objects.filter(chat=self.event.chat, profile__chats=self.event.chat)

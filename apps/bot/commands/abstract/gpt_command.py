@@ -54,7 +54,9 @@ class GPTCommand(ABC, Command):
         "Порядок использования препромптов в конфах:\n"
         "1) Персональный препромт конфы\n"
         "2) Персональный препромт\n"
-        "3) Препромпт конфы"
+        "3) Препромпт конфы\n\n"
+
+        "Нарисуй может принимать ключ --orig/--original/--ориг/--оригинал, то будет прилан документ без сжатия, а не картинка"
     )
 
     def __init__(self, gpt_preprompt_provider: str, gpt_api_class: type[GPTAPI], gpt_messages_class: type[GPTMessages]):
@@ -118,11 +120,28 @@ class GPTCommand(ABC, Command):
             if use_statistics:
                 GPTUsage.add_statistics(self.event.sender, response.usage)
 
+            use_document_att = False
+            if self.event.message.keys:
+                keys_to_check = {"orig", "original", "ориг", "оригинал"}
+                if keys_to_check.intersection(self.event.message.keys):
+                    use_document_att = True
+
             attachments = []
-            for image in response.get_images():
-                att = self.bot.get_photo_attachment(image, send_chat_action=False)
-                att.download_content()
-                attachments.append(att)
+            if use_document_att:
+                for i, image in enumerate(response.get_images()):
+                    att = self.bot.get_document_attachment(
+                        image,
+                        send_chat_action=False,
+                        filename=f'gpt_draw_{i + 1}.png'
+                    )
+                    att.download_content()
+                    att.set_thumbnail(att.content)
+                    attachments.append(att)
+            else:
+                for image in response.get_images():
+                    att = self.bot.get_photo_attachment(image, send_chat_action=False)
+                    att.download_content()
+                    attachments.append(att)
         image_prompt = response.images_prompt if response.images_prompt else request_text
         answer = f'Результат генерации по запросу "{image_prompt}"'
         return ResponseMessageItem(text=answer, attachments=attachments, reply_to=self.event.message.id)
@@ -405,7 +424,10 @@ class GPTCommand(ABC, Command):
                 format_mapping = {
                     "квадрат": GPTImageFormat.SQUARE,
                     "портрет": GPTImageFormat.PORTAIR,
-                    "альбом": GPTImageFormat.ALBUM
+                    "альбом": GPTImageFormat.ALBUM,
+                    "square": GPTImageFormat.SQUARE,
+                    "portair": GPTImageFormat.PORTAIR,
+                    "album": GPTImageFormat.ALBUM,
                 }
                 if image_format := format_mapping.get(arg1, None):
                     msg_args = msg_args[1:]

@@ -24,7 +24,7 @@ from apps.bot.classes.messages.attachments.voice import VoiceAttachment
 from apps.bot.classes.messages.response_message import ResponseMessageItem, ResponseMessage
 from apps.bot.commands.meme import Meme
 from apps.bot.models import Profile, Chat
-from apps.bot.utils.utils import get_thumbnail_for_image, split_text_by_n_symbols, get_chunks
+from apps.bot.utils.utils import split_text_by_n_symbols, get_chunks
 from petrovich.settings import env
 
 
@@ -219,10 +219,8 @@ class TgBot(Bot):
             r = self.requests.get('sendDocument', params).json()
         else:
             files = {'document': document.content}
-            try:
-                files['thumbnail'] = get_thumbnail_for_image(document, size=320)
-            except Exception:
-                pass
+            if document.thumbnail:
+                files['thumbnail'] = document.thumbnail.get_bytes_io_content()
             r = self.requests.get('sendDocument', params, files=files).json()
         return r
 

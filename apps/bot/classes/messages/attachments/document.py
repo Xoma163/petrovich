@@ -2,6 +2,7 @@ import logging
 
 from apps.bot.classes.const.activities import ActivitiesEnum
 from apps.bot.classes.messages.attachments.attachment import Attachment
+from apps.bot.classes.messages.attachments.mixins.thumbnail_mixin import ThumbnailMixin
 
 logger = logging.getLogger()
 
@@ -26,7 +27,7 @@ class DocumentMimeType:
         return self.type.startswith(f'{_type}/')
 
 
-class DocumentAttachment(Attachment):
+class DocumentAttachment(Attachment, ThumbnailMixin):
     TYPE = 'document'
     ACTIVITY = ActivitiesEnum.UPLOAD_DOCUMENT
 

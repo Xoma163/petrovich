@@ -123,7 +123,8 @@ class Media(AcceptExtraCommand):
     @staticmethod
     def accept_extra(event: Event) -> bool:
         if event.message and not event.message.mentioned:
-            if "nomedia" in event.message.keys or "no-media" in event.message.keys:
+            keys_to_check = {"nomedia", "no-media"}
+            if keys_to_check.intersection(event.message.keys):
                 return False
             all_urls = get_urls_from_text(event.message.clear_case)
             for url in all_urls:
@@ -239,7 +240,8 @@ class Media(AcceptExtraCommand):
 
     @retry(3, Exception, [PSkip], sleep_time=2)
     def get_youtube_video(self, url) -> (list, str):
-        if 'audio' in self.event.message.keys:
+        keys_to_check = {"аудио", "audio"}
+        if keys_to_check.intersection(self.event.message.keys):
             return self.get_youtube_audio(url)
 
         yt_api = YoutubeVideo()
@@ -441,8 +443,8 @@ class Media(AcceptExtraCommand):
             raise PWarning("Медиа твиттер доступен только для доверенных пользователей")
 
         t_api = Twitter(log_filter=self.event.log_filter)
-        with_threads = self.event.message.keys and self.event.message.keys[0] in ['thread', 'threads', 'with-threads',
-                                                                                  'тред', 'треды']
+        keys_to_check = {'thread', 'threads', 'with-threads', 'тред', 'треды'}
+        with_threads = self.event.message.keys and keys_to_check.intersection(self.event.message.keys)
         data = t_api.get_post_data(url, with_threads=with_threads)
 
         if not data.items:

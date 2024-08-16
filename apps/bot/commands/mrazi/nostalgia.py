@@ -221,6 +221,7 @@ class Nostalgia(Command):
         pil_image.save(bytes_io, format='PNG')
         if pil_image.height > 1500:
             image = self.bot.get_document_attachment(bytes_io, self.event.peer_id, filename="petrovich_nostalgia.png")
+            image.set_thumbnail(image.content)
         else:
             image = self.bot.get_photo_attachment(bytes_io, peer_id=self.event.peer_id,
                                                   filename="petrovich_nostalgia.png")
