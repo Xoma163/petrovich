@@ -23,7 +23,7 @@ class GPTAPI(API):
     def _headers(self) -> dict:
         raise NotImplementedError
 
-    def draw(self, prompt: str, gpt_image_format: GPTImageFormat) -> GPTAPIImageDrawResponse:
+    def draw(self, prompt: str, gpt_image_format: GPTImageFormat, count: int = 1) -> GPTAPIImageDrawResponse:
         """
         Метод для рисования GPTAPI, переопределяется не у всех наследников
         """

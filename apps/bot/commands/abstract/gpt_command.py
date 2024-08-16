@@ -39,9 +39,10 @@ class GPTCommand(ABC, Command):
         HelpTextItemCommand("(текстовый файл)", "общение с ботом с учётом текстового файла")
     ]
     VISION_HELP_TEXT_ITEM = HelpTextItemCommand("(фраза) [картинка]", "общение с ботом с учётом пересланной картинки")
-    DRAW_HELP_TEXT_ITEM = HelpTextItemCommand("нарисуй [альбом/портрет/квадрат] (фраза/пересланное сообщение)",
-                                              "генерация картинки")
-
+    DRAW_HELP_TEXT_ITEM = HelpTextItemCommand(
+        "нарисуй [альбом/портрет/квадрат] (фраза/пересланное сообщение)",
+        "генерация картинки"
+    )
     PREPROMPT_HELP_TEXT_ITEMS = [
         HelpTextItemCommand("препромпт [конфа]", "посмотреть текущий препромпт"),
         HelpTextItemCommand("препромпт [конфа] (текст)", "добавить препромпт"),
@@ -56,7 +57,8 @@ class GPTCommand(ABC, Command):
         "2) Персональный препромт\n"
         "3) Препромпт конфы\n\n"
 
-        "Нарисуй может принимать ключ --orig/--original/--ориг/--оригинал, то будет прилан документ без сжатия, а не картинка"
+        "Нарисуй может принимать ключ --orig/--original/--ориг/--оригинал, то будет прилан документ без сжатия, а не картинка\n"
+        "Нарисуй может принимать ключ --(число), которое определит сколько картинок нужно сгенерировать. Максимум 10"
     )
 
     def __init__(self, gpt_preprompt_provider: str, gpt_api_class: type[GPTAPI], gpt_messages_class: type[GPTMessages]):
@@ -116,14 +118,16 @@ class GPTCommand(ABC, Command):
         request_text, image_format = self._get_draw_image_request_text()
         gpt_api = self.gpt_api_class(log_filter=self.event.log_filter, sender=self.event.sender)
         with ChatActivity(self.bot, ActivitiesEnum.UPLOAD_PHOTO, self.event.peer_id):
-            response: GPTAPIImageDrawResponse = gpt_api.draw(request_text, image_format)
+            count = self._get_images_count_by_keys()
+
+            response: GPTAPIImageDrawResponse = gpt_api.draw(request_text, image_format, count=count)
             if use_statistics:
                 GPTUsage.add_statistics(self.event.sender, response.usage)
 
             use_document_att = False
-            if self.event.message.keys:
+            if keys := self.event.message.keys:
                 keys_to_check = {"orig", "original", "ориг", "оригинал"}
-                if keys_to_check.intersection(self.event.message.keys):
+                if keys_to_check.intersection(keys):
                     use_document_att = True
 
             attachments = []
@@ -440,3 +444,15 @@ class GPTCommand(ABC, Command):
             return self.event.fwd[0].message.raw, None
         else:
             raise PWarning("Должен быть текст или пересланное сообщение")
+
+    def _get_images_count_by_keys(self) -> int:
+        count = 1
+        if keys := self.event.message.keys:
+            for key in keys:
+                if key.isdigit():
+                    count = int(key)
+                    break
+        MAX_IMAGES_COUNT = 10
+        if count > MAX_IMAGES_COUNT:
+            raise PWarning(f"Максимальное число картинок в запросе - {MAX_IMAGES_COUNT}")
+        return count

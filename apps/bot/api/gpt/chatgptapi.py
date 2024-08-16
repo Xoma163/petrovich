@@ -66,39 +66,47 @@ class ChatGPTAPI(GPTAPI):
         )
         return r
 
-    def draw(self, prompt: str, image_format: GPTImageFormat) -> GPTAPIImageDrawResponse:
+    def draw(self, prompt: str, image_format: GPTImageFormat, count: int = 1) -> GPTAPIImageDrawResponse:
         model = self._get_draw_model(image_format)
         is_dalle_3_model = model in [GPTModels.DALLE_3_ALBUM, GPTModels.DALLE_3_PORTAIR, GPTModels.DALLE_3_SQUARE]
         is_dalle_2_model = model in [GPTModels.DALLE_2_BIG, GPTModels.DALLE_2_MEDIUM, GPTModels.DALLE_2_SMALL]
         if is_dalle_3_model:
-            count = 1
+            api_count = 1
         elif is_dalle_2_model:
-            count = 3
+            api_count = count
         else:
             raise RuntimeError()
+
         size = f"{model.width}x{model.height}"
 
         payload = {
             "model": model.name,
             "prompt": prompt,
-            "n": count,
+            "n": api_count,
             "size": size,
         }
         if is_dalle_3_model:
             payload["quality"] = "hd"
 
-        r_json = self._do_request(self.IMAGE_GEN_URL, json=payload)
-
         usage = GPTAPIImageDrawUsage(
             model=model,
             images_count=count,
         )
-
         r = GPTAPIImageDrawResponse(
             usage=usage,
-            images_url=[x['url'] for x in r_json['data']],
-            images_prompt=r_json['data'][0]['revised_prompt']
+            images_url=[],
+            images_prompt=""
         )
+        if is_dalle_3_model and count > 1:
+            # ToDo: делать параллельно #854
+            for _ in range(count):
+                r_json = self._do_request(self.IMAGE_GEN_URL, json=payload)
+                r.images_url.append(r_json['data'][0]['url'])
+                r.images_prompt = r_json['data'][0]['revised_prompt']
+        else:
+            r_json = self._do_request(self.IMAGE_GEN_URL, json=payload)
+            r.images_url = [x['url'] for x in r_json['data']]
+            r.images_prompt = r_json['data'][0]['revised_prompt']
         return r
 
     def recognize_voice(self, audio: AudioAttachment) -> GPTAPIVoiceRecognitionResponse:
