@@ -58,20 +58,12 @@ class Issue(Command):
 
         if msg.count('\n') == 0:
             title = msg
-        elif msg.count('\n') == 1:
-            msg_split = msg.split('\n')
-            title, body = msg_split
-            tags = self._get_tags(body)
-            if tags:
-                labels_in_github = [x for x in issue.get_all_labels() if x.lower() in tags] if tags else []
-                body = ""
         else:
             msg_split = msg.split('\n')
             title = msg_split[0]
             body = "\n".join(msg_split[1:-1])
             tags = self._get_tags(msg_split[-1])
             labels_in_github = [x for x in issue.get_all_labels() if x.lower() in tags] if tags else []
-
             if not labels_in_github:
                 body = "\n".join(msg_split[1:])
 
