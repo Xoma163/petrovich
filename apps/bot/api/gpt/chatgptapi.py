@@ -1,4 +1,6 @@
+import concurrent
 import re
+from concurrent.futures import ThreadPoolExecutor
 from json import JSONDecodeError
 
 from apps.bot.api.gpt.gpt import GPTAPI
@@ -66,6 +68,11 @@ class ChatGPTAPI(GPTAPI):
         )
         return r
 
+    def _fetch_image(self, payload) -> (str, str):
+        r_json = self._do_request(self.IMAGE_GEN_URL, json=payload)
+        image_data = r_json['data'][0]
+        return image_data['url'], image_data['revised_prompt']
+
     def draw(self, prompt: str, image_format: GPTImageFormat, count: int = 1) -> GPTAPIImageDrawResponse:
         model = self._get_draw_model(image_format)
         is_dalle_3_model = model in [GPTModels.DALLE_3_ALBUM, GPTModels.DALLE_3_PORTAIR, GPTModels.DALLE_3_SQUARE]
@@ -98,15 +105,15 @@ class ChatGPTAPI(GPTAPI):
             images_prompt=""
         )
         if is_dalle_3_model and count > 1:
-            # ToDo: делать параллельно #854
-            for _ in range(count):
-                r_json = self._do_request(self.IMAGE_GEN_URL, json=payload)
-                r.images_url.append(r_json['data'][0]['url'])
-                r.images_prompt = r_json['data'][0]['revised_prompt']
+            with ThreadPoolExecutor() as executor:
+                futures = [executor.submit(self._fetch_image, payload) for _ in range(count)]
+                results = [f.result() for f in concurrent.futures.as_completed(futures)]
+            r.images_url = [url for url, _ in results]
+            r.images_prompt = results[0][1]
         else:
-            r_json = self._do_request(self.IMAGE_GEN_URL, json=payload)
-            r.images_url = [x['url'] for x in r_json['data']]
-            r.images_prompt = r_json['data'][0]['revised_prompt']
+            url, prompt = self._fetch_image(payload)
+            r.images_url = [url]
+            r.images_prompt = prompt
         return r
 
     def recognize_voice(self, audio: AudioAttachment) -> GPTAPIVoiceRecognitionResponse:
