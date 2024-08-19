@@ -16,7 +16,7 @@ class GPTMessage(ABC):
     images: list[str] | None = None
 
     def get_message(self) -> dict:
-        raise NotImplementedError()
+        raise NotImplementedError
 
 
 @dataclasses.dataclass

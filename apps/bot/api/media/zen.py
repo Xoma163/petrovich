@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 
+from apps.bot.api.media.data import VideoData
 from apps.bot.classes.messages.attachments.video import VideoAttachment
 from apps.bot.utils.video.video_handler import VideoHandler
 
@@ -24,7 +25,7 @@ class ZenVideoData:
 
 class Zen:
     @staticmethod
-    def parse_video(url: str) -> ZenVideoData:
+    def parse_video(url: str) -> VideoData:
         options = Options()
         options.add_argument("--headless")
         driver = webdriver.Firefox(options=options)
@@ -43,20 +44,22 @@ class Zen:
         video_data = data['data']['MICRO_APP_SSR_DATA']['settings']['exportData']['video']
         m3u8_master_url = [x for x in video_data['video']['streams'] if "master.m3u8" in x][0]
 
-        return ZenVideoData(
+        return VideoData(
             channel_id=video_data['publisherId'],
             channel_title=video_data['source']['title'],
-            playlist_id=video_data['collectionMetaAndItem']['meta']['id'],
-            playlist_title=video_data['collectionMetaAndItem']['meta']['title'],
+            # ToDo: пригодится для подписок
+            # playlist_id=video_data['collectionMetaAndItem']['meta']['id'],
+            # playlist_title=video_data['collectionMetaAndItem']['meta']['title'],
             video_id=video_data['id'],
-            video_title=video_data['title'],
+            title=video_data['title'],
             thumbnail_url=video_data['image'],
             m3u8_master_url=m3u8_master_url
         )
 
     @staticmethod
-    def download_video(m3u8_master_url) -> bytes:
+    def download_video(m3u8_master_url) -> VideoAttachment:
         va = VideoAttachment()
         va.m3u8_url = m3u8_master_url
         vh = VideoHandler(video=va)
-        return vh.download()
+        va.content = vh.download()
+        return va

@@ -1,6 +1,6 @@
 import re
 
-from apps.bot.classes.command import AcceptExtraCommand
+from apps.bot.classes.command import AcceptExtraMixin
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.event.event import Event
@@ -10,7 +10,7 @@ from apps.bot.classes.messages.response_message import ResponseMessage, Response
 from apps.service.models import Tag as TagModel
 
 
-class Tag(AcceptExtraCommand):
+class Tag(AcceptExtraMixin):
     name = "тег"
     names = ["менш", "меншон", "вызов", "клич", "tag", "группа", "теги"]
 

@@ -3,6 +3,7 @@ from urllib.parse import urlparse, parse_qsl
 
 import yt_dlp
 
+from apps.bot.api.media.data import AudioData
 from apps.bot.utils.nothing_logger import NothingLogger
 from apps.bot.utils.proxy import get_proxies
 
@@ -25,13 +26,13 @@ class YoutubeMusic:
             res += f"?v={v}"
         return res
 
-    def get_info(self, url):
+    def get_info(self, url) -> AudioData:
         try:
             return self._get_info(url)
         finally:
             self.delete_temp_file()
 
-    def _get_info(self, url) -> dict:
+    def _get_info(self, url) -> AudioData:
         ydl_params = {
             'format': 'bestaudio/best',
             'title': True,
@@ -73,14 +74,14 @@ class YoutubeMusic:
         with open(self._temp_file_path, 'rb') as file:
             content = file.read()
 
-        return {
-            "artists": artists,
-            "title": title,
-            "duration": info.get('duration'),
-            "thumbnail_url": self._get_thumbnail(info),
-            "format": info['requested_downloads'][0]['ext'],
-            "content": content
-        }
+        return AudioData(
+            artists=artists,
+            title=title,
+            duration=info.get('duration'),
+            thumbnail_url=self._get_thumbnail(info),
+            format=info['requested_downloads'][0]['ext'],
+            content=content,
+        )
 
     @staticmethod
     def _get_thumbnail(info: dict) -> str | None:

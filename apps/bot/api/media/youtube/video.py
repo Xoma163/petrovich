@@ -1,4 +1,3 @@
-import dataclasses
 import re
 from datetime import timedelta
 from urllib import parse
@@ -8,7 +7,9 @@ import requests
 import yt_dlp
 from bs4 import BeautifulSoup
 
-from apps.bot.api.subscribe_service import SubscribeService, SubscribeServiceNewVideosData, SubscribeServiceNewVideoData
+from apps.bot.api.media.data import VideoData
+from apps.bot.api.subscribe_service import SubscribeService, SubscribeServiceNewVideosData, \
+    SubscribeServiceNewVideoData, SubscribeServiceData
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.messages.attachments.audio import AudioAttachment
 from apps.bot.classes.messages.attachments.video import VideoAttachment
@@ -16,30 +17,6 @@ from apps.bot.utils.nothing_logger import NothingLogger
 from apps.bot.utils.proxy import get_proxies
 from apps.bot.utils.video.video_handler import VideoHandler
 from petrovich.settings import env
-
-
-@dataclasses.dataclass
-class YoutubeVideoData:
-    DEFAULT_CHUNK_SIZE = 10 * 1024 * 1024
-
-    video_download_url: str
-    video_download_chunk_size: int | None
-    audio_download_url: str
-    audio_download_chunk_size: int | None
-    filesize: int
-    title: str
-    duration: int | None
-    width: int | None
-    height: int | None
-    start_pos: str
-    end_pos: str
-    thubmnail_url: str
-
-    def get_video_download_chunk_size(self):
-        return self.video_download_chunk_size if self.video_download_chunk_size is not None else self.DEFAULT_CHUNK_SIZE
-
-    def get_audio_download_chunk_size(self):
-        return self.audio_download_chunk_size if self.audio_download_chunk_size is not None else self.DEFAULT_CHUNK_SIZE
 
 
 class YoutubeVideo(SubscribeService):
@@ -66,7 +43,7 @@ class YoutubeVideo(SubscribeService):
         return ""
 
     @staticmethod
-    def _clear_url(url) -> str:
+    def clear_url(url) -> str:
         parsed = urlparse(url)
         v = dict(parse_qsl(parsed.query)).get('v')
         res = f"{parsed.scheme}://{parsed.hostname}{parsed.path}"
@@ -74,12 +51,14 @@ class YoutubeVideo(SubscribeService):
             res += f"?v={v}"
         return res
 
-    @staticmethod
-    def check_url_is_video(url):
+    def check_url_is_video(self, url):
+        url = self.clear_url(url)
         r = r"((youtube.com\/watch\?v=)|(youtu.be\/)|(youtube.com\/shorts\/))"
-        return re.findall(r, url)
+        res = re.findall(r, url)
+        if not res:
+            raise PWarning("Ссылка должна быть на видео, не на канал")
 
-    def _get_video_info(self, url) -> dict:
+    def _get_video_info(self, url: str) -> dict:
         ydl_params = {
             'logger': NothingLogger(),
         }
@@ -88,9 +67,6 @@ class YoutubeVideo(SubscribeService):
         ydl = yt_dlp.YoutubeDL(ydl_params)
         ydl.add_default_info_extractors()
 
-        url = self._clear_url(url)
-        if not self.check_url_is_video(url):
-            raise PWarning("Ссылка должна быть на видео, не на канал")
         try:
             video_info = ydl.extract_info(url, download=False)
         except yt_dlp.utils.DownloadError as e:
@@ -102,14 +78,14 @@ class YoutubeVideo(SubscribeService):
     def get_video_info(
             self,
             url,
-            max_filesize_mb: int | None = None,
+            high_res=False,
             _timedelta: float | None = None
-    ) -> YoutubeVideoData:
+    ) -> VideoData:
         video_info = self._get_video_info(url)
 
-        video, audio, filesize = self._get_video_download_urls(video_info, max_filesize_mb, _timedelta)
+        video, audio, filesize = self._get_video_download_urls(video_info, high_res, _timedelta)
 
-        return YoutubeVideoData(
+        return VideoData(
             filesize=filesize,
             video_download_url=video['url'] if video else None,
             video_download_chunk_size=video['downloader_options']['http_chunk_size'] if video else None,
@@ -121,28 +97,32 @@ class YoutubeVideo(SubscribeService):
             height=video.get('height'),
             start_pos=str(video_info['section_start']) if video_info.get('section_start') else None,
             end_pos=str(video_info['section_end']) if video_info.get('section_end') else None,
-            thubmnail_url=self._get_thumbnail(video_info)
+            thumbnail_url=self._get_thumbnail(video_info),
+            channel_id=video_info['channel_id'],
+            video_id=video_info['id'],
+            channel_title=video_info['channel']
         )
 
-    def download_video(self, data: YoutubeVideoData) -> VideoAttachment:
+    def download_video(self, data: VideoData) -> VideoAttachment:
         if not data.video_download_url or not data.audio_download_url:
             raise ValueError
 
         _va = VideoAttachment()
         _va.public_download_url = data.video_download_url
-        _va.download_content(chunk_size=data.get_video_download_chunk_size(), use_proxy=self.use_proxy)
+        _va.download_content(chunk_size=data.video_download_chunk_size, use_proxy=self.use_proxy)
         _aa = AudioAttachment()
         _aa.public_download_url = data.audio_download_url
-        _aa.download_content(chunk_size=data.get_audio_download_chunk_size(), use_proxy=self.use_proxy)
+        _aa.download_content(chunk_size=data.audio_download_chunk_size, use_proxy=self.use_proxy)
 
         vh = VideoHandler(video=_va, audio=_aa)
         content = vh.mux()
 
         va = VideoAttachment()
         va.content = content
-        va.width = data.width
-        va.height = data.height
-        va.duration = data.duration
+        va.width = data.width or None
+        va.height = data.height or None
+        va.duration = data.duration or None
+        va.thumbnail_url = data.thumbnail_url or None
         return va
 
     @staticmethod
@@ -172,7 +152,7 @@ class YoutubeVideo(SubscribeService):
     @staticmethod
     def _get_video_download_urls(
             video_info: dict,
-            max_filesize_mb: int | None = None,
+            high_res: bool = False,
             _timedelta: int | None = None,
     ) -> tuple[dict, dict, int]:
         """
@@ -205,7 +185,7 @@ class YoutubeVideo(SubscribeService):
         )
 
         best_audio_format = audio_formats[0]
-        best_video_format = video_formats[0] if max_filesize_mb is None else None
+        best_video_format = video_formats[0] if high_res else None
 
         for video_format in video_formats:
             if best_video_format:
@@ -213,6 +193,7 @@ class YoutubeVideo(SubscribeService):
             video_filesize = (video_format['filesize'] + best_audio_format['filesize']) / 1024 / 1024
             if _timedelta:
                 video_filesize = video_filesize * _timedelta / video_info.get('duration')
+            max_filesize_mb = 200
             if video_filesize < max_filesize_mb:
                 best_video_format = video_format
 
@@ -280,7 +261,7 @@ class YoutubeVideo(SubscribeService):
         videos = [x for x in videos if x['snippet']['resourceId'].get('videoId')]
         return videos
 
-    def get_data_to_add_new_subscribe(self, url: str) -> dict:
+    def get_channel_info(self, url: str) -> SubscribeServiceData:
         r = requests.get(url, proxies=self.proxies)
         bs4 = BeautifulSoup(r.content, 'lxml')
         href = bs4.find_all('link', {'rel': 'canonical'})[0].attrs['href']
@@ -303,13 +284,13 @@ class YoutubeVideo(SubscribeService):
             channel_id = href.split('/')[-1]
             last_videos_id = self._get_channel_videos(channel_id)
             channel_title = self._get_channel_info(channel_id)['author']
-        return {
-            'channel_id': channel_id,
-            'playlist_id': playlist_id,
-            'channel_title': channel_title,
-            'playlist_title': playlist_title,
-            'last_videos_id': last_videos_id,
-        }
+        return SubscribeServiceData(
+            channel_id=channel_id,
+            playlist_id=playlist_id,
+            channel_title=channel_title,
+            playlist_title=playlist_title,
+            last_videos_id=last_videos_id
+        )
 
     def get_filtered_new_videos(
             self,

@@ -50,11 +50,11 @@ class DonationAdmin(TimeStampAdminMixin):
 
 @admin.register(Subscribe)
 class SubscribeAdmin(TimeStampAdminMixin):
-    list_display = ('author', 'chat', 'channel_title', 'playlist_title', 'service', 'save_to_plex')
+    list_display = ('author', 'chat', 'channel_title', 'playlist_title', 'service', 'save_to_disk')
     list_filter = (
         ('author', admin.RelatedOnlyFieldListFilter),
         ('chat', admin.RelatedOnlyFieldListFilter),
-        'save_to_plex',
+        'save_to_disk',
         'service')
     search_fields = ('channel_title', 'playlist_title', 'last_videos_id')
     ordering = ['channel_title']

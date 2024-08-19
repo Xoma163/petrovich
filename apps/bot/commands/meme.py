@@ -2,7 +2,7 @@ import threading
 
 from apps.bot.api.media.youtube.video import YoutubeVideo
 from apps.bot.classes.bots.bot import send_message_to_moderator_chat
-from apps.bot.classes.command import AcceptExtraCommand
+from apps.bot.classes.command import AcceptExtraMixin
 from apps.bot.classes.const.consts import Role, Platform, ATTACHMENT_TYPE_TRANSLATOR
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.event.event import Event
@@ -19,7 +19,7 @@ from apps.bot.utils.utils import tanimoto
 from apps.service.models import Meme as MemeModel
 
 
-class Meme(AcceptExtraCommand):
+class Meme(AcceptExtraMixin):
     name = "мем"
 
     help_text = HelpText(
@@ -472,7 +472,7 @@ class Meme(AcceptExtraCommand):
                 va = yt_api.download_video(data)
                 video_content = va.content
             video = self.bot.get_video_attachment(video_content)
-            video.thumbnail_url = data.thubmnail_url
+            video.thumbnail_url = data.thumbnail_url
 
             meme.tg_file_id = video.get_file_id()
             meme.type = VideoAttachment.TYPE

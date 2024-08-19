@@ -574,3 +574,17 @@ def make_thumbnail(
     jpeg_image_io.seek(0)
 
     return jpeg_image_io
+
+
+def prepare_filename(filename: str, replace_symbol=".") -> str:
+    """
+    Заменяет "плохие" символы в строке для корректного сохранения файла
+    Обрезает по длине
+    """
+
+    bad_symbols = ["\\", "/", ":", "*", "?", "\"", "<", ">", "|", "+"]
+    for symbol in bad_symbols:
+        filename = filename.replace(symbol, replace_symbol)
+    filename = re.sub(f"\\{replace_symbol}+", replace_symbol, filename)
+    filename = filename[:255]
+    return filename

@@ -2,7 +2,7 @@ from apps.bot.api.gpt.chatgptapi import ChatGPTAPI
 from apps.bot.api.gpt.response import GPTAPIVoiceRecognitionResponse
 from apps.bot.classes.bots.chat_activity import ChatActivity
 from apps.bot.classes.bots.tg_bot import TgBot
-from apps.bot.classes.command import AcceptExtraCommand
+from apps.bot.classes.command import AcceptExtraMixin
 from apps.bot.classes.const.activities import ActivitiesEnum
 from apps.bot.classes.const.consts import Platform, Role
 from apps.bot.classes.const.exceptions import PSkip, PWarning
@@ -17,7 +17,7 @@ from apps.bot.utils.audio.splitter import AudioSplitter
 from apps.service.models import GPTUsage
 
 
-class VoiceRecognition(AcceptExtraCommand):
+class VoiceRecognition(AcceptExtraMixin):
     name = 'распознай'
     names = ["голос", "голосовое"]
 
@@ -69,7 +69,7 @@ class VoiceRecognition(AcceptExtraCommand):
             if not audio_message.ext:
                 raise PWarning("Для вложения не указано расширение (mp3/oga/wav). Укажите его для корректной работы")
 
-            if audio_message.size / 1024 / 1024 > self.MAX_FILE_SIZE_MB:
+            if audio_message.get_size_mb() > self.MAX_FILE_SIZE_MB:
                 chunks = AudioSplitter.split(audio_message, self.MAX_FILE_SIZE_MB)
 
                 attachments = []

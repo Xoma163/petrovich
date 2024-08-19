@@ -15,7 +15,7 @@ class ResponseMessageItem:
             reply_to: str | None = None,
             keyboard: dict | None = None,
             message_id: str | None = None,
-            message_thread_id: str | None = None,
+            message_thread_id: str | int | None = None,
             peer_id: int | None = None,
             log_level: str = 'debug',
             exc_info=None,

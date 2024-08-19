@@ -189,7 +189,7 @@ class Attachment:
             os.remove(self.private_download_path)
             self.private_download_path = None
 
-    def get_size(self):
+    def get_size(self) -> float | None:
         if not self.size and self.content:
             try:
                 self.size = len(self.content)
@@ -198,8 +198,11 @@ class Attachment:
                 self.content.seek(0)
         return self.size
 
-    def get_size_mb(self):
-        return self.get_size() / 1024 / 1024
+    def get_size_mb(self) -> float | None:
+        size = self.get_size()
+        if not size:
+            return None
+        return size / 1024 / 1024
 
     def to_log(self) -> dict:
         """

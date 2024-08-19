@@ -1,8 +1,8 @@
 from django.db.models import Q
 
-from apps.bot.api.media.premier import Premier
 from apps.bot.api.media.vk.video import VKVideo
 from apps.bot.api.media.youtube.video import YoutubeVideo
+from apps.bot.api.subscribe_service import SubscribeServiceData
 from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role, Platform
@@ -20,7 +20,7 @@ class Subscribe(Command):
     names = ['подписки']
 
     help_text = HelpText(
-        commands_text="создаёт подписку на каналы. Доступные: YouTube, VK video, Premier. Бот пришлёт тебе новое видео с канала когда оно выйдет",
+        commands_text="создаёт подписку на каналы. Доступные: YouTube, VK Видео. Бот пришлёт тебе новое видео с канала когда оно выйдет",
         help_texts=[
             HelpTextItem(Role.TRUSTED, [
                 HelpTextItemCommand(None, "список активных подписок в лс, если в конфе, то только общие в конфе"),
@@ -60,23 +60,21 @@ class Subscribe(Command):
             data = self.add_youtube(attachment.url)
         elif attachment.is_vk_link:
             data = self.add_vk(attachment.url)
-        elif attachment.is_premier_link:
-            data = self.add_premiere(attachment.url)
         else:
-            raise PWarning("Незнакомый сервис. Доступные: \nYouTube, VK video, Premier")
+            raise PWarning("Незнакомый сервис. Доступные: \nYouTube, VK video")
 
         if self.event.chat:
             existed_sub = SubscribeModel.objects.filter(
                 chat=self.event.chat,
-                channel_id=data["channel_id"],
-                playlist_id=data["playlist_id"]
+                channel_id=data.channel_id,
+                playlist_id=data.playlist_id
             )
         else:
             existed_sub = SubscribeModel.objects.filter(
                 chat__isnull=True,
                 author=self.event.user,
-                channel_id=data["channel_id"],
-                playlist_id=data["playlist_id"]
+                channel_id=data.channel_id,
+                playlist_id=data.playlist_id
             )
         if existed_sub.exists():
             if data['playlist_id']:
@@ -84,40 +82,34 @@ class Subscribe(Command):
                     f"Ты уже и так подписан на плейлист \"{existed_sub.first().playlist_title}\" канала \"{existed_sub.first().channel_title}\"")
             raise PWarning(f"Ты уже и так подписан на канал \"{existed_sub.first().channel_title}\"")
 
-        data.update({
+        data_dict = data.__dict__
+
+        data_dict.update({
             "author": self.event.user,
             "chat": self.event.chat,
             "message_thread_id": self.event.message_thread_id,
         })
 
-        sub = SubscribeModel(**data)
+        sub = SubscribeModel(**data_dict)
         sub.save()
         if sub.playlist_id:
-            answer = f"Подписал на плейлист \"{data['playlist_title']}\" канала \"{data['channel_title']}\""
+            answer = f"Подписал на плейлист \"{data.playlist_title}\" канала \"{data.channel_title}\""
         else:
-            answer = f"Подписал на канал \"{data['channel_title']}\""
+            answer = f"Подписал на канал \"{data.channel_title}\""
         return ResponseMessageItem(text=answer)
 
     @staticmethod
-    def add_youtube(url):
+    def add_youtube(url) -> SubscribeServiceData:
         yt_api = YoutubeVideo()
-        parsed = yt_api.get_data_to_add_new_subscribe(url)
-        parsed['service'] = SubscribeModel.SERVICE_YOUTUBE
+        parsed = yt_api.get_channel_info(url)
+        parsed.service = SubscribeModel.SERVICE_YOUTUBE
         return parsed
 
     @staticmethod
-    def add_vk(url):
+    def add_vk(url) -> SubscribeServiceData:
         vk_api = VKVideo()
-        parsed = vk_api.get_data_to_add_new_subscribe(url)
-        parsed['service'] = SubscribeModel.SERVICE_VK
-        return parsed
-
-    def add_premiere(self, url):
-        p_api = Premier(log_filter=self.event.log_filter)
-        parsed = p_api.get_data_to_add_new_subscribe(url)
-        parsed['service'] = SubscribeModel.SERVICE_PREMIERE
-        if not parsed:
-            raise PWarning("Необходима ссылка на сериал, не фильм")
+        parsed = vk_api.get_channel_info(url)
+        parsed.service = SubscribeModel.SERVICE_VK
         return parsed
 
     def menu_subs(self) -> ResponseMessageItem:

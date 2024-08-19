@@ -395,7 +395,7 @@ class Command:
         return self.name
 
 
-class AcceptExtraCommand(Command):
+class AcceptExtraMixin(Command):
     @staticmethod
     def accept_extra(event):
         """

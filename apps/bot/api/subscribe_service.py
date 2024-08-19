@@ -10,6 +10,7 @@ class SubscribeServiceData:
     channel_title: str
     playlist_title: str
     last_videos_id: list[str]
+    service = None
 
 
 @dataclasses.dataclass
@@ -37,10 +38,11 @@ class SubscribeServiceNewVideosData:
 
 
 class SubscribeService:
-    def get_data_to_add_new_subscribe(self, url: str) -> SubscribeServiceData:
+    def get_channel_info(self, url: str) -> SubscribeServiceData:
         """
         Метод по выдаче информации для добавления новой подписки
         Используется в команде для добавления подписок
+        Может распознавать плейлист
         """
         raise NotImplementedError
 

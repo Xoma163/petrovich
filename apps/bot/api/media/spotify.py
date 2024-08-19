@@ -2,6 +2,7 @@ import spotipy
 import yt_dlp
 from spotipy import SpotifyClientCredentials
 
+from apps.bot.api.media.data import AudioData
 from apps.bot.api.media.youtube.music import YoutubeMusic
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.utils.nothing_logger import NothingLogger
@@ -19,7 +20,7 @@ class Spotify:
             )
         )
 
-    def get_info(self, track_id):
+    def get_info(self, track_id) -> AudioData:
         track = self.sp.track(track_id=track_id)
         artists = ", ".join([artist["name"] for artist in track['artists']])
 
@@ -32,7 +33,7 @@ class Spotify:
 
         ytm_api = YoutubeMusic()
         data = ytm_api.get_info(yt_url)
-        data['artists'] = artists
-        data['title'] = track['name']
-        data['thumbnail_url'] = track['album']['images'][-1]['url']
+        data.artists = artists
+        data.title = track['name']
+        data.thumbnail_url = track['album']['images'][-1]['url']
         return data

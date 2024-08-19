@@ -1,3 +1,4 @@
+import dataclasses
 import json
 import re
 from urllib.parse import urlparse
@@ -6,11 +7,23 @@ import requests
 import xmltodict
 from bs4 import BeautifulSoup
 
-from apps.bot.api.subscribe_service import SubscribeService, SubscribeServiceNewVideosData, SubscribeServiceNewVideoData
+from apps.bot.api.media.data import VideoData
+from apps.bot.api.subscribe_service import SubscribeService, SubscribeServiceNewVideosData, \
+    SubscribeServiceNewVideoData, SubscribeServiceData
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.messages.attachments.audio import AudioAttachment
 from apps.bot.classes.messages.attachments.video import VideoAttachment
 from apps.bot.utils.video.video_handler import VideoHandler
+
+
+@dataclasses.dataclass
+class VKVideoData:
+    channel_id: str
+    video_id: str
+    channel_title: str
+    title: str
+    width: int | None
+    height: int | None
 
 
 class VKVideo(SubscribeService):
@@ -34,25 +47,18 @@ class VKVideo(SubscribeService):
     def __init__(self):
         super().__init__()
 
-    def get_video(self, url) -> dict:
+    def download(self, url: str, high_res: bool = False) -> VideoAttachment:
         player_url = self._get_player_url(url)
-        va, aa = self._get_video_audio(player_url)
+        va, aa = self._get_video_audio(player_url, high_res=high_res)
         if aa is not None:
             vh = VideoHandler(video=va, audio=aa)
-            return {
-                'video': vh.mux(),
-                'thumbnail_url': va.thumbnail_url
-            }
+            va.content = vh.mux()
         if va.m3u8_url:
             vh = VideoHandler(video=va)
-            return {
-                'video': vh.download(),
-                'thumbnail_url': va.thumbnail_url
-            }
-        return {
-            'video': va.download_content(headers=self.headers),
-            'thumbnail_url': va.thumbnail_url
-        }
+            va.content = vh.download()
+
+        va.download_content(headers=self.headers)
+        return va
 
     def _get_player_url(self, url: str) -> str:
         r = requests.get(url, headers=self.headers)
@@ -63,7 +69,7 @@ class VKVideo(SubscribeService):
         player_url = bs4.find("meta", property="og:video").attrs['content']
         return player_url
 
-    def _get_video_audio(self, player_url: str) -> tuple[VideoAttachment, AudioAttachment | None]:
+    def _get_video_audio(self, player_url: str, high_res: bool) -> tuple[VideoAttachment, AudioAttachment | None]:
         r = requests.get(player_url, headers=self.headers)
         js_code = re.findall('var playerParams = (\{.*\})', r.text)[0]
         info = json.loads(js_code)
@@ -76,14 +82,14 @@ class VKVideo(SubscribeService):
         # if dash_webm := info.get('dash_webm'):
         #     va, aa = self._get_video_audio_dash(dash_webm)
         if dash_sep := info.get('dash_sep'):
-            va, aa = self._get_video_audio_dash(dash_sep)
+            va, aa = self._get_video_audio_dash(dash_sep, high_res=high_res)
         elif hls := info.get('hls'):
             va, aa = self._get_video_hls(hls)
         if va:
             va.thumbnail_url = info.get('short_video_cover', info.get('jpg'))
         return va, aa
 
-    def _get_video_audio_dash(self, dash_webm_url) -> tuple[VideoAttachment, AudioAttachment]:
+    def _get_video_audio_dash(self, dash_webm_url: str, high_res: bool) -> tuple[VideoAttachment, AudioAttachment]:
         parsed_url = urlparse(dash_webm_url)
 
         r = requests.get(dash_webm_url, headers=self.headers).content
@@ -91,16 +97,23 @@ class VKVideo(SubscribeService):
         adaptation_sets = dash_webm_dict['MPD']['Period']['AdaptationSet']
 
         video_representations = adaptation_sets[0]['Representation']
-        video_representations = list(sorted(video_representations, key=lambda x: int(x['@bandwidth'])))
+        video_representations = list(sorted(video_representations, key=lambda x: int(x['@bandwidth']), reverse=True))
 
         audio_representations = adaptation_sets[1]['Representation']
-        audio_representations = list(sorted(audio_representations, key=lambda x: int(x['@bandwidth'])))
+        audio_representations = list(sorted(audio_representations, key=lambda x: int(x['@bandwidth']), reverse=True))
 
         aa = AudioAttachment()
         aa.public_download_url = f"{parsed_url.scheme}://{parsed_url.hostname}/{audio_representations[-1]['BaseURL']}"
         aa.download_content(headers=self.headers, stream=True)
+
+        vr = video_representations[0]
+        if not high_res:
+            for vr in video_representations:
+                if int(vr['@height']) <= 1080:
+                    break
+
         va = VideoAttachment()
-        va.public_download_url = f"{parsed_url.scheme}://{parsed_url.hostname}/{video_representations[-1]['BaseURL']}"
+        va.public_download_url = f"{parsed_url.scheme}://{parsed_url.hostname}/{vr['BaseURL']}"
         va.download_content(headers=self.headers, stream=True)
 
         return va, aa
@@ -111,7 +124,7 @@ class VKVideo(SubscribeService):
         va.m3u8_url = hls_url
         return va, None
 
-    def get_video_info(self, url) -> dict:
+    def get_video_info(self, url) -> VideoData:
         content = requests.get(url, headers=self.headers).content
         bs4 = BeautifulSoup(content, 'html.parser')
         try:
@@ -144,18 +157,18 @@ class VKVideo(SubscribeService):
                 width = None
                 height = None
 
-            return {
-                'channel_id': channel_id,
-                'video_id': video_id,
-                'channel_title': channel_title,
-                'video_title': video_title,
-                'width': width,
-                'height': height
-            }
-        except Exception:
-            raise PWarning("Не смог получить информацию о видео")
+            return VideoData(
+                channel_id=channel_id,
+                video_id=video_id,
+                channel_title=channel_title,
+                title=video_title,
+                width=width,
+                height=height
+            )
+        except Exception as e:
+            raise PWarning("Не смог получить информацию о видео") from e
 
-    def get_data_to_add_new_subscribe(self, url: str) -> dict:
+    def get_channel_info(self, url: str) -> SubscribeServiceData:
         content = requests.get(url, headers=self.headers).content
         bs4 = BeautifulSoup(content, "html.parser")
         if 'playlist' in url:
@@ -182,13 +195,13 @@ class VKVideo(SubscribeService):
             last_videos_id = list(
                 reversed([x.find("a", {"class": "VideoCard__title"}).attrs['data-id'] for x in videos]))
 
-        return {
-            'channel_id': channel_id,
-            'playlist_id': playlist_id,
-            'channel_title': channel_title,
-            'playlist_title': playlist_title,
-            'last_videos_id': last_videos_id,
-        }
+        return SubscribeServiceData(
+            channel_id=channel_id,
+            playlist_id=playlist_id,
+            channel_title=channel_title,
+            playlist_title=playlist_title,
+            last_videos_id=last_videos_id,
+        )
 
     def get_filtered_new_videos(
             self,

@@ -39,6 +39,7 @@ class Bot(Thread):
     QUOTE_TAG = None
 
     MAX_MESSAGE_TEXT_LENGTH = inf
+    MAX_VIDEO_SIZE_MB = inf
 
     def __init__(self, platform, **kwargs):
         Thread.__init__(self)

@@ -3,6 +3,8 @@ import re
 import requests
 from bs4 import BeautifulSoup
 
+from apps.bot.api.media.data import AudioData
+
 
 class SunoAIData:
 
@@ -18,7 +20,7 @@ class SunoAIData:
 class SunoAI:
 
     @staticmethod
-    def get_info(url) -> SunoAIData:
+    def get_info(url) -> AudioData:
         r = requests.post(url)
         bs4 = BeautifulSoup(r.content, 'html.parser')
         title = bs4.find('meta', attrs={'property': 'og:title'}).attrs['content'].replace(" | Suno", "")
@@ -30,10 +32,10 @@ class SunoAI:
         title = title.replace(f"by @{author.lower()}", '').strip()
         text = None
 
-        return SunoAIData(
-            title,
-            audio_url,
-            thumbnail_url,
-            text,
-            author
+        return AudioData(
+            title=title,
+            download_url=audio_url,
+            thumbnail_url=thumbnail_url,
+            text=text,
+            artists=author
         )
