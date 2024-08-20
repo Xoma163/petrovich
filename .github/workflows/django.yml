@@ -54,6 +54,7 @@ jobs:
           GITHUB_TOKEN: ''
           OPENAI_KEY: ''
           REDIS_URL: 'redis://127.0.0.1:6379/1'
+          SENTRY_URL: ''
         run: |
           python manage.py test
       - name: Deploy on production
