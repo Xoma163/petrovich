@@ -137,7 +137,7 @@ class YoutubeVideo(SubscribeService):
             ))
         else:
             thumbnails = list(filter(
-                lambda x: x['url'].endswith("mqdefault.jpg"),
+                lambda x: x['url'].endswith("maxresdefault.jpg"),
                 info['thumbnails']
             ))
 

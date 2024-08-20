@@ -235,7 +235,6 @@ class TgBot(Bot):
             params['width'] = video.width
         if video.height:
             params['height'] = video.height
-
         if video.file_id:
             params['video'] = video.file_id
             r = self.requests.get('sendVideo', params).json()

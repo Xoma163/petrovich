@@ -20,7 +20,7 @@ class ThumbnailMixin:
         else:
             thumb_file.parse(self.thumbnail_url, guarantee_url=True)
 
-        thumbnail = make_thumbnail(thumb_file, max_size=320)
+        thumbnail = make_thumbnail(thumb_file, max_size=None)
         thumbnail_att = PhotoAttachment()
         thumbnail_att.parse(thumbnail)
         self.thumbnail = thumbnail_att

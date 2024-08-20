@@ -551,7 +551,7 @@ def get_font_by_path(font_path: str, size: int) -> ImageFont:
 
 def make_thumbnail(
         photo_attachment: PhotoAttachment,
-        max_size: int
+        max_size: int | None = None
 ) -> io.BytesIO:
     """
     Центрирование изображение с блюром в пустотах
@@ -562,7 +562,7 @@ def make_thumbnail(
     image_bytes = io.BytesIO(photo_attachment.download_content())
     image = Image.open(image_bytes).convert("RGB")
     # Проверяем, нужно ли уменьшить изображение
-    if image.width > max_size or image.height > max_size:
+    if max_size and (image.width > max_size or image.height > max_size):
         # Вычисляем коэффициент уменьшения
         ratio = min(max_size / image.width, max_size / image.height)
         # Уменьшаем изображение пропорционально
