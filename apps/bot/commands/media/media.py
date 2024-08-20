@@ -7,7 +7,9 @@ from apps.bot.classes.const.consts import Role, Platform
 from apps.bot.classes.const.exceptions import PWarning, PSkip
 from apps.bot.classes.event.event import Event
 from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
+from apps.bot.classes.messages.attachments.audio import AudioAttachment
 from apps.bot.classes.messages.attachments.link import LinkAttachment
+from apps.bot.classes.messages.attachments.video import VideoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.commands.media.service import MediaService, MediaServiceResponse
 from apps.bot.commands.media.services.coub import CoubService
@@ -25,6 +27,7 @@ from apps.bot.commands.media.services.youtube_music import YoutubeMusicService
 from apps.bot.commands.media.services.youtube_video import YoutubeVideoService
 from apps.bot.commands.media.services.zen import ZenService
 from apps.bot.utils.utils import get_urls_from_text, get_flat_list, markdown_wrap_symbols
+from apps.bot.utils.video.video_handler import VideoHandler
 
 
 class Media(AcceptExtraMixin):
@@ -116,10 +119,22 @@ class Media(AcceptExtraMixin):
             else:
                 raise PSkip()
 
-        if self.DISK_KEYS.intersection(self.event.message.keys):
+        att_is_video = media_response.attachments and isinstance(media_response.attachments[0], VideoAttachment)
+
+        if self.DISK_KEYS.intersection(self.event.message.keys) and att_is_video:
             self.check_sender(Role.ADMIN)
             title = media_response.video_title or str(random.randint(1000000000, 999999999))
             service.save_to_disk(media_response, "Скачано", title)
+
+        if self.AUDIO_KEYS.intersection(self.event.message.keys) and att_is_video:
+            video: VideoAttachment = media_response.attachments[0]
+            vh = VideoHandler(video=video)
+            aa = AudioAttachment()
+            aa.title = media_response.video_title
+            aa.content = vh.get_audio_track()
+            aa.thumbnail_url = video.thumbnail_url
+            media_response.attachments[0] = aa
+
         return self.prepare_media_response(media_response, chosen_service=service_class, chosen_url=chosen_url)
 
     def _get_service_and_chosen_url(self, source) -> tuple[type[MediaService], str]:
