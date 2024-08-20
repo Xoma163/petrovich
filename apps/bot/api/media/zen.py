@@ -44,6 +44,14 @@ class Zen:
         video_data = data['data']['MICRO_APP_SSR_DATA']['settings']['exportData']['video']
         m3u8_master_url = [x for x in video_data['video']['streams'] if "master.m3u8" in x][0]
 
+        try:
+            resolution = video_data['video']['resolutions'][-1]
+            width = resolution['width']
+            height = resolution['height']
+        except (KeyError, IndexError):
+            width = None
+            height = None
+
         return VideoData(
             channel_id=video_data['publisherId'],
             channel_title=video_data['source']['title'],
@@ -53,7 +61,9 @@ class Zen:
             video_id=video_data['id'],
             title=video_data['title'],
             thumbnail_url=video_data['image'],
-            m3u8_master_url=m3u8_master_url
+            m3u8_master_url=m3u8_master_url,
+            width=width,
+            height=height
         )
 
     @staticmethod

@@ -26,6 +26,9 @@ class ZenService(MediaService):
             return cached
 
         va = self.service.download_video(data.m3u8_master_url)
+        va.thumbnail_url = data.thumbnail_url
+        va.width = data.width
+        va.height = data.height
         if va.get_size_mb() > self.bot.MAX_VIDEO_SIZE_MB:
             return self._cache_video(data.channel_id, data.video_id, data.title, va.content)
 
@@ -37,4 +40,4 @@ class ZenService(MediaService):
 
     @classmethod
     def urls(cls) -> list[str]:
-        return ["www.tiktok.com", 'vm.tiktok.com', 'm.tiktok.com', 'vt.tiktok.com']
+        return ["dzen.ru"]
