@@ -219,4 +219,5 @@ sentry_sdk.init(
     dsn=env.str("SENTRY_URL"),
     traces_sample_rate=1.0,
     profiles_sample_rate=1.0,
+    environment="production" if not DEBUG else "stage"
 )
