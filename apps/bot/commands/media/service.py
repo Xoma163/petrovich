@@ -27,6 +27,7 @@ class MediaService:
         self.activity = None
 
     HIGH_KEYS = {'high', 'best'}
+    CACHE_KEYS = {'cache'}
 
     def get_content_by_url(self, url: str) -> MediaServiceResponse:
         """

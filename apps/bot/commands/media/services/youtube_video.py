@@ -27,7 +27,8 @@ class YoutubeVideoService(MediaService):
 
         va = self.service.download_video(data)
 
-        if va.get_size_mb() > self.bot.MAX_VIDEO_SIZE_MB:
+        force_cache = self.CACHE_KEYS.intersection(self.event.message.keys)
+        if force_cache or va.get_size_mb() > self.bot.MAX_VIDEO_SIZE_MB:
             return self._cache_video(data.channel_id, data.video_id, data.title, va.content)
 
         return MediaServiceResponse(text=text, attachments=[va], video_title=data.title)

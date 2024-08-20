@@ -120,7 +120,8 @@ class Command(BaseCommand):
     def get_media_service_response(
             url: str,
             service_class: type[MediaService],
-            high_res: bool = False
+            high_res: bool = False,
+            force_cache: bool = False,
     ) -> MediaServiceResponse:
         """
         Получение результата от медиа сервиса, проставление file_id
@@ -130,7 +131,9 @@ class Command(BaseCommand):
         event = Event()
         event.message = Message()
         if high_res:
-            event.message.keys = ['high']
+            event.message.keys = [MediaService.HIGH_KEYS[0]]
+        if force_cache:
+            event.message.keys = [MediaService.CACHE_KEYS[0]]
 
         logger.debug({
             "message": "get_media_result_msg",

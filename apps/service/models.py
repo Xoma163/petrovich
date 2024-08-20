@@ -157,8 +157,10 @@ class Subscribe(TimeStampModelMixin):
     playlist_title = models.CharField("Название плейлиста", max_length=100, blank=True, null=True)
     last_videos_id = models.JSONField("ID последних видео", max_length=100, null=True, blank=True)  # array
     service = models.SmallIntegerField("Сервис", blank=True, choices=SERVICE_CHOICES, default=SERVICE_YOUTUBE)
+
     save_to_disk = models.BooleanField("Сохранять на диск", default=False)
     high_resolution = models.BooleanField("Присылать в высоком разрешении", default=False)
+    force_cache = models.BooleanField("Принудительно кэшировать", default=False)
 
     @property
     def peer_id(self):

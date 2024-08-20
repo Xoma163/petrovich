@@ -45,9 +45,10 @@ class Media(AcceptExtraMixin):
             "Поддерживаемые соцсети: Youtube Video/Youtube Music/Reddit/TikTok/Instagram/Twitter/"
             "Yandex Music/Pinterest/Coub/VK Video/TwitchClips/Spotify/Suno AI/Yandex Zen\n\n"
             "Ключ --nomedia позволяет не запускать команду\n"
-            "Ключ --audio позволяет скачивать аудиодорожку для видео с ютуба\n"
+            "Ключ --audio позволяет скачивать аудиодорожку для видео\n"
             "Ключ --save сохраняет видео в локальную директорию\n"
             "Ключ --high сохраняет видео в максимальном качестве (VK Video/Youtube Video)\n"
+            "Ключ --cache позволяет загрузить видео в онлайн-кэш (VK Video/Youtube Video)\n\n"
             "Ключ --thread позволяет скачивать пост с комментариями автора для твиттера\n\n"
             # "Видосы из ютуба качаются автоматически только если длина ролика менее 2 минут. \n"
             # "Вручную с указанием команды - скачается\n\n"
@@ -80,6 +81,7 @@ class Media(AcceptExtraMixin):
     NO_MEDIA_KEYS = {"nomedia", "no-media"}
     DISK_KEYS = {'save', 'disk'}
     AUDIO_KEYS = {'audio'}
+    CACHE_KEYS = {'cache'}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
