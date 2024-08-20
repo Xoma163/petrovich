@@ -233,7 +233,6 @@ class Tag(TimeStampModelMixin):
         return str(self.name)
 
 
-# ToDo: remove gigachat
 class GPTPrePrompt(TimeStampModelMixin):
     CHATGPT = 'chatgpt'
     GEMINI = 'gemini'

@@ -77,7 +77,7 @@ class Subscribe(Command):
                 playlist_id=data.playlist_id
             )
         if existed_sub.exists():
-            if data['playlist_id']:
+            if data.playlist_id:
                 raise PWarning(
                     f"Ты уже и так подписан на плейлист \"{existed_sub.first().playlist_title}\" канала \"{existed_sub.first().channel_title}\"")
             raise PWarning(f"Ты уже и так подписан на канал \"{existed_sub.first().channel_title}\"")

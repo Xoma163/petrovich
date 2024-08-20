@@ -18,7 +18,6 @@ class AudioAttachment(Attachment, ThumbnailMixin, DurationMixin):
         self.size = event['file_size']
 
         self.file_id = event['file_id']
-        # self.filename_full = event.get('file_name')
         try:
             self.file_name, self.ext = event['file_name'].rsplit('.', 1)
         except:

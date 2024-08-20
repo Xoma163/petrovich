@@ -38,13 +38,11 @@ class MediaService:
         """
         Проверка на валидный урл
         """
-        pass
 
     def check_sender_role(self) -> None:
         """
         Проверка на роль пользователя
         """
-        pass
 
     @classmethod
     def urls(cls) -> list[str]:
