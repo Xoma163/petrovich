@@ -45,7 +45,8 @@ class Attachment:
         from apps.bot.classes.bots.tg_bot import TgBot
         tg_bot = TgBot()
 
-        if self.get_size_mb() > tg_bot.MAX_ATTACHMENT_SIZE_MB:
+        size = self.get_size_mb()
+        if size and size > tg_bot.MAX_ATTACHMENT_SIZE_MB:
             return
 
         with ChatActivity(tg_bot, self.ACTIVITY, peer_id):
