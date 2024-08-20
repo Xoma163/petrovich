@@ -64,6 +64,8 @@ class GithubView(CSRFExemptMixin, View):
 
     @staticmethod
     def send_notify_to_user(issue: GithubIssueAPI, text):
+        if not issue.author:
+            return
         user = issue.author.get_tg_user()
         bot = TgBot()
         rmi = ResponseMessageItem(text=text, peer_id=user.user_id)
@@ -87,7 +89,7 @@ class GithubView(CSRFExemptMixin, View):
     def created_comment(self, data, issue: GithubIssueAPI):
         comment = data['comment']['body']
         problem_str = TgBot.get_formatted_url('проблемой #' + str(issue.number), issue.remote_url)
-        text = f"Новый комментарий от разработчика под вашей {problem_str}\n\n{comment}"
+        text = f"Новый комментарий от разработчика под ваш  ей {problem_str}\n\n{comment}"
         self.send_notify_to_user(issue, text)
 
     def new_label(self, data, issue: GithubIssueAPI):
