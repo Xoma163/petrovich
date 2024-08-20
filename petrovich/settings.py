@@ -1,6 +1,7 @@
 import os
 
 import environ
+import sentry_sdk
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -213,3 +214,9 @@ CACHES = {
         }
     }
 }
+
+sentry_sdk.init(
+    dsn=env.str("SENTRY_URL"),
+    traces_sample_rate=1.0,
+    profiles_sample_rate=1.0,
+)
