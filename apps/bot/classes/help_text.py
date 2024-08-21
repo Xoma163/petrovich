@@ -1,16 +1,23 @@
 from apps.bot.classes.const.consts import Role
 
 
-class HelpTextItemCommand:
+class HelpTextArgument:
     def __init__(self, args: str | None, description: str):
         self.args: str = args
         self.description: str = description
 
 
+class HelpTextKey:
+    def __init__(self, key: str, aliases: list[str] | None, description: str):
+        self.key: str = key
+        self.aliases: list[str] | None = aliases
+        self.description: str = description
+
+
 class HelpTextItem:
-    def __init__(self, role: Role, texts: list[HelpTextItemCommand]):
+    def __init__(self, role: Role, texts: list[HelpTextArgument | HelpTextKey]):
         self.role: role = role
-        self.texts: list[HelpTextItemCommand] = texts
+        self.items: list[HelpTextArgument] = texts
 
 
 class HelpText:
@@ -22,19 +29,36 @@ class HelpText:
     extra_text: Текст который также будет выводиться для команды /помощь {название команды} отдельно внизу
     """
 
-    def __init__(self, commands_text: str, extra_text: str = None, help_texts: list[HelpTextItem] = None):
+    def __init__(
+            self,
+            commands_text: str,
+            extra_text: str = None,
+            help_texts: list[HelpTextItem] = None,
+            help_text_keys: list[HelpTextItem] = None,
+    ):
 
         if help_texts is None:
             help_texts = []
+        if help_text_keys is None:
+            help_text_keys = []
 
         self.commands_text: str = commands_text
         self.extra_text: str = extra_text
 
-        self.items: dict[Role, HelpTextItem] = {}
+        self.help_texts: dict[Role, HelpTextItem] = {}
         for hti in help_texts:
             hti: HelpTextItem
-            self.items[hti.role] = hti
+            self.help_texts[hti.role] = hti
+
+        self.keys_items: dict[Role, HelpTextItem] = {}
+        for htk in help_text_keys:
+            htk: HelpTextItem
+            self.keys_items[htk.role] = htk
 
     def get_help_text_item(self, role: Role) -> str | None:
-        hti = self.items.get(role)
+        hti = self.help_texts.get(role)
+        return hti if hti else None
+
+    def get_help_text_key(self, role: Role) -> str | None:
+        hti = self.keys_items.get(role)
         return hti if hti else None

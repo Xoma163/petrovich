@@ -6,7 +6,7 @@ from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Platform, Role
 from apps.bot.classes.const.exceptions import PWarning
-from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
+from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextArgument
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.models import Profile as ProfileModel
@@ -20,19 +20,19 @@ class Profile(Command):
         commands_text="позволяет управлять вашим профилем",
         help_texts=[
             HelpTextItem(Role.USER, [
-                HelpTextItemCommand(None, "присылает информацию по вашему профилю"),
-                HelpTextItemCommand(
+                HelpTextArgument(None, "присылает информацию по вашему профилю"),
+                HelpTextArgument(
                     "(имя, фамилия, логин/id, никнейм)",
                     "присылает информацию по профилю человека в конфе"),
-                HelpTextItemCommand("город (название города)", "устанавливает новый город"),
-                HelpTextItemCommand("город добавить (название города)", "добавляет новый город в базу"),
-                HelpTextItemCommand("др (дата)", "устанавливает новый др"),
-                HelpTextItemCommand("имя (имя)", "устанавливает новое имя"),
-                HelpTextItemCommand("фамилия (фамилия)", "устанавливает новую фамилию"),
-                HelpTextItemCommand("никнейм (никнейм)", "устанавливает новый никнейм"),
-                HelpTextItemCommand("пол (мужской/женский)", "устанавливает новый пол"),
-                HelpTextItemCommand("аватар", "обновляет аватар"),
-                HelpTextItemCommand("аватар (изображение)", "обновляет аватар из вложения")
+                HelpTextArgument("город (название города)", "устанавливает новый город"),
+                HelpTextArgument("город добавить (название города)", "добавляет новый город в базу"),
+                HelpTextArgument("др (дата)", "устанавливает новый др"),
+                HelpTextArgument("имя (имя)", "устанавливает новое имя"),
+                HelpTextArgument("фамилия (фамилия)", "устанавливает новую фамилию"),
+                HelpTextArgument("никнейм (никнейм)", "устанавливает новый никнейм"),
+                HelpTextArgument("пол (мужской/женский)", "устанавливает новый пол"),
+                HelpTextArgument("аватар", "обновляет аватар"),
+                HelpTextArgument("аватар (изображение)", "обновляет аватар из вложения")
             ])
         ]
     )

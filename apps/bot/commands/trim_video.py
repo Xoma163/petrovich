@@ -7,7 +7,7 @@ from apps.bot.classes.command import Command
 from apps.bot.classes.const.activities import ActivitiesEnum
 from apps.bot.classes.const.consts import Platform, Role
 from apps.bot.classes.const.exceptions import PWarning
-from apps.bot.classes.help_text import HelpTextItem, HelpText, HelpTextItemCommand
+from apps.bot.classes.help_text import HelpTextItem, HelpText, HelpTextArgument
 from apps.bot.classes.messages.attachments.audio import AudioAttachment
 from apps.bot.classes.messages.attachments.link import LinkAttachment
 from apps.bot.classes.messages.attachments.video import VideoAttachment
@@ -24,22 +24,22 @@ class TrimVideo(Command):
         commands_text="обрезание видео/аудио",
         help_texts=[
             HelpTextItem(Role.USER, [
-                HelpTextItemCommand(
+                HelpTextArgument(
                     "(вложенное видео/аудио) (таймкод начала)",
                     "обрезает видео с таймкода и до конца"),
-                HelpTextItemCommand(
+                HelpTextArgument(
                     "(вложенное видео/аудио) (таймкод начала) (таймкод конца)",
                     "обрезает видео по таймкодам"),
-                HelpTextItemCommand(
+                HelpTextArgument(
                     "(youtube ссылка) (таймкод начала)",
                     "обрезает с таймкода и до конца"),
-                HelpTextItemCommand(
+                HelpTextArgument(
                     "(youtube ссылка) (таймкод начала) (таймкод конца)",
                     "обрезает по таймкодам"),
-                HelpTextItemCommand(
+                HelpTextArgument(
                     "(youtube ссылка с таймкодом)",
                     "обрезает с таймкода и до конца"),
-                HelpTextItemCommand(
+                HelpTextArgument(
                     "(youtube ссылка с таймкодом) (таймкод конца)",
                     "обрезает по таймкодам"),
             ])

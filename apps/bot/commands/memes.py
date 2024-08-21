@@ -4,7 +4,7 @@ from django.db.models import Q
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
-from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
+from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextArgument
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.service.models import Meme as MemeModel
 
@@ -16,7 +16,7 @@ class Memes(Command):
         commands_text="список мемов",
         help_texts=[
             HelpTextItem(Role.USER, [
-                HelpTextItemCommand(
+                HelpTextArgument(
                     "[фраза для поиска] [страница=1]",
                     "присылает список мемов, подходящих поисковому запросу на странице"
                 )

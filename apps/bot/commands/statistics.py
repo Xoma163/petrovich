@@ -5,7 +5,7 @@ from django.db.models import Count
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
-from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
+from apps.bot.classes.help_text import HelpText, HelpTextArgument, HelpTextItem, HelpTextKey
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.models import Profile
 from apps.games.models import PetrovichUser
@@ -20,8 +20,14 @@ class Statistics(Command):
         commands_text="статистика по победителям игр или по кол-ву созданных мемов",
         help_texts=[
             HelpTextItem(Role.USER, [
-                HelpTextItemCommand("[модуль=все]", "статистика по победителям-петровичам и по кол-ву созданных мемов"),
-                HelpTextItemCommand("(петрович) [год=текущий]", "статистика по победителям петровича")
+                HelpTextArgument("[модуль=все]", "статистика по победителям-петровичам и по кол-ву созданных мемов"),
+                HelpTextArgument("(петрович) [год=текущий]", "статистика по победителям петровича")
+            ])
+        ],
+        help_text_keys=[
+            HelpTextItem(Role.USER, [
+                HelpTextKey("all", None,
+                            "если выбран модуль петрович, то выведутся пользователя которые также покинули группу")
             ])
         ],
         extra_text=(

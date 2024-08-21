@@ -2,7 +2,7 @@ from apps.bot.api.gpt.chatgptapi import GPTModels, ChatGPTAPI
 from apps.bot.api.gpt.message import ChatGPTMessages, GPTMessageRole
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
-from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
+from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextArgument
 from apps.bot.classes.messages.attachments.document import DocumentAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.commands.abstract.gpt_command import GPTCommand
@@ -28,15 +28,16 @@ class ChatGPT(GPTCommand):
                 ] +
                 GPTCommand.PREPROMPT_HELP_TEXT_ITEMS +
                 [
-                    HelpTextItemCommand("стата", "статистика по использованию"),
-                    HelpTextItemCommand("ключ (ключ)", "добавляет персональный API ключ"),
-                    HelpTextItemCommand("ключ удалить", "удаляет персональный API ключ"),
-                    HelpTextItemCommand("модели", "выводит список доступных моделей"),
-                    HelpTextItemCommand("модель", "выведет текущую модель"),
-                    HelpTextItemCommand("модель (название модели)", "указывает какую модель использовать")
+                    HelpTextArgument("стата", "статистика по использованию"),
+                    HelpTextArgument("ключ (ключ)", "добавляет персональный API ключ"),
+                    HelpTextArgument("ключ удалить", "удаляет персональный API ключ"),
+                    HelpTextArgument("модели", "выводит список доступных моделей"),
+                    HelpTextArgument("модель", "выведет текущую модель"),
+                    HelpTextArgument("модель (название модели)", "указывает какую модель использовать")
                 ]
             )
         ],
+        help_text_keys=GPTCommand.DEFAULT_KEYS,
         extra_text=GPTCommand.DEFAULT_EXTRA_TEXT
     )
 

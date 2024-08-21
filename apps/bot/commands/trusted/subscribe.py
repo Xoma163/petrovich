@@ -7,7 +7,7 @@ from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role, Platform
 from apps.bot.classes.const.exceptions import PWarning
-from apps.bot.classes.help_text import HelpTextItem, HelpText, HelpTextItemCommand
+from apps.bot.classes.help_text import HelpTextItem, HelpText, HelpTextArgument
 from apps.bot.classes.messages.attachments.link import LinkAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.service.models import Subscribe as SubscribeModel
@@ -23,9 +23,9 @@ class Subscribe(Command):
         commands_text="создаёт подписку на каналы. Доступные: YouTube, VK Видео. Бот пришлёт тебе новое видео с канала когда оно выйдет",
         help_texts=[
             HelpTextItem(Role.TRUSTED, [
-                HelpTextItemCommand(None, "список активных подписок в лс, если в конфе, то только общие в конфе"),
-                HelpTextItemCommand("добавить (ссылка на канал/плейлист)", "создаёт подписку на канал."),
-                HelpTextItemCommand("удалить (название канала/плейлиста/id)", "удаляет вашу подписку на канал"),
+                HelpTextArgument(None, "список активных подписок в лс, если в конфе, то только общие в конфе"),
+                HelpTextArgument("добавить (ссылка на канал/плейлист)", "создаёт подписку на канал."),
+                HelpTextArgument("удалить (название канала/плейлиста/id)", "удаляет вашу подписку на канал"),
             ])
         ],
         extra_text=(

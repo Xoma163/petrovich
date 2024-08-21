@@ -1,6 +1,6 @@
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role
-from apps.bot.classes.help_text import HelpTextItem, HelpText, HelpTextItemCommand
+from apps.bot.classes.help_text import HelpTextItem, HelpText, HelpTextArgument
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.utils.utils import get_random_int
 
@@ -13,9 +13,9 @@ class Random(Command):
         commands_text="рандомное число в заданном диапазоне",
         help_texts=[
             HelpTextItem(Role.USER, [
-                HelpTextItemCommand(None, "рандомное число в диапазоне[0:1]"),
-                HelpTextItemCommand("[N]", "рандомное число в заданном диапазоне[1:N]"),
-                HelpTextItemCommand("[N,M]", "рандомное число в заданном диапазоне[N:M]")
+                HelpTextArgument(None, "рандомное число в диапазоне[0:1]"),
+                HelpTextArgument("[N]", "рандомное число в заданном диапазоне[1:N]"),
+                HelpTextArgument("[N,M]", "рандомное число в заданном диапазоне[N:M]")
             ])
         ]
     )

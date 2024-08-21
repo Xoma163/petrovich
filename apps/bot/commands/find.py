@@ -5,7 +5,7 @@ from apps.bot.classes.command import Command
 from apps.bot.classes.const.activities import ActivitiesEnum
 from apps.bot.classes.const.consts import Platform, Role
 from apps.bot.classes.const.exceptions import PWarning
-from apps.bot.classes.help_text import HelpTextItem, HelpText, HelpTextItemCommand
+from apps.bot.classes.help_text import HelpTextItem, HelpText, HelpTextArgument
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 
@@ -17,8 +17,8 @@ class Find(Command):
         commands_text="ищет информацию по картинкам в гугле",
         help_texts=[
             HelpTextItem(Role.USER, [
-                HelpTextItemCommand("(запрос)", "присылает картинки по поиску в гугле"),
-                HelpTextItemCommand("(пересланное сообщение)", "присылает картинки по поиску в гугле")
+                HelpTextArgument("(запрос)", "присылает картинки по поиску в гугле"),
+                HelpTextArgument("(пересланное сообщение)", "присылает картинки по поиску в гугле")
             ])
         ]
     )

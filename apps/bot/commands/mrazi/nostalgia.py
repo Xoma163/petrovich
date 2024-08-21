@@ -8,7 +8,7 @@ from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role, Platform
 from apps.bot.classes.const.exceptions import PWarning
-from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
+from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextArgument
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.models import Profile, Bot
 from apps.bot.utils.quotes_generator import QuotesGenerator
@@ -23,12 +23,12 @@ class Nostalgia(Command):
         commands_text="генерирует картинку с сообщениями из конфы беседки мразей",
         help_texts=[
             HelpTextItem(access, [
-                HelpTextItemCommand(None, "присылает 10 случайных сообщений"),
-                HelpTextItemCommand("(N,M=10)",
+                HelpTextArgument(None, "присылает 10 случайных сообщений"),
+                HelpTextArgument("(N,M=10)",
                                     "присылает сообщения с позиции N до M. Максимальная разница между N и M - 200"),
-                HelpTextItemCommand("(вложения)", "присылает вложения со скриншота"),
-                HelpTextItemCommand("(фраза)", "ищет фразу по переписке"),
-                HelpTextItemCommand("поиск (фраза) [N=1]", "ищет фразу по переписке. N - номер страницы")
+                HelpTextArgument("(вложения)", "присылает вложения со скриншота"),
+                HelpTextArgument("(фраза)", "ищет фразу по переписке"),
+                HelpTextArgument("поиск (фраза) [N=1]", "ищет фразу по переписке. N - номер страницы")
             ])
         ]
     )

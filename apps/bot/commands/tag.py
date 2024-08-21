@@ -4,7 +4,7 @@ from apps.bot.classes.command import AcceptExtraMixin
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.event.event import Event
-from apps.bot.classes.help_text import HelpTextItem, HelpText, HelpTextItemCommand
+from apps.bot.classes.help_text import HelpTextItem, HelpText, HelpTextArgument
 from apps.bot.classes.messages.message import Message
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.service.models import Tag as TagModel
@@ -18,14 +18,14 @@ class Tag(AcceptExtraMixin):
         commands_text="тегает людей в конфе",
         help_texts=[
             HelpTextItem(Role.USER, [
-                HelpTextItemCommand("создать (название)", "добавляет новую группу"),
-                HelpTextItemCommand("удалить (название)", "удаляет группу"),
-                HelpTextItemCommand(
+                HelpTextArgument("создать (название)", "добавляет новую группу"),
+                HelpTextArgument("удалить (название)", "удаляет группу"),
+                HelpTextArgument(
                     "добавить (название) (имя пользователя/никнейм)",
                     "добавляет пользователя в группу"),
-                HelpTextItemCommand("убрать (название) (имя пользователя/никнейм)", "удаляет пользователя из группы"),
-                HelpTextItemCommand("список", "выводит список всех тегов"),
-                HelpTextItemCommand("(название)", "тегает всех пользователей в группе")
+                HelpTextArgument("убрать (название) (имя пользователя/никнейм)", "удаляет пользователя из группы"),
+                HelpTextArgument("список", "выводит список всех тегов"),
+                HelpTextArgument("(название)", "тегает всех пользователей в группе")
             ])
         ]
     )

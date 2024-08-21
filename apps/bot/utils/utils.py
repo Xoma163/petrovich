@@ -12,6 +12,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
+from apps.bot.classes.help_text import HelpTextKey
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessageItem
 from apps.service.models import Service
@@ -125,9 +126,10 @@ def get_help_texts_for_command(command, roles: list[Role] = None) -> str:
     """
 
     DASH = "—"
+    DOUBLE_DASH = "--"
 
     from apps.bot.classes.bots.tg_bot import TgBot
-    from apps.bot.classes.help_text import HelpTextItemCommand
+    from apps.bot.classes.help_text import HelpTextArgument
 
     if roles is None:
         roles = [Role.USER]
@@ -140,17 +142,41 @@ def get_help_texts_for_command(command, roles: list[Role] = None) -> str:
     if result:
         result += '\n'
     if command.help_text:
-        items: list[HelpTextItemCommand] = []
+        _format = TgBot.get_formatted_text_line
+        # help texts
+        items: list[HelpTextArgument] = []
         for role in roles:
             if res := command.help_text.get_help_text_item(role):
-                items += res.texts
+                items += res.items
         full_help_texts_list = []
 
         for item in items:
             if item.args:
-                line = TgBot.get_formatted_text_line(f"/{command.name} {item.args}") + f" {DASH} {item.description}"
+                full_command_name = _format(f"/{command.name} {item.args}")
             else:
-                line = TgBot.get_formatted_text_line(f"/{command.name}") + f" {DASH} {item.description}"
+                full_command_name = _format(f"/{command.name}")
+            line = f"{full_command_name} {DASH} {item.description}"
+            full_help_texts_list.append(line)
+
+        # Отступ
+        if full_help_texts_list:
+            full_help_texts_list.append("")
+
+        # help keys
+        full_help_texts_list.append("Возможные ключи:")
+
+        keys: list[HelpTextKey] = []
+        for role in roles:
+            if res := command.help_text.get_help_text_key(role):
+                keys += res.items
+
+        for key in keys:
+            if key.aliases:
+                full_keys = [key.key] + key.aliases
+                full_key = ", ".join([_format(DOUBLE_DASH + x) for x in full_keys])
+            else:
+                full_key = _format(f"{DOUBLE_DASH}{key.key}")
+            line = f"{full_key} {DASH} {key.description}"
             full_help_texts_list.append(line)
 
         if command.help_text.extra_text:

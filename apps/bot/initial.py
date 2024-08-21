@@ -104,7 +104,7 @@ def get_text_for_documentation():
             if not cmd.help_text.items:
                 continue
             help_texts = get_flat_list([
-                cmd.help_text.items.get(_role).texts for _role in cmd.help_text.items if _role in allowed_roles
+                cmd.help_text.items.get(_role).items for _role in cmd.help_text.items if _role in allowed_roles
             ])
             help_text_items = []
             for help_text in help_texts:

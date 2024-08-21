@@ -6,7 +6,7 @@ import textwrap
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
-from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
+from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextArgument
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.utils.utils import draw_text_on_image
 from petrovich.settings import DEBUG_FILE
@@ -26,7 +26,7 @@ class Logs(Command):
         commands_text="логи бота",
         help_texts=[
             HelpTextItem(access, [
-                HelpTextItemCommand(f"[уровень логов = {DEFAULT_LEVEL}] [кол-во записей = {DEFAULT_COUNT}]", "логи")
+                HelpTextArgument(f"[уровень логов = {DEFAULT_LEVEL}] [кол-во записей = {DEFAULT_COUNT}]", "логи")
             ])
         ],
         extra_text=(

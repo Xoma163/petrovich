@@ -6,7 +6,7 @@ from apps.bot.classes.command import AcceptExtraMixin
 from apps.bot.classes.const.consts import Role, Platform
 from apps.bot.classes.const.exceptions import PWarning, PSkip
 from apps.bot.classes.event.event import Event
-from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
+from apps.bot.classes.help_text import HelpText, HelpTextArgument, HelpTextKey, HelpTextItem
 from apps.bot.classes.messages.attachments.audio import AudioAttachment
 from apps.bot.classes.messages.attachments.link import LinkAttachment
 from apps.bot.classes.messages.attachments.video import VideoAttachment
@@ -38,25 +38,36 @@ class Media(AcceptExtraMixin):
         commands_text="скачивает видео/фото из соцсетей и присылает его",
         help_texts=[
             HelpTextItem(Role.USER, [
-                HelpTextItemCommand("(ссылка на видео/пост)", "скачивает видео из соцсетей и присылает его")
+                HelpTextArgument("(ссылка на видео/пост)", "скачивает видео из соцсетей и присылает его")
             ])
+        ],
+        help_text_keys=[
+            HelpTextItem(Role.USER, [
+                HelpTextKey(MediaKeys.NO_MEDIA_KEYS[0], MediaKeys.NO_MEDIA_KEYS[1:], "позволяет не запускать команду"),
+                HelpTextKey(MediaKeys.AUDIO_KEYS[0], MediaKeys.AUDIO_KEYS[1:],
+                            "позволяет скачивать аудиодорожку для видео"),
+                HelpTextKey(MediaKeys.HIGH_KEYS[0], MediaKeys.HIGH_KEYS[1:],
+                            "сохраняет видео в максимальном качестве (VK Video/Youtube Video)"),
+                HelpTextKey(MediaKeys.CACHE_KEYS[0], MediaKeys.CACHE_KEYS[1:],
+                            "позволяет загрузить видео в онлайн-кэш (VK Video/Youtube Video)"),
+                HelpTextKey(MediaKeys.FORCE_KEYS[0], MediaKeys.FORCE_KEYS[1:],
+                            "позволяет загрузить видео принудительно (Youtube Video)"),
+                HelpTextKey(MediaKeys.THREADS_KEYS[0], MediaKeys.THREADS_KEYS[1:],
+                            "позволяет скачивать пост с комментариями автора(Twitter)"),
+            ]),
+            HelpTextItem(Role.ADMIN, [
+                HelpTextKey(MediaKeys.DISK_KEYS[0], MediaKeys.DISK_KEYS[1:], "сохраняет видео в локальную директорию"),
+            ]),
+
         ],
         extra_text=(
             "Поддерживаемые соцсети: Youtube Video/Youtube Music/Reddit/TikTok/Instagram/Twitter/"
             "Yandex Music/Pinterest/Coub/VK Video/TwitchClips/Spotify/Suno AI/Yandex Zen\n\n"
 
-            "Ключ --nomedia позволяет не запускать команду\n"
-            "Ключ --audio позволяет скачивать аудиодорожку для видео\n"
-            "Ключ --save сохраняет видео в локальную директорию\n"
-            "Ключ --high сохраняет видео в максимальном качестве (VK Video/Youtube Video)\n"
-            "Ключ --cache позволяет загрузить видео в онлайн-кэш (VK Video/Youtube Video)\n"
-            "Ключ --force позволяет загрузить видео принудительно (Youtube Video)\n\n"
-
-            "Ключ --thread позволяет скачивать пост с комментариями автора(Twitter)\n\n"
-
             "Некоторые сервисы доступны только доверенным пользователям: Twitter/Instagram/Yandex Music\n"
             "По умолчанию видео для Youtube/VK Video качается в качестве до 1080p\n"
-            "Видосы из ютуба в чате качаются автоматически только если длина ролика менее 2 минут"
+            "Видосы из ютуба в чате качаются автоматически только если длина ролика менее 2 минут\n"
+            "Если у бота есть доступ к переписке, то достаточно прислать только ссылку"
         )
     )
 
@@ -93,7 +104,8 @@ class Media(AcceptExtraMixin):
     @classmethod
     def accept_extra(cls, event: Event) -> bool:
         if event.message and not event.message.mentioned:
-            if MediaKeys.NO_MEDIA_KEYS.intersection(event.message.keys):
+            media_keys = MediaKeys(event.message.keys)
+            if media_keys.no_media:
                 return False
             all_urls = get_urls_from_text(event.message.clear_case)
             for url in all_urls:

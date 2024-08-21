@@ -11,11 +11,11 @@ from apps.bot.api.gpt.response import GPTAPIImageDrawResponse, GPTAPICompletions
 from apps.bot.classes.bots.chat_activity import ChatActivity
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.activities import ActivitiesEnum
-from apps.bot.classes.const.consts import Platform
+from apps.bot.classes.const.consts import Platform, Role
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.event.event import Event
 from apps.bot.classes.event.tg_event import TgEvent
-from apps.bot.classes.help_text import HelpTextItemCommand
+from apps.bot.classes.help_text import HelpTextArgument, HelpTextKey, HelpTextItem
 from apps.bot.classes.messages.attachments.document import DocumentAttachment
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessageItem
@@ -34,19 +34,19 @@ class GPTCommand(ABC, Command):
     abstract = True
 
     DEFAULT_HELP_TEXT_ITEMS = [
-        HelpTextItemCommand("(фраза)", "общение с ботом"),
-        HelpTextItemCommand("(пересланное сообщение)", "общение с ботом с учётом пересланного сообщения"),
-        HelpTextItemCommand("(текстовый файл)", "общение с ботом с учётом текстового файла")
+        HelpTextArgument("(фраза)", "общение с ботом"),
+        HelpTextArgument("(пересланное сообщение)", "общение с ботом с учётом пересланного сообщения"),
+        HelpTextArgument("(текстовый файл)", "общение с ботом с учётом текстового файла")
     ]
-    VISION_HELP_TEXT_ITEM = HelpTextItemCommand("(фраза) [картинка]", "общение с ботом с учётом пересланной картинки")
-    DRAW_HELP_TEXT_ITEM = HelpTextItemCommand(
+    VISION_HELP_TEXT_ITEM = HelpTextArgument("(фраза) [картинка]", "общение с ботом с учётом пересланной картинки")
+    DRAW_HELP_TEXT_ITEM = HelpTextArgument(
         "нарисуй [альбом/портрет/квадрат] (фраза/пересланное сообщение)",
         "генерация картинки"
     )
     PREPROMPT_HELP_TEXT_ITEMS = [
-        HelpTextItemCommand("препромпт [конфа]", "посмотреть текущий препромпт"),
-        HelpTextItemCommand("препромпт [конфа] (текст)", "добавить препромпт"),
-        HelpTextItemCommand("препромпт [конфа] удалить", "удаляет препромпт")
+        HelpTextArgument("препромпт [конфа]", "посмотреть текущий препромпт"),
+        HelpTextArgument("препромпт [конфа] (текст)", "добавить препромпт"),
+        HelpTextArgument("препромпт [конфа] удалить", "удаляет препромпт")
     ]
 
     DEFAULT_EXTRA_TEXT = (
@@ -56,10 +56,14 @@ class GPTCommand(ABC, Command):
         "1) Персональный препромт конфы\n"
         "2) Персональный препромт\n"
         "3) Препромпт конфы\n\n"
-
-        "Нарисуй может принимать ключ --orig/--original/--ориг/--оригинал, то будет прилан документ без сжатия, а не картинка\n"
-        "Нарисуй может принимать ключ --(число), которое определит сколько картинок нужно сгенерировать. Максимум 10"
     )
+
+    DEFAULT_KEYS = [
+        HelpTextItem(Role.USER, [
+            HelpTextKey("orig", ["original", "ориг", "оригинал"], "нарисуй пришлёт документ без сжатия, а не картинку"),
+            HelpTextKey("(число)", [], "нарисуй пришлёт несколько картинок. Максимум 10"),
+        ])
+    ]
 
     def __init__(self, gpt_preprompt_provider: str, gpt_api_class: type[GPTAPI], gpt_messages_class: type[GPTMessages]):
         super().__init__()

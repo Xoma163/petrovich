@@ -1,6 +1,6 @@
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role
-from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
+from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextArgument
 from apps.bot.classes.messages.attachments.video import VideoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessageItem, ResponseMessage
 from apps.bot.utils.video.video_handler import VideoHandler
@@ -14,7 +14,7 @@ class AudioTrack(Command):
         commands_text="Вырезает аудиодорожку из видео",
         help_texts=[
             HelpTextItem(Role.USER, [
-                HelpTextItemCommand("(видео)", "вырезает аудиодорожку из видео")
+                HelpTextArgument("(видео)", "вырезает аудиодорожку из видео")
             ])
         ],
     )

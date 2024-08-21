@@ -3,7 +3,7 @@ from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.event.tg_event import TgEvent
-from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
+from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextArgument
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from petrovich.settings import env
 
@@ -16,31 +16,31 @@ class Settings(Command):
         commands_text="устанавливает настройки пользователя/чата",
         help_texts=[
             HelpTextItem(Role.USER, [
-                HelpTextItemCommand(
+                HelpTextArgument(
                     None,
                     "присылает текущие настройки и права бота в чате"),
-                HelpTextItemCommand(
+                HelpTextArgument(
                     "триггериться (вкл/выкл)",
                     "определяет будет ли бот триггериться на команды без упоминания в конфе(требуются админские права)"),
-                HelpTextItemCommand(
+                HelpTextArgument(
                     "реагировать (вкл/выкл)",
                     "определяет, будет ли бот реагировать на неправильные команды в конфе. Это сделано для того, чтобы в конфе с несколькими ботами не было ложных срабатываний"),
-                HelpTextItemCommand(
+                HelpTextArgument(
                     "мемы (вкл/выкл)",
                     "определяет, будет ли бот присылать мем если прислано его точное название без / (боту требуется доступ к переписке)"),
-                HelpTextItemCommand(
+                HelpTextArgument(
                     "туретт (вкл/выкл)",
                     "определяет, будет ли бот случайно присылать ругательства"),
-                HelpTextItemCommand(
+                HelpTextArgument(
                     "голосовые (вкл/выкл)",
                     "определяет, будет ли бот автоматически распознавать голосовые"),
-                HelpTextItemCommand(
+                HelpTextArgument(
                     "др (вкл/выкл)",
                     "определяет, будет ли бот поздравлять с Днём рождения и будет ли ДР отображаться в /профиль"),
-                HelpTextItemCommand(
+                HelpTextArgument(
                     "ругаться (вкл/выкл)",
                     "определяет будет ли бот использовать ругательные команды"),
-                HelpTextItemCommand(
+                HelpTextArgument(
                     "упоминания (вкл/выкл)",
                     "определяет будет ли бот использовать упоминания вас"),
             ])

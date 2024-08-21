@@ -6,7 +6,7 @@ from apps.bot.classes.command import AcceptExtraMixin
 from apps.bot.classes.const.consts import Role, Platform, ATTACHMENT_TYPE_TRANSLATOR
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.event.event import Event
-from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
+from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextArgument
 from apps.bot.classes.messages.attachments.gif import GifAttachment
 from apps.bot.classes.messages.attachments.link import LinkAttachment
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
@@ -26,27 +26,27 @@ class Meme(AcceptExtraMixin):
         commands_text="присылает мем",
         help_texts=[
             HelpTextItem(Role.USER, [
-                HelpTextItemCommand(None, "присылает рандомный мем"),
-                HelpTextItemCommand(
+                HelpTextArgument(None, "присылает рандомный мем"),
+                HelpTextArgument(
                     "(название/id)",
                     "присылает нужный мем. Можно использовать * вместо символов поиска. Например /мем ж*па"),
-                HelpTextItemCommand(
+                HelpTextArgument(
                     "добавить (название) (Вложение/Пересланное сообщение с вложением)",
                     "добавляет мем"),
-                HelpTextItemCommand("добавить (название) (ссылка на youtube/coub)", "добавляет мем с youtube/coub"),
-                HelpTextItemCommand(
+                HelpTextArgument("добавить (название) (ссылка на youtube/coub)", "добавляет мем с youtube/coub"),
+                HelpTextArgument(
                     "обновить (название/id) (Вложение/Пересланное сообщение с вложением)",
                     "обновляет созданный вами мем."),
-                HelpTextItemCommand("обновить (название/id) (ссылка на youtube/coub)", "обновляет созданный вами мем"),
-                HelpTextItemCommand("удалить (название/id)", "удаляет созданный вами мем"),
-                HelpTextItemCommand("инфо (название/id)", "присылает информацию по мему")
+                HelpTextArgument("обновить (название/id) (ссылка на youtube/coub)", "обновляет созданный вами мем"),
+                HelpTextArgument("удалить (название/id)", "удаляет созданный вами мем"),
+                HelpTextArgument("инфо (название/id)", "присылает информацию по мему")
             ]),
             HelpTextItem(Role.MODERATOR, [
-                HelpTextItemCommand("подтвердить", "присылает мем на подтверждение"),
-                HelpTextItemCommand("подтвердить (название/id)", "подтверждает мем"),
-                HelpTextItemCommand("отклонить (название/id)", "отклоняет мем"),
-                HelpTextItemCommand("переименовать (id) (новое название)", "переименовывает мем"),
-                HelpTextItemCommand("удалить (название/id)", "удаляет мем")
+                HelpTextArgument("подтвердить", "присылает мем на подтверждение"),
+                HelpTextArgument("подтвердить (название/id)", "подтверждает мем"),
+                HelpTextArgument("отклонить (название/id)", "отклоняет мем"),
+                HelpTextArgument("переименовать (id) (новое название)", "переименовывает мем"),
+                HelpTextArgument("удалить (название/id)", "удаляет мем")
             ])
         ],
         extra_text=(

@@ -5,7 +5,7 @@ from apps.bot.api.imgur import Imgur
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
-from apps.bot.classes.help_text import HelpTextItem, HelpText, HelpTextItemCommand
+from apps.bot.classes.help_text import HelpTextItem, HelpText, HelpTextArgument
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.models import Profile
@@ -19,11 +19,11 @@ class Issue(Command):
         commands_text="добавляет проблему Петровича, которую нужно решить",
         help_texts=[
             HelpTextItem(Role.USER, [
-                HelpTextItemCommand(
+                HelpTextArgument(
                     "(проблема)\n[описание проблемы]\n[теги]",
                     "добавляет проблему Петровича"
                 ),
-                HelpTextItemCommand(
+                HelpTextArgument(
                     "(пересылаемое сообщение)",
                     "добавляет проблему Петровича"
                 )

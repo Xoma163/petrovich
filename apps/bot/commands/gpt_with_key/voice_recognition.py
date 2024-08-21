@@ -7,7 +7,7 @@ from apps.bot.classes.const.activities import ActivitiesEnum
 from apps.bot.classes.const.consts import Platform, Role
 from apps.bot.classes.const.exceptions import PSkip, PWarning
 from apps.bot.classes.event.event import Event
-from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
+from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextArgument
 from apps.bot.classes.messages.attachments.audio import AudioAttachment
 from apps.bot.classes.messages.attachments.document import DocumentAttachment
 from apps.bot.classes.messages.attachments.video_note import VideoNoteAttachment
@@ -28,7 +28,7 @@ class VoiceRecognition(AcceptExtraMixin):
         commands_text="распознаёт голосовое сообщение",
         help_texts=[
             HelpTextItem(access, [
-                HelpTextItemCommand(
+                HelpTextArgument(
                     "(Пересланное сообщение с голосовым сообщением)",
                     "распознаёт голосовое сообщение/кружок/аудиофайл на основе ChatGPT"
                 )

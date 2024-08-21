@@ -8,7 +8,7 @@ from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Platform, Role
 from apps.bot.classes.const.exceptions import PWarning
-from apps.bot.classes.help_text import HelpTextItem, HelpText, HelpTextItemCommand
+from apps.bot.classes.help_text import HelpTextItem, HelpText, HelpTextArgument
 from apps.bot.classes.messages.response_message import ResponseMessageItem, ResponseMessage
 from apps.bot.utils.utils import localize_datetime, remove_tz, random_event
 from apps.games.models import PetrovichGame, PetrovichUser
@@ -25,10 +25,10 @@ class Petrovich(Command):
         commands_text="мини-игра, определяющая кто Петрович Дня",
         help_texts=[
             HelpTextItem(Role.USER, [
-                HelpTextItemCommand(None, "мини-игра, определяющая кто Петрович дня"),
-                HelpTextItemCommand("рег", "регистрация в игре"),
-                HelpTextItemCommand("дерег", "дерегистрация в игре"),
-                HelpTextItemCommand("игроки", "список зарегистрированных участников")
+                HelpTextArgument(None, "мини-игра, определяющая кто Петрович дня"),
+                HelpTextArgument("рег", "регистрация в игре"),
+                HelpTextArgument("дерег", "дерегистрация в игре"),
+                HelpTextArgument("игроки", "список зарегистрированных участников")
             ])
         ]
     )

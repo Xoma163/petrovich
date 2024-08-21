@@ -2,7 +2,7 @@ from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
-from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
+from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextArgument
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.models import Profile
 from apps.bot.utils.utils import get_role_by_str
@@ -16,8 +16,8 @@ class Roles(Command):
         commands_text="добавление и удаление ролей пользователю",
         help_texts=[
             HelpTextItem(Role.ADMIN, [
-                HelpTextItemCommand("добавить (пользователь) (роль)", "добавляет роль пользователю"),
-                HelpTextItemCommand("удалить (пользователь) (роль)", "удаляет роль пользователю")
+                HelpTextArgument("добавить (пользователь) (роль)", "добавляет роль пользователю"),
+                HelpTextArgument("удалить (пользователь) (роль)", "удаляет роль пользователю")
             ])
         ]
     )

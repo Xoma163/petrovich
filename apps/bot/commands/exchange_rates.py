@@ -2,7 +2,7 @@ from apps.bot.api.cbr import CBRAPI
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
-from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
+from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextArgument
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 
 
@@ -13,8 +13,8 @@ class ExchangeRates(Command):
         commands_text="курс валют",
         help_texts=[
             HelpTextItem(Role.USER, [
-                HelpTextItemCommand(None, "курс валют"),
-                HelpTextItemCommand("[количество=1] (валюта)", "перевод в другие валюты конкретное количество валюты")
+                HelpTextArgument(None, "курс валют"),
+                HelpTextArgument("[количество=1] (валюта)", "перевод в другие валюты конкретное количество валюты")
             ])
         ]
     )

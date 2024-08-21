@@ -9,7 +9,7 @@ from apps.bot.classes.const.consts import Role, Platform
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.event.event import Event
 from apps.bot.classes.event.tg_event import TgEvent
-from apps.bot.classes.help_text import HelpTextItemCommand
+from apps.bot.classes.help_text import HelpTextArgument
 from apps.bot.classes.messages.response_message import ResponseMessage
 from apps.bot.commands.abstract.gpt_command import GPTCommand
 from apps.bot.models import User
@@ -25,11 +25,11 @@ class WTFCommand(Command):
     DEFAULT_PROMPT = "Я пришлю тебе переписку участников группы. Суммаризируй её, опиши, что произошло, о чём общались люди?"
     DEFAULT_N = 50
     DEFAULT_HELP_TEXT_ITEMS = [
-        HelpTextItemCommand(
+        HelpTextArgument(
             f"[prompt] [N={DEFAULT_N}]",
             "обрабатывает последние N сообщений в конфе через GPT по указанному prompt"
         ),
-        HelpTextItemCommand(
+        HelpTextArgument(
             "(пересланное сообщение)",
             "обрабатывает последние сообщения до пересланного в конфе через GPT по указанному prompt"
         )

@@ -2,7 +2,7 @@ from apps.bot.api.github.issue import GithubIssueAPI
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
-from apps.bot.classes.help_text import HelpTextItem, HelpText, HelpTextItemCommand
+from apps.bot.classes.help_text import HelpTextItem, HelpText, HelpTextArgument
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 
 
@@ -14,7 +14,7 @@ class DeIssue(Command):
         commands_text="закрывает проблему Петровича без решения",
         help_texts=[
             HelpTextItem(Role.TRUSTED, [
-                HelpTextItemCommand("(id)", "закрывает проблему Петровича без решения")
+                HelpTextArgument("(id)", "закрывает проблему Петровича без решения")
             ])
         ]
     )

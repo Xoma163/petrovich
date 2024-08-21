@@ -1,7 +1,7 @@
 from apps.bot.api.minecraft_server import MinecraftServer
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role
-from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextItemCommand
+from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextArgument
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from petrovich.settings import MAIN_DOMAIN
 
@@ -14,9 +14,9 @@ class Minecraft(Command):
         commands_text="действия с сервером майнкрафта",
         help_texts=[
             HelpTextItem(Role.MINECRAFT, [
-                HelpTextItemCommand(None, "статус по всем серверам"),
-                HelpTextItemCommand("старт", "стартует сервер"),
-                HelpTextItemCommand("стоп", "останавливает сервер")
+                HelpTextArgument(None, "статус по всем серверам"),
+                HelpTextArgument("старт", "стартует сервер"),
+                HelpTextArgument("стоп", "останавливает сервер")
             ])
         ]
     )

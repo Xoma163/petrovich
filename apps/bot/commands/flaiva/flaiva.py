@@ -1,6 +1,6 @@
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
-from apps.bot.classes.help_text import HelpTextItem, HelpText, HelpTextItemCommand
+from apps.bot.classes.help_text import HelpTextItem, HelpText, HelpTextArgument
 from apps.bot.commands.mrazi.nostalgia import Nostalgia
 
 
@@ -12,13 +12,13 @@ class Flaiva(Nostalgia):
         commands_text="генерирует картинку с сообщениями из конфы флейвы",
         help_texts=[
             HelpTextItem(access, [
-                HelpTextItemCommand(None, "присылает 10 случайных сообщений"),
-                HelpTextItemCommand(
+                HelpTextArgument(None, "присылает 10 случайных сообщений"),
+                HelpTextArgument(
                     "(N,M=10)",
                     "присылает сообщения с позиции N до M. Максимальная разница между N и M - 200"),
-                HelpTextItemCommand("(вложения)", "присылает вложения со скриншота"),
-                HelpTextItemCommand("(фраза)", "ищет фразу по переписке"),
-                HelpTextItemCommand("поиск (фраза) [N=1]", "ищет фразу по переписке. N - номер страницы")
+                HelpTextArgument("(вложения)", "присылает вложения со скриншота"),
+                HelpTextArgument("(фраза)", "ищет фразу по переписке"),
+                HelpTextArgument("поиск (фраза) [N=1]", "ищет фразу по переписке. N - номер страницы")
             ])
         ]
     )

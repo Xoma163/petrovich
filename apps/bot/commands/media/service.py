@@ -21,13 +21,13 @@ class MediaServiceResponse:
 
 
 class MediaKeys:
-    NO_MEDIA_KEYS = {"nomedia", "no-media", 'n'}
-    AUDIO_KEYS = {'audio', 'a'}
-    DISK_KEYS = {'save', 'disk', 's', 'd'}
-    HIGH_KEYS = {'high', 'best', 'h', 'b'}
-    CACHE_KEYS = {'cache', 'c'}
-    FORCE_KEYS = {'force', 'f'}
-    THREADS_KEYS = {'thread', 'threads', 'with-threads', 'тред', 'треды', 't'}
+    NO_MEDIA_KEYS = ["nomedia", "no-media", 'n']
+    AUDIO_KEYS = ['audio', 'a']
+    DISK_KEYS = ['save', 'disk', 's', 'd']
+    HIGH_KEYS = ['high', 'best', 'h', 'b']
+    CACHE_KEYS = ['cache', 'c']
+    FORCE_KEYS = ['force', 'f']
+    THREADS_KEYS = ['thread', 'threads', 'with-threads', 'тред', 'треды', 't']
 
     def __init__(self, keys: list):
         self.no_media: bool = self.check_key(keys, self.NO_MEDIA_KEYS)
@@ -39,8 +39,8 @@ class MediaKeys:
         self.threads: bool = self.check_key(keys, self.THREADS_KEYS)
 
     @staticmethod
-    def check_key(keys_event, keys_values) -> bool:
-        return bool(keys_event and keys_values.intersection(keys_event))
+    def check_key(keys_event: list, keys_values: list) -> bool:
+        return any(x in keys_event for x in keys_values)
 
 
 class MediaService:
