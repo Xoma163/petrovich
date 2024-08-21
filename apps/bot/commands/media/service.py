@@ -20,14 +20,36 @@ class MediaServiceResponse:
     video_title: str | None = None
 
 
+class MediaKeys:
+    NO_MEDIA_KEYS = {"nomedia", "no-media", 'n'}
+    AUDIO_KEYS = {'audio', 'a'}
+    DISK_KEYS = {'save', 'disk', 's', 'd'}
+    HIGH_KEYS = {'high', 'best', 'h', 'b'}
+    CACHE_KEYS = {'cache', 'c'}
+    FORCE_KEYS = {'force', 'f'}
+    THREADS_KEYS = {'thread', 'threads', 'with-threads', 'тред', 'треды', 't'}
+
+    def __init__(self, keys: list):
+        self.no_media: bool = self.check_key(keys, self.NO_MEDIA_KEYS)
+        self.audio: bool = self.check_key(keys, self.AUDIO_KEYS)
+        self.disk: bool = self.check_key(keys, self.DISK_KEYS)
+        self.high: bool = self.check_key(keys, self.HIGH_KEYS)
+        self.cache: bool = self.check_key(keys, self.CACHE_KEYS)
+        self.force: bool = self.check_key(keys, self.FORCE_KEYS)
+        self.threads: bool = self.check_key(keys, self.THREADS_KEYS)
+
+    @staticmethod
+    def check_key(keys_event, keys_values) -> bool:
+        return bool(keys_event and keys_values.intersection(keys_event))
+
+
 class MediaService:
-    def __init__(self, bot: Bot, event: Event):
+    def __init__(self, bot: Bot, event: Event, media_keys: MediaKeys, has_command_name: bool):
         self.bot: Bot = bot
         self.event: Event = event
+        self.media_keys: MediaKeys = media_keys
+        self.has_command_name: bool = has_command_name
         self.activity = None
-
-    HIGH_KEYS = {'high', 'best'}
-    CACHE_KEYS = {'cache'}
 
     def get_content_by_url(self, url: str) -> MediaServiceResponse:
         """

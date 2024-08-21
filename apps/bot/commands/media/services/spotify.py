@@ -10,6 +10,7 @@ from apps.bot.commands.media.service import MediaServiceResponse, MediaService
 class SpotifyService(MediaService):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
         self.service = Spotify()
 
     def get_content_by_url(self, url: str) -> MediaServiceResponse:

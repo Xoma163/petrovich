@@ -8,8 +8,6 @@ from apps.bot.utils.utils import retry
 
 
 class TwitterService(MediaService):
-    WITH_THREADS_KEYS = {'thread', 'threads', 'with-threads', 'тред', 'треды'}
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -22,7 +20,7 @@ class TwitterService(MediaService):
 
     def _get_content_by_url(self, url: str) -> MediaServiceResponse:
         t_api = Twitter()
-        with_threads = self.event.message.keys and self.WITH_THREADS_KEYS.intersection(self.event.message.keys)
+        with_threads = self.event.message.keys and self.media_keys.threads
         data = t_api.get_post_data(url, with_threads=with_threads)
 
         if not data.items:

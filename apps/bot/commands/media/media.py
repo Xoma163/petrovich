@@ -11,7 +11,7 @@ from apps.bot.classes.messages.attachments.audio import AudioAttachment
 from apps.bot.classes.messages.attachments.link import LinkAttachment
 from apps.bot.classes.messages.attachments.video import VideoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
-from apps.bot.commands.media.service import MediaService, MediaServiceResponse
+from apps.bot.commands.media.service import MediaService, MediaServiceResponse, MediaKeys
 from apps.bot.commands.media.services.coub import CoubService
 from apps.bot.commands.media.services.instagram import InstagramService
 from apps.bot.commands.media.services.pinterest import PinterestService
@@ -44,15 +44,19 @@ class Media(AcceptExtraMixin):
         extra_text=(
             "Поддерживаемые соцсети: Youtube Video/Youtube Music/Reddit/TikTok/Instagram/Twitter/"
             "Yandex Music/Pinterest/Coub/VK Video/TwitchClips/Spotify/Suno AI/Yandex Zen\n\n"
+
             "Ключ --nomedia позволяет не запускать команду\n"
             "Ключ --audio позволяет скачивать аудиодорожку для видео\n"
             "Ключ --save сохраняет видео в локальную директорию\n"
             "Ключ --high сохраняет видео в максимальном качестве (VK Video/Youtube Video)\n"
-            "Ключ --cache позволяет загрузить видео в онлайн-кэш (VK Video/Youtube Video)\n\n"
-            "Ключ --thread позволяет скачивать пост с комментариями автора для твиттера\n\n"
-            # "Видосы из ютуба качаются автоматически только если длина ролика менее 2 минут. \n"
-            # "Вручную с указанием команды - скачается\n\n"
-            "Некоторые сервисы доступны только доверенным пользователям: Twitter/Instagram/Yandex Music"
+            "Ключ --cache позволяет загрузить видео в онлайн-кэш (VK Video/Youtube Video)\n"
+            "Ключ --force позволяет загрузить видео принудительно (Youtube Video)\n\n"
+
+            "Ключ --thread позволяет скачивать пост с комментариями автора(Twitter)\n\n"
+
+            "Некоторые сервисы доступны только доверенным пользователям: Twitter/Instagram/Yandex Music\n"
+            "По умолчанию видео для Youtube/VK Video качается в качестве до 1080p\n"
+            "Видосы из ютуба в чате качаются автоматически только если длина ролика менее 2 минут"
         )
     )
 
@@ -78,11 +82,6 @@ class Media(AcceptExtraMixin):
         ZenService,
     ]
 
-    NO_MEDIA_KEYS = {"nomedia", "no-media"}
-    DISK_KEYS = {'save', 'disk'}
-    AUDIO_KEYS = {'audio'}
-    CACHE_KEYS = {'cache'}
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.has_command_name = None
@@ -94,7 +93,7 @@ class Media(AcceptExtraMixin):
     @classmethod
     def accept_extra(cls, event: Event) -> bool:
         if event.message and not event.message.mentioned:
-            if cls.NO_MEDIA_KEYS.intersection(event.message.keys):
+            if MediaKeys.NO_MEDIA_KEYS.intersection(event.message.keys):
                 return False
             all_urls = get_urls_from_text(event.message.clear_case)
             for url in all_urls:
@@ -105,9 +104,10 @@ class Media(AcceptExtraMixin):
 
     def start(self) -> ResponseMessage:
         source = self._get_source_link()
+        media_keys = MediaKeys(self.event.message.keys)
 
         service_class, chosen_url = self._get_service_and_chosen_url(source)
-        service = service_class(self.bot, self.event)
+        service = service_class(self.bot, self.event, media_keys=media_keys, has_command_name=self.has_command_name)
         service.check_sender_role()
         service.check_valid_url(chosen_url)
 
@@ -123,12 +123,12 @@ class Media(AcceptExtraMixin):
 
         att_is_video = media_response.attachments and isinstance(media_response.attachments[0], VideoAttachment)
 
-        if self.DISK_KEYS.intersection(self.event.message.keys) and att_is_video:
+        if media_keys.disk and att_is_video:
             self.check_sender(Role.ADMIN)
             title = media_response.video_title or str(random.randint(1000000000, 999999999))
             service.save_to_disk(media_response, "Скачано", title)
 
-        if self.AUDIO_KEYS.intersection(self.event.message.keys) and att_is_video:
+        if media_keys.audio and att_is_video:
             video: VideoAttachment = media_response.attachments[0]
             vh = VideoHandler(video=video)
             aa = AudioAttachment()

@@ -165,7 +165,8 @@ class YoutubeVideo(SubscribeService):
                         x.get('vbr') and  # Это видео
                         x.get('ext') == 'mp4' and  # С форматом mp4
                         x.get('vcodec') not in ['vp9'] and  # С кодеками которые поддерживают все платформы
-                        x.get('dynamic_range') == 'SDR'  # В SDR качестве
+                        x.get('dynamic_range') == 'SDR' and  # В SDR качестве
+                        x.get('format_note')  # Имеют разрешение для просмотра (?)
                 ),
                 video_info['formats']
             )
@@ -184,24 +185,16 @@ class YoutubeVideo(SubscribeService):
             reverse=True
         )
 
-        best_audio_format = audio_formats[0]
-        best_video_format = video_formats[0] if high_res else None
+        af = audio_formats[0]
+        vf = video_formats[0]
 
-        for video_format in video_formats:
-            if best_video_format:
-                break
-            video_filesize = (video_format['filesize'] + best_audio_format['filesize']) / 1024 / 1024
-            if _timedelta:
-                video_filesize = video_filesize * _timedelta / video_info.get('duration')
-            max_filesize_mb = 200
-            if video_filesize < max_filesize_mb:
-                best_video_format = video_format
+        if not high_res:
+            for vf in video_formats:
+                if int(vf['height']) <= 1080:
+                    break
 
-        if not best_video_format:
-            raise ValueError()
-
-        video_filesize = (best_video_format['filesize'] + best_audio_format['filesize']) / 1024 / 1024
-        return best_video_format, best_audio_format, video_filesize
+        video_filesize = (vf['filesize'] + af['filesize']) / 1024 / 1024
+        return vf, af, video_filesize
 
     def _get_channel_info(self, channel_id: str) -> dict:
         url = "https://www.googleapis.com/youtube/v3/channels"
