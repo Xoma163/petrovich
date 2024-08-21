@@ -3,7 +3,7 @@ import io
 import os
 from concurrent.futures import ThreadPoolExecutor
 from io import BytesIO
-from tempfile import NamedTemporaryFile, _TemporaryFileWrapper
+from tempfile import NamedTemporaryFile, _TemporaryFileWrapper  # noqa
 from urllib.parse import urlparse
 
 import requests
