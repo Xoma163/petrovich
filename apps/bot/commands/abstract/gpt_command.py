@@ -311,12 +311,12 @@ class GPTCommand(ABC, Command):
                     defaults={'text': preprompt},
                     **dict(q.children)
                 )
-                rmi = ResponseMessageItem(f"Обновил {is_for}: {preprompt_obj.text}")
+                rmi = ResponseMessageItem(f"Обновил {is_for}: {self.bot.get_formatted_text(preprompt_obj.text)}")
         # посмотреть
         else:
             try:
                 preprompt = GPTPrePrompt.objects.get(q).text
-                rmi = ResponseMessageItem(f"Текущий {is_for}: {preprompt}")
+                rmi = ResponseMessageItem(f"Текущий {is_for}: {self.bot.get_formatted_text(preprompt)}")
             except GPTPrePrompt.DoesNotExist:
                 rmi = ResponseMessageItem(f"Текущий {is_for} не задан")
         return rmi

@@ -238,9 +238,11 @@ class Tag(TimeStampModelMixin):
 class GPTPrePrompt(TimeStampModelMixin):
     CHATGPT = 'chatgpt'
     GEMINI = 'gemini'
+    CLAUDE = 'claude'
     PROVIDER_CHOICES = (
         (CHATGPT, 'СhatGPT'),
-        (GEMINI, 'Gemini')
+        (GEMINI, 'Gemini'),
+        (CLAUDE, 'Claude'),
     )
 
     author = models.ForeignKey(Profile, models.CASCADE, verbose_name="Пользователь", null=True, blank=True)

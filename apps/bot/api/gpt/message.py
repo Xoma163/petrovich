@@ -1,6 +1,7 @@
 import dataclasses
 from abc import ABC
 from enum import Enum
+from itertools import groupby
 
 
 class GPTMessageRole(Enum):
@@ -42,7 +43,6 @@ class ChatGPTMessage(GPTMessage):
         return message
 
 
-
 @dataclasses.dataclass
 class GeminiGPTMessage(GPTMessage):
     def get_message(self) -> dict:
@@ -74,6 +74,31 @@ class GeminiGPTMessage(GPTMessage):
         return f"System prompt: {self.text}" if self.role == GPTMessageRole.SYSTEM else self.text
 
 
+@dataclasses.dataclass
+class ClaudeGPTMessage(GPTMessage):
+    def get_message(self) -> dict:
+        message = {
+            'role': self.role.value,
+            'content': [
+                {
+                    'type': 'text',
+                    'text': self.text
+                }
+            ]
+        }
+        if self.images:
+            for image in self.images:
+                message['content'].append({
+                    'type': 'image',
+                    "source": {
+                        "type": "base64",
+                        "media_type": "image/jpeg",
+                        "data": image
+                    },
+                })
+        return message
+
+
 class GPTMessages(ABC):
     def __init__(self, gpt_message_class: type[GPTMessage]):
         self._messages: list[GPTMessage] = []
@@ -103,3 +128,20 @@ class ChatGPTMessages(GPTMessages):
 class GeminiGPTMessages(GPTMessages):
     def __init__(self):
         super().__init__(GeminiGPTMessage)
+
+
+class ClaudeGPTMessages(GPTMessages):
+    def __init__(self):
+        super().__init__(ClaudeGPTMessage)
+
+    def get_messages(self) -> list[dict]:
+        _messages = [x.get_message() for x in self._messages]
+        grouped = groupby(_messages, key=lambda x: x['role'])
+        messages = []
+        for role, groupped_messages in grouped:
+            message = {'role': role, "content": []}
+            for groupped_message in groupped_messages:
+                for submessage in groupped_message['content']:
+                    message['content'].append(submessage)
+            messages.append(message)
+        return messages
