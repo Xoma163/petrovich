@@ -78,13 +78,18 @@ class VKVideo(SubscribeService):
         # Если не будет работать, то можно попробовать через поля 'url2160/url1440/url1080/url720/url480/url360/url240'
         va = None
         aa = None
+
+        dash = info.get('dash_sep')
+        hls = info.get('hls', info.get('hls_ondemand'))
         # Iphone не умеют в WEBM
-        # if dash_webm := info.get('dash_webm'):
-        #     va, aa = self._get_video_audio_dash(dash_webm)
-        if dash_sep := info.get('dash_sep'):
-            va, aa = self._get_video_audio_dash(dash_sep, high_res=high_res)
-        elif hls := info.get('hls'):
+        dash_webm = info.get('dash_webm')
+
+        if dash:
+            va, aa = self._get_video_audio_dash(dash, high_res=high_res)
+        elif hls:
             va, aa = self._get_video_hls(hls)
+        elif dash_webm:
+            va, aa = self._get_video_audio_dash(dash_webm, high_res=high_res)
         if va:
             va.thumbnail_url = info.get('short_video_cover', info.get('jpg'))
         return va, aa
