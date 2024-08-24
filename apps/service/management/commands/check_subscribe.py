@@ -12,7 +12,7 @@ from apps.bot.classes.const.exceptions import PSubscribeIndexError
 from apps.bot.classes.event.event import Event
 from apps.bot.classes.messages.message import Message
 from apps.bot.classes.messages.response_message import ResponseMessageItem
-from apps.bot.commands.media.service import MediaService, MediaServiceResponse
+from apps.bot.commands.media.service import MediaService, MediaServiceResponse, MediaKeys
 from apps.bot.commands.media.services.vk_video import VKVideoService
 from apps.bot.commands.media.services.youtube_video import YoutubeVideoService
 from apps.service.models import Subscribe
@@ -130,16 +130,19 @@ class Command(BaseCommand):
         bot = TgBot()
         event = Event()
         event.message = Message()
+
+        media_keys_list = []
         if high_res:
-            event.message.keys = [MediaService.HIGH_KEYS[0]]
+            media_keys_list.append(MediaKeys.HIGH_KEYS[0])
         if force_cache:
-            event.message.keys = [MediaService.CACHE_KEYS[0]]
+            media_keys_list.append(MediaKeys.CACHE_KEYS[0])
+        media_keys = MediaKeys(media_keys_list)
 
         logger.debug({
             "message": "get_media_result_msg",
             "notify_enitity": url,
         })
-        service = service_class(bot, event)
+        service = service_class(bot, event, media_keys=media_keys, has_command_name=True)
         response: MediaServiceResponse = service.get_content_by_url(url)
 
         if response.attachments:
