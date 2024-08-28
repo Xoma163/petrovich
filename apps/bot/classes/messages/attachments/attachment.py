@@ -163,9 +163,11 @@ class Attachment:
                 ranges = [(i, min(i + chunk_size - 1, file_size - 1)) for i in range(0, file_size, chunk_size)]
 
                 with ThreadPoolExecutor() as executor:
-                    chunks = list(
-                        executor.map(lambda r: self._download_chunk(download_url, r[0], r[1], proxies, _headers),
-                                     ranges))
+                    futures = [
+                        executor.submit(self._download_chunk, download_url, r[0], r[1], proxies, _headers)
+                        for r in ranges
+                    ]
+                    chunks = [future.result() for future in futures]
                 self.content = b''.join(chunks)
 
             elif stream:
