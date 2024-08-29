@@ -2,6 +2,7 @@ import dataclasses
 import os
 import shutil
 from io import BytesIO
+from urllib.parse import unquote
 
 from apps.bot.classes.bots.bot import Bot
 from apps.bot.classes.event.event import Event
@@ -112,7 +113,8 @@ class MediaService:
                                     video_title=title)
 
     def _get_download_cache_text(self, title, cache_video_url):
-        return f"{title}\nСкачать можно здесь {self.bot.get_formatted_url('здесь', self._get_cached_url(cache_video_url))}"
+        url = unquote(cache_video_url)
+        return f"{title}\nСкачать можно {self.bot.get_formatted_url('здесь', self._get_cached_url(url))}"
 
     @staticmethod
     def _get_cached_url(cache_video_url: str) -> str:

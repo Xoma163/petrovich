@@ -133,7 +133,8 @@ class Media(AcceptExtraMixin):
             else:
                 raise PSkip()
 
-        att_is_video = media_response.attachments and isinstance(media_response.attachments[0], VideoAttachment)
+        att_is_video = (media_response.attachments and isinstance(media_response.attachments[0],
+                                                                  VideoAttachment)) or media_response.cache_url
 
         if media_keys.disk and att_is_video:
             self.check_sender(Role.ADMIN)
@@ -196,8 +197,7 @@ class Media(AcceptExtraMixin):
 
         answer = ""
         if text:
-            # NOT IN VK VIDEO
-            if chosen_service not in [None]:
+            if not media_response.cache_url:
                 answer = f"{markdown_wrap_symbols(text)}\n"
             else:
                 answer = text

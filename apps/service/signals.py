@@ -7,7 +7,7 @@ from apps.service.models import VideoCache
 
 
 @receiver(models.signals.post_delete, sender=VideoCache)
-def delete_file_with_record(_, instance, **kwargs):
+def delete_file_with_record(instance, **kwargs):
     """
     Deletes file from filesystem
     when corresponding `MediaFile` object is deleted.

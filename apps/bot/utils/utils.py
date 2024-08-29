@@ -602,7 +602,7 @@ def make_thumbnail(
     return jpeg_image_io
 
 
-def prepare_filename(filename: str, replace_symbol=".") -> str:
+def prepare_filename(filename: str, replace_symbol="_") -> str:
     """
     Заменяет "плохие" символы в строке для корректного сохранения файла
     Обрезает по длине
@@ -612,5 +612,6 @@ def prepare_filename(filename: str, replace_symbol=".") -> str:
     for symbol in bad_symbols:
         filename = filename.replace(symbol, replace_symbol)
     filename = re.sub(f"\\{replace_symbol}+", replace_symbol, filename)
+    filename = re.sub(f'\s*{re.escape(replace_symbol)}\s*', replace_symbol, filename)
     filename = filename[:255]
     return filename
