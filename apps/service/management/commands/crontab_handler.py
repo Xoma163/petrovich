@@ -29,11 +29,19 @@ class Command(BaseCommand):
 
         dt_now = localize_datetime(datetime.utcnow(), TIME_ZONE).replace(second=0, microsecond=0)
 
+        threads = []
         for item in schedule:
             # Берём прошедшие события но в пределах 1 минуты
             if item.cron.previous(dt_now) != -60:
                 continue
-            threading.Thread(target=call_command, args=item.thread_args).start()
+            thread = threading.Thread(target=call_command, args=item.thread_args)
+            threads.append(thread)
+
+        for thread in threads:
+            thread.start()
+
+        for thread in threads:
+            thread.join()
 
 
 class ScheduleItem:

@@ -124,9 +124,13 @@ class Attachment:
         return self.private_download_url
 
     @staticmethod
-    def _download_chunk(url: str, _range: tuple[int, int], proxies: dict | None = None,
-                        headers: dict | None = None) -> bytes:
-        start, end = _range
+    def _download_chunk(
+            url: str,
+            start: int,
+            end: int,
+            proxies: dict | None = None,
+            headers: dict | None = None
+    ) -> bytes:
         _headers = {'Range': f'bytes={start}-{end}'}
         _headers.update(headers)
 
@@ -164,8 +168,9 @@ class Attachment:
                 ranges = [(i, min(i + chunk_size - 1, file_size - 1)) for i in range(0, file_size, chunk_size)]
 
                 with ThreadPoolExecutor() as executor:
-                    parts = executor.map(lambda x: self._download_chunk(download_url, x, proxies, _headers), ranges)
-                self.content = b''.join(parts)
+                    chunks = executor.map(lambda r: self._download_chunk(download_url, r[0], r[1], proxies, _headers),
+                                          ranges)
+                self.content = b''.join(chunks)
 
             elif stream:
                 self.content = requests.get(download_url, proxies=proxies, headers=_headers, stream=True).iter_content(
