@@ -214,8 +214,8 @@ class YoutubeVideo(SubscribeService):
         r = requests.get(f"https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}", proxies=self.proxies)
         if r.status_code != 200:
             raise PWarning("Не нашёл такого канала")
-        bsop = BeautifulSoup(r.content, 'lxml')
-        videos = [x.find('yt:videoid').text for x in bsop.find_all('entry')]
+        bsop = BeautifulSoup(r.content, 'xml')
+        videos = [x.find('yt:videoId').text for x in bsop.find_all('entry')]
         return list(reversed(videos))
 
     def _get_playlist_info(self, channel_id: str) -> dict:
