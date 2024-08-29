@@ -108,7 +108,7 @@ class VKVideo(SubscribeService):
         audio_representations = list(sorted(audio_representations, key=lambda x: int(x['@bandwidth']), reverse=True))
 
         aa = AudioAttachment()
-        aa.public_download_url = f"{parsed_url.scheme}://{parsed_url.hostname}/{audio_representations[-1]['BaseURL']}"
+        aa.public_download_url = f"{parsed_url.scheme}://{parsed_url.hostname}/{audio_representations[0]['BaseURL']}"
         aa.download_content(headers=self.headers, stream=True)
 
         vr = video_representations[0]
