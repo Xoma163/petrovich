@@ -67,9 +67,9 @@ class Zen:
         )
 
     @staticmethod
-    def download_video(m3u8_master_url) -> VideoAttachment:
+    def download_video(data: VideoData) -> VideoAttachment:
         va = VideoAttachment()
-        va.m3u8_url = m3u8_master_url
+        va.m3u8_url = data.m3u8_master_url
         vh = VideoHandler(video=va)
         va.content = vh.download()
         return va

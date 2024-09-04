@@ -25,7 +25,7 @@ class ZenService(MediaService):
         if cached := self._get_cached(data.channel_id, data.video_id, data.title):
             return cached
 
-        va = self.service.download_video(data.m3u8_master_url)
+        va = self.service.download_video(data)
         va.thumbnail_url = data.thumbnail_url
         va.width = data.width
         va.height = data.height

@@ -82,6 +82,9 @@ class GPTCommand(ABC, Command):
         if accept:
             return True
 
+        # if event.is_from_pm:
+        #     return True
+
         # Проверка, является ли это сообщение реплаем на другое сообщение, которое в свою очередь может быть реплаем на
         # обращение к gpt
         return bool(self._get_first_gpt_event_in_replies(event))
@@ -252,7 +255,7 @@ class GPTCommand(ABC, Command):
             raw = data.get(reply_to_id)
             tg_event = TgEvent({"message": raw})
             tg_event.setup_event()
-            if tg_event.message and tg_event.message.command in self.full_names:
+            if tg_event.message and tg_event.message.command in self.full_names:  # or event.is_from_pm:
                 find_accept_event = tg_event
             reply_to_id = data.get(reply_to_id, {}).get('reply_to_message', {}).get('message_id')
             if not reply_to_id:

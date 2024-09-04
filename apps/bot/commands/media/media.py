@@ -21,6 +21,7 @@ from apps.bot.commands.media.services.suno_ai import SunoAIService
 from apps.bot.commands.media.services.tiktok import TikTokService
 from apps.bot.commands.media.services.twitch_clips import TwitchClipsService
 from apps.bot.commands.media.services.twitter import TwitterService
+from apps.bot.commands.media.services.u_tv import UTVService
 from apps.bot.commands.media.services.vk_video import VKVideoService
 from apps.bot.commands.media.services.yandex_music import YandexMusicService
 from apps.bot.commands.media.services.youtube_music import YoutubeMusicService
@@ -43,17 +44,36 @@ class Media(AcceptExtraMixin):
         ],
         help_text_keys=[
             HelpTextItem(Role.USER, [
-                HelpTextKey(MediaKeys.NO_MEDIA_KEYS[0], MediaKeys.NO_MEDIA_KEYS[1:], "позволяет не запускать команду"),
-                HelpTextKey(MediaKeys.AUDIO_KEYS[0], MediaKeys.AUDIO_KEYS[1:],
-                            "позволяет скачивать аудиодорожку для видео"),
-                HelpTextKey(MediaKeys.HIGH_KEYS[0], MediaKeys.HIGH_KEYS[1:],
-                            "сохраняет видео в максимальном качестве (VK Video/Youtube Video)"),
-                HelpTextKey(MediaKeys.CACHE_KEYS[0], MediaKeys.CACHE_KEYS[1:],
-                            "позволяет загрузить видео в онлайн-кэш (VK Video/Youtube Video)"),
-                HelpTextKey(MediaKeys.FORCE_KEYS[0], MediaKeys.FORCE_KEYS[1:],
-                            "позволяет загрузить видео принудительно (Youtube Video)"),
-                HelpTextKey(MediaKeys.THREADS_KEYS[0], MediaKeys.THREADS_KEYS[1:],
-                            "позволяет скачивать пост с комментариями автора(Twitter)"),
+                HelpTextKey(
+                    MediaKeys.NO_MEDIA_KEYS[0],
+                    MediaKeys.NO_MEDIA_KEYS[1:],
+                    "позволяет не запускать команду"
+                ),
+                HelpTextKey(
+                    MediaKeys.AUDIO_KEYS[0],
+                    MediaKeys.AUDIO_KEYS[1:],
+                    "позволяет скачивать аудиодорожку для видео"
+                ),
+                HelpTextKey(
+                    MediaKeys.HIGH_KEYS[0],
+                    MediaKeys.HIGH_KEYS[1:],
+                    "сохраняет видео в максимальном качестве (VK Video/Youtube Video)"
+                ),
+                HelpTextKey(
+                    MediaKeys.CACHE_KEYS[0],
+                    MediaKeys.CACHE_KEYS[1:],
+                    "позволяет загрузить видео в онлайн-кэш (VK Video/Youtube Video/Телеканал Ю)"
+                ),
+                HelpTextKey(
+                    MediaKeys.FORCE_KEYS[0],
+                    MediaKeys.FORCE_KEYS[1:],
+                    "позволяет загрузить видео принудительно (Youtube Video)"
+                ),
+                HelpTextKey(
+                    MediaKeys.THREADS_KEYS[0],
+                    MediaKeys.THREADS_KEYS[1:],
+                    "позволяет скачивать пост с комментариями автора(Twitter)"
+                ),
             ]),
             HelpTextItem(Role.ADMIN, [
                 HelpTextKey(MediaKeys.DISK_KEYS[0], MediaKeys.DISK_KEYS[1:], "сохраняет видео в локальную директорию"),
@@ -62,7 +82,7 @@ class Media(AcceptExtraMixin):
         ],
         extra_text=(
             "Поддерживаемые соцсети: Youtube Video/Youtube Music/Reddit/TikTok/Instagram/Twitter/"
-            "Yandex Music/Pinterest/Coub/VK Video/TwitchClips/Spotify/Suno AI/Yandex Zen\n\n"
+            "Yandex Music/Pinterest/Coub/VK Video/TwitchClips/Spotify/Suno AI/Yandex Zen/Телеканал Ю\n\n"
 
             "Некоторые сервисы доступны только доверенным пользователям: Twitter/Instagram/Yandex Music\n"
             "По умолчанию видео для Youtube/VK Video качается в качестве до 1080p\n"
@@ -91,6 +111,7 @@ class Media(AcceptExtraMixin):
         SpotifyService,
         SunoAIService,
         ZenService,
+        UTVService
     ]
 
     def __init__(self, *args, **kwargs):
