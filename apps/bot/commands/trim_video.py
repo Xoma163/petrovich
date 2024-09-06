@@ -87,10 +87,8 @@ class TrimVideo(Command):
             start_dt = datetime.strptime(start_pos, self.TIMECODE_FORMAT)
             delta = (end_dt - start_dt).seconds
 
-        max_filesize_mb = self.bot.MAX_VIDEO_SIZE_MB if isinstance(self.bot, TgBot) else None
-
         yt_api = YoutubeVideo()
-        info = yt_api.get_video_info(link, _timedelta=delta, max_filesize_mb=max_filesize_mb)
+        info = yt_api.get_video_info(link, _timedelta=delta)
         video = yt_api.download_video(info)
         return self.trim(video, start_pos, end_pos)
 

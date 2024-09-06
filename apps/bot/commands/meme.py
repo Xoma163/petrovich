@@ -462,8 +462,7 @@ class Meme(AcceptExtraMixin):
         try:
             # Если видео надо нарезать
             from apps.bot.classes.bots.tg_bot import TgBot
-            max_filesize_mb = self.bot.MAX_VIDEO_SIZE_MB if isinstance(self.bot, TgBot) else None
-            data = yt_api.get_video_info(meme.link, max_filesize_mb)
+            data = yt_api.get_video_info(meme.link)
 
             if start_pos:
                 tm = TrimVideo()
