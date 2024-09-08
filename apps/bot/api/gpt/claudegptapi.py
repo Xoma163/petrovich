@@ -1,6 +1,7 @@
 from apps.bot.api.gpt.gpt import GPTAPI
 from apps.bot.api.gpt.message import GPTMessages, GPTMessageRole
 from apps.bot.api.gpt.response import GPTAPICompletionsResponse
+from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.utils.proxy import get_proxies
 from petrovich.settings import env
 
@@ -26,6 +27,9 @@ class ClaudeGPTAPI(GPTAPI):
             data["system"] = preprompt
 
         r = self._do_request(data)
+        if error := r.get("error", {}).get("message"):
+            if "Your credit balance is too low" in error:
+                raise PWarning("Закончились деньги((")
 
         answer = r['content'][0]['text']
         r = GPTAPICompletionsResponse(text=answer)
