@@ -11,11 +11,11 @@ from apps.bot.utils.utils import get_role_by_str
 class Roles(Command):
     name = "роль"
     names = ["роли"]
-    access = Role.ADMIN
+    access = Role.MODERATOR
     help_text = HelpText(
         commands_text="добавление и удаление ролей пользователю",
         help_texts=[
-            HelpTextItem(Role.ADMIN, [
+            HelpTextItem(Role.MODERATOR, [
                 HelpTextArgument("добавить (пользователь) (роль)", "добавляет роль пользователю"),
                 HelpTextArgument("удалить (пользователь) (роль)", "удаляет роль пользователю")
             ])
@@ -32,6 +32,10 @@ class Roles(Command):
         role = get_role_by_str(role_str)
         if role in [Role.ADMIN, Role.BANNED, Role.USER]:
             raise PWarning(f"Нельзя добавлять/удалять роль \"{role}\"")
+
+        if self.event.sender.check_role(Role.MODERATOR):
+            if role in [Role.MODERATOR]:
+                raise PWarning(f"Нельзя добавлять/удалять роль \"{role}\"")
 
         if action == "добавить":
             rmi = self.add_role(profile, role)
