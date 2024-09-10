@@ -15,7 +15,6 @@ class ChatGPT(GPTCommand):
     abstract = False
 
     access = Role.USER
-    chat_gpt_key = True
 
     help_text = HelpText(
         commands_text="чат ChatGPT",
@@ -45,8 +44,8 @@ class ChatGPT(GPTCommand):
         super().__init__(GPTPrePrompt.CHATGPT, ChatGPTAPI, ChatGPTMessages)
 
     def start(self) -> ResponseMessage:
-        if not self.event.sender.check_role(Role.TRUSTED) and not self.event.sender.settings.chat_gpt_key:
-            if self.event.message.args[0] == "ключ":
+        if not self.event.sender.check_role(Role.GPT) and not self.event.sender.settings.chat_gpt_key:
+            if self.event.message.args[0] in ["ключ", "key"]:
                 return ResponseMessage(self.menu_key())
             else:
                 self.check_chat_gpt_key()
