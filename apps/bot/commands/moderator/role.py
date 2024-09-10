@@ -27,13 +27,22 @@ class Roles(Command):
     bot: TgBot
 
     def start(self) -> ResponseMessage:
-        action, username, role_str = self.event.message.args_str.split(' ', 3)
+        try:
+            action, username, role_str = self.event.message.args_str.split(' ', 3)
+        except ValueError:
+            raise PWarning("Проверьте синтаксис команды. Слишком много аргументов")
+
         profile = self.bot.get_profile_by_name([username], self.event.chat)
         role = get_role_by_str(role_str)
+        if role is None:
+            raise PWarning(f"Я не знаю роли {role_str}")
+
+        # Нельзя никому
         if role in [Role.ADMIN, Role.BANNED, Role.USER]:
             raise PWarning(f"Нельзя добавлять/удалять роль \"{role}\"")
 
-        if self.event.sender.check_role(Role.MODERATOR):
+        # Нельзя модераторам, можно админам
+        if self.event.sender.check_role(Role.MODERATOR) and not self.event.sender.check_role(Role.ADMIN):
             if role in [Role.MODERATOR]:
                 raise PWarning(f"Нельзя добавлять/удалять роль \"{role}\"")
 

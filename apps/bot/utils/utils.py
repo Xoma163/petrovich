@@ -240,15 +240,16 @@ def get_role_by_str(role_str: str):
     """
 
     roles_map = {
-        ('администрация', 'администратор', 'админы', 'админ', 'главный', 'власть', 'господин', 'хозяин'): Role.ADMIN,
-        ('moderators', 'moderator', 'модераторы', 'модератор', 'модеры', 'модер'): Role.MODERATOR,
-        ('майнкрафт', 'майн'): Role.MINECRAFT,
-        ('забанен', 'бан'): Role.BANNED,
-        ('доверенный', 'проверенный'): Role.TRUSTED,
-        ('мразь', 'мразота', 'мрази'): Role.MRAZ,
-        ('флейва',): Role.FLAIVA,
+        ('администрация', 'администратор', 'админы', 'админ', 'главный', 'власть', 'господин', 'хозяин', 'admin',
+         'administrator'): Role.ADMIN,
+        ('moderators', 'moderator', 'модераторы', 'модератор', 'модеры', 'модер', 'moder'): Role.MODERATOR,
+        ('майнкрафт', 'майн', 'minecraft', 'mine'): Role.MINECRAFT,
+        ('забанен', 'бан', 'ban', 'banned'): Role.BANNED,
+        ('доверенный', 'проверенный', 'trust', 'trusted'): Role.TRUSTED,
+        ('мразь', 'мразота', 'мрази', 'mraz'): Role.MRAZ,
+        ('флейва', 'flaiva'): Role.FLAIVA,
         ('gpt', 'гпт'): Role.GPT,
-        ('пользователь', 'юзер'): Role.USER
+        ('пользователь', 'юзер', 'user'): Role.USER
     }
     for k in roles_map:
         if role_str in k:
