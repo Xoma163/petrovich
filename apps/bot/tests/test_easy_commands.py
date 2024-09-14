@@ -62,5 +62,13 @@ class CommandHiTestCase(BotInitializer):
 class CommandThanksTestCase(BotInitializer):
     Command = Thanks
 
-    def test_no_args(self):
+    def test_no_args_pm(self):
+        self.event.is_from_pm = True
         return self.check_correct_answer()
+
+    def test_no_args_chat(self):
+        self.event.is_from_chat = True
+        try:
+            return self.check_correct_answer()
+        except PSkip:
+            return True
