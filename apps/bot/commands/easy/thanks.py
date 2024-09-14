@@ -6,6 +6,7 @@ from apps.bot.utils.utils import random_event
 class Thanks(Command):
     name = "спасибо"
     names = ["спс", 'ty', 'дякую', 'сяп']
+    mentioned = True
 
     def start(self) -> ResponseMessage:
         answer = random_event(["Всегда пожалуйста", "На здоровье", "Обращайся", "<3"])
