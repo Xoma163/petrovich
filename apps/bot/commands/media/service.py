@@ -81,7 +81,7 @@ class MediaService:
         """
         try:
             cache = VideoCache.objects.get(channel_id=channel_id, video_id=video_id)
-            text = self._get_download_cache_text(title, cache.video.url)
+            text = self._get_download_cache_text(title, cache.video.url, cache.original_url)
             return MediaServiceResponse(text, None, cache=cache, cache_url=self._get_cached_url(cache.video.url),
                                         video_title=title)
         except VideoCache.DoesNotExist:
@@ -92,6 +92,7 @@ class MediaService:
             channel_id: str,
             video_id: str,
             title: str,
+            original_url: str,
             content: bytes
     ) -> MediaServiceResponse:
         """
@@ -104,17 +105,19 @@ class MediaService:
         cache = VideoCache(
             channel_id=channel_id,
             video_id=video_id,
-            filename=filename
+            filename=filename,
+            original_url=original_url,
         )
         cache.video.save(filename, content=BytesIO(content))
         cache.save()
-        text = self._get_download_cache_text(title, cache.video.url)
+        text = self._get_download_cache_text(title, cache.video.url, cache.original_url)
         return MediaServiceResponse(text, None, cache=cache, cache_url=self._get_cached_url(cache.video.url),
                                     video_title=title)
 
-    def _get_download_cache_text(self, title, cache_video_url):
+    def _get_download_cache_text(self, title, cache_video_url, cache_video_original_url):
         url = unquote(cache_video_url)
-        return f"{title}\nСкачать можно {self.bot.get_formatted_url('здесь', self._get_cached_url(url))}"
+        return f"{self.bot.get_formatted_url(title, self._get_cached_url(cache_video_original_url))}\n" \
+               f"Скачать можно {self.bot.get_formatted_url('здесь', self._get_cached_url(url))}"
 
     @staticmethod
     def _get_cached_url(cache_video_url: str) -> str:

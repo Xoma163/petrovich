@@ -30,7 +30,7 @@ class ZenService(MediaService):
         va.width = data.width
         va.height = data.height
         if va.get_size_mb() > self.bot.MAX_VIDEO_SIZE_MB:
-            return self._cache_video(data.channel_id, data.video_id, data.title, va.content)
+            return self._cache_video(data.channel_id, data.video_id, data.title, url, va.content)
 
         return MediaServiceResponse(text=data.title, attachments=[va], video_title=data.title)
 

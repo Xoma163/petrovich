@@ -22,9 +22,9 @@ class YoutubeVideoService(MediaService):
             raise PSkip()
 
         with ChatActivity(self.bot, ActivitiesEnum.UPLOAD_VIDEO, self.event.peer_id):
-            return self._get_content_by_url(video_data)
+            return self._get_content_by_url(video_data, url)
 
-    def _get_content_by_url(self, data: VideoData) -> MediaServiceResponse:
+    def _get_content_by_url(self, data: VideoData, url: str) -> MediaServiceResponse:
         text = data.title if data.duration > 60 else None
 
         if cached := self._get_cached(data.channel_id, data.video_id, text):
@@ -33,7 +33,7 @@ class YoutubeVideoService(MediaService):
         va = self.service.download_video(data)
 
         if self.media_keys.cache or va.get_size_mb() > self.bot.MAX_VIDEO_SIZE_MB:
-            return self._cache_video(data.channel_id, data.video_id, data.title, va.content)
+            return self._cache_video(data.channel_id, data.video_id, data.title, url, va.content)
 
         return MediaServiceResponse(text=text, attachments=[va], video_title=data.title)
 
