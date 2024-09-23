@@ -65,7 +65,9 @@ class Twitter(API):
         response = TwitterAPIResponse()
         response.caption = text
 
-        if not tweet_data['extended_entities']:
+        if not tweet_data.get('extended_entities'):
+            if 'exceeded the MONTHLY quota' in tweet_data.get('message'):
+                raise PWarning("Закончились запросы к API((")
             return response
 
         for entity in tweet_data['extended_entities']['media']:
