@@ -603,16 +603,23 @@ def make_thumbnail(
     return jpeg_image_io
 
 
-def prepare_filename(filename: str, replace_symbol="_") -> str:
+def prepare_filename(filename: str, replace_symbol=".") -> str:
     """
     Заменяет "плохие" символы в строке для корректного сохранения файла
     Обрезает по длине
     """
+    escaped_replace_symbol = re.escape(replace_symbol)
 
+    # Заменяем "плохие" символы на replace_symbol
     bad_symbols = ["\\", "/", ":", "*", "?", "\"", "<", ">", "|", "+"]
     for symbol in bad_symbols:
         filename = filename.replace(symbol, replace_symbol)
-    filename = re.sub(f"\\{replace_symbol}+", replace_symbol, filename)
-    filename = re.sub(f'\s*{re.escape(replace_symbol)}\s*', replace_symbol, filename)
-    filename = filename[:255]
+    # Убираем пробелы с краёв
+    filename = filename.strip()
+    # Убираем последовательности replace_symbol до одного
+    filename = re.sub(rf"{escaped_replace_symbol}+", replace_symbol, filename)
+    # Убираем лишние пробелы до одного
+    filename = re.sub(r"\s+", " ", filename)  # Удаление лишних пробелов
+    # Максимальная длина - 255. Режем с конца, так как может потеряться расширение файла
+    filename = filename[-255:]
     return filename
