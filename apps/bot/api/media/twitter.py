@@ -54,22 +54,27 @@ class Twitter(API):
         if r.get('message') and self.MONTHLY_QUOTA_ERROR in r['message']:
             raise PWarning("Закончились запросы к API((")
 
-        post_data = r.get('details', {}).get('legacy', {})
-        threads = r.get('threadContent')
+        response = r.get('details', {})
+        post_data = response.get('legacy', {})
 
         if not post_data:
             raise PWarning("Ошибка. В посте нет данных. Заведите ишу, плиз, гляну чё там")
 
+        threads = r.get('threadContent')
         if with_threads and threads:
             try:
                 return self._get_post_with_replies(post_data, threads)
             except RuntimeError:
                 return self._get_text_and_attachments(post_data)
         else:
-            return self._get_text_and_attachments(post_data)
+            note_tweet = response.get('note_tweet', {}).get('note_tweet_results', {}).get('result', {}).get('text', "")
+            return self._get_text_and_attachments(post_data, text=note_tweet)
 
-    def _get_text_and_attachments(self, post_data) -> TwitterAPIResponse:
-        text = self._get_text_without_tco_links(post_data.get('full_text', ""))
+    def _get_text_and_attachments(self, post_data: dict, text=None) -> TwitterAPIResponse:
+        full_text = post_data.get("full_text", "")
+        text = text or full_text
+        text = self._get_text_without_tco_links(text)
+
         response = TwitterAPIResponse()
         response.caption = text
 
@@ -89,7 +94,10 @@ class Twitter(API):
         tweet_id = post_data.get('id_str')
         user_id = post_data.get('user_id_str')
 
-        threads = [x for x in threads if x[0]['legacy']['user_id_str'] == user_id][0]
+        threads_list = [x for x in threads if x[0]['legacy']['user_id_str'] == user_id]
+        if not threads_list:
+            raise PWarning("Не нашёл тредов по данному твиту")
+        threads = threads_list[0]
         replies = list(filter(lambda x: x['legacy']['user_id_str'] == user_id, threads))
 
         replies_tweet_reply_id_dict = {x['legacy']['in_reply_to_status_id_str']: x for x in replies}
