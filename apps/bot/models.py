@@ -103,6 +103,7 @@ class Chat(Platform, TimeStampModelMixin):
     def __str__(self):
         return str(self.name) if self.name else f"id:{self.id}"
 
+
 class Profile(TimeStampModelMixin):
     GENDER_FEMALE = '1'
     GENDER_MALE = '2'
@@ -147,7 +148,6 @@ class Profile(TimeStampModelMixin):
         if self.settings:
             self.settings.delete()
         super(Profile, self).delete(*args, **kwargs)
-
 
     def set_avatar(self, att: PhotoAttachment = None):
         image = att.get_bytes_io_content()

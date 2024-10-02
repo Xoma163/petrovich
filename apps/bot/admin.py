@@ -1,5 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.models import Group
+from django.urls import reverse
+from django.utils.html import format_html
 
 from apps.bot.models import Profile, Chat, Bot, User, ChatSettings, UserSettings
 from apps.service.mixins import TimeStampAdminMixin
@@ -18,26 +20,33 @@ class NoSpecificGroupFilter(admin.SimpleListFilter):
             return queryset.exclude(groups__id=self.value())
         return queryset
 
+
 @admin.register(Profile)
 class ProfileAdmin(TimeStampAdminMixin):
     list_display = ('name', 'surname', 'nickname_real', 'gender', 'birthday', 'city')
     fieldsets = (
         (
-            'Информация о профиле',
+            'Profile Info',
             {
                 'fields': ('name', 'surname', 'nickname_real', 'gender', 'birthday', 'city', 'avatar')
             }
         ),
         (
-            'Прочее',
+            'Other',
             {
-                'fields': ('groups', 'chats', 'settings')
+                'fields': ('groups', 'settings')
             }
         ),
         (
             'API',
             {
                 'fields': ('api_token',)
+            }
+        ),
+        (
+            'Chats',
+            {
+                'fields': ('get_chats', 'chats')
             }
         ),
 
@@ -53,6 +62,21 @@ class ProfileAdmin(TimeStampAdminMixin):
     search_fields = ['name', 'surname', 'nickname_real', 'user__user_id']
 
     ordering = ["name", "surname"]
+
+    readonly_fields = ['get_chats']
+
+    @admin.display(description='Чаты 2')
+    def get_chats(self, obj):
+        chats = obj.chats.all()
+        links = [
+            format_html(
+                '<a href="{url}">{name}</a>',
+                url=reverse('admin:bot_chat_change', args=[profile.id]),
+                name=str(profile)
+            )
+            for profile in chats
+        ]
+        return format_html("<br>".join(links))
 
 
 @admin.register(User)
@@ -71,6 +95,21 @@ class ChatAdmin(TimeStampAdminMixin):
     list_filter = ('platform', 'kicked')
 
     ordering = ["name"]
+
+    readonly_fields = ['get_users']
+
+    @admin.display(description='Пользователи')
+    def get_users(self, obj):
+        profiles = obj.users.all()
+        links = [
+            format_html(
+                '<a href="{url}">{name}</a>',
+                url=reverse('admin:bot_profile_change', args=[profile.id]),
+                name=str(profile)
+            )
+            for profile in profiles
+        ]
+        return format_html("<br>".join(links))
 
 
 @admin.register(Bot)
