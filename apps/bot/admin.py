@@ -34,7 +34,7 @@ class ProfileAdmin(TimeStampAdminMixin):
         (
             'Other',
             {
-                'fields': ('groups', 'settings')
+                'fields': ('groups', 'get_settings')
             }
         ),
         (
@@ -68,7 +68,7 @@ class ProfileAdmin(TimeStampAdminMixin):
 
     ordering = ["name", "surname"]
 
-    readonly_fields = ['get_chats', 'get_chats_count']
+    readonly_fields = ['get_chats', 'get_chats_count', 'get_settings']
 
     @admin.display(description='Чаты')
     def get_chats(self, obj: Profile):
@@ -86,6 +86,15 @@ class ProfileAdmin(TimeStampAdminMixin):
     @admin.display(description='Количество чатов')
     def get_chats_count(self, obj: Profile):
         return obj.chats.all().count()
+
+    @admin.display(description="Настройки")
+    def get_settings(self, obj: Profile):
+        settings = obj.settings.first()
+        return format_html(
+            '<a href="{url}">{name}</a>',
+            url=reverse('admin:bot_usersettings_change', args=[settings.id]),
+            name=str(settings)
+        )
 
 
 @admin.register(User)
@@ -105,7 +114,7 @@ class ChatAdmin(TimeStampAdminMixin):
 
     ordering = ["name"]
 
-    readonly_fields = ['get_users_count', 'get_users']
+    readonly_fields = ['get_users_count', 'get_users', 'get_settings']
 
     fieldsets = (
         (
@@ -117,7 +126,7 @@ class ChatAdmin(TimeStampAdminMixin):
         (
             'Other',
             {
-                'fields': ('settings',)
+                'fields': ('get_settings',)
             }
         ),
         (
@@ -151,6 +160,14 @@ class ChatAdmin(TimeStampAdminMixin):
     def get_users_count(self, obj: Chat):
         return obj.users.all().count()
 
+    @admin.display(description="Настройки")
+    def get_settings(self, obj: Chat):
+        settings = obj.settings.first()
+        return format_html(
+            '<a href="{url}">{name}</a>',
+            url=reverse('admin:bot_chatsettings_change', args=[settings.id]),
+            name=str(settings)
+        )
 
 @admin.register(Bot)
 class BotAdmin(TimeStampAdminMixin):
