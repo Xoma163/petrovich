@@ -163,10 +163,14 @@ class BotAdmin(TimeStampAdminMixin):
 class UserSettingsAdmin(TimeStampAdminMixin):
     list_display = (
         'profile', 'need_meme', 'need_reaction', 'use_swear', 'celebrate_bday', 'show_birthday_year', 'use_mention',
-        'chat_gpt_key', 'chat_gpt_model')
+        'chat_gpt_key', 'chat_gpt_model'
+    )
+    list_editable = ('need_meme', 'need_reaction', 'use_swear', 'celebrate_bday', 'show_birthday_year', 'use_mention')
+
     ordering = ["id"]
 
 
 @admin.register(ChatSettings)
 class ChatSettingsAdmin(TimeStampAdminMixin):
     list_display = ('chat', 'no_mention', 'need_turett', 'celebrate_bday', 'recognize_voice')
+    list_editable = ('no_mention', 'need_turett', 'celebrate_bday', 'recognize_voice')
