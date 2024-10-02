@@ -23,7 +23,7 @@ class NoSpecificGroupFilter(admin.SimpleListFilter):
 
 @admin.register(Profile)
 class ProfileAdmin(TimeStampAdminMixin):
-    list_display = ('name', 'surname', 'nickname_real', 'gender', 'birthday', 'city')
+    list_display = ('name', 'surname', 'nickname_real', 'gender', 'birthday', 'city', 'get_chats_count')
     fieldsets = (
         (
             'Profile Info',
@@ -68,7 +68,7 @@ class ProfileAdmin(TimeStampAdminMixin):
 
     ordering = ["name", "surname"]
 
-    readonly_fields = ['get_chats']
+    readonly_fields = ['get_chats', 'get_chats_count']
 
     @admin.display(description='Чаты')
     def get_chats(self, obj: Profile):
