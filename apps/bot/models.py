@@ -28,6 +28,9 @@ class BaseSettings(models.Model):
 
 
 class ChatSettings(BaseSettings, TimeStampModelMixin):
+    chat = models.ForeignKey("Chat", on_delete=models.CASCADE, verbose_name="Чат", related_name="settings", blank=True,
+                             null=True)
+
     no_mention = models.BooleanField('Работа без упоминания в конфе', default=False)
     need_turett = models.BooleanField('Слать туреттные сообщения', default=False)
     celebrate_bday = models.BooleanField('Поздравлять с Днём рождения', default=False)
@@ -43,6 +46,9 @@ class ChatSettings(BaseSettings, TimeStampModelMixin):
 
 class UserSettings(BaseSettings, TimeStampModelMixin):
     GPT_MODEL_CHOICES = [(x.name, x.verbose_name) for x in GPTModels.get_completions_models()]
+
+    profile = models.ForeignKey("Profile", on_delete=models.CASCADE, verbose_name="Профиль", related_name="settings",
+                                blank=True, null=True)
 
     need_meme = models.BooleanField('Слать мемы по точному названию', default=False)
     need_reaction = models.BooleanField('Реагировать на неверные команды', default=True)
@@ -73,10 +79,6 @@ class Chat(Platform, TimeStampModelMixin):
     name = models.CharField('Название', max_length=256, default="", blank=True)
     is_banned = models.BooleanField('Забанен', default=False)
 
-    # Настройки
-    settings = models.OneToOneField(ChatSettings, verbose_name="Настройки", on_delete=models.CASCADE, null=True,
-                                    related_name="chat")
-
     # Для статистики
     kicked = models.BooleanField("Бота кикнули", default=False)
 
@@ -94,11 +96,6 @@ class Chat(Platform, TimeStampModelMixin):
             self.settings = cs
 
         super(Chat, self).save(**kwargs)
-
-    def delete(self, *args, **kwargs):
-        if self.settings:
-            self.settings.delete()
-        super(Chat, self).delete(*args, **kwargs)
 
     def __str__(self):
         return str(self.name) if self.name else f"id:{self.id}"
@@ -123,10 +120,6 @@ class Profile(TimeStampModelMixin):
     groups = models.ManyToManyField(Group, verbose_name="Группы")
     chats = models.ManyToManyField(Chat, verbose_name="Чаты", blank=True, related_name="users")
 
-    # Настройки
-    settings = models.OneToOneField(UserSettings, verbose_name="Настройки", on_delete=models.CASCADE, null=True,
-                                    related_name="profile")
-
     api_token = models.CharField("Токен для API", max_length=100, blank=True)
 
     def save(self, **kwargs):
@@ -143,11 +136,6 @@ class Profile(TimeStampModelMixin):
             # auto add user group
             group_user = Group.objects.get(name=Role.USER.name)
             self.groups.add(group_user)
-
-    def delete(self, *args, **kwargs):
-        if self.settings:
-            self.settings.delete()
-        super(Profile, self).delete(*args, **kwargs)
 
     def set_avatar(self, att: PhotoAttachment = None):
         image = att.get_bytes_io_content()
