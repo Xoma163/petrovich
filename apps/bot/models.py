@@ -28,8 +28,8 @@ class BaseSettings(models.Model):
 
 
 class ChatSettings(BaseSettings, TimeStampModelMixin):
-    chat = models.ForeignKey("Chat", on_delete=models.CASCADE, verbose_name="Чат", related_name="settings", blank=True,
-                             null=True)
+    chat = models.OneToOneField("Chat", on_delete=models.CASCADE, verbose_name="Чат", related_name="settings",
+                                blank=True, null=True)
 
     no_mention = models.BooleanField('Работа без упоминания в конфе', default=False)
     need_turett = models.BooleanField('Слать туреттные сообщения', default=False)
@@ -47,8 +47,8 @@ class ChatSettings(BaseSettings, TimeStampModelMixin):
 class UserSettings(BaseSettings, TimeStampModelMixin):
     GPT_MODEL_CHOICES = [(x.name, x.verbose_name) for x in GPTModels.get_completions_models()]
 
-    profile = models.ForeignKey("Profile", on_delete=models.CASCADE, verbose_name="Профиль", related_name="settings",
-                                blank=True, null=True)
+    profile = models.OneToOneField("Profile", on_delete=models.CASCADE, verbose_name="Профиль",
+                                   related_name="settings", blank=True, null=True)
 
     need_meme = models.BooleanField('Слать мемы по точному названию', default=False)
     need_reaction = models.BooleanField('Реагировать на неверные команды', default=True)

@@ -89,7 +89,7 @@ class ProfileAdmin(TimeStampAdminMixin):
 
     @admin.display(description="Настройки")
     def get_settings(self, obj: Profile):
-        settings = obj.settings.first()
+        settings = obj.settings
         return format_html(
             '<a href="{url}">{name}</a>',
             url=reverse('admin:bot_usersettings_change', args=[settings.id]),
@@ -162,7 +162,7 @@ class ChatAdmin(TimeStampAdminMixin):
 
     @admin.display(description="Настройки")
     def get_settings(self, obj: Chat):
-        settings = obj.settings.first()
+        settings = obj.settings
         return format_html(
             '<a href="{url}">{name}</a>',
             url=reverse('admin:bot_chatsettings_change', args=[settings.id]),
