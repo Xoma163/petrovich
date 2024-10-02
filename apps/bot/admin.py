@@ -7,9 +7,9 @@ from apps.bot.models import Profile, Chat, Bot, User, ChatSettings, UserSettings
 from apps.service.mixins import TimeStampAdminMixin
 
 
-class NoSpecificGroupFilter(admin.SimpleListFilter):
-    title = 'Нет группы'
-    parameter_name = 'no_specific_group'
+class NoSpecificRoleFilter(admin.SimpleListFilter):
+    title = 'Нет роли'
+    parameter_name = 'no_specific_role'
 
     def lookups(self, request, model_admin):
         groups = Group.objects.all()
@@ -61,7 +61,7 @@ class ProfileAdmin(TimeStampAdminMixin):
         'gender',
         ('city', admin.RelatedOnlyFieldListFilter),
         ('groups', admin.RelatedOnlyFieldListFilter),
-        NoSpecificGroupFilter,
+        NoSpecificRoleFilter,
         'chats__name'
     )
     search_fields = ['name', 'surname', 'nickname_real', 'user__user_id']
@@ -161,9 +161,12 @@ class BotAdmin(TimeStampAdminMixin):
 
 @admin.register(UserSettings)
 class UserSettingsAdmin(TimeStampAdminMixin):
-    pass
+    list_display = (
+        'profile', 'need_meme', 'need_reaction', 'use_swear', 'celebrate_bday', 'show_birthday_year', 'use_mention',
+        'chat_gpt_key', 'chat_gpt_model')
+    ordering = ["id"]
 
 
 @admin.register(ChatSettings)
 class ChatSettingsAdmin(TimeStampAdminMixin):
-    pass
+    list_display = ('chat', 'no_mention', 'need_turett', 'celebrate_bday', 'recognize_voice')
