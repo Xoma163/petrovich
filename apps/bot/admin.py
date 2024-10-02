@@ -46,10 +46,15 @@ class ProfileAdmin(TimeStampAdminMixin):
         (
             'Chats',
             {
-                'fields': ('get_chats', 'chats')
+                'fields': ('get_chats_count', 'get_chats', 'chats')
             }
         ),
-
+        (
+            'Date',
+            {
+                'fields': ('created_at', 'updated_at')
+            }
+        ),
     )
 
     list_filter = (
@@ -65,8 +70,8 @@ class ProfileAdmin(TimeStampAdminMixin):
 
     readonly_fields = ['get_chats']
 
-    @admin.display(description='Чаты 2')
-    def get_chats(self, obj):
+    @admin.display(description='Чаты')
+    def get_chats(self, obj: Profile):
         chats = obj.chats.all()
         links = [
             format_html(
@@ -77,6 +82,10 @@ class ProfileAdmin(TimeStampAdminMixin):
             for profile in chats
         ]
         return format_html("<br>".join(links))
+
+    @admin.display(description='Количество чатов')
+    def get_chats_count(self, obj: Profile):
+        return obj.chats.all().count()
 
 
 @admin.register(User)
@@ -91,15 +100,42 @@ class UserAdmin(TimeStampAdminMixin):
 @admin.register(Chat)
 class ChatAdmin(TimeStampAdminMixin):
     search_fields = ('name', 'chat_id')
-    list_display = ('id', 'name', 'platform', 'is_banned', 'kicked')
+    list_display = ('id', 'name', 'platform', 'is_banned', 'kicked', 'get_users_count')
     list_filter = ('platform', 'kicked')
 
     ordering = ["name"]
 
-    readonly_fields = ['get_users']
+    readonly_fields = ['get_users_count', 'get_users']
+
+    fieldsets = (
+        (
+            'Chat Info',
+            {
+                'fields': ('name', 'platform', 'is_banned', 'kicked',)
+            }
+        ),
+        (
+            'Other',
+            {
+                'fields': ('settings',)
+            }
+        ),
+        (
+            'Users',
+            {
+                'fields': ('get_users_count', 'get_users')
+            }
+        ),
+        (
+            'Date',
+            {
+                'fields': ('created_at', 'updated_at')
+            }
+        ),
+    )
 
     @admin.display(description='Пользователи')
-    def get_users(self, obj):
+    def get_users(self, obj: Chat):
         profiles = obj.users.all()
         links = [
             format_html(
@@ -110,6 +146,10 @@ class ChatAdmin(TimeStampAdminMixin):
             for profile in profiles
         ]
         return format_html("<br>".join(links))
+
+    @admin.display(description='Количество пользователей')
+    def get_users_count(self, obj: Chat):
+        return obj.users.all().count()
 
 
 @admin.register(Bot)
