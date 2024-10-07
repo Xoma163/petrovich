@@ -247,6 +247,11 @@ class YoutubeVideo(SubscribeService):
         videos = []
         while True:
             r = requests.get(url, params=params, proxies=self.proxies).json()
+
+            if error := r.get('error'):
+                if error['code'] == 404:
+                    raise PWarning("Плейлист не найден")
+                raise PWarning("Ошибка получения плейлиста API")
             videos += r['items']
             if not r.get('nextPageToken'):
                 break

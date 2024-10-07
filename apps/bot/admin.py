@@ -114,13 +114,13 @@ class ChatAdmin(TimeStampAdminMixin):
 
     ordering = ["name"]
 
-    readonly_fields = ['get_users_count', 'get_users', 'get_settings']
+    readonly_fields = ['get_users_count', 'get_users', 'get_settings', 'chat_id']
 
     fieldsets = (
         (
             'Chat Info',
             {
-                'fields': ('name', 'platform', 'is_banned', 'kicked',)
+                'fields': ('chat_id', 'name', 'platform', 'is_banned', 'kicked',)
             }
         ),
         (
