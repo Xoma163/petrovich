@@ -20,8 +20,3 @@
 
 Основная информация по проекту для пользователей и разработчиков находится
 в [вики](https://github.com/Xoma163/petrovich/wiki/1.-Документация-по-использованию-бота)
-
-## Отдельная благодарность
-
-<a href="https://www.jetbrains.com/?from=petrovich" title="JetBrains"><img src="readme/jetbrains_logo.png" width="140"></a>
-
