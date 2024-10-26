@@ -17,6 +17,7 @@ from apps.bot.utils.utils import random_probability, random_event
 class Turett(Command):
     conversation = True
     priority = 85
+    name = 'туретт'
 
     # ACCEPT CHANCES
     MENTIONED_CHANCE = 1
@@ -84,14 +85,20 @@ class Turett(Command):
             chance = self.NOT_MENTIONED_CHANCE if event.chat.settings.no_mention else self.MENTIONED_CHANCE
             if random_probability(chance):
                 return True
-        return False
+        return super().accept(event)
 
     def start(self) -> ResponseMessage:
         if isinstance(self.event.bot, TgBot):
-            rmi = self.handle_tg_event()
+            if self.event.message.command in self.full_names:
+                rmi = self.handle_tg_event_with_mention()
+            else:
+                rmi = self.handle_tg_event()
         else:
             rmi = self.handle_event()
         return ResponseMessage(rmi)
+
+    def handle_tg_event_with_mention(self) -> ResponseMessageItem:
+        return self.get_gpt_wtf_text()
 
     def handle_tg_event(self) -> ResponseMessageItem:
         events = [self.get_text, self.get_sticker, self.get_gpt_text, self.get_gpt_wtf_text, self.set_reaction]
