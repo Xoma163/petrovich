@@ -88,14 +88,13 @@ class Chat(Platform, TimeStampModelMixin):
         unique_together = ('chat_id', 'platform',)
 
     def save(self, **kwargs):
-        # auto create settings model
+        super(Chat, self).save(**kwargs)
+
         is_new = self.id is None
         if is_new:
-            cs = ChatSettings.objects.create()
+            # auto create settings model
+            cs = ChatSettings.objects.create(profile=self)
             cs.save()
-            self.settings = cs
-
-        super(Chat, self).save(**kwargs)
 
     def __str__(self):
         return str(self.name) if self.name else f"id:{self.id}"
@@ -123,13 +122,7 @@ class Profile(TimeStampModelMixin):
     api_token = models.CharField("Токен для API", max_length=100, blank=True)
 
     def save(self, **kwargs):
-        # auto create settings model
         is_new = self.id is None
-        if is_new:
-            # auto create settings
-            us = UserSettings.objects.create()
-            us.save()
-            self.settings = us
 
         super(Profile, self).save(**kwargs)
 
@@ -137,6 +130,10 @@ class Profile(TimeStampModelMixin):
             # auto add user group
             group_user = Group.objects.get(name=Role.USER.name)
             self.groups.add(group_user)
+
+            # auto create settings
+            us = UserSettings.objects.create(profile=self)
+            us.save()
 
     def set_avatar(self, att: PhotoAttachment = None):
         image = att.get_bytes_io_content()
