@@ -11,6 +11,7 @@ from apps.bot.classes.help_text import HelpTextItem, HelpText, HelpTextArgument
 from apps.bot.classes.messages.attachments.audio import AudioAttachment
 from apps.bot.classes.messages.attachments.link import LinkAttachment
 from apps.bot.classes.messages.attachments.video import VideoAttachment
+from apps.bot.classes.messages.attachments.video_note import VideoNoteAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.utils.utils import prepend_symbols, append_symbols
 from apps.bot.utils.video.video_handler import VideoHandler
@@ -52,13 +53,13 @@ class TrimVideo(Command):
     platforms = [Platform.TG]
     bot: TgBot
 
-    attachments = [LinkAttachment, VideoAttachment, AudioAttachment]
+    attachments = [LinkAttachment, VideoAttachment, AudioAttachment, VideoNoteAttachment]
     args = 1
 
     TIMECODE_FORMAT = "%H:%M:%S.%f"
 
     def start(self) -> ResponseMessage:
-        att = self.event.get_all_attachments([LinkAttachment, VideoAttachment, AudioAttachment])[0]
+        att = self.event.get_all_attachments(self.attachments)[0]
         with ChatActivity(self.bot, ActivitiesEnum.UPLOAD_VIDEO, self.event.peer_id):
             if isinstance(att, LinkAttachment):
                 if not att.is_youtube_link:
