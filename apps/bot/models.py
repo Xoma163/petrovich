@@ -128,6 +128,7 @@ class Profile(TimeStampModelMixin):
         if is_new:
             # auto create settings
             us = UserSettings.objects.create()
+            us.save()
             self.settings = us
 
         super(Profile, self).save(**kwargs)
