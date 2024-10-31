@@ -3,7 +3,6 @@ import datetime
 from apps.bot.classes.command import Command
 from apps.bot.classes.help_text import HelpText
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
-from apps.bot.models import Chat
 
 
 class Birthday(Command):
@@ -15,7 +14,6 @@ class Birthday(Command):
     conversation = True
 
     def start(self) -> ResponseMessage:
-        self.event.chat = Chat.objects.get(pk=46)
         users = self.event.chat.users.filter(birthday__isnull=False).order_by('birthday__month', 'birthday__day')
 
         this_year_birthday_people = []
