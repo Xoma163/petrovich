@@ -245,9 +245,10 @@ class Calculator:
         if root is None:
             raise PWarning("Не смог распарсить выражение")
         else:
+            value = round(root.value, 5)
             try:
-                if isinstance(root.value, float) and root.value == int(root.value):
-                    answer = str(int(root.value))
+                if isinstance(value, float) and value == int(value):
+                    answer = str(int(value))
                 else:
                     answer = str(root.value)
             except OverflowError:
