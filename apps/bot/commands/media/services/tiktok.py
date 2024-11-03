@@ -28,6 +28,10 @@ class TikTokService(MediaService):
         return MediaServiceResponse(text=None, attachments=[va], video_title="")
 
     def check_valid_url(self, url: str) -> None:
+        path = urlparse(url).path
+        if "video/" in path:
+            return
+
         if urlparse(url).path.strip('/')[0] == "@":
             raise PSkip()
 
