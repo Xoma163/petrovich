@@ -162,6 +162,8 @@ class VKVideo(SubscribeService):
                 width = None
                 height = None
 
+            # Лишний текст
+            channel_title = channel_title.replace("Видеозаписи ", "")
             return VideoData(
                 channel_id=channel_id,
                 video_id=video_id,
@@ -189,8 +191,8 @@ class VKVideo(SubscribeService):
 
             video_info = self.get_video_info(f"https://vk.com/video{last_videos_id[-1]}")
 
-            channel_id = video_info['channel_id']
-            channel_title = video_info['channel_title']
+            channel_id = video_info.channel_id
+            channel_title = video_info.channel_title
         else:
             channel_id = bs4.select_one('.VideoCard__additionalInfo a').attrs['href'].split('/')[-1]
             channel_title = bs4.select_one(".VideoCard__ownerLink").text
