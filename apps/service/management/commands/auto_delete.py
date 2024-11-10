@@ -2,7 +2,7 @@ import datetime
 
 from django.core.management.base import BaseCommand
 
-from apps.bot.models import UserSettings, ChatSettings
+from apps.bot.models import ProfileSettings, ChatSettings
 from apps.service.models import VideoCache
 
 
@@ -24,5 +24,5 @@ class Command(BaseCommand):
         """
         Костыль по удалению настроек, которые не привязаны
         """
-        UserSettings.objects.filter(profile__isnull=True).delete()
+        ProfileSettings.objects.filter(profile__isnull=True).delete()
         ChatSettings.objects.filter(chat__isnull=True).delete()

@@ -44,7 +44,7 @@ class ChatSettings(BaseSettings, TimeStampModelMixin):
         return str(self.chat) if self.chat else ""
 
 
-class UserSettings(BaseSettings, TimeStampModelMixin):
+class ProfileSettings(BaseSettings, TimeStampModelMixin):
     GPT_MODEL_CHOICES = [(x.name, x.verbose_name) for x in GPTModels.get_completions_models()]
 
     profile = models.OneToOneField("Profile", on_delete=models.CASCADE, verbose_name="Профиль",
@@ -132,7 +132,7 @@ class Profile(TimeStampModelMixin):
             self.groups.add(group_user)
 
             # auto create settings
-            us = UserSettings.objects.create(profile=self)
+            us = ProfileSettings.objects.create(profile=self)
             us.save()
 
     def set_avatar(self, att: PhotoAttachment = None):

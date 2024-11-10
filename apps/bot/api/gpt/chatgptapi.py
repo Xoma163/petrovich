@@ -174,8 +174,8 @@ class ChatGPTAPI(GPTAPI):
         if use_image:
             return self.DEFAULT_VISION_MODEL
 
-        from apps.bot.models import UserSettings
-        settings: UserSettings = self.sender.settings
+        from apps.bot.models import ProfileSettings
+        settings: ProfileSettings = self.sender.settings
         try:
             return settings.get_gpt_model()
         except ValueError:

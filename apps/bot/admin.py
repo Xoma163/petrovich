@@ -3,7 +3,7 @@ from django.contrib.auth.models import Group
 from django.urls import reverse
 from django.utils.html import format_html
 
-from apps.bot.models import Profile, Chat, Bot, User, ChatSettings, UserSettings
+from apps.bot.models import Profile, Chat, Bot, User, ChatSettings, ProfileSettings
 from apps.service.mixins import TimeStampAdminMixin
 
 
@@ -21,20 +21,19 @@ class NoSpecificRoleFilter(admin.SimpleListFilter):
         return queryset
 
 
+class ProfileSettingsInline(admin.StackedInline):
+    model = ProfileSettings
+    can_delete = False
+
 @admin.register(Profile)
 class ProfileAdmin(TimeStampAdminMixin):
     list_display = ('name', 'surname', 'nickname_real', 'gender', 'birthday', 'city', 'get_chats_count')
+    inlines = [ProfileSettingsInline]
     fieldsets = (
         (
             'Profile Info',
             {
                 'fields': ('name', 'surname', 'nickname_real', 'gender', 'birthday', 'city', 'avatar')
-            }
-        ),
-        (
-            'Other',
-            {
-                'fields': ('groups', 'get_settings')
             }
         ),
         (
@@ -68,7 +67,7 @@ class ProfileAdmin(TimeStampAdminMixin):
 
     ordering = ["name", "surname"]
 
-    readonly_fields = ['get_chats', 'get_chats_count', 'get_settings']
+    readonly_fields = ['get_chats', 'get_chats_count']
 
     @admin.display(description='Чаты')
     def get_chats(self, obj: Profile):
@@ -87,16 +86,6 @@ class ProfileAdmin(TimeStampAdminMixin):
     def get_chats_count(self, obj: Profile):
         return obj.chats.all().count()
 
-    @admin.display(description="Настройки")
-    def get_settings(self, obj: Profile):
-        settings = obj.settings
-        return format_html(
-            '<a href="{url}">{name}</a>',
-            url=reverse('admin:bot_usersettings_change', args=[settings.id]),
-            name=str(settings)
-        )
-
-
 @admin.register(User)
 class UserAdmin(TimeStampAdminMixin):
     search_fields = ('profile__name', 'profile__surname', 'profile__nickname_real', 'nickname', 'user_id')
@@ -106,27 +95,27 @@ class UserAdmin(TimeStampAdminMixin):
     ordering = ["profile"]
 
 
+class ChatSettingsInline(admin.StackedInline):
+    model = ChatSettings
+    can_delete = False
+
+
 @admin.register(Chat)
 class ChatAdmin(TimeStampAdminMixin):
     search_fields = ('name', 'chat_id')
     list_display = ('id', 'name', 'platform', 'is_banned', 'kicked', 'get_users_count')
     list_filter = ('platform', 'kicked')
+    inlines = [ChatSettingsInline]
 
     ordering = ["name"]
 
-    readonly_fields = ['get_users_count', 'get_users', 'get_settings', 'chat_id']
+    readonly_fields = ['get_users_count', 'get_users', 'chat_id']
 
     fieldsets = (
         (
             'Chat Info',
             {
                 'fields': ('chat_id', 'name', 'platform', 'is_banned', 'kicked',)
-            }
-        ),
-        (
-            'Other',
-            {
-                'fields': ('get_settings',)
             }
         ),
         (
@@ -160,15 +149,6 @@ class ChatAdmin(TimeStampAdminMixin):
     def get_users_count(self, obj: Chat):
         return obj.users.all().count()
 
-    @admin.display(description="Настройки")
-    def get_settings(self, obj: Chat):
-        settings = obj.settings
-        return format_html(
-            '<a href="{url}">{name}</a>',
-            url=reverse('admin:bot_chatsettings_change', args=[settings.id]),
-            name=str(settings)
-        )
-
 
 @admin.register(Bot)
 class BotAdmin(TimeStampAdminMixin):
@@ -177,8 +157,8 @@ class BotAdmin(TimeStampAdminMixin):
     ordering = ["id"]
 
 
-@admin.register(UserSettings)
-class UserSettingsAdmin(TimeStampAdminMixin):
+@admin.register(ProfileSettings)
+class ProfileSettingsAdmin(TimeStampAdminMixin):
     list_display = (
         'profile', 'need_meme', 'need_reaction', 'use_swear', 'celebrate_bday', 'show_birthday_year', 'use_mention',
         'chat_gpt_key', 'chat_gpt_model'
