@@ -21,19 +21,41 @@ class NoSpecificRoleFilter(admin.SimpleListFilter):
         return queryset
 
 
+@admin.register(User)
+class UserAdmin(TimeStampAdminMixin):
+    search_fields = ('profile__name', 'profile__surname', 'profile__nickname_real', 'nickname', 'user_id')
+    list_display = ('show_user_id', 'show_url', 'platform', 'profile', 'nickname')
+    list_filter = ('platform',)
+    list_select_related = ('profile',)
+
+    ordering = ("profile",)
+
+
+class UserInline(admin.StackedInline):
+    model = User
+    can_delete = False
+
+
 class ProfileSettingsInline(admin.StackedInline):
     model = ProfileSettings
     can_delete = False
 
+
 @admin.register(Profile)
 class ProfileAdmin(TimeStampAdminMixin):
     list_display = ('name', 'surname', 'nickname_real', 'gender', 'birthday', 'city', 'get_chats_count')
-    inlines = [ProfileSettingsInline]
+    inlines = (ProfileSettingsInline, UserInline)
     fieldsets = (
         (
             'Profile Info',
             {
                 'fields': ('name', 'surname', 'nickname_real', 'gender', 'birthday', 'city', 'avatar')
+            }
+        ),
+        (
+            'Other',
+            {
+                'fields': ('groups',)
             }
         ),
         (
@@ -63,11 +85,12 @@ class ProfileAdmin(TimeStampAdminMixin):
         NoSpecificRoleFilter,
         'chats__name'
     )
-    search_fields = ['name', 'surname', 'nickname_real', 'user__user_id']
+    search_fields = ('name', 'surname', 'nickname_real', 'user__user_id', 'user__nickname')
+    list_select_related = ('user',)
 
-    ordering = ["name", "surname"]
+    ordering = ("name", "surname")
 
-    readonly_fields = ['get_chats', 'get_chats_count']
+    readonly_fields = ('get_chats', 'get_chats_count')
 
     @admin.display(description='Чаты')
     def get_chats(self, obj: Profile):
@@ -86,14 +109,6 @@ class ProfileAdmin(TimeStampAdminMixin):
     def get_chats_count(self, obj: Profile):
         return obj.chats.all().count()
 
-@admin.register(User)
-class UserAdmin(TimeStampAdminMixin):
-    search_fields = ('profile__name', 'profile__surname', 'profile__nickname_real', 'nickname', 'user_id')
-    list_display = ('show_user_id', 'show_url', 'platform', 'profile', 'nickname')
-    list_filter = ('platform',)
-
-    ordering = ["profile"]
-
 
 class ChatSettingsInline(admin.StackedInline):
     model = ChatSettings
@@ -105,11 +120,11 @@ class ChatAdmin(TimeStampAdminMixin):
     search_fields = ('name', 'chat_id')
     list_display = ('id', 'name', 'platform', 'is_banned', 'kicked', 'get_users_count')
     list_filter = ('platform', 'kicked')
-    inlines = [ChatSettingsInline]
+    inlines = (ChatSettingsInline,)
 
-    ordering = ["name"]
+    ordering = ("name",)
 
-    readonly_fields = ['get_users_count', 'get_users', 'chat_id']
+    readonly_fields = ('get_users_count', 'get_users', 'chat_id')
 
     fieldsets = (
         (
@@ -154,7 +169,7 @@ class ChatAdmin(TimeStampAdminMixin):
 class BotAdmin(TimeStampAdminMixin):
     list_display = ('name', 'platform',)
     list_filter = ('platform',)
-    ordering = ["id"]
+    ordering = ("id",)
 
 
 @admin.register(ProfileSettings)
@@ -164,11 +179,11 @@ class ProfileSettingsAdmin(TimeStampAdminMixin):
         'chat_gpt_key', 'chat_gpt_model'
     )
     list_editable = ('need_meme', 'need_reaction', 'use_swear', 'celebrate_bday', 'show_birthday_year', 'use_mention')
-    ordering = ["profile"]
+    ordering = ("profile",)
 
 
 @admin.register(ChatSettings)
 class ChatSettingsAdmin(TimeStampAdminMixin):
     list_display = ('chat', 'no_mention', 'need_turett', 'celebrate_bday', 'recognize_voice')
     list_editable = ('no_mention', 'need_turett', 'celebrate_bday', 'recognize_voice')
-    ordering = ["chat"]
+    ordering = ("chat",)
