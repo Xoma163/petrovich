@@ -44,7 +44,7 @@ class YandexMusicService(MediaService):
 
     @classmethod
     def urls(cls) -> list[str]:
-        return ["music.yandex.ru", "music.yandex.com"]
+        return ["music.yandex.ru", "music.yandex.com", "next.music.yandex.ru", "next.music.yandex.com"]
 
     def check_sender_role(self) -> None:
         if not self.event.sender.check_role(Role.TRUSTED):

@@ -32,17 +32,17 @@ class YandexMusicAPI:
 
         album_id, track_id = None, None
 
-        r = re.compile(r"https://music.yandex.(ru|com)/album/(.*)/track/(.*)")
+        r = re.compile(r"https://(?:next.)?music.yandex.(?:ru|com)/album/(\d*)/track/(\d*)")
         try:
-            _, album_id, track_id = r.findall(url)[-1]
+            album_id, track_id = r.findall(url)[0]
         except IndexError:
             try:
-                r = re.compile(r"https://music.yandex.(ru|com)/track/(.*)")
-                track_id = r.findall(url)[-1]
+                r = re.compile(r"https://(?:next.)?music.yandex.(?:ru|com)/track/(\d*)")
+                track_id = r.findall(url)[0]
             except IndexError:
                 try:
-                    r = re.compile(r"https://music.yandex.(ru|com)/album/(.*)")
-                    album_id = r.findall(url)[-1]
+                    r = re.compile(r"https://(?:next.)?music.yandex.(?:ru|com)/album/(\d*)")
+                    album_id = r.findall(url)[0]
                 except IndexError:
                     raise PWarning("Не нашёл песни по этому URL")
 
