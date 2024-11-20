@@ -4,7 +4,7 @@ from concurrent.futures import ThreadPoolExecutor
 from json import JSONDecodeError
 
 from apps.bot.api.gpt.gpt import GPTAPI
-from apps.bot.api.gpt.message import GPTMessages
+from apps.bot.api.gpt.message import GPTMessages, GPTMessageRole
 from apps.bot.api.gpt.models import GPTModels, GPTCompletionModel, GPTImageDrawModel, GPTVoiceRecognitionModel, \
     GPTImageFormat
 from apps.bot.api.gpt.response import GPTAPICompletionsResponse, GPTAPIImageDrawResponse, GPTAPIVoiceRecognitionResponse
@@ -49,6 +49,11 @@ class ChatGPTAPI(GPTAPI):
             "model": model.name,
             "messages": messages.get_messages()
         }
+
+        # ToDo: костыль, так как o1 не умеют в system role
+        if model in [GPTModels.GPT_4_O1_PREVIEW, GPTModels.GPT_4_O1_MINI]:
+            if payload['messages'][0]['role'] == GPTMessageRole.SYSTEM:
+                payload['messages'][0]['role'] = GPTMessageRole.USER
 
         if use_image:
             payload['max_tokens'] = self.GPT_4_VISION_MAX_TOKENS

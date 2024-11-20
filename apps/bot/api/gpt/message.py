@@ -1,10 +1,10 @@
 import dataclasses
 from abc import ABC
-from enum import Enum
+from enum import StrEnum
 from itertools import groupby
 
 
-class GPTMessageRole(Enum):
+class GPTMessageRole(StrEnum):
     SYSTEM = 'system'
     USER = 'user'
     ASSISTANT = 'assistant'

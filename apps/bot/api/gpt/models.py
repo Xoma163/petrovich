@@ -42,9 +42,13 @@ class GPTVoiceRecognitionModel(GPTModel):
 
 
 class GPTModels:
+    # GPT o1
+    GPT_4_O1_PREVIEW = GPTCompletionModel("o1-preview", "GPT-o1 preview", 15, 60)
+    GPT_4_O1_MINI = GPTCompletionModel("o1-mini", "GPT-o1 mini", 3, 12)
+
     # GPT-4
     GPT_4_OMNI_MINI = GPTCompletionModel("gpt-4o-mini", "GPT-4 OMNI MINI", 0.15, 0.6)
-    GPT_4_OMNI = GPTCompletionModel("gpt-4o", "GPT-4 OMNI", 5, 15)
+    GPT_4_OMNI = GPTCompletionModel("gpt-4o", "GPT-4 OMNI", 2.5, 10)
     GPT_4_TURBO = GPTCompletionModel("gpt-4-turbo", "GPT-4 TURBO", 10, 30)
     GPT_4 = GPTCompletionModel("gpt-4", "GPT-4", 30, 60)
     GPT_4_32K = GPTCompletionModel("gpt-4-32k", "GPT-4 32K", 60, 120)
@@ -56,7 +60,7 @@ class GPTModels:
     GPT_3_5_TURBO_16K_0613 = GPTCompletionModel("gpt-3.5-turbo-16k-0613", "GPT-3.5 TURBO 16K 0613", 3, 4)
     GPT_3_5_TURBO_0301 = GPTCompletionModel("gpt-3.5-turbo-0301", "GPT-3.5 TURBO 16K 0613", 1.5, 2)
 
-    # image models
+    # Image models
     DALLE_3_ALBUM = GPTImageDrawModel("dall-e-3", "DALLE 3", image_cost=0.12, width=1792, height=1024)
     DALLE_3_PORTAIR = GPTImageDrawModel("dall-e-3", "DALLE 3", image_cost=0.12, width=1024, height=1792)
     DALLE_3_SQUARE = GPTImageDrawModel("dall-e-3", "DALLE 3", image_cost=0.08, width=1024, height=1024)
