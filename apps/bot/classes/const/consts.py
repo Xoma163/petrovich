@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import StrEnum
 
 from apps.bot.classes.messages.attachments.audio import AudioAttachment
 from apps.bot.classes.messages.attachments.document import DocumentAttachment
@@ -11,7 +11,7 @@ from apps.bot.classes.messages.attachments.video_note import VideoNoteAttachment
 from apps.bot.classes.messages.attachments.voice import VoiceAttachment
 
 
-class Role(Enum):
+class Role(StrEnum):
     ADMIN = "администратор"
     MODERATOR = "модератор"
     MINECRAFT = "майнкрафт"
@@ -30,7 +30,7 @@ class Role(Enum):
         return self.value
 
 
-class Platform(Enum):
+class Platform(StrEnum):
     TG = 'tg'
     API = 'api'
 

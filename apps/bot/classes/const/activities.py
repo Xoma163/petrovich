@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class ActivitiesEnum(Enum):
+class ActivitiesEnum(StrEnum):
     TYPING = 'typing'
     UPLOAD_VIDEO = 'upload_video'
     UPLOAD_PHOTO = 'upload_photo'

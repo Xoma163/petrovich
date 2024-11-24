@@ -24,7 +24,7 @@ class GPTMessage(ABC):
 class ChatGPTMessage(GPTMessage):
     def get_message(self) -> dict:
         message = {
-            'role': self.role.value,
+            'role': self.role,
             'content': [
                 {
                     'type': 'text',
@@ -68,7 +68,7 @@ class GeminiGPTMessage(GPTMessage):
         elif self.role == GPTMessageRole.ASSISTANT:
             return 'model'
         else:
-            return GPTMessageRole.USER.value
+            return GPTMessageRole.USER
 
     def _get_text(self) -> str:
         return f"System prompt: {self.text}" if self.role == GPTMessageRole.SYSTEM else self.text
@@ -78,7 +78,7 @@ class GeminiGPTMessage(GPTMessage):
 class ClaudeGPTMessage(GPTMessage):
     def get_message(self) -> dict:
         message = {
-            'role': self.role.value,
+            'role': self.role,
             'content': [
                 {
                     'type': 'text',

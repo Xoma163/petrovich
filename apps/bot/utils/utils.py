@@ -138,7 +138,7 @@ def get_help_texts_for_command(command, roles: list[Role] = None) -> str:
     if len(command.full_names) > 1:
         result += f"Названия команды: {', '.join(command.full_names)}\n"
     if command.access != Role.USER:
-        result += f"Необходимый уровень прав {DASH} {command.access.value}\n"
+        result += f"Необходимый уровень прав {DASH} {command.access}\n"
     if result:
         result += '\n'
     if command.help_text:

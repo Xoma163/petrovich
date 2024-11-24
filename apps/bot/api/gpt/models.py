@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 
 
 @dataclass
@@ -94,7 +94,7 @@ class GPTModels:
         raise ValueError
 
 
-class GPTImageFormat(Enum):
+class GPTImageFormat(StrEnum):
     ALBUM = "album"
     PORTAIR = "portair"
     SQUARE = "square"

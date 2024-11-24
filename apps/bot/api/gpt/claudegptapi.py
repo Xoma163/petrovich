@@ -14,7 +14,7 @@ class ClaudeGPTAPI(GPTAPI):
     def completions(self, messages: GPTMessages, use_image: bool = False) -> GPTAPICompletionsResponse:
         messages = messages.get_messages()
         preprompt = None
-        if messages[0]['role'] == GPTMessageRole.SYSTEM.value:
+        if messages[0]['role'] == GPTMessageRole.SYSTEM:
             preprompt = messages[0]['content'][0]['text']
             messages = messages[1:]
 

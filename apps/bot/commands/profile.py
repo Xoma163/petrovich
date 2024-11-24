@@ -183,7 +183,7 @@ class Profile(Command):
 
         roles = []
         for group in profile.groups.all():
-            roles.append(Role[group.name].value)
+            roles.append(Role[group.name])
         roles = sorted(roles)
         roles_str = ", ".join(roles)
 
