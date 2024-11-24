@@ -33,7 +33,7 @@ class VKVideoService(MediaService):
         if cached := self._get_cached(data.channel_id, data.video_id, data.title):
             return cached
 
-        va = self.service.download(url, high_res=self.media_keys.high)
+        va = self.service.download(url, video_id=data.video_id, high_res=self.media_keys.high)
         va.width = data.width
         va.height = data.height
 
