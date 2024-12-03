@@ -19,9 +19,10 @@ class ResponseMessageItem:
             peer_id: int | None = None,
             log_level: str = 'debug',
             exc_info=None,
-            disable_web_page_preview: bool | None = False,
+            disable_web_page_preview: bool = False,
             entities: list | None = None,
-            send: bool | None = True
+            send: bool = True,
+            spoiler: bool = False
     ):
         self.text = text if text is not None else ""
         self.attachments = attachments if attachments else []
@@ -42,6 +43,7 @@ class ResponseMessageItem:
         self.kwargs = {}
 
         self.send = send
+        self.spoiler = spoiler
 
     def to_log(self) -> dict:
         """

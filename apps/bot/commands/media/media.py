@@ -73,6 +73,10 @@ class Media(AcceptExtraMixin):
                     MediaKeys.THREADS_KEYS[0],
                     MediaKeys.THREADS_KEYS[1:],
                     "позволяет скачивать пост с комментариями автора(Twitter)"
+                ), HelpTextKey(
+                    MediaKeys.SPOILER_KEYS[0],
+                    MediaKeys.SPOILER_KEYS[1:],
+                    "позволяет скрыть пост спойлером"
                 ),
             ]),
             HelpTextItem(Role.ADMIN, [
@@ -171,7 +175,7 @@ class Media(AcceptExtraMixin):
             aa.thumbnail_url = video.thumbnail_url
             media_response.attachments[0] = aa
 
-        return self.prepare_media_response(media_response, chosen_service=service_class, chosen_url=chosen_url)
+        return self.prepare_media_response(media_response, media_keys, service_class, chosen_url)
 
     def _get_service_and_chosen_url(self, source) -> tuple[type[MediaService], str]:
         """
@@ -211,6 +215,7 @@ class Media(AcceptExtraMixin):
     def prepare_media_response(
             self,
             media_response: MediaServiceResponse,
+            media_keys: MediaKeys,
             chosen_service: type[MediaService],
             chosen_url: str
     ) -> ResponseMessage:
@@ -231,6 +236,8 @@ class Media(AcceptExtraMixin):
             answer += f"\nОт {self.event.sender}"
 
         source_hostname = str(urlparse(chosen_url).hostname).lstrip('www.')
+        if media_keys.spoiler:
+            answer = self.bot.get_spoiler_text(answer)
         answer += f'\nИсточник: {self.bot.get_formatted_url(source_hostname, chosen_url)}'
         answer = answer.strip()
 
@@ -243,6 +250,10 @@ class Media(AcceptExtraMixin):
             peer_id=self.event.peer_id,
             message_thread_id=self.event.message_thread_id
         )
+
+        if media_keys.spoiler:
+            rmi.spoiler = True
+
         br = self.bot.send_response_message_item(rmi)
         if br.success:
             self.bot.delete_messages(self.event.peer_id, self.event.message.id)

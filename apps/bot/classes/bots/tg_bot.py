@@ -192,6 +192,8 @@ class TgBot(Bot):
         """
         params = copy(default_params)
         photo: PhotoAttachment = rmi.attachments[0]
+        if rmi.spoiler:
+            params['has_spoiler'] = rmi.spoiler
         if photo.file_id:
             params['photo'] = photo.file_id
             r = self.requests.get('sendPhoto', params).json()
@@ -235,6 +237,9 @@ class TgBot(Bot):
             params['width'] = video.width
         if video.height:
             params['height'] = video.height
+        if rmi.spoiler:
+            params['has_spoiler'] = rmi.spoiler
+
         if video.file_id:
             params['video'] = video.file_id
             r = self.requests.get('sendVideo', params).json()
@@ -298,6 +303,8 @@ class TgBot(Bot):
         """
         params = copy(default_params)
         gif: GifAttachment = rmi.attachments[0]
+        if rmi.spoiler:
+            params['has_spoiler'] = rmi.spoiler
         if gif.file_id:
             params['animation'] = gif.file_id
             r = self.requests.get('sendAnimation', params).json()

@@ -29,6 +29,7 @@ class MediaKeys:
     CACHE_KEYS = ['cache', 'c']
     FORCE_KEYS = ['force', 'f']
     THREADS_KEYS = ['thread', 'threads', 'with-threads', 'тред', 'треды', 't']
+    SPOILER_KEYS = ['spoiler', 's']
 
     def __init__(self, keys: list):
         self.no_media: bool = self.check_key(keys, self.NO_MEDIA_KEYS)
@@ -38,7 +39,7 @@ class MediaKeys:
         self.cache: bool = self.check_key(keys, self.CACHE_KEYS)
         self.force: bool = self.check_key(keys, self.FORCE_KEYS)
         self.threads: bool = self.check_key(keys, self.THREADS_KEYS)
-
+        self.spoiler: bool = self.check_key(keys, self.SPOILER_KEYS)
     @staticmethod
     def check_key(keys_event: list, keys_values: list) -> bool:
         return any(x in keys_event for x in keys_values)
