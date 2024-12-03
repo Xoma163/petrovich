@@ -151,11 +151,11 @@ class VKVideo(SubscribeService):
                     channel_id = bs4.select_one('title').text.split(" | ")[0].lstrip("Клипы ")
                     channel_title = channel_id
             else:
-                video_id, video_url, data = re.compile('showVideo\((.*)\);').findall(bs4.decode_contents())[1].split(
-                    ',', 2)
-                video_id = video_id.strip("'").strip('"')
-                channel_id = video_url.strip(' ').strip("'").strip('"').strip('/video/')
-                channel_title = re.compile(r"prevTitle:\s*'([^']*)'").findall(data)[0]
+                short_video_data = self._get_short_video_data(bs4)
+                video_data = self._get_video_data(bs4)
+                video_id = short_video_data['ownerId']
+                channel_id = short_video_data['ownerId']
+                channel_title = video_data['playlistAddedTitle'].split(' ', 1)[1]
 
             try:
                 width = bs4.find('meta', {'property': 'og:video:width'})['content']
@@ -253,6 +253,28 @@ class VKVideo(SubscribeService):
                 )
             )
         return data
+
+    @staticmethod
+    def _get_short_video_data(bs4):
+        bs4_str = str(bs4)
+        pos1_text = "window.initReactApplication('Video_page', "
+        pos2_text = ");"
+        pos1 = bs4_str.find(pos1_text)
+        pos2 = bs4_str.find(pos2_text, pos1)
+        data = json.loads(bs4_str[pos1 + len(pos1_text):pos2])
+        return data
+
+    @staticmethod
+    def _get_video_data(bs4) -> dict:
+        bs4_str = str(bs4)
+        pos1_text = "var newCur = "
+        pos2_text = "};"
+        pos1 = bs4_str.find(pos1_text) - 1
+        pos2 = bs4_str.find(pos2_text, pos1) + 1
+        data = json.loads(bs4_str[pos1 + len(pos1_text):pos2])
+        del data['lang']
+        return data
+
 
     @staticmethod
     def _get_playlist_data(bs4):

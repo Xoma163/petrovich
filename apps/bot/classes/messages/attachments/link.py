@@ -17,7 +17,7 @@ class LinkAttachment(Attachment):
 
     @property
     def is_vk_link(self):
-        return self._check_link(["vk.com"])
+        return self._check_link(["vk.com", "vkvideo.ru"])
 
     def _check_link(self, urls):
         parsed_url = urlparse(self.url)
