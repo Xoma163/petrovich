@@ -122,5 +122,5 @@ class VoiceRecognition(AcceptExtraMixin):
     def _wrap_text_in_document(text, filename) -> DocumentAttachment:
         text = text.replace("\n", "<br>")
         document = DocumentAttachment()
-        document.parse(text.encode('utf-8-sig'), filename=f'Транскрибация {filename} файла.html')
+        document.parse(text.encode('utf-8-sig'), filename=filename)
         return document
