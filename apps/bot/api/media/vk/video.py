@@ -14,6 +14,7 @@ from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.messages.attachments.audio import AudioAttachment
 from apps.bot.classes.messages.attachments.video import VideoAttachment
 from apps.bot.utils.video.video_handler import VideoHandler
+from apps.service.models import SubscribeItem
 
 
 @dataclasses.dataclass
@@ -143,12 +144,11 @@ class VKVideo(SubscribeService):
 
             if "clip-" in url:
                 video_id = urlparse(url).path.split('clip')[1]
+                channel_id = video_id.split('_', 1)[0]
                 try:
                     a_tag = bs4.select_one('.ui_crumb')
-                    channel_id = f"@{a_tag.attrs['href'].split('/')[-1]}"
                     channel_title = a_tag.te
                 except:
-                    channel_id = bs4.select_one('title').text.split(" | ")[0].lstrip("Клипы ")
                     channel_title = channel_id
             else:
                 short_video_data = self._get_short_video_data(bs4)
@@ -210,6 +210,7 @@ class VKVideo(SubscribeService):
             channel_title=channel_title,
             playlist_title=playlist_title,
             last_videos_id=last_videos_id,
+            service=SubscribeItem.SERVICE_VK
         )
 
     def get_filtered_new_videos(
@@ -274,7 +275,6 @@ class VKVideo(SubscribeService):
         data = json.loads(bs4_str[pos1 + len(pos1_text):pos2])
         del data['lang']
         return data
-
 
     @staticmethod
     def _get_playlist_data(bs4):

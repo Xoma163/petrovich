@@ -1,6 +1,5 @@
 import logging
 import time
-from itertools import groupby
 
 from django.core.management import BaseCommand
 
@@ -15,7 +14,7 @@ from apps.bot.classes.messages.response_message import ResponseMessageItem
 from apps.bot.commands.media.service import MediaService, MediaServiceResponse, MediaKeys
 from apps.bot.commands.media.services.vk_video import VKVideoService
 from apps.bot.commands.media.services.youtube_video import YoutubeVideoService
-from apps.service.models import Subscribe
+from apps.service.models import Subscribe, SubscribeItem
 
 logger = logging.getLogger('subscribe_notifier')
 
@@ -31,89 +30,84 @@ class Command(BaseCommand):
     }
 
     def handle(self, *args, **kwargs):
-        """
-        Группирование по каналам, чтобы сразу отправлять некоторые подписки вместе для экономии ресурсов
-        """
 
         logger.debug({
             "message": "handle"
         })
-        subs = Subscribe.objects.all()
-        groupped_subs = groupby(subs.order_by("channel_id"), lambda x: (x.service, x.channel_id, x.playlist_id))
+        sub_items = SubscribeItem.objects.all()
 
-        for (service, _, _), subs in groupped_subs:
-            sub_class = self.SERVICE_CLASS[service]
-            media_service = self.SERVICE_MEDIA_METHOD[service]
-            subs = list(subs)
+        for sub_item in sub_items:
+            sub_class = self.SERVICE_CLASS[sub_item.service]
+            media_service = self.SERVICE_MEDIA_METHOD[sub_item.service]
             try:
-                self.check_video(subs, sub_class, media_service)
+                self.check_video(sub_item, sub_class, media_service)
             except Exception:
                 logger.exception({
                     "message": "Ошибка в проверке/отправке подписки",
-                    "notify_enitity": subs[0].__dict__,
+                    "notify_enitity": sub_item.__dict__,
                 })
         logger.debug({
             "message": "end handle"
         })
 
-    def check_video(self, subs: list[Subscribe], sub_class: type[SubscribeService], media_service: type[MediaService]):
+    def check_video(
+            self,
+            sub_item: SubscribeItem,
+            sub_class: type[SubscribeService],
+            media_service: type[MediaService]
+    ):
         """
         Проверка на добавление новых видео на каналы/плейлисты
         """
+        api = sub_class()
+        try:
+            new_videos = api.get_filtered_new_videos(
+                sub_item.channel_id,
+                sub_item.last_videos_id,
+                playlist_id=sub_item.playlist_id
+            )
+        except PSubscribeIndexError as e:
+            if e.args[0]:
+                sub_item.last_videos_id = e.args[0]
+                sub_item.save()
+            raise
 
-        if len(set(x.last_videos_id[-1] for x in subs)) == 1:
-            api = sub_class()
-            try:
-                new_videos = api.get_filtered_new_videos(
-                    subs[0].channel_id,
-                    subs[0].last_videos_id,
-                    playlist_id=subs[0].playlist_id
-                )
-            except PSubscribeIndexError as e:
-                for sub in subs:
-                    if e.args[0]:
-                        sub.last_videos_id = e.args[0]
-                        sub.save()
-                raise
+        if not new_videos.videos:
+            return
 
-            if not new_videos.videos:
-                return
-
-            self.send_video(subs, new_videos, media_service=media_service)
-        else:
-            for sub in subs:
-                self.check_video([sub], sub_class, media_service)
+        self.send_video(sub_item, new_videos, media_service=media_service)
 
     def send_video(
             self,
-            subs: list[Subscribe],
+            sub_item: SubscribeItem,
             videos: SubscribeServiceNewVideosData,
             media_service: type[MediaService]
     ):
         logger.debug({
             "message": "send_file_or_video",
-            "notify_enitity": subs[0].__dict__,
+            "notify_enitity": sub_item.__dict__,
         })
         messages_with_att = []
-        high_res = any([sub.high_resolution for sub in subs])
+        subscribes = sub_item.subscribes.all()
+        high_res = any([sub.high_resolution for sub in subscribes])
         for video in videos.videos:
             media_response = self.get_media_service_response(video.url, media_service, high_res=high_res)
             messages_with_att.append((media_response, video))
 
-        for sub in subs:
+        for sub in subscribes:
             for media_response, video in messages_with_att:
-                self.send_notify(sub, video.title, video.url, media_response)
+                self.send_notify(sub_item, sub, video.title, video.url, media_response)
 
                 if sub.save_to_disk:
                     self._save_to_disk(media_response, str(sub), video.title, )
 
                 time.sleep(1)
-            sub.last_videos_id = sub.last_videos_id + videos.ids
-            sub.save()
+        sub_item.last_videos_id = sub_item.last_videos_id + videos.ids
+        sub_item.save()
 
         logger.debug({
             "message": "end send_file_or_video",
-            "notify_enitity": subs[0].__dict__,
+            "notify_enitity": sub_item.__dict__,
         })
 
     @staticmethod
@@ -160,17 +154,23 @@ class Command(BaseCommand):
         return response
 
     @staticmethod
-    def send_notify(sub: Subscribe, title: str, url: str, media_response: MediaServiceResponse):
+    def send_notify(
+            sub_item: SubscribeItem,
+            sub: Subscribe,
+            title: str,
+            url: str,
+            media_response: MediaServiceResponse
+    ):
         logger.debug({
             "message": "send_notify",
             "notify_enitity": url,
         })
         bot = TgBot()
 
-        if sub.playlist_title:
-            answer = f"Новое видео в плейлисте {sub.playlist_title} канала {sub.channel_title}"
+        if sub_item.playlist_title:
+            answer = f"Новое видео в плейлисте {sub_item.playlist_title} канала {sub_item.channel_title}"
         else:
-            answer = f"Новое видео на канале {sub.channel_title}"
+            answer = f"Новое видео на канале {sub_item.channel_title}"
 
         answer += f"\n\n{media_response.text}"
         answer = answer.replace(title, bot.get_formatted_url(title, url))
@@ -188,7 +188,11 @@ class Command(BaseCommand):
         })
 
     @staticmethod
-    def _save_to_disk(media_response: MediaServiceResponse, show_name: str, series_name: str):
+    def _save_to_disk(
+            media_response: MediaServiceResponse,
+            show_name: str,
+            series_name: str
+    ):
         logger.debug({
             "message": "_save_to_disk",
             "notify_enitity": show_name,

@@ -10,7 +10,7 @@ class SubscribeServiceData:
     channel_title: str
     playlist_title: str
     last_videos_id: list[str]
-    service = None
+    service: int
 
 
 @dataclasses.dataclass

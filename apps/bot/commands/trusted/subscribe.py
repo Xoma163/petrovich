@@ -10,7 +10,7 @@ from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.help_text import HelpTextItem, HelpText, HelpTextArgument
 from apps.bot.classes.messages.attachments.link import LinkAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
-from apps.service.models import Subscribe as SubscribeModel
+from apps.service.models import Subscribe as SubscribeModel, SubscribeItem
 
 MAX_USER_SUBS_COUNT = 3
 
@@ -61,38 +61,51 @@ class Subscribe(Command):
         elif attachment.is_vk_link:
             data = self.add_vk(attachment.url)
         else:
-            raise PWarning("Незнакомый сервис. Доступные: \nYouTube, VK video")
+            raise PWarning("Незнакомый сервис. Доступные:\nYouTube, VK video")
 
-        if self.event.chat:
-            existed_sub = SubscribeModel.objects.filter(
-                chat=self.event.chat,
-                channel_id=data.channel_id,
-                playlist_id=data.playlist_id
-            )
+        try:
+            sub_item = SubscribeItem.objects.get(**data.__dict__)
+        except SubscribeItem.DoesNotExist:
+            sub_item = None
+
+        if sub_item:
+            if self.event.chat:
+                existed_sub = SubscribeModel.objects.filter(
+                    chat=self.event.chat,
+                    subscribe_item=sub_item
+                )
+                if existed_sub.exists():
+                    if data.playlist_id:
+                        raise PWarning(
+                            f"Ты уже и так подписан на плейлист \"{sub_item.playlist_title}\" канала \"{sub_item.channel_title}\" в этом чате")
+                    raise PWarning(f"Ты уже и так подписан на канал \"{sub_item.channel_title}\" в этом чате")
+            else:
+                existed_sub = SubscribeModel.objects.filter(
+                    chat__isnull=True,
+                    author=self.event.user,
+                    subscribe_item=sub_item
+                )
+                if existed_sub.exists():
+                    if data.playlist_id:
+                        raise PWarning(
+                            f"Ты уже и так подписан на плейлист \"{sub_item.playlist_title}\" канала \"{sub_item.channel_title}\"")
+                    raise PWarning(f"Ты уже и так подписан на канал \"{sub_item.channel_title}\"")
+
         else:
-            existed_sub = SubscribeModel.objects.filter(
-                chat__isnull=True,
-                author=self.event.user,
-                channel_id=data.channel_id,
-                playlist_id=data.playlist_id
-            )
-        if existed_sub.exists():
-            if data.playlist_id:
-                raise PWarning(
-                    f"Ты уже и так подписан на плейлист \"{existed_sub.first().playlist_title}\" канала \"{existed_sub.first().channel_title}\"")
-            raise PWarning(f"Ты уже и так подписан на канал \"{existed_sub.first().channel_title}\"")
+            sub_item = SubscribeItem(**data.__dict__)
+            sub_item.save()
 
-        data_dict = data.__dict__
-
-        data_dict.update({
+        # ToDo: добавить сюда сервисные ключи, чтобы пользователь мог их определять при создании подписки?
+        data_dict = {
             "author": self.event.user,
             "chat": self.event.chat,
             "message_thread_id": self.event.message_thread_id,
-        })
+            "subscribe_item": sub_item,
+        }
 
         sub = SubscribeModel(**data_dict)
         sub.save()
-        if sub.playlist_id:
+        if sub_item.playlist_id:
             answer = f"Подписал на плейлист \"{data.playlist_title}\" канала \"{data.channel_title}\""
         else:
             answer = f"Подписал на канал \"{data.channel_title}\""
@@ -102,14 +115,12 @@ class Subscribe(Command):
     def add_youtube(url) -> SubscribeServiceData:
         yt_api = YoutubeVideo()
         parsed = yt_api.get_channel_info(url)
-        parsed.service = SubscribeModel.SERVICE_YOUTUBE
         return parsed
 
     @staticmethod
     def add_vk(url) -> SubscribeServiceData:
         vk_api = VKVideo()
         parsed = vk_api.get_channel_info(url)
-        parsed.service = SubscribeModel.SERVICE_VK
         return parsed
 
     def menu_subs(self) -> ResponseMessageItem:
@@ -121,9 +132,12 @@ class Subscribe(Command):
         self.check_args(2)
         channel_filter = self.event.message.args[1:]
         sub = self.get_sub(channel_filter)
-        sub_title = sub.channel_title
-        playlist_title = sub.playlist_title
+        sub_item = sub.subscribe_item
+        sub_title = sub_item.channel_title
+        playlist_title = sub_item.playlist_title
         sub.delete()
+        if sub_item.subscribes.count() == 0:
+            sub_item.delete()
         if playlist_title:
             answer = f"Удалил подписку на плейлист \"{playlist_title}\" канала \"{sub_title}\""
         else:
@@ -154,11 +168,12 @@ class Subscribe(Command):
     def get_subs_str(self, subs) -> str:
         subs_titles_str = ""
         for sub in subs:
-            if sub.playlist_title:
-                title = f"{sub.channel_title} | {sub.playlist_title}"
+            sub_item = sub.subscribe_item
+            if sub_item.playlist_title:
+                title = f"{sub_item.channel_title} | {sub_item.playlist_title}"
             else:
-                title = sub.channel_title
-            subs_titles_str += f"[{sub.get_service_display()} id:{self.bot.get_formatted_text_line(sub.pk)}] {self.bot.get_formatted_text_line(title)}"
+                title = sub_item.channel_title
+            subs_titles_str += f"[{sub_item.get_service_display()} id:{self.bot.get_formatted_text_line(sub.pk)}] {self.bot.get_formatted_text_line(title)}"
             if sub.chat:
                 subs_titles_str += f" (конфа - {sub.chat})"
             subs_titles_str += '\n'
@@ -166,9 +181,9 @@ class Subscribe(Command):
 
     def get_filtered_subs(self) -> SubscribeModel.objects:
         if self.event.chat:
-            subs = SubscribeModel.objects.filter(chat=self.event.chat)
+            subs = SubscribeModel.objects.filter(chat=self.event.chat).order_by("pk")
         else:
-            subs = SubscribeModel.objects.filter(author=self.event.user)
+            subs = SubscribeModel.objects.filter(author=self.event.user).order_by("pk")
         if subs.count() == 0:
             raise PWarning("Нет активных подписок")
         return subs

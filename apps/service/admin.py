@@ -1,8 +1,10 @@
 from django.contrib import admin
+from django.urls import reverse
+from django.utils.html import format_html
 
 from apps.service.mixins import TimeStampAdminMixin
 from apps.service.models import Service, Meme, Notify, City, Donation, TimeZone, Subscribe, Tag, VideoCache, \
-    GPTPrePrompt, GPTUsage
+    GPTPrePrompt, GPTUsage, SubscribeItem
 
 
 @admin.register(Service)
@@ -19,6 +21,7 @@ class MemeAdmin(TimeStampAdminMixin):
     search_fields = ('name', 'link')
     list_filter = (('author', admin.RelatedOnlyFieldListFilter), 'type', 'approved', 'for_trusted')
     ordering = ["name"]
+
 
 @admin.register(Notify)
 class NotifyAdmin(TimeStampAdminMixin):
@@ -48,14 +51,51 @@ class DonationAdmin(TimeStampAdminMixin):
     ordering = ['-date']
 
 
+class SubscribeInline(admin.TabularInline):
+    model = Subscribe
+    can_delete = False
+    extra = 0
+
+
+@admin.register(SubscribeItem)
+class SubscribeItemAdmin(TimeStampAdminMixin):
+    list_display = (
+        'channel_title',
+        'playlist_title',
+        'service',
+        'get_subscribes',
+        'get_subscribes_count'
+    )
+    list_filter = (
+        'service',
+    )
+    search_fields = ('channel_title', 'playlist_title', 'last_videos_id')
+    ordering = ['channel_title']
+    inlines = (SubscribeInline,)
+
+    @admin.display(description='Подписки')
+    def get_subscribes(self, obj: SubscribeItem):
+        subscribes = obj.subscribes.all()
+        links = [
+            format_html(
+                '<a href="{url}">{name}</a>',
+                url=reverse('admin:service_subscribe_change', args=[subscribe.id]),
+                name=str(subscribe)
+            )
+            for subscribe in subscribes
+        ]
+        return format_html("<br>".join(links))
+
+    @admin.display(description='Количество подписок')
+    def get_subscribes_count(self, obj: SubscribeItem):
+        return obj.subscribes.all().count()
+
 @admin.register(Subscribe)
 class SubscribeAdmin(TimeStampAdminMixin):
     list_display = (
         'author',
         'chat',
-        'channel_title',
-        'playlist_title',
-        'service',
+        'subscribe_item',
         'save_to_disk',
         'high_resolution',
         'force_cache',
@@ -66,10 +106,7 @@ class SubscribeAdmin(TimeStampAdminMixin):
         'save_to_disk',
         'high_resolution',
         'force_cache',
-        'service'
     )
-    search_fields = ('channel_title', 'playlist_title', 'last_videos_id')
-    ordering = ['channel_title']
 
 
 @admin.register(VideoCache)

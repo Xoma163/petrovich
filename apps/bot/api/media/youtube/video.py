@@ -16,6 +16,7 @@ from apps.bot.classes.messages.attachments.video import VideoAttachment
 from apps.bot.utils.nothing_logger import NothingLogger
 from apps.bot.utils.proxy import get_proxies
 from apps.bot.utils.video.video_handler import VideoHandler
+from apps.service.models import SubscribeItem
 from petrovich.settings import env
 
 
@@ -287,7 +288,9 @@ class YoutubeVideo(SubscribeService):
             playlist_id=playlist_id,
             channel_title=channel_title,
             playlist_title=playlist_title,
-            last_videos_id=last_videos_id
+            last_videos_id=last_videos_id,
+            service=SubscribeItem.SERVICE_YOUTUBE
+
         )
 
     def get_filtered_new_videos(

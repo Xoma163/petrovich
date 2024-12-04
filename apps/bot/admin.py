@@ -34,11 +34,13 @@ class UserAdmin(TimeStampAdminMixin):
 class UserInline(admin.StackedInline):
     model = User
     can_delete = False
+    extra = 0
 
 
 class ProfileSettingsInline(admin.StackedInline):
     model = ProfileSettings
     can_delete = False
+    extra = 0
 
 
 @admin.register(Profile)
@@ -113,6 +115,7 @@ class ProfileAdmin(TimeStampAdminMixin):
 class ChatSettingsInline(admin.StackedInline):
     model = ChatSettings
     can_delete = False
+    extra = 0
 
 
 @admin.register(Chat)

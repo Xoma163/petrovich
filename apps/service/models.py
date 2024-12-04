@@ -139,6 +139,30 @@ class Donation(TimeStampModelMixin):
         return f"{username}. {self.amount}"
 
 
+class SubscribeItem(TimeStampModelMixin):
+    SERVICE_YOUTUBE = 1
+    SERVICE_VK = 4
+    SERVICE_CHOICES = (
+        (SERVICE_YOUTUBE, 'YouTube'),
+        (SERVICE_VK, 'VK'),
+    )
+    channel_id = models.CharField("ID канала", max_length=100)
+    channel_title = models.CharField("Название канала", max_length=100)
+    playlist_id = models.CharField("ID плейлиста", max_length=100, blank=True, null=True)
+    playlist_title = models.CharField("Название плейлиста", max_length=100, blank=True, null=True)
+    last_videos_id = models.JSONField("ID последних видео", null=True)  # array
+    service = models.SmallIntegerField("Сервис", blank=True, choices=SERVICE_CHOICES, default=SERVICE_YOUTUBE)
+
+    def __str__(self):
+        if self.playlist_title:
+            return f"{self.channel_title} | {self.playlist_title}"
+        return self.channel_title
+
+    class Meta:
+        verbose_name = "Элемент подписки"
+        verbose_name_plural = "Элементы подписки"
+
+
 class Subscribe(TimeStampModelMixin):
     SERVICE_YOUTUBE = 1
     SERVICE_VK = 4
@@ -151,29 +175,30 @@ class Subscribe(TimeStampModelMixin):
     chat = models.ForeignKey(Chat, models.CASCADE, verbose_name='Чат', null=True, blank=True)
     message_thread_id = models.IntegerField("message_thread_id", blank=True, null=True, default=None)
 
-    channel_id = models.CharField("ID канала", max_length=100, blank=True, null=True)
-    playlist_id = models.CharField("ID плейлиста", max_length=100, blank=True, null=True)
-    channel_title = models.CharField("Название канала", max_length=100)
-    playlist_title = models.CharField("Название плейлиста", max_length=100, blank=True, null=True)
-    last_videos_id = models.JSONField("ID последних видео", max_length=100, null=True, blank=True)  # array
-    service = models.SmallIntegerField("Сервис", blank=True, choices=SERVICE_CHOICES, default=SERVICE_YOUTUBE)
-
     save_to_disk = models.BooleanField("Сохранять на диск", default=False)
     high_resolution = models.BooleanField("Присылать в высоком разрешении", default=False)
     force_cache = models.BooleanField("Принудительно кэшировать", default=False)
+
+    subscribe_item = models.ForeignKey(
+        SubscribeItem,
+        verbose_name="Сервис подписки",
+        null=True,
+        on_delete=models.CASCADE,
+        related_name="subscribes"
+    )
 
     @property
     def peer_id(self):
         return self.chat.chat_id if self.chat else self.author.user_id
 
+    def __str__(self):
+        if self.chat:
+            return f"{str(self.chat)} | {self.author} | {self.subscribe_item}"
+        return f"{self.author} | {self.subscribe_item}"
+
     class Meta:
         verbose_name = "Подписка"
         verbose_name_plural = "Подписки"
-
-    def __str__(self):
-        if self.playlist_title:
-            return f"{self.channel_title} | {self.playlist_title}"
-        return self.channel_title
 
 
 class VideoCache(TimeStampModelMixin):
