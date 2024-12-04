@@ -23,20 +23,20 @@ class MediaServiceResponse:
 
 class MediaKeys:
     NO_MEDIA_KEYS = ["nomedia", "no-media", 'n']
-    AUDIO_KEYS = ['audio', 'a']
-    DISK_KEYS = ['save', 'disk', 's', 'd']
-    HIGH_KEYS = ['high', 'best', 'h', 'b']
-    CACHE_KEYS = ['cache', 'c']
+    AUDIO_ONLY_KEYS = ['audio', 'a']
+    SAVE_TO_DISK_KEYS = ['save', 'disk', 's', 'd']
+    HIGH_RESOLUTION_KEYS = ['high', 'best', 'h', 'b']
+    FORCE_CACHE_KEYS = ['cache', 'c']
     FORCE_KEYS = ['force', 'f']
     THREADS_KEYS = ['thread', 'threads', 'with-threads', 'тред', 'треды', 't']
     SPOILER_KEYS = ['spoiler', 's']
 
     def __init__(self, keys: list):
         self.no_media: bool = self.check_key(keys, self.NO_MEDIA_KEYS)
-        self.audio: bool = self.check_key(keys, self.AUDIO_KEYS)
-        self.disk: bool = self.check_key(keys, self.DISK_KEYS)
-        self.high: bool = self.check_key(keys, self.HIGH_KEYS)
-        self.cache: bool = self.check_key(keys, self.CACHE_KEYS)
+        self.audio_only: bool = self.check_key(keys, self.AUDIO_ONLY_KEYS)
+        self.save_to_disk: bool = self.check_key(keys, self.SAVE_TO_DISK_KEYS)
+        self.high_resolution: bool = self.check_key(keys, self.HIGH_RESOLUTION_KEYS)
+        self.force_cache: bool = self.check_key(keys, self.FORCE_CACHE_KEYS)
         self.force: bool = self.check_key(keys, self.FORCE_KEYS)
         self.threads: bool = self.check_key(keys, self.THREADS_KEYS)
         self.spoiler: bool = self.check_key(keys, self.SPOILER_KEYS)

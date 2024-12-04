@@ -28,7 +28,7 @@ class UTVService(MediaService):
         va.width = data.width
         va.height = data.height
 
-        if self.media_keys.cache or va.get_size_mb() > self.bot.MAX_VIDEO_SIZE_MB:
+        if self.media_keys.force_cache or va.get_size_mb() > self.bot.MAX_VIDEO_SIZE_MB:
             return self._cache_video(data.channel_id, data.video_id, text, url, va.content)
         return MediaServiceResponse(text=text, attachments=[va], video_title=text)
 

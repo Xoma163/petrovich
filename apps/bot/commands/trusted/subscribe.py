@@ -7,12 +7,11 @@ from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role, Platform
 from apps.bot.classes.const.exceptions import PWarning
-from apps.bot.classes.help_text import HelpTextItem, HelpText, HelpTextArgument
+from apps.bot.classes.help_text import HelpTextItem, HelpText, HelpTextArgument, HelpTextKey
 from apps.bot.classes.messages.attachments.link import LinkAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
+from apps.bot.commands.media.service import MediaKeys
 from apps.service.models import Subscribe as SubscribeModel, SubscribeItem
-
-MAX_USER_SUBS_COUNT = 3
 
 
 class Subscribe(Command):
@@ -30,8 +29,30 @@ class Subscribe(Command):
         ],
         extra_text=(
             "Проверка новых видео проходит каждые 30 минут\n"
-            "Для вк нужно перейти в 'Показать все' и скопировать ссылку оттуда. Также поддерживаются ссылки на плейлисты для VK/Youtube"
+            "Для вк нужно перейти в 'Показать все' и скопировать ссылку оттуда.\n"
+            "Также поддерживаются ссылки на плейлисты для VK/Youtube"
         ),
+        help_text_keys=[
+            HelpTextItem(Role.USER, [
+                HelpTextKey(
+                    MediaKeys.HIGH_RESOLUTION_KEYS[0],
+                    MediaKeys.HIGH_RESOLUTION_KEYS[1:],
+                    "присылает видео в максимальном качестве"
+                ),
+                HelpTextKey(
+                    MediaKeys.FORCE_CACHE_KEYS[0],
+                    MediaKeys.FORCE_CACHE_KEYS[1:],
+                    "позволяет загрузить видео в онлайн-кэш"
+                ),
+            ]),
+            HelpTextItem(Role.ADMIN, [
+                HelpTextKey(
+                    MediaKeys.SAVE_TO_DISK_KEYS[0],
+                    MediaKeys.SAVE_TO_DISK_KEYS[1:],
+                    "сохраняет видео в локальную директорию"
+                ),
+            ]),
+        ]
     )
 
     platforms = [Platform.TG]
@@ -95,12 +116,17 @@ class Subscribe(Command):
             sub_item = SubscribeItem(**data.__dict__)
             sub_item.save()
 
-        # ToDo: добавить сюда сервисные ключи, чтобы пользователь мог их определять при создании подписки?
+        media_keys = MediaKeys(self.event.message.keys)
+        if media_keys.save_to_disk:
+            self.check_sender(Role.ADMIN)
         data_dict = {
             "author": self.event.user,
             "chat": self.event.chat,
             "message_thread_id": self.event.message_thread_id,
             "subscribe_item": sub_item,
+            "high_resolution": media_keys.high_resolution,
+            "force_cache": media_keys.force_cache,
+            "save_to_disk": media_keys.save_to_disk,
         }
 
         sub = SubscribeModel(**data_dict)

@@ -133,9 +133,9 @@ class Command(BaseCommand):
 
         media_keys_list = []
         if high_resolution:
-            media_keys_list.append(MediaKeys.HIGH_KEYS[0])
+            media_keys_list.append(MediaKeys.HIGH_RESOLUTION_KEYS[0])
         if force_cache:
-            media_keys_list.append(MediaKeys.CACHE_KEYS[0])
+            media_keys_list.append(MediaKeys.FORCE_CACHE_KEYS[0])
         media_keys = MediaKeys(media_keys_list)
 
         logger.debug({

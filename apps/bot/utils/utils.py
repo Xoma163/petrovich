@@ -163,13 +163,13 @@ def get_help_texts_for_command(command, roles: list[Role] = None) -> str:
             full_help_texts_list.append("")
 
         # help keys
-        full_help_texts_list.append("Возможные ключи:")
 
         keys: list[HelpTextKey] = []
         for role in roles:
             if res := command.help_text.get_help_text_key(role):
                 keys += res.items
-
+        if keys:
+            full_help_texts_list.append("Возможные ключи:")
         for key in keys:
             if key.aliases:
                 full_keys = [key.key] + key.aliases

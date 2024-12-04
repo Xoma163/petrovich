@@ -50,18 +50,18 @@ class Media(AcceptExtraMixin):
                     "позволяет не запускать команду"
                 ),
                 HelpTextKey(
-                    MediaKeys.AUDIO_KEYS[0],
-                    MediaKeys.AUDIO_KEYS[1:],
+                    MediaKeys.AUDIO_ONLY_KEYS[0],
+                    MediaKeys.AUDIO_ONLY_KEYS[1:],
                     "позволяет скачивать аудиодорожку для видео"
                 ),
                 HelpTextKey(
-                    MediaKeys.HIGH_KEYS[0],
-                    MediaKeys.HIGH_KEYS[1:],
-                    "сохраняет видео в максимальном качестве (VK Video/Youtube Video)"
+                    MediaKeys.HIGH_RESOLUTION_KEYS[0],
+                    MediaKeys.HIGH_RESOLUTION_KEYS[1:],
+                    "присылает видео в максимальном качестве (VK Video/Youtube Video)"
                 ),
                 HelpTextKey(
-                    MediaKeys.CACHE_KEYS[0],
-                    MediaKeys.CACHE_KEYS[1:],
+                    MediaKeys.FORCE_CACHE_KEYS[0],
+                    MediaKeys.FORCE_CACHE_KEYS[1:],
                     "позволяет загрузить видео в онлайн-кэш (VK Video/Youtube Video/Телеканал Ю)"
                 ),
                 HelpTextKey(
@@ -80,7 +80,8 @@ class Media(AcceptExtraMixin):
                 ),
             ]),
             HelpTextItem(Role.ADMIN, [
-                HelpTextKey(MediaKeys.DISK_KEYS[0], MediaKeys.DISK_KEYS[1:], "сохраняет видео в локальную директорию"),
+                HelpTextKey(MediaKeys.SAVE_TO_DISK_KEYS[0], MediaKeys.SAVE_TO_DISK_KEYS[1:],
+                            "сохраняет видео в локальную директорию"),
             ]),
 
         ],
@@ -161,12 +162,12 @@ class Media(AcceptExtraMixin):
         att_is_video = (media_response.attachments and isinstance(media_response.attachments[0],
                                                                   VideoAttachment)) or media_response.cache_url
 
-        if media_keys.disk and att_is_video:
+        if media_keys.save_to_disk and att_is_video:
             self.check_sender(Role.ADMIN)
             title = media_response.video_title or str(random.randint(1000000000, 999999999))
             service.save_to_disk(media_response, "Скачано", title)
 
-        if media_keys.audio and att_is_video:
+        if media_keys.audio_only and att_is_video:
             video: VideoAttachment = media_response.attachments[0]
             vh = VideoHandler(video=video)
             aa = AudioAttachment()
