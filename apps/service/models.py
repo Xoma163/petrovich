@@ -153,6 +153,21 @@ class SubscribeItem(TimeStampModelMixin):
     last_videos_id = models.JSONField("ID последних видео", null=True)  # array
     service = models.SmallIntegerField("Сервис", blank=True, choices=SERVICE_CHOICES, default=SERVICE_YOUTUBE)
 
+    @property
+    def save_to_disk(self) -> bool:
+        subscribes = self.subscribes.all()
+        return any([sub.save_to_disk for sub in subscribes])
+
+    @property
+    def high_resolution(self) -> bool:
+        subscribes = self.subscribes.all()
+        return any([sub.high_resolution for sub in subscribes])
+
+    @property
+    def force_cache(self) -> bool:
+        subscribes = self.subscribes.all()
+        return any([sub.force_cache for sub in subscribes])
+
     def __str__(self):
         if self.playlist_title:
             return f"{self.channel_title} | {self.playlist_title}"

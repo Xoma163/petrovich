@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.templatetags.static import static
 from django.urls import reverse
 from django.utils.html import format_html
 
@@ -64,7 +65,10 @@ class SubscribeItemAdmin(TimeStampAdminMixin):
         'playlist_title',
         'service',
         'get_subscribes',
-        'get_subscribes_count'
+        'get_subscribes_count',
+        'save_to_disk_admin',
+        'high_resolution_admin',
+        'force_cache_admin',
     )
     list_filter = (
         'service',
@@ -72,6 +76,8 @@ class SubscribeItemAdmin(TimeStampAdminMixin):
     search_fields = ('channel_title', 'playlist_title', 'last_videos_id')
     ordering = ['channel_title']
     inlines = (SubscribeInline,)
+
+    # list_select_related = ('subscribes',)
 
     @admin.display(description='Подписки')
     def get_subscribes(self, obj: SubscribeItem):
@@ -89,6 +95,26 @@ class SubscribeItemAdmin(TimeStampAdminMixin):
     @admin.display(description='Количество подписок')
     def get_subscribes_count(self, obj: SubscribeItem):
         return obj.subscribes.all().count()
+
+    @admin.display(description='Сохранять на диск')
+    def save_to_disk_admin(self, obj: SubscribeItem) -> bool:
+        return self._get_boolean_icon(obj.save_to_disk)
+
+    @admin.display(description='Высокое разрешение')
+    def high_resolution_admin(self, obj: SubscribeItem) -> bool:
+        return self._get_boolean_icon(obj.high_resolution)
+
+    @admin.display(description='Принудительно кэшировать')
+    def force_cache_admin(self, obj: SubscribeItem) -> bool:
+        return self._get_boolean_icon(obj.force_cache)
+
+    @staticmethod
+    def _get_boolean_icon(value):
+        gif_filename_map = {True: 'yes', False: 'no', None: 'unknown'}
+        gif_filename = gif_filename_map[value]
+        icon_url = static(f'admin/img/icon-{gif_filename}.svg')
+        return format_html(f'<img src="{icon_url}" alt="{value}" />', )
+
 
 @admin.register(Subscribe)
 class SubscribeAdmin(TimeStampAdminMixin):

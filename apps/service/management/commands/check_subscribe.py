@@ -89,19 +89,25 @@ class Command(BaseCommand):
         })
         messages_with_att = []
         subscribes = sub_item.subscribes.all()
-        high_res = any([sub.high_resolution for sub in subscribes])
         for video in videos.videos:
-            media_response = self.get_media_service_response(video.url, media_service, high_res=high_res)
+            media_response = self.get_media_service_response(
+                video.url,
+                media_service,
+                force_cache=sub_item.force_cache,
+                high_resolution=sub_item.high_resolution
+            )
             messages_with_att.append((media_response, video))
 
         for sub in subscribes:
             for media_response, video in messages_with_att:
                 self.send_notify(sub_item, sub, video.title, video.url, media_response)
-
-                if sub.save_to_disk:
-                    self._save_to_disk(media_response, str(sub), video.title, )
-
                 time.sleep(1)
+
+        if sub_item.save_to_disk:
+            media_response = messages_with_att[0][0]
+            video_title = messages_with_att[0][1].title
+            self._save_to_disk(media_response, str(sub_item), video_title)
+
         sub_item.last_videos_id = sub_item.last_videos_id + videos.ids
         sub_item.save()
 
@@ -114,7 +120,7 @@ class Command(BaseCommand):
     def get_media_service_response(
             url: str,
             service_class: type[MediaService],
-            high_res: bool = False,
+            high_resolution: bool = False,
             force_cache: bool = False,
     ) -> MediaServiceResponse:
         """
@@ -126,7 +132,7 @@ class Command(BaseCommand):
         event.message = Message()
 
         media_keys_list = []
-        if high_res:
+        if high_resolution:
             media_keys_list.append(MediaKeys.HIGH_KEYS[0])
         if force_cache:
             media_keys_list.append(MediaKeys.CACHE_KEYS[0])
