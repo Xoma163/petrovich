@@ -25,16 +25,8 @@ class SubscribeServiceNewVideosData:
     videos: list[SubscribeServiceNewVideoData]
 
     @property
-    def ids(self):
+    def ids(self) -> list[int | str]:
         return [x.id for x in self.videos]
-
-    @property
-    def titles(self):
-        return [x.title for x in self.videos]
-
-    @property
-    def urls(self):
-        return [x.url for x in self.videos]
 
 
 class SubscribeService:

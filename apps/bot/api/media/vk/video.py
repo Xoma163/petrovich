@@ -153,7 +153,7 @@ class VKVideo(SubscribeService):
             else:
                 short_video_data = self._get_short_video_data(bs4)
                 video_data = self._get_video_data(bs4)
-                video_id = short_video_data['ownerId']
+                video_id = short_video_data['videoId']
                 channel_id = short_video_data['ownerId']
                 channel_title = video_data['playlistAddedTitle'].split(' ', 1)[1]
 
