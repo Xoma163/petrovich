@@ -169,8 +169,8 @@ class VKVideo(SubscribeService):
             return VideoData(
                 channel_id=channel_id,
                 video_id=video_id,
-                channel_title=channel_title,
-                title=video_title,
+                channel_title=self._prepare_title(channel_title),
+                title=self._prepare_title(video_title),
                 width=width,
                 height=height
             )
@@ -207,8 +207,8 @@ class VKVideo(SubscribeService):
         return SubscribeServiceData(
             channel_id=channel_id,
             playlist_id=playlist_id,
-            channel_title=channel_title,
-            playlist_title=playlist_title,
+            channel_title=self._prepare_title(channel_title),
+            playlist_title=self._prepare_title(playlist_title),
             last_videos_id=last_videos_id,
             service=SubscribeItem.SERVICE_VK
         )
@@ -244,6 +244,8 @@ class VKVideo(SubscribeService):
         ids = ids[index:]
         titles = titles[index:]
 
+        titles = [self._prepare_title(x) for x in titles]
+
         data = SubscribeServiceNewVideosData(videos=[])
         for i, _id in enumerate(ids):
             data.videos.append(
@@ -254,6 +256,10 @@ class VKVideo(SubscribeService):
                 )
             )
         return data
+
+    @staticmethod
+    def _prepare_title(name: str) -> str:
+        return name.replace("&#774;", "й")
 
     @staticmethod
     def _get_short_video_data(bs4):
