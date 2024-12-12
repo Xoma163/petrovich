@@ -88,7 +88,7 @@ class ProfileAdmin(TimeStampAdminMixin):
         'chats__name'
     )
     search_fields = ('name', 'surname', 'nickname_real', 'user__user_id', 'user__nickname')
-    list_select_related = ('user',)
+    list_select_related = ('city', 'settings')
 
     ordering = ("name", "surname")
 
