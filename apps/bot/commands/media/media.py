@@ -70,10 +70,6 @@ class Media(AcceptExtraMixin):
                     "позволяет загрузить видео принудительно (Youtube Video)"
                 ),
                 HelpTextKey(
-                    MediaKeys.THREADS_KEYS[0],
-                    MediaKeys.THREADS_KEYS[1:],
-                    "позволяет скачивать пост с комментариями автора(Twitter)"
-                ), HelpTextKey(
                     MediaKeys.SPOILER_KEYS[0],
                     MediaKeys.SPOILER_KEYS[1:],
                     "позволяет скрыть пост спойлером"
