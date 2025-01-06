@@ -9,7 +9,7 @@ package-mode = false
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.12"
 beautifulsoup4 = "^4.12.3"
 colorlog = "^6.8.2"
 crontab = "^1.0.1"
@@ -34,6 +34,7 @@ numpy = "^2.0.0"
 python-dateutil = "^2.9.0.post0"
 selenium = "^4.22.0"
 sentry-sdk = { extras = ["django"], version = "^2.13.0" }
+selenium-wire = "^5.1.0"
 
 [tool.poetry.dev-dependencies]
 
