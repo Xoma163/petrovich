@@ -1,4 +1,4 @@
-import dataclasses
+import json
 import json
 import re
 from urllib.parse import urlparse
@@ -15,16 +15,6 @@ from apps.bot.classes.messages.attachments.audio import AudioAttachment
 from apps.bot.classes.messages.attachments.video import VideoAttachment
 from apps.bot.utils.video.video_handler import VideoHandler
 from apps.service.models import SubscribeItem
-
-
-@dataclasses.dataclass
-class VKVideoData:
-    channel_id: str
-    video_id: str
-    channel_title: str
-    title: str
-    width: int | None
-    height: int | None
 
 
 class VKVideo(SubscribeService):
@@ -74,7 +64,7 @@ class VKVideo(SubscribeService):
 
     def _get_video_audio(self, player_url: str, high_res: bool) -> tuple[VideoAttachment, AudioAttachment | None]:
         r = requests.get(player_url, headers=self.headers)
-        js_code = re.findall('var playerParams = (\{.*\})', r.text)[0]
+        js_code = re.findall(r'var playerParams = (\{.*\})', r.text)[0]
         info = json.loads(js_code)
         info = info.get('params')[0]
 

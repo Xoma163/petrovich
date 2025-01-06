@@ -1,38 +1,22 @@
-import dataclasses
 import json
 import re
 
 from bs4 import BeautifulSoup
-from selenium import webdriver
-from selenium.webdriver.firefox.options import Options
 
 from apps.bot.api.media.data import VideoData
 from apps.bot.classes.messages.attachments.video import VideoAttachment
 from apps.bot.utils.video.video_handler import VideoHandler
-
-
-@dataclasses.dataclass
-class ZenVideoData:
-    channel_id: str
-    channel_title: str
-    playlist_id: str
-    playlist_title: str
-    video_id: str
-    video_title: str
-    m3u8_master_url: str
-    thumbnail_url: str
+from apps.bot.utils.web_driver import get_web_driver
 
 
 class Zen:
     @staticmethod
     def parse_video(url: str) -> VideoData:
-        options = Options()
-        options.add_argument("--headless")
-        driver = webdriver.Firefox(options=options)
+        web_driver = get_web_driver()
 
-        driver.get(url)
-        bs4 = BeautifulSoup(driver.page_source, "html.parser")
-        driver.close()
+        web_driver.get(url)
+        bs4 = BeautifulSoup(web_driver.page_source, "html.parser")
+        web_driver.quit()
 
         scripts = [x.text for x in bs4.find_all('script') if "master.m3u8" in x.text]
         script = scripts[0]

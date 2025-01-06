@@ -34,7 +34,8 @@ numpy = "^2.0.0"
 python-dateutil = "^2.9.0.post0"
 selenium = "^4.22.0"
 sentry-sdk = { extras = ["django"], version = "^2.13.0" }
-selenium-wire = "^5.1.0"
+blinker = "1.7.0"
+setuptools = "^75.7.0"
 
 [tool.poetry.dev-dependencies]
 
