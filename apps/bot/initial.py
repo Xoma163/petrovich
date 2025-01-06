@@ -72,8 +72,8 @@ HELP_TEXTS = generate_help_text()
 
 def get_text_for_documentation():
     NL = '\n'
-    LEFT_QUOTE_NEW = '\['
-    RIGHT_QUOTE_NEW = '\]'
+    LEFT_QUOTE_NEW = r'\['
+    RIGHT_QUOTE_NEW = r'\]'
     BR = "<br>"
     BR_NL = f"{BR}\n"
     INS = "<ins>"

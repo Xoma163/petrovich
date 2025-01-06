@@ -319,7 +319,7 @@ def get_urls_from_text(text: str) -> list:
     Поиск ссылок в тексте.
     Возвращает список найденных ссылок
     """
-    return re.findall("(?P<url>https?://[^\s]+)", text)
+    return re.findall(r"(?P<url>https?://[^\s]+)", text)
 
 
 def get_chunks(lst: list, n: int):

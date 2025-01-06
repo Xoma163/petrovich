@@ -82,7 +82,7 @@ class ResponseMessageItem:
             self.kwargs['parse_mode'] = "html"
         else:
             for tag in self.TG_TAGS:
-                p = re.compile(f"<{tag}.*>[\s\S]*</{tag}>")
+                p = re.compile(rf"<{tag}.*>[\s\S]*</{tag}>")
                 if p.search(self.text):
                     self.kwargs['parse_mode'] = "html"
                     break
