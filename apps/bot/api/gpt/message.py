@@ -99,6 +99,10 @@ class ClaudeGPTMessage(GPTMessage):
         return message
 
 
+class GrokGPTMessage(ChatGPTMessage):
+    pass
+
+
 class GPTMessages(ABC):
     def __init__(self, gpt_message_class: type[GPTMessage]):
         self._messages: list[GPTMessage] = []
@@ -145,3 +149,8 @@ class ClaudeGPTMessages(GPTMessages):
                     message['content'].append(submessage)
             messages.append(message)
         return messages
+
+
+class GrokGPTMessages(GPTMessages):
+    def __init__(self):
+        super().__init__(GrokGPTMessage)
