@@ -178,9 +178,9 @@ class Subscribe(Command):
             subs = subs.filter(pk=pk)
         except ValueError:
             for _filter in filters:
-                q = Q(channel_title__icontains=_filter) | Q(playlist_title__icontains=_filter)
+                q = Q(subscribe_item__channel_title__icontains=_filter) | Q(
+                    subscribe_item__playlist_title__icontains=_filter)
                 subs = subs.filter(q)
-
         subs_count = subs.count()
         if subs_count == 0:
             raise PWarning("Не нашёл :(")
