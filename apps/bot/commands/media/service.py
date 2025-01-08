@@ -28,19 +28,22 @@ class MediaKeys:
     HIGH_RESOLUTION_KEYS = ['high', 'best', 'h', 'b']
     FORCE_CACHE_KEYS = ['cache', 'c']
     FORCE_KEYS = ['force', 'f']
-    SPOILER_KEYS = ['spoiler', 's']
+    SPOILER_KEYS = ['spoiler']
 
-    def __init__(self, keys: list):
-        self.no_media: bool = self.check_key(keys, self.NO_MEDIA_KEYS)
-        self.audio_only: bool = self.check_key(keys, self.AUDIO_ONLY_KEYS)
-        self.save_to_disk: bool = self.check_key(keys, self.SAVE_TO_DISK_KEYS)
-        self.high_resolution: bool = self.check_key(keys, self.HIGH_RESOLUTION_KEYS)
-        self.force_cache: bool = self.check_key(keys, self.FORCE_CACHE_KEYS)
-        self.force: bool = self.check_key(keys, self.FORCE_KEYS)
-        self.spoiler: bool = self.check_key(keys, self.SPOILER_KEYS)
+    def __init__(self, keys: list, short_keys: list):
+        self.no_media: bool = self.check_key(keys, short_keys, self.NO_MEDIA_KEYS)
+        self.audio_only: bool = self.check_key(keys, short_keys, self.AUDIO_ONLY_KEYS)
+        self.save_to_disk: bool = self.check_key(keys, short_keys, self.SAVE_TO_DISK_KEYS)
+        self.high_resolution: bool = self.check_key(keys, short_keys, self.HIGH_RESOLUTION_KEYS)
+        self.force_cache: bool = self.check_key(keys, short_keys, self.FORCE_CACHE_KEYS)
+        self.force: bool = self.check_key(keys, short_keys, self.FORCE_KEYS)
+        self.spoiler: bool = self.check_key(keys, short_keys, self.SPOILER_KEYS)
+
     @staticmethod
-    def check_key(keys_event: list, keys_values: list) -> bool:
-        return any(x in keys_event for x in keys_values)
+    def check_key(keys_event: list, short_keys_event: list, keys_values: list) -> bool:
+        keys = any(x in keys_event for x in keys_values)
+        short_keys = any(x == y for x in keys_values for y in short_keys_event)
+        return keys or short_keys
 
 
 class MediaService:
@@ -81,8 +84,13 @@ class MediaService:
         try:
             cache = VideoCache.objects.get(channel_id=channel_id, video_id=video_id)
             text = self._get_download_cache_text(title, cache.video.url, cache.original_url)
-            return MediaServiceResponse(text, None, cache=cache, cache_url=self._get_cached_url(cache.video.url),
-                                        video_title=title)
+            return MediaServiceResponse(
+                text=text,
+                attachments=None,
+                cache=cache,
+                cache_url=self._get_cached_url(cache.video.url),
+                video_title=title
+            )
         except VideoCache.DoesNotExist:
             return None
 
@@ -110,13 +118,20 @@ class MediaService:
         cache.video.save(filename, content=BytesIO(content))
         cache.save()
         text = self._get_download_cache_text(title, cache.video.url, cache.original_url)
-        return MediaServiceResponse(text, None, cache=cache, cache_url=self._get_cached_url(cache.video.url),
-                                    video_title=title)
+        return MediaServiceResponse(
+            text=text,
+            attachments=None,
+            cache=cache,
+            cache_url=self._get_cached_url(cache.video.url),
+            video_title=title
+        )
 
     def _get_download_cache_text(self, title, cache_video_url, cache_video_original_url):
         url = unquote(cache_video_url)
-        return f"{self.bot.get_formatted_url(title, self._get_cached_url(cache_video_original_url))}\n" \
-               f"Скачать можно {self.bot.get_formatted_url('здесь', self._get_cached_url(url))}"
+        formatted_original_video_url = self.bot.get_formatted_url(title, cache_video_original_url)
+        formatted_cached_video_url = self.bot.get_formatted_url('здесь', self._get_cached_url(url))
+        return f"{formatted_original_video_url}\n" \
+               f"Скачать можно {formatted_cached_video_url}"
 
     @staticmethod
     def _get_cached_url(cache_video_url: str) -> str:

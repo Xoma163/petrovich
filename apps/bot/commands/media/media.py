@@ -126,7 +126,7 @@ class Media(AcceptExtraMixin):
     @classmethod
     def accept_extra(cls, event: Event) -> bool:
         if event.message and not event.message.mentioned:
-            media_keys = MediaKeys(event.message.keys)
+            media_keys = MediaKeys(event.message.keys, event.message.short_keys)
             if media_keys.no_media:
                 return False
             all_urls = get_urls_from_text(event.message.clear_case)
@@ -138,7 +138,7 @@ class Media(AcceptExtraMixin):
 
     def start(self) -> ResponseMessage:
         source = self._get_source_link()
-        media_keys = MediaKeys(self.event.message.keys)
+        media_keys = MediaKeys(self.event.message.keys, self.event.message.short_keys)
 
         service_class, chosen_url = self._get_service_and_chosen_url(source)
         service = service_class(self.bot, self.event, media_keys=media_keys, has_command_name=self.has_command_name)
@@ -160,7 +160,7 @@ class Media(AcceptExtraMixin):
 
         if media_keys.save_to_disk and att_is_video:
             self.check_sender(Role.ADMIN)
-            title = media_response.video_title or str(random.randint(1000000000, 999999999))
+            title = media_response.video_title or str(random.randint(1000000000, 9999999999))
             service.save_to_disk(media_response, "Скачано", title)
 
         if media_keys.audio_only and att_is_video:
@@ -200,13 +200,28 @@ class Media(AcceptExtraMixin):
         index = args_str.find(chosen_url)
         extra_text = f"{args_str[:index].strip()}\n{args_str[index + len(chosen_url):].strip()}"
         extra_text = extra_text if extra_text.strip() else ""
-        for key in self.event.message.keys:
-            for key_symbol in self.event.message.KEYS_SYMBOLS:
+
+        extra_text = self._strip_extra_text_by_keys(
+            self.event.message.keys,
+            self.event.message.KEYS_SYMBOLS,
+            extra_text
+        )
+        extra_text = self._strip_extra_text_by_keys(
+            self.event.message._short_keys_raw,
+            self.event.message.SHORT_KEYS_SYMBOLS,
+            extra_text
+        )
+
+        extra_text = extra_text if extra_text.strip() else ""
+        return extra_text
+
+    @staticmethod
+    def _strip_extra_text_by_keys(keys: list, keys_symbols: list, extra_text: str) -> str:
+        for key in keys:
+            for key_symbol in keys_symbols:
                 full_key = key_symbol + key
                 if (index := extra_text.find(full_key)) != -1:
                     extra_text = f"{extra_text[:index].strip()}\n{extra_text[index + len(full_key):].strip()}"
-
-        extra_text = extra_text if extra_text.strip() else ""
         return extra_text
 
     def prepare_media_response(
@@ -233,9 +248,13 @@ class Media(AcceptExtraMixin):
             answer += f"\nОт {self.event.sender}"
 
         source_hostname = str(urlparse(chosen_url).hostname).lstrip('www.')
+
         if media_keys.spoiler:
             answer = self.bot.get_spoiler_text(answer)
-        answer += f'\nИсточник: {self.bot.get_formatted_url(source_hostname, chosen_url)}'
+
+        if not media_response.cache:
+            answer += f'\nИсточник: {self.bot.get_formatted_url(source_hostname, chosen_url)}'
+
         answer = answer.strip()
 
         reply_to = self.event.fwd[0].message.id if self.event.fwd else None

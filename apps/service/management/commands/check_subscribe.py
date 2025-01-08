@@ -136,7 +136,7 @@ class Command(BaseCommand):
             media_keys_list.append(MediaKeys.HIGH_RESOLUTION_KEYS[0])
         if force_cache:
             media_keys_list.append(MediaKeys.FORCE_CACHE_KEYS[0])
-        media_keys = MediaKeys(media_keys_list)
+        media_keys = MediaKeys(media_keys_list, [])
 
         logger.debug({
             "message": "get_media_result_msg",

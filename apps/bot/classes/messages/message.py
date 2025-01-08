@@ -3,6 +3,7 @@ import re
 
 class Message:
     COMMAND_SYMBOLS = ['/']
+    SHORT_KEYS_SYMBOLS = ["-"]
     KEYS_SYMBOLS = ["—", "--"]
     SPACE_REGEX = r' |\n'
 
@@ -39,6 +40,8 @@ class Message:
         self.kwargs: dict = {}
 
         # Ключи
+        self._short_keys_raw: list = []
+        self.short_keys: list = []
         self.keys: list = []
 
         self.id = _id
@@ -78,9 +81,16 @@ class Message:
 
         for arg in filter(None, args_split):
             key = next((arg[len(ks):].lower() for ks in self.KEYS_SYMBOLS if arg.startswith(ks)), None)
-            if key:
+            short_key = next((arg[len(ks):].lower() for ks in self.SHORT_KEYS_SYMBOLS if arg.startswith(ks)), None)
+
+            if key or short_key:
                 index = args_str.find(arg)
-                self.keys.append(key)
+                if key:
+                    self.keys.append(key)
+                elif short_key:
+                    self._short_keys_raw.append(short_key)
+                    self.short_keys += [x for x in short_key]
+
                 if index == 0:
                     args_str = args_str[:index]
                 else:

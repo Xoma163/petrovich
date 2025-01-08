@@ -25,9 +25,8 @@ class YoutubeVideoService(MediaService):
             return self._get_content_by_url(video_data, url)
 
     def _get_content_by_url(self, data: VideoData, url: str) -> MediaServiceResponse:
-        text = data.title if data.duration > 60 else None
 
-        if cached := self._get_cached(data.channel_id, data.video_id, text):
+        if cached := self._get_cached(data.channel_id, data.video_id, data.title):
             return cached
 
         va = self.service.download_video(data)
@@ -35,7 +34,7 @@ class YoutubeVideoService(MediaService):
         if self.media_keys.force_cache or va.get_size_mb() > self.bot.MAX_VIDEO_SIZE_MB:
             return self._cache_video(data.channel_id, data.video_id, data.title, url, va.content)
 
-        return MediaServiceResponse(text=text, attachments=[va], video_title=data.title)
+        return MediaServiceResponse(text=data.title, attachments=[va], video_title=data.title)
 
     def check_valid_url(self, url: str) -> None:
         self.service.check_url_is_video(url)

@@ -124,8 +124,8 @@ def get_help_texts_for_command(command, roles: list[Role] = None) -> str:
     """
     Получает help_texts для команды
     """
-
-    DASH = "—"
+    DASH = "-"
+    LONG_DASH = "—"
     DOUBLE_DASH = "--"
 
     from apps.bot.classes.bots.tg_bot import TgBot
@@ -138,7 +138,7 @@ def get_help_texts_for_command(command, roles: list[Role] = None) -> str:
     if len(command.full_names) > 1:
         result += f"Названия команды: {', '.join(command.full_names)}\n"
     if command.access != Role.USER:
-        result += f"Необходимый уровень прав {DASH} {command.access}\n"
+        result += f"Необходимый уровень прав {LONG_DASH} {command.access}\n"
     if result:
         result += '\n'
     if command.help_text:
@@ -155,7 +155,7 @@ def get_help_texts_for_command(command, roles: list[Role] = None) -> str:
                 full_command_name = _format(f"/{command.name} {item.args}")
             else:
                 full_command_name = _format(f"/{command.name}")
-            line = f"{full_command_name} {DASH} {item.description}"
+            line = f"{full_command_name} {LONG_DASH} {item.description}"
             full_help_texts_list.append(line)
 
         # Отступ
@@ -171,12 +171,16 @@ def get_help_texts_for_command(command, roles: list[Role] = None) -> str:
         if keys:
             full_help_texts_list.append("Возможные ключи:")
         for key in keys:
-            if key.aliases:
-                full_keys = [key.key] + key.aliases
-                full_key = ", ".join([_format(DOUBLE_DASH + x) for x in full_keys])
-            else:
-                full_key = _format(f"{DOUBLE_DASH}{key.key}")
-            line = f"{full_key} {DASH} {key.description}"
+            aliases = [key.key]
+            aliases += key.get_aliases()
+            full_keys = []
+            for key_item in aliases:
+                if len(key_item) == 1:
+                    full_keys.append(_format(DASH + key_item))
+                else:
+                    full_keys.append(_format(DOUBLE_DASH + key_item))
+            full_key = ", ".join(full_keys)
+            line = f"{full_key} {LONG_DASH} {key.description}"
             full_help_texts_list.append(line)
 
         if command.help_text.extra_text:

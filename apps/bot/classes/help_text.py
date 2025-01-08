@@ -13,6 +13,8 @@ class HelpTextKey:
         self.aliases: list[str] | None = aliases
         self.description: str = description
 
+    def get_aliases(self) -> list[str]:
+        return self.aliases if self.aliases else []
 
 class HelpTextItem:
     def __init__(self, role: Role, texts: list[HelpTextArgument | HelpTextKey]):

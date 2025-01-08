@@ -116,7 +116,7 @@ class Subscribe(Command):
             sub_item = SubscribeItem(**data.__dict__)
             sub_item.save()
 
-        media_keys = MediaKeys(self.event.message.keys)
+        media_keys = MediaKeys(self.event.message.keys, self.event.message.short_keys)
         if media_keys.save_to_disk:
             self.check_sender(Role.ADMIN)
         data_dict = {
