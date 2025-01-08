@@ -25,7 +25,7 @@ class GithubIssueAPI(GithubAPI):
 
         self.remote_url: str = ""
         self.created_at: datetime | None = None
-
+        self.state_reason: str | None = None
         self.author: Profile | None = None
 
     def parse_response(self, response: dict):
@@ -37,6 +37,7 @@ class GithubIssueAPI(GithubAPI):
         self.assignee: str = response['assignee']
         self.remote_url: str = response['html_url']
         self.created_at: datetime = datetime.strptime(response['created_at'], '%Y-%m-%dT%H:%M:%SZ')
+        self.state_reason: str = response['state_reason']
 
         self.author: Profile | None = None
         match = self.USER_PK_RE.findall(self.body)
@@ -93,3 +94,7 @@ class GithubIssueAPI(GithubAPI):
     def get_all_labels(self) -> list[str]:
         r = self.requests.get(self.LABELS_URL, json.dumps({})).json()
         return [x['name'] for x in r]
+
+    @property
+    def state_reason_is_not_planned(self) -> bool:
+        return self.state_reason == "not_planned"

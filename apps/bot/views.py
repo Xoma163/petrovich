@@ -68,7 +68,7 @@ class GithubView(CSRFExemptMixin, View):
             return
         user = issue.author.get_tg_user()
         bot = TgBot()
-        rmi = ResponseMessageItem(text=text, peer_id=user.user_id)
+        rmi = ResponseMessageItem(text=text, peer_id=user.user_id, disable_web_page_preview=True)
         bot.send_response_message_item(rmi)
 
     def reopen_issue(self, issue: GithubIssueAPI):
@@ -79,6 +79,8 @@ class GithubView(CSRFExemptMixin, View):
     def closed_issue(self, issue: GithubIssueAPI):
         problem_str = TgBot.get_formatted_url('Проблема #' + str(issue.number), issue.remote_url)
         text = f"{problem_str} была закрыта"
+        if issue.state_reason_is_not_planned:
+            text += " как незапланированная"
         self.send_notify_to_user(issue, text)
 
     def delete_issue(self, issue: GithubIssueAPI):

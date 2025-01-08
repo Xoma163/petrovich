@@ -29,7 +29,7 @@ class TwitterAPIResponse:
 
 
 class Twitter(API):
-    URL_TWEET_INFO = f"https://cdn.syndication.twimg.com/tweet-result"
+    URL_TWEET_INFO = "https://cdn.syndication.twimg.com/tweet-result"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
