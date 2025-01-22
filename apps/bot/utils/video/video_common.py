@@ -13,12 +13,11 @@ class VideoCommon:
     @staticmethod
     def _place_file(file: NamedTemporaryFile, att: Attachment):
         with open(file.name, 'wb') as _file:
-            content = att.download_content(stream=True)
-            if isinstance(content, types.GeneratorType):
-                for chunk in content:
+            if isinstance(att.content, types.GeneratorType):
+                for chunk in att.content:
                     _file.write(chunk)
             else:
-                _file.write(content)
+                _file.write(att.content)
 
     @staticmethod
     def close_file(file: NamedTemporaryFile):

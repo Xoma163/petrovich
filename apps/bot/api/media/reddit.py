@@ -79,9 +79,11 @@ class Reddit:
 
         va = VideoAttachment()
         va.public_download_url = video_url
+        va.download_content(stream=True)
 
         aa = AudioAttachment()
         aa.public_download_url = audio_url
+        aa.download_content(stream=True)
 
         vh = VideoHandler(video=va, audio=aa)
         return vh.mux()

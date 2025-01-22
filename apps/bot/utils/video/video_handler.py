@@ -8,7 +8,10 @@ from apps.bot.utils.video.trimmer import VideoTrimmer
 
 
 class VideoHandler:
+    AUDIO_ERROR = "Video must be provided"
+    AUDIO_CONTENT_ERROR = "Audio content must be provided"
     VIDEO_ERROR = "Video must be provided"
+    VIDEO_CONTENT_ERROR = "Video must be provided"
     VIDEO_OR_AUDIO_ERROR = "Video or audio must be provided"
     def __init__(
             self,
@@ -21,8 +24,13 @@ class VideoHandler:
     def mux(self) -> bytes:
         if not self.video:
             raise RuntimeError(self.VIDEO_ERROR)
+        if not self.video.content:
+            raise RuntimeError(self.VIDEO_CONTENT_ERROR)
+
         if not self.audio:
-            raise RuntimeError(self.VIDEO_ERROR)
+            raise RuntimeError(self.AUDIO_ERROR)
+        if not self.audio.content:
+            raise RuntimeError(self.AUDIO_CONTENT_ERROR)
 
         avm = AudioVideoMuxer(self.video, self.audio)
         return avm.mux()

@@ -41,7 +41,10 @@ class VKVideo(SubscribeService):
     def download(self, url: str, video_id: str, high_res: bool = False) -> VideoAttachment:
         player_url = self._get_player_url(url, video_id)
         va, aa = self._get_video_audio(player_url, high_res=high_res)
+
         if aa is not None:
+            va.download_content(stream=True)
+            aa.download_content(stream=True)
             vh = VideoHandler(video=va, audio=aa)
             va.content = vh.mux()
         if va.m3u8_url:
