@@ -21,6 +21,8 @@ from petrovich.settings import env
 
 
 class YoutubeVideo(SubscribeService):
+    DEFAULT_VIDEO_QUALITY_HIGHT = 1080
+
     def __init__(self, use_proxy=True):
         super().__init__()
 
@@ -150,8 +152,8 @@ class YoutubeVideo(SubscribeService):
         except (IndexError, KeyError):
             return None
 
-    @staticmethod
     def _get_video_download_urls(
+            self,
             video_info: dict,
             high_res: bool = False,
             _timedelta: int | None = None,
@@ -191,7 +193,7 @@ class YoutubeVideo(SubscribeService):
 
         if not high_res:
             for vf in video_formats:
-                if int(vf['height']) <= 1080:
+                if int(vf['height']) <= self.DEFAULT_VIDEO_QUALITY_HIGHT:
                     break
 
         video_filesize = (vf['filesize'] + af['filesize']) / 1024 / 1024
