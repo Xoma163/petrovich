@@ -88,12 +88,12 @@ class Chat(Platform, TimeStampModelMixin):
         unique_together = ('chat_id', 'platform',)
 
     def save(self, **kwargs):
+        is_new = self.id is None
         super(Chat, self).save(**kwargs)
 
-        is_new = self.id is None
         if is_new:
             # auto create settings model
-            cs = ChatSettings.objects.create(profile=self)
+            cs = ChatSettings.objects.create(chat=self)
             cs.save()
 
     def __str__(self):

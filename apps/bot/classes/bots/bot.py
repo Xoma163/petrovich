@@ -112,7 +112,7 @@ class Bot(Thread):
                 peer_id=event.peer_id,
                 message_thread_id=event.message_thread_id,
             )
-            if event.sender.check_role(Role.TRUSTED):
+            if event.sender and event.sender.check_role(Role.TRUSTED):
                 button = self.get_button('Логи', command="логи")
                 keyboard = self.get_inline_keyboard([button])
                 rmi.keyboard = keyboard
