@@ -64,9 +64,9 @@ class TrimVideo(Command):
             if isinstance(att, LinkAttachment):
                 if not att.is_youtube_link:
                     raise PWarning("Обрезка по ссылке доступна только для YouTube")
-                video_bytes = self.trim_att_by_link(att)
+                video_bytes = self.trim_attachment_by_link(att)
             else:
-                video_bytes = self.trim_video(att)
+                video_bytes = self.trim_attachment(att)
 
         if isinstance(att, AudioAttachment):
             attachment = self.bot.get_audio_attachment(video_bytes, peer_id=self.event.peer_id)
@@ -74,7 +74,7 @@ class TrimVideo(Command):
             attachment = self.bot.get_video_attachment(video_bytes, peer_id=self.event.peer_id)
         return ResponseMessage(ResponseMessageItem(attachments=[attachment]))
 
-    def trim_att_by_link(self, att) -> bytes:
+    def trim_attachment_by_link(self, att: LinkAttachment) -> bytes:
         args = [x for x in self.event.message.args]
         args.remove(att.url.lower())
 
@@ -93,7 +93,7 @@ class TrimVideo(Command):
         video = yt_api.download_video(info)
         return self.trim(video, start_pos, end_pos)
 
-    def trim_video(self, video: VideoAttachment) -> bytes:
+    def trim_attachment(self, video: VideoAttachment | AudioAttachment) -> bytes:
         start_pos = self.parse_timecode(self.event.message.args[0])
         end_pos = None
         if len(self.event.message.args) > 1:
@@ -102,7 +102,8 @@ class TrimVideo(Command):
         return self.trim(video, start_pos, end_pos)
 
     @staticmethod
-    def trim(video: VideoAttachment | LinkAttachment | None, start_pos: str, end_pos: str) -> bytes:
+    def trim(video: VideoAttachment | AudioAttachment | LinkAttachment | None, start_pos: str, end_pos: str) -> bytes:
+        video.download_content()
         vh = VideoHandler(video)
         return vh.trim(start_pos, end_pos)
 
