@@ -19,6 +19,7 @@ class MediaServiceResponse:
     cache: VideoCache | None = None
     cache_url: str | None = None
     video_title: str | None = None
+    need_to_wrap_html_tags: bool = True
 
 
 class MediaKeys:

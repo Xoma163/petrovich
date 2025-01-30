@@ -15,6 +15,8 @@ class RedditService(MediaService):
     @retry(3, Exception, sleep_time=2)
     def get_content_by_url(self, url: str) -> MediaServiceResponse:
         reddit_data = self.service.get_post_data(url)
+        result_text = self.service.title
+
         if self.service.is_gif:
             attachments = [self.bot.get_gif_attachment(
                 reddit_data,
@@ -67,11 +69,10 @@ class RedditService(MediaService):
                 )
                 for photo in all_photos
             ]
-            text = f"{self.service.title}\n\n{text}"
-            return MediaServiceResponse(text=text, attachments=attachments)
+            result_text = f"{self.service.title}\n\n{text}"
         else:
             raise PWarning("Я хз чё за контент")
-        return MediaServiceResponse(text=self.service.title, attachments=attachments)
+        return MediaServiceResponse(text=result_text, attachments=attachments, need_to_wrap_html_tags=False)
 
     @classmethod
     def urls(cls) -> list[str]:

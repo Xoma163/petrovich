@@ -235,7 +235,7 @@ class Media(AcceptExtraMixin):
 
         answer = ""
         if text:
-            if not media_response.cache_url:
+            if not media_response.cache_url and media_response.need_to_wrap_html_tags:
                 answer = f"{markdown_wrap_symbols(text)}\n"
             else:
                 answer = text
