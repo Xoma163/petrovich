@@ -32,5 +32,5 @@ class DeIssue(Command):
             raise PWarning("Вы не являетесь автором issue")
 
         issue.delete_in_github()
-        answer = f"Проблема {_id}({issue.title}) закрыта. "
+        answer = f"Проблема {_id} закрыта. "
         return ResponseMessage(ResponseMessageItem(text=answer))

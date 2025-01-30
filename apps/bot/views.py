@@ -78,7 +78,7 @@ class GithubView(CSRFExemptMixin, View):
 
     def closed_issue(self, issue: GithubIssueAPI):
         problem_str = TgBot.get_formatted_url('Проблема #' + str(issue.number), issue.remote_url)
-        text = f"{problem_str} была закрыта"
+        text = f"{problem_str}({issue.title}) была закрыта"
         if issue.state_reason_is_not_planned:
             text += " как незапланированная"
         self.send_notify_to_user(issue, text)
