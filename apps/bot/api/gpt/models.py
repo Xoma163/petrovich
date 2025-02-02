@@ -42,9 +42,10 @@ class GPTVoiceRecognitionModel(GPTModel):
 
 
 class GPTModels:
-    # GPT o1
-    GPT_4_O1_PREVIEW = GPTCompletionModel("o1-preview", "GPT-o1 preview", 15, 60)
-    GPT_4_O1_MINI = GPTCompletionModel("o1-mini", "GPT-o1 mini", 3, 12)
+    # GPT o
+    GPT_4_O1 = GPTCompletionModel("o1", "o1", 15, 60)
+    GPT_4_O1_MINI = GPTCompletionModel("o1-mini", "o1 mini", 1.1, 4.4)
+    GPT_4_O3_MINI = GPTCompletionModel("o3-mini", "o3-mini", 1.1, 4.4)
 
     # GPT-4
     GPT_4_OMNI_MINI = GPTCompletionModel("gpt-4o-mini", "GPT-4 OMNI MINI", 0.15, 0.6)
