@@ -36,7 +36,8 @@ class ChatGPTAPI(GPTAPI):
         503: "ChatGPT недоступен",
         'insufficient_quota': "Закончились деньги((",
         'invalid_api_key': "Некорректный API KEY. Проверьте свой ключ",
-        'rate_limit_exceeded': "Слишком большой запрос"
+        'rate_limit_exceeded': "Слишком большой запрос",
+        'model_not_found': "Модель не существует или у вас нет к ней доступа"
     }
 
     def __init__(self, sender=None, **kwargs):
