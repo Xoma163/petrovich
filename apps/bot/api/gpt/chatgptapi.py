@@ -51,7 +51,7 @@ class ChatGPTAPI(GPTAPI):
         }
 
         # ToDo: костыль, так как o1 не умеют в system role
-        if model in [GPTModels.GPT_4_O1_PREVIEW, GPTModels.GPT_4_O1_MINI]:
+        if model in [GPTModels.GPT_4_O1, GPTModels.GPT_4_O1_MINI, GPTModels.GPT_4_O3_MINI]:
             if payload['messages'][0]['role'] == GPTMessageRole.SYSTEM:
                 payload['messages'][0]['role'] = GPTMessageRole.USER
 
