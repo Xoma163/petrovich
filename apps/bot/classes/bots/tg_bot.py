@@ -110,7 +110,7 @@ class TgBot(Bot):
             'results': json.dumps(inline_query_result, ensure_ascii=False),
             'cache_time': 0
         }
-        r = self.requests.get('answerInlineQuery', params).json()
+        r = self.requests.post('answerInlineQuery', params).json()
         return r
 
     def _send_media_group_wrap(self, rmi: ResponseMessageItem, default_params) -> dict:
@@ -146,9 +146,9 @@ class TgBot(Bot):
         del params['caption']
         params['media'] = json.dumps(media_list)
         if not files:
-            r = self.requests.get('sendMediaGroup', params).json()
+            r = self.requests.post('sendMediaGroup', params).json()
         else:
-            r = self.requests.get('sendMediaGroup', params, files=files).json()
+            r = self.requests.post('sendMediaGroup', params, files=files).json()
         return r
 
     def _send_media_group(self, rmi: ResponseMessageItem, default_params) -> dict:
@@ -190,21 +190,22 @@ class TgBot(Bot):
         """
         Отправка фото. Ссылка или файл
         """
+
         params = copy(default_params)
         photo: PhotoAttachment = rmi.attachments[0]
         if rmi.spoiler:
             params['has_spoiler'] = rmi.spoiler
         if photo.file_id:
             params['photo'] = photo.file_id
-            r = self.requests.get('sendPhoto', params).json()
+            r = self.requests.post('sendPhoto', params).json()
         elif photo.public_download_url and not photo.content:
             params['photo'] = photo.public_download_url
-            r = self.requests.get('sendPhoto', params).json()
+            r = self.requests.post('sendPhoto', params).json()
         else:
             if photo.get_size_mb() > self.MAX_PHOTO_SIZE:
                 rmi.attachments = []
                 raise PError(f"Нельзя загружать фото более {self.MAX_PHOTO_SIZE} мб в телеграмм")
-            r = self.requests.get('sendPhoto', params, files={'photo': photo.content}).json()
+            r = self.requests.post('sendPhoto', params, files={'photo': photo.content}).json()
         return r
 
     def _send_document(self, rmi: ResponseMessageItem, default_params) -> dict:
@@ -215,15 +216,15 @@ class TgBot(Bot):
         document: DocumentAttachment = rmi.attachments[0]
         if document.file_id:
             params['document'] = document.file_id
-            r = self.requests.get('sendDocument', params).json()
+            r = self.requests.post('sendDocument', params).json()
         elif document.public_download_url and not document.content:
             params['document'] = document.public_download_url
-            r = self.requests.get('sendDocument', params).json()
+            r = self.requests.post('sendDocument', params).json()
         else:
             files = {'document': document.content}
             if document.thumbnail:
                 files['thumbnail'] = document.thumbnail.get_bytes_io_content()
-            r = self.requests.get('sendDocument', params, files=files).json()
+            r = self.requests.post('sendDocument', params, files=files).json()
         return r
 
     def _send_video(self, rmi: ResponseMessageItem, default_params) -> dict:
@@ -242,10 +243,10 @@ class TgBot(Bot):
 
         if video.file_id:
             params['video'] = video.file_id
-            r = self.requests.get('sendVideo', params).json()
+            r = self.requests.post('sendVideo', params).json()
         elif video.public_download_url and not video.content:
             params['video'] = video.public_download_url
-            r = self.requests.get('sendVideo', params).json()
+            r = self.requests.post('sendVideo', params).json()
         else:
             with ChatActivity(self, ActivitiesEnum.UPLOAD_VIDEO, params['chat_id']):
                 if video.get_size_mb() > self.MAX_VIDEO_SIZE_MB:
@@ -257,7 +258,7 @@ class TgBot(Bot):
                     video.set_thumbnail()
                 if video.thumbnail:
                     files['thumbnail'] = video.thumbnail.get_bytes_io_content()
-                r = self.requests.get('sendVideo', params, files=files).json()
+                r = self.requests.post('sendVideo', params, files=files).json()
         return r
 
     def _send_video_note(self, rmi: ResponseMessageItem, default_params) -> dict:
@@ -267,7 +268,7 @@ class TgBot(Bot):
         params = copy(default_params)
         video_note: VideoNoteAttachment = rmi.attachments[0]
         params['video_note'] = video_note.file_id
-        r = self.requests.get('sendVideoNote', params).json()
+        r = self.requests.post('sendVideoNote', params).json()
         return r
 
     def _send_audio(self, rmi: ResponseMessageItem, default_params) -> dict:
@@ -287,14 +288,14 @@ class TgBot(Bot):
             if audio.thumbnail_url:
                 params['thumbnail'] = audio.thumbnail_url
             params['audio'] = audio.public_download_url
-            r = self.requests.get('sendAudio', params).json()
+            r = self.requests.post('sendAudio', params).json()
         else:
             files = {'audio': audio.content}
             if audio.thumbnail_url:
                 audio.set_thumbnail()
             if audio.thumbnail:
                 files['thumbnail'] = audio.thumbnail.get_bytes_io_content()
-            r = self.requests.get('sendAudio', params, files=files).json()
+            r = self.requests.post('sendAudio', params, files=files).json()
         return r
 
     def _send_gif(self, rmi: ResponseMessageItem, default_params) -> dict:
@@ -307,15 +308,15 @@ class TgBot(Bot):
             params['has_spoiler'] = rmi.spoiler
         if gif.file_id:
             params['animation'] = gif.file_id
-            r = self.requests.get('sendAnimation', params).json()
+            r = self.requests.post('sendAnimation', params).json()
         elif gif.public_download_url:
             params['animation'] = gif.public_download_url
-            r = self.requests.get('sendAnimation', params).json()
+            r = self.requests.post('sendAnimation', params).json()
         else:
             if gif.get_size_mb() > self.MAX_GIF_SIZE:
                 rmi.attachments = []
                 raise PError(f"Нельзя загружать гифы более {self.MAX_GIF_SIZE} мб в телеграмм")
-            r = self.requests.get('sendAnimation', params, files={'animation': gif.content}).json()
+            r = self.requests.post('sendAnimation', params, files={'animation': gif.content}).json()
         return r
 
     def _send_sticker(self, rmi: ResponseMessageItem, default_params) -> dict:
@@ -325,7 +326,7 @@ class TgBot(Bot):
         params = copy(default_params)
         sticker: StickerAttachment = rmi.attachments[0]
         params['sticker'] = sticker.file_id
-        r = self.requests.get('sendSticker', params).json()
+        r = self.requests.post('sendSticker', params).json()
         return r
 
     def _send_voice(self, rmi: ResponseMessageItem, default_params) -> dict:
@@ -335,31 +336,31 @@ class TgBot(Bot):
         params = copy(default_params)
         voice: VoiceAttachment = rmi.attachments[0]
         params['voice'] = voice.file_id
-        r = self.requests.get('sendVoice', params).json()
+        r = self.requests.post('sendVoice', params).json()
         return r
 
     def _send_text(self, default_params) -> dict:
         params = copy(default_params)
         self.set_activity(params['chat_id'], ActivitiesEnum.TYPING)
         params['text'] = params.pop('caption')
-        r = self.requests.get('sendMessage', params).json()
+        r = self.requests.post('sendMessage', params).json()
         return r
 
     def edit_message(self, default_params) -> dict:
         params = copy(default_params)
         params['text'] = params.pop('caption')
-        r = self.requests.get('editMessageText', params=params).json()
+        r = self.requests.post('editMessageText', params=params).json()
         return r
 
     def edit_caption(self, default_params) -> dict:
         params = copy(default_params)
-        r = self.requests.get('editMessageCaption', params=params).json()
+        r = self.requests.post('editMessageCaption', params=params).json()
         return r
 
     def edit_keyboard(self, default_params) -> dict:
         params = copy(default_params)
         del params['caption']
-        r = self.requests.get('editMessageReplyMarkup', params=params).json()
+        r = self.requests.post('editMessageReplyMarkup', params=params).json()
         return r
 
     def edit_media(self, rmi: ResponseMessageItem, default_params) -> dict:
@@ -373,7 +374,7 @@ class TgBot(Bot):
         else:
             params['media']['media'] = self.get_file_id(att)
         params['media'] = json.dumps(params['media'])
-        r = self.requests.get('editMessageMedia', params=params).json()
+        r = self.requests.post('editMessageMedia', params=params).json()
         return r
 
     def send_response_message_item(self, rmi: ResponseMessageItem) -> BotResponse:
@@ -535,7 +536,7 @@ class TgBot(Bot):
 
     # USERS GROUPS BOTS
     def update_profile_avatar(self, profile: Profile, user_id) -> dict:
-        r = self.requests.get('getUserProfilePhotos', {'user_id': user_id}).json()
+        r = self.requests.post('getUserProfilePhotos', {'user_id': user_id}).json()
         photos = r['result']['photos']
         if len(photos) == 0:
             raise PWarning("Нет фотографий в профиле")
@@ -546,7 +547,7 @@ class TgBot(Bot):
         return r
 
     def get_chat_administrators(self, chat_id) -> dict:
-        r = self.requests.get('getChatAdministrators', {'chat_id': chat_id}).json()
+        r = self.requests.post('getChatAdministrators', {'chat_id': chat_id}).json()
         return r['result']
 
     # END USERS GROUPS BOTS
@@ -595,7 +596,7 @@ class TgBot(Bot):
 
         # no wait for response
         threading.Thread(
-            target=self.requests.get,
+            target=self.requests.post,
             args=(
                 'sendChatAction',
                 {
@@ -620,18 +621,18 @@ class TgBot(Bot):
         """
         if not isinstance(message_ids, list):
             message_ids = [message_ids]
-        r = self.requests.get(
+        r = self.requests.post(
             'deleteMessages',
             params={'chat_id': chat_id, 'message_ids': json.dumps(message_ids)}
         ).json()
         return r
 
     def get_sticker_set(self, name: str) -> list:
-        r = self.requests.get('getStickerSet', json={'name': name}).json()
+        r = self.requests.post('getStickerSet', json={'name': name}).json()
         return r['result']['stickers']
 
     def set_chat_admin_title(self, chat_id: int | str, user_id: int | str, title: str) -> dict:
-        r = self.requests.get('setChatAdministratorCustomTitle', json={
+        r = self.requests.post('setChatAdministratorCustomTitle', json={
             'chat_id': chat_id,
             'user_id': user_id,
             'custom_title': title
@@ -639,7 +640,7 @@ class TgBot(Bot):
         return r
 
     def promote_chat_member(self, chat_id: int | str, user_id: int | str) -> dict:
-        r = self.requests.get('promoteChatMember', json={
+        r = self.requests.post('promoteChatMember', json={
             'chat_id': chat_id,
             'user_id': user_id,
             'can_manage_chat': False,
@@ -648,7 +649,7 @@ class TgBot(Bot):
         return r
 
     def get_chat(self, chat_id: int | str) -> dict:
-        r = self.requests.get('getChat', json={
+        r = self.requests.post('getChat', json={
             'chat_id': chat_id
         }).json()
         return r
@@ -656,14 +657,14 @@ class TgBot(Bot):
     def set_chat_title(self, chat_id: int | str, title: str) -> dict:
         if len(title) > 128:
             raise PWarning("Максимальная длина названия чата - 128 символов")
-        r = self.requests.get('setChatTitle', json={
+        r = self.requests.post('setChatTitle', json={
             'chat_id': chat_id,
             'title': title
         }).json()
         return r
 
     def leave_group(self, chat_id) -> dict:
-        r = self.requests.get('leaveChat', json={
+        r = self.requests.post('leaveChat', json={
             'chat_id': chat_id,
         }).json()
         return r
@@ -674,7 +675,7 @@ class TgBot(Bot):
         if not isinstance(reactions, list):
             reactions = [reactions]
         reactions = [{"type": "emoji", "emoji": x} for x in reactions]
-        r = self.requests.get('setMessageReaction', json={
+        r = self.requests.post('setMessageReaction', json={
             'chat_id': chat_id,
             'message_id': message_id,
             'reaction': json.dumps(reactions),
