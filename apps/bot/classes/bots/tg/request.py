@@ -18,7 +18,7 @@ class Request:
         self.log_filter = log_filter
 
     def get(self, action, params=None, **kwargs) -> Response:
-        return self._do(action, "post", params, **kwargs)
+        return self._do(action, "get", params, **kwargs)
 
     def post(self, action, params=None, **kwargs) -> Response:
         return self._do(action, "post", params, **kwargs)

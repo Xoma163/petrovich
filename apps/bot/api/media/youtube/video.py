@@ -126,6 +126,7 @@ class YoutubeVideo(SubscribeService):
         va.height = data.height or None
         va.duration = data.duration or None
         va.thumbnail_url = data.thumbnail_url or None
+        va.use_proxy_on_download_thumbnail = True
         return va
 
     @staticmethod

@@ -40,11 +40,6 @@ class Grok(GPTCommand):
         return ResponseMessage(answer)
 
     def completions(self, messages: GPTMessages, use_statistics=True) -> ResponseMessageItem:
-        # Если картинка, то просто игнорируем препромпт
-        # last_message = messages.last_message
-        # if last_message.images:
-        #     messages = self.gpt_messages_class()
-        #     messages.add_message(last_message.role, last_message.text, last_message.images)
         return super().completions(messages, use_statistics=False)
 
     def default(self, with_vision=True):
