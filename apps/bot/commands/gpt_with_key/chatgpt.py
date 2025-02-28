@@ -111,10 +111,17 @@ class ChatGPT(GPTCommand):
 
         gpt_models = GPTModels.get_completions_models()
         models_list = [
-            f"{self.bot.get_formatted_text_line(x.name)}\n${x.prompt_1m_token_cost} / 1M входных токенов\n${x.completion_1m_token_cost} / 1M выходных токенов"
-            for x in gpt_models]
-        models_str = "\n\n".join(models_list)
-        answer = f"Список доступных моделей:\n{models_str}"
+            f"{self.bot.get_formatted_text_line(x.name)} (${x.prompt_1m_token_cost} / ${x.completion_1m_token_cost})"
+            for x in gpt_models
+        ]
+        models_str = "\n".join(models_list)
+        answer = (
+            "Список доступных моделей:"
+            "\n"
+            "Название (цена за 1кк входных токенов / цена за 1кк выходных токенов)"
+            "\n"
+            f"{models_str}"
+        )
         return ResponseMessageItem(answer)
 
     def menu_model(self) -> ResponseMessageItem:

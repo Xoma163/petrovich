@@ -53,6 +53,7 @@ class GPTModels:
     GPT_4_TURBO = GPTCompletionModel("gpt-4-turbo", "GPT-4 TURBO", 10, 30)
     GPT_4 = GPTCompletionModel("gpt-4", "GPT-4", 30, 60)
     GPT_4_32K = GPTCompletionModel("gpt-4-32k", "GPT-4 32K", 60, 120)
+    GPT_4_5 = GPTCompletionModel("gpt-4.5-preview", "GPT-4.5", 75, 150)
 
     # GPT-3.5
     GPT_3_5_TURBO_0125 = GPTCompletionModel("gpt-3.5-turbo-0125", "GPT-3.5 TURBO 0125", 0.5, 1.5)

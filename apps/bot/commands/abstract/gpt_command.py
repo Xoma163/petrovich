@@ -353,6 +353,15 @@ class GPTCommand(ABC, Command):
         Получение статистики
         """
 
+        """
+        Запрос для статистики за 3 месяца по юзерам без ключа
+        
+        [x for x in GPTUsage.objects.filter(created_at__gte=dt_now - datetime.timedelta(days=90)) \
+            .values('author__name') \
+            .filter(Q(author__settings__chat_gpt_key='') | Q(author__settings__chat_gpt_key__isnull=True))
+            .annotate(total_cost=Round(Sum('cost'),2), total_requests=Count('id')) \
+            .order_by('-total_cost')]
+        """
         stats_all = self._get_stat_db_profile(Q(author=profile))
         if not stats_all:
             return None
