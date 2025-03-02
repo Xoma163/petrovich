@@ -24,6 +24,7 @@ class AudioTrack(Command):
 
     def start(self) -> ResponseMessage:
         att = self.event.get_all_attachments([VideoAttachment])[0]
+        att.download_content()
         vh = VideoHandler(video=att)
         audio_track = vh.get_audio_track()
         audio_att = self.bot.get_audio_attachment(audio_track)

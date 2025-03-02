@@ -60,8 +60,7 @@ class VideoHandler:
         return vt.trim(start_pos, end_pos)
 
     def get_audio_track(self) -> bytes:
-        if not self.video:
-            raise RuntimeError(self.VIDEO_ERROR)
+        self._check_video_content()
 
         at = AudioTrack(self.video)
         return at.get_audio_track()
