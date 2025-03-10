@@ -189,7 +189,11 @@ class YoutubeVideo(SubscribeService):
             reverse=True
         )
 
-        af = audio_formats[0]
+        try:
+            ru_audio_formats = [x for x in audio_formats if x.get('language') == 'ru']
+            af = ru_audio_formats[0]
+        except IndexError:
+            af = audio_formats[0]
         vf = video_formats[0]
 
         if not high_res:
