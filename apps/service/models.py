@@ -281,13 +281,13 @@ class GPTPrePrompt(TimeStampModelMixin):
     GEMINI = 'gemini'
     CLAUDE = 'claude'
     GROK = 'grok'
-    DEEPSEEK = 'deepseek'
+    # DEEPSEEK = 'deepseek'
     PROVIDER_CHOICES = (
         (CHATGPT, 'СhatGPT'),
         (GEMINI, 'Gemini'),
         (CLAUDE, 'Claude'),
         (GROK, 'Grok'),
-        (DEEPSEEK, 'deepseek'),
+        # (DEEPSEEK, 'deepseek'),
     )
 
     author = models.ForeignKey(Profile, models.CASCADE, verbose_name="Пользователь", null=True, blank=True)
