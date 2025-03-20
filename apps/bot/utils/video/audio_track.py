@@ -22,4 +22,5 @@ class AudioTrack(VideoCommon):
         return audio
 
     def _get_audio_track(self):
-        do_the_linux_command(f"ffmpeg6 -i {self.tmp_video_file.name} -f adts -y {self.tmp_output_file.name}")
+        do_the_linux_command(
+            f"ffmpeg6 -i {self.tmp_video_file.name} -vn -acodec copy -f adts -y {self.tmp_output_file.name}")
