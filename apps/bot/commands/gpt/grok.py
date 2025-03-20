@@ -19,7 +19,10 @@ class Grok(GPTCommand):
             HelpTextItem(
                 access,
                 GPTCommand.DEFAULT_HELP_TEXT_ITEMS + \
-                [GPTCommand.VISION_HELP_TEXT_ITEM] + \
+                [
+                    GPTCommand.VISION_HELP_TEXT_ITEM,
+                    GPTCommand.DRAW_HELP_TEXT_ITEM
+                ] + \
                 GPTCommand.PREPROMPT_HELP_TEXT_ITEMS
             )
         ],
@@ -32,12 +35,16 @@ class Grok(GPTCommand):
     def start(self) -> ResponseMessage:
         arg0 = self.event.message.args[0] if self.event.message.args else None
         menu = [
+            [["нарисуй", "draw"], self.menu_draw_image],
             [["препромпт", "препромт", "промпт", "preprompt", "prepromp", "prompt"], self.menu_preprompt],
             [['default'], self.default]
         ]
         method = self.handle_menu(menu, arg0)
         answer = method()
         return ResponseMessage(answer)
+
+    def menu_draw_image(self, use_statistics=True) -> ResponseMessageItem:
+        return super().menu_draw_image(use_statistics=False)
 
     def completions(self, messages: GPTMessages, use_statistics=True) -> ResponseMessageItem:
         return super().completions(messages, use_statistics=False)

@@ -3,7 +3,8 @@ from requests import HTTPError
 
 from apps.bot.api.gpt.gpt import GPTAPI
 from apps.bot.api.gpt.message import GrokGPTMessages
-from apps.bot.api.gpt.response import GPTAPICompletionsResponse
+from apps.bot.api.gpt.models import GPTImageFormat
+from apps.bot.api.gpt.response import GPTAPICompletionsResponse, GPTAPIImageDrawResponse
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.utils.proxy import get_proxies
 from petrovich.settings import env
@@ -14,8 +15,11 @@ class GrokGPTAPI(GPTAPI):
 
     DEFAULT_COMPLETIONS_MODEL: str = "grok-2-latest"
     DEFAULT_VISION_MODEL: str = "grok-2-vision-1212"
+    DEFAULT_DRAW_MODEL: str = "grok-2-image-latest"
 
-    URL = "https://api.x.ai/v1/chat/completions"
+    BASE_URL = "https://api.x.ai/v1"
+    COMPLETIONS_URL = f"{BASE_URL}/chat/completions"
+    IMAGE_GEN_URL: str = f"{BASE_URL}/images/generations"
 
     def __init__(self, **kwargs):
         super(GrokGPTAPI, self).__init__(**kwargs)
@@ -25,7 +29,7 @@ class GrokGPTAPI(GPTAPI):
             "messages": messages.get_messages(),
             "model": self._get_model(use_image),
         }
-        r = self._do_request(self.URL, json=data)
+        r = self._do_request(self.COMPLETIONS_URL, json=data)
         answer = r.json()['choices'][0]['message']['content']
         r = GPTAPICompletionsResponse(
             text=answer
@@ -55,3 +59,23 @@ class GrokGPTAPI(GPTAPI):
         return {
             'Authorization': f"Bearer {self.API_KEY}"
         }
+
+    def draw(self, prompt: str, gpt_image_format: GPTImageFormat, count: int = 1) -> GPTAPIImageDrawResponse:
+        """
+        Метод для рисования GPTAPI, переопределяется не у всех наследников
+        """
+        data = {
+
+            'prompt': prompt,
+            'n': count,
+            'response_format': 'url',
+            'model': self.DEFAULT_DRAW_MODEL,
+        }
+        result = self._do_request(self.IMAGE_GEN_URL, json=data).json()
+
+        image_prompt = result['data'][0]['revised_prompt']
+        r = GPTAPIImageDrawResponse(
+            images_url=[x['url'] for x in result['data']],
+            images_prompt=image_prompt
+        )
+        return r
