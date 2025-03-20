@@ -1,3 +1,5 @@
+import base64
+
 import requests
 from requests import HTTPError
 
@@ -68,14 +70,15 @@ class GrokGPTAPI(GPTAPI):
 
             'prompt': prompt,
             'n': count,
-            'response_format': 'url',
+            'response_format': 'b64_json',
             'model': self.DEFAULT_DRAW_MODEL,
         }
         result = self._do_request(self.IMAGE_GEN_URL, json=data).json()
 
         image_prompt = result['data'][0]['revised_prompt']
+
         r = GPTAPIImageDrawResponse(
-            images_url=[x['url'] for x in result['data']],
+            images_bytes=[base64.b64decode(x['b64_json'][23:]) for x in result['data']],
             images_prompt=image_prompt
         )
         return r

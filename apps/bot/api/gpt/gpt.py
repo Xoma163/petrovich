@@ -5,7 +5,7 @@ from apps.bot.api.handler import API
 
 
 class GPTAPI(API):
-    DEFAULT_COMPLETIONS_MODEL: GPTCompletionModel | None = None
+    DEFAULT_MODEL: GPTCompletionModel | None = None
     DEFAULT_DRAW_MODEL: GPTImageDrawModel | None = None
     DEFAULT_VISION_MODEL: GPTCompletionModel | None = None
     DEFAULT_VOICE_RECOGNITION_MODEL: GPTVoiceRecognitionModel | None = None
