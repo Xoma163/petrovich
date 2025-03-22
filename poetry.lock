@@ -1554,25 +1554,6 @@ files = [
 ]
 
 [[package]]
-name = "spotipy"
-version = "2.25.0"
-description = "A light weight Python library for the Spotify Web API"
-optional = false
-python-versions = ">3.8"
-files = [
-    { file = "spotipy-2.25.0-py3-none-any.whl", hash = "sha256:92ef16577adab22aeac7d699b9aa6abb8e38d3023d865c0a233cdcfa0dca9583" },
-    { file = "spotipy-2.25.0.tar.gz", hash = "sha256:c72720ef85355aff959f7fe8d89ded48504d8c33b92583db90ec16daac0da54f" },
-]
-
-[package.dependencies]
-redis = ">=3.5.3"
-requests = ">=2.25.0"
-urllib3 = ">=1.26.0"
-
-[package.extras]
-memcache = ["pymemcache (>=3.5.2)"]
-
-[[package]]
 name = "sqlparse"
 version = "0.5.3"
 description = "A non-validating SQL parser."
@@ -1891,4 +1872,4 @@ test = ["pytest (>=8.1,<9.0)", "pytest-rerunfailures (>=14.0,<15.0)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "7c064ea63fc1555e2182e1fa57af659a075f050a5a6b2716ce01dd4f357c4078"
+content-hash = "a2c81db28d58e784f66c74df70fcac5966f8109db48a5e37199a705924a6a56d"

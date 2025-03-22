@@ -16,7 +16,6 @@ from apps.bot.commands.media.services.coub import CoubService
 from apps.bot.commands.media.services.instagram import InstagramService
 from apps.bot.commands.media.services.pinterest import PinterestService
 from apps.bot.commands.media.services.reddit import RedditService
-from apps.bot.commands.media.services.spotify import SpotifyService
 from apps.bot.commands.media.services.suno_ai import SunoAIService
 from apps.bot.commands.media.services.tiktok import TikTokService
 from apps.bot.commands.media.services.twitch_clips import TwitchClipsService
@@ -83,7 +82,7 @@ class Media(AcceptExtraMixin):
         ],
         extra_text=(
             "Поддерживаемые соцсети: Youtube Video/Youtube Music/Reddit/TikTok/Instagram/Twitter/"
-            "Yandex Music/Pinterest/Coub/VK Video/TwitchClips/Spotify/Suno AI/Yandex Zen/Телеканал Ю\n\n"
+            "Yandex Music/Pinterest/Coub/VK Video/TwitchClips/Suno AI/Yandex Zen/Телеканал Ю\n\n"
 
             "Некоторые сервисы доступны только доверенным пользователям: Twitter/Instagram/Yandex Music\n"
             "По умолчанию видео для Youtube/VK Video качается в качестве до 1080p\n"
@@ -109,7 +108,6 @@ class Media(AcceptExtraMixin):
         PinterestService,
         CoubService,
         TwitchClipsService,
-        SpotifyService,
         SunoAIService,
         ZenService,
         UTVService
