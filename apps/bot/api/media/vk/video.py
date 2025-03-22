@@ -97,15 +97,23 @@ class VKVideo(SubscribeService):
         dash_webm_dict = xmltodict.parse(r)
         adaptation_sets = dash_webm_dict['MPD']['Period']['AdaptationSet']
 
-        video_representations = adaptation_sets[0]['Representation']
-        video_representations = list(sorted(video_representations, key=lambda x: int(x['@bandwidth']), reverse=True))
+        if isinstance(adaptation_sets, dict):
+            video_representations = adaptation_sets['Representation']
+            video_representations = list(
+                sorted(video_representations, key=lambda x: int(x['@bandwidth']), reverse=True))
+            aa = None
+        else:
+            video_representations = adaptation_sets[0]['Representation']
+            video_representations = list(
+                sorted(video_representations, key=lambda x: int(x['@bandwidth']), reverse=True))
 
-        audio_representations = adaptation_sets[1]['Representation']
-        audio_representations = list(sorted(audio_representations, key=lambda x: int(x['@bandwidth']), reverse=True))
+            audio_representations = adaptation_sets[1]['Representation']
+            audio_representations = list(
+                sorted(audio_representations, key=lambda x: int(x['@bandwidth']), reverse=True))
 
-        aa = AudioAttachment()
-        aa.public_download_url = f"{parsed_url.scheme}://{parsed_url.hostname}/{audio_representations[0]['BaseURL']}"
-        aa.download_content(headers=self.headers, stream=True)
+            aa = AudioAttachment()
+            aa.public_download_url = f"{parsed_url.scheme}://{parsed_url.hostname}/{audio_representations[0]['BaseURL']}"
+            aa.download_content(headers=self.headers, stream=True)
 
         vr = video_representations[0]
         if not high_res:

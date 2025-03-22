@@ -173,8 +173,11 @@ class Attachment:
                 self.content = b''.join(chunks)
 
             elif stream:
-                self.content = requests.get(download_url, proxies=proxies, headers=_headers, stream=True).iter_content(
-                    self.CHUNK_SIZE)
+                chunks = []
+                request = requests.get(download_url, proxies=proxies, headers=_headers, stream=True)
+                for chunk in request.iter_content(self.CHUNK_SIZE):
+                    chunks.append(chunk)
+                self.content = b''.join(chunks)
             else:
                 self.content = requests.get(download_url, proxies=proxies, headers=_headers).content
 
