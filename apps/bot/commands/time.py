@@ -1,10 +1,11 @@
 import datetime
 import re
 from itertools import groupby
+from typing import Iterable
 
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role
-from apps.bot.classes.const.exceptions import PWarning
+from apps.bot.classes.const.exceptions import PWarning, PSkip
 from apps.bot.classes.event.event import Event
 from apps.bot.classes.help_text import HelpTextItem, HelpText, HelpTextArgument
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
@@ -50,10 +51,11 @@ class Time(Command):
         return super_res
 
     def start(self) -> ResponseMessage:
-        # args
-
+        # time in message
         r = re.compile(self.REGEXP)
         if res := r.findall(self.event.message.raw):
+            if not self.event.chat.settings.time_conversion:
+                raise PSkip()
             new_res = []
             for item in res:
                 h, m = re.split('[:.]', item[1])
@@ -62,43 +64,53 @@ class Time(Command):
                 new_res.append(f"{h}:{m}")
             new_res = list(set(new_res))
             return self._get_time_in_cities_in_text(new_res)
+        # command + arg
         if self.event.message.args:
             city_name = self.event.message.args[0]
             city = City.objects.filter(synonyms__icontains=city_name).first()
             if not city:
                 raise PWarning(f"Не знаю такого города - {city_name}")
             answer = self._get_city_time_str(city, "%H:%M:%S")
-        # pm
+        # pm command
         elif self.event.is_from_pm:
             self.check_city()
             answer = self._get_city_time_str(self.event.sender.city, "%H:%M:%S")
-        # chat
+        # chat command
         else:
             dt_now = datetime.datetime.utcnow()
-            answer = self._get_time_in_cities(dt_now, "%H:%M:%S")
+            cities = self.get_cities_in_chat()
+            answer = self._get_time_in_cities(dt_now, "%H:%M:%S", cities)
 
         return ResponseMessage(ResponseMessageItem(text=answer))
 
     def _get_time_in_cities_in_text(self, times_str):
         answer = []
+        cities = self.get_cities_in_chat()
+        if len(cities) < 2:
+            raise PSkip()
+
+        _dt = datetime.datetime.strptime(times_str[0], "%H:%M")
+        timezones_count = len(list(self.group_cities(cities, _dt)))
+        if timezones_count < 2:
+            raise PSkip()
+
         for item in times_str:
             dt = datetime.datetime.strptime(item, "%H:%M")
             dt = datetime.datetime.utcnow().replace(hour=dt.hour, minute=dt.minute)
             dt = remove_tz(normalize_datetime(dt, self.event.sender.city.timezone.name))
-            time_in_cities = self._get_time_in_cities(dt, "%H:%M")
+            time_in_cities = self._get_time_in_cities(dt, "%H:%M", cities)
             answer.append(f"{item}\n{time_in_cities}")
         answer = "\n\n".join(answer)
         return ResponseMessage(ResponseMessageItem(text=answer, reply_to=self.event.message.id))
 
-    def _get_time_in_cities(self, dt: datetime.datetime, strf_format):
-        cities = set([x.city for x in self.event.chat.users.all() if x.city])
+    def _get_time_in_cities(self, dt: datetime.datetime, strf_format, cities: set[City]):
         if not cities:
             self.check_city()
             return self._get_city_time_str(self.event.sender.city, strf_format)
         else:
             cities = sorted(cities, key=lambda x: self._group_key(dt, x))
             answers = []
-            for _, items in groupby(cities, key=lambda x: self._group_key(dt, x)):
+            for _, items in self.group_cities(cities, dt):
                 answers.append(self._get_cities_group_time_str(list(items), dt, strf_format))
             return "\n".join(answers)
 
@@ -124,3 +136,9 @@ class Time(Command):
         cities_str = ", ".join([x.name for x in cities])
         answer = f"{cities_str} — {dt_str}"
         return answer
+
+    def get_cities_in_chat(self) -> set[City]:
+        return set([x.city for x in self.event.chat.users.all() if x.city])
+
+    def group_cities(self, cities: Iterable[City], dt: datetime.datetime):
+        return groupby(cities, key=lambda x: self._group_key(dt, x))

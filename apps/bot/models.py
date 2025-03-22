@@ -35,6 +35,7 @@ class ChatSettings(BaseSettings, TimeStampModelMixin):
     need_turett = models.BooleanField('Слать туреттные сообщения', default=False)
     celebrate_bday = models.BooleanField('Поздравлять с Днём рождения', default=False)
     recognize_voice = models.BooleanField('Распозновать голосовые автоматически', default=True)
+    time_conversion = models.BooleanField('Переводить время в разные часовые пояса', default=True)
 
     class Meta:
         verbose_name = "Настройка чата"

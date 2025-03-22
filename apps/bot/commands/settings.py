@@ -19,15 +19,10 @@ class Settings(Command):
                 HelpTextArgument(
                     None,
                     "присылает текущие настройки и права бота в чате"),
+                # Chat settings
                 HelpTextArgument(
                     "триггериться (вкл/выкл)",
                     "определяет будет ли бот триггериться на команды без упоминания в конфе(требуются админские права)"),
-                HelpTextArgument(
-                    "реагировать (вкл/выкл)",
-                    "определяет, будет ли бот реагировать на неправильные команды в конфе. Это сделано для того, чтобы в конфе с несколькими ботами не было ложных срабатываний"),
-                HelpTextArgument(
-                    "мемы (вкл/выкл)",
-                    "определяет, будет ли бот присылать мем если прислано его точное название без / (боту требуется доступ к переписке)"),
                 HelpTextArgument(
                     "туретт (вкл/выкл)",
                     "определяет, будет ли бот случайно присылать ругательства"),
@@ -38,6 +33,17 @@ class Settings(Command):
                     "др (вкл/выкл)",
                     "определяет, будет ли бот поздравлять с Днём рождения и будет ли ДР отображаться в /профиль"),
                 HelpTextArgument(
+                    "время (вкл/выкл)",
+                    "определяет, будет ли бот автоматически переводить время во все часовые пояса для участников чата"),
+
+                # user settings
+                HelpTextArgument(
+                    "мемы (вкл/выкл)",
+                    "определяет, будет ли бот присылать мем если прислано его точное название без / (боту требуется доступ к переписке)"),
+                HelpTextArgument(
+                    "реагировать (вкл/выкл)",
+                    "определяет, будет ли бот реагировать на неправильные команды в конфе. Это сделано для того, чтобы в конфе с несколькими ботами не было ложных срабатываний"),
+                HelpTextArgument(
                     "ругаться (вкл/выкл)",
                     "определяет будет ли бот использовать ругательные команды"),
                 HelpTextArgument(
@@ -45,7 +51,7 @@ class Settings(Command):
                     "определяет будет ли бот использовать упоминания вас"),
             ])
         ],
-        extra_text="Если команда запускается в чате, то общие настройки (поздравления с др) будут указываться для текущего чата"
+        extra_text="Если команда запускается в чате, то общие настройки (поздравления с др) будут указываться для текущего чата, если в личные сообщения, то для пользователя."
     )
 
     ON_OFF_TRANSLATOR = {
@@ -82,14 +88,19 @@ class Settings(Command):
             arg0 = None
 
         menu = [
-            [['реагировать', 'реагируй', 'реагирование'], self.menu_reaction],
+            # chat settings
             [['триггериться', 'тригериться', 'триггер', 'тригер'], self.menu_no_mention],
-            [['мемы', 'мем'], self.menu_memes],
-            [['др', 'днюха'], self.menu_bd],
-            [['голосовые', 'голос', 'голосовухи', 'голосовуха', 'голосовое'], self.menu_voice],
             [['туретт', 'туррет', 'турретт', 'турет'], self.menu_turett],
+            [['голосовые', 'голос', 'голосовухи', 'голосовуха', 'голосовое'], self.menu_voice],
+            [['время'], self.menu_time],
+            # user settings
+            [['мемы', 'мем'], self.menu_memes],
+            [['реагировать', 'реагируй', 'реагирование'], self.menu_reaction],
             [['ругаться'], self.menu_swear],
             [['упоминание', 'упоминания'], self.menu_use_mention],
+            # common settings
+            [['др', 'днюха'], self.menu_bday],
+            # other
             [['default'], self.menu_default],
         ]
         method = self.handle_menu(menu, arg0)
@@ -113,6 +124,9 @@ class Settings(Command):
     def menu_voice(self) -> ResponseMessageItem:
         return self.setup_default_chat_setting('recognize_voice')
 
+    def menu_time(self) -> ResponseMessageItem:
+        return self.setup_default_chat_setting('time_conversion')
+
     # END CHAT
 
     # PROFILE
@@ -129,12 +143,11 @@ class Settings(Command):
     def menu_use_mention(self) -> ResponseMessageItem:
         return self.setup_default_profile_setting("use_mention")
 
-
     # END PROFILE
 
     # COMMON
 
-    def menu_bd(self) -> ResponseMessageItem:
+    def menu_bday(self) -> ResponseMessageItem:
         if self.event.is_from_chat:
             return self.setup_default_chat_setting('celebrate_bday')
         else:
@@ -175,6 +188,7 @@ class Settings(Command):
         need_turett = settings.need_turett
         recognize_voice = settings.recognize_voice
         celebrate_bday = settings.celebrate_bday
+        time_conversion = settings.time_conversion
 
         answer = [
             "Настройки чата:",
@@ -182,6 +196,7 @@ class Settings(Command):
             f"Синдром Туретта — {self.TRUE_FALSE_TRANSLATOR[need_turett]}",
             f"Автоматически распознавать голосовые — {self.TRUE_FALSE_TRANSLATOR[recognize_voice]}",
             f"Поздравлять с днём рождения — {self.TRUE_FALSE_TRANSLATOR[celebrate_bday]}",
+            f"Автоматически переводить время — {self.TRUE_FALSE_TRANSLATOR[time_conversion]}",
         ]
         return "\n".join(answer)
 
