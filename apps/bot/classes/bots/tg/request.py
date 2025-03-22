@@ -12,6 +12,13 @@ class Request:
 
     LOG_IGNORE_ACTIONS = []
 
+    LOG_WARNING_ERRORS = [
+        "Forbidden: bot was blocked by the user",
+        "Bad Request: message to edit not found",
+        "Bad Request: message can't be deleted",
+        "Bad Request: message can't be deleted for everyone"
+    ]
+
     def __init__(self, token, log_filter=None):
         self.token = token
         self.logger = logging.getLogger('bot')
@@ -34,7 +41,14 @@ class Request:
     def _log(self, response: dict, action):
         if action in self.LOG_IGNORE_ACTIONS:
             return
-        level = "debug" if response['ok'] else "error"
+
+        if response['ok']:
+            level = "debug"
+        elif response['description'] in self.LOG_WARNING_ERRORS:
+            level = "warning"
+        else:
+            level = "error"
+
         log_data = {"response": response, "action": action}
         if self.log_filter:
             log_data.update({'log_filter': self.log_filter})

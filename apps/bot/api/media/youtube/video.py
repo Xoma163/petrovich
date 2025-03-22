@@ -6,6 +6,7 @@ from urllib.parse import urlparse, parse_qsl
 import requests
 import yt_dlp
 from bs4 import BeautifulSoup
+from requests.exceptions import SSLError
 
 from apps.bot.api.media.data import VideoData
 from apps.bot.api.subscribe_service import SubscribeService, SubscribeServiceNewVideosData, \
@@ -15,6 +16,7 @@ from apps.bot.classes.messages.attachments.audio import AudioAttachment
 from apps.bot.classes.messages.attachments.video import VideoAttachment
 from apps.bot.utils.nothing_logger import NothingLogger
 from apps.bot.utils.proxy import get_proxies
+from apps.bot.utils.utils import retry
 from apps.bot.utils.video.video_handler import VideoHandler
 from apps.service.models import SubscribeItem
 from petrovich.settings import env
@@ -204,6 +206,7 @@ class YoutubeVideo(SubscribeService):
         video_filesize = (vf['filesize'] + af['filesize']) / 1024 / 1024
         return vf, af, video_filesize
 
+    @retry(3, SSLError, sleep_time=2)
     def _get_channel_info(self, channel_id: str) -> dict:
         url = "https://www.googleapis.com/youtube/v3/channels"
         params = {
