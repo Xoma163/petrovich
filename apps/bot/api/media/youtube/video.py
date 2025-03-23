@@ -221,6 +221,7 @@ class YoutubeVideo(SubscribeService):
             "author": r['items'][0]['snippet']['title']
         }
 
+    @retry(3, SSLError, sleep_time=2)
     def _get_channel_videos(self, channel_id: str) -> list:
         r = requests.get(f"https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}", proxies=self.proxies)
         if r.status_code != 200:
@@ -229,6 +230,7 @@ class YoutubeVideo(SubscribeService):
         videos = [x.find('yt:videoId').text for x in bsop.find_all('entry')]
         return list(reversed(videos))
 
+    @retry(3, SSLError, sleep_time=2)
     def _get_playlist_info(self, channel_id: str) -> dict:
         url = "https://www.googleapis.com/youtube/v3/playlists"
         params = {
@@ -247,6 +249,7 @@ class YoutubeVideo(SubscribeService):
             "channel_id": snippet['channelId']
         }
 
+    @retry(3, SSLError, sleep_time=2)
     def _get_playlist_videos(self, playlist_id: str) -> list:
         url = "https://www.googleapis.com/youtube/v3/playlistItems"
         params = {
@@ -270,6 +273,7 @@ class YoutubeVideo(SubscribeService):
         videos = [x for x in videos if x['snippet']['resourceId'].get('videoId')]
         return videos
 
+    @retry(3, SSLError, sleep_time=2)
     def get_channel_info(self, url: str) -> SubscribeServiceData:
         r = requests.get(url, proxies=self.proxies)
         bs4 = BeautifulSoup(r.content, 'lxml')
