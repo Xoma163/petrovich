@@ -141,7 +141,7 @@ class TgBot(Bot):
 
             media_list.append(media)
 
-        media_list[0]['caption'] = default_params['caption']
+        media_list[-1]['caption'] = default_params['caption']
 
         del params['caption']
         params['media'] = json.dumps(media_list)
