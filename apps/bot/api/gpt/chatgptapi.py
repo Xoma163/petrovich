@@ -6,7 +6,7 @@ from json import JSONDecodeError
 from apps.bot.api.gpt.gpt import GPTAPI
 from apps.bot.api.gpt.message import GPTMessages, GPTMessageRole
 from apps.bot.api.gpt.models import GPTModels, GPTCompletionModel, GPTImageDrawModel, GPTVoiceRecognitionModel, \
-    GPTImageFormat
+    GPTImageFormat, GPTImageQuality
 from apps.bot.api.gpt.response import GPTAPICompletionsResponse, GPTAPIImageDrawResponse, GPTAPIVoiceRecognitionResponse
 from apps.bot.api.gpt.usage import GPTAPIImageDrawUsage, GPTAPIVoiceRecognitionUsage, GPTAPICompletionsUsage
 from apps.bot.classes.const.consts import Role
@@ -79,27 +79,25 @@ class ChatGPTAPI(GPTAPI):
         image_data = r_json['data'][0]
         return image_data['url'], image_data['revised_prompt']
 
-    def draw(self, prompt: str, image_format: GPTImageFormat, count: int = 1) -> GPTAPIImageDrawResponse:
-        model = self._get_draw_model(image_format)
-        is_dalle_3_model = model in [GPTModels.DALLE_3_ALBUM, GPTModels.DALLE_3_PORTAIR, GPTModels.DALLE_3_SQUARE]
-        is_dalle_2_model = model in [GPTModels.DALLE_2_BIG, GPTModels.DALLE_2_MEDIUM, GPTModels.DALLE_2_SMALL]
-        if is_dalle_3_model:
-            api_count = 1
-        elif is_dalle_2_model:
-            api_count = count
-        else:
-            raise RuntimeError()
+    def draw(
+            self,
+            prompt: str,
+            image_format: GPTImageFormat,
+            quality: GPTImageQuality,
+            count: int = 1,
+    ) -> GPTAPIImageDrawResponse:
+        model = self._get_draw_model(image_format, quality)
 
         size = f"{model.width}x{model.height}"
 
         payload = {
             "model": model.name,
             "prompt": prompt,
-            "n": api_count,
+            "n": 1,  # max restriction by api
             "size": size,
         }
-        if is_dalle_3_model:
-            payload["quality"] = "hd"
+        if quality:
+            payload["quality"] = quality
 
         usage = GPTAPIImageDrawUsage(
             model=model,
@@ -110,7 +108,7 @@ class ChatGPTAPI(GPTAPI):
             images_url=[],
             images_prompt=""
         )
-        if is_dalle_3_model and count > 1:
+        if count > 1:
             with ThreadPoolExecutor() as executor:
                 futures = [executor.submit(self._fetch_image, payload) for _ in range(count)]
                 results = [f.result() for f in concurrent.futures.as_completed(futures)]
@@ -188,12 +186,19 @@ class ChatGPTAPI(GPTAPI):
             return self.DEFAULT_COMPLETIONS_MODEL
 
     @staticmethod
-    def _get_draw_model(gpt_image_format: GPTImageFormat):
-        if gpt_image_format == GPTImageFormat.PORTAIR:
-            return GPTModels.DALLE_3_PORTAIR
-        elif gpt_image_format == GPTImageFormat.SQUARE:
-            return GPTModels.DALLE_3_SQUARE
-        return GPTModels.DALLE_3_ALBUM
+    def _get_draw_model(gpt_image_format: GPTImageFormat, quality: GPTImageQuality):
+        """
+        Получение модели для рисования. Стандартная модель - SQUARE STANDARD
+        """
+        models_map = {
+            (GPTImageFormat.PORTAIR, GPTImageQuality.HIGH): GPTModels.DALLE_3_PORTAIR_HD,
+            (GPTImageFormat.PORTAIR, GPTImageQuality.STANDARD): GPTModels.DALLE_3_PORTAIR,
+            (GPTImageFormat.SQUARE, GPTImageQuality.HIGH): GPTModels.DALLE_3_SQUARE_HD,
+            (GPTImageFormat.SQUARE, GPTImageQuality.STANDARD): GPTModels.DALLE_3_SQUARE,
+            (GPTImageFormat.ALBUM, GPTImageQuality.HIGH): GPTModels.DALLE_3_ALBUM_HD,
+            (GPTImageFormat.ALBUM, GPTImageQuality.STANDARD): GPTModels.DALLE_3_ALBUM
+        }
+        return models_map.get((gpt_image_format, quality), GPTModels.DALLE_3_SQUARE)
 
     @property
     def _headers(self):

@@ -6,7 +6,7 @@ from django.db.models import Q, Sum
 
 from apps.bot.api.gpt.gpt import GPTAPI
 from apps.bot.api.gpt.message import GPTMessages, GPTMessageRole
-from apps.bot.api.gpt.models import GPTImageFormat
+from apps.bot.api.gpt.models import GPTImageFormat, GPTImageQuality
 from apps.bot.api.gpt.response import GPTAPIImageDrawResponse, GPTAPICompletionsResponse
 from apps.bot.classes.bots.chat_activity import ChatActivity
 from apps.bot.classes.command import Command
@@ -40,7 +40,7 @@ class GPTCommand(ABC, Command):
     ]
     VISION_HELP_TEXT_ITEM = HelpTextArgument("(фраза) [картинка]", "общение с ботом с учётом пересланной картинки")
     DRAW_HELP_TEXT_ITEM = HelpTextArgument(
-        "нарисуй [альбом/портрет/квадрат] (фраза/пересланное сообщение)",
+        "нарисуй (фраза/пересланное сообщение)",
         "генерация картинки"
     )
     PREPROMPT_HELP_TEXT_ITEMS = [
@@ -58,11 +58,45 @@ class GPTCommand(ABC, Command):
         "3) Препромпт конфы\n\n"
     )
 
+    DEFAULT_KEY_ITEM_ORIG = HelpTextKey(
+        "orig",
+        ["original", "ориг", "оригинал"],
+        "нарисуй пришлёт документ без сжатия, а не картинку"
+    )
+    DEFAULT_KEY_ITEM_COUNT = HelpTextKey(
+        "(число)",
+        [],
+        "нарисуй пришлёт несколько картинок. Максимум 10"
+    )
+    DEFAULT_KEY_ITEM_HD = HelpTextKey(
+        "hd",
+        ['xd', 'hq', 'хд'],
+        "нарисуй пришлёт несколько картинок. Максимум 10")
+
+    DEFAULT_KEY_ITEMS_FORMAT = [
+        HelpTextKey(
+            "квадрат",
+            ['квадратная', 'square'],
+            "нарисуй пришлёт квадратную картинку"
+        ),
+        HelpTextKey(
+            "альбом",
+            ['альбомная', 'album'],
+            "нарисуй пришлёт альбомную картинку"
+        ),
+        HelpTextKey(
+            "портрет",
+            ['портретная', 'portair'],
+            "нарисуй пришлёт портретную картинку"
+        )
+    ]
     DEFAULT_KEYS = [
         HelpTextItem(Role.USER, [
-            HelpTextKey("orig", ["original", "ориг", "оригинал"], "нарисуй пришлёт документ без сжатия, а не картинку"),
-            HelpTextKey("(число)", [], "нарисуй пришлёт несколько картинок. Максимум 10"),
-        ])
+            DEFAULT_KEY_ITEM_ORIG,
+            DEFAULT_KEY_ITEM_COUNT,
+            DEFAULT_KEY_ITEM_HD
+        ] + DEFAULT_KEY_ITEMS_FORMAT
+                     )
     ]
 
     def __init__(self, gpt_preprompt_provider: str, gpt_api_class: type[GPTAPI], gpt_messages_class: type[GPTMessages]):
@@ -122,20 +156,21 @@ class GPTCommand(ABC, Command):
         """
         Рисование изображения
         """
-        request_text, image_format = self._get_draw_image_request_text()
+        request_text = self._get_draw_image_request_text()
+        image_format = self._get_image_format()
         gpt_api = self.gpt_api_class(log_filter=self.event.log_filter, sender=self.event.sender)
         with ChatActivity(self.bot, ActivitiesEnum.UPLOAD_PHOTO, self.event.peer_id):
             count = self._get_images_count_by_keys()
 
-            response: GPTAPIImageDrawResponse = gpt_api.draw(request_text, image_format, count=count)
+            quality: GPTImageQuality = GPTImageQuality.STANDARD
+            if self.event.message.is_key_provided({"hd", "xd", "hq", "хд"}):
+                quality = GPTImageQuality.HIGH
+
+            response: GPTAPIImageDrawResponse = gpt_api.draw(request_text, image_format, quality, count=count)
             if use_statistics:
                 GPTUsage.add_statistics(self.event.sender, response.usage)
 
-            use_document_att = False
-            if keys := self.event.message.keys:
-                keys_to_check = {"orig", "original", "ориг", "оригинал"}
-                if keys_to_check.intersection(keys):
-                    use_document_att = True
+            use_document_att = self.event.message.is_key_provided({"orig", "original", "ориг", "оригинал"})
 
             attachments = []
             if use_document_att:
@@ -430,36 +465,33 @@ class GPTCommand(ABC, Command):
         document.parse(text.encode('utf-8'), filename='answer.html')
         return document
 
-    def _get_draw_image_request_text(self) -> tuple[str, GPTImageFormat | None]:
+    def _get_draw_image_request_text(self) -> str:
         """
         Получение текста, который хочет нарисовать пользователь
         """
 
         if len(self.event.message.args) > 1:
             msg_args = self.event.message.args_case[1:]
-
-            image_format = None
-            if len(self.event.message.args) > 2:
-                arg1 = msg_args[0].lower()
-                format_mapping = {
-                    "квадрат": GPTImageFormat.SQUARE,
-                    "портрет": GPTImageFormat.PORTAIR,
-                    "альбом": GPTImageFormat.ALBUM,
-                    "square": GPTImageFormat.SQUARE,
-                    "portair": GPTImageFormat.PORTAIR,
-                    "album": GPTImageFormat.ALBUM,
-                }
-                if image_format := format_mapping.get(arg1, None):
-                    msg_args = msg_args[1:]
-
             text = " ".join(msg_args)
-            return text, image_format
+            return text
         elif self.event.message.quote:
-            return self.event.message.quote, None
+            return self.event.message.quote
         elif self.event.fwd:
-            return self.event.fwd[0].message.raw, None
+            return self.event.fwd[0].message.raw
         else:
             raise PWarning("Должен быть текст или пересланное сообщение")
+
+    def _get_image_format(self) -> GPTImageFormat | None:
+        """
+        Получение формата картинки, которую хочет получить пользователь.
+        """
+        if self.event.message.is_key_provided({'square', 'квадрат', 'квадратная'}):
+            return GPTImageFormat.SQUARE
+        elif self.event.message.is_key_provided({'album', 'альбом', 'альбомная'}):
+            return GPTImageFormat.ALBUM
+        elif self.event.message.is_key_provided({'portair', 'портрет', 'портретная'}):
+            return GPTImageFormat.PORTAIR
+        return GPTImageFormat.SQUARE
 
     def _get_images_count_by_keys(self) -> int:
         count = 1

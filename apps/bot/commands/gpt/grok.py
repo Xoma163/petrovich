@@ -26,6 +26,12 @@ class Grok(GPTCommand):
                 GPTCommand.PREPROMPT_HELP_TEXT_ITEMS
             )
         ],
+        help_text_keys=[
+            HelpTextItem(Role.USER, [
+                GPTCommand.DEFAULT_KEY_ITEM_ORIG,
+                GPTCommand.DEFAULT_KEY_ITEM_COUNT,
+            ])
+        ],
         extra_text=GPTCommand.DEFAULT_EXTRA_TEXT
     )
 

@@ -1,5 +1,6 @@
 from apps.bot.api.gpt.message import GPTMessages
-from apps.bot.api.gpt.models import GPTCompletionModel, GPTImageDrawModel, GPTVoiceRecognitionModel, GPTImageFormat
+from apps.bot.api.gpt.models import GPTCompletionModel, GPTImageDrawModel, GPTVoiceRecognitionModel, GPTImageFormat, \
+    GPTImageQuality
 from apps.bot.api.gpt.response import GPTAPICompletionsResponse, GPTAPIImageDrawResponse
 from apps.bot.api.handler import API
 
@@ -23,7 +24,13 @@ class GPTAPI(API):
     def _headers(self) -> dict:
         raise NotImplementedError
 
-    def draw(self, prompt: str, gpt_image_format: GPTImageFormat, count: int = 1) -> GPTAPIImageDrawResponse:
+    def draw(
+            self,
+            prompt: str,
+            image_format: GPTImageFormat,
+            quality: GPTImageQuality,
+            count: int = 1,
+    ) -> GPTAPIImageDrawResponse:
         """
         Метод для рисования GPTAPI, переопределяется не у всех наследников
         """

@@ -4,10 +4,10 @@ import requests
 from requests import HTTPError
 
 from apps.bot.api.gpt.gpt import GPTAPI
-from apps.bot.api.gpt.message import GPTMessages, GeminiGPTMessage, GPTMessageRole
-from apps.bot.api.gpt.models import GPTImageFormat
+from apps.bot.api.gpt.message import GPTMessages
+from apps.bot.api.gpt.models import GPTImageFormat, GPTImageQuality
 from apps.bot.api.gpt.response import GPTAPICompletionsResponse, GPTAPIImageDrawResponse
-from apps.bot.classes.const.exceptions import PWarning
+from apps.bot.classes.const.exceptions import PError
 from apps.bot.utils.proxy import get_proxies
 from petrovich.settings import env
 
@@ -16,12 +16,16 @@ class GeminiGPTAPI(GPTAPI):
     API_KEY = env.str("GEMINI_API_KEY")
 
     DEFAULT_MODEL: str = "gemini-2.0-flash"
-    DEFAULT_DRAW_MODEL: str = 'gemini-2.0-flash-exp-image-generation'
+    DEFAULT_DRAW_MODEL: str = 'imagen-3.0-generate-002'
 
     BASE_URL = "https://generativelanguage.googleapis.com/v1/models"
     BASE_BETA_URL = "https://generativelanguage.googleapis.com/v1beta/models"
     URL = f"{BASE_URL}/{DEFAULT_MODEL}:generateContent"
-    IMAGE_DRAW_URL = f"{BASE_BETA_URL}/{DEFAULT_DRAW_MODEL}:generateContent"
+    IMAGE_DRAW_URL = f"{BASE_BETA_URL}/{DEFAULT_DRAW_MODEL}:predict"
+
+    ERRORS_MAP = {
+        'Image generation failed with the following error: The prompt could not be submitted. Your current safety filter threshold prohibited one or more words in this prompt. If you think this was an error, send feedback.': "Gemini не может обработать запрос по политикам безопасности",
+    }
 
     def __init__(self, **kwargs):
         super(GeminiGPTAPI, self).__init__(**kwargs)
@@ -38,23 +42,38 @@ class GeminiGPTAPI(GPTAPI):
         )
         return r
 
-    def draw(self, prompt: str, gpt_image_format: GPTImageFormat, count: int = 1) -> GPTAPIImageDrawResponse:
+    def draw(
+            self,
+            prompt: str,
+            image_format: GPTImageFormat,
+            quality: GPTImageQuality,  # not supported
+            count: int = 1,
+    ) -> GPTAPIImageDrawResponse:
         """
         Метод для рисования GPTAPI, переопределяется не у всех наследников
         """
-        gpt_message = GeminiGPTMessage(role=GPTMessageRole.USER, text=prompt)
-
         data = {
-            "contents": [gpt_message.get_message()],
-            "safetySettings": self._safety_settings,
-            "generationConfig": {"responseModalities": ["Text", "Image"]}
+            "instances": {
+                "prompt": prompt
+            },
+            "parameters": {
+                "sampleCount": count,
+                "person_generation": "ALLOW_ADULT"
+            },
         }
+
+        ratio_map = {
+            GPTImageFormat.SQUARE: "1:1",
+            GPTImageFormat.ALBUM: "16:9",
+            GPTImageFormat.PORTAIR: "9:16",
+        }
+        if ratio_format := ratio_map.get(image_format):
+            data['parameters']['aspect_ratio'] = ratio_format
 
         result = self._do_request(self.IMAGE_DRAW_URL, json=data).json()
 
         r = GPTAPIImageDrawResponse(
-            images_bytes=[base64.b64decode(x['inlineData']['data']) for x in
-                          result['candidates'][0]['content']['parts']],
+            images_bytes=[base64.b64decode(x['bytesBase64Encoded']) for x in result['predictions']],
             images_prompt=None
         )
         return r
@@ -76,7 +95,9 @@ class GeminiGPTAPI(GPTAPI):
         try:
             r.raise_for_status()
         except HTTPError:
-            raise PWarning("Какая-то ошибка API Gemini")
+            code = r.json().get('error', {}).get('message')
+            error_str = self.ERRORS_MAP.get(code, "Какая-то ошибка API Gemini")
+            raise PError(error_str)
         return r
 
     @property

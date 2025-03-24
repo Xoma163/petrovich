@@ -127,6 +127,9 @@ class Message:
                 raw += f" {' '.join(args)}"
         self.parse_raw(raw)
 
+    def is_key_provided(self, keys_to_check: set) -> bool:
+        return self.keys and bool(keys_to_check.intersection(self.keys))
+
     @property
     def mentioned(self) -> bool:
         return self.has_command_symbols or self.has_mention

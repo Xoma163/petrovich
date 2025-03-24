@@ -5,7 +5,7 @@ from requests import HTTPError
 
 from apps.bot.api.gpt.gpt import GPTAPI
 from apps.bot.api.gpt.message import GrokGPTMessages
-from apps.bot.api.gpt.models import GPTImageFormat
+from apps.bot.api.gpt.models import GPTImageFormat, GPTImageQuality
 from apps.bot.api.gpt.response import GPTAPICompletionsResponse, GPTAPIImageDrawResponse
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.utils.proxy import get_proxies
@@ -62,12 +62,17 @@ class GrokGPTAPI(GPTAPI):
             'Authorization': f"Bearer {self.API_KEY}"
         }
 
-    def draw(self, prompt: str, gpt_image_format: GPTImageFormat, count: int = 1) -> GPTAPIImageDrawResponse:
+    def draw(
+            self,
+            prompt: str,
+            image_format: GPTImageFormat,
+            quality: GPTImageQuality,  # quality are not supported by xAI API at the moment.
+            count: int = 1,
+    ) -> GPTAPIImageDrawResponse:
         """
         Метод для рисования GPTAPI, переопределяется не у всех наследников
         """
         data = {
-
             'prompt': prompt,
             'n': count,
             'response_format': 'b64_json',
@@ -78,7 +83,8 @@ class GrokGPTAPI(GPTAPI):
         image_prompt = result['data'][0]['revised_prompt']
 
         r = GPTAPIImageDrawResponse(
-            images_bytes=[base64.b64decode(x['b64_json'][23:]) for x in result['data']],
+            # [23:]
+            images_bytes=[base64.b64decode(x['b64_json']) for x in result['data']],
             images_prompt=image_prompt
         )
         return r
