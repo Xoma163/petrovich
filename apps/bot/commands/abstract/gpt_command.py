@@ -71,8 +71,8 @@ class GPTCommand(ABC, Command):
     DEFAULT_KEY_ITEM_HD = HelpTextKey(
         "hd",
         ['xd', 'hq', 'хд'],
-        "нарисуй пришлёт несколько картинок. Максимум 10")
-
+        "нарисуй пришлёт картинки в высоком качестве"
+    )
     DEFAULT_KEY_ITEMS_FORMAT = [
         HelpTextKey(
             "квадрат",
