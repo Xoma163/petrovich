@@ -7,7 +7,7 @@ from apps.bot.api.gpt.gpt import GPTAPI
 from apps.bot.api.gpt.message import GPTMessages
 from apps.bot.api.gpt.models import GPTImageFormat, GPTImageQuality
 from apps.bot.api.gpt.response import GPTAPICompletionsResponse, GPTAPIImageDrawResponse
-from apps.bot.classes.const.exceptions import PError
+from apps.bot.classes.const.exceptions import PError, PWarning
 from apps.bot.utils.proxy import get_proxies
 from petrovich.settings import env
 
@@ -71,6 +71,8 @@ class GeminiGPTAPI(GPTAPI):
             data['parameters']['aspect_ratio'] = ratio_format
 
         result = self._do_request(self.IMAGE_DRAW_URL, json=data).json()
+        if not result:
+            raise PWarning("Gemini по известным только ему причинам не смог сгенерировать картинку")
 
         r = GPTAPIImageDrawResponse(
             images_bytes=[base64.b64decode(x['bytesBase64Encoded']) for x in result['predictions']],
