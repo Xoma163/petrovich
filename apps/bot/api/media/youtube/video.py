@@ -17,6 +17,7 @@ from apps.bot.classes.messages.attachments.video import VideoAttachment
 from apps.bot.utils.nothing_logger import NothingLogger
 from apps.bot.utils.proxy import get_proxies
 from apps.bot.utils.utils import retry
+from apps.bot.utils.video.downloader import VideoDownloader
 from apps.bot.utils.video.video_handler import VideoHandler
 from apps.service.models import SubscribeItem
 from petrovich.settings import env
@@ -93,9 +94,9 @@ class YoutubeVideo(SubscribeService):
         return VideoData(
             filesize=filesize,
             video_download_url=video['url'] if video else None,
-            video_download_chunk_size=video['downloader_options']['http_chunk_size'] if video else None,
+            # video_download_chunk_size=video['downloader_options']['http_chunk_size'] if video else None,
             audio_download_url=audio['url'],
-            audio_download_chunk_size=audio['downloader_options']['http_chunk_size'],
+            # audio_download_chunk_size=audio['downloader_options']['http_chunk_size'],
             title=video_info['title'],
             duration=video_info.get('duration'),
             width=video.get('width'),
@@ -111,13 +112,15 @@ class YoutubeVideo(SubscribeService):
     def download_video(self, data: VideoData) -> VideoAttachment:
         if not data.video_download_url or not data.audio_download_url:
             raise ValueError
-
         _va = VideoAttachment()
-        _va.public_download_url = data.video_download_url
-        _va.download_content(chunk_size=data.video_download_chunk_size, use_proxy=self.use_proxy)
+        _va.m3u8_url = data.video_download_url
+        vd = VideoDownloader(_va)
+        _va.content = vd.download_m3u8(threads=10, use_proxy=self.use_proxy)
+
         _aa = AudioAttachment()
-        _aa.public_download_url = data.audio_download_url
-        _aa.download_content(chunk_size=data.audio_download_chunk_size, use_proxy=self.use_proxy)
+        _aa.m3u8_url = data.audio_download_url
+        vd = VideoDownloader(_aa)
+        _aa.content = vd.download_m3u8(threads=2, use_proxy=self.use_proxy)
 
         vh = VideoHandler(video=_va, audio=_aa)
         content = vh.mux()
@@ -171,8 +174,8 @@ class YoutubeVideo(SubscribeService):
                         x.get('vbr') and  # Это видео
                         x.get('ext') == 'mp4' and  # С форматом mp4
                         x.get('vcodec') not in ['vp9'] and  # С кодеками которые поддерживают все платформы
-                        x.get('dynamic_range') == 'SDR' and  # В SDR качестве
-                        x.get('format_note')  # Имеют разрешение для просмотра (?)
+                        x.get('dynamic_range') == 'SDR'  # В SDR качестве
+                    # x.get('format_note')  # Имеют разрешение для просмотра (?)
                 ),
                 video_info['formats']
             )
@@ -181,13 +184,13 @@ class YoutubeVideo(SubscribeService):
             _format['filesize_approx_vbr'] = video_info['duration'] * _format.get('vbr')
         video_formats = sorted(
             video_formats,
-            key=lambda x: x.get('filesize') or x.get('filesize_approx') or x.get('filesize_approx_vbr'),
+            key=self._filesize_key,
             reverse=True
         )
 
         audio_formats = sorted(
-            [x for x in video_info['formats'] if x.get('abr')],
-            key=lambda x: x['filesize'],
+            [x for x in video_info['formats'] if x.get('language')],  # abr
+            key=self._filesize_key,
             reverse=True
         )
 
@@ -203,8 +206,12 @@ class YoutubeVideo(SubscribeService):
                 if int(vf['height']) <= self.DEFAULT_VIDEO_QUALITY_HIGHT:
                     break
 
-        video_filesize = (vf['filesize'] + af['filesize']) / 1024 / 1024
+        video_filesize = (self._filesize_key(vf) + self._filesize_key(af)) / 1024 / 1024
         return vf, af, video_filesize
+
+    @staticmethod
+    def _filesize_key(x):
+        return x.get('filesize', x.get('filesize_approx', x.get('filesize_approx_vbr', 0)))
 
     @retry(3, SSLError, sleep_time=2)
     def _get_channel_info(self, channel_id: str) -> dict:

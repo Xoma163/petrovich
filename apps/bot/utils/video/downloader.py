@@ -1,22 +1,27 @@
 import os
 from tempfile import NamedTemporaryFile
 
+from apps.bot.classes.messages.attachments.audio import AudioAttachment
 from apps.bot.classes.messages.attachments.video import VideoAttachment
 from apps.bot.utils.do_the_linux_command import do_the_linux_command
+from apps.bot.utils.proxy import get_http_proxies
 
 
 class VideoDownloader:
 
-    def __init__(self, video: VideoAttachment):
-        self.video: VideoAttachment = video
+    def __init__(self, att: VideoAttachment | AudioAttachment):
+        self.att: VideoAttachment = att
 
-    def download_m3u8(self, threads: int = 1) -> bytes:
-        if self.video.m3u8_url is None:
+    def download_m3u8(self, threads: int = 1, use_proxy=None) -> bytes:
+        if self.att.m3u8_url is None:
             raise RuntimeError("m3u8_url not set")
 
         tmp_video_file = NamedTemporaryFile().name
         try:
-            do_the_linux_command(f"yt-dlp -N {threads} -o {tmp_video_file} {self.video.m3u8_url}")
+            command = f"yt-dlp -N {threads} -o {tmp_video_file} {self.att.m3u8_url}"
+            if use_proxy:
+                command += f" --proxy {get_http_proxies()['https']}"
+            do_the_linux_command(command)
             with open(tmp_video_file, 'rb') as file:
                 video_content = file.read()
         finally:

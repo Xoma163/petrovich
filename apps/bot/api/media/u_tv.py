@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 
 from apps.bot.api.media.data import VideoData
 from apps.bot.classes.messages.attachments.video import VideoAttachment
-from apps.bot.utils.video.video_handler import VideoHandler
+from apps.bot.utils.video.downloader import VideoDownloader
 
 
 class UTV:
@@ -29,9 +29,9 @@ class UTV:
         )
 
     @staticmethod
-    def download(data: VideoData):
+    def download(data: VideoData) -> VideoAttachment:
         va = VideoAttachment()
         va.m3u8_url = data.m3u8_master_url
-        vh = VideoHandler(video=va)
-        va.content = vh.download()
+        vd = VideoDownloader(va)
+        va.content = vd.download_m3u8(threads=10)
         return va
