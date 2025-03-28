@@ -18,9 +18,14 @@ class VideoDownloader:
 
         tmp_video_file = NamedTemporaryFile().name
         try:
-            command = f"yt-dlp -N {threads} -o {tmp_video_file} {self.att.m3u8_url}"
+            args = {
+                '-N': threads,
+                '-o': tmp_video_file
+            }
             if use_proxy:
-                command += f" --proxy {get_http_proxies()['https']}"
+                args['--proxy'] = get_http_proxies()['https']
+            args_str = " ".join([f"{x[0]} {x[1]}" for x in args.items()])
+            command = f"yt-dlp {args_str} {self.att.m3u8_url}"
             do_the_linux_command(command)
             with open(tmp_video_file, 'rb') as file:
                 video_content = file.read()
