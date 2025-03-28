@@ -189,7 +189,7 @@ class YoutubeVideo(SubscribeService):
         )
 
         audio_formats = sorted(
-            [x for x in video_info['formats'] if x.get('language')],  # abr
+            [x for x in video_info['formats'] if x['resolution'] == 'audio only'],  # abr
             key=self._filesize_key,
             reverse=True
         )
