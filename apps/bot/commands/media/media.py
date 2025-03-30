@@ -12,6 +12,7 @@ from apps.bot.classes.messages.attachments.link import LinkAttachment
 from apps.bot.classes.messages.attachments.video import VideoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.commands.media.service import MediaService, MediaServiceResponse, MediaKeys
+from apps.bot.commands.media.services.boosty import BoostyService
 from apps.bot.commands.media.services.coub import CoubService
 from apps.bot.commands.media.services.instagram import InstagramService
 from apps.bot.commands.media.services.pinterest import PinterestService
@@ -110,7 +111,8 @@ class Media(AcceptExtraMixin):
         TwitchClipsService,
         SunoAIService,
         ZenService,
-        UTVService
+        UTVService,
+        BoostyService,
     ]
 
     def __init__(self, *args, **kwargs):

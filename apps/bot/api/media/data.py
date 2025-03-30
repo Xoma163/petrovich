@@ -4,6 +4,7 @@ import dataclasses
 @dataclasses.dataclass
 class VideoData:
     title: str
+    description: str | None = None
     video_id: str | None = None
     channel_id: str | None = None
     channel_title: str | None = None
@@ -20,6 +21,7 @@ class VideoData:
     thumbnail_url: str | None = None
     filename: str | None = None
     m3u8_master_url: str | None = None
+    extra_data: dict | None = None  # to save smth in context
 
 
 @dataclasses.dataclass

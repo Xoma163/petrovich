@@ -13,6 +13,7 @@ from apps.bot.api.subscribe_service import SubscribeService, SubscribeServiceNew
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.messages.attachments.audio import AudioAttachment
 from apps.bot.classes.messages.attachments.video import VideoAttachment
+from apps.bot.utils.video.downloader import VideoDownloader
 from apps.bot.utils.video.video_handler import VideoHandler
 from apps.service.models import SubscribeItem
 
@@ -48,10 +49,10 @@ class VKVideo(SubscribeService):
             vh = VideoHandler(video=va, audio=aa)
             va.content = vh.mux()
         if va.m3u8_url:
-            vh = VideoHandler(video=va)
-            va.content = vh.download()
+            vd = VideoDownloader(va)
+            va.content = vd.download_m3u8(threads=10)  # ToDo: тут не передаются хедеры, возможно будет проблема
 
-        va.download_content(headers=self.headers)
+        # va.download_content(headers=self.headers)
         return va
 
     def _get_player_url(self, url: str, video_id: str) -> str:

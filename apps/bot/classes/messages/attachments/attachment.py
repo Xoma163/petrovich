@@ -150,8 +150,8 @@ class Attachment:
 
         from apps.bot.utils.utils import get_default_headers
         _headers = get_default_headers()
-        if headers:
-            _headers.update(headers)
+        if headers is not None:
+            _headers = headers  # ToDo: возможно отвалится половина всего, потестить.
 
         download_url = self._get_download_url(peer_id)
         if self.private_download_path:
@@ -163,7 +163,7 @@ class Attachment:
         else:
             proxies = get_proxies() if use_proxy else {}
             if chunk_size:
-                response = requests.head(download_url, proxies=proxies)
+                response = requests.head(download_url, proxies=proxies, headers=_headers)
                 file_size = int(response.headers['Content-Length'])
                 ranges = [(i, min(i + chunk_size - 1, file_size - 1)) for i in range(0, file_size, chunk_size)]
 
