@@ -57,7 +57,7 @@ class Media(AcceptExtraMixin):
                 HelpTextKey(
                     MediaKeys.HIGH_RESOLUTION_KEYS[0],
                     MediaKeys.HIGH_RESOLUTION_KEYS[1:],
-                    "присылает видео в максимальном качестве (VK Video/Youtube Video)"
+                    "присылает видео в максимальном качестве (VK Video/Youtube Video/Boosty)"
                 ),
                 HelpTextKey(
                     MediaKeys.FORCE_CACHE_KEYS[0],
@@ -83,10 +83,10 @@ class Media(AcceptExtraMixin):
         ],
         extra_text=(
             "Поддерживаемые соцсети: Youtube Video/Youtube Music/Reddit/TikTok/Instagram/Twitter/"
-            "Yandex Music/Pinterest/Coub/VK Video/TwitchClips/Suno AI/Yandex Zen/Телеканал Ю\n\n"
-
+            "Yandex Music/Pinterest/Coub/VK Video/TwitchClips/Suno AI/Yandex Zen/Телеканал Ю/Boosty\n"
+            "\n"
             "Некоторые сервисы доступны только доверенным пользователям: Twitter/Instagram/Yandex Music\n"
-            "По умолчанию видео для Youtube/VK Video качается в качестве до 1080p\n"
+            "По умолчанию видео для Youtube/VK Video/Boosty качается в качестве до 1080p\n"
             "Видосы из ютуба в чате качаются автоматически только если длина ролика менее 2 минут\n"
             "Если у бота есть доступ к переписке, то достаточно прислать только ссылку"
         )
@@ -287,36 +287,3 @@ class Media(AcceptExtraMixin):
         else:
             self.has_command_name = False
         return self.event.get_all_attachments([LinkAttachment])[0].url
-
-
-"""
-
-# def _remove_trim_args(self, url, end_pos):
-#     yt_api = YoutubeVideo()
-#     raw_list = self.event.message.raw.split(' ')
-#
-#     index = 1
-#     if self.has_command_name:
-#         index += 1
-#
-#     if yt_api.get_timecode_str(url):
-#         if end_pos:
-#             del raw_list[index]
-#     else:
-#         if end_pos:
-#             del raw_list[index + 1]
-#             del raw_list[index]
-#         else:
-#             del raw_list[index]
-#     raw = " ".join(raw_list)
-#     self.event.message = Message(raw, _id=self.event.message.id)
-
-# try:
-#     pass
-# except PWarning as e:
-#     button = self.bot.get_button("Повторить", command=self.name, args=[url])
-#     keyboard = self.bot.get_inline_keyboard([button])
-#     raise PWarning(e.msg, keyboard=keyboard)
-
-
-"""

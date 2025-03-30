@@ -35,7 +35,7 @@ class Boosty:
                 "https://boosty.to/amazinguser/posts/12345678-aabb-ccdd-eeff-123456789012\n"
                 "...accessToken...refreshToken...expiresAt......"
             )
-        video_info = post_data[2]
+        video_info = [x for x in post_data if x.get('vid')][0]
 
         author_id = post['user']['id']
         author_name = post['user']['name']
@@ -46,7 +46,7 @@ class Boosty:
         thumbnail = video_info.get('defaultPreview', 'preview')
 
         try:
-            description = json.loads(post_data[0]['content'])[0]
+            description = "\n".join([json.loads(x['content'])[0] for x in post_data if x.get('content')])
         except:
             description = None
 
