@@ -287,9 +287,9 @@ class VKVideo(SubscribeService):
     @staticmethod
     def _get_playlist_data(bs4):
         bs4_str = str(bs4)
-        pos1_text = "extend(window.cur || {}, "
+        pos1_text = '{"apiPrefetchCache"'
         pos2_text = ");Promise"
         pos1 = bs4_str.find(pos1_text)
         pos2 = bs4_str.find(pos2_text, pos1)
-        data = json.loads(bs4_str[pos1 + len(pos1_text):pos2])
+        data = json.loads(pos1_text + bs4_str[pos1 + len(pos1_text):pos2])
         return data
