@@ -204,7 +204,8 @@ class VKVideo(SubscribeService):
             playlist_id = None
             playlist_title = None
             last_videos_id = list(
-                reversed([x.find("a", {"class": "VideoCard__title"}).attrs['data-id'] for x in videos]))
+                reversed([x.find("a", {"class": "VideoCard__title"}).attrs['data-id'] for x in videos])
+            )
 
         return SubscribeServiceData(
             channel_id=channel_id,

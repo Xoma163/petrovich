@@ -15,12 +15,12 @@ from petrovich.settings import env
 class GeminiGPTAPI(GPTAPI):
     API_KEY = env.str("GEMINI_API_KEY")
 
-    DEFAULT_MODEL: str = "gemini-2.0-flash"
+    DEFAULT_COMPLETIONS_MODEL: str = "gemini-2.0-flash"
     DEFAULT_DRAW_MODEL: str = 'imagen-3.0-generate-002'
 
     BASE_URL = "https://generativelanguage.googleapis.com/v1/models"
     BASE_BETA_URL = "https://generativelanguage.googleapis.com/v1beta/models"
-    URL = f"{BASE_URL}/{DEFAULT_MODEL}:generateContent"
+    URL = f"{BASE_URL}/{DEFAULT_COMPLETIONS_MODEL}:generateContent"
     IMAGE_DRAW_URL = f"{BASE_BETA_URL}/{DEFAULT_DRAW_MODEL}:predict"
 
     ERRORS_MAP = {

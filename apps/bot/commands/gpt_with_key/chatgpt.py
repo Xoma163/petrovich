@@ -134,7 +134,7 @@ class ChatGPT(GPTCommand):
             if settings.chat_gpt_model:
                 answer = f"Текущая модель - {self.bot.get_formatted_text_line(settings.get_gpt_model().name)}"
             else:
-                default_model = self.bot.get_formatted_text_line(self.gpt_api_class.DEFAULT_MODEL.name)
+                default_model = self.bot.get_formatted_text_line(self.gpt_api_class.DEFAULT_COMPLETIONS_MODEL.name)
                 answer = f"Модель не установлена. Используется модель по умолчанию - {default_model}"
             return ResponseMessageItem(answer)
 
