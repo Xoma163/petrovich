@@ -211,7 +211,13 @@ class YoutubeVideo(SubscribeService):
 
     @staticmethod
     def _filesize_key(x):
-        return x.get('filesize', x.get('filesize_approx', x.get('filesize_approx_vbr', 0)))
+        if filesize := x.get('filesize'):
+            return filesize
+        if filesize_approx := x.get('filesize_approx'):
+            return filesize_approx
+        if filesize_approx_vbr := x.get('filesize_approx_vbr'):
+            return filesize_approx_vbr * 100
+        return 0
 
     @retry(3, SSLError, sleep_time=2)
     def _get_channel_info(self, channel_id: str) -> dict:
