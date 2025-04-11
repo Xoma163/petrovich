@@ -31,7 +31,7 @@ class QuotesGenerator:
         mask = mask.filter(ImageFilter.GaussianBlur(blur_radius))
         img_round = Image.composite(cropped_image, back_color, mask)
 
-        img_round.thumbnail_url((max_size, max_size), Image.LANCZOS)
+        img_round.thumbnail((max_size, max_size), Image.LANCZOS)
         return img_round
 
     @staticmethod
@@ -41,7 +41,7 @@ class QuotesGenerator:
             return image
         k = w / max_size
         new_size = (max_size, h // k)
-        image.thumbnail_url(new_size, Image.LANCZOS)
+        image.thumbnail(new_size, Image.LANCZOS)
         return image
 
     @staticmethod
@@ -181,7 +181,7 @@ class QuotesGenerator:
                 avatar_image = self.get_centered_rounded_image(avatar_image)
                 avatar_start_pos = (margin_left, margin_top)
                 img.paste(avatar_image, avatar_start_pos)
-            except:
+            except Exception as e:
                 pass
 
         d = ImageDraw.Draw(img)
