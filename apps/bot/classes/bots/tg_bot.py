@@ -411,9 +411,11 @@ class TgBot(Bot):
             "Bad Request: message can't be deleted",
             "Bad Request: message can't be deleted for everyone"
         ]
+        BAD_URL_ERROR_MSG = "Ссылка не понравилась серверу телеграмм. Внутренняя ошибка."
         bad_url_catch_errors = {
-            'Bad Request: failed to get HTTP URL content': "Ссылка не понравилась серверу телеграмм. Внутренняя ошибка.",
-            'Bad Request: wrong file identifier/HTTP URL specified': "Ссылка не понравилась серверу телеграмм. Внутренняя ошибка."
+            'Bad Request: failed to get HTTP URL content': BAD_URL_ERROR_MSG,
+            'Bad Request: wrong file identifier/HTTP URL specified': BAD_URL_ERROR_MSG,
+            'Bad Request: wrong type of the web page content': BAD_URL_ERROR_MSG
         }
         catch_errors = {
             'Bad Request: VOICE_MESSAGES_FORBIDDEN': "Не могу отправить голосовуху из-за ваших настроек безопасности",
@@ -446,6 +448,8 @@ class TgBot(Bot):
                 links_str.append(link_str)
             links_str = "\n".join(links_str)
             msg = f"{msg}\n\n{links_str}"
+            if rmi.text:
+                msg = f"{msg}\n\n{rmi.text}"
         elif error in catch_errors:
             msg = catch_errors[error]
             log_level = "warning"
