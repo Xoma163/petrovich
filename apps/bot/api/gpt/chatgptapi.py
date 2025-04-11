@@ -2,6 +2,7 @@ import concurrent
 import re
 from concurrent.futures import ThreadPoolExecutor
 from json import JSONDecodeError
+from ssl import SSLError
 
 from apps.bot.api.gpt.gpt import GPTAPI
 from apps.bot.api.gpt.message import GPTMessages, GPTMessageRole
@@ -13,6 +14,7 @@ from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning, PError
 from apps.bot.classes.messages.attachments.audio import AudioAttachment
 from apps.bot.utils.proxy import get_proxies
+from apps.bot.utils.utils import retry
 from petrovich.settings import env
 
 
@@ -141,6 +143,7 @@ class ChatGPTAPI(GPTAPI):
         )
         return r
 
+    @retry(3, SSLError, sleep_time=2)
     def _do_request(self, url, **kwargs):
         r = self.requests.post(url, headers=self._headers, proxies=get_proxies(), **kwargs)
         if r.status_code != 200:
