@@ -181,7 +181,7 @@ class QuotesGenerator:
                 avatar_image = self.get_centered_rounded_image(avatar_image)
                 avatar_start_pos = (margin_left, margin_top)
                 img.paste(avatar_image, avatar_start_pos)
-            except Exception as e:
+            except:
                 pass
 
         d = ImageDraw.Draw(img)
