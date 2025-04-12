@@ -5,8 +5,8 @@ import dataclasses
 class VideoData:
     title: str
     description: str | None = None
-    video_id: str | None = None
-    channel_id: str | None = None
+    video_id: str | int | None = None
+    channel_id: str | int | None = None
     channel_title: str | None = None
     video_download_url: str | None = None
     video_download_chunk_size: int | None = None
