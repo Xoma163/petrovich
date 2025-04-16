@@ -187,6 +187,6 @@ class ProfileSettingsAdmin(TimeStampAdminMixin):
 
 @admin.register(ChatSettings)
 class ChatSettingsAdmin(TimeStampAdminMixin):
-    list_display = ('chat', 'no_mention', 'need_turett', 'celebrate_bday', 'recognize_voice')
-    list_editable = ('no_mention', 'need_turett', 'celebrate_bday', 'recognize_voice')
+    list_display = ('chat', 'no_mention', 'need_turett', 'celebrate_bday', 'recognize_voice', 'time_conversion')
+    list_editable = ('no_mention', 'need_turett', 'celebrate_bday', 'recognize_voice', 'time_conversion')
     ordering = ("chat",)

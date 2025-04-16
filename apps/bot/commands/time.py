@@ -5,7 +5,7 @@ from typing import Iterable
 
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role
-from apps.bot.classes.const.exceptions import PWarning, PSkip
+from apps.bot.classes.const.exceptions import PWarning, PSkipContinue
 from apps.bot.classes.event.event import Event
 from apps.bot.classes.help_text import HelpTextItem, HelpText, HelpTextArgument
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
@@ -29,7 +29,8 @@ class Time(Command):
         )
     )
 
-    priority = -5
+    # Обоснование: команда должна запускаться без участия пользователя только в случае, если другие команды не подходят
+    priority = -20
 
     REGEXP = r"(^|\D)(\d?\d:\d\d)($|\D)"
 
@@ -55,7 +56,7 @@ class Time(Command):
         r = re.compile(self.REGEXP)
         if res := r.findall(self.event.message.raw):
             if not self.event.chat.settings.time_conversion:
-                raise PSkip()
+                raise PSkipContinue()
             new_res = []
             for item in res:
                 h, m = re.split('[:.]', item[1])
@@ -87,12 +88,12 @@ class Time(Command):
         answer = []
         cities = self.get_cities_in_chat()
         if len(cities) < 2:
-            raise PSkip()
+            raise PSkipContinue()
 
         _dt = datetime.datetime.strptime(times_str[0], "%H:%M")
         timezones_count = len(list(self.group_cities(cities, _dt)))
         if timezones_count < 2:
-            raise PSkip()
+            raise PSkipContinue()
 
         for item in times_str:
             dt = datetime.datetime.strptime(item, "%H:%M")

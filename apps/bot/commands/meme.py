@@ -58,7 +58,9 @@ class Meme(AcceptExtraMixin):
         )
     )
 
-    priority = 70
+    # Обоснование: команда должна обрабатываться после остальных команд так как могут быть мемы пересекающиеся
+    #  с названием команд
+    priority = -10
 
     ALLOWED_ATTACHMENTS = [
         PhotoAttachment, VideoAttachment, StickerAttachment, GifAttachment, VoiceAttachment, VideoNoteAttachment,

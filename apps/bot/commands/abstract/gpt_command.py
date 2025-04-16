@@ -30,7 +30,8 @@ logger = logging.getLogger()
 
 class GPTCommand(ABC, Command):
     platforms = [Platform.TG]
-    priority = 90
+    # Обоснование:
+    priority = -30
     abstract = True
 
     DEFAULT_HELP_TEXT_ITEMS = [

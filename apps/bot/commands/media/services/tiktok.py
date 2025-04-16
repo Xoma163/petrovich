@@ -3,7 +3,7 @@ from urllib.parse import urlparse
 from apps.bot.api.media.tiktok import TikTok
 from apps.bot.classes.bots.chat_activity import ChatActivity
 from apps.bot.classes.const.activities import ActivitiesEnum
-from apps.bot.classes.const.exceptions import PSkip
+from apps.bot.classes.const.exceptions import PSkipContinue
 from apps.bot.classes.messages.attachments.video import VideoAttachment
 from apps.bot.commands.media.service import MediaServiceResponse, MediaService
 from apps.bot.utils.utils import retry
@@ -33,7 +33,7 @@ class TikTokService(MediaService):
             return
 
         if urlparse(url).path.strip('/')[0] == "@":
-            raise PSkip()
+            raise PSkipContinue()
 
     @classmethod
     def urls(cls) -> list[str]:

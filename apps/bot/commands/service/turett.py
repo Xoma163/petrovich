@@ -2,7 +2,7 @@ from apps.bot.api.gpt.message import GPTMessages
 from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role
-from apps.bot.classes.const.exceptions import PSkip
+from apps.bot.classes.const.exceptions import PSkipContinue
 from apps.bot.classes.event.event import Event
 from apps.bot.classes.event.tg_event import TgEvent
 from apps.bot.classes.messages.attachments.sticker import StickerAttachment
@@ -16,7 +16,9 @@ from apps.bot.utils.utils import random_probability, random_event
 
 class Turett(Command):
     conversation = True
-    priority = 85
+    # Обоснование: команда должна запускаться с высоким приоритетом, чтобы запуститься перед другими командами
+
+    priority = 90
     name = 'туретт'
 
     # ACCEPT CHANCES
@@ -121,7 +123,7 @@ class Turett(Command):
 
     def get_text(self) -> ResponseMessageItem:
         if not self.event.sender.settings.use_swear:
-            raise PSkip()
+            raise PSkipContinue()
         answer = random_event(self.TURETT_WORDS)
         return ResponseMessageItem(text=answer)
 
@@ -167,7 +169,7 @@ class Turett(Command):
         reactions = ["💩", "🤡"]
         reaction = random_event(reactions)
         self.bot.set_message_reaction(self.event.chat.chat_id, self.event.message.id, reaction, True)
-        raise PSkip()
+        raise PSkipContinue()
 
     def _set_random_gpt_wtf_classes(self):
         classes = [

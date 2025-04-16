@@ -5,7 +5,7 @@ from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import AcceptExtraMixin
 from apps.bot.classes.const.activities import ActivitiesEnum
 from apps.bot.classes.const.consts import Platform, Role
-from apps.bot.classes.const.exceptions import PSkip, PWarning
+from apps.bot.classes.const.exceptions import PWarning, PSkipContinue
 from apps.bot.classes.event.event import Event
 from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextArgument
 from apps.bot.classes.messages.attachments.audio import AudioAttachment
@@ -42,6 +42,9 @@ class VoiceRecognition(AcceptExtraMixin):
 
     platforms = [Platform.TG]
     attachments = [VoiceAttachment, VideoNoteAttachment, AudioAttachment]
+    # Обоснование: команда должна запускаться с минимальным приоритетом, потому что может быть любая другая команда,
+    #  которая будет обрабатывать эти типы вложений
+
     priority = -100
 
     bot: TgBot
@@ -60,7 +63,7 @@ class VoiceRecognition(AcceptExtraMixin):
             elif event.is_from_pm:
                 return True
             else:
-                raise PSkip()
+                raise PSkipContinue()
         return False
 
     def start(self) -> ResponseMessage:

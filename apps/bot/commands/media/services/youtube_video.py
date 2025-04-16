@@ -2,7 +2,7 @@ from apps.bot.api.media.data import VideoData
 from apps.bot.api.media.youtube.video import YoutubeVideo
 from apps.bot.classes.bots.chat_activity import ChatActivity
 from apps.bot.classes.const.activities import ActivitiesEnum
-from apps.bot.classes.const.exceptions import PSkip
+from apps.bot.classes.const.exceptions import PSkipContinue
 from apps.bot.commands.media.service import MediaService, MediaServiceResponse
 from apps.bot.utils.utils import retry
 
@@ -19,7 +19,7 @@ class YoutubeVideoService(MediaService):
         video_data = self.service.get_video_info(url, high_res=self.media_keys.high_resolution)
 
         if not self.media_keys.force and self.event.is_from_chat and video_data.duration > 120:
-            raise PSkip()
+            raise PSkipContinue()
 
         with ChatActivity(self.bot, ActivitiesEnum.UPLOAD_VIDEO, self.event.peer_id):
             return self._get_content_by_url(video_data, url)

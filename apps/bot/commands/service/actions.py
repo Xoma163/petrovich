@@ -7,6 +7,7 @@ from petrovich.settings import env
 
 class Actions(Command):
     names = None
+    # Обоснование: команда должна запускаться с максимальным приоритетом из-за экшенов
     priority = 100
 
     def accept(self, event: Event) -> bool:

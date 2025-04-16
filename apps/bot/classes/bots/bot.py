@@ -10,7 +10,7 @@ from apps.bot.classes.bot_response import BotResponse
 from apps.bot.classes.bots.chat_activity import ChatActivity
 from apps.bot.classes.const.activities import ActivitiesEnum
 from apps.bot.classes.const.consts import Role
-from apps.bot.classes.const.exceptions import PWarning, PError, PSkip, PIDK
+from apps.bot.classes.const.exceptions import PWarning, PError, PSkip, PIDK, PSkipContinue
 from apps.bot.classes.event.event import Event
 from apps.bot.classes.messages.attachments.audio import AudioAttachment
 from apps.bot.classes.messages.attachments.document import DocumentAttachment
@@ -164,8 +164,11 @@ class Bot(Thread):
             return event.command().check_and_start(self, event)
         for command in COMMANDS:
             if command.accept(event):
-                return command.__class__().check_and_start(self, event)
-
+                try:
+                    return command.__class__().check_and_start(self, event)
+                # Гипотеза, что если мы скипаем команду, то можем идти дальше ?
+                except PSkipContinue:
+                    continue
         # Если это нотификация, то это ок
         if event.is_notify:
             raise PSkip()

@@ -7,11 +7,17 @@ class PetrovichException(Exception):
         self.reply_to = reply_to
 
 
+
 class PSkip(PetrovichException):
     """
     Просто скипает выполнение
     """
 
+
+class PSkipContinue(PSkip):
+    """
+    Просто скипает выполнение и переходит к обработке следующий команды
+    """
 
 class PIDK(PetrovichException):
     """
