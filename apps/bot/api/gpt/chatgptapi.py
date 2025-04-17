@@ -26,9 +26,9 @@ class ChatGPTAPI(GPTAPI):
     IMAGE_GEN_URL: str = f"{BASE_URL}/images/generations"
     VOICE_RECOGNITION_URL: str = f"{BASE_URL}/audio/transcriptions"
 
-    DEFAULT_COMPLETIONS_MODEL: GPTCompletionModel = GPTModels.GPT_4_OMNI
+    DEFAULT_COMPLETIONS_MODEL: GPTCompletionModel = GPTModels.GPT_4_O
     DEFAULT_DRAW_MODEL: GPTImageDrawModel = GPTModels.DALLE_3_ALBUM
-    DEFAULT_VISION_MODEL: GPTCompletionModel = GPTModels.GPT_4_OMNI
+    DEFAULT_VISION_MODEL: GPTCompletionModel = GPTModels.GPT_4_O
     DEFAULT_VOICE_RECOGNITION_MODEL: GPTVoiceRecognitionModel = GPTModels.WHISPER
 
     GPT_4_VISION_MAX_TOKENS = 1024
@@ -54,7 +54,7 @@ class ChatGPTAPI(GPTAPI):
         }
 
         # ToDo: костыль, так как o1 не умеют в system role
-        if model in [GPTModels.GPT_4_O1, GPTModels.GPT_4_O1_MINI, GPTModels.GPT_4_O3_MINI]:
+        if model in [GPTModels.O1, GPTModels.O1_MINI, GPTModels.O3_MINI]:
             if payload['messages'][0]['role'] == GPTMessageRole.SYSTEM:
                 payload['messages'][0]['role'] = GPTMessageRole.USER
 

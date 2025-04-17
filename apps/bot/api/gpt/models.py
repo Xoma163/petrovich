@@ -42,17 +42,26 @@ class GPTVoiceRecognitionModel(GPTModel):
 
 
 class GPTModels:
-    # GPT o
-    GPT_4_O1 = GPTCompletionModel("o1", "o1", 15, 60)
-    GPT_4_O1_MINI = GPTCompletionModel("o1-mini", "o1 mini", 1.1, 4.4)
-    GPT_4_O3_MINI = GPTCompletionModel("o3-mini", "o3-mini", 1.1, 4.4)
+    # o
+    O1 = GPTCompletionModel("o1", "o1", 15, 60)
+    # O1_PRO = GPTCompletionModel("o1-pro", "o1 pro", 150, 600)
+    O1_MINI = GPTCompletionModel("o1-mini", "o1 mini", 1.1, 4.4)
+    O3 = GPTCompletionModel("o3", "o3", 10, 40)
+    O3_MINI = GPTCompletionModel("o3-mini", "o3 mini", 1.1, 4.4)
+    O4_MINI = GPTCompletionModel("o4-mini", "o4 mini", 1.1, 4.4)
 
     # GPT-4
-    GPT_4_OMNI_MINI = GPTCompletionModel("gpt-4o-mini", "GPT-4 OMNI MINI", 0.15, 0.6)
-    GPT_4_OMNI = GPTCompletionModel("gpt-4o", "GPT-4 OMNI", 2.5, 10)
-    GPT_4_TURBO = GPTCompletionModel("gpt-4-turbo", "GPT-4 TURBO", 10, 30)
+    GPT_4_1 = GPTCompletionModel("gpt-4.1", "GPT-4.1", 2, 8)
+    GPT_4_1_MINI = GPTCompletionModel("gpt-4.1-mini", "GPT-4.1 MINI", 0.4, 1.6)
+    GPT_4_1_NANO = GPTCompletionModel("gpt-4.1-nano", "GPT-4.1 NANO", 0.1, 0.4)
+
+    GPT_4_O = GPTCompletionModel("gpt-4o", "GPT-4o", 2.5, 10)
+    GPT_4_O_MINI = GPTCompletionModel("gpt-4o-mini", "GPT-4o MINI", 0.15, 0.6)
+
     GPT_4 = GPTCompletionModel("gpt-4", "GPT-4", 30, 60)
+    GPT_4_TURBO = GPTCompletionModel("gpt-4-turbo", "GPT-4 TURBO", 10, 30)
     GPT_4_32K = GPTCompletionModel("gpt-4-32k", "GPT-4 32K", 60, 120)
+
     GPT_4_5 = GPTCompletionModel("gpt-4.5-preview", "GPT-4.5", 75, 150)
 
     # GPT-3.5
