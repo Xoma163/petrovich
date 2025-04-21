@@ -49,10 +49,11 @@ class Twitter(API):
         return self._get_text_and_attachments(post_data)
 
     def _get_text_and_attachments(self, post_data: dict) -> TwitterAPIResponse:
-        try:
-            text = post_data['text'][:post_data['display_text_range'][1]]
-        except:
-            text = ""
+        finish_text_pos = self._get_finish_text_pos(post_data)
+
+        text = post_data['text']
+        if finish_text_pos:
+            text = post_data['text'][:finish_text_pos]
 
         response = TwitterAPIResponse()
         response.caption = text
@@ -70,6 +71,20 @@ class Twitter(API):
                 photo = entity['media_url_https']
                 response.add_item(TwitterAPIResponseItem(TwitterAPIResponseItem.CONTENT_TYPE_IMAGE, photo))
         return response
+
+    @staticmethod
+    def _get_finish_text_pos(post_data: dict) -> int | None:
+        try:
+            return post_data['entities']['media'][0]['indices'][0]
+        except (KeyError, IndexError):
+            pass
+
+        try:
+            return post_data['display_text_range'][1]
+        except (KeyError, IndexError):
+            pass
+
+        return None
 
     @staticmethod
     def _get_video(video_info: list) -> str:
