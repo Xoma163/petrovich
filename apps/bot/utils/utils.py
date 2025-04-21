@@ -9,12 +9,14 @@ from io import BytesIO
 from urllib.parse import urlparse
 
 from PIL import Image, ImageDraw, ImageFont
+from django.contrib.auth.models import Group
 
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.help_text import HelpTextKey
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessageItem
+from apps.bot.models import Profile
 from apps.service.models import Service
 from petrovich.settings import STATIC_ROOT
 
@@ -628,3 +630,12 @@ def prepare_filename(filename: str, replace_symbol=".") -> str:
     # Максимальная длина - 255. Режем с конца, так как может потеряться расширение файла
     filename = filename[-255:]
     return filename
+
+
+def get_admin_profile(exclude_profile) -> Profile | None:
+    admin_group = Group.objects.get(name=Role.ADMIN.name)
+    profile = Profile.objects.filter(groups__in=[admin_group]).first()
+
+    if profile == exclude_profile:
+        return
+    return profile

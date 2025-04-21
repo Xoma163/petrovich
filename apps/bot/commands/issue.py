@@ -1,14 +1,11 @@
-from django.contrib.auth.models import Group
-
 from apps.bot.api.github.issue import GithubIssueAPI
-from apps.bot.api.imgur import Imgur
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.help_text import HelpTextItem, HelpText, HelpTextArgument
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
-from apps.bot.models import Profile
+from apps.bot.utils.utils import get_admin_profile
 
 
 class Issue(Command):
@@ -41,6 +38,9 @@ class Issue(Command):
     args_or_fwd = True
     mentioned = True
 
+    BODY_FINE_PRINT_TEMPLATE = "Ишю от пользователя {sender} (id={id})\n" \
+                               "Данное ишю сгенерировано автоматически"
+
     def start(self) -> ResponseMessage:
         if self.event.message.args:
             msg = self.event.message.raw.split(' ', 1)[1]
@@ -51,7 +51,7 @@ class Issue(Command):
         else:
             raise PWarning("В сообщении должны быть аргументы или пересылаемое сообщение")
 
-        body = ""
+        body = []
         labels_in_github = []
 
         issue = GithubIssueAPI(log_filter=self.event.log_filter)
@@ -61,20 +61,18 @@ class Issue(Command):
         else:
             msg_split = msg.split('\n')
             title = msg_split[0]
-            body = "\n".join(msg_split[1:-1])
+            body = ["\n".join(msg_split[1:-1])]
             tags = self._get_tags(msg_split[-1])
             labels_in_github = [x for x in issue.get_all_labels() if x.lower() in tags] if tags else []
             if not labels_in_github:
-                body = "\n".join(msg_split[1:])
+                body = ["\n".join(msg_split[1:])]
 
         photos = self.event.get_all_attachments([PhotoAttachment])
         if photos:
-            for photo in photos:
-                i_api = Imgur(log_filter=self.event.log_filter)
-                image_url = i_api.upload_image(photo.download_content())
-                body += f"\n![image]({image_url})"
-        body += f"\n\nИшю от пользователя {self.event.sender} (id={self.event.sender.pk})\n" \
-                f"Данное ишю сгенерировано автоматически"
+            body.append(issue.get_text_for_images_in_body(photos))
+
+        body.append(self.BODY_FINE_PRINT_TEMPLATE.format(sender=self.event.sender, id=self.event.sender.pk))
+        body = "\n\n".join(body)
         body = body.lstrip("\n")
 
         issue.author = self.event.sender
@@ -100,12 +98,7 @@ class Issue(Command):
         return tags
 
     def send_issue_info_to_admin(self, issue: GithubIssueAPI):
-
-        admin_group = Group.objects.get(name=Role.ADMIN.name)
-        profile = Profile.objects.filter(groups__in=[admin_group]).first()
-
-        if profile == issue.author:
-            return
+        profile = get_admin_profile(exclude_profile=issue.author)
 
         answer = f"Новая иша {self.bot.get_formatted_url('тут', issue.remote_url)}"
         rmi = ResponseMessageItem(answer)

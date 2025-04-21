@@ -30,7 +30,8 @@ logger = logging.getLogger()
 
 class GPTCommand(ABC, Command):
     platforms = [Platform.TG]
-    # Обоснование:
+
+    # Обоснование: если была вызвана команда, то обработать её
     priority = -30
     abstract = True
 

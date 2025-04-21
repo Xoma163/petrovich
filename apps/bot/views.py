@@ -61,14 +61,15 @@ class TelegramView(CSRFExemptMixin, View):
 
 
 class GithubView(CSRFExemptMixin, View):
-
+    NEW_COMMENT_FROM_DEVELOPER_TEMPLATE = "Новый комментарий от разработчика под вашей {problem_str}\n\n{comment}\n\nЧтобы оставить комментарий, ответьте на это сообщение"
+    AUTO_GENERATED_COMMENT_STR = "Данный комментарий сгенерирован автоматически"
     @staticmethod
     def send_notify_to_user(issue: GithubIssueAPI, text):
         if not issue.author:
             return
         user = issue.author.get_tg_user()
         bot = TgBot()
-        rmi = ResponseMessageItem(text=text, peer_id=user.user_id, disable_web_page_preview=True)
+        rmi = ResponseMessageItem(text=text, peer_id=user.user_id)
         bot.send_response_message_item(rmi)
 
     def reopen_issue(self, issue: GithubIssueAPI):
@@ -78,7 +79,7 @@ class GithubView(CSRFExemptMixin, View):
 
     def closed_issue(self, issue: GithubIssueAPI):
         problem_str = TgBot.get_formatted_url('Проблема #' + str(issue.number), issue.remote_url)
-        text = f"{problem_str}({issue.title}) была закрыта"
+        text = f"{problem_str} была закрыта"
         if issue.state_reason_is_not_planned:
             text += " как незапланированная"
         self.send_notify_to_user(issue, text)
@@ -90,8 +91,10 @@ class GithubView(CSRFExemptMixin, View):
 
     def created_comment(self, data, issue: GithubIssueAPI):
         comment = data['comment']['body']
+        if self.AUTO_GENERATED_COMMENT_STR in data['comment']['body']:
+            return
         problem_str = TgBot.get_formatted_url('проблемой #' + str(issue.number), issue.remote_url)
-        text = f"Новый комментарий от разработчика под вашей {problem_str}\n\n{comment}"
+        text = self.NEW_COMMENT_FROM_DEVELOPER_TEMPLATE.format(problem_str=problem_str, comment=comment)
         self.send_notify_to_user(issue, text)
 
     def new_label(self, data, issue: GithubIssueAPI):

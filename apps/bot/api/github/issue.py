@@ -59,6 +59,7 @@ class GithubIssueAPI(GithubAPI):
 
     def create_in_github(self):
         """Создание issue."""
+
         issue_data = {
             'title': self.title,
             'body': self.body,
@@ -75,6 +76,20 @@ class GithubIssueAPI(GithubAPI):
             raise PWarning("Проблема с созданием issue на github")
 
         self.remote_url = r_json['html_url']
+
+    def add_comment(self, comment: str):
+        """Добавление комментария."""
+
+        comment_data = {
+            'body': comment
+        }
+        COMMENT_URL = f"{self.ISSUES_URL}/{self.number}/comments"
+        r = self.requests.post(COMMENT_URL, json.dumps(comment_data))
+
+        try:
+            r.raise_for_status()
+        except HTTPError:
+            raise PWarning("Проблема с созданием комментария на github")
 
     def delete_in_github(self) -> dict:
         issue_data = {
