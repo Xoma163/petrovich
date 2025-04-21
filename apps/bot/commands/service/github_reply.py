@@ -21,6 +21,7 @@ class GithubReply(Command):
     def accept(self, event: Event) -> bool:
         if event.fwd and event.fwd[0].message:
             return bool(re.findall(self.ACCEPT_PATTERN, event.fwd[0].message.clear_case))
+        return False
 
     def start(self) -> ResponseMessage | None:
         issue_number = re.search(self.ACCEPT_PATTERN, self.event.fwd[0].message.clear_case).group(1)
