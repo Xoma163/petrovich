@@ -241,7 +241,7 @@ class Notifies(Command):
         date = normalize_datetime(date, timezone)
         datetime_now = localize_datetime(datetime.utcnow(), "UTC")
 
-        if (date - datetime_now).seconds < 60:
+        if (date - datetime_now).total_seconds() < 60:
             raise PWarning("Нельзя добавлять напоминание на ближайшую минуту")
 
         if not exact_time_flag and ((date - datetime_now).days < 0 or (datetime_now - date).seconds < 0):
