@@ -632,10 +632,10 @@ def prepare_filename(filename: str, replace_symbol=".") -> str:
     return filename
 
 
-def get_admin_profile(exclude_profile) -> Profile | None:
+def get_admin_profile(exclude_profile: Profile | None = None) -> Profile | None:
     admin_group = Group.objects.get(name=Role.ADMIN.name)
     profile = Profile.objects.filter(groups__in=[admin_group]).first()
 
-    if profile == exclude_profile:
+    if exclude_profile and profile == exclude_profile:
         return
     return profile
