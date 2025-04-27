@@ -72,6 +72,7 @@ class Meme(AcceptExtraMixin):
     MESSAGE_YOUTUBE_STATUS_IN_PROGRESS = "Статус скачивания с ютуба: 🔄 в процессе"
     MESSAGE_YOUTUBE_STATUS_COMPLETE = "Статус скачивания с ютуба: ✅ готово"
     MESSAGE_YOUTUBE_STATUS_ERROR = "Статус скачивания с ютуба: ❌ ошибка"
+    MESSAGE_YOUTUBE_STATUS_CUSTOM_ERROR = "Статус скачивания с ютуба: ❌ ошибка ({error_msg})"
 
     @staticmethod
     def accept_extra(event: Event) -> bool:
@@ -523,7 +524,13 @@ class Meme(AcceptExtraMixin):
             callback_params_data['caption'] += f"\n{self.MESSAGE_YOUTUBE_STATUS_COMPLETE}"
             self.bot.edit_message(callback_params_data)
             return
-        except Exception:
+        except PWarning as e:
+            callback_params_data['caption'] = self.MESSAGE_YOUTUBE_STATUS_CUSTOM_ERROR.format(
+                error_msg=e.msg
+            )
+            self.bot.edit_message(callback_params_data)
+            return
+        except Exception as e:
             callback_params_data['caption'] = f"\n{self.MESSAGE_YOUTUBE_STATUS_ERROR}"
             self.bot.edit_message(callback_params_data)
             return
