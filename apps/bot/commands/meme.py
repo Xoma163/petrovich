@@ -4,7 +4,7 @@ from apps.bot.api.media.youtube.video import YoutubeVideo
 from apps.bot.classes.bots.bot import send_message_to_moderator_chat
 from apps.bot.classes.command import AcceptExtraMixin
 from apps.bot.classes.const.consts import Role, Platform, ATTACHMENT_TYPE_TRANSLATOR
-from apps.bot.classes.const.exceptions import PWarning
+from apps.bot.classes.const.exceptions import PWarning, PSkip
 from apps.bot.classes.event.event import Event
 from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextArgument
 from apps.bot.classes.messages.attachments.gif import GifAttachment
@@ -68,6 +68,10 @@ class Meme(AcceptExtraMixin):
     ]
 
     platforms = [Platform.TG]
+
+    MESSAGE_YOUTUBE_STATUS_IN_PROGRESS = "Статус скачивания с ютуба: 🔄 в процессе"
+    MESSAGE_YOUTUBE_STATUS_COMPLETE = "Статус скачивания с ютуба: ✅ готово"
+    MESSAGE_YOUTUBE_STATUS_ERROR = "Статус скачивания с ютуба: ❌ ошибка"
 
     @staticmethod
     def accept_extra(event: Event) -> bool:
@@ -140,11 +144,29 @@ class Meme(AcceptExtraMixin):
         new_meme_obj = MemeModel.objects.create(**new_meme)
 
         # Кэш
-        if isinstance(attachment, LinkAttachment) and attachment.is_youtube_link:
-            self.set_youtube_file_id(new_meme_obj)
+        is_youtube_link = isinstance(attachment, LinkAttachment) and attachment.is_youtube_link
+        callback_params_data = {}
+
         if new_meme['approved']:
             answer = "Добавил"
-            return ResponseMessage(ResponseMessageItem(text=answer))
+            if not is_youtube_link:
+                return ResponseMessage(ResponseMessageItem(text=answer))
+
+            answer_with_youtube = f"{answer}\n{self.MESSAGE_YOUTUBE_STATUS_IN_PROGRESS}"
+            response = self.bot.send_response_message_item(
+                ResponseMessageItem(text=answer_with_youtube, peer_id=self.event.peer_id)
+            )
+            callback_params_data = {
+                "chat_id": self.event.peer_id,
+                "message_id": response.response['result']['message_id'],
+                "caption": answer
+            }
+
+        if is_youtube_link:
+            self.set_youtube_file_id(new_meme_obj, callback_params_data)
+
+        if new_meme['approved']:
+            raise PSkip()
 
         meme_to_send = self.prepare_meme_to_send(new_meme_obj)
         meme_to_send.text = "Запрос на подтверждение мема:\n" \
@@ -196,14 +218,32 @@ class Meme(AcceptExtraMixin):
         for attr, value in fields.items():
             setattr(meme, attr, value)
 
+        is_youtube_link = isinstance(attachment, LinkAttachment) and attachment.is_youtube_link
+        callback_params_data = {}
+
+        trusted_user = self.event.sender.check_role(Role.MODERATOR) or self.event.sender.check_role(Role.TRUSTED)
         # Кэш
-        if self.event.sender.check_role(Role.MODERATOR) or \
-                self.event.sender.check_role(Role.TRUSTED):
+        if trusted_user:
             meme.save()
-            if isinstance(attachment, LinkAttachment) and attachment.is_youtube_link:
-                self.set_youtube_file_id(meme)
             answer = f'Обновил мем "{meme.name}"'
-            return ResponseMessage(ResponseMessageItem(text=answer))
+            if not is_youtube_link:
+                return ResponseMessage(ResponseMessageItem(text=answer))
+
+            answer_with_youtube = f"{answer}\n{self.MESSAGE_YOUTUBE_STATUS_IN_PROGRESS}"
+            response = self.bot.send_response_message_item(
+                ResponseMessageItem(text=answer_with_youtube, peer_id=self.event.peer_id)
+            )
+            callback_params_data = {
+                "chat_id": self.event.peer_id,
+                "message_id": response.response['result']['message_id'],
+                "caption": answer
+            }
+
+        if is_youtube_link:
+            self.set_youtube_file_id(meme, callback_params_data)
+
+        if trusted_user:
+            raise PSkip()
 
         meme_to_send = self.prepare_meme_to_send(meme)
         meme_to_send.text = "Запрос на обновление мема:\n" \
@@ -450,11 +490,11 @@ class Meme(AcceptExtraMixin):
         if not attachment.is_youtube_link:
             raise PWarning("Это ссылка не на youtube видео")
 
-    def set_youtube_file_id(self, meme):
-        thread = threading.Thread(target=self._set_youtube_file_id, args=(meme,))
+    def set_youtube_file_id(self, meme: MemeModel, callback_params_data: dict):
+        thread = threading.Thread(target=self._set_youtube_file_id, args=(meme, callback_params_data))
         thread.start()
 
-    def _set_youtube_file_id(self, meme):
+    def _set_youtube_file_id(self, meme: MemeModel, callback_params_data: dict):
         from apps.bot.commands.trim_video import TrimVideo
 
         lower_link_index = self.event.message.args.index(meme.link.lower())
@@ -474,12 +514,18 @@ class Meme(AcceptExtraMixin):
                 video_content = va.content
             video = self.bot.get_video_attachment(video_content)
             video.thumbnail_url = data.thumbnail_url
+            video.use_proxy_on_download_thumbnail = True
 
             meme.tg_file_id = video.get_file_id()
             meme.type = VideoAttachment.TYPE
             meme.save()
+
+            callback_params_data['caption'] += f"\n{self.MESSAGE_YOUTUBE_STATUS_COMPLETE}"
+            self.bot.edit_message(callback_params_data)
             return
         except Exception:
+            callback_params_data['caption'] = f"\n{self.MESSAGE_YOUTUBE_STATUS_ERROR}"
+            self.bot.edit_message(callback_params_data)
             return
 
     @staticmethod
