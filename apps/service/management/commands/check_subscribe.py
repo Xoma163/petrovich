@@ -15,6 +15,7 @@ from apps.bot.commands.media.service import MediaService, MediaServiceResponse, 
 from apps.bot.commands.media.services.vk_video import VKVideoService
 from apps.bot.commands.media.services.youtube_video import YoutubeVideoService
 from apps.service.models import Subscribe, SubscribeItem
+from petrovich.settings import DEBUG
 
 logger = logging.getLogger('subscribe_notifier')
 
@@ -204,7 +205,8 @@ class Command(BaseCommand):
             "notify_enitity": show_name,
         })
 
-        MediaService.save_to_disk(media_response, show_name, series_name)
+        if not DEBUG:
+            MediaService.save_to_disk(media_response, show_name, series_name)
 
         logger.debug({
             "message": "end _save_to_disk",
