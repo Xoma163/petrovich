@@ -78,6 +78,8 @@ class YoutubeVideo(SubscribeService):
         except yt_dlp.utils.DownloadError as e:
             if "Sign in to confirm your age" in e.msg:
                 raise PWarning("К сожалению видос доступен только залогиненым пользователям")
+            if "Sign in to confirm you’re not a bot" in e.msg:
+                raise PWarning("Ютуб думает что я бот (да я бот). Попробуйте скачать видео позже")
             raise PWarning("Не смог найти видео по этой ссылке")
         return video_info
 
