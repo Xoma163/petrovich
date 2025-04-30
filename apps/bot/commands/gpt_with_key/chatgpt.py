@@ -4,6 +4,7 @@ from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextArgument
 from apps.bot.classes.messages.attachments.document import DocumentAttachment
+from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.commands.abstract.gpt_command import GPTCommand
 from apps.service.models import GPTPrePrompt
@@ -73,11 +74,13 @@ class ChatGPT(GPTCommand):
         Просмотр статистики по использованию
         """
         self.check_pm()
-        answer = self._get_stat_for_user(self.event.sender)
-        if not answer:
+        text_answer, statistics_plot_bytes = self._get_stat_for_user(self.event.sender)
+        if not text_answer:
             raise PWarning("Ещё не было использований GPT")
 
-        return ResponseMessageItem(answer)
+        statistics_plot_image = PhotoAttachment()
+        statistics_plot_image.parse(statistics_plot_bytes)
+        return ResponseMessageItem(text_answer, attachments=[statistics_plot_image])
 
     def menu_key(self) -> ResponseMessageItem:
         """
