@@ -15,7 +15,7 @@ from petrovich.settings import env
 class GrokGPTAPI(GPTAPI):
     API_KEY = env.str("GROK_API_KEY")
 
-    DEFAULT_COMPLETIONS_MODEL: str = "grok-2-latest"
+    DEFAULT_COMPLETIONS_MODEL: str = "grok-3-beta"
     DEFAULT_VISION_MODEL: str = "grok-2-vision-1212"
     DEFAULT_DRAW_MODEL: str = "grok-2-image-latest"
 
