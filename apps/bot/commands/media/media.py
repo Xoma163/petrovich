@@ -125,6 +125,7 @@ class Media(AcceptExtraMixin):
 
     @classmethod
     def accept_extra(cls, event: Event) -> bool:
+        result = False
         if event.message and not event.message.mentioned:
             media_keys = MediaKeys(event.message.keys, event.message.short_keys)
             if media_keys.no_media:
@@ -133,8 +134,15 @@ class Media(AcceptExtraMixin):
             for url in all_urls:
                 message_is_media_link = urlparse(url).hostname in cls.all_urls()
                 if message_is_media_link:
-                    return True
-        return False
+                    result = True
+                    break
+
+        from apps.bot.commands.meme import Meme as MemeCommand
+
+        event_command = event.message.command
+        if result and event_command == MemeCommand.name or event_command in MemeCommand.names:
+            return False
+        return result
 
     def start(self) -> ResponseMessage:
         source = self._get_source_link()
