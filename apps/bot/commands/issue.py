@@ -99,6 +99,8 @@ class Issue(Command):
 
     def send_issue_info_to_admin(self, issue: GithubIssueAPI):
         profile = get_admin_profile(exclude_profile=issue.author)
+        if not profile:
+            return
 
         answer = f"Новая иша {self.bot.get_formatted_url('тут', issue.remote_url)}"
         rmi = ResponseMessageItem(answer)
