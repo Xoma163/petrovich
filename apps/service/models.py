@@ -276,24 +276,28 @@ class Tag(TimeStampModelMixin):
         return str(self.name)
 
 
-class GPTPrePrompt(TimeStampModelMixin):
+class ProviderModelMixin(models.Model):
     CHATGPT = 'chatgpt'
     GEMINI = 'gemini'
     CLAUDE = 'claude'
     GROK = 'grok'
-    # DEEPSEEK = 'deepseek'
     PROVIDER_CHOICES = (
         (CHATGPT, 'СhatGPT'),
         (GEMINI, 'Gemini'),
         (CLAUDE, 'Claude'),
         (GROK, 'Grok'),
-        # (DEEPSEEK, 'deepseek'),
     )
 
+    provider = models.CharField('Провайдер', max_length=10, blank=True, choices=PROVIDER_CHOICES)
+
+    class Meta:
+        abstract = True
+
+
+class GPTPrePrompt(TimeStampModelMixin, ProviderModelMixin):
     author = models.ForeignKey(Profile, models.CASCADE, verbose_name="Пользователь", null=True, blank=True)
     chat = models.ForeignKey(Chat, models.CASCADE, verbose_name="Чат", null=True, blank=True)
     text = models.TextField("ChatGPT preprompt", default="", blank=True)
-    provider = models.CharField('Провайдер', max_length=10, blank=True, choices=PROVIDER_CHOICES)
 
     class Meta:
         verbose_name = "GPT препромпт"
@@ -301,7 +305,7 @@ class GPTPrePrompt(TimeStampModelMixin):
         unique_together = ('author', 'chat', 'provider')
 
 
-class GPTUsage(TimeStampModelMixin):
+class GPTUsage(TimeStampModelMixin, ProviderModelMixin):
     author = models.ForeignKey(Profile, models.CASCADE, verbose_name="Пользователь", null=True, db_index=True)
     cost = models.FloatField("Стоимость запроса", default=0)
 
