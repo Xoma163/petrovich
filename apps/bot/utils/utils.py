@@ -14,6 +14,7 @@ from django.contrib.auth.models import Group
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.help_text import HelpTextKey
+from apps.bot.classes.messages.attachments.document import DocumentAttachment
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessageItem
 from apps.bot.models import Profile
@@ -639,3 +640,10 @@ def get_admin_profile(exclude_profile: Profile | None = None) -> Profile | None:
     if exclude_profile and profile == exclude_profile:
         return
     return profile
+
+
+def wrap_text_in_document(text: str, filename: str = 'file.html') -> DocumentAttachment:
+    text = text.replace("\n", "<br>")
+    document = DocumentAttachment()
+    document.parse(text.encode('utf-8-sig'), filename=filename)
+    return document

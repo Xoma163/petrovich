@@ -2,7 +2,6 @@ from django.db import models
 from django.db.models import JSONField
 from django.utils.html import format_html
 
-from apps.bot.api.gpt.usage import GPTAPIUsage
 from apps.bot.models import Chat, Profile, User
 from apps.service.mixins import TimeStampModelMixin
 
@@ -274,48 +273,3 @@ class Tag(TimeStampModelMixin):
 
     def __str__(self):
         return str(self.name)
-
-
-class ProviderModelMixin(models.Model):
-    CHATGPT = 'chatgpt'
-    GEMINI = 'gemini'
-    CLAUDE = 'claude'
-    GROK = 'grok'
-    PROVIDER_CHOICES = (
-        (CHATGPT, 'СhatGPT'),
-        (GEMINI, 'Gemini'),
-        (CLAUDE, 'Claude'),
-        (GROK, 'Grok'),
-    )
-
-    provider = models.CharField('Провайдер', max_length=10, blank=True, choices=PROVIDER_CHOICES)
-
-    class Meta:
-        abstract = True
-
-
-class GPTPrePrompt(TimeStampModelMixin, ProviderModelMixin):
-    author = models.ForeignKey(Profile, models.CASCADE, verbose_name="Пользователь", null=True, blank=True)
-    chat = models.ForeignKey(Chat, models.CASCADE, verbose_name="Чат", null=True, blank=True)
-    text = models.TextField("ChatGPT preprompt", default="", blank=True)
-
-    class Meta:
-        verbose_name = "GPT препромпт"
-        verbose_name_plural = "GPT препромпты"
-        unique_together = ('author', 'chat', 'provider')
-
-
-class GPTUsage(TimeStampModelMixin, ProviderModelMixin):
-    author = models.ForeignKey(Profile, models.CASCADE, verbose_name="Пользователь", null=True, db_index=True)
-    cost = models.FloatField("Стоимость запроса", default=0)
-
-    class Meta:
-        verbose_name = "GPT использование"
-        verbose_name_plural = "GPT использования"
-
-    @classmethod
-    def add_statistics(cls, sender: Profile, usage: GPTAPIUsage):
-        GPTUsage(
-            author=sender,
-            cost=usage.total_cost
-        ).save()

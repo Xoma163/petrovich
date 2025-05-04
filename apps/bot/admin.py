@@ -178,8 +178,7 @@ class BotAdmin(TimeStampAdminMixin):
 @admin.register(ProfileSettings)
 class ProfileSettingsAdmin(TimeStampAdminMixin):
     list_display = (
-        'profile', 'need_meme', 'need_reaction', 'use_swear', 'celebrate_bday', 'show_birthday_year', 'use_mention',
-        'chat_gpt_key', 'chat_gpt_model'
+        'profile', 'need_meme', 'need_reaction', 'use_swear', 'celebrate_bday', 'show_birthday_year', 'use_mention'
     )
     list_editable = ('need_meme', 'need_reaction', 'use_swear', 'celebrate_bday', 'show_birthday_year', 'use_mention')
     ordering = ("profile",)

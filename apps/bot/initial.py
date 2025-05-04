@@ -11,11 +11,15 @@ from petrovich.settings import BASE_DIR
 
 
 def import_all_commands():
-    base_commands_folder_dir = os.path.join(BASE_DIR, "apps", "bot", "commands")
+    commands_folders = [
+        os.path.join(BASE_DIR, "apps", "bot", "commands"),
+        os.path.join(BASE_DIR, "apps", "gpt", "commands")
+    ]
     commands_dirs = []
-    for path in os.walk(base_commands_folder_dir):
-        if not path[0].endswith('__pycache__'):
-            commands_dirs.append(path[0])
+    for commands_folder in commands_folders:
+        for path in os.walk(commands_folder):
+            if not path[0].endswith('__pycache__'):
+                commands_dirs.append(path[0])
 
     for (module_loader, name, _) in pkgutil.iter_modules(commands_dirs):
         package = module_loader.path.replace(BASE_DIR, '')[1:].replace('/', '.')
@@ -36,7 +40,8 @@ def generate_commands(base_class=Command):
             new_commands = _new_commands
         else:
             flag = False
-    commands = [x() for x in commands if x.__module__.startswith('apps.bot.commands') and x.enabled and not x.abstract]
+    commands = [x() for x in commands if (x.__module__.startswith('apps.bot.commands') or x.__module__.startswith(
+        'apps.gpt.commands')) and x.enabled and not x.abstract]
     commands.sort(key=lambda x: x.priority, reverse=True)
     return commands
 

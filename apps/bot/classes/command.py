@@ -44,7 +44,6 @@ class Command:
     city: bool = False  # Должно ли сообщение обрабатываться только с заданным городом у пользователя
     mentioned: bool = False  # Должно ли сообщение обрабатываться только с упоминанием бота
     non_mentioned: bool = False  # Должно ли сообщение обрабатываться только без упоминания бота
-    chat_gpt_key: bool = False  # Должно ли сообщение обрабатываться только для доверенных или пользователей с chat_gpt_key
 
     ATTACHMENT_TRANSLATOR = {
         AudioAttachment: 'аудио',
@@ -137,8 +136,6 @@ class Command:
             self.check_mentioned()
         if self.non_mentioned:
             self.check_non_mentioned()
-        if self.chat_gpt_key:
-            self.check_chat_gpt_key()
 
     def start(self) -> ResponseMessage | None:
         """
@@ -354,14 +351,6 @@ class Command:
         if self.event.message.mentioned:
             raise PWarning("Команда работает только без упоминания")
         return True
-
-    def check_chat_gpt_key(self):
-        """
-        Проверяет наличие ключа для ChatGPT или роли TRUSTED
-        """
-        if not self.event.sender.check_role(Role.GPT) and not self.event.sender.settings.chat_gpt_key:
-            raise PWarning(
-                f"Для использования ChatGPT укажите свой ключ (API_KEY) {self.bot.get_formatted_text_line('/gpt ключ (ключ)')}")
 
     def handle_menu(self, menu: list, arg: str):
         """

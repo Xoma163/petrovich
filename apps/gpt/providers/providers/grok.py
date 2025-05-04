@@ -1,0 +1,15 @@
+from apps.gpt.api.base import GPTAPI
+from apps.gpt.api.providers.grok import GrokAPI
+from apps.gpt.enums import GPTProviderEnum
+from apps.gpt.gpt_models.base import GPTModels
+from apps.gpt.gpt_models.providers.grok import GrokModels
+from apps.gpt.messages.base import GPTMessages
+from apps.gpt.messages.providers.grok import GrokMessages
+from apps.gpt.providers.base import GPTProvider
+
+
+class GrokProvider(GPTProvider):
+    name: GPTProviderEnum = GPTProviderEnum.GROK
+    messages_class: type[GPTMessages] = GrokMessages
+    api_class: type[GPTAPI] = GrokAPI
+    models: type[GPTModels] = GrokModels
