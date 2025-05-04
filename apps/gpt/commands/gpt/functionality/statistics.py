@@ -114,7 +114,7 @@ class StatisticsFunctionality(HasCommandFields):
         dates = [datetime.datetime.combine(date, datetime.time()) for date in dates]
 
         # Создание фигуры и осей
-        fig, ax = plt.subplots(figsize=(12, 6))
+        _, ax = plt.subplots(figsize=(12, 6))
 
         # Построение графика
         ax.plot(dates, costs, marker='o')

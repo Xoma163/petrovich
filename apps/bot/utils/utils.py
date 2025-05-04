@@ -647,3 +647,45 @@ def wrap_text_in_document(text: str, filename: str = 'file.html') -> DocumentAtt
     document = DocumentAttachment()
     document.parse(text.encode('utf-8-sig'), filename=filename)
     return document
+
+
+def convert_jpg_to_png(image_bytes_jpg: bytes, image_mode="RGBA") -> bytes:
+    image = Image.open(io.BytesIO(image_bytes_jpg))
+    if image.mode != image_mode:
+        image = image.convert(image_mode)
+    output_buffer = io.BytesIO()
+    # Сохраняем без дополнительных изменений
+    image.save(output_buffer, format="PNG", quality=100)
+    image_bytes_png = output_buffer.getvalue()
+    return image_bytes_png
+
+
+def crop_image_to_square(image_bytes: bytes) -> bytes:
+    """
+    Обрезает изображение по меньшей стороне,
+    """
+    # Читаем картинку из байтов
+    img = Image.open(io.BytesIO(image_bytes))
+    width, height = img.size
+    # Размер стороны квадрата
+    side = min(width, height)
+
+    # Вычисляем отступы, чтобы центрировать квадратик
+    left = (width - side) // 2
+    top = (height - side) // 2
+    right = left + side
+    bottom = top + side
+
+    square = img.crop((left, top, right, bottom))
+
+    output_buffer = io.BytesIO()
+    fmt = img.format or 'PNG'
+    square.save(output_buffer, format=fmt)
+    return output_buffer.getvalue()
+
+
+def get_transparent_rgba_png(width, height):
+    img = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    return buf.getvalue()

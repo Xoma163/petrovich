@@ -39,10 +39,7 @@ class ClaudeAPI(
 
     # ---------- completions ---------- #
 
-    @property
-    def completions_url(self) -> str:
-        return f"{self.base_url}/messages"
-
+    completions_url = f"{base_url}/messages"
     default_completions_model: GPTCompletionModel = ClaudeCompletionModels.claude_3_5_haiku
 
     def completions(self, messages: GPTMessages) -> GPTCompletionsResponse:
@@ -79,10 +76,7 @@ class ClaudeAPI(
 
     # ---------- vision ---------- #
 
-    @property
-    def vision_url(self) -> str:
-        return f"{self.base_url}/chat/completions"
-
+    vision_url = f"{base_url}/chat/completions"
     default_vision_model: GPTVisionModel = ClaudeVisionModels.claude_3_5_haiku_vision
 
     def get_vision_model(self) -> GPTVisionModel:

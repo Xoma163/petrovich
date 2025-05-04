@@ -1,5 +1,3 @@
-import base64
-
 from apps.gpt.api.base import GPTAPI, CompletionsMixin, VisionMixin, ImageDrawMixin
 from apps.gpt.api.openai_api import OpenAIAPI
 from apps.gpt.api.responses import GPTVisionResponse, GPTImageDrawResponse, GPTCompletionsResponse
@@ -7,7 +5,6 @@ from apps.gpt.enums import GPTImageFormat, GPTImageQuality
 from apps.gpt.gpt_models.base import GPTModels, GPTVisionModel, GPTImageDrawModel, GPTCompletionModel
 from apps.gpt.gpt_models.providers.grok import GrokModels, GrokCompletionModels, GrokVisionModels, GrokImageDrawModels
 from apps.gpt.messages.base import GPTMessages
-from apps.gpt.usage import GPTImageDrawUsage
 
 
 class GrokAPI(
@@ -33,10 +30,7 @@ class GrokAPI(
 
     # ---------- completions ---------- #
 
-    @property
-    def completions_url(self) -> str:
-        return f"{self.base_url}/chat/completions"
-
+    completions_url = f"{base_url}/chat/completions"
     default_completions_model: GPTCompletionModel = GrokCompletionModels.grok_3
 
     def completions(self, messages: GPTMessages) -> GPTCompletionsResponse:
@@ -50,10 +44,7 @@ class GrokAPI(
 
     # ---------- vision ---------- #
 
-    @property
-    def vision_url(self) -> str:
-        return f"{self.base_url}/chat/completions"
-
+    vision_url = f"{base_url}/chat/completions"
     default_vision_model: GPTVisionModel = GrokVisionModels.grok_2_vision
 
     def get_vision_model(self) -> GPTVisionModel:
@@ -69,43 +60,32 @@ class GrokAPI(
 
     # ---------- image draw ---------- #
 
-    @property
-    def draw_url(self) -> str:
-        return f"{self.base_url}/images/generations"
+    image_draw_url = f"{base_url}/images/generations"
+    default_image_draw_model: GPTImageDrawModel = GrokImageDrawModels.grok_2_image
 
-    default_draw_model: GPTImageDrawModel = GrokImageDrawModels.grok_2_image
+    def get_image_draw_model(self, gpt_image_format: GPTImageFormat, quality: GPTImageQuality) -> GPTImageDrawModel:
+        return self.default_image_draw_model
 
-    def get_draw_model(self, gpt_image_format: GPTImageFormat, quality: GPTImageQuality) -> GPTImageDrawModel:
-        return self.default_draw_model
-
-    def image_draw(
+    def draw_image(
             self,
             prompt: str,
             image_format: GPTImageFormat,
             quality: GPTImageQuality,
             count: int = 1,  # quality are not supported by xAI API at the moment.
     ) -> GPTImageDrawResponse:
-        """
-        Метод для рисования GPTAPI, переопределяется не у всех наследников
-        """
-        model = self.get_draw_model(image_format, quality)
-
+        model = self.get_image_draw_model(image_format, quality)
         payload = {
+            'model': model.name,
             'prompt': prompt,
             'n': count,
+            # 'size': model.size # size are not supported by xAI API at the moment.
             'response_format': 'b64_json',
-            'model': model.name
         }
-        result = self.do_request(self.draw_url, json=payload)
-
-        image_prompt = result['data'][0]['revised_prompt']
-        usage = GPTImageDrawUsage(
+        return self.do_image_request(
             model=model,
-            images_count=count,
+            url=self.image_draw_url,
+            json=payload,
+            count=count,
+            headers=self.headers,
+            log=False
         )
-        r = GPTImageDrawResponse(
-            images_bytes=[base64.b64decode(x['b64_json']) for x in result['data']],
-            images_prompt=image_prompt,
-            usage=usage
-        )
-        return r

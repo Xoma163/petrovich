@@ -15,6 +15,7 @@ from apps.bot.utils.utils import wrap_text_in_document
 from apps.gpt.api.providers.chatgpt import ChatGPTAPI
 from apps.gpt.api.responses import GPTVoiceRecognitionResponse
 from apps.gpt.models import Usage
+from apps.gpt.providers.providers.chatgpt import ChatGPTProvider
 
 
 class VoiceRecognition(AcceptExtraMixin):
@@ -71,7 +72,6 @@ class VoiceRecognition(AcceptExtraMixin):
 
     def start(self) -> ResponseMessage:
         # ToDo: check role?
-        
         with ChatActivity(self.bot, ActivitiesEnum.TYPING, self.event.peer_id):
             audio_message = self.event.get_all_attachments(self.attachments)[0]
             if not audio_message.ext:
@@ -96,7 +96,7 @@ class VoiceRecognition(AcceptExtraMixin):
                 response: GPTVoiceRecognitionResponse = chat_gpt_api.voice_recognition(attachment.ext, content)
                 answer = response.text
                 if self.event.message.mentioned:
-                    Usage.add_statistics(self.event.sender, response.usage)
+                    Usage.add_statistics(self.event.sender, response.usage, ChatGPTProvider())
 
                 answers.append(answer)
             answer = "\n\n".join(answers)

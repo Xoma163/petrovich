@@ -39,6 +39,12 @@ class GPTImageDrawModel(GPTModel):
     image_cost: float
     width: int
     height: int
+    quality: str | None = None
+
+    @property
+    def size(self) -> str:
+        return f'{self.width}x{self.height}'
+
 
 
 @dataclass

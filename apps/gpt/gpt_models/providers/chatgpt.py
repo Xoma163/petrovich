@@ -51,22 +51,40 @@ class ChatGPTVisionModels(GPTModels):
     GPT_4_5 = GPTVisionModel("gpt-4.5-preview", "GPT-4.5", 75, 150)
 
 
-#   ToDo: add model "gpt-image-1"
-
-
 class ChatGPTImageDrawModels(GPTModels):
-    DALLE_3_PORTAIR = GPTImageDrawModel("dall-e-3", "DALLE 3", image_cost=0.08, width=1024, height=1792)
-    DALLE_3_PORTAIR_HD = GPTImageDrawModel("dall-e-3", "DALLE 3", image_cost=0.12, width=1792, height=1024)
-    DALLE_3_SQUARE = GPTImageDrawModel("dall-e-3", "DALLE 3", image_cost=0.04, width=1024, height=1024)
-    DALLE_3_SQUARE_HD = GPTImageDrawModel("dall-e-3", "DALLE 3", image_cost=0.08, width=1024, height=1024)
-    DALLE_3_ALBUM = GPTImageDrawModel("dall-e-3", "DALLE 3", image_cost=0.08, width=1792, height=1024)
-    DALLE_3_ALBUM_HD = GPTImageDrawModel("dall-e-3", "DALLE 3", image_cost=0.12, width=1792, height=1024)
+    DALLE_2_SMALL_SQUARE = GPTImageDrawModel("dall-e-2", "DALLE 2", 0.016, 256, 256, quality='Standart')
+    DALLE_2_MEDIUM_SQUARE = GPTImageDrawModel("dall-e-2", "DALLE 2", 0.018, 512, 512, quality='Standart')
+    DALLE_2_BIG_SQUARE = GPTImageDrawModel("dall-e-2", "DALLE 2", 0.02, 1024, 1024, quality='Standart')
+
+    DALLE_3_SQUARE_STANDART = GPTImageDrawModel("dall-e-3", "DALLE 3", 0.04, 1024, 1024, quality='Standart')
+    DALLE_3_PORTAIR_STANDART = GPTImageDrawModel("dall-e-3", "DALLE 3", 0.08, 1024, 1792, quality='Standart')
+    DALLE_3_LANDSCAPE_STANDART = GPTImageDrawModel("dall-e-3", "DALLE 3", 0.08, 1792, 1024, quality='Standart')
+
+    DALLE_3_SQUARE_HD = GPTImageDrawModel("dall-e-3", "DALLE 3", 0.08, 1024, 1024, quality='HD')
+    DALLE_3_PORTAIR_HD = GPTImageDrawModel("dall-e-3", "DALLE 3", 0.12, 1024, 1792, quality='HD')
+    DALLE_3_LANDSCAPE_HD = GPTImageDrawModel("dall-e-3", "DALLE 3", 0.12, 1792, 1024, quality='HD')
+
+    GPT_IMAGE_1_SQUARE_LOW = GPTImageDrawModel("gpt-image-1", "gpt-image-1", 0.011, 1024, 1024, quality="Low")
+    GPT_IMAGE_1_PORTAIR_LOW = GPTImageDrawModel("gpt-image-1", "gpt-image-1", 0.016, 1024, 1536, quality="Low")
+    GPT_IMAGE_1_LANDSCAPE_LOW = GPTImageDrawModel("gpt-image-1", "gpt-image-1", 0.016, 1536, 1024, quality="Low")
+
+    GPT_IMAGE_1_SQUARE_MEDIUM = GPTImageDrawModel("gpt-image-1", "gpt-image-1", 0.042, 1024, 1024, quality="Medium")
+    GPT_IMAGE_1_PORTAIR_MEDIUM = GPTImageDrawModel("gpt-image-1", "gpt-image-1", 0.063, 1024, 1536, quality="Medium")
+    GPT_IMAGE_1_LANDSCAPE_MEDIUM = GPTImageDrawModel("gpt-image-1", "gpt-image-1", 0.063, 1536, 1024, quality="Medium")
+
+    GPT_IMAGE_1_SQUARE_HIGH = GPTImageDrawModel("gpt-image-1", "gpt-image-1", 0.167, 1024, 1024, quality="High")
+    GPT_IMAGE_1_PORTAIR_HIGH = GPTImageDrawModel("gpt-image-1", "gpt-image-1", 0.25, 1024, 1536, quality="High")
+    GPT_IMAGE_1_LANDSCAPE_HIGH = GPTImageDrawModel("gpt-image-1", "gpt-image-1", 0.25, 1536, 1024, quality="High")
 
 
 class ChatGPTVoiceRecognitionModels(GPTModels):
     WHISPER = GPTVoiceRecognitionModel("whisper-1", "whisper-1", voice_recognition_1_min_cost=0.006)
 
 
-class ChatGPTModels(ChatGPTCompletionModels, ChatGPTVisionModels, ChatGPTImageDrawModels,
-                    ChatGPTVoiceRecognitionModels):
+class ChatGPTModels(
+    ChatGPTCompletionModels,
+    ChatGPTVisionModels,
+    ChatGPTImageDrawModels,
+    ChatGPTVoiceRecognitionModels
+):
     pass

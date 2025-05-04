@@ -63,5 +63,5 @@ class CompletionsFunctionality(HasCommandFields):
         history.add_message(GPTMessageRole.USER, PROMPT)
         history.add_message(GPTMessageRole.USER, text)
 
-        rmi = self.completions(history, use_statistics=True)
+        rmi = self.completions(history)
         return self._send_rmi(rmi)

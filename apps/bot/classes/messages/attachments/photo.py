@@ -27,5 +27,5 @@ class PhotoAttachment(Attachment, SizedMixin):
         return base64.b64encode(self.content).decode('utf-8')
 
     @staticmethod
-    def decode_base64(encoded_str):
-        return base64.b64decode(encoded_str).decode('utf-8')
+    def decode_base64(encoded_str: str) -> bytes:
+        return base64.b64decode(encoded_str)

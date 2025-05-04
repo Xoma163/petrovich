@@ -23,8 +23,7 @@ class GPTMessages(ABC):
     def message_class(self) -> type[GPTMessage]:
         pass
 
-    def __init__(self):
-        self._messages: list[GPTMessage] = []
+    _messages: list[GPTMessage] = []
 
     def add_message(self, role: GPTMessageRole, text: str, images: list[str] | None = None):
         # ToDo: непонятно почему здесь unexpected argument

@@ -1,12 +1,12 @@
-import concurrent
-from concurrent.futures import ThreadPoolExecutor
+import io
 
 from apps.gpt.api.base import (
     GPTAPI,
     CompletionsMixin,
     VisionMixin,
     ImageDrawMixin,
-    VoiceRecognitionMixin
+    VoiceRecognitionMixin,
+    ImageEditMixin
 )
 from apps.gpt.api.openai_api import OpenAIAPI
 from apps.gpt.api.responses import (
@@ -32,7 +32,6 @@ from apps.gpt.gpt_models.providers.chatgpt import (
 from apps.gpt.messages.base import GPTMessages
 from apps.gpt.messages.consts import GPTMessageRole
 from apps.gpt.usage import (
-    GPTImageDrawUsage,
     GPTVoiceRecognitionUsage
 )
 
@@ -43,6 +42,7 @@ class ChatGPTAPI(
     CompletionsMixin,
     VisionMixin,
     ImageDrawMixin,
+    ImageEditMixin,
     VoiceRecognitionMixin
 ):
 
@@ -61,11 +61,7 @@ class ChatGPTAPI(
     models = ChatGPTModels
 
     # ---------- completions ---------- #
-
-    @property
-    def completions_url(self) -> str:
-        return f"{self.base_url}/chat/completions"
-
+    completions_url = f"{base_url}/chat/completions"
     default_completions_model: GPTCompletionModel = ChatGPTCompletionModels.O4_MINI
 
     def completions(self, messages: GPTMessages) -> GPTCompletionsResponse:
@@ -84,10 +80,7 @@ class ChatGPTAPI(
 
     # ---------- vision ---------- #
 
-    @property
-    def vision_url(self) -> str:
-        return self.completions_url
-
+    vision_url = completions_url
     default_vision_model: GPTVisionModel = ChatGPTVisionModels.GPT_4_O
 
     def get_vision_model(self) -> GPTVisionModel:
@@ -103,70 +96,86 @@ class ChatGPTAPI(
 
     # ---------- image draw ---------- #
 
-    @property
-    def draw_url(self) -> str:
-        return f"{self.base_url}/images/generations"
+    image_draw_url = f"{base_url}/images/generations"
+    default_image_draw_model: GPTImageDrawModel = ChatGPTImageDrawModels.DALLE_3_SQUARE_HD
 
-    default_draw_model: GPTImageDrawModel = ChatGPTImageDrawModels.DALLE_3_SQUARE
-
-    def get_draw_model(self, gpt_image_format: GPTImageFormat, quality: GPTImageQuality) -> GPTImageDrawModel:
+    def get_image_draw_model(self, gpt_image_format: GPTImageFormat, quality: GPTImageQuality) -> GPTImageDrawModel:
         models_map = {
-            (GPTImageFormat.PORTAIR, GPTImageQuality.HIGH): ChatGPTImageDrawModels.DALLE_3_PORTAIR_HD,
-            (GPTImageFormat.PORTAIR, GPTImageQuality.STANDARD): ChatGPTImageDrawModels.DALLE_3_PORTAIR,
+            (GPTImageFormat.SQUARE, GPTImageQuality.STANDARD): ChatGPTImageDrawModels.DALLE_3_SQUARE_STANDART,
+            (GPTImageFormat.PORTAIR, GPTImageQuality.STANDARD): ChatGPTImageDrawModels.DALLE_3_PORTAIR_STANDART,
+            (GPTImageFormat.LANDSCAPE, GPTImageQuality.STANDARD): ChatGPTImageDrawModels.DALLE_3_LANDSCAPE_STANDART,
             (GPTImageFormat.SQUARE, GPTImageQuality.HIGH): ChatGPTImageDrawModels.DALLE_3_SQUARE_HD,
-            (GPTImageFormat.SQUARE, GPTImageQuality.STANDARD): ChatGPTImageDrawModels.DALLE_3_SQUARE,
-            (GPTImageFormat.ALBUM, GPTImageQuality.HIGH): ChatGPTImageDrawModels.DALLE_3_ALBUM_HD,
-            (GPTImageFormat.ALBUM, GPTImageQuality.STANDARD): ChatGPTImageDrawModels.DALLE_3_ALBUM
+            (GPTImageFormat.PORTAIR, GPTImageQuality.HIGH): ChatGPTImageDrawModels.DALLE_3_PORTAIR_HD,
+            (GPTImageFormat.LANDSCAPE, GPTImageQuality.HIGH): ChatGPTImageDrawModels.DALLE_3_LANDSCAPE_HD,
         }
-        return models_map.get((gpt_image_format, quality), self.default_draw_model)
+        return models_map.get((gpt_image_format, quality), self.default_image_draw_model)
 
-    def _fetch_image(self, payload) -> (str, str):
-        r_json = self.do_request(self.draw_url, json=payload)
-        image_data = r_json['data'][0]
-        return image_data['url'], image_data['revised_prompt']
-
-    def image_draw(
+    def draw_image(
             self,
             prompt: str,
             image_format: GPTImageFormat,
             quality: GPTImageQuality,
             count: int = 1,
     ) -> GPTImageDrawResponse:
-        model = self.get_draw_model(image_format, quality)
-
-        size = f"{model.width}x{model.height}"
-
+        model = self.get_image_draw_model(image_format, quality)
         payload = {
             "model": model.name,
             "prompt": prompt,
             "n": 1,  # max restriction by api
-            "size": size,
+            "size": model.size,
+            "response_format": "b64_json"
         }
         if quality:
             payload["quality"] = quality
 
-        usage = GPTImageDrawUsage(
+        return self.do_image_request(
             model=model,
-            images_count=count,
+            url=self.image_draw_url,
+            json=payload,
+            count=count,
+            headers=self.headers,
+            log=False
         )
-        r = GPTImageDrawResponse(
-            images_prompt="",
-            images_url=[],
-            usage=usage,
+
+    # ---------- image edit ---------- #
+
+    image_edit_url = f"{base_url}/images/edits"
+    default_image_edit_model: GPTImageDrawModel = ChatGPTImageDrawModels.DALLE_2_BIG_SQUARE
+
+    def get_image_edit_model(self) -> GPTImageDrawModel:
+        return self.default_image_edit_model
+
+    def edit_image(
+            self,
+            prompt: str,
+            image: bytes,
+            mask: bytes,
+            count: int = 1,
+    ) -> GPTImageDrawResponse:
+        model = self.get_image_edit_model()
+        payload = {
+            "prompt": prompt,
+            "model": model.name,
+            "n": count,
+            "response_format": "b64_json",
+            # "size": model.size
+        }
+        files = {
+            'image': ('image.png', io.BytesIO(image), 'image/png'),
+            'mask': ('image.png', io.BytesIO(mask), 'image/png'),
+        }
+        return self.do_image_request(
+            model,
+            url=self.image_edit_url,
+            data=payload,
+            count=count,
+            headers=self.headers,
+            log=False,
+            files=files
         )
-        if count > 1:
-            with ThreadPoolExecutor() as executor:
-                futures = [executor.submit(self._fetch_image, payload) for _ in range(count)]
-                results = [f.result() for f in concurrent.futures.as_completed(futures)]
-            r.images_url = [url for url, _ in results]
-            r.images_prompt = results[0][1]
-        else:
-            url, prompt = self._fetch_image(payload)
-            r.images_url = [url]
-            r.images_prompt = prompt
-        return r
 
     # ---------- voice recognition ---------- #
+
     MAX_AUDIO_FILE_SIZE_MB = 24
 
     @property
@@ -186,7 +195,7 @@ class ChatGPTAPI(
         }
 
         file = (f"audio.{audio_ext}", content)
-        r_json = self.do_request(self.voice_recognition_url, data=data, files={'file': file})
+        r_json = self.do_request(self.voice_recognition_url, data=data, files={'file': file}, headers=self.headers)
 
         usage = GPTVoiceRecognitionUsage(
             model=model,

@@ -44,7 +44,6 @@ class GPTCommand(Command):
         """
         Обрабатывать ли боту команду или нет
         """
-
         # Стандартный обработчик
         accept = super(GPTCommand, self).accept(event)
         if accept:
@@ -63,13 +62,18 @@ class GPTCommand(Command):
             if result:
                 return result
 
+        arg0 = self.event.message.args[0] if self.event.message.args else None
+        edit_text_command_aliases = ["фотошоп", "photoshop"]
+
+
         if isinstance(self, VisionFunctionality):
-            if self.event.get_all_attachments([PhotoAttachment]):
+            if self.event.get_all_attachments([PhotoAttachment]) and not arg0 in edit_text_command_aliases:
                 return ResponseMessage(self.menu_vision())
 
         menu = []
         if isinstance(self, ImageDrawFunctionality):
             menu.append([["нарисуй", "draw"], self.menu_image_draw])
+            menu.append([edit_text_command_aliases, self.menu_image_edit])
         if isinstance(self, StatisticsFunctionality):
             menu.append([["стат", "стата", "статистика", "stat", "stats", "statistics"], self.menu_statistics])
         if isinstance(self, PrepromptFunctionality):

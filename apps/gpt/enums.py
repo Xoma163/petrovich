@@ -8,7 +8,7 @@ class GPTProviderEnum(StrEnum):
 
 
 class GPTImageFormat(StrEnum):
-    ALBUM = "album"
+    LANDSCAPE = "landscape"
     PORTAIR = "portair"
     SQUARE = "square"
 

@@ -31,7 +31,6 @@ class GPTAPI(API):
         """
         Хост, куда будут делаться запросы API
         """
-        pass
 
     @property
     def api_key(self) -> str:
@@ -134,26 +133,46 @@ class VisionMixin:
 class ImageDrawMixin:
     @property
     @abstractmethod
-    def draw_url(self) -> str:
+    def image_draw_url(self) -> str:
         pass
 
     @property
     @abstractmethod
-    def default_draw_model(self) -> GPTImageDrawModel:
+    def default_image_draw_model(self) -> GPTImageDrawModel:
         pass
 
     @abstractmethod
-    def get_draw_model(self, gpt_image_format: GPTImageFormat, quality: GPTImageQuality) -> GPTImageDrawModel:
+    def get_image_draw_model(self, gpt_image_format: GPTImageFormat, quality: GPTImageQuality) -> GPTImageDrawModel:
         pass
 
     @abstractmethod
-    def image_draw(
+    def draw_image(
             self,
             prompt: str,
             image_format: GPTImageFormat,
             quality: GPTImageQuality,
             count: int = 1,
     ) -> GPTImageDrawResponse:
+        pass
+
+
+class ImageEditMixin:
+    @property
+    @abstractmethod
+    def image_edit_url(self) -> str:
+        pass
+
+    @property
+    @abstractmethod
+    def default_image_edit_model(self) -> GPTImageDrawModel:
+        pass
+
+    @abstractmethod
+    def get_image_edit_model(self) -> GPTImageDrawModel:
+        pass
+
+    @abstractmethod
+    def edit_image(self, prompt: str, image: bytes, mask: bytes, count: int = 1) -> GPTImageDrawResponse:
         pass
 
 
