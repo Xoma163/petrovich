@@ -12,10 +12,17 @@ from apps.gpt.models import Usage
 
 
 class ImageDrawFunctionality(HasCommandFields):
-    DRAW_HELP_TEXT_ITEMS = [
+    IMAGE_DRAW_HELP_TEXT_ITEMS = [
         HelpTextArgument(
             "нарисуй (фраза/пересланное сообщение)",
             "генерация картинки"
+        )
+    ]
+
+    IMAGE_EDIT_HELP_TEXT_ITEMS = [
+        HelpTextArgument(
+            "фотошоп (фраза) [картинка]",
+            "редактирование и генерация картинки"
         )
     ]
 

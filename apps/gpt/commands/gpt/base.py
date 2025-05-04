@@ -9,6 +9,7 @@ from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessageItem, ResponseMessage
 from apps.bot.utils.cache import MessagesCache
 from apps.bot.utils.utils import markdown_to_html, wrap_text_in_document
+from apps.gpt.api.base import ImageEditMixin
 from apps.gpt.commands.gpt.functionality.completions import CompletionsFunctionality
 from apps.gpt.commands.gpt.functionality.image_draw import ImageDrawFunctionality
 from apps.gpt.commands.gpt.functionality.key import KeyFunctionality
@@ -67,12 +68,14 @@ class GPTCommand(Command):
 
 
         if isinstance(self, VisionFunctionality):
-            if self.event.get_all_attachments([PhotoAttachment]) and not arg0 in edit_text_command_aliases:
+            if self.event.get_all_attachments([PhotoAttachment]) and arg0 not in edit_text_command_aliases:
                 return ResponseMessage(self.menu_vision())
 
         menu = []
         if isinstance(self, ImageDrawFunctionality):
             menu.append([["нарисуй", "draw"], self.menu_image_draw])
+        # ToDo: хм, а может нахер проверять фукнциональности, а проверять именно апишные классы?
+        if isinstance(self.provider.api_class, ImageEditMixin):
             menu.append([edit_text_command_aliases, self.menu_image_edit])
         if isinstance(self, StatisticsFunctionality):
             menu.append([["стат", "стата", "статистика", "stat", "stats", "statistics"], self.menu_statistics])

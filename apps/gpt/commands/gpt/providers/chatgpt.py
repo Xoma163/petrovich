@@ -37,7 +37,8 @@ class ChatGPTCommand(
                 access,
                 CompletionsFunctionality.COMPLETIONS_HELP_TEXT_ITEMS +
                 VisionFunctionality.VISION_HELP_TEXT_ITEMS +
-                ImageDrawFunctionality.DRAW_HELP_TEXT_ITEMS +
+                ImageDrawFunctionality.IMAGE_DRAW_HELP_TEXT_ITEMS +
+                ImageDrawFunctionality.IMAGE_EDIT_HELP_TEXT_ITEMS +
                 PrepromptFunctionality.PREPROMPT_HELP_TEXT_ITEMS +
                 StatisticsFunctionality.STATISTICS_HELP_TEXT_ITEMS +
                 ModelChoiceFunctionality.MODEL_CHOOSE_HELP_TEXT_ITEMS +
