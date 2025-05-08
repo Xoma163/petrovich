@@ -1,6 +1,5 @@
 import datetime
 import io
-from typing import Tuple
 
 import matplotlib.pyplot as plt
 from django.db.models import Q, Sum
@@ -14,29 +13,37 @@ from apps.bot.classes.help_text import HelpTextArgument
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessageItem
 from apps.bot.models import Profile
-from apps.gpt.commands.gpt.protocols import HasCommandFields
+from apps.gpt.api.responses import GPTAPIResponse
 from apps.gpt.models import Usage
+from apps.gpt.protocols import GPTCommandProtocol
 
 
-class StatisticsFunctionality(HasCommandFields):
+class GPTStatisticsMixin(GPTCommandProtocol):
     STATISTICS_HELP_TEXT_ITEMS = [
         HelpTextArgument("стата", "статистика по использованию"),
     ]
+
+    # MENU
 
     def menu_statistics(self) -> ResponseMessageItem:
         """
         Просмотр статистики по использованию
         """
         self.check_pm()
-        text_answer, statistics_plot_bytes = self.get_statistics_for_user(self.event.sender)
+        text_answer = self._get_statistics_for_user(self.event.sender)
         if not text_answer:
             raise PWarning("Ещё не было использований GPT")
 
+        plot_data = self._get_data_for_statistics_plot(self.event.sender)
+        plot_bytes = self._get_statistics_plot(plot_data)
+
         statistics_plot_image = PhotoAttachment()
-        statistics_plot_image.parse(statistics_plot_bytes)
+        statistics_plot_image.parse(plot_bytes)
         return ResponseMessageItem(text_answer, attachments=[statistics_plot_image])
 
-    def get_statistics_for_user(self, profile: Profile) -> Tuple[str | None, bytes | None]:
+    # HANDLERS
+
+    def _get_statistics_for_user(self, profile: Profile) -> str | None:
         """
         Получение статистики
         """
@@ -53,7 +60,7 @@ class StatisticsFunctionality(HasCommandFields):
 
         stats_all = self._get_stat_db_profile(Q(author=profile))
         if not stats_all:
-            return None, None
+            return None
 
         # Начало и конец предыдущего месяца
         dt_now = timezone.now()
@@ -76,9 +83,6 @@ class StatisticsFunctionality(HasCommandFields):
             Q(author=profile, created_at__gte=first_day_of_current_month, created_at__lt=dt_now)
         )
 
-        plot_data = self._get_data_for_statistics_plot(profile)
-        plot = self._get_statistics_plot(plot_data)
-
         text_answer = f"{profile}:\n" \
                       f"Сегодня - $ {round(stats_today, 2)}\n" \
                       f"7 дней - $ {round(stats_7_day, 2)}\n" \
@@ -86,7 +90,19 @@ class StatisticsFunctionality(HasCommandFields):
                       f"Текущий месяц- $ {round(current_month, 2)}\n" \
                       f"Всего - $ {round(stats_all, 2)}"
 
-        return text_answer, plot
+        return text_answer
+
+    # COMMON UTILS
+
+    def add_statistics(self, api_response: GPTAPIResponse):
+        Usage(
+            author=self.event.sender,
+            cost=api_response.usage.total_cost,
+            provider=self.provider,
+            # model_name=model_name
+        ).save()
+
+    # UTILS
 
     @staticmethod
     def _get_data_for_statistics_plot(profile):

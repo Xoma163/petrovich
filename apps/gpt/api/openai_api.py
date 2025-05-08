@@ -1,14 +1,15 @@
 import concurrent
 import re
+from abc import ABC
 from concurrent.futures import ThreadPoolExecutor
 
 from requests.exceptions import SSLError, JSONDecodeError
 
-from apps.bot.api.handler import API
 from apps.bot.classes.const.exceptions import PError, PWarning
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 from apps.bot.utils.proxy import get_proxies
 from apps.bot.utils.utils import retry
+from apps.gpt.api.base import GPTAPI
 from apps.gpt.api.responses import (
     GPTCompletionsResponse,
     GPTCompletionsVisionResponse,
@@ -29,7 +30,7 @@ from apps.gpt.usage import (
 )
 
 
-class OpenAIAPI(API):
+class OpenAIAPI(GPTAPI, ABC):
     ERRORS_MAP = {
         'content_policy_violation': "ChatGPT не может обработать запрос по политикам безопасности",
         503: "ChatGPT недоступен",

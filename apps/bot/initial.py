@@ -4,7 +4,7 @@ import pkgutil
 
 from django.contrib.auth.models import Group
 
-from apps.bot.classes.command import Command, AcceptExtraMixin
+from apps.bot.classes.command import Command, AcceptExtraCommand
 from apps.bot.classes.const.consts import Platform, Role
 from apps.bot.utils.utils import get_flat_list
 from petrovich.settings import BASE_DIR
@@ -70,7 +70,7 @@ import_all_commands()
 
 COMMANDS = generate_commands(Command)
 
-EXTRA_COMMANDS = generate_commands(AcceptExtraMixin)
+EXTRA_COMMANDS = generate_commands(AcceptExtraCommand)
 
 HELP_TEXTS = generate_help_text()
 

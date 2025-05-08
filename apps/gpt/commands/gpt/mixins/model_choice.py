@@ -1,18 +1,20 @@
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.help_text import HelpTextArgument
 from apps.bot.classes.messages.response_message import ResponseMessageItem
-from apps.gpt.api.base import CompletionsMixin
-from apps.gpt.commands.gpt.protocols import HasCommandFields
+from apps.gpt.api.base import CompletionsAPIMixin
 from apps.gpt.gpt_models.base import GPTCompletionModel
 from apps.gpt.models import GPTSettings
+from apps.gpt.protocols import GPTCommandProtocol
 
 
-class ModelChoiceFunctionality(HasCommandFields):
+class GPTModelChoiceMixin(GPTCommandProtocol):
     MODEL_CHOOSE_HELP_TEXT_ITEMS = [
         HelpTextArgument("модели", "выводит список доступных моделей"),
         HelpTextArgument("модель", "выведет текущую модель"),
         HelpTextArgument("модель (название модели)", "указывает какую модель использовать")
     ]
+
+    # MENU
 
     def menu_models(self) -> ResponseMessageItem:
         """
@@ -53,7 +55,7 @@ class ModelChoiceFunctionality(HasCommandFields):
                 gpt_model = self.provider.models.get_model_by_name(gpt_model_str, GPTCompletionModel)
                 answer = f"Текущая модель - {self.bot.get_formatted_text_line(gpt_model.verbose_name)}"
             else:
-                if isinstance(self.provider.api_class, CompletionsMixin):
+                if isinstance(self.provider.api_class, CompletionsAPIMixin):
                     default_model = self.bot.get_formatted_text_line(
                         self.provider.api_class.default_completions_model.name)
                     answer = f"Модель не установлена. Используется модель по умолчанию - {default_model}"

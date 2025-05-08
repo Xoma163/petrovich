@@ -1,6 +1,6 @@
 from apps.bot.classes.bots.chat_activity import ChatActivity
 from apps.bot.classes.bots.tg_bot import TgBot
-from apps.bot.classes.command import AcceptExtraMixin
+from apps.bot.classes.command import AcceptExtraCommand
 from apps.bot.classes.const.activities import ActivitiesEnum
 from apps.bot.classes.const.consts import Platform, Role
 from apps.bot.classes.const.exceptions import PWarning, PSkipContinue
@@ -18,7 +18,7 @@ from apps.gpt.models import Usage
 from apps.gpt.providers.providers.chatgpt import ChatGPTProvider
 
 
-class VoiceRecognition(AcceptExtraMixin):
+class VoiceRecognition(AcceptExtraCommand):
     name = 'распознай'
     names = ["голос", "голосовое"]
 
@@ -96,7 +96,12 @@ class VoiceRecognition(AcceptExtraMixin):
                 response: GPTVoiceRecognitionResponse = chat_gpt_api.voice_recognition(attachment.ext, content)
                 answer = response.text
                 if self.event.message.mentioned:
-                    Usage.add_statistics(self.event.sender, response.usage, ChatGPTProvider())
+                    Usage(
+                        author=self.event.sender,
+                        cost=response.usage.total_cost,
+                        provider=ChatGPTProvider(),
+                        # model_name=model_name
+                    ).save()
 
                 answers.append(answer)
             answer = "\n\n".join(answers)

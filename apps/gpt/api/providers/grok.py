@@ -1,4 +1,4 @@
-from apps.gpt.api.base import GPTAPI, CompletionsMixin, VisionMixin, ImageDrawMixin
+from apps.gpt.api.base import CompletionsAPIMixin, VisionAPIMixin, ImageDrawAPIMixin
 from apps.gpt.api.openai_api import OpenAIAPI
 from apps.gpt.api.responses import GPTVisionResponse, GPTImageDrawResponse, GPTCompletionsResponse
 from apps.gpt.enums import GPTImageFormat, GPTImageQuality
@@ -8,11 +8,10 @@ from apps.gpt.messages.base import GPTMessages
 
 
 class GrokAPI(
-    GPTAPI,
     OpenAIAPI,
-    CompletionsMixin,
-    VisionMixin,
-    ImageDrawMixin,
+    CompletionsAPIMixin,
+    VisionAPIMixin,
+    ImageDrawAPIMixin,
 ):
     @property
     def headers(self) -> dict:

@@ -1,12 +1,18 @@
 from abc import ABC
 from dataclasses import dataclass
 
-from apps.gpt.usage import GPTImageDrawUsage, GPTCompletionsUsage, GPTVisionUsage, GPTVoiceRecognitionUsage, \
-    GPTCompletionsVisionUsage
+from apps.gpt.usage import (
+    GPTImageDrawUsage,
+    GPTCompletionsUsage,
+    GPTVisionUsage,
+    GPTVoiceRecognitionUsage,
+    GPTCompletionsVisionUsage,
+    GPTUsage
+)
 
 
 class GPTAPIResponse(ABC):
-    pass
+    usage: GPTUsage
 
 
 @dataclass

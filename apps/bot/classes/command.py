@@ -12,10 +12,11 @@ from apps.bot.classes.messages.attachments.video import VideoAttachment
 from apps.bot.classes.messages.attachments.video_note import VideoNoteAttachment
 from apps.bot.classes.messages.attachments.voice import VoiceAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage
+from apps.bot.protocols import CommandProtocol
 from apps.bot.utils.utils import get_help_texts_for_command, transform_k
 
 
-class Command:
+class Command(CommandProtocol):
     # Основные поля команды
     name: str = ""  # Имя команды
     names: list = []  # Вспопогательные имена команды
@@ -384,7 +385,7 @@ class Command:
         return self.name
 
 
-class AcceptExtraMixin(Command):
+class AcceptExtraCommand(Command):
     @staticmethod
     def accept_extra(event):
         """

@@ -14,9 +14,17 @@ from apps.gpt.gpt_models.base import (
     GPTCompletionModel,
     GPTImageDrawModel,
     GPTVisionModel,
-    GPTVoiceRecognitionModel, GPTModels
+    GPTVoiceRecognitionModel,
+    GPTModels
 )
 from apps.gpt.messages.base import GPTMessages
+from apps.gpt.protocols import (
+    HasCompletions,
+    HasVision,
+    HasVoiceRecognition,
+    HasImageEdit,
+    HasImageDraw
+)
 from petrovich.settings import env
 
 
@@ -86,7 +94,7 @@ class GPTAPI(API):
     #     pass
 
 
-class CompletionsMixin:
+class CompletionsAPIMixin(HasCompletions):
     @property
     @abstractmethod
     def completions_url(self) -> str:
@@ -109,7 +117,7 @@ class CompletionsMixin:
         pass
 
 
-class VisionMixin:
+class VisionAPIMixin(HasVision):
 
     @property
     @abstractmethod
@@ -130,7 +138,7 @@ class VisionMixin:
         pass
 
 
-class ImageDrawMixin:
+class ImageDrawAPIMixin(HasImageDraw):
     @property
     @abstractmethod
     def image_draw_url(self) -> str:
@@ -156,7 +164,7 @@ class ImageDrawMixin:
         pass
 
 
-class ImageEditMixin:
+class ImageEditAPIMixin(HasImageEdit):
     @property
     @abstractmethod
     def image_edit_url(self) -> str:
@@ -172,11 +180,17 @@ class ImageEditMixin:
         pass
 
     @abstractmethod
-    def edit_image(self, prompt: str, image: bytes, mask: bytes, count: int = 1) -> GPTImageDrawResponse:
+    def edit_image(
+            self,
+            prompt: str,
+            image: bytes,
+            mask: bytes,
+            count: int = 1
+    ) -> GPTImageDrawResponse:
         pass
 
 
-class VoiceRecognitionMixin:
+class VoiceRecognitionAPIMixin(HasVoiceRecognition):
 
     @property
     @abstractmethod

@@ -2,17 +2,19 @@ from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.help_text import HelpTextArgument
 from apps.bot.classes.messages.response_message import ResponseMessageItem, ResponseMessage
-from apps.gpt.commands.gpt.protocols import HasCommandFields
 from apps.gpt.models import GPTSettings
+from apps.gpt.protocols import GPTCommandProtocol
 
 
-class KeyFunctionality(HasCommandFields):
+class GPTKeyMixin(GPTCommandProtocol):
     KEY_HELP_TEXT_ITEMS = [
         HelpTextArgument("ключ (ключ)", "добавляет персональный API ключ"),
         HelpTextArgument("ключ удалить", "удаляет персональный API ключ"),
     ]
 
     KEEP_YOUR_SECRET_KEY_IN_SAFE = "Держите свой ключ в секрете. Я удалил ваше сообщение с ключом (или удалите сами если у меня нет прав). Добавьте его в личных сообщениях"
+
+    # MENU
 
     def menu_key(self) -> ResponseMessageItem:
         """
@@ -42,7 +44,9 @@ class KeyFunctionality(HasCommandFields):
 
         return rmi
 
-    def _check_key(self):
+    # COMMON UTILS
+
+    def check_key(self) -> ResponseMessage | None:
         settings_key_field = self.provider.gpt_settings_key_field
 
         # try:

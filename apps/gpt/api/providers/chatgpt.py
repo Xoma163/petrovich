@@ -1,12 +1,11 @@
 import io
 
 from apps.gpt.api.base import (
-    GPTAPI,
-    CompletionsMixin,
-    VisionMixin,
-    ImageDrawMixin,
-    VoiceRecognitionMixin,
-    ImageEditMixin
+    CompletionsAPIMixin,
+    VisionAPIMixin,
+    ImageDrawAPIMixin,
+    VoiceRecognitionAPIMixin,
+    ImageEditAPIMixin
 )
 from apps.gpt.api.openai_api import OpenAIAPI
 from apps.gpt.api.responses import (
@@ -37,13 +36,12 @@ from apps.gpt.usage import (
 
 
 class ChatGPTAPI(
-    GPTAPI,
     OpenAIAPI,
-    CompletionsMixin,
-    VisionMixin,
-    ImageDrawMixin,
-    ImageEditMixin,
-    VoiceRecognitionMixin
+    CompletionsAPIMixin,
+    VisionAPIMixin,
+    ImageDrawAPIMixin,
+    ImageEditAPIMixin,
+    VoiceRecognitionAPIMixin
 ):
 
     @property

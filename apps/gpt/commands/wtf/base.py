@@ -50,7 +50,7 @@ class WTFCommand(Command):
         gpt.bot = self.bot
         gpt.event = self.event
         with ChatActivity(self.bot, ActivitiesEnum.TYPING, self.event.peer_id):
-            answer = gpt.completions(messages)
+            answer = gpt._completions(messages)  # noqa TODO CHECK
         return ResponseMessage(answer)
 
     def _get_n_and_prompt(self) -> tuple[int, str]:

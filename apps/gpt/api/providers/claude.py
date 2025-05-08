@@ -1,6 +1,6 @@
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.utils.proxy import get_proxies
-from apps.gpt.api.base import GPTAPI, CompletionsMixin, VisionMixin
+from apps.gpt.api.base import GPTAPI, CompletionsAPIMixin, VisionAPIMixin
 from apps.gpt.api.responses import GPTVisionResponse, GPTCompletionsResponse
 from apps.gpt.gpt_models.base import GPTModels, GPTVisionModel, GPTCompletionModel
 from apps.gpt.gpt_models.providers.claude import ClaudeModels, ClaudeVisionModels, ClaudeCompletionModels
@@ -11,8 +11,8 @@ from apps.gpt.usage import GPTCompletionsUsage, GPTVisionUsage
 
 class ClaudeAPI(
     GPTAPI,
-    CompletionsMixin,
-    VisionMixin,
+    CompletionsAPIMixin,
+    VisionAPIMixin,
 ):
     @property
     def headers(self):

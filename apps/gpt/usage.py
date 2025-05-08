@@ -29,7 +29,8 @@ class GPTCompletionsVisionUsage(GPTUsage):
 
     @property
     def total_cost(self) -> float:
-        return self.prompt_tokens * self.prompt_token_cost + self.completion_tokens * self.completion_token_cost
+        return (self.prompt_tokens * self.prompt_token_cost +
+                self.completion_tokens * self.completion_token_cost)
 
 
 @dataclass
