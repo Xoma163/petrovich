@@ -43,18 +43,12 @@ class Preprompt(TimeStampModelMixin, ProviderModelMixin):
 class Usage(TimeStampModelMixin, ProviderModelMixin):
     author = models.ForeignKey(Profile, models.CASCADE, verbose_name="Пользователь", null=True, db_index=True)
     cost = models.FloatField("Стоимость запроса", default=0)
+    cost = models.DecimalField("Стоимость запроса", max_digits=4, decimal_places=2, default=0)
+    model_name = models.CharField("Название модели", blank=True, max_length=128)
 
     class Meta:
         verbose_name = "GPT использование"
         verbose_name_plural = "GPT использования"
-
-    @classmethod
-    def add_statistics(cls, sender: Profile, usage: GPTAPIUsage, provider: GPTProvider):
-        Usage(
-            author=sender,
-            cost=usage.total_cost,
-            provider=provider.name
-        ).save()
 
 
 class GPTSettings(TimeStampModelMixin):
