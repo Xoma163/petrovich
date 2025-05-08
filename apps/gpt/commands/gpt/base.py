@@ -93,7 +93,7 @@ class GPTCommand(
             menu.append([["модели", "models"], self.menu_models])
             menu.append([["модель", "model"], self.menu_model])
         if isinstance(self, GPTCompletionsFunctionality):
-            menu.append([["_summary"], self.menu_summary])
+            menu.append([["_wtf"], self.menu_wtf])
             menu.append([['default'], self.menu_completions])
 
         arg0 = self.event.message.args[0] if self.event.message.args else None

@@ -99,7 +99,7 @@ class GPTStatisticsMixin(GPTCommandProtocol):
             author=self.event.sender,
             cost=api_response.usage.total_cost,
             provider=self.provider,
-            # model_name=model_name
+            model_name=api_response.usage.model.name
         ).save()
 
     # UTILS

@@ -1,11 +1,18 @@
 from abc import abstractmethod, ABC
 from dataclasses import dataclass
 
-from apps.gpt.gpt_models.base import GPTCompletionModel, GPTVisionModel, GPTImageDrawModel, GPTVoiceRecognitionModel, \
-    GPTCompletionsVisionModel
+from apps.gpt.gpt_models.base import (
+    GPTCompletionModel,
+    GPTVisionModel,
+    GPTImageDrawModel,
+    GPTVoiceRecognitionModel,
+    GPTCompletionsVisionModel,
+    GPTModel
+)
 
 
 class GPTUsage(ABC):
+    model: GPTModel
 
     @property
     @abstractmethod

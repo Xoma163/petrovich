@@ -22,7 +22,7 @@ class GPTCompletionsFunctionality(GPTCommandProtocol):
         HelpTextArgument("(текстовый файл)", "общение с ботом с учётом текстового файла")
     ]
 
-    DEFAULT_SUMMARY_PROMPT = "Я пришлю тебе голосовое сообщение. Сделай саммари по нему, сократи и донеси суть, но не теряй важных деталей"
+    DEFAULT_WTF_PROMPT = "Я пришлю тебе голосовое сообщение. Сделай саммари по нему, сократи и донеси суть, но не теряй важных деталей"
 
     # MENU
 
@@ -35,7 +35,7 @@ class GPTCompletionsFunctionality(GPTCommandProtocol):
         rmi = self._completions(messages)
         return self.send_rmi(rmi)
 
-    def menu_summary(self):
+    def menu_wtf(self):
         message = self.event.raw['callback_query']['message']
 
         documents: list[DocumentAttachment] = self.event.get_all_attachments([DocumentAttachment])
@@ -50,7 +50,7 @@ class GPTCompletionsFunctionality(GPTCommandProtocol):
         if preprompt:
             history.add_message(GPTMessageRole.SYSTEM, preprompt)
 
-        history.add_message(GPTMessageRole.USER, self.DEFAULT_SUMMARY_PROMPT)
+        history.add_message(GPTMessageRole.USER, self.DEFAULT_WTF_PROMPT)
         history.add_message(GPTMessageRole.USER, text)
 
         rmi = self._completions(history)

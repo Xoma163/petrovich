@@ -49,8 +49,6 @@ class VoiceRecognition(AcceptExtraCommand):
 
     bot: TgBot
 
-
-
     @staticmethod
     def accept_extra(event: Event) -> bool:
         if event.has_voice_message or event.has_video_note:
@@ -100,7 +98,7 @@ class VoiceRecognition(AcceptExtraCommand):
                         author=self.event.sender,
                         cost=response.usage.total_cost,
                         provider=ChatGPTProvider(),
-                        # model_name=model_name
+                        model_name=response.usage.model.name
                     ).save()
 
                 answers.append(answer)
@@ -118,16 +116,21 @@ class VoiceRecognition(AcceptExtraCommand):
         """
         answer = answer if answer else "{пустой ответ}"
         keyboard = None
+
+        # Если в тексте более 200 символов, то появляется кнопка саммари
         if len(answer) > 200:
             answer = self.bot.get_quote_text(answer, expandable=True)
-            button = self.bot.get_button("Саммари", "gpt", ['_summary'])
+            button = self.bot.get_button("Саммари ", "gpt", ['_wtf'])
             keyboard = self.bot.get_inline_keyboard([button])
+
         # Если ответ слишком длинный - кладём в файл
+        rmi = ResponseMessageItem()
         if len(answer) > self.bot.MAX_MESSAGE_TEXT_LENGTH:
             document = wrap_text_in_document(answer, 'Транскрибация.html')
             answer = "Полная транскрибация в одном файле"
-            rmi = ResponseMessageItem(text=answer, attachments=[document], reply_to=self.event.message.id,
-                                      keyboard=keyboard)
-        else:
-            rmi = ResponseMessageItem(text=answer, reply_to=self.event.message.id, keyboard=keyboard)
+            rmi.attachments = [document]
+
+        rmi.text = answer
+        rmi.reply_to = self.event.message.id
+        rmi.keyboard = keyboard
         return rmi

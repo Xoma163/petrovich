@@ -33,12 +33,14 @@ class GPTVisionResponse(GPTCompletionsVisionResponse):
 
 @dataclass
 class GPTImageDrawResponse(GPTAPIResponse):
-    images_prompt: str
     usage: GPTImageDrawUsage
+
+    images_prompt: str
     images_bytes: list[bytes] | None = None
 
 
 @dataclass
 class GPTVoiceRecognitionResponse(GPTAPIResponse):
-    text: str
     usage: GPTVoiceRecognitionUsage
+
+    text: str
