@@ -60,9 +60,7 @@ class OpenAIAPI(GPTAPI, ABC):
 
 
         usage = GPTImageDrawUsage(
-            # ToDo: почему он думает, что мы ему засунем Type? Выше в аргументах явно указан ImageDrawModel
-            #  что ещё смешнее, если я переименую переменную и аргумент, то всё заработает явно хорошо
-            model=model,
+            model=model,  # noqa
             images_count=count,
         )
         return GPTImageDrawResponse(
@@ -126,3 +124,25 @@ class OpenAIAPI(GPTAPI, ABC):
             raise PError(error_str)
 
         return r_json
+
+    def _check_key(self, model, headers) -> bool:
+        from apps.gpt.messages.providers.chatgpt import ChatGPTMessages
+        from apps.gpt.messages.consts import GPTMessageRole
+
+        messages = ChatGPTMessages()
+        messages.add_message(GPTMessageRole.USER, "привет")
+        url = f"{self.base_url}/chat/completions"
+        json_data = {
+            "model": model,
+            "messages": messages.get_messages(),
+            "max_completion_tokens": 50
+        }
+        try:
+            response_json = self.do_request(
+                url,
+                json=json_data,
+                headers=headers,
+            )
+            return 'usage' in response_json
+        except Exception as e:
+            return False

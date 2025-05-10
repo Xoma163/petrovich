@@ -1,5 +1,3 @@
-from typing import Union
-
 from apps.bot.classes.bots.chat_activity import ChatActivity
 from apps.bot.classes.const.activities import ActivitiesEnum
 from apps.bot.classes.const.exceptions import PWarning
@@ -80,7 +78,7 @@ class GPTImageDrawFunctionality(GPTCommandProtocol):
         """
         Генерация изображения
         """
-        gpt_api: Union[GPTAPI, HasImageDraw] = self.provider.api_class(
+        gpt_api: GPTAPI | HasImageDraw = self.provider.api_class(
             api_key=self.get_api_key(),
             log_filter=self.event.log_filter
         )

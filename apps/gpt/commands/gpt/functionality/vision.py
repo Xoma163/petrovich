@@ -1,5 +1,3 @@
-from typing import Union
-
 from apps.bot.classes.bots.chat_activity import ChatActivity
 from apps.bot.classes.const.activities import ActivitiesEnum
 from apps.bot.classes.help_text import HelpTextArgument
@@ -41,7 +39,7 @@ class GPTVisionFunctionality(GPTCommandProtocol):
         Стандартное общение с моделью
         """
 
-        gpt_api: Union[GPTAPI, HasVision] = self.provider.api_class(
+        gpt_api: GPTAPI | HasVision = self.provider.api_class(
             api_key=self.get_api_key(),
             log_filter=self.event.log_filter
         )

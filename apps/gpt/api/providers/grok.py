@@ -25,6 +25,9 @@ class GrokAPI(
 
     base_url = "https://api.x.ai/v1"
 
+    def check_key(self) -> bool:
+        return self._check_key("grok-3-mini", self.headers)
+
     # ---------- completions ---------- #
 
     completions_url = f"{base_url}/chat/completions"
@@ -35,7 +38,7 @@ class GrokAPI(
             "messages": messages.get_messages()
         }
 
-        return self.do_completions_request(model, self.completions_url, json=payload, headers=self.headers)
+        return self.do_completions_request(model, self.completions_url, json=payload, headers=self.headers),  # noqa
 
     # ---------- vision ---------- #
 
@@ -46,7 +49,7 @@ class GrokAPI(
             "model": model.name,
             "messages": messages.get_messages()
         }
-        return self.do_vision_request(model, self.vision_url, json=payload, headers=self.headers)
+        return self.do_vision_request(model, self.vision_url, json=payload, headers=self.headers),  # noqa
 
     # ---------- image draw ---------- #
 
@@ -67,7 +70,7 @@ class GrokAPI(
             'response_format': 'b64_json',
         }
         return self.do_image_request(
-            model=model,
+            model=model,  # noqa
             url=self.image_draw_url,
             json=payload,
             count=count,

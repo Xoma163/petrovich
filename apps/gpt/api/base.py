@@ -36,6 +36,9 @@ class GPTAPI(API):
         Хост, куда будут делаться запросы API
         """
 
+    @abstractmethod
+    def check_key(self) -> bool:
+        pass
 
 class CompletionsAPIMixin(HasCompletions):
     @property

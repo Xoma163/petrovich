@@ -48,6 +48,9 @@ class ChatGPTAPI(
 
     base_url = "https://api.openai.com/v1"
 
+    def check_key(self) -> bool:
+        return self._check_key("gpt-4.1-nano", self.headers)
+
     # ---------- completions ---------- #
 
     completions_url = f"{base_url}/chat/completions"
@@ -63,7 +66,7 @@ class ChatGPTAPI(
             if payload['messages'][0]['role'] == GPTMessageRole.SYSTEM:
                 payload['messages'][0]['role'] = GPTMessageRole.USER
 
-        return self.do_completions_request(model, self.completions_url, json=payload, headers=self.headers)
+        return self.do_completions_request(model, self.completions_url, json=payload, headers=self.headers)  # noqa
 
     # ---------- vision ---------- #
 
@@ -74,7 +77,7 @@ class ChatGPTAPI(
             "model": model.name,
             "messages": messages.get_messages()
         }
-        return self.do_vision_request(model, self.vision_url, json=payload, headers=self.headers)
+        return self.do_vision_request(model, self.vision_url, json=payload, headers=self.headers)  # noqa
 
     # ---------- image draw ---------- #
 
@@ -96,7 +99,7 @@ class ChatGPTAPI(
         }
 
         return self.do_image_request(
-            model=model,
+            model=model,  # noqa
             url=self.image_draw_url,
             json=payload,
             count=count,
@@ -128,7 +131,7 @@ class ChatGPTAPI(
             'mask': ('image.png', io.BytesIO(mask), 'image/png'),
         }
         return self.do_image_request(
-            model,
+            model,  # noqa
             url=self.image_edit_url,
             data=payload,
             count=count,
@@ -160,7 +163,7 @@ class ChatGPTAPI(
         r_json = self.do_request(self.voice_recognition_url, data=data, files={'file': file}, headers=self.headers)
 
         usage = GPTVoiceRecognitionUsage(
-            model=model,
+            model=model,  # noqa
             voice_duration=Decimal(r_json['duration'])
         )
 

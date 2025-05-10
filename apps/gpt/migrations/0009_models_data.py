@@ -43,7 +43,7 @@ def add_models(apps, schema_editor):
                         completion_1m_token_cost=4, provider=provider),
         CompletionModel(name="claude-3-opus-latest", verbose_name="3 Opus", prompt_1m_token_cost=15,
                         completion_1m_token_cost=75, provider=provider),
-        CompletionModel(name="claude-3-haiku-latest", verbose_name="3 Haiku", prompt_1m_token_cost=0.25,
+        CompletionModel(name="claude-3-haiku-20240307", verbose_name="3 Haiku", prompt_1m_token_cost=0.25,
                         completion_1m_token_cost=1.25, provider=provider),
     ]
     CompletionModel.objects.bulk_create(models_to_create, ignore_conflicts=True)
@@ -57,7 +57,7 @@ def add_models(apps, schema_editor):
                     completion_1m_token_cost=4, provider=provider),
         VisionModel(name="claude-3-opus-latest", verbose_name="3 Opus", prompt_1m_token_cost=15,
                     completion_1m_token_cost=75, provider=provider),
-        VisionModel(name="claude-3-haiku-latest", verbose_name="3 Haiku", prompt_1m_token_cost=0.25,
+        VisionModel(name="claude-3-haiku-20240307", verbose_name="3 Haiku", prompt_1m_token_cost=0.25,
                     completion_1m_token_cost=1.25, provider=provider),
     ]
     VisionModel.objects.bulk_create(models_to_create, ignore_conflicts=True)

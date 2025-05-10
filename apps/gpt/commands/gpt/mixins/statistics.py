@@ -38,7 +38,6 @@ class GPTStatisticsMixin(GPTCommandProtocol):
         """
         self.check_pm()
 
-        # ToDo: check it later
         if self.event.message.is_key_provided({"ключ", "key"}):
             profiles_gpt_settings = ProfileGPTSettings.objects.filter(
                 provider=self.provider_model,

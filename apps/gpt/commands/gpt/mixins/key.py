@@ -1,6 +1,8 @@
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.help_text import HelpTextArgument
 from apps.bot.classes.messages.response_message import ResponseMessageItem, ResponseMessage
+from apps.gpt.api.base import GPTAPI
+from apps.gpt.models import ProfileGPTSettings
 from apps.gpt.protocols import GPTCommandProtocol
 from apps.gpt.utils import user_has_role_or_has_gpt_key
 
@@ -34,13 +36,9 @@ class GPTKeyMixin(GPTCommandProtocol):
         else:
             if self.event.is_from_chat:
                 self.bot.delete_messages(self.event.chat.chat_id, self.event.message.id)
-                # ToDo: проверять ключ методом в API?
-                profile_gpt_settings.set_key(arg)
-                profile_gpt_settings.save()
+                self._set_key(profile_gpt_settings, arg)
                 raise PWarning(self.KEEP_YOUR_SECRET_KEY_IN_SAFE)
-            # ToDo: проверять ключ методом в API?
-            profile_gpt_settings.set_key(arg)
-            profile_gpt_settings.save()
+            self._set_key(profile_gpt_settings, arg)
             rmi = ResponseMessageItem(text="Добавил новый ключ")
 
         return rmi
@@ -59,3 +57,15 @@ class GPTKeyMixin(GPTCommandProtocol):
                     command_name=self.bot.get_formatted_text_line(f'/{self.name}')
                 )
                 raise PWarning(error_msg)
+
+    # UTILS
+
+    def _set_key(self, profile_gpt_settings: ProfileGPTSettings, api_key: str):
+        gpt_api: GPTAPI = self.provider.api_class(
+            api_key=api_key,
+            log_filter=self.event.log_filter,
+        )
+        if not gpt_api.check_key():
+            raise PWarning("Невалидный ключ")
+        profile_gpt_settings.set_key(api_key)
+        profile_gpt_settings.save()

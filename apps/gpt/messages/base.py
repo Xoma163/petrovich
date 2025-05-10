@@ -27,7 +27,6 @@ class GPTMessages(ABC):
         self.messages: list[GPTMessage] = []
 
     def add_message(self, role: GPTMessageRole, text: str, images: list[str] | None = None):
-        # ToDo: непонятно почему здесь unexpected argument
         message = self.message_class(role, text, images)  # noqa
         self.messages.append(message)
 

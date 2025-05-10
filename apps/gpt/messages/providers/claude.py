@@ -34,7 +34,7 @@ class ClaudeMessages(GPTMessages):
     message_class: type[GPTMessage] = ClaudeMessage
 
     def get_messages(self) -> list[dict]:
-        _messages = [x.get_message() for x in self._messages]
+        _messages = [x.get_message() for x in self.messages]
         grouped = groupby(_messages, key=lambda x: x['role'])
         messages = []
         for role, groupped_messages in grouped:

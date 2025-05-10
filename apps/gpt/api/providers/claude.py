@@ -27,6 +27,26 @@ class ClaudeAPI(
             "anthropic-version": "2023-06-01"
         }
 
+    def check_key(self) -> bool:
+        from apps.gpt.messages.providers.claude import ClaudeMessages
+        from apps.gpt.messages.consts import GPTMessageRole
+
+        messages = ClaudeMessages()
+        messages.add_message(GPTMessageRole.USER, "привет")
+        url = f"{self.base_url}/messages"
+
+        json_data = {
+            "model": "claude-3-haiku-20240307",
+            "messages": messages.get_messages(),
+            "max_tokens": 50
+        }
+
+        try:
+            response_json = self.do_request(url, json=json_data)
+            return 'usage' in response_json
+        except Exception:
+            return False
+
     # ---------- base ---------- #
 
     base_url = "https://api.anthropic.com/v1"
@@ -61,7 +81,7 @@ class ClaudeAPI(
         r_json = self.do_request(self.completions_url, json=data)
 
         usage = GPTCompletionsUsage(
-            model=model,
+            model=model,  # noqa
             completion_tokens=r_json['usage']['output_tokens'],
             prompt_tokens=r_json['usage']['input_tokens'],
         )
@@ -95,7 +115,7 @@ class ClaudeAPI(
         r_json = self.do_request(self.completions_url, json=data)
 
         usage = GPTVisionUsage(
-            model=model,
+            model=model,  # noqa
             completion_tokens=r_json['usage']['output_tokens'],
             prompt_tokens=r_json['usage']['input_tokens'],
         )
