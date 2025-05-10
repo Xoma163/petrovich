@@ -38,7 +38,7 @@ class GrokAPI(
             "messages": messages.get_messages()
         }
 
-        return self.do_completions_request(model, self.completions_url, json=payload, headers=self.headers),  # noqa
+        return self.do_completions_request(model, self.completions_url, json=payload, headers=self.headers)  # noqa
 
     # ---------- vision ---------- #
 
@@ -49,7 +49,7 @@ class GrokAPI(
             "model": model.name,
             "messages": messages.get_messages()
         }
-        return self.do_vision_request(model, self.vision_url, json=payload, headers=self.headers),  # noqa
+        return self.do_vision_request(model, self.vision_url, json=payload, headers=self.headers)  # noqa
 
     # ---------- image draw ---------- #
 
