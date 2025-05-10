@@ -55,7 +55,7 @@ jobs:
           OPENAI_KEY: ''
           REDIS_URL: 'redis://127.0.0.1:6379/1'
           SENTRY_URL: ''
-          FERNET_SECRET_KEY: ''
+          FERNET_SECRET_KEY: '8wfAT-WwL8AeRkttrtzeduEKZ9x9zjRDLIPrsVuaVRA='
         run: |
           python manage.py test
       - name: Deploy on production
