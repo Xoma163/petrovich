@@ -2,7 +2,7 @@ from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.help_text import HelpTextArgument
 from apps.bot.classes.messages.response_message import ResponseMessageItem, ResponseMessage
-from apps.gpt.models import GPTSettings
+from apps.gpt.models import ProfileGPTSettings
 from apps.gpt.protocols import GPTCommandProtocol
 
 
@@ -28,7 +28,8 @@ class GPTKeyMixin(GPTCommandProtocol):
 
         gpt_settings = getattr(self.event.sender, "gpt_settings", None)
         if not gpt_settings:
-            gpt_settings = GPTSettings(profile=self.event.sender)
+            # ToDo: test
+            gpt_settings = ProfileGPTSettings(profile=self.event.sender)
 
         if arg.lower() == "удалить":
             setattr(gpt_settings, key_field_name, "")

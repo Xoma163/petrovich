@@ -2,8 +2,6 @@ from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.utils.proxy import get_proxies
 from apps.gpt.api.base import GPTAPI, CompletionsAPIMixin, VisionAPIMixin
 from apps.gpt.api.responses import GPTVisionResponse, GPTCompletionsResponse
-from apps.gpt.gpt_models.base import GPTModels, GPTVisionModel, GPTCompletionModel
-from apps.gpt.gpt_models.providers.claude import ClaudeModels, ClaudeVisionModels, ClaudeCompletionModels
 from apps.gpt.messages.base import GPTMessages
 from apps.gpt.messages.consts import GPTMessageRole
 from apps.gpt.usage import GPTCompletionsUsage, GPTVisionUsage
@@ -25,9 +23,6 @@ class ClaudeAPI(
 
     base_url = "https://api.anthropic.com/v1"
     api_key_env_name = "CLAUDE_API_KEY"
-    gpt_settings_key_field = "claude_key"
-    gpt_settings_model_field = "claude_model"
-    models: type[GPTModels] = ClaudeModels
 
     def do_request(self, url, **kwargs) -> dict:
         r_json = self.requests.post(url, headers=self.headers, proxies=get_proxies(), **kwargs).json()
@@ -40,7 +35,6 @@ class ClaudeAPI(
     # ---------- completions ---------- #
 
     completions_url = f"{base_url}/messages"
-    default_completions_model: GPTCompletionModel = ClaudeCompletionModels.claude_3_5_haiku
 
     def completions(self, messages: GPTMessages) -> GPTCompletionsResponse:
         model = self.get_completions_model()
@@ -77,10 +71,6 @@ class ClaudeAPI(
     # ---------- vision ---------- #
 
     vision_url = f"{base_url}/chat/completions"
-    default_vision_model: GPTVisionModel = ClaudeVisionModels.claude_3_5_haiku_vision
-
-    def get_vision_model(self) -> GPTVisionModel:
-        return self.default_vision_model
 
     def vision(self, messages: GPTMessages) -> GPTVisionResponse:
         model = self.get_vision_model()

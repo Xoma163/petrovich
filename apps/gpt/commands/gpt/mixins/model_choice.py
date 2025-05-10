@@ -2,8 +2,7 @@ from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.help_text import HelpTextArgument
 from apps.bot.classes.messages.response_message import ResponseMessageItem
 from apps.gpt.api.base import CompletionsAPIMixin
-from apps.gpt.gpt_models.base import GPTCompletionModel
-from apps.gpt.models import GPTSettings
+from apps.gpt.models import ProfileGPTSettings
 from apps.gpt.protocols import GPTCommandProtocol
 
 
@@ -45,17 +44,19 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
 
         gpt_settings = getattr(self.event.sender, "gpt_settings", None)
         if not gpt_settings:
-            gpt_settings = GPTSettings(profile=self.event.sender)
+            gpt_settings = ProfileGPTSettings(profile=self.event.sender)
 
         settings_model_field = self.provider.gpt_settings_model_field
 
         if len(self.event.message.args) < 2:
             gpt_model_str = getattr(gpt_settings, settings_model_field)
             if gpt_model_str:
+                # fixme
                 gpt_model = self.provider.models.get_model_by_name(gpt_model_str, GPTCompletionModel)
                 answer = f"Текущая модель - {self.bot.get_formatted_text_line(gpt_model.verbose_name)}"
             else:
                 if isinstance(self.provider.api_class, CompletionsAPIMixin):
+                    # fixme
                     default_model = self.bot.get_formatted_text_line(
                         self.provider.api_class.default_completions_model.name)
                     answer = f"Модель не установлена. Используется модель по умолчанию - {default_model}"
@@ -65,9 +66,8 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
 
         new_model_str = self.event.message.args[1]
 
-        gpt_models = self.provider.models
-
         try:
+            # fixme
             gpt_model = gpt_models.get_model_by_name(new_model_str, GPTCompletionModel)
         except ValueError:
             button = self.bot.get_button('Список моделей', command=self.name, args=['модели'])

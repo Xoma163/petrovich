@@ -15,19 +15,6 @@ from apps.gpt.api.responses import (
     GPTVoiceRecognitionResponse
 )
 from apps.gpt.enums import GPTImageFormat, GPTImageQuality
-from apps.gpt.gpt_models.base import (
-    GPTCompletionModel,
-    GPTVisionModel,
-    GPTImageDrawModel,
-    GPTVoiceRecognitionModel
-)
-from apps.gpt.gpt_models.providers.chatgpt import (
-    ChatGPTCompletionModels,
-    ChatGPTVisionModels,
-    ChatGPTImageDrawModels,
-    ChatGPTVoiceRecognitionModels,
-    ChatGPTModels
-)
 from apps.gpt.messages.base import GPTMessages
 from apps.gpt.messages.consts import GPTMessageRole
 from apps.gpt.usage import (
@@ -54,13 +41,9 @@ class ChatGPTAPI(
 
     base_url = "https://api.openai.com/v1"
     api_key_env_name = "OPENAI_KEY"
-    gpt_settings_key_field = "chat_gpt_key"
-    gpt_settings_model_field = "chat_gpt_model"
-    models = ChatGPTModels
 
     # ---------- completions ---------- #
     completions_url = f"{base_url}/chat/completions"
-    default_completions_model: GPTCompletionModel = ChatGPTCompletionModels.O4_MINI
 
     def completions(self, messages: GPTMessages) -> GPTCompletionsResponse:
         model = self.get_completions_model()
@@ -70,6 +53,7 @@ class ChatGPTAPI(
         }
 
         # Костыль, так как некоторые модели "o" не умеют в system role
+        # ToDo: как-то обыграть это тут
         if model in [ChatGPTModels.O1_MINI]:
             if payload['messages'][0]['role'] == GPTMessageRole.SYSTEM:
                 payload['messages'][0]['role'] = GPTMessageRole.USER
@@ -79,10 +63,7 @@ class ChatGPTAPI(
     # ---------- vision ---------- #
 
     vision_url = completions_url
-    default_vision_model: GPTVisionModel = ChatGPTVisionModels.GPT_4_O
 
-    def get_vision_model(self) -> GPTVisionModel:
-        return self.default_vision_model
 
     def vision(self, messages: GPTMessages) -> GPTVisionResponse:
         model = self.get_vision_model()
@@ -95,8 +76,8 @@ class ChatGPTAPI(
     # ---------- image draw ---------- #
 
     image_draw_url = f"{base_url}/images/generations"
-    default_image_draw_model: GPTImageDrawModel = ChatGPTImageDrawModels.DALLE_3_SQUARE_HD
 
+    # ToDo: возможно уедет в base
     def get_image_draw_model(self, gpt_image_format: GPTImageFormat, quality: GPTImageQuality) -> GPTImageDrawModel:
         models_map = {
             (GPTImageFormat.SQUARE, GPTImageQuality.STANDARD): ChatGPTImageDrawModels.DALLE_3_SQUARE_STANDART,
@@ -138,10 +119,6 @@ class ChatGPTAPI(
     # ---------- image edit ---------- #
 
     image_edit_url = f"{base_url}/images/edits"
-    default_image_edit_model: GPTImageDrawModel = ChatGPTImageDrawModels.DALLE_2_BIG_SQUARE
-
-    def get_image_edit_model(self) -> GPTImageDrawModel:
-        return self.default_image_edit_model
 
     def edit_image(
             self,
@@ -179,11 +156,6 @@ class ChatGPTAPI(
     @property
     def voice_recognition_url(self) -> str:
         return f"{self.base_url}/audio/transcriptions"
-
-    default_voice_recognition_model: GPTVoiceRecognitionModel = ChatGPTVoiceRecognitionModels.WHISPER
-
-    def get_voice_recognition_model(self) -> GPTVoiceRecognitionModel:
-        return self.default_voice_recognition_model
 
     def voice_recognition(self, audio_ext: str, content: bytes) -> GPTVoiceRecognitionResponse:
         model = self.get_voice_recognition_model()

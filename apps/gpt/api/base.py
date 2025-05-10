@@ -10,14 +10,14 @@ from apps.gpt.api.responses import (
     GPTVoiceRecognitionResponse
 )
 from apps.gpt.enums import GPTImageFormat, GPTImageQuality
-from apps.gpt.gpt_models.base import (
-    GPTCompletionModel,
-    GPTImageDrawModel,
-    GPTVisionModel,
-    GPTVoiceRecognitionModel,
-    GPTModels
-)
 from apps.gpt.messages.base import GPTMessages
+from apps.gpt.models import (
+    CompletionModel,
+    VisionModel,
+    ImageDrawModel,
+    ImageEditModel,
+    VoiceRecognitionModel
+)
 from apps.gpt.protocols import (
     HasCompletions,
     HasVision,
@@ -46,6 +46,7 @@ class GPTAPI(API):
         Получение ключа, если он проставлен пользователем, иначе общий ключ, если есть доступ, иначе ошибка
         """
         if gpt_settings := getattr(self.sender, "gpt_settings", None):
+            # ToDo:
             user_key = getattr(gpt_settings, self.gpt_settings_key_field)
             if user_key:
                 return user_key
@@ -61,38 +62,6 @@ class GPTAPI(API):
         """
         pass
 
-    @property
-    @abstractmethod
-    def gpt_settings_key_field(self) -> str:
-        """
-        Имя поля в котором хранится ключ пользователя
-        """
-        pass
-
-    @property
-    @abstractmethod
-    def gpt_settings_model_field(self) -> str:
-        """
-        Имя поля в котором хранится выбранная пользователем модель
-        """
-        pass
-
-    @property
-    @abstractmethod
-    def models(self) -> type[GPTModels]:
-        """
-        Список всех моделей
-        """
-        pass
-
-    # @abstractmethod
-    # def do_request(self, url, **kwargs) -> dict:
-    #     """
-    #     Выполнение любого запроса.
-    #     Должно выполняться через self.request. ...
-    #     """
-    #     pass
-
 
 class CompletionsAPIMixin(HasCompletions):
     @property
@@ -100,16 +69,14 @@ class CompletionsAPIMixin(HasCompletions):
     def completions_url(self) -> str:
         pass
 
-    @property
-    @abstractmethod
-    def default_completions_model(self) -> GPTCompletionModel:
-        pass
-
-    def get_completions_model(self) -> GPTCompletionModel:
+    # ToDo: сделать метод для всех миксинов
+    def get_completions_model(self) -> CompletionModel:
+        # ToDo: поправить получение модели
         if gpt_settings := getattr(self.sender, "gpt_settings", None):  # noqa
             if user_model_str := getattr(gpt_settings, self.gpt_settings_model_field):  # noqa
                 return self.models.get_model_by_name(user_model_str, GPTCompletionModel)  # noqa
 
+        # ToDo: поправить получение стандартной модели
         return self.default_completions_model
 
     @abstractmethod
@@ -124,13 +91,8 @@ class VisionAPIMixin(HasVision):
     def vision_url(self) -> str:
         pass
 
-    @property
     @abstractmethod
-    def default_vision_model(self) -> GPTVisionModel:
-        pass
-
-    @abstractmethod
-    def get_vision_model(self) -> GPTVisionModel:
+    def get_vision_model(self) -> VisionModel:
         pass
 
     @abstractmethod
@@ -144,13 +106,8 @@ class ImageDrawAPIMixin(HasImageDraw):
     def image_draw_url(self) -> str:
         pass
 
-    @property
     @abstractmethod
-    def default_image_draw_model(self) -> GPTImageDrawModel:
-        pass
-
-    @abstractmethod
-    def get_image_draw_model(self, gpt_image_format: GPTImageFormat, quality: GPTImageQuality) -> GPTImageDrawModel:
+    def get_image_draw_model(self, gpt_image_format: GPTImageFormat, quality: GPTImageQuality) -> ImageDrawModel:
         pass
 
     @abstractmethod
@@ -170,13 +127,8 @@ class ImageEditAPIMixin(HasImageEdit):
     def image_edit_url(self) -> str:
         pass
 
-    @property
     @abstractmethod
-    def default_image_edit_model(self) -> GPTImageDrawModel:
-        pass
-
-    @abstractmethod
-    def get_image_edit_model(self) -> GPTImageDrawModel:
+    def get_image_edit_model(self) -> ImageEditModel:
         pass
 
     @abstractmethod
@@ -197,13 +149,8 @@ class VoiceRecognitionAPIMixin(HasVoiceRecognition):
     def voice_recognition_url(self) -> str:
         pass
 
-    @property
     @abstractmethod
-    def default_voice_recognition_model(self) -> GPTVoiceRecognitionModel:
-        pass
-
-    @abstractmethod
-    def get_voice_recognition_model(self) -> GPTVoiceRecognitionModel:
+    def get_voice_recognition_model(self) -> VoiceRecognitionModel:
         pass
 
     @abstractmethod

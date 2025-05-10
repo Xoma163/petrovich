@@ -16,11 +16,11 @@ from apps.gpt.api.responses import (
     GPTVisionResponse,
     GPTImageDrawResponse
 )
-from apps.gpt.gpt_models.base import (
-    GPTCompletionModel,
-    GPTCompletionsVisionModel,
-    GPTVisionModel,
-    GPTImageDrawModel
+from apps.gpt.models import (
+    CompletionModel,
+    VisionModel,
+    ImageDrawModel,
+    GPTCompletionsVisionModel
 )
 from apps.gpt.usage import (
     GPTCompletionsUsage,
@@ -40,13 +40,13 @@ class OpenAIAPI(GPTAPI, ABC):
         'model_not_found': "Модель не существует или у вас нет к ней доступа"
     }
 
-    def do_completions_request(self, model: GPTCompletionModel, url, **kwargs) -> GPTCompletionsResponse:
+    def do_completions_request(self, model: CompletionModel, url, **kwargs) -> GPTCompletionsResponse:
         return self._do_request(GPTCompletionsUsage, GPTCompletionsResponse, model, url, **kwargs)  # noqa
 
-    def do_vision_request(self, model: GPTVisionModel, url, **kwargs) -> GPTVisionResponse:
+    def do_vision_request(self, model: VisionModel, url, **kwargs) -> GPTVisionResponse:
         return self._do_request(GPTVisionUsage, GPTVisionResponse, model, url, **kwargs)  # noqa
 
-    def do_image_request(self, model: GPTImageDrawModel, count: int, url: str, **kwargs) -> GPTImageDrawResponse:
+    def do_image_request(self, model: ImageDrawModel, count: int, url: str, **kwargs) -> GPTImageDrawResponse:
         if count > 1:
             with ThreadPoolExecutor() as executor:
                 futures = [executor.submit(self.fetch_image_request, url, **kwargs) for _ in range(count)]
@@ -58,7 +58,10 @@ class OpenAIAPI(GPTAPI, ABC):
             images_bytes = [image_bytes]
             images_prompt = prompt
 
+
         usage = GPTImageDrawUsage(
+            # ToDo: почему он думает, что мы ему засунем Type? Выше в аргументах явно указан ImageDrawModel
+            #  что ещё смешнее, если я переименую переменную и аргумент, то всё заработает явно хорошо
             model=model,
             images_count=count,
         )

@@ -2,68 +2,226 @@ from django.db import models
 
 from apps.bot.models import Profile, Chat
 from apps.gpt.enums import GPTProviderEnum
-from apps.gpt.providers.base import GPTProvider
-from apps.gpt.usage import GPTUsage as GPTAPIUsage
 from apps.service.mixins import TimeStampModelMixin
 
 
-# Create your models here.
-
-class ProviderModelMixin(models.Model):
-    CHATGPT = 'chatgpt'
-    CLAUDE = 'claude'
-    GROK = 'grok'
-    PROVIDER_CHOICES = (
-        (CHATGPT, 'СhatGPT'),
-        (CLAUDE, 'Claude'),
-        (GROK, 'Grok'),
-    )
-
-    provider = models.CharField(
+class Provider(models.Model):
+    name = models.CharField(
         'Провайдер',
         max_length=10,
         choices=[(provider.value, provider.name) for provider in GPTProviderEnum],  # noqa
+    )
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = "Провайдер"
+        verbose_name_plural = "Провайдеры"
+
+
+class Preprompt(TimeStampModelMixin):
+    provider = models.ForeignKey(Provider, models.CASCADE, verbose_name="Провайдер")
+
+    author = models.ForeignKey(Profile, models.CASCADE, verbose_name="Пользователь", null=True, blank=True)
+    chat = models.ForeignKey(Chat, models.CASCADE, verbose_name="Чат", null=True, blank=True)
+    text = models.TextField("Текст препромпта", blank=True)
+
+    class Meta:
+        verbose_name = "Препромпт"
+        verbose_name_plural = "Препромпты"
+        unique_together = ('author', 'chat', 'provider')
+
+
+class Usage(TimeStampModelMixin):
+    provider = models.ForeignKey(Provider, models.CASCADE, verbose_name="Провайдер")
+
+    author = models.ForeignKey(Profile, models.CASCADE, verbose_name="Пользователь", null=True, db_index=True)
+    cost = models.DecimalField("Стоимость запроса", max_digits=8, decimal_places=4)
+    model_name = models.CharField("Название модели", blank=True, max_length=256)
+
+    class Meta:
+        verbose_name = "Использование"
+        verbose_name_plural = "Использования"
+
+
+class GPTModel(models.Model):
+    provider = models.ForeignKey(Provider, models.CASCADE, verbose_name="Провайдер")
+
+    name = models.CharField(max_length=256, verbose_name="Название модели в API")
+    verbose_name = models.CharField(max_length=256, verbose_name="Название модели для пользователя")
+    is_default = models.BooleanField(default=False)
+
+    def save(self, *args, **kwargs):
+        # Если модель сохраняется с полем is_default, значит сбрасываем всем остальным поле default
+        if self.is_default:
+            self.__class__.objects \
+                .filter(provider=self.provider, is_default=True) \
+                .exclude(id=self.id).update(is_default=False)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        abstract = True
+
+
+class GPTCompletionsVisionModel(GPTModel):
+    prompt_1m_token_cost = models.DecimalField(
+        "Стоимость за 1млн. входных токенов",
+        max_digits=8,
+        decimal_places=4,
+    )
+    completion_1m_token_cost = models.DecimalField(
+        "Стоимость за 1млн. выходных токенов",
+        max_digits=8,
+        decimal_places=4,
     )
 
     class Meta:
         abstract = True
 
 
-class Preprompt(TimeStampModelMixin, ProviderModelMixin):
-    author = models.ForeignKey(Profile, models.CASCADE, verbose_name="Пользователь", null=True, blank=True)
-    chat = models.ForeignKey(Chat, models.CASCADE, verbose_name="Чат", null=True, blank=True)
-    text = models.TextField("ChatGPT preprompt", default="", blank=True)
+class CompletionModel(GPTCompletionsVisionModel):
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['name'], name='unique_name_completion_model')
+        ]
+
+        verbose_name = "Модель обработки текста"
+        verbose_name_plural = "Модели обработки текста"
+
+
+class VisionModel(GPTCompletionsVisionModel):
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['name'], name='unique_name_vision_model')
+        ]
+
+        verbose_name = "Модель обработки изображений"
+        verbose_name_plural = "Модели обработки изображений"
+
+
+class GPTIMageModel(GPTModel):
+    width = models.PositiveSmallIntegerField("Ширина картинки")
+    height = models.PositiveSmallIntegerField("Высота картинки")
+
+    @property
+    def size(self) -> str:
+        return f'{self.width}x{self.height}'
 
     class Meta:
-        verbose_name = "GPT препромпт"
-        verbose_name_plural = "GPT препромпты"
-        unique_together = ('author', 'chat', 'provider')
+        abstract = True
 
 
-class Usage(TimeStampModelMixin, ProviderModelMixin):
-    author = models.ForeignKey(Profile, models.CASCADE, verbose_name="Пользователь", null=True, db_index=True)
-    cost = models.FloatField("Стоимость запроса", default=0)
-    cost = models.DecimalField("Стоимость запроса", max_digits=4, decimal_places=2, default=0)
-    model_name = models.CharField("Название модели", blank=True, max_length=128)
-
-    class Meta:
-        verbose_name = "GPT использование"
-        verbose_name_plural = "GPT использования"
-
-
-class GPTSettings(TimeStampModelMixin):
-    profile = models.OneToOneField(Profile, models.CASCADE, verbose_name="Пользователь", related_name="gpt_settings")
-
-    # Если указан, то будет использоваться он, иначе - общий
-    chat_gpt_key = models.CharField("Ключ ChatGPT", max_length=256, blank=True)
-    chat_gpt_model = models.CharField("Модель ChatGPT", max_length=64, blank=True)
-
-    claude_key = models.CharField("Ключ Claude", max_length=256, blank=True)
-    claude_model = models.CharField("Модель Claude", max_length=64, blank=True)
-
-    grok_key = models.CharField("Ключ Grok", max_length=256, blank=True)
-    grok_model = models.CharField("Модель Grok", max_length=64, blank=True)
+class ImageDrawModel(GPTIMageModel):
+    image_cost = models.DecimalField(
+        "Стоимость генерации одной картинки",
+        max_digits=8,
+        decimal_places=4
+    )
+    quality = models.CharField("Название качества модели в API", max_length=32)
 
     class Meta:
-        verbose_name = "GPT настройка"
-        verbose_name_plural = "GPT настройки"
+        constraints = [
+            models.UniqueConstraint(
+                fields=['name', 'width', 'height', 'quality'],
+                name='unique_name_width_height_quality_img_draw'
+            )
+        ]
+
+        verbose_name = "Модель рисования изображений"
+        verbose_name_plural = "Модели рисования изображений"
+
+
+class ImageEditModel(GPTIMageModel):
+    image_cost = models.DecimalField(
+        "Стоимость редактирования одной картинки",
+        max_digits=8,
+        decimal_places=4
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['name', 'width', 'height'], name='unique_name_width_height_image_edit')
+        ]
+
+        verbose_name = "Модель редактирования изображений"
+        verbose_name_plural = "Модели редактирования изображений"
+
+
+class VoiceRecognitionModel(GPTModel):
+    voice_recognition_1_min_cost = models.DecimalField(
+        "Стоимость за 1 минуту распознования голоса",
+        max_digits=8,
+        decimal_places=4,
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['name'], name='unique_name_voice_recognition_model')
+        ]
+
+        verbose_name = "Модель распознования голоса"
+        verbose_name_plural = "Модели распознования голоса"
+
+
+class ProfileGPTSettings(TimeStampModelMixin):
+    provider = models.ForeignKey(Provider, models.CASCADE, verbose_name="Провайдер")
+
+    profile = models.ForeignKey(
+        Profile,
+        models.CASCADE,
+        verbose_name="Профиль",
+        related_name="gpt_settings"
+    )
+    # ToDo: шифровать и дешифровать
+    key = models.CharField(
+        "Ключ провайдера",
+        max_length=256,
+        blank=True
+    )
+    completions_model = models.ForeignKey(
+        CompletionModel,
+        models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Модель обработки текста",
+
+    )
+    vision_model = models.ForeignKey(
+        VisionModel,
+        models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Модель обработки изображений",
+    )
+    image_draw_model = models.ForeignKey(
+        ImageDrawModel,
+        models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Модель рисования изображений",
+    )
+    image_edit_model = models.ForeignKey(
+        ImageEditModel,
+        models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Модель редактирования изображений",
+    )
+    voice_recognition_model = models.ForeignKey(
+        VoiceRecognitionModel,
+        models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Модель распознования голоса",
+    )
+
+    def __str__(self):
+        return str(self.profile)
+
+    class Meta:
+        verbose_name = "Настройка пользователя"
+        verbose_name_plural = "Настройки пользователя"
