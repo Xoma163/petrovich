@@ -206,7 +206,7 @@ class GPTCommand(
         """
         provider = self._get_provider_model()
         gpt_settings = self.event.sender.gpt_settings
-        profile_gpt_settings, created = gpt_settings.get_or_create(
+        profile_gpt_settings, _ = gpt_settings.get_or_create(
             provider=provider,
             profile=self.event.sender,
         )

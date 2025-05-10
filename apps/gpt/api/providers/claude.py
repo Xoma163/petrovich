@@ -29,7 +29,6 @@ class ClaudeAPI(
 
     def check_key(self) -> bool:
         from apps.gpt.messages.providers.claude import ClaudeMessages
-        from apps.gpt.messages.consts import GPTMessageRole
 
         messages = ClaudeMessages()
         messages.add_message(GPTMessageRole.USER, "привет")

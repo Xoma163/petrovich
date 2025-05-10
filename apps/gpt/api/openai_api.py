@@ -144,5 +144,5 @@ class OpenAIAPI(GPTAPI, ABC):
                 headers=headers,
             )
             return 'usage' in response_json
-        except Exception as e:
+        except Exception:
             return False
