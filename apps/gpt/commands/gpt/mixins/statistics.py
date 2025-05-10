@@ -39,11 +39,14 @@ class GPTStatisticsMixin(GPTCommandProtocol):
         self.check_pm()
 
         if self.event.message.is_key_provided({"ключ", "key"}):
-            profiles_gpt_settings = ProfileGPTSettings.objects.filter(
-                provider=self.provider_model,
-                key=self.get_profile_gpt_settings().key
-            )
-            profiles = list(Profile.objects.filter(gpt_settings__in=profiles_gpt_settings))
+            profiles_gpt_settings = ProfileGPTSettings.objects \
+                .filter(provider=self.provider_model) \
+                .exclude(key="")
+            profiles_with_same_key = [
+                x for x in profiles_gpt_settings
+                if x.get_key() == self.get_profile_gpt_settings().get_key()
+            ]
+            profiles = list(Profile.objects.filter(gpt_settings__in=profiles_with_same_key))
         else:
             profiles = [self.event.sender]
 
