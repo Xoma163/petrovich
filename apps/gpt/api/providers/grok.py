@@ -1,8 +1,12 @@
 from apps.gpt.api.base import CompletionsAPIMixin, VisionAPIMixin, ImageDrawAPIMixin
 from apps.gpt.api.openai_api import OpenAIAPI
 from apps.gpt.api.responses import GPTVisionResponse, GPTImageDrawResponse, GPTCompletionsResponse
-from apps.gpt.enums import GPTImageFormat, GPTImageQuality
 from apps.gpt.messages.base import GPTMessages
+from apps.gpt.models import (
+    CompletionsModel,
+    VisionModel,
+    ImageDrawModel
+)
 
 
 class GrokAPI(
@@ -20,14 +24,12 @@ class GrokAPI(
     # ---------- base ---------- #
 
     base_url = "https://api.x.ai/v1"
-    api_key_env_name = "GROK_API_KEY"
 
     # ---------- completions ---------- #
 
     completions_url = f"{base_url}/chat/completions"
 
-    def completions(self, messages: GPTMessages) -> GPTCompletionsResponse:
-        model = self.get_completions_model()
+    def completions(self, messages: GPTMessages, model: CompletionsModel) -> GPTCompletionsResponse:
         payload = {
             "model": model.name,
             "messages": messages.get_messages()
@@ -39,8 +41,7 @@ class GrokAPI(
 
     vision_url = f"{base_url}/chat/completions"
 
-    def vision(self, messages: GPTMessages) -> GPTVisionResponse:
-        model = self.get_vision_model()
+    def vision(self, messages: GPTMessages, model: VisionModel) -> GPTVisionResponse:
         payload = {
             "model": model.name,
             "messages": messages.get_messages()
@@ -54,11 +55,10 @@ class GrokAPI(
     def draw_image(
             self,
             prompt: str,
-            image_format: GPTImageFormat,
-            quality: GPTImageQuality,
+            model: ImageDrawModel,
             count: int = 1,  # quality are not supported by xAI API at the moment.
+
     ) -> GPTImageDrawResponse:
-        model = self.get_image_draw_model(image_format, quality)
         payload = {
             'model': model.name,
             'prompt': prompt,

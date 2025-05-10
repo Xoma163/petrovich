@@ -10,6 +10,7 @@ from apps.gpt.api.base import GPTAPI
 from apps.gpt.api.responses import GPTCompletionsResponse
 from apps.gpt.messages.base import GPTMessages
 from apps.gpt.messages.consts import GPTMessageRole
+from apps.gpt.models import CompletionsModel, VoiceRecognitionModel
 from apps.gpt.protocols import HasCompletions, GPTCommandProtocol
 
 logger = logging.getLogger()
@@ -32,7 +33,7 @@ class GPTCompletionsFunctionality(GPTCommandProtocol):
         Вызов истории и если нужно использовть vision модель, добавление картинок
         """
         messages = self.get_dialog()
-        rmi = self._completions(messages)
+        rmi = self.completions(messages)
         return self.send_rmi(rmi)
 
     def menu_wtf(self):
@@ -53,26 +54,40 @@ class GPTCompletionsFunctionality(GPTCommandProtocol):
         history.add_message(GPTMessageRole.USER, self.DEFAULT_WTF_PROMPT)
         history.add_message(GPTMessageRole.USER, text)
 
-        rmi = self._completions(history)
+        rmi = self.completions(history)
         return self.send_rmi(rmi)
 
     # HANDLERS
 
-    def _completions(self, messages: GPTMessages) -> ResponseMessageItem:
+    def completions(self, messages: GPTMessages) -> ResponseMessageItem:
         """
         Стандартное общение с моделью
         """
 
         gpt_api: Union[GPTAPI, HasCompletions] = self.provider.api_class(
+            api_key=self.get_api_key(),
             log_filter=self.event.log_filter,
-            sender=self.event.sender
         )
 
         with ChatActivity(self.bot, ActivitiesEnum.TYPING, self.event.peer_id):
-            response: GPTCompletionsResponse = gpt_api.completions(messages)
+            response: GPTCompletionsResponse = gpt_api.completions(
+                messages,
+                model=self.get_completions_model()
+            )
 
         self.add_statistics(api_response=response)
 
         return self.get_completions_rmi(response.text)
 
+    # COMMON UTILS
+
+    def get_completions_model(self) -> CompletionsModel:
+        return self.get_model(CompletionsModel, "completions_model")
+
+    def get_default_completions_model(self) -> CompletionsModel:
+        return self.get_default_model(CompletionsModel)
+
     # UTILS
+
+    def get_voice_recognition_model(self) -> VoiceRecognitionModel:
+        return self.get_model(VoiceRecognitionModel, "voice_recognition_model")

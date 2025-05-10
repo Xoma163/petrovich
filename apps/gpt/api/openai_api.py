@@ -17,7 +17,7 @@ from apps.gpt.api.responses import (
     GPTImageDrawResponse
 )
 from apps.gpt.models import (
-    CompletionModel,
+    CompletionsModel,
     VisionModel,
     ImageDrawModel,
     GPTCompletionsVisionModel
@@ -40,7 +40,7 @@ class OpenAIAPI(GPTAPI, ABC):
         'model_not_found': "Модель не существует или у вас нет к ней доступа"
     }
 
-    def do_completions_request(self, model: CompletionModel, url, **kwargs) -> GPTCompletionsResponse:
+    def do_completions_request(self, model: CompletionsModel, url, **kwargs) -> GPTCompletionsResponse:
         return self._do_request(GPTCompletionsUsage, GPTCompletionsResponse, model, url, **kwargs)  # noqa
 
     def do_vision_request(self, model: VisionModel, url, **kwargs) -> GPTVisionResponse:
@@ -114,7 +114,7 @@ class OpenAIAPI(GPTAPI, ABC):
 
         if error := r_json.get('error'):
             code = error.get('code')
-            error_str = self.ERRORS_MAP.get(code, "Какая-то ошибка API")
+            error_str = self.ERRORS_MAP.get(code, "Какая-то ошибка OpenAI API")
 
             if code == "rate_limit_exceeded":
                 message = error.get('message')

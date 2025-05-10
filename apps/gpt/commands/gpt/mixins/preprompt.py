@@ -47,7 +47,7 @@ class GPTPrepromptMixin(GPTCommandProtocol):
         Обработка препромптов
         """
 
-        q &= Q(provider=self.provider.name)
+        q &= Q(provider=self.provider_model)
 
         if len(self.event.message.args) > args_slice_index:
             # удалить
@@ -78,14 +78,15 @@ class GPTPrepromptMixin(GPTCommandProtocol):
         Получить препромпт под текущую ситуацию (персональный в чате,в чате,в лс)
         """
 
+
         if chat:
             variants = [
-                Q(author=sender, chat=chat, provider=self.provider.name),
-                Q(author=None, chat=chat, provider=self.provider.name),
+                Q(author=sender, chat=chat, provider=self.provider_model),
+                Q(author=None, chat=chat, provider=self.provider_model),
             ]
         else:
             variants = [
-                Q(author=sender, chat=None, provider=self.provider.name),
+                Q(author=sender, chat=None, provider=self.provider_model),
             ]
 
         for q in variants:

@@ -1,13 +1,15 @@
+from typing import Union
+
 from apps.bot.classes.bots.chat_activity import ChatActivity
 from apps.bot.classes.const.activities import ActivitiesEnum
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.help_text import HelpTextArgument, HelpTextKey
-from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessageItem
-from apps.bot.utils.utils import convert_jpg_to_png, get_transparent_rgba_png, crop_image_to_square
+from apps.gpt.api.base import GPTAPI
 from apps.gpt.api.responses import GPTImageDrawResponse
 from apps.gpt.enums import GPTImageFormat, GPTImageQuality
-from apps.gpt.protocols import GPTCommandProtocol
+from apps.gpt.models import ImageDrawModel, ImageEditModel
+from apps.gpt.protocols import GPTCommandProtocol, HasImageDraw
 
 
 class GPTImageDrawFunctionality(GPTCommandProtocol):
@@ -61,47 +63,44 @@ class GPTImageDrawFunctionality(GPTCommandProtocol):
     # MENU
 
     def menu_image_draw(self) -> ResponseMessageItem:
-        return self._image_draw()
+        return self.image_draw()
 
-    def menu_image_edit(self) -> ResponseMessageItem:
-        """
-        Редактирование изображения
-        """
-        self.attachments = [PhotoAttachment]
-        self.check_attachments()
-
-        return self._image_edit()
+    # def menu_image_edit(self) -> ResponseMessageItem:
+    #     """
+    #     Редактирование изображения
+    #     """
+    #     self.attachments = [PhotoAttachment]
+    #     self.check_attachments()
+    #
+    #     return self._image_edit()
 
     # HANDLERS
 
-    def _image_draw(self):
+    def image_draw(self):
         """
-        Рисование изображения
+        Генерация изображения
         """
+        gpt_api: Union[GPTAPI, HasImageDraw] = self.provider.api_class(
+            api_key=self.get_api_key(),
+            log_filter=self.event.log_filter
+        )
         request_text = self._get_draw_image_request_text()
-        image_format = self._get_image_format()
-
-        count = self._get_images_count_by_keys()
-
-        quality: GPTImageQuality = GPTImageQuality.STANDARD
-        if self.event.message.is_key_provided({"hd", "xd", "hq", "хд"}):
-            quality = GPTImageQuality.HIGH
-
-        use_document_att = self.event.message.is_key_provided({"orig", "original", "ориг", "оригинал"})
-
-        gpt_api = self.provider.api_class(log_filter=self.event.log_filter, sender=self.event.sender)
         with ChatActivity(self.bot, ActivitiesEnum.UPLOAD_PHOTO, self.event.peer_id):
-            response: GPTImageDrawResponse = gpt_api.draw_image(request_text, image_format, quality, count=count)
+            response: GPTImageDrawResponse = gpt_api.draw_image(
+                prompt=request_text,
+                model=self.get_image_draw_model_with_parameters(),
+                count=self._get_images_count_by_keys()
+            )
 
             self.add_statistics(api_response=response)
 
             attachments = []
             for i, image in enumerate(response.images_bytes):
-                if use_document_att:
+                if self._get_use_original_image():
                     att = self.bot.get_document_attachment(
                         image,
                         send_chat_action=False,
-                        filename=f'gpt_draw_{i + 1}.png'
+                        filename=f'{self.provider.name}_draw_{i + 1}.png'
                     )
                     att.download_content()
                     att.set_thumbnail(att.content)
@@ -114,45 +113,76 @@ class GPTImageDrawFunctionality(GPTCommandProtocol):
         answer = f'Результат генерации по запросу "{image_prompt}"'
         return ResponseMessageItem(text=answer, attachments=attachments, reply_to=self.event.message.id)
 
-    def _image_edit(self):
-        request_text = self._get_draw_image_request_text()
-        count = self._get_images_count_by_keys()
-        use_document_att = self.event.message.is_key_provided({"orig", "original", "ориг", "оригинал"})
+    # def _image_edit(self):
+    #     request_text = self._get_draw_image_request_text()
+    #     count = self._get_images_count_by_keys()
+    #     use_document_att = self.event.message.is_key_provided({"orig", "original", "ориг", "оригинал"})
+    #
+    #     gpt_api = self.provider.api_class(log_filter=self.event.log_filter, sender=self.event.sender)
+    #     with ChatActivity(self.bot, ActivitiesEnum.UPLOAD_PHOTO, self.event.peer_id):
+    #         image = self.event.get_all_attachments([PhotoAttachment])[0]
+    #         cropped_image_bytes_png = crop_image_to_square(convert_jpg_to_png(image.download_content()))
+    #         side = min(image.width, image.height)
+    #         mask_bytes = get_transparent_rgba_png(side, side)
+    #
+    #         response: GPTImageDrawResponse = gpt_api.edit_image(
+    #             request_text,
+    #             cropped_image_bytes_png,
+    #             mask_bytes,
+    #             count=count
+    #         )
+    #
+    #         self.add_statistics(api_response=response)
+    #
+    #         attachments = []
+    #         for i, image in enumerate(response.images_bytes):
+    #             if use_document_att:
+    #                 att = self.bot.get_document_attachment(
+    #                     image,
+    #                     send_chat_action=False,
+    #                     filename=f'gpt_draw_{i + 1}.png'
+    #                 )
+    #                 att.download_content()
+    #                 att.set_thumbnail(att.content)
+    #             else:
+    #                 att = self.bot.get_photo_attachment(image, send_chat_action=False)
+    #                 att.download_content()
+    #                 attachments.append(att)
+    #
+    #     image_prompt = response.images_prompt if response.images_prompt else request_text
+    #     answer = f'Результат редактирования изображения по запросу "{image_prompt}"'
+    #     return ResponseMessageItem(text=answer, attachments=attachments, reply_to=self.event.message.id)
 
-        gpt_api = self.provider.api_class(log_filter=self.event.log_filter, sender=self.event.sender)
-        with ChatActivity(self.bot, ActivitiesEnum.UPLOAD_PHOTO, self.event.peer_id):
-            image = self.event.get_all_attachments([PhotoAttachment])[0]
-            cropped_image_bytes_png = crop_image_to_square(convert_jpg_to_png(image.download_content()))
-            side = min(image.width, image.height)
-            mask_bytes = get_transparent_rgba_png(side, side)
+    # COMMON UTILS
 
-            response: GPTImageDrawResponse = gpt_api.edit_image(
-                request_text,
-                cropped_image_bytes_png,
-                mask_bytes,
-                count=count
-            )
+    def get_image_draw_model_with_parameters(self) -> ImageDrawModel:
+        image_format = self._get_image_format()
+        quality = self._get_quality()
 
-            self.add_statistics(api_response=response)
+        image_draw_models = ImageDrawModel.objects.filter(provider=self.provider_model)
 
-            attachments = []
-            for i, image in enumerate(response.images_bytes):
-                if use_document_att:
-                    att = self.bot.get_document_attachment(
-                        image,
-                        send_chat_action=False,
-                        filename=f'gpt_draw_{i + 1}.png'
-                    )
-                    att.download_content()
-                    att.set_thumbnail(att.content)
-                else:
-                    att = self.bot.get_photo_attachment(image, send_chat_action=False)
-                    att.download_content()
-                    attachments.append(att)
+        current_image_model = self.get_image_draw_model()
+        available_models = [x for x in image_draw_models if
+                            x.image_quality == quality and x.image_format == image_format and x.name == current_image_model.name]
+        if len(available_models) == 0:
+            raise PWarning(
+                "Не смог определить какую модель с какими характеристиками нужно использовать. Сообщите админу")
+        if len(available_models) == 0:
+            raise PWarning(
+                "Не смог определить какую модель с какими характеристиками нужно использовать. Сообщите админу")
+        return available_models[0]
 
-        image_prompt = response.images_prompt if response.images_prompt else request_text
-        answer = f'Результат редактирования изображения по запросу "{image_prompt}"'
-        return ResponseMessageItem(text=answer, attachments=attachments, reply_to=self.event.message.id)
+    def get_image_draw_model(self) -> ImageDrawModel:
+        return self.get_model(ImageDrawModel, "image_draw_model")
+
+    def get_default_image_draw_model(self) -> ImageDrawModel:
+        return self.get_default_model(ImageDrawModel)
+
+    def get_image_edit_model(self) -> ImageEditModel:
+        return self.get_model(ImageEditModel, "image_edit_model")
+
+    def get_default_image_edit_model(self) -> ImageEditModel:
+        return self.get_default_model(ImageEditModel)
 
     # UTILS
 
@@ -172,19 +202,36 @@ class GPTImageDrawFunctionality(GPTCommandProtocol):
         else:
             raise PWarning("Должен быть текст или пересланное сообщение")
 
-    def _get_image_format(self) -> GPTImageFormat | None:
+    def _get_image_format(self) -> GPTImageFormat:
         """
         Получение формата картинки, которую хочет получить пользователь.
+
+        По умолчанию SQUARE
         """
-        if self.event.message.is_key_provided({'square', 'квадрат', 'квадратная'}):
+        if self.event.message.is_key_provided({'square', 'квадрат', 'квадратная', 'квадратную'}):
             return GPTImageFormat.SQUARE
-        elif self.event.message.is_key_provided({'album', 'альбом', 'альбомная'}):
+        elif self.event.message.is_key_provided({'album', 'альбом', 'альбомная', 'альбомную'}):
             return GPTImageFormat.LANDSCAPE
-        elif self.event.message.is_key_provided({'portair', 'портрет', 'портретная'}):
+        elif self.event.message.is_key_provided({'portair', 'портрет', 'портретная', 'портретную'}):
             return GPTImageFormat.PORTAIR
         return GPTImageFormat.SQUARE
 
+    def _get_quality(self) -> GPTImageQuality:
+        """
+        Получение качества картинки, которую хочет получить пользователь.
+
+        По умолчанию MEDIUM
+        """
+
+        if self.event.message.is_key_provided({"hd", "xd", "hq", "хд"}):
+            return GPTImageQuality.HIGH
+        return GPTImageQuality.MEDIUM
+
     def _get_images_count_by_keys(self) -> int:
+        """
+        Определение числа картинок, которое хочет сгенерировать пользователь
+        """
+
         count = 1
         if keys := self.event.message.keys:
             for key in keys:
@@ -195,3 +242,9 @@ class GPTImageDrawFunctionality(GPTCommandProtocol):
         if count > MAX_IMAGES_COUNT:
             raise PWarning(f"Максимальное число картинок в запросе - {MAX_IMAGES_COUNT}")
         return count
+
+    def _get_use_original_image(self) -> bool:
+        """
+        Получение информации, хочет ли пользователь получить изображение в оригинале или нет
+        """
+        return self.event.message.is_key_provided({"orig", "original", "ориг", "оригинал"})

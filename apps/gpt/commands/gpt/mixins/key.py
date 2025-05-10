@@ -1,9 +1,8 @@
-from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.help_text import HelpTextArgument
 from apps.bot.classes.messages.response_message import ResponseMessageItem, ResponseMessage
-from apps.gpt.models import ProfileGPTSettings
 from apps.gpt.protocols import GPTCommandProtocol
+from apps.gpt.utils import user_has_role_or_has_gpt_key
 
 
 class GPTKeyMixin(GPTCommandProtocol):
@@ -12,7 +11,9 @@ class GPTKeyMixin(GPTCommandProtocol):
         HelpTextArgument("ключ удалить", "удаляет персональный API ключ"),
     ]
 
-    KEEP_YOUR_SECRET_KEY_IN_SAFE = "Держите свой ключ в секрете. Я удалил ваше сообщение с ключом (или удалите сами если у меня нет прав). Добавьте его в личных сообщениях"
+    KEEP_YOUR_SECRET_KEY_IN_SAFE = "Держите свой ключ в секрете. Я удалил ваше сообщение с ключом (или удалите сами если у меня нет прав)"
+    PROVIDE_API_KEY_TEMPLATE = "Для использования {provider_name} укажите свой ключ (API_KEY)\n" \
+                               "{command_name} ключ (ключ)"
 
     # MENU
 
@@ -24,23 +25,22 @@ class GPTKeyMixin(GPTCommandProtocol):
         self.check_args(2)
         arg = self.event.message.args_case[1]
 
-        key_field_name = self.provider.gpt_settings_key_field
-
-        gpt_settings = getattr(self.event.sender, "gpt_settings", None)
-        if not gpt_settings:
-            # ToDo: test
-            gpt_settings = ProfileGPTSettings(profile=self.event.sender)
+        profile_gpt_settings = self.get_profile_gpt_settings()
 
         if arg.lower() == "удалить":
-            setattr(gpt_settings, key_field_name, "")
-            gpt_settings.save()
+            profile_gpt_settings.set_key("")
+            profile_gpt_settings.save()
             rmi = ResponseMessageItem(text="Удалил ваш ключ")
         else:
             if self.event.is_from_chat:
                 self.bot.delete_messages(self.event.chat.chat_id, self.event.message.id)
+                # ToDo: проверять ключ методом в API?
+                profile_gpt_settings.set_key(arg)
+                profile_gpt_settings.save()
                 raise PWarning(self.KEEP_YOUR_SECRET_KEY_IN_SAFE)
-            setattr(gpt_settings, key_field_name, arg)
-            gpt_settings.save()
+            # ToDo: проверять ключ методом в API?
+            profile_gpt_settings.set_key(arg)
+            profile_gpt_settings.save()
             rmi = ResponseMessageItem(text="Добавил новый ключ")
 
         return rmi
@@ -48,17 +48,14 @@ class GPTKeyMixin(GPTCommandProtocol):
     # COMMON UTILS
 
     def check_key(self) -> ResponseMessage | None:
-        settings_key_field = self.provider.gpt_settings_key_field
-
-        # try:
-        gpt_settings = getattr(self.event.sender, "gpt_settings", None)
-        user_has_not_role_gpt = not self.event.sender.check_role(Role.GPT)
-        user_has_not_personal_key = not (gpt_settings and getattr(gpt_settings, settings_key_field))
-
-        if user_has_not_role_gpt and user_has_not_personal_key:
-            if self.event.message.args[0] in ["ключ", "key"]:
+        has_access = user_has_role_or_has_gpt_key(self.event.sender, self.provider)
+        # Если у пользователя нет роли GPT и нет персонального ключа, тогда единственное, что мы ему даём - добавить ключ
+        if not has_access:
+            if self.event.message.args and self.event.message.args[0] in ["ключ", "key"]:
                 return ResponseMessage(self.menu_key())
             else:
-                # ?
-                raise PWarning(
-                    f"Для использования {self.provider.name} укажите свой ключ (API_KEY) {self.bot.get_formatted_text_line('/gpt ключ (ключ)')}")
+                error_msg = self.PROVIDE_API_KEY_TEMPLATE.format(
+                    provider_name=self.provider.type_enum,
+                    command_name=self.bot.get_formatted_text_line(f'/{self.name}')
+                )
+                raise PWarning(error_msg)

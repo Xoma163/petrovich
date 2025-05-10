@@ -12,3 +12,6 @@ class ChatGPTMessage(OpenAIMessage):
 @dataclass
 class ChatGPTMessages(OpenAIMessages):
     message_class: type[GPTMessage] = ChatGPTMessage
+
+    def __init__(self):
+        super().__init__()

@@ -9,7 +9,7 @@ class CWTF(WTFCommand):
     names = ["свтф", "квтф", "цвтф"]
 
     abstract = False
-    access = Role.GPT
+    access = Role.TRUSTED
 
     help_text = HelpText(
         commands_text="обрабатывает сообщения в конфе через Claude",

@@ -4,9 +4,11 @@ from apps.gpt.enums import GPTProviderEnum
 from apps.gpt.messages.base import GPTMessages
 from apps.gpt.messages.providers.chatgpt import ChatGPTMessages
 from apps.gpt.providers.base import GPTProvider
+from petrovich.settings import env
 
 
 class ChatGPTProvider(GPTProvider):
-    name: GPTProviderEnum = GPTProviderEnum.CHATGPT
+    type_enum: GPTProviderEnum = GPTProviderEnum.CHATGPT
     messages_class: type[GPTMessages] = ChatGPTMessages
     api_class: type[GPTAPI] = ChatGPTAPI
+    api_key: str = env.str("OPENAI_KEY")

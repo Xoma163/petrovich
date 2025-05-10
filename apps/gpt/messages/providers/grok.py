@@ -12,3 +12,6 @@ class GrokMessage(OpenAIMessage):
 @dataclass
 class GrokMessages(OpenAIMessages):
     message_class: type[GPTMessage] = GrokMessage
+
+    def __init__(self):
+        super().__init__()

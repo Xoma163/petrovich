@@ -23,19 +23,20 @@ class GPTMessages(ABC):
     def message_class(self) -> type[GPTMessage]:
         pass
 
-    _messages: list[GPTMessage] = []
+    def __init__(self):
+        self.messages: list[GPTMessage] = []
 
     def add_message(self, role: GPTMessageRole, text: str, images: list[str] | None = None):
         # ToDo: непонятно почему здесь unexpected argument
         message = self.message_class(role, text, images)  # noqa
-        self._messages.append(message)
+        self.messages.append(message)
 
     def get_messages(self) -> list[dict]:
-        return [x.get_message() for x in self._messages]
+        return [x.get_message() for x in self.messages]
 
     def reverse(self):
-        self._messages.reverse()
+        self.messages.reverse()
 
     @property
     def last_message(self) -> GPTMessage:
-        return self._messages[-1]
+        return self.messages[-1]

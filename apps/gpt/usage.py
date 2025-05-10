@@ -5,7 +5,7 @@ from decimal import Decimal
 from apps.gpt.models import (
     GPTModel,
     GPTCompletionsVisionModel,
-    CompletionModel,
+    CompletionsModel,
     VisionModel,
     ImageDrawModel,
     VoiceRecognitionModel
@@ -43,7 +43,7 @@ class GPTCompletionsVisionUsage(GPTUsage):
 
 @dataclass
 class GPTCompletionsUsage(GPTCompletionsVisionUsage):
-    model: CompletionModel
+    model: CompletionsModel
 
 
 @dataclass
@@ -68,7 +68,7 @@ class GPTImageDrawUsage(GPTUsage):
 @dataclass
 class GPTVoiceRecognitionUsage(GPTUsage):
     model: VoiceRecognitionModel
-    voice_duration: float
+    voice_duration: Decimal
 
     @property
     def voice_recognition_cost(self) -> Decimal:

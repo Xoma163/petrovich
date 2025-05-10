@@ -1,8 +1,8 @@
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.help_text import HelpTextArgument
 from apps.bot.classes.messages.response_message import ResponseMessageItem
-from apps.gpt.api.base import CompletionsAPIMixin
-from apps.gpt.models import ProfileGPTSettings
+from apps.gpt.commands.gpt.functionality.completions import GPTCompletionsFunctionality
+from apps.gpt.models import CompletionsModel
 from apps.gpt.protocols import GPTCommandProtocol
 
 
@@ -19,20 +19,27 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
         """
         Просмотр списка моделей
         """
+        if not isinstance(self, GPTCompletionsFunctionality):
+            raise PWarning("Для данного провайдера недоступен список моделей")
 
-        gpt_models = self.provider.models
+        completions_models = CompletionsModel.objects.filter(provider=self.provider_model).order_by('name')
+        if completions_models.count() == 0:
+            raise PWarning("В базе нет моделей. Сообщите админу")
 
-        completions_models = gpt_models.get_completions_models()
+        model_row_template = "{model_name} ${input_cost} / ${output_cost}"
+
         models_list = [
-            f"{self.bot.get_formatted_text_line(x.name)} (${x.prompt_1m_token_cost} / ${x.completion_1m_token_cost})"
+            model_row_template.format(
+                model_name=self.bot.get_formatted_text_line(x.name),
+                input_cost=float(x.prompt_1m_token_cost.normalize()),
+                output_cost=float(x.completion_1m_token_cost.normalize())
+            )
             for x in completions_models
         ]
         models_str = "\n".join(models_list)
         answer = (
-            "Список доступных моделей:"
-            "\n"
-            "Название (цена за 1кк входных токенов / цена за 1кк выходных токенов)"
-            "\n"
+            "Список доступных моделей:\n"
+            "Название (цена за 1кк входных токенов / цена за 1кк выходных токенов)\n"
             f"{models_str}"
         )
         return ResponseMessageItem(answer)
@@ -41,40 +48,34 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
         """
         Установка модели
         """
+        if not isinstance(self, GPTCompletionsFunctionality):
+            raise PWarning("Для данного провайдера недоступна смена модели")
 
-        gpt_settings = getattr(self.event.sender, "gpt_settings", None)
-        if not gpt_settings:
-            gpt_settings = ProfileGPTSettings(profile=self.event.sender)
+        profile_gpt_settings = self.get_profile_gpt_settings()
 
-        settings_model_field = self.provider.gpt_settings_model_field
-
+        # Вывод текущей модели
         if len(self.event.message.args) < 2:
-            gpt_model_str = getattr(gpt_settings, settings_model_field)
-            if gpt_model_str:
-                # fixme
-                gpt_model = self.provider.models.get_model_by_name(gpt_model_str, GPTCompletionModel)
-                answer = f"Текущая модель - {self.bot.get_formatted_text_line(gpt_model.verbose_name)}"
+            if profile_gpt_settings.completions_model:
+                current_model = profile_gpt_settings.completions_model
+                current_model_str = self.bot.get_formatted_text_line(current_model.verbose_name)
+                answer = f"Текущая модель - {current_model_str}"
             else:
-                if isinstance(self.provider.api_class, CompletionsAPIMixin):
-                    # fixme
-                    default_model = self.bot.get_formatted_text_line(
-                        self.provider.api_class.default_completions_model.name)
-                    answer = f"Модель не установлена. Используется модель по умолчанию - {default_model}"
-                else:
-                    raise PWarning("Для данного GPT отсутствует completions функция")
+                default_model = self.get_default_completions_model()
+                default_model_str = self.bot.get_formatted_text_line(default_model.verbose_name)
+                answer = f"Модель не установлена. Используется модель по умолчанию - {default_model_str}"
             return ResponseMessageItem(answer)
 
+        # Установка новой модели
         new_model_str = self.event.message.args[1]
 
         try:
-            # fixme
-            gpt_model = gpt_models.get_model_by_name(new_model_str, GPTCompletionModel)
-        except ValueError:
+            gpt_model = CompletionsModel.objects.filter(provider=self.provider_model).get(name=new_model_str)
+        except CompletionsModel.DoesNotExist:
             button = self.bot.get_button('Список моделей', command=self.name, args=['модели'])
             keyboard = self.bot.get_inline_keyboard([button])
             raise PWarning("Не понял какая модель", keyboard=keyboard)
 
-        setattr(gpt_settings, settings_model_field, gpt_model.name)
-        gpt_settings.save()
+        profile_gpt_settings.completions_model = gpt_model
+        profile_gpt_settings.save()
         rmi = ResponseMessageItem(text=f"Поменял модель на {self.bot.get_formatted_text_line(gpt_model.verbose_name)}")
         return rmi

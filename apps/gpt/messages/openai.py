@@ -29,3 +29,6 @@ class OpenAIMessage(GPTMessage):
 @dataclass
 class OpenAIMessages(GPTMessages):
     message_class: type[GPTMessage] = OpenAIMessage
+
+    def __init__(self):
+        super().__init__()

@@ -18,7 +18,7 @@ class ClaudeCommand(
 ):
     name = "claude"
     names = ["клауд"]
-    access = Role.GPT
+    access = Role.TRUSTED
     abstract = False
 
     provider: GPTProvider = ClaudeProvider()
@@ -35,6 +35,12 @@ class ClaudeCommand(
                 GPTModelChoiceMixin.MODEL_CHOOSE_HELP_TEXT_ITEMS +
                 GPTKeyMixin.KEY_HELP_TEXT_ITEMS
 
+            )
+        ],
+        help_text_keys=[
+            HelpTextItem(
+                Role.USER,
+                GPTStatisticsMixin.STATISTICS_KEY_ITEMS_KEY
             )
         ],
         extra_text=f"{GPTCommand.EXTRA_TEXT}\n\n{GPTPrepromptMixin.EXTRA_TEXT}"

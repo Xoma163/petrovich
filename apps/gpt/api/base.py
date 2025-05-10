@@ -1,18 +1,15 @@
 from abc import abstractmethod
 
 from apps.bot.api.handler import API
-from apps.bot.classes.const.consts import Role
-from apps.bot.classes.const.exceptions import PWarning
 from apps.gpt.api.responses import (
     GPTCompletionsResponse,
     GPTImageDrawResponse,
     GPTVisionResponse,
     GPTVoiceRecognitionResponse
 )
-from apps.gpt.enums import GPTImageFormat, GPTImageQuality
 from apps.gpt.messages.base import GPTMessages
 from apps.gpt.models import (
-    CompletionModel,
+    CompletionsModel,
     VisionModel,
     ImageDrawModel,
     ImageEditModel,
@@ -25,13 +22,12 @@ from apps.gpt.protocols import (
     HasImageEdit,
     HasImageDraw
 )
-from petrovich.settings import env
 
 
 class GPTAPI(API):
-    def __init__(self, sender=None, *args, **kwargs):
+    def __init__(self, api_key: str, *args, **kwargs):
         super(GPTAPI, self).__init__(*args, **kwargs)
-        self.sender = sender
+        self.api_key: str = api_key
 
     @property
     @abstractmethod
@@ -40,28 +36,6 @@ class GPTAPI(API):
         Хост, куда будут делаться запросы API
         """
 
-    @property
-    def api_key(self) -> str:
-        """
-        Получение ключа, если он проставлен пользователем, иначе общий ключ, если есть доступ, иначе ошибка
-        """
-        if gpt_settings := getattr(self.sender, "gpt_settings", None):
-            # ToDo:
-            user_key = getattr(gpt_settings, self.gpt_settings_key_field)
-            if user_key:
-                return user_key
-        if self.sender.check_role(Role.GPT):
-            return env.str(self.api_key_env_name)
-        raise PWarning("Нет доступа")
-
-    @property
-    @abstractmethod
-    def api_key_env_name(self) -> str:
-        """
-        Имя переменной среды, в которой содержится базовый API KEY
-        """
-        pass
-
 
 class CompletionsAPIMixin(HasCompletions):
     @property
@@ -69,18 +43,8 @@ class CompletionsAPIMixin(HasCompletions):
     def completions_url(self) -> str:
         pass
 
-    # ToDo: сделать метод для всех миксинов
-    def get_completions_model(self) -> CompletionModel:
-        # ToDo: поправить получение модели
-        if gpt_settings := getattr(self.sender, "gpt_settings", None):  # noqa
-            if user_model_str := getattr(gpt_settings, self.gpt_settings_model_field):  # noqa
-                return self.models.get_model_by_name(user_model_str, GPTCompletionModel)  # noqa
-
-        # ToDo: поправить получение стандартной модели
-        return self.default_completions_model
-
     @abstractmethod
-    def completions(self, messages: GPTMessages) -> GPTCompletionsResponse:
+    def completions(self, messages: GPTMessages, model: CompletionsModel) -> GPTCompletionsResponse:
         pass
 
 
@@ -92,11 +56,7 @@ class VisionAPIMixin(HasVision):
         pass
 
     @abstractmethod
-    def get_vision_model(self) -> VisionModel:
-        pass
-
-    @abstractmethod
-    def vision(self, messages: GPTMessages) -> GPTVisionResponse:
+    def vision(self, messages: GPTMessages, model: VisionModel) -> GPTVisionResponse:
         pass
 
 
@@ -107,15 +67,10 @@ class ImageDrawAPIMixin(HasImageDraw):
         pass
 
     @abstractmethod
-    def get_image_draw_model(self, gpt_image_format: GPTImageFormat, quality: GPTImageQuality) -> ImageDrawModel:
-        pass
-
-    @abstractmethod
     def draw_image(
             self,
             prompt: str,
-            image_format: GPTImageFormat,
-            quality: GPTImageQuality,
+            model: ImageDrawModel,
             count: int = 1,
     ) -> GPTImageDrawResponse:
         pass
@@ -128,13 +83,10 @@ class ImageEditAPIMixin(HasImageEdit):
         pass
 
     @abstractmethod
-    def get_image_edit_model(self) -> ImageEditModel:
-        pass
-
-    @abstractmethod
     def edit_image(
             self,
             prompt: str,
+            model: ImageEditModel,
             image: bytes,
             mask: bytes,
             count: int = 1
@@ -150,9 +102,6 @@ class VoiceRecognitionAPIMixin(HasVoiceRecognition):
         pass
 
     @abstractmethod
-    def get_voice_recognition_model(self) -> VoiceRecognitionModel:
-        pass
-
-    @abstractmethod
-    def voice_recognition(self, audio_ext: str, content: bytes) -> GPTVoiceRecognitionResponse:
+    def voice_recognition(self, audio_ext: str, content: bytes,
+                          model: VoiceRecognitionModel) -> GPTVoiceRecognitionResponse:
         pass

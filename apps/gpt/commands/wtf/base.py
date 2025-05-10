@@ -13,8 +13,11 @@ from apps.bot.classes.messages.response_message import ResponseMessage
 from apps.bot.models import User
 from apps.bot.utils.cache import MessagesCache
 from apps.gpt.commands.gpt.base import GPTCommand
+from apps.gpt.commands.gpt.mixins.key import GPTKeyMixin
 from apps.gpt.messages.base import GPTMessages
 from apps.gpt.messages.consts import GPTMessageRole
+from apps.gpt.providers.providers.chatgpt import ChatGPTProvider
+from apps.gpt.utils import user_has_role_or_has_gpt_key
 
 
 class WTFCommand(Command):
@@ -40,17 +43,30 @@ class WTFCommand(Command):
         super().__init__()
         self.gpt_command_class: type[GPTCommand] = gpt_command_class
 
+    def _check_gpt_access(self):
+        has_access = user_has_role_or_has_gpt_key(self.event.sender, ChatGPTProvider())
+        if not has_access:
+            error_msg = GPTKeyMixin.PROVIDE_API_KEY_TEMPLATE.format(
+                provider_name=self.gpt_command_class.provider.type_enum,
+                command_name=self.bot.get_formatted_text_line(f'/{self.gpt_command_class.name}')
+            )
+            raise PWarning(error_msg)
+
     def start(self) -> ResponseMessage:
+        self._check_gpt_access()
+
+
         n, prompt = self._get_n_and_prompt()
 
         with ChatActivity(self.bot, ActivitiesEnum.TYPING, self.event.peer_id):
             messages = self.get_conversation(n, prompt)
 
-        gpt = self.gpt_command_class()
+        gpt: GPTCommand = self.gpt_command_class()
         gpt.bot = self.bot
         gpt.event = self.event
+        gpt.set_provider_model()
         with ChatActivity(self.bot, ActivitiesEnum.TYPING, self.event.peer_id):
-            answer = gpt._completions(messages)  # noqa TODO CHECK
+            answer = gpt.completions(messages)  # noqa
         return ResponseMessage(answer)
 
     def _get_n_and_prompt(self) -> tuple[int, str]:

@@ -20,7 +20,7 @@ class ChatGPTCommand(
 ):
     name = "gpt"
     names = ["гпт", "chatgpt", "чатгпт"]
-    access = Role.USER
+    access = Role.TRUSTED
     abstract = False
 
     provider: GPTProvider = ChatGPTProvider()
@@ -48,7 +48,8 @@ class ChatGPTCommand(
                     GPTImageDrawFunctionality.KEY_ITEM_COUNT,
                     GPTImageDrawFunctionality.KEY_ITEM_HD
                 ] +
-                GPTImageDrawFunctionality.KEY_ITEMS_FORMAT
+                GPTImageDrawFunctionality.KEY_ITEMS_FORMAT +
+                GPTStatisticsMixin.STATISTICS_KEY_ITEMS_KEY
             )
         ],
         extra_text=f"{GPTCommand.EXTRA_TEXT}\n\n{GPTPrepromptMixin.EXTRA_TEXT}"

@@ -1,9 +1,17 @@
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.utils.proxy import get_proxies
-from apps.gpt.api.base import GPTAPI, CompletionsAPIMixin, VisionAPIMixin
+from apps.gpt.api.base import (
+    GPTAPI,
+    CompletionsAPIMixin,
+    VisionAPIMixin
+)
 from apps.gpt.api.responses import GPTVisionResponse, GPTCompletionsResponse
 from apps.gpt.messages.base import GPTMessages
 from apps.gpt.messages.consts import GPTMessageRole
+from apps.gpt.models import (
+    CompletionsModel,
+    VisionModel
+)
 from apps.gpt.usage import GPTCompletionsUsage, GPTVisionUsage
 
 
@@ -22,7 +30,6 @@ class ClaudeAPI(
     # ---------- base ---------- #
 
     base_url = "https://api.anthropic.com/v1"
-    api_key_env_name = "CLAUDE_API_KEY"
 
     def do_request(self, url, **kwargs) -> dict:
         r_json = self.requests.post(url, headers=self.headers, proxies=get_proxies(), **kwargs).json()
@@ -36,9 +43,7 @@ class ClaudeAPI(
 
     completions_url = f"{base_url}/messages"
 
-    def completions(self, messages: GPTMessages) -> GPTCompletionsResponse:
-        model = self.get_completions_model()
-
+    def completions(self, messages: GPTMessages, model: CompletionsModel) -> GPTCompletionsResponse:
         preprompt = None
         messages = messages.get_messages()
         if messages[0]['role'] == GPTMessageRole.SYSTEM:
@@ -72,9 +77,7 @@ class ClaudeAPI(
 
     vision_url = f"{base_url}/chat/completions"
 
-    def vision(self, messages: GPTMessages) -> GPTVisionResponse:
-        model = self.get_vision_model()
-
+    def vision(self, messages: GPTMessages, model: VisionModel) -> GPTVisionResponse:
         preprompt = None
         messages = messages.get_messages()
         if messages[0]['role'] == GPTMessageRole.SYSTEM:

@@ -9,7 +9,7 @@ from apps.gpt.messages.base import GPTMessages
 class GPTProvider(ABC):
     @property
     @abstractmethod
-    def name(self) -> GPTProviderEnum:
+    def type_enum(self) -> GPTProviderEnum:
         pass
 
     @property
@@ -22,3 +22,7 @@ class GPTProvider(ABC):
     def api_class(self) -> Type[GPTAPI]:
         pass
 
+    @property
+    @abstractmethod
+    def api_key(self) -> str:
+        pass

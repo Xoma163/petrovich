@@ -4,7 +4,7 @@ from petrovich.settings import env
 
 
 class Fernet:
-    _cipher_suite: fernet.Fernet = fernet.Fernet(env.str("SECRET_KEY").encode())
+    _cipher_suite: fernet.Fernet = fernet.Fernet(env.str("FERNET_SECRET_KEY").encode())
 
     @classmethod
     def encrypt(cls, _str: str) -> str:

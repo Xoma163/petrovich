@@ -9,7 +9,7 @@ class WTF(WTFCommand):
     names = ['втф', 'саммари', 'суммаризируй']
 
     abstract = False
-    access = Role.GPT
+    access = Role.TRUSTED
 
     help_text = HelpText(
         commands_text="обрабатывает сообщения в конфе через ChatGPT",

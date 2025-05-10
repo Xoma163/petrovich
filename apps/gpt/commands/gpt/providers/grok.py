@@ -20,7 +20,7 @@ class GrokCommand(
 ):
     name = "grok"
     names = ["грок", "грк", "grk"]
-    access = Role.GPT
+    access = Role.TRUSTED
     abstract = False
 
     provider: GPTProvider = GrokProvider()
@@ -45,7 +45,8 @@ class GrokCommand(
                 Role.USER, [
                     GPTImageDrawFunctionality.KEY_ITEM_ORIG,
                     GPTImageDrawFunctionality.KEY_ITEM_COUNT,
-                ])
+                           ] + GPTStatisticsMixin.STATISTICS_KEY_ITEMS_KEY
+            )
         ],
         extra_text=f"{GPTCommand.EXTRA_TEXT}\n\n{GPTPrepromptMixin.EXTRA_TEXT}"
     )

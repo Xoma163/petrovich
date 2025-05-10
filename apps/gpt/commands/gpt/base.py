@@ -2,6 +2,7 @@ import logging
 from abc import abstractmethod
 
 from apps.bot.classes.command import Command
+from apps.bot.classes.const.exceptions import PWarning, PError
 from apps.bot.classes.event.event import Event
 from apps.bot.classes.event.tg_event import TgEvent
 from apps.bot.classes.messages.attachments.document import DocumentAttachment
@@ -9,7 +10,7 @@ from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessageItem, ResponseMessage
 from apps.bot.utils.cache import MessagesCache
 from apps.bot.utils.utils import markdown_to_html, wrap_text_in_document
-from apps.gpt.api.base import ImageEditAPIMixin
+from apps.gpt.api.base import ImageDrawAPIMixin, VisionAPIMixin, CompletionsAPIMixin
 from apps.gpt.commands.gpt.functionality.completions import GPTCompletionsFunctionality
 from apps.gpt.commands.gpt.functionality.image_draw import GPTImageDrawFunctionality
 from apps.gpt.commands.gpt.functionality.vision import GPTVisionFunctionality
@@ -19,6 +20,8 @@ from apps.gpt.commands.gpt.mixins.preprompt import GPTPrepromptMixin
 from apps.gpt.commands.gpt.mixins.statistics import GPTStatisticsMixin
 from apps.gpt.messages.base import GPTMessages
 from apps.gpt.messages.consts import GPTMessageRole
+from apps.gpt.models import Provider, ProfileGPTSettings, GPTModel
+from apps.gpt.protocols import GPTCommandProtocol
 from apps.gpt.providers.base import GPTProvider
 from petrovich.settings import env
 
@@ -30,19 +33,25 @@ class GPTCommand(
     GPTKeyMixin,
     GPTModelChoiceMixin,
     GPTPrepromptMixin,
-    GPTStatisticsMixin
+    GPTStatisticsMixin,
+    GPTCommandProtocol
 ):
-    @property
-    @abstractmethod
-    def provider(self) -> GPTProvider:
-        pass
-
     abstract = True
 
     EXTRA_TEXT = (
         "Если отвечать на сообщения бота через кнопку \"Ответить\" то будет продолжаться непрерывный диалог.\n"
         "В таком случае необязательно писать команду, можно просто текст"
     )
+
+    NO_DEFAULT_MODEL_ERROR_MSG = "Не установлена модель по умолчанию. Сообщите об этом админу.\n" \
+                                 "Прямо сейчас вы можете просто вручную установить модель и пользоваться ей"
+
+    @property
+    @abstractmethod
+    def provider(self) -> GPTProvider:
+        pass
+
+    provider_model: Provider = None
 
     def __init__(self):
         super().__init__()
@@ -64,24 +73,26 @@ class GPTCommand(
         return bool(self._get_first_gpt_event_in_replies(event))
 
     def start(self) -> ResponseMessage | None:
+        self.set_provider_model()
+
         if isinstance(self, GPTKeyMixin):
             result = self.check_key()
             if result:
                 return result
 
         arg0 = self.event.message.args[0] if self.event.message.args else None
-        edit_text_command_aliases = ["фотошоп", "photoshop"]
+        # edit_image_command_aliases = ["фотошоп", "photoshop"]
+        edit_image_command_aliases = []
 
-        if isinstance(self, GPTVisionFunctionality):
-            if self.event.get_all_attachments([PhotoAttachment]) and arg0 not in edit_text_command_aliases:
+        if issubclass(self.provider.api_class, VisionAPIMixin) and isinstance(self, GPTVisionFunctionality):
+            if self.event.get_all_attachments([PhotoAttachment]) and arg0 not in edit_image_command_aliases:
                 return ResponseMessage(self.menu_vision())
 
         menu = []
-        if isinstance(self, GPTImageDrawFunctionality):
+        if issubclass(self.provider.api_class, ImageDrawAPIMixin) and isinstance(self, GPTImageDrawFunctionality):
             menu.append([["нарисуй", "draw"], self.menu_image_draw])
-        # ToDo: хм, а может нахер проверять фукнциональности, а проверять именно апишные классы?
-        if isinstance(self.provider.api_class, ImageEditAPIMixin):
-            menu.append([edit_text_command_aliases, self.menu_image_edit])
+        # if isinstance(self.provider.api_class, ImageEditAPIMixin):
+        #     menu.append([edit_image_command_aliases, self.menu_image_edit])
 
         if isinstance(self, GPTStatisticsMixin):
             menu.append([["стат", "стата", "статистика", "stat", "stats", "statistics"], self.menu_statistics])
@@ -92,7 +103,7 @@ class GPTCommand(
         if isinstance(self, GPTModelChoiceMixin):
             menu.append([["модели", "models"], self.menu_models])
             menu.append([["модель", "model"], self.menu_model])
-        if isinstance(self, GPTCompletionsFunctionality):
+        if issubclass(self.provider.api_class, CompletionsAPIMixin) and isinstance(self, GPTCompletionsFunctionality):
             menu.append([["_wtf"], self.menu_wtf])
             menu.append([['default'], self.menu_completions])
 
@@ -102,6 +113,7 @@ class GPTCommand(
         return ResponseMessage(answer)
 
     # COMMON UTILS
+
     def get_dialog(self, extra_message: str | None = None) -> GPTMessages:
         """
         Получение списка всех сообщений с пользователем
@@ -178,7 +190,68 @@ class GPTCommand(
         rmi.text = "Ответ GPT содержит в себе очень много тегов, которые не распарсились. Положил ответ в файл"
         return rmi
 
+    def get_api_key(self) -> str:
+        """
+        Получение api_key
+        Сначала ищем у пользователя, потом берём общий
+        """
+        profile_gpt_settings = self.get_profile_gpt_settings()
+        if key := profile_gpt_settings.get_key():
+            return key
+        return self.provider.api_key
+
+    def get_profile_gpt_settings(self) -> ProfileGPTSettings:
+        """
+        Получение GPT настроек пользователя
+        """
+        provider = self._get_provider_model()
+        gpt_settings = self.event.sender.gpt_settings
+        profile_gpt_settings, created = gpt_settings.get_or_create(
+            provider=provider,
+            profile=self.event.sender,
+        )
+        return profile_gpt_settings
+
+    def get_model(self, model_class: type[GPTModel], field_model_name: str):
+        """
+        Получение модели пользователя.
+
+        model_class: класс модели
+        field_model_name - поле модели в profile_gpt_settings
+
+        Если не найдено, то берёт стандартную модель
+        """
+
+        if user_model := self.get_user_model(field_model_name):
+            return user_model
+        return self.get_default_model(model_class)
+
+    def get_user_model(self, field_model_name: str) -> GPTModel | None:
+        """
+        Получение модели для пользователя.
+
+
+        Возвращает найденную модель для пользователя или None, если она не найдена
+        """
+        profile_gpt_settings = self.get_profile_gpt_settings()
+        return getattr(profile_gpt_settings, field_model_name, None)
+
+    def get_default_model(self, model_class: type[GPTModel]) -> GPTModel:
+        """
+        Получение модели по умолчанию
+        Если такая не указана в базе, то выдаёт ошибку
+        """
+        try:
+            return model_class.objects.get(provider=self.provider_model, is_default=True)
+        except model_class.DoesNotExist:
+            raise PError(self.NO_DEFAULT_MODEL_ERROR_MSG)
+
+    def set_provider_model(self):
+        if not self.provider_model:
+            self.provider_model = self._get_provider_model()
+
     # UTILS
+
     def _get_first_gpt_event_in_replies(self, event) -> TgEvent | None:
         """
         Получение первого сообщении в серии reply сообщений
@@ -233,3 +306,12 @@ class GPTCommand(
                 "message": "Формирование сообщений для GPT наткнулось на сообщение, где message.text = None"
             })
             return None
+
+    def _get_provider_model(self):
+        if self.provider_model:
+            return self.provider_model
+
+        try:
+            return Provider.objects.get(name=self.provider.type_enum.value)
+        except Provider.DoesNotExist:
+            raise PWarning("Провайдер не определён. Сообщите админу.")

@@ -44,3 +44,6 @@ class ClaudeMessages(GPTMessages):
                     message['content'].append(submessage)
             messages.append(message)
         return messages
+
+    def __init__(self):
+        super().__init__()

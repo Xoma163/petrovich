@@ -9,18 +9,25 @@ from matplotlib.dates import DateFormatter
 from matplotlib.ticker import MaxNLocator
 
 from apps.bot.classes.const.exceptions import PWarning
-from apps.bot.classes.help_text import HelpTextArgument
+from apps.bot.classes.help_text import HelpTextArgument, HelpTextKey
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessageItem
 from apps.bot.models import Profile
 from apps.gpt.api.responses import GPTAPIResponse
-from apps.gpt.models import Usage
+from apps.gpt.models import Usage, ProfileGPTSettings
 from apps.gpt.protocols import GPTCommandProtocol
 
 
 class GPTStatisticsMixin(GPTCommandProtocol):
     STATISTICS_HELP_TEXT_ITEMS = [
         HelpTextArgument("стата", "статистика по использованию"),
+    ]
+    STATISTICS_KEY_ITEMS_KEY = [
+        HelpTextKey(
+            "ключ",
+            ['key'],
+            "статистика пришлёт информацию по всем пользователям с этим ключом"
+        ),
     ]
 
     # MENU
@@ -30,11 +37,22 @@ class GPTStatisticsMixin(GPTCommandProtocol):
         Просмотр статистики по использованию
         """
         self.check_pm()
-        text_answer = self._get_statistics_for_user(self.event.sender)
+
+        # ToDo: check it later
+        if self.event.message.is_key_provided({"ключ", "key"}):
+            profiles_gpt_settings = ProfileGPTSettings.objects.filter(
+                provider=self.provider_model,
+                key=self.get_profile_gpt_settings().key
+            )
+            profiles = list(Profile.objects.filter(gpt_settings__in=profiles_gpt_settings))
+        else:
+            profiles = [self.event.sender]
+
+        text_answer = self._get_statistics_for_user(profiles)
         if not text_answer:
             raise PWarning("Ещё не было использований GPT")
 
-        plot_data = self._get_data_for_statistics_plot(self.event.sender)
+        plot_data = self._get_data_for_statistics_plot(profiles)
         plot_bytes = self._get_statistics_plot(plot_data)
 
         statistics_plot_image = PhotoAttachment()
@@ -43,7 +61,11 @@ class GPTStatisticsMixin(GPTCommandProtocol):
 
     # HANDLERS
 
-    def _get_statistics_for_user(self, profile: Profile) -> str | None:
+    # def _get_statistics_for_key(self, profile: Profile):
+    # profiles =
+    # stats_all = self._get_stat_db_profile(Q(author=profile))
+
+    def _get_statistics_for_user(self, profiles: list[Profile]) -> str | None:
         """
         Получение статистики
         """
@@ -58,7 +80,7 @@ class GPTStatisticsMixin(GPTCommandProtocol):
             .order_by('-total_cost')]
         """
 
-        stats_all = self._get_stat_db_profile(Q(author=profile))
+        stats_all = self._get_stat_db_profile(Q(author__in=profiles))
         if not stats_all:
             return None
 
@@ -69,21 +91,22 @@ class GPTStatisticsMixin(GPTCommandProtocol):
         first_day_of_last_month = last_day_of_last_month.replace(day=1)
 
         stats_today = self._get_stat_db_profile(
-            Q(author=profile, created_at__gte=dt_now - datetime.timedelta(days=1))
+            Q(author__in=profiles, created_at__gte=dt_now - datetime.timedelta(days=1))
         )
         stats_7_day = self._get_stat_db_profile(
-            Q(author=profile, created_at__gte=dt_now - datetime.timedelta(days=7))
+            Q(author__in=profiles, created_at__gte=dt_now - datetime.timedelta(days=7))
         )
 
         last_month = self._get_stat_db_profile(
-            Q(author=profile, created_at__gte=first_day_of_last_month, created_at__lt=first_day_of_current_month)
+            Q(author__in=profiles, created_at__gte=first_day_of_last_month, created_at__lt=first_day_of_current_month)
         )
 
         current_month = self._get_stat_db_profile(
-            Q(author=profile, created_at__gte=first_day_of_current_month, created_at__lt=dt_now)
+            Q(author__in=profiles, created_at__gte=first_day_of_current_month, created_at__lt=dt_now)
         )
 
-        text_answer = f"{profile}:\n" \
+        profiles_str = ", ".join([str(x) for x in profiles])
+        text_answer = f"{profiles_str}:\n" \
                       f"Сегодня - $ {round(stats_today, 2)}\n" \
                       f"7 дней - $ {round(stats_7_day, 2)}\n" \
                       f"Прошлый месяц- $ {round(last_month, 2)}\n" \
@@ -98,18 +121,18 @@ class GPTStatisticsMixin(GPTCommandProtocol):
         Usage(
             author=self.event.sender,
             cost=api_response.usage.total_cost,
-            provider=self.provider,
+            provider=self.provider_model,
             model_name=api_response.usage.model.name
         ).save()
 
     # UTILS
 
     @staticmethod
-    def _get_data_for_statistics_plot(profile):
+    def _get_data_for_statistics_plot(profiles: list[Profile]):
         one_month_ago = timezone.now() - datetime.timedelta(days=30)
 
         usage_stats = Usage.objects.filter(
-            author=profile,
+            author__in=profiles,
             created_at__gte=one_month_ago
         ).annotate(
             date=TruncDate('created_at')
@@ -143,7 +166,7 @@ class GPTStatisticsMixin(GPTCommandProtocol):
         plt.xticks(rotation=45)
 
         # Настройка заголовка и подписей осей
-        plt.title(f'Использование {self.provider.name} за последние 30 дней', fontsize=16)
+        plt.title(f'Использование {self.provider.type_enum} за последние 30 дней', fontsize=16)
         plt.xlabel('Дата', fontsize=14)
         plt.ylabel('Стоимость, $', fontsize=14)
 
@@ -163,6 +186,6 @@ class GPTStatisticsMixin(GPTCommandProtocol):
         """
         Получение статистики в БД
         """
-        q |= Q(provider=self.provider.name)
+        q &= Q(provider=self.provider_model)
         res = Usage.objects.filter(q).aggregate(Sum('cost')).get('cost__sum')
         return res if res else 0
