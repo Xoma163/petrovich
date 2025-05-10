@@ -262,25 +262,6 @@ class ProfileGPTSettings(TimeStampModelMixin):
         else:
             self.key = Fernet.encrypt(key)
 
-    def save(
-            self,
-            *args,
-            force_insert=False,
-            force_update=False,
-            using=None,
-            update_fields=None,
-    ):
-        # TODO: TEMP
-        if self.key != "":
-            self.set_key(self.key)
-        super().save(
-            *args,
-            force_insert=False,
-            force_update=False,
-            using=None,
-            update_fields=None,
-        )
-
     def __str__(self):
         return str(self.profile)
 
