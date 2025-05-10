@@ -9,7 +9,8 @@ from apps.service.mixins import TimeStampModelMixin
 class Provider(models.Model):
     name = models.CharField(
         'Провайдер',
-        max_length=10,
+        unique=True,
+        max_length=32,
         choices=[(provider.value, provider.name) for provider in GPTProviderEnum],  # noqa
     )
 
@@ -183,7 +184,6 @@ class ImageEditModel(GPTImageModel):
         verbose_name_plural = "Модели редактирования изображений"
 
 
-
 class VoiceRecognitionModel(GPTModel):
     voice_recognition_1_min_cost = models.DecimalField(
         "Стоимость за 1 минуту распознования голоса",
@@ -261,6 +261,25 @@ class ProfileGPTSettings(TimeStampModelMixin):
             self.key = ""
         else:
             self.key = Fernet.encrypt(key)
+
+    def save(
+            self,
+            *args,
+            force_insert=False,
+            force_update=False,
+            using=None,
+            update_fields=None,
+    ):
+        # TODO: TEMP
+        if self.key != "":
+            self.set_key(self.key)
+        super().save(
+            *args,
+            force_insert=False,
+            force_update=False,
+            using=None,
+            update_fields=None,
+        )
 
     def __str__(self):
         return str(self.profile)
