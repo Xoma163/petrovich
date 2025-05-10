@@ -17,7 +17,7 @@ class ClaudeCommand(
     GPTVisionFunctionality
 ):
     name = "claude"
-    names = ["клауд"]
+    names = ["клауд", "клауди", "клауде", "клод"]
     access = Role.TRUSTED
     abstract = False
 
