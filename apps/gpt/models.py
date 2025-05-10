@@ -211,7 +211,7 @@ class ProfileGPTSettings(TimeStampModelMixin):
     )
     key = models.CharField(
         "Ключ провайдера",
-        max_length=256,
+        max_length=1024,
         blank=True
     )
     completions_model = models.ForeignKey(
