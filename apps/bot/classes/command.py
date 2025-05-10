@@ -12,10 +12,11 @@ from apps.bot.classes.messages.attachments.video import VideoAttachment
 from apps.bot.classes.messages.attachments.video_note import VideoNoteAttachment
 from apps.bot.classes.messages.attachments.voice import VoiceAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage
+from apps.bot.protocols import CommandProtocol
 from apps.bot.utils.utils import get_help_texts_for_command, transform_k
 
 
-class Command:
+class Command(CommandProtocol):
     # Основные поля команды
     name: str = ""  # Имя команды
     names: list = []  # Вспопогательные имена команды
@@ -44,7 +45,6 @@ class Command:
     city: bool = False  # Должно ли сообщение обрабатываться только с заданным городом у пользователя
     mentioned: bool = False  # Должно ли сообщение обрабатываться только с упоминанием бота
     non_mentioned: bool = False  # Должно ли сообщение обрабатываться только без упоминания бота
-    chat_gpt_key: bool = False  # Должно ли сообщение обрабатываться только для доверенных или пользователей с chat_gpt_key
 
     ATTACHMENT_TRANSLATOR = {
         AudioAttachment: 'аудио',
@@ -137,8 +137,6 @@ class Command:
             self.check_mentioned()
         if self.non_mentioned:
             self.check_non_mentioned()
-        if self.chat_gpt_key:
-            self.check_chat_gpt_key()
 
     def start(self) -> ResponseMessage | None:
         """
@@ -355,14 +353,6 @@ class Command:
             raise PWarning("Команда работает только без упоминания")
         return True
 
-    def check_chat_gpt_key(self):
-        """
-        Проверяет наличие ключа для ChatGPT или роли TRUSTED
-        """
-        if not self.event.sender.check_role(Role.GPT) and not self.event.sender.settings.chat_gpt_key:
-            raise PWarning(
-                f"Для использования ChatGPT укажите свой ключ (API_KEY) {self.bot.get_formatted_text_line('/gpt ключ (ключ)')}")
-
     def handle_menu(self, menu: list, arg: str):
         """
         Вызов 'подпрограмм' основной команды по присланному аргументу
@@ -395,7 +385,7 @@ class Command:
         return self.name
 
 
-class AcceptExtraMixin(Command):
+class AcceptExtraCommand(Command):
     @staticmethod
     def accept_extra(event):
         """

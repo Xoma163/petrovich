@@ -1,4 +1,4 @@
-from apps.bot.api.gpt.message import GPTMessages
+
 from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role
@@ -7,11 +7,14 @@ from apps.bot.classes.event.event import Event
 from apps.bot.classes.event.tg_event import TgEvent
 from apps.bot.classes.messages.attachments.sticker import StickerAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
-from apps.bot.commands.gpt.gemini import Gemini
-from apps.bot.commands.gpt.gwtf import GWTF
-from apps.bot.commands.gpt_with_key.chatgpt import ChatGPT
-from apps.bot.commands.gpt_with_key.wtf import WTF
 from apps.bot.utils.utils import random_probability, random_event
+from apps.gpt.commands.gpt.providers.chatgpt import ChatGPTCommand
+from apps.gpt.commands.gpt.providers.claude import ClaudeCommand
+from apps.gpt.commands.gpt.providers.grok import GrokCommand
+from apps.gpt.commands.wtf.providers.chatgpt_wtf import WTF
+from apps.gpt.commands.wtf.providers.claude_wtf import CWTF
+from apps.gpt.commands.wtf.providers.grok_wtf import GWTF
+from apps.gpt.messages.base import GPTMessages
 
 
 class Turett(Command):
@@ -171,10 +174,12 @@ class Turett(Command):
         self.bot.set_message_reaction(self.event.chat.chat_id, self.event.message.id, reaction, True)
         raise PSkipContinue()
 
+    # ToDo: test
     def _set_random_gpt_wtf_classes(self):
         classes = [
-            [ChatGPT, WTF],
-            [Gemini, GWTF]
+            [ChatGPTCommand, WTF],
+            [GrokCommand, GWTF],
+            [ClaudeCommand, CWTF]
         ]
         gpt_class, wtf_class = random_event(classes)
         self.gpt_class = gpt_class

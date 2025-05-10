@@ -54,7 +54,6 @@ class HelpText:
 
         self.keys_items: dict[Role, HelpTextItem] = {}
         for htk in help_text_keys:
-            htk: HelpTextItem
             self.keys_items[htk.role] = htk
 
     def get_help_text_item(self, role: Role) -> str | None:

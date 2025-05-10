@@ -2,7 +2,7 @@ import threading
 
 from apps.bot.api.media.youtube.video import YoutubeVideo
 from apps.bot.classes.bots.bot import send_message_to_moderator_chat
-from apps.bot.classes.command import AcceptExtraMixin
+from apps.bot.classes.command import AcceptExtraCommand
 from apps.bot.classes.const.consts import Role, Platform, ATTACHMENT_TYPE_TRANSLATOR
 from apps.bot.classes.const.exceptions import PWarning, PSkip
 from apps.bot.classes.event.event import Event
@@ -19,7 +19,7 @@ from apps.bot.utils.utils import tanimoto
 from apps.service.models import Meme as MemeModel
 
 
-class Meme(AcceptExtraMixin):
+class Meme(AcceptExtraCommand):
     name = "мем"
 
     help_text = HelpText(

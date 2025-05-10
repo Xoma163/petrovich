@@ -2,7 +2,7 @@ import random
 from urllib.parse import urlparse
 
 from apps.bot.classes.bots.tg_bot import TgBot
-from apps.bot.classes.command import AcceptExtraMixin
+from apps.bot.classes.command import AcceptExtraCommand
 from apps.bot.classes.const.consts import Role, Platform
 from apps.bot.classes.const.exceptions import PWarning, PSkip
 from apps.bot.classes.event.event import Event
@@ -31,7 +31,7 @@ from apps.bot.utils.utils import get_urls_from_text, get_flat_list, markdown_wra
 from apps.bot.utils.video.video_handler import VideoHandler
 
 
-class Media(AcceptExtraMixin):
+class Media(AcceptExtraCommand):
     name = "медиа"
     names = ["media"]
 

@@ -3,7 +3,6 @@ from django.core.files import File
 from django.db import models
 from django.utils.html import format_html
 
-from apps.bot.api.gpt.models import GPTModels
 from apps.bot.classes.const.consts import Platform as PlatformEnum, Role
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 from apps.service.mixins import TimeStampModelMixin
@@ -46,7 +45,6 @@ class ChatSettings(BaseSettings, TimeStampModelMixin):
 
 
 class ProfileSettings(BaseSettings, TimeStampModelMixin):
-    GPT_MODEL_CHOICES = [(x.name, x.verbose_name) for x in GPTModels.get_completions_models()]
 
     profile = models.OneToOneField("Profile", on_delete=models.CASCADE, verbose_name="Профиль",
                                    related_name="settings", blank=True, null=True)
@@ -59,13 +57,6 @@ class ProfileSettings(BaseSettings, TimeStampModelMixin):
     show_birthday_year = models.BooleanField('Показывать год', default=True)
     use_mention = models.BooleanField('Использовать упоминания', default=True)
 
-    # GPT
-    # Если указан, то будет использоваться он, иначе - общий
-    chat_gpt_key = models.CharField("Ключ GPT", max_length=256, blank=True)
-    chat_gpt_model = models.CharField("модель GPT", max_length=64, choices=GPT_MODEL_CHOICES, blank=True)
-
-    def get_gpt_model(self):
-        return GPTModels.get_model_by_name(self.chat_gpt_model)
 
     class Meta:
         verbose_name = "Настройка профиля"

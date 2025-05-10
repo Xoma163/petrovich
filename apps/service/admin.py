@@ -5,7 +5,7 @@ from django.utils.html import format_html
 
 from apps.service.mixins import TimeStampAdminMixin
 from apps.service.models import Service, Meme, Notify, City, Donation, TimeZone, Subscribe, Tag, VideoCache, \
-    GPTPrePrompt, GPTUsage, SubscribeItem
+    SubscribeItem
 
 
 @admin.register(Service)
@@ -147,20 +147,3 @@ class TagAdmin(TimeStampAdminMixin):
     list_filter = (('chat', admin.RelatedOnlyFieldListFilter), ('users', admin.RelatedOnlyFieldListFilter))
     ordering = ['name']
 
-
-@admin.register(GPTPrePrompt)
-class GPTPrepromptAdmin(TimeStampAdminMixin):
-    list_display = ('author', 'chat', 'provider', 'text')
-    list_filter = (
-        ('author', admin.RelatedOnlyFieldListFilter),
-        ('chat', admin.RelatedOnlyFieldListFilter),
-        'provider'
-    )
-
-
-@admin.register(GPTUsage)
-class GPTUsageAdmin(TimeStampAdminMixin):
-    list_display = ('author', 'cost',)
-    list_filter = (
-        ('author', admin.RelatedOnlyFieldListFilter),
-    )

@@ -1,6 +1,7 @@
 import copy
 
 from apps.bot.classes.const.consts import Platform, Role
+from apps.bot.classes.messages.attachments.attachment import Attachment
 from apps.bot.classes.messages.attachments.audio import AudioAttachment
 from apps.bot.classes.messages.attachments.document import DocumentAttachment
 from apps.bot.classes.messages.attachments.gif import GifAttachment
@@ -124,18 +125,18 @@ class Event:
         """
         Есть ли голосовое сообщение во вложениях
         """
-        for att in self.attachments:
-            if isinstance(att, VoiceAttachment):
-                return True
-        return False
+        return self.has_attachment(VoiceAttachment)
 
     @property
     def has_video_note(self):
         """
         Есть ли кружочек во вложениях
         """
+        return self.has_attachment(VideoNoteAttachment)
+
+    def has_attachment(self, attachment_type: type[Attachment]):
         for att in self.attachments:
-            if isinstance(att, VideoNoteAttachment):
+            if isinstance(att, attachment_type):
                 return True
         return False
 
