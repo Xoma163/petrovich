@@ -10,7 +10,8 @@ from django.db import connection
 class Command(BaseCommand):
     """
     Пример запуска
-    reset_migrations dev --apps bot service games
+    reset_migrations dev --apps bot service games gpt
+    reset_migrations prod --apps bot service games gpt
     """
 
     help = 'Сброс миграций и "типа" squah их в одну миграцию'
@@ -27,29 +28,27 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         help_text = [
-            "1) Запускаем скрипт на dev, он удалит все старые файлы миграций и сотрёт их из django_migrations в БД",
+            "1) Запускаем скрипт на dev, он удалит все старые файлы миграций и сотрет их из django_migrations в БД",
             "2) Коммитим новые миграции, удаляем из гита старые (не забываем)",
             "3) Проверяем себя showmigrations",
-            "4) Заливаем и комментим строку с makemigrations",
+            "4) Заливаем",
             "5) Запускаем скрипт на prod",
         ]
         parser.description = "\n".join(help_text)
         parser.add_argument(
             self.MODE,
             type=str,
-            help='Стенд на котором запускается скрипт. "prod" для продакшена, "dev" для дев стенда и локальной разработки.'
+            help='Стенд, на котором запускается скрипт. "prod" для продакшена, "dev" для дев стенда и локальной разработки.'
         )
-        parser.add_argument('apps', nargs='+', type=str)
         parser.add_argument(
             f"--{self.APPS}",
             type=str,
             nargs='+',
-            help='Список приложений в котором нужно произвести сброс миграций'
+            help='Список приложений, в которых нужно произвести сброс миграций'
         )
-
     def delete_django_migrations_db_app(self, app: str):
         self.stdout.write(f'Сброс миграций приложения "{app}" в БД')
-        self.cursor.execute(f"DELETE from django_migrations WHERE app = {app}")
+        self.cursor.execute(f"DELETE from django_migrations WHERE app = '{app}'")
 
     def delete_migrations_files_app(self, app: str):
         self.stdout.write(f'Удаление миграций приложения "{app}" в файлах')
