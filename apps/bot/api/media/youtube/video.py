@@ -108,7 +108,8 @@ class YoutubeVideo(SubscribeService):
             thumbnail_url=self._get_thumbnail(video_info),
             channel_id=video_info['channel_id'],
             video_id=video_info['id'],
-            channel_title=video_info['channel']
+            channel_title=video_info['channel'],
+            is_short_video="/shorts/" in url
         )
 
     def download_video(self, data: VideoData) -> VideoAttachment:
@@ -345,7 +346,7 @@ class YoutubeVideo(SubscribeService):
                 video_info = self._get_video_info(url)
             except PWarning:
                 continue
-            if video_info['duration'] <= 60:
+            if video_info['duration'] <= 120:
                 continue
             video = SubscribeServiceNewVideoData(
                 id=ids[i],

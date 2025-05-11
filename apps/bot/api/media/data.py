@@ -22,6 +22,7 @@ class VideoData:
     filename: str | None = None
     m3u8_master_url: str | None = None
     extra_data: dict | None = None  # to save smth in context
+    is_short_video: bool | None = None
 
 
 @dataclasses.dataclass
