@@ -4,6 +4,7 @@ from django.urls import reverse
 from django.utils.html import format_html
 
 from apps.bot.models import Profile, Chat, Bot, User, ChatSettings, ProfileSettings
+from apps.gpt.admin import ProfileGPTSettingsInline
 from apps.service.mixins import TimeStampAdminMixin
 
 
@@ -46,7 +47,7 @@ class ProfileSettingsInline(admin.StackedInline):
 @admin.register(Profile)
 class ProfileAdmin(TimeStampAdminMixin):
     list_display = ('name', 'surname', 'nickname_real', 'gender', 'birthday', 'city', 'get_chats_count')
-    inlines = (ProfileSettingsInline, UserInline)
+    inlines = (ProfileSettingsInline, ProfileGPTSettingsInline, UserInline)
     fieldsets = (
         (
             'Profile Info',

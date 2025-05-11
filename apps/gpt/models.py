@@ -58,7 +58,7 @@ class GPTModel(models.Model):
 
     name = models.CharField(max_length=256, verbose_name="Название модели в API")
     verbose_name = models.CharField(max_length=256, verbose_name="Название модели для пользователя")
-    is_default = models.BooleanField(default=False)
+    is_default = models.BooleanField(default=False, verbose_name="Модель по умолчанию")
 
     def __str__(self):
         return self.name
@@ -94,7 +94,7 @@ class GPTCompletionsVisionModel(GPTModel):
 class CompletionsModel(GPTCompletionsVisionModel):
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['name'], name='unique_name_completion_model')
+            models.UniqueConstraint(fields=['name', 'provider'], name='unique_name_completion_model')
         ]
 
         verbose_name = "Модель обработки текста"
@@ -104,7 +104,7 @@ class CompletionsModel(GPTCompletionsVisionModel):
 class VisionModel(GPTCompletionsVisionModel):
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['name'], name='unique_name_vision_model')
+            models.UniqueConstraint(fields=['name', 'provider'], name='unique_name_vision_model')
         ]
 
         verbose_name = "Модель обработки изображений"
@@ -159,7 +159,7 @@ class ImageDrawModel(GPTImageModel):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=['name', 'width', 'height', 'quality'],
+                fields=['name', 'width', 'height', 'quality', 'provider'],
                 name='unique_name_width_height_quality_img_draw'
             )
         ]
@@ -177,7 +177,8 @@ class ImageEditModel(GPTImageModel):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['name', 'width', 'height'], name='unique_name_width_height_image_edit')
+            models.UniqueConstraint(fields=['name', 'width', 'height', 'provider'],
+                                    name='unique_name_width_height_image_edit')
         ]
 
         verbose_name = "Модель редактирования изображений"
@@ -193,7 +194,7 @@ class VoiceRecognitionModel(GPTModel):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['name'], name='unique_name_voice_recognition_model')
+            models.UniqueConstraint(fields=['name', 'provider'], name='unique_name_voice_recognition_model')
         ]
 
         verbose_name = "Модель распознования голоса"
@@ -266,5 +267,7 @@ class ProfileGPTSettings(TimeStampModelMixin):
         return str(self.profile)
 
     class Meta:
-        verbose_name = "Настройка пользователя"
-        verbose_name_plural = "Настройки пользователя"
+        unique_together = ('profile', 'provider')
+
+        verbose_name = "Настройка профиля GPT"
+        verbose_name_plural = "Настройки профиля GPT"
