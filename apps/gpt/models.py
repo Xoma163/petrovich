@@ -156,6 +156,9 @@ class ImageDrawModel(GPTImageModel):
     def standar_quality(self):
         return self.quality.lower() in ["High", "HD"]
 
+    def __str__(self):
+        return f"{self.name} | {self.size} | {self.quality}"
+
     class Meta:
         constraints = [
             models.UniqueConstraint(

@@ -14,14 +14,14 @@ class GPTImageDrawFunctionality(GPTCommandProtocol):
     IMAGE_DRAW_HELP_TEXT_ITEMS = [
         HelpTextArgument(
             "нарисуй (фраза/пересланное сообщение)",
-            "генерация картинки"
+            "генерация изображения"
         )
     ]
 
     IMAGE_EDIT_HELP_TEXT_ITEMS = [
         HelpTextArgument(
-            "фотошоп (фраза) [картинка]",
-            "редактирование и генерация картинки"
+            "фотошоп (фраза) [изображение]",
+            "редактирование и генерация изображения"
         )
     ]
 
@@ -33,12 +33,12 @@ class GPTImageDrawFunctionality(GPTCommandProtocol):
     KEY_ITEM_COUNT = HelpTextKey(
         "(число)",
         [],
-        "нарисуй пришлёт несколько картинок. Максимум 10"
+        "нарисуй пришлёт несколько изображений. Максимум 10"
     )
     KEY_ITEM_HD = HelpTextKey(
         "hd",
         ['xd', 'hq', 'хд'],
-        "нарисуй пришлёт картинки в высоком качестве"
+        "нарисуй пришлёт изображения в высоком качестве"
     )
     KEY_ITEMS_FORMAT = [
         HelpTextKey(
@@ -57,6 +57,10 @@ class GPTImageDrawFunctionality(GPTCommandProtocol):
             "нарисуй пришлёт портретную картинку"
         )
     ]
+
+    EXTRA_TEXT = (
+        "По умолчанию для генерации изображения выбирается модель с качеством Standard и квадратным разрешением"
+    )
 
     # MENU
 
@@ -202,7 +206,7 @@ class GPTImageDrawFunctionality(GPTCommandProtocol):
 
     def _get_image_format(self) -> GPTImageFormat:
         """
-        Получение формата картинки, которую хочет получить пользователь.
+        Получение формата изображения, которую хочет получить пользователь.
 
         По умолчанию SQUARE
         """
@@ -216,7 +220,7 @@ class GPTImageDrawFunctionality(GPTCommandProtocol):
 
     def _get_quality(self) -> GPTImageQuality:
         """
-        Получение качества картинки, которую хочет получить пользователь.
+        Получение качества изображения, которую хочет получить пользователь.
 
         По умолчанию MEDIUM
         """
@@ -227,7 +231,7 @@ class GPTImageDrawFunctionality(GPTCommandProtocol):
 
     def _get_images_count_by_keys(self) -> int:
         """
-        Определение числа картинок, которое хочет сгенерировать пользователь
+        Определение числа изображений, которое хочет сгенерировать пользователь
         """
 
         count = 1
@@ -238,7 +242,7 @@ class GPTImageDrawFunctionality(GPTCommandProtocol):
                     break
         MAX_IMAGES_COUNT = 10
         if count > MAX_IMAGES_COUNT:
-            raise PWarning(f"Максимальное число картинок в запросе - {MAX_IMAGES_COUNT}")
+            raise PWarning(f"Максимальное число изображений в запросе - {MAX_IMAGES_COUNT}")
         return count
 
     def _get_use_original_image(self) -> bool:

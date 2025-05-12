@@ -48,5 +48,5 @@ class GrokCommand(
                            ] + GPTStatisticsMixin.STATISTICS_KEY_ITEMS_KEY
             )
         ],
-        extra_text=f"{GPTCommand.EXTRA_TEXT}\n\n{GPTPrepromptMixin.EXTRA_TEXT}"
+        extra_text=f"{GPTCommand.EXTRA_TEXT}\n\n{GPTPrepromptMixin.EXTRA_TEXT}\n\n{GPTImageDrawFunctionality.EXTRA_TEXT}"
     )
