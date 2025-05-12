@@ -1,61 +1,141 @@
 from django.contrib import admin
-from django.templatetags.static import static
-from django.urls import reverse
-from django.utils.html import format_html
 
+from apps.service.inlines import SubscribeInline
 from apps.service.mixins import TimeStampAdminMixin
-from apps.service.models import Service, Meme, Notify, City, Donation, TimeZone, Subscribe, Tag, VideoCache, \
+from apps.service.models import (
+    Service,
+    Meme,
+    Notify,
+    City,
+    Donation,
+    TimeZone,
+    Subscribe,
+    Tag,
+    VideoCache,
     SubscribeItem
+)
 
 
 @admin.register(Service)
 class ServiceAdmin(TimeStampAdminMixin):
-    list_display = ('name', 'value', 'update_datetime')
+    list_display = (
+        'name',
+        'value',
+        'update_datetime'
+    )
 
 
 @admin.register(Meme)
 class MemeAdmin(TimeStampAdminMixin):
     list_display = (
-        'id', 'name', 'preview_image', 'preview_link', 'author', 'approved', 'type', 'uses', 'inline_uses', 'link',
-        'tg_file_id', "for_trusted"
+        'id',
+        'name',
+        'author',
+        'approved',
+        'type',
+        'uses',
+        'inline_uses',
+        'link',
+        'has_tg_file_id',
+        "for_trusted"
     )
-    search_fields = ('name', 'link')
-    list_filter = (('author', admin.RelatedOnlyFieldListFilter), 'type', 'approved', 'for_trusted')
-    ordering = ["name"]
+    search_fields = (
+        'name',
+        'link'
+    )
+    list_filter = (
+        ('author', admin.RelatedOnlyFieldListFilter),
+        'type',
+        'approved',
+        'for_trusted'
+    )
+    list_select_related = (
+        'author',
+    )
+    ordering = (
+        "name",
+    )
+
+    @admin.display(description="Есть tg_file_id", boolean=True)
+    def has_tg_file_id(self, obj: Meme) -> bool:
+        return bool(obj.tg_file_id)
 
 
 @admin.register(Notify)
 class NotifyAdmin(TimeStampAdminMixin):
-    list_display = ('id', 'date', 'crontab', 'text', 'user', 'chat')
-    search_fields = ['date', 'crontab', 'text']
-    list_filter = (('user', admin.RelatedOnlyFieldListFilter), ('chat', admin.RelatedOnlyFieldListFilter),)
-    ordering = ["user"]
+    list_display = (
+        'id',
+        'date',
+        'crontab',
+        'text',
+        'user',
+        'chat'
+    )
+    search_fields = (
+        'date',
+        'crontab',
+        'text'
+    )
+    list_filter = (
+        ('user', admin.RelatedOnlyFieldListFilter),
+        ('chat', admin.RelatedOnlyFieldListFilter),
+    )
+    list_select_related = (
+        'user',
+        'chat'
+    )
+    ordering = (
+        "user",
+    )
+
 
 
 @admin.register(City)
 class CityAdmin(admin.ModelAdmin):
-    search_fields = ('name',)
-    list_display = ('name', 'synonyms', 'timezone', 'lat', 'lon')
-    ordering = ["name"]
+    list_display = (
+        'name',
+        'synonyms',
+        'timezone',
+        'lat',
+        'lon'
+    )
+    search_fields = (
+        'name',
+    )
+    ordering = (
+        "name",
+    )
 
 
 @admin.register(TimeZone)
 class TimeZoneAdmin(admin.ModelAdmin):
-    search_fields = ('name',)
-    list_display = ('name',)
-    ordering = ["name"]
+    list_display = (
+        "name",
+    )
+    search_fields = (
+        "name",
+    )
+    ordering = (
+        "name",
+    )
 
 
 @admin.register(Donation)
 class DonationAdmin(TimeStampAdminMixin):
-    list_display = ('username', 'amount', 'currency', 'message', 'date')
-    ordering = ['-date']
+    list_display = (
+        'username',
+        'amount',
+        'currency',
+        'message',
+        'date'
+    )
+    ordering = (
+        '-date',
+    )
 
 
-class SubscribeInline(admin.TabularInline):
-    model = Subscribe
-    can_delete = False
-    extra = 0
+
+
 
 
 @admin.register(SubscribeItem)
@@ -64,7 +144,6 @@ class SubscribeItemAdmin(TimeStampAdminMixin):
         'channel_title',
         'playlist_title',
         'service',
-        'get_subscribes',
         'get_subscribes_count',
         'save_to_disk_admin',
         'high_resolution_admin',
@@ -72,48 +151,35 @@ class SubscribeItemAdmin(TimeStampAdminMixin):
     )
     list_filter = (
         'service',
+        ('subscribes__chat', admin.RelatedOnlyFieldListFilter),
     )
-    search_fields = ('channel_title', 'playlist_title', 'last_videos_id')
-    ordering = ['channel_title']
-    inlines = (SubscribeInline,)
-
-    # list_select_related = ('subscribes',)
-
-    @admin.display(description='Подписки')
-    def get_subscribes(self, obj: SubscribeItem):
-        subscribes = obj.subscribes.all()
-        links = [
-            format_html(
-                '<a href="{url}">{name}</a>',
-                url=reverse('admin:service_subscribe_change', args=[subscribe.id]),
-                name=str(subscribe)
-            )
-            for subscribe in subscribes
-        ]
-        return format_html("<br>".join(links))
+    search_fields = (
+        'channel_title',
+        'playlist_title',
+        'last_videos_id'
+    )
+    inlines = (
+        SubscribeInline,
+    )
+    ordering = (
+        'channel_title',
+    )
 
     @admin.display(description='Количество подписок')
-    def get_subscribes_count(self, obj: SubscribeItem):
+    def get_subscribes_count(self, obj: SubscribeItem) -> int:
         return obj.subscribes.all().count()
 
-    @admin.display(description='Сохранять на диск')
+    @admin.display(description='Сохранять на диск', boolean=True)
     def save_to_disk_admin(self, obj: SubscribeItem) -> bool:
-        return self._get_boolean_icon(obj.save_to_disk)
+        return obj.save_to_disk
 
-    @admin.display(description='Высокое разрешение')
+    @admin.display(description='Высокое разрешение', boolean=True)
     def high_resolution_admin(self, obj: SubscribeItem) -> bool:
-        return self._get_boolean_icon(obj.high_resolution)
+        return obj.high_resolution
 
-    @admin.display(description='Принудительно кэшировать')
+    @admin.display(description='Принудительно кэшировать', boolean=True)
     def force_cache_admin(self, obj: SubscribeItem) -> bool:
-        return self._get_boolean_icon(obj.force_cache)
-
-    @staticmethod
-    def _get_boolean_icon(value):
-        gif_filename_map = {True: 'yes', False: 'no', None: 'unknown'}
-        gif_filename = gif_filename_map[value]
-        icon_url = static(f'admin/img/icon-{gif_filename}.svg')
-        return format_html(f'<img src="{icon_url}" alt="{value}" />', )
+        return obj.force_cache
 
 
 @admin.register(Subscribe)
@@ -137,13 +203,28 @@ class SubscribeAdmin(TimeStampAdminMixin):
 
 @admin.register(VideoCache)
 class VideoCacheAdmin(TimeStampAdminMixin):
-    list_display = ('filename',)
-    ordering = ['filename']
+    list_display = (
+        'filename',
+        'original_url',
+    )
+    ordering = (
+        'filename',
+    )
 
 
 @admin.register(Tag)
 class TagAdmin(TimeStampAdminMixin):
-    list_display = ('name', 'chat')
-    list_filter = (('chat', admin.RelatedOnlyFieldListFilter), ('users', admin.RelatedOnlyFieldListFilter))
-    ordering = ['name']
-
+    list_display = (
+        'name',
+        'chat'
+    )
+    list_filter = (
+        ('chat', admin.RelatedOnlyFieldListFilter),
+        ('users', admin.RelatedOnlyFieldListFilter)
+    )
+    list_select_related = (
+        'chat',
+    )
+    ordering = (
+        'name',
+    )

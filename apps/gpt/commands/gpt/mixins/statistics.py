@@ -50,7 +50,7 @@ class GPTStatisticsMixin(GPTCommandProtocol):
         else:
             profiles = [self.event.sender]
 
-        text_answer = self._get_statistics_for_user(profiles)
+        text_answer = self._get_statistics_for_users(profiles)
         if not text_answer:
             raise PWarning("Ещё не было использований GPT")
 
@@ -63,11 +63,7 @@ class GPTStatisticsMixin(GPTCommandProtocol):
 
     # HANDLERS
 
-    # def _get_statistics_for_key(self, profile: Profile):
-    # profiles =
-    # stats_all = self._get_stat_db_profile(Q(author=profile))
-
-    def _get_statistics_for_user(self, profiles: list[Profile]) -> str | None:
+    def _get_statistics_for_users(self, profiles: list[Profile]) -> str | None:
         """
         Получение статистики
         """

@@ -1,6 +1,5 @@
 from django.db import models
 from django.db.models import JSONField
-from django.utils.html import format_html
 
 from apps.bot.models import Chat, Profile, User
 from apps.service.mixins import TimeStampModelMixin
@@ -78,17 +77,6 @@ class BaseMeme(TimeStampModelMixin):
             info += "\nДля доверенных: Да"
         return info
 
-    def preview_image(self):
-        if self.link and self.type == 'photo':
-            return format_html('<img src="{src}" width="150"/>', src=self.link)
-        else:
-            return '(Нет изображения)'
-
-    def preview_link(self):
-        if self.link:
-            return format_html('<a href="{href}">Тык</a>', href=self.link)
-        else:
-            return '(Нет изображения)'
 
     class Meta:
         abstract = True
