@@ -273,12 +273,15 @@ class ProfileGPTSettings(TimeStampModelMixin):
             'vision_model': self.vision_model,
             'voice_recognition_model': self.voice_recognition_model,
         }
+
+        errors = {}
+        error_template = "Провайдер модели ({provider_model}) не совпадает с провайдером настроек ({provider_self})."
         for model_name, model_instance in models_to_check.items():
             if model_instance and model_instance.provider != self.provider:
-                raise ValidationError(
-                    {
-                        model_name: f"Провайдер модели ({model_instance.provider}) не совпадает с провайдером настроек ({self.provider})."}
-                )
+                errors[model_name] = error_template.format(provider_model=model_instance.provider,
+                                                           provider_self=self.provider)
+        if len(errors) > 0:
+            raise ValidationError(errors)
 
     class Meta:
         unique_together = ('profile', 'provider')
