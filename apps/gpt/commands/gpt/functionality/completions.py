@@ -88,5 +88,10 @@ class GPTCompletionsFunctionality(GPTCommandProtocol):
 
     # UTILS
 
+    # ToDo это здесь временно
+
     def get_voice_recognition_model(self) -> VoiceRecognitionModel:
         return self.get_model(VoiceRecognitionModel, "voice_recognition_model")
+
+    def get_default_voice_recognition_model(self) -> CompletionsModel:
+        return self.get_default_model(VoiceRecognitionModel)

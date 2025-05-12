@@ -33,10 +33,13 @@ class ChatGPTCommand(
                 GPTCompletionsFunctionality.COMPLETIONS_HELP_TEXT_ITEMS +
                 GPTVisionFunctionality.VISION_HELP_TEXT_ITEMS +
                 GPTImageDrawFunctionality.IMAGE_DRAW_HELP_TEXT_ITEMS +
-                GPTImageDrawFunctionality.IMAGE_EDIT_HELP_TEXT_ITEMS +
                 GPTPrepromptMixin.PREPROMPT_HELP_TEXT_ITEMS +
                 GPTStatisticsMixin.STATISTICS_HELP_TEXT_ITEMS +
                 GPTModelChoiceMixin.MODEL_CHOOSE_HELP_TEXT_ITEMS +
+                GPTModelChoiceMixin.COMPLETIONS_HELP_TEXT_ITEMS +
+                GPTModelChoiceMixin.VISION_HELP_TEXT_ITEMS +
+                GPTModelChoiceMixin.IMAGE_DRAW_HELP_TEXT_ITEMS +
+                GPTModelChoiceMixin.VOICE_RECOGNITION_HELP_TEXT_ITEMS +
                 GPTKeyMixin.KEY_HELP_TEXT_ITEMS
             )
         ],

@@ -33,6 +33,8 @@ class ClaudeCommand(
                 GPTPrepromptMixin.PREPROMPT_HELP_TEXT_ITEMS +
                 GPTStatisticsMixin.STATISTICS_HELP_TEXT_ITEMS +
                 GPTModelChoiceMixin.MODEL_CHOOSE_HELP_TEXT_ITEMS +
+                GPTModelChoiceMixin.COMPLETIONS_HELP_TEXT_ITEMS +
+                GPTModelChoiceMixin.VISION_HELP_TEXT_ITEMS +
                 GPTKeyMixin.KEY_HELP_TEXT_ITEMS
 
             )

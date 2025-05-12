@@ -176,7 +176,7 @@ class GPTImageDrawFunctionality(GPTCommandProtocol):
 
         if len(available_models) == 0:
             raise PWarning(
-                "Не смог определить какую модель с какими характеристиками нужно использовать. Сообщите админу"
+                "Не смог определить какую модель с какими характеристиками нужно использовать. Проверьте ваш запрос и доступные модели"
             )
         if len(available_models) > 1:
             raise PWarning(
