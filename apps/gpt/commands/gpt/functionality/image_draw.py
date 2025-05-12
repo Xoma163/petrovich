@@ -158,20 +158,30 @@ class GPTImageDrawFunctionality(GPTCommandProtocol):
     # COMMON UTILS
 
     def get_image_draw_model_with_parameters(self) -> ImageDrawModel:
-        image_format = self._get_image_format()
-        quality = self._get_quality()
-
-        image_draw_models = ImageDrawModel.objects.filter(provider=self.provider_model)
-
         current_image_model = self.get_image_draw_model()
-        available_models = [x for x in image_draw_models if
-                            x.image_quality == quality and x.image_format == image_format and x.name == current_image_model.name]
+
+        image_quality = self._get_image_quality() or current_image_model.image_quality
+        image_format = self._get_image_format() or current_image_model.image_format
+
+        image_draw_models = ImageDrawModel.objects.filter(
+            provider=self.provider_model,
+            name=current_image_model.name
+        )
+
+        available_models = [
+            model for model in image_draw_models
+            if model.image_quality == image_quality and \
+               model.image_format == image_format
+        ]
+
         if len(available_models) == 0:
             raise PWarning(
-                "Не смог определить какую модель с какими характеристиками нужно использовать. Сообщите админу")
-        if len(available_models) == 0:
+                "Не смог определить какую модель с какими характеристиками нужно использовать. Сообщите админу"
+            )
+        if len(available_models) > 1:
             raise PWarning(
-                "Не смог определить какую модель с какими характеристиками нужно использовать. Сообщите админу")
+                "Не смог определить какую модель с какими характеристиками нужно использовать. Подходит сразу несколько. Сообщите админу"
+            )
         return available_models[0]
 
     def get_image_draw_model(self) -> ImageDrawModel:
@@ -204,7 +214,7 @@ class GPTImageDrawFunctionality(GPTCommandProtocol):
         else:
             raise PWarning("Должен быть текст или пересланное сообщение")
 
-    def _get_image_format(self) -> GPTImageFormat:
+    def _get_image_format(self) -> GPTImageFormat | None:
         """
         Получение формата изображения, которую хочет получить пользователь.
 
@@ -216,9 +226,9 @@ class GPTImageDrawFunctionality(GPTCommandProtocol):
             return GPTImageFormat.LANDSCAPE
         elif self.event.message.is_key_provided({'portair', 'портрет', 'портретная', 'портретную'}):
             return GPTImageFormat.PORTAIR
-        return GPTImageFormat.SQUARE
+        return None
 
-    def _get_quality(self) -> GPTImageQuality:
+    def _get_image_quality(self) -> GPTImageQuality | None:
         """
         Получение качества изображения, которую хочет получить пользователь.
 
@@ -227,7 +237,7 @@ class GPTImageDrawFunctionality(GPTCommandProtocol):
 
         if self.event.message.is_key_provided({"hd", "xd", "hq", "хд"}):
             return GPTImageQuality.HIGH
-        return GPTImageQuality.MEDIUM
+        return None
 
     def _get_images_count_by_keys(self) -> int:
         """

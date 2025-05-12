@@ -140,21 +140,15 @@ class ImageDrawModel(GPTImageModel):
     quality = models.CharField("Название качества модели в API", max_length=32)
 
     @property
-    def image_quality(self) -> GPTImageQuality:
-        if self.quality.lower() in ['high', 'hd']:
+    def image_quality(self) -> GPTImageQuality | None:
+        quality = self.quality.lower()
+        if quality in ['high', 'hd']:
             return GPTImageQuality.HIGH
-        elif self.quality.lower() in ['medium', 'md', 'standart', 'standard']:
+        elif quality in ['medium', 'md', 'standart', 'standard']:
             return GPTImageQuality.MEDIUM
-        else:
+        elif quality in ['low']:
             return GPTImageQuality.LOW
-
-    @property
-    def high_quality(self):
-        return self.quality.lower() in ["High", "HD"]
-
-    @property
-    def standar_quality(self):
-        return self.quality.lower() in ["High", "HD"]
+        return None
 
     def __str__(self):
         return f"{self.name} | {self.size} | {self.quality}"
