@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 
 from apps.bot.models import Profile, Chat
@@ -262,6 +263,22 @@ class ProfileGPTSettings(TimeStampModelMixin):
 
     def __str__(self):
         return str(self.profile)
+
+    def clean(self):
+        super().clean()
+        models_to_check = {
+            'completions_model': self.completions_model,
+            'image_draw_model': self.image_draw_model,
+            'image_edit_model': self.image_edit_model,
+            'vision_model': self.vision_model,
+            'voice_recognition_model': self.voice_recognition_model,
+        }
+        for model_name, model_instance in models_to_check.items():
+            if model_instance and model_instance.provider != self.provider:
+                raise ValidationError(
+                    {
+                        model_name: f"Провайдер модели ({model_instance.provider}) не совпадает с провайдером настроек ({self.provider})."}
+                )
 
     class Meta:
         unique_together = ('profile', 'provider')
