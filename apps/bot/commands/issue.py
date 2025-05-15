@@ -69,7 +69,7 @@ class Issue(Command):
 
         photos = self.event.get_all_attachments([PhotoAttachment])
         if photos:
-            body.append(issue.get_text_for_images_in_body(photos))
+            body.append(issue.get_text_for_images_in_body(photos, log_filter=self.event.log_filter))
 
         body.append(self.BODY_FINE_PRINT_TEMPLATE.format(sender=self.event.sender, id=self.event.sender.pk))
         body = "\n\n".join(body)

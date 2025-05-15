@@ -17,11 +17,11 @@ class GithubAPI(API):
     ISSUES_URL = f'{BASE_API_URL}/issues'
     LABELS_URL = f'{BASE_API_URL}/labels'
 
-    def get_text_for_images_in_body(self, images: list[PhotoAttachment]) -> str:
+    def get_text_for_images_in_body(self, images: list[PhotoAttachment], log_filter=None) -> str:
         result = []
         for image in images:
             from apps.bot.api.imgur import Imgur
-            i_api = Imgur(log_filter=self.event.log_filter)
+            i_api = Imgur(log_filter=log_filter)
             image_url = i_api.upload_image(image.download_content())
             result.append(f"![image]({image_url})")
         return "\n" + "\n".join(result)
