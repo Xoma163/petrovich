@@ -1,4 +1,5 @@
 from apps.bot.api.handler import API
+from apps.bot.classes.const.exceptions import PWarning
 from petrovich.settings import env
 
 
@@ -8,12 +9,14 @@ class Imgur(API):
     HOST = "https://api.imgur.com"
     URL_UPLOAD = f"{HOST}/3/upload"
 
-    HEADERS = {"Authorization": f"Bearer {ACCESS_TOKEN}"}
+    HEADERS = {"Authorization": f"Client-ID {ACCESS_TOKEN}"}
 
     def upload_image(self, image: bytes) -> str:
         files = {
             "image": image
         }
         r = self.requests.post(self.URL_UPLOAD, files=files, headers=self.HEADERS).json()
-
-        return r['data']['link']
+        try:
+            return r['data']['link']
+        except KeyError:
+            raise PWarning("Ошибка на стороне Imgur")

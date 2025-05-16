@@ -2,6 +2,7 @@ import re
 
 from apps.bot.api.github.issue import GithubIssueAPI
 from apps.bot.classes.command import Command
+from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.event.event import Event
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
@@ -31,15 +32,23 @@ class GithubReply(Command):
 
         comment = self.event.message.raw
         body = [comment]
+
+        error_msg = None
         photos = self.event.get_all_attachments([PhotoAttachment])
         if photos:
-            body.append(issue.get_text_for_images_in_body(photos, log_filter=self.event.log_filter))
+            try:
+                body.append(issue.get_text_for_images_in_body(photos, log_filter=self.event.log_filter))
+            except PWarning:
+                error_msg = "Загрузка картинок временно не работает. Пожалуйста, загрузите вручную"
+
         body.append(self.BODY_FINE_PRINT_TEMPLATE.format(sender=self.event.sender, id=self.event.sender.pk))
         body = "\n\n".join(body)
         issue.add_comment(body)
 
         self.send_comment_info_to_admin(issue, comment)
         answer = "Успешно оставил ваш комментарий"
+        if error_msg:
+            answer += f"\n{error_msg}"
         return ResponseMessage(ResponseMessageItem(text=answer))
 
     def send_comment_info_to_admin(self, issue: GithubIssueAPI, comment):
