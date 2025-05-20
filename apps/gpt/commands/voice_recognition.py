@@ -92,7 +92,11 @@ class VoiceRecognition(AcceptExtraCommand):
                 model = VoiceRecognitionModel.objects.get(provider=chat_gpt_provider, is_default=True)
             except VoiceRecognitionModel.DoesNotExist:
                 raise PError("Не установлена модель для обработки аудио. Сообщите админу")
-            profile_gpt_settings = self.event.sender.gpt_settings.get(provider=chat_gpt_provider)
+
+            profile_gpt_settings, created = self.event.sender.gpt_settings.get_or_create(
+                provider=chat_gpt_provider,
+                defaults={'profile': self.event.sender}
+            )
 
             api_key = profile_gpt_settings.get_key() or ChatGPTProvider.api_key
             chat_gpt_api = ChatGPTAPI(log_filter=self.event.log_filter, sender=self.event.sender, api_key=api_key)
