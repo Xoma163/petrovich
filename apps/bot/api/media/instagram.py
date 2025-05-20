@@ -1,5 +1,6 @@
 from apps.bot.api.handler import API
 from apps.bot.classes.const.exceptions import PWarning
+from apps.bot.utils.proxy import get_proxies
 from petrovich.settings import env
 
 
@@ -34,13 +35,19 @@ class Instagram(API):
         "X-RapidAPI-Host": HOST
     }
 
+    LOCATION_BANNED_ERROR = "Sorry, we are unable to provide RapidAPI services to your location"
+
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.requests.headers = self.HEADERS
 
     def get_data(self, instagram_link) -> InstagramAPIData:
         params = {"code_or_id_or_url": instagram_link}
-        r = self.requests.get(self.URL, params=params).json()
+        r = self.requests.get(self.URL, params=params, proxies=get_proxies()).json()
+        if error_message := r.get("messages"):
+            if error_message.startswith(self.LOCATION_BANNED_ERROR):
+                raise PWarning("API забанили. Я в курсе проблемы, постараюсь решить как можно скорее")
         if not r.get('data'):
             raise PWarning("Ошибка API")
         return self._parse_response(r['data'])
