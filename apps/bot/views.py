@@ -10,6 +10,7 @@ from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.const.exceptions import PError
 from apps.bot.classes.messages.response_message import ResponseMessageItem
 from apps.bot.mixins import CSRFExemptMixin
+from apps.bot.utils.utils import get_admin_profile
 
 
 class APIView(CSRFExemptMixin, View):
@@ -65,9 +66,15 @@ class GithubView(CSRFExemptMixin, View):
     AUTO_GENERATED_COMMENT_STR = "Данный комментарий сгенерирован автоматически"
     @staticmethod
     def send_notify_to_user(issue: GithubIssueAPI, text):
-        if not issue.author:
+        user_profile = issue.author
+        if not user_profile:
             return
-        user = issue.author.get_tg_user()
+
+        admin_profile = get_admin_profile(exclude_profile=issue.author)
+        if user_profile == admin_profile:
+            return
+
+        user = user_profile.get_tg_user()
         bot = TgBot()
         rmi = ResponseMessageItem(text=text, peer_id=user.user_id)
         bot.send_response_message_item(rmi)
