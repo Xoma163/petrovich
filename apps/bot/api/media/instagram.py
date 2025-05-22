@@ -100,6 +100,7 @@ class Instagram:
         self._init_client()
         if os.path.exists(self.SESSION_FILE):
             self.client.load_settings(Path(self.SESSION_FILE))
+            self.client.login(self.LOGIN, self.PASSWORD)
         else:
             # ToDo: здесь используется input ввод, сделать TOTP?
             #  https://subzeroid.github.io/instagrapi/usage-guide/totp.html
@@ -113,7 +114,7 @@ class Instagram:
             media_pk = match.group(1)
         else:
             media_pk = self.client.media_pk_from_url(instagram_link)
-        media_info = self.client.media_info(media_pk)
+        media_info = self.client.media_info_v1(media_pk)
         try:
             return self._parse_response(media_info)
         except LoginRequired:
