@@ -1,4 +1,10 @@
-from apps.bot.api.handler import API
+import os
+import re
+from pathlib import Path
+
+from instagrapi import Client
+from instagrapi.exceptions import LoginRequired
+
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.utils.proxy import get_proxies
 from petrovich.settings import env
@@ -24,55 +30,114 @@ class InstagramAPIData:
     def add_item(self, item: InstagramAPIDataItem):
         self.items.append(item)
 
+    def add_video(self, download_url: str):
+        item = InstagramAPIDataItem(
+            content_type=InstagramAPIDataItem.CONTENT_TYPE_VIDEO,
+            download_url=download_url
+        )
+        self.add_item(item)
 
-class Instagram(API):
-    RAPID_API_KEY = env.str("RAPID_API_KEY")
-
-    HOST = "instagram-scraper-api2.p.rapidapi.com"
-    URL = f'https://{HOST}/v1/post_info'
-    HEADERS = {
-        "X-RapidAPI-Key": RAPID_API_KEY,
-        "X-RapidAPI-Host": HOST
-    }
-
-    LOCATION_BANNED_ERROR = "Sorry, we are unable to provide RapidAPI services to your location"
+    def add_image(self, download_url: str):
+        item = InstagramAPIDataItem(
+            content_type=InstagramAPIDataItem.CONTENT_TYPE_IMAGE,
+            download_url=download_url
+        )
+        self.add_item(item)
 
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.requests.headers = self.HEADERS
+class Instagram:
+    LOGIN = env.str("INSTAGRAM_LOGIN")
+    PASSWORD = env.str("INSTAGRAM_PASSWORD")
+
+    SESSION_FILE = "secrets/instagram_session.json"
+
+    def __init__(self):
+        self.client: Client | None = None
+
+    def _init_client(self):
+        instagram_app_version = "269.0.0.18.75"
+        android_version = 35
+        android_release = "15.0.0"
+        dpi = "500dpi"
+        resolution = "3088x1440"
+        device_manufacturer = "samsung"
+        device_name = "SM-S908E"
+        device_model = "Galaxy S22 Ultra"
+        cpu = "qcom"
+        version_code = "314665256"
+
+        locale = "nl_NL"
+        country = "NL"
+        country_code = 31
+
+        user_agent = f"Instagram {instagram_app_version} Android ({android_version}/{android_release}; {dpi}; {resolution}; {device_manufacturer}; {device_name}; {device_model}; {cpu}; {locale}; 314665256)"
+        self.client.set_user_agent(user_agent)
+
+        device = {
+            "app_version": instagram_app_version,
+            "android_version": android_version,
+            "android_release": android_release,
+            "dpi": dpi,
+            "resolution": resolution,
+            "manufacturer": device_manufacturer,
+            "device": device_name,
+            "model": device_model,
+            "cpu": cpu,
+            "version_code": version_code,
+        }
+        self.client.set_device(device)
+
+        self.client.set_locale(locale)
+        self.client.set_country(country)
+        self.client.set_country_code(country_code)
+
+        self.client.set_proxy(get_proxies()['https'])
+
+    def login(self):
+        if self.client:
+            return self.client
+        self.client = Client()
+        self._init_client()
+        if os.path.exists(self.SESSION_FILE):
+            self.client.load_settings(Path(self.SESSION_FILE))
+        else:
+            # ToDo: здесь используется input ввод, сделать TOTP?
+            #  https://subzeroid.github.io/instagrapi/usage-guide/totp.html
+            self.client.login(self.LOGIN, self.PASSWORD)
+            self.client.dump_settings(Path(self.SESSION_FILE))
 
     def get_data(self, instagram_link) -> InstagramAPIData:
-        params = {"code_or_id_or_url": instagram_link}
-        r = self.requests.get(self.URL, params=params, proxies=get_proxies()).json()
-        if error_message := r.get("messages"):
-            if error_message.startswith(self.LOCATION_BANNED_ERROR):
-                raise PWarning("API забанили. Я в курсе проблемы, постараюсь решить как можно скорее")
-        if not r.get('data'):
-            raise PWarning("Ошибка API")
-        return self._parse_response(r['data'])
+        self.login()
+        match = re.search(r"stories/.*/(\d+)", instagram_link)
+        if match:
+            media_pk = match.group(1)
+        else:
+            media_pk = self.client.media_pk_from_url(instagram_link)
+        media_info = self.client.media_info(media_pk)
+        try:
+            return self._parse_response(media_info)
+        except LoginRequired:
+            raise PWarning("Ошибка аутентификации. Пните разраба. Не пинайте больше инсту, а то забанят акк((")
 
     @staticmethod
     def _parse_response(item) -> InstagramAPIData:
         data = InstagramAPIData()
+        data.caption = item.caption_text
+        product_type = item.product_type
 
-        # caption
-        caption_block = item.get('caption') if item else None
-        data.caption = caption_block.get('text') if caption_block else None
-
-        if carousel := item.get('carousel_media'):
-            for carousel_item in carousel:
-                if video_url := carousel_item.get('video_url'):
-                    data.add_item(InstagramAPIDataItem(InstagramAPIDataItem.CONTENT_TYPE_VIDEO, video_url))
-                elif image_versions := carousel_item.get('image_versions'):
-                    image_url = image_versions['items'][0]['url']
-                    data.add_item(InstagramAPIDataItem(InstagramAPIDataItem.CONTENT_TYPE_IMAGE, image_url))
-        elif video_url := item.get('video_url'):
-            data.add_item(InstagramAPIDataItem(InstagramAPIDataItem.CONTENT_TYPE_VIDEO, video_url))
-        elif display_url := item.get('display_url'):
-            data.add_item(InstagramAPIDataItem(InstagramAPIDataItem.CONTENT_TYPE_IMAGE, display_url))
-        elif image_versions := item.get('image_versions'):
-            image_url = image_versions['items'][0]['url']
-            data.add_item(InstagramAPIDataItem(InstagramAPIDataItem.CONTENT_TYPE_IMAGE, image_url))
+        if product_type == 'carousel_container':
+            for resource in item.resources:
+                if resource.video_url:
+                    data.add_video(str(resource.video_url))
+                elif resource.thumbnail_url:
+                    data.add_image(str(resource.thumbnail_url))
+        elif product_type in ['story', 'clips', 'feed']:
+            if item.video_url:
+                data.add_video(str(item.video_url))
+            elif item.image_versions2:
+                image_url = item.image_versions2['candidates'][0]['url']
+                data.add_image(str(image_url))
+        else:
+            raise PWarning(f"Неизвестный product_type \"{product_type}\". Сообщите разработчику")
 
         return data

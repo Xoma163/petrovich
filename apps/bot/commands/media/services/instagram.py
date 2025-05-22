@@ -1,17 +1,15 @@
 from apps.bot.api.media.instagram import Instagram, InstagramAPIData, InstagramAPIDataItem
 from apps.bot.classes.const.consts import Role
-from apps.bot.classes.const.exceptions import PWarning, PError
+from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.commands.media.service import MediaServiceResponse, MediaService
-from apps.bot.utils.utils import retry
 
 
 class InstagramService(MediaService):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.service = Instagram(log_filter=self.event.log_filter)
+        self.service = Instagram()
 
-    @retry(3, Exception, except_exceptions=(PWarning, PError), sleep_time=2)
     def get_content_by_url(self, url: str) -> MediaServiceResponse:
         data: InstagramAPIData = self.service.get_data(url)
 
