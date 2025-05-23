@@ -70,7 +70,7 @@ class GithubView(CSRFExemptMixin, View):
         if not user_profile:
             return
 
-        admin_profile = get_admin_profile(exclude_profile=issue.author)
+        admin_profile = get_admin_profile()
         if user_profile == admin_profile:
             return
 
