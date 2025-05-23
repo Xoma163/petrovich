@@ -3,7 +3,7 @@ import re
 from pathlib import Path
 
 from instagrapi import Client
-from instagrapi.exceptions import LoginRequired
+from instagrapi.exceptions import LoginRequired, MediaNotFound
 
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.utils.proxy import get_proxies
@@ -48,11 +48,15 @@ class InstagramAPIData:
 class Instagram:
     LOGIN = env.str("INSTAGRAM_LOGIN")
     PASSWORD = env.str("INSTAGRAM_PASSWORD")
+    TOTP_SEED = env.str("INSTAGRAM_TOTP_SEED")
+    TOTP_BACKUP_CODES = env.list("INSTAGRAM_TOTP_BACKUP_CODES")
 
     SESSION_FILE = "secrets/instagram_session.json"
 
     def __init__(self):
-        self.client: Client | None = None
+        self.client = Client()
+        self._init_client()
+        self.login()
 
     def _init_client(self):
         instagram_app_version = "269.0.0.18.75"
@@ -94,31 +98,60 @@ class Instagram:
         self.client.set_proxy(get_proxies()['https'])
 
     def login(self):
-        if self.client:
-            return self.client
-        self.client = Client()
-        self._init_client()
         if os.path.exists(self.SESSION_FILE):
-            self.client.load_settings(Path(self.SESSION_FILE))
-            self.client.login(self.LOGIN, self.PASSWORD)
+            self._login_with_session()
         else:
-            # ToDo: здесь используется input ввод, сделать TOTP?
-            #  https://subzeroid.github.io/instagrapi/usage-guide/totp.html
-            self.client.login(self.LOGIN, self.PASSWORD)
-            self.client.dump_settings(Path(self.SESSION_FILE))
+            self._login_without_session()
+
+    def _login_with_session(self):
+        self.client.load_settings(Path(self.SESSION_FILE))
+        self.client.login(self.LOGIN, self.PASSWORD, verification_code=self.totp_get_code())
+        print('ok login session file')
+
+    def _login_without_session(self):
+        self.client.login(self.LOGIN, self.PASSWORD, verification_code=self.totp_get_code())
+        self.client.dump_settings(Path(self.SESSION_FILE))
+        print('ok login without session file')
+
+    def relogin(self):
+        self.client.login(self.LOGIN, self.PASSWORD, relogin=True, verification_code=self.totp_get_code())
+        self.client.dump_settings(Path(self.SESSION_FILE))
+        print('ok relogin')
+
+    def totp_enable(self):
+        """
+        Запускается однократно для генерации сида и бэкап ключей
+        """
+
+        seed = self.client.totp_generate_seed()
+        code = self.client.totp_generate_code(seed)
+        backup_codes = self.client.totp_enable(code)
+        print(f"seed = {seed}")
+        print(f"backup_codes = {backup_codes}")
+
+    def totp_get_code(self):
+        return self.client.totp_generate_code(self.TOTP_SEED)
 
     def get_data(self, instagram_link) -> InstagramAPIData:
-        self.login()
         match = re.search(r"stories/.*/(\d+)", instagram_link)
         if match:
             media_pk = match.group(1)
         else:
             media_pk = self.client.media_pk_from_url(instagram_link)
-        media_info = self.client.media_info_v1(media_pk)
+
+        # Получить данные
         try:
-            return self._parse_response(media_info)
+            media_info = self.client.media_info_v1(media_pk)
+        except MediaNotFound:
+            raise PWarning("Медиа не найдена или закрытый аккаунт")
         except LoginRequired:
-            raise PWarning("Ошибка аутентификации. Пните разраба. Не пинайте больше инсту, а то забанят акк((")
+            self.relogin()
+            try:
+                media_info = self.client.media_info_v1(media_pk)
+            except LoginRequired:
+                raise PWarning("Ошибка аутентификации. Пните разраба. Не пинайте больше инсту, а то забанят акк((")
+
+        return self._parse_response(media_info)
 
     @staticmethod
     def _parse_response(item) -> InstagramAPIData:
