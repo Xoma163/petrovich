@@ -1,30 +1,34 @@
 from urllib.parse import urlparse
 
+from apps.bot.api.media.data import VideoData
 from apps.bot.api.media.tiktok import TikTok
 from apps.bot.classes.bots.chat_activity import ChatActivity
 from apps.bot.classes.const.activities import ActivitiesEnum
-from apps.bot.classes.const.exceptions import PSkipContinue, PWarning, PError
+from apps.bot.classes.const.exceptions import PSkipContinue
 from apps.bot.classes.messages.attachments.video import VideoAttachment
 from apps.bot.commands.media.service import MediaServiceResponse, MediaService
-from apps.bot.utils.utils import retry
 
 
 class TikTokService(MediaService):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.service = TikTok(log_filter=self.event.log_filter)
+        self.service = TikTok()
 
-    @retry(3, Exception, except_exceptions=(PWarning, PError), sleep_time=2)
     def get_content_by_url(self, url: str) -> MediaServiceResponse:
         with ChatActivity(self.bot, ActivitiesEnum.UPLOAD_VIDEO, self.event.peer_id):
             return self._get_content_by_url(url)
 
     def _get_content_by_url(self, url: str) -> MediaServiceResponse:
-        ttd = self.service.get_video(url)
+        video_data: VideoData = self.service.get_video(url)
         va = VideoAttachment()
-        va.public_download_url = ttd.video_url
-        va.thumbnail_url = ttd.thumbnail_url
+        va.public_download_url = video_data.video_download_url
+        va.thumbnail_url = video_data.thumbnail_url
+        va.use_proxy_on_download_thumbnail = True
+        va.width = video_data.width
+        va.height = video_data.height
+        va.download_content(use_proxy=True, cookies=video_data.extra_data['cookies'])
+
         return MediaServiceResponse(text=None, attachments=[va], video_title="")
 
     def check_valid_url(self, url: str) -> None:

@@ -35,9 +35,9 @@ class InstagramParser:
             bs4 = BeautifulSoup(page_source, "html.parser")
             all_scripts = bs4.select('script[type="application/json"][data-content-len][data-processed]')
             api_scripts = [x for x in all_scripts if 'xdt_api__v1' in x.text]
-            media = self._get_media(api_scripts, is_post, is_reel)
+            media = self._get_media(api_scripts)
         except:
-            media = self.get_media_by_parse_json(page_source, is_post, is_reel)
+            media = self.get_media_by_parse_json(page_source)
 
         return self._parse_media(media)
 
@@ -63,33 +63,34 @@ class InstagramParser:
         return page_content
 
     @staticmethod
-    def _get_media(api_scripts, is_post=False, is_reel=False):
+    def _get_media(api_scripts):
         for script in api_scripts:
             json_data = json.loads(script.text)
             try:
                 json_data = json_data['require'][0][3][0]['__bbox']['require'][0][3][1]['__bbox']['result']['data']
-                if is_post:
-                    return json_data['xdt_api__v1__media__shortcode__web_info']['items'][0]
-                elif is_reel:
-                    return json_data['xdt_api__v1__clips__clips_on_logged_out_connection_v2']['edges'][0]['node'][
-                        'media']
-                else:
-                    raise PWarning("Неизвестный тип контента. Сообщите разработчику")
+                if shortcode_web_info := json_data.get('xdt_api__v1__media__shortcode__web_info'):
+                    return shortcode_web_info['items'][0]
+                elif clips_on_logged_out := json_data.get('xdt_api__v1__clips__clips_on_logged_out_connection_v2'):
+                    return clips_on_logged_out['edges'][0]['node']['media']
             except (KeyError, IndexError):
                 continue
 
-        raise PWarning("Не могу скачать этот контент (no media)")
+        raise PWarning("Не могу скачать этот контент. Неизвестный тип. Сообщите разработчику")
 
-    def get_media_by_parse_json(self, page_source, is_post=False, is_reel=False):
-        if is_post:
+    def get_media_by_parse_json(self, page_source):
+        try:
             json_data = self.extract_json(page_source, "xdt_api__v1__media__shortcode__web_info")
             return json_data['items'][0]
-        elif is_reel:
+        except:
+            pass
+
+        try:
             json_data = self.extract_json(page_source, 'xdt_api__v1__clips__clips_on_logged_out_connection_v2')
             return json_data['edges'][0]['node']['media']
-        else:
-            raise PWarning("Неизвестный тип контента. Сообщите разработчику")
+        except:
+            pass
 
+        raise PWarning("Не могу скачать этот контент. Неизвестный тип. Сообщите разработчику")
 
     @staticmethod
     def _parse_media(media):
@@ -99,11 +100,11 @@ class InstagramParser:
         if carousel_item := media.get('carousel_media'):
             for carousel_item in carousel_item:
                 if video := carousel_item.get('video_versions'):
-                    data.add_video(download_url=video[0]['url'])
+                    data.add_video(download_url=video[0]['url'], thumbnail_url=carousel_item['display_uri'])
                 elif image := carousel_item.get('image_versions2'):
                     data.add_image(download_url=image['candidates'][0]['url'])
         elif video := media.get('video_versions'):
-            data.add_video(download_url=video[0]['url'])
+            data.add_video(download_url=video[0]['url'], thumbnail_url=media['display_uri'])
         elif image := media.get('image_versions2'):
             data.add_image(download_url=image['candidates'][0]['url'])
         return data

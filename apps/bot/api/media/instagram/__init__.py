@@ -2,12 +2,13 @@ class InstagramAPIDataItem:
     CONTENT_TYPE_IMAGE = 'image'
     CONTENT_TYPE_VIDEO = 'video'
 
-    def __init__(self, content_type, download_url):
+    def __init__(self, content_type: str, download_url: str, thumbnail_url: str | None = None):
         if content_type not in (self.CONTENT_TYPE_IMAGE, self.CONTENT_TYPE_VIDEO):
             raise RuntimeError(f"content_type must be {self.CONTENT_TYPE_IMAGE} or {self.CONTENT_TYPE_VIDEO}")
 
         self.content_type = content_type
         self.download_url = download_url
+        self.thumbnail_url = thumbnail_url
 
 
 class InstagramAPIData:
@@ -18,10 +19,11 @@ class InstagramAPIData:
     def add_item(self, item: InstagramAPIDataItem):
         self.items.append(item)
 
-    def add_video(self, download_url: str):
+    def add_video(self, download_url: str, thumbnail_url: str):
         item = InstagramAPIDataItem(
             content_type=InstagramAPIDataItem.CONTENT_TYPE_VIDEO,
-            download_url=download_url
+            download_url=download_url,
+            thumbnail_url=thumbnail_url
         )
         self.add_item(item)
 

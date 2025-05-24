@@ -436,7 +436,7 @@ class Bot(Thread):
 
     def get_video_attachment(
             self,
-            document,
+            video,
             peer_id: str | int | None = None,
             filename: str | None = None,
             thumbnail: PhotoAttachment | None = None,
@@ -448,7 +448,7 @@ class Bot(Thread):
         """
         va = VideoAttachment()
         with ChatActivity(self, ActivitiesEnum.UPLOAD_VIDEO, peer_id, send_chat_action=send_chat_action):
-            va.parse(document, filename=filename)
+            va.parse(video, filename=filename)
         va.thumbnail = thumbnail
         va.thumbnail_url = thumbnail_url
         return va

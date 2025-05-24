@@ -24,6 +24,9 @@ class InstagramService(MediaService):
                 )
             elif item.content_type == InstagramAPIDataItem.CONTENT_TYPE_VIDEO:
                 attachment = self.bot.get_video_attachment(item.download_url, peer_id=self.event.peer_id)
+                attachment.thumbnail_url = item.thumbnail_url
+                attachment.use_proxy_on_download_thumbnail = True
+                attachment.download_content(use_proxy=True)
             else:
                 continue
             attachments.append(attachment)
