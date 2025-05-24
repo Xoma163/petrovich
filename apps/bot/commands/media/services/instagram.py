@@ -1,4 +1,5 @@
-from apps.bot.api.media.instagram import Instagram, InstagramAPIData, InstagramAPIDataItem
+from apps.bot.api.media.instagram import InstagramAPIDataItem, InstagramAPIData
+from apps.bot.api.media.instagram.parse import InstagramParser
 from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.commands.media.service import MediaServiceResponse, MediaService
@@ -7,8 +8,7 @@ from apps.bot.commands.media.service import MediaServiceResponse, MediaService
 class InstagramService(MediaService):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-        self.service = Instagram()
+        self.service = InstagramParser()
 
     def get_content_by_url(self, url: str) -> MediaServiceResponse:
         data: InstagramAPIData = self.service.get_data(url)
