@@ -30,12 +30,15 @@ class InstagramParser:
             page_source = self._get_instagram_request(url, proxy)
         except TimeoutException:
             raise PWarning("Подозрение на \"странный\" контент. Сообщите разработчику")
-        bs4 = BeautifulSoup(page_source, "html.parser")
 
-        all_scripts = bs4.select('script[type="application/json"][data-content-len][data-processed]')
-        api_scripts = [x for x in all_scripts if 'xdt_api__v1' in x.text]
+        try:
+            bs4 = BeautifulSoup(page_source, "html.parser")
+            all_scripts = bs4.select('script[type="application/json"][data-content-len][data-processed]')
+            api_scripts = [x for x in all_scripts if 'xdt_api__v1' in x.text]
+            media = self._get_media(api_scripts, is_post, is_reel)
+        except:
+            media = self.get_media_by_parse_json(page_source, is_post, is_reel)
 
-        media = self._get_media(api_scripts, is_post, is_reel)
         return self._parse_media(media)
 
     @retry(times=5, exceptions=(TimeoutException,))
@@ -77,6 +80,17 @@ class InstagramParser:
 
         raise PWarning("Не могу скачать этот контент (no media)")
 
+    def get_media_by_parse_json(self, page_source, is_post=False, is_reel=False):
+        if is_post:
+            json_data = self.extract_json(page_source, "xdt_api__v1__media__shortcode__web_info")
+            return json_data['items'][0]
+        elif is_reel:
+            json_data = self.extract_json(page_source, 'xdt_api__v1__clips__clips_on_logged_out_connection_v2')
+            return json_data['edges'][0]['node']['media']
+        else:
+            raise PWarning("Неизвестный тип контента. Сообщите разработчику")
+
+
     @staticmethod
     def _parse_media(media):
         data = InstagramAPIData()
@@ -93,3 +107,27 @@ class InstagramParser:
         elif image := media.get('image_versions2'):
             data.add_image(download_url=image['candidates'][0]['url'])
         return data
+
+    @staticmethod
+    def extract_json(text, key):
+        start_idx = text.find(key)
+        if start_idx == -1:
+            raise ValueError("Ключ не найден")
+        brace_start = text.find("{", start_idx)
+        if brace_start == -1:
+            raise ValueError("Не найдена открывающая скобка после фразы")
+
+        stack = 0
+        for i in range(brace_start, len(text)):
+            if text[i] == "{":
+                stack += 1
+            elif text[i] == "}":
+                stack -= 1
+                if stack == 0:
+                    end_idx = i + 1
+                    break
+        else:
+            raise ValueError("Баланс скобок не найден")
+
+        json_str = text[brace_start:end_idx]
+        return json.loads(json_str)
