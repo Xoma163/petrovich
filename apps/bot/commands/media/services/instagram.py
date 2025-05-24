@@ -11,7 +11,6 @@ class InstagramService(MediaService):
         self.service = Instagram()
 
     def get_content_by_url(self, url: str) -> MediaServiceResponse:
-        raise PWarning("Временно не работает")
         data: InstagramAPIData = self.service.get_data(url)
 
         attachments = []
