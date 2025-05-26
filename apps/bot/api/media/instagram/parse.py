@@ -95,7 +95,9 @@ class InstagramParser:
     @staticmethod
     def _parse_media(media):
         data = InstagramAPIData()
-        data.caption = media.get('caption', {}).get('text', None)
+        caption = media.get('caption')
+        if caption:
+            data.caption = caption.get('text', None)
 
         if carousel_item := media.get('carousel_media'):
             for carousel_item in carousel_item:
