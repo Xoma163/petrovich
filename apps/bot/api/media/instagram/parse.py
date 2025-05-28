@@ -15,6 +15,7 @@ from apps.bot.utils.web_driver import get_web_driver
 
 
 class InstagramParser:
+    AGE_RESTRICTION_MESSAGE = "You must be 13 years old or over to see this profile"
 
     def get_data(self, url):
         is_post = bool(re.search(r"p/([A-Za-z0-9_-]+)", url))
@@ -31,10 +32,12 @@ class InstagramParser:
         except TimeoutException:
             raise PWarning("Подозрение на \"странный\" контент. Сообщите разработчику")
 
+        bs4 = BeautifulSoup(page_source, "html.parser")
+        if any([self.AGE_RESTRICTION_MESSAGE in x.text for x in bs4.find_all("span")]):
+            raise PWarning("Не могу скачать контент, так как он недоступен без аутентификации (возрастное ограничение)")
         try:
-            bs4 = BeautifulSoup(page_source, "html.parser")
             all_scripts = bs4.select('script[type="application/json"][data-content-len][data-processed]')
-            api_scripts = [x for x in all_scripts if 'xdt_api__v1' in x.text]
+            api_scripts = [x for x in all_scripts if 'xdt_api__v1__' in x.text]
             media = self._get_media(api_scripts)
         except:
             media = self.get_media_by_parse_json(page_source)
@@ -102,11 +105,11 @@ class InstagramParser:
         if carousel_item := media.get('carousel_media'):
             for carousel_item in carousel_item:
                 if video := carousel_item.get('video_versions'):
-                    data.add_video(download_url=video[0]['url'], thumbnail_url=carousel_item['display_uri'])
+                    data.add_video(download_url=video[0]['url'], thumbnail_url=carousel_item.get('display_uri'))
                 elif image := carousel_item.get('image_versions2'):
                     data.add_image(download_url=image['candidates'][0]['url'])
         elif video := media.get('video_versions'):
-            data.add_video(download_url=video[0]['url'], thumbnail_url=media['display_uri'])
+            data.add_video(download_url=video[0]['url'], thumbnail_url=media.get('display_uri'))
         elif image := media.get('image_versions2'):
             data.add_image(download_url=image['candidates'][0]['url'])
         return data
