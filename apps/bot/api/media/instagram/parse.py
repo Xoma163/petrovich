@@ -39,8 +39,7 @@ class InstagramParser:
             all_scripts = bs4.select('script[type="application/json"][data-content-len][data-processed]')
             api_scripts = [x for x in all_scripts if 'xdt_api__v1__' in x.text]
             media = self._get_media(api_scripts)
-        except Exception as e:
-            print()
+        except Exception:
             media = self.get_media_by_parse_json(page_source)
 
         return self._parse_media(media)
