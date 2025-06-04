@@ -139,12 +139,15 @@ class Reddit:
     def _get_post_data(self):
         # use UA headers to prevent 429 error
         headers = get_default_headers()
-        post_url = requests.get(self.post_url, headers=headers).history[-1].url
-        self.post_url = post_url
-        urlparsed = urlparse(post_url)
-
+        try:
+            post_url = requests.get(self.post_url, headers=headers).history[-1].url
+            self.post_url = post_url
+        except:
+            pass
+        urlparsed = urlparse(self.post_url)
         url = f"{urlparsed.scheme}://{urlparsed.netloc}{urlparsed.path}.json"
         data = requests.get(url, headers=headers).json()
+
         self.data = data[0]["data"]["children"][0]["data"]
         self.title = self.data['title']
         self.media_data = self.data["media"]
