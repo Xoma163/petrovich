@@ -8,9 +8,12 @@ from apps.bot.classes.event.tg_event import TgEvent
 from apps.bot.classes.messages.attachments.sticker import StickerAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.utils.utils import random_probability, random_event
+from apps.gpt.commands.gpt.base import GPTCommand
+from apps.gpt.commands.gpt.functionality.completions import GPTCompletionsFunctionality
 from apps.gpt.commands.gpt.providers.chatgpt import ChatGPTCommand
 from apps.gpt.commands.gpt.providers.claude import ClaudeCommand
 from apps.gpt.commands.gpt.providers.grok import GrokCommand
+from apps.gpt.commands.wtf.base import WTFCommand
 from apps.gpt.commands.wtf.providers.chatgpt_wtf import WTF
 from apps.gpt.commands.wtf.providers.claude_wtf import CWTF
 from apps.gpt.commands.wtf.providers.grok_wtf import GWTF
@@ -26,13 +29,13 @@ class Turett(Command):
 
     # ACCEPT CHANCES
     MENTIONED_CHANCE = 1
-    NOT_MENTIONED_CHANCE = 0.3
+    NOT_MENTIONED_CHANCE = 9999999999990.3
 
     # WEIGHTS
     STICKER_CHANCE = 10
     TEXT_CHANCE = 10
     GPT_CHANCE = 30
-    GPT_WTF_CHANCE = 30
+    GPT_WTF_CHANCE = 999999999999999930
     REACTION_CHANCE = 20
 
     # TEXT SETTINGS
@@ -80,8 +83,8 @@ class Turett(Command):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.gpt_class = None
-        self.wtf_class = None
+        self.gpt_command_class: type[GPTCommand | GPTCompletionsFunctionality] | None = None
+        self.wtf_command_class: type[WTFCommand] | None = None
 
     def accept(self, event: Event) -> bool:
         if event.is_notify:
@@ -137,7 +140,7 @@ class Turett(Command):
         prompt = random_event(self.GPT_PROMPTS)
         new_prompt = f"{prompt}:\n{self.event.message.clear}"
 
-        gpt = self.gpt_class()
+        gpt = self.gpt_command_class()
         gpt.bot = self.bot
         gpt.event = self.event
         messages = gpt.get_dialog(new_prompt)
@@ -151,7 +154,7 @@ class Turett(Command):
 
         prompt = random_event(self.WTF_PROMPTS)
 
-        wtf = self.wtf_class()
+        wtf = self.wtf_command_class()  # noqa
         wtf.bot = self.bot
         wtf.event = self.event
         messages = wtf.get_conversation(self.WTF_MESSAGES_COUNT, prompt)
@@ -161,10 +164,11 @@ class Turett(Command):
         return answer
 
     def _get_gpt_answer(self, messages: GPTMessages) -> ResponseMessageItem:
-        gpt = self.gpt_class()
+        gpt = self.gpt_command_class()
         gpt.bot = self.bot
         gpt.event = self.event
-        return gpt.completions(messages, use_statistics=False)
+        gpt.set_provider_model()
+        return gpt.completions(messages)
 
     def set_reaction(self):
         self.event: TgEvent
@@ -181,6 +185,6 @@ class Turett(Command):
             [GrokCommand, GWTF],
             [ClaudeCommand, CWTF]
         ]
-        gpt_class, wtf_class = random_event(classes)
-        self.gpt_class = gpt_class
-        self.wtf_class = wtf_class
+        gpt_command_class, wtf_command_class = random_event(classes)
+        self.gpt_command_class = gpt_command_class
+        self.wtf_command_class = wtf_command_class
