@@ -2,12 +2,13 @@ import datetime
 import io
 
 import matplotlib.pyplot as plt
-from django.db.models import Q, Sum
+from django.db.models import Q, Sum, QuerySet
 from django.db.models.functions import TruncDate
 from django.utils import timezone
 from matplotlib.dates import DateFormatter
 from matplotlib.ticker import MaxNLocator
 
+from apps.bot.classes.const.consts import Role
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.help_text import HelpTextArgument, HelpTextKey
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
@@ -39,19 +40,21 @@ class GPTStatisticsMixin(GPTCommandProtocol):
         self.check_pm()
 
         if self.event.message.is_key_provided({"ключ", "key"}):
-            profiles_gpt_settings = ProfileGPTSettings.objects \
-                .filter(provider=self.provider_model) \
-                .exclude(key="")
-            profiles_with_same_key = [
-                x for x in profiles_gpt_settings
-                if x.get_key() == self.get_profile_gpt_settings().get_key()
-            ]
-            profiles = list(Profile.objects.filter(gpt_settings__in=profiles_with_same_key))
+            profiles = self._get_profiles_by_key()
+            answer = self._get_statistics_per_profile(profiles)
+        elif self.event.message.is_key_provided({"nokey"}):
+            self.check_sender(Role.ADMIN)
+            profiles = self._get_profiles_with_no_key()
+            answer = self._get_statistics_per_profile(profiles)
+        elif self.event.message.is_key_provided({"all"}):
+            self.check_sender(Role.ADMIN)
+            profiles = self._get_all_profiles()
+            answer = self._get_statistics_per_profile(profiles)
         else:
             profiles = [self.event.sender]
+            answer = self._get_statistics_for_users(profiles)
 
-        text_answer = self._get_statistics_for_users(profiles)
-        if not text_answer:
+        if not answer:
             raise PWarning("Ещё не было использований GPT")
 
         plot_data = self._get_data_for_statistics_plot(profiles)
@@ -59,59 +62,50 @@ class GPTStatisticsMixin(GPTCommandProtocol):
 
         statistics_plot_image = PhotoAttachment()
         statistics_plot_image.parse(plot_bytes)
-        return ResponseMessageItem(text_answer, attachments=[statistics_plot_image])
+        return ResponseMessageItem(answer, attachments=[statistics_plot_image])
 
     # HANDLERS
-
-    def _get_statistics_for_users(self, profiles: list[Profile]) -> str | None:
-        """
-        Получение статистики
-        """
-
-        """
-        Запрос для статистики за 3 месяца по юзерам без ключа
-
-        [x for x in GPTUsage.objects.filter(created_at__gte=datetime.datetime.now() - datetime.timedelta(days=30)) \
-            .values('author__name') \
-            .filter(Q(author__settings__chat_gpt_key='') | Q(author__settings__chat_gpt_key__isnull=True))
-            .annotate(total_cost=Round(Sum('cost'),2), total_requests=Count('id')) \
-            .order_by('-total_cost')]
-        """
-
-        stats_all = self._get_stat_db_profile(Q(author__in=profiles))
-        if not stats_all:
+    def _get_statistics_for_users(
+            self,
+            profiles: list[Profile],
+            return_today_data: bool = True,
+            return_7_day_data: bool = True,
+            return_last_month_data: bool = True,
+            return_current_month_data: bool = True,
+            return_total_data: bool = True,
+    ) -> str | None:
+        """Получение статистики по пользователям за разные периоды."""
+        total_stats = self._get_stat_db_profile(Q(author__in=profiles))
+        if not total_stats:
             return None
 
-        # Начало и конец предыдущего месяца
-        dt_now = timezone.now()
-        first_day_of_current_month = dt_now.replace(day=1)
-        last_day_of_last_month = first_day_of_current_month - datetime.timedelta(days=1)
-        first_day_of_last_month = last_day_of_last_month.replace(day=1)
+        now = timezone.now()
+        current_month_start = now.replace(day=1)
+        last_month_end = current_month_start - datetime.timedelta(days=1)
+        last_month_start = last_month_end.replace(day=1)
 
-        stats_today = self._get_stat_db_profile(
-            Q(author__in=profiles, created_at__gte=dt_now - datetime.timedelta(days=1))
-        )
-        stats_7_day = self._get_stat_db_profile(
-            Q(author__in=profiles, created_at__gte=dt_now - datetime.timedelta(days=7))
-        )
+        profiles_str = ", ".join(map(str, profiles))
+        answer = [f"{profiles_str}:"]
 
-        last_month = self._get_stat_db_profile(
-            Q(author__in=profiles, created_at__gte=first_day_of_last_month, created_at__lt=first_day_of_current_month)
-        )
+        periods = [
+            (return_today_data, "Сегодня", now - datetime.timedelta(days=1), now),
+            (return_7_day_data, "7 дней", now - datetime.timedelta(days=7), now),
+            (return_last_month_data, "Прошлый месяц", last_month_start, current_month_start),
+            (return_current_month_data, "Текущий месяц", current_month_start, now),
+        ]
 
-        current_month = self._get_stat_db_profile(
-            Q(author__in=profiles, created_at__gte=first_day_of_current_month, created_at__lt=dt_now)
-        )
+        for should_return, label, start, end in periods:
+            if not should_return:
+                continue
+            stats = self._get_stat_db_profile(
+                Q(author__in=profiles, created_at__gte=start, created_at__lt=end)
+            )
+            answer.append(f"{label} - $ {round(stats, 2)}")
 
-        profiles_str = ", ".join([str(x) for x in profiles])
-        text_answer = f"{profiles_str}:\n" \
-                      f"Сегодня - $ {round(stats_today, 2)}\n" \
-                      f"7 дней - $ {round(stats_7_day, 2)}\n" \
-                      f"Прошлый месяц- $ {round(last_month, 2)}\n" \
-                      f"Текущий месяц- $ {round(current_month, 2)}\n" \
-                      f"Всего - $ {round(stats_all, 2)}"
+        if return_total_data:
+            answer.append(f"Всего - $ {round(total_stats, 2)}")
 
-        return text_answer
+        return "\n".join(answer)
 
     # COMMON UTILS
 
@@ -124,6 +118,66 @@ class GPTStatisticsMixin(GPTCommandProtocol):
         ).save()
 
     # UTILS
+
+    def _get_profiles_by_key(self) -> QuerySet[Profile]:
+        profile_key = self.get_profile_gpt_settings().get_key()
+        if not profile_key:
+            raise PWarning("У вас не установлен ключ")
+
+        profiles_gpt_settings = ProfileGPTSettings.objects \
+            .filter(provider=self.provider_model) \
+            .exclude(key="")
+        profiles_with_same_key = [
+            x for x in profiles_gpt_settings
+            if x.get_key() == profile_key
+        ]
+        profiles = Profile.objects.filter(gpt_settings__in=profiles_with_same_key)
+        if profiles.count() == 1:
+            raise PWarning("Не найдено других пользователей с вашим ключом")
+        return profiles
+
+    def _get_profiles_with_no_key(self) -> QuerySet[Profile]:
+        profiles_gpt_settings = ProfileGPTSettings.objects \
+            .filter(provider=self.provider_model) \
+            .filter(key="")
+        profiles = Profile.objects.filter(gpt_settings__in=profiles_gpt_settings)
+        if profiles.count() == 0:
+            raise PWarning("Не найдено пользователей без ключа")
+        return profiles
+
+    def _get_all_profiles(self) -> QuerySet[Profile]:
+        profiles_gpt_settings = ProfileGPTSettings.objects \
+            .filter(provider=self.provider_model)
+        profiles = Profile.objects.filter(gpt_settings__in=profiles_gpt_settings)
+        if profiles.count() == 0:
+            raise PWarning("Не найдено пользователей")
+        return profiles
+
+    def _get_statistics_per_profile(self, profiles: QuerySet[Profile]) -> str | None:
+        answers = []
+        for profile in profiles:
+            profile_stats = self._get_statistics_for_users(
+                [profile],
+                return_today_data=False,
+                return_7_day_data=False
+            )
+            if profile_stats:
+                answers.append(profile_stats)
+        if not answers:
+            return None
+
+        if profiles.count() > 1:
+            total_statistics = self._get_statistics_for_users(
+                list(profiles),
+                return_today_data=False,
+                return_7_day_data=False
+            )
+            total_statistics = total_statistics.split('\n')
+            total_statistics[0] = "Всего:"
+            total_statistics = "\n".join(total_statistics)
+
+            answers.append(total_statistics)
+        return "\n\n".join(answers)
 
     @staticmethod
     def _get_data_for_statistics_plot(profiles: list[Profile]):
