@@ -621,13 +621,14 @@ def prepare_filename(filename: str, replace_symbol=".") -> str:
     # Заменяем "плохие" символы на replace_symbol
     bad_symbols = ["\\", "/", ":", "*", "?", "\"", "<", ">", "|", "+"]
     for symbol in bad_symbols:
-        filename = filename.replace(symbol, replace_symbol)
+        # На случай, если символ считался разделителем, добавляем пробел справа
+        filename = filename.replace(symbol, f"{replace_symbol} ")
     # Убираем пробелы с краёв
     filename = filename.strip()
     # Убираем последовательности replace_symbol до одного
     filename = re.sub(rf"{escaped_replace_symbol}+", replace_symbol, filename)
     # Убираем лишние пробелы до одного
-    filename = re.sub(r"\s+", " ", filename)  # Удаление лишних пробелов
+    filename = re.sub(r"\s+", " ", filename)
     # Удаляем пробел перед точкой
     filename = filename.replace(f" {replace_symbol}", replace_symbol)
     # Максимальная длина - 255. Режем с конца, так как может потеряться расширение файла
