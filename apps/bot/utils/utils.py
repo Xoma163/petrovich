@@ -628,10 +628,11 @@ def prepare_filename(filename: str, replace_symbol=".") -> str:
     filename = re.sub(rf"{escaped_replace_symbol}+", replace_symbol, filename)
     # Убираем лишние пробелы до одного
     filename = re.sub(r"\s+", " ", filename)  # Удаление лишних пробелов
+    # Удаляем пробел перед точкой
+    filename = filename.replace(f" {replace_symbol}", replace_symbol)
     # Максимальная длина - 255. Режем с конца, так как может потеряться расширение файла
     filename = filename[-255:]
     return filename
-
 
 def get_admin_profile(exclude_profile: Profile | None = None) -> Profile | None:
     admin_group = Group.objects.get(name=Role.ADMIN.name)
