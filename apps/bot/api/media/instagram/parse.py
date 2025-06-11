@@ -3,8 +3,6 @@ import re
 
 from bs4 import BeautifulSoup
 from selenium.common import TimeoutException
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
 from apps.bot.api.media.instagram import InstagramAPIData
@@ -15,7 +13,7 @@ from apps.bot.utils.web_driver import get_web_driver
 
 
 class InstagramParser:
-    AGE_RESTRICTION_RE = "You must be (\d+) years old or over to see this profile"
+    AGE_RESTRICTION_RE = r"You must be (\d+) years old or over to see this profile"
 
     def get_data(self, url):
         is_post = bool(re.search(r"p/([A-Za-z0-9_-]+)", url))
@@ -50,13 +48,13 @@ class InstagramParser:
         try:
             web_driver.get(url)
 
-            wait = WebDriverWait(web_driver, 2)
-            decline_btn = wait.until(
-                EC.element_to_be_clickable(
-                    (By.XPATH, "//button[contains(text(), 'Decline optional cookies')]")
-                )
-            )
-            decline_btn.click()
+            # wait = WebDriverWait(web_driver, 2)
+            # decline_btn = wait.until(
+            #     EC.element_to_be_clickable(
+            #         (By.XPATH, "//button[contains(text(), 'Decline optional cookies')]")
+            #     )
+            # )
+            # decline_btn.click()
 
             wait = WebDriverWait(web_driver, 2)
             wait.until(lambda x: "xdt_api__v1__" in x.page_source)
