@@ -12,6 +12,7 @@ from apps.bot.utils.web_driver import get_web_driver
 
 
 class TikTok:
+    AGE_RESTRICTION_MESSAGE = r'This post may not be comfortable for some audiences. Log in to make the most of your experience.'
 
     @retry(times=5, exceptions=(TimeoutException,))
     def _get_tiktok_request(self, url, proxy):
@@ -36,6 +37,9 @@ class TikTok:
             raise PWarning("Подозрение на \"странный\" контент. Сообщите разработчику")
 
         bs4 = BeautifulSoup(page_source, "html.parser")
+        if any([self.AGE_RESTRICTION_MESSAGE in x.text for x in bs4.find_all("p")]):
+            raise PWarning("Не могу скачать контент, так как он недоступен без аутентификации (возрастное ограничение)")
+
         script_data = bs4.find(id="__UNIVERSAL_DATA_FOR_REHYDRATION__")
         data = json.loads(script_data.text)
         video_detail = data['__DEFAULT_SCOPE__'].get('webapp.video-detail')
