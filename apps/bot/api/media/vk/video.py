@@ -41,6 +41,7 @@ class VKVideo(SubscribeService):
 
     def download(self, url: str, author_id: int, video_id: int, high_res: bool = False) -> VideoAttachment:
         player_url = self._get_player_url(url, author_id, video_id)
+
         va, aa = self._get_video_audio(player_url, high_res=high_res)
 
         if aa is not None:
@@ -61,6 +62,8 @@ class VKVideo(SubscribeService):
         og_video = bs4.find("meta", property="og:video")
         if og_video:
             player_url = bs4.find("meta", property="og:video").attrs['content']
+        elif "clip-" in url:
+            player_url = f"https://vk.com/video_ext.php?oid={author_id}&id={video_id.split('_')[1]}"
         else:
             player_url = f"https://vk.com/video_ext.php?oid={author_id}&id={video_id}"
         return player_url
