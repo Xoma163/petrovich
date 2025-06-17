@@ -50,5 +50,4 @@ class Command(BaseCommand):
                 tg_bot.send_response_message_item(rmi)
 
     def add_arguments(self, parser):
-        parser.add_argument('chat_id', nargs='+', type=str,
-                            help='chat_id')
+        parser.add_argument('chat_id', nargs='+', type=str, help='chat_id')

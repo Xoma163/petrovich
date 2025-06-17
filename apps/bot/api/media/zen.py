@@ -1,10 +1,10 @@
 import json
-import re
 
 from bs4 import BeautifulSoup
 
 from apps.bot.api.media.data import VideoData
 from apps.bot.classes.messages.attachments.video import VideoAttachment
+from apps.bot.utils.utils import get_default_headers, extract_json
 from apps.bot.utils.video.downloader import VideoDownloader
 from apps.bot.utils.web_driver import get_web_driver
 
@@ -12,22 +12,22 @@ from apps.bot.utils.web_driver import get_web_driver
 class Zen:
     @staticmethod
     def parse_video(url: str) -> VideoData:
-        web_driver = get_web_driver()
+        web_driver = get_web_driver(headers=get_default_headers())
 
         web_driver.get(url)
         bs4 = BeautifulSoup(web_driver.page_source, "html.parser")
         web_driver.quit()
 
-        scripts = [x.text for x in bs4.find_all('script') if "master.m3u8" in x.text]
+        scripts = [x.text for x in bs4.find_all('script') if ".m3u8" in x.text]
         script = scripts[0]
+        start_pos = script.find('var _params=(')
+        json_text = extract_json(script[start_pos + +len('var _params=('):])
+        data = json.loads(json_text)
 
-        re_str = r"\!function\(\)\{\"use strict\";\!function\(a\)\{var e\=window,n\=a\.namespaceKey\?e\[a\.namespaceKey\]\|\|\(e\[a\.namespaceKey\]\=\{\}\)\:e;for\(var t in a\.data\)a\.data\.hasOwnProperty\(t\)&&\(n\[t\]\=a\.data\[t\]\)\}\(\((.*)\)\)}\(\);"
-        res = re.findall(re_str, script)
-        data = json.loads(res[0])
+        video_data = data['ssrData']['videoMetaResponse']['video']
 
-        video_data = data['data']['MICRO_APP_SSR_DATA']['settings']['exportData']['video']
+        # ToDo: здесь можно выбирать качество и передавать --high-res ключ в будущем. Смотреть в поле streams
         m3u8_master_url = [x for x in video_data['video']['streams'] if "master.m3u8" in x][0]
-
         try:
             resolution = video_data['video']['resolutions'][-1]
             width = resolution['width']

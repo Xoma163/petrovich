@@ -691,3 +691,23 @@ def get_transparent_rgba_png(width, height):
     buf = io.BytesIO()
     img.save(buf, format="PNG")
     return buf.getvalue()
+
+
+def extract_json(text) -> str:
+    start = text.find('{')
+    if start == -1:
+        raise ValueError('JSON не найден')
+
+    depth = 0
+    for i, char in enumerate(text[start:]):
+        if char == '{':
+            depth += 1
+        elif char == '}':
+            depth -= 1
+            if depth == 0:
+                end = start + i + 1
+                break
+    else:
+        raise ValueError('Некорректный JSON: не сходятся скобки')
+    json_str = text[start:end]
+    return json_str
