@@ -1,6 +1,7 @@
 import logging
 
 from apps.bot.classes.const.activities import ActivitiesEnum
+from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.messages.attachments.attachment import Attachment
 from apps.bot.classes.messages.attachments.mixins.thumbnail_mixin import ThumbnailMixin
 
@@ -45,4 +46,8 @@ class DocumentAttachment(Attachment, ThumbnailMixin):
             self.file_name = event.get('file_name')
         self.mime_type = DocumentMimeType(event['mime_type'])
     def read_text(self):
-        return self.download_content().decode('utf-8')
+        content = self.download_content()
+        try:
+            return content.decode('utf-8')
+        except UnicodeDecodeError:
+            raise PWarning("Не могу прочитать файл. Убедитесь, что кодировка файла UTF-8")
