@@ -6,6 +6,9 @@ class YandexGeo(API):
     URL = "https://geocode-maps.yandex.ru/1.x/"
     API_KEY = env.str("YANDEX_GEO_TOKEN")
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
     def get_city_info_by_name(self, city_name) -> dict:
         params = {
             'apikey': self.API_KEY,

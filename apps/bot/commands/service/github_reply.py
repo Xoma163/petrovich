@@ -2,7 +2,6 @@ import re
 
 from apps.bot.api.github.issue import GithubIssueAPI
 from apps.bot.classes.command import Command
-from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.event.event import Event
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessage, ResponseMessageItem
@@ -30,21 +29,22 @@ class GithubReply(Command):
         issue.number = issue_number
         issue.get_from_github()
 
+        body = []
         comment = self.event.message.raw
-        body = [comment]
+        if comment:
+            body.append(comment)
 
         error_msg = None
-        photos = self.event.get_all_attachments([PhotoAttachment])
+        photos = self.event.get_all_attachments([PhotoAttachment], use_fwd=False)
         if photos:
-            try:
-                body.append(issue.get_text_for_images_in_body(photos, log_filter=self.event.log_filter))
-            except PWarning:
-                error_msg = "Загрузка картинок временно не работает. Пожалуйста, загрузите вручную"
+            body.append(issue.get_text_for_images_in_body(photos, log_filter=self.event.log_filter))
 
         body.append(self.BODY_FINE_PRINT_TEMPLATE.format(sender=self.event.sender, id=self.event.sender.pk))
         body = "\n\n".join(body)
         issue.add_comment(body)
 
+        if not comment and photos:
+            comment = "Изображение(я)"
         self.send_comment_info_to_admin(issue, comment)
         answer = "Успешно оставил ваш комментарий"
         if error_msg:
@@ -53,6 +53,8 @@ class GithubReply(Command):
 
     def send_comment_info_to_admin(self, issue: GithubIssueAPI, comment):
         profile = get_admin_profile(exclude_profile=issue.author)
+        if not profile:
+            return
 
         problem_str = self.bot.get_formatted_url('проблемой #' + str(issue.number), issue.remote_url)
         answer = self.NEW_COMMENT_FROM_USER_TEMPLATE.format(problem_str=problem_str, comment=comment)

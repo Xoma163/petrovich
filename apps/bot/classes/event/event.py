@@ -146,7 +146,7 @@ class Event:
         """
         self.message = Message(text, _id) if text else None
 
-    def get_all_attachments(self, types: list | None = None):
+    def get_all_attachments(self, types: list | None = None, use_fwd=True):
         if types is None:
             types = [
                 AudioAttachment, DocumentAttachment, GifAttachment, LinkAttachment,
@@ -156,7 +156,7 @@ class Event:
         if self.attachments:
             attachments = [att for att in self.attachments if isinstance(att, tuple(types))]
 
-        if self.fwd:
+        if use_fwd and self.fwd:
             attachments_fwd = [att for msg in self.fwd for att in msg.attachments if isinstance(att, tuple(types))]
             attachments.extend(attachments_fwd)
 

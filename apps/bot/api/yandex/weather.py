@@ -51,6 +51,9 @@ class YandexWeather(API):
         "c": "штиль",
     }
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
     def get_weather_str(self, city: City) -> str:
         data = self._get_weather(city)
 

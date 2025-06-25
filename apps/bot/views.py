@@ -1,4 +1,5 @@
 import json
+import re
 from datetime import datetime
 
 from django.http import JsonResponse, HttpResponse
@@ -8,6 +9,7 @@ from apps.bot.api.github.issue import GithubIssueAPI
 from apps.bot.classes.bots.api_bot import APIBot
 from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.const.exceptions import PError
+from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessageItem
 from apps.bot.mixins import CSRFExemptMixin
 from apps.bot.utils.utils import get_admin_profile
@@ -64,8 +66,10 @@ class TelegramView(CSRFExemptMixin, View):
 class GithubView(CSRFExemptMixin, View):
     NEW_COMMENT_FROM_DEVELOPER_TEMPLATE = "Новый комментарий от разработчика под вашей {problem_str}\n\n{comment}\n\nЧтобы оставить комментарий, ответьте на это сообщение"
     AUTO_GENERATED_COMMENT_STR = "Данный комментарий сгенерирован автоматически"
+    IMAGE_URL_PATTERN = r'!\[.*?\]\((https?://[^\)]+)\)'
+
     @staticmethod
-    def send_notify_to_user(issue: GithubIssueAPI, text):
+    def send_notify_to_user(issue: GithubIssueAPI, text, attachments=None):
         user_profile = issue.author
         if not user_profile:
             return
@@ -76,7 +80,7 @@ class GithubView(CSRFExemptMixin, View):
 
         user = user_profile.get_tg_user()
         bot = TgBot()
-        rmi = ResponseMessageItem(text=text, peer_id=user.user_id)
+        rmi = ResponseMessageItem(text=text, peer_id=user.user_id, attachments=attachments)
         bot.send_response_message_item(rmi)
 
     def reopen_issue(self, issue: GithubIssueAPI):
@@ -100,9 +104,12 @@ class GithubView(CSRFExemptMixin, View):
         comment = data['comment']['body']
         if self.AUTO_GENERATED_COMMENT_STR in data['comment']['body']:
             return
+
+        photo_attachments, comment = self._get_image_urls_from_text(comment)
+
         problem_str = TgBot.get_formatted_url('проблемой #' + str(issue.number), issue.remote_url)
-        text = self.NEW_COMMENT_FROM_DEVELOPER_TEMPLATE.format(problem_str=problem_str, comment=comment)
-        self.send_notify_to_user(issue, text)
+        answer = self.NEW_COMMENT_FROM_DEVELOPER_TEMPLATE.format(problem_str=problem_str, comment=comment)
+        self.send_notify_to_user(issue, answer, attachments=photo_attachments)
 
     def new_label(self, data, issue: GithubIssueAPI):
         # Github при создании иши присылает вебхук, типа он пометил её label'ами. Такое скипаем
@@ -113,6 +120,19 @@ class GithubView(CSRFExemptMixin, View):
         problem_str = TgBot.get_formatted_url('проблемой #' + str(issue.number), issue.remote_url)
         text = f"Новый тег от разработчика под вашей {problem_str}\n\n{label_name}"
         self.send_notify_to_user(issue, text)
+
+    def _get_image_urls_from_text(self, comment: str) -> tuple[list[PhotoAttachment] | None, str]:
+        image_urls = re.findall(self.IMAGE_URL_PATTERN, comment)
+        if not image_urls:
+            return None, comment
+
+        photo_attachments = []
+        for image_url in image_urls:
+            pa = PhotoAttachment()
+            pa.public_download_url = image_url
+            photo_attachments.append(pa)
+        comment = re.sub(self.IMAGE_URL_PATTERN, '', comment)
+        return photo_attachments, comment
 
     def post(self, request):
         data = json.loads(request.body)

@@ -70,10 +70,7 @@ class Issue(Command):
         error_msg = None
         photos = self.event.get_all_attachments([PhotoAttachment])
         if photos:
-            try:
-                body.append(issue.get_text_for_images_in_body(photos, log_filter=self.event.log_filter))
-            except PWarning:
-                error_msg = "Загрузка картинок временно не работает. Пожалуйста, загрузите вручную"
+            body.append(issue.get_text_for_images_in_body(photos, log_filter=self.event.log_filter))
         body.append(self.BODY_FINE_PRINT_TEMPLATE.format(sender=self.event.sender, id=self.event.sender.pk))
         body = "\n\n".join(body)
         body = body.lstrip("\n")
