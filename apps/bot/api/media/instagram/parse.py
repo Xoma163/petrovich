@@ -13,7 +13,7 @@ from apps.bot.utils.web_driver import get_web_driver
 
 
 class InstagramParser:
-    AGE_RESTRICTION_RE = r"You must be (\d+) years old or over to see this profile"
+    AGE_RESTRICTION_RE = r"You must be (\d+) years old or over to"
 
     def get_data(self, url):
         is_post = bool(re.search(r"p/([A-Za-z0-9_-]+)", url))
