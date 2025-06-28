@@ -3,6 +3,7 @@ import io
 import os
 from concurrent.futures import ThreadPoolExecutor
 from io import BytesIO
+from pathlib import Path
 from tempfile import NamedTemporaryFile, _TemporaryFileWrapper  # noqa
 from urllib.parse import urlparse
 
@@ -39,8 +40,6 @@ class Attachment:
         self.file_name: str | None = None
         self.file_name_full: str | None = None
 
-        self.name: str | None = None
-
     def get_file(self, peer_id=None):
         from apps.bot.classes.bots.tg_bot import TgBot
         tg_bot = TgBot()
@@ -58,14 +57,18 @@ class Attachment:
                 self.private_download_path = file_path
             else:
                 self.private_download_url = f'https://{tg_bot.requests.API_TELEGRAM_URL}/file/bot{tg_bot.token}/{file_path}'
-            self.ext = file_path.rsplit('.')[-1]
+            path = Path(file_path)
+
+            self.file_name_full = path.name
+            self.file_name, self.ext = self.file_name_full.rsplit('.', 1)
+
 
     def parse(self, file_like_object, allowed_exts_url=None, filename=None, guarantee_url=False):
         """
         Подготовка объектов(в основном картинок) для загрузки.
         То есть метод позволяет преобразовывать почти из любого формата
         """
-        self.name = filename
+        self.file_name = filename
         # url
         parsed_url = None
         if isinstance(file_like_object, str):
@@ -187,10 +190,10 @@ class Attachment:
             else:
                 self.content = requests.get(download_url, proxies=proxies, headers=_headers, cookies=cookies).content
 
-        if self.name:
+        if self.file_name:
             tmp = NamedTemporaryFile()
             tmp.write(self.content)
-            tmp.name = self.name
+            tmp.name = self.file_name
             tmp.seek(0)
             self.content = tmp
         return self.content

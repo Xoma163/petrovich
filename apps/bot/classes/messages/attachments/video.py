@@ -17,7 +17,6 @@ class VideoAttachment(Attachment, ThumbnailMixin, SizedMixin, DurationMixin):
         self.duration = event.get('duration')
         self.width = event.get('width')
         self.height = event.get('height')
-        self.name = event.get('name')
         self.size = event['file_size']
 
         self.file_id = event['file_id']
