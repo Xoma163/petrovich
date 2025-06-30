@@ -57,8 +57,8 @@ class Attachment:
                 self.private_download_path = file_path
             else:
                 self.private_download_url = f'https://{tg_bot.requests.API_TELEGRAM_URL}/file/bot{tg_bot.token}/{file_path}'
-            path = Path(file_path)
 
+            path = Path(file_path)
             self.file_name_full = path.name
             self.file_name, self.ext = self.file_name_full.rsplit('.', 1)
 
@@ -162,6 +162,7 @@ class Attachment:
             _headers = headers  # ToDo: возможно отвалится половина всего, потестить.
 
         download_url = self._get_download_url(peer_id)
+
         if self.private_download_path:
             try:
                 with open(self.private_download_path, 'rb') as file:
@@ -190,12 +191,12 @@ class Attachment:
             else:
                 self.content = requests.get(download_url, proxies=proxies, headers=_headers, cookies=cookies).content
 
-        if self.file_name:
-            tmp = NamedTemporaryFile()
-            tmp.write(self.content)
-            tmp.name = self.file_name
-            tmp.seek(0)
-            self.content = tmp
+        # if self.file_name:
+        #     tmp = NamedTemporaryFile()
+        #     tmp.write(self.content)
+        #     tmp.name = self.file_name
+        #     tmp.seek(0)
+        #     self.content = tmp
         return self.content
 
     def get_bytes_io_content(self, peer_id=None) -> BytesIO:

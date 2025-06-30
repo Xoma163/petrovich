@@ -40,11 +40,8 @@ class DocumentAttachment(Attachment, ThumbnailMixin):
     def parse_tg(self, event):
         self.file_id = event['file_id']
         self.file_name_full = event.get('file_name')
-        try:
-            self.file_name, self.ext = event['file_name'].rsplit('.', 1)
-        except:
-            self.file_name = event.get('file_name')
         self.mime_type = DocumentMimeType(event['mime_type'])
+
     def read_text(self):
         content = self.download_content()
         try:

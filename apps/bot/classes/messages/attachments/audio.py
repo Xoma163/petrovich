@@ -18,9 +18,5 @@ class AudioAttachment(Attachment, ThumbnailMixin, DurationMixin):
         self.size = event['file_size']
 
         self.file_id = event['file_id']
-        try:
-            self.file_name, self.ext = event['file_name'].rsplit('.', 1)
-        except:
-            self.file_name = event.get('file_name')
-            if event['mime_type'] == 'audio/mpeg':
-                self.ext = 'mp3'
+        if event['mime_type'] == 'audio/mpeg':
+            self.ext = 'mp3'
