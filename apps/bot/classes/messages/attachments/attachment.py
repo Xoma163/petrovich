@@ -34,11 +34,12 @@ class Attachment:
         self.size: int | None = 0
         # bytes
         self.content = None
+        # filename
         self.ext: str | None = None
-        # tg
-        self.file_id: str | None = None
         self.file_name: str | None = None
         self.file_name_full: str | None = None
+        # tg
+        self.file_id: str | None = None
 
     def get_file(self, peer_id=None):
         from apps.bot.classes.bots.tg_bot import TgBot
@@ -50,17 +51,23 @@ class Attachment:
 
         with ChatActivity(tg_bot, self.ACTIVITY, peer_id):
             r = tg_bot.requests.get('getFile', params={'file_id': self.file_id})
-            if r.status_code != 200:
-                return
-            file_path = r.json()['result']['file_path']
-            if tg_bot.MODE == tg_bot.LOCAL_SERVER:
-                self.private_download_path = file_path
-            else:
-                self.private_download_url = f'https://{tg_bot.requests.API_TELEGRAM_URL}/file/bot{tg_bot.token}/{file_path}'
 
-            path = Path(file_path)
-            self.file_name_full = path.name
-            self.file_name, self.ext = self.file_name_full.rsplit('.', 1)
+        if r.status_code != 200:
+            return
+        file_path = r.json()['result']['file_path']
+        if tg_bot.MODE == tg_bot.LOCAL_SERVER:
+            self.private_download_path = file_path
+        else:
+            self.private_download_url = f'https://{tg_bot.requests.API_TELEGRAM_URL}/file/bot{tg_bot.token}/{file_path}'
+
+        self._set_file_name(file_path)
+
+    def _set_file_name(self, file_path: str):
+        path = Path(file_path)
+        self.file_name_full = path.name
+        file_name, ext = self.file_name_full.rsplit('.', 1)
+        self.file_name = file_name
+        self.ext = ext
 
 
     def parse(self, file_like_object, allowed_exts_url=None, filename=None, guarantee_url=False):
@@ -73,6 +80,7 @@ class Attachment:
         parsed_url = None
         if isinstance(file_like_object, str):
             parsed_url = urlparse(file_like_object)
+
         if guarantee_url:
             self.public_download_url = file_like_object
         elif parsed_url and parsed_url.hostname:
@@ -237,7 +245,7 @@ class Attachment:
         Вывод в API
         """
         dict_self = copy.copy(self.__dict__)
-        ignore_fields = ['private_download_url']
+        ignore_fields = ['private_download_url', 'content']
         for ignore_field in ignore_fields:
             dict_self[ignore_field] = '*' * 5 if dict_self[ignore_field] else dict_self[ignore_field]
         return dict_self
