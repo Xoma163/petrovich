@@ -65,9 +65,13 @@ class Attachment:
     def _set_file_name(self, file_path: str):
         path = Path(file_path)
         self.file_name_full = path.name
-        file_name, ext = self.file_name_full.rsplit('.', 1)
-        self.file_name = file_name
-        self.ext = ext
+        parts = self.file_name_full.split('.')
+        if len(parts) > 2:
+            self.file_name = ".".join(parts[0])
+            self.ext = ".".join(parts[1:])
+        else:
+            self.file_name = parts[0]
+            self.ext = parts[1] if len(parts) == 2 else None
 
 
     def parse(self, file_like_object, allowed_exts_url=None, filename=None, guarantee_url=False):
