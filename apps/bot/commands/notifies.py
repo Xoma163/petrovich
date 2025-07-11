@@ -1,3 +1,4 @@
+import re
 from datetime import datetime, timedelta
 
 from crontab import CronTab
@@ -41,14 +42,18 @@ class Notifies(Command):
     names = ["напоминание", "напомни", "напоминай"]
 
     help_text = HelpText(
-        commands_text="список напоминаний",
+        commands_text="установка напоминаний",
         help_texts=[
             HelpTextItem(Role.USER, [
                 HelpTextArgument(None, "список активных напоминаний в лс, если в конфе, то только общие в конфе"),
-                HelpTextArgument("добавить (дата/дата и время/день недели) (сообщение/команда) [вложения]",
-                                    "добавляет напоминание"),
-                HelpTextArgument("добавить (crontab) (сообщение/команда) [вложения]",
-                                    "добавляет постоянное напоминание"),
+                HelpTextArgument(
+                    "добавить (дата/дата и время/день недели) (сообщение/команда) [вложения]",
+                    "добавляет напоминание"
+                ),
+                HelpTextArgument(
+                    "добавить (crontab) (сообщение/команда) [вложения]",
+                    "добавляет постоянное напоминание"
+                ),
                 HelpTextArgument("удалить (текст/дата/crontab/id)", "удаляет напоминание")
             ])
         ],
@@ -265,8 +270,10 @@ class Notifies(Command):
     def _add_notify_repeat(self, crontab) -> dict:
         text = None
         # remove menu str
-        args_str_case = self.event.message.args_str_case.split(' ', 1)[1]
-        args_split = args_str_case.split(' ', 5)
+        args_str_case = re.split(r'\s+', self.event.message.args_str_case, 1)[1]
+
+        # remove crontab str
+        args_split = re.split(r'\s+', args_str_case, 5)
         if len(args_split) > 5:
             text = args_split[-1]
 
