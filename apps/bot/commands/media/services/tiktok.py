@@ -27,7 +27,11 @@ class TikTokService(MediaService):
         va.use_proxy_on_download_thumbnail = True
         va.width = video_data.width
         va.height = video_data.height
-        va.download_content(use_proxy=True, cookies=video_data.extra_data['cookies'])
+        va.download_content(
+            use_proxy=True,
+            cookies=video_data.extra_data['cookies'],
+            headers=video_data.extra_data['headers']
+        )
 
         return MediaServiceResponse(text=None, attachments=[va], video_title="")
 
