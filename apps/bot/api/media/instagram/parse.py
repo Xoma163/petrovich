@@ -28,8 +28,10 @@ class InstagramParser:
         try:
             page_source = self._get_instagram_request(url, proxy)
         except TimeoutException:
-            raise PWarning("Подозрение на \"странный\" контент. Сообщите разработчику")
-
+            raise PWarning(
+                "Убедитесь в браузере(инкогнито), что по ссылке фото/видео и доступно к просмотру. "
+                "Если это так, то сообщите разработчику"
+            )
         bs4 = BeautifulSoup(page_source, "html.parser")
         if any([re.search(self.AGE_RESTRICTION_RE, x.text) for x in bs4.find_all("span")]):
             raise PWarning("Не могу скачать контент, так как он недоступен без аутентификации (возрастное ограничение)")
