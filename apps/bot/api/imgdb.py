@@ -18,7 +18,10 @@ class ImgdbAPI(API):
         if expire is not None:
             expire = max(expire, 60)
             expire = min(expire, 15552000)
-            params['expiration'] = expire
+        else:
+            expire = 15552000
+        params['expiration'] = expire
+
         files = {
             'image': (image.file_name_full, content)
         }

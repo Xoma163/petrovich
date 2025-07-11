@@ -26,6 +26,6 @@ class GithubAPI(API):
         result = []
         i_api = ImgdbAPI(log_filter=log_filter)
         for image in images:
-            image_url = i_api.upload_image(image, expire=60)
+            image_url = i_api.upload_image(image)
             result.append(f"![image]({image_url})")
         return "\n" + "\n".join(result)
