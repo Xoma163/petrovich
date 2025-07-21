@@ -40,7 +40,7 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
             "Указывает какую модель использовать для обработки изображений (vision)"
         ),
         HelpTextArgument(
-            "модель completions удалить",
+            "модель vision удалить",
             "Удаляет выбранную модель для обработки изображений (vision)"
         )
     ]
@@ -57,7 +57,7 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
     VOICE_RECOGNITION_HELP_TEXT_ITEMS = [
         HelpTextArgument(
             "модель voice (название модели)",
-            "Указывает какую модель использовать для обработки голосовых (voice)"
+            "Указывает какую модель использовать для обработки голоса (voice)"
         ),
         HelpTextArgument(
             "модель voice удалить",

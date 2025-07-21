@@ -24,7 +24,7 @@ from apps.gpt.protocols import GPTCommandProtocol
 class GPTStatisticsMixin(GPTCommandProtocol):
     STATISTICS_HELP_TEXT_ITEMS = [
         HelpTextArgument(
-            "стата [дата 1] [дата 2]",
+            "стата [дата начала=месяц назад] [дата конца=сегодня]",
             "статистика по использованию. Если переданы аргументы, то пришлёт статистику за указаный период"
         ),
     ]
