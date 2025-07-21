@@ -39,7 +39,8 @@ class DocumentAttachment(Attachment, ThumbnailMixin):
 
     def parse_tg(self, event):
         self.file_id = event['file_id']
-        self.file_name_full = event.get('file_name')
+        # ToDo: кажется это надо вынести в общий parse_tg метод, чтобы всем проставлялся file_id и _set_file_name
+        self._set_file_name(event.get('file_name'))
         self.mime_type = DocumentMimeType(event['mime_type'])
 
     def read_text(self):

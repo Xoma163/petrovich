@@ -46,6 +46,8 @@ class GPTCommand(
     NO_DEFAULT_MODEL_ERROR_MSG = "Не установлена модель по умолчанию. Сообщите об этом админу.\n" \
                                  "Прямо сейчас вы можете просто вручную установить модель и пользоваться ей"
 
+    RESPONSE_MESSAGE_TOO_LONG = "Твой запрос получился слишком большой. Положил ответ в файл"
+
     @property
     @abstractmethod
     def provider(self) -> GPTProvider:
@@ -173,8 +175,8 @@ class GPTCommand(
 
         if len(answer) > self.bot.MAX_MESSAGE_TEXT_LENGTH:
             document = wrap_text_in_document(answer, 'gpt.html')
-            answer = "Твой запрос получился слишком большой. Положил ответ в файл"
-            rmi = ResponseMessageItem(text=answer, attachments=[document], reply_to=self.event.message.id)
+            rmi = ResponseMessageItem(text=self.RESPONSE_MESSAGE_TOO_LONG, attachments=[document],
+                                      reply_to=self.event.message.id)
         else:
             rmi = ResponseMessageItem(text=answer, reply_to=self.event.message.id)
         return rmi
@@ -287,14 +289,19 @@ class GPTCommand(
             return self._get_common_msg(event, event.message.raw)
 
     def _get_bot_msg(self, event: TgEvent) -> str | None:
-        return self._get_common_msg(event, event.message.raw)
+        if event.message.raw == self.RESPONSE_MESSAGE_TOO_LONG:
+            return self._get_common_msg(event, None)
+        else:
+            return self._get_common_msg(event, event.message.raw)
+
 
     @staticmethod
     def _get_common_msg(event, text: str | None):
         documents: list[DocumentAttachment] = event.get_all_attachments([DocumentAttachment])
         text = text if text else ""
-        if documents and documents[0].mime_type.is_text:
-            doc_txt = documents[0].read_text()
+        document = documents[0] if documents else None
+        if document and (document.mime_type.is_text or document.ext.lower() in ['html', 'txt']):
+            doc_txt = document.read_text()
             doc_txt_str = f"Содержимое файла: {doc_txt}"
             if not text:
                 return doc_txt_str
