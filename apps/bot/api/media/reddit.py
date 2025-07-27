@@ -1,3 +1,4 @@
+import re
 from urllib.parse import urlparse
 
 import requests
@@ -140,8 +141,9 @@ class Reddit:
         # use UA headers to prevent 429 error
         headers = get_default_headers()
         try:
-            post_url = requests.get(self.post_url, headers=headers).history[-1].url
-            self.post_url = post_url
+            post_url_raw = requests.get(self.post_url, headers=get_default_headers()).history[-1].text
+            if match := re.search(r'href="([^"]+)"', post_url_raw):
+                self.post_url = match.group(1)
         except:
             pass
         urlparsed = urlparse(self.post_url)
