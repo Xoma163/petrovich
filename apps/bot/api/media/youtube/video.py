@@ -197,13 +197,15 @@ class YoutubeVideo(SubscribeService):
             reverse=True
         )
 
-        try:
-            ru_audio_formats = [x for x in audio_formats if x.get('language') == 'ru']
-            af = ru_audio_formats[0]
-        except IndexError:
+        # Выбор аудио-формата по языковой дорожке
+        for lang in ('ru', 'en-US'):
+            af = next((x for x in audio_formats if x.get('language') == lang), None)
+            if af:
+                break
+        if not af and audio_formats:
             af = audio_formats[0]
-        vf = video_formats[0]
 
+        vf = video_formats[0]
         if not high_res:
             for vf in video_formats:
                 if int(vf['height']) <= self.DEFAULT_VIDEO_QUALITY_HIGHT:
