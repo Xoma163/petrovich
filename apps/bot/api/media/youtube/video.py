@@ -93,6 +93,7 @@ class YoutubeVideo(SubscribeService):
 
         video, audio, filesize = self._get_video_download_urls(video_info, high_res, _timedelta)
 
+
         return VideoData(
             filesize=filesize,
             video_download_url=video['url'] if video else None,
@@ -169,28 +170,8 @@ class YoutubeVideo(SubscribeService):
     ) -> tuple[dict, dict, int]:
         """
         Метод ищет видео которое максимально может скачать с учётом ограничением платформы
-        return: max_quality_video, max_quality_audio
+        return: video_format, audio_format, video_filesize
         """
-        video_formats = list(
-            filter(
-                lambda x: (
-                        x.get('vbr') and  # Это видео
-                        x.get('ext') == 'mp4' and  # С форматом mp4
-                        x.get('vcodec') not in ['vp9'] and  # С кодеками которые поддерживают все платформы
-                        x.get('dynamic_range') == 'SDR'  # В SDR качестве
-                    # x.get('format_note')  # Имеют разрешение для просмотра (?)
-                ),
-                video_info['formats']
-            )
-        )
-        for _format in video_formats:
-            _format['filesize_approx_vbr'] = video_info['duration'] * _format.get('vbr')
-        video_formats = sorted(
-            video_formats,
-            key=self._filesize_key,
-            reverse=True
-        )
-
         audio_formats = sorted(
             [x for x in video_info['formats'] if x['resolution'] == 'audio only'],  # abr
             key=self._filesize_key,
@@ -204,6 +185,28 @@ class YoutubeVideo(SubscribeService):
                 break
         if not af and audio_formats:
             af = audio_formats[0]
+
+
+        video_formats = list(
+            filter(
+                lambda x: (
+                        x.get('vbr') and  # Это видео
+                        x.get('ext') == 'mp4' and  # С форматом mp4
+                        x.get('vcodec') not in ['vp9'] and  # С кодеками которые поддерживают все платформы
+                        x.get('dynamic_range') == 'SDR' and  # В SDR качестве
+                        not x.get('__needs_testing')  # Без тестовых
+                    # x.get('format_note')  # Имеют разрешение для просмотра (?)
+                ),
+                video_info['formats']
+            )
+        )
+        for _format in video_formats:
+            _format['filesize_approx_vbr'] = video_info['duration'] * _format.get('vbr')
+        video_formats = sorted(
+            video_formats,
+            key=self._filesize_key,
+            reverse=True
+        )
 
         vf = video_formats[0]
         if not high_res:
