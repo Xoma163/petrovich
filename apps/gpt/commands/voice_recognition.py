@@ -3,7 +3,7 @@ from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import AcceptExtraCommand
 from apps.bot.classes.const.activities import ActivitiesEnum
 from apps.bot.classes.const.consts import Platform, Role
-from apps.bot.classes.const.exceptions import PWarning, PSkipContinue, PError
+from apps.bot.classes.const.exceptions import PWarning, PSkipContinue, PError, PSkip
 from apps.bot.classes.event.event import Event
 from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextArgument
 from apps.bot.classes.messages.attachments.audio import AudioAttachment
@@ -18,7 +18,7 @@ from apps.gpt.commands.gpt.mixins.key import GPTKeyMixin
 from apps.gpt.commands.gpt.providers.chatgpt import ChatGPTCommand
 from apps.gpt.models import Usage, Provider, VoiceRecognitionModel
 from apps.gpt.providers.providers.chatgpt import ChatGPTProvider
-from apps.gpt.utils import user_has_role_or_has_gpt_key
+from apps.gpt.utils import user_has_api_key
 
 
 class VoiceRecognition(AcceptExtraCommand):
@@ -55,7 +55,7 @@ class VoiceRecognition(AcceptExtraCommand):
     @staticmethod
     def accept_extra(event: Event) -> bool:
         if event.has_voice_message or event.has_video_note:
-            has_access = user_has_role_or_has_gpt_key(event.sender, ChatGPTProvider())
+            has_access = user_has_api_key(event.sender, ChatGPTProvider())
             if has_access:
                 return True
 
@@ -68,13 +68,16 @@ class VoiceRecognition(AcceptExtraCommand):
         return False
 
     def _check_gpt_access(self):
-        has_access = user_has_role_or_has_gpt_key(self.event.sender, ChatGPTProvider())
+        has_access = user_has_api_key(self.event.sender, ChatGPTProvider())
         if not has_access:
-            error_msg = GPTKeyMixin.PROVIDE_API_KEY_TEMPLATE.format(
-                provider_name=ChatGPTProvider.type_enum,
-                command_name=self.bot.get_formatted_text_line(f'/{ChatGPTCommand.name}')
-            )
-            raise PWarning(error_msg)
+            if self.event.message.mentioned:
+                GPTKeyMixin.raise_no_access_exception(
+                    ChatGPTProvider.type_enum,
+                    self.bot.get_formatted_text_line(f'/{ChatGPTCommand.name}')
+                )
+            else:
+                raise PSkip()
+
 
     def start(self) -> ResponseMessage:
         self._check_gpt_access()
@@ -99,7 +102,7 @@ class VoiceRecognition(AcceptExtraCommand):
                 defaults={'profile': self.event.sender}
             )
 
-            api_key = profile_gpt_settings.get_key() or ChatGPTProvider.api_key
+            api_key = profile_gpt_settings.get_key()
             chat_gpt_api = ChatGPTAPI(log_filter=self.event.log_filter, sender=self.event.sender, api_key=api_key)
 
             for attachment in attachments:

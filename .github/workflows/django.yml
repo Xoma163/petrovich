@@ -52,7 +52,6 @@ jobs:
           TIMEZONEDB_API_KEY: ''
           YANDEX_GEO_TOKEN: ''
           GITHUB_TOKEN: ''
-          OPENAI_KEY: ''
           REDIS_URL: 'redis://127.0.0.1:6379/1'
           SENTRY_URL: ''
           IMGDB_API_KEY: ''

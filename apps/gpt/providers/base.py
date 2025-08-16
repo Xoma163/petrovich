@@ -21,8 +21,3 @@ class GPTProvider(ABC):
     @abstractmethod
     def api_class(self) -> Type[GPTAPI]:
         pass
-
-    @property
-    @abstractmethod
-    def api_key(self) -> str:
-        pass

@@ -2,9 +2,10 @@ from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.help_text import HelpTextArgument
 from apps.bot.classes.messages.response_message import ResponseMessageItem, ResponseMessage
 from apps.gpt.api.base import GPTAPI
+from apps.gpt.enums import GPTProviderEnum
 from apps.gpt.models import ProfileGPTSettings
 from apps.gpt.protocols import GPTCommandProtocol
-from apps.gpt.utils import user_has_role_or_has_gpt_key
+from apps.gpt.utils import user_has_api_key
 
 
 class GPTKeyMixin(GPTCommandProtocol):
@@ -46,8 +47,8 @@ class GPTKeyMixin(GPTCommandProtocol):
     # COMMON UTILS
 
     def check_key(self) -> ResponseMessage | None:
-        has_access = user_has_role_or_has_gpt_key(self.event.sender, self.provider)
-        # Если у пользователя нет роли GPT и нет персонального ключа, тогда единственное, что мы ему даём - добавить ключ
+        has_access = user_has_api_key(self.event.sender, self.provider)
+        # Если у пользователя нет персонального ключа, тогда единственное, что мы ему даём - добавить ключ
         if not has_access:
             if self.event.message.args and self.event.message.args[0] in ["ключ", "key"]:
                 return ResponseMessage(self.menu_key())
@@ -57,6 +58,15 @@ class GPTKeyMixin(GPTCommandProtocol):
                     command_name=self.bot.get_formatted_text_line(f'/{self.name}')
                 )
                 raise PWarning(error_msg)
+
+    @staticmethod
+    def raise_no_access_exception(gpt_type_enum: GPTProviderEnum, command_name: str) -> None:
+        error_msg = GPTKeyMixin.PROVIDE_API_KEY_TEMPLATE.format(
+            provider_name=gpt_type_enum,
+            command_name=command_name
+        )
+        raise PWarning(error_msg)
+
 
     # UTILS
 

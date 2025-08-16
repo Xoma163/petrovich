@@ -17,7 +17,7 @@ from apps.gpt.commands.gpt.mixins.key import GPTKeyMixin
 from apps.gpt.messages.base import GPTMessages
 from apps.gpt.messages.consts import GPTMessageRole
 from apps.gpt.providers.providers.chatgpt import ChatGPTProvider
-from apps.gpt.utils import user_has_role_or_has_gpt_key
+from apps.gpt.utils import user_has_api_key
 
 
 class WTFCommand(Command):
@@ -44,17 +44,15 @@ class WTFCommand(Command):
         self.gpt_command_class: type[GPTCommand] = gpt_command_class
 
     def _check_gpt_access(self):
-        has_access = user_has_role_or_has_gpt_key(self.event.sender, ChatGPTProvider())
+        has_access = user_has_api_key(self.event.sender, ChatGPTProvider())
         if not has_access:
-            error_msg = GPTKeyMixin.PROVIDE_API_KEY_TEMPLATE.format(
-                provider_name=self.gpt_command_class.provider.type_enum,
-                command_name=self.bot.get_formatted_text_line(f'/{self.gpt_command_class.name}')
+            GPTKeyMixin.raise_no_access_exception(
+                self.gpt_command_class.provider.type_enum,
+                self.bot.get_formatted_text_line(f'/{self.gpt_command_class.name}')
             )
-            raise PWarning(error_msg)
 
     def start(self) -> ResponseMessage:
         self._check_gpt_access()
-
 
         n, prompt = self._get_n_and_prompt()
 

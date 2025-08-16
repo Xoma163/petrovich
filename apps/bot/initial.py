@@ -90,7 +90,6 @@ def get_text_for_documentation():
         Role.USER: "всех пользователей",
         Role.MINECRAFT: "майнкрафтеров",
         Role.TRUSTED: "доверенных пользователей",
-        Role.GPT: "gpt пользователей",
         Role.MODERATOR: "модераторов",
         Role.ADMIN: "админа",
     }

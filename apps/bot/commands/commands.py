@@ -31,7 +31,6 @@ class Commands(Command):
             {"role": Role.TRUSTED, "text": "команды для доверенных пользователей"},
             {"role": Role.MRAZ, "text": "команды для мразей"},
             {"role": Role.FLAIVA, "text": "команды для флейвы"},
-            {"role": Role.GPT, "text": "команды для gpt"}
         ]
 
         if self.event.message.args:

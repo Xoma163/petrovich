@@ -1,6 +1,5 @@
 from django.contrib import admin
 
-from apps.bot.classes.const.consts import Role
 from apps.gpt.models import (
     Preprompt,
     Usage,
@@ -198,7 +197,6 @@ class ProfileGPTSettingsAdmin(TimeStampAdminMixin):
     list_display = (
         'profile',
         'has_key',
-        'has_gpt_role',
         "provider",
         "completions_model",
         "vision_model",
@@ -231,7 +229,3 @@ class ProfileGPTSettingsAdmin(TimeStampAdminMixin):
     @admin.display(boolean=True, description='Есть ключ')
     def has_key(self, obj: ProfileGPTSettings) -> bool:
         return bool(obj.key)
-
-    @admin.display(boolean=True, description='Есть роль GPT')
-    def has_gpt_role(self, obj: ProfileGPTSettings) -> bool:
-        return obj.profile.check_role(Role.GPT)

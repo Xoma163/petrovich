@@ -195,12 +195,9 @@ class GPTCommand(
     def get_api_key(self) -> str:
         """
         Получение api_key
-        Сначала ищем у пользователя, потом берём общий
         """
         profile_gpt_settings = self.get_profile_gpt_settings()
-        if key := profile_gpt_settings.get_key():
-            return key
-        return self.provider.api_key
+        return profile_gpt_settings.get_key()
 
     def get_profile_gpt_settings(self) -> ProfileGPTSettings:
         """
