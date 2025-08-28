@@ -1,5 +1,4 @@
 import json
-import json
 import re
 from urllib.parse import urlparse
 
@@ -269,7 +268,7 @@ class VKVideo(SubscribeService):
     @staticmethod
     def _get_short_video_data(bs4):
         bs4_str = str(bs4)
-        pos1_text = "window.initReactApplication('Video_page', "
+        pos1_text = "initReactApplication('Video_page', "
         pos2_text = ");"
         pos1 = bs4_str.find(pos1_text)
         pos2 = bs4_str.find(pos2_text, pos1)
