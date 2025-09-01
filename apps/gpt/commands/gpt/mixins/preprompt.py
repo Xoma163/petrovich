@@ -56,7 +56,7 @@ class GPTPrepromptMixin(GPTCommandProtocol):
                 rmi = ResponseMessageItem(f"Удалил {is_for}")
             # обновить/создать
             else:
-                preprompt = " ".join(self.event.message.args_case[args_slice_index:])
+                preprompt = " ".join(self.event.message.args_str_case.split(" ")[args_slice_index:])
                 preprompt_obj, _ = Preprompt.objects.update_or_create(
                     defaults={'text': preprompt},
                     **dict(q.children)
