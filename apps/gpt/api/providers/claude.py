@@ -106,7 +106,7 @@ class ClaudeAPI(
         data = {
             "model": model.name,
             "messages": messages,
-            "max_tokens": 8192
+            "max_tokens": 4096
         }
         if preprompt:
             data["system"] = preprompt
