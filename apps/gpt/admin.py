@@ -11,7 +11,7 @@ from apps.gpt.models import (
     ImageEditModel,
     VoiceRecognitionModel
 )
-from apps.service.mixins import TimeStampAdminMixin
+from apps.service.mixins import TimeStampAdminMixin, TopFieldsMixin
 
 
 @admin.register(Provider)
@@ -193,7 +193,8 @@ class VoiceRecognitionModelAdmin(admin.ModelAdmin):
 
 
 @admin.register(ProfileGPTSettings)
-class ProfileGPTSettingsAdmin(TimeStampAdminMixin):
+class ProfileGPTSettingsAdmin(TimeStampAdminMixin, TopFieldsMixin):
+    TOP_ORDER_FIELDS = ['profile']
     list_display = (
         'profile',
         'has_key',

@@ -3,7 +3,13 @@ from django.db import models
 
 from apps.bot.models import Profile, Chat
 from apps.bot.utils.fernet import Fernet
-from apps.gpt.enums import GPTProviderEnum, GPTImageFormat, GPTImageQuality
+from apps.gpt.enums import (
+    GPTProviderEnum,
+    GPTImageFormat,
+    GPTImageQuality,
+    GPTReasoningEffortLevel,
+    GPTVerbosityLevel
+)
 from apps.service.mixins import TimeStampModelMixin
 
 
@@ -175,8 +181,10 @@ class ImageEditModel(GPTImageModel):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['name', 'width', 'height', 'provider'],
-                                    name='unique_name_width_height_image_edit')
+            models.UniqueConstraint(
+                fields=['name', 'width', 'height', 'provider'],
+                name='unique_name_width_height_image_edit'
+            )
         ]
 
         verbose_name = "Модель редактирования изображений"
@@ -199,27 +207,15 @@ class VoiceRecognitionModel(GPTModel):
         verbose_name_plural = "Модели распознования голоса"
 
 
-class ProfileGPTSettings(TimeStampModelMixin):
+class ProfileGPTBaseSettings(TimeStampModelMixin):
     provider = models.ForeignKey(Provider, models.CASCADE, verbose_name="Провайдер")
 
-    profile = models.ForeignKey(
-        Profile,
-        models.CASCADE,
-        verbose_name="Профиль",
-        related_name="gpt_settings"
-    )
-    key = models.CharField(
-        "Ключ провайдера",
-        max_length=1024,
-        blank=True
-    )
     completions_model = models.ForeignKey(
         CompletionsModel,
         models.SET_NULL,
         null=True,
         blank=True,
         verbose_name="Модель обработки текста",
-
     )
     vision_model = models.ForeignKey(
         VisionModel,
@@ -250,19 +246,20 @@ class ProfileGPTSettings(TimeStampModelMixin):
         verbose_name="Модель распознования голоса",
     )
 
-    def get_key(self) -> str:
-        if not self.key:
-            return self.key
-        return Fernet.decrypt(self.key)
-
-    def set_key(self, key: str) -> None:
-        if key == "":
-            self.key = ""
-        else:
-            self.key = Fernet.encrypt(key)
-
-    def __str__(self):
-        return str(self.profile)
+    gpt_5_settings_reasoning_effort_level = models.CharField(
+        "Уровень рассуждений моделей семейства gpt-5",
+        null=True,
+        blank=True,
+        max_length=32,
+        choices=[(effort_level.value, effort_level.name) for effort_level in GPTReasoningEffortLevel],  # noqa
+    )
+    gpt_5_settings_verbosity_level = models.CharField(
+        "Уровень многословности моделей семейства gpt-5",
+        null=True,
+        blank=True,
+        max_length=32,
+        choices=[(verbosity_level.value, verbosity_level.name) for verbosity_level in GPTVerbosityLevel],  # noqa
+    )
 
     def clean(self):
         super().clean()
@@ -278,13 +275,61 @@ class ProfileGPTSettings(TimeStampModelMixin):
         error_template = "Провайдер модели ({provider_model}) не совпадает с провайдером настроек ({provider_self})."
         for model_name, model_instance in models_to_check.items():
             if model_instance and model_instance.provider != self.provider:
-                errors[model_name] = error_template.format(provider_model=model_instance.provider,
-                                                           provider_self=self.provider)
+                errors[model_name] = error_template.format(
+                    provider_model=model_instance.provider,
+                    provider_self=self.provider
+                )
         if len(errors) > 0:
             raise ValidationError(errors)
+
+    class Meta:
+        abstract = True
+
+
+class ProfileGPTSettings(ProfileGPTBaseSettings):
+    key = models.CharField(
+        "Ключ провайдера",
+        max_length=1024,
+        blank=True
+    )
+
+    profile = models.ForeignKey(
+        Profile,
+        models.CASCADE,
+        verbose_name="Профиль",
+        related_name="gpt_settings"
+    )
+
+    def get_key(self) -> str:
+        if not self.key:
+            return self.key
+        return Fernet.decrypt(self.key)
+
+    def set_key(self, key: str) -> None:
+        if key == "":
+            self.key = ""
+        else:
+            self.key = Fernet.encrypt(key)
+
+    def __str__(self):
+        return str(self.profile)
 
     class Meta:
         unique_together = ('profile', 'provider')
 
         verbose_name = "Настройка профиля GPT"
         verbose_name_plural = "Настройки профиля GPT"
+
+
+class ProfileGPTPreset(ProfileGPTBaseSettings):
+    name = models.CharField("Название")
+
+    profile = models.ForeignKey(
+        Profile,
+        models.CASCADE,
+        verbose_name="Профиль",
+        related_name="gpt_presets"
+    )
+
+    def __str__(self):
+        return f"{self.profile} | {self.name}"

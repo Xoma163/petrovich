@@ -55,7 +55,7 @@ class ChatGPTAPI(
 
     completions_url = f"{base_url}/chat/completions"
 
-    def completions(self, messages: GPTMessages, model: CompletionsModel) -> GPTCompletionsResponse:
+    def completions(self, messages: GPTMessages, model: CompletionsModel, extra_data: dict) -> GPTCompletionsResponse:
         payload = {
             "model": model.name,
             "messages": messages.get_messages()
@@ -65,6 +65,10 @@ class ChatGPTAPI(
         if model.name in ["o1-mini"]:
             if payload['messages'][0]['role'] == GPTMessageRole.SYSTEM:
                 payload['messages'][0]['role'] = GPTMessageRole.USER
+
+        if model.name in ['gpt-5', 'gpt-5-mini', 'gpt-5-nano'] and extra_data:
+            payload["reasoning_effort"] = extra_data['effort_level']
+            payload["verbosity"] = extra_data['verbosity_level']
 
         return self.do_completions_request(model, self.completions_url, json=payload, headers=self.headers)  # noqa
 

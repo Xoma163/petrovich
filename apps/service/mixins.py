@@ -18,3 +18,13 @@ class TimeStampAdminMixin(admin.ModelAdmin):
         self.readonly_fields = list(self.readonly_fields) + self.EXTRA_FIELDS
         self.list_filter = list(self.list_filter) + self.EXTRA_FIELDS
         super().__init__(model, admin_site)
+
+
+class TopFieldsMixin(admin.ModelAdmin):
+    TOP_ORDER_FIELDS = []
+
+    def get_fields(self, request, obj=None):
+        fields = list(super().get_fields(request, obj))
+        for top_field in self.TOP_ORDER_FIELDS:
+            fields.remove(top_field)
+        return self.TOP_ORDER_FIELDS + fields

@@ -2,6 +2,7 @@ from apps.bot.classes.const.consts import Role
 from apps.bot.classes.help_text import HelpTextItem, HelpText
 from apps.gpt.commands.gpt.base import GPTCommand
 from apps.gpt.commands.gpt.functionality.completions import GPTCompletionsFunctionality
+from apps.gpt.commands.gpt.functionality.gpt_5_settings import GPT5SettingsFunctionality
 from apps.gpt.commands.gpt.functionality.image_draw import GPTImageDrawFunctionality
 from apps.gpt.commands.gpt.functionality.vision import GPTVisionFunctionality
 from apps.gpt.commands.gpt.mixins.key import GPTKeyMixin
@@ -16,7 +17,9 @@ class ChatGPTCommand(
     GPTCommand,
     GPTCompletionsFunctionality,
     GPTVisionFunctionality,
-    GPTImageDrawFunctionality
+    GPTImageDrawFunctionality,
+    GPT5SettingsFunctionality,
+
 ):
     name = "gpt"
     names = ["гпт", "chatgpt", "чатгпт"]
@@ -40,7 +43,8 @@ class ChatGPTCommand(
                 GPTModelChoiceMixin.VISION_HELP_TEXT_ITEMS +
                 GPTModelChoiceMixin.IMAGE_DRAW_HELP_TEXT_ITEMS +
                 GPTModelChoiceMixin.VOICE_RECOGNITION_HELP_TEXT_ITEMS +
-                GPTKeyMixin.KEY_HELP_TEXT_ITEMS
+                GPTKeyMixin.KEY_HELP_TEXT_ITEMS +
+                GPT5SettingsFunctionality.GPT_5_SETTINGS_HELP_TEXT_ITEMS
             )
         ],
         help_text_keys=[

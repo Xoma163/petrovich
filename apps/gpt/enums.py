@@ -14,6 +14,20 @@ class GPTImageFormat(StrEnum):
 
 
 class GPTImageQuality(StrEnum):
-    HIGH = "HIGH"
+    HIGH = "high"
     MEDIUM = "medium"
     LOW = "low"
+
+
+class GPTReasoningEffortLevel(StrEnum):
+    HIGH = "high"
+    MEDIUM = "medium"
+    LOW = "low"
+    MINIMAL = "minimal"
+
+
+class GPTVerbosityLevel(StrEnum):
+    HIGH = "high"
+    MEDIUM = "medium"
+    LOW = "low"
+

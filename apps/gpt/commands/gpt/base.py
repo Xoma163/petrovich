@@ -12,6 +12,7 @@ from apps.bot.utils.cache import MessagesCache
 from apps.bot.utils.utils import markdown_to_html, wrap_text_in_document
 from apps.gpt.api.base import ImageDrawAPIMixin, VisionAPIMixin, CompletionsAPIMixin
 from apps.gpt.commands.gpt.functionality.completions import GPTCompletionsFunctionality
+from apps.gpt.commands.gpt.functionality.gpt_5_settings import GPT5SettingsFunctionality
 from apps.gpt.commands.gpt.functionality.image_draw import GPTImageDrawFunctionality
 from apps.gpt.commands.gpt.functionality.vision import GPTVisionFunctionality
 from apps.gpt.commands.gpt.mixins.key import GPTKeyMixin
@@ -105,6 +106,9 @@ class GPTCommand(
         if isinstance(self, GPTModelChoiceMixin):
             menu.append([["модели", "models"], self.menu_models])
             menu.append([["модель", "model"], self.menu_model])
+        if isinstance(self, GPT5SettingsFunctionality):
+            menu.append([["gpt_5_reasoning"], self.reasoning])
+            menu.append([["gpt_5_verbosity"], self.verbosity])
         if issubclass(self.provider.api_class, CompletionsAPIMixin) and isinstance(self, GPTCompletionsFunctionality):
             menu.append([["_wtf"], self.menu_wtf])
             menu.append([['default'], self.menu_completions])
@@ -175,10 +179,16 @@ class GPTCommand(
 
         if len(answer) > self.bot.MAX_MESSAGE_TEXT_LENGTH:
             document = wrap_text_in_document(answer, 'gpt.html')
-            rmi = ResponseMessageItem(text=self.RESPONSE_MESSAGE_TOO_LONG, attachments=[document],
-                                      reply_to=self.event.message.id)
+            rmi = ResponseMessageItem(
+                text=self.RESPONSE_MESSAGE_TOO_LONG,
+                attachments=[document],
+                reply_to=self.event.message.id
+            )
         else:
-            rmi = ResponseMessageItem(text=answer, reply_to=self.event.message.id)
+            rmi = ResponseMessageItem(
+                text=answer,
+                reply_to=self.event.message.id
+            )
         return rmi
 
     def send_rmi(self, rmi):
@@ -290,7 +300,6 @@ class GPTCommand(
             return self._get_common_msg(event, None)
         else:
             return self._get_common_msg(event, event.message.raw)
-
 
     @staticmethod
     def _get_common_msg(event, text: str | None):

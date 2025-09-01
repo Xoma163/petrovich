@@ -81,9 +81,9 @@ class GPTCommandProtocol(
 class HasCompletions(Protocol):
     def completions(
             self,
-            messages:
-            GPTMessages,
-            model: CompletionsModel
+            messages: GPTMessages,
+            model: CompletionsModel,
+            extra_data: dict
     ) -> GPTCompletionsResponse:
         ...
 

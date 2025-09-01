@@ -32,7 +32,7 @@ class GrokAPI(
 
     completions_url = f"{base_url}/chat/completions"
 
-    def completions(self, messages: GPTMessages, model: CompletionsModel) -> GPTCompletionsResponse:
+    def completions(self, messages: GPTMessages, model: CompletionsModel, extra_data: dict) -> GPTCompletionsResponse:
         payload = {
             "model": model.name,
             "messages": messages.get_messages()

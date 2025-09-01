@@ -62,7 +62,7 @@ class ClaudeAPI(
 
     completions_url = f"{base_url}/messages"
 
-    def completions(self, messages: GPTMessages, model: CompletionsModel) -> GPTCompletionsResponse:
+    def completions(self, messages: GPTMessages, model: CompletionsModel, extra_data: dict) -> GPTCompletionsResponse:
         preprompt = None
         messages = messages.get_messages()
         if messages[0]['role'] == GPTMessageRole.SYSTEM:

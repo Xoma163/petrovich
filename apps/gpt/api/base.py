@@ -40,6 +40,7 @@ class GPTAPI(API):
     def check_key(self) -> bool:
         pass
 
+
 class CompletionsAPIMixin(HasCompletions):
     @property
     @abstractmethod
@@ -47,7 +48,12 @@ class CompletionsAPIMixin(HasCompletions):
         pass
 
     @abstractmethod
-    def completions(self, messages: GPTMessages, model: CompletionsModel) -> GPTCompletionsResponse:
+    def completions(
+            self,
+            messages: GPTMessages,
+            model: CompletionsModel,
+            extra_data: dict
+    ) -> GPTCompletionsResponse:
         pass
 
 
