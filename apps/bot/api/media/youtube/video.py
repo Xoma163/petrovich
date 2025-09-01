@@ -78,9 +78,12 @@ class YoutubeVideo(SubscribeService):
         except yt_dlp.utils.DownloadError as e:
             if "Sign in to confirm your age" in e.msg:
                 raise PWarning("К сожалению видос доступен только залогиненым пользователям")
-            if "Sign in to confirm you’re not a bot" in e.msg:
+            elif "Sign in to confirm you’re not a bot" in e.msg:
                 raise PWarning("Ютуб думает что я бот (да я бот). Попробуйте скачать видео позже")
-            raise PWarning("Не смог найти видео по этой ссылке")
+            elif "The following content is not available on this app" in e.msg:
+                raise PWarning("Это видео скачать не получится. ПАТАМУШТА")
+            else:
+                raise PWarning("Не смог найти видео по этой ссылке")
         return video_info
 
     def get_video_info(
@@ -92,7 +95,6 @@ class YoutubeVideo(SubscribeService):
         video_info = self._get_video_info(url)
 
         video, audio, filesize = self._get_video_download_urls(video_info, high_res, _timedelta)
-
 
         return VideoData(
             filesize=filesize,
@@ -186,7 +188,6 @@ class YoutubeVideo(SubscribeService):
         if not af and audio_formats:
             af = audio_formats[0]
 
-
         video_formats = list(
             filter(
                 lambda x: (
@@ -194,7 +195,7 @@ class YoutubeVideo(SubscribeService):
                         x.get('ext') == 'mp4' and  # С форматом mp4
                         x.get('vcodec') not in ['vp9'] and  # С кодеками которые поддерживают все платформы
                         x.get('dynamic_range') == 'SDR' and  # В SDR качестве
-                        not x.get('__needs_testing')  # Без тестовых
+                        not x.get('__working')  # Без тестовых
                     # x.get('format_note')  # Имеют разрешение для просмотра (?)
                 ),
                 video_info['formats']

@@ -51,7 +51,7 @@ class GPTPrepromptMixin(GPTCommandProtocol):
 
         if len(self.event.message.args) > args_slice_index:
             # удалить
-            if self.event.message.args[args_slice_index] == "удалить":
+            if self.event.message.args[args_slice_index] in ["удалить", "delete"]:
                 Preprompt.objects.filter(q).delete()
                 rmi = ResponseMessageItem(f"Удалил {is_for}")
             # обновить/создать
