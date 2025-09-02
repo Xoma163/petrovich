@@ -18,7 +18,9 @@ from apps.gpt.models import (
     ImageDrawModel,
     ImageEditModel,
     VoiceRecognitionModel,
-    Provider, GPTModel
+    Provider,
+    GPTModel,
+    Preprompt
 )
 from apps.gpt.models import ProfileGPTSettings
 
@@ -40,7 +42,7 @@ class GPTModelChoiceProtocol(Protocol):
 class GPTPrepromptProtocol(Protocol):
     def menu_preprompt(self) -> ResponseMessageItem: ...
 
-    def get_preprompt(self, sender: Profile, chat: Chat) -> str | None: ...
+    def get_preprompt(self, sender: Profile, chat: Chat | None) -> Preprompt | None: ...
 
 
 class GPTStatisticsProtocol(Protocol):

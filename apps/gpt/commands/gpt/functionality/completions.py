@@ -49,7 +49,7 @@ class GPTCompletionsFunctionality(GPTCommandProtocol):
 
         preprompt = self.get_preprompt(self.event.sender, self.event.chat)
         if preprompt:
-            history.add_message(GPTMessageRole.SYSTEM, preprompt)
+            history.add_message(GPTMessageRole.SYSTEM, preprompt.text)
 
         history.add_message(GPTMessageRole.USER, self.DEFAULT_WTF_PROMPT)
         history.add_message(GPTMessageRole.USER, text)

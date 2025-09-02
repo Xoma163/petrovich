@@ -6,6 +6,8 @@ from apps.gpt.commands.gpt.functionality.vision import GPTVisionFunctionality
 from apps.gpt.commands.gpt.mixins.key import GPTKeyMixin
 from apps.gpt.commands.gpt.mixins.model_choice import GPTModelChoiceMixin
 from apps.gpt.commands.gpt.mixins.preprompt import GPTPrepromptMixin
+from apps.gpt.commands.gpt.mixins.preset import GPTPresetMixin
+from apps.gpt.commands.gpt.mixins.settings import GPTSettingsMixin
 from apps.gpt.commands.gpt.mixins.statistics import GPTStatisticsMixin
 from apps.gpt.providers.base import GPTProvider
 from apps.gpt.providers.providers.claude import ClaudeProvider
@@ -35,7 +37,9 @@ class ClaudeCommand(
                 GPTModelChoiceMixin.MODEL_CHOOSE_HELP_TEXT_ITEMS +
                 GPTModelChoiceMixin.COMPLETIONS_HELP_TEXT_ITEMS +
                 GPTModelChoiceMixin.VISION_HELP_TEXT_ITEMS +
-                GPTKeyMixin.KEY_HELP_TEXT_ITEMS
+                GPTKeyMixin.KEY_HELP_TEXT_ITEMS +
+                GPTPresetMixin.PRESET_HELP_TEXT_ITEMS +
+                GPTSettingsMixin.SETTINGS_HELP_TEXT_ITEMS
 
             )
         ],

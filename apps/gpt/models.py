@@ -64,6 +64,7 @@ class GPTModel(models.Model):
     provider = models.ForeignKey(Provider, models.CASCADE, verbose_name="Провайдер")
 
     name = models.CharField(max_length=256, verbose_name="Название модели в API")
+    # ToDo: deprecated?
     verbose_name = models.CharField(max_length=256, verbose_name="Название модели для пользователя")
     is_default = models.BooleanField(default=False, verbose_name="Модель по умолчанию")
 
@@ -321,15 +322,22 @@ class ProfileGPTSettings(ProfileGPTBaseSettings):
         verbose_name_plural = "Настройки профиля GPT"
 
 
-class ProfileGPTPreset(ProfileGPTBaseSettings):
-    name = models.CharField("Название")
-
+class GPTPreset(ProfileGPTBaseSettings):
+    name = models.CharField("Название", max_length=255)
+    description = models.CharField("Описание", max_length=1023, blank=True, null=True)
     profile = models.ForeignKey(
         Profile,
         models.CASCADE,
         verbose_name="Профиль",
         related_name="gpt_presets"
     )
+    preprompt_text = models.TextField("Текст препромпта", blank=True, null=True)
 
     def __str__(self):
         return f"{self.profile} | {self.name}"
+
+    class Meta:
+        unique_together = ('profile', 'provider', 'name')
+
+        verbose_name = "Пресет GPT"
+        verbose_name_plural = "Пресеты GPT"

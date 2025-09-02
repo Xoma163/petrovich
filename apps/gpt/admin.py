@@ -9,7 +9,7 @@ from apps.gpt.models import (
     VisionModel,
     ImageDrawModel,
     ImageEditModel,
-    VoiceRecognitionModel
+    VoiceRecognitionModel, GPTPreset
 )
 from apps.service.mixins import TimeStampAdminMixin, TopFieldsMixin
 
@@ -194,7 +194,7 @@ class VoiceRecognitionModelAdmin(admin.ModelAdmin):
 
 @admin.register(ProfileGPTSettings)
 class ProfileGPTSettingsAdmin(TimeStampAdminMixin, TopFieldsMixin):
-    TOP_ORDER_FIELDS = ['profile']
+    TOP_ORDER_FIELDS = ["provider", "profile"]
     list_display = (
         'profile',
         'has_key',
@@ -230,3 +230,35 @@ class ProfileGPTSettingsAdmin(TimeStampAdminMixin, TopFieldsMixin):
     @admin.display(boolean=True, description='Есть ключ')
     def has_key(self, obj: ProfileGPTSettings) -> bool:
         return bool(obj.key)
+
+
+@admin.register(GPTPreset)
+class GPTPresetAdmin(TimeStampAdminMixin, TopFieldsMixin):
+    TOP_ORDER_FIELDS = ["provider", "profile", "name", "description"]
+    list_display = (
+        "profile",
+        "name",
+        "description",
+        "provider",
+    )
+    search_fields = (
+        'profile__name',
+        'profile__surname',
+        'profile__nickname_real'
+    )
+    list_filter = (
+        "provider",
+        ('profile', admin.RelatedOnlyFieldListFilter),
+    )
+    list_select_related = (
+        "profile",
+        "provider",
+        "completions_model",
+        "vision_model",
+        "image_draw_model",
+        "image_edit_model",
+        "voice_recognition_model",
+    )
+    ordering = (
+        'profile',
+    )

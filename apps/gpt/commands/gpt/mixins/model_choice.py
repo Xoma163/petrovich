@@ -151,7 +151,7 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
                 voice_recognition_models,
                 profile_gpt_settings,
                 self._get_voice_recognition_row,
-                "генерации изображений (draw)",
+                "распознавания голоса (voice)",
                 "Название | цена за минуту",
                 (6,)
 
@@ -264,15 +264,15 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
         if len(self.event.message.args) < 3:
             return ResponseMessageItem(text=self._get_current_completions_model_str(profile_gpt_settings))
         new_model_name = self.event.message.args[2]
-        if new_model_name in ["удалить", "delete"]:
+        if new_model_name in ["удалить", "сброс", "delete", "reset"]:
             profile_gpt_settings.completions_model = None
             profile_gpt_settings.save()
-            return ResponseMessageItem(text=f"Удалил модель обработки текста(completions)")
+            return ResponseMessageItem(text=f"Удалил модель обработки текста (completions)")
 
         new_model = self._find_model(CompletionsModel, new_model_name)
         profile_gpt_settings.completions_model = new_model
         profile_gpt_settings.save()
-        answer = f"Поменял модель обработки текста(completions) на {self.bot.get_formatted_text_line(new_model.verbose_name)}"
+        answer = f"Поменял модель обработки текста (completions) на {self.bot.get_formatted_text_line(new_model.name)}"
         return ResponseMessageItem(text=answer)
 
     def _sub_menu_vision_model_choice(self, profile_gpt_settings: ProfileGPTSettings):
@@ -282,15 +282,15 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
             return ResponseMessageItem(text=self._get_current_vision_model_str(profile_gpt_settings))
 
         new_model_name = self.event.message.args[2]
-        if new_model_name in ["удалить", "delete"]:
+        if new_model_name in ["удалить", "сброс", "delete", "reset"]:
             profile_gpt_settings.vision_model = None
             profile_gpt_settings.save()
-            return ResponseMessageItem(text=f"Удалил модель обработки изображений(vision)")
+            return ResponseMessageItem(text=f"Удалил модель обработки изображений (vision)")
 
         new_model = self._find_model(VisionModel, new_model_name)
         profile_gpt_settings.vision_model = new_model
         profile_gpt_settings.save()
-        answer = f"Поменял модель обработки изображений(vision) на {self.bot.get_formatted_text_line(new_model.verbose_name)}"
+        answer = f"Поменял модель обработки изображений (vision) на {self.bot.get_formatted_text_line(new_model.name)}"
         return ResponseMessageItem(text=answer)
 
     def _sub_menu_image_draw_model_choice(self, profile_gpt_settings: ProfileGPTSettings):
@@ -300,7 +300,7 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
             return ResponseMessageItem(text=self._get_current_image_draw_model_str(profile_gpt_settings))
 
         new_model_name = self.event.message.args[2]
-        if new_model_name in ["удалить", "delete"]:
+        if new_model_name in ["удалить", "сброс", "delete", "reset"]:
             profile_gpt_settings.image_draw_model = None
             profile_gpt_settings.save()
             return ResponseMessageItem(text=f"Удалил модель генерации изображений (draw)")
@@ -316,7 +316,7 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
 
         profile_gpt_settings.image_draw_model = new_model
         profile_gpt_settings.save()
-        answer = f"Поменял модель генерации изображения(draw) на {self.bot.get_formatted_text_line(new_model.verbose_name)}"
+        answer = f"Поменял модель генерации изображения (draw) на {self.bot.get_formatted_text_line(new_model.name)}"
         return ResponseMessageItem(text=answer)
 
     def _sub_menu_voice_recognition_model_choice(self, profile_gpt_settings: ProfileGPTSettings):
@@ -326,15 +326,15 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
             return ResponseMessageItem(text=self._get_current_voice_recognition_model_str(profile_gpt_settings))
 
         new_model_name = self.event.message.args[2]
-        if new_model_name in ["удалить", "delete"]:
+        if new_model_name in ["удалить", "сброс", "delete", "reset"]:
             profile_gpt_settings.voice_recognition_model = None
             profile_gpt_settings.save()
-            return ResponseMessageItem(text=f"Удалил голосовую(voice) модель")
+            return ResponseMessageItem(text=f"Удалил модель обработки голоса (voice)")
 
         new_model = self._find_model(VoiceRecognitionModel, new_model_name)
         profile_gpt_settings.voice_recognition_model = new_model
         profile_gpt_settings.save()
-        answer = f"Поменял модель обработки голоса(voice) на {self.bot.get_formatted_text_line(new_model.verbose_name)}"
+        answer = f"Поменял модель обработки голоса (voice) на {self.bot.get_formatted_text_line(new_model.name)}"
         return ResponseMessageItem(text=answer)
 
     def _find_model(
@@ -367,20 +367,20 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
         :get_default_model_method - Метод для получения стандартной модели
         """
         if current_model := getattr(settings, model_field):
-            current_model_str = self.bot.get_formatted_text_line(current_model.verbose_name)
+            current_model_str = self.bot.get_formatted_text_line(current_model.name)
             return current_model_str
         else:
             default_model = get_default_model_method()
-            default_model_str = self.bot.get_formatted_text_line(default_model.verbose_name)
+            default_model_str = self.bot.get_formatted_text_line(default_model.name)
             return f"{default_model_str} (по умолчанию)"
 
     def _get_current_completions_model_str(self, settings: ProfileGPTSettings):
         current_model_str = self._get_current_model_str(
             settings,
             'completions_model',
-            self.get_default_completions_model
+            self.get_default_completions_model  # noqa
         )
-        return f"Текстовая(completions)\n{current_model_str}"
+        return f"Текстовая (completions)\n{current_model_str}"
 
     def _get_current_vision_model_str(self, settings: ProfileGPTSettings):
         # if not isinstance(self, GPTVisionFunctionality):
@@ -388,25 +388,25 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
         current_model_str = self._get_current_model_str(
             settings,
             'vision_model',
-            self.get_default_vision_model
+            self.get_default_vision_model  # noqa
         )
-        return f"Зрения(vision)\n{current_model_str}"
+        return f"Зрения (vision)\n{current_model_str}"
 
     def _get_current_image_draw_model_str(self, settings: ProfileGPTSettings):
         current_model_str = self._get_current_model_str(
             settings,
             'image_draw_model',
-            self.get_default_image_draw_model
+            self.get_default_image_draw_model  # noqa
         )
-        return f"Генерации изображений(draw)\n{current_model_str}"
+        return f"Генерации изображений (draw)\n{current_model_str}"
 
     def _get_current_voice_recognition_model_str(self, settings: ProfileGPTSettings):
         current_model_str = self._get_current_model_str(
             settings,
             'voice_recognition_model',
-            self.get_default_voice_recognition_model
+            self.get_default_voice_recognition_model  # noqa
         )
-        return f"Голосовая(voice)\n{current_model_str}"
+        return f"Голосовая (voice)\n{current_model_str}"
 
     def _get_all_current_models(self, profile_gpt_settings: ProfileGPTSettings) -> ResponseMessageItem:
         """

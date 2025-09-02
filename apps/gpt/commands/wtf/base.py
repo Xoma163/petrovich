@@ -113,7 +113,7 @@ class WTFCommand(Command):
         )
         history: GPTMessages = gpt_command.provider.messages_class()
         if preprompt:
-            history.add_message(GPTMessageRole.SYSTEM, preprompt)
+            history.add_message(GPTMessageRole.SYSTEM, preprompt.text)
         history.add_message(GPTMessageRole.USER, prompt)
         history.add_message(GPTMessageRole.USER, "\n".join(result_message))
         return history

@@ -12,12 +12,14 @@ from apps.bot.utils.cache import MessagesCache
 from apps.bot.utils.utils import markdown_to_html, wrap_text_in_document
 from apps.gpt.api.base import ImageDrawAPIMixin, VisionAPIMixin, CompletionsAPIMixin
 from apps.gpt.commands.gpt.functionality.completions import GPTCompletionsFunctionality
-from apps.gpt.commands.gpt.functionality.gpt_5_settings import GPT5SettingsFunctionality
 from apps.gpt.commands.gpt.functionality.image_draw import GPTImageDrawFunctionality
 from apps.gpt.commands.gpt.functionality.vision import GPTVisionFunctionality
+from apps.gpt.commands.gpt.mixins.gpt_5_settings import GPT5SettingsMixin
 from apps.gpt.commands.gpt.mixins.key import GPTKeyMixin
 from apps.gpt.commands.gpt.mixins.model_choice import GPTModelChoiceMixin
 from apps.gpt.commands.gpt.mixins.preprompt import GPTPrepromptMixin
+from apps.gpt.commands.gpt.mixins.preset import GPTPresetMixin
+from apps.gpt.commands.gpt.mixins.settings import GPTSettingsMixin
 from apps.gpt.commands.gpt.mixins.statistics import GPTStatisticsMixin
 from apps.gpt.messages.base import GPTMessages
 from apps.gpt.messages.consts import GPTMessageRole
@@ -35,7 +37,9 @@ class GPTCommand(
     GPTModelChoiceMixin,
     GPTPrepromptMixin,
     GPTStatisticsMixin,
-    GPTCommandProtocol
+    GPTPresetMixin,
+    GPTSettingsMixin,
+    GPTCommandProtocol,
 ):
     abstract = True
 
@@ -106,9 +110,13 @@ class GPTCommand(
         if isinstance(self, GPTModelChoiceMixin):
             menu.append([["модели", "models"], self.menu_models])
             menu.append([["модель", "model"], self.menu_model])
-        if isinstance(self, GPT5SettingsFunctionality):
+        if isinstance(self, GPT5SettingsMixin):
             menu.append([["gpt_5_reasoning"], self.reasoning])
             menu.append([["gpt_5_verbosity"], self.verbosity])
+        if isinstance(self, GPTPresetMixin):
+            menu.append([["пресет", "пресеты", "preset", "presets"], self.preset])
+        if isinstance(self, GPTSettingsMixin):
+            menu.append([["настройки", "настройка", "settings"], self.settings])
         if issubclass(self.provider.api_class, CompletionsAPIMixin) and isinstance(self, GPTCompletionsFunctionality):
             menu.append([["_wtf"], self.menu_wtf])
             menu.append([['default'], self.menu_completions])
@@ -158,7 +166,7 @@ class GPTCommand(
         if isinstance(self, GPTPrepromptMixin):
             preprompt = self.get_preprompt(self.event.sender, self.event.chat)
             if preprompt:
-                history.add_message(GPTMessageRole.SYSTEM, preprompt)
+                history.add_message(GPTMessageRole.SYSTEM, preprompt.text)
         history.reverse()
 
         user_message = self._get_user_msg(self.event)

@@ -5,21 +5,31 @@ from apps.gpt.enums import GPTReasoningEffortLevel, GPTVerbosityLevel
 from apps.gpt.protocols import GPTCommandProtocol
 
 
-class GPT5SettingsFunctionality(GPTCommandProtocol):
+class GPT5SettingsMixin(GPTCommandProtocol):
     GPT_5_SETTINGS_HELP_TEXT_ITEMS = [
         HelpTextArgument(
             "gpt_5_reasoning (high/medium/low/minimal)",
-            "устанавливает уровень рассуждений для моделей семейства GPT-5. По умолчанию - medium"
+            "устанавливает уровень рассуждений для моделей семейства GPT-5"
+        ),
+        HelpTextArgument(
+            "gpt_5_reasoning удалить",
+            "удаляет настройку"
         ),
         HelpTextArgument(
             "gpt_5_verbosity (high/medium/low)",
-            "устанавливает уровень многословности для моделей семейства GPT-5. По умолчанию - medium"
+            "устанавливает уровень многословности для моделей семейства GPT-5"
+        ),
+        HelpTextArgument(
+            "gpt_5_verbosity удалить",
+            "удаляет настройку"
         )
     ]
 
     def reasoning(self) -> ResponseMessageItem:
         try:
             self.check_args(2)
+            if self.event.message.args[1] in ["удалить", "сброс", "delete", "reset"]:
+                return self.delete_reasoning()
             return self.set_reasoning()
         except:
             return self.get_reasoning()
@@ -47,9 +57,17 @@ class GPT5SettingsFunctionality(GPTCommandProtocol):
         answer = f"Уровень рассуждений для моделей семейства GPT-5 - {value}"
         return ResponseMessageItem(text=answer)
 
+    def delete_reasoning(self) -> ResponseMessageItem:
+        profile_settings = self.get_profile_gpt_settings()
+        profile_settings.gpt_5_settings_reasoning_effort_level = None
+        profile_settings.save()
+        answer = f"Удалил уровень рассуждений для моделей семейства GPT-5"
+        return ResponseMessageItem(text=answer)
+
     def verbosity(self) -> ResponseMessageItem:
         try:
-            self.check_args(2)
+            if self.event.message.args[1] in ["удалить", "сброс", "delete", "reset"]:
+                return self.delete_verbosity()
             return self.set_verbosity()
         except:
             return self.get_verbosity()
@@ -75,4 +93,11 @@ class GPT5SettingsFunctionality(GPTCommandProtocol):
             value = "medium (по умолчанию)"
 
         answer = f"Уровень многословности для моделей семейства GPT-5 - {value}"
+        return ResponseMessageItem(text=answer)
+
+    def delete_verbosity(self) -> ResponseMessageItem:
+        profile_settings = self.get_profile_gpt_settings()
+        profile_settings.gpt_5_settings_verbosity_level = None
+        profile_settings.save()
+        answer = f"Удалил уровень многословности для моделей семейства GPT-5"
         return ResponseMessageItem(text=answer)

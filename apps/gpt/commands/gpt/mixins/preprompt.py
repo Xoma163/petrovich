@@ -16,13 +16,12 @@ class GPTPrepromptMixin(GPTCommandProtocol):
 
     EXTRA_TEXT = (
         "Порядок использования препромптов в конфах:\n"
-        "1) Персональный препромт конфы\n"
-        "2) Персональный препромт\n"
-        "3) Препромпт конфы"
+        "1) Персональный препромт\n"
+        "2) Препромпт конфы"
     )
 
     # MENU
-    
+
     def menu_preprompt(self) -> ResponseMessageItem:
         """
         Установка/удаление препромпта
@@ -33,12 +32,8 @@ class GPTPrepromptMixin(GPTCommandProtocol):
             q = Q(chat=self.event.chat, author=None)
             return self._preprompt(2, q, 'препромпт конфы')
         else:
-            if self.event.is_from_pm:
-                q = Q(chat=None, author=self.event.sender)
-                return self._preprompt(1, q, 'персональный препромпт')
-            else:
-                q = Q(chat=self.event.chat, author=self.event.sender)
-                return self._preprompt(1, q, 'персональный препромпт конфы')
+            q = Q(chat=None, author=self.event.sender)
+            return self._preprompt(1, q, 'персональный препромпт')
 
     # HANDLERS
 
@@ -51,7 +46,7 @@ class GPTPrepromptMixin(GPTCommandProtocol):
 
         if len(self.event.message.args) > args_slice_index:
             # удалить
-            if self.event.message.args[args_slice_index] in ["удалить", "delete"]:
+            if self.event.message.args[args_slice_index] in ["удалить", "сброс", "delete", "reset"]:
                 Preprompt.objects.filter(q).delete()
                 rmi = ResponseMessageItem(f"Удалил {is_for}")
             # обновить/создать
@@ -72,16 +67,16 @@ class GPTPrepromptMixin(GPTCommandProtocol):
         return rmi
 
     # COMMON UTILS
-    
-    def get_preprompt(self, sender: Profile, chat: Chat) -> str | None:
-        """
-        Получить препромпт под текущую ситуацию (персональный в чате,в чате,в лс)
-        """
 
+    def get_preprompt(self, sender: Profile, chat: Chat | None) -> Preprompt | None:
+        """
+        Получить препромпт под текущую ситуацию (в чате,в лс)
+        """
 
         if chat:
             variants = [
-                Q(author=sender, chat=chat, provider=self.provider_model),
+                # Q(author=sender, chat=chat, provider=self.provider_model),
+                Q(author=sender, chat=None, provider=self.provider_model),
                 Q(author=None, chat=chat, provider=self.provider_model),
             ]
         else:
@@ -91,7 +86,7 @@ class GPTPrepromptMixin(GPTCommandProtocol):
 
         for q in variants:
             try:
-                return Preprompt.objects.get(q).text
+                return Preprompt.objects.get(q)
             except Preprompt.DoesNotExist:
                 continue
         return None
