@@ -61,7 +61,7 @@ class GPT5SettingsMixin(GPTCommandProtocol):
         profile_settings = self.get_profile_gpt_settings()
         profile_settings.gpt_5_settings_reasoning_effort_level = None
         profile_settings.save()
-        answer = f"Удалил уровень рассуждений для моделей семейства GPT-5"
+        answer = "Удалил уровень рассуждений для моделей семейства GPT-5"
         return ResponseMessageItem(text=answer)
 
     def verbosity(self) -> ResponseMessageItem:
@@ -99,5 +99,5 @@ class GPT5SettingsMixin(GPTCommandProtocol):
         profile_settings = self.get_profile_gpt_settings()
         profile_settings.gpt_5_settings_verbosity_level = None
         profile_settings.save()
-        answer = f"Удалил уровень многословности для моделей семейства GPT-5"
+        answer = "Удалил уровень многословности для моделей семейства GPT-5"
         return ResponseMessageItem(text=answer)

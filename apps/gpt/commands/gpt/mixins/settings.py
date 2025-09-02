@@ -56,7 +56,7 @@ class GPTSettingsMixin(GPTCommandProtocol):
         preprompt = self.get_preprompt(self.event.sender, None)
 
         answer_parts = [
-            f"Текущие настройки:",
+            "Текущие настройки:",
             f"Модель обработки текста (completions)\n{self.bot.get_formatted_text_line(ps.completions_model.name)}" if ps.completions_model else None,
             f"Модель обработки изображений (vision)\n{self.bot.get_formatted_text_line(ps.vision_model.name)}" if ps.vision_model else None,
             f"Модель генерации изображений (draw)\n{self.bot.get_formatted_text_line(ps.image_draw_model.name)}" if ps.image_draw_model else None,
