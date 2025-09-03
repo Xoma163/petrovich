@@ -121,12 +121,10 @@ class Issue(Command):
         pres = [e for e in entities if e.get('type') == 'pre']
         pres.sort(key=lambda e: e.get('offset', 0), reverse=True)
 
-        appended_symbols = 0
         for pre in pres:
             offset = pre['offset'] - removed_symbols  # + appended_symbols
             length = pre['length']
             end = offset + length
             segment = msg[offset:end]
             msg = msg[:offset] + "```\n" + segment + "\n```" + msg[end:]
-            appended_symbols += 8
         return msg
