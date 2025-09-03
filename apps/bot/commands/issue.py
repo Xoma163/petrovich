@@ -43,13 +43,19 @@ class Issue(Command):
 
     def start(self) -> ResponseMessage:
         if self.event.message.args:
-            msg = self.event.message.raw.split(' ', 1)[1]
+            parts = self.event.message.raw.split(' ', 1)
+            removed_symbols = len(parts[0]) + 1
+            msg = parts[1]
         elif self.event.message.quote:
             msg = self.event.message.quote
+            removed_symbols = 0
         elif self.event.fwd:
             msg = self.event.fwd[0].message.raw
+            removed_symbols = 0
         else:
             raise PWarning("В сообщении должны быть аргументы или пересылаемое сообщение")
+
+        msg = self._wrap_with_pre(msg, removed_symbols)
 
         body = []
         labels_in_github = []
@@ -108,3 +114,19 @@ class Issue(Command):
         rmi = ResponseMessageItem(answer)
         rmi.peer_id = profile.get_tg_user().user_id
         self.bot.send_response_message_item(rmi)
+
+    def _wrap_with_pre(self, msg: str, removed_symbols: int) -> str:
+        # берем только pre-entities
+        entities = self.event.raw.get('message', {}).get('entities', [])
+        pres = [e for e in entities if e.get('type') == 'pre']
+        pres.sort(key=lambda e: e.get('offset', 0), reverse=True)
+
+        appended_symbols = 0
+        for pre in pres:
+            offset = pre['offset'] - removed_symbols  # + appended_symbols
+            length = pre['length']
+            end = offset + length
+            segment = msg[offset:end]
+            msg = msg[:offset] + "```\n" + segment + "\n```" + msg[end:]
+            appended_symbols += 8
+        return msg
