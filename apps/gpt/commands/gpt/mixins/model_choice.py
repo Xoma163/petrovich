@@ -264,7 +264,7 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
         if len(self.event.message.args) < 3:
             return ResponseMessageItem(text=self._get_current_completions_model_str(profile_gpt_settings))
         new_model_name = self.event.message.args[2]
-        if new_model_name in ["удалить", "сброс", "delete", "reset"]:
+        if new_model_name in ["удалить", "сброс", "сбросить", "delete", "reset"]:
             profile_gpt_settings.completions_model = None
             profile_gpt_settings.save()
             return ResponseMessageItem(text=f"Удалил модель обработки текста (completions)")
@@ -282,7 +282,7 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
             return ResponseMessageItem(text=self._get_current_vision_model_str(profile_gpt_settings))
 
         new_model_name = self.event.message.args[2]
-        if new_model_name in ["удалить", "сброс", "delete", "reset"]:
+        if new_model_name in ["удалить", "сброс", "сбросить", "delete", "reset"]:
             profile_gpt_settings.vision_model = None
             profile_gpt_settings.save()
             return ResponseMessageItem(text=f"Удалил модель обработки изображений (vision)")
@@ -300,7 +300,7 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
             return ResponseMessageItem(text=self._get_current_image_draw_model_str(profile_gpt_settings))
 
         new_model_name = self.event.message.args[2]
-        if new_model_name in ["удалить", "сброс", "delete", "reset"]:
+        if new_model_name in ["удалить", "сброс", "сбросить", "delete", "reset"]:
             profile_gpt_settings.image_draw_model = None
             profile_gpt_settings.save()
             return ResponseMessageItem(text=f"Удалил модель генерации изображений (draw)")
@@ -326,7 +326,7 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
             return ResponseMessageItem(text=self._get_current_voice_recognition_model_str(profile_gpt_settings))
 
         new_model_name = self.event.message.args[2]
-        if new_model_name in ["удалить", "сброс", "delete", "reset"]:
+        if new_model_name in ["удалить", "сброс", "сбросить", "delete", "reset"]:
             profile_gpt_settings.voice_recognition_model = None
             profile_gpt_settings.save()
             return ResponseMessageItem(text=f"Удалил модель обработки голоса (voice)")

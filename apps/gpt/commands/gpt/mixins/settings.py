@@ -23,7 +23,7 @@ class GPTSettingsMixin(GPTCommandProtocol):
     def settings(self) -> ResponseMessageItem:
         try:
             self.check_args(2)
-            if self.event.message.args[1] in ["удалить", "сброс", "delete", "reset"]:
+            if self.event.message.args[1] in ["удалить", "сброс", "сбросить", "delete", "reset"]:
                 return self.delete_settings()
             return self.get_settings()
         except PWarning:

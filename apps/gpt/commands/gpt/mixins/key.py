@@ -30,7 +30,7 @@ class GPTKeyMixin(GPTCommandProtocol):
 
         profile_gpt_settings = self.get_profile_gpt_settings()
 
-        if arg.lower() in ["удалить", "сброс", "delete", "reset"]:
+        if arg.lower() in ["удалить", "сброс", "сбросить", "delete", "reset"]:
             profile_gpt_settings.set_key("")
             profile_gpt_settings.save()
             rmi = ResponseMessageItem(text="Удалил ваш ключ")

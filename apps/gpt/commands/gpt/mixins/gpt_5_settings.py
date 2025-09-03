@@ -28,7 +28,7 @@ class GPT5SettingsMixin(GPTCommandProtocol):
     def reasoning(self) -> ResponseMessageItem:
         try:
             self.check_args(2)
-            if self.event.message.args[1] in ["удалить", "сброс", "delete", "reset"]:
+            if self.event.message.args[1] in ["удалить", "сброс", "сбросить", "delete", "reset"]:
                 return self.delete_reasoning()
             return self.set_reasoning()
         except:
@@ -66,7 +66,7 @@ class GPT5SettingsMixin(GPTCommandProtocol):
 
     def verbosity(self) -> ResponseMessageItem:
         try:
-            if self.event.message.args[1] in ["удалить", "сброс", "delete", "reset"]:
+            if self.event.message.args[1] in ["удалить", "сброс", "сбросить", "delete", "reset"]:
                 return self.delete_verbosity()
             return self.set_verbosity()
         except:

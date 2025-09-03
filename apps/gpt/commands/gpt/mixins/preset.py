@@ -39,7 +39,7 @@ class GPTPresetMixin(GPTCommandProtocol):
 
         menu = [
             [["добавить", "создать", "сохранить", "add", "save", "create"], self.menu_add_preset],
-            [["удалить", "сброс", "delete", "reset"], self.menu_delete_preset],
+            [["удалить", "сброс", "сбросить", "delete", "reset"], self.menu_delete_preset],
             [["default"], self.menu_select_or_list_preset],
         ]
 
