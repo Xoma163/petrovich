@@ -33,6 +33,11 @@ class GPTMessages(ABC):
     def get_messages(self) -> list[dict]:
         return [x.get_message() for x in self.messages]
 
+    def get_preprompt_and_messages(self) -> tuple[str | None, list[dict]]:
+        if self.messages[0].role != GPTMessageRole.SYSTEM:
+            return None, self.get_messages()
+        return self.messages[0].text, [x.get_message() for x in self.messages[1:]]
+
     def reverse(self):
         self.messages.reverse()
 

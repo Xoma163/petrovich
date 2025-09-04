@@ -74,6 +74,7 @@ class GPTPresetMixin(GPTCommandProtocol):
                 "voice_recognition_model": profile_settings.voice_recognition_model,
                 "gpt_5_settings_reasoning_effort_level": profile_settings.gpt_5_settings_reasoning_effort_level,
                 "gpt_5_settings_verbosity_level": profile_settings.gpt_5_settings_verbosity_level,
+                "gpt_5_settings_web_search": profile_settings.gpt_5_settings_web_search,
                 "preprompt_text": preprompt_text,
             }
         )
@@ -88,6 +89,7 @@ class GPTPresetMixin(GPTCommandProtocol):
             f"Модель обработки голоса (voice)\n{self.bot.get_formatted_text_line(preset.voice_recognition_model.name)}" if preset.voice_recognition_model else None,
             f"Уровень рассуждений для моделей семейства GPT-5\n{self.bot.get_formatted_text_line(preset.gpt_5_settings_reasoning_effort_level)}" if preset.gpt_5_settings_reasoning_effort_level else None,
             f"Уровень многословности для моделей семейства GPT-5\n{self.bot.get_formatted_text_line(preset.gpt_5_settings_verbosity_level)}" if preset.gpt_5_settings_verbosity_level else None,
+            f"Поиск в интернете для моделей семейства GPT-5\n{self.bot.get_formatted_text_line(preset.gpt_5_settings_web_search)}" if preset.gpt_5_settings_web_search else None,
             f"Препромпт:\n{self.bot.get_formatted_text(preset.preprompt_text)}" if preprompt_text else None
         ]
 
@@ -136,6 +138,7 @@ class GPTPresetMixin(GPTCommandProtocol):
         profile_settings.voice_recognition_model = preset.voice_recognition_model if preset.voice_recognition_model else None
         profile_settings.gpt_5_settings_reasoning_effort_level = preset.gpt_5_settings_reasoning_effort_level if preset.gpt_5_settings_reasoning_effort_level else None
         profile_settings.gpt_5_settings_verbosity_level = preset.gpt_5_settings_verbosity_level if preset.gpt_5_settings_verbosity_level else None
+        profile_settings.gpt_5_settings_web_search = preset.gpt_5_settings_web_search if preset.gpt_5_settings_web_search else None
         profile_settings.save()
 
         if isinstance(self, GPTPrepromptMixin):

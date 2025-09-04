@@ -47,7 +47,8 @@ class GPTVisionFunctionality(GPTCommandProtocol):
         with ChatActivity(self.bot, ActivitiesEnum.TYPING, self.event.peer_id):
             response: GPTVisionResponse = gpt_api.vision(
                 messages=messages,
-                model=self.get_vision_model()
+                model=self.get_vision_model(),
+                extra_data=self.get_extra_data()
             )
 
         self.add_statistics(api_response=response)

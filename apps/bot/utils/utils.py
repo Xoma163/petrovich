@@ -409,12 +409,11 @@ def append_symbols(string: str, symbol: str, n: int) -> str:
 
 
 def replace_markdown_links(text: str, bot) -> str:
-    p = re.compile(r"\[(.*)\]\(([^\)]*)\)")  # markdown links
+    p = re.compile(r"\[([^\]]+)\]\(([^)]+)\)")
     for item in reversed(list(p.finditer(text))):
-        start_pos = item.start()
-        end_pos = item.end()
-        link_text = text[item.regs[1][0]:item.regs[1][1]]
-        link = text[item.regs[2][0]:item.regs[2][1]]
+        start_pos, end_pos = item.span()
+        link_text = item.group(1)
+        link = item.group(2)
         tg_url = bot.get_formatted_url(link_text, link)
         text = text[:start_pos] + tg_url + text[end_pos:]
     return text
@@ -633,6 +632,7 @@ def prepare_filename(filename: str, replace_symbol=".") -> str:
     # Максимальная длина - 255. Режем с конца, так как может потеряться расширение файла
     filename = filename[-255:]
     return filename
+
 
 def get_admin_profile(exclude_profile: Profile | None = None) -> Profile | None:
     admin_group = Group.objects.get(name=Role.ADMIN.name)

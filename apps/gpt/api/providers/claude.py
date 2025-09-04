@@ -63,15 +63,12 @@ class ClaudeAPI(
     completions_url = f"{base_url}/messages"
 
     def completions(self, messages: GPTMessages, model: CompletionsModel, extra_data: dict) -> GPTCompletionsResponse:
-        preprompt = None
-        messages = messages.get_messages()
-        if messages[0]['role'] == GPTMessageRole.SYSTEM:
-            preprompt = messages[0]['content'][0]['text']
-            messages = messages[1:]
+        preprompt, messages_dict = messages.get_preprompt_and_messages()
+
 
         data = {
             "model": model.name,
-            "messages": messages,
+            "messages": messages_dict,
             "max_tokens": 8192
         }
         if preprompt:
@@ -96,16 +93,12 @@ class ClaudeAPI(
 
     vision_url = f"{base_url}/chat/completions"
 
-    def vision(self, messages: GPTMessages, model: VisionModel) -> GPTVisionResponse:
-        preprompt = None
-        messages = messages.get_messages()
-        if messages[0]['role'] == GPTMessageRole.SYSTEM:
-            preprompt = messages[0]['content'][0]['text']
-            messages = messages[1:]
+    def vision(self, messages: GPTMessages, model: VisionModel, extra_data: dict) -> GPTVisionResponse:
+        preprompt, messages_dict = messages.get_preprompt_and_messages()
 
         data = {
             "model": model.name,
-            "messages": messages,
+            "messages": messages_dict,
             "max_tokens": 4096
         }
         if preprompt:

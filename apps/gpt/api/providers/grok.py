@@ -44,7 +44,7 @@ class GrokAPI(
 
     vision_url = f"{base_url}/chat/completions"
 
-    def vision(self, messages: GPTMessages, model: VisionModel) -> GPTVisionResponse:
+    def vision(self, messages: GPTMessages, model: VisionModel, extra_data: dict) -> GPTVisionResponse:
         payload = {
             "model": model.name,
             "messages": messages.get_messages()

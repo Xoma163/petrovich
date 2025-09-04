@@ -8,7 +8,7 @@ from apps.gpt.api.base import (
     VoiceRecognitionAPIMixin,
     ImageEditAPIMixin
 )
-from apps.gpt.api.openai_api import OpenAIAPI
+from apps.gpt.api.openai_responses_api import OpenAIResponsesAPI
 from apps.gpt.api.responses import (
     GPTCompletionsResponse,
     GPTVisionResponse,
@@ -16,7 +16,6 @@ from apps.gpt.api.responses import (
     GPTVoiceRecognitionResponse
 )
 from apps.gpt.messages.base import GPTMessages
-from apps.gpt.messages.consts import GPTMessageRole
 from apps.gpt.models import (
     CompletionsModel,
     VisionModel,
@@ -30,7 +29,7 @@ from apps.gpt.usage import (
 
 
 class ChatGPTAPI(
-    OpenAIAPI,
+    OpenAIResponsesAPI,
     CompletionsAPIMixin,
     VisionAPIMixin,
     ImageDrawAPIMixin,
@@ -53,22 +52,24 @@ class ChatGPTAPI(
 
     # ---------- completions ---------- #
 
-    completions_url = f"{base_url}/chat/completions"
+    completions_url = f"{base_url}/responses"
 
     def completions(self, messages: GPTMessages, model: CompletionsModel, extra_data: dict) -> GPTCompletionsResponse:
         payload = {
-            "model": model.name,
-            "messages": messages.get_messages()
+            "model": model.name
         }
-
-        # Костыль, так как некоторые модели "o" не умеют в system role
-        if model.name in ["o1-mini"]:
-            if payload['messages'][0]['role'] == GPTMessageRole.SYSTEM:
-                payload['messages'][0]['role'] = GPTMessageRole.USER
+        preprompt, messages_dict = messages.get_preprompt_and_messages()
+        if preprompt:
+            payload["instructions"] = preprompt
+        payload["input"] = messages_dict
 
         if model.name in ['gpt-5', 'gpt-5-mini', 'gpt-5-nano'] and extra_data:
-            payload["reasoning_effort"] = extra_data['effort_level']
-            payload["verbosity"] = extra_data['verbosity_level']
+            if verbosity_level := extra_data['verbosity_level']:
+                payload['text'] = {"verbosity": verbosity_level}
+            if effort_level := extra_data['effort_level']:
+                payload['reasoning'] = {"effort": effort_level}
+            if extra_data["web_search"]:
+                payload["tools"] = [{"type": "web_search_preview"}]
 
         return self.do_completions_request(model, self.completions_url, json=payload, headers=self.headers)  # noqa
 
@@ -76,11 +77,21 @@ class ChatGPTAPI(
 
     vision_url = completions_url
 
-    def vision(self, messages: GPTMessages, model: VisionModel) -> GPTVisionResponse:
+    def vision(self, messages: GPTMessages, model: VisionModel, extra_data: dict) -> GPTVisionResponse:
         payload = {
-            "model": model.name,
-            "messages": messages.get_messages()
+            "model": model.name
         }
+        preprompt, messages_dict = messages.get_preprompt_and_messages()
+        if preprompt:
+            payload["instructions"] = preprompt
+        payload["input"] = messages_dict
+
+        if model.name in ['gpt-5', 'gpt-5-mini', 'gpt-5-nano'] and extra_data:
+            if verbosity_level := extra_data['verbosity_level']:
+                payload['text'] = {"verbosity": verbosity_level}
+            if effort_level := extra_data['effort_level']:
+                payload['reasoning'] = {"effort": effort_level}
+
         return self.do_vision_request(model, self.vision_url, json=payload, headers=self.headers)  # noqa
 
     # ---------- image draw ---------- #

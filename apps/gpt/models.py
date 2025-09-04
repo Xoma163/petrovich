@@ -261,6 +261,10 @@ class ProfileGPTBaseSettings(TimeStampModelMixin):
         max_length=32,
         choices=[(verbosity_level.value, verbosity_level.name) for verbosity_level in GPTVerbosityLevel],  # noqa
     )
+    gpt_5_settings_web_search = models.BooleanField(
+        "Поиск информации в интернете",
+        null=True
+    )
 
     def clean(self):
         super().clean()

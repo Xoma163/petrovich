@@ -113,6 +113,7 @@ class GPTCommand(
         if isinstance(self, GPT5SettingsMixin):
             menu.append([["gpt_5_reasoning"], self.reasoning])
             menu.append([["gpt_5_verbosity"], self.verbosity])
+            menu.append([["gpt_5_web_search"], self.web_search])
         if isinstance(self, GPTPresetMixin):
             menu.append([["пресет", "пресеты", "preset", "presets"], self.preset])
         if isinstance(self, GPTSettingsMixin):
@@ -266,6 +267,21 @@ class GPTCommand(
     def set_provider_model(self):
         if not self.provider_model:
             self.provider_model = self._get_provider_model()
+
+    def get_extra_data(self) -> dict:
+        from apps.gpt.commands.gpt.providers.chatgpt import ChatGPTCommand
+
+        if isinstance(self, ChatGPTCommand):
+            profile_settings = self.get_profile_gpt_settings()
+            extra_data = {}
+            if profile_settings.gpt_5_settings_reasoning_effort_level:
+                extra_data['effort_level'] = profile_settings.gpt_5_settings_reasoning_effort_level
+            if profile_settings.gpt_5_settings_verbosity_level:
+                extra_data['verbosity_level'] = profile_settings.gpt_5_settings_verbosity_level
+            if profile_settings.gpt_5_settings_web_search:
+                extra_data['web_search'] = profile_settings.gpt_5_settings_web_search
+            return extra_data
+        return {}
 
     # UTILS
 

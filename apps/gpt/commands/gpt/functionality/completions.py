@@ -7,7 +7,6 @@ from apps.bot.classes.messages.attachments.document import DocumentAttachment
 from apps.bot.classes.messages.response_message import ResponseMessageItem
 from apps.gpt.api.base import GPTAPI
 from apps.gpt.api.responses import GPTCompletionsResponse
-from apps.gpt.enums import GPTReasoningEffortLevel, GPTVerbosityLevel
 from apps.gpt.messages.base import GPTMessages
 from apps.gpt.messages.consts import GPTMessageRole
 from apps.gpt.models import CompletionsModel, VoiceRecognitionModel
@@ -87,19 +86,6 @@ class GPTCompletionsFunctionality(GPTCommandProtocol):
 
     def get_default_completions_model(self) -> CompletionsModel:
         return self.get_default_model(CompletionsModel)
-
-    def get_extra_data(self) -> dict:
-        from apps.gpt.commands.gpt.providers.chatgpt import ChatGPTCommand
-
-        if isinstance(self, ChatGPTCommand):
-            default_reasoning_effort_level = GPTReasoningEffortLevel.MEDIUM
-            default_verbosity_level = GPTVerbosityLevel.MEDIUM
-            profile_settings = self.get_profile_gpt_settings()
-            return {
-                'effort_level': profile_settings.gpt_5_settings_reasoning_effort_level or default_reasoning_effort_level,
-                'verbosity_level': profile_settings.gpt_5_settings_verbosity_level or default_verbosity_level
-            }
-        return {}
 
     # UTILS
 

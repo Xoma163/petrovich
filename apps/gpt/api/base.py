@@ -65,7 +65,12 @@ class VisionAPIMixin(HasVision):
         pass
 
     @abstractmethod
-    def vision(self, messages: GPTMessages, model: VisionModel) -> GPTVisionResponse:
+    def vision(
+            self,
+            messages: GPTMessages,
+            model: VisionModel,
+            extra_data: dict
+    ) -> GPTVisionResponse:
         pass
 
 

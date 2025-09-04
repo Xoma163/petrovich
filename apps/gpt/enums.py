@@ -1,4 +1,4 @@
-from enum import StrEnum
+from enum import StrEnum, Enum
 
 
 class GPTProviderEnum(StrEnum):
@@ -31,3 +31,7 @@ class GPTVerbosityLevel(StrEnum):
     MEDIUM = "medium"
     LOW = "low"
 
+
+class GPTWebSearch(Enum):
+    ON = True
+    OFF = False

@@ -79,6 +79,8 @@ class GPTCommandProtocol(
 
     def set_provider_model(self) -> None: ...
 
+    def get_extra_data(self) -> dict: ...
+
 
 class HasCompletions(Protocol):
     def completions(
@@ -94,7 +96,8 @@ class HasVision(Protocol):
     def vision(
             self,
             messages: GPTMessages,
-            model: VisionModel
+            model: VisionModel,
+            extra_data: dict
     ) -> GPTVisionResponse:
         ...
 
