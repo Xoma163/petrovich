@@ -65,7 +65,7 @@ class GPTSettingsMixin(GPTCommandProtocol):
             f"Модель обработки голоса (voice)\n{self.bot.get_formatted_text_line(ps.voice_recognition_model.name)}" if ps.voice_recognition_model else None,
             f"Уровень рассуждений для моделей семейства GPT-5\n{self.bot.get_formatted_text_line(ps.gpt_5_settings_reasoning_effort_level)}" if ps.gpt_5_settings_reasoning_effort_level else None,
             f"Уровень многословности для моделей семейства GPT-5\n{self.bot.get_formatted_text_line(ps.gpt_5_settings_verbosity_level)}" if ps.gpt_5_settings_verbosity_level else None,
-            f"Поиск в интернете для моделей семейства GPT-5\n{self.bot.get_formatted_text_line("Включено") if ps.gpt_5_settings_web_search is True else self.bot.get_formatted_text_line("Выключено")}" if ps.gpt_5_settings_web_search is not None else None,
+            f"Поиск в интернете для моделей семейства GPT-5\n{self.bot.get_formatted_text_line('Включено') if ps.gpt_5_settings_web_search is True else self.bot.get_formatted_text_line('Выключено')}" if ps.gpt_5_settings_web_search is not None else None,
             f"Препромпт:\n{self.bot.get_formatted_text(preprompt.text)}" if preprompt else None
         ]
 

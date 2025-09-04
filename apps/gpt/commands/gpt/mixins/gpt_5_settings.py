@@ -62,7 +62,7 @@ class GPT5SettingsMixin(GPTCommandProtocol):
         if profile_settings.gpt_5_settings_reasoning_effort_level:
             value_str = self.bot.get_formatted_text_line(profile_settings.gpt_5_settings_reasoning_effort_level)
         else:
-            value_str = f"{self.bot.get_formatted_text_line("medium")} (по умолчанию)"
+            value_str = f"{self.bot.get_formatted_text_line('medium')} (по умолчанию)"
 
         answer = f"Уровень рассуждений для моделей семейства GPT-5\n{value_str}"
         return ResponseMessageItem(text=answer)
@@ -101,7 +101,7 @@ class GPT5SettingsMixin(GPTCommandProtocol):
         if profile_settings.gpt_5_settings_verbosity_level:
             value_str = self.bot.get_formatted_text_line(profile_settings.gpt_5_settings_verbosity_level)
         else:
-            value_str = f"{self.bot.get_formatted_text_line("medium")} (по умолчанию)"
+            value_str = f"{self.bot.get_formatted_text_line('medium')} (по умолчанию)"
 
         answer = f"Уровень многословности для моделей семейства GPT-5\n{value_str}"
         return ResponseMessageItem(text=answer)
