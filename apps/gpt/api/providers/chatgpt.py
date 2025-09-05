@@ -64,11 +64,11 @@ class ChatGPTAPI(
         payload["input"] = messages_dict
 
         if model.name in ['gpt-5', 'gpt-5-mini', 'gpt-5-nano'] and extra_data:
-            if verbosity_level := extra_data['verbosity_level']:
+            if verbosity_level := extra_data.get('verbosity_level'):
                 payload['text'] = {"verbosity": verbosity_level}
-            if effort_level := extra_data['effort_level']:
+            if effort_level := extra_data.get('effort_level'):
                 payload['reasoning'] = {"effort": effort_level}
-            if extra_data["web_search"]:
+            if extra_data.get("web_search"):
                 payload["tools"] = [{"type": "web_search_preview"}]
 
         return self.do_completions_request(model, self.completions_url, json=payload, headers=self.headers)  # noqa

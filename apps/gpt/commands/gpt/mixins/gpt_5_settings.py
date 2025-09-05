@@ -1,4 +1,4 @@
-from apps.bot.classes.const.exceptions import PWarning, PError
+from apps.bot.classes.const.exceptions import PError
 from apps.bot.classes.help_text import HelpTextArgument
 from apps.bot.classes.messages.response_message import ResponseMessageItem
 from apps.gpt.enums import GPTReasoningEffortLevel, GPTVerbosityLevel, GPTWebSearch
@@ -39,7 +39,7 @@ class GPT5SettingsMixin(GPTCommandProtocol):
             if self.event.message.args[1] in ["удалить", "сброс", "сбросить", "delete", "reset"]:
                 return self.delete_reasoning()
             return self.set_reasoning()
-        except PWarning:
+        except IndexError:
             return self.get_reasoning()
 
     def set_reasoning(self) -> ResponseMessageItem:
@@ -79,7 +79,7 @@ class GPT5SettingsMixin(GPTCommandProtocol):
             if self.event.message.args[1] in ["удалить", "сброс", "сбросить", "delete", "reset"]:
                 return self.delete_verbosity()
             return self.set_verbosity()
-        except PWarning:
+        except IndexError:
             return self.get_verbosity()
 
     def set_verbosity(self) -> ResponseMessageItem:
@@ -118,7 +118,7 @@ class GPT5SettingsMixin(GPTCommandProtocol):
             if self.event.message.args[1] in ["удалить", "сброс", "сбросить", "delete", "reset"]:
                 return self.delete_web_search()
             return self.set_web_search()
-        except PWarning:
+        except IndexError:
             return self.get_web_search()
 
     def set_web_search(self) -> ResponseMessageItem:
