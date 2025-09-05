@@ -93,9 +93,10 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
         arg = self.event.message.args[1]
 
         menu = [
-            [['completion', 'completions', 'текст', 'текстовая', 'чат'], self._sub_menu_completions_model_choice],
-            [["vision", "вижн", 'зрение'], self._sub_menu_vision_model_choice],
-            [["draw", "рисования", "рисовать", "изображения"], self._sub_menu_image_draw_model_choice],
+            [['completion', 'completions', 'текст', 'текстовая', 'чат', 'text', 'chat', 't', 'c'],
+             self._sub_menu_completions_model_choice],
+            [["vision", "вижн", 'зрение', 'v'], self._sub_menu_vision_model_choice],
+            [["draw", "рисования", "рисовать", "изображения", 'd'], self._sub_menu_image_draw_model_choice],
             [["voice", "голос", "голосовая"], self._sub_menu_voice_recognition_model_choice],
             [['default'], self._get_all_current_models]
         ]

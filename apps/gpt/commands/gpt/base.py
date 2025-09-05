@@ -111,9 +111,9 @@ class GPTCommand(
             menu.append([["модели", "models"], self.menu_models])
             menu.append([["модель", "model"], self.menu_model])
         if isinstance(self, GPT5SettingsMixin):
-            menu.append([["gpt_5_reasoning"], self.reasoning])
-            menu.append([["gpt_5_verbosity"], self.verbosity])
-            menu.append([["gpt_5_web_search"], self.web_search])
+            menu.append([["gpt_5_reasoning", "reasoning", "r"], self.reasoning])
+            menu.append([["gpt_5_verbosity", "verbosity", "v"], self.verbosity])
+            menu.append([["gpt_5_web_search", "web_search", "websearch", "s"], self.web_search])
         if isinstance(self, GPTPresetMixin):
             menu.append([["пресет", "пресеты", "preset", "presets"], self.preset])
         if isinstance(self, GPTSettingsMixin):
