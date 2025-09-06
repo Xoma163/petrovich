@@ -61,23 +61,41 @@ class GPTPresetMixin(GPTCommandProtocol):
             if preprompt:
                 preprompt_text = preprompt.text
 
-        preset, created = GPTPreset.objects.update_or_create(
-            provider=self.provider_model,
-            profile=self.event.sender,
-            name=name,
-            defaults={
-                "description": description,
-                "completions_model": profile_settings.completions_model,
-                "vision_model": profile_settings.vision_model,
-                "image_draw_model": profile_settings.image_draw_model,
-                "image_edit_model": profile_settings.image_edit_model,
-                "voice_recognition_model": profile_settings.voice_recognition_model,
-                "gpt_5_settings_reasoning_effort_level": profile_settings.gpt_5_settings_reasoning_effort_level,
-                "gpt_5_settings_verbosity_level": profile_settings.gpt_5_settings_verbosity_level,
-                "gpt_5_settings_web_search": profile_settings.gpt_5_settings_web_search,
-                "preprompt_text": preprompt_text,
-            }
-        )
+        defaults = {
+            "description": description,
+            "completions_model": profile_settings.completions_model,
+            "vision_model": profile_settings.vision_model,
+            "image_draw_model": profile_settings.image_draw_model,
+            "image_edit_model": profile_settings.image_edit_model,
+            "voice_recognition_model": profile_settings.voice_recognition_model,
+            "gpt_5_settings_reasoning_effort_level": profile_settings.gpt_5_settings_reasoning_effort_level,
+            "gpt_5_settings_verbosity_level": profile_settings.gpt_5_settings_verbosity_level,
+            "gpt_5_settings_web_search": profile_settings.gpt_5_settings_web_search,
+            "preprompt_text": preprompt_text,
+        }
+
+        try:
+            created = False
+            preset = GPTPreset.objects.get(
+                provider=self.provider_model,
+                profile=self.event.sender,
+                name=name
+            )
+
+            if not description:
+                defaults.pop('description')
+            for key, value in defaults.items():
+                setattr(preset, key, value)
+            preset.save()
+        except GPTPreset.DoesNotExist:
+            created = True
+            preset = GPTPreset(
+                provider=self.provider_model,
+                profile=self.event.sender,
+                name=name,
+                **defaults
+            )
+            preset.save()
 
         answer_parts = [
             f"Сохранил пресет {self.bot.get_formatted_text_line(name)}:" if created else f"Обновилл пресет {self.bot.get_formatted_text_line(name)}:",
