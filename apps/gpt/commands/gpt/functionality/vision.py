@@ -46,7 +46,13 @@ class GPTVisionFunctionality(GPTCommandProtocol):
 
         self.add_statistics(api_response=response)
 
-        return self.get_completions_rmi(response.text)
+        response_text = response.text
+
+        profile_settings = self.get_profile_gpt_settings()
+        if profile_settings.use_debug:
+            response_text += self.get_debug_text(response)
+
+        return self.get_completions_rmi(response_text)
 
     # COMMON UTILS
 

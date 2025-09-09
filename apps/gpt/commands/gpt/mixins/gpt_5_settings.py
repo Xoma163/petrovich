@@ -37,12 +37,12 @@ class GPT5SettingsMixin(GPTCommandProtocol):
         try:
             self.check_args(2)
             if self.event.message.args[1] in ["удалить", "сброс", "сбросить", "delete", "reset"]:
-                return self.delete_reasoning()
-            return self.set_reasoning()
+                return self._delete_reasoning()
+            return self._set_reasoning()
         except IndexError:
-            return self.get_reasoning()
+            return self._get_reasoning()
 
-    def set_reasoning(self) -> ResponseMessageItem:
+    def _set_reasoning(self) -> ResponseMessageItem:
         user_value = self.event.message.args[1]
         try:
             effort_level = GPTReasoningEffortLevel[user_value.upper()]
@@ -57,7 +57,7 @@ class GPT5SettingsMixin(GPTCommandProtocol):
         answer = f"Установил уровень рассуждений {self.bot.get_formatted_text_line(user_value)} для моделей семейства GPT-5"
         return ResponseMessageItem(text=answer)
 
-    def get_reasoning(self) -> ResponseMessageItem:
+    def _get_reasoning(self) -> ResponseMessageItem:
         profile_settings = self.get_profile_gpt_settings()
         if profile_settings.gpt_5_settings_reasoning_effort_level:
             value_str = self.bot.get_formatted_text_line(profile_settings.gpt_5_settings_reasoning_effort_level)
@@ -67,7 +67,7 @@ class GPT5SettingsMixin(GPTCommandProtocol):
         answer = f"Уровень рассуждений для моделей семейства GPT-5\n{value_str}"
         return ResponseMessageItem(text=answer)
 
-    def delete_reasoning(self) -> ResponseMessageItem:
+    def _delete_reasoning(self) -> ResponseMessageItem:
         profile_settings = self.get_profile_gpt_settings()
         profile_settings.gpt_5_settings_reasoning_effort_level = None
         profile_settings.save()
@@ -77,12 +77,12 @@ class GPT5SettingsMixin(GPTCommandProtocol):
     def verbosity(self) -> ResponseMessageItem:
         try:
             if self.event.message.args[1] in ["удалить", "сброс", "сбросить", "delete", "reset"]:
-                return self.delete_verbosity()
-            return self.set_verbosity()
+                return self._delete_verbosity()
+            return self._set_verbosity()
         except IndexError:
-            return self.get_verbosity()
+            return self._get_verbosity()
 
-    def set_verbosity(self) -> ResponseMessageItem:
+    def _set_verbosity(self) -> ResponseMessageItem:
         user_value = self.event.message.args[1]
         try:
             verbosity_level = GPTVerbosityLevel[user_value.upper()]
@@ -96,7 +96,7 @@ class GPT5SettingsMixin(GPTCommandProtocol):
         answer = f"Установил уровень многословности {self.bot.get_formatted_text_line(user_value)} для моделей семейства GPT-5"
         return ResponseMessageItem(text=answer)
 
-    def get_verbosity(self) -> ResponseMessageItem:
+    def _get_verbosity(self) -> ResponseMessageItem:
         profile_settings = self.get_profile_gpt_settings()
         if profile_settings.gpt_5_settings_verbosity_level:
             value_str = self.bot.get_formatted_text_line(profile_settings.gpt_5_settings_verbosity_level)
@@ -106,7 +106,7 @@ class GPT5SettingsMixin(GPTCommandProtocol):
         answer = f"Уровень многословности для моделей семейства GPT-5\n{value_str}"
         return ResponseMessageItem(text=answer)
 
-    def delete_verbosity(self) -> ResponseMessageItem:
+    def _delete_verbosity(self) -> ResponseMessageItem:
         profile_settings = self.get_profile_gpt_settings()
         profile_settings.gpt_5_settings_verbosity_level = None
         profile_settings.save()
@@ -116,12 +116,12 @@ class GPT5SettingsMixin(GPTCommandProtocol):
     def web_search(self) -> ResponseMessageItem:
         try:
             if self.event.message.args[1] in ["удалить", "сброс", "сбросить", "delete", "reset"]:
-                return self.delete_web_search()
-            return self.set_web_search()
+                return self._delete_web_search()
+            return self._set_web_search()
         except IndexError:
-            return self.get_web_search()
+            return self._get_web_search()
 
-    def set_web_search(self) -> ResponseMessageItem:
+    def _set_web_search(self) -> ResponseMessageItem:
         user_value = self.event.message.args[1]
         try:
             web_search = GPTWebSearch[user_value.upper()]
@@ -137,7 +137,7 @@ class GPT5SettingsMixin(GPTCommandProtocol):
         answer = f"{answer_value} поиск в интернете для моделей семейства GPT-5"
         return ResponseMessageItem(text=answer)
 
-    def get_web_search(self) -> ResponseMessageItem:
+    def _get_web_search(self) -> ResponseMessageItem:
         profile_settings = self.get_profile_gpt_settings()
         if profile_settings.gpt_5_settings_web_search is True:
             value_str = self.bot.get_formatted_text_line("Включено")
@@ -148,7 +148,7 @@ class GPT5SettingsMixin(GPTCommandProtocol):
         answer = f"Поиск в интернете для моделей семейства GPT-5\n{value_str}"
         return ResponseMessageItem(text=answer)
 
-    def delete_web_search(self) -> ResponseMessageItem:
+    def _delete_web_search(self) -> ResponseMessageItem:
         profile_settings = self.get_profile_gpt_settings()
         profile_settings.gpt_5_settings_web_search = None
         profile_settings.save()

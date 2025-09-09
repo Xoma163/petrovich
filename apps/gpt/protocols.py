@@ -61,6 +61,11 @@ class GPTCommandProtocol(
     provider: "GPTProvider"  # noqa circular import
     provider_model: Provider
 
+    EXTRA_TEXT: str
+    NO_DEFAULT_MODEL_ERROR_MSG: str
+    RESPONSE_MESSAGE_TOO_LONG: str
+    DEBUG: str
+
     def get_dialog(self) -> GPTMessages: ...
 
     def get_completions_rmi(self, answer: str): ...
@@ -80,6 +85,8 @@ class GPTCommandProtocol(
     def set_provider_model(self) -> None: ...
 
     def get_extra_data(self) -> dict: ...
+
+    def get_debug_text(self, response: GPTAPIResponse) -> str: ...
 
 
 class HasCompletions(Protocol):

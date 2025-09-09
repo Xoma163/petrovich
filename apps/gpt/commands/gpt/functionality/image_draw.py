@@ -113,6 +113,11 @@ class GPTImageDrawFunctionality(GPTCommandProtocol):
 
         image_prompt = response.images_prompt if response.images_prompt else request_text
         answer = f'Результат генерации по запросу "{image_prompt}"'
+
+        profile_settings = self.get_profile_gpt_settings()
+        if profile_settings.use_debug:
+            answer += self.get_debug_text(response)
+
         return ResponseMessageItem(text=answer, attachments=attachments, reply_to=self.event.message.id)
 
     # def _image_edit(self):

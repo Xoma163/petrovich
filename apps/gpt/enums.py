@@ -35,3 +35,8 @@ class GPTVerbosityLevel(StrEnum):
 class GPTWebSearch(Enum):
     ON = True
     OFF = False
+
+
+class GPTDebug(Enum):
+    ON = True
+    OFF = False

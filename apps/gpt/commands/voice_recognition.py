@@ -124,6 +124,10 @@ class VoiceRecognition(AcceptExtraCommand):
             answer = "\n\n".join(answers)
 
         rmi = self._get_rmi(answer)
+
+        if profile_gpt_settings.use_debug:
+            rmi.text += ChatGPTCommand.get_debug_text(response)
+
         return ResponseMessage(rmi)
 
     @staticmethod

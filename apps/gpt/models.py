@@ -265,6 +265,10 @@ class ProfileGPTBaseSettings(TimeStampModelMixin):
         "Поиск информации в интернете",
         null=True
     )
+    use_debug = models.BooleanField(
+        "Дебаг режим",
+        null=True
+    )
 
     def clean(self):
         super().clean()

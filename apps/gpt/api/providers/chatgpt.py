@@ -179,7 +179,7 @@ class ChatGPTAPI(
 
         usage = GPTVoiceRecognitionUsage(
             model=model,  # noqa
-            voice_duration=Decimal(r_json['duration'])
+            voice_duration=Decimal(round(r_json['duration']))
         )
 
         r = GPTVoiceRecognitionResponse(

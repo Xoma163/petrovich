@@ -28,17 +28,24 @@ class GPTCompletionsVisionUsage(GPTUsage):
     prompt_tokens: int
 
     @property
-    def prompt_token_cost(self) -> Decimal:
+    def prompt_one_token_cost(self) -> Decimal:
         return self.model.prompt_1m_token_cost / 1_000_000
 
     @property
-    def completion_token_cost(self) -> Decimal:
+    def completion_one_token_cost(self) -> Decimal:
         return self.model.completion_1m_token_cost / 1_000_000
 
     @property
+    def prompt_tokens_cost(self) -> Decimal:
+        return self.prompt_tokens * self.prompt_one_token_cost
+
+    @property
+    def completion_tokens_cost(self) -> Decimal:
+        return self.completion_tokens * self.completion_one_token_cost
+
+    @property
     def total_cost(self) -> Decimal:
-        return (self.prompt_tokens * self.prompt_token_cost +
-                self.completion_tokens * self.completion_token_cost)
+        return self.prompt_tokens_cost + self.completion_tokens_cost
 
 
 @dataclass

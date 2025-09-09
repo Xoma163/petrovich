@@ -11,6 +11,8 @@ from apps.bot.classes.messages.response_message import ResponseMessageItem, Resp
 from apps.bot.utils.cache import MessagesCache
 from apps.bot.utils.utils import markdown_to_html, wrap_text_in_document
 from apps.gpt.api.base import ImageDrawAPIMixin, VisionAPIMixin, CompletionsAPIMixin
+from apps.gpt.api.responses import GPTAPIResponse, GPTCompletionsResponse, GPTVisionResponse, GPTImageDrawResponse, \
+    GPTVoiceRecognitionResponse
 from apps.gpt.commands.gpt.functionality.completions import GPTCompletionsFunctionality
 from apps.gpt.commands.gpt.functionality.image_draw import GPTImageDrawFunctionality
 from apps.gpt.commands.gpt.functionality.vision import GPTVisionFunctionality
@@ -52,6 +54,8 @@ class GPTCommand(
                                  "Прямо сейчас вы можете просто вручную установить модель и пользоваться ей"
 
     RESPONSE_MESSAGE_TOO_LONG = "Твой запрос получился слишком большой. Положил ответ в файл"
+
+    DEBUG = "\n\n---------- DEBUG ----------"
 
     @property
     @abstractmethod
@@ -119,6 +123,7 @@ class GPTCommand(
             menu.append([["пресет", "пресеты", "preset", "presets"], self.preset])
         if isinstance(self, GPTSettingsMixin):
             menu.append([["настройки", "настройка", "settings"], self.settings])
+            menu.append([["дебаг", "debug"], self.debug])
         if issubclass(self.provider.api_class, CompletionsAPIMixin) and isinstance(self, GPTCompletionsFunctionality):
             menu.append([["_wtf"], self.menu_wtf])
             menu.append([['default'], self.menu_completions])
@@ -286,6 +291,25 @@ class GPTCommand(
             return extra_data
         return {}
 
+    @classmethod
+    def get_debug_text(cls, response: GPTAPIResponse) -> str:
+        if isinstance(response, GPTCompletionsResponse) or isinstance(response, GPTVisionResponse):
+            return (
+                f"{cls.DEBUG}\n"
+                f"input_tokens: {response.usage.prompt_tokens}\n"
+                f"output_tokens: {response.usage.completion_tokens}\n"
+                f"input_cost: ${response.usage.prompt_tokens_cost}\n"
+                f"output_cost: ${response.usage.completion_tokens_cost}\n"
+                f"total_cost: ${response.usage.total_cost}"
+            )
+        elif isinstance(response, GPTImageDrawResponse) or isinstance(response, GPTVoiceRecognitionResponse):
+            return (
+                f"{cls.DEBUG}\n"
+                f"total_cost: ${response.usage.total_cost}"
+            )
+
+        return ""
+
     # UTILS
 
     def _get_first_gpt_event_in_replies(self, event) -> TgEvent | None:
@@ -355,14 +379,14 @@ class GPTCommand(
 
         history.add_message(role, text, photos, documents)
 
-    @staticmethod
-    def _get_common_msg_text(event, text: str | None) -> str:
+    def _get_common_msg_text(self, event, text: str | None) -> str:
         """
         Если есть текстовый файл, то используем его содержимое как текст
         """
 
         documents: list[DocumentAttachment] = event.get_all_attachments([DocumentAttachment], use_fwd=False)
         text = text if text else ""
+        text = text.split(self.DEBUG, 1)[0]
 
         txt_documents = [document for document in documents if
                          document.mime_type.is_text or document.ext.lower() in ['html', 'txt']]
@@ -370,6 +394,7 @@ class GPTCommand(
             result_text = [text] if text else []
             for document in txt_documents:
                 doc_txt_str = f"\nСодержимое файла:\n{document.read_text()}"
+                doc_txt_str = text.split(self.DEBUG, 1)[0]
                 result_text.append(doc_txt_str)
             return "\n".join(result_text)
         return text
