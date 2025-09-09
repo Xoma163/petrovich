@@ -1,7 +1,6 @@
 from apps.bot.classes.bots.chat_activity import ChatActivity
 from apps.bot.classes.const.activities import ActivitiesEnum
 from apps.bot.classes.help_text import HelpTextArgument
-from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessageItem
 from apps.gpt.api.base import GPTAPI
 from apps.gpt.api.responses import GPTVisionResponse
@@ -23,12 +22,6 @@ class GPTVisionFunctionality(GPTCommandProtocol):
         Вызов истории и если нужно использовть vision модель, добавление картинок
         """
         messages = self.get_dialog()
-
-        # vision
-        photos = self.event.get_all_attachments([PhotoAttachment])
-        base64_photos = [photo.base64() for photo in photos]
-        messages.last_message.images = base64_photos
-
         rmi = self.vision(messages)
         return self.send_rmi(rmi)
 

@@ -130,7 +130,9 @@ class GPTCommand(
 
     # COMMON UTILS
 
-    def get_dialog(self, extra_message: str | None = None) -> GPTMessages:
+    # ToDo: эта штука ваще непонятно как работает, нужно подробно закоментить
+    #  удивительно, что она вообще работает пока что
+    def get_dialog(self) -> GPTMessages:
         """
         Получение списка всех сообщений с пользователем
         """
@@ -149,21 +151,24 @@ class GPTCommand(
                 tg_event.setup_event()
                 is_me = str(tg_event.from_id) == env.str("TG_BOT_GROUP_ID")
                 if is_me:
-                    if msg := self._get_bot_msg(tg_event):
-                        history.add_message(GPTMessageRole.ASSISTANT, msg)
+                    self._add_bot_message(history, tg_event)
                 else:
-                    if msg := self._get_user_msg(tg_event):
-                        history.add_message(GPTMessageRole.USER, msg)
+                    self._add_user_message(history, tg_event)
                 reply_to_id = data.get(reply_to_id, {}).get('reply_to_message', {}).get('message_id')
                 if not reply_to_id or tg_event.message.id == first_event.message.id:
                     break
             if first_event.fwd:
-                # unreach?
+                is_me = str(first_event.fwd[0].from_id) == env.str("TG_BOT_GROUP_ID")
+                if is_me:
+                    self._add_bot_message(history, tg_event, use_fwd=True)
+                else:
+                    self._add_user_message(history, tg_event, use_fwd=True)
+
                 logger.debug({"message": "gpt:175 unreach"})
-                history.add_message(GPTMessageRole.USER, first_event.fwd[0].message.raw)
+                self._add_user_message(history, self.event, use_fwd=True)
         # Ответ на сообщение
-        elif self.event.fwd and self.event.fwd[0].message.raw:
-            history.add_message(GPTMessageRole.USER, self.event.fwd[0].message.raw)
+        elif self.event.fwd and (self.event.fwd[0].message.raw or self.event.fwd[0].attachments):
+            self._add_user_message(history, self.event, use_fwd=True)
 
         if isinstance(self, GPTPrepromptMixin):
             preprompt = self.get_preprompt(self.event.sender, self.event.chat)
@@ -171,10 +176,7 @@ class GPTCommand(
                 history.add_message(GPTMessageRole.SYSTEM, preprompt.text)
         history.reverse()
 
-        user_message = self._get_user_msg(self.event)
-        history.add_message(GPTMessageRole.USER, user_message)
-        if extra_message:
-            history.add_message(GPTMessageRole.USER, extra_message)
+        self._add_user_message(history, self.event)
         return history
 
     def get_completions_rmi(self, answer: str):
@@ -293,8 +295,8 @@ class GPTCommand(
 
         if not event.fwd:
             return None
-        if not event.fwd[0].is_from_bot_me:
-            return None
+        # if not event.fwd[0].is_from_bot_me:
+        #     return None
         mc = MessagesCache(event.peer_id)
         data = mc.get_messages()
         reply_to_id = event.fwd[0].message.id
@@ -310,40 +312,67 @@ class GPTCommand(
                 break
         return find_accept_event
 
-    def _get_user_msg(self, event: TgEvent) -> str | None:
+    def _add_bot_message(self, history: GPTMessages, event: TgEvent, use_fwd: bool = False):
         """
-        Получение текста от пользователя
+        Добавление сообщение ассистента
         """
+        if use_fwd:
+            event = event.fwd[0]
+
+        if event.message.raw == self.RESPONSE_MESSAGE_TOO_LONG:
+            text = self._get_common_msg_text(event, None)
+        else:
+            text = self._get_common_msg_text(event, event.message.raw)
+
+        self._add_common_message(history, event, GPTMessageRole.ASSISTANT, text)
+
+    def _add_user_message(self, history: GPTMessages, event: TgEvent, use_fwd: bool = False):
+        """
+        Добавление сообщение пользователя
+        """
+        if use_fwd:
+            event = event.fwd[0]
 
         if event.message.command in self.full_names:
-            return self._get_common_msg(event, event.message.args_str_case)
+            text = self._get_common_msg_text(event, event.message.args_str_case)
         else:
-            return self._get_common_msg(event, event.message.raw)
+            text = self._get_common_msg_text(event, event.message.raw)
 
-    def _get_bot_msg(self, event: TgEvent) -> str | None:
-        if event.message.raw == self.RESPONSE_MESSAGE_TOO_LONG:
-            return self._get_common_msg(event, None)
+        self._add_common_message(history, event, GPTMessageRole.USER, text)
+
+    def _add_common_message(self, history: GPTMessages, event: TgEvent, role: GPTMessageRole, text: str):
+        """
+        Добавление сообщение
+        """
+        from apps.gpt.commands.gpt.providers.chatgpt import ChatGPTCommand
+
+        photos = event.get_all_attachments([PhotoAttachment], use_fwd=False)
+        if isinstance(self, ChatGPTCommand):
+            documents = [x for x in event.get_all_attachments([DocumentAttachment], use_fwd=False) if
+                         x.mime_type.is_pdf]
         else:
-            return self._get_common_msg(event, event.message.raw)
+            documents = []
+
+        history.add_message(role, text, photos, documents)
 
     @staticmethod
-    def _get_common_msg(event, text: str | None):
-        documents: list[DocumentAttachment] = event.get_all_attachments([DocumentAttachment])
+    def _get_common_msg_text(event, text: str | None) -> str:
+        """
+        Если есть текстовый файл, то используем его содержимое как текст
+        """
+
+        documents: list[DocumentAttachment] = event.get_all_attachments([DocumentAttachment], use_fwd=False)
         text = text if text else ""
-        document = documents[0] if documents else None
-        if document and (document.mime_type.is_text or document.ext.lower() in ['html', 'txt']):
-            doc_txt = document.read_text()
-            doc_txt_str = f"Содержимое файла: {doc_txt}"
-            if not text:
-                return doc_txt_str
-            return f"{text}\n{doc_txt_str}"
-        elif event.message.raw:
-            return text
-        else:
-            logger.warning({
-                "message": "Формирование сообщений для GPT наткнулось на сообщение, где message.text = None"
-            })
-            return None
+
+        txt_documents = [document for document in documents if
+                         document.mime_type.is_text or document.ext.lower() in ['html', 'txt']]
+        if txt_documents:
+            result_text = [text] if text else []
+            for document in txt_documents:
+                doc_txt_str = f"\nСодержимое файла:\n{document.read_text()}"
+                result_text.append(doc_txt_str)
+            return "\n".join(result_text)
+        return text
 
     def _get_provider_model(self):
         if self.provider_model:

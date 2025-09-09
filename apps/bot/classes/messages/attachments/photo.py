@@ -1,5 +1,3 @@
-import base64
-
 from apps.bot.classes.const.activities import ActivitiesEnum
 from apps.bot.classes.messages.attachments.attachment import Attachment
 from apps.bot.classes.messages.attachments.mixins.sized_mixin import SizedMixin
@@ -22,10 +20,3 @@ class PhotoAttachment(Attachment, SizedMixin):
     def parse_api(self, event):
         self.public_download_url = event.get('url')
 
-    def base64(self) -> base64:
-        self.download_content()
-        return base64.b64encode(self.content).decode('utf-8')
-
-    @staticmethod
-    def decode_base64(encoded_str: str) -> bytes:
-        return base64.b64decode(encoded_str)

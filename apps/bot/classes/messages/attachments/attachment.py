@@ -1,3 +1,4 @@
+import base64
 import copy
 import io
 import os
@@ -263,3 +264,11 @@ class Attachment:
         if not self.file_id:
             self.set_file_id()
         return self.file_id
+
+    def base64(self) -> base64:
+        self.download_content()
+        return base64.b64encode(self.content).decode('utf-8')
+
+    @staticmethod
+    def decode_base64(encoded_str: str) -> bytes:
+        return base64.b64decode(encoded_str)

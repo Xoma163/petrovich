@@ -2,6 +2,8 @@ import dataclasses
 from abc import ABC
 from abc import abstractmethod
 
+from apps.bot.classes.messages.attachments.document import DocumentAttachment
+from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 from apps.gpt.messages.consts import GPTMessageRole
 
 
@@ -9,7 +11,8 @@ from apps.gpt.messages.consts import GPTMessageRole
 class GPTMessage(ABC):
     role: GPTMessageRole
     text: str
-    images: list[str] | None = None
+    images: list[PhotoAttachment] | None = None
+    files: list[DocumentAttachment] | None = None
 
     @abstractmethod
     def get_message(self) -> dict:
@@ -26,8 +29,14 @@ class GPTMessages(ABC):
     def __init__(self):
         self.messages: list[GPTMessage] = []
 
-    def add_message(self, role: GPTMessageRole, text: str, images: list[str] | None = None):
-        message = self.message_class(role, text, images)  # noqa
+    def add_message(
+            self,
+            role: GPTMessageRole,
+            text: str,
+            images: list[PhotoAttachment] | None = None,
+            files: list[DocumentAttachment] | None = None
+    ):
+        message = self.message_class(role, text, images, files)  # noqa
         self.messages.append(message)
 
     def get_messages(self) -> list[dict]:

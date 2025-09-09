@@ -12,20 +12,27 @@ class DocumentMimeType:
     def __init__(self, _type: str):
         self.type = _type
 
+    def __str__(self):
+        return self.type
+
     @property
     def is_image(self):
-        return self._check_value('image')
+        return self._check_value('image/')
 
     @property
     def is_text(self):
-        return self._check_value('text')
+        return self._check_value('text/')
+
+    @property
+    def is_pdf(self):
+        return self._check_value('application/pdf')
 
     @property
     def is_audio(self):
-        return self._check_value('audio')
+        return self._check_value('audio/')
 
     def _check_value(self, _type):
-        return self.type.startswith(f'{_type}/')
+        return self.type.startswith(f'{_type}')
 
 
 class DocumentAttachment(Attachment, ThumbnailMixin):
