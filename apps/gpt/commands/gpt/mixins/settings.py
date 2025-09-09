@@ -16,6 +16,14 @@ class GPTSettingsMixin(GPTCommandProtocol):
         HelpTextArgument(
             "настройки удалить",
             "сбрасывает настройки"
+        ),
+        HelpTextArgument(
+            "debug (on/off)",
+            "устанавливает дебаг режим. По умолчанию false"
+        ),
+        HelpTextArgument(
+            "debug удалить",
+            "удаляет настройку"
         )
     ]
 
