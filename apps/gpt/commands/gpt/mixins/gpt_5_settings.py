@@ -144,7 +144,7 @@ class GPT5SettingsMixin(GPTCommandProtocol):
         elif profile_settings.gpt_5_settings_web_search is False:
             value_str = self.bot.get_formatted_text_line("Выключено")
         else:
-            value_str = f"{self.bot.get_formatted_text_line("Выключено")} (по умолчанию)"
+            value_str = f"{self.bot.get_formatted_text_line('Выключено')} (по умолчанию)"
         answer = f"Поиск в интернете для моделей семейства GPT-5\n{value_str}"
         return ResponseMessageItem(text=answer)
 

@@ -119,7 +119,7 @@ class GPTSettingsMixin(GPTCommandProtocol):
         elif profile_settings.use_debug is False:
             value_str = self.bot.get_formatted_text_line("Выключено")
         else:
-            value_str = f"{self.bot.get_formatted_text_line("Выключено")} (по умолчанию)"
+            value_str = f"{self.bot.get_formatted_text_line('Выключено')} (по умолчанию)"
         answer = f"Дебаг режим\n{value_str}"
         return ResponseMessageItem(text=answer)
 
