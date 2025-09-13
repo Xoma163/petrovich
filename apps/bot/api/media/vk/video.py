@@ -18,7 +18,7 @@ from apps.service.models import SubscribeItem
 
 
 class VKVideo(SubscribeService):
-    URL = "https://vk.com/video"
+    URL = "https://vkvideo.ru"
     headers = {
         'authority': 'vk.com',
         'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
@@ -256,7 +256,7 @@ class VKVideo(SubscribeService):
                 SubscribeServiceNewVideoData(
                     id=ids[i],
                     title=titles[i],
-                    url=f"{self.URL}{_id}"
+                    url=f"{self.URL}video{_id}"
                 )
             )
         return data
