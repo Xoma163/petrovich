@@ -394,7 +394,7 @@ class GPTCommand(
             result_text = [text] if text else []
             for document in txt_documents:
                 doc_txt_str = f"\nСодержимое файла:\n{document.read_text()}"
-                doc_txt_str = text.split(self.DEBUG, 1)[0]
+                doc_txt_str = doc_txt_str.split(self.DEBUG, 1)[0]
                 result_text.append(doc_txt_str)
             return "\n".join(result_text)
         return text
