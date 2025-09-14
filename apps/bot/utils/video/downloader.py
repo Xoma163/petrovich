@@ -12,7 +12,7 @@ class VideoDownloader:
     def __init__(self, att: VideoAttachment | AudioAttachment):
         self.att: VideoAttachment = att
 
-    def download_m3u8(self, threads: int = 1, use_proxy=None) -> bytes:
+    def download_m3u8(self, threads: int = 1, use_proxy=None, http_chunk_size: int | None = None) -> bytes:
         if self.att.m3u8_url is None:
             raise RuntimeError("m3u8_url not set")
 
@@ -22,6 +22,8 @@ class VideoDownloader:
                 '-N': threads,
                 '-o': tmp_video_file
             }
+            if http_chunk_size is not None:
+                args['--http-chunk-size'] = http_chunk_size
             if use_proxy:
                 args['--proxy'] = get_http_proxies()['https']
             args_str = " ".join([f"{x[0]} {x[1]}" for x in args.items()])

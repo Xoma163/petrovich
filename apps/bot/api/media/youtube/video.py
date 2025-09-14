@@ -11,7 +11,7 @@ from requests.exceptions import SSLError
 from apps.bot.api.media.data import VideoData
 from apps.bot.api.subscribe_service import SubscribeService, SubscribeServiceNewVideosData, \
     SubscribeServiceNewVideoData, SubscribeServiceData
-from apps.bot.classes.const.exceptions import PWarning
+from apps.bot.classes.const.exceptions import PWarning, PSubscribeIndexError
 from apps.bot.classes.messages.attachments.audio import AudioAttachment
 from apps.bot.classes.messages.attachments.video import VideoAttachment
 from apps.bot.utils.nothing_logger import NothingLogger
@@ -24,7 +24,9 @@ from petrovich.settings import env
 
 
 class YoutubeVideo(SubscribeService):
-    DEFAULT_VIDEO_QUALITY_HIGHT = 1080
+    DEFAULT_VIDEO_QUALITY_HIGHT = 720
+    DOMAIN = "youtube.com"
+    URL = f"https://{DOMAIN}"
 
     def __init__(self, use_proxy=True):
         super().__init__()
@@ -33,6 +35,149 @@ class YoutubeVideo(SubscribeService):
         self.use_proxy = use_proxy
         if self.use_proxy:
             self.proxies = get_proxies()
+
+    # SERVICE METHODS
+
+    def get_video_info(
+            self,
+            url,
+            high_res=False,
+            _timedelta: float | None = None
+    ) -> VideoData:
+        video_info = self._get_video_info(url)
+
+        video, audio, filesize = self._get_video_download_urls(video_info, high_res, _timedelta)
+
+        return VideoData(
+            filesize=filesize,
+            video_download_url=video['url'] if video else None,
+            audio_download_url=audio['url'],
+            title=video_info['title'],
+            duration=video_info.get('duration'),
+            width=video.get('width'),
+            height=video.get('height'),
+            start_pos=str(video_info['section_start']) if video_info.get('section_start') else None,
+            end_pos=str(video_info['section_end']) if video_info.get('section_end') else None,
+            thumbnail_url=self._get_thumbnail(video_info),
+            channel_id=video_info['channel_id'],
+            video_id=video_info['id'],
+            channel_title=video_info['channel'],
+            is_short_video="/shorts/" in url or video_info.get('media_type') == 'short',
+            extra_data={
+                'http_chunk_size_video': video.get('downloader_options', {}).get('http_chunk_size', 10 * 1024 * 1024),
+                'http_chunk_size_audio': audio.get('downloader_options', {}).get('http_chunk_size', 10 * 1024 * 1024),
+            }
+        )
+
+    def download_video(self, data: VideoData) -> VideoAttachment:
+        if not data.video_download_url or not data.audio_download_url:
+            raise ValueError
+        _va = VideoAttachment()
+        _va.m3u8_url = data.video_download_url
+        vd = VideoDownloader(_va)
+        http_chunk_size_video = data.extra_data.get('http_chunk_size_video')
+        _va.content = vd.download_m3u8(threads=16, use_proxy=self.use_proxy, http_chunk_size=http_chunk_size_video)
+
+        _aa = AudioAttachment()
+        _aa.m3u8_url = data.audio_download_url
+        vd = VideoDownloader(_aa)
+        http_chunk_size_audio = data.extra_data.get('http_chunk_size_audio')
+        _aa.content = vd.download_m3u8(threads=8, use_proxy=self.use_proxy, http_chunk_size=http_chunk_size_audio)
+
+        vh = VideoHandler(video=_va, audio=_aa)
+        content = vh.mux()
+
+        va = VideoAttachment()
+        va.content = content
+        va.width = data.width or None
+        va.height = data.height or None
+        va.duration = data.duration or None
+        va.thumbnail_url = data.thumbnail_url or None
+        va.use_proxy_on_download_thumbnail = True
+        return va
+
+    # -----------------------------
+
+    # SUBSCRIBE METHODS
+
+    @retry(3, SSLError, sleep_time=2)
+    def get_channel_info(self, url: str) -> SubscribeServiceData:
+        r = requests.get(url, proxies=self.proxies)
+        bs4 = BeautifulSoup(r.content, 'lxml')
+        href = bs4.find_all('link', {'rel': 'canonical'})[0].attrs['href']
+        get_params = dict(parse.parse_qsl(parse.urlsplit(href).query))
+
+        playlist_id = None
+        playlist_title = None
+
+        if get_params.get('list'):
+            playlist_id = get_params.get('list')
+
+            last_videos = self._get_playlist_videos(playlist_id)
+            last_videos_ids = last_videos['ids']
+
+            playlist_info = self._get_playlist_info(playlist_id)
+            channel_id = playlist_info['channel_id']
+            playlist_title = playlist_info['title']
+            channel_title = playlist_info['author']
+        else:
+            channel_id = href.split('/')[-1]
+            last_videos = self._get_channel_videos(channel_id)
+            last_videos_ids = last_videos['ids']
+
+            channel_info = self._get_channel_info(channel_id)
+            channel_title = channel_info['author']
+
+        return SubscribeServiceData(
+            channel_id=channel_id,
+            playlist_id=playlist_id,
+            channel_title=channel_title,
+            playlist_title=playlist_title,
+            last_videos_id=last_videos_ids,
+            service=SubscribeItem.SERVICE_YOUTUBE
+        )
+
+    def get_filtered_new_videos(
+            self,
+            channel_id: str,
+            last_videos_id: list[str],
+            **kwargs
+    ) -> SubscribeServiceNewVideosData:
+        if kwargs.get('playlist_id'):
+            videos = self._get_playlist_videos(kwargs['playlist_id'])
+        else:
+            videos = self._get_channel_videos(channel_id)
+        ids = videos['ids']
+        titles = videos['titles']
+        urls = videos['urls']
+
+        index = self.filter_by_id(ids, last_videos_id)
+        if len(ids) == index:
+            return SubscribeServiceNewVideosData(videos=[])
+
+        ids = ids[index:]
+        titles = titles[index:]
+        urls = urls[index:]
+
+        data = SubscribeServiceNewVideosData(videos=[])
+        for i in range(len(ids)):
+            try:
+                video_info = self.get_video_info(urls[i])
+            except PWarning:
+                raise PSubscribeIndexError([ids[i]])
+            if video_info.is_short_video:
+                continue
+            video = SubscribeServiceNewVideoData(
+                id=ids[i],
+                title=titles[i],
+                url=urls[i]
+            )
+            data.videos.append(video)
+        return data
+
+    # -----------------------------
+
+    # UTILS
 
     @staticmethod
     def get_timecode_str(url) -> str:
@@ -57,88 +202,25 @@ class YoutubeVideo(SubscribeService):
             res += f"?v={v}"
         return res
 
+    def _get_video_url(self, video_id) -> str:
+        return f"{self.URL}/watch?v={video_id}"
+
     def check_url_is_video(self, url):
         url = self.clear_url(url)
-        r = r"((youtube.com\/watch\?v=)|(youtu.be\/)|(youtube.com\/shorts\/))"
+        r = rf"(({self.DOMAIN}\/watch\?v=)|(youtu.be\/)|({self.DOMAIN}\/shorts\/))"
         res = re.findall(r, url)
         if not res:
             raise PWarning("Ссылка должна быть на видео, не на канал")
 
-    def _get_video_info(self, url: str) -> dict:
-        ydl_params = {
-            'logger': NothingLogger(),
-        }
-        if self.use_proxy:
-            ydl_params['proxy'] = self.proxies['https']
-        ydl = yt_dlp.YoutubeDL(ydl_params)
-        ydl.add_default_info_extractors()
-
-        try:
-            video_info = ydl.extract_info(url, download=False)
-        except yt_dlp.utils.DownloadError as e:
-            if "Sign in to confirm your age" in e.msg:
-                raise PWarning("К сожалению видос доступен только залогиненым пользователям")
-            elif "Sign in to confirm you’re not a bot" in e.msg:
-                raise PWarning("Ютуб думает что я бот (да я бот). Попробуйте скачать видео позже")
-            elif "The following content is not available on this app" in e.msg:
-                raise PWarning("Это видео скачать не получится. ПАТАМУШТА")
-            else:
-                raise PWarning("Не смог найти видео по этой ссылке")
-        return video_info
-
-    def get_video_info(
-            self,
-            url,
-            high_res=False,
-            _timedelta: float | None = None
-    ) -> VideoData:
-        video_info = self._get_video_info(url)
-
-        video, audio, filesize = self._get_video_download_urls(video_info, high_res, _timedelta)
-
-        return VideoData(
-            filesize=filesize,
-            video_download_url=video['url'] if video else None,
-            # video_download_chunk_size=video['downloader_options']['http_chunk_size'] if video else None,
-            audio_download_url=audio['url'],
-            # audio_download_chunk_size=audio['downloader_options']['http_chunk_size'],
-            title=video_info['title'],
-            duration=video_info.get('duration'),
-            width=video.get('width'),
-            height=video.get('height'),
-            start_pos=str(video_info['section_start']) if video_info.get('section_start') else None,
-            end_pos=str(video_info['section_end']) if video_info.get('section_end') else None,
-            thumbnail_url=self._get_thumbnail(video_info),
-            channel_id=video_info['channel_id'],
-            video_id=video_info['id'],
-            channel_title=video_info['channel'],
-            is_short_video="/shorts/" in url
-        )
-
-    def download_video(self, data: VideoData) -> VideoAttachment:
-        if not data.video_download_url or not data.audio_download_url:
-            raise ValueError
-        _va = VideoAttachment()
-        _va.m3u8_url = data.video_download_url
-        vd = VideoDownloader(_va)
-        _va.content = vd.download_m3u8(threads=10, use_proxy=self.use_proxy)
-
-        _aa = AudioAttachment()
-        _aa.m3u8_url = data.audio_download_url
-        vd = VideoDownloader(_aa)
-        _aa.content = vd.download_m3u8(threads=2, use_proxy=self.use_proxy)
-
-        vh = VideoHandler(video=_va, audio=_aa)
-        content = vh.mux()
-
-        va = VideoAttachment()
-        va.content = content
-        va.width = data.width or None
-        va.height = data.height or None
-        va.duration = data.duration or None
-        va.thumbnail_url = data.thumbnail_url or None
-        va.use_proxy_on_download_thumbnail = True
-        return va
+    @staticmethod
+    def _filesize_key(x):
+        if filesize := x.get('filesize'):
+            return filesize
+        if filesize_approx := x.get('filesize_approx'):
+            return filesize_approx
+        if filesize_approx_vbr := x.get('filesize_approx_vbr'):
+            return filesize_approx_vbr * 100
+        return 0
 
     @staticmethod
     def _get_thumbnail(info: dict) -> str | None:
@@ -163,6 +245,32 @@ class YoutubeVideo(SubscribeService):
             return thumbnails[0]['url']
         except (IndexError, KeyError):
             return None
+
+    # -----------------------------
+
+    # VIDEO DOWNLOAD HELPERS
+
+    def _get_video_info(self, url: str) -> dict:
+        ydl_params = {
+            'logger': NothingLogger(),
+        }
+        if self.use_proxy:
+            ydl_params['proxy'] = self.proxies['https']
+        ydl = yt_dlp.YoutubeDL(ydl_params)
+        ydl.add_default_info_extractors()
+
+        try:
+            video_info = ydl.extract_info(url, download=False)
+        except yt_dlp.utils.DownloadError as e:
+            if "Sign in to confirm your age" in e.msg:
+                raise PWarning("К сожалению видос доступен только залогиненым пользователям")
+            elif "Sign in to confirm you’re not a bot" in e.msg:
+                raise PWarning("Ютуб думает что я бот (да я бот). Попробуйте скачать видео позже")
+            elif "The following content is not available on this app" in e.msg:
+                raise PWarning("Это видео скачать не получится. ПАТАМУШТА")
+            else:
+                raise PWarning("Не смог найти видео по этой ссылке")
+        return video_info
 
     def _get_video_download_urls(
             self,
@@ -218,15 +326,9 @@ class YoutubeVideo(SubscribeService):
         video_filesize = (self._filesize_key(vf) + self._filesize_key(af)) / 1024 / 1024
         return vf, af, video_filesize
 
-    @staticmethod
-    def _filesize_key(x):
-        if filesize := x.get('filesize'):
-            return filesize
-        if filesize_approx := x.get('filesize_approx'):
-            return filesize_approx
-        if filesize_approx_vbr := x.get('filesize_approx_vbr'):
-            return filesize_approx_vbr * 100
-        return 0
+    # -----------------------------
+
+    # CHANNEL/PLAYLISTS INFO GETTERS
 
     @retry(3, SSLError, sleep_time=2)
     def _get_channel_info(self, channel_id: str) -> dict:
@@ -244,13 +346,17 @@ class YoutubeVideo(SubscribeService):
         }
 
     @retry(3, SSLError, sleep_time=2)
-    def _get_channel_videos(self, channel_id: str) -> list:
-        r = requests.get(f"https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}", proxies=self.proxies)
+    def _get_channel_videos(self, channel_id: str) -> dict:
+        r = requests.get(f"{self.URL}/feeds/videos.xml?channel_id={channel_id}", proxies=self.proxies)
         if r.status_code != 200:
             raise PWarning("Не нашёл такого канала")
         bsop = BeautifulSoup(r.content, 'xml')
-        videos = [x.find('yt:videoId').text for x in bsop.find_all('entry')]
-        return list(reversed(videos))
+        ids = [x.find('yt:videoId').text for x in reversed(bsop.find_all('entry'))]
+        return {
+            "ids": ids,
+            "titles": [x.find('title').text for x in reversed(bsop.find_all('entry'))],
+            "urls": [self._get_video_url(_id) for _id in ids]
+        }
 
     @retry(3, SSLError, sleep_time=2)
     def _get_playlist_info(self, channel_id: str) -> dict:
@@ -272,7 +378,7 @@ class YoutubeVideo(SubscribeService):
         }
 
     @retry(3, SSLError, sleep_time=2)
-    def _get_playlist_videos(self, playlist_id: str) -> list:
+    def _get_playlist_videos(self, playlist_id: str) -> dict:
         url = "https://www.googleapis.com/youtube/v3/playlistItems"
         params = {
             "playlistId": playlist_id,
@@ -293,71 +399,11 @@ class YoutubeVideo(SubscribeService):
                 break
             params['pageToken'] = r['nextPageToken']
         videos = [x for x in videos if x['snippet']['resourceId'].get('videoId')]
-        return videos
+        ids = [v['snippet']['resourceId']['videoId'] for v in videos]
+        return {
+            "ids": ids,
+            "titles": [v['snippet']['title'] for v in videos],
+            "urls": [self._get_video_url(_id) for _id in ids]
+        }
 
-    @retry(3, SSLError, sleep_time=2)
-    def get_channel_info(self, url: str) -> SubscribeServiceData:
-        r = requests.get(url, proxies=self.proxies)
-        bs4 = BeautifulSoup(r.content, 'lxml')
-        href = bs4.find_all('link', {'rel': 'canonical'})[0].attrs['href']
-        get_params = dict(parse.parse_qsl(parse.urlsplit(href).query))
-
-        playlist_id = None
-        playlist_title = None
-
-        if get_params.get('list'):
-            playlist_id = get_params.get('list')
-            last_videos = self._get_playlist_videos(playlist_id)
-            last_videos_id = [x['snippet']['resourceId']['videoId'] for x in last_videos]
-
-            playlist_info = self._get_playlist_info(playlist_id)
-
-            channel_id = playlist_info['channel_id']
-            playlist_title = playlist_info['title']
-            channel_title = playlist_info['author']
-        else:
-            channel_id = href.split('/')[-1]
-            last_videos_id = self._get_channel_videos(channel_id)
-            channel_title = self._get_channel_info(channel_id)['author']
-        return SubscribeServiceData(
-            channel_id=channel_id,
-            playlist_id=playlist_id,
-            channel_title=channel_title,
-            playlist_title=playlist_title,
-            last_videos_id=last_videos_id,
-            service=SubscribeItem.SERVICE_YOUTUBE
-
-        )
-
-    def get_filtered_new_videos(
-            self,
-            channel_id: str,
-            last_videos_id: list[str],
-            **kwargs
-    ) -> SubscribeServiceNewVideosData:
-        if kwargs.get('playlist_id'):
-            videos = self._get_playlist_videos(kwargs.get('playlist_id'))
-            ids = [x['snippet']['resourceId']['videoId'] for x in videos]
-        else:
-            ids = self._get_channel_videos(channel_id)
-
-        index = self.filter_by_id(ids, last_videos_id)
-
-        ids = ids[index:]
-        urls = [f"https://www.youtube.com/watch?v={x}" for x in ids]
-
-        data = SubscribeServiceNewVideosData(videos=[])
-        for i, url in enumerate(urls):
-            try:
-                video_info = self._get_video_info(url)
-            except PWarning:
-                continue
-            if video_info['duration'] <= 120:
-                continue
-            video = SubscribeServiceNewVideoData(
-                id=ids[i],
-                title=video_info['title'],
-                url=url
-            )
-            data.videos.append(video)
-        return data
+    # -----------------------------
