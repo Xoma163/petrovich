@@ -160,7 +160,7 @@ class YoutubeVideo(SubscribeService):
         urls = urls[index:]
 
         data = SubscribeServiceNewVideosData(videos=[])
-        for i in range(len(ids)):
+        for i, _ in enumerate(ids):
             try:
                 video_info = self.get_video_info(urls[i])
             except PWarning:
@@ -268,6 +268,8 @@ class YoutubeVideo(SubscribeService):
                 raise PWarning("Ютуб думает что я бот (да я бот). Попробуйте скачать видео позже")
             elif "The following content is not available on this app" in e.msg:
                 raise PWarning("Это видео скачать не получится. ПАТАМУШТА")
+            elif "Requested format is not available." in e.msg:
+                raise PWarning("Ютуб отвалился. Создайте ишу, чтобы разраб обновил библиотечку плиз c:")
             else:
                 raise PWarning("Не смог найти видео по этой ссылке")
         return video_info

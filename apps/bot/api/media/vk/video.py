@@ -122,8 +122,8 @@ class VKVideo(SubscribeService):
             channel_id = channel_info['channel_id']
             channel_title = channel_info['channel_title']
             last_videos = self._get_channel_videos(channel_id)
-            # last_videos_id = last_videos["ids"]
-            last_videos_id = []
+            last_videos_id = last_videos["ids"]
+            # last_videos_id = []
 
         return SubscribeServiceData(
             channel_id=channel_id,
@@ -157,7 +157,7 @@ class VKVideo(SubscribeService):
         urls = urls[index:]
 
         data = SubscribeServiceNewVideosData(videos=[])
-        for i in range(len(ids)):
+        for i, _ in enumerate(ids):
             video = SubscribeServiceNewVideoData(
                 id=ids[i],
                 title=titles[i],
@@ -315,20 +315,22 @@ class VKVideo(SubscribeService):
         }
 
     def _get_playlist_videos(self, playlist_id):
-        url = f"{self.URL}/{playlist_id}"
-        content = requests.get(url, headers=self.HEADERS).content
-        bs4 = BeautifulSoup(content, "html.parser")
+        raise PError("Получение списка видео для плейлистов групп VK временно не работает")
 
-        data = self._get_playlist_data(bs4)
-        videos = data['apiPrefetchCache'][0]['response']['items']
-        videos = list(reversed(videos))
-
-        ids = [f"{v['owner_id']}_{v['id']}" for v in videos]
-        return {
-            "ids": ids,
-            "titles": [self._prepare_title(v['title']) for v in videos],
-            "urls": [self._get_video_url(_id) for _id in ids]
-        }
+        # url = f"{self.URL}/{playlist_id}"
+        # content = requests.get(url, headers=self.HEADERS).content
+        # bs4 = BeautifulSoup(content, "html.parser")
+        #
+        # data = self._get_playlist_data(bs4)
+        # videos = data['apiPrefetchCache'][0]['response']['items']
+        # videos = list(reversed(videos))
+        #
+        # ids = [f"{v['owner_id']}_{v['id']}" for v in videos]
+        # return {
+        #     "ids": ids,
+        #     "titles": [self._prepare_title(v['title']) for v in videos],
+        #     "urls": [self._get_video_url(_id) for _id in ids]
+        # }
 
     # -----------------------------
 
