@@ -34,7 +34,7 @@ python-dateutil = "^2.9.0.post0"
 selenium = "^4.22.0"
 sentry-sdk = { extras = ["django"], version = "^2.13.0" }
 blinker = "1.7.0"
-setuptools = "^75.7.0"
+setuptools = "^80.9.0"
 matplotlib = "^3.10.1"
 cryptography = "^44.0.3"
 instagrapi = "^2.1.3"
