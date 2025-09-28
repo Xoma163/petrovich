@@ -11,9 +11,11 @@ from urllib.parse import urlparse
 import requests
 from PIL.Image import Image as PILImage
 from django.db.models.fields.files import FieldFile
+from urllib3.exceptions import SSLError
 
 from apps.bot.classes.bots.chat_activity import ChatActivity
 from apps.bot.classes.const.exceptions import PWarning
+from apps.bot.utils.decorators import retry
 from apps.bot.utils.proxy import get_proxies
 
 
@@ -154,6 +156,7 @@ class Attachment:
         response = requests.get(url, headers=_headers, stream=True, proxies=proxies, cookies=cookies)
         return response.content
 
+    @retry(3, SSLError, sleep_time=2)
     def download_content(
             self,
             peer_id: str | int = None,

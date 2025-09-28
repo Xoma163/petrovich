@@ -7,8 +7,8 @@ from requests.exceptions import SSLError, JSONDecodeError
 
 from apps.bot.classes.const.exceptions import PError, PWarning
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
+from apps.bot.utils.decorators import retry
 from apps.bot.utils.proxy import get_proxies
-from apps.bot.utils.utils import retry
 from apps.gpt.api.base import GPTAPI
 from apps.gpt.api.responses import (
     GPTCompletionsResponse,

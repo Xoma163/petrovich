@@ -3,7 +3,7 @@ from apps.bot.classes.bots.chat_activity import ChatActivity
 from apps.bot.classes.const.activities import ActivitiesEnum
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.commands.media.service import MediaServiceResponse, MediaService
-from apps.bot.utils.utils import retry
+from apps.bot.utils.decorators import retry
 
 
 class YoutubeMusicService(MediaService):

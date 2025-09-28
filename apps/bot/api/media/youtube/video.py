@@ -14,9 +14,9 @@ from apps.bot.api.subscribe_service import SubscribeService, SubscribeServiceNew
 from apps.bot.classes.const.exceptions import PWarning, PSubscribeIndexError
 from apps.bot.classes.messages.attachments.audio import AudioAttachment
 from apps.bot.classes.messages.attachments.video import VideoAttachment
+from apps.bot.utils.decorators import retry
 from apps.bot.utils.nothing_logger import NothingLogger
 from apps.bot.utils.proxy import get_proxies
-from apps.bot.utils.utils import retry
 from apps.bot.utils.video.downloader import VideoDownloader
 from apps.bot.utils.video.video_handler import VideoHandler
 from apps.service.models import SubscribeItem

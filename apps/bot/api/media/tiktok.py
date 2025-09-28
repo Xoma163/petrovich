@@ -6,8 +6,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 from apps.bot.api.media.data import VideoData
 from apps.bot.classes.const.exceptions import PWarning
+from apps.bot.utils.decorators import retry
 from apps.bot.utils.proxy import get_proxies
-from apps.bot.utils.utils import retry
 from apps.bot.utils.web_driver import get_web_driver, get_web_driver_headers
 
 

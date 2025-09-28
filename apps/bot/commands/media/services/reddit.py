@@ -3,7 +3,8 @@ import re
 from apps.bot.api.media.reddit import Reddit
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.commands.media.service import MediaServiceResponse, MediaService
-from apps.bot.utils.utils import retry, markdown_to_html
+from apps.bot.utils.decorators import retry
+from apps.bot.utils.utils import markdown_to_html
 
 
 class RedditService(MediaService):
@@ -47,7 +48,7 @@ class RedditService(MediaService):
                 .strip()
             text = markdown_to_html(text, self.bot)
             regexps_with_static = (
-            (r"https.*player", "Видео"), (r"https://preview\.redd\.it/(?:\w|\d|\.|\?|\=|&)*", "Фото"))
+                (r"https.*player", "Видео"), (r"https://preview\.redd\.it/(?:\w|\d|\.|\?|\=|&)*", "Фото"))
             for regexp, _text in regexps_with_static:
                 p = re.compile(regexp)
                 for item in reversed(list(p.finditer(text))):

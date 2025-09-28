@@ -4,7 +4,7 @@ from apps.bot.classes.bots.chat_activity import ChatActivity
 from apps.bot.classes.const.activities import ActivitiesEnum
 from apps.bot.classes.const.exceptions import PSkipContinue, PWarning
 from apps.bot.commands.media.service import MediaService, MediaServiceResponse
-from apps.bot.utils.utils import retry
+from apps.bot.utils.decorators import retry
 
 
 class YoutubeVideoService(MediaService):
