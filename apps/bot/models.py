@@ -49,7 +49,6 @@ class ProfileSettings(BaseSettings, TimeStampModelMixin):
     profile = models.OneToOneField("Profile", on_delete=models.CASCADE, verbose_name="Профиль",
                                    related_name="settings", blank=True, null=True)
 
-    need_meme = models.BooleanField('Слать мемы по точному названию', default=False)
     need_reaction = models.BooleanField('Реагировать на неверные команды', default=True)
     use_swear = models.BooleanField("Использовать ругательства", default=True)
 

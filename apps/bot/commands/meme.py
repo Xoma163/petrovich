@@ -2,10 +2,9 @@ import threading
 
 from apps.bot.api.media.youtube.video import YoutubeVideo
 from apps.bot.classes.bots.bot import send_message_to_moderator_chat
-from apps.bot.classes.command import AcceptExtraCommand
+from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role, Platform, ATTACHMENT_TYPE_TRANSLATOR
 from apps.bot.classes.const.exceptions import PWarning, PSkip
-from apps.bot.classes.event.event import Event
 from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextArgument
 from apps.bot.classes.messages.attachments.gif import GifAttachment
 from apps.bot.classes.messages.attachments.link import LinkAttachment
@@ -19,7 +18,7 @@ from apps.bot.utils.utils import tanimoto
 from apps.service.models import Meme as MemeModel
 
 
-class Meme(AcceptExtraCommand):
+class Meme(Command):
     name = "мем"
 
     help_text = HelpText(
@@ -74,20 +73,9 @@ class Meme(AcceptExtraCommand):
     MESSAGE_YOUTUBE_STATUS_ERROR = "Статус скачивания с ютуба: ❌ ошибка"
     MESSAGE_YOUTUBE_STATUS_CUSTOM_ERROR = "Статус скачивания с ютуба: ❌ ошибка ({error_msg})"
 
-    @staticmethod
-    def accept_extra(event: Event) -> bool:
-        if event.is_fwd:
-            return False
-        if event.message and not event.message.mentioned:
-            if event.sender.settings.need_meme and not event.message.mentioned:
-                message_is_exact_meme_name = MemeModel.objects.filter(name=event.message.clear, approved=True).exists()
-                if message_is_exact_meme_name:
-                    return True
-        return False
-
     def start(self) -> ResponseMessage:
-        if self.event.command == self.__class__:
-            self.event.message.args = self.event.message.clear.split(' ')
+        # if self.event.command == self.__class__:
+        #     self.event.message.args = self.event.message.clear.split(' ')
 
         if not self.event.message.args:
             return self.menu_random()

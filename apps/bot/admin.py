@@ -211,7 +211,6 @@ class BotAdmin(TimeStampAdminMixin):
 class ProfileSettingsAdmin(TimeStampAdminMixin):
     list_display = (
         'profile',
-        'need_meme',
         'need_reaction',
         'use_swear',
         'celebrate_bday',
@@ -219,7 +218,6 @@ class ProfileSettingsAdmin(TimeStampAdminMixin):
         'use_mention'
     )
     list_editable = (
-        'need_meme',
         'need_reaction',
         'use_swear',
         'celebrate_bday',

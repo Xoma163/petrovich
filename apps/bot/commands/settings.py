@@ -38,9 +38,6 @@ class Settings(Command):
 
                 # user settings
                 HelpTextArgument(
-                    "мемы (вкл/выкл)",
-                    "определяет, будет ли бот присылать мем если прислано его точное название без / (боту требуется доступ к переписке)"),
-                HelpTextArgument(
                     "реагировать (вкл/выкл)",
                     "определяет, будет ли бот реагировать на неправильные команды в конфе. Это сделано для того, чтобы в конфе с несколькими ботами не было ложных срабатываний"),
                 HelpTextArgument(
@@ -94,7 +91,6 @@ class Settings(Command):
             [['голосовые', 'голос', 'голосовухи', 'голосовуха', 'голосовое'], self.menu_voice],
             [['время'], self.menu_time],
             # user settings
-            [['мемы', 'мем'], self.menu_memes],
             [['реагировать', 'реагируй', 'реагирование'], self.menu_reaction],
             [['ругаться'], self.menu_swear],
             [['упоминание', 'упоминания'], self.menu_use_mention],
@@ -131,9 +127,6 @@ class Settings(Command):
 
     # PROFILE
 
-    def menu_memes(self) -> ResponseMessageItem:
-        return self.setup_default_profile_setting('need_meme')
-
     def menu_reaction(self) -> ResponseMessageItem:
         return self.setup_default_profile_setting('need_reaction')
 
@@ -166,7 +159,6 @@ class Settings(Command):
 
     def _get_str_user_settings(self) -> str:
         settings = self.event.sender.settings
-        need_meme = settings.need_meme
         need_reaction = settings.need_reaction
         use_swear = settings.use_swear
         celebrate_bday = settings.celebrate_bday
@@ -174,7 +166,6 @@ class Settings(Command):
 
         answer = [
             "Настройки пользователя:",
-            f"Присылать мемы по точным названиям — {self.TRUE_FALSE_TRANSLATOR[need_meme]}",
             f"Реагировать на неправильные команды — {self.TRUE_FALSE_TRANSLATOR[need_reaction]}",
             f"Использовать ругательные команды — {self.TRUE_FALSE_TRANSLATOR[use_swear]}",
             f"Поздравлять с днём рождения — {self.TRUE_FALSE_TRANSLATOR[celebrate_bday]}",
