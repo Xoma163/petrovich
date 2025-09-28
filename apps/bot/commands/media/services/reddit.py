@@ -12,7 +12,7 @@ class RedditService(MediaService):
 
         self.service = Reddit()
 
-    @retry(3, Exception, sleep_time=2)
+    @retry(3, Exception, sleep_time=2, except_exceptions=(PWarning,))
     def get_content_by_url(self, url: str) -> MediaServiceResponse:
         reddit_data = self.service.get_post_data(url)
         result_text = self.service.title

@@ -1,6 +1,7 @@
 from apps.bot.api.media.youtube.music import YoutubeMusic
 from apps.bot.classes.bots.chat_activity import ChatActivity
 from apps.bot.classes.const.activities import ActivitiesEnum
+from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.commands.media.service import MediaServiceResponse, MediaService
 from apps.bot.utils.utils import retry
 
@@ -12,7 +13,7 @@ class YoutubeMusicService(MediaService):
         self.use_proxy = True
         self.service = YoutubeMusic(use_proxy=self.use_proxy)
 
-    @retry(3, Exception, sleep_time=2)
+    @retry(3, Exception, sleep_time=2, except_exceptions=(PWarning,))
     def get_content_by_url(self, url: str) -> MediaServiceResponse:
         with ChatActivity(self.bot, ActivitiesEnum.UPLOAD_AUDIO, self.event.peer_id):
             return self._get_content_by_url(url)

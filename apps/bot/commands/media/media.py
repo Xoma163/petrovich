@@ -4,7 +4,7 @@ from urllib.parse import urlparse
 from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import AcceptExtraCommand
 from apps.bot.classes.const.consts import Role, Platform
-from apps.bot.classes.const.exceptions import PWarning, PSkip
+from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.event.event import Event
 from apps.bot.classes.help_text import HelpText, HelpTextArgument, HelpTextKey, HelpTextItem
 from apps.bot.classes.messages.attachments.audio import AudioAttachment
@@ -153,18 +153,11 @@ class Media(AcceptExtraCommand):
         service.check_sender_role()
         service.check_valid_url(chosen_url)
 
-        try:
-            media_response = service.get_content_by_url(chosen_url)
-        except PWarning as e:
-            # Если была вызвана команда или отправлено сообщение в лс
-            if self.has_command_name or self.event.is_from_pm:
-                raise e
-            # Иначе не отправляем сообщение
-            else:
-                raise PSkip()
+        media_response = service.get_content_by_url(chosen_url)
 
-        att_is_video = (media_response.attachments and isinstance(media_response.attachments[0],
-                                                                  VideoAttachment)) or media_response.cache_url
+        att_is_video = False
+        if media_response.attachments:
+            att_is_video = isinstance(media_response.attachments[0], VideoAttachment) or media_response.cache_url
 
         if media_keys.save_to_disk and att_is_video:
             self.check_sender(Role.ADMIN)

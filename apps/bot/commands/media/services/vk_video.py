@@ -14,7 +14,7 @@ class VKVideoService(MediaService):
 
         self.service = VKVideo()
 
-    @retry(3, Exception, sleep_time=2)
+    @retry(3, Exception, sleep_time=2, except_exceptions=(PWarning,))
     def get_content_by_url(self, url: str) -> MediaServiceResponse:
         with ChatActivity(self.bot, ActivitiesEnum.UPLOAD_VIDEO, self.event.peer_id):
             return self._get_content_by_url(url)

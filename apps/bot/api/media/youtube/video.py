@@ -270,6 +270,8 @@ class YoutubeVideo(SubscribeService):
                 raise PWarning("Это видео скачать не получится. ПАТАМУШТА")
             elif "Requested format is not available." in e.msg:
                 raise PWarning("Ютуб отвалился. Создайте ишу, чтобы разраб обновил библиотечку плиз c:")
+            elif "This video has been removed for violating YouTube's Community Guidelines" in e.msg:
+                raise PWarning("Это видео было удалено за нарушение правил YouTube")
             else:
                 raise PWarning("Не смог найти видео по этой ссылке")
         return video_info

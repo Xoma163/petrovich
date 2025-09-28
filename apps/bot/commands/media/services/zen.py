@@ -3,7 +3,7 @@ from urllib.parse import urlparse
 from apps.bot.api.media.zen import Zen
 from apps.bot.classes.bots.chat_activity import ChatActivity
 from apps.bot.classes.const.activities import ActivitiesEnum
-from apps.bot.classes.const.exceptions import PSkipContinue
+from apps.bot.classes.const.exceptions import PSkipContinue, PWarning
 from apps.bot.commands.media.service import MediaServiceResponse, MediaService
 from apps.bot.utils.utils import retry
 
@@ -14,7 +14,7 @@ class ZenService(MediaService):
 
         self.service = Zen()
 
-    @retry(3, Exception, sleep_time=2)
+    @retry(3, Exception, sleep_time=2, except_exceptions=(PWarning,))
     def get_content_by_url(self, url: str) -> MediaServiceResponse:
         with ChatActivity(self.bot, ActivitiesEnum.UPLOAD_VIDEO, self.event.peer_id):
             return self._get_content_by_url(url)

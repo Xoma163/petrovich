@@ -4,7 +4,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from apps.bot.api.media.data import VideoData
-from apps.bot.classes.const.exceptions import PWarning
+from apps.bot.classes.const.exceptions import PWarning, PError
 from apps.bot.classes.messages.attachments.video import VideoAttachment
 
 
@@ -77,7 +77,7 @@ class Boosty:
                 video_data.video_download_url = video_url
                 break
         else:
-            raise PWarning("Не смог найти видео")
+            raise PError("Не смог найти видео")
 
     def download(self, video_data: VideoData, high_res=False) -> VideoAttachment:
         self._set_download_url(video_data, high_res)

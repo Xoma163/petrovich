@@ -13,7 +13,7 @@ class TwitterService(MediaService):
 
         self.service = Twitter(log_filter=self.event.log_filter)
 
-    @retry(3, Exception, sleep_time=2)
+    @retry(3, Exception, sleep_time=2, except_exceptions=(PWarning,))
     def get_content_by_url(self, url: str) -> MediaServiceResponse:
         with ChatActivity(self.bot, ActivitiesEnum.TYPING, self.event.peer_id):
             return self._get_content_by_url(url)

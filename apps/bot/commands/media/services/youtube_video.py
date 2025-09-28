@@ -2,7 +2,7 @@ from apps.bot.api.media.data import VideoData
 from apps.bot.api.media.youtube.video import YoutubeVideo
 from apps.bot.classes.bots.chat_activity import ChatActivity
 from apps.bot.classes.const.activities import ActivitiesEnum
-from apps.bot.classes.const.exceptions import PSkipContinue
+from apps.bot.classes.const.exceptions import PSkipContinue, PWarning
 from apps.bot.commands.media.service import MediaService, MediaServiceResponse
 from apps.bot.utils.utils import retry
 
@@ -14,7 +14,7 @@ class YoutubeVideoService(MediaService):
         self.use_proxy = True
         self.service = YoutubeVideo(use_proxy=self.use_proxy)
 
-    @retry(3, Exception, sleep_time=2)
+    @retry(3, Exception, sleep_time=2, except_exceptions=(PWarning,))
     def get_content_by_url(self, url: str) -> MediaServiceResponse:
         video_data = self.service.get_video_info(url, high_res=self.media_keys.high_resolution)
 

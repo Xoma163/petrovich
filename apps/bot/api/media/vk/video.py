@@ -9,7 +9,7 @@ from bs4 import BeautifulSoup
 from apps.bot.api.media.data import VideoData
 from apps.bot.api.subscribe_service import SubscribeService, SubscribeServiceNewVideosData, \
     SubscribeServiceNewVideoData, SubscribeServiceData
-from apps.bot.classes.const.exceptions import PWarning, PError
+from apps.bot.classes.const.exceptions import PError
 from apps.bot.classes.messages.attachments.audio import AudioAttachment
 from apps.bot.classes.messages.attachments.video import VideoAttachment
 from apps.bot.utils.video.downloader import VideoDownloader
@@ -83,7 +83,7 @@ class VKVideo(SubscribeService):
                 height=height
             )
         except Exception as e:
-            raise PWarning("Не смог получить информацию о видео") from e
+            raise PError("Не смог получить информацию о видео") from e
 
     def download_video(self, url: str, author_id: int, video_id: str, high_res: bool = False) -> VideoAttachment:
         player_url = self._get_player_url(url, author_id, video_id)
