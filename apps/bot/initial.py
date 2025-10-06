@@ -105,10 +105,11 @@ def get_text_for_documentation():
         for cmd in commands:
             cmd: Command
             command_text = f"{BOLD}{INS}{cmd.name.capitalize()}{INS_END}{BOLD} - {cmd.help_text.commands_text}{NL}{BR_NL}"
-            if not cmd.help_text.items:
+            if not cmd.help_text.help_texts:
                 continue
             help_texts = get_flat_list([
-                cmd.help_text.items.get(_role).items for _role in cmd.help_text.items if _role in allowed_roles
+                cmd.help_text.help_texts.get(_role).items for _role in cmd.help_text.help_texts if
+                _role in allowed_roles
             ])
             help_text_items = []
             for help_text in help_texts:
