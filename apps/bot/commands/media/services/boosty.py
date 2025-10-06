@@ -20,10 +20,15 @@ class BoostyService(MediaService):
 
     def _get_content_by_url(self, url: str) -> MediaServiceResponse:
         auth_cookie = None
-        if self.event.message.args and "token" in self.event.message.args[0]:
-            auth_cookie = self.event.message.args_case[0]
-            new_message = self.event.message.raw.replace(auth_cookie + "\n", '').replace(auth_cookie, '')
-            self.event.message = Message(new_message)
+        if self.event.message.args:
+            if "token" in self.event.message.args[0]:
+                auth_cookie = self.event.message.args_case[0]
+            elif "token" in self.event.message.args[1]:
+                auth_cookie = self.event.message.args_case[1]
+
+            if auth_cookie:
+                new_message = self.event.message.raw.replace(auth_cookie + "\n", '').replace(auth_cookie, '')
+                self.event.message = Message(new_message)
 
         video_data = self.service.get_video_info(url, auth_cookie)
 
