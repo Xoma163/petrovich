@@ -191,6 +191,7 @@ class GPTCommand(
         answer = answer if answer else "{пустой ответ}"
         answer = markdown_to_html(answer, self.bot)
         pre = f"<{self.bot.PRE_TAG}>"
+        # Сворачивание длинных сообщений от GPT в чатах в цитаты для укорачивания высоты сообщения в чате
         if self.event.is_from_chat and pre not in answer and len(answer) > 200:
             answer = self.bot.get_quote_text(answer, expandable=True)
 
