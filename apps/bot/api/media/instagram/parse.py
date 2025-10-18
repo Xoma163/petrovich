@@ -14,6 +14,7 @@ from apps.bot.utils.web_driver import get_web_driver
 
 class InstagramParser:
     AGE_RESTRICTION_RE = r"You must be (\d+) years old or over to"
+    INAPPROPRIATE_CONTENT = "This content may be inappropriate"
 
     def get_data(self, url):
         is_post = bool(re.search(r"p/([A-Za-z0-9_-]+)", url))
@@ -33,8 +34,12 @@ class InstagramParser:
                 "Если это так, то сообщите разработчику"
             )
         bs4 = BeautifulSoup(page_source, "html.parser")
-        if any([re.search(self.AGE_RESTRICTION_RE, x.text) for x in bs4.find_all("span")]):
+        spans = bs4.find_all("span")
+        if any([re.search(self.AGE_RESTRICTION_RE, x.text) for x in spans]):
             raise PWarning("Не могу скачать контент, так как он недоступен без аутентификации (возрастное ограничение)")
+        elif any(self.INAPPROPRIATE_CONTENT in x.text for x in spans):
+            raise PWarning("Не могу скачать контент, так как он недоступен без аутентификации (неприемлимый контент)")
+
         try:
             all_scripts = bs4.select('script[type="application/json"][data-content-len][data-processed]')
             api_scripts = [x for x in all_scripts if 'xdt_api__v1__' in x.text]
