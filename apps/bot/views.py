@@ -66,7 +66,6 @@ class TelegramView(CSRFExemptMixin, View):
 class GithubView(CSRFExemptMixin, View):
     NEW_COMMENT_FROM_DEVELOPER_TEMPLATE = "Новый комментарий от разработчика под вашей {problem_str}\n\n{comment}\n\nЧтобы оставить комментарий, ответьте на это сообщение"
     AUTO_GENERATED_COMMENT_STR = "Данный комментарий сгенерирован автоматически"
-    IMAGE_URL_PATTERN = r'!\[.*?\]\((https?://[^\)]+)\)'
 
     @staticmethod
     def send_notify_to_user(issue: GithubIssueAPI, text, attachments=None):
@@ -121,17 +120,18 @@ class GithubView(CSRFExemptMixin, View):
         text = f"Новый тег от разработчика под вашей {problem_str}\n\n{label_name}"
         self.send_notify_to_user(issue, text)
 
-    def _get_image_urls_from_text(self, comment: str) -> tuple[list[PhotoAttachment] | None, str]:
-        image_urls = re.findall(self.IMAGE_URL_PATTERN, comment)
+    @staticmethod
+    def _get_image_urls_from_text(comment: str) -> tuple[list[PhotoAttachment] | None, str]:
+        IMG_RE = r"<img\b[^>]*\bsrc\s*=\s*\"(.*)[\"']\s*\/>"
+        image_urls = re.findall(IMG_RE, comment)
         if not image_urls:
             return None, comment
-
         photo_attachments = []
         for image_url in image_urls:
             pa = PhotoAttachment()
             pa.public_download_url = image_url
             photo_attachments.append(pa)
-        comment = re.sub(self.IMAGE_URL_PATTERN, '', comment)
+        comment = re.sub(IMG_RE, '', comment, flags=re.I)
         return photo_attachments, comment
 
     def post(self, request):
