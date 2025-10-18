@@ -100,30 +100,35 @@ class GPTCommand(
                 return ResponseMessage(self.menu_vision())
 
         menu = []
-        if issubclass(self.provider.api_class, ImageDrawAPIMixin) and isinstance(self, GPTImageDrawFunctionality):
-            menu.append([["нарисуй", "draw"], self.menu_image_draw])
-        # if isinstance(self.provider.api_class, ImageEditAPIMixin):
-        #     menu.append([edit_image_command_aliases, self.menu_image_edit])
 
-        if isinstance(self, GPTStatisticsMixin):
-            menu.append([["стат", "стата", "статистика", "stat", "stats", "statistics"], self.menu_statistics])
-        if isinstance(self, GPTPrepromptMixin):
-            menu.append([["препромпт", "препромт", "промпт", "preprompt", "prepromp", "prompt"], self.menu_preprompt])
-        if isinstance(self, GPTKeyMixin):
-            menu.append([["ключ", "key"], self.menu_key])
-        if isinstance(self, GPTModelChoiceMixin):
-            menu.append([["модели", "models"], self.menu_models])
-            menu.append([["модель", "model"], self.menu_model])
-        if isinstance(self, GPT5SettingsMixin):
-            menu.append([["gpt_5_reasoning", "reasoning", "r"], self.reasoning])
-            menu.append([["gpt_5_verbosity", "verbosity", "v"], self.verbosity])
-            menu.append(
-                [["gpt_5_web_search", "web_search", "websearch", "web", "search", "ws", "w", "s"], self.web_search])
-        if isinstance(self, GPTPresetMixin):
-            menu.append([["пресет", "пресеты", "preset", "presets"], self.preset])
-        if isinstance(self, GPTSettingsMixin):
-            menu.append([["настройки", "настройка", "settings"], self.settings])
-            menu.append([["дебаг", "debug"], self.debug])
+        # Если это не продолжение диалога, то можно пользоваться этим всем
+        if not bool(self._get_first_gpt_event_in_replies(self.event)):
+            if issubclass(self.provider.api_class, ImageDrawAPIMixin) and isinstance(self, GPTImageDrawFunctionality):
+                menu.append([["нарисуй", "draw"], self.menu_image_draw])
+            # if isinstance(self.provider.api_class, ImageEditAPIMixin):
+            #     menu.append([edit_image_command_aliases, self.menu_image_edit])
+
+            if isinstance(self, GPTStatisticsMixin):
+                menu.append([["стат", "стата", "статистика", "stat", "stats", "statistics"], self.menu_statistics])
+            if isinstance(self, GPTPrepromptMixin):
+                menu.append(
+                    [["препромпт", "препромт", "промпт", "preprompt", "prepromp", "prompt"], self.menu_preprompt])
+            if isinstance(self, GPTKeyMixin):
+                menu.append([["ключ", "key"], self.menu_key])
+            if isinstance(self, GPTModelChoiceMixin):
+                menu.append([["модели", "models"], self.menu_models])
+                menu.append([["модель", "model"], self.menu_model])
+            if isinstance(self, GPT5SettingsMixin):
+                menu.append([["gpt_5_reasoning", "reasoning", "r"], self.reasoning])
+                menu.append([["gpt_5_verbosity", "verbosity", "v"], self.verbosity])
+                menu.append(
+                    [["gpt_5_web_search", "web_search", "websearch", "web", "search", "ws", "w", "s"], self.web_search])
+            if isinstance(self, GPTPresetMixin):
+                menu.append([["пресет", "пресеты", "preset", "presets"], self.preset])
+            if isinstance(self, GPTSettingsMixin):
+                menu.append([["настройки", "настройка", "settings"], self.settings])
+                menu.append([["дебаг", "debug"], self.debug])
+        # В общем случае Completions (в том числе и при продолжении диалога) должен быть доступен
         if issubclass(self.provider.api_class, CompletionsAPIMixin) and isinstance(self, GPTCompletionsFunctionality):
             menu.append([["_wtf"], self.menu_wtf])
             menu.append([['default'], self.menu_completions])
