@@ -211,8 +211,8 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
         )
 
     def _get_completions_vision_row(self, model: CompletionsModel | VisionModel, extra_text="", *max_lens):
-        input_cost = f"${float(model.prompt_1m_token_cost)}"
-        output_cost = f"${float(model.completion_1m_token_cost)}"
+        input_cost = f"${float(model.input_1m_token_cost)}"
+        output_cost = f"${float(model.output_1m_token_cost)}"
 
         filler_model_name = " " * (max_lens[0] - len(model.name))
         filler_input_cost = " " * (max_lens[1] - len(input_cost))

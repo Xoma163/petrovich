@@ -78,8 +78,10 @@ class ClaudeAPI(
 
         usage = GPTCompletionsUsage(
             model=model,  # noqa
-            completion_tokens=r_json['usage']['output_tokens'],
-            prompt_tokens=r_json['usage']['input_tokens'],
+            input_tokens=r_json['usage']['input_tokens'],
+            input_cached_tokens=0,
+            # Здесь можно получить количество кэшей, но надо рыться в доке. Сделать если будет нужда
+            output_tokens=r_json['usage']['output_tokens'],
         )
 
         answer = r_json['content'][0]['text']
@@ -108,8 +110,8 @@ class ClaudeAPI(
 
         usage = GPTVisionUsage(
             model=model,  # noqa
-            completion_tokens=r_json['usage']['output_tokens'],
-            prompt_tokens=r_json['usage']['input_tokens'],
+            output_tokens=r_json['usage']['output_tokens'],
+            input_tokens=r_json['usage']['input_tokens'],
         )
 
         answer = r_json['content'][0]['text']

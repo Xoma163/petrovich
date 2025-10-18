@@ -84,12 +84,17 @@ class GPTModel(models.Model):
 
 
 class GPTCompletionsVisionModel(GPTModel):
-    prompt_1m_token_cost = models.DecimalField(
+    input_1m_token_cost = models.DecimalField(
         "Стоимость за 1млн. входных токенов",
         max_digits=8,
         decimal_places=4,
     )
-    completion_1m_token_cost = models.DecimalField(
+    input_cached_1m_token_cost = models.DecimalField(
+        "Стоимость за 1млн. входных токенов (кэшированных)",
+        max_digits=8,
+        decimal_places=4,
+    )
+    output_1m_token_cost = models.DecimalField(
         "Стоимость за 1млн. выходных токенов",
         max_digits=8,
         decimal_places=4,

@@ -87,8 +87,9 @@ class OpenAIAPI(GPTAPI, ABC):
         usage_dict = r_json.get('usage')
         usage = usage(
             model=model,  # noqa
-            completion_tokens=usage_dict['completion_tokens'],  # noqa
-            prompt_tokens=usage_dict['prompt_tokens']  # noqa
+            input_tokens=usage_dict['prompt_tokens'],  # noqa
+            input_cached_tokens=0,  # noqa
+            output_tokens=usage_dict['completion_tokens'],  # noqa
         )
 
         answer = r_json['choices'][0]['message']['content']

@@ -25,8 +25,9 @@ class OpenAIResponsesAPI(OpenAIAPI, ABC):
         usage_dict = r_json.get('usage')
         usage = usage(
             model=model,  # noqa
-            completion_tokens=usage_dict['output_tokens'],  # noqa
-            prompt_tokens=usage_dict['input_tokens']  # noqa
+            input_tokens=usage_dict['input_tokens'] - usage_dict['input_tokens_details']['cached_tokens'],  # noqa
+            input_cached_tokens=usage_dict['input_tokens_details']['cached_tokens'],  # noqa
+            output_tokens=usage_dict['output_tokens'],  # noqa
         )
 
         answer = r_json['output'][-1]['content'][0]['text']

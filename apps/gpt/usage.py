@@ -24,28 +24,43 @@ class GPTUsage(ABC):
 @dataclass
 class GPTCompletionsVisionUsage(GPTUsage):
     model: GPTCompletionsVisionModel
-    completion_tokens: int
-    prompt_tokens: int
+    input_tokens: int
+    input_cached_tokens: int
+    output_tokens: int
+
+    # --- Цены за 1 токен ---
 
     @property
-    def prompt_one_token_cost(self) -> Decimal:
-        return self.model.prompt_1m_token_cost / 1_000_000
+    def input_one_token_cost(self) -> Decimal:
+        return self.model.input_1m_token_cost / 1_000_000
 
     @property
-    def completion_one_token_cost(self) -> Decimal:
-        return self.model.completion_1m_token_cost / 1_000_000
+    def input_cached_one_token_cost(self) -> Decimal:
+        return self.model.input_cached_1m_token_cost / 1_000_000
 
     @property
-    def prompt_tokens_cost(self) -> Decimal:
-        return self.prompt_tokens * self.prompt_one_token_cost
+    def output_one_token_cost(self) -> Decimal:
+        return self.model.output_1m_token_cost / 1_000_000
+
+    # --- Цены за потраченное количество токенов ---
 
     @property
-    def completion_tokens_cost(self) -> Decimal:
-        return self.completion_tokens * self.completion_one_token_cost
+    def input_tokens_cost(self) -> Decimal:
+        return self.input_tokens * self.input_one_token_cost
+
+    @property
+    def input_cached_tokens_cost(self) -> Decimal:
+        return self.input_cached_tokens * self.input_cached_one_token_cost
+
+    @property
+    def output_tokens_cost(self) -> Decimal:
+        return self.output_tokens * self.output_one_token_cost
+
+    # --- Итоговая цена ---
 
     @property
     def total_cost(self) -> Decimal:
-        return self.prompt_tokens_cost + self.completion_tokens_cost
+        return self.input_tokens_cost + self.input_cached_tokens_cost + self.output_tokens_cost
 
 
 @dataclass

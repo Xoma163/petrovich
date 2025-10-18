@@ -299,19 +299,27 @@ class GPTCommand(
 
     @classmethod
     def get_debug_text(cls, response: GPTAPIResponse) -> str:
+
+        fmt_cost = lambda x: "0" if round(x, 3) == 0 else f"{x:.3f}"
+
         if isinstance(response, GPTCompletionsResponse) or isinstance(response, GPTVisionResponse):
+
             return (
                 f"{cls.DEBUG}\n"
-                f"input_tokens: {response.usage.prompt_tokens}\n"
-                f"output_tokens: {response.usage.completion_tokens}\n"
-                f"input_cost: ${response.usage.prompt_tokens_cost}\n"
-                f"output_cost: ${response.usage.completion_tokens_cost}\n"
-                f"total_cost: ${response.usage.total_cost}"
+                f"input_tokens: {response.usage.input_tokens}\n"
+                f"input_cached_tokens: {response.usage.input_cached_tokens}\n"
+                f"output_tokens: {response.usage.output_tokens}\n"
+                f"---\n"
+                f"input_cost: ${fmt_cost(response.usage.input_tokens_cost)}\n"
+                f"input_cached_cost: ${fmt_cost(response.usage.input_cached_tokens_cost)}\n"
+                f"output_cost: ${fmt_cost(response.usage.output_tokens_cost)}\n"
+                f"---\n"
+                f"total_cost: ${fmt_cost(response.usage.total_cost)}"
             )
         elif isinstance(response, GPTImageDrawResponse) or isinstance(response, GPTVoiceRecognitionResponse):
             return (
                 f"{cls.DEBUG}\n"
-                f"total_cost: ${response.usage.total_cost}"
+                f"total_cost: ${fmt_cost(response.usage.total_cost)}"
             )
 
         return ""

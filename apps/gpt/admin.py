@@ -87,8 +87,15 @@ class CompletionModelAdmin(admin.ModelAdmin):
         "provider",
         "verbose_name",
         "is_default",
-        "prompt_1m_token_cost",
-        "completion_1m_token_cost"
+        "input_1m_token_cost",
+        "input_cached_1m_token_cost",
+        "output_1m_token_cost"
+    )
+    list_editable = (
+        "verbose_name",
+        "input_1m_token_cost",
+        "input_cached_1m_token_cost",
+        "output_1m_token_cost"
     )
     list_filter = (
         "provider",
@@ -109,8 +116,15 @@ class VisionModelAdmin(admin.ModelAdmin):
         "provider",
         "verbose_name",
         "is_default",
-        "prompt_1m_token_cost",
-        "completion_1m_token_cost"
+        "input_1m_token_cost",
+        "input_cached_1m_token_cost",
+        "output_1m_token_cost"
+    )
+    list_editable = (
+        "verbose_name",
+        "input_1m_token_cost",
+        "input_cached_1m_token_cost",
+        "output_1m_token_cost"
     )
     list_filter = (
         "provider",
