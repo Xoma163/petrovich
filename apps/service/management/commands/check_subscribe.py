@@ -7,7 +7,7 @@ from apps.bot.api.media.vk.video import VKVideo
 from apps.bot.api.media.youtube.video import YoutubeVideo
 from apps.bot.api.subscribe_service import SubscribeServiceNewVideosData, SubscribeService
 from apps.bot.classes.bots.tg_bot import TgBot
-from apps.bot.classes.const.exceptions import PSubscribeIndexError
+from apps.bot.classes.const.exceptions import PSubscribeIndexError, PError
 from apps.bot.classes.event.event import Event
 from apps.bot.classes.messages.message import Message
 from apps.bot.classes.messages.response_message import ResponseMessageItem
@@ -72,6 +72,8 @@ class Command(BaseCommand):
                 sub_item.last_videos_id = e.args[0]
                 sub_item.save()
             raise
+        except PError:
+            return
 
         if not new_videos.videos:
             return
