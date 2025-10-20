@@ -5,6 +5,7 @@ from urllib.parse import urlparse
 import requests
 import xmltodict
 from bs4 import BeautifulSoup
+from selenium.webdriver.support.wait import WebDriverWait
 
 from apps.bot.api.media.data import VideoData
 from apps.bot.api.subscribe_service import SubscribeService, SubscribeServiceNewVideosData, \
@@ -14,6 +15,7 @@ from apps.bot.classes.messages.attachments.audio import AudioAttachment
 from apps.bot.classes.messages.attachments.video import VideoAttachment
 from apps.bot.utils.video.downloader import VideoDownloader
 from apps.bot.utils.video.video_handler import VideoHandler
+from apps.bot.utils.web_driver import get_web_driver
 from apps.service.models import SubscribeItem
 
 
@@ -114,19 +116,18 @@ class VKVideo(SubscribeService):
             playlist_info = self._get_playlist_info(url)
             playlist_id = playlist_info['playlist_id']
             playlist_title = playlist_info['playlist_title']
-            channel_id = playlist_info['channel_id']
+            channel_path = playlist_info['channel_path']
             channel_title = playlist_info['channel_title']
             last_videos_id = playlist_info['last_videos_id']
         else:
             channel_info = self._get_channel_info(url)
-            channel_id = channel_info['channel_id']
+            channel_path = channel_info['channel_path']
             channel_title = channel_info['channel_title']
-            last_videos = self._get_channel_videos(channel_id)
-            last_videos_id = last_videos["ids"]
+            last_videos_id = channel_info['last_videos_id']
             # last_videos_id = []
 
         return SubscribeServiceData(
-            channel_id=channel_id,
+            channel_id=channel_path,
             playlist_id=playlist_id,
             channel_title=channel_title,
             playlist_title=playlist_title,
@@ -140,10 +141,12 @@ class VKVideo(SubscribeService):
             last_videos_id: list[str],
             **kwargs
     ) -> SubscribeServiceNewVideosData:
-        if kwargs.get('playlist_id'):
-            videos = self._get_playlist_videos(kwargs['playlist_id'])
+        if playlist_id := kwargs.get('playlist_id'):
+            url = self._get_channel_playlist_videos_url(playlist_id)
+            videos = self._get_playlist_videos(url)
         else:
-            videos = self._get_channel_videos(channel_id)
+            url = self._get_channel_videos_url(channel_id)
+            videos = self._get_channel_videos(url)
         ids = videos['ids']
         titles = videos['titles']
         urls = videos['urls']
@@ -174,8 +177,18 @@ class VKVideo(SubscribeService):
     def _prepare_title(name: str) -> str:
         return name.replace("&#774;", "й")
 
+    def _get_channel_videos_url(self, channel_path: str):
+        return f"{self.URL}/{channel_path}"
+
+    def _get_channel_playlist_videos_url(self, playlist_id: str):
+        return f"{self.URL}/{playlist_id}"
+
     def _get_video_url(self, video_id):
         return f"{self.URL}/video{video_id}"
+
+    @staticmethod
+    def _get_playlist_path(owner_id, playlist_id):
+        return f"playlist/{owner_id}_{playlist_id}"
 
     # -----------------------------
 
@@ -268,69 +281,54 @@ class VKVideo(SubscribeService):
     # CHANNEL/PLAYLISTS INFO GETTERS
 
     def _get_channel_info(self, url) -> dict:
-        content = requests.get(url, headers=self.HEADERS).content
-        bs4 = BeautifulSoup(content, "html.parser")
-        channel_data = json.loads(bs4.select_one('.VideoShowcaseCommunityHeader').attrs['data-exec'])[
-            'VideoShowcaseCommunityHeader/init']
+        data = self._get_channel_data(url)
+        videos = data['videos']
+        videos = list(reversed(videos))
+        last_videos_id = [f"{x['owner_id']}_{x['video_id']}" for x in videos]
 
         return {
-            "channel_id": channel_data['ownerId'],
-            "channel_title": self._prepare_title(channel_data['name']),
+            'channel_path': data['channel_path'],
+            'channel_title': data['channel_title'],
+            'last_videos_id': last_videos_id
         }
 
-    def _get_channel_videos(self, channel_id):
-        raise PError("Получение списка видео для групп VK временно не работает")
+    def _get_channel_videos(self, url):
+        data = self._get_channel_data(url)
+        videos = data['videos']
+        videos = list(reversed(videos))
 
-        # url = f"{self.URL}/{channel_id}/all"
-        # content = requests.get(url, headers=self.HEADERS).content
-        # bs4 = BeautifulSoup(content, "html.parser")
-        # videos = bs4.find('div', {'id': "video_subtab_pane_all"}).find_all('div', {'class': 'VideoCard__info'})
-        # videos = list(reversed(videos))
-        #
-        # ids = [v.find('a', {'class': 'VideoCard__title'}).attrs['data-id'] for v in videos]
-        # return {
-        #     "ids": ids,
-        #     "titles": [self._prepare_title(v.find('a', {'class': 'VideoCard__title'}).text.strip()) for v in videos],
-        #     "urls": [self._get_video_url(_id) for _id in ids]
-        # }
+        ids = [f"{v['owner_id']}_{v['video_id']}" for v in videos]
+        return {
+            "ids": ids,
+            "titles": [self._prepare_title(v['title']) for v in videos],
+            "urls": [self._get_video_url(_id) for _id in ids]
+        }
 
     def _get_playlist_info(self, url) -> dict:
-        content = requests.get(url, headers=self.HEADERS).content
-        bs4 = BeautifulSoup(content, "html.parser")
-        data = self._get_playlist_data(bs4)
-        _playlist_id = url.rsplit('_', 1)[1]
-        owner_id = data['apiPrefetchCache'][1]['response']['owner_id']
-
-        videos = data['apiPrefetchCache'][0]['response']['items']
+        data = self._get_playlist_data(url)
+        videos = data['videos']
         videos = list(reversed(videos))
-        last_videos_id = [f"{x['owner_id']}_{x['id']}" for x in videos]
-        video_info = self.get_video_info(f"{self.URL}/video{last_videos_id[-1]}")
+        last_videos_id = [f"{x['owner_id']}_{x['video_id']}" for x in videos]
 
         return {
-            "playlist_id": f"playlist/{owner_id}_{_playlist_id}",
-            "playlist_title": self._prepare_title(data['apiPrefetchCache'][1]['response']['title']),
-            "channel_id": video_info.channel_id,
-            "channel_title": self._prepare_title(video_info.channel_title),
+            "playlist_id": self._get_playlist_path(data['owner_id'], data['playlist_id']),
+            "playlist_title": self._prepare_title(data['playlist_title']),
+            "channel_path": data['channel_path'],
+            "channel_title": self._prepare_title(data['channel_title']),
             "last_videos_id": last_videos_id,
         }
 
-    def _get_playlist_videos(self, playlist_id):
-        raise PError("Получение списка видео для плейлистов групп VK временно не работает")
+    def _get_playlist_videos(self, url):
+        data = self._get_playlist_data(url)
+        videos = data['videos']
+        videos = list(reversed(videos))
 
-        # url = f"{self.URL}/{playlist_id}"
-        # content = requests.get(url, headers=self.HEADERS).content
-        # bs4 = BeautifulSoup(content, "html.parser")
-        #
-        # data = self._get_playlist_data(bs4)
-        # videos = data['apiPrefetchCache'][0]['response']['items']
-        # videos = list(reversed(videos))
-        #
-        # ids = [f"{v['owner_id']}_{v['id']}" for v in videos]
-        # return {
-        #     "ids": ids,
-        #     "titles": [self._prepare_title(v['title']) for v in videos],
-        #     "urls": [self._get_video_url(_id) for _id in ids]
-        # }
+        ids = [f"{v['owner_id']}_{v['video_id']}" for v in videos]
+        return {
+            "ids": ids,
+            "titles": [self._prepare_title(v['title']) for v in videos],
+            "urls": [self._get_video_url(_id) for _id in ids]
+        }
 
     # -----------------------------
 
@@ -357,14 +355,85 @@ class VKVideo(SubscribeService):
         del data['lang']
         return data
 
-    @staticmethod
-    def _get_playlist_data(bs4):
-        bs4_str = str(bs4)
-        pos1_text = '{"apiPrefetchCache"'
-        pos2_text = ");Promise"
-        pos1 = bs4_str.find(pos1_text)
-        pos2 = bs4_str.find(pos2_text, pos1)
-        data = json.loads(pos1_text + bs4_str[pos1 + len(pos1_text):pos2])
-        return data
+    def _get_channel_data(self, url):
+        web_driver = get_web_driver(headers=self.HEADERS)
+        try:
+            web_driver.get(url)
+            WebDriverWait(web_driver, 10).until(
+                lambda x: 'data-testid="video_list_item"' in x.page_source
+            )
+            page_content = web_driver.page_source
+        finally:
+            web_driver.quit()
+
+        bs4 = BeautifulSoup(page_content, "html.parser")
+
+        urls_and_titles = [(x.attrs['href'], x.select_one('div[aria-label]').attrs['aria-label']) for x in
+                           bs4.select('a[data-testid="video_list_item"]')]
+
+        pattern = re.compile(r'/video(?P<owner_id>-?\d+)_(?P<video_id>\d+)')
+        videos = []
+        for _url, title in urls_and_titles:
+            if match := pattern.search(_url):
+
+                try:
+                    slice_index_end = title.index(" длительностью")
+                    title = title[:slice_index_end]
+                except ValueError:
+                    pass
+
+                videos.append({
+                    'owner_id': match.group('owner_id'),
+                    'video_id': match.group('video_id'),
+                    'title': title
+                })
+
+        content = requests.get(url, headers=self.HEADERS).content
+        bs4 = BeautifulSoup(content, "html.parser")
+        channel_data = json.loads(bs4.select_one('.VideoShowcaseCommunityHeader').attrs['data-exec'])[
+            'VideoShowcaseCommunityHeader/init']
+        return {
+            "channel_path": urlparse(url).path.replace('/', ''),
+            "channel_title": channel_data['groupName'],
+            "owner_id": channel_data['ownerId'],
+            "videos": videos,
+        }
+
+    def _get_playlist_data(self, url):
+        web_driver = get_web_driver(headers=self.HEADERS)
+        try:
+            web_driver.get(url)
+            WebDriverWait(web_driver, 10).until(
+                lambda x: 'data-testid="video_card_title"' in x.page_source
+            )
+            page_content = web_driver.page_source
+        finally:
+            web_driver.quit()
+
+        bs4 = BeautifulSoup(page_content, "html.parser")
+
+        urls_and_titles = [(x.attrs['href'], x.text) for x in bs4.select('div[data-testid="video_card_title"] a')]
+
+        pattern = re.compile(r'/video(?P<owner_id>-?\d+)_(?P<video_id>\d+)')
+        videos = []
+        for _url, title in urls_and_titles:
+            if match := pattern.search(_url):
+                videos.append({
+                    'owner_id': match.group('owner_id'),
+                    'video_id': match.group('video_id'),
+                    'title': title
+                })
+        owner_id, playlist_id = urlparse(url).path.replace("/playlist/", "").split("_", 1)
+
+        first_breadcrumb = bs4.select('span[data-testid="breadcrumb-label"]')[0]
+        last_breadcrumb = bs4.select('span[data-testid="breadcrumb-label"]')[-1]
+        return {
+            "channel_path": first_breadcrumb.previous.attrs['href'].replace('/', ''),
+            "channel_title": first_breadcrumb.text,
+            "owner_id": owner_id,
+            "videos": videos,
+            "playlist_id": playlist_id,
+            "playlist_title": last_breadcrumb.text,
+        }
 
     # -----------------------------
