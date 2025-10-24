@@ -48,7 +48,7 @@ class ChatGPTAPI(
     base_url = "https://api.openai.com/v1"
 
     def check_key(self) -> bool:
-        return self._check_key("gpt-4.1-nano", self.headers)
+        return self._check_key("gpt-5-nano", self.headers)
 
     # ---------- completions ---------- #
 

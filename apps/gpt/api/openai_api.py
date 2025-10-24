@@ -132,11 +132,11 @@ class OpenAIAPI(GPTAPI, ABC):
 
         messages = ChatGPTMessages()
         messages.add_message(GPTMessageRole.USER, "привет")
-        url = f"{self.base_url}/chat/completions"
+        url = f"{self.base_url}/responses"
         json_data = {
             "model": model,
-            "messages": messages.get_messages(),
-            "max_completion_tokens": 50
+            "input": messages.get_messages(),
+            "max_output_tokens": 50
         }
         try:
             response_json = self.do_request(
