@@ -50,5 +50,7 @@ ATTACHMENT_TYPE_TRANSLATOR = {
     'link': LinkAttachment,
     'sticker': StickerAttachment,
     'voice': VoiceAttachment,
-    'gif': GifAttachment
+    # ToDo: в чём разница между gif и animation. Animation - свежее как будто?
+    'gif': GifAttachment,
+    'animation': GifAttachment
 }
