@@ -38,7 +38,7 @@ class VoiceRecognition(AcceptExtraCommand):
             ])
         ],
         extra_text=(
-            "Если дан доступ к переписке и указан chatgpt api_key, то распознает автоматически\n"
+            "Если указан chatgpt api_key, то распознает автоматически\n"
             "Поддерживаются форматы: flac, m4a, mp3, mp4, mpeg, mpga, oga, ogg, wav, webm"
         )
     )

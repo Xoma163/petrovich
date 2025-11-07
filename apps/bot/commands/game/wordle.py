@@ -9,7 +9,7 @@ from apps.bot.classes.const.consts import Platform, Role, rus_alphabet
 from apps.bot.classes.const.exceptions import PWarning, PSkip
 from apps.bot.classes.help_text import HelpText, HelpTextItem, HelpTextArgument
 from apps.bot.classes.messages.response_message import ResponseMessageItem, ResponseMessage
-from apps.bot.utils.utils import random_event, send_message_session_or_edit, get_font_by_path
+from apps.bot.utils.utils import random_event, get_font_by_path
 from apps.games.models import Wordle as WordleModel
 
 lock = Lock()
@@ -331,3 +331,28 @@ class WordleImageGenerator:
         elif letter not in secret_word:
             return self.COLOR_WRONG_LETTER
         return self.COLOR_DEFAULT
+
+
+def send_message_session_or_edit(bot, event, session, rmi: ResponseMessageItem, max_delta):
+    delta_messages = 0
+    if event.message.id:
+        delta_messages = event.message.id - session.message_id
+
+    if delta_messages > max_delta:
+        old_msg_id = session.message_id
+        br = bot.send_response_message_item(rmi)
+        message_id = br.response['result']['message_id']
+        session.message_id = message_id
+        session.save()
+        bot.delete_messages(event.peer_id, old_msg_id)
+    else:
+        rmi.message_id = session.message_id
+        br = bot.send_response_message_item(rmi)
+    if not br.success and br.response.get('description') != \
+            'Bad Request: message is not modified: specified new message content and reply markup are exactly the same as a current content and reply markup of the message':
+        rmi.message_id = None
+        br = bot.send_response_message_item(rmi)
+        message_id = br.response['result']['message_id']
+        session.message_id = message_id
+        session.save()
+    bot.delete_messages(event.peer_id, event.message.id)

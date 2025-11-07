@@ -15,7 +15,6 @@ from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.help_text import HelpTextKey
 from apps.bot.classes.messages.attachments.document import DocumentAttachment
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
-from apps.bot.classes.messages.response_message import ResponseMessageItem
 from apps.bot.models import Profile
 from apps.service.models import Service
 from petrovich.settings import STATIC_ROOT
@@ -361,30 +360,6 @@ def fix_layout(s) -> str:
 def get_url_file_ext(url) -> str:
     return urlparse(url).path.rsplit('.', 1)[-1]
 
-
-def send_message_session_or_edit(bot, event, session, rmi: ResponseMessageItem, max_delta):
-    delta_messages = 0
-    if event.message.id:
-        delta_messages = event.message.id - session.message_id
-
-    if delta_messages > max_delta:
-        old_msg_id = session.message_id
-        br = bot.send_response_message_item(rmi)
-        message_id = br.response['result']['message_id']
-        session.message_id = message_id
-        session.save()
-        bot.delete_messages(event.peer_id, old_msg_id)
-    else:
-        rmi.message_id = session.message_id
-        br = bot.send_response_message_item(rmi)
-    if not br.success and br.response.get('description') != \
-            'Bad Request: message is not modified: specified new message content and reply markup are exactly the same as a current content and reply markup of the message':
-        rmi.message_id = None
-        br = bot.send_response_message_item(rmi)
-        message_id = br.response['result']['message_id']
-        session.message_id = message_id
-        session.save()
-    bot.delete_messages(event.peer_id, event.message.id)
 
 
 def prepend_symbols(string: str, symbol: str, n: int) -> str:

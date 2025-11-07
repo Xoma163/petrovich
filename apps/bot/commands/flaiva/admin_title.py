@@ -19,7 +19,8 @@ class AdminTitle(Command):
                 HelpTextArgument("(пользователь) (должность)", "меняет должность участнику"),
                 HelpTextArgument("(пользователь)", "сбрасывает должность участнику")
             ])
-        ]
+        ],
+        extra_text="Для работы требуются права \"Change group info\""
     )
 
     access = Role.FLAIVA
