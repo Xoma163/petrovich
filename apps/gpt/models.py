@@ -99,6 +99,11 @@ class GPTCompletionsVisionModel(GPTModel):
         max_digits=8,
         decimal_places=4,
     )
+    web_search_1k_token_cost = models.DecimalField(
+        "Стоимость за 1тыс. поисковых токенов",
+        max_digits=8,
+        decimal_places=4,
+    )
 
     class Meta:
         abstract = True

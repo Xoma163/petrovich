@@ -79,7 +79,6 @@ class ClaudeAPI(
         usage = GPTCompletionsUsage(
             model=model,  # noqa
             input_tokens=r_json['usage']['input_tokens'],
-            input_cached_tokens=0,
             # Здесь можно получить количество кэшей, но надо рыться в доке. Сделать если будет нужда
             output_tokens=r_json['usage']['output_tokens'],
         )

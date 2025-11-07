@@ -25,8 +25,9 @@ class GPTUsage(ABC):
 class GPTCompletionsVisionUsage(GPTUsage):
     model: GPTCompletionsVisionModel
     input_tokens: int
-    input_cached_tokens: int
     output_tokens: int
+    input_cached_tokens: int = 0
+    web_search_tokens: int = 0
 
     # --- Цены за 1 токен ---
 
@@ -42,6 +43,10 @@ class GPTCompletionsVisionUsage(GPTUsage):
     def output_one_token_cost(self) -> Decimal:
         return self.model.output_1m_token_cost / 1_000_000
 
+    @property
+    def web_search_one_token_cost(self) -> Decimal:
+        return self.model.web_search_1k_token_cost / 1_000
+
     # --- Цены за потраченное количество токенов ---
 
     @property
@@ -56,11 +61,20 @@ class GPTCompletionsVisionUsage(GPTUsage):
     def output_tokens_cost(self) -> Decimal:
         return self.output_tokens * self.output_one_token_cost
 
+    @property
+    def web_search_tokens_cost(self) -> Decimal:
+        return self.web_search_tokens * self.web_search_one_token_cost
+
     # --- Итоговая цена ---
 
     @property
     def total_cost(self) -> Decimal:
-        return self.input_tokens_cost + self.input_cached_tokens_cost + self.output_tokens_cost
+        return (
+                self.input_tokens_cost +
+                self.input_cached_tokens_cost +
+                self.output_tokens_cost +
+                self.web_search_tokens_cost
+        )
 
 
 @dataclass

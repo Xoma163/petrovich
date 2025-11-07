@@ -1,4 +1,5 @@
 import concurrent
+import logging
 import re
 from abc import ABC
 from concurrent.futures import ThreadPoolExecutor
@@ -29,6 +30,8 @@ from apps.gpt.usage import (
     GPTImageDrawUsage
 )
 
+logger = logging.getLogger('openai')
+
 
 class OpenAIAPI(GPTAPI, ABC):
     ERRORS_MAP = {
@@ -57,7 +60,6 @@ class OpenAIAPI(GPTAPI, ABC):
             image_bytes, prompt = self.fetch_image_request(url, **kwargs)
             images_bytes = [image_bytes]
             images_prompt = prompt
-
 
         usage = GPTImageDrawUsage(
             model=model,  # noqa
@@ -88,7 +90,6 @@ class OpenAIAPI(GPTAPI, ABC):
         usage = usage(
             model=model,  # noqa
             input_tokens=usage_dict['prompt_tokens'],  # noqa
-            input_cached_tokens=0,  # noqa
             output_tokens=usage_dict['completion_tokens'],  # noqa
         )
 
@@ -112,6 +113,7 @@ class OpenAIAPI(GPTAPI, ABC):
             r_json = r.json()
 
         if error := r_json.get('error'):
+            logger.error(str(r_json))
             code = error.get('code')
             error_str = self.ERRORS_MAP.get(code, "Какая-то ошибка OpenAI API")
 

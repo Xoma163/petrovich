@@ -309,10 +309,12 @@ class GPTCommand(
                 f"input_tokens: {response.usage.input_tokens}\n"
                 f"input_cached_tokens: {response.usage.input_cached_tokens}\n"
                 f"output_tokens: {response.usage.output_tokens}\n"
+                f"web_search_tokens: {response.usage.web_search_tokens}\n"
                 f"---\n"
                 f"input_cost: ${fmt_cost(response.usage.input_tokens_cost)}\n"
                 f"input_cached_cost: ${fmt_cost(response.usage.input_cached_tokens_cost)}\n"
                 f"output_cost: ${fmt_cost(response.usage.output_tokens_cost)}\n"
+                f"web_search_cost: {fmt_cost(response.usage.web_search_tokens_cost)}\n"
                 f"---\n"
                 f"total_cost: ${fmt_cost(response.usage.total_cost)}"
             )
