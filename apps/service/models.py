@@ -50,7 +50,9 @@ class BaseMeme(TimeStampModelMixin):
         ('video', 'Видео'),
         ('link', 'Ссылка'),
         ('sticker', 'Стикер'),
+        # ToDo: в чём разница между gif и animation. Animation - свежее как будто?
         ('gif', 'Гифка'),
+        ('animation', 'Гифка'),
         ('voice', 'Голосовое'),
         ('video_note', 'Кружочек'),
     ]
@@ -76,7 +78,6 @@ class BaseMeme(TimeStampModelMixin):
         if self.for_trusted:
             info += "\nДля доверенных: Да"
         return info
-
 
     class Meta:
         abstract = True
