@@ -19,24 +19,22 @@ class YandexWeather(API):
     }
 
     WEATHER_TRANSLATOR = {
-        'clear': 'Ясно ☀',
-        'partly-cloudy': 'Малооблачно ⛅',
-        'cloudy': 'Облачно с прояснениями 🌥',
-        'overcast': 'Пасмурно ☁',
-        'partly-cloudy-and-light-rain': 'Небольшой дождь 🌧',
-        'partly-cloudy-and-rain': 'Дождь 🌧',
-        'overcast-and-rain': 'Сильный дождь 🌧🌧',
-        'overcast-thunderstorms-with-rain': 'Сильный дождь, гроза 🌩',
-        'cloudy-and-light-rain': 'Небольшой дождь 🌧',
-        'overcast-and-light-rain': 'Небольшой дождь 🌧',
-        'cloudy-and-rain': 'Дождь 🌧',
-        'overcast-and-wet-snow': 'Дождь со снегом 🌨',
-        'partly-cloudy-and-light-snow': 'Небольшой снег 🌨',
-        'partly-cloudy-and-snow': 'Снег 🌨',
-        'overcast-and-snow': 'Снегопад 🌨',
-        'cloudy-and-light-snow': 'Небольшой снег 🌨',
-        'overcast-and-light-snow': 'Небольшой снег 🌨',
-        'cloudy-and-snow': 'Снег 🌨'
+        "clear": "Ясно ☀",
+        "partly-cloudy": "Малооблачно ⛅",
+        "cloudy": 'Облачно с прояснениями 🌥',
+        "overcast": 'Пасмурно ☁',
+        "light-rain": "Небольшой дождь 🌧",
+        "rain": "Дождь 🌧",
+        "heavy-rain": "Сильный дождь 🌧🌧",
+        "showers": "Ливень 🌧🌧",
+        "wet-snow": 'Дождь со снегом 🌨',
+        "light-snow": 'Небольшой снег 🌨',
+        "snow": 'Снег 🌨',
+        "snow-showers": 'Снегопад 🌨',
+        "hail": "Град",
+        "thunderstorm": "Гроза 🌩",
+        "thunderstorm-with-rain": "Дождь с грозой 🌩",
+        "thunderstorm-with-hail": "Гроза с градом 🌩",
     }
 
     WEATHER_WIND_DIRECTION_TRANSLATOR = {
