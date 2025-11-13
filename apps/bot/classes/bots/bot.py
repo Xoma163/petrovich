@@ -224,7 +224,7 @@ class Bot(Thread):
 
     @staticmethod
     def _generate_tanimoto_commands(commands, messages, event) -> list:
-        tanimoto_commands = [{command: 0.0 for command in commands} for _ in range(len(messages))]
+        tanimoto_commands = [dict.fromkeys(commands, 0.0) for _ in range(len(messages))]
 
         for command in commands:
             command_has_not_full_names = not command.full_names

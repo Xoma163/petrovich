@@ -48,7 +48,7 @@ def generate_commands(base_class=Command):
 
 def generate_help_text():
     groups = [x['name'] for x in Group.objects.all().values('name')]
-    help_text_generated = {platform: {group: "" for group in groups} for platform in list(Platform)}
+    help_text_generated = {p: dict.fromkeys(groups, "") for p in Platform}
     help_text_list = {platform: {group: [] for group in groups} for platform in list(Platform)}
 
     for command in COMMANDS:
