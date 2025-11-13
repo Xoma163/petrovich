@@ -22,5 +22,15 @@ class AudioTrack(VideoCommon):
         return audio
 
     def _get_audio_track(self):
-        do_the_linux_command(
-            f"ffmpeg6 -i {self.tmp_video_file.name} -vn -acodec copy -f adts -y {self.tmp_output_file.name}")
+        args = [
+            "ffmpeg6",
+            "-i", self.tmp_video_file.name,
+            "-vn", "-c:a", "aac",
+            "-b:a", "192k",
+            "-f", "adts",
+            "-y",
+            self.tmp_output_file.name,
+        ]
+        cmd = " ".join(args)
+        res = do_the_linux_command(cmd)
+        print()
