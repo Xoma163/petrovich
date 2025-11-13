@@ -65,6 +65,9 @@ class Profile(Command):
         self.check_args(2)
         arg1 = self.event.message.args_case[1]
         if arg1 == 'добавить':
+            raise PWarning(
+                "Добавление городов временно недоступно. Если очень хотите добавить город - тыкните палкой в админа"
+            )
             city_name = " ".join(self.event.message.args_case[2:])
             city = self.add_city_to_db(city_name)
             answer = f"Добавил новый город - {city.name}"
