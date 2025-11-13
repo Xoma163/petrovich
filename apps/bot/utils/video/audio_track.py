@@ -32,5 +32,4 @@ class AudioTrack(VideoCommon):
             self.tmp_output_file.name,
         ]
         cmd = " ".join(args)
-        res = do_the_linux_command(cmd)
-        print()
+        do_the_linux_command(cmd)
