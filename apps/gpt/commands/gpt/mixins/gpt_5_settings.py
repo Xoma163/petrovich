@@ -8,8 +8,8 @@ from apps.gpt.protocols import GPTCommandProtocol
 class GPT5SettingsMixin(GPTCommandProtocol):
     GPT_5_SETTINGS_HELP_TEXT_ITEMS = [
         HelpTextArgument(
-            "gpt_5_reasoning (high/medium/low/minimal)",
-            "устанавливает уровень рассуждений для моделей семейства GPT-5. По умолчанию medium"
+            "gpt_5_reasoning (high/medium/low/minimal/none)",
+            "устанавливает уровень рассуждений для моделей семейства GPT-5. По умолчанию medium. Для GPT-5.1 по умолчанию none"
         ),
         HelpTextArgument(
             "gpt_5_reasoning удалить",
