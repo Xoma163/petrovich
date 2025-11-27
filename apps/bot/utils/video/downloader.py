@@ -5,6 +5,7 @@ from apps.bot.classes.messages.attachments.audio import AudioAttachment
 from apps.bot.classes.messages.attachments.video import VideoAttachment
 from apps.bot.utils.do_the_linux_command import do_the_linux_command
 from apps.bot.utils.proxy import get_http_proxies
+from petrovich.settings import BASE_DIR
 
 
 class VideoDownloader:
@@ -20,7 +21,8 @@ class VideoDownloader:
         try:
             args = {
                 '-N': threads,
-                '-o': tmp_video_file
+                '-o': tmp_video_file,
+                '--cookies': os.path.join(BASE_DIR, 'secrets', 'youtube_cookies.txt')
             }
             if http_chunk_size is not None:
                 args['--http-chunk-size'] = http_chunk_size
