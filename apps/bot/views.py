@@ -13,6 +13,7 @@ from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessageItem
 from apps.bot.mixins import CSRFExemptMixin
 from apps.bot.utils.utils import get_admin_profile
+from petrovich.settings import env
 
 
 class APIView(CSRFExemptMixin, View):
@@ -57,6 +58,8 @@ class APIView(CSRFExemptMixin, View):
 
 class TelegramView(CSRFExemptMixin, View):
     def post(self, request, *args, **kwargs):
+        if request.headers.get('x-telegram-bot-api-secret-token') != env.str('TG_WEBHOOK_SECRET'):
+            return HttpResponse(status=403)
         raw = json.loads(request.body)
         tg_bot = TgBot()
         tg_bot.parse(raw)
