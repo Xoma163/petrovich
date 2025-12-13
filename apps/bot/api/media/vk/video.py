@@ -13,6 +13,7 @@ from apps.bot.api.subscribe_service import SubscribeService, SubscribeServiceNew
 from apps.bot.classes.const.exceptions import PError
 from apps.bot.classes.messages.attachments.audio import AudioAttachment
 from apps.bot.classes.messages.attachments.video import VideoAttachment
+from apps.bot.utils.utils import extract_json
 from apps.bot.utils.video.downloader import VideoDownloader
 from apps.bot.utils.video.video_handler import VideoHandler
 from apps.bot.utils.web_driver import get_web_driver
@@ -207,18 +208,20 @@ class VKVideo(SubscribeService):
 
     def _get_video_audio(self, player_url: str, high_res: bool) -> tuple[VideoAttachment, AudioAttachment | None]:
         r = requests.get(player_url, headers=self.HEADERS)
-        js_code = re.findall(r'var playerParams = (\{.*\})', r.text)[0]
-        info = json.loads(js_code)
-        info = info.get('params')[0]
+        js_code = re.findall(r';window.cur = Object.assign\(window.cur |\| \{\}, ({.*?})\)', r.text)[-1]
+        info = json.loads(extract_json(js_code))
+        info = info['apiPrefetchCache'][0]['response']['items'][0]
 
         # Если не будет работать, то можно попробовать через поля 'url2160/url1440/url1080/url720/url480/url360/url240'
         va = None
         aa = None
 
-        dash = info.get('dash_sep')
-        hls = info.get('hls', info.get('hls_ondemand'))
+        files = info.get('files', {})
+
+        dash = files.get('dash_sep')
+        hls = files.get('hls') or info.get('hls_ondemand')
         # Iphone не умеют в WEBM
-        dash_webm = info.get('dash_webm')
+        dash_webm = files.get('dash_webm')
 
         if dash:
             va, aa = self._get_video_audio_dash(dash, high_res=high_res)
