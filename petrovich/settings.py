@@ -28,7 +28,7 @@ if DEBUG:
     ALLOWED_HOSTS += [REMOTE_IP, LOCAL_IP]
     MAIN_SITE = f'http://{REMOTE_IP}:{REMOTE_OR_LOCAL_PORT}'
 else:
-    MAIN_SITE = f'https://{PETROVICH_DOMAIN}'
+    MAIN_SITE = f'https://{MAIN_DOMAIN}'
 
 # Application definition
 DJANGO_APPS = [
