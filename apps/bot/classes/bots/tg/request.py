@@ -4,6 +4,7 @@ import requests
 from requests import Response
 
 from apps.bot.utils.cache import MessagesCache
+from apps.bot.utils.proxy import get_http_proxies
 
 
 class Request:
@@ -19,10 +20,15 @@ class Request:
         "Bad Request: message can't be deleted for everyone"
     ]
 
-    def __init__(self, token, log_filter=None):
+    def __init__(self, token, log_filter=None, use_proxy=False):
         self.token = token
         self.logger = logging.getLogger('bot')
         self.log_filter = log_filter
+        self.use_proxy = use_proxy
+
+        self.proxies = None
+        if self.use_proxy:
+            self.proxies = get_http_proxies()
 
     def get(self, action, params=None, **kwargs) -> Response:
         return self._do(action, "get", params, **kwargs)
@@ -32,7 +38,7 @@ class Request:
 
     def _do(self, action, method="get", params=None, **kwargs) -> Response:
         url = f'{self.PREFIX}://{self.API_TELEGRAM_URL}/bot{self.token}/{action}'
-        r = getattr(requests, method)(url, params, **kwargs)
+        r = getattr(requests, method)(url, params, proxies=self.proxies, **kwargs)
         r_json = r.json()
         self._log(r_json, action)
         self._cache(r_json)

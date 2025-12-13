@@ -32,7 +32,7 @@ class TgBot(Bot):
     TG_SERVER = 0
     LOCAL_SERVER = 1
 
-    MODE = LOCAL_SERVER
+    MODE = TG_SERVER
 
     MAX_VIDEO_SIZE_MB = 50 if MODE == TG_SERVER else 2000
     MAX_ATTACHMENT_SIZE_MB = 20 if MODE == TG_SERVER else inf
@@ -75,7 +75,7 @@ class TgBot(Bot):
 
     def init_requests(self):
         if self.MODE == self.TG_SERVER:
-            self.requests = Request(self.token, log_filter=self.log_filter)
+            self.requests = Request(self.token, log_filter=self.log_filter, use_proxy=True)
         else:
             self.requests = RequestLocal(self.token, log_filter=self.log_filter)
 
