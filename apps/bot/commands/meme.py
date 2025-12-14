@@ -615,7 +615,7 @@ class Meme(Command):
                 qr['title'] = meme.name
 
             # set youtube preview
-            if meme.type in [VideoAttachment.TYPE]:
+            if meme.type in [VideoAttachment.TYPE] and meme.link:
                 if video_id := get_youtube_video_id(meme.link):
                     qr['thumb_url'] = f"https://img.youtube.com/vi/{video_id}/default.jpg"
 
