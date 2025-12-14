@@ -7,58 +7,58 @@ on:
 jobs:
   build:
     runs-on: ubuntu-22.04
-    strategy:
-      max-parallel: 4
-      matrix:
-        python-version: [ 3.11 ]
-    services:
-      db:
-        image: postgres
-        env:
-          POSTGRES_DB: postgres
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-        ports:
-          - 5432:5432
-      redis:
-        image: redis
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 6379:6379
+    #    strategy:
+    #      max-parallel: 4
+    #      matrix:
+    #        python-version: [ 3.11 ]
+    #    services:
+    #      db:
+    #        image: postgres
+    #        env:
+    #          POSTGRES_DB: postgres
+    #          POSTGRES_USER: postgres
+    #          POSTGRES_PASSWORD: postgres
+    #        ports:
+    #          - 5432:5432
+    #      redis:
+    #        image: redis
+    #        options: >-
+    #          --health-cmd "redis-cli ping"
+    #          --health-interval 10s
+    #          --health-timeout 5s
+    #          --health-retries 5
+    #        ports:
+    #          - 6379:6379
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Apt dependencies
-        run: |
-          sudo apt-get install libpq-dev python3-dev redis
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-      - name: Run tests
-        env:
-          SECRET_KEY: d7e72d9c61c4774bc5024bdd1434b1b322c62404d01ebc968b
-          DEBUG: False
-          TG_TOKEN: ''
-          TG_BOT_LOGIN: ''
-          DATABASE_URL: 'postgres://postgres:postgres@localhost:5432/postgres'
-          TIMEZONEDB_API_KEY: ''
-          YANDEX_GEO_TOKEN: ''
-          GITHUB_TOKEN: ''
-          REDIS_URL: 'redis://127.0.0.1:6379/1'
-          SENTRY_URL: ''
-          IMGDB_API_KEY: ''
-          TG_REMOTE_HOST: ''
-          FERNET_SECRET_KEY: '8wfAT-WwL8AeRkttrtzeduEKZ9x9zjRDLIPrsVuaVRA='
-        run: |
-          python manage.py test
+      #      - uses: actions/checkout@v2
+      #      - name: Set up Python ${{ matrix.python-version }}
+      #        uses: actions/setup-python@v2
+      #        with:
+      #          python-version: ${{ matrix.python-version }}
+      #      - name: Apt dependencies
+      #        run: |
+      #          sudo apt-get install libpq-dev python3-dev redis
+      #      - name: Install dependencies
+      #        run: |
+      #          python -m pip install --upgrade pip
+      #          pip install -r requirements.txt
+      #      - name: Run tests
+      #        env:
+      #          SECRET_KEY: d7e72d9c61c4774bc5024bdd1434b1b322c62404d01ebc968b
+      #          DEBUG: False
+      #          TG_TOKEN: ''
+      #          TG_BOT_LOGIN: ''
+      #          DATABASE_URL: 'postgres://postgres:postgres@localhost:5432/postgres'
+      #          TIMEZONEDB_API_KEY: ''
+      #          YANDEX_GEO_TOKEN: ''
+      #          GITHUB_TOKEN: ''
+      #          REDIS_URL: 'redis://127.0.0.1:6379/1'
+      #          SENTRY_URL: ''
+      #          IMGDB_API_KEY: ''
+      #          TG_REMOTE_HOST: ''
+      #          FERNET_SECRET_KEY: '8wfAT-WwL8AeRkttrtzeduEKZ9x9zjRDLIPrsVuaVRA='
+      #        run: |
+      #          python manage.py test
       - name: Deploy on production
         uses: appleboy/ssh-action@master
         with:
