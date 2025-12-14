@@ -253,6 +253,10 @@ class YoutubeVideo(SubscribeService):
     def _get_video_info(self, url: str) -> dict:
         ydl_params = {
             'logger': NothingLogger(),
+            'noplaylist': True,
+            # Не забыть закинуть deno в /usr/bin/local
+            'js_runtimes': {'deno': {}},
+            'remote_components': ['ejs:npm', 'ejs:github'],
             # 'cookiefile': os.path.join(BASE_DIR, 'secrets', 'youtube_cookies.txt')
         }
         if self.use_proxy:

@@ -58,7 +58,8 @@ class APIView(CSRFExemptMixin, View):
 
 class TelegramView(CSRFExemptMixin, View):
     def post(self, request, *args, **kwargs):
-        if request.headers.get('x-telegram-bot-api-secret-token') != env.str('TG_WEBHOOK_SECRET'):
+        if env.str('TG_WEBHOOK_SECRET') and \
+                request.headers.get('x-telegram-bot-api-secret-token') != env.str('TG_WEBHOOK_SECRET'):
             return HttpResponse(status=403)
         raw = json.loads(request.body)
         tg_bot = TgBot()

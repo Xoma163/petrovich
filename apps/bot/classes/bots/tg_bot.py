@@ -33,7 +33,7 @@ class TgBot(Bot):
     LOCAL_SERVER = 1
     REMOTE_SERVER = 2
 
-    MODE = TG_SERVER
+    MODE = LOCAL_SERVER
 
     MAX_VIDEO_SIZE_MB = 50 if MODE == TG_SERVER else 2000
     MAX_ATTACHMENT_SIZE_MB = 20 if MODE == TG_SERVER else inf
