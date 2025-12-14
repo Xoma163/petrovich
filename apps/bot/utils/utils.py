@@ -5,7 +5,7 @@ import re
 import zoneinfo
 from datetime import datetime
 from io import BytesIO
-from urllib.parse import urlparse
+from urllib.parse import urlparse, parse_qsl
 
 from PIL import Image, ImageDraw, ImageFont
 from django.contrib.auth.models import Group
@@ -361,7 +361,6 @@ def get_url_file_ext(url) -> str:
     return urlparse(url).path.rsplit('.', 1)[-1]
 
 
-
 def prepend_symbols(string: str, symbol: str, n: int) -> str:
     """
     Добивает строку до N символов вставляя их перед строкой
@@ -514,9 +513,6 @@ def split_text_by_n_symbols(text: str, n: int, split_on: list[str] | None = None
     return texts
 
 
-
-
-
 def get_default_headers() -> dict:
     return {
         'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
@@ -656,3 +652,17 @@ def extract_json(text) -> str:
         raise ValueError('Некорректный JSON: не сходятся скобки')
     json_str = text[start:end]
     return json_str
+
+
+def get_youtube_video_id(url) -> str | None:
+    parsed_url = urlparse(url)
+    hostname = parsed_url.hostname.replace('www.', '').lower()
+
+    if hostname == 'youtube.com':
+        query_dict = {x[0]: x[1] for x in parse_qsl(parsed_url.query)}
+        if video_id := query_dict.get('v', None):
+            return video_id
+        return parsed_url.path.replace("/shorts", "").strip("/")
+    elif hostname == 'youtu.be':
+        return parsed_url.path.strip('/')
+    return None

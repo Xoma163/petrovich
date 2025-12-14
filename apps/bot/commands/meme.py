@@ -14,7 +14,7 @@ from apps.bot.classes.messages.attachments.video import VideoAttachment
 from apps.bot.classes.messages.attachments.video_note import VideoNoteAttachment
 from apps.bot.classes.messages.attachments.voice import VoiceAttachment
 from apps.bot.classes.messages.response_message import ResponseMessageItem, ResponseMessage
-from apps.bot.utils.utils import tanimoto
+from apps.bot.utils.utils import tanimoto, get_youtube_video_id
 from apps.service.models import Meme as MemeModel
 
 
@@ -612,9 +612,13 @@ class Meme(Command):
                 att_type_map[meme.type]: meme.tg_file_id
             }
             if meme.type in [VideoAttachment.TYPE, GifAttachment.TYPE, VoiceAttachment.TYPE]:
-                qr.update({
-                    'title': meme.name,
-                })
+                qr['title'] = meme.name
+
+            # set youtube preview
+            if meme.type in [VideoAttachment.TYPE]:
+                if video_id := get_youtube_video_id(meme.link):
+                    qr['thumb_url'] = f"https://img.youtube.com/vi/{video_id}/default.jpg"
+
             _inline_qr.append(qr)
         return _inline_qr
 

@@ -36,7 +36,7 @@ class Attachment:
         self.private_download_path: str | None = None
         self.size: int | None = 0
         # bytes
-        self.content = None
+        self.content: bytes | None = None
         # filename
         self.ext: str | None = None
         self.file_name: str | None = None
@@ -75,7 +75,6 @@ class Attachment:
         else:
             self.file_name = parts[0]
             self.ext = parts[1] if len(parts) == 2 else None
-
 
     def parse(self, file_like_object, allowed_exts_url=None, filename=None, guarantee_url=False):
         """
@@ -195,7 +194,7 @@ class Attachment:
                 with ThreadPoolExecutor() as executor:
                     chunks = executor.map(
                         lambda r: self._download_chunk(download_url, r[0], r[1], proxies, _headers, cookies),
-                                          ranges)
+                        ranges)
                 self.content = b''.join(chunks)
 
             elif stream:

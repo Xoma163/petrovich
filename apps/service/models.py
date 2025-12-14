@@ -64,6 +64,8 @@ class BaseMeme(TimeStampModelMixin):
     inline_uses = models.PositiveIntegerField("Рекомендаций в inline", default=0)
     approved = models.BooleanField("Разрешённый", default=False)
     for_trusted = models.BooleanField("Для доверенных пользователей", default=False)
+    file = models.FileField("Файл", upload_to="service/memes", null=True)
+    file_preview = models.FileField("Файл превью", upload_to="service/memes_preview", null=True)
 
     tg_file_id = models.CharField("file_id в tg", max_length=128, blank=True)
 

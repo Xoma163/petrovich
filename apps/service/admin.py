@@ -47,7 +47,8 @@ class MemeAdmin(TimeStampAdminMixin):
         ('author', admin.RelatedOnlyFieldListFilter),
         'type',
         'approved',
-        'for_trusted'
+        'for_trusted',
+        ('file', admin.EmptyFieldListFilter)
     )
     list_select_related = (
         'author',
@@ -59,6 +60,10 @@ class MemeAdmin(TimeStampAdminMixin):
     @admin.display(description="Есть tg_file_id", boolean=True)
     def has_tg_file_id(self, obj: Meme) -> bool:
         return bool(obj.tg_file_id)
+
+    @admin.display(description="Есть файл", boolean=True)
+    def has_file(self, obj: Meme) -> bool:
+        return bool(obj.file)
 
 
 @admin.register(Notify)
