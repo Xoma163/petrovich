@@ -32,8 +32,8 @@ class Command(BaseCommand):
                 att = ATTACHMENT_TYPE_TRANSLATOR[meme.type]()
                 att.file_id = meme.tg_file_id
                 att.get_file()
-                if not att.private_download_url:
-                    raise RuntimeError("can't get private_download_url")
+                if not att.private_download_url and not att.private_download_path:
+                    raise RuntimeError("can't get private_download_url/private_download_path")
                 else:
                     content = att.download_content(use_proxy=True)
 
