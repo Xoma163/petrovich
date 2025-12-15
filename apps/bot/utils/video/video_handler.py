@@ -1,3 +1,7 @@
+import subprocess
+import tempfile
+from pathlib import Path
+
 from apps.bot.classes.messages.attachments.audio import AudioAttachment
 from apps.bot.classes.messages.attachments.link import LinkAttachment
 from apps.bot.classes.messages.attachments.video import VideoAttachment
@@ -64,6 +68,27 @@ class VideoHandler:
 
         at = AudioTrack(self.video)
         return at.get_audio_track()
+
+    def get_preview(self, second: float = 1.0, max_width=120, max_height=90) -> bytes:
+        with tempfile.NamedTemporaryFile(suffix=".mp4", delete=False) as tmp:
+            tmp.write(self.video.content)
+            tmp_path = tmp.name
+        out_path = tmp_path + ".jpg"
+        try:
+            cmd = [
+                "ffmpeg", "-hide_banner", "-loglevel", "error",
+                "-ss", f"{second}",
+                "-i", tmp_path,
+                "-frames:v", "1",
+                "-vf", f"scale={max_width}:{max_height}:flags=lanczos",
+                "-q:v", "2",
+                out_path
+            ]
+            subprocess.check_call(cmd)
+            return Path(out_path).read_bytes()
+        finally:
+            Path(tmp_path).unlink()
+            Path(out_path).unlink()
 
     # def download(self, threads=10) -> bytes:
     #     if not self.video:

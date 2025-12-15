@@ -1,5 +1,7 @@
 import threading
 
+from django.core.files.base import ContentFile
+
 from apps.bot.api.media.youtube.video import YoutubeVideo
 from apps.bot.classes.bots.bot import send_message_to_moderator_chat
 from apps.bot.classes.command import Command
@@ -14,7 +16,8 @@ from apps.bot.classes.messages.attachments.video import VideoAttachment
 from apps.bot.classes.messages.attachments.video_note import VideoNoteAttachment
 from apps.bot.classes.messages.attachments.voice import VoiceAttachment
 from apps.bot.classes.messages.response_message import ResponseMessageItem, ResponseMessage
-from apps.bot.utils.utils import tanimoto, get_youtube_video_id
+from apps.bot.utils.utils import tanimoto, get_youtube_video_id, detect_ext
+from apps.bot.utils.video.video_handler import VideoHandler
 from apps.service.models import Meme as MemeModel
 
 
@@ -139,6 +142,7 @@ class Meme(Command):
         if new_meme['approved']:
             answer = "Добавил"
             if not is_youtube_link:
+                self._save_meme(new_meme_obj)
                 return ResponseMessage(ResponseMessageItem(text=answer))
 
             answer_with_youtube = f"{answer}\n{self.MESSAGE_YOUTUBE_STATUS_IN_PROGRESS}"
@@ -153,6 +157,8 @@ class Meme(Command):
 
         if is_youtube_link:
             self.set_youtube_file_id(new_meme_obj, callback_params_data)
+        else:
+            self._save_meme(new_meme_obj)
 
         if new_meme['approved']:
             raise PSkip()
@@ -214,6 +220,7 @@ class Meme(Command):
         # Кэш
         if trusted_user:
             meme.save()
+            self._save_meme(meme, is_update=True)
             answer = f'Обновил мем "{meme.name}"'
             if not is_youtube_link:
                 return ResponseMessage(ResponseMessageItem(text=answer))
@@ -229,7 +236,7 @@ class Meme(Command):
             }
 
         if is_youtube_link:
-            self.set_youtube_file_id(meme, callback_params_data)
+            self.set_youtube_file_id(meme, callback_params_data, is_update=True)
 
         if trusted_user:
             raise PSkip()
@@ -272,6 +279,8 @@ class Meme(Command):
             rm.messages.append(rmi)
 
         meme_name = meme.name
+        meme.file.delete()
+        meme.file_preview.delete()
         meme.delete()
         answer = f'Удалил мем "{meme_name}"'
         rm.messages.append(ResponseMessageItem(text=answer))
@@ -325,6 +334,8 @@ class Meme(Command):
         answer = f'Мем "{meme.name}" ({meme.id}) отклонён'
         user = meme.author.get_tg_user()
 
+        meme.file.delete()
+        meme.file_preview.delete()
         meme.delete()
         return ResponseMessage([
             ResponseMessageItem(text=answer),
@@ -479,11 +490,11 @@ class Meme(Command):
         if not attachment.is_youtube_link:
             raise PWarning("Это ссылка не на youtube видео")
 
-    def set_youtube_file_id(self, meme: MemeModel, callback_params_data: dict):
-        thread = threading.Thread(target=self._set_youtube_file_id, args=(meme, callback_params_data))
+    def set_youtube_file_id(self, meme: MemeModel, callback_params_data: dict, is_update: bool = False):
+        thread = threading.Thread(target=self._set_youtube_file_id, args=(meme, callback_params_data, is_update))
         thread.start()
 
-    def _set_youtube_file_id(self, meme: MemeModel, callback_params_data: dict):
+    def _set_youtube_file_id(self, meme: MemeModel, callback_params_data: dict, is_update: bool = False):
         from apps.bot.commands.trim_video import TrimVideo
 
         lower_link_index = self.event.message.args.index(meme.link.lower())
@@ -503,11 +514,13 @@ class Meme(Command):
                 video_content = va.content
             video = self.bot.get_video_attachment(video_content)
             video.thumbnail_url = data.thumbnail_url
+            # зачем?
             video.use_proxy_on_download_thumbnail = True
 
             meme.tg_file_id = video.get_file_id()
             meme.type = VideoAttachment.TYPE
             meme.save()
+            self._save_meme(meme, video_content, is_update=is_update)
 
             callback_params_data['caption'] += f"\n{self.MESSAGE_YOUTUBE_STATUS_COMPLETE}"
             self.bot.edit_message(callback_params_data)
@@ -621,6 +634,45 @@ class Meme(Command):
 
             _inline_qr.append(qr)
         return _inline_qr
+
+    @staticmethod
+    def _save_meme(meme: MemeModel, content: bytes | None = None, is_update: bool = False):
+        # save meme
+        att = ATTACHMENT_TYPE_TRANSLATOR[meme.type]()
+        att.file_id = meme.tg_file_id
+        att.get_file()
+        if not content:
+            content = att.download_content(use_proxy=True)
+        else:
+            att.content = content
+
+        detected_ext = detect_ext(content)
+        if not detected_ext:
+            raise RuntimeError("Can't detect ext")
+        filename = f"{meme.id}.{detected_ext}"
+        if is_update:
+            meme.file.delete()
+        meme.file.save(filename, ContentFile(content))
+
+        # save preview for youtube vieos
+        _content = None
+        if meme.link:
+            if video_id := get_youtube_video_id(meme.link):
+                preview_url = f"https://img.youtube.com/vi/{video_id}/default.jpg"
+                att_pa = PhotoAttachment()
+                att_pa.public_download_url = preview_url
+                _content = att_pa.download_content(use_proxy=True)
+            if isinstance(att, VideoAttachment) and not _content:
+                vh = VideoHandler(video=att)
+                _content = vh.get_preview()
+            if _content:
+                filename = f"{meme.id}_preview.jpg"
+
+                if is_update:
+                    meme.file_preview.delete()
+                meme.file_preview.save(filename, ContentFile(_content))
+
+    # --------------------
 
     def get_tg_inline_memes(self, filter_list, max_count=10):
         if filter_list:

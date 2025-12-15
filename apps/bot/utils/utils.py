@@ -666,3 +666,31 @@ def get_youtube_video_id(url) -> str | None:
     elif hostname == 'youtu.be':
         return parsed_url.path.strip('/')
     return None
+
+
+def detect_ext(b: bytes) -> str | None:
+    if not b:
+        return None
+
+    if b.startswith(b'\xFF\xD8\xFF'):
+        return "jpg"
+
+    if b.startswith(b'GIF87a') or b.startswith(b'GIF89a'):
+        return "gif"
+
+    if len(b) >= 12 and b[4:8] == b'ftyp':
+        return "mp4"
+    idx = b.find(b'ftyp', 0, 64)
+    if idx != -1 and idx + 4 + 4 <= len(b):
+        return "mp4"
+
+    if b.startswith(b'OggS'):
+        return "ogg"
+
+    if len(b) >= 12 and b[0:4] == b'RIFF' and b[8:12] == b'WEBP':
+        return "webp"
+
+    if b.startswith(b'\x1A\x45\xDF\xA3') and b'webm' in b[:4096].lower():
+        return "webm"
+
+    return None
