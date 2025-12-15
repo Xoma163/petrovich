@@ -25,7 +25,7 @@ class Command(BaseCommand):
         print("get_meme_files")
         memes = Meme.objects.filter(file="").order_by('id')
         for i, meme in enumerate(memes):
-            print(f"Processing {i + 1} of {len(memes) + 1}. id={meme.id}")
+            print(f"Processing {i + 1} of {len(memes)}. id={meme.id}")
             try:
                 if not meme.tg_file_id:
                     raise RuntimeError("can't get tg_file_id")
@@ -52,7 +52,7 @@ class Command(BaseCommand):
         no_file_preview_q = Q(file_preview__isnull=True) | Q(file_preview="")
         memes = Meme.objects.filter(type='video').filter(no_file_preview_q).order_by('id')
         for i, meme in enumerate(memes):
-            print(f"Processing {i + 1} of {len(memes) + 1}. id={meme.id}")
+            print(f"Processing {i + 1} of {len(memes)}. id={meme.id}")
             try:
                 if meme.link:
                     content = self._get_meme_file_previews_link(meme)
