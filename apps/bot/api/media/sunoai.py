@@ -27,10 +27,14 @@ class SunoAI:
         audio_url = bs4.find('meta', attrs={'property': 'og:audio'}).attrs['content']
         thumbnail_url = bs4.find('meta', attrs={'property': 'og:image'}).attrs['content']
 
-        author = re.findall(r'\\"display_name\\":\\"(.*)\\",\\"handle', r.text)
-        author = author[0] if author else None
-        title = title.replace(f"by @{author.lower()}", '').strip()
-        text = None
+        author = re.findall(r'"display_name\\\"\:\\\"((?:\\\\.|[^\"\\\\])*)\\\"', r.text)
+        author = author[-1] if author else None
+        # title = title.replace(f"by @{author.lower()}", '').strip()
+
+        text = re.findall(r'prompt\\\"\:\\\"(.*)\\\"\,\\\"edited', r.text)
+        if text:
+            text = text[0] if text else None
+            text = "\n".join(text.split('\\\\n'))
 
         return AudioData(
             title=title,
