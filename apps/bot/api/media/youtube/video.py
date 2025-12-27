@@ -408,7 +408,7 @@ class YoutubeVideo(SubscribeService):
             if not r.get('nextPageToken'):
                 break
             params['pageToken'] = r['nextPageToken']
-        videos = reversed(videos)
+        # videos = reversed(videos)
         videos = [x for x in videos if x['snippet']['resourceId'].get('videoId')]
         ids = [v['snippet']['resourceId']['videoId'] for v in videos]
         return {
