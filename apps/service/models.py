@@ -140,7 +140,7 @@ class SubscribeItem(TimeStampModelMixin):
     channel_title = models.CharField("Название канала", max_length=100)
     playlist_id = models.CharField("ID плейлиста", max_length=100, blank=True, null=True)
     playlist_title = models.CharField("Название плейлиста", max_length=100, blank=True, null=True)
-    # Отсортировано от старых к новым
+    # Отсортировано от новых к старым
     last_videos_id = models.JSONField("ID последних видео", null=True)  # array
     service = models.SmallIntegerField("Сервис", blank=True, choices=SERVICE_CHOICES, default=SERVICE_YOUTUBE)
 

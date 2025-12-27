@@ -10,7 +10,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 from apps.bot.api.media.data import VideoData
 from apps.bot.api.subscribe_service import SubscribeService, SubscribeServiceNewVideosData, \
     SubscribeServiceNewVideoData, SubscribeServiceData
-from apps.bot.classes.const.exceptions import PError
+from apps.bot.classes.const.exceptions import PError, PWarning
 from apps.bot.classes.messages.attachments.audio import AudioAttachment
 from apps.bot.classes.messages.attachments.video import VideoAttachment
 from apps.bot.utils.utils import extract_json
@@ -142,6 +142,7 @@ class VKVideo(SubscribeService):
             last_videos_id: list[str],
             **kwargs
     ) -> SubscribeServiceNewVideosData:
+        raise PWarning("Временно не работает")
         if playlist_id := kwargs.get('playlist_id'):
             url = self._get_channel_playlist_videos_url(playlist_id)
             videos = self._get_playlist_videos(url)

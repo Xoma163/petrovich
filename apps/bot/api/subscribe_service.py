@@ -28,6 +28,8 @@ class SubscribeServiceNewVideosData:
     def ids(self) -> list[int | str]:
         return [x.id for x in self.videos]
 
+    def reverse(self):
+        self.videos = list(reversed(self.videos))
 
 class SubscribeService:
     def get_channel_info(self, url: str) -> SubscribeServiceData:
@@ -54,7 +56,7 @@ class SubscribeService:
     def filter_by_id(ids, last_videos_id):
         for last_video_id in reversed(last_videos_id):
             try:
-                return ids.index(last_video_id) + 1
+                return ids.index(last_video_id)
             except ValueError:
                 continue
         raise PSubscribeIndexError(ids)

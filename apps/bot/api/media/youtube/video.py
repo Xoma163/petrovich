@@ -147,17 +147,19 @@ class YoutubeVideo(SubscribeService):
             videos = self._get_playlist_videos(kwargs['playlist_id'])
         else:
             videos = self._get_channel_videos(channel_id)
+
+        # От новых к старым
         ids = videos['ids']
         titles = videos['titles']
         urls = videos['urls']
 
         index = self.filter_by_id(ids, last_videos_id)
-        if len(ids) == index:
+        if index == 0:
             return SubscribeServiceNewVideosData(videos=[])
 
-        ids = ids[index:]
-        titles = titles[index:]
-        urls = urls[index:]
+        ids = ids[:index]
+        titles = titles[:index]
+        urls = urls[:index]
 
         data = SubscribeServiceNewVideosData(videos=[])
         for i, _ in enumerate(ids):
@@ -173,6 +175,7 @@ class YoutubeVideo(SubscribeService):
                 url=urls[i]
             )
             data.videos.append(video)
+        data.reverse()
         return data
 
     # -----------------------------
@@ -360,10 +363,11 @@ class YoutubeVideo(SubscribeService):
         if r.status_code != 200:
             raise PWarning("Не нашёл такого канала")
         bsop = BeautifulSoup(r.content, 'xml')
-        ids = [x.find('yt:videoId').text for x in reversed(bsop.find_all('entry'))]
+        # От новых к старым
+        ids = [x.find('yt:videoId').text for x in bsop.find_all('entry')]
         return {
             "ids": ids,
-            "titles": [x.find('title').text for x in reversed(bsop.find_all('entry'))],
+            "titles": [x.find('title').text for x in bsop.find_all('entry')],
             "urls": [self._get_video_url(_id) for _id in ids]
         }
 
@@ -408,7 +412,9 @@ class YoutubeVideo(SubscribeService):
             if not r.get('nextPageToken'):
                 break
             params['pageToken'] = r['nextPageToken']
-        # videos = reversed(videos)
+
+        # От новых к старым
+        videos = sorted(videos, key=lambda x: x['snippet']['publishedAt'], reverse=True)
         videos = [x for x in videos if x['snippet']['resourceId'].get('videoId')]
         ids = [v['snippet']['resourceId']['videoId'] for v in videos]
         return {
