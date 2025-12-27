@@ -164,7 +164,7 @@ class YoutubeVideo(SubscribeService):
             try:
                 video_info = self.get_video_info(urls[i])
             except PWarning:
-                raise PSubscribeIndexError([ids[i]])
+                raise PSubscribeIndexError(ids)
             if video_info.is_short_video:
                 continue
             video = SubscribeServiceNewVideoData(
@@ -367,6 +367,7 @@ class YoutubeVideo(SubscribeService):
             "urls": [self._get_video_url(_id) for _id in ids]
         }
 
+    # ToDo: Перейти на RSS? https://www.youtube.com/feeds/videos.xml?playlist_id=...
     @retry(3, SSLError, sleep_time=2)
     def _get_playlist_info(self, channel_id: str) -> dict:
         url = "https://www.googleapis.com/youtube/v3/playlists"
