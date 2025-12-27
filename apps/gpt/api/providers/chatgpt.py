@@ -167,7 +167,7 @@ class ChatGPTAPI(
             self,
             audio_ext: str,
             content: bytes,
-            model: VoiceRecognitionModel
+            model: type[VoiceRecognitionModel]
     ) -> GPTVoiceRecognitionResponse:
         data = {
             "model": model.name,

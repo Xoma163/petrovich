@@ -4,12 +4,15 @@ from apps.gpt.models import Provider, ProfileGPTSettings
 from apps.gpt.providers.base import GPTProvider
 
 
-def user_has_api_key(sender: Profile, provider: GPTProvider) -> bool:
+def get_gpt_provider(provider):
     try:
-        chat_gpt_provider = Provider.objects.get(name=provider.type_enum.value)
+        return Provider.objects.get(name=provider.type_enum.value)
     except Provider.DoesNotExist:
         raise PWarning("Провайдер не определён. Сообщите админу.")
 
+
+def user_has_api_key(sender: Profile, provider: GPTProvider) -> bool:
+    chat_gpt_provider = get_gpt_provider(provider)
     try:
         profile_gpt_settings = sender.gpt_settings.get(provider=chat_gpt_provider)
         return bool(profile_gpt_settings.get_key())

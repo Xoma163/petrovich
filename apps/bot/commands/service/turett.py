@@ -23,8 +23,8 @@ from apps.bot.utils.utils import random_probability, random_event
 
 class Turett(Command):
     conversation = True
-    # Обоснование: команда должна запускаться с высоким приоритетом, чтобы запуститься перед другими командами
 
+    # Обоснование: команда должна запускаться с высоким приоритетом, чтобы запуститься перед другими командами
     priority = 90
     name = 'туретт'
 

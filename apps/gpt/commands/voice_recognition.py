@@ -69,6 +69,7 @@ class VoiceRecognition(AcceptExtraCommand):
 
     def _check_gpt_access(self):
         has_access = user_has_api_key(self.event.sender, ChatGPTProvider())
+
         if not has_access:
             if self.event.message.mentioned:
                 GPTKeyMixin.raise_no_access_exception(
@@ -107,11 +108,16 @@ class VoiceRecognition(AcceptExtraCommand):
 
             for attachment in attachments:
                 content = attachment.download_content()
-                response: GPTVoiceRecognitionResponse = chat_gpt_api.voice_recognition(
-                    attachment.ext,
-                    content,
-                    model=model
-                )
+                try:
+                    response: GPTVoiceRecognitionResponse = chat_gpt_api.voice_recognition(
+                        attachment.ext,
+                        content,
+                        model=model
+                    )
+                except PWarning as e:
+                    if not self.event.message.mentioned:
+                        raise PSkip()
+                    raise e
                 answer = response.text
                 Usage(
                     author=self.event.sender,
