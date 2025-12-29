@@ -4,7 +4,11 @@ git reset HEAD --hard
 git clean -fd
 git pull
 
+set -a
 source venv/bin/activate
+set +a
+
+which python
 
 python -m pip install --upgrade pip setuptools wheel  | grep -v 'Requirement already satisfied'
 poetry lock
