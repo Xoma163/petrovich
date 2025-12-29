@@ -114,7 +114,7 @@ class VoiceRecognition(AcceptExtraCommand):
                         content,
                         model=model
                     )
-                except PWarning as e:
+                except (PWarning, PError) as e:
                     if not self.event.message.mentioned:
                         raise PSkip()
                     raise e
