@@ -4,7 +4,9 @@ import socket
 import struct
 import time
 
+from apps.bot.classes.const.exceptions import PError
 from apps.bot.utils.minecraft.forge import ForgeMod, ForgeData
+from apps.bot.utils.utils import extract_json
 
 
 @dataclasses.dataclass
@@ -86,11 +88,13 @@ class MinecraftServerStatus:
         """
         Получение статуса сервера с помощью подключения по сокету
         """
-        start_time = time.time()
 
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             sock.settimeout(5)
+
+            start_time = time.time()
             sock.connect((self.host, self.port))
+            elapsed_time = time.time() - start_time
 
             # Handshake packet
             handshake_packet = b""
@@ -126,17 +130,14 @@ class MinecraftServerStatus:
             while len(response) < length:
                 response += sock.recv(length - len(response))
             response_data = response.decode('utf-8', errors='ignore')
-        elapsed_time = time.time() - start_time
+
         # Extract JSON from the response
         try:
-            json_start = response_data.index("{")
-            json_end = response_data.rindex("}") + 1
-            response_json = json.loads(response_data[json_start:json_end])
+            response_json = json.loads(extract_json(response_data))
         except ValueError:
-            response_json = {}
+            raise PError("Не смог получить данные по серверу")
 
         response_json["latency"] = elapsed_time
-
         return response_json
 
     def get_server_data(self, parse_forge_data: bool = False) -> MinecraftServerData:
@@ -152,18 +153,18 @@ class MinecraftServerStatus:
                 forge_data.sort_mods()
 
         players = []
-        if _players := server_status['players'].get('sample'):
+        if _players := server_status.get('players', {}).get('sample'):
             players = [MinecraftPlayerData(_id=player_raw['id'], name=player_raw['name']) for player_raw in _players]
 
         return MinecraftServerData(
-            favicon=server_status['favicon'],
-            enforces_secure_chat=server_status['enforcesSecureChat'],
-            description=server_status['description']['text'],
-            players_online=server_status['players']['online'],
-            players_max=server_status['players']['max'],
-            version=server_status['version']['name'],
-            version_protocol=server_status['version']['protocol'],
-            latency=server_status['latency'],
+            favicon=server_status.get('favicon'),
+            enforces_secure_chat=server_status.get('enforcesSecureChat'),
+            description=server_status.get('description', {}).get('text'),
+            players_online=server_status.get('players', {}).get('online'),
+            players_max=server_status.get('players', {}).get('max'),
+            version=server_status.get('version', {}).get('name'),
+            version_protocol=server_status.get('version', {}).get('protocol'),
+            latency=server_status.get('latency'),
             players=players,
             forge_data=forge_data,
         )

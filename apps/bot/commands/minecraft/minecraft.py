@@ -29,7 +29,7 @@ class Minecraft(Command):
         delay=60,
         names=['1.20.1', "1.20"],
         service_name="minecraft",
-        map_url=f"https://minecraft-map.{MAIN_DOMAIN}/",
+        # map_url=f"https://minecraft-map.{MAIN_DOMAIN}/",
     )
 
     def start(self) -> ResponseMessage:
