@@ -6,7 +6,7 @@ from selenium.common import TimeoutException
 from selenium.webdriver.support.ui import WebDriverWait
 
 from apps.bot.api.media.instagram import InstagramAPIData
-from apps.bot.classes.const.exceptions import PWarning
+from apps.bot.classes.const.exceptions import PWarning, PError
 from apps.bot.utils.decorators import retry
 from apps.bot.utils.proxy import get_proxies
 from apps.bot.utils.web_driver import get_web_driver
@@ -36,14 +36,16 @@ class InstagramParser:
         bs4 = BeautifulSoup(page_source, "html.parser")
         spans = bs4.find_all("span")
         if any([re.search(self.AGE_RESTRICTION_RE, x.text) for x in spans]):
-            raise PWarning("Не могу скачать контент, так как он недоступен без аутентификации (возрастное ограничение)")
+            raise PWarning("Не могу скачать контент. Он недоступен без аутентификации (возрастное ограничение)")
         elif any(self.INAPPROPRIATE_CONTENT in x.text for x in spans):
-            raise PWarning("Не могу скачать контент, так как он недоступен без аутентификации (неприемлимый контент)")
+            raise PWarning("Не могу скачать контент. Он недоступен без аутентификации (неприемлимый контент)")
 
         try:
             all_scripts = bs4.select('script[type="application/json"][data-content-len][data-processed]')
             api_scripts = [x for x in all_scripts if 'xdt_api__v1__' in x.text]
             media = self._get_media(api_scripts)
+        except PError:
+            raise
         except Exception:
             media = self.get_media_by_parse_json(page_source)
 
@@ -63,7 +65,7 @@ class InstagramParser:
             # )
             # decline_btn.click()
 
-            wait = WebDriverWait(web_driver, 2)
+            wait = WebDriverWait(web_driver, 5)
             wait.until(lambda x: "xdt_api__v1__" in x.page_source)
             page_content = web_driver.page_source
         finally:
@@ -75,12 +77,17 @@ class InstagramParser:
         for script in api_scripts:
             json_data = json.loads(script.text)
             try:
-                json_data = json_data['require'][0][3][0]['__bbox']['require'][0][3][1]['__bbox']['result']['data']
-                if shortcode_web_info := json_data.get('xdt_api__v1__media__shortcode__web_info'):
+                result = json_data['require'][0][3][0]['__bbox']['require'][0][3][1]['__bbox']['result']
+                if result.get('errors'):
+                    # error = result['errors'][0]
+                    raise PError("Не могу скачать контент. Ошибка со стороны сервера")
+
+                data = result.get('data')
+                if shortcode_web_info := data.get('xdt_api__v1__media__shortcode__web_info'):
                     return shortcode_web_info['items'][0]
-                elif clips_on_logged_out := json_data.get('xdt_api__v1__clips__clips_on_logged_out_connection_v2'):
+                elif clips_on_logged_out := data.get('xdt_api__v1__clips__clips_on_logged_out_connection_v2'):
                     return clips_on_logged_out['edges'][0]['node']['media']
-            except (KeyError, IndexError):
+            except (KeyError, IndexError, AttributeError):
                 continue
 
         raise PWarning("Не могу скачать этот контент. Неизвестный тип. Сообщите разработчику")
