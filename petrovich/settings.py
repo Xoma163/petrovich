@@ -197,11 +197,6 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': False,
         },
-        'subscribe_notifier': {
-            'handlers': ['file-debug', 'file-error'],
-            'level': 'DEBUG',
-            'propagate': False,
-        }
     }
 }
 if DEBUG:

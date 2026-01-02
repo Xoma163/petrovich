@@ -1,6 +1,5 @@
 from django.contrib import admin
 
-from apps.service.inlines import SubscribeInline
 from apps.service.mixins import TimeStampAdminMixin
 from apps.service.models import (
     Service,
@@ -8,10 +7,8 @@ from apps.service.models import (
     Notify,
     City,
     TimeZone,
-    Subscribe,
     Tag,
     VideoCache,
-    SubscribeItem
 )
 
 
@@ -121,70 +118,6 @@ class TimeZoneAdmin(admin.ModelAdmin):
     ordering = (
         "name",
     )
-
-
-@admin.register(SubscribeItem)
-class SubscribeItemAdmin(TimeStampAdminMixin):
-    list_display = (
-        'channel_title',
-        'playlist_title',
-        'service',
-        'get_subscribes_count',
-        'save_to_disk_admin',
-        'high_resolution_admin',
-        'force_cache_admin',
-    )
-    list_filter = (
-        'service',
-        ('subscribes__chat', admin.RelatedOnlyFieldListFilter),
-    )
-    search_fields = (
-        'channel_title',
-        'playlist_title',
-        'last_videos_id'
-    )
-    inlines = (
-        SubscribeInline,
-    )
-    ordering = (
-        'channel_title',
-    )
-
-    @admin.display(description='Количество подписок')
-    def get_subscribes_count(self, obj: SubscribeItem) -> int:
-        return obj.subscribes.all().count()
-
-    @admin.display(description='Сохранять на диск', boolean=True)
-    def save_to_disk_admin(self, obj: SubscribeItem) -> bool:
-        return obj.save_to_disk
-
-    @admin.display(description='Высокое разрешение', boolean=True)
-    def high_resolution_admin(self, obj: SubscribeItem) -> bool:
-        return obj.high_resolution
-
-    @admin.display(description='Принудительно кэшировать', boolean=True)
-    def force_cache_admin(self, obj: SubscribeItem) -> bool:
-        return obj.force_cache
-
-
-@admin.register(Subscribe)
-class SubscribeAdmin(TimeStampAdminMixin):
-    list_display = (
-        'author',
-        'chat',
-        'subscribe_item',
-        'save_to_disk',
-        'high_resolution',
-        'force_cache',
-    )
-    list_filter = (
-        ('author', admin.RelatedOnlyFieldListFilter),
-        ('chat', admin.RelatedOnlyFieldListFilter),
-        'save_to_disk',
-        'high_resolution',
-        'force_cache',
-    )
-
 
 @admin.register(VideoCache)
 class VideoCacheAdmin(TimeStampAdminMixin):

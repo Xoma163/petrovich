@@ -1,29 +1,20 @@
 import re
 from datetime import timedelta
-from urllib import parse
 from urllib.parse import urlparse, parse_qsl
 
-import requests
 import yt_dlp
-from bs4 import BeautifulSoup
-from requests.exceptions import SSLError
 
 from apps.bot.api.media.data import VideoData
-from apps.bot.api.subscribe_service import SubscribeService, SubscribeServiceNewVideosData, \
-    SubscribeServiceNewVideoData, SubscribeServiceData
-from apps.bot.classes.const.exceptions import PWarning, PSubscribeIndexError
+from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.messages.attachments.audio import AudioAttachment
 from apps.bot.classes.messages.attachments.video import VideoAttachment
-from apps.bot.utils.decorators import retry
 from apps.bot.utils.nothing_logger import NothingLogger
 from apps.bot.utils.proxy import get_proxies
 from apps.bot.utils.video.downloader import VideoDownloader
 from apps.bot.utils.video.video_handler import VideoHandler
-from apps.service.models import SubscribeItem
-from petrovich.settings import env
 
 
-class YoutubeVideo(SubscribeService):
+class YoutubeVideo:
     DEFAULT_VIDEO_QUALITY_HIGHT = 720
     DOMAIN = "youtube.com"
     URL = f"https://{DOMAIN}"
@@ -95,88 +86,6 @@ class YoutubeVideo(SubscribeService):
         va.thumbnail_url = data.thumbnail_url or None
         va.use_proxy_on_download_thumbnail = True
         return va
-
-    # -----------------------------
-
-    # SUBSCRIBE METHODS
-
-    @retry(3, SSLError, sleep_time=2)
-    def get_channel_info(self, url: str) -> SubscribeServiceData:
-        r = requests.get(url, proxies=self.proxies)
-        bs4 = BeautifulSoup(r.content, 'lxml')
-        href = bs4.find_all('link', {'rel': 'canonical'})[0].attrs['href']
-        get_params = dict(parse.parse_qsl(parse.urlsplit(href).query))
-
-        playlist_id = None
-        playlist_title = None
-
-        if get_params.get('list'):
-            playlist_id = get_params.get('list')
-
-            last_videos = self._get_playlist_videos(playlist_id)
-            last_videos_ids = last_videos['ids']
-
-            playlist_info = self._get_playlist_info(playlist_id)
-            channel_id = playlist_info['channel_id']
-            playlist_title = playlist_info['title']
-            channel_title = playlist_info['author']
-        else:
-            channel_id = href.split('/')[-1]
-            last_videos = self._get_channel_videos(channel_id)
-            last_videos_ids = last_videos['ids']
-
-            channel_info = self._get_channel_info(channel_id)
-            channel_title = channel_info['author']
-
-        return SubscribeServiceData(
-            channel_id=channel_id,
-            playlist_id=playlist_id,
-            channel_title=channel_title,
-            playlist_title=playlist_title,
-            last_videos_id=last_videos_ids,
-            service=SubscribeItem.SERVICE_YOUTUBE
-        )
-
-    def get_filtered_new_videos(
-            self,
-            channel_id: str,
-            last_videos_id: list[str],
-            **kwargs
-    ) -> SubscribeServiceNewVideosData:
-        if kwargs.get('playlist_id'):
-            videos = self._get_playlist_videos(kwargs['playlist_id'])
-        else:
-            videos = self._get_channel_videos(channel_id)
-
-        # От новых к старым
-        ids = videos['ids']
-        titles = videos['titles']
-        urls = videos['urls']
-
-        index = self.filter_by_id(ids, last_videos_id)
-        if index == 0:
-            return SubscribeServiceNewVideosData(videos=[])
-
-        ids = ids[:index]
-        titles = titles[:index]
-        urls = urls[:index]
-
-        data = SubscribeServiceNewVideosData(videos=[])
-        for i, _ in enumerate(ids):
-            try:
-                video_info = self.get_video_info(urls[i])
-            except PWarning:
-                raise PSubscribeIndexError(ids)
-            if video_info.is_short_video:
-                continue
-            video = SubscribeServiceNewVideoData(
-                id=ids[i],
-                title=titles[i],
-                url=urls[i]
-            )
-            data.videos.append(video)
-        data.reverse()
-        return data
 
     # -----------------------------
 
@@ -337,90 +246,3 @@ class YoutubeVideo(SubscribeService):
 
         video_filesize = (self._filesize_key(vf) + self._filesize_key(af)) / 1024 / 1024
         return vf, af, video_filesize
-
-    # -----------------------------
-
-    # CHANNEL/PLAYLISTS INFO GETTERS
-
-    @retry(3, SSLError, sleep_time=2)
-    def _get_channel_info(self, channel_id: str) -> dict:
-        url = "https://www.googleapis.com/youtube/v3/channels"
-        params = {
-            "id": channel_id,
-            "key": env.str('GOOGLE_API_KEY'),
-            "part": "snippet"
-        }
-        r = requests.get(url, params=params, proxies=self.proxies).json()
-        if not r['items']:
-            raise PWarning("Не нашёл канал")
-        return {
-            "author": r['items'][0]['snippet']['title']
-        }
-
-    @retry(3, SSLError, sleep_time=2)
-    def _get_channel_videos(self, channel_id: str) -> dict:
-        r = requests.get(f"{self.URL}/feeds/videos.xml?channel_id={channel_id}", proxies=self.proxies)
-        if r.status_code != 200:
-            raise PWarning("Не нашёл такого канала")
-        bsop = BeautifulSoup(r.content, 'xml')
-        # От новых к старым
-        ids = [x.find('yt:videoId').text for x in bsop.find_all('entry')]
-        return {
-            "ids": ids,
-            "titles": [x.find('title').text for x in bsop.find_all('entry')],
-            "urls": [self._get_video_url(_id) for _id in ids]
-        }
-
-    # ToDo: Перейти на RSS? https://www.youtube.com/feeds/videos.xml?playlist_id=...
-    @retry(3, SSLError, sleep_time=2)
-    def _get_playlist_info(self, channel_id: str) -> dict:
-        url = "https://www.googleapis.com/youtube/v3/playlists"
-        params = {
-            "id": channel_id,
-            "key": env.str('GOOGLE_API_KEY'),
-            "part": "snippet"
-        }
-        r = requests.get(url, params=params, proxies=self.proxies).json()
-        if not r['items']:
-            raise PWarning("Не нашёл плейлист")
-
-        snippet = r['items'][0]['snippet']
-        return {
-            "title": snippet['title'],
-            "author": snippet['channelTitle'],
-            "channel_id": snippet['channelId']
-        }
-
-    @retry(3, SSLError, sleep_time=2)
-    def _get_playlist_videos(self, playlist_id: str) -> dict:
-        url = "https://www.googleapis.com/youtube/v3/playlistItems"
-        params = {
-            "playlistId": playlist_id,
-            "part": "snippet",
-            "maxResults": 50,
-            "key": env.str('GOOGLE_API_KEY'),
-        }
-        videos = []
-        while True:
-            r = requests.get(url, params=params, proxies=self.proxies).json()
-
-            if error := r.get('error'):
-                if error['code'] == 404:
-                    raise PWarning("Плейлист не найден")
-                raise PWarning("Ошибка получения плейлиста API")
-            videos += r['items']
-            if not r.get('nextPageToken'):
-                break
-            params['pageToken'] = r['nextPageToken']
-
-        # От новых к старым
-        videos = sorted(videos, key=lambda x: x['snippet']['publishedAt'], reverse=True)
-        videos = [x for x in videos if x['snippet']['resourceId'].get('videoId')]
-        ids = [v['snippet']['resourceId']['videoId'] for v in videos]
-        return {
-            "ids": ids,
-            "titles": [v['snippet']['title'] for v in videos],
-            "urls": [self._get_video_url(_id) for _id in ids]
-        }
-
-    # -----------------------------

@@ -17,8 +17,6 @@ class Command(BaseCommand):
             ScheduleItem("0 10 * * *", "check_birthday"),
             # Проверка оповещений
             ScheduleItem("*/1 * * * *", "check_notify"),
-            # Проверка подписок
-            ScheduleItem("*/30 * * * *", "check_subscribe"),
             # Отправка новостей Паше
             ScheduleItem("0 */6 * * *", "check_pasha_news", "130"),
             # Удаление сущностей которые должны быть удалены со временем
