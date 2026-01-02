@@ -21,12 +21,10 @@ from apps.bot.commands.media.services.suno_ai import SunoAIService
 from apps.bot.commands.media.services.tiktok import TikTokService
 from apps.bot.commands.media.services.twitch_clips import TwitchClipsService
 from apps.bot.commands.media.services.twitter import TwitterService
-from apps.bot.commands.media.services.u_tv import UTVService
 from apps.bot.commands.media.services.vk_video import VKVideoService
 from apps.bot.commands.media.services.yandex_music import YandexMusicService
 from apps.bot.commands.media.services.youtube_music import YoutubeMusicService
 from apps.bot.commands.media.services.youtube_video import YoutubeVideoService
-from apps.bot.commands.media.services.zen import ZenService
 from apps.bot.utils.utils import get_urls_from_text, get_flat_list, markdown_wrap_symbols
 from apps.bot.utils.video.video_handler import VideoHandler
 
@@ -83,7 +81,7 @@ class Media(AcceptExtraCommand):
         ],
         extra_text=(
             "Поддерживаемые соцсети: Youtube Video/Youtube Music/Reddit/TikTok/Instagram/Twitter/"
-            "Yandex Music/Pinterest/Coub/VK Video/TwitchClips/Suno AI/Yandex Zen/Телеканал Ю/Boosty\n"
+            "Yandex Music/Pinterest/Coub/VK Video/TwitchClips/Suno AI/Boosty\n"
             "\n"
             "Некоторые сервисы доступны только доверенным пользователям: Yandex Music\n"
             "По умолчанию видео для Youtube/VK Video/Boosty качается в качестве до 1080p\n"
@@ -112,8 +110,6 @@ class Media(AcceptExtraCommand):
         CoubService,
         TwitchClipsService,
         SunoAIService,
-        ZenService,
-        UTVService,
         BoostyService,
     ]
 

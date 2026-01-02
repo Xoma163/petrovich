@@ -15,8 +15,6 @@ class Command(BaseCommand):
         schedule = [
             # Проверка на др
             ScheduleItem("0 10 * * *", "check_birthday"),
-            # Проверка донатов
-            ScheduleItem("*/30 * * * *", "check_donations", "46"),
             # Проверка оповещений
             ScheduleItem("*/1 * * * *", "check_notify"),
             # Проверка подписок

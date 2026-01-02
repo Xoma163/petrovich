@@ -112,23 +112,6 @@ class Notify(TimeStampModelMixin):
         return str(self.text)
 
 
-class Donation(TimeStampModelMixin):
-    username = models.CharField("Имя", max_length=100, blank=True, null=True)
-    amount = models.CharField("Количество", max_length=10, blank=True)
-    currency = models.CharField("Валюта", max_length=30, blank=True)
-    message = models.CharField("Сообщение", max_length=1000, blank=True)
-    date = models.DateTimeField("Дата", auto_now_add=True, blank=True)
-
-    class Meta:
-        verbose_name = "Донат"
-        verbose_name_plural = "Донаты"
-        ordering = ['-date']
-
-    def __str__(self):
-        username = self.username if self.username else "Аноним"
-        return f"{username}. {self.amount}"
-
-
 class SubscribeItem(TimeStampModelMixin):
     SERVICE_YOUTUBE = 1
     SERVICE_VK = 4

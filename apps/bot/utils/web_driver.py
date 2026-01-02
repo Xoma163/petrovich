@@ -6,12 +6,14 @@ def get_web_driver(proxy=None, headers=None) -> webdriver.Chrome:
     options.add_argument("--headless")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-crash-reporter")
+    options.add_argument(
+        'user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36')
+
     if proxy:
         options.add_argument(f"--proxy-server={proxy}")
     if headers:
         for header in headers:
             options.add_argument(f"{header}={headers[header]}")
-        options.add_argument('user-agent=ТВОЙ_АГЕНТ')
     return webdriver.Chrome(options=options)
 
 

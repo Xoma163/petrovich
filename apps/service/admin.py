@@ -7,7 +7,6 @@ from apps.service.models import (
     Meme,
     Notify,
     City,
-    Donation,
     TimeZone,
     Subscribe,
     Tag,
@@ -94,7 +93,6 @@ class NotifyAdmin(TimeStampAdminMixin):
     )
 
 
-
 @admin.register(City)
 class CityAdmin(admin.ModelAdmin):
     list_display = (
@@ -123,24 +121,6 @@ class TimeZoneAdmin(admin.ModelAdmin):
     ordering = (
         "name",
     )
-
-
-@admin.register(Donation)
-class DonationAdmin(TimeStampAdminMixin):
-    list_display = (
-        'username',
-        'amount',
-        'currency',
-        'message',
-        'date'
-    )
-    ordering = (
-        '-date',
-    )
-
-
-
-
 
 
 @admin.register(SubscribeItem)

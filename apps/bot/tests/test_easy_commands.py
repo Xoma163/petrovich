@@ -1,7 +1,6 @@
 from apps.bot.classes.const.exceptions import PSkip
 from apps.bot.commands.easy.bye import Bye
 from apps.bot.commands.easy.documentation import Documentation
-from apps.bot.commands.easy.donate import Donate
 from apps.bot.commands.easy.git import Git
 from apps.bot.commands.easy.hi import Hi
 from apps.bot.commands.easy.thanks import Thanks
@@ -29,12 +28,6 @@ class CommandDocumentationTestCase(BotInitializer):
     def test_no_args(self):
         return self.check_correct_answer()
 
-
-class CommandDonateTestCase(BotInitializer):
-    Command = Donate
-
-    def test_no_args(self):
-        return self.check_correct_answer()
 
 
 class CommandGitTestCase(BotInitializer):
