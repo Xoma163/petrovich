@@ -1,9 +1,9 @@
+import datetime
 import io
 import os
 import random
 import re
 import zoneinfo
-from datetime import datetime
 from io import BytesIO
 from urllib.parse import urlparse, parse_qsl
 
@@ -80,14 +80,14 @@ def has_cyrillic(text: str) -> bool:
     return bool(re.search('[а-яА-Я]', text))
 
 
-def remove_tz(dt: datetime) -> datetime:
+def remove_tz(dt: datetime.datetime) -> datetime.datetime:
     """
     Убирает временную зону у datetime
     """
     return dt.replace(tzinfo=None)
 
 
-def localize_datetime(dt: datetime, tz: str) -> datetime:
+def localize_datetime(dt: datetime.datetime, tz: str) -> datetime.datetime:
     """
     Локализация datetime
     Переводит из datetime UTC в datetime UTC, но с учетом офсета таймзоны
@@ -97,7 +97,7 @@ def localize_datetime(dt: datetime, tz: str) -> datetime:
     return dt.astimezone(zoneinfo.ZoneInfo(tz))
 
 
-def normalize_datetime(dt: datetime, tz: str) -> datetime:
+def normalize_datetime(dt: datetime.datetime, tz: str) -> datetime.datetime:
     """
     Нормализация datetime
     """
@@ -256,6 +256,7 @@ def get_role_by_str(role_str: str):
     for k in roles_map:
         if role_str in k:
             return roles_map[k]
+    return None
 
 
 def check_command_time(name: str, seconds: int):
@@ -269,7 +270,7 @@ def check_command_time(name: str, seconds: int):
     if created:
         return
     update_datetime = entity.update_datetime
-    delta_time = datetime.utcnow() - remove_tz(update_datetime)
+    delta_time = datetime.datetime.now(datetime.UTC) - remove_tz(update_datetime)
     if delta_time.seconds < seconds and delta_time.days == 0:
         error = f"Нельзя часто вызывать данную команду. Осталось {seconds - delta_time.seconds} секунд"
         raise PWarning(error)
@@ -579,7 +580,7 @@ def get_admin_profile(exclude_profile: Profile | None = None) -> Profile | None:
     profile = Profile.objects.filter(groups__in=[admin_group]).first()
 
     if exclude_profile and profile == exclude_profile:
-        return
+        return None
     return profile
 
 

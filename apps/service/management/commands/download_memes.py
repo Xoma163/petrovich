@@ -21,7 +21,8 @@ class Command(BaseCommand):
         self.get_meme_files()
         self.get_meme_file_previews()
 
-    def get_meme_files(self):
+    @staticmethod
+    def get_meme_files():
         print("get_meme_files")
         memes = Meme.objects.filter(file="").order_by('id')
         for i, meme in enumerate(memes):

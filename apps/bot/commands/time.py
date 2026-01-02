@@ -78,7 +78,7 @@ class Time(Command):
             answer = self._get_city_time_str(self.event.sender.city, "%H:%M:%S")
         # chat command
         else:
-            dt_now = datetime.datetime.utcnow()
+            dt_now = datetime.datetime.now(datetime.UTC)
             cities = self.get_cities_in_chat()
             answer = self._get_time_in_cities(dt_now, "%H:%M:%S", cities)
 
@@ -97,7 +97,7 @@ class Time(Command):
 
         for item in times_str:
             dt = datetime.datetime.strptime(item, "%H:%M")
-            dt = datetime.datetime.utcnow().replace(hour=dt.hour, minute=dt.minute)
+            dt = datetime.datetime.now(datetime.UTC).replace(hour=dt.hour, minute=dt.minute)
             dt = remove_tz(normalize_datetime(dt, self.event.sender.city.timezone.name))
             time_in_cities = self._get_time_in_cities(dt, "%H:%M", cities)
             answer.append(f"{item}\n{time_in_cities}")
@@ -123,7 +123,7 @@ class Time(Command):
     @staticmethod
     def _get_city_time_str(city: City, strf_format=None, dt=None) -> str:
         if not dt:
-            dt = datetime.datetime.utcnow()
+            dt = datetime.datetime.now(datetime.UTC)
         new_date = localize_datetime(dt, city.timezone.name)
         dt_str = new_date.strftime(strf_format)
         answer = f"{city} — {dt_str}"

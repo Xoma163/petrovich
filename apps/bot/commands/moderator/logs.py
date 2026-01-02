@@ -141,20 +141,20 @@ class Logs(Command):
         # filter by chat/user
         if self.event.chat:
             if log_filter['chat_id'] != self.event.chat.chat_id:
-                return
+                return None
         else:
             if log_filter['chat_id'] is not None:
-                return
+                return None
             if log_filter['user_id'] != self.event.user.user_id:
-                return
+                return None
 
         # filter by level
         if filter_level and item_json['levelname'] not in filter_level:
-            return
+            return None
 
         # filter by content
         if 'action' in item_json and item_json['action'] == 'sendChatAction':
-            return
+            return None
 
         # drop trash
         if 'event' in item_json and 'raw' in item_json['event']:

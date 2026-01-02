@@ -128,12 +128,12 @@ class Instagram:
         if product_type == 'carousel_container':
             for resource in item.resources:
                 if resource.video_url:
-                    data.add_video(str(resource.video_url))
+                    data.add_video(str(resource.video_url), None)
                 elif resource.thumbnail_url:
                     data.add_image(str(resource.thumbnail_url))
         elif product_type in ['story', 'clips', 'feed']:
             if item.video_url:
-                data.add_video(str(item.video_url))
+                data.add_video(str(item.video_url), None)
             elif item.image_versions2:
                 image_url = item.image_versions2['candidates'][0]['url']
                 data.add_image(str(image_url))

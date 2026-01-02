@@ -71,7 +71,7 @@ class OpenAIAPI(GPTAPI, ABC):
             usage=usage,
         )
 
-    def fetch_image_request(self, url, **kwargs) -> (bytes, str | None):
+    def fetch_image_request(self, url, **kwargs) -> tuple[bytes, str | None]:
         r_json = self.do_request(url, **kwargs)
         image_data = r_json['data'][0]
         base64_image = PhotoAttachment.decode_base64(image_data['b64_json'])

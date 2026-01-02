@@ -1,6 +1,6 @@
+import datetime
 import json
 import re
-from datetime import datetime
 
 from django.http import JsonResponse, HttpResponse
 from django.views import View
@@ -17,7 +17,8 @@ from petrovich.settings import env
 
 
 class APIView(CSRFExemptMixin, View):
-    def post(self, request, *args, **kwargs):
+    @staticmethod
+    def post(request, *args, **kwargs):
         authorization = request.headers.get('Authorization')
         if not authorization:
             return JsonResponse({'error': 'no authorization header provided'}, status=500)
@@ -57,7 +58,8 @@ class APIView(CSRFExemptMixin, View):
 
 
 class TelegramView(CSRFExemptMixin, View):
-    def post(self, request, *args, **kwargs):
+    @staticmethod
+    def post(request, *args, **kwargs):
         if env.str('TG_WEBHOOK_SECRET') and \
                 request.headers.get('x-telegram-bot-api-secret-token') != env.str('TG_WEBHOOK_SECRET'):
             return HttpResponse(status=403)
@@ -116,7 +118,7 @@ class GithubView(CSRFExemptMixin, View):
 
     def new_label(self, data, issue: GithubIssueAPI):
         # Github при создании иши присылает вебхук, типа он пометил её label'ами. Такое скипаем
-        if (datetime.utcnow() - issue.created_at).seconds < 10:
+        if (datetime.datetime.now(datetime.UTC) - issue.created_at).seconds < 10:
             return
 
         label_name = data['label']['name']

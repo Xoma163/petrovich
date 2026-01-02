@@ -177,7 +177,7 @@ class GPTStatisticsMixin(GPTCommandProtocol):
     def _get_statistics_per_profile(
             self,
             profiles: QuerySet[Profile],
-            custom_range: tuple[datetime, ...] | None = None
+            custom_range: tuple[datetime.datetime, ...] | None = None
     ) -> str | None:
         stats_with_cost = []
         for profile in profiles:
@@ -241,7 +241,8 @@ class GPTStatisticsMixin(GPTCommandProtocol):
         return start_datetime, end_datetime
 
     @staticmethod
-    def _get_data_for_statistics_plot(profiles: list[Profile], custom_range: tuple[datetime, ...] | None = None):
+    def _get_data_for_statistics_plot(profiles: list[Profile],
+                                      custom_range: tuple[datetime.datetime, ...] | None = None):
         if not custom_range:
             start = timezone.now() - datetime.timedelta(days=30)
             end = timezone.now()

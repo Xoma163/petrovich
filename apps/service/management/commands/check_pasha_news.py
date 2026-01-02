@@ -38,7 +38,7 @@ class Command(BaseCommand):
         for news in news_to_send:
             news_content, news_url, news_title = self.parse_news(f"{self.URL}{news.attrs['href']}")
             answer = f'{bot.get_formatted_url(news_title, news_url)}\n\n{news_content}'
-            rm.messages.append(ResponseMessageItem(text=answer, peer_id=pasha.user_id))
+            rm.messages.append(ResponseMessageItem(text=answer, peer_id=int(pasha.user_id)))
         if not rm.messages:
             return
         last_news_id = self.get_news_id(news_to_send[0])

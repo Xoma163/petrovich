@@ -96,6 +96,7 @@ class Wordle(Command):
             return self.lose()
 
         self.get_current_state(session)
+        return None
 
     def get_current_state(self, session) -> ResponseMessage:
         image = self.get_keyboard_image(session)

@@ -18,7 +18,7 @@ class HelpTextKey:
 
 class HelpTextItem:
     def __init__(self, role: Role, texts: list[HelpTextArgument | HelpTextKey]):
-        self.role: role = role
+        self.role: Role = role
         self.items: list[HelpTextArgument] = texts
 
 

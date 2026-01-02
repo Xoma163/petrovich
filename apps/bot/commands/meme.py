@@ -531,7 +531,7 @@ class Meme(Command):
             )
             self.bot.edit_message(callback_params_data)
             return
-        except Exception as e:
+        except Exception:
             callback_params_data['caption'] = f"\n{self.MESSAGE_YOUTUBE_STATUS_ERROR}"
             self.bot.edit_message(callback_params_data)
             return

@@ -1,7 +1,8 @@
 from django.contrib.auth.models import Group
 from django.core.files import File
 from django.db import models
-from django.utils.html import format_html
+from django.utils.html import escape
+from django.utils.safestring import mark_safe
 
 from apps.bot.classes.const.consts import Platform as PlatformEnum, Role
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
@@ -138,8 +139,8 @@ class Profile(TimeStampModelMixin):
         group = Group.objects.get(name=role.name)
         self.groups.remove(group)
 
-    def check_role(self, role: Role):
-        group = self.groups.filter(name=role.name)
+    def check_role(self, role_group: Group):
+        group = self.groups.filter(name=role_group.name)
         return group.exists()
 
     def get_roles(self) -> list[Role]:
@@ -177,11 +178,12 @@ class User(Platform, TimeStampModelMixin):
     nickname = models.CharField("Никнейм", max_length=40, blank=True, null=True)
 
     def show_url(self):
-        if self.get_platform_enum() == PlatformEnum.TG:
-            return format_html(f"<a href='https://t.me/{self.nickname}'>{self.platform}</a>")
-        else:
-            return self.platform
-
+        if self.get_platform_enum() == PlatformEnum.TG and self.nickname:
+            safe_nick = escape(self.nickname)
+            safe_platform = escape(self.platform)
+            url = f"https://t.me/{safe_nick}"
+            return mark_safe(f'<a href="{escape(url)}">{safe_platform}</a>')
+        return escape(self.platform)
     show_url.short_description = "Ссылка"
 
     def show_user_id(self):

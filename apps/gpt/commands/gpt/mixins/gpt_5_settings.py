@@ -139,9 +139,9 @@ class GPT5SettingsMixin(GPTCommandProtocol):
 
     def _get_web_search(self) -> ResponseMessageItem:
         profile_settings = self.get_profile_gpt_settings()
-        if profile_settings.gpt_5_settings_web_search is True:
+        if profile_settings.gpt_5_settings_web_search is True:  # noqa
             value_str = self.bot.get_formatted_text_line("Включено")
-        elif profile_settings.gpt_5_settings_web_search is False:
+        elif profile_settings.gpt_5_settings_web_search is False:  # noqa
             value_str = self.bot.get_formatted_text_line("Выключено")
         else:
             value_str = f"{self.bot.get_formatted_text_line('Выключено')} (по умолчанию)"

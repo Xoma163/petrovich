@@ -87,7 +87,7 @@ class YandexTrack(YandexMusicAPI):
         if not info.direct_link:
             info.get_direct_link()
         mp3 = info.client.request.download(info.direct_link, None)
-        return mp3
+        return mp3  # noqa
 
 
 class YandexAlbum(YandexMusicAPI):
@@ -106,4 +106,4 @@ class YandexAlbum(YandexMusicAPI):
 # service redefinition
 class YandexRequest(Request):
     def download(self, url, timeout=5, *args, **kwargs) -> bytes:
-        return self.retrieve(url, timeout=timeout, *args, *kwargs)
+        return self.retrieve(url, timeout=timeout, *args, *kwargs)  # noqa

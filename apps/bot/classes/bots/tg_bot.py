@@ -246,6 +246,7 @@ class TgBot(Bot):
         if rmi.spoiler:
             params['has_spoiler'] = rmi.spoiler
 
+        r = None
         if video.file_id:
             params['video'] = video.file_id
             r = self.requests.post('sendVideo', params).json()
@@ -496,7 +497,7 @@ class TgBot(Bot):
                 if len(rmi.attachments) > 1:
                     r = self._send_media_group(rmi, params)
                 else:
-                    r = self.att_map[rmi.attachments[0].__class__](rmi, params)
+                    r = self.att_map[rmi.attachments[0].__class__](rmi, params)  # noqa
         else:
             r = self._send_text(params)
 
@@ -695,7 +696,7 @@ class TgBot(Bot):
 
     def get_file_id(self, attachment: Attachment):
         uploading_chat = Chat.objects.get(pk=env.str("TG_PHOTO_UPLOADING_CHAT_PK"))
-        rmi = ResponseMessageItem(attachments=[attachment], peer_id=uploading_chat.chat_id)
+        rmi = ResponseMessageItem(attachments=[attachment], peer_id=int(uploading_chat.chat_id))
         br = self.send_response_message_item(rmi)
         r = br.response
         self.delete_messages(uploading_chat.chat_id, r['result']['message_id'])

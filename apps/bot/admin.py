@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.urls import reverse
-from django.utils.html import format_html
+from django.utils.html import escape
+from django.utils.safestring import mark_safe
 
 from apps.bot.filters import NoSpecificRoleFilter
 from apps.bot.inlines import ProfileSettingsInline, UserInline, ChatSettingsInline
@@ -109,15 +110,12 @@ class ProfileAdmin(TimeStampAdminMixin):
     @admin.display(description='Чаты')
     def get_chats(self, obj: Profile):
         chats = obj.chats.all()
-        links = [
-            format_html(
-                '<a href="{url}">{name}</a>',
-                url=reverse('admin:bot_chat_change', args=[profile.id]),
-                name=str(profile)
-            )
-            for profile in chats
-        ]
-        return format_html("<br>".join(links))
+        links = []
+        for chat in chats:
+            url = reverse('admin:bot_chat_change', args=[chat.id])
+            name = escape(str(chat))
+            links.append(f'<a href="{url}">{name}</a>')
+        return mark_safe("<br/>".join(links)) if links else "-"
 
     @admin.display(description='Количество чатов')
     def get_chats_count(self, obj: Profile):
@@ -178,15 +176,13 @@ class ChatAdmin(TimeStampAdminMixin):
     @admin.display(description='Пользователи')
     def get_users(self, obj: Chat):
         profiles = obj.users.all()
-        links = [
-            format_html(
-                '<a href="{url}">{name}</a>',
-                url=reverse('admin:bot_profile_change', args=[profile.id]),
-                name=str(profile)
-            )
-            for profile in profiles
-        ]
-        return format_html("<br>".join(links))
+        links = []
+        for profile in profiles:
+            url = reverse('admin:bot_profile_change', args=[profile.id])
+            safe_url = escape(url)
+            safe_name = escape(str(profile))
+            links.append(f'<a href="{safe_url}">{safe_name}</a>')
+        return mark_safe("<br/>".join(links)) if links else "-"
 
     @admin.display(description='Количество пользователей')
     def get_users_count(self, obj: Chat):

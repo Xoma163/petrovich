@@ -165,7 +165,8 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
 
     def _get_models_str(
             self,
-            models: QuerySet[CompletionsModel | VisionModel | ImageDrawModel | ImageEditModel],
+            models: QuerySet[CompletionsModel] | QuerySet[VisionModel] | QuerySet[ImageDrawModel] | QuerySet[
+                ImageEditModel] | QuerySet[VoiceRecognitionModel],
             profile_gpt_settings: ProfileGPTSettings,
             _get_row_method,
             _models_for_str: str,

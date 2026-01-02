@@ -267,7 +267,7 @@ class Attachment:
             self.set_file_id()
         return self.file_id
 
-    def base64(self) -> base64:
+    def base64(self) -> str:
         self.download_content()
         return base64.b64encode(self.content).decode('utf-8')
 

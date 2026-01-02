@@ -66,7 +66,7 @@ class TgEvent(Event):
                 message = self.raw
             elif poll:
                 message = self.raw
-                self._cache_poll(poll)
+                # self._cache_poll(poll)
             else:
                 message = self.raw.get('message')
         if not message:

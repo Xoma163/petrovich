@@ -35,6 +35,8 @@ class SunoAI:
         if text:
             text = text[0] if text else None
             text = "\n".join(text.split('\\\\n'))
+        else:
+            text = None
 
         return AudioData(
             title=title,

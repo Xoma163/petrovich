@@ -136,6 +136,7 @@ class Reddit:
                 self.content_type = self.CONTENT_TYPE_VIDEO
                 return self._get_video_from_post()
             return link
+        return None
 
     def _get_post_data(self):
         # use UA headers to prevent 429 error

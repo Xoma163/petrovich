@@ -3,7 +3,7 @@ import dataclasses
 
 @dataclasses.dataclass
 class VideoData:
-    title: str
+    title: str | None = None
     description: str | None = None
     video_id: str | int | None = None
     channel_id: str | int | None = None

@@ -1,5 +1,5 @@
+import datetime
 import threading
-from datetime import datetime
 
 from crontab import CronTab
 from django.core.management import call_command
@@ -23,7 +23,7 @@ class Command(BaseCommand):
             ScheduleItem("0 9 * * *", "auto_delete"),
         ]
 
-        dt_now = localize_datetime(datetime.utcnow(), TIME_ZONE).replace(second=0, microsecond=0)
+        dt_now = localize_datetime(datetime.datetime.now(datetime.UTC), TIME_ZONE).replace(second=0, microsecond=0)
 
         threads = []
         for item in schedule:

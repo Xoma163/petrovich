@@ -13,7 +13,7 @@ class Actions(Command):
     def accept(self, event: Event) -> bool:
         return bool(event.action)
 
-    def start(self) -> ResponseMessage:
+    def start(self) -> ResponseMessage | None:
         my_chat_member = self.event.action.get('my_chat_member')
         chat_member = self.event.action.get('chat_member')
         new_chat_members = self.event.action.get('new_chat_members')
@@ -41,6 +41,7 @@ class Actions(Command):
 
         if answer:
             return ResponseMessage(ResponseMessageItem(text=answer))
+        return None
 
     def setup_new_chat_member(self, member_id, is_bot):
         if is_bot:
@@ -49,9 +50,12 @@ class Actions(Command):
                 self.edit_chat_title(self.event.raw['message']['chat']['title'])
                 self._set_kicked_state(False)
                 return "Привет!"
+            return None
         else:
             profile = self.bot.get_profile_by_user_id(member_id)
             self.bot.add_chat_to_profile(profile, self.event.chat)
+            return None
+
 
     def setup_left_chat_member(self, left_chat_member):
         is_bot = left_chat_member['is_bot']

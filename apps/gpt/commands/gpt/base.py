@@ -147,7 +147,7 @@ class GPTCommand(
         Получение списка всех сообщений с пользователем
         """
 
-        self.event: TgEvent
+        self.event: TgEvent = self.event  # noqa
         mc = MessagesCache(self.event.peer_id)
 
         history = self.provider.messages_class()

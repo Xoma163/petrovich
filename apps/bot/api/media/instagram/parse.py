@@ -17,9 +17,9 @@ class InstagramParser:
     INAPPROPRIATE_CONTENT = "This content may be inappropriate"
 
     def get_data(self, url):
-        is_post = bool(re.search(r"p/([A-Za-z0-9_-]+)", url))
+        # is_post = bool(re.search(r"p/([A-Za-z0-9_-]+)", url))
         is_story = bool(re.search(r"stories/.*/(\d+)", url))
-        is_reel = bool(re.search(r"reels?/([A-Za-z0-9_-]+)/", url))
+        # is_reel = bool(re.search(r"reels?/([A-Za-z0-9_-]+)/", url))
 
         if is_story:
             raise PWarning("Парсинг сторей не работает")

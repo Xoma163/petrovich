@@ -19,7 +19,7 @@ class InstagramAPIData:
     def add_item(self, item: InstagramAPIDataItem):
         self.items.append(item)
 
-    def add_video(self, download_url: str, thumbnail_url: str):
+    def add_video(self, download_url: str, thumbnail_url: str | None):
         item = InstagramAPIDataItem(
             content_type=InstagramAPIDataItem.CONTENT_TYPE_VIDEO,
             download_url=download_url,

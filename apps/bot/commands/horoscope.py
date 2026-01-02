@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime
 
 from apps.bot.classes.command import Command
 from apps.bot.classes.const.consts import Role
@@ -17,9 +17,8 @@ class ZodiacSign:
         self.signs = signs
         self.start_date = start_date
 
-    def is_contains_name_or_sign(self, text):
-        if text in self.name or text in self.signs:
-            return True
+    def is_contains_name_or_sign(self, text) -> bool:
+        return text in self.name or text in self.signs
 
 
 class ZodiacSigns:
@@ -30,8 +29,8 @@ class ZodiacSigns:
         date = date.replace(year=1900)
         zodiac_days = [x.start_date for x in self.signs]
         for i in range(len(zodiac_days) - 1):
-            zodiac_date_start = datetime.strptime(zodiac_days[i], "%d.%m").date()
-            zodiac_date_end = datetime.strptime(zodiac_days[i + 1], "%d.%m").date()
+            zodiac_date_start = datetime.datetime.strptime(zodiac_days[i], "%d.%m").date()
+            zodiac_date_end = datetime.datetime.strptime(zodiac_days[i + 1], "%d.%m").date()
             if zodiac_date_start <= date < zodiac_date_end:
                 return self.signs[i]
         return self.signs[-1]
@@ -40,6 +39,7 @@ class ZodiacSigns:
         for i, _zodiac_sign in enumerate(self.signs):
             if zodiac_sign == _zodiac_sign:
                 return i
+        return None
 
     def get_zodiac_sign_by_sign_or_name(self, text):
         for zodiac_sign in self.signs:
@@ -182,7 +182,7 @@ class Horoscope(Command):
 
     @staticmethod
     def get_or_create_horoscope() -> HoroscopeModel:
-        d_now = localize_datetime(datetime.utcnow(), DEFAULT_TIME_ZONE).date()
+        d_now = localize_datetime(datetime.datetime.now(datetime.UTC), DEFAULT_TIME_ZONE).date()
 
         try:
             horoscope = HoroscopeModel.objects.get(date=d_now)

@@ -1,5 +1,5 @@
+import datetime
 import logging
-from datetime import datetime, timedelta
 
 from crontab import CronTab
 from django.core.management.base import BaseCommand
@@ -18,7 +18,7 @@ class Command(BaseCommand):
 
     def __init__(self):
         super().__init__()
-        self.dt_now = datetime.utcnow()
+        self.dt_now = datetime.datetime.now(datetime.UTC)
 
     def handle(self, *args, **options):
 
@@ -53,7 +53,7 @@ class Command(BaseCommand):
             prev_seconds_delta = - entry.previous(localized_datetime, default_utc=True)
             return prev_seconds_delta <= 60
         else:
-            delta_time = remove_tz(notify.date) - self.dt_now + timedelta(minutes=1)
+            delta_time = remove_tz(notify.date) - self.dt_now + datetime.timedelta(minutes=1)
             return delta_time.days == 0 and delta_time.seconds <= 60
 
     @staticmethod

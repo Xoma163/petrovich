@@ -36,7 +36,7 @@ class CommandProtocol(Protocol):
     mentioned: bool
     non_mentioned: bool
 
-    def __init__(self, bot: Bot = None, event: Event = None): ...
+    def __init__(self, bot: Bot = None, event: Event = None): ...  # noqa
 
     bot: Bot
     event: Event

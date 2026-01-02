@@ -73,7 +73,7 @@ class Bot(Thread):
         try:
             event.setup_event()
             if not event.need_a_response():
-                return
+                return None
 
             if event.sender and not event.sender.check_role(Role.TRUSTED):
                 raise PWarning("Обратитесь за доступом к создателю бота.")
@@ -85,7 +85,7 @@ class Bot(Thread):
             # Если мы попали в команду и не вылетели по exception
             self.log_event(event)
             if not rm:
-                return
+                return None
             self.log_message(rm)
 
         # Если предвиденная ошибка
@@ -103,7 +103,7 @@ class Bot(Thread):
             self.log_message(rm, e.level)
         # Если нужно пропустить
         except (PSkip, PIDK):
-            return
+            return None
         # Непредвиденная ошибка
         except Exception:
             self.log_event(event)

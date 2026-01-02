@@ -58,10 +58,12 @@ class Command(CommandProtocol):
     }
 
     def __init__(self, bot: Bot = None, event: Event = None):
+        super().__init__(bot, event)
+
         self.bot: Bot = bot
         self.event: Event = event
 
-        self.full_names: str = ""  # Полный список имён команды (основное имя, дополнительное, имя в тг)
+        self.full_names: list = []  # Полный список имён команды (основное имя, дополнительное, имя в тг)
 
         if self.name:
             self.full_names = [self.name] + self.names

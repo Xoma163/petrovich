@@ -114,9 +114,9 @@ class GPTSettingsMixin(GPTCommandProtocol):
 
     def _get_debug(self) -> ResponseMessageItem:
         profile_settings = self.get_profile_gpt_settings()
-        if profile_settings.use_debug is True:
+        if profile_settings.use_debug is True:  # noqa
             value_str = self.bot.get_formatted_text_line("Включено")
-        elif profile_settings.use_debug is False:
+        elif profile_settings.use_debug is False:  # noqa
             value_str = self.bot.get_formatted_text_line("Выключено")
         else:
             value_str = f"{self.bot.get_formatted_text_line('Выключено')} (по умолчанию)"

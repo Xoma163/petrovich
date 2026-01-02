@@ -10,7 +10,7 @@ class QuotesGenerator:
     WIDTH = 620
     BACKGROUND_COLOR = "#F5F5F5"
 
-    def get_centered_rounded_image(self, image: Image, max_size=80):
+    def get_centered_rounded_image(self, image, max_size=80):
         w, h = image.size
         center_point = (w // 2, h // 2)
         min_size = min(center_point)
@@ -35,7 +35,7 @@ class QuotesGenerator:
         return img_round
 
     @staticmethod
-    def get_message_photo(image: Image, max_size=290):
+    def get_message_photo(image, max_size=290):
         w, h = image.size
         if w < max_size:
             return image

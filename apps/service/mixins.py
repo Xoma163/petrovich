@@ -15,8 +15,8 @@ class TimeStampAdminMixin(admin.ModelAdmin):
 
     def __init__(self, model, admin_site):
         self.list_display = list(self.list_display) + self.EXTRA_FIELDS
-        self.readonly_fields = list(self.readonly_fields) + self.EXTRA_FIELDS
-        self.list_filter = list(self.list_filter) + self.EXTRA_FIELDS
+        self.readonly_fields = list(self.readonly_fields) + self.EXTRA_FIELDS  # noqa
+        self.list_filter = list(self.list_filter) + self.EXTRA_FIELDS  # noqa
         super().__init__(model, admin_site)
 
 

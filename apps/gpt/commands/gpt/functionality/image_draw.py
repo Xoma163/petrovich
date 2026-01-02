@@ -162,7 +162,7 @@ class GPTImageDrawFunctionality(GPTCommandProtocol):
 
     # COMMON UTILS
 
-    def get_image_draw_model_with_parameters(self) -> ImageDrawModel:
+    def get_image_draw_model_with_parameters(self) -> type[ImageDrawModel]:
         current_image_model = self.get_image_draw_model()
 
         image_quality = self._get_image_quality() or current_image_model.image_quality

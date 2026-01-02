@@ -58,6 +58,7 @@ class GPTKeyMixin(GPTCommandProtocol):
                     command_name=self.bot.get_formatted_text_line(f'/{self.name}')
                 )
                 raise PWarning(error_msg)
+        return None
 
     @staticmethod
     def raise_no_access_exception(gpt_type_enum: GPTProviderEnum, command_name: str) -> None:

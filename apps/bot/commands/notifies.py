@@ -1,10 +1,10 @@
+import datetime
 import re
-from datetime import datetime, timedelta
 
 from crontab import CronTab
 from dateutil import parser
 from dateutil.parser import ParserError
-from django.db.models import Q
+from django.db.models import Q, QuerySet
 
 from apps.bot.classes.bots.tg_bot import TgBot
 from apps.bot.classes.command import Command
@@ -182,7 +182,7 @@ class Notifies(Command):
         result_without_mentions = result.replace('@', '@_')
         return result_without_mentions
 
-    def get_filtered_notifies(self) -> Notify.objects:
+    def get_filtered_notifies(self) -> QuerySet[Notify]:
         if self.event.chat:
             notifies = Notify.objects.filter(chat=self.event.chat)
         else:
@@ -202,20 +202,22 @@ class Notifies(Command):
         exact_datetime_flag = True
         if arg1 in DELTA_WEEKDAY:
             exact_datetime_flag = False
-            arg1 = (datetime.today().date() + timedelta(days=DELTA_WEEKDAY[arg1])).strftime("%d.%m.%Y")
+            arg1 = (datetime.datetime.today().date() + datetime.timedelta(days=DELTA_WEEKDAY[arg1])).strftime(
+                "%d.%m.%Y")
 
         if arg1 in WEEK_TRANSLATOR:
             exact_datetime_flag = False
-            delta_days = WEEK_TRANSLATOR[arg1] - datetime.today().isoweekday()
+            delta_days = WEEK_TRANSLATOR[arg1] - datetime.datetime.today().isoweekday()
             if delta_days <= 0:
                 delta_days += 7
-            arg1 = (datetime.today().date() + timedelta(days=delta_days)).strftime("%d.%m.%Y")
+            arg1 = (datetime.datetime.today().date() + datetime.timedelta(days=delta_days)).strftime("%d.%m.%Y")
 
-        default_datetime = remove_tz(normalize_datetime(datetime.utcnow(), tz=timezone.name)) \
+        default_datetime = remove_tz(normalize_datetime(datetime.datetime.now(datetime.UTC), tz=timezone.name)) \
             .replace(hour=9, minute=0, second=0, microsecond=0)
         try:
             if arg1.count('.') == 1:
-                if datetime.strptime(f"{arg1}.{default_datetime.year}", '%d.%m.%Y') < datetime.utcnow():
+                if datetime.datetime.strptime(f"{arg1}.{default_datetime.year}", '%d.%m.%Y') < datetime.datetime.now(
+                        datetime.UTC):
                     arg1 = f"{arg1}.{default_datetime.year + 1}"
                 else:
                     arg1 = f"{arg1}.{default_datetime.year}"
@@ -244,13 +246,13 @@ class Notifies(Command):
         if not date:
             raise PWarning("Не смог распарсить дату")
         date = normalize_datetime(date, timezone)
-        datetime_now = localize_datetime(datetime.utcnow(), "UTC")
+        datetime_now = localize_datetime(datetime.datetime.now(datetime.UTC), "UTC")
 
         if (date - datetime_now).total_seconds() < 60:
             raise PWarning("Нельзя добавлять напоминание на ближайшую минуту")
 
         if not exact_time_flag and ((date - datetime_now).days < 0 or (datetime_now - date).seconds < 0):
-            date = date + timedelta(days=1)
+            date = date + datetime.timedelta(days=1)
 
         if (date - datetime_now).days < 0 or (datetime_now - date).seconds < 0:
             raise PWarning("Нельзя указывать дату в прошлом")
