@@ -8,9 +8,8 @@ set -a
 source venv/bin/activate
 set +a
 
-python -m pip install --upgrade pip setuptools wheel  | grep -v 'Requirement already satisfied'
-poetry lock
-poetry install # venv/bin/pip install -r requirements.txt | grep -v 'Requirement already satisfied'
+pip install --upgrade pip setuptools wheel  | grep -v 'Requirement already satisfied'
+poetry install
 python manage.py migrate
 python manage.py collectstatic --noinput
 
