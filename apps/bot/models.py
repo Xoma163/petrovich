@@ -139,8 +139,8 @@ class Profile(TimeStampModelMixin):
         group = Group.objects.get(name=role.name)
         self.groups.remove(group)
 
-    def check_role(self, role_group: Group):
-        group = self.groups.filter(name=role_group.name)
+    def check_role(self, role: Role):
+        group = self.groups.filter(name=role.name)
         return group.exists()
 
     def get_roles(self) -> list[Role]:

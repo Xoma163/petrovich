@@ -31,7 +31,7 @@ def generate_commands(base_class=Command):
     new_commands = commands
     flag = True
     while flag:
-        new_commands = [x for x in [cls.__subclasses__() for cls in new_commands] if x]
+        new_commands = [x for x in [cls.__subclasses__() for cls in new_commands] if x]  # noqa
         if new_commands:
             _new_commands = []
             for cmd in new_commands:

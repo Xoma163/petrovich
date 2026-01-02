@@ -11,7 +11,7 @@ def _delete_cache_activity_keys():
 
     from django.core.cache import cache
 
-    activity_keys = cache.keys("activity_*")
+    activity_keys = cache.keys("activity_*")  # noqa
     for key in activity_keys:
         cache.delete(key)
 
