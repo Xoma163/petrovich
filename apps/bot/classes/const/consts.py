@@ -18,8 +18,6 @@ class Role(StrEnum):
     USER = "пользователь"
     BANNED = "забанен"
     TRUSTED = "доверенный"
-    MRAZ = "мразь"
-    FLAIVA = "флейва"
     GPT = "gpt"
 
     @classmethod

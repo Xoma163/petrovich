@@ -251,8 +251,6 @@ def get_role_by_str(role_str: str):
         ('майнкрафт', 'майн', 'minecraft', 'mine'): Role.MINECRAFT,
         ('забанен', 'бан', 'ban', 'banned'): Role.BANNED,
         ('доверенный', 'проверенный', 'trust', 'trusted'): Role.TRUSTED,
-        ('мразь', 'мразота', 'мрази', 'mraz'): Role.MRAZ,
-        ('флейва', 'flaiva'): Role.FLAIVA,
         ('пользователь', 'юзер', 'user'): Role.USER
     }
     for k in roles_map:
