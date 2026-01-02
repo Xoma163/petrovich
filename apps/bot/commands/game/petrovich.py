@@ -22,7 +22,7 @@ class Petrovich(Command):
     names = ['петровна']
 
     help_text = HelpText(
-        commands_text="мини-игра, определяющая кто Петрович Дня",
+        commands_text="мини-игра, определяющая кто Петрович дня",
         help_texts=[
             HelpTextItem(Role.USER, [
                 HelpTextArgument(None, "мини-игра, определяющая кто Петрович дня"),

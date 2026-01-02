@@ -1,4 +1,3 @@
-static/vendors
 secrets
 
 .git
@@ -15,3 +14,5 @@ __pycache__
 apps/bot/migrations
 apps/games/migrations
 apps/service/migrations
+apps/gpt/migrations
+

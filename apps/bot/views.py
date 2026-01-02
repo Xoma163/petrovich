@@ -2,59 +2,16 @@ import datetime
 import json
 import re
 
-from django.http import JsonResponse, HttpResponse
+from django.http import HttpResponse
 from django.views import View
 
 from apps.bot.api.github.issue import GithubIssueAPI
-from apps.bot.classes.bots.api_bot import APIBot
 from apps.bot.classes.bots.tg_bot import TgBot
-from apps.bot.classes.const.exceptions import PError
 from apps.bot.classes.messages.attachments.photo import PhotoAttachment
 from apps.bot.classes.messages.response_message import ResponseMessageItem
 from apps.bot.mixins import CSRFExemptMixin
 from apps.bot.utils.utils import get_admin_profile
 from petrovich.settings import env
-
-
-class APIView(CSRFExemptMixin, View):
-    @staticmethod
-    def post(request, *args, **kwargs):
-        authorization = request.headers.get('Authorization')
-        if not authorization:
-            return JsonResponse({'error': 'no authorization header provided'}, status=500)
-        if not authorization.startswith("Bearer "):
-            return JsonResponse({'error': 'no bearer token in authorization header'}, status=500)
-        if not request.POST and not request.body:
-            return JsonResponse({'error': 'POST data is empty'}, status=500)
-        if request.POST:
-            data = request.POST
-        else:
-            data = json.loads(request.body.decode())
-        text = data.get('text')
-        if not text:
-            return JsonResponse({'error': 'no text in POST data'}, status=500)
-
-        query = {
-            'text': text,
-            'token': authorization.replace("Bearer ", '')
-        }
-        attachments = data.get('attachments')
-        if attachments:
-            query['attachments'] = attachments
-
-        api_bot = APIBot()
-        try:
-            response = api_bot.parse(query)
-        except PError as e:
-            return JsonResponse({'error': str(e)}, status=500)
-        except Exception:
-            return JsonResponse({'wtf': True}, status=500)
-
-        if not response:
-            return JsonResponse({'wtf': True}, status=500)
-
-        r_json = response.to_api()
-        return JsonResponse(r_json, status=200)
 
 
 class TelegramView(CSRFExemptMixin, View):

@@ -37,7 +37,7 @@ class YoutubeMusic:
             'format': 'bestaudio/best',
             'title': True,
             'logger': NothingLogger(),
-            'outtmpl': '/tmp/yt_dlp_%(title)s-%(id)s.%(ext)s',
+            # 'outtmpl': '/tmp/yt_dlp_%(title)s-%(id)s.%(ext)s',
             'postprocessors': [{
                 'key': 'FFmpegExtractAudio',
                 'preferredcodec': 'mp3',

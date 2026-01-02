@@ -269,7 +269,7 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
         if new_model_name in ["удалить", "сброс", "сбросить", "delete", "reset"]:
             profile_gpt_settings.completions_model = None
             profile_gpt_settings.save()
-            return ResponseMessageItem(text=f"Удалил модель обработки текста (completions)")
+            return ResponseMessageItem(text="Удалил модель обработки текста (completions)")
 
         new_model = self._find_model(CompletionsModel, new_model_name)
         profile_gpt_settings.completions_model = new_model
@@ -287,7 +287,7 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
         if new_model_name in ["удалить", "сброс", "сбросить", "delete", "reset"]:
             profile_gpt_settings.vision_model = None
             profile_gpt_settings.save()
-            return ResponseMessageItem(text=f"Удалил модель обработки изображений (vision)")
+            return ResponseMessageItem(text="Удалил модель обработки изображений (vision)")
 
         new_model = self._find_model(VisionModel, new_model_name)
         profile_gpt_settings.vision_model = new_model
@@ -305,7 +305,7 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
         if new_model_name in ["удалить", "сброс", "сбросить", "delete", "reset"]:
             profile_gpt_settings.image_draw_model = None
             profile_gpt_settings.save()
-            return ResponseMessageItem(text=f"Удалил модель генерации изображений (draw)")
+            return ResponseMessageItem(text="Удалил модель генерации изображений (draw)")
 
         new_model_name = self.event.message.args[2]
         try:
@@ -331,7 +331,7 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
         if new_model_name in ["удалить", "сброс", "сбросить", "delete", "reset"]:
             profile_gpt_settings.voice_recognition_model = None
             profile_gpt_settings.save()
-            return ResponseMessageItem(text=f"Удалил модель обработки голоса (voice)")
+            return ResponseMessageItem(text="Удалил модель обработки голоса (voice)")
 
         new_model = self._find_model(VoiceRecognitionModel, new_model_name)
         profile_gpt_settings.voice_recognition_model = new_model
