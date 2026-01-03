@@ -61,7 +61,7 @@ def generate_help_text():
     for platform in list(Platform):
         for group in groups:
             help_text_list[platform][group].sort()
-            help_text_generated[platform][group] = "\n".join(help_text_list[platform][group])
+            help_text_generated[platform][group] = "\n".join(help_text_list[platform][group])  # noqa
 
     return help_text_generated
 
