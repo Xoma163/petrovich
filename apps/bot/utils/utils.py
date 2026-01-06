@@ -270,7 +270,7 @@ def check_command_time(name: str, seconds: int):
     if created:
         return
     update_datetime = entity.update_datetime
-    delta_time = datetime.datetime.now(datetime.UTC) - remove_tz(update_datetime)
+    delta_time = datetime.datetime.now(datetime.UTC) - update_datetime
     if delta_time.seconds < seconds and delta_time.days == 0:
         error = f"Нельзя часто вызывать данную команду. Осталось {seconds - delta_time.seconds} секунд"
         raise PWarning(error)
