@@ -104,7 +104,7 @@ class VoiceRecognition(AcceptExtraCommand):
             )
 
             api_key = profile_gpt_settings.get_key()
-            chat_gpt_api = ChatGPTAPI(log_filter=self.event.log_filter, sender=self.event.sender, api_key=api_key)
+            chat_gpt_api = ChatGPTAPI(log_filter=self.event.log_filter, api_key=api_key)
 
             for attachment in attachments:
                 content = attachment.download_content()

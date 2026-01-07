@@ -216,8 +216,8 @@ class Notifies(Command):
             .replace(hour=9, minute=0, second=0, microsecond=0)
         try:
             if arg1.count('.') == 1:
-                if datetime.datetime.strptime(f"{arg1}.{default_datetime.year}", '%d.%m.%Y') < datetime.datetime.now(
-                        datetime.UTC):
+                if datetime.datetime.strptime(f"{arg1}.{default_datetime.year}", '%d.%m.%Y') < remove_tz(
+                        datetime.datetime.now(datetime.UTC)):
                     arg1 = f"{arg1}.{default_datetime.year + 1}"
                 else:
                     arg1 = f"{arg1}.{default_datetime.year}"
