@@ -102,7 +102,7 @@ class OpenAIAPI(GPTAPI, ABC):
     @retry(3, SSLError, sleep_time=2)
     def do_request(self, url, **kwargs) -> dict:
         # kwargs['headers']['Content-Type'] = "application/json"
-        r = self.requests.post(url, proxies=self.proxies, **kwargs)
+        r = self.requests.post(url, **kwargs)
         if r.status_code != 200:
             try:
                 r_json = r.json()
