@@ -43,6 +43,14 @@ class OpenAIAPI(GPTAPI, ABC):
         'model_not_found': "Модель не существует или у вас нет к ней доступа"
     }
 
+    def __init__(self, *args, use_proxy=False, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.proxies = None
+        self.use_proxy = use_proxy
+        if self.use_proxy:
+            self.proxies = get_proxies()
+
     def do_completions_request(self, model: CompletionsModel, url, **kwargs) -> GPTCompletionsResponse:
         return self._do_request(GPTCompletionsUsage, GPTCompletionsResponse, model, url, **kwargs)  # noqa
 
@@ -103,7 +111,7 @@ class OpenAIAPI(GPTAPI, ABC):
     @retry(3, SSLError, sleep_time=2)
     def do_request(self, url, **kwargs) -> dict:
         # kwargs['headers']['Content-Type'] = "application/json"
-        r = self.requests.post(url, proxies=get_proxies(), **kwargs)
+        r = self.requests.post(url, proxies=self.proxies, **kwargs)
         if r.status_code != 200:
             try:
                 r_json = r.json()
