@@ -9,7 +9,6 @@ from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.classes.messages.attachments.audio import AudioAttachment
 from apps.bot.classes.messages.attachments.video import VideoAttachment
 from apps.bot.utils.nothing_logger import NothingLogger
-from apps.bot.utils.proxy import get_proxies
 from apps.bot.utils.video.downloader import VideoDownloader
 from apps.bot.utils.video.video_handler import VideoHandler
 
@@ -18,14 +17,6 @@ class YoutubeVideo:
     DEFAULT_VIDEO_QUALITY_HIGHT = 720
     DOMAIN = "youtube.com"
     URL = f"https://{DOMAIN}"
-
-    def __init__(self, use_proxy=False):
-        super().__init__()
-
-        self.proxies = None
-        self.use_proxy = use_proxy
-        if self.use_proxy:
-            self.proxies = get_proxies()
 
     # SERVICE METHODS
 
@@ -67,13 +58,13 @@ class YoutubeVideo:
         _va.m3u8_url = data.video_download_url
         vd = VideoDownloader(_va)
         http_chunk_size_video = data.extra_data.get('http_chunk_size_video')
-        _va.content = vd.download_m3u8(threads=16, use_proxy=self.use_proxy, http_chunk_size=http_chunk_size_video)
+        _va.content = vd.download_m3u8(threads=16, http_chunk_size=http_chunk_size_video)
 
         _aa = AudioAttachment()
         _aa.m3u8_url = data.audio_download_url
         vd = VideoDownloader(_aa)
         http_chunk_size_audio = data.extra_data.get('http_chunk_size_audio')
-        _aa.content = vd.download_m3u8(threads=8, use_proxy=self.use_proxy, http_chunk_size=http_chunk_size_audio)
+        _aa.content = vd.download_m3u8(threads=8, http_chunk_size=http_chunk_size_audio)
 
         vh = VideoHandler(video=_va, audio=_aa)
         content = vh.mux()
@@ -84,7 +75,6 @@ class YoutubeVideo:
         va.height = data.height or None
         va.duration = data.duration or None
         va.thumbnail_url = data.thumbnail_url or None
-        va.use_proxy_on_download_thumbnail = True
         return va
 
     # -----------------------------
@@ -171,8 +161,6 @@ class YoutubeVideo:
             'remote_components': ['ejs:npm', 'ejs:github'],
             # 'cookiefile': os.path.join(BASE_DIR, 'secrets', 'youtube_cookies.txt')
         }
-        if self.use_proxy:
-            ydl_params['proxy'] = self.proxies['https']
         ydl = yt_dlp.YoutubeDL(ydl_params)
         ydl.add_default_info_extractors()
 

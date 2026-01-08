@@ -1,7 +1,7 @@
 from selenium import webdriver
 
 
-def get_web_driver(proxy=None, headers=None) -> webdriver.Chrome:
+def get_web_driver(headers=None) -> webdriver.Chrome:
     options = webdriver.ChromeOptions()
     options.add_argument("--headless")
     options.add_argument("--no-sandbox")
@@ -9,8 +9,8 @@ def get_web_driver(proxy=None, headers=None) -> webdriver.Chrome:
     options.add_argument(
         'user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36')
 
-    if proxy:
-        options.add_argument(f"--proxy-server={proxy}")
+    # if proxy:
+    #     options.add_argument(f"--proxy-server={proxy}")
     if headers:
         for header in headers:
             options.add_argument(f"{header}={headers[header]}")

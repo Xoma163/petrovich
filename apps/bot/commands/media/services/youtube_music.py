@@ -10,8 +10,7 @@ class YoutubeMusicService(MediaService):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.use_proxy = False
-        self.service = YoutubeMusic(use_proxy=self.use_proxy)
+        self.service = YoutubeMusic()
 
     @retry(3, Exception, sleep_time=2, except_exceptions=(PWarning,))
     def get_content_by_url(self, url: str) -> MediaServiceResponse:

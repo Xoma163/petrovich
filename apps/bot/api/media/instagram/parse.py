@@ -8,7 +8,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 from apps.bot.api.media.instagram import InstagramAPIData
 from apps.bot.classes.const.exceptions import PWarning, PError
 from apps.bot.utils.decorators import retry
-from apps.bot.utils.proxy import get_proxies
 from apps.bot.utils.web_driver import get_web_driver
 
 
@@ -24,10 +23,9 @@ class InstagramParser:
         if is_story:
             raise PWarning("Парсинг сторей не работает")
 
-        proxy = get_proxies()['https'].replace('socks5h', 'socks5')
 
         try:
-            page_source = self._get_instagram_request(url, proxy)
+            page_source = self._get_instagram_request(url)
         except TimeoutException:
             raise PWarning(
                 "Убедитесь в браузере(инкогнито), что по ссылке фото/видео и доступно к просмотру. "
@@ -52,8 +50,8 @@ class InstagramParser:
         return self._parse_media(media)
 
     @retry(times=5, exceptions=(TimeoutException,))
-    def _get_instagram_request(self, url, proxy):
-        web_driver = get_web_driver(proxy=proxy)
+    def _get_instagram_request(self, url):
+        web_driver = get_web_driver()
         try:
             web_driver.get(url)
 

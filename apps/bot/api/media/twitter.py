@@ -5,7 +5,6 @@ from urllib.parse import urlparse
 
 from apps.bot.api.handler import API
 from apps.bot.classes.const.exceptions import PWarning
-from apps.bot.utils.proxy import get_proxies
 
 
 class TwitterAPIResponseItem:
@@ -31,21 +30,13 @@ class TwitterAPIResponse:
 class Twitter(API):
     URL_TWEET_INFO = "https://cdn.syndication.twimg.com/tweet-result"
 
-    def __init__(self, use_proxy=False, **kwargs):
-        super().__init__(**kwargs)
-
-        self.proxies = None
-        self.use_proxy = use_proxy
-        if self.use_proxy:
-            self.proxies = get_proxies()
 
     def get_post_data(self, url) -> TwitterAPIResponse:
         tweet_id = urlparse(url).path.strip('/').split('/')[-1]
         token = self._get_token(tweet_id)
         post_data = self.requests.get(
             self.URL_TWEET_INFO,
-            params={'id': tweet_id, 'token': token},
-            proxies=self.proxies
+            params={'id': tweet_id, 'token': token}
         ).json()
 
         if not post_data:

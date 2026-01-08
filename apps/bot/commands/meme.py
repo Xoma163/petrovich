@@ -515,7 +515,6 @@ class Meme(Command):
             video = self.bot.get_video_attachment(video_content)
             video.thumbnail_url = data.thumbnail_url
             # зачем?
-            video.use_proxy_on_download_thumbnail = True
 
             meme.tg_file_id = video.get_file_id()
             meme.type = VideoAttachment.TYPE
@@ -642,7 +641,7 @@ class Meme(Command):
         att.file_id = meme.tg_file_id
         att.get_file()
         if not content:
-            content = att.download_content(use_proxy=False)
+            content = att.download_content()
         else:
             att.content = content
 
@@ -661,7 +660,7 @@ class Meme(Command):
                 preview_url = f"https://img.youtube.com/vi/{video_id}/default.jpg"
                 att_pa = PhotoAttachment()
                 att_pa.public_download_url = preview_url
-                _content = att_pa.download_content(use_proxy=False)
+                _content = att_pa.download_content()
             if isinstance(att, VideoAttachment) and not _content:
                 vh = VideoHandler(video=att)
                 _content = vh.get_preview()

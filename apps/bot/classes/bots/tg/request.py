@@ -4,7 +4,6 @@ import requests
 from requests import Response
 
 from apps.bot.utils.cache import MessagesCache
-from apps.bot.utils.proxy import get_http_proxies
 from petrovich.settings import env
 
 
@@ -21,15 +20,12 @@ class Request:
         "Bad Request: message can't be deleted for everyone"
     ]
 
-    def __init__(self, token, log_filter=None, use_proxy=False):
+    def __init__(self, token, log_filter=None):
         self.token = token
         self.logger = logging.getLogger('bot')
         self.log_filter = log_filter
-        self.use_proxy = use_proxy
 
         self.proxies = None
-        if self.use_proxy:
-            self.proxies = get_http_proxies()
 
     def get(self, action, params=None, **kwargs) -> Response:
         return self._do(action, "get", params, **kwargs)

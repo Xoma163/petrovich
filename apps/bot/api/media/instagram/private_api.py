@@ -7,7 +7,6 @@ from instagrapi.exceptions import LoginRequired, MediaNotFound
 
 from apps.bot.api.media.instagram import InstagramAPIData
 from apps.bot.classes.const.exceptions import PWarning
-from apps.bot.utils.proxy import get_proxies
 from petrovich.settings import env
 
 
@@ -60,8 +59,6 @@ class Instagram:
         self.client.set_locale(locale)
         self.client.set_country(country)
         self.client.set_country_code(country_code)
-
-        self.client.set_proxy(get_proxies()['https'])
 
     def login(self):
         if os.path.exists(self.SESSION_FILE):

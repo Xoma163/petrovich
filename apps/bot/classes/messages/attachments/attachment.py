@@ -16,7 +16,6 @@ from urllib3.exceptions import SSLError
 from apps.bot.classes.bots.chat_activity import ChatActivity
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.utils.decorators import retry
-from apps.bot.utils.proxy import get_proxies
 
 
 class Attachment:
@@ -145,21 +144,19 @@ class Attachment:
             url: str,
             start: int,
             end: int,
-            proxies: dict | None = None,
             headers: dict | None = None,
             cookies: dict | None = None
     ) -> bytes:
         _headers = {'Range': f'bytes={start}-{end}'}
         _headers.update(headers)
 
-        response = requests.get(url, headers=_headers, stream=True, proxies=proxies, cookies=cookies)
+        response = requests.get(url, headers=_headers, stream=True, cookies=cookies)
         return response.content
 
     @retry(3, SSLError, sleep_time=2)
     def download_content(
             self,
             peer_id: str | int = None,
-            use_proxy: bool = False,
             headers: dict | None = None,
             stream: bool = False,
             chunk_size: int | None = None,
@@ -185,26 +182,25 @@ class Attachment:
             finally:
                 self.delete_download_path_file()
         else:
-            proxies = get_proxies() if use_proxy else {}
             if chunk_size:
-                response = requests.head(download_url, proxies=proxies, cookies=cookies, headers=_headers)
+                response = requests.head(download_url, cookies=cookies, headers=_headers)
                 file_size = int(response.headers['Content-Length'])
                 ranges = [(i, min(i + chunk_size - 1, file_size - 1)) for i in range(0, file_size, chunk_size)]
 
                 with ThreadPoolExecutor() as executor:
                     chunks = executor.map(
-                        lambda r: self._download_chunk(download_url, r[0], r[1], proxies, _headers, cookies),
+                        lambda r: self._download_chunk(download_url, r[0], r[1], _headers, cookies),
                         ranges)
                 self.content = b''.join(chunks)
 
             elif stream:
                 chunks = []
-                request = requests.get(download_url, proxies=proxies, headers=_headers, cookies=cookies, stream=True)
+                request = requests.get(download_url, headers=_headers, cookies=cookies, stream=True)
                 for chunk in request.iter_content(self.CHUNK_SIZE):
                     chunks.append(chunk)
                 self.content = b''.join(chunks)
             else:
-                self.content = requests.get(download_url, proxies=proxies, headers=_headers, cookies=cookies).content
+                self.content = requests.get(download_url, headers=_headers, cookies=cookies).content
 
         # if self.file_name:
         #     tmp = NamedTemporaryFile()

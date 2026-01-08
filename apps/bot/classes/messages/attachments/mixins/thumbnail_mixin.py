@@ -7,7 +7,6 @@ class ThumbnailMixin:
         super().__init__(**kwargs)
         self.thumbnail_url: str | None = None
         self.thumbnail: PhotoAttachment | None = None
-        self.use_proxy_on_download_thumbnail: bool = False
 
     def set_thumbnail(self, content: bytes = None):
         from apps.bot.utils.utils import make_thumbnail
@@ -21,7 +20,7 @@ class ThumbnailMixin:
         else:
             thumb_file.parse(self.thumbnail_url, guarantee_url=True)
 
-        thumbnail = make_thumbnail(thumb_file, max_size=None, use_proxy=self.use_proxy_on_download_thumbnail)
+        thumbnail = make_thumbnail(thumb_file, max_size=None)
         thumbnail_att = PhotoAttachment()
         thumbnail_att.parse(thumbnail)
         self.thumbnail = thumbnail_att

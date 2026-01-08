@@ -24,11 +24,9 @@ class TikTokService(MediaService):
         va = VideoAttachment()
         va.public_download_url = video_data.video_download_url
         va.thumbnail_url = video_data.thumbnail_url
-        va.use_proxy_on_download_thumbnail = False
         va.width = video_data.width
         va.height = video_data.height
         va.download_content(
-            use_proxy=False,
             cookies=video_data.extra_data['cookies'],
             headers=video_data.extra_data['headers']
         )

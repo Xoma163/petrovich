@@ -1,5 +1,4 @@
 from apps.bot.classes.const.exceptions import PWarning
-from apps.bot.utils.proxy import get_proxies
 from apps.gpt.api.base import (
     GPTAPI,
     CompletionsAPIMixin,
@@ -51,7 +50,7 @@ class ClaudeAPI(
     base_url = "https://api.anthropic.com/v1"
 
     def do_request(self, url, **kwargs) -> dict:
-        r_json = self.requests.post(url, headers=self.headers, proxies=get_proxies(), **kwargs).json()
+        r_json = self.requests.post(url, headers=self.headers, **kwargs).json()
 
         if error := r_json.get("error", {}).get("message"):
             if "Your credit balance is too low" in error:

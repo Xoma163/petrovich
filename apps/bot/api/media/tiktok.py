@@ -7,24 +7,18 @@ from selenium.webdriver.support.ui import WebDriverWait
 from apps.bot.api.media.data import VideoData
 from apps.bot.classes.const.exceptions import PWarning
 from apps.bot.utils.decorators import retry
-from apps.bot.utils.proxy import get_proxies
 from apps.bot.utils.web_driver import get_web_driver, get_web_driver_headers
 
 
 class TikTok:
     AGE_RESTRICTION_MESSAGE = r'This post may not be comfortable for some audiences. Log in to make the most of your experience.'
 
-    def __init__(self, use_proxy=False):
+    def __init__(self):
         super().__init__()
 
-        self.proxies = None
-        self.use_proxy = use_proxy
-        if self.use_proxy:
-            self.proxies = get_proxies()['https'].replace('socks5h', 'socks5')
-
     @retry(times=5, exceptions=(TimeoutException,))
-    def _get_tiktok_request(self, url, proxy):
-        web_driver = get_web_driver(proxy=proxy)
+    def _get_tiktok_request(self, url):
+        web_driver = get_web_driver()
         try:
             web_driver.get(url)
 
@@ -40,7 +34,7 @@ class TikTok:
     def get_video(self, url) -> VideoData:
 
         try:
-            page_source, cookies, headers = self._get_tiktok_request(url, self.proxies)
+            page_source, cookies, headers = self._get_tiktok_request(url)
         except TimeoutException:
             raise PWarning("Подозрение на \"странный\" контент. Сообщите разработчику")
 

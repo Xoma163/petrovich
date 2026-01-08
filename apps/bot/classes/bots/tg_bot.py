@@ -76,7 +76,7 @@ class TgBot(Bot):
 
     def init_requests(self):
         if self.MODE == self.TG_SERVER:
-            self.requests = Request(self.token, log_filter=self.log_filter, use_proxy=False)
+            self.requests = Request(self.token, log_filter=self.log_filter)
         elif self.MODE == self.LOCAL_SERVER:
             self.requests = RequestLocal(self.token, log_filter=self.log_filter)
         elif self.MODE == self.REMOTE_SERVER:
