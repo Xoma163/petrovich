@@ -11,7 +11,7 @@ class YoutubeVideoService(MediaService):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.use_proxy = True
+        self.use_proxy = False
         self.service = YoutubeVideo(use_proxy=self.use_proxy)
 
     @retry(3, Exception, sleep_time=2, except_exceptions=(PWarning,))

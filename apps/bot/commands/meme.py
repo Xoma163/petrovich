@@ -642,7 +642,7 @@ class Meme(Command):
         att.file_id = meme.tg_file_id
         att.get_file()
         if not content:
-            content = att.download_content(use_proxy=True)
+            content = att.download_content(use_proxy=False)
         else:
             att.content = content
 
@@ -661,7 +661,7 @@ class Meme(Command):
                 preview_url = f"https://img.youtube.com/vi/{video_id}/default.jpg"
                 att_pa = PhotoAttachment()
                 att_pa.public_download_url = preview_url
-                _content = att_pa.download_content(use_proxy=True)
+                _content = att_pa.download_content(use_proxy=False)
             if isinstance(att, VideoAttachment) and not _content:
                 vh = VideoHandler(video=att)
                 _content = vh.get_preview()

@@ -36,7 +36,7 @@ class Command(BaseCommand):
                 if not att.private_download_url and not att.private_download_path:
                     raise RuntimeError("can't get private_download_url/private_download_path")
                 else:
-                    content = att.download_content(use_proxy=True)
+                    content = att.download_content(use_proxy=False)
 
                 detected_ext = detect_ext(content)
                 if not detected_ext:
@@ -72,7 +72,7 @@ class Command(BaseCommand):
         preview_url = f"https://img.youtube.com/vi/{video_id}/default.jpg"
         att = PhotoAttachment()
         att.public_download_url = preview_url
-        content = att.download_content(use_proxy=True)
+        content = att.download_content(use_proxy=False)
         if len(content) == 1097:  # default youtube preview
             content = self._get_meme_file_previews_content(meme)
         return content
@@ -86,7 +86,7 @@ class Command(BaseCommand):
 
     @staticmethod
     def get_youtube_content(meme) -> bytes:
-        yt_service = YoutubeVideo(use_proxy=True)
+        yt_service = YoutubeVideo(use_proxy=False)
         video_data = yt_service.get_video_info(meme.link)
         va = yt_service.download_video(video_data)
         return va.content

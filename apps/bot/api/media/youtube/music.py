@@ -9,7 +9,7 @@ from apps.bot.utils.proxy import get_proxies
 
 
 class YoutubeMusic:
-    def __init__(self, use_proxy=True):
+    def __init__(self, use_proxy=False):
         self._temp_file_path = ""
 
         self.proxies = None

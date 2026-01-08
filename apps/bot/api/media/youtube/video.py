@@ -19,7 +19,7 @@ class YoutubeVideo:
     DOMAIN = "youtube.com"
     URL = f"https://{DOMAIN}"
 
-    def __init__(self, use_proxy=True):
+    def __init__(self, use_proxy=False):
         super().__init__()
 
         self.proxies = None
