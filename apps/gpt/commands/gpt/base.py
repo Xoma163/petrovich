@@ -212,6 +212,7 @@ class GPTCommand(
                 text=answer,
                 reply_to=self.event.message.id
             )
+        rmi.message_thread_id = self.event.message_thread_id
         return rmi
 
     def send_rmi(self, rmi):
