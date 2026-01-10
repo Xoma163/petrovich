@@ -22,6 +22,9 @@ class Actions(Command):
         group_chat_created = self.event.action.get('group_chat_created')
         new_chat_title = self.event.action.get('new_chat_title')
 
+        forum_topic_created = self.event.action.get('forum_topic_created')
+        forum_topic_edited = self.event.action.get('forum_topic_edited')
+
         answer = None
         if new_chat_members:
             answers = [self.setup_new_chat_member(member['id'], is_bot=member['is_bot']) for member in new_chat_members]
@@ -38,6 +41,10 @@ class Actions(Command):
             self.edit_chat_title(new_chat_title)
         elif my_chat_member or chat_member:
             self.chat_member(my_chat_member or chat_member)
+        elif forum_topic_created:
+            self.create_forum_topic(forum_topic_created)
+        elif forum_topic_edited:
+            self.edit_forum_topic(forum_topic_edited)
 
         if answer:
             return ResponseMessage(ResponseMessageItem(text=answer))
@@ -55,7 +62,6 @@ class Actions(Command):
             profile = self.bot.get_profile_by_user_id(member_id)
             self.bot.add_chat_to_profile(profile, self.event.chat)
             return None
-
 
     def setup_left_chat_member(self, left_chat_member):
         is_bot = left_chat_member['is_bot']
@@ -99,3 +105,11 @@ class Actions(Command):
         status = chat_member['status']
         if status in ["left", "kicked"]:
             self.setup_left_chat_member(chat_member['user'])
+
+    # ToDo: peer_id + message_thread_id
+    def create_forum_topic(self, forum_topic_created):
+        pass
+
+    # ToDo: здесь получаем только имя. peer_id + message_thread_id нужно брать из ивента
+    def edit_forum_topic(self, forum_topic_edited):
+        pass

@@ -158,7 +158,8 @@ class TgEvent(Event):
 
     def setup_action(self, message):
         actions = [
-            'new_chat_members', "left_chat_member", "migrate_from_chat_id", "group_chat_created", "new_chat_title"
+            'new_chat_members', "left_chat_member", "migrate_from_chat_id", "group_chat_created", "new_chat_title",
+            "forum_topic_created", "forum_topic_edited"
         ]
         for action in actions:
             if action in message:
