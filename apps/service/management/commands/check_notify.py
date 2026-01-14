@@ -53,7 +53,7 @@ class Command(BaseCommand):
             prev_seconds_delta = - entry.previous(localized_datetime, default_utc=True)
             return prev_seconds_delta <= 60
         else:
-            delta_time = remove_tz(notify.date) - self.dt_now + datetime.timedelta(minutes=1)
+            delta_time = remove_tz(notify.date) - remove_tz(self.dt_now) + datetime.timedelta(minutes=1)
             return delta_time.days == 0 and delta_time.seconds <= 60
 
     @staticmethod
