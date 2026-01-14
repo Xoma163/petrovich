@@ -113,7 +113,15 @@ class OpenAIAPI(GPTAPI, ABC):
 
         if error := r_json.get('error'):
             logger.error(str(r_json))
-            code = error.get('code')
+
+            # grok
+            if isinstance(error, str):
+                code = None
+                if 'used all available credits' in error:
+                    code = 'insufficient_quota'
+            # chatgpt
+            else:
+                code = error.get('code')
             error_str = self.ERRORS_MAP.get(code, "Какая-то ошибка OpenAI API")
 
             if code == "rate_limit_exceeded":
