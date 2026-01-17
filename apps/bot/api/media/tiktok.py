@@ -16,6 +16,10 @@ class TikTok:
     def __init__(self):
         super().__init__()
 
+        self.errors = {
+            10231: "Не могу скачать контент. Недоступно в нашей стране"
+        }
+
     @retry(times=5, exceptions=(TimeoutException,))
     def _get_tiktok_request(self, url):
         web_driver = get_web_driver()
@@ -45,10 +49,16 @@ class TikTok:
         script_data = bs4.find(id="__UNIVERSAL_DATA_FOR_REHYDRATION__")
         data = json.loads(script_data.text)
         video_detail = data['__DEFAULT_SCOPE__'].get('webapp.video-detail')
+        self.raise_on_errors(video_detail)
+
         if video_detail:
             return self.get_video_post(video_detail, cookies, headers)
         else:
             raise PWarning("Не нашёл видео в тиктоке. Если это пост-слайдер, то я не умею их скачивать")
+
+    def raise_on_errors(self, video_detail):
+        if video_detail['statusCode'] in self.errors:
+            raise PWarning(self.errors[video_detail['statusCode']])
 
     @staticmethod
     def get_video_post(video_detail, cookies, headers):
