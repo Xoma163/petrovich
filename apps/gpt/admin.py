@@ -1,5 +1,6 @@
 from django.contrib import admin
 
+from apps.gpt.actions import copy_completions_to_vision
 from apps.gpt.models import (
     Preprompt,
     Usage,
@@ -109,6 +110,8 @@ class CompletionModelAdmin(admin.ModelAdmin):
     ordering = (
         'name',
     )
+
+    actions = [copy_completions_to_vision]
 
 
 @admin.register(VisionModel)
