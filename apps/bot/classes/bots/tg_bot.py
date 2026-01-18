@@ -710,6 +710,14 @@ class TgBot(Bot):
             raise PError()
         return file_id
 
+    def answer_callback_query(self, callback_query_id: int, text: str | None = None, show_alert: bool = False) -> dict:
+        r = self.requests.post('answerCallbackQuery', json={
+            'callback_query_id': callback_query_id,
+            'text': text,
+            'show_alert': show_alert,
+        }).json()
+        return r
+
     @classmethod
     def get_formatted_text(cls, text: str, language: str = None) -> str:
         """

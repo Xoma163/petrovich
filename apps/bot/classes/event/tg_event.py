@@ -55,6 +55,7 @@ class TgEvent(Event):
             poll = self.raw.get('poll')
 
             if callback_query:
+                self.bot.answer_callback_query(self.raw['callback_query']['id'])
                 message = callback_query['message']
                 message['from'] = callback_query['from']
                 message['payload'] = callback_query['data']
