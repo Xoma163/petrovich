@@ -427,7 +427,7 @@ class TgBot(Bot):
             'Bad Request: VOICE_MESSAGES_FORBIDDEN': "Не могу отправить голосовуху из-за ваших настроек безопасности",
         }
         catch_errors_starts_with = {
-            "Bad Request: can\'t parse entities": "Не смог распарсить markdown/html сущности. Внутренняя ошибка."
+            "Bad Request: can't parse entities": "Не смог распарсить markdown/html сущности. Внутренняя ошибка."
         }
 
         error = r['description']
@@ -710,11 +710,9 @@ class TgBot(Bot):
             raise PError()
         return file_id
 
-    def answer_callback_query(self, callback_query_id: int, text: str | None = None, show_alert: bool = False) -> dict:
+    def answer_callback_query(self, callback_query_id: int) -> dict:
         r = self.requests.post('answerCallbackQuery', json={
-            'callback_query_id': callback_query_id,
-            'text': text,
-            'show_alert': show_alert,
+            'callback_query_id': callback_query_id
         }).json()
         return r
 
