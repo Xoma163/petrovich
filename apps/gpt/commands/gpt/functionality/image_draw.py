@@ -102,7 +102,7 @@ class GPTImageDrawFunctionality(GPTCommandProtocol):
                     att = self.bot.get_document_attachment(
                         image,
                         send_chat_action=False,
-                        filename=f'{self.provider.name}_draw_{i + 1}.png'
+                        filename=f'{self.provider.type_enum.name}_draw_{i + 1}.png'
                     )
                     att.download_content()
                     att.set_thumbnail(att.content)
