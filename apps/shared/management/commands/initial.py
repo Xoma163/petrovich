@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand
 
 from apps.bot.consts import RoleEnum
 from apps.bot.models import Role
-from apps.commands.models import City, TimeZone
+from apps.shared.models import City, TimeZone
 
 
 class Command(BaseCommand):

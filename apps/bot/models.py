@@ -5,8 +5,8 @@ from django.utils.safestring import mark_safe
 
 from apps.bot.consts import Platform as PlatformEnum, RoleEnum as RoleEnum
 from apps.bot.core.messages.attachments.photo import PhotoAttachment
-from apps.commands.models import City
 from apps.shared.mixins import TimeStampModelMixin
+from apps.shared.models import City
 
 
 class Platform(models.Model):

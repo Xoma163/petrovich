@@ -7,8 +7,8 @@ from apps.bot.core.messages.response_message import ResponseMessage, ResponseMes
 from apps.bot.models import Profile as ProfileModel
 from apps.commands.command import Command
 from apps.commands.help_text import HelpText, HelpTextItem, HelpTextArgument
-from apps.commands.models import City
 from apps.shared.exceptions import PWarning
+from apps.shared.models import City
 
 
 class Profile(Command):
