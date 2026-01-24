@@ -1,9 +1,0 @@
-from django.apps import AppConfig
-
-
-class ServiceConfig(AppConfig):
-    name = 'apps.service'
-    verbose_name = "Сервисы"
-
-    def ready(self):
-        import apps.commands.media_command.signals  # noqa

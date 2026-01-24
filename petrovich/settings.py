@@ -47,10 +47,8 @@ VENDORS_APPS = [
 
 PROJECT_APPS = [
     'apps.bot',
-    'apps.service',
     "apps.shared",
     "apps.connectors",
-    "apps.commands",
     'apps.commands.games',
     'apps.commands.gpt',
     "apps.commands.media_command",
