@@ -1,12 +1,12 @@
 import datetime
 from threading import Lock
 
-from django.contrib.auth.models import Group
 from django.db.models import QuerySet
 
 from apps.bot.consts import Platform, RoleEnum
 from apps.bot.core.bot.tg_bot.tg_bot import TgBot
 from apps.bot.core.messages.response_message import ResponseMessageItem, ResponseMessage
+from apps.bot.models import Role
 from apps.commands.command import Command
 from apps.commands.games.models import PetrovichGame, PetrovichUser
 from apps.commands.help_text import HelpTextItem, HelpText, HelpTextArgument
@@ -165,9 +165,9 @@ class Petrovich(Command):
             ])
 
     def _get_petrovich_gamers(self) -> QuerySet[PetrovichUser]:
-        group_banned = Group.objects.get(name=RoleEnum.BANNED.name)
+        role_banned = Role.objects.get(name=RoleEnum.BANNED.name)
         gamers = PetrovichUser.objects \
             .filter(chat=self.event.chat, active=True) \
-            .exclude(profile__groups=group_banned) \
+            .exclude(profile__roles=role_banned) \
             .filter(profile__chats=self.event.chat)
         return gamers

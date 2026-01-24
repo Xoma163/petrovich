@@ -2,9 +2,8 @@ import importlib
 import os
 import pkgutil
 
-from django.contrib.auth.models import Group
-
 from apps.bot.consts import Platform, RoleEnum
+from apps.bot.models import Role
 from apps.commands.command import Command, AcceptExtraCommand
 from apps.shared.utils.utils import get_flat_list
 from petrovich.settings import BASE_DIR
@@ -58,9 +57,9 @@ def generate_commands(base_class=Command):
 
 
 def generate_help_text():
-    groups = [x['name'] for x in Group.objects.all().values('name')]
-    help_text_generated = {p: dict.fromkeys(groups, "") for p in Platform}
-    help_text_list = {platform: {group: [] for group in groups} for platform in list(Platform)}
+    roles = [x['name'] for x in Role.objects.all().values('name')]
+    help_text_generated = {p: dict.fromkeys(roles, "") for p in Platform}
+    help_text_list = {platform: {role: [] for role in roles} for platform in list(Platform)}
 
     for command in COMMANDS:
         if command.help_text and command.enabled:
@@ -70,9 +69,9 @@ def generate_help_text():
                 help_text_list[platform][text_for].append(text)
 
     for platform in list(Platform):
-        for group in groups:
-            help_text_list[platform][group].sort()
-            help_text_generated[platform][group] = "\n".join(help_text_list[platform][group])  # noqa
+        for role in roles:
+            help_text_list[platform][role].sort()
+            help_text_generated[platform][role] = "\n".join(help_text_list[platform][role])  # noqa
 
     return help_text_generated
 

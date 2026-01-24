@@ -1,4 +1,3 @@
-from django.contrib.auth.models import Group
 from django.core.files import File
 from django.db import models
 from django.utils.html import escape
@@ -107,7 +106,7 @@ class Profile(TimeStampModelMixin):
     birthday = models.DateField('Дата рождения', null=True, blank=True)
     city = models.ForeignKey(City, models.SET_NULL, verbose_name='Город', null=True, blank=True)
     avatar = models.ImageField('Аватар', blank=True, upload_to="bot/users/avatar/")
-    roles = models.ManyToManyField(Group, verbose_name="Роли")
+    roles = models.ManyToManyField(Role, verbose_name="Роли")
     chats = models.ManyToManyField(Chat, verbose_name="Чаты", blank=True, related_name="users")
 
     api_token = models.CharField("Токен для API", max_length=100, blank=True)
@@ -131,16 +130,16 @@ class Profile(TimeStampModelMixin):
         self.avatar.save(f"avatar_{str(self)}.{att.ext}", File(image))
 
     def add_role(self, role: Role):
-        group = Group.objects.get(name=role.name)
-        self.roles.add(group)
+        role = Role.objects.get(name=role.name)
+        self.roles.add(role)
 
     def remove_role(self, role: Role):
-        group = Group.objects.get(name=role.name)
-        self.roles.remove(group)
+        role = Role.objects.get(name=role.name)
+        self.roles.remove(role)
 
     def check_role(self, role: Role):
-        group = self.roles.filter(name=role.name)
-        return group.exists()
+        role = self.roles.filter(name=role.name)
+        return role.exists()
 
     def get_roles(self) -> list[Role]:
         return [getattr(Role, x['name']) for x in self.roles.all().values()]

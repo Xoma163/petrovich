@@ -8,12 +8,12 @@ from io import BytesIO
 from urllib.parse import urlparse, parse_qsl
 
 from PIL import Image, ImageDraw, ImageFont
-from django.contrib.auth.models import Group
 
 from apps.bot.consts import RoleEnum
 from apps.bot.core.messages.attachments.document import DocumentAttachment
 from apps.bot.core.messages.attachments.photo import PhotoAttachment
 from apps.bot.models import Profile
+from apps.bot.models import Role
 from apps.commands.help_text import HelpTextKey
 from apps.commands.models import Service
 from apps.shared.exceptions import PWarning
@@ -575,8 +575,8 @@ def prepare_filename(filename: str, replace_symbol=".") -> str:
 
 
 def get_admin_profile(exclude_profile: Profile | None = None) -> Profile | None:
-    admin_group = Group.objects.get(name=RoleEnum.ADMIN.name)
-    profile = Profile.objects.filter(groups__in=[admin_group]).first()
+    admin_role = Role.objects.get(name=RoleEnum.ADMIN.name)
+    profile = Profile.objects.filter(roles__in=[admin_role]).first()
 
     if exclude_profile and profile == exclude_profile:
         return None

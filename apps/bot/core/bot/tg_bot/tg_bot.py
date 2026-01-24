@@ -674,7 +674,7 @@ class TgBot(Bot):
         }).json()
         return r
 
-    def leave_group(self, chat_id) -> dict:
+    def leave_chat(self, chat_id) -> dict:
         r = self.requests.post('leaveChat', json={
             'chat_id': chat_id,
         }).json()

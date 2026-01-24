@@ -1,17 +1,17 @@
-from django.contrib.auth.models import Group
 from django.core.management.base import BaseCommand
 
 from apps.bot.consts import RoleEnum
+from apps.bot.models import Role
 from apps.commands.models import City, TimeZone
 
 
 class Command(BaseCommand):
 
     @staticmethod
-    def init_groups():
-        groups = [x.name for x in RoleEnum]
-        for group in groups:
-            Group.objects.update_or_create(name=group)
+    def init_roles():
+        roles = [x.name for x in RoleEnum]
+        for role in roles:
+            Role.objects.update_or_create(name=role)
 
     @staticmethod
     def init_cities_offline():
@@ -355,8 +355,8 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        self.init_groups()
-        print('done init groups')
+        self.init_roles()
+        print('done init roles')
 
         self.init_cities_offline()
         print('done init cities')

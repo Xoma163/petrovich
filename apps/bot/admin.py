@@ -59,7 +59,7 @@ class ProfileAdmin(TimeStampAdminMixin):
     list_filter = (
         'gender',
         ('city', admin.RelatedOnlyFieldListFilter),
-        ('groups', admin.RelatedOnlyFieldListFilter),
+        ('roles', admin.RelatedOnlyFieldListFilter),
         NoSpecificRoleFilter,
         'chats__name'
     )
@@ -83,7 +83,7 @@ class ProfileAdmin(TimeStampAdminMixin):
         (
             'Other',
             {
-                'fields': ('groups',)
+                'fields': ('roles',)
             }
         ),
         (
