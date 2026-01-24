@@ -15,7 +15,7 @@ from apps.bot.core.messages.attachments.document import DocumentAttachment
 from apps.bot.core.messages.attachments.photo import PhotoAttachment
 from apps.bot.models import Profile
 from apps.commands.help_text import HelpTextKey
-from apps.service.models import Service
+from apps.commands.models import Service
 from apps.shared.exceptions import PWarning
 from petrovich.settings import STATIC_ROOT
 

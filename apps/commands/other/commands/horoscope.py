@@ -6,7 +6,7 @@ from apps.bot.utils.utils import localize_datetime
 from apps.commands.command import Command
 from apps.commands.help_text import HelpText, HelpTextItem, HelpTextArgument
 from apps.commands.meme.commands.meme import Meme as MemeCommand
-from apps.service.models import Horoscope as HoroscopeModel, HoroscopeMeme, Meme
+from apps.commands.meme.models import Horoscope as HoroscopeModel, HoroscopeMeme, Meme
 from apps.shared.exceptions import PWarning, PError
 from petrovich.settings import DEFAULT_TIME_ZONE
 

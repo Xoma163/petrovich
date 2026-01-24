@@ -5,7 +5,7 @@ from apps.bot.consts import Role
 from apps.bot.core.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.commands.command import Command
 from apps.commands.help_text import HelpText, HelpTextItem, HelpTextArgument
-from apps.service.models import Meme as MemeModel
+from apps.commands.meme.models import Meme as MemeModel
 from apps.shared.exceptions import PWarning
 
 

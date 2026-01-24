@@ -9,7 +9,7 @@ from apps.bot.core.bot.tg_bot.tg_bot import TgBot
 from apps.bot.core.event.event import Event
 from apps.bot.core.messages.response_message import ResponseMessageItem
 from apps.bot.utils.utils import remove_tz, localize_datetime
-from apps.service.models import Notify
+from apps.commands.notifies.models import Notify
 
 logger = logging.getLogger('notifier')
 

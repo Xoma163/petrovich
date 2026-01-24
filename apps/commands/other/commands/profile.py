@@ -1,14 +1,14 @@
 from datetime import datetime
 
-from apps.bot.core.bot.tg_bot.tg_bot import TgBot
-from apps.commands.command import Command
 from apps.bot.consts import Platform, Role
-from apps.shared.exceptions import PWarning
-from apps.commands.help_text import HelpText, HelpTextItem, HelpTextArgument
+from apps.bot.core.bot.tg_bot.tg_bot import TgBot
 from apps.bot.core.messages.attachments.photo import PhotoAttachment
 from apps.bot.core.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.models import Profile as ProfileModel
-from apps.service.models import City
+from apps.commands.command import Command
+from apps.commands.help_text import HelpText, HelpTextItem, HelpTextArgument
+from apps.commands.models import City
+from apps.shared.exceptions import PWarning
 
 
 class Profile(Command):

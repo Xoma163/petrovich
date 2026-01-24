@@ -2,14 +2,14 @@ import datetime
 
 from django.db.models import Count
 
-from apps.commands.command import Command
 from apps.bot.consts import Role
-from apps.shared.exceptions import PWarning
-from apps.commands.help_text import HelpText, HelpTextArgument, HelpTextItem, HelpTextKey
 from apps.bot.core.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.models import Profile
+from apps.commands.command import Command
 from apps.commands.games.models import PetrovichUser
-from apps.service.models import Meme
+from apps.commands.help_text import HelpText, HelpTextArgument, HelpTextItem, HelpTextKey
+from apps.commands.meme.models import Meme
+from apps.shared.exceptions import PWarning
 
 
 class Statistics(Command):

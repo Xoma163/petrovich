@@ -6,6 +6,7 @@ from django.utils.safestring import mark_safe
 
 from apps.bot.consts import Platform as PlatformEnum, Role
 from apps.bot.core.messages.attachments.photo import PhotoAttachment
+from apps.commands.models import City
 from apps.shared.mixins import TimeStampModelMixin
 
 
@@ -96,7 +97,7 @@ class Profile(TimeStampModelMixin):
     nickname_real = models.CharField("Прозвище", max_length=40, blank=True)
     gender = models.CharField('Пол', max_length=2, blank=True, choices=GENDER_CHOICES)
     birthday = models.DateField('Дата рождения', null=True, blank=True)
-    city = models.ForeignKey('service.City', models.SET_NULL, verbose_name='Город', null=True, blank=True)
+    city = models.ForeignKey(City, models.SET_NULL, verbose_name='Город', null=True, blank=True)
     avatar = models.ImageField('Аватар', blank=True, upload_to="bot/users/avatar/")
     groups = models.ManyToManyField(Group, verbose_name="Группы")
     chats = models.ManyToManyField(Chat, verbose_name="Чаты", blank=True, related_name="users")

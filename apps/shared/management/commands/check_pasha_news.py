@@ -5,7 +5,7 @@ from django.core.management.base import BaseCommand
 from apps.bot.core.bot.tg_bot.tg_bot import TgBot
 from apps.bot.core.messages.response_message import ResponseMessageItem, ResponseMessage
 from apps.bot.models import User
-from apps.service.models import Service
+from apps.commands.models import Service
 
 
 class Command(BaseCommand):

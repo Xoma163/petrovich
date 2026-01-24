@@ -17,7 +17,7 @@ from apps.bot.core.messages.response_message import ResponseMessage, ResponseMes
 from apps.bot.utils.utils import localize_datetime, normalize_datetime, remove_tz
 from apps.commands.command import Command
 from apps.commands.help_text import HelpText, HelpTextItem, HelpTextArgument
-from apps.service.models import Notify
+from apps.commands.notifies.models import Notify
 from apps.shared.exceptions import PWarning
 
 DELTA_WEEKDAY = {

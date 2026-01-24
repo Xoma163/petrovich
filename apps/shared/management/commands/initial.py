@@ -2,7 +2,7 @@ from django.contrib.auth.models import Group
 from django.core.management.base import BaseCommand
 
 from apps.bot.consts import Role
-from apps.service.models import City, TimeZone
+from apps.commands.models import City, TimeZone
 
 
 class Command(BaseCommand):

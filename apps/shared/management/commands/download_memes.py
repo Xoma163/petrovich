@@ -10,8 +10,8 @@ from apps.bot.core.messages.attachments.photo import PhotoAttachment
 from apps.bot.core.messages.attachments.video import VideoAttachment
 from apps.bot.utils.utils import get_youtube_video_id, detect_ext
 from apps.bot.utils.video.video_handler import VideoHandler
+from apps.commands.meme.models import Meme
 from apps.connectors.parsers.media_command.youtube.video import YoutubeVideo
-from apps.service.models import Meme
 
 tg_bot = TgBot()
 
