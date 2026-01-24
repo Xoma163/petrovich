@@ -4,8 +4,8 @@ from django.db import models
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
 
-from apps.bot.classes.const.consts import Platform as PlatformEnum, Role
-from apps.bot.classes.messages.attachments.photo import PhotoAttachment
+from apps.bot.consts import Platform as PlatformEnum, Role
+from apps.bot.core.messages.attachments.photo import PhotoAttachment
 from apps.service.mixins import TimeStampModelMixin
 
 

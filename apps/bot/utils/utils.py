@@ -10,13 +10,13 @@ from urllib.parse import urlparse, parse_qsl
 from PIL import Image, ImageDraw, ImageFont
 from django.contrib.auth.models import Group
 
-from apps.bot.classes.const.consts import Role
-from apps.bot.classes.const.exceptions import PWarning
-from apps.bot.classes.help_text import HelpTextKey
-from apps.bot.classes.messages.attachments.document import DocumentAttachment
-from apps.bot.classes.messages.attachments.photo import PhotoAttachment
+from apps.bot.consts import Role
+from apps.bot.core.messages.attachments.document import DocumentAttachment
+from apps.bot.core.messages.attachments.photo import PhotoAttachment
 from apps.bot.models import Profile
+from apps.commands.help_text import HelpTextKey
 from apps.service.models import Service
+from apps.shared.exceptions import PWarning
 from petrovich.settings import STATIC_ROOT
 
 
@@ -129,8 +129,8 @@ def get_help_texts_for_command(command, roles: list[Role] = None) -> str:
     LONG_DASH = "—"
     DOUBLE_DASH = "--"
 
-    from apps.bot.classes.bots.tg_bot import TgBot
-    from apps.bot.classes.help_text import HelpTextArgument
+    from apps.bot.core.bot.tg_bot.tg_bot import TgBot
+    from apps.commands.help_text import HelpTextArgument
 
     if roles is None:
         roles = [Role.USER]

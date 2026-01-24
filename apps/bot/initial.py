@@ -4,16 +4,19 @@ import pkgutil
 
 from django.contrib.auth.models import Group
 
-from apps.bot.classes.command import Command, AcceptExtraCommand
-from apps.bot.classes.const.consts import Platform, Role
+from apps.bot.consts import Platform, Role
 from apps.bot.utils.utils import get_flat_list
+from apps.commands.command import Command, AcceptExtraCommand
 from petrovich.settings import BASE_DIR
 
 
 def import_all_commands():
     commands_folders = [
         os.path.join(BASE_DIR, "apps", "bot", "commands"),
-        os.path.join(BASE_DIR, "apps", "gpt", "commands")
+        os.path.join(BASE_DIR, "apps", "commands", "gpt"),
+        os.path.join(BASE_DIR, "apps", "commands", "games"),
+        os.path.join(BASE_DIR, "apps", "commands", "media_command"),
+        os.path.join(BASE_DIR, "apps", "commands", "other")
     ]
     commands_dirs = []
     for commands_folder in commands_folders:
@@ -24,7 +27,6 @@ def import_all_commands():
     for (module_loader, name, _) in pkgutil.iter_modules(commands_dirs):
         package = module_loader.path.replace(BASE_DIR, '')[1:].replace('/', '.')
         importlib.import_module('.' + name, package)
-
 
 def generate_commands(base_class=Command):
     commands = base_class.__subclasses__()
@@ -40,8 +42,13 @@ def generate_commands(base_class=Command):
             new_commands = _new_commands
         else:
             flag = False
-    commands = [x() for x in commands if (x.__module__.startswith('apps.bot.commands') or x.__module__.startswith(
-        'apps.gpt.commands')) and x.enabled and not x.abstract]
+    commands = [x() for x in commands if (
+            x.__module__.startswith('apps.bot.commands') or
+            x.__module__.startswith('apps.commands.gpt') or
+            x.__module__.startswith('apps.commands.games') or
+            x.__module__.startswith('apps.commands.media_command') or
+            x.__module__.startswith('apps.commands.other')
+    ) and x.enabled and not x.abstract]
     commands.sort(key=lambda x: x.priority, reverse=True)
     return commands
 

@@ -48,8 +48,13 @@ VENDORS_APPS = [
 PROJECT_APPS = [
     'apps.bot',
     'apps.service',
-    'apps.games',
-    'apps.gpt'
+    "apps.shared",
+    "apps.connectors",
+    "apps.commands",
+    'apps.commands.games',
+    'apps.commands.gpt',
+    "apps.commands.media_command",
+    "apps.commands.other",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + VENDORS_APPS + PROJECT_APPS
@@ -70,7 +75,7 @@ ROOT_URLCONF = 'petrovich.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates'), 'templates'],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

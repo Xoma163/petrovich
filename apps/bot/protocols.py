@@ -1,10 +1,10 @@
 from typing import Protocol, Callable
 
-from apps.bot.classes.bots.bot import Bot
-from apps.bot.classes.const.consts import Role
-from apps.bot.classes.event.event import Event
-from apps.bot.classes.help_text import HelpText
-from apps.bot.classes.messages.response_message import ResponseMessage
+from apps.bot.consts import Role
+from apps.bot.core.bot.bot import Bot
+from apps.bot.core.event.event import Event
+from apps.bot.core.messages.response_message import ResponseMessage
+from apps.commands.help_text import HelpText
 
 
 class CommandProtocol(Protocol):

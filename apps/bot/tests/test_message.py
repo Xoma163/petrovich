@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from apps.bot.classes.messages.message import Message
+from apps.bot.core.messages.message import Message
 
 
 class MessageTestCase(TestCase):

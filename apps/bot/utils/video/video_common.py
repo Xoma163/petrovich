@@ -1,7 +1,7 @@
 import types
 from tempfile import NamedTemporaryFile
 
-from apps.bot.classes.messages.attachments.attachment import Attachment
+from apps.bot.core.messages.attachments.attachment import Attachment
 
 
 class VideoCommon:
