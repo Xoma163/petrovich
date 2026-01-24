@@ -90,6 +90,14 @@ class Role(models.Model):
         choices=[(role.value, role.name) for role in RoleEnum],  # noqa
     )
 
+    class Meta:
+        verbose_name = "Роль"
+        verbose_name_plural = "Роли"
+
+    def __str__(self):
+        return self.name
+
+
 class Profile(TimeStampModelMixin):
     GENDER_FEMALE = '1'
     GENDER_MALE = '2'
