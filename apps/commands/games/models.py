@@ -6,9 +6,9 @@ from apps.shared.mixins import TimeStampModelMixin
 
 
 class PetrovichUser(TimeStampModelMixin):
-    profile = models.ForeignKey(Profile, models.CASCADE, verbose_name="Пользователь", null=True)
+    profile = models.ForeignKey(Profile, models.CASCADE, verbose_name="Профиль", null=True)
     chat = models.ForeignKey(Chat, models.CASCADE, verbose_name='Чат', null=True, blank=True)
-    active = models.BooleanField("Активность", default=True)
+    active = models.BooleanField("Флаг активности", default=True)
 
     @property
     def wins(self):
@@ -26,11 +26,11 @@ class PetrovichUser(TimeStampModelMixin):
 
 
 class PetrovichGame(TimeStampModelMixin):
-    profile = models.ForeignKey(Profile, models.CASCADE, verbose_name="Пользователь", null=True)
+    profile = models.ForeignKey(Profile, models.CASCADE, verbose_name="Профиль", null=True)
     chat = models.ForeignKey(Chat, models.CASCADE, verbose_name='Чат', null=True, blank=True)
 
     class Meta:
-        verbose_name = "Петровича игра"
+        verbose_name = "Петрович игра"
         verbose_name_plural = "Петрович игры"
 
     def __str__(self):
@@ -38,9 +38,9 @@ class PetrovichGame(TimeStampModelMixin):
 
 
 class Wordle(TimeStampModelMixin):
-    profile = models.ForeignKey(Profile, models.CASCADE, verbose_name="Пользователь", null=True)
+    profile = models.ForeignKey(Profile, models.CASCADE, verbose_name="Профиль", null=True)
     chat = models.ForeignKey(Chat, models.CASCADE, verbose_name="Чат", null=True)
-    word = models.CharField(max_length=5)
+    word = models.CharField("Загаданное слово", max_length=5)
     steps = models.PositiveIntegerField("Количество попыток", default=0)
     hypotheses = ArrayField(models.CharField(verbose_name="Гипотеза", max_length=5), verbose_name="Гипотезы",
                             max_length=6)

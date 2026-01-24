@@ -84,7 +84,7 @@ class MediaService:
         """
         try:
             cache = VideoCache.objects.get(channel_id=channel_id, video_id=video_id)
-            text = self._get_download_cache_text(title, cache.video.url, cache.original_url)
+            text = self._get_download_cache_text(title, cache.video.url, cache.source_url)
             return MediaServiceResponse(
                 text=text,
                 attachments=None,
@@ -118,7 +118,7 @@ class MediaService:
         )
         cache.video.save(filename, content=BytesIO(content))
         cache.save()
-        text = self._get_download_cache_text(title, cache.video.url, cache.original_url)
+        text = self._get_download_cache_text(title, cache.video.url, cache.source_url)
         return MediaServiceResponse(
             text=text,
             attachments=None,

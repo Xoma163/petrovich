@@ -10,10 +10,8 @@ class Notify(TimeStampModelMixin):
     date = models.DateTimeField("Дата напоминания", null=True, blank=True)
     crontab = models.CharField("Crontab", max_length=100, null=True, blank=True)
     text = models.CharField("Текст/команда", max_length=1000, default="", blank=True)
-    chat = models.ForeignKey(Chat, models.CASCADE, verbose_name='Чат', null=True, blank=True,
-                             related_name='+')  # TODO: +
-    user = models.ForeignKey(User, models.CASCADE, verbose_name="Пользователь", null=True, blank=True,
-                             related_name='+')  # TODO +
+    chat = models.ForeignKey(Chat, models.CASCADE, verbose_name='Чат', null=True, blank=True)
+    user = models.ForeignKey(User, models.CASCADE, verbose_name="Пользователь", null=True, blank=True)
     mention_sender = models.BooleanField("Упоминать автора", default=True)
     attachments = JSONField("Вложения", blank=True, default=dict)
     message_thread_id = models.IntegerField("message_thread_id", blank=True, null=True, default=None)

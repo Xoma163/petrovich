@@ -18,8 +18,7 @@ class BaseMeme(TimeStampModelMixin):
     ]
     name = models.CharField("Название", max_length=1000, default="")
     link = models.CharField("Ссылка", max_length=1000, default="", null=True, blank=True)
-    author = models.ForeignKey(Profile, models.SET_NULL, verbose_name="Автор", null=True,
-                               related_name="+")  # TODO: убрать +
+    author = models.ForeignKey(Profile, models.SET_NULL, verbose_name="Профиль автора", null=True)
     type = models.CharField("Тип", max_length=10, choices=ATTACHMENT_NAMES, blank=True)
     uses = models.PositiveIntegerField("Использований", default=0)
     inline_uses = models.PositiveIntegerField("Рекомендаций в inline", default=0)

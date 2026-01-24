@@ -32,7 +32,7 @@ class Provider(models.Model):
 class Preprompt(TimeStampModelMixin):
     provider = models.ForeignKey(Provider, models.CASCADE, verbose_name="Провайдер")
 
-    author = models.ForeignKey(Profile, models.CASCADE, verbose_name="Пользователь", null=True, blank=True)
+    author = models.ForeignKey(Profile, models.CASCADE, verbose_name="Профиль автора", null=True, blank=True)
     chat = models.ForeignKey(Chat, models.CASCADE, verbose_name="Чат", null=True, blank=True)
     text = models.TextField("Текст препромпта", blank=True)
 
@@ -48,7 +48,7 @@ class Preprompt(TimeStampModelMixin):
 class Usage(TimeStampModelMixin):
     provider = models.ForeignKey(Provider, models.CASCADE, verbose_name="Провайдер")
 
-    author = models.ForeignKey(Profile, models.CASCADE, verbose_name="Пользователь", null=True, db_index=True)
+    author = models.ForeignKey(Profile, models.CASCADE, verbose_name="Профиль автора", null=True, db_index=True)
     cost = models.DecimalField("Стоимость запроса", max_digits=10, decimal_places=6)
     model_name = models.CharField("Название модели", blank=True, max_length=256)
 
@@ -64,8 +64,6 @@ class GPTModel(models.Model):
     provider = models.ForeignKey(Provider, models.CASCADE, verbose_name="Провайдер")
 
     name = models.CharField(max_length=256, verbose_name="Название модели в API")
-    # ToDo: deprecated?
-    verbose_name = models.CharField(max_length=256, verbose_name="Название модели для пользователя")
     is_default = models.BooleanField(default=False, verbose_name="Модель по умолчанию")
 
     def __str__(self):

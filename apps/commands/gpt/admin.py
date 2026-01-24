@@ -86,7 +86,6 @@ class CompletionModelAdmin(admin.ModelAdmin):
     list_display = (
         "name",
         "provider",
-        "verbose_name",
         "is_default",
         "input_1m_token_cost",
         "input_cached_1m_token_cost",
@@ -94,7 +93,6 @@ class CompletionModelAdmin(admin.ModelAdmin):
         "web_search_1k_token_cost"
     )
     list_editable = (
-        "verbose_name",
         "input_1m_token_cost",
         "input_cached_1m_token_cost",
         "output_1m_token_cost",
@@ -119,7 +117,6 @@ class VisionModelAdmin(admin.ModelAdmin):
     list_display = (
         "name",
         "provider",
-        "verbose_name",
         "is_default",
         "input_1m_token_cost",
         "input_cached_1m_token_cost",
@@ -127,7 +124,6 @@ class VisionModelAdmin(admin.ModelAdmin):
         "web_search_1k_token_cost"
     )
     list_editable = (
-        "verbose_name",
         "input_1m_token_cost",
         "input_cached_1m_token_cost",
         "output_1m_token_cost",
@@ -150,7 +146,6 @@ class ImageDrawModelAdmin(admin.ModelAdmin):
     list_display = (
         "name",
         "provider",
-        "verbose_name",
         "is_default",
         "image_cost",
         "width",
@@ -174,7 +169,6 @@ class ImageEditModelAdmin(admin.ModelAdmin):
     list_display = (
         "name",
         "provider",
-        "verbose_name",
         "is_default",
         "image_cost",
         "width",
@@ -197,7 +191,6 @@ class VoiceRecognitionModelAdmin(admin.ModelAdmin):
     list_display = (
         "name",
         "provider",
-        "verbose_name",
         "is_default",
         "voice_recognition_1_min_cost"
     )
