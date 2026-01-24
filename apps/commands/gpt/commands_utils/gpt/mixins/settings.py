@@ -1,5 +1,5 @@
 from apps.bot.core.messages.response_message import ResponseMessageItem
-from apps.commands.gpt.commands.gpt.mixins.preprompt import GPTPrepromptMixin
+from apps.commands.gpt.commands_utils.gpt.mixins.preprompt import GPTPrepromptMixin
 from apps.commands.gpt.enums import GPTDebug
 from apps.commands.gpt.models import Preprompt
 from apps.commands.gpt.protocols import GPTCommandProtocol

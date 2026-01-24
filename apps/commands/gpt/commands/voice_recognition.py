@@ -10,8 +10,8 @@ from apps.bot.core.messages.response_message import ResponseMessage, ResponseMes
 from apps.commands.command import AcceptExtraCommand
 from apps.commands.gpt.api.providers.chatgpt import ChatGPTAPI
 from apps.commands.gpt.api.responses import GPTVoiceRecognitionResponse
-from apps.commands.gpt.commands.gpt.mixins.key import GPTKeyMixin
-from apps.commands.gpt.commands.gpt.providers.chatgpt import ChatGPTCommand
+from apps.commands.gpt.commands.chatgpt import ChatGPTCommand
+from apps.commands.gpt.commands_utils.gpt.mixins.key import GPTKeyMixin
 from apps.commands.gpt.models import Usage, Provider, VoiceRecognitionModel
 from apps.commands.gpt.providers.providers.chatgpt import ChatGPTProvider
 from apps.commands.gpt.utils import user_has_api_key

@@ -11,16 +11,16 @@ from apps.commands.gpt.api.base import ImageDrawAPIMixin, VisionAPIMixin, Comple
 from apps.commands.gpt.api.responses import GPTAPIResponse, GPTCompletionsResponse, GPTVisionResponse, \
     GPTImageDrawResponse, \
     GPTVoiceRecognitionResponse
-from apps.commands.gpt.commands.gpt.functionality.completions import GPTCompletionsFunctionality
-from apps.commands.gpt.commands.gpt.functionality.image_draw import GPTImageDrawFunctionality
-from apps.commands.gpt.commands.gpt.functionality.vision import GPTVisionFunctionality
-from apps.commands.gpt.commands.gpt.mixins.gpt_5_settings import GPT5SettingsMixin
-from apps.commands.gpt.commands.gpt.mixins.key import GPTKeyMixin
-from apps.commands.gpt.commands.gpt.mixins.model_choice import GPTModelChoiceMixin
-from apps.commands.gpt.commands.gpt.mixins.preprompt import GPTPrepromptMixin
-from apps.commands.gpt.commands.gpt.mixins.preset import GPTPresetMixin
-from apps.commands.gpt.commands.gpt.mixins.settings import GPTSettingsMixin
-from apps.commands.gpt.commands.gpt.mixins.statistics import GPTStatisticsMixin
+from apps.commands.gpt.commands_utils.gpt.functionality.completions import GPTCompletionsFunctionality
+from apps.commands.gpt.commands_utils.gpt.functionality.image_draw import GPTImageDrawFunctionality
+from apps.commands.gpt.commands_utils.gpt.functionality.vision import GPTVisionFunctionality
+from apps.commands.gpt.commands_utils.gpt.mixins.gpt_5_settings import GPT5SettingsMixin
+from apps.commands.gpt.commands_utils.gpt.mixins.key import GPTKeyMixin
+from apps.commands.gpt.commands_utils.gpt.mixins.model_choice import GPTModelChoiceMixin
+from apps.commands.gpt.commands_utils.gpt.mixins.preprompt import GPTPrepromptMixin
+from apps.commands.gpt.commands_utils.gpt.mixins.preset import GPTPresetMixin
+from apps.commands.gpt.commands_utils.gpt.mixins.settings import GPTSettingsMixin
+from apps.commands.gpt.commands_utils.gpt.mixins.statistics import GPTStatisticsMixin
 from apps.commands.gpt.messages.base import GPTMessages
 from apps.commands.gpt.messages.consts import GPTMessageRole
 from apps.commands.gpt.models import Provider, ProfileGPTSettings, GPTModel
@@ -285,7 +285,7 @@ class GPTCommand(
             self.provider_model = self._get_provider_model()
 
     def get_extra_data(self) -> dict:
-        from apps.commands.gpt.commands.gpt.providers.chatgpt import ChatGPTCommand
+        from apps.commands.gpt.commands.chatgpt import ChatGPTCommand
 
         if isinstance(self, ChatGPTCommand):
             profile_settings = self.get_profile_gpt_settings()
@@ -386,7 +386,7 @@ class GPTCommand(
         """
         Добавление сообщение
         """
-        from apps.commands.gpt.commands.gpt.providers.chatgpt import ChatGPTCommand
+        from apps.commands.gpt.commands.chatgpt import ChatGPTCommand
 
         photos = event.get_all_attachments([PhotoAttachment], use_fwd=False)
         if isinstance(self, ChatGPTCommand):

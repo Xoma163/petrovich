@@ -5,7 +5,7 @@ from django.utils.safestring import mark_safe
 
 from apps.bot.filters import NoSpecificRoleFilter
 from apps.bot.inlines import ProfileSettingsInline, UserInline, ChatSettingsInline
-from apps.bot.models import Profile, Chat, Bot, User, ChatSettings, ProfileSettings
+from apps.bot.models import Profile, Chat, Bot, User, ChatSettings, ProfileSettings, Role
 from apps.commands.gpt.inlines import ProfileGPTSettingsInline
 from apps.shared.mixins import TimeStampAdminMixin
 
@@ -35,6 +35,13 @@ class UserAdmin(TimeStampAdminMixin):
     )
     ordering = (
         "profile",
+    )
+
+
+@admin.register(Role)
+class RoleAdmin(admin.ModelAdmin):
+    list_display = (
+        'name',
     )
 
 

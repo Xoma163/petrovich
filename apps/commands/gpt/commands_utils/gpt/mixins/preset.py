@@ -1,7 +1,7 @@
 from django.db.models import QuerySet
 
 from apps.bot.core.messages.response_message import ResponseMessageItem
-from apps.commands.gpt.commands.gpt.mixins.preprompt import GPTPrepromptMixin
+from apps.commands.gpt.commands_utils.gpt.mixins.preprompt import GPTPrepromptMixin
 from apps.commands.gpt.models import GPTPreset, Preprompt
 from apps.commands.gpt.protocols import GPTCommandProtocol
 from apps.commands.help_text import HelpTextArgument

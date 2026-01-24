@@ -9,8 +9,8 @@ from apps.bot.core.event.tg_event.tg_event import TgEvent
 from apps.bot.core.messages.response_message import ResponseMessage
 from apps.bot.models import User
 from apps.commands.command import Command
-from apps.commands.gpt.commands.gpt.base import GPTCommand
-from apps.commands.gpt.commands.gpt.mixins.key import GPTKeyMixin
+from apps.commands.gpt.commands_utils.gpt.gpt_abstract import GPTCommand
+from apps.commands.gpt.commands_utils.gpt.mixins.key import GPTKeyMixin
 from apps.commands.gpt.messages.base import GPTMessages
 from apps.commands.gpt.messages.consts import GPTMessageRole
 from apps.commands.gpt.providers.providers.chatgpt import ChatGPTProvider

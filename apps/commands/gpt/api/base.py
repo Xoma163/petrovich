@@ -1,4 +1,4 @@
-from abc import abstractmethod
+from abc import abstractmethod, ABC
 
 from apps.commands.gpt.api.responses import (
     GPTCompletionsResponse,
@@ -24,7 +24,7 @@ from apps.commands.gpt.protocols import (
 from apps.connectors.api.handler import API
 
 
-class GPTAPI(API):
+class GPTAPI(API, ABC):
     def __init__(self, api_key: str, *args, **kwargs):
         super(GPTAPI, self).__init__(*args, **kwargs)
         self.api_key: str = api_key

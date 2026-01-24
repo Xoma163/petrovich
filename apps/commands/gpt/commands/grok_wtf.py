@@ -1,18 +1,18 @@
 from apps.bot.consts import RoleEnum
-from apps.commands.gpt.commands.gpt.providers.chatgpt import ChatGPTCommand
-from apps.commands.gpt.commands.wtf.base import WTFCommand
+from apps.commands.gpt.commands.grok import GrokCommand
+from apps.commands.gpt.commands_utils.wtf.wtf_abstract import WTFCommand
 from apps.commands.help_text import HelpText, HelpTextItem
 
 
-class WTF(WTFCommand):
-    name = "wtf"
-    names = ['втф', 'саммари', 'суммаризируй']
+class GWTF(WTFCommand):
+    name = "gwtf"
+    names = ['гвтф']
 
     abstract = False
     access = RoleEnum.TRUSTED
 
     help_text = HelpText(
-        commands_text="обрабатывает сообщения в конфе через ChatGPT",
+        commands_text="обрабатывает сообщения в конфе через Grok",
         help_texts=[
             HelpTextItem(
                 access,
@@ -23,4 +23,4 @@ class WTF(WTFCommand):
     )
 
     def __init__(self):
-        super().__init__(ChatGPTCommand)
+        super().__init__(GrokCommand)

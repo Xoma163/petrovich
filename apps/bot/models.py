@@ -137,15 +137,15 @@ class Profile(TimeStampModelMixin):
         image = att.get_bytes_io_content()
         self.avatar.save(f"avatar_{str(self)}.{att.ext}", File(image))
 
-    def add_role(self, role: Role):
+    def add_role(self, role: RoleEnum):
         role = Role.objects.get(name=role.name)
         self.roles.add(role)
 
-    def remove_role(self, role: Role):
+    def remove_role(self, role: RoleEnum):
         role = Role.objects.get(name=role.name)
         self.roles.remove(role)
 
-    def check_role(self, role: Role):
+    def check_role(self, role: RoleEnum):
         role = self.roles.filter(name=role.name)
         return role.exists()
 
