@@ -8,9 +8,9 @@ from django.views import View
 from apps.bot.core.bot.tg_bot.tg_bot import TgBot
 from apps.bot.core.messages.attachments.photo import PhotoAttachment
 from apps.bot.core.messages.response_message import ResponseMessageItem
-from apps.bot.utils.utils import get_admin_profile
 from apps.connectors.api.github.issue import GithubIssueAPI
 from apps.shared.mixins import CSRFExemptMixin
+from apps.shared.utils.utils import get_admin_profile
 from petrovich.settings import env
 
 

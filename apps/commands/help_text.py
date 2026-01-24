@@ -1,4 +1,4 @@
-from apps.bot.consts import Role
+from apps.bot.consts import RoleEnum
 
 
 class HelpTextArgument:
@@ -17,8 +17,8 @@ class HelpTextKey:
         return self.aliases if self.aliases else []
 
 class HelpTextItem:
-    def __init__(self, role: Role, texts: list[HelpTextArgument | HelpTextKey]):
-        self.role: Role = role
+    def __init__(self, role: RoleEnum, texts: list[HelpTextArgument | HelpTextKey]):
+        self.role: RoleEnum = role
         self.items: list[HelpTextArgument] = texts
 
 
@@ -47,19 +47,19 @@ class HelpText:
         self.commands_text: str = commands_text
         self.extra_text: str = extra_text
 
-        self.help_texts: dict[Role, HelpTextItem] = {}
+        self.help_texts: dict[RoleEnum, HelpTextItem] = {}
         for hti in help_texts:
             hti: HelpTextItem
             self.help_texts[hti.role] = hti
 
-        self.keys_items: dict[Role, HelpTextItem] = {}
+        self.keys_items: dict[RoleEnum, HelpTextItem] = {}
         for htk in help_text_keys:
             self.keys_items[htk.role] = htk
 
-    def get_help_text_item(self, role: Role) -> str | None:
+    def get_help_text_item(self, role: RoleEnum) -> str | None:
         hti = self.help_texts.get(role)
         return hti if hti else None
 
-    def get_help_text_key(self, role: Role) -> str | None:
+    def get_help_text_key(self, role: RoleEnum) -> str | None:
         hti = self.keys_items.get(role)
         return hti if hti else None

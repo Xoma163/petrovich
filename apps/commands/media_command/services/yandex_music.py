@@ -1,4 +1,4 @@
-from apps.bot.consts import Role
+from apps.bot.consts import RoleEnum
 from apps.bot.core.activities import ActivitiesEnum
 from apps.bot.core.chat_activity import ChatActivity
 from apps.commands.media_command.service import MediaServiceResponse, MediaService
@@ -47,5 +47,5 @@ class YandexMusicService(MediaService):
         return ["music.yandex.ru", "music.yandex.com", "next.music.yandex.ru", "next.music.yandex.com"]
 
     def check_sender_role(self) -> None:
-        if not self.event.sender.check_role(Role.TRUSTED):
+        if not self.event.sender.check_role(RoleEnum.TRUSTED):
             raise PWarning("Медиа яндекс музыка доступен только для доверенных пользователей")

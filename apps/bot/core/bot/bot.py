@@ -6,7 +6,7 @@ from threading import Thread
 
 from django.db.models import Q
 
-from apps.bot.consts import Role
+from apps.bot.consts import RoleEnum
 from apps.bot.core.activities import ActivitiesEnum
 from apps.bot.core.bot_response import BotResponse
 from apps.bot.core.chat_activity import ChatActivity
@@ -18,8 +18,8 @@ from apps.bot.core.messages.attachments.photo import PhotoAttachment
 from apps.bot.core.messages.attachments.video import VideoAttachment
 from apps.bot.core.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.models import Profile, Chat, Bot as BotModel, User
-from apps.bot.utils.utils import tanimoto, get_chunks, fix_layout, get_flat_list, has_cyrillic
 from apps.shared.exceptions import PWarning, PError, PSkip, PIDK, PSkipContinue
+from apps.shared.utils.utils import tanimoto, get_chunks, fix_layout, get_flat_list, has_cyrillic
 from petrovich.settings import env
 
 lock = Lock()
@@ -75,7 +75,7 @@ class Bot(Thread):
             if not event.need_a_response():
                 return None
 
-            if event.sender and not event.sender.check_role(Role.TRUSTED):
+            if event.sender and not event.sender.check_role(RoleEnum.TRUSTED):
                 raise PWarning("Обратитесь за доступом к создателю бота.")
 
             self.log_filter = event.log_filter
@@ -112,7 +112,7 @@ class Bot(Thread):
                 peer_id=event.peer_id,
                 message_thread_id=event.message_thread_id,
             )
-            if event.sender and event.sender.check_role(Role.TRUSTED):
+            if event.sender and event.sender.check_role(RoleEnum.TRUSTED):
                 button = self.get_button('Логи', command="логи")
                 keyboard = self.get_inline_keyboard([button])
                 rmi.keyboard = keyboard

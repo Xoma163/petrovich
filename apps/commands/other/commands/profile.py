@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from apps.bot.consts import Platform, Role
+from apps.bot.consts import Platform, RoleEnum
 from apps.bot.core.bot.tg_bot.tg_bot import TgBot
 from apps.bot.core.messages.attachments.photo import PhotoAttachment
 from apps.bot.core.messages.response_message import ResponseMessage, ResponseMessageItem
@@ -17,7 +17,7 @@ class Profile(Command):
     help_text = HelpText(
         commands_text="позволяет управлять вашим профилем",
         help_texts=[
-            HelpTextItem(Role.USER, [
+            HelpTextItem(RoleEnum.USER, [
                 HelpTextArgument(None, "присылает информацию по вашему профилю"),
                 HelpTextArgument(
                     "(имя, фамилия, логин/id, никнейм)",
@@ -173,8 +173,9 @@ class Profile(Command):
         _surname = profile.surname or not_defined
 
         roles = []
-        for group in profile.groups.all():
-            roles.append(Role[group.name])
+        #  TODO: Check
+        for role in profile.roles.all():
+            roles.append(RoleEnum[role.name])
         roles = sorted(roles)
         roles_str = ", ".join(roles)
 

@@ -9,16 +9,16 @@ from django.utils import timezone
 from matplotlib.dates import DateFormatter
 from matplotlib.ticker import MaxNLocator
 
-from apps.bot.consts import Role
+from apps.bot.consts import RoleEnum
 from apps.bot.core.messages.attachments.photo import PhotoAttachment
 from apps.bot.core.messages.response_message import ResponseMessageItem
 from apps.bot.models import Profile
-from apps.bot.utils.utils import decl_of_num
 from apps.commands.gpt.api.responses import GPTAPIResponse
 from apps.commands.gpt.models import Usage, ProfileGPTSettings
 from apps.commands.gpt.protocols import GPTCommandProtocol
 from apps.commands.help_text import HelpTextArgument, HelpTextKey
 from apps.shared.exceptions import PWarning
+from apps.shared.utils.utils import decl_of_num
 
 
 class GPTStatisticsMixin(GPTCommandProtocol):
@@ -49,11 +49,11 @@ class GPTStatisticsMixin(GPTCommandProtocol):
             profiles = self._get_profiles_by_key()
             answer = self._get_statistics_per_profile(profiles, custom_range=custom_range)
         elif self.event.message.is_key_provided({"nokey"}):
-            self.check_sender(Role.ADMIN)
+            self.check_sender(RoleEnum.ADMIN)
             profiles = self._get_profiles_with_no_key()
             answer = self._get_statistics_per_profile(profiles, custom_range=custom_range)
         elif self.event.message.is_key_provided({"all"}):
-            self.check_sender(Role.ADMIN)
+            self.check_sender(RoleEnum.ADMIN)
             profiles = self._get_all_profiles()
             answer = self._get_statistics_per_profile(profiles, custom_range=custom_range)
         else:

@@ -1,9 +1,9 @@
-from apps.bot.consts import Role
+from apps.bot.consts import RoleEnum
 from apps.bot.core.messages.response_message import ResponseMessage, ResponseMessageItem
-from apps.bot.utils.utils import get_role_by_str
 from apps.commands.command import Command
 from apps.commands.help_text import HelpText, HelpTextItem, HelpTextArgument
 from apps.shared.exceptions import PWarning
+from apps.shared.utils.utils import get_role_by_str
 
 
 class Commands(Command):
@@ -12,7 +12,7 @@ class Commands(Command):
     help_text = HelpText(
         commands_text="список всех команд",
         help_texts=[
-            HelpTextItem(Role.USER, [
+            HelpTextItem(RoleEnum.USER, [
                 HelpTextArgument(None, "список всех команд"),
                 HelpTextArgument("(название роли)", "список команд для роли")
             ])
@@ -24,11 +24,11 @@ class Commands(Command):
 
         help_texts = HELP_TEXTS[self.event.platform]
         ordered_roles = [
-            {"role": Role.USER, "text": "общие команды"},
-            {"role": Role.ADMIN, "text": "команды для администраторов"},
-            {"role": Role.MODERATOR, "text": "команды для модераторов"},
-            {"role": Role.MINECRAFT, "text": "команды для игроков майнкрафта"},
-            {"role": Role.TRUSTED, "text": "команды для доверенных пользователей"},
+            {"role": RoleEnum.USER, "text": "общие команды"},
+            {"role": RoleEnum.ADMIN, "text": "команды для администраторов"},
+            {"role": RoleEnum.MODERATOR, "text": "команды для модераторов"},
+            {"role": RoleEnum.MINECRAFT, "text": "команды для игроков майнкрафта"},
+            {"role": RoleEnum.TRUSTED, "text": "команды для доверенных пользователей"},
         ]
 
         if self.event.message.args:

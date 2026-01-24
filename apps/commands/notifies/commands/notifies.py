@@ -6,7 +6,7 @@ from dateutil import parser
 from dateutil.parser import ParserError
 from django.db.models import Q, QuerySet
 
-from apps.bot.consts import Role, Platform
+from apps.bot.consts import RoleEnum, Platform
 from apps.bot.core.bot.tg_bot.tg_bot import TgBot
 from apps.bot.core.messages.attachments.audio import AudioAttachment
 from apps.bot.core.messages.attachments.document import DocumentAttachment
@@ -14,11 +14,11 @@ from apps.bot.core.messages.attachments.gif import GifAttachment
 from apps.bot.core.messages.attachments.photo import PhotoAttachment
 from apps.bot.core.messages.attachments.video import VideoAttachment
 from apps.bot.core.messages.response_message import ResponseMessage, ResponseMessageItem
-from apps.bot.utils.utils import localize_datetime, normalize_datetime, remove_tz
 from apps.commands.command import Command
 from apps.commands.help_text import HelpText, HelpTextItem, HelpTextArgument
 from apps.commands.notifies.models import Notify
 from apps.shared.exceptions import PWarning
+from apps.shared.utils.utils import localize_datetime, normalize_datetime, remove_tz
 
 DELTA_WEEKDAY = {
     'сегодня': 0,
@@ -44,7 +44,7 @@ class Notifies(Command):
     help_text = HelpText(
         commands_text="установка напоминаний",
         help_texts=[
-            HelpTextItem(Role.USER, [
+            HelpTextItem(RoleEnum.USER, [
                 HelpTextArgument(None, "список активных напоминаний в лс, если в конфе, то только общие в конфе"),
                 HelpTextArgument(
                     "добавить (дата/дата и время/день недели) (сообщение/команда) [вложения]",
@@ -192,7 +192,7 @@ class Notifies(Command):
         return notifies.order_by("date")
 
     def check_max_notifies(self):
-        if not self.event.sender.check_role(Role.TRUSTED) and \
+        if not self.event.sender.check_role(RoleEnum.TRUSTED) and \
                 len(Notify.objects.filter(user=self.event.user)) >= 5:
             raise PWarning("Нельзя добавлять более 5 напоминаний")
 

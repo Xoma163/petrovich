@@ -7,7 +7,6 @@ from concurrent.futures import ThreadPoolExecutor
 from requests.exceptions import SSLError, JSONDecodeError
 
 from apps.bot.core.messages.attachments.photo import PhotoAttachment
-from apps.bot.utils.decorators import retry
 from apps.commands.gpt.api.base import GPTAPI
 from apps.commands.gpt.api.responses import (
     GPTCompletionsResponse,
@@ -28,6 +27,7 @@ from apps.commands.gpt.usage import (
     GPTImageDrawUsage
 )
 from apps.shared.exceptions import PError, PWarning
+from apps.shared.utils.decorators import retry
 
 logger = logging.getLogger('openai')
 

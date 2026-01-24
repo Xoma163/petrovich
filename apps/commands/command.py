@@ -1,8 +1,6 @@
+from apps.bot.consts import RoleEnum, Platform
 from apps.bot.core.bot.bot import Bot
-from apps.bot.consts import Role, Platform
-from apps.shared.exceptions import PWarning, PSkip, PIDK
 from apps.bot.core.event.event import Event
-from apps.commands.help_text import HelpText
 from apps.bot.core.messages.attachments.audio import AudioAttachment
 from apps.bot.core.messages.attachments.document import DocumentAttachment
 from apps.bot.core.messages.attachments.link import LinkAttachment
@@ -12,8 +10,10 @@ from apps.bot.core.messages.attachments.video import VideoAttachment
 from apps.bot.core.messages.attachments.video_note import VideoNoteAttachment
 from apps.bot.core.messages.attachments.voice import VoiceAttachment
 from apps.bot.core.messages.response_message import ResponseMessage
-from apps.bot.protocols import CommandProtocol
-from apps.bot.utils.utils import get_help_texts_for_command, transform_k
+from apps.commands.help_text import HelpText
+from apps.commands.protocols import CommandProtocol
+from apps.shared.exceptions import PWarning, PSkip, PIDK
+from apps.shared.utils.utils import get_help_texts_for_command, transform_k
 
 
 class Command(CommandProtocol):
@@ -31,7 +31,7 @@ class Command(CommandProtocol):
     abstract: bool = False  # Абстрактная команда, которая не запускается и не попадает в список всех команд
 
     # Проверки
-    access: Role = Role.USER  # Необходимые права для выполнения команды
+    access: RoleEnum = RoleEnum.USER  # Необходимые права для выполнения команды
     pm: bool = False  # Должно ли сообщение обрабатываться только в лс
     conversation: bool = False  # Должно ли сообщение обрабатываться только в конфе
     fwd: bool = False  # Должно ли сообщение обрабатываться только с пересланными сообщениями
@@ -147,7 +147,7 @@ class Command(CommandProtocol):
         """
         raise NotImplementedError
 
-    def check_sender(self, role: Role):
+    def check_sender(self, role: RoleEnum):
         """
         Проверка на роль отправителя
         :param role: требуемая роль

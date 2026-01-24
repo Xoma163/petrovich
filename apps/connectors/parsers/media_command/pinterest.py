@@ -3,8 +3,8 @@ import json
 import requests
 from bs4 import BeautifulSoup
 
-from apps.bot.utils.utils import get_url_file_ext
 from apps.shared.exceptions import PWarning
+from apps.shared.utils.utils import get_url_file_ext
 
 
 class PinterestDataItem:

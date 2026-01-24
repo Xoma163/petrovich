@@ -1,4 +1,4 @@
-from apps.bot.consts import Platform, Role
+from apps.bot.consts import Platform, RoleEnum
 from apps.bot.core.activities import ActivitiesEnum
 from apps.bot.core.bot.tg_bot.tg_bot import TgBot
 from apps.bot.core.chat_activity import ChatActivity
@@ -7,8 +7,6 @@ from apps.bot.core.messages.attachments.audio import AudioAttachment
 from apps.bot.core.messages.attachments.video_note import VideoNoteAttachment
 from apps.bot.core.messages.attachments.voice import VoiceAttachment
 from apps.bot.core.messages.response_message import ResponseMessage, ResponseMessageItem
-from apps.bot.utils.audio.splitter import AudioSplitter
-from apps.bot.utils.utils import wrap_text_in_document
 from apps.commands.command import AcceptExtraCommand
 from apps.commands.gpt.api.providers.chatgpt import ChatGPTAPI
 from apps.commands.gpt.api.responses import GPTVoiceRecognitionResponse
@@ -19,13 +17,15 @@ from apps.commands.gpt.providers.providers.chatgpt import ChatGPTProvider
 from apps.commands.gpt.utils import user_has_api_key
 from apps.commands.help_text import HelpText, HelpTextItem, HelpTextArgument
 from apps.shared.exceptions import PWarning, PSkipContinue, PError, PSkip
+from apps.shared.utils.audio.splitter import AudioSplitter
+from apps.shared.utils.utils import wrap_text_in_document
 
 
 class VoiceRecognition(AcceptExtraCommand):
     name = 'распознай'
     names = ["голос", "голосовое"]
 
-    access = Role.TRUSTED
+    access = RoleEnum.TRUSTED
 
     help_text = HelpText(
         commands_text="распознаёт голосовое сообщение",

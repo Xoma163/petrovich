@@ -1,11 +1,11 @@
-from apps.bot.consts import Role
+from apps.bot.consts import RoleEnum
 from apps.bot.core.messages.attachments.photo import PhotoAttachment
 from apps.bot.core.messages.response_message import ResponseMessage, ResponseMessageItem
-from apps.bot.utils.utils import get_admin_profile
 from apps.commands.command import Command
 from apps.commands.help_text import HelpTextItem, HelpText, HelpTextArgument
 from apps.connectors.api.github.issue import GithubIssueAPI
 from apps.shared.exceptions import PWarning
+from apps.shared.utils.utils import get_admin_profile
 
 
 class Issue(Command):
@@ -15,7 +15,7 @@ class Issue(Command):
     help_text = HelpText(
         commands_text="добавляет проблему Петровича, которую нужно решить",
         help_texts=[
-            HelpTextItem(Role.USER, [
+            HelpTextItem(RoleEnum.USER, [
                 HelpTextArgument(
                     "(проблема)\n[описание проблемы]\n[теги]",
                     "добавляет проблему Петровича"

@@ -10,7 +10,7 @@ from urllib.parse import urlparse, parse_qsl
 from PIL import Image, ImageDraw, ImageFont
 from django.contrib.auth.models import Group
 
-from apps.bot.consts import Role
+from apps.bot.consts import RoleEnum
 from apps.bot.core.messages.attachments.document import DocumentAttachment
 from apps.bot.core.messages.attachments.photo import PhotoAttachment
 from apps.bot.models import Profile
@@ -121,7 +121,7 @@ def decl_of_num(number, titles: list[str]) -> str:
         return titles[cases[5]]
 
 
-def get_help_texts_for_command(command, roles: list[Role] = None) -> str:
+def get_help_texts_for_command(command, roles: list[RoleEnum] = None) -> str:
     """
     Получает help_texts для команды
     """
@@ -133,12 +133,12 @@ def get_help_texts_for_command(command, roles: list[Role] = None) -> str:
     from apps.commands.help_text import HelpTextArgument
 
     if roles is None:
-        roles = [Role.USER]
+        roles = [RoleEnum.USER]
 
     result = ""
     if len(command.full_names) > 1:
         result += f"Названия команды: {', '.join(command.full_names)}\n"
-    if command.access != Role.USER:
+    if command.access != RoleEnum.USER:
         result += f"Необходимый уровень прав {LONG_DASH} {command.access}\n"
     if result:
         result += '\n'
@@ -246,12 +246,12 @@ def get_role_by_str(role_str: str):
 
     roles_map = {
         ('администрация', 'администратор', 'админы', 'админ', 'главный', 'власть', 'господин', 'хозяин', 'admin',
-         'administrator'): Role.ADMIN,
-        ('moderators', 'moderator', 'модераторы', 'модератор', 'модеры', 'модер', 'moder'): Role.MODERATOR,
-        ('майнкрафт', 'майн', 'minecraft', 'mine'): Role.MINECRAFT,
-        ('забанен', 'бан', 'ban', 'banned'): Role.BANNED,
-        ('доверенный', 'проверенный', 'trust', 'trusted'): Role.TRUSTED,
-        ('пользователь', 'юзер', 'user'): Role.USER
+         'administrator'): RoleEnum.ADMIN,
+        ('moderators', 'moderator', 'модераторы', 'модератор', 'модеры', 'модер', 'moder'): RoleEnum.MODERATOR,
+        ('майнкрафт', 'майн', 'minecraft', 'mine'): RoleEnum.MINECRAFT,
+        ('забанен', 'бан', 'ban', 'banned'): RoleEnum.BANNED,
+        ('доверенный', 'проверенный', 'trust', 'trusted'): RoleEnum.TRUSTED,
+        ('пользователь', 'юзер', 'user'): RoleEnum.USER
     }
     for k in roles_map:
         if role_str in k:
@@ -575,7 +575,7 @@ def prepare_filename(filename: str, replace_symbol=".") -> str:
 
 
 def get_admin_profile(exclude_profile: Profile | None = None) -> Profile | None:
-    admin_group = Group.objects.get(name=Role.ADMIN.name)
+    admin_group = Group.objects.get(name=RoleEnum.ADMIN.name)
     profile = Profile.objects.filter(groups__in=[admin_group]).first()
 
     if exclude_profile and profile == exclude_profile:

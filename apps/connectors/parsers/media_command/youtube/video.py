@@ -6,11 +6,11 @@ import yt_dlp
 
 from apps.bot.core.messages.attachments.audio import AudioAttachment
 from apps.bot.core.messages.attachments.video import VideoAttachment
-from apps.bot.utils.nothing_logger import NothingLogger
-from apps.bot.utils.video.downloader import VideoDownloader
-from apps.bot.utils.video.video_handler import VideoHandler
 from apps.connectors.parsers.media_command.data import VideoData
 from apps.shared.exceptions import PWarning
+from apps.shared.utils.nothing_logger import NothingLogger
+from apps.shared.utils.video.downloader import VideoDownloader
+from apps.shared.utils.video.video_handler import VideoHandler
 
 
 class YoutubeVideo:

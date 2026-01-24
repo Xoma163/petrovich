@@ -1,4 +1,4 @@
-from apps.bot.consts import Role
+from apps.bot.consts import RoleEnum
 from apps.commands.media_command.service import MediaServiceResponse, MediaService
 from apps.connectors.parsers.media_command.instagram import InstagramAPIDataItem, InstagramAPIData
 from apps.connectors.parsers.media_command.instagram.parse import InstagramParser
@@ -38,5 +38,5 @@ class InstagramService(MediaService):
         return ['www.instagram.com', 'instagram.com']
 
     def check_sender_role(self) -> None:
-        if not self.event.sender.check_role(Role.TRUSTED):
+        if not self.event.sender.check_role(RoleEnum.TRUSTED):
             raise PWarning("Медиа инстаграмм доступен только для доверенных пользователей")

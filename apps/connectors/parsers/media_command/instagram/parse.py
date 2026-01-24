@@ -5,10 +5,10 @@ from bs4 import BeautifulSoup
 from selenium.common import TimeoutException
 from selenium.webdriver.support.ui import WebDriverWait
 
-from apps.bot.utils.decorators import retry
-from apps.bot.utils.web_driver import get_web_driver
 from apps.connectors.parsers.media_command.instagram import InstagramAPIData
 from apps.shared.exceptions import PWarning, PError
+from apps.shared.utils.decorators import retry
+from apps.shared.utils.web_driver import get_web_driver
 
 
 class InstagramParser:

@@ -1,10 +1,10 @@
+from apps.bot.consts import RoleEnum
 from apps.bot.core.bot.tg_bot.tg_bot import TgBot
-from apps.commands.command import Command
-from apps.bot.consts import Role
-from apps.shared.exceptions import PWarning
 from apps.bot.core.event.tg_event.tg_event import TgEvent
-from apps.commands.help_text import HelpText, HelpTextItem, HelpTextArgument
 from apps.bot.core.messages.response_message import ResponseMessage, ResponseMessageItem
+from apps.commands.command import Command
+from apps.commands.help_text import HelpText, HelpTextItem, HelpTextArgument
+from apps.shared.exceptions import PWarning
 from petrovich.settings import env
 
 
@@ -15,7 +15,7 @@ class Settings(Command):
     help_text = HelpText(
         commands_text="устанавливает настройки пользователя/чата",
         help_texts=[
-            HelpTextItem(Role.USER, [
+            HelpTextItem(RoleEnum.USER, [
                 HelpTextArgument(
                     None,
                     "присылает текущие настройки и права бота в чате"),

@@ -3,12 +3,12 @@ import json
 import logging
 import textwrap
 
-from apps.bot.consts import Role
+from apps.bot.consts import RoleEnum
 from apps.bot.core.messages.response_message import ResponseMessage, ResponseMessageItem
-from apps.bot.utils.utils import draw_text_on_image
 from apps.commands.command import Command
 from apps.commands.help_text import HelpText, HelpTextItem, HelpTextArgument
 from apps.shared.exceptions import PWarning
+from apps.shared.utils.utils import draw_text_on_image
 from petrovich.settings import DEBUG_FILE
 
 
@@ -20,7 +20,7 @@ class Logs(Command):
 
     name = "логи"
     names = ["лог"]
-    access = Role.MODERATOR
+    access = RoleEnum.MODERATOR
 
     help_text = HelpText(
         commands_text="логи бота",

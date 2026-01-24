@@ -4,7 +4,7 @@ from django.db import models
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
 
-from apps.bot.consts import Platform as PlatformEnum, Role
+from apps.bot.consts import Platform as PlatformEnum, RoleEnum as RoleEnum
 from apps.bot.core.messages.attachments.photo import PhotoAttachment
 from apps.commands.models import City
 from apps.shared.mixins import TimeStampModelMixin
@@ -83,6 +83,14 @@ class Chat(Platform, TimeStampModelMixin):
         return str(self.name) if self.name else f"id:{self.id}"
 
 
+class Role(models.Model):
+    name = models.CharField(
+        'Название',
+        unique=True,
+        max_length=32,
+        choices=[(role.value, role.name) for role in RoleEnum],  # noqa
+    )
+
 class Profile(TimeStampModelMixin):
     GENDER_FEMALE = '1'
     GENDER_MALE = '2'
@@ -99,7 +107,7 @@ class Profile(TimeStampModelMixin):
     birthday = models.DateField('Дата рождения', null=True, blank=True)
     city = models.ForeignKey(City, models.SET_NULL, verbose_name='Город', null=True, blank=True)
     avatar = models.ImageField('Аватар', blank=True, upload_to="bot/users/avatar/")
-    groups = models.ManyToManyField(Group, verbose_name="Группы")
+    roles = models.ManyToManyField(Group, verbose_name="Роли")
     chats = models.ManyToManyField(Chat, verbose_name="Чаты", blank=True, related_name="users")
 
     api_token = models.CharField("Токен для API", max_length=100, blank=True)
@@ -110,9 +118,9 @@ class Profile(TimeStampModelMixin):
         super(Profile, self).save(**kwargs)
 
         if is_new:
-            # auto add user group
-            group_user = Group.objects.get(name=Role.USER.name)
-            self.groups.add(group_user)
+            # auto add profile role
+            role_user = Role.objects.get(name=RoleEnum.USER.name)
+            self.roles.add(role_user)
 
             # auto create settings
             us = ProfileSettings.objects.create(profile=self)
@@ -124,18 +132,18 @@ class Profile(TimeStampModelMixin):
 
     def add_role(self, role: Role):
         group = Group.objects.get(name=role.name)
-        self.groups.add(group)
+        self.roles.add(group)
 
     def remove_role(self, role: Role):
         group = Group.objects.get(name=role.name)
-        self.groups.remove(group)
+        self.roles.remove(group)
 
     def check_role(self, role: Role):
-        group = self.groups.filter(name=role.name)
+        group = self.roles.filter(name=role.name)
         return group.exists()
 
     def get_roles(self) -> list[Role]:
-        return [getattr(Role, x['name']) for x in self.groups.all().values()]
+        return [getattr(Role, x['name']) for x in self.roles.all().values()]
 
     def get_tg_user(self):
         return self.user.get(platform=PlatformEnum.TG.name)

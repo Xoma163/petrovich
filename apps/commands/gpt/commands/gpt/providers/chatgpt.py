@@ -1,4 +1,4 @@
-from apps.bot.consts import Role
+from apps.bot.consts import RoleEnum
 from apps.commands.gpt.commands.gpt.base import GPTCommand
 from apps.commands.gpt.commands.gpt.functionality.completions import GPTCompletionsFunctionality
 from apps.commands.gpt.commands.gpt.functionality.image_draw import GPTImageDrawFunctionality
@@ -24,7 +24,7 @@ class ChatGPTCommand(
 ):
     name = "gpt"
     names = ["гпт", "chatgpt", "чатгпт"]
-    access = Role.TRUSTED
+    access = RoleEnum.TRUSTED
     abstract = False
 
     provider: GPTProvider = ChatGPTProvider()
@@ -52,7 +52,7 @@ class ChatGPTCommand(
         ],
         help_text_keys=[
             HelpTextItem(
-                Role.USER,
+                RoleEnum.USER,
                 [
                     GPTImageDrawFunctionality.KEY_ITEM_ORIG,
                     GPTImageDrawFunctionality.KEY_ITEM_COUNT,

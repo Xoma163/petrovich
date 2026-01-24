@@ -1,6 +1,6 @@
 from apps.bot.core.messages.attachments.video import VideoAttachment
-from apps.bot.utils.do_the_linux_command import do_the_linux_command
-from apps.bot.utils.video.video_common import VideoCommon
+from apps.shared.utils.do_the_linux_command import do_the_linux_command
+from apps.shared.utils.video.video_common import VideoCommon
 
 
 class AudioTrack(VideoCommon):

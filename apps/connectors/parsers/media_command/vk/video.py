@@ -8,11 +8,11 @@ from bs4 import BeautifulSoup
 
 from apps.bot.core.messages.attachments.audio import AudioAttachment
 from apps.bot.core.messages.attachments.video import VideoAttachment
-from apps.bot.utils.utils import extract_json
-from apps.bot.utils.video.downloader import VideoDownloader
-from apps.bot.utils.video.video_handler import VideoHandler
 from apps.connectors.parsers.media_command.data import VideoData
 from apps.shared.exceptions import PError
+from apps.shared.utils.utils import extract_json
+from apps.shared.utils.video.downloader import VideoDownloader
+from apps.shared.utils.video.video_handler import VideoHandler
 
 
 class VKVideo:

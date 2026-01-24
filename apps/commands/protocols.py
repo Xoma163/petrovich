@@ -1,6 +1,6 @@
 from typing import Protocol, Callable
 
-from apps.bot.consts import Role
+from apps.bot.consts import RoleEnum
 from apps.bot.core.bot.bot import Bot
 from apps.bot.core.event.event import Event
 from apps.bot.core.messages.response_message import ResponseMessage
@@ -21,7 +21,7 @@ class CommandProtocol(Protocol):
     abstract: bool
 
     # Проверки
-    access: Role
+    access: RoleEnum
     pm: bool
     conversation: bool
     fwd: bool
@@ -49,7 +49,7 @@ class CommandProtocol(Protocol):
 
     def start(self) -> ResponseMessage | None: ...
 
-    def check_sender(self, role: Role) -> None: ...
+    def check_sender(self, role: RoleEnum) -> None: ...
 
     def check_args(self, args: int = None) -> bool: ...
 

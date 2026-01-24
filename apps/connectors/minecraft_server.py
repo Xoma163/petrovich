@@ -1,7 +1,7 @@
 from apps.shared.exceptions import PError
-from apps.bot.utils.do_the_linux_command import do_the_linux_command
-from apps.bot.utils.minecraft.server_data import MinecraftServerStatus, MinecraftServerData
-from apps.bot.utils.utils import check_command_time
+from apps.shared.utils.do_the_linux_command import do_the_linux_command
+from apps.shared.utils.minecraft.server_data import MinecraftServerStatus, MinecraftServerData
+from apps.shared.utils.utils import check_command_time
 
 
 class MinecraftServer:

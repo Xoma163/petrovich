@@ -1,4 +1,4 @@
-from apps.bot.consts import Role
+from apps.bot.consts import RoleEnum
 from apps.commands.gpt.commands.gpt.base import GPTCommand
 from apps.commands.gpt.commands.gpt.functionality.completions import GPTCompletionsFunctionality
 from apps.commands.gpt.commands.gpt.functionality.image_draw import GPTImageDrawFunctionality
@@ -22,7 +22,7 @@ class GrokCommand(
 ):
     name = "grok"
     names = ["грок", "грк", "grk"]
-    access = Role.TRUSTED
+    access = RoleEnum.TRUSTED
     abstract = False
 
     provider: GPTProvider = GrokProvider()
@@ -48,7 +48,7 @@ class GrokCommand(
         ],
         help_text_keys=[
             HelpTextItem(
-                Role.USER, [
+                RoleEnum.USER, [
                                GPTImageDrawFunctionality.KEY_ITEM_ORIG,
                                GPTImageDrawFunctionality.KEY_ITEM_COUNT,
                            ] + GPTStatisticsMixin.STATISTICS_KEY_ITEMS_KEY

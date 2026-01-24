@@ -1,12 +1,12 @@
 import math
 
-from apps.bot.consts import Role
+from apps.bot.consts import RoleEnum
 from apps.bot.core.event.event import Event
 from apps.bot.core.messages.response_message import ResponseMessage, ResponseMessageItem
-from apps.bot.utils.calculator import Calculator
 from apps.commands.command import Command
 from apps.commands.help_text import HelpTextItem, HelpText, HelpTextArgument
 from apps.shared.exceptions import PWarning
+from apps.shared.utils.calculator import Calculator
 
 
 class Calc(Command):
@@ -16,7 +16,7 @@ class Calc(Command):
     help_text = HelpText(
         commands_text="калькулятор",
         help_texts=[
-            HelpTextItem(Role.USER, [
+            HelpTextItem(RoleEnum.USER, [
                 HelpTextArgument("(выражение)", "калькулятор выражений. Умеет работать с + - * / ^ ( )")
             ])
         ]

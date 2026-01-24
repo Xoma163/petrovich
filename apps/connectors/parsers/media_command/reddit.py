@@ -6,9 +6,9 @@ from bs4 import BeautifulSoup
 
 from apps.bot.core.messages.attachments.audio import AudioAttachment
 from apps.bot.core.messages.attachments.video import VideoAttachment
-from apps.bot.utils.utils import get_url_file_ext, get_default_headers
-from apps.bot.utils.video.video_handler import VideoHandler
 from apps.shared.exceptions import PWarning
+from apps.shared.utils.utils import get_url_file_ext, get_default_headers
+from apps.shared.utils.video.video_handler import VideoHandler
 
 
 class Reddit:

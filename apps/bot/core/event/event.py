@@ -1,6 +1,6 @@
 import copy
 
-from apps.bot.consts import Platform, Role
+from apps.bot.consts import Platform, RoleEnum
 from apps.bot.core.messages.attachments.attachment import Attachment
 from apps.bot.core.messages.attachments.audio import AudioAttachment
 from apps.bot.core.messages.attachments.document import DocumentAttachment
@@ -13,7 +13,7 @@ from apps.bot.core.messages.attachments.video_note import VideoNoteAttachment
 from apps.bot.core.messages.attachments.voice import VoiceAttachment
 from apps.bot.core.messages.message import Message
 from apps.bot.models import Profile, Chat, User
-from apps.bot.utils.cache import MessagesCache
+from apps.shared.utils.cache import MessagesCache
 
 
 class Event:
@@ -79,7 +79,7 @@ class Event:
         if not self.sender:
             return False
 
-        if self.sender.check_role(Role.BANNED):
+        if self.sender.check_role(RoleEnum.BANNED):
             return False
         if self.is_from_bot:
             return False

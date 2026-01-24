@@ -4,14 +4,14 @@ from threading import Lock
 from django.contrib.auth.models import Group
 from django.db.models import QuerySet
 
-from apps.bot.consts import Platform, Role
+from apps.bot.consts import Platform, RoleEnum
 from apps.bot.core.bot.tg_bot.tg_bot import TgBot
 from apps.bot.core.messages.response_message import ResponseMessageItem, ResponseMessage
-from apps.bot.utils.utils import localize_datetime, remove_tz, random_event
 from apps.commands.command import Command
 from apps.commands.games.models import PetrovichGame, PetrovichUser
 from apps.commands.help_text import HelpTextItem, HelpText, HelpTextArgument
 from apps.shared.exceptions import PWarning
+from apps.shared.utils.utils import localize_datetime, remove_tz, random_event
 from petrovich.settings import DEFAULT_TIME_ZONE
 
 lock = Lock()
@@ -24,7 +24,7 @@ class Petrovich(Command):
     help_text = HelpText(
         commands_text="мини-игра, определяющая кто Петрович дня",
         help_texts=[
-            HelpTextItem(Role.USER, [
+            HelpTextItem(RoleEnum.USER, [
                 HelpTextArgument(None, "мини-игра, определяющая кто Петрович дня"),
                 HelpTextArgument("рег", "регистрация в игре"),
                 HelpTextArgument("дерег", "дерегистрация в игре"),
@@ -165,7 +165,7 @@ class Petrovich(Command):
             ])
 
     def _get_petrovich_gamers(self) -> QuerySet[PetrovichUser]:
-        group_banned = Group.objects.get(name=Role.BANNED.name)
+        group_banned = Group.objects.get(name=RoleEnum.BANNED.name)
         gamers = PetrovichUser.objects \
             .filter(chat=self.event.chat, active=True) \
             .exclude(profile__groups=group_banned) \

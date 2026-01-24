@@ -6,8 +6,6 @@ from apps.bot.core.event.tg_event.tg_event import TgEvent
 from apps.bot.core.messages.attachments.document import DocumentAttachment
 from apps.bot.core.messages.attachments.photo import PhotoAttachment
 from apps.bot.core.messages.response_message import ResponseMessageItem, ResponseMessage
-from apps.bot.utils.cache import MessagesCache
-from apps.bot.utils.utils import markdown_to_html, wrap_text_in_document
 from apps.commands.command import Command
 from apps.commands.gpt.api.base import ImageDrawAPIMixin, VisionAPIMixin, CompletionsAPIMixin
 from apps.commands.gpt.api.responses import GPTAPIResponse, GPTCompletionsResponse, GPTVisionResponse, \
@@ -29,6 +27,8 @@ from apps.commands.gpt.models import Provider, ProfileGPTSettings, GPTModel
 from apps.commands.gpt.protocols import GPTCommandProtocol
 from apps.commands.gpt.providers.base import GPTProvider
 from apps.shared.exceptions import PWarning, PError
+from apps.shared.utils.cache import MessagesCache
+from apps.shared.utils.utils import markdown_to_html, wrap_text_in_document
 from petrovich.settings import env
 
 logger = logging.getLogger(__name__)

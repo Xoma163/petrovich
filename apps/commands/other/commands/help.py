@@ -1,9 +1,9 @@
 from apps.bot.core.event.event import Event
 from apps.bot.core.messages.response_message import ResponseMessage, ResponseMessageItem
-from apps.bot.utils.utils import get_help_texts_for_command
 from apps.commands.command import Command
 from apps.commands.help_text import HelpText
 from apps.shared.exceptions import PWarning
+from apps.shared.utils.utils import get_help_texts_for_command
 
 
 class Help(Command):

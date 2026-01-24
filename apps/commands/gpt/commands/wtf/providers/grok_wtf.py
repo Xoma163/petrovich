@@ -1,4 +1,4 @@
-from apps.bot.consts import Role
+from apps.bot.consts import RoleEnum
 from apps.commands.gpt.commands.gpt.providers.grok import GrokCommand
 from apps.commands.gpt.commands.wtf.base import WTFCommand
 from apps.commands.help_text import HelpText, HelpTextItem
@@ -9,7 +9,7 @@ class GWTF(WTFCommand):
     names = ['гвтф']
 
     abstract = False
-    access = Role.TRUSTED
+    access = RoleEnum.TRUSTED
 
     help_text = HelpText(
         commands_text="обрабатывает сообщения в конфе через Grok",

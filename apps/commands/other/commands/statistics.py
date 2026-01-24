@@ -2,7 +2,7 @@ import datetime
 
 from django.db.models import Count
 
-from apps.bot.consts import Role
+from apps.bot.consts import RoleEnum
 from apps.bot.core.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.models import Profile
 from apps.commands.command import Command
@@ -19,13 +19,13 @@ class Statistics(Command):
     help_text = HelpText(
         commands_text="статистика по победителям игр или по кол-ву созданных мемов",
         help_texts=[
-            HelpTextItem(Role.USER, [
+            HelpTextItem(RoleEnum.USER, [
                 HelpTextArgument("[модуль=все]", "статистика по победителям-петровичам и по кол-ву созданных мемов"),
                 HelpTextArgument("(петрович) [год=текущий]", "статистика по победителям петровича")
             ])
         ],
         help_text_keys=[
-            HelpTextItem(Role.USER, [
+            HelpTextItem(RoleEnum.USER, [
                 HelpTextKey("all", None,
                             "если выбран модуль петрович, то выведутся пользователя которые также покинули группу")
             ])

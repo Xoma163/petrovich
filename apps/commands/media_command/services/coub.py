@@ -3,8 +3,8 @@ import json
 import requests
 from bs4 import BeautifulSoup
 
-from apps.bot.utils.utils import get_default_headers
 from apps.commands.media_command.service import MediaServiceResponse, MediaService
+from apps.shared.utils.utils import get_default_headers
 
 
 class CoubService(MediaService):

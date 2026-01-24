@@ -4,9 +4,9 @@ import pkgutil
 
 from django.contrib.auth.models import Group
 
-from apps.bot.consts import Platform, Role
-from apps.bot.utils.utils import get_flat_list
+from apps.bot.consts import Platform, RoleEnum
 from apps.commands.command import Command, AcceptExtraCommand
+from apps.shared.utils.utils import get_flat_list
 from petrovich.settings import BASE_DIR
 
 
@@ -98,11 +98,11 @@ def get_text_for_documentation():
     ITALIC = "_"
 
     allowed_roles = {
-        Role.USER: "всех пользователей",
-        Role.MINECRAFT: "майнкрафтеров",
-        Role.TRUSTED: "доверенных пользователей",
-        Role.MODERATOR: "модераторов",
-        Role.ADMIN: "админа",
+        RoleEnum.USER: "всех пользователей",
+        RoleEnum.MINECRAFT: "майнкрафтеров",
+        RoleEnum.TRUSTED: "доверенных пользователей",
+        RoleEnum.MODERATOR: "модераторов",
+        RoleEnum.ADMIN: "админа",
     }
 
     documentation = []

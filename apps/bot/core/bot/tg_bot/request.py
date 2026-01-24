@@ -3,7 +3,7 @@ import logging
 import requests
 from requests import Response
 
-from apps.bot.utils.cache import MessagesCache
+from apps.shared.utils.cache import MessagesCache
 
 
 class Request:

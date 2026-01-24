@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from apps.bot.consts import Platform, Role
+from apps.bot.consts import Platform, RoleEnum
 from apps.bot.core.activities import ActivitiesEnum
 from apps.bot.core.bot.tg_bot.tg_bot import TgBot
 from apps.bot.core.chat_activity import ChatActivity
@@ -9,12 +9,12 @@ from apps.bot.core.messages.attachments.link import LinkAttachment
 from apps.bot.core.messages.attachments.video import VideoAttachment
 from apps.bot.core.messages.attachments.video_note import VideoNoteAttachment
 from apps.bot.core.messages.response_message import ResponseMessage, ResponseMessageItem
-from apps.bot.utils.utils import prepend_symbols, append_symbols
-from apps.bot.utils.video.video_handler import VideoHandler
 from apps.commands.command import Command
 from apps.commands.help_text import HelpTextItem, HelpText, HelpTextArgument
 from apps.connectors.parsers.media_command.youtube.video import YoutubeVideo
 from apps.shared.exceptions import PWarning
+from apps.shared.utils.utils import prepend_symbols, append_symbols
+from apps.shared.utils.video.video_handler import VideoHandler
 
 
 class TrimVideo(Command):
@@ -24,7 +24,7 @@ class TrimVideo(Command):
     help_text = HelpText(
         commands_text="обрезание видео/аудио",
         help_texts=[
-            HelpTextItem(Role.USER, [
+            HelpTextItem(RoleEnum.USER, [
                 HelpTextArgument(
                     "(вложенное видео/аудио) (таймкод начала)",
                     "обрезает видео с таймкода и до конца"),
@@ -55,7 +55,7 @@ class TrimVideo(Command):
 
     attachments = [LinkAttachment, VideoAttachment, AudioAttachment, VideoNoteAttachment]
     args = 1
-    access = Role.TRUSTED
+    access = RoleEnum.TRUSTED
 
     TIMECODE_FORMAT = "%H:%M:%S.%f"
 

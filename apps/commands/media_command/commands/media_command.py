@@ -1,15 +1,13 @@
 import random
 from urllib.parse import urlparse
 
-from apps.bot.consts import Role, Platform
+from apps.bot.consts import RoleEnum, Platform
 from apps.bot.core.bot.tg_bot.tg_bot import TgBot
 from apps.bot.core.event.event import Event
 from apps.bot.core.messages.attachments.audio import AudioAttachment
 from apps.bot.core.messages.attachments.link import LinkAttachment
 from apps.bot.core.messages.attachments.video import VideoAttachment
 from apps.bot.core.messages.response_message import ResponseMessage, ResponseMessageItem
-from apps.bot.utils.utils import get_urls_from_text, get_flat_list, markdown_wrap_symbols
-from apps.bot.utils.video.video_handler import VideoHandler
 from apps.commands.command import AcceptExtraCommand
 from apps.commands.help_text import HelpText, HelpTextArgument, HelpTextKey, HelpTextItem
 from apps.commands.media_command.service import MediaService, MediaServiceResponse, MediaKeys
@@ -27,6 +25,8 @@ from apps.commands.media_command.services.yandex_music import YandexMusicService
 from apps.commands.media_command.services.youtube_music import YoutubeMusicService
 from apps.commands.media_command.services.youtube_video import YoutubeVideoService
 from apps.shared.exceptions import PWarning
+from apps.shared.utils.utils import get_urls_from_text, get_flat_list, markdown_wrap_symbols
+from apps.shared.utils.video.video_handler import VideoHandler
 
 
 class Media(AcceptExtraCommand):
@@ -36,12 +36,12 @@ class Media(AcceptExtraCommand):
     help_text = HelpText(
         commands_text="скачивает видео/фото из соцсетей и присылает его",
         help_texts=[
-            HelpTextItem(Role.USER, [
+            HelpTextItem(RoleEnum.USER, [
                 HelpTextArgument("(ссылка на видео/пост)", "скачивает видео из соцсетей и присылает его")
             ])
         ],
         help_text_keys=[
-            HelpTextItem(Role.USER, [
+            HelpTextItem(RoleEnum.USER, [
                 HelpTextKey(
                     MediaKeys.NO_MEDIA_KEYS[0],
                     MediaKeys.NO_MEDIA_KEYS[1:],
@@ -73,7 +73,7 @@ class Media(AcceptExtraCommand):
                     "позволяет скрыть пост спойлером"
                 ),
             ]),
-            HelpTextItem(Role.ADMIN, [
+            HelpTextItem(RoleEnum.ADMIN, [
                 HelpTextKey(MediaKeys.SAVE_TO_DISK_KEYS[0], MediaKeys.SAVE_TO_DISK_KEYS[1:],
                             "сохраняет видео в локальную директорию"),
             ]),
@@ -158,7 +158,7 @@ class Media(AcceptExtraCommand):
             att_is_video = isinstance(media_response.attachments[0], VideoAttachment) or media_response.cache_url
 
         if media_keys.save_to_disk and att_is_video:
-            self.check_sender(Role.ADMIN)
+            self.check_sender(RoleEnum.ADMIN)
             title = media_response.video_title or str(random.randint(1000000000, 9999999999))
             service.save_to_disk(media_response, "Скачано", title)
 

@@ -1,9 +1,9 @@
-from apps.bot.consts import Role
+from apps.bot.consts import RoleEnum
 from apps.bot.core.messages.attachments.video import VideoAttachment
 from apps.bot.core.messages.response_message import ResponseMessageItem, ResponseMessage
-from apps.bot.utils.video.video_handler import VideoHandler
 from apps.commands.command import Command
 from apps.commands.help_text import HelpText, HelpTextItem, HelpTextArgument
+from apps.shared.utils.video.video_handler import VideoHandler
 
 
 class AudioTrack(Command):
@@ -13,13 +13,13 @@ class AudioTrack(Command):
     help_text = HelpText(
         commands_text="Вырезает аудиодорожку из видео",
         help_texts=[
-            HelpTextItem(Role.USER, [
+            HelpTextItem(RoleEnum.USER, [
                 HelpTextArgument("(видео)", "вырезает аудиодорожку из видео")
             ])
         ],
     )
 
-    access = Role.TRUSTED
+    access = RoleEnum.TRUSTED
     attachments = [VideoAttachment]
 
     def start(self) -> ResponseMessage:

@@ -1,7 +1,7 @@
 from django.contrib.auth.models import Group
 from django.core.management.base import BaseCommand
 
-from apps.bot.consts import Role
+from apps.bot.consts import RoleEnum
 from apps.commands.models import City, TimeZone
 
 
@@ -9,7 +9,7 @@ class Command(BaseCommand):
 
     @staticmethod
     def init_groups():
-        groups = [x.name for x in Role]
+        groups = [x.name for x in RoleEnum]
         for group in groups:
             Group.objects.update_or_create(name=group)
 

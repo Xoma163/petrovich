@@ -1,13 +1,13 @@
 import datetime
 
-from apps.bot.consts import Role
+from apps.bot.consts import RoleEnum
 from apps.bot.core.messages.response_message import ResponseMessage, ResponseMessageItem
-from apps.bot.utils.utils import localize_datetime
 from apps.commands.command import Command
 from apps.commands.help_text import HelpText, HelpTextItem, HelpTextArgument
 from apps.commands.meme.commands.meme import Meme as MemeCommand
 from apps.commands.meme.models import Horoscope as HoroscopeModel, HoroscopeMeme, Meme
 from apps.shared.exceptions import PWarning, PError
+from apps.shared.utils.utils import localize_datetime
 from petrovich.settings import DEFAULT_TIME_ZONE
 
 
@@ -57,7 +57,7 @@ class Horoscope(Command):
     help_text = HelpText(
         commands_text="мемный гороскоп",
         help_texts=[
-            HelpTextItem(Role.USER, [
+            HelpTextItem(RoleEnum.USER, [
                 HelpTextArgument("[знак зодиака = по др в профиле]",
                                  "пришлёт мемный гороскоп на день для знака зодиака"),
                 HelpTextArgument("все", "пришлёт мемный гороскоп для всех знаков зодиака"),

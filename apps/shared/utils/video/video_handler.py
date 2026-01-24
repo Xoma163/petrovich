@@ -5,9 +5,9 @@ from pathlib import Path
 from apps.bot.core.messages.attachments.audio import AudioAttachment
 from apps.bot.core.messages.attachments.link import LinkAttachment
 from apps.bot.core.messages.attachments.video import VideoAttachment
-from apps.bot.utils.video.audio_track import AudioTrack
-from apps.bot.utils.video.muxer import AudioVideoMuxer
-from apps.bot.utils.video.trimmer import VideoTrimmer
+from apps.shared.utils.video.audio_track import AudioTrack
+from apps.shared.utils.video.muxer import AudioVideoMuxer
+from apps.shared.utils.video.trimmer import VideoTrimmer
 
 
 class VideoHandler:

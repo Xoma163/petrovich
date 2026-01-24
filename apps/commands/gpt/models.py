@@ -2,7 +2,6 @@ from django.core.exceptions import ValidationError
 from django.db import models
 
 from apps.bot.models import Profile, Chat
-from apps.bot.utils.fernet import Fernet
 from apps.commands.gpt.enums import (
     GPTProviderEnum,
     GPTImageFormat,
@@ -11,6 +10,7 @@ from apps.commands.gpt.enums import (
     GPTVerbosityLevel
 )
 from apps.shared.mixins import TimeStampModelMixin
+from apps.shared.utils.fernet import Fernet
 
 
 class Provider(models.Model):

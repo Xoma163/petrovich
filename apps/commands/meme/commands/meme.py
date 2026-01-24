@@ -2,7 +2,7 @@ import threading
 
 from django.core.files.base import ContentFile
 
-from apps.bot.consts import Role, Platform, ATTACHMENT_TYPE_TRANSLATOR
+from apps.bot.consts import RoleEnum, Platform, ATTACHMENT_TYPE_TRANSLATOR
 from apps.bot.core.bot.bot import send_message_to_moderator_chat
 from apps.bot.core.messages.attachments.gif import GifAttachment
 from apps.bot.core.messages.attachments.link import LinkAttachment
@@ -12,13 +12,13 @@ from apps.bot.core.messages.attachments.video import VideoAttachment
 from apps.bot.core.messages.attachments.video_note import VideoNoteAttachment
 from apps.bot.core.messages.attachments.voice import VoiceAttachment
 from apps.bot.core.messages.response_message import ResponseMessageItem, ResponseMessage
-from apps.bot.utils.utils import tanimoto, get_youtube_video_id, detect_ext
-from apps.bot.utils.video.video_handler import VideoHandler
 from apps.commands.command import Command
 from apps.commands.help_text import HelpText, HelpTextItem, HelpTextArgument
 from apps.commands.meme.models import Meme as MemeModel
 from apps.connectors.parsers.media_command.youtube.video import YoutubeVideo
 from apps.shared.exceptions import PWarning, PSkip
+from apps.shared.utils.utils import tanimoto, get_youtube_video_id, detect_ext
+from apps.shared.utils.video.video_handler import VideoHandler
 
 
 class Meme(Command):
@@ -27,7 +27,7 @@ class Meme(Command):
     help_text = HelpText(
         commands_text="присылает мем",
         help_texts=[
-            HelpTextItem(Role.USER, [
+            HelpTextItem(RoleEnum.USER, [
                 HelpTextArgument(None, "присылает рандомный мем"),
                 HelpTextArgument(
                     "(название/id)",
@@ -43,7 +43,7 @@ class Meme(Command):
                 HelpTextArgument("удалить (название/id)", "удаляет созданный вами мем"),
                 HelpTextArgument("инфо (название/id)", "присылает информацию по мему")
             ]),
-            HelpTextItem(Role.MODERATOR, [
+            HelpTextItem(RoleEnum.MODERATOR, [
                 HelpTextArgument("подтвердить", "присылает мем на подтверждение"),
                 HelpTextArgument("подтвердить (название/id)", "подтверждает мем"),
                 HelpTextArgument("отклонить (название/id)", "отклоняет мем"),
@@ -120,7 +120,8 @@ class Meme(Command):
             'name': meme_name,
             'type': attachment.type,
             'author': self.event.sender,
-            'approved': self.event.sender.check_role(Role.MODERATOR) or self.event.sender.check_role(Role.TRUSTED)
+            'approved': self.event.sender.check_role(RoleEnum.MODERATOR) or self.event.sender.check_role(
+                RoleEnum.TRUSTED)
         }
 
         try:
@@ -197,9 +198,9 @@ class Meme(Command):
             meme_filter['_id'] = id_name
         else:
             meme_filter['filter_list'] = id_name.split(' ')
-        if not (self.event.sender.check_role(Role.MODERATOR) or self.event.sender.check_role(Role.TRUSTED)):
+        if not (self.event.sender.check_role(RoleEnum.MODERATOR) or self.event.sender.check_role(RoleEnum.TRUSTED)):
             meme_filter['filter_user'] = self.event.sender
-        if not self.event.sender.check_role(Role.TRUSTED):
+        if not self.event.sender.check_role(RoleEnum.TRUSTED):
             meme_filter['exclude_trusted'] = True
 
         meme = self.get_meme(**meme_filter)
@@ -216,7 +217,8 @@ class Meme(Command):
         is_youtube_link = isinstance(attachment, LinkAttachment) and attachment.is_youtube_link
         callback_params_data = {}
 
-        trusted_user = self.event.sender.check_role(Role.MODERATOR) or self.event.sender.check_role(Role.TRUSTED)
+        trusted_user = self.event.sender.check_role(RoleEnum.MODERATOR) or self.event.sender.check_role(
+            RoleEnum.TRUSTED)
         # Кэш
         if trusted_user:
             meme.save()
@@ -255,13 +257,13 @@ class Meme(Command):
     def menu_delete(self) -> ResponseMessage:
         self.check_args(2)
         meme_filter = self.get_default_meme_filter_by_args(self.event.message.args[1:])
-        if not self.event.sender.check_role(Role.MODERATOR):
+        if not self.event.sender.check_role(RoleEnum.MODERATOR):
             meme_filter['filter_user'] = self.event.sender
-        if not self.event.sender.check_role(Role.TRUSTED):
+        if not self.event.sender.check_role(RoleEnum.TRUSTED):
             meme_filter['exclude_trusted'] = True
         meme = self.get_meme(**meme_filter)
 
-        if not self.event.sender.check_role(Role.MODERATOR) and meme.author != self.event.sender:
+        if not self.event.sender.check_role(RoleEnum.MODERATOR) and meme.author != self.event.sender:
             raise PWarning("У вас нет прав на удаление мемов")
         # Если удаляем мем другого человека, шлём ему сообщением
 
@@ -288,14 +290,14 @@ class Meme(Command):
 
     def menu_random(self) -> ResponseMessage:
         memes = MemeModel.objects.filter(approved=True)
-        if not self.event.sender.check_role(Role.TRUSTED):
+        if not self.event.sender.check_role(RoleEnum.TRUSTED):
             memes = memes.exclude(for_trusted=True)
         meme = memes.order_by('?').first()
         rmi = self.prepare_meme_to_send(meme, print_name=True, send_keyboard=True)
         return ResponseMessage(rmi)
 
     def menu_approve(self) -> ResponseMessage:
-        self.check_sender(Role.MODERATOR)
+        self.check_sender(RoleEnum.MODERATOR)
 
         if len(self.event.message.args) == 1:
             meme = self.get_meme(approved=False)
@@ -323,7 +325,7 @@ class Meme(Command):
         ])
 
     def menu_reject(self) -> ResponseMessage:
-        self.check_sender(Role.MODERATOR)
+        self.check_sender(RoleEnum.MODERATOR)
         self.check_args(2)
 
         meme_filter = self.get_default_meme_filter_by_args(self.event.message.args[1:])
@@ -346,12 +348,12 @@ class Meme(Command):
         ])
 
     def menu_rename(self) -> ResponseMessage:
-        self.check_sender(Role.MODERATOR)
+        self.check_sender(RoleEnum.MODERATOR)
         self.check_args(3)
         self.int_args = [1]
         self.parse_int()
         exclude_trusted = False
-        if not self.event.sender.check_role(Role.TRUSTED):
+        if not self.event.sender.check_role(RoleEnum.TRUSTED):
             exclude_trusted = True
         meme = self.get_meme(_id=self.event.message.args[1], exclude_trusted=exclude_trusted)
 
@@ -386,7 +388,7 @@ class Meme(Command):
         self.check_args(2)
         meme_filter = self.get_default_meme_filter_by_args(self.event.message.args[1:])
         exclude_trusted = False
-        if not self.event.sender.check_role(Role.TRUSTED):
+        if not self.event.sender.check_role(RoleEnum.TRUSTED):
             exclude_trusted = True
         meme = self.get_meme(**meme_filter, exclude_trusted=exclude_trusted)
         answer = meme.get_info()
@@ -396,7 +398,7 @@ class Meme(Command):
         warning_message = None
 
         exclude_trusted = False
-        if not self.event.sender.check_role(Role.TRUSTED):
+        if not self.event.sender.check_role(RoleEnum.TRUSTED):
             exclude_trusted = True
 
         id_name = self.get_id_or_meme_name(self.event.message.args)
@@ -680,7 +682,7 @@ class Meme(Command):
             filtered_memes = MemeModel.objects.all().order_by('-uses')
 
         memes = filtered_memes.filter(type__in=['photo', 'sticker', 'video', 'voice', 'gif'], approved=True)
-        if not self.event.sender.check_role(Role.TRUSTED):
+        if not self.event.sender.check_role(RoleEnum.TRUSTED):
             memes = memes.exclude(for_trusted=True)
 
         all_memes_qr = []

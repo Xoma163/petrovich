@@ -1,10 +1,10 @@
-from apps.bot.consts import Role
+from apps.bot.consts import RoleEnum
 from apps.bot.core.activities import ActivitiesEnum
 from apps.bot.core.chat_activity import ChatActivity
-from apps.bot.utils.decorators import retry
 from apps.commands.media_command.service import MediaServiceResponse, MediaService
 from apps.connectors.parsers.media_command.twitter import Twitter
 from apps.shared.exceptions import PWarning
+from apps.shared.utils.decorators import retry
 
 
 class TwitterService(MediaService):
@@ -46,5 +46,5 @@ class TwitterService(MediaService):
         return ['www.twitter.com', 'twitter.com', 'x.com']
 
     def check_sender_role(self) -> None:
-        if not self.event.sender.check_role(Role.TRUSTED):
+        if not self.event.sender.check_role(RoleEnum.TRUSTED):
             raise PWarning("Медиа твиттер доступен только для доверенных пользователей")

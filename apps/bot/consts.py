@@ -11,14 +11,13 @@ from apps.bot.core.messages.attachments.video_note import VideoNoteAttachment
 from apps.bot.core.messages.attachments.voice import VoiceAttachment
 
 
-class Role(StrEnum):
+class RoleEnum(StrEnum):
     ADMIN = "администратор"
     MODERATOR = "модератор"
     MINECRAFT = "майнкрафт"
     USER = "пользователь"
     BANNED = "забанен"
     TRUSTED = "доверенный"
-    GPT = "gpt"
 
     @classmethod
     def has_value(cls, value):

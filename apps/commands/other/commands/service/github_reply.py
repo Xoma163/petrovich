@@ -3,9 +3,9 @@ import re
 from apps.bot.core.event.event import Event
 from apps.bot.core.messages.attachments.photo import PhotoAttachment
 from apps.bot.core.messages.response_message import ResponseMessage, ResponseMessageItem
-from apps.bot.utils.utils import get_admin_profile
 from apps.commands.command import Command
 from apps.connectors.api.github.issue import GithubIssueAPI
+from apps.shared.utils.utils import get_admin_profile
 
 
 class GithubReply(Command):

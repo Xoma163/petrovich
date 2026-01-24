@@ -1,4 +1,4 @@
-from apps.bot.consts import Role
+from apps.bot.consts import RoleEnum
 from apps.bot.core.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.commands.command import Command
 from apps.commands.help_text import HelpText, HelpTextItem, HelpTextArgument
@@ -13,7 +13,7 @@ class Minecraft(Command):
     help_text = HelpText(
         commands_text="действия с сервером майнкрафта",
         help_texts=[
-            HelpTextItem(Role.MINECRAFT, [
+            HelpTextItem(RoleEnum.MINECRAFT, [
                 HelpTextArgument(None, "статус по всем серверам"),
                 HelpTextArgument("старт", "стартует сервер"),
                 HelpTextArgument("стоп", "останавливает сервер")
@@ -21,7 +21,7 @@ class Minecraft(Command):
         ]
     )
 
-    access = Role.MINECRAFT
+    access = RoleEnum.MINECRAFT
 
     server = MinecraftServer(
         ip=MAIN_DOMAIN,

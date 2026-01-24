@@ -3,7 +3,6 @@ from typing import Protocol
 
 from apps.bot.core.messages.response_message import ResponseMessageItem, ResponseMessage
 from apps.bot.models import Profile, Chat
-from apps.bot.protocols import CommandProtocol
 from apps.commands.gpt.api.responses import (
     GPTCompletionsResponse,
     GPTVisionResponse,
@@ -23,6 +22,7 @@ from apps.commands.gpt.models import (
     Preprompt
 )
 from apps.commands.gpt.models import ProfileGPTSettings
+from apps.commands.protocols import CommandProtocol
 
 logger = logging.getLogger(__name__)
 

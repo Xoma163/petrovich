@@ -3,14 +3,14 @@ from threading import Lock
 
 from PIL import Image, ImageDraw
 
-from apps.bot.consts import Platform, Role, rus_alphabet
+from apps.bot.consts import Platform, RoleEnum, rus_alphabet
 from apps.bot.core.bot.tg_bot.tg_bot import TgBot
 from apps.bot.core.messages.response_message import ResponseMessageItem, ResponseMessage
-from apps.bot.utils.utils import random_event, get_font_by_path
 from apps.commands.command import Command
 from apps.commands.games.models import Wordle as WordleModel
 from apps.commands.help_text import HelpText, HelpTextItem, HelpTextArgument
 from apps.shared.exceptions import PWarning, PSkip
+from apps.shared.utils.utils import random_event, get_font_by_path
 
 lock = Lock()
 
@@ -22,7 +22,7 @@ class Wordle(Command):
     help_text = HelpText(
         commands_text="игра wordle",
         help_texts=[
-            HelpTextItem(Role.USER, [
+            HelpTextItem(RoleEnum.USER, [
                 HelpTextArgument(None, "запуск сессии игры"),
                 HelpTextArgument("сдаться", "удаление сессии"),
                 HelpTextArgument("(слово из 5 букв)", "попытка угадать слово")

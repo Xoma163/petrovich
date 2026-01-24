@@ -1,7 +1,7 @@
 from django.core.paginator import Paginator
 from django.db.models import Q
 
-from apps.bot.consts import Role
+from apps.bot.consts import RoleEnum
 from apps.bot.core.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.commands.command import Command
 from apps.commands.help_text import HelpText, HelpTextItem, HelpTextArgument
@@ -15,7 +15,7 @@ class Memes(Command):
     help_text = HelpText(
         commands_text="список мемов",
         help_texts=[
-            HelpTextItem(Role.USER, [
+            HelpTextItem(RoleEnum.USER, [
                 HelpTextArgument(
                     "[фраза для поиска] [страница=1]",
                     "присылает список мемов, подходящих поисковому запросу на странице"
@@ -43,7 +43,7 @@ class Memes(Command):
             page = 1
 
         q_exclude = Q()
-        if not self.event.sender.check_role(Role.TRUSTED):
+        if not self.event.sender.check_role(RoleEnum.TRUSTED):
             q_exclude &= Q(for_trusted=True)
         memes = MemeModel.objects.filter(approved=True).filter(q).exclude(q_exclude)
         if len(memes) == 0:

@@ -1,14 +1,13 @@
 from collections import OrderedDict
 from itertools import groupby
 
-from apps.bot.consts import Role, Platform
+from apps.bot.consts import RoleEnum, Platform
 from apps.bot.core.activities import ActivitiesEnum
 from apps.bot.core.chat_activity import ChatActivity
 from apps.bot.core.event.event import Event
 from apps.bot.core.event.tg_event.tg_event import TgEvent
 from apps.bot.core.messages.response_message import ResponseMessage
 from apps.bot.models import User
-from apps.bot.utils.cache import MessagesCache
 from apps.commands.command import Command
 from apps.commands.gpt.commands.gpt.base import GPTCommand
 from apps.commands.gpt.commands.gpt.mixins.key import GPTKeyMixin
@@ -18,11 +17,12 @@ from apps.commands.gpt.providers.providers.chatgpt import ChatGPTProvider
 from apps.commands.gpt.utils import user_has_api_key
 from apps.commands.help_text import HelpTextArgument
 from apps.shared.exceptions import PWarning
+from apps.shared.utils.cache import MessagesCache
 
 
 class WTFCommand(Command):
     names = ['саммари', 'суммаризируй']
-    access = Role.TRUSTED
+    access = RoleEnum.TRUSTED
     abstract = True
     platforms = [Platform.TG]
 

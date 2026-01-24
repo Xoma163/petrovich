@@ -9,7 +9,7 @@ class ThumbnailMixin:
         self.thumbnail: PhotoAttachment | None = None
 
     def set_thumbnail(self, content: bytes = None):
-        from apps.bot.utils.utils import make_thumbnail
+        from apps.shared.utils.utils import make_thumbnail
 
         if self.thumbnail_url is None and content is None:
             return

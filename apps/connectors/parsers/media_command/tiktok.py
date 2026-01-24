@@ -4,10 +4,10 @@ from bs4 import BeautifulSoup
 from selenium.common import TimeoutException
 from selenium.webdriver.support.ui import WebDriverWait
 
-from apps.bot.utils.decorators import retry
-from apps.bot.utils.web_driver import get_web_driver, get_web_driver_headers
 from apps.connectors.parsers.media_command.data import VideoData
 from apps.shared.exceptions import PWarning
+from apps.shared.utils.decorators import retry
+from apps.shared.utils.web_driver import get_web_driver, get_web_driver_headers
 
 
 class TikTok:

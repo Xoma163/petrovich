@@ -4,12 +4,12 @@ import logging
 from crontab import CronTab
 from django.core.management.base import BaseCommand
 
-from apps.bot.consts import Role, ATTACHMENT_TYPE_TRANSLATOR, Platform
+from apps.bot.consts import RoleEnum, ATTACHMENT_TYPE_TRANSLATOR, Platform
 from apps.bot.core.bot.tg_bot.tg_bot import TgBot
 from apps.bot.core.event.event import Event
 from apps.bot.core.messages.response_message import ResponseMessageItem
-from apps.bot.utils.utils import remove_tz, localize_datetime
 from apps.commands.notifies.models import Notify
+from apps.shared.utils.utils import remove_tz, localize_datetime
 
 logger = logging.getLogger('notifier')
 
@@ -42,7 +42,7 @@ class Command(BaseCommand):
 
     def get_flag_by_notify(self, notify):
 
-        if notify.user.profile.check_role(Role.BANNED):
+        if notify.user.profile.check_role(RoleEnum.BANNED):
             return False
 
         if notify.crontab:
