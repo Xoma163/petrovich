@@ -3,7 +3,7 @@ import re
 from apps.bot.utils.decorators import retry
 from apps.bot.utils.utils import markdown_to_html
 from apps.commands.media_command.service import MediaServiceResponse, MediaService
-from apps.connectors.parsers.media.reddit import Reddit
+from apps.connectors.parsers.media_command.reddit import Reddit
 from apps.shared.exceptions import PWarning
 
 

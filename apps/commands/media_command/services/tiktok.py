@@ -4,8 +4,8 @@ from apps.bot.core.activities import ActivitiesEnum
 from apps.bot.core.chat_activity import ChatActivity
 from apps.bot.core.messages.attachments.video import VideoAttachment
 from apps.commands.media_command.service import MediaServiceResponse, MediaService
-from apps.connectors.parsers.media.data import VideoData
-from apps.connectors.parsers.media.tiktok import TikTok
+from apps.connectors.parsers.media_command.data import VideoData
+from apps.connectors.parsers.media_command.tiktok import TikTok
 from apps.shared.exceptions import PSkipContinue
 
 

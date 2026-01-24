@@ -3,7 +3,7 @@ from apps.bot.core.chat_activity import ChatActivity
 from apps.bot.core.messages.message import Message
 from apps.bot.utils.decorators import retry
 from apps.commands.media_command.service import MediaService, MediaServiceResponse
-from apps.connectors.parsers.media.boosty import Boosty
+from apps.connectors.parsers.media_command.boosty import Boosty
 from apps.shared.exceptions import PWarning
 
 

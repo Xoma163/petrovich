@@ -1,7 +1,7 @@
 from apps.bot.consts import Role
 from apps.commands.media_command.service import MediaServiceResponse, MediaService
-from apps.connectors.parsers.media.instagram import InstagramAPIDataItem, InstagramAPIData
-from apps.connectors.parsers.media.instagram.parse import InstagramParser
+from apps.connectors.parsers.media_command.instagram import InstagramAPIDataItem, InstagramAPIData
+from apps.connectors.parsers.media_command.instagram.parse import InstagramParser
 from apps.shared.exceptions import PWarning
 
 

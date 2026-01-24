@@ -2,7 +2,7 @@ from apps.bot.core.activities import ActivitiesEnum
 from apps.bot.core.chat_activity import ChatActivity
 from apps.bot.utils.decorators import retry
 from apps.commands.media_command.service import MediaServiceResponse, MediaService
-from apps.connectors.parsers.media.youtube.music import YoutubeMusic
+from apps.connectors.parsers.media_command.youtube.music import YoutubeMusic
 from apps.shared.exceptions import PWarning
 
 

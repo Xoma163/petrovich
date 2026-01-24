@@ -16,7 +16,7 @@ from apps.bot.utils.utils import tanimoto, get_youtube_video_id, detect_ext
 from apps.bot.utils.video.video_handler import VideoHandler
 from apps.commands.command import Command
 from apps.commands.help_text import HelpText, HelpTextItem, HelpTextArgument
-from apps.connectors.parsers.media.youtube.video import YoutubeVideo
+from apps.connectors.parsers.media_command.youtube.video import YoutubeVideo
 from apps.service.models import Meme as MemeModel
 from apps.shared.exceptions import PWarning, PSkip
 

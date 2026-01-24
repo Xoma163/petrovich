@@ -1,7 +1,7 @@
 from apps.bot.core.activities import ActivitiesEnum
 from apps.bot.core.chat_activity import ChatActivity
 from apps.commands.media_command.service import MediaServiceResponse, MediaService
-from apps.connectors.parsers.media.sunoai import SunoAI
+from apps.connectors.parsers.media_command.sunoai import SunoAI
 
 
 class SunoAIService(MediaService):

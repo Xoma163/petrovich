@@ -1,5 +1,5 @@
 from apps.commands.media_command.service import MediaServiceResponse, MediaService
-from apps.connectors.parsers.media.pinterest import Pinterest, PinterestDataItem
+from apps.connectors.parsers.media_command.pinterest import Pinterest, PinterestDataItem
 from apps.shared.exceptions import PWarning
 
 
