@@ -4,7 +4,7 @@ from django.contrib.auth.models import Group
 from django.core.management.base import BaseCommand
 
 from apps.bot.classes.const.consts import Role
-from apps.service.models import City, TimeZone, Service
+from apps.service.models import City, TimeZone
 
 
 class Command(BaseCommand):
@@ -403,8 +403,7 @@ class Command(BaseCommand):
 
     @staticmethod
     def init_services_db():
-        Service.objects.get_or_create(name='mrazi_chats_index_from', defaults={'value': 0})
-        Service.objects.get_or_create(name='mrazi_chats_index_to', defaults={'value': 20})
+        pass
 
     def handle(self, *args, **options):
         self.init_groups()

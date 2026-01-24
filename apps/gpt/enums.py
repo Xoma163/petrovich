@@ -3,7 +3,6 @@ from enum import StrEnum, Enum
 
 class GPTProviderEnum(StrEnum):
     CHATGPT = 'chatgpt'
-    CLAUDE = 'claude'
     GROK = 'grok'
 
 

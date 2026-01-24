@@ -87,7 +87,6 @@ class Settings(Command):
         menu = [
             # chat settings
             [['триггериться', 'тригериться', 'триггер', 'тригер'], self.menu_no_mention],
-            [['туретт', 'туррет', 'турретт', 'турет'], self.menu_turett],
             [['голосовые', 'голос', 'голосовухи', 'голосовуха', 'голосовое'], self.menu_voice],
             [['время'], self.menu_time],
             # user settings
@@ -114,14 +113,9 @@ class Settings(Command):
     def menu_no_mention(self) -> ResponseMessageItem:
         return self.setup_default_chat_setting('no_mention')
 
-    def menu_turett(self) -> ResponseMessageItem:
-        return self.setup_default_chat_setting("need_turett")
-
     def menu_voice(self) -> ResponseMessageItem:
         return self.setup_default_chat_setting('recognize_voice')
 
-    def menu_time(self) -> ResponseMessageItem:
-        return self.setup_default_chat_setting('time_conversion')
 
     # END CHAT
 
@@ -129,9 +123,6 @@ class Settings(Command):
 
     def menu_reaction(self) -> ResponseMessageItem:
         return self.setup_default_profile_setting('need_reaction')
-
-    def menu_swear(self) -> ResponseMessageItem:
-        return self.setup_default_profile_setting("use_swear")
 
     def menu_use_mention(self) -> ResponseMessageItem:
         return self.setup_default_profile_setting("use_mention")
@@ -160,14 +151,12 @@ class Settings(Command):
     def _get_str_user_settings(self) -> str:
         settings = self.event.sender.settings
         need_reaction = settings.need_reaction
-        use_swear = settings.use_swear
         celebrate_bday = settings.celebrate_bday
         use_mention = settings.use_mention
 
         answer = [
             "Настройки пользователя:",
             f"Реагировать на неправильные команды — {self.TRUE_FALSE_TRANSLATOR[need_reaction]}",
-            f"Использовать ругательные команды — {self.TRUE_FALSE_TRANSLATOR[use_swear]}",
             f"Поздравлять с днём рождения — {self.TRUE_FALSE_TRANSLATOR[celebrate_bday]}",
             f"Использовать упоминания в сообщениях — {self.TRUE_FALSE_TRANSLATOR[use_mention]}",
         ]
@@ -176,18 +165,14 @@ class Settings(Command):
     def _get_str_chat_settings(self) -> str:
         settings = self.event.chat.settings
         no_mention = settings.no_mention
-        need_turett = settings.need_turett
         recognize_voice = settings.recognize_voice
         celebrate_bday = settings.celebrate_bday
-        time_conversion = settings.time_conversion
 
         answer = [
             "Настройки чата:",
             f"Триггериться на команды без упоминания — {self.TRUE_FALSE_TRANSLATOR[no_mention]}",
-            f"Синдром Туретта — {self.TRUE_FALSE_TRANSLATOR[need_turett]}",
             f"Автоматически распознавать голосовые — {self.TRUE_FALSE_TRANSLATOR[recognize_voice]}",
             f"Поздравлять с днём рождения — {self.TRUE_FALSE_TRANSLATOR[celebrate_bday]}",
-            f"Автоматически переводить время — {self.TRUE_FALSE_TRANSLATOR[time_conversion]}",
         ]
         return "\n".join(answer)
 

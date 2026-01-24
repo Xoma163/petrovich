@@ -32,10 +32,8 @@ class ChatSettings(BaseSettings, TimeStampModelMixin):
                                 blank=True, null=True)
 
     no_mention = models.BooleanField('Работа без упоминания в конфе', default=False)
-    need_turett = models.BooleanField('Слать туреттные сообщения', default=False)
     celebrate_bday = models.BooleanField('Поздравлять с Днём рождения', default=False)
     recognize_voice = models.BooleanField('Распозновать голосовые автоматически', default=True)
-    time_conversion = models.BooleanField('Переводить время в разные часовые пояса', default=True)
 
     class Meta:
         verbose_name = "Настройка чата"
@@ -51,10 +49,9 @@ class ProfileSettings(BaseSettings, TimeStampModelMixin):
                                    related_name="settings", blank=True, null=True)
 
     need_reaction = models.BooleanField('Реагировать на неверные команды', default=True)
-    use_swear = models.BooleanField("Использовать ругательства", default=True)
 
     celebrate_bday = models.BooleanField('Поздравлять с Днём рождения', default=True)
-    show_birthday_year = models.BooleanField('Показывать год', default=True)
+    show_birthday_year = models.BooleanField('Показывать год рождения', default=True)
     use_mention = models.BooleanField('Использовать упоминания', default=True)
 
 

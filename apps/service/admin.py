@@ -7,7 +7,6 @@ from apps.service.models import (
     Notify,
     City,
     TimeZone,
-    Tag,
     VideoCache,
 )
 
@@ -127,22 +126,4 @@ class VideoCacheAdmin(TimeStampAdminMixin):
     )
     ordering = (
         'filename',
-    )
-
-
-@admin.register(Tag)
-class TagAdmin(TimeStampAdminMixin):
-    list_display = (
-        'name',
-        'chat'
-    )
-    list_filter = (
-        ('chat', admin.RelatedOnlyFieldListFilter),
-        ('users', admin.RelatedOnlyFieldListFilter)
-    )
-    list_select_related = (
-        'chat',
-    )
-    ordering = (
-        'name',
     )
