@@ -4,8 +4,8 @@ import logging
 from crontab import CronTab
 from django.core.management.base import BaseCommand
 
-from apps.bot.core.bot.tg_bot.tg_bot import TgBot
 from apps.bot.consts import Role, ATTACHMENT_TYPE_TRANSLATOR, Platform
+from apps.bot.core.bot.tg_bot.tg_bot import TgBot
 from apps.bot.core.event.event import Event
 from apps.bot.core.messages.response_message import ResponseMessageItem
 from apps.bot.utils.utils import remove_tz, localize_datetime

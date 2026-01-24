@@ -5,7 +5,7 @@ from apps.commands.games.models import (
     PetrovichGame,
     Wordle
 )
-from apps.service.mixins import TimeStampAdminMixin
+from apps.shared.mixins import TimeStampAdminMixin
 
 
 @admin.register(PetrovichUser)

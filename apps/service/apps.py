@@ -6,4 +6,4 @@ class ServiceConfig(AppConfig):
     verbose_name = "Сервисы"
 
     def ready(self):
-        import apps.service.signals  # noqa
+        import apps.commands.media_command.signals  # noqa

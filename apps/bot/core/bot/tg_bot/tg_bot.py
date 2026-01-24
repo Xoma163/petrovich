@@ -23,7 +23,7 @@ from apps.bot.core.messages.attachments.voice import VoiceAttachment
 from apps.bot.core.messages.response_message import ResponseMessageItem, ResponseMessage
 from apps.bot.models import Profile, Chat
 from apps.bot.utils.utils import split_text_by_n_symbols, get_chunks
-from apps.commands.other.commands.meme import Meme
+from apps.commands.meme.commands.meme import Meme
 from apps.shared.exceptions import PError, PWarning, PSkip
 from petrovich.settings import env
 

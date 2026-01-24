@@ -2,7 +2,7 @@ from django.contrib.postgres.fields import ArrayField
 from django.db import models
 
 from apps.bot.models import Profile, Chat
-from apps.service.mixins import TimeStampModelMixin
+from apps.shared.mixins import TimeStampModelMixin
 
 
 class PetrovichUser(TimeStampModelMixin):

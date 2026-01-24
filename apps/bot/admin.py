@@ -7,7 +7,7 @@ from apps.bot.filters import NoSpecificRoleFilter
 from apps.bot.inlines import ProfileSettingsInline, UserInline, ChatSettingsInline
 from apps.bot.models import Profile, Chat, Bot, User, ChatSettings, ProfileSettings
 from apps.commands.gpt.inlines import ProfileGPTSettingsInline
-from apps.service.mixins import TimeStampAdminMixin
+from apps.shared.mixins import TimeStampAdminMixin
 
 
 @admin.register(User)

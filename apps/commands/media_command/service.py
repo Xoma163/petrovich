@@ -8,7 +8,7 @@ from apps.bot.core.bot.bot import Bot
 from apps.bot.core.event.event import Event
 from apps.bot.core.messages.attachments.attachment import Attachment
 from apps.bot.utils.utils import prepare_filename
-from apps.service.models import VideoCache
+from apps.commands.media_command.models import VideoCache
 from petrovich.settings import MAIN_SITE, env
 
 

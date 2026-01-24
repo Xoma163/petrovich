@@ -6,11 +6,8 @@ from dateutil import parser
 from dateutil.parser import ParserError
 from django.db.models import Q, QuerySet
 
-from apps.bot.core.bot.tg_bot.tg_bot import TgBot
-from apps.commands.command import Command
 from apps.bot.consts import Role, Platform
-from apps.shared.exceptions import PWarning
-from apps.commands.help_text import HelpText, HelpTextItem, HelpTextArgument
+from apps.bot.core.bot.tg_bot.tg_bot import TgBot
 from apps.bot.core.messages.attachments.audio import AudioAttachment
 from apps.bot.core.messages.attachments.document import DocumentAttachment
 from apps.bot.core.messages.attachments.gif import GifAttachment
@@ -18,7 +15,10 @@ from apps.bot.core.messages.attachments.photo import PhotoAttachment
 from apps.bot.core.messages.attachments.video import VideoAttachment
 from apps.bot.core.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.utils.utils import localize_datetime, normalize_datetime, remove_tz
+from apps.commands.command import Command
+from apps.commands.help_text import HelpText, HelpTextItem, HelpTextArgument
 from apps.service.models import Notify
+from apps.shared.exceptions import PWarning
 
 DELTA_WEEKDAY = {
     'сегодня': 0,

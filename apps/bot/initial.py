@@ -16,6 +16,8 @@ def import_all_commands():
         os.path.join(BASE_DIR, "apps", "commands", "gpt"),
         os.path.join(BASE_DIR, "apps", "commands", "games"),
         os.path.join(BASE_DIR, "apps", "commands", "media_command"),
+        os.path.join(BASE_DIR, "apps", "commands", "meme"),
+        os.path.join(BASE_DIR, "apps", "commands", "notifies"),
         os.path.join(BASE_DIR, "apps", "commands", "other")
     ]
     commands_dirs = []
@@ -47,6 +49,8 @@ def generate_commands(base_class=Command):
             x.__module__.startswith('apps.commands.gpt') or
             x.__module__.startswith('apps.commands.games') or
             x.__module__.startswith('apps.commands.media_command') or
+            x.__module__.startswith('apps.commands.meme') or
+            x.__module__.startswith('apps.commands.notifies') or
             x.__module__.startswith('apps.commands.other')
     ) and x.enabled and not x.abstract]
     commands.sort(key=lambda x: x.priority, reverse=True)

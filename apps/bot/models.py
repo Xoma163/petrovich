@@ -6,7 +6,7 @@ from django.utils.safestring import mark_safe
 
 from apps.bot.consts import Platform as PlatformEnum, Role
 from apps.bot.core.messages.attachments.photo import PhotoAttachment
-from apps.service.mixins import TimeStampModelMixin
+from apps.shared.mixins import TimeStampModelMixin
 
 
 class Platform(models.Model):
@@ -21,13 +21,7 @@ class Platform(models.Model):
         abstract = True
 
 
-class BaseSettings(models.Model):
-    # celebrate_bday
-    class Meta:
-        abstract = True
-
-
-class ChatSettings(BaseSettings, TimeStampModelMixin):
+class ChatSettings(TimeStampModelMixin):
     chat = models.OneToOneField("Chat", on_delete=models.CASCADE, verbose_name="Чат", related_name="settings",
                                 blank=True, null=True)
 
@@ -43,8 +37,7 @@ class ChatSettings(BaseSettings, TimeStampModelMixin):
         return str(self.chat) if self.chat else ""
 
 
-class ProfileSettings(BaseSettings, TimeStampModelMixin):
-
+class ProfileSettings(TimeStampModelMixin):
     profile = models.OneToOneField("Profile", on_delete=models.CASCADE, verbose_name="Профиль",
                                    related_name="settings", blank=True, null=True)
 

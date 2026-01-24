@@ -3,7 +3,7 @@ import os
 from django.db import models
 from django.dispatch import receiver
 
-from apps.service.models import VideoCache
+from apps.commands.media_command.models import VideoCache
 
 
 @receiver(models.signals.post_delete, sender=VideoCache)

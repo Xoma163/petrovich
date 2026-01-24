@@ -12,7 +12,7 @@ from apps.commands.gpt.models import (
     ImageEditModel,
     VoiceRecognitionModel, GPTPreset
 )
-from apps.service.mixins import TimeStampAdminMixin, TopFieldsMixin
+from apps.shared.mixins import TimeStampAdminMixin, TopFieldsMixin
 
 
 @admin.register(Provider)

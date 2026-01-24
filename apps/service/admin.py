@@ -1,6 +1,5 @@
 from django.contrib import admin
 
-from apps.service.mixins import TimeStampAdminMixin
 from apps.service.models import (
     Service,
     Meme,
@@ -9,6 +8,7 @@ from apps.service.models import (
     TimeZone,
     VideoCache,
 )
+from apps.shared.mixins import TimeStampAdminMixin
 
 
 @admin.register(Service)

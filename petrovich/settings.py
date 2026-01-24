@@ -54,6 +54,8 @@ PROJECT_APPS = [
     'apps.commands.games',
     'apps.commands.gpt',
     "apps.commands.media_command",
+    "apps.commands.meme",
+    "apps.commands.notifies",
     "apps.commands.other",
 ]
 

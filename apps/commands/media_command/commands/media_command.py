@@ -135,7 +135,7 @@ class Media(AcceptExtraCommand):
                     result = True
                     break
 
-        from apps.commands.other.commands.meme import Meme as MemeCommand
+        from apps.commands.meme.commands.meme import Meme as MemeCommand
 
         event_command = event.message.command
         if result and event_command == MemeCommand.name or event_command in MemeCommand.names:

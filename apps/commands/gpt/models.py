@@ -10,7 +10,7 @@ from apps.commands.gpt.enums import (
     GPTReasoningEffortLevel,
     GPTVerbosityLevel
 )
-from apps.service.mixins import TimeStampModelMixin
+from apps.shared.mixins import TimeStampModelMixin
 
 
 class Provider(models.Model):
