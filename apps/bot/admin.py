@@ -6,8 +6,8 @@ from django.utils.safestring import mark_safe
 from apps.bot.filters import NoSpecificRoleFilter
 from apps.bot.inlines import ProfileSettingsInline, UserInline, ChatSettingsInline
 from apps.bot.models import Profile, Chat, Bot, User, ChatSettings, ProfileSettings
-from apps.gpt.inlines import ProfileGPTSettingsInline
-from apps.service.mixins import TimeStampAdminMixin
+from apps.commands.gpt.inlines import ProfileGPTSettingsInline
+from apps.shared.mixins import TimeStampAdminMixin
 
 
 @admin.register(User)
@@ -208,14 +208,12 @@ class ProfileSettingsAdmin(TimeStampAdminMixin):
     list_display = (
         'profile',
         'need_reaction',
-        'use_swear',
         'celebrate_bday',
         'show_birthday_year',
         'use_mention'
     )
     list_editable = (
         'need_reaction',
-        'use_swear',
         'celebrate_bday',
         'show_birthday_year',
         'use_mention'
@@ -233,17 +231,13 @@ class ChatSettingsAdmin(TimeStampAdminMixin):
     list_display = (
         'chat',
         'no_mention',
-        'need_turett',
         'celebrate_bday',
         'recognize_voice',
-        'time_conversion'
     )
     list_editable = (
         'no_mention',
-        'need_turett',
         'celebrate_bday',
         'recognize_voice',
-        'time_conversion'
     )
     list_select_related = (
         "chat",

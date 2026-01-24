@@ -3,7 +3,7 @@ import datetime
 from django.core.management.base import BaseCommand
 
 from apps.bot.models import ProfileSettings, ChatSettings
-from apps.service.models import VideoCache
+from apps.commands.media_command.models import VideoCache
 
 
 class Command(BaseCommand):

@@ -2,7 +2,7 @@ from io import BytesIO
 
 from pydub import AudioSegment
 
-from apps.bot.classes.messages.attachments.audio import AudioAttachment
+from apps.bot.core.messages.attachments.audio import AudioAttachment
 
 
 class AudioSplitter:

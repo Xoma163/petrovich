@@ -2,9 +2,10 @@ from django.db import models
 from django.db.models import JSONField
 
 from apps.bot.models import Chat, Profile, User
-from apps.service.mixins import TimeStampModelMixin
+from apps.shared.mixins import TimeStampModelMixin
 
 
+# Перенесено
 class TimeZone(models.Model):
     name = models.CharField("Временная зона UTC", null=True, max_length=30)
 
@@ -16,6 +17,7 @@ class TimeZone(models.Model):
         return str(self.name)
 
 
+# Перенесено
 class City(models.Model):
     name = models.CharField("Название", max_length=100)
     synonyms = models.CharField("Похожие названия", max_length=300)
@@ -31,6 +33,7 @@ class City(models.Model):
         return str(self.name)
 
 
+# Перенесено
 class Service(TimeStampModelMixin):
     name = models.CharField(primary_key=True, verbose_name="Имя", max_length=50)
     value = models.CharField("Значение", max_length=5000, default="", null=True)
@@ -44,6 +47,7 @@ class Service(TimeStampModelMixin):
         return self.name
 
 
+# Перенесено
 class BaseMeme(TimeStampModelMixin):
     ATTACHMENT_NAMES = [
         ('photo', 'Фото'),
@@ -88,6 +92,7 @@ class BaseMeme(TimeStampModelMixin):
         return str(self.name)
 
 
+# Перенесено
 class Meme(BaseMeme):
     class Meta:
         verbose_name = "мем"
@@ -112,6 +117,7 @@ class Notify(TimeStampModelMixin):
         return str(self.text)
 
 
+# Перенесено
 class VideoCache(TimeStampModelMixin):
     channel_id = models.CharField("ID канала", max_length=100)
     video_id = models.CharField("ID видео", max_length=100, null=True)
@@ -128,6 +134,7 @@ class VideoCache(TimeStampModelMixin):
         return self.filename
 
 
+# Перенесено
 class HoroscopeMeme(BaseMeme):
     meme_pk = models.PositiveIntegerField(verbose_name="ID мема", blank=True, default=0)
 
@@ -146,6 +153,7 @@ class HoroscopeMeme(BaseMeme):
         return info
 
 
+# Перенесено
 class Horoscope(models.Model):
     memes = models.ManyToManyField(HoroscopeMeme)
     date = models.DateField("Дата", null=True)
@@ -158,15 +166,3 @@ class Horoscope(models.Model):
         return str(self.pk)
 
 
-class Tag(TimeStampModelMixin):
-    name = models.CharField("Название", max_length=100)
-    users = models.ManyToManyField(Profile, verbose_name="Пользователи", blank=True)
-    chat = models.ForeignKey(Chat, models.CASCADE, verbose_name="Чат")
-
-    class Meta:
-        verbose_name = "Тег"
-        verbose_name_plural = "Теги"
-        unique_together = ('name', 'chat')
-
-    def __str__(self):
-        return str(self.name)

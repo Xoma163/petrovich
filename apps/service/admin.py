@@ -1,15 +1,14 @@
 from django.contrib import admin
 
-from apps.service.mixins import TimeStampAdminMixin
 from apps.service.models import (
     Service,
     Meme,
     Notify,
     City,
     TimeZone,
-    Tag,
     VideoCache,
 )
+from apps.shared.mixins import TimeStampAdminMixin
 
 
 @admin.register(Service)
@@ -127,22 +126,4 @@ class VideoCacheAdmin(TimeStampAdminMixin):
     )
     ordering = (
         'filename',
-    )
-
-
-@admin.register(Tag)
-class TagAdmin(TimeStampAdminMixin):
-    list_display = (
-        'name',
-        'chat'
-    )
-    list_filter = (
-        ('chat', admin.RelatedOnlyFieldListFilter),
-        ('users', admin.RelatedOnlyFieldListFilter)
-    )
-    list_select_related = (
-        'chat',
-    )
-    ordering = (
-        'name',
     )

@@ -2,7 +2,7 @@
 name = "petrovich"
 version = "0.1.0"
 description = "Чат-бот"
-authors = ["AndrewSha <Xoma163rus@gmail.com>"]
+authors = ["Xoma163 <Xoma163rus@gmail.com>"]
 readme = "README.md"
 repository = "https://github.com/Xoma163/petrovich"
 package-mode = false
@@ -25,19 +25,16 @@ python-json-logger = "^2.0.7"
 requests = "^2.32.3"
 twitch-dl = "^2.3.1"
 uWSGI = "^2.0.26" # Unknown metadata version: 2.4
-virtualenv = "^20.26.3"
+virtualenv = "^20.36.1"
 xmltodict = "^0.13.0"
 yandex-music = "^2.2.0"
 yt-dlp = { extras = ["default"], version = "^2025.12.8" }
-numpy = "^2.0.0"
 python-dateutil = "^2.9.0.post0"
 selenium = "^4.22.0"
 sentry-sdk = { extras = ["django"], version = "^2.13.0" }
-blinker = "1.7.0"
 setuptools = "^80.9.0"
 matplotlib = "^3.10.1"
 cryptography = "^44.0.3"
-instagrapi = "^2.1.3"
 
 [poetry.group.dev.dependencies]
 

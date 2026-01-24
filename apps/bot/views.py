@@ -5,12 +5,12 @@ import re
 from django.http import HttpResponse
 from django.views import View
 
-from apps.bot.api.github.issue import GithubIssueAPI
-from apps.bot.classes.bots.tg_bot import TgBot
-from apps.bot.classes.messages.attachments.photo import PhotoAttachment
-from apps.bot.classes.messages.response_message import ResponseMessageItem
-from apps.bot.mixins import CSRFExemptMixin
+from apps.bot.core.bot.tg_bot.tg_bot import TgBot
+from apps.bot.core.messages.attachments.photo import PhotoAttachment
+from apps.bot.core.messages.response_message import ResponseMessageItem
 from apps.bot.utils.utils import get_admin_profile
+from apps.connectors.api.github.issue import GithubIssueAPI
+from apps.shared.mixins import CSRFExemptMixin
 from petrovich.settings import env
 
 

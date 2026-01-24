@@ -1,10 +1,8 @@
-from time import sleep
-
 from django.contrib.auth.models import Group
 from django.core.management.base import BaseCommand
 
-from apps.bot.classes.const.consts import Role
-from apps.service.models import City, TimeZone, Service
+from apps.bot.consts import Role
+from apps.service.models import City, TimeZone
 
 
 class Command(BaseCommand):
@@ -353,65 +351,14 @@ class Command(BaseCommand):
             City.objects.update_or_create(name=city['name'], defaults=city)
 
     @staticmethod
-    def init_cities_online():
-        from apps.bot.api.yandex.geo import YandexGeo
-        from apps.bot.api.timezonedb import TimezoneDB
-
-        timezonedb_api = TimezoneDB()
-        yandexgeo_api = YandexGeo()
-
-        cities_list = ["Москва", "Санкт-Петербург", "Новосибирск", "Екатеринбург", "Нижний Новгород", "Казань",
-                       "Самара", "Омск", "Челябинск", "Ростов-на-Дону", "Уфа", "Волгоград", "Пермь", "Красноярск",
-                       "Воронеж", "Саратов", "Краснодар", "Тольятти", "Барнаул", "Ижевск", "Ульяновск", "Владивосток",
-                       "Ярославль", "Иркутск", "Тюмень", "Махачкала", "Хабаровск", "Оренбург", "Новокузнецк",
-                       "Кемерово", "Рязань", "Томск", "Астрахань", "Пенза", "Набережные Челны", "Липецк", "Тула",
-                       "Киров", "Чебоксары", "Улан-Удэ", "Калининград", "Брянск", "Курск", "Иваново", "Магнитогорск",
-                       "Тверь", "Ставрополь", "Севастополь", "Нижний Тагил", "Белгород", "Архангельск", "Владимир",
-                       "Сочи", "Курган", "Симферополь", "Смоленск", "Калуга", "Чита", "Саранск", "Орёл", "Волжский",
-                       "Череповец", "Владикавказ", "Мурманск", "Сургут", "Вологда", "Тамбов", "Стерлитамак", "Грозный",
-                       "Якутск", "Кострома", "Комсомольск-на-Амуре", "Петрозаводск", "Таганрог", "Нижневартовск",
-                       "Йошкар-ОлаБратск", "Новороссийск", "Дзержинск", "ШахтыНальчик", "Орск", "Сыктывкар",
-                       "Нижнекамск", "Ангарск", "Старый Оскол", "Великий Новгород", "Балашиха", "Благовещенск",
-                       "Прокопьевск", "Химки", "Псков", "Бийск", "Энгельс", "Рыбинск", "Балаково", "Северодвинск",
-                       "Армавир", "Подольск", "Королёв", "Южно-Сахалинск", "Петропавловск-Камчатский", "Сызрань",
-                       "Норильск", "Златоуст", "Каменск-Уральский", "Мытищи", "Люберцы", "Волгодонск", "Новочеркасск",
-                       "Абакан", "Находка", "Уссурийск", "Березники", "Салават", "Электросталь", "Миасс",
-                       "Первоуральск", "Керчь", "Рубцовск", "Альметьевск", "Ковров", "Коломна", "Майкоп", "Пятигорск",
-                       "Одинцово", "Копейск", "Хасавюрт", "Новомосковск", "Кисловодск", "Серпухов", "Новочебоксарск",
-                       "Нефтеюганск", "Димитровград", "Нефтекамск", "Черкесск", "Орехово-Зуево", "Дербент", "Камышин",
-                       "Невинномысск", "Красногорск", "Муром", "Батайск", "Новошахтинск", "Сергиев Посад", "Ноябрьск",
-                       "Щёлково", "Кызыл", "Октябрьский", "Ачинск", "Северск", "Новокуйбышевск", "Елец", "Арзамас",
-                       "Евпатория", "Обнинск", "Новый Уренгой", "Каспийск", "Элиста", "Пушкино", "Жуковский", "Артём",
-                       "Междуреченск", "Ленинск-Кузнецкий", "Сарапул", "Ессентуки", "Воткинск"]
-        for city_name in cities_list:
-            city_info = yandexgeo_api.get_city_info_by_name(city_name)
-            if not city_info:
-                print(f"Warn: не смог добавить город {city_name}. Ошибка получения координат")
-                continue
-            city_info['synonyms'] = city_info['name'].lower()
-            # Увеличить задержку, если крашится получение таймзон
-            sleep(0.5)
-            timezone_name = timezonedb_api.get_timezone_by_coordinates(city_info['lat'], city_info['lon'])
-            if not timezone_name:
-                print(f"Warn: не смог добавить город {city_name}. Ошибка получения таймзоны")
-
-            timezone_obj, _ = TimeZone.objects.get_or_create(name=timezone_name)
-
-            city_info['timezone'] = timezone_obj
-            City.objects.update_or_create(name=city_info['name'], defaults=city_info)
-            print(f'add/update {city_info["name"]}')
-
-    @staticmethod
     def init_services_db():
-        Service.objects.get_or_create(name='mrazi_chats_index_from', defaults={'value': 0})
-        Service.objects.get_or_create(name='mrazi_chats_index_to', defaults={'value': 20})
+        pass
 
     def handle(self, *args, **options):
         self.init_groups()
         print('done init groups')
 
         self.init_cities_offline()
-        # self.init_cities_online()
         print('done init cities')
 
         self.init_services_db()

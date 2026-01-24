@@ -4,9 +4,9 @@ from django.db import models
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
 
-from apps.bot.classes.const.consts import Platform as PlatformEnum, Role
-from apps.bot.classes.messages.attachments.photo import PhotoAttachment
-from apps.service.mixins import TimeStampModelMixin
+from apps.bot.consts import Platform as PlatformEnum, Role
+from apps.bot.core.messages.attachments.photo import PhotoAttachment
+from apps.shared.mixins import TimeStampModelMixin
 
 
 class Platform(models.Model):
@@ -21,21 +21,13 @@ class Platform(models.Model):
         abstract = True
 
 
-class BaseSettings(models.Model):
-    # celebrate_bday
-    class Meta:
-        abstract = True
-
-
-class ChatSettings(BaseSettings, TimeStampModelMixin):
+class ChatSettings(TimeStampModelMixin):
     chat = models.OneToOneField("Chat", on_delete=models.CASCADE, verbose_name="Чат", related_name="settings",
                                 blank=True, null=True)
 
     no_mention = models.BooleanField('Работа без упоминания в конфе', default=False)
-    need_turett = models.BooleanField('Слать туреттные сообщения', default=False)
     celebrate_bday = models.BooleanField('Поздравлять с Днём рождения', default=False)
     recognize_voice = models.BooleanField('Распозновать голосовые автоматически', default=True)
-    time_conversion = models.BooleanField('Переводить время в разные часовые пояса', default=True)
 
     class Meta:
         verbose_name = "Настройка чата"
@@ -45,16 +37,14 @@ class ChatSettings(BaseSettings, TimeStampModelMixin):
         return str(self.chat) if self.chat else ""
 
 
-class ProfileSettings(BaseSettings, TimeStampModelMixin):
-
+class ProfileSettings(TimeStampModelMixin):
     profile = models.OneToOneField("Profile", on_delete=models.CASCADE, verbose_name="Профиль",
                                    related_name="settings", blank=True, null=True)
 
     need_reaction = models.BooleanField('Реагировать на неверные команды', default=True)
-    use_swear = models.BooleanField("Использовать ругательства", default=True)
 
     celebrate_bday = models.BooleanField('Поздравлять с Днём рождения', default=True)
-    show_birthday_year = models.BooleanField('Показывать год', default=True)
+    show_birthday_year = models.BooleanField('Показывать год рождения', default=True)
     use_mention = models.BooleanField('Использовать упоминания', default=True)
 
 

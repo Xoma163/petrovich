@@ -1,5 +1,5 @@
 # By E.Dubovitsky and A.Popova
-from apps.bot.classes.const.exceptions import PWarning
+from apps.shared.exceptions import PWarning
 
 ACCURACY = 15
 

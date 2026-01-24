@@ -4,9 +4,9 @@ import socket
 import struct
 import time
 
-from apps.bot.classes.const.exceptions import PError
 from apps.bot.utils.minecraft.forge import ForgeMod, ForgeData
 from apps.bot.utils.utils import extract_json
+from apps.shared.exceptions import PError
 
 
 @dataclasses.dataclass

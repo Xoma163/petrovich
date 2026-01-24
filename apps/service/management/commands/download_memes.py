@@ -4,11 +4,11 @@ from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
 from django.db.models import Q
 
-from apps.bot.api.media.youtube.video import YoutubeVideo
-from apps.bot.classes.bots.tg_bot import TgBot
-from apps.bot.classes.const.consts import ATTACHMENT_TYPE_TRANSLATOR
-from apps.bot.classes.messages.attachments.photo import PhotoAttachment
-from apps.bot.classes.messages.attachments.video import VideoAttachment
+from apps.connectors.parsers.media.youtube.video import YoutubeVideo
+from apps.bot.core.bot.tg_bot.tg_bot import TgBot
+from apps.bot.consts import ATTACHMENT_TYPE_TRANSLATOR
+from apps.bot.core.messages.attachments.photo import PhotoAttachment
+from apps.bot.core.messages.attachments.video import VideoAttachment
 from apps.bot.utils.utils import get_youtube_video_id, detect_ext
 from apps.bot.utils.video.video_handler import VideoHandler
 from apps.service.models import Meme
