@@ -1,6 +1,7 @@
 import os
 from os.path import isfile, join
 
+from django.apps import apps
 from django.core.management import call_command
 from django.core.management.base import BaseCommand, CommandError
 from django.db import connection
@@ -46,13 +47,15 @@ class Command(BaseCommand):
             nargs='+',
             help='Список приложений, в которых нужно произвести сброс миграций'
         )
+
     def delete_django_migrations_db_app(self, app: str):
         self.stdout.write(f'Сброс миграций приложения "{app}" в БД')
         self.cursor.execute(f"DELETE from django_migrations WHERE app = '{app}'")
 
     def delete_migrations_files_app(self, app: str):
         self.stdout.write(f'Удаление миграций приложения "{app}" в файлах')
-        migrations_dir = os.path.join("apps", app, 'migrations')
+        app_path = apps.get_app_config(app).path
+        migrations_dir = os.path.join(app_path, 'migrations')
         if os.path.exists(migrations_dir):
             files = [f for f in os.listdir(migrations_dir) if isfile(join(migrations_dir, f))]
             files = list(filter(lambda x: x != '__init__.py', files))
