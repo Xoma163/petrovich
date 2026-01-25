@@ -31,12 +31,8 @@ class SunoAI:
         author = author[-1] if author else None
         # title = title.replace(f"by @{author.lower()}", '').strip()
 
-        text = re.findall(r'prompt\\\"\:\\\"(.*)\\\"\,\\\"edited', r.text)
-        if text:
-            text = text[0] if text else None
-            text = "\n".join(text.split('\\\\n'))
-        else:
-            text = None
+        match = re.search(r'prompt\\\"\:\\\"(.*?)\\\"\,\\\"edited', r.text)
+        text = "\n".join(match.group(1).split(r'\\n')) if match else None
 
         return AudioData(
             title=title,
