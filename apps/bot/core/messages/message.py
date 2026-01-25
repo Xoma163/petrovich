@@ -88,7 +88,7 @@ class Message:
                 if key:
                     self.keys.append(key)
                 elif short_key:
-                    self._short_keys_raw.append(short_key)
+                    self.short_keys_raw.append(short_key)
                     self.short_keys += [x for x in short_key]
 
                 if index == 0:

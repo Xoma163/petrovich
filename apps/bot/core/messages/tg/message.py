@@ -17,6 +17,7 @@ class TgMessage(Message):
         self.has_mention = has_mention
         self.raw = raw_str
 
+        # Это текст который пользователь выделил при reply_to
         if quote:
             self.quote = quote['text']
 

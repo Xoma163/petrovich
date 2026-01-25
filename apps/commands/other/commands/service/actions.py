@@ -1,6 +1,7 @@
 from apps.bot.core.event.event import Event
 from apps.bot.core.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.models import Chat
+from apps.bot.utils import remove_profile_from_chat, get_profile_by_user_id, add_profile_to_chat
 from apps.commands.command import Command
 from petrovich.settings import env
 
@@ -59,8 +60,8 @@ class Actions(Command):
                 return "Привет!"
             return None
         else:
-            profile = self.bot.get_profile_by_user_id(member_id)
-            self.bot.add_chat_to_profile(profile, self.event.chat)
+            profile = get_profile_by_user_id(member_id, self.bot.platform)
+            add_profile_to_chat(profile, self.event.chat)
             return None
 
     def setup_left_chat_member(self, left_chat_member):
@@ -72,8 +73,8 @@ class Actions(Command):
             if user_id == bot_group_id:
                 self._set_kicked_state(True)
         if not is_bot:
-            profile = self.bot.get_profile_by_user_id(user_id)
-            self.bot.remove_chat_from_profile(profile, self.event.chat)
+            profile = get_profile_by_user_id(user_id, self.bot.platform)
+            remove_profile_from_chat(profile, self.event.chat)
 
     def setup_new_chat_id(self, chat_id):
         # Если новый чат каким-то чудом создался - удаляем его

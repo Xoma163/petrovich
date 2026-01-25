@@ -1,10 +1,7 @@
 import logging
-import time
 from math import inf
 from threading import Lock
 from threading import Thread
-
-from django.db.models import Q
 
 from apps.bot.consts import RoleEnum
 from apps.bot.core.activities import ActivitiesEnum
@@ -17,10 +14,9 @@ from apps.bot.core.messages.attachments.gif import GifAttachment
 from apps.bot.core.messages.attachments.photo import PhotoAttachment
 from apps.bot.core.messages.attachments.video import VideoAttachment
 from apps.bot.core.messages.response_message import ResponseMessage, ResponseMessageItem
-from apps.bot.models import Profile, Chat, Bot as BotModel, User
+from apps.bot.models import Profile
 from apps.shared.exceptions import PWarning, PError, PSkip, PIDK, PSkipContinue
 from apps.shared.utils.utils import get_chunks
-from petrovich.settings import env
 
 lock = Lock()
 
@@ -62,7 +58,6 @@ class Bot(Thread):
         Получение новых событий и их обработка
         """
 
-    # Костыль (?)
     def init_requests(self):
         pass
 
@@ -138,13 +133,8 @@ class Bot(Thread):
         for rmi in rm.messages:
             if not rmi.send:
                 continue
-            if rm.thread:
-                Thread(target=self.send_response_message_item, args=(rmi,)).start()
-            else:
-                br = self.send_response_message_item(rmi)
-                results.append(br)
-            if rm.delay:
-                time.sleep(rm.delay)
+            br = self.send_response_message_item(rmi)
+            results.append(br)
         return results
 
     def send_response_message_item(self, rmi: ResponseMessageItem) -> BotResponse:
@@ -167,7 +157,6 @@ class Bot(Thread):
             if command.accept(event):
                 try:
                     return command.__class__().check_and_start(self, event)
-                # Гипотеза, что если мы скипаем команду, то можем идти дальше ?
                 except PSkipContinue:
                     continue
         # Если это нотификация, то это ок
@@ -184,7 +173,6 @@ class Bot(Thread):
             raise PSkip()
 
         if not event.message or not event.message.raw:
-            # ToDo: ignore?
             answer = "Я не понял, что вы от меня хотите(("
         else:
             answer = f"Я не понял команды \"{event.message.command}\"\n"
@@ -215,115 +203,8 @@ class Bot(Thread):
 
     # END LOGGING
 
-    # USERS GROUPS BOTS
-
-    def get_user_by_id(self, user_id, _defaults: dict = None) -> User:
-        """
-        Получение пользователя по его id
-        """
-        if not _defaults:
-            _defaults = {}
-        defaults = {}
-        defaults.update(_defaults)
-
-        with lock:
-            user, _ = User.objects.get_or_create(
-                user_id=user_id,
-                platform=self.platform.name,
-                defaults=defaults
-            )
-        return user
-
-    def get_profile_by_user_id(self, user_id):
-        user = self.get_user_by_id(user_id)
-        profile = self.get_profile_by_user(user)
-        return profile
-
-    @staticmethod
-    def get_profile_by_user(user: User, _defaults: dict = None) -> Profile:
-        """
-        Возвращает профиль по пользователю
-        """
-        if not _defaults:
-            _defaults = {}
-        defaults = {}
-        defaults.update(_defaults)
-
-        if not user.profile:
-            with lock:
-                profile = Profile(**defaults)
-                profile.save()
-                user.profile = profile
-                user.save()
-
-        return user.profile
-
-    @staticmethod
-    def get_profile_by_name(filters: list, filter_chat=None) -> Profile:
-        """
-        Получение пользователя по имени/фамилии/имени и фамилии/никнейма/ид
-        """
-        users = Profile.objects.all()
-        if filter_chat:
-            users = users.filter(chats=filter_chat)
-
-        for _filter in filters:
-            q = Q(name__icontains=_filter) | Q(surname__icontains=_filter) | Q(nickname_real__icontains=_filter)
-            users = users.filter(q)
-
-        if len(users) == 0:
-            filters_str = " ".join(filters)
-            raise PWarning(f"Пользователь {filters_str} не найден. Возможно опечатка или он мне ещё ни разу не писал")
-        elif len(users) > 1:
-            raise PWarning("2 и более пользователей подходит под поиск")
-
-        return users.first()
-
-    def get_chat_by_id(self, chat_id: int) -> Chat:
-        """
-        Возвращает чат по его id
-        """
-        with lock:
-            chat, _ = Chat.objects.get_or_create(
-                chat_id=chat_id, platform=self.platform.name
-            )
-        return chat
-
-    def get_bot_by_id(self, bot_id: int) -> BotModel:
-        """
-        Возвращает бота по его id
-        """
-        if bot_id > 0:
-            bot_id = -bot_id
-        with lock:
-            bot, _ = BotModel.objects.get_or_create(
-                bot_id=bot_id, platform=self.platform.name
-            )
-        return bot
-
-    @staticmethod
-    def add_chat_to_profile(profile: Profile, chat: Chat):
-        """
-        Добавление чата пользователю
-        """
-        with lock:
-            chats = profile.chats
-            if chat not in chats.all():
-                chats.add(chat)
-
-    @staticmethod
-    def remove_chat_from_profile(profile: Profile, chat: Chat):
-        """
-        Удаление чата пользователю
-        """
-        with lock:
-            chats = profile.chats
-            if chat in chats.all():
-                chats.remove(chat)
-
-    # END USERS GROUPS BOTS
-
     # ATTACHMENTS
+    # ToDo: Выпилить нахер
     def get_photo_attachment(
             self,
             image,
@@ -423,14 +304,14 @@ class Bot(Thread):
         Проставление активности боту (например, отправка сообщения)
         """
 
-    # ToDo: А может лучше перенести в Event?
     @staticmethod
     def get_button(text: str, command: str = None, args: list = None, kwargs: dict = None, url: str = None):
         """
         Определение кнопки для клавиатур
         """
 
-    def get_inline_keyboard(self, buttons: list, cols=1):
+    @staticmethod
+    def get_inline_keyboard(buttons: list, cols=1):
         """
         param buttons: ToDo:
         Получение инлайн-клавиатуры с кнопками
@@ -450,6 +331,13 @@ class Bot(Thread):
         """
         Удаление сообщения
         """
+
+    def edit_message(self, default_params) -> dict:
+        """
+        Редактирование сообщения
+        """
+
+    # ToDo думаю это надо куда-то унести
 
     @classmethod
     def get_formatted_text(cls, text: str, language: str = None) -> str:
@@ -512,18 +400,3 @@ class Bot(Thread):
         return text
 
     # END EXTRA
-
-    # ToDo: куда это?
-    def edit_message(self, default_params) -> dict:
-        pass
-
-
-def send_message_to_moderator_chat(msg: ResponseMessageItem):
-    def get_moderator_chat_peer_id():
-        test_chat_id = env.str("TG_MODERATOR_CHAT_PK")
-        return Chat.objects.get(pk=test_chat_id).chat_id
-
-    from apps.bot.core.bot.tg_bot.tg_bot import TgBot
-    bot = TgBot()
-    msg.peer_id = get_moderator_chat_peer_id()
-    return bot.send_response_message_item(msg)

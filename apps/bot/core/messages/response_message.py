@@ -141,10 +141,8 @@ class ResponseMessageItem:
 
 
 class ResponseMessage:
-    def __init__(self, messages=None, send: bool = True, thread: bool = False, delay: float = 0):
+    def __init__(self, messages=None, send: bool = True):
         self.send = send
-        self.thread = thread
-        self.delay = delay
 
         if messages is None:
             messages = []

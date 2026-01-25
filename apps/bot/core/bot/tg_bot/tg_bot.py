@@ -102,6 +102,9 @@ class TgBot(Bot):
         return super().route(event)
 
     def route_inline_mode(self, event) -> dict:
+        """
+        Режим работы исключительно для поиска мемасов
+        """
         data = event.inline_data
 
         filter_list = event.inline_data['message'].clear.split(' ')
@@ -587,7 +590,8 @@ class TgBot(Bot):
             data['url'] = url
         return data
 
-    def get_inline_keyboard(self, buttons: list, cols=1):
+    @staticmethod
+    def get_inline_keyboard(buttons: list, cols=1):
         """
         param buttons: ToDo:
         Получение инлайн-клавиатуры с кнопками

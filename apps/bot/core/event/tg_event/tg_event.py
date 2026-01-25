@@ -13,6 +13,7 @@ from apps.bot.core.messages.attachments.video_note import VideoNoteAttachment
 from apps.bot.core.messages.attachments.voice import VoiceAttachment
 from apps.bot.core.messages.message import Message
 from apps.bot.core.messages.tg.message import TgMessage
+from apps.bot.utils import get_chat_by_id, get_user_by_id, get_profile_by_user, add_profile_to_chat
 from petrovich.settings import env
 
 
@@ -67,7 +68,6 @@ class TgEvent(Event):
                 message = self.raw
             elif poll:
                 message = self.raw
-                # self._cache_poll(poll)
             else:
                 message = self.raw.get('message')
         if not message:
@@ -88,7 +88,7 @@ class TgEvent(Event):
             self.chat_id = chat.get('id')
             self.is_from_chat = True
             if self.use_db:
-                self.chat = self.bot.get_chat_by_id(chat.get('id'))
+                self.chat = get_chat_by_id(chat.get('id'), self.bot.platform)
 
         _from = None
         if self.is_fwd:
@@ -119,14 +119,16 @@ class TgEvent(Event):
 
         forward_from_chat = message.get('forward_from_chat')
         if forward_from_chat:
+            # Не реагируем на пересланные сообщения
             self.force_response = False
 
         via_bot = message.get('via_bot')
         if via_bot and via_bot['username'] == env.str("TG_BOT_LOGIN"):
+            # Не реагируем на сообщения пользователей отправленные via bot
             self.force_response = False
 
         if self.sender and self.chat and not self.is_fwd and self.use_db:
-            self.bot.add_chat_to_profile(self.sender, self.chat)
+            add_profile_to_chat(self.sender, self.chat)
 
         if fwd_message_without_voice and self.use_db:
             need_a_response_extra = self.need_a_response_extra()
@@ -151,10 +153,10 @@ class TgEvent(Event):
             }
             self.user_id = _from['id']
             if self.use_db:
-                self.user = self.bot.get_user_by_id(self.user_id, {'nickname': _from.get('username')})
+                self.user = get_user_by_id(self.user_id, self.bot.platform, {'nickname': _from.get('username')})
             defaults.pop('nickname')
             if self.use_db:
-                self.sender = self.bot.get_profile_by_user(self.user, _defaults=defaults)
+                self.sender = get_profile_by_user(self.user, _defaults=defaults)
             self.is_from_user = True
 
     def setup_action(self, message):
@@ -301,8 +303,8 @@ class TgEvent(Event):
         self.user_id = _from['id']
         self.is_from_user = True
         if self.use_db:
-            self.user = self.bot.get_user_by_id(self.user_id, {'nickname': _from.get('username')})
-            self.sender = self.bot.get_profile_by_user(self.user, _defaults=defaults)
+            self.user = get_user_by_id(self.user_id, self.bot.platform, {'nickname': _from.get('username')})
+            self.sender = get_profile_by_user(self.user, _defaults=defaults)
 
     def need_a_response(self):
         """

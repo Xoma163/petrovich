@@ -75,6 +75,7 @@ class Attachment:
             self.file_name = parts[0]
             self.ext = parts[1] if len(parts) == 2 else None
 
+    # ToDo: избавиться от этого
     def parse(self, file_like_object, allowed_exts_url=None, filename=None, guarantee_url=False):
         """
         Подготовка объектов(в основном картинок) для загрузки.

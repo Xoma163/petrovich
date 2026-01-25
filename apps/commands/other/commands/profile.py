@@ -5,6 +5,7 @@ from apps.bot.core.bot.tg_bot.tg_bot import TgBot
 from apps.bot.core.messages.attachments.photo import PhotoAttachment
 from apps.bot.core.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.models import Profile as ProfileModel
+from apps.bot.utils import get_profile_by_name
 from apps.commands.command import Command
 from apps.commands.help_text import HelpText, HelpTextItem, HelpTextArgument
 from apps.shared.exceptions import PWarning
@@ -148,7 +149,7 @@ class Profile(Command):
     def menu_default(self) -> ResponseMessageItem:
         if self.event.message.args:
             self.check_conversation()
-            profile = self.bot.get_profile_by_name(self.event.message.args, filter_chat=self.event.chat)
+            profile = get_profile_by_name(self.event.message.args, filter_chat=self.event.chat)
             return self.get_profile_info(profile)
         profile = self.event.sender
         return self.get_profile_info(profile)
