@@ -10,6 +10,7 @@ license = "MIT"
 requires-python = ">=3.13"
 
 dependencies = [
+    "audioop-lts>=0.2.2",
     "beautifulsoup4>=4.14.3",
     "colorlog>=6.10.1",
     "crontab>=1.0.5",
