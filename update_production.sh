@@ -5,14 +5,15 @@ git clean -fd
 git pull
 
 set -a
-source venv/bin/activate
+source .venv/bin/activate
 set +a
 
-pip install --upgrade pip setuptools wheel  | grep -v 'Requirement already satisfied'
-poetry install
+uv sync
+
 python manage.py migrate
 python manage.py collectstatic --noinput
 
+deactivate
+
 sudo systemctl restart petrovich
 
-deactivate
