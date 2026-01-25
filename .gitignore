@@ -12,6 +12,7 @@ coverage.xml
 # Environments
 secrets
 venv
+.venv
 
 # PyCharm
 .idea/
