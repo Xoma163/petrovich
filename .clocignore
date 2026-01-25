@@ -1,5 +1,3 @@
-secrets
-
 .git
 .docs
 .idea
@@ -11,8 +9,6 @@ secrets
 venv
 __pycache__
 
-apps/bot/migrations
-apps/games/migrations
-apps/service/migrations
-apps/gpt/migrations
-
+/migrations/
+/media/
+/static/
