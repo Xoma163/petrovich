@@ -2,7 +2,9 @@
 name = "petrovich"
 version = "0.1.0"
 description = "Чат-бот"
-authors = ["Xoma163 <Xoma163rus@gmail.com>"]
+authors = [
+    { name = "Xoma163", email = "Xoma163rus@gmail.com" },
+]
 readme = "README.md"
 repository = "https://github.com/Xoma163/petrovich"
 package-mode = false
@@ -15,7 +17,7 @@ dependencies = [
     "colorlog>=6.10.1",
     "crontab>=1.0.5",
     "cryptography>=46.0.3",
-    "django>=5.2.10",
+    "django>=6.0.1",
     "django-environ>=0.12.0",
     "django-extensions>=4.1",
     "django-redis>=6.0.0",
@@ -27,7 +29,7 @@ dependencies = [
     "python-dateutil>=2.9.0.post0",
     "python-json-logger>=4.0.0",
     "requests>=2.32.5",
-    "selenium>=4.40w.0",
+    "selenium>=4.40.0",
     "sentry-sdk>=2.50.0",
     "twitch-dl>=3.3.0",
     "uwsgi>=2.0.31",
