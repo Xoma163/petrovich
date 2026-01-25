@@ -113,6 +113,8 @@ def generate_help_text(cmds):
     }
 
     for command in cmds:
+        if not command.help_text:
+            continue
         entry = f"{command.name.capitalize()} - {command.help_text.commands_text}"
         role_name = command.access.name
         for platform in command.platforms:
