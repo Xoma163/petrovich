@@ -100,7 +100,7 @@ class MediaService:
             channel_id: str,
             video_id: str,
             title: str,
-            original_url: str,
+            source_url: str,
             content: bytes
     ) -> MediaServiceResponse:
         """
@@ -114,7 +114,7 @@ class MediaService:
             channel_id=channel_id,
             video_id=video_id,
             filename=filename,
-            original_url=original_url,
+            source_url=source_url,
         )
         cache.video.save(filename, content=BytesIO(content))
         cache.save()
@@ -127,9 +127,9 @@ class MediaService:
             video_title=title
         )
 
-    def _get_download_cache_text(self, title, cache_video_url, cache_video_original_url):
+    def _get_download_cache_text(self, title, cache_video_url, cache_video_source_url):
         url = unquote(cache_video_url)
-        formatted_original_video_url = self.bot.get_formatted_url(title, cache_video_original_url)
+        formatted_original_video_url = self.bot.get_formatted_url(title, cache_video_source_url)
         formatted_cached_video_url = self.bot.get_formatted_url('здесь', self._get_cached_url(url))
         return f"{formatted_original_video_url}\n" \
                f"Скачать можно {formatted_cached_video_url}"
