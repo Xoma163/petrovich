@@ -2,7 +2,7 @@ from apps.bot.consts import RoleEnum
 from apps.bot.core.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.commands.command import Command
 from apps.commands.help_text import HelpText, HelpTextItem, HelpTextArgument
-from apps.connectors.minecraft_server import MinecraftServer
+from apps.connectors.parsers.minecraft.minecraft_server import MinecraftServer
 from petrovich.settings import MAIN_DOMAIN
 
 

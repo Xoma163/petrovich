@@ -3,8 +3,8 @@ from apps.bot.core.activities import ActivitiesEnum
 from apps.bot.core.chat_activity import ChatActivity
 from apps.commands.media_command.service import MediaServiceResponse, MediaService
 from apps.connectors.parsers.media_command.twitter import Twitter
+from apps.shared.decorators import retry
 from apps.shared.exceptions import PWarning
-from apps.shared.utils.decorators import retry
 
 
 class TwitterService(MediaService):

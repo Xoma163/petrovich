@@ -3,12 +3,13 @@ from threading import Lock
 
 from PIL import Image, ImageDraw
 
-from apps.bot.consts import PlatformEnum, RoleEnum, rus_alphabet
+from apps.bot.consts import PlatformEnum, RoleEnum
 from apps.bot.core.bot.tg_bot.tg_bot import TgBot
 from apps.bot.core.messages.response_message import ResponseMessageItem, ResponseMessage
 from apps.commands.command import Command
 from apps.commands.games.models import Wordle as WordleModel
 from apps.commands.help_text import HelpText, HelpTextItem, HelpTextArgument
+from apps.shared.consts import rus_alphabet
 from apps.shared.exceptions import PWarning, PSkip
 from apps.shared.utils.utils import random_event, get_font_by_path
 

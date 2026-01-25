@@ -4,8 +4,8 @@ import socket
 import struct
 import time
 
+from apps.connectors.parsers.minecraft.forge import ForgeMod, ForgeData
 from apps.shared.exceptions import PError
-from apps.shared.utils.minecraft.forge import ForgeMod, ForgeData
 from apps.shared.utils.utils import extract_json
 
 

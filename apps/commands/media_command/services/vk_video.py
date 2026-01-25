@@ -3,9 +3,9 @@ import re
 from apps.bot.core.activities import ActivitiesEnum
 from apps.bot.core.chat_activity import ChatActivity
 from apps.commands.media_command.service import MediaService, MediaServiceResponse
-from apps.connectors.parsers.media_command.vk.video import VKVideo
+from apps.connectors.parsers.media_command.vk_video import VKVideo
+from apps.shared.decorators import retry
 from apps.shared.exceptions import PWarning
-from apps.shared.utils.decorators import retry
 
 
 class VKVideoService(MediaService):

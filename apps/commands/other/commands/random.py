@@ -1,9 +1,11 @@
+import random
+
 from apps.bot.consts import RoleEnum
 from apps.bot.core.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.commands.command import Command
 from apps.commands.help_text import HelpTextItem, HelpText, HelpTextArgument
 from apps.shared.exceptions import PWarning
-from apps.shared.utils.utils import get_random_int, random_event
+from apps.shared.utils.utils import random_event
 
 
 class Random(Command):
@@ -27,14 +29,15 @@ class Random(Command):
         try:
             self.int_args = [0, 1]
             self.parse_int()
-            rand_int = self._get_random_int()
-            answer = str(rand_int)
+            int1, int2 = self.get_numbers()
+            random_int = random.randint(int1, int2)
+            answer = str(random_int)
         # Если текст
         except PWarning:
             answer = random_event(self.event.message.args_case)
         return ResponseMessage(ResponseMessageItem(text=answer))
 
-    def _get_random_int(self):
+    def get_numbers(self):
         if self.event.message.args:
             if len(self.event.message.args) == 2:
                 int1 = self.event.message.args[0]
@@ -50,4 +53,4 @@ class Random(Command):
         if int1 > int2:
             int1, int2 = int2, int1
 
-        return get_random_int(int1, int2)
+        return int1, int2

@@ -28,7 +28,8 @@ from apps.commands.gpt.protocols import GPTCommandProtocol
 from apps.commands.gpt.providers.base import GPTProvider
 from apps.shared.exceptions import PWarning, PError
 from apps.shared.utils.cache import MessagesCache
-from apps.shared.utils.utils import markdown_to_html, wrap_text_in_document
+from apps.shared.utils.markdown import markdown_to_html
+from apps.shared.utils.utils import wrap_text_in_document
 from petrovich.settings import env
 
 logger = logging.getLogger(__name__)

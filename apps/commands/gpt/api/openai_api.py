@@ -26,8 +26,8 @@ from apps.commands.gpt.usage import (
     GPTVisionUsage,
     GPTImageDrawUsage
 )
+from apps.shared.decorators import retry
 from apps.shared.exceptions import PError, PWarning
-from apps.shared.utils.decorators import retry
 
 logger = logging.getLogger('openai')
 

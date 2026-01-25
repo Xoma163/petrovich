@@ -14,8 +14,8 @@ from django.db.models.fields.files import FieldFile
 from urllib3.exceptions import SSLError
 
 from apps.bot.core.chat_activity import ChatActivity
+from apps.shared.decorators import retry
 from apps.shared.exceptions import PWarning
-from apps.shared.utils.decorators import retry
 
 
 class Attachment:
@@ -168,7 +168,7 @@ class Attachment:
         if not cookies:
             cookies = {}
 
-        from apps.shared.utils.utils import get_default_headers
+        from apps.connectors.utils import get_default_headers
         _headers = get_default_headers()
         if headers is not None:
             _headers = headers  # ToDo: возможно отвалится половина всего, потестить.

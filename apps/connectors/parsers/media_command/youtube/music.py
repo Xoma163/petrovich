@@ -4,7 +4,7 @@ from urllib.parse import urlparse, parse_qsl
 import yt_dlp
 
 from apps.connectors.parsers.media_command.data import AudioData
-from apps.shared.utils.nothing_logger import NothingLogger
+from apps.connectors.parsers.media_command.youtube.nothing_logger import NothingLogger
 
 
 class YoutubeMusic:

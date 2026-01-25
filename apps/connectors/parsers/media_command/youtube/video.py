@@ -7,8 +7,8 @@ import yt_dlp
 from apps.bot.core.messages.attachments.audio import AudioAttachment
 from apps.bot.core.messages.attachments.video import VideoAttachment
 from apps.connectors.parsers.media_command.data import VideoData
+from apps.connectors.parsers.media_command.youtube.nothing_logger import NothingLogger
 from apps.shared.exceptions import PWarning
-from apps.shared.utils.nothing_logger import NothingLogger
 from apps.shared.utils.video.downloader import VideoDownloader
 from apps.shared.utils.video.video_handler import VideoHandler
 
@@ -159,7 +159,6 @@ class YoutubeVideo:
             # Не забыть закинуть deno в /usr/bin/local
             'js_runtimes': {'deno': {}},
             'remote_components': ['ejs:npm', 'ejs:github'],
-            # 'cookiefile': os.path.join(BASE_DIR, 'secrets', 'youtube_cookies.txt')
         }
         ydl = yt_dlp.YoutubeDL(ydl_params)
         ydl.add_default_info_extractors()

@@ -35,7 +35,6 @@ class PlatformEnum(StrEnum):
         return tuple((i.name, i.value) for i in cls)
 
 
-rus_alphabet = "ёйцукенгшщзхъфывапролджэячсмитьбю"
 
 ATTACHMENT_TYPE_TRANSLATOR = {
     'photo': PhotoAttachment,

@@ -2,7 +2,7 @@ from apps.bot.consts import RoleEnum
 from apps.bot.core.activities import ActivitiesEnum
 from apps.bot.core.chat_activity import ChatActivity
 from apps.commands.media_command.service import MediaServiceResponse, MediaService
-from apps.connectors.parsers.media_command.yandex.music import YandexMusicAPI, YandexAlbum, YandexTrack
+from apps.connectors.parsers.media_command.yandex_music import YandexMusicAPI, YandexAlbum, YandexTrack
 from apps.shared.exceptions import PWarning
 
 

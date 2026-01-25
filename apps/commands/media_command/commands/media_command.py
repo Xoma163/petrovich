@@ -25,7 +25,8 @@ from apps.commands.media_command.services.yandex_music import YandexMusicService
 from apps.commands.media_command.services.youtube_music import YoutubeMusicService
 from apps.commands.media_command.services.youtube_video import YoutubeVideoService
 from apps.shared.exceptions import PWarning
-from apps.shared.utils.utils import get_urls_from_text, get_flat_list, markdown_wrap_symbols
+from apps.shared.utils.markdown import markdown_wrap_symbols
+from apps.shared.utils.utils import get_urls_from_text, get_flat_list
 from apps.shared.utils.video.video_handler import VideoHandler
 
 

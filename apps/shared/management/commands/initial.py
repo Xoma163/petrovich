@@ -361,8 +361,7 @@ class Command(BaseCommand):
         self.init_cities_offline()
         print('done init cities')
 
-        self.init_services_db()
-        # self.init_cities_online()
-        print('done init services_db')
+        # self.init_services_db()
+        # print('done init services_db')
 
         print("done all")

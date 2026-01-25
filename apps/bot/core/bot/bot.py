@@ -19,7 +19,7 @@ from apps.bot.core.messages.attachments.video import VideoAttachment
 from apps.bot.core.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.models import Profile, Chat, Bot as BotModel, User
 from apps.shared.exceptions import PWarning, PError, PSkip, PIDK, PSkipContinue
-from apps.shared.utils.utils import tanimoto, get_chunks, fix_layout, get_flat_list, has_cyrillic
+from apps.shared.utils.utils import get_chunks
 from petrovich.settings import env
 
 lock = Lock()
@@ -183,73 +183,19 @@ class Bot(Thread):
         if event.chat and event.chat.settings.no_mention and event.message and not event.message.mentioned:
             raise PSkip()
 
-        similar_command, keyboard = self.get_similar_command(event, registry_commands)
+        if not event.message or not event.message.raw:
+            # ToDo: ignore?
+            answer = "Я не понял, что вы от меня хотите(("
+        else:
+            answer = f"Я не понял команды \"{event.message.command}\"\n"
+
         rm = ResponseMessage(
             ResponseMessageItem(
-                text=similar_command,
-                keyboard=keyboard,
+                text=answer,
                 peer_id=event.peer_id,
                 message_thread_id=event.message_thread_id
             ))
         return rm
-
-    def get_similar_command(self, event: Event, commands):
-        """
-        Получение похожей команды по неправильно введённой
-        """
-        if not event.message or not event.message.raw:
-            idk_what_you_want = "Я не понял, что вы от меня хотите(("
-            return idk_what_you_want, {}
-        original_text = event.message.raw.split(' ')
-        messages = [original_text[0]]
-
-        # Если в тексте нет кириллицы, то предлагаем пофикшенное название команды
-        if not has_cyrillic(original_text[0]):
-            fixed_command = fix_layout(original_text[0])
-            messages.append(fixed_command)
-
-        tanimoto_commands = self._generate_tanimoto_commands(commands, messages, event)
-
-        msg = f"Я не понял команды \"{event.message.command}\"\n"
-        if tanimoto_commands[0][0] and tanimoto_commands[0][1] != 0:
-            msg += f"Возможно вы имели в виду команду \"{tanimoto_commands[0][0].name}\""
-        buttons = []
-        for command in tanimoto_commands:
-            command_name = command[0].name
-            # Добавляем в клаву просто команду
-            buttons.append(self.get_button(command_name, command_name))
-        keyboard = {}
-        if buttons:
-            keyboard = self.get_inline_keyboard(buttons, 1)
-        return msg, keyboard
-
-    @staticmethod
-    def _generate_tanimoto_commands(commands, messages, event) -> list:
-        tanimoto_commands = [dict.fromkeys(commands, 0.0) for _ in range(len(messages))]
-
-        for command in commands:
-            command_has_not_full_names = not command.full_names
-            user_has_not_access = not event.sender.check_role(command.access)
-            command_is_not_suggested = not command.suggest_for_similar
-
-            if command_has_not_full_names or user_has_not_access or command_is_not_suggested:
-                continue
-
-            for name in command.full_names:
-                if not name:
-                    continue
-
-                for i, message in enumerate(messages):
-                    tanimoto_commands[i][command] = max(tanimoto(message, name), tanimoto_commands[i][command])
-
-        # Сортируем словари, берём топ2 и делаем из них один список, который повторно сортируем
-        tanimoto_commands = [
-            {k: v for k, v in sorted(x.items(), key=lambda item: item[1], reverse=True)}
-            for x in tanimoto_commands
-        ]
-        tanimoto_commands = get_flat_list([list(x.items())[:2] for x in tanimoto_commands])
-        tanimoto_commands = sorted(tanimoto_commands, key=lambda x: x[1], reverse=True)
-        return tanimoto_commands
 
     # END MAIN ROUTING AND MESSAGING
 
@@ -566,6 +512,10 @@ class Bot(Thread):
         return text
 
     # END EXTRA
+
+    # ToDo: куда это?
+    def edit_message(self, default_params) -> dict:
+        pass
 
 
 def send_message_to_moderator_chat(msg: ResponseMessageItem):

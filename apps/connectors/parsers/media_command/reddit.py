@@ -6,8 +6,9 @@ from bs4 import BeautifulSoup
 
 from apps.bot.core.messages.attachments.audio import AudioAttachment
 from apps.bot.core.messages.attachments.video import VideoAttachment
+from apps.connectors.utils import get_default_headers
 from apps.shared.exceptions import PWarning
-from apps.shared.utils.utils import get_url_file_ext, get_default_headers
+from apps.shared.utils.utils import get_url_file_ext
 from apps.shared.utils.video.video_handler import VideoHandler
 
 
@@ -142,7 +143,7 @@ class Reddit:
         # use UA headers to prevent 429 error
         headers = get_default_headers()
         try:
-            post_url_raw = requests.get(self.post_url, headers=get_default_headers()).history[-1].text
+            post_url_raw = requests.get(self.post_url, headers=headers).history[-1].text
             if match := re.search(r'href="([^"]+)"', post_url_raw):
                 self.post_url = match.group(1)
         except:

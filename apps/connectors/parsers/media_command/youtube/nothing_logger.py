@@ -1,6 +1,6 @@
-class NothingLogger(object):
+class NothingLogger:
     """
-    Класс для отключения логов
+    Класс для отключения логов Youtube
     """
 
     @staticmethod

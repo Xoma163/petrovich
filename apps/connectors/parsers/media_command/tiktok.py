@@ -5,9 +5,9 @@ from selenium.common import TimeoutException
 from selenium.webdriver.support.ui import WebDriverWait
 
 from apps.connectors.parsers.media_command.data import VideoData
+from apps.connectors.parsers.web_driver import get_web_driver, get_web_driver_headers
+from apps.shared.decorators import retry
 from apps.shared.exceptions import PWarning
-from apps.shared.utils.decorators import retry
-from apps.shared.utils.web_driver import get_web_driver, get_web_driver_headers
 
 
 class TikTok:

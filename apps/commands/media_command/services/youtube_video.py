@@ -3,8 +3,8 @@ from apps.bot.core.chat_activity import ChatActivity
 from apps.commands.media_command.service import MediaService, MediaServiceResponse
 from apps.connectors.parsers.media_command.data import VideoData
 from apps.connectors.parsers.media_command.youtube.video import YoutubeVideo
+from apps.shared.decorators import retry
 from apps.shared.exceptions import PSkipContinue, PWarning
-from apps.shared.utils.decorators import retry
 
 
 class YoutubeVideoService(MediaService):

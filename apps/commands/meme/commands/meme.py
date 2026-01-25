@@ -17,7 +17,7 @@ from apps.commands.help_text import HelpText, HelpTextItem, HelpTextArgument
 from apps.commands.meme.models import Meme as MemeModel
 from apps.connectors.parsers.media_command.youtube.video import YoutubeVideo
 from apps.shared.exceptions import PWarning, PSkip
-from apps.shared.utils.utils import tanimoto, get_youtube_video_id, detect_ext
+from apps.shared.utils.utils import get_youtube_video_id, detect_ext
 from apps.shared.utils.video.video_handler import VideoHandler
 
 
@@ -105,8 +105,8 @@ class Meme(Command):
         if len(attachments) == 0:
             raise PWarning("Не нашёл вложений в сообщении")
         attachment = attachments[0]
-
         meme_name_list = self.event.message.args[1:]
+
         if isinstance(attachment, LinkAttachment):
             self._check_allowed_url(attachment)
             att_url_lower = attachment.url.lower()
@@ -395,8 +395,6 @@ class Meme(Command):
         return ResponseMessage(ResponseMessageItem(text=answer))
 
     def menu_default(self) -> ResponseMessage:
-        warning_message = None
-
         exclude_trusted = False
         if not self.event.sender.check_role(RoleEnum.TRUSTED):
             exclude_trusted = True
@@ -409,18 +407,12 @@ class Meme(Command):
             try:
                 meme = self.get_one_meme(memes, self.event.message.args)
             except PWarning:
-                tanimoto_memes = self.get_tanimoto_memes(memes, " ".join(self.event.message.args))
-                if len(tanimoto_memes) == 0:
-                    raise PWarning("Не нашёл :(")
-                meme = tanimoto_memes[0]
-                warning_message = self.get_similar_memes_names(tanimoto_memes)
+                raise PWarning("Не нашёл :(")
 
         meme.uses += 1
         meme.save()
         rm = ResponseMessage()
         rm.messages.append(self.prepare_meme_to_send(meme))
-        if warning_message:
-            rm.messages.append(warning_message)
         return rm
 
     @staticmethod
@@ -536,17 +528,6 @@ class Meme(Command):
             callback_params_data['caption'] = f"\n{self.MESSAGE_YOUTUBE_STATUS_ERROR}"
             self.bot.edit_message(callback_params_data)
             return
-
-    @staticmethod
-    def get_tanimoto_memes(memes, filter_list) -> list[MemeModel]:
-        query = " ".join(filter_list)
-        memes_list = []
-        for meme in memes:
-            tanimoto_coefficient = tanimoto(meme.name, query)
-            memes_list.append({'meme': meme, 'tanimoto': tanimoto_coefficient, 'contains_query': query in meme.name})
-        memes_list.sort(key=lambda x: (x['contains_query'], x['tanimoto']), reverse=True)
-        memes_list = [meme['meme'] for meme in memes_list]
-        return memes_list
 
     @staticmethod
     def get_similar_memes_names(memes) -> ResponseMessageItem:

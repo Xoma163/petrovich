@@ -1,6 +1,6 @@
+from apps.connectors.parsers.minecraft.server_data import MinecraftServerStatus, MinecraftServerData
 from apps.shared.exceptions import PError
 from apps.shared.utils.do_the_linux_command import do_the_linux_command
-from apps.shared.utils.minecraft.server_data import MinecraftServerStatus, MinecraftServerData
 from apps.shared.utils.utils import check_command_time
 
 
