@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from apps.bot.consts import PlatformEnum, RoleEnum
-from apps.bot.core.bot.tg_bot.tg_bot import TgBot
+from apps.bot.core.bot.telegram.tg_bot import TgBot
 from apps.bot.core.messages.attachments.photo import PhotoAttachment
 from apps.bot.core.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.models import Profile as ProfileModel

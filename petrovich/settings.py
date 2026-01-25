@@ -139,8 +139,8 @@ LOGS_DIR = os.path.join(BASE_DIR, 'logs')
 if not os.path.exists(LOGS_DIR):
     os.mkdir(LOGS_DIR)
 
-DEBUG_FILE = os.path.join(LOGS_DIR, 'debug.log')
-ERROR_FILE = os.path.join(LOGS_DIR, 'error.log')
+DEBUG_FILE = os.path.join(LOGS_DIR, 'debug.log')  # noqa
+ERROR_FILE = os.path.join(LOGS_DIR, 'error.log')  # noqa
 
 GB_1 = 2 ** 30  # 1 gb
 

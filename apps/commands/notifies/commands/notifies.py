@@ -7,7 +7,7 @@ from dateutil.parser import ParserError
 from django.db.models import Q, QuerySet
 
 from apps.bot.consts import RoleEnum, PlatformEnum
-from apps.bot.core.bot.tg_bot.tg_bot import TgBot
+from apps.bot.core.bot.telegram.tg_bot import TgBot
 from apps.bot.core.messages.attachments.audio import AudioAttachment
 from apps.bot.core.messages.attachments.document import DocumentAttachment
 from apps.bot.core.messages.attachments.gif import GifAttachment

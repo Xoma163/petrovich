@@ -70,7 +70,7 @@ class GPTPrepromptMixin(GPTCommandProtocol):
 
     def get_preprompt(self, sender: Profile, chat: Chat | None) -> Preprompt | None:
         """
-        Получить препромпт под текущую ситуацию (в чате,в лс)
+        Получить препромпт под текущую ситуацию (в чате, в лс)
         """
 
         if chat:

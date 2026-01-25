@@ -2,7 +2,7 @@ import logging
 from abc import abstractmethod
 
 from apps.bot.core.event.event import Event
-from apps.bot.core.event.tg_event.tg_event import TgEvent
+from apps.bot.core.event.telegram.tg_event import TgEvent
 from apps.bot.core.messages.attachments.document import DocumentAttachment
 from apps.bot.core.messages.attachments.photo import PhotoAttachment
 from apps.bot.core.messages.response_message import ResponseMessageItem, ResponseMessage

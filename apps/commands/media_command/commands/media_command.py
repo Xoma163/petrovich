@@ -2,7 +2,7 @@ import random
 from urllib.parse import urlparse
 
 from apps.bot.consts import RoleEnum, PlatformEnum
-from apps.bot.core.bot.tg_bot.tg_bot import TgBot
+from apps.bot.core.bot.telegram.tg_bot import TgBot
 from apps.bot.core.event.event import Event
 from apps.bot.core.messages.attachments.audio import AudioAttachment
 from apps.bot.core.messages.attachments.link import LinkAttachment

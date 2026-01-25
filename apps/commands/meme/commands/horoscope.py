@@ -113,7 +113,7 @@ class Horoscope(Command):
 
     def get_horoscope_for_all(self) -> ResponseMessage:
         signs = self.zodiac_signs.get_zodiac_signs()
-        rm = ResponseMessage(delay=1)
+        rm = ResponseMessage(send_delay=1)
         for sign in signs:
             message = self.get_horoscope_by_zodiac_sign(sign)
             message.peer_id = self.event.peer_id

@@ -39,7 +39,7 @@ class Attachment:
         self.file_id: str | None = None
 
     def get_file(self, peer_id=None):
-        from apps.bot.core.bot.tg_bot.tg_bot import TgBot
+        from apps.bot.core.bot.telegram.tg_bot import TgBot
         tg_bot = TgBot()
 
         size = self.get_size_mb()
@@ -187,11 +187,7 @@ class Attachment:
 
     def get_size(self) -> float | None:
         if not self.size and self.content:
-            try:
-                self.size = len(self.content)
-            except TypeError:
-                self.size = self.content.seek(0, 2)
-                self.content.seek(0)
+            self.size = len(self.content)
         return self.size
 
     def get_size_mb(self) -> float | None:
@@ -223,7 +219,7 @@ class Attachment:
         return dict_self
 
     def set_file_id(self):
-        from apps.bot.core.bot.tg_bot.tg_bot import TgBot
+        from apps.bot.core.bot.telegram.tg_bot import TgBot
         tg_bot = TgBot()
         self.file_id = tg_bot.get_file_id(self)
 

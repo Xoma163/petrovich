@@ -8,9 +8,9 @@ from apps.bot.core.bot.bot import Bot
 from apps.bot.core.bot_response import BotResponse
 from apps.bot.core.chat_action_sender import ChatActionSender
 from apps.bot.core.chat_actions import ChatActionEnum, TG_CHAT_ACTIONS
-from apps.bot.core.connectors.telegram import TelegramAPI, TelegramAPIRequestMode
+from apps.bot.core.connectors.telegram.telegram import TelegramAPI, TelegramAPIRequestMode
 from apps.bot.core.event.event import Event
-from apps.bot.core.event.tg_event.tg_event import TgEvent
+from apps.bot.core.event.telegram.tg_event import TgEvent
 from apps.bot.core.messages.attachments.attachment import Attachment
 from apps.bot.core.messages.attachments.audio import AudioAttachment
 from apps.bot.core.messages.attachments.document import DocumentAttachment
@@ -524,11 +524,11 @@ class TgBot(Bot):
     # END LOGGING
 
     # USERS GROUPS BOTS
-    def get_user_profile_photos(self, user_id) -> dict:
+    def get_user_profile_photos(self, user_id: int | str) -> dict:
         r = self.api_handler.get_user_profile_photos(user_id)
         return r['result']['photos']
 
-    def get_chat_administrators(self, chat_id) -> dict:
+    def get_chat_administrators(self, chat_id: int | str) -> dict:
         return self.api_handler.get_chat_administrators(chat_id)['result']
 
     # END USERS GROUPS BOTS

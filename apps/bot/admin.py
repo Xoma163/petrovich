@@ -102,7 +102,7 @@ class ProfileAdmin(TimeStampAdminMixin):
         (
             'Chats',
             {
-                'fields': ('get_chats_count', 'get_chats', 'chats')
+                'fields': ('get_chats_count', 'get_chats', 'chats')  # noqa
             }
         ),
         (
@@ -164,7 +164,7 @@ class ChatAdmin(TimeStampAdminMixin):
         (
             'Users',
             {
-                'fields': ('get_users_count', 'get_users')
+                'fields': ('get_users_count', 'get_users')  # noqa
             }
         ),
         (

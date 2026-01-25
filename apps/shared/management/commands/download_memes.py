@@ -5,7 +5,7 @@ from django.core.management.base import BaseCommand
 from django.db.models import Q
 
 from apps.bot.consts import ATTACHMENT_TYPE_TRANSLATOR
-from apps.bot.core.bot.tg_bot.tg_bot import TgBot
+from apps.bot.core.bot.telegram.tg_bot import TgBot
 from apps.bot.core.messages.attachments.photo import PhotoAttachment
 from apps.bot.core.messages.attachments.video import VideoAttachment
 from apps.commands.meme.models import Meme

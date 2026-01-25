@@ -12,7 +12,7 @@ from apps.bot.core.messages.attachments.video import VideoAttachment
 from apps.bot.core.messages.attachments.video_note import VideoNoteAttachment
 from apps.bot.core.messages.attachments.voice import VoiceAttachment
 from apps.bot.core.messages.message import Message
-from apps.bot.core.messages.tg.message import TgMessage
+from apps.bot.core.messages.telegram.message import TgMessage
 from apps.bot.utils import get_chat_by_id, get_user_by_id, get_profile_by_user, add_profile_to_chat
 from petrovich.settings import env
 
@@ -20,7 +20,7 @@ from petrovich.settings import env
 class TgEvent(Event):
 
     def __init__(self, raw_event=None, use_db=True):
-        from apps.bot.core.bot.tg_bot.tg_bot import TgBot
+        from apps.bot.core.bot.telegram.tg_bot import TgBot
         super().__init__(raw_event, use_db)
 
         self.bot = TgBot()
@@ -82,6 +82,7 @@ class TgEvent(Event):
         self.peer_id = chat.get('id')
         self.from_id = message.get('from', {}).get('id')
 
+        self.chat = None
         if chat.get('type') == 'private':
             self.is_from_pm = True
         elif chat.get('type') in ["group", "supergroup", "channel"]:
@@ -126,7 +127,6 @@ class TgEvent(Event):
         if via_bot and via_bot['username'] == env.str("TG_BOT_LOGIN"):
             # Не реагируем на сообщения пользователей отправленные via bot
             self.force_response = False
-
         if self.sender and self.chat and not self.is_fwd and self.use_db:
             add_profile_to_chat(self.sender, self.chat)
 

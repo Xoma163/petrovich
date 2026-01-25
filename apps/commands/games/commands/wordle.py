@@ -4,7 +4,7 @@ from threading import Lock
 from PIL import Image, ImageDraw
 
 from apps.bot.consts import PlatformEnum, RoleEnum
-from apps.bot.core.bot.tg_bot.tg_bot import TgBot
+from apps.bot.core.bot.telegram.tg_bot import TgBot
 from apps.bot.core.messages.response_message import ResponseMessageItem, ResponseMessage
 from apps.commands.command import Command
 from apps.commands.games.models import Wordle as WordleModel
@@ -137,7 +137,7 @@ class Wordle(Command):
                 wrong_letters.append(i)
         return correct_letters, exactly_correct_letters, wrong_letters
 
-    def get_keyboard_image(self, session):
+    def get_keyboard_image(self, session) -> bytes:
         correct_letters = set()
         exactly_correct_letters = set()
         wrong_letters = set()
@@ -180,7 +180,9 @@ class Wordle(Command):
         keyboard = self.bot.get_inline_keyboard([button])
 
         image = self.get_keyboard_image(session)
-        attachment = self.bot.get_photo_attachment(image)
+        attachment = self.bot.get_photo_attachment(
+            _bytes=image
+        )
         rmi = ResponseMessageItem(attachments=[attachment], peer_id=self.event.peer_id,
                                   message_thread_id=self.event.message_thread_id)
         send_message_session_or_edit(self.bot, self.event, session, rmi, max_delta=8)

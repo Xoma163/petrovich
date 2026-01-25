@@ -123,7 +123,7 @@ def send_message_to_moderator_chat(msg: ResponseMessageItem):
     moderator_chat_pk = env.str("TG_MODERATOR_CHAT_PK")
     moderator_chat_id = Chat.objects.get(pk=moderator_chat_pk).chat_id
 
-    from apps.bot.core.bot.tg_bot.tg_bot import TgBot
+    from apps.bot.core.bot.telegram.tg_bot import TgBot
     bot = TgBot()
     msg.peer_id = moderator_chat_id
     return bot.send_response_message_item(msg)

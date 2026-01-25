@@ -111,7 +111,7 @@ class ResponseMessageItem:
                 continue
 
             if len(self.attachments) < 2:
-                from apps.bot.core.bot.tg_bot.tg_bot import TgBot
+                from apps.bot.core.bot.telegram.tg_bot import TgBot
                 self.text = self.text[:start_pos] + TgBot.get_formatted_url(url, url) + self.text[end_pos:]
 
     def __str__(self):
@@ -145,8 +145,9 @@ class ResponseMessageItem:
 
 
 class ResponseMessage:
-    def __init__(self, messages=None, send: bool = True):
+    def __init__(self, messages=None, send: bool = True, send_delay: int = 0):
         self.send = send
+        self.send_delay = send_delay
 
         if messages is None:
             messages = []

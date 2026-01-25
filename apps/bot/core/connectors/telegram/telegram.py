@@ -1,7 +1,7 @@
 import json
 from enum import Enum
 
-from apps.bot.core.connectors.request import Request, RequestLocal
+from apps.bot.core.connectors.telegram.request import Request, RequestLocal
 
 
 class TelegramAPIRequestMode(Enum):
@@ -89,6 +89,7 @@ class TelegramAPI:
         params = {
             "chat_id": chat_id,
             "message_thread_id": message_thread_id,
+            "reply_to_message_id": reply_to_message_id,
         }
         if media:
             params['media'] = json.dumps(media)  # noqa
@@ -208,6 +209,7 @@ class TelegramAPI:
         params = {
             "chat_id": chat_id,
             "message_thread_id": message_thread_id,
+            "reply_to_message_id": reply_to_message_id,
             "caption": caption,
             "parse_mode": parse_mode,
             "title": title,

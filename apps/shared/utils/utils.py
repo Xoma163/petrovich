@@ -82,7 +82,7 @@ def get_help_texts_for_command(command, roles: list[RoleEnum] = None) -> str:
     LONG_DASH = "—"
     DOUBLE_DASH = "--"
 
-    from apps.bot.core.bot.tg_bot.tg_bot import TgBot
+    from apps.bot.core.bot.telegram.tg_bot import TgBot
     from apps.commands.help_text import HelpTextArgument
 
     if roles is None:

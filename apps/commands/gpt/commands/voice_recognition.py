@@ -1,5 +1,5 @@
 from apps.bot.consts import PlatformEnum, RoleEnum
-from apps.bot.core.bot.tg_bot.tg_bot import TgBot
+from apps.bot.core.bot.telegram.tg_bot import TgBot
 from apps.bot.core.chat_action_sender import ChatActionSender
 from apps.bot.core.chat_actions import ChatActionEnum
 from apps.bot.core.event.event import Event
@@ -144,7 +144,7 @@ class VoiceRecognition(AcceptExtraCommand):
             attachments = []
             for chunk in chunks:
                 audio = AudioAttachment()
-                audio.content = chunk
+                audio.content = chunk.read()
                 audio.ext = audio_message.ext
                 attachments.append(audio)
         else:

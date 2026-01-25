@@ -4,7 +4,7 @@ from threading import Lock
 from django.db.models import QuerySet
 
 from apps.bot.consts import PlatformEnum, RoleEnum
-from apps.bot.core.bot.tg_bot.tg_bot import TgBot
+from apps.bot.core.bot.telegram.tg_bot import TgBot
 from apps.bot.core.messages.response_message import ResponseMessageItem, ResponseMessage
 from apps.bot.models import Role
 from apps.commands.command import Command

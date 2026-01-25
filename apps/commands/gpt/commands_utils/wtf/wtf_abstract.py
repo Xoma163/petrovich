@@ -5,7 +5,7 @@ from apps.bot.consts import RoleEnum, PlatformEnum
 from apps.bot.core.chat_action_sender import ChatActionSender
 from apps.bot.core.chat_actions import ChatActionEnum
 from apps.bot.core.event.event import Event
-from apps.bot.core.event.tg_event.tg_event import TgEvent
+from apps.bot.core.event.telegram.tg_event import TgEvent
 from apps.bot.core.messages.response_message import ResponseMessage
 from apps.bot.models import User
 from apps.commands.command import Command

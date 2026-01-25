@@ -5,7 +5,7 @@ from crontab import CronTab
 from django.core.management.base import BaseCommand
 
 from apps.bot.consts import RoleEnum, ATTACHMENT_TYPE_TRANSLATOR, PlatformEnum
-from apps.bot.core.bot.tg_bot.tg_bot import TgBot
+from apps.bot.core.bot.telegram.tg_bot import TgBot
 from apps.bot.core.event.event import Event
 from apps.bot.core.messages.response_message import ResponseMessageItem
 from apps.commands.notifies.models import Notify

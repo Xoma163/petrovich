@@ -1,4 +1,5 @@
 import logging
+import time
 from io import BytesIO
 from math import inf
 from threading import Lock
@@ -127,6 +128,8 @@ class Bot:
                 continue
             br = self.send_response_message_item(rmi)
             results.append(br)
+            if rm.send_delay:
+                time.sleep(rm.send_delay)
         return results
 
     def send_response_message_item(self, rmi: ResponseMessageItem) -> BotResponse:
@@ -349,6 +352,11 @@ class Bot:
     def edit_message(self, default_params) -> dict:
         """
         Редактирование сообщения
+        """
+
+    def get_chat_administrators(self, chat_id: int | str) -> list:
+        """
+        Получение администраторов чата
         """
 
     # ToDo думаю это надо куда-то унести
