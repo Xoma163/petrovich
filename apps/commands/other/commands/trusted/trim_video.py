@@ -1,9 +1,9 @@
 from datetime import datetime
 
 from apps.bot.consts import PlatformEnum, RoleEnum
-from apps.bot.core.activities import ActivitiesEnum
 from apps.bot.core.bot.tg_bot.tg_bot import TgBot
-from apps.bot.core.chat_activity import ChatActivity
+from apps.bot.core.chat_action_sender import ChatActionSender
+from apps.bot.core.chat_actions import ChatActionEnum
 from apps.bot.core.messages.attachments.audio import AudioAttachment
 from apps.bot.core.messages.attachments.link import LinkAttachment
 from apps.bot.core.messages.attachments.video import VideoAttachment
@@ -61,7 +61,7 @@ class TrimVideo(Command):
 
     def start(self) -> ResponseMessage:
         att = self.event.get_all_attachments(self.attachments)[0]
-        with ChatActivity(self.bot, ActivitiesEnum.UPLOAD_VIDEO, self.event.peer_id):
+        with ChatActionSender(self.bot, ChatActionEnum.UPLOAD_VIDEO, self.event.peer_id):
             if isinstance(att, LinkAttachment):
                 if not att.is_youtube_link:
                     raise PWarning("Обрезка по ссылке доступна только для YouTube")
@@ -70,9 +70,15 @@ class TrimVideo(Command):
                 video_bytes = self.trim_attachment(att)
 
         if isinstance(att, AudioAttachment):
-            attachment = self.bot.get_audio_attachment(video_bytes, peer_id=self.event.peer_id)
+            attachment = self.bot.get_audio_attachment(
+                _bytes=video_bytes,
+                peer_id=self.event.peer_id
+            )
         else:
-            attachment = self.bot.get_video_attachment(video_bytes, peer_id=self.event.peer_id)
+            attachment = self.bot.get_video_attachment(
+                _bytes=video_bytes,
+                peer_id=self.event.peer_id
+            )
         return ResponseMessage(ResponseMessageItem(attachments=[attachment]))
 
     def trim_attachment_by_link(self, att: LinkAttachment) -> bytes:

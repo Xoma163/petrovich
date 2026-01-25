@@ -154,18 +154,18 @@ class Reddit:
 
         self.data = data[0]["data"]["children"][0]["data"]
         self.title = self.data['title']
-        self.media_data = self.data["media_command"]
+        self.media_data = self.data["media"]
         self.content_type = self.data.get('post_hint', self.CONTENT_TYPE_TEXT)
 
         if not self.media_data:
-            if self.data.get('media_command'):
-                self.media_data = self.data["media_command"]
+            if self.data.get('media'):
+                self.media_data = self.data["media"]
             elif 'crosspost_parent_list' in self.data:
                 self.data = self.data['crosspost_parent_list'][0]
                 if isinstance(data, dict):
-                    self.media_data = data["media_command"]
+                    self.media_data = data["media"]
                 else:
-                    self.media_data = self.data['media_command']
+                    self.media_data = self.data['media']
 
     def _set_post_url(self, post_url: str):
         parsed_url = urlparse(post_url)

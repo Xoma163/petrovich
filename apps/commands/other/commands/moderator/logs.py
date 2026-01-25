@@ -1,4 +1,3 @@
-import io
 import json
 import logging
 import textwrap
@@ -8,7 +7,7 @@ from apps.bot.core.messages.response_message import ResponseMessage, ResponseMes
 from apps.commands.command import Command
 from apps.commands.help_text import HelpText, HelpTextItem, HelpTextArgument
 from apps.shared.exceptions import PWarning
-from apps.shared.utils.utils import draw_text_on_image
+from apps.shared.utils.utils import draw_text_on_image, convert_pil_image_to_bytes
 from petrovich.settings import DEBUG_FILE
 
 
@@ -56,16 +55,16 @@ class Logs(Command):
             logs_list.insert(i * 2 + 1, separator)
         logs_txt = "\n".join(logs_list)
         img = draw_text_on_image(logs_txt)
-        img_byte_arr = io.BytesIO()
-        img.save(img_byte_arr, format='PNG')
+        _bytes = convert_pil_image_to_bytes(img)
 
-        attachment = self.bot.get_document_attachment(
-            img_byte_arr,
+        document = self.bot.get_document_attachment(
+            _bytes=_bytes,
+            thumbnail_bytes=_bytes,
             peer_id=self.event.peer_id,
-            filename='petrovich_logs.png'
+            filename='petrovich_logs.png',
         )
-        attachment.set_thumbnail(attachment.content)
-        return ResponseMessage(ResponseMessageItem(attachments=[attachment]))
+        # document.set_thumbnail(document.content)
+        return ResponseMessage(ResponseMessageItem(attachments=[document]))
 
     def transform_logs_by_values(self, items):
         if isinstance(items, dict):

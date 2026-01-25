@@ -1,7 +1,7 @@
 import logging
 
-from apps.bot.core.activities import ActivitiesEnum
-from apps.bot.core.chat_activity import ChatActivity
+from apps.bot.core.chat_action_sender import ChatActionSender
+from apps.bot.core.chat_actions import ChatActionEnum
 from apps.bot.core.messages.attachments.document import DocumentAttachment
 from apps.bot.core.messages.response_message import ResponseMessageItem
 from apps.commands.gpt.api.base import GPTAPI
@@ -68,7 +68,7 @@ class GPTCompletionsFunctionality(GPTCommandProtocol):
             log_filter=self.event.log_filter,
         )
 
-        with ChatActivity(self.bot, ActivitiesEnum.TYPING, self.event.peer_id):
+        with ChatActionSender(self.bot, ChatActionEnum.TYPING, self.event.peer_id):
             response: GPTCompletionsResponse = gpt_api.completions(
                 messages,
                 model=self.get_completions_model(),

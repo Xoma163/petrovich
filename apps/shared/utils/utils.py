@@ -1,4 +1,5 @@
 import datetime
+import io
 import os
 import random
 import re
@@ -413,3 +414,10 @@ def detect_ext(b: bytes) -> str | None:
         return "webm"
 
     return None
+
+
+def convert_pil_image_to_bytes(pil_image, _format="PNG") -> bytes:
+    img_byte_arr = io.BytesIO()
+    pil_image.save(img_byte_arr, format=_format)
+    img_byte_arr.seek(0)
+    return img_byte_arr.read()

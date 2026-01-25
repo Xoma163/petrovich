@@ -24,7 +24,7 @@ class ResponseMessageItem:
             send: bool = True,
             spoiler: bool = False
     ):
-        self.text = text if text is not None else ""
+        self.text = text
         self.attachments = attachments if attachments else []
         if not isinstance(self.attachments, list):
             self.attachments = [self.attachments]
@@ -118,14 +118,18 @@ class ResponseMessageItem:
         return self.text if self.text else ""
 
     def get_tg_params(self) -> dict:
-        params = {
+        params: dict = {
             'chat_id': self.peer_id,
-            'caption': self.text,
             **self.kwargs
         }
+        if self.text:
+            if self.attachments:
+                params['caption'] = self.text
+            else:
+                params['text'] = self.text
 
         if self.keyboard:
-            params['reply_markup'] = json.dumps(self.keyboard)
+            params['reply_markup'] = self.keyboard
         if self.reply_to:
             params['reply_to_message_id'] = self.reply_to
         if self.disable_web_page_preview:

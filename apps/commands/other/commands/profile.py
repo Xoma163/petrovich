@@ -138,13 +138,23 @@ class Profile(Command):
     def menu_avatar(self) -> ResponseMessageItem:
         images = self.event.get_all_attachments([PhotoAttachment])
         if len(images) > 0:
-            self.event.sender.set_avatar(images[0])
+            avatar = images[0]
         else:
             if self.event.platform not in [PlatformEnum.TG]:
-                raise PWarning("Обновление аватара по пользователю доступно только для ВК/ТГ")
-            self.bot.update_profile_avatar(self.event.sender, self.event.user.user_id)
+                raise PWarning("Обновление аватара по пользователю доступно только для ТГ")
+            avatar = self._get_photo_from_tg()
+        self.event.sender.set_avatar(avatar)
         answer = "Изменил аватарку"
         return ResponseMessageItem(text=answer)
+
+    def _get_photo_from_tg(self):
+        profile_photos = self.bot.get_user_profile_photos(self.event.user.user_id)
+        if len(profile_photos) == 0:
+            raise PWarning("Нет фотографий в профиле")
+
+        pa = PhotoAttachment()
+        pa.parse_tg(profile_photos[0][-1])
+        return pa
 
     def menu_default(self) -> ResponseMessageItem:
         if self.event.message.args:
@@ -174,7 +184,6 @@ class Profile(Command):
         _surname = profile.surname or not_defined
 
         roles = []
-        #  TODO: Check
         for role in profile.roles.all():
             roles.append(RoleEnum[role.name])  # noqa
         roles = sorted(roles)
@@ -191,8 +200,11 @@ class Profile(Command):
         rmi = ResponseMessageItem(text=answer)
 
         if profile.avatar:
-            attachment = self.bot.get_photo_attachment(profile.avatar.path, peer_id=self.event.peer_id,
-                                                       filename="petrovich_user_avatar.png")
+            attachment = self.bot.get_photo_attachment(
+                path=profile.avatar.path,
+                peer_id=self.event.peer_id,
+                filename="petrovich_user_avatar.png"
+            )
             rmi.attachments = [attachment]
 
         return rmi

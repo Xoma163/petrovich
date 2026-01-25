@@ -2,8 +2,8 @@ from collections import OrderedDict
 from itertools import groupby
 
 from apps.bot.consts import RoleEnum, PlatformEnum
-from apps.bot.core.activities import ActivitiesEnum
-from apps.bot.core.chat_activity import ChatActivity
+from apps.bot.core.chat_action_sender import ChatActionSender
+from apps.bot.core.chat_actions import ChatActionEnum
 from apps.bot.core.event.event import Event
 from apps.bot.core.event.tg_event.tg_event import TgEvent
 from apps.bot.core.messages.response_message import ResponseMessage
@@ -56,14 +56,14 @@ class WTFCommand(Command):
 
         n, prompt = self._get_n_and_prompt()
 
-        with ChatActivity(self.bot, ActivitiesEnum.TYPING, self.event.peer_id):
+        with ChatActionSender(self.bot, ChatActionEnum.TYPING, self.event.peer_id):
             messages = self.get_conversation(n, prompt)
 
         gpt: GPTCommand = self.gpt_command_class()
         gpt.bot = self.bot
         gpt.event = self.event  # noqa
         gpt.set_provider_model()
-        with ChatActivity(self.bot, ActivitiesEnum.TYPING, self.event.peer_id):
+        with ChatActionSender(self.bot, ChatActionEnum.TYPING, self.event.peer_id):
             answer = gpt.completions(messages)  # noqa
         return ResponseMessage(answer)
 

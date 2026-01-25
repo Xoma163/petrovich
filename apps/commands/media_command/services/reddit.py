@@ -20,20 +20,20 @@ class RedditService(MediaService):
 
         if self.service.is_gif:
             attachments = [self.bot.get_gif_attachment(
-                reddit_data,
+                _bytes=reddit_data,
                 peer_id=self.event.peer_id,
-                filename=self.service.filename
+                filename=self.service.filename,
             )]
         elif self.service.is_image or self.service.is_images or self.service.is_gallery:
             attachments = [self.bot.get_photo_attachment(
-                att,
-                peer_id=self.event.peer_id,
+                url=att,
                 filename=self.service.filename,
+                peer_id=self.event.peer_id,
                 send_chat_action=False
             ) for att in reddit_data]
         elif self.service.is_video:
             attachments = [self.bot.get_video_attachment(
-                reddit_data,
+                _bytes=reddit_data,
                 peer_id=self.event.peer_id,
                 filename=self.service.filename
             )]
@@ -65,9 +65,9 @@ class RedditService(MediaService):
             all_photos = reversed(all_photos)
             attachments = [
                 self.bot.get_photo_attachment(
-                    photo,
-                    peer_id=self.event.peer_id,
+                    url=photo,
                     filename=self.service.filename,
+                    peer_id=self.event.peer_id,
                     send_chat_action=False
                 )
                 for photo in all_photos

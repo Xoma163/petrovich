@@ -3,7 +3,6 @@ import json
 import requests
 from bs4 import BeautifulSoup
 
-from apps.bot.core.messages.attachments.video import VideoAttachment
 from apps.connectors.parsers.media_command.data import VideoData
 from apps.shared.exceptions import PWarning, PError
 
@@ -35,7 +34,10 @@ class Boosty:
                 "https://boosty.to/amazinguser/posts/12345678-aabb-ccdd-eeff-123456789012\n"
                 "...accessToken...refreshToken...expiresAt......"
             )
-        video_info = [x for x in post_data if x.get('vid')][0]
+        video_info_list = [x for x in post_data if x.get('vid')]
+        if not video_info_list:
+            raise PWarning("Не найдено видео в посте ")
+        video_info = video_info_list[0]
 
         author_id = post['user']['id']
         author_name = post['user']['name']
@@ -65,7 +67,7 @@ class Boosty:
         )
 
     @staticmethod
-    def _set_download_url(video_data: VideoData, high_res=False):
+    def set_download_url(video_data: VideoData, high_res=False):
         player_urls_dict = video_data.extra_data['player_urls_dict']  # noqa
         qualities_order = ['ultra_hd', 'quad_hd', 'full_hd', 'high', 'medium', 'low']
         if not high_res:
@@ -79,9 +81,3 @@ class Boosty:
         else:
             raise PError("Не смог найти видео")
 
-    def download(self, video_data: VideoData, high_res=False) -> VideoAttachment:
-        self._set_download_url(video_data, high_res)
-        va = VideoAttachment()
-        va.public_download_url = video_data.video_download_url
-        va.download_content(headers={}, chunk_size=self.DOWNLOAD_CHUNK_SIZE)
-        return va

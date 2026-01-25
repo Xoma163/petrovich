@@ -14,12 +14,21 @@ class PinterestService(MediaService):
         data: PinterestDataItem = self.service.get_post_data(url)
 
         if data.content_type == PinterestDataItem.CONTENT_TYPE_VIDEO:
-            attachment = self.bot.get_video_attachment(data.download_url, peer_id=self.event.peer_id)
+            attachment = self.bot.get_video_attachment(
+                url=data.download_url,
+                peer_id=self.event.peer_id
+            )
         elif data.content_type == PinterestDataItem.CONTENT_TYPE_IMAGE:
-            attachment = self.bot.get_photo_attachment(data.download_url, peer_id=self.event.peer_id,
-                                                       send_chat_action=False)
+            attachment = self.bot.get_photo_attachment(
+                url=data.download_url,
+                peer_id=self.event.peer_id,
+                send_chat_action=False
+            )
         elif data.content_type == PinterestDataItem.CONTENT_TYPE_GIF:
-            attachment = self.bot.get_gif_attachment(data.download_url, peer_id=self.event.peer_id)
+            attachment = self.bot.get_gif_attachment(
+                url=data.download_url,
+                peer_id=self.event.peer_id
+            )
         else:
             raise PWarning(Pinterest.ERROR_MSG)
 

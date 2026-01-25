@@ -1,6 +1,6 @@
 from apps.bot.consts import RoleEnum
-from apps.bot.core.activities import ActivitiesEnum
-from apps.bot.core.chat_activity import ChatActivity
+from apps.bot.core.chat_action_sender import ChatActionSender
+from apps.bot.core.chat_actions import ChatActionEnum
 from apps.commands.media_command.service import MediaServiceResponse, MediaService
 from apps.connectors.parsers.media_command.yandex_music import YandexMusicAPI, YandexAlbum, YandexTrack
 from apps.shared.exceptions import PWarning
@@ -14,7 +14,7 @@ class YandexMusicService(MediaService):
         self.service = YandexMusicAPI()
 
     def get_content_by_url(self, url: str) -> MediaServiceResponse:
-        with ChatActivity(self.bot, ActivitiesEnum.UPLOAD_AUDIO, self.event.peer_id):
+        with ChatActionSender(self.bot, ChatActionEnum.UPLOAD_AUDIO, self.event.peer_id):
             return self._get_content_by_url(url)
 
     def _get_content_by_url(self, url: str) -> MediaServiceResponse:
@@ -32,9 +32,9 @@ class YandexMusicService(MediaService):
             audiofile = track.download()
             title = f"{track.artists} - {track.title}"
             audio = self.bot.get_audio_attachment(
-                audiofile,
-                peer_id=self.event.peer_id,
+                _bytes=audiofile,
                 filename=f"{title}.{track.format}",
+                peer_id=self.event.peer_id,
                 thumbnail_url=track.thumbnail_url,
                 artist=track.artists,
                 title=track.title

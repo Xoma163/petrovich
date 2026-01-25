@@ -11,7 +11,7 @@ from apps.commands.games.models import Wordle as WordleModel
 from apps.commands.help_text import HelpText, HelpTextItem, HelpTextArgument
 from apps.shared.consts import rus_alphabet
 from apps.shared.exceptions import PWarning, PSkip
-from apps.shared.utils.utils import random_event, get_font_by_path
+from apps.shared.utils.utils import random_event, get_font_by_path, convert_pil_image_to_bytes
 
 lock = Lock()
 
@@ -101,7 +101,10 @@ class Wordle(Command):
 
     def get_current_state(self, session) -> ResponseMessage:
         image = self.get_keyboard_image(session)
-        attachment = self.bot.get_photo_attachment(image)
+        attachment = self.bot.get_photo_attachment(
+            _bytes=image,
+            peer_id=self.event.peer_id
+        )
         rmi = ResponseMessageItem(attachments=[attachment], peer_id=self.event.peer_id,
                                   message_thread_id=self.event.message_thread_id)
         send_message_session_or_edit(self.bot, self.event, session, rmi, max_delta=8)
@@ -226,7 +229,7 @@ class WordleImageGenerator:
 
     FONT_NAME = "Intro.otf"
 
-    def generate(self, words, correct_letters, exactly_correct_letters, wrong_letters, secret_word):
+    def generate(self, words, correct_letters, exactly_correct_letters, wrong_letters, secret_word) -> bytes:
         image_words = self.generate_words(words, secret_word)
         image_keyboard = self.generate_keyboard(correct_letters, exactly_correct_letters, wrong_letters)
 
@@ -236,7 +239,8 @@ class WordleImageGenerator:
                         self.COLOR_BACKGROUND)
         dst.paste(image_words, (int(width_diff / 2), 0))
         dst.paste(image_keyboard, (0, image_words.height))
-        return dst
+
+        return convert_pil_image_to_bytes(dst)
 
     def generate_words(self, words: list, secret_word):
         image = Image.new("RGBA", (self.MAIN_WINDOW_WIDTH, self.MAIN_WINDOW_HEIGHT), self.COLOR_BACKGROUND)

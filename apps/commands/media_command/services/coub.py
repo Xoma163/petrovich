@@ -15,7 +15,10 @@ class CoubService(MediaService):
         bs4 = BeautifulSoup(content, "html.parser")
         data = json.loads(bs4.find("script", {'id': 'coubPageCoubJson'}).text)
         video_url = data['file_versions']['share']['default']
-        video = self.bot.get_video_attachment(video_url, peer_id=self.event.peer_id)
+        video = self.bot.get_video_attachment(
+            url=video_url,
+            peer_id=self.event.peer_id
+        )
         title = data['title']
         return MediaServiceResponse(text=title, attachments=[video])
 

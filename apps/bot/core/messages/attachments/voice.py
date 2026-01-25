@@ -1,11 +1,11 @@
-from apps.bot.core.activities import ActivitiesEnum
+from apps.bot.core.chat_actions import ChatActionEnum
 from apps.bot.core.messages.attachments.attachment import Attachment
 from apps.bot.core.messages.attachments.mixins.duration_mixin import DurationMixin
 
 
 class VoiceAttachment(Attachment, DurationMixin):
     TYPE = "voice"
-    ACTIVITY = ActivitiesEnum.UPLOAD_AUDIO
+    ACTIVITY = ChatActionEnum.UPLOAD_AUDIO
 
     def __init__(self):
         super().__init__(self.TYPE)

@@ -1,7 +1,7 @@
 from apps.bot.consts import PlatformEnum, RoleEnum
-from apps.bot.core.activities import ActivitiesEnum
 from apps.bot.core.bot.tg_bot.tg_bot import TgBot
-from apps.bot.core.chat_activity import ChatActivity
+from apps.bot.core.chat_action_sender import ChatActionSender
+from apps.bot.core.chat_actions import ChatActionEnum
 from apps.bot.core.event.event import Event
 from apps.bot.core.messages.attachments.audio import AudioAttachment
 from apps.bot.core.messages.attachments.video_note import VideoNoteAttachment
@@ -83,7 +83,7 @@ class VoiceRecognition(AcceptExtraCommand):
     def start(self) -> ResponseMessage:
         self._check_gpt_access()
 
-        with ChatActivity(self.bot, ActivitiesEnum.TYPING, self.event.peer_id):
+        with ChatActionSender(self.bot, ChatActionEnum.TYPING, self.event.peer_id):
             audio_message = self.event.get_all_attachments(self.attachments)[0]
             audio_message.get_file()
             if not audio_message.ext:

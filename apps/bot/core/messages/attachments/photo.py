@@ -1,11 +1,11 @@
-from apps.bot.core.activities import ActivitiesEnum
+from apps.bot.core.chat_actions import ChatActionEnum
 from apps.bot.core.messages.attachments.attachment import Attachment
 from apps.bot.core.messages.attachments.mixins.sized_mixin import SizedMixin
 
 
 class PhotoAttachment(Attachment, SizedMixin):
     TYPE = "photo"
-    ACTIVITY = ActivitiesEnum.UPLOAD_PHOTO
+    ACTIVITY = ChatActionEnum.UPLOAD_PHOTO
 
     def __init__(self):
         super().__init__(self.TYPE)

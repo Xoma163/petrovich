@@ -1,12 +1,12 @@
 import logging
+from io import BytesIO
 from math import inf
 from threading import Lock
-from threading import Thread
 
 from apps.bot.consts import RoleEnum
-from apps.bot.core.activities import ActivitiesEnum
 from apps.bot.core.bot_response import BotResponse
-from apps.bot.core.chat_activity import ChatActivity
+from apps.bot.core.chat_action_sender import ChatActionSender
+from apps.bot.core.chat_actions import ChatActionEnum
 from apps.bot.core.event.event import Event
 from apps.bot.core.messages.attachments.audio import AudioAttachment
 from apps.bot.core.messages.attachments.document import DocumentAttachment
@@ -16,12 +16,11 @@ from apps.bot.core.messages.attachments.video import VideoAttachment
 from apps.bot.core.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.models import Profile
 from apps.shared.exceptions import PWarning, PError, PSkip, PIDK, PSkipContinue
-from apps.shared.utils.utils import get_chunks
 
 lock = Lock()
 
 
-class Bot(Thread):
+class Bot:
     ERROR_MSG = "Непредвиденная ошибка. Сообщите разработчику."
 
     CODE_TAG = None
@@ -38,7 +37,6 @@ class Bot(Thread):
     MAX_VIDEO_SIZE_MB = inf
 
     def __init__(self, platform, **kwargs):
-        Thread.__init__(self)
         self.log_filter = {}
 
         self.platform = platform
@@ -50,12 +48,6 @@ class Bot(Thread):
     def run(self):
         """
         Thread запуск основного тела команды
-        """
-        self.listen()
-
-    def listen(self):
-        """
-        Получение новых событий и их обработка
         """
 
     def init_requests(self):
@@ -204,59 +196,73 @@ class Bot(Thread):
     # END LOGGING
 
     # ATTACHMENTS
-    # ToDo: Выпилить нахер
+    # Куда это можно унести? И нужно ли? Технически можно если отказаться от with ChatAction именно здесь
     def get_photo_attachment(
             self,
-            image,
-            peer_id: str | int | None = None,
-            allowed_exts_url: list[str] | None = None,
-            guarantee_url: bool = False,
+            url: str | None = None,
+            path: str | None = None,
+            _bytes: bytes | BytesIO | None = None,
             filename: str | None = None,
-            send_chat_action: bool = True
+
+            peer_id: str | int | None = None,
+            send_chat_action: bool = True,
     ) -> PhotoAttachment:
         """
         Получение фото
         """
-        if allowed_exts_url is None:
-            allowed_exts_url = ['jpg', 'jpeg', 'png', 'webp', 'heic']
         pa = PhotoAttachment()
-        with ChatActivity(self, ActivitiesEnum.UPLOAD_PHOTO, peer_id, send_chat_action=send_chat_action):
-            pa.parse(image, allowed_exts_url, guarantee_url=guarantee_url, filename=filename)
+        with ChatActionSender(self, ChatActionEnum.UPLOAD_PHOTO, peer_id, send_chat_action=send_chat_action):
+            pa.parse(url, path, _bytes, filename=filename)
         return pa
 
     def get_document_attachment(
             self,
-            document,
+            url: str | None = None,
+            path: str | None = None,
+            _bytes: bytes | BytesIO | None = None,
+            filename: str | None = None,
+
             peer_id: str | int | None = None,
-            filename: str = None,
-            send_chat_action: bool = True
+            send_chat_action: bool = True,
+
+            thumbnail_bytes: bytes | None = None,
+            thumbnail_url: str | None = None,
     ) -> DocumentAttachment:
         """
         Получение документа
         """
         da = DocumentAttachment()
-        with ChatActivity(self, ActivitiesEnum.UPLOAD_DOCUMENT, peer_id, send_chat_action=send_chat_action):
-            da.parse(document, filename=filename)
+        with ChatActionSender(self, ChatActionEnum.UPLOAD_DOCUMENT, peer_id, send_chat_action=send_chat_action):
+            da.parse(url, path, _bytes, filename=filename)
+
+        da.thumbnail_bytes = thumbnail_bytes
+        da.thumbnail_url = thumbnail_url
+
         return da
 
     def get_audio_attachment(
             self,
-            audio,
+            url: str | None = None,
+            path: str | None = None,
+            _bytes: bytes | BytesIO | None = None,
+            filename: str | None = None,
+
             peer_id: str | int | None = None,
+            send_chat_action: bool = True,
+
             title: str | None = None,
             artist: str | None = None,
-            filename: str | None = None,
-            thumbnail: PhotoAttachment | None = None,
+            thumbnail_bytes: bytes | None = None,
             thumbnail_url: str | None = None,
-            send_chat_action: bool = True
     ) -> AudioAttachment:
         """
         Получение аудио
         """
         aa = AudioAttachment()
-        with ChatActivity(self, ActivitiesEnum.UPLOAD_AUDIO, peer_id, send_chat_action=send_chat_action):
-            aa.parse(audio, filename=filename)
-        aa.thumbnail = thumbnail
+        with ChatActionSender(self, ChatActionEnum.UPLOAD_AUDIO, peer_id, send_chat_action=send_chat_action):
+            aa.parse(url, path, _bytes, filename=filename)
+
+        aa.thumbnail_bytes = thumbnail_bytes
         aa.thumbnail_url = thumbnail_url
         aa.title = title
         aa.artist = artist
@@ -264,42 +270,53 @@ class Bot(Thread):
 
     def get_video_attachment(
             self,
-            video,
-            peer_id: str | int | None = None,
+            url: str | None = None,
+            path: str | None = None,
+            _bytes: bytes | BytesIO | None = None,
             filename: str | None = None,
-            thumbnail: PhotoAttachment | None = None,
+
+            peer_id: str | int | None = None,
+            send_chat_action: bool = True,
+
+            width: int | None = None,
+            height: int | None = None,
+            thumbnail_bytes: bytes | None = None,
             thumbnail_url: str | None = None,
-            send_chat_action: bool = True
     ) -> VideoAttachment:
         """
         Получение видео
         """
         va = VideoAttachment()
-        with ChatActivity(self, ActivitiesEnum.UPLOAD_VIDEO, peer_id, send_chat_action=send_chat_action):
-            va.parse(video, filename=filename)
-        va.thumbnail = thumbnail
+        with ChatActionSender(self, ChatActionEnum.UPLOAD_VIDEO, peer_id, send_chat_action=send_chat_action):
+            va.parse(url, path, _bytes, filename=filename)
+        va.width = width
+        va.height = height
+        va.thumbnail_bytes = thumbnail_bytes
         va.thumbnail_url = thumbnail_url
         return va
 
     def get_gif_attachment(
             self,
-            gif,
-            peer_id: str | int | None = None,
+            url: str | None = None,
+            path: str | None = None,
+            _bytes: bytes | BytesIO | None = None,
             filename: str | None = None,
-            send_chat_action: bool = True
+
+            peer_id: str | int | None = None,
+            send_chat_action: bool = True,
     ) -> GifAttachment:
         """
         Получение гифки
         """
         ga = GifAttachment()
-        with ChatActivity(self, ActivitiesEnum.UPLOAD_VIDEO, peer_id, send_chat_action=send_chat_action):
-            ga.parse(gif, filename=filename)
+        with ChatActionSender(self, ChatActionEnum.UPLOAD_VIDEO, peer_id, send_chat_action=send_chat_action):
+            ga.parse(url, path, _bytes, filename=filename)
         return ga
 
     # END ATTACHMENTS
 
     # EXTRA
-    def set_activity(self, chat_id: int | str, activity: ActivitiesEnum):
+    def set_chat_action(self, chat_id: int | str, chat_action: ChatActionEnum):
         """
         Проставление активности боту (например, отправка сообщения)
         """
@@ -317,9 +334,6 @@ class Bot(Thread):
         Получение инлайн-клавиатуры с кнопками
         В основном используется для команд, где нужно запускать много команд и лень набирать заново
         """
-        buttons_chunks = get_chunks(buttons, cols)
-        keyboard = list(buttons_chunks)
-        return keyboard
 
     def get_mention(self, profile: Profile) -> str:
         """

@@ -1,5 +1,5 @@
-from apps.bot.core.activities import ActivitiesEnum
-from apps.bot.core.chat_activity import ChatActivity
+from apps.bot.core.chat_action_sender import ChatActionSender
+from apps.bot.core.chat_actions import ChatActionEnum
 from apps.bot.core.messages.message import Message
 from apps.commands.media_command.service import MediaService, MediaServiceResponse
 from apps.connectors.parsers.media_command.boosty import Boosty
@@ -15,7 +15,7 @@ class BoostyService(MediaService):
 
     @retry(3, Exception, sleep_time=2, except_exceptions=(PWarning,))
     def get_content_by_url(self, url: str) -> MediaServiceResponse:
-        with ChatActivity(self.bot, ActivitiesEnum.UPLOAD_VIDEO, self.event.peer_id):
+        with ChatActionSender(self.bot, ChatActionEnum.UPLOAD_VIDEO, self.event.peer_id):
             return self._get_content_by_url(url)
 
     def _get_content_by_url(self, url: str) -> MediaServiceResponse:
@@ -38,10 +38,15 @@ class BoostyService(MediaService):
         if cached := self._get_cached(video_data.channel_id, video_data.video_id, video_data.title):
             return cached
 
-        va = self.service.download(video_data, high_res=self.media_keys.high_resolution)
-        va.width = video_data.width
-        va.height = video_data.height
-        va.thumbnail_url = video_data.thumbnail_url
+        self.service.set_download_url(video_data, high_res=self.media_keys.high_resolution)
+
+        va = self.bot.get_video_attachment(
+            url=video_data.video_download_url,
+            thumbnail_url=video_data.thumbnail_url,
+            width=video_data.width,
+            height=video_data.height
+        )
+        va.download_content(headers={}, chunk_size=self.service.DOWNLOAD_CHUNK_SIZE)
 
         if self.media_keys.force_cache or va.get_size_mb() > self.bot.MAX_VIDEO_SIZE_MB:
             return self._cache_video(video_data.channel_id, video_data.video_id, video_data.title, url, va.content)

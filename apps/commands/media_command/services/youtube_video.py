@@ -1,5 +1,5 @@
-from apps.bot.core.activities import ActivitiesEnum
-from apps.bot.core.chat_activity import ChatActivity
+from apps.bot.core.chat_action_sender import ChatActionSender
+from apps.bot.core.chat_actions import ChatActionEnum
 from apps.commands.media_command.service import MediaService, MediaServiceResponse
 from apps.connectors.parsers.media_command.data import VideoData
 from apps.connectors.parsers.media_command.youtube.video import YoutubeVideo
@@ -21,7 +21,7 @@ class YoutubeVideoService(MediaService):
         if not self.media_keys.force and self.event.is_from_chat and video_data.duration > 120 and not self.event.message.mentioned and not video_data.is_short_video:
             raise PSkipContinue()
 
-        with ChatActivity(self.bot, ActivitiesEnum.UPLOAD_VIDEO, self.event.peer_id):
+        with ChatActionSender(self.bot, ChatActionEnum.UPLOAD_VIDEO, self.event.peer_id):
             return self._get_content_by_url(video_data, url)
 
     def _get_content_by_url(self, data: VideoData, url: str) -> MediaServiceResponse:

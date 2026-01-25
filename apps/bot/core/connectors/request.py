@@ -74,7 +74,3 @@ class Request:
 class RequestLocal(Request):
     API_TELEGRAM_URL = '192.168.1.10:10010'
     PREFIX = "http"
-
-# class RequestRemote(Request):
-#     API_TELEGRAM_URL = env.str("TG_REMOTE_HOST")
-#     PREFIX = "https"

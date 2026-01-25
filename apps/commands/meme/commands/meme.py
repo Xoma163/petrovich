@@ -506,10 +506,11 @@ class Meme(Command):
             else:
                 va = yt_api.download_video(data)
                 video_content = va.content
-            video = self.bot.get_video_attachment(video_content)
-            video.thumbnail_url = data.thumbnail_url
-            # зачем?
-
+            video = self.bot.get_video_attachment(
+                url=video_content,
+                peer_id=self.event.peer_id,
+                thumbnail_url=data.thumbnail_url
+            )
             meme.tg_file_id = video.get_file_id()
             meme.type = VideoAttachment.TYPE
             meme.save()

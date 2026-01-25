@@ -1,4 +1,4 @@
-from apps.bot.core.activities import ActivitiesEnum
+from apps.bot.core.chat_actions import ChatActionEnum
 from apps.bot.core.messages.attachments.attachment import Attachment
 from apps.bot.core.messages.attachments.mixins.duration_mixin import DurationMixin
 from apps.bot.core.messages.attachments.mixins.thumbnail_mixin import ThumbnailMixin
@@ -6,7 +6,7 @@ from apps.bot.core.messages.attachments.mixins.thumbnail_mixin import ThumbnailM
 
 class AudioAttachment(Attachment, ThumbnailMixin, DurationMixin):
     TYPE = "audio"
-    ACTIVITY = ActivitiesEnum.UPLOAD_AUDIO
+    ACTIVITY = ChatActionEnum.UPLOAD_AUDIO
 
     def __init__(self):
         super().__init__(self.TYPE)

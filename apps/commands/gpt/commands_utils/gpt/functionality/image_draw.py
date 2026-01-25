@@ -1,5 +1,5 @@
-from apps.bot.core.activities import ActivitiesEnum
-from apps.bot.core.chat_activity import ChatActivity
+from apps.bot.core.chat_action_sender import ChatActionSender
+from apps.bot.core.chat_actions import ChatActionEnum
 from apps.bot.core.messages.response_message import ResponseMessageItem
 from apps.commands.gpt.api.base import GPTAPI
 from apps.commands.gpt.api.responses import GPTImageDrawResponse
@@ -87,7 +87,7 @@ class GPTImageDrawFunctionality(GPTCommandProtocol):
             log_filter=self.event.log_filter
         )
         request_text = self._get_draw_image_request_text()
-        with ChatActivity(self.bot, ActivitiesEnum.UPLOAD_PHOTO, self.event.peer_id):
+        with ChatActionSender(self.bot, ChatActionEnum.UPLOAD_PHOTO, self.event.peer_id):
             response: GPTImageDrawResponse = gpt_api.draw_image(
                 prompt=request_text,
                 model=self.get_image_draw_model_with_parameters(),
@@ -100,14 +100,17 @@ class GPTImageDrawFunctionality(GPTCommandProtocol):
             for i, image in enumerate(response.images_bytes):
                 if self._get_use_original_image():
                     att = self.bot.get_document_attachment(
-                        image,
+                        _bytes=image,
+                        thumbnail_bytes=image,
                         send_chat_action=False,
                         filename=f'{self.provider.type_enum.name}_draw_{i + 1}.png'
                     )
                     att.download_content()
-                    att.set_thumbnail(att.content)
                 else:
-                    att = self.bot.get_photo_attachment(image, send_chat_action=False)
+                    att = self.bot.get_photo_attachment(
+                        _bytes=image,
+                        send_chat_action=False
+                    )
                     att.download_content()
                 attachments.append(att)
 
@@ -145,14 +148,14 @@ class GPTImageDrawFunctionality(GPTCommandProtocol):
     #         for i, image in enumerate(response.images_bytes):
     #             if use_document_att:
     #                 att = self.bot.get_document_attachment(
-    #                     image,
+    #                     _bytes=image,
     #                     send_chat_action=False,
     #                     filename=f'gpt_draw_{i + 1}.png'
     #                 )
     #                 att.download_content()
-    #                 att.set_thumbnail(att.content)
+    #               #  att.set_thumbnail(att.content)
     #             else:
-    #                 att = self.bot.get_photo_attachment(image, send_chat_action=False)
+    #                 att = self.bot.get_photo_attachment(_bytes=image, send_chat_action=False)
     #                 att.download_content()
     #                 attachments.append(att)
     #

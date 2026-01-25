@@ -1,6 +1,6 @@
 import logging
 
-from apps.bot.core.activities import ActivitiesEnum
+from apps.bot.core.chat_actions import ChatActionEnum
 from apps.bot.core.messages.attachments.attachment import Attachment
 from apps.bot.core.messages.attachments.mixins.thumbnail_mixin import ThumbnailMixin
 from apps.shared.exceptions import PWarning
@@ -37,7 +37,7 @@ class DocumentMimeType:
 
 class DocumentAttachment(Attachment, ThumbnailMixin):
     TYPE = 'document'
-    ACTIVITY = ActivitiesEnum.UPLOAD_DOCUMENT
+    ACTIVITY = ChatActionEnum.UPLOAD_DOCUMENT
 
     def __init__(self):
         super().__init__(self.TYPE)

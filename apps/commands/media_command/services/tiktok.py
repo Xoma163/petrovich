@@ -1,8 +1,7 @@
 from urllib.parse import urlparse
 
-from apps.bot.core.activities import ActivitiesEnum
-from apps.bot.core.chat_activity import ChatActivity
-from apps.bot.core.messages.attachments.video import VideoAttachment
+from apps.bot.core.chat_action_sender import ChatActionSender
+from apps.bot.core.chat_actions import ChatActionEnum
 from apps.commands.media_command.service import MediaServiceResponse, MediaService
 from apps.connectors.parsers.media_command.data import VideoData
 from apps.connectors.parsers.media_command.tiktok import TikTok
@@ -16,16 +15,18 @@ class TikTokService(MediaService):
         self.service = TikTok()
 
     def get_content_by_url(self, url: str) -> MediaServiceResponse:
-        with ChatActivity(self.bot, ActivitiesEnum.UPLOAD_VIDEO, self.event.peer_id):
+        with ChatActionSender(self.bot, ChatActionEnum.UPLOAD_VIDEO, self.event.peer_id):
             return self._get_content_by_url(url)
 
     def _get_content_by_url(self, url: str) -> MediaServiceResponse:
         video_data: VideoData = self.service.get_video(url)
-        va = VideoAttachment()
-        va.public_download_url = video_data.video_download_url
-        va.thumbnail_url = video_data.thumbnail_url
-        va.width = video_data.width
-        va.height = video_data.height
+        va = self.bot.get_video_attachment(
+            url=video_data.video_download_url,
+            peer_id=self.event.peer_id,
+            thumbnail_url=video_data.thumbnail_url,
+            width=video_data.width,
+            height=video_data.height,
+        )
         va.download_content(
             cookies=video_data.extra_data['cookies'],  # noqa
             headers=video_data.extra_data['headers']  # noqa
