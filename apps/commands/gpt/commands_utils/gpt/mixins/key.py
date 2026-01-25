@@ -68,7 +68,6 @@ class GPTKeyMixin(GPTCommandProtocol):
         )
         raise PWarning(error_msg)
 
-
     # UTILS
 
     def _set_key(self, profile_gpt_settings: ProfileGPTSettings, api_key: str):

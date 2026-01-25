@@ -31,6 +31,7 @@ class TopFieldsMixin(admin.ModelAdmin):
             fields.remove(top_field)
         return self.TOP_ORDER_FIELDS + fields
 
+
 class CSRFExemptMixin(object):
     @method_decorator(csrf_exempt)
     def dispatch(self, *args, **kwargs):

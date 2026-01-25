@@ -79,7 +79,6 @@ class VoiceRecognition(AcceptExtraCommand):
             else:
                 raise PSkip()
 
-
     def start(self) -> ResponseMessage:
         self._check_gpt_access()
 

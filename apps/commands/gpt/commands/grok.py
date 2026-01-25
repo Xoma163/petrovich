@@ -49,9 +49,9 @@ class GrokCommand(
         help_text_keys=[
             HelpTextItem(
                 RoleEnum.USER, [
-                               GPTImageDrawFunctionality.KEY_ITEM_ORIG,
-                               GPTImageDrawFunctionality.KEY_ITEM_COUNT,
-                           ] + GPTStatisticsMixin.STATISTICS_KEY_ITEMS_KEY
+                                   GPTImageDrawFunctionality.KEY_ITEM_ORIG,
+                                   GPTImageDrawFunctionality.KEY_ITEM_COUNT,
+                               ] + GPTStatisticsMixin.STATISTICS_KEY_ITEMS_KEY
             )
         ],
         extra_text=f"{GPTCommand.EXTRA_TEXT}\n\n{GPTPrepromptMixin.EXTRA_TEXT}\n\n{GPTImageDrawFunctionality.EXTRA_TEXT}"

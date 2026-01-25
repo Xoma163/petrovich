@@ -80,4 +80,3 @@ class Boosty:
                 break
         else:
             raise PError("Не смог найти видео")
-

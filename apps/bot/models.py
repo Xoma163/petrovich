@@ -47,7 +47,6 @@ class ProfileSettings(TimeStampModelMixin):
     show_birthday_year = models.BooleanField('Показывать год рождения', default=True)
     use_mention = models.BooleanField('Использовать упоминания', default=True)
 
-
     class Meta:
         verbose_name = "Настройка профиля"
         verbose_name_plural = "Настройки профилей"
@@ -190,6 +189,7 @@ class User(Platform, TimeStampModelMixin):
             url = f"https://t.me/{safe_nick}"
             return mark_safe(f'<a href="{escape(url)}">{safe_platform}</a>')
         return escape(self.platform)
+
     show_url.short_description = "Ссылка"
 
     def show_user_id(self):

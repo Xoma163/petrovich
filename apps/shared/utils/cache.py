@@ -42,4 +42,3 @@ class MessagesCache:
 
     def get_messages(self) -> dict:
         return self.cache.get(self._get_key(), {})
-

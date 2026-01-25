@@ -282,7 +282,6 @@ class Command(CommandProtocol):
         error = f"Для работы команды требуются вложения: {allowed_types}"
         raise PWarning(error)
 
-
     def check_mentioned(self):
         """
         Проверяет на упоминание бота в сообщении

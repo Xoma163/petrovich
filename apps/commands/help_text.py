@@ -16,6 +16,7 @@ class HelpTextKey:
     def get_aliases(self) -> list[str]:
         return self.aliases if self.aliases else []
 
+
 class HelpTextItem:
     def __init__(self, role: RoleEnum, texts: list[HelpTextArgument | HelpTextKey]):
         self.role: RoleEnum = role

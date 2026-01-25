@@ -19,4 +19,3 @@ class PhotoAttachment(Attachment, SizedMixin):
 
     def parse_api(self, event):
         self.public_download_url = event.get('url')
-

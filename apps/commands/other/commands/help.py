@@ -11,7 +11,6 @@ class Help(Command):
     name = "помощь"
     names = ["хелп", "ман", "помоги", "памаги", "спаси", "хелб", "манул", "help", "start"]
 
-
     help_text = HelpText(
         commands_text="помощь по командам и боту",
         help_texts=[

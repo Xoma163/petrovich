@@ -285,8 +285,6 @@ def append_symbols(string: str, symbol: str, n: int) -> str:
     return string
 
 
-
-
 def split_text_by_n_symbols(text: str, n: int, split_on: list[str] | None = None) -> list[str]:
     """
     Разбивает текст на чанки с делением по спецсимволам указанным в split_on
