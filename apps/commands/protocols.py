@@ -10,17 +10,11 @@ from apps.commands.help_text import HelpText
 class CommandProtocol(Protocol):
     name: str
     names: list
-
     help_text: HelpText | None
-
-    enabled: bool
-    suggest_for_similar: bool
     priority: int
-    hidden: bool
-
     abstract: bool
 
-    # Проверки
+    # Проверки и ограничения
     access: RoleEnum
     pm: bool
     conversation: bool
@@ -28,11 +22,8 @@ class CommandProtocol(Protocol):
     args: int
     args_or_fwd: bool
     int_args: list
-    float_args: list
     platforms: list
-    excluded_platforms: list
     attachments: list
-    city: bool
     mentioned: bool
     non_mentioned: bool
 

@@ -101,7 +101,7 @@ _accept_extra_commands = [
 
 
 def get_sorted_commands(cmds):
-    _cmds = [_cmd() for _cmd in cmds if _cmd.enabled]
+    _cmds = [_cmd() for _cmd in cmds]
     return sorted(_cmds, key=lambda x: x.priority, reverse=True)
 
 
@@ -113,8 +113,6 @@ def generate_help_text(cmds):
     }
 
     for command in cmds:
-        if not (command.enabled and command.help_text):
-            continue
         entry = f"{command.name.capitalize()} - {command.help_text.commands_text}"
         role_name = command.access.name
         for platform in command.platforms:
@@ -155,9 +153,7 @@ def get_text_for_documentation(cmds):
                 if (
                     cmd.access == role
                     and cmd.name
-                    and cmd.suggest_for_similar
                     and cmd.help_text
-                    and not cmd.hidden
             )
             ),
             key=lambda c: c.name,

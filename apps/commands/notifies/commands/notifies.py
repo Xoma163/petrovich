@@ -63,11 +63,15 @@ class Notifies(Command):
     )
 
     platforms = [PlatformEnum.TG]
-    city = True
 
     bot: TgBot
 
     def start(self) -> ResponseMessage:
+        if not self.event.sender.city:
+            error = ("Не указан город в профиле. /профиль город (название) - устанавливает город пользователю.\n"
+                     "Без него я не смогу узнать часовой пояс")
+            raise PWarning(error)
+
         arg0 = self.event.message.args[0] if self.event.message.args else None
         menu = [
             [["удалить", "удали"], self.menu_delete],

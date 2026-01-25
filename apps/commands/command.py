@@ -12,7 +12,7 @@ from apps.bot.core.messages.attachments.voice import VoiceAttachment
 from apps.bot.core.messages.response_message import ResponseMessage
 from apps.commands.help_text import HelpText
 from apps.commands.protocols import CommandProtocol
-from apps.shared.exceptions import PWarning, PSkip, PIDK
+from apps.shared.exceptions import PWarning, PSkip
 from apps.shared.utils.utils import get_help_texts_for_command, transform_k
 
 
@@ -20,17 +20,11 @@ class Command(CommandProtocol):
     # Основные поля команды
     name: str = ""  # Имя команды
     names: list = []  # Вспопогательные имена команды
-
     help_text: HelpText | None = None  # текст для команды /команды и для /помощь
-
-    enabled: bool = True  # Включена ли команда
-    suggest_for_similar: bool = True  # предлагать ли команду в выдаче похожих команд при ошибке пользователя в вводе
     priority: int = 0  # Приоритет обработки команды
-    hidden: bool = False  # Скрытая команда, будет отвечать пользователям без соответствующих прав заглушкой "я вас не понял"
-
     abstract: bool = False  # Абстрактная команда, которая не запускается и не попадает в список всех команд
 
-    # Проверки
+    # Проверки и ограничения
     access: RoleEnum = RoleEnum.USER  # Необходимые права для выполнения команды
     pm: bool = False  # Должно ли сообщение обрабатываться только в лс
     conversation: bool = False  # Должно ли сообщение обрабатываться только в конфе
@@ -38,11 +32,8 @@ class Command(CommandProtocol):
     args: int = 0  # Должно ли сообщение обрабатываться только с заданным количеством аргументов
     args_or_fwd: bool = False  # Должно ли сообщение обрабатываться только с пересланными сообщениями или аргументами
     int_args: list = []  # Список аргументов, которые должны быть целым числом
-    float_args: list = []  # Список аргументов, которые должны быть числом
     platforms: list = list(PlatformEnum)  # Список платформ, которые могут обрабатывать команду
-    excluded_platforms: list = []  # Список исключённых платформ.
     attachments: list = []  # Должно ли сообщение обрабатываться только с вложениями
-    city: bool = False  # Должно ли сообщение обрабатываться только с заданным городом у пользователя
     mentioned: bool = False  # Должно ли сообщение обрабатываться только с упоминанием бота
     non_mentioned: bool = False  # Должно ли сообщение обрабатываться только без упоминания бота
 
@@ -67,9 +58,6 @@ class Command(CommandProtocol):
 
         if self.name:
             self.full_names = [self.name] + self.names
-
-        if self.hidden and self.suggest_for_similar:
-            raise RuntimeError("Поле hidden=True и suggest_for_similar=True не могут быть переданы вместе")
 
     def accept(self, event: Event) -> bool:
         """
@@ -129,12 +117,8 @@ class Command(CommandProtocol):
             self.check_args_or_fwd()
         if self.int_args:
             self.parse_int()
-        if self.float_args:
-            self.parse_float()
         if self.attachments:
             self.check_attachments()
-        if self.city:
-            self.check_city()
         if self.mentioned:
             self.check_mentioned()
         if self.non_mentioned:
@@ -155,8 +139,6 @@ class Command(CommandProtocol):
         """
         if self.event.sender.check_role(role):
             return
-        if self.hidden:
-            raise PIDK()
         error = f"Команда доступна только для пользователей с уровнем прав {role}"
         raise PWarning(error)
 
@@ -239,24 +221,6 @@ class Command(CommandProtocol):
                     error = "Аргумент должен быть целочисленным"
                     raise PWarning(error)
 
-    def parse_float(self):
-        """
-        Парсинг аргументов в float из заданного диапазона индексов(self.float_args)
-        :return: bool
-        """
-        if not self.event.message.args:
-            return
-        for checked_arg_index in self.float_args:
-            if len(self.event.message.args) - 1 >= checked_arg_index:
-                if isinstance(self.event.message.args[checked_arg_index], float):
-                    continue
-                try:
-                    self.event.message.args[checked_arg_index] = transform_k(self.event.message.args[checked_arg_index])
-                    self.event.message.args[checked_arg_index] = float(self.event.message.args[checked_arg_index])
-                except ValueError:
-                    error = "Аргумент должен быть с плавающей запятой"
-                    raise PWarning(error)
-
     def check_pm(self) -> bool:
         """
         Проверка на сообщение из ЛС
@@ -295,9 +259,6 @@ class Command(CommandProtocol):
         Проверка на вид платформы
         :return: bool
         """
-        if self.event.platform in self.excluded_platforms:
-            error = f"Команда недоступна для {self.event.platform.upper()}"
-            raise PWarning(error)
         if self.event.platform not in self.platforms:
             error = f"Команда недоступна для {self.event.platform.upper()}"
             raise PWarning(error)
@@ -321,19 +282,6 @@ class Command(CommandProtocol):
         error = f"Для работы команды требуются вложения: {allowed_types}"
         raise PWarning(error)
 
-    def check_city(self, city=None):
-        """
-        Проверяет на город у пользователя или в присланном сообщении
-        :param city: город
-        :return: bool
-        """
-        if city:
-            return
-        if self.event.sender.city:
-            return
-
-        error = "Не указан город в профиле. /профиль город (название) - устанавливает город пользователю"
-        raise PWarning(error)
 
     def check_mentioned(self):
         """
