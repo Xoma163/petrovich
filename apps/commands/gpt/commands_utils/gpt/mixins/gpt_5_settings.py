@@ -85,7 +85,7 @@ class GPT5SettingsMixin(GPTCommandProtocol):
     def _set_verbosity(self) -> ResponseMessageItem:
         user_value = self.event.message.args[1]
         try:
-            verbosity_level = GPTVerbosityLevel[user_value.upper()]
+            verbosity_level = GPTVerbosityLevel[user_value.upper()]  # noqa
         except KeyError:
             available_levels = ", ".join(self.bot.get_formatted_text_line(x.name.lower()) for x in GPTVerbosityLevel)
             raise PError(f"Уровня {user_value} нет среди доступных.\nДоступные уровни: {available_levels}")

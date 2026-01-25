@@ -206,7 +206,7 @@ LOGGING = {
 }
 if DEBUG:
     for logger in LOGGING['loggers']:
-        LOGGING['loggers'][logger]['handlers'].append('console-debug')
+        LOGGING['loggers'][logger]['handlers'].append('console-debug')  # noqa
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 

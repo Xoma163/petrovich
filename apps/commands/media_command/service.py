@@ -116,7 +116,7 @@ class MediaService:
             filename=filename,
             source_url=source_url,
         )
-        cache.video.save(filename, content=BytesIO(content))
+        cache.video.save(filename, content=BytesIO(content))  # noqa
         cache.save()
         text = self._get_download_cache_text(title, cache.video.url, cache.source_url)
         return MediaServiceResponse(
@@ -154,4 +154,4 @@ class MediaService:
             shutil.copyfile(media_response.cache.video.path, os.path.join(str(show_folder), full_path))
         else:
             with open(full_path, 'wb') as f:
-                f.write(media_response.attachments[0].content)
+                f.write(media_response.attachments[0].content)  # noqa

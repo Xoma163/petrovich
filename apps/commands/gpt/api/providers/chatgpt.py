@@ -55,8 +55,8 @@ class ChatGPTAPI(
     completions_url = f"{base_url}/responses"
 
     def completions(self, messages: GPTMessages, model: CompletionsModel, extra_data: dict) -> GPTCompletionsResponse:
-        payload = {
-            "model": model.name
+        payload: dict = {
+            "model": model.name,
         }
         preprompt, messages_dict = messages.get_preprompt_and_messages()
         if preprompt:
@@ -78,7 +78,7 @@ class ChatGPTAPI(
     vision_url = completions_url
 
     def vision(self, messages: GPTMessages, model: VisionModel, extra_data: dict) -> GPTVisionResponse:
-        payload = {
+        payload: dict = {
             "model": model.name
         }
         preprompt, messages_dict = messages.get_preprompt_and_messages()

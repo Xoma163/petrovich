@@ -175,7 +175,7 @@ class Profile(Command):
         roles = []
         #  TODO: Check
         for role in profile.roles.all():
-            roles.append(RoleEnum[role.name])
+            roles.append(RoleEnum[role.name])  # noqa
         roles = sorted(roles)
         roles_str = ", ".join(roles)
 

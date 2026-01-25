@@ -15,7 +15,7 @@ class Command(BaseCommand):
 
     @staticmethod
     def init_cities_offline():
-        cities = [
+        cities: list[dict] = [
             {'name': 'Абакан', 'synonyms': 'абакан', 'timezone__name': 'Asia/Krasnoyarsk', 'lat': 53.721152,
              'lon': 91.442387},
             {'name': 'Альметьевск', 'synonyms': 'альметьевск', 'timezone__name': 'Europe/Moscow', 'lat': 54.901383,

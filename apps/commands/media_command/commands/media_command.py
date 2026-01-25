@@ -49,33 +49,33 @@ class Media(AcceptExtraCommand):
                     "позволяет не запускать команду"
                 ),
                 HelpTextKey(
-                    MediaKeys.AUDIO_ONLY_KEYS[0],
-                    MediaKeys.AUDIO_ONLY_KEYS[1:],
+                    MediaKeys.AUDIO_ONLY_KEYS[0],  # noqa
+                    MediaKeys.AUDIO_ONLY_KEYS[1:],  # noqa
                     "позволяет скачивать аудиодорожку для видео"
                 ),
                 HelpTextKey(
-                    MediaKeys.HIGH_RESOLUTION_KEYS[0],
-                    MediaKeys.HIGH_RESOLUTION_KEYS[1:],
+                    MediaKeys.HIGH_RESOLUTION_KEYS[0],  # noqa
+                    MediaKeys.HIGH_RESOLUTION_KEYS[1:],  # noqa
                     "присылает видео в максимальном качестве (VK Video/Youtube Video/Boosty)"
                 ),
                 HelpTextKey(
-                    MediaKeys.FORCE_CACHE_KEYS[0],
-                    MediaKeys.FORCE_CACHE_KEYS[1:],
+                    MediaKeys.FORCE_CACHE_KEYS[0],  # noqa
+                    MediaKeys.FORCE_CACHE_KEYS[1:],  # noqa
                     "позволяет загрузить видео в онлайн-кэш (VK Video/Youtube Video/Телеканал Ю)"
                 ),
                 HelpTextKey(
-                    MediaKeys.FORCE_KEYS[0],
-                    MediaKeys.FORCE_KEYS[1:],
+                    MediaKeys.FORCE_KEYS[0],  # noqa
+                    MediaKeys.FORCE_KEYS[1:],  # noqa
                     "позволяет загрузить видео принудительно (Youtube Video)"
                 ),
                 HelpTextKey(
-                    MediaKeys.SPOILER_KEYS[0],
-                    MediaKeys.SPOILER_KEYS[1:],
+                    MediaKeys.SPOILER_KEYS[0],  # noqa
+                    MediaKeys.SPOILER_KEYS[1:],  # noqa
                     "позволяет скрыть пост спойлером"
                 ),
             ]),
             HelpTextItem(RoleEnum.ADMIN, [
-                HelpTextKey(MediaKeys.SAVE_TO_DISK_KEYS[0], MediaKeys.SAVE_TO_DISK_KEYS[1:],
+                HelpTextKey(MediaKeys.SAVE_TO_DISK_KEYS[0], MediaKeys.SAVE_TO_DISK_KEYS[1:],  # noqa
                             "сохраняет видео в локальную директорию"),
             ]),
 
@@ -156,7 +156,8 @@ class Media(AcceptExtraCommand):
 
         att_is_video = False
         if media_response.attachments:
-            att_is_video = isinstance(media_response.attachments[0], VideoAttachment) or media_response.cache_url
+            att_is_video = isinstance(media_response.attachments[0],
+                                      VideoAttachment) or media_response.cache_url  # noqa
 
         if media_keys.save_to_disk and att_is_video:
             self.check_sender(RoleEnum.ADMIN)
@@ -164,15 +165,15 @@ class Media(AcceptExtraCommand):
             service.save_to_disk(media_response, "Скачано", title)
 
         if media_keys.audio_only and att_is_video:
-            video: VideoAttachment = media_response.attachments[0]
+            video: VideoAttachment = media_response.attachments[0]  # noqa
             vh = VideoHandler(video=video)
             aa = AudioAttachment()
             aa.title = media_response.video_title
             aa.content = vh.get_audio_track()
             aa.thumbnail_url = video.thumbnail_url
-            media_response.attachments[0] = aa
+            media_response.attachments[0] = aa  # noqa
 
-        return self.prepare_media_response(media_response, media_keys, service_class, chosen_url)
+        return self.prepare_media_response(media_response, media_keys, chosen_url)
 
     def _get_service_and_chosen_url(self, source) -> tuple[type[MediaService], str]:
         """
@@ -207,7 +208,7 @@ class Media(AcceptExtraCommand):
             extra_text
         )
         extra_text = self._strip_extra_text_by_keys(
-            self.event.message._short_keys_raw,
+            self.event.message.short_keys_raw,
             self.event.message.SHORT_KEYS_SYMBOLS,
             extra_text
         )
@@ -228,7 +229,6 @@ class Media(AcceptExtraCommand):
             self,
             media_response: MediaServiceResponse,
             media_keys: MediaKeys,
-            chosen_service: type[MediaService],
             chosen_url: str
     ) -> ResponseMessage:
         text = media_response.text or ""

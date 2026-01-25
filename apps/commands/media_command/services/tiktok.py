@@ -27,8 +27,8 @@ class TikTokService(MediaService):
         va.width = video_data.width
         va.height = video_data.height
         va.download_content(
-            cookies=video_data.extra_data['cookies'],
-            headers=video_data.extra_data['headers']
+            cookies=video_data.extra_data['cookies'],  # noqa
+            headers=video_data.extra_data['headers']  # noqa
         )
 
         return MediaServiceResponse(text=None, attachments=[va], video_title="")

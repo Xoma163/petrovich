@@ -66,7 +66,7 @@ class Boosty:
 
     @staticmethod
     def _set_download_url(video_data: VideoData, high_res=False):
-        player_urls_dict = video_data.extra_data['player_urls_dict']
+        player_urls_dict = video_data.extra_data['player_urls_dict']  # noqa
         qualities_order = ['ultra_hd', 'quad_hd', 'full_hd', 'high', 'medium', 'low']
         if not high_res:
             qualities_order = qualities_order[2:]

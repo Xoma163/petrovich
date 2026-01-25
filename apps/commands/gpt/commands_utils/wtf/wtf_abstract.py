@@ -47,7 +47,7 @@ class WTFCommand(Command):
         has_access = user_has_api_key(self.event.sender, ChatGPTProvider())
         if not has_access:
             GPTKeyMixin.raise_no_access_exception(
-                self.gpt_command_class.provider.type_enum,
+                self.gpt_command_class.provider.type_enum,  # noqa
                 self.bot.get_formatted_text_line(f'/{self.gpt_command_class.name}')
             )
 
@@ -61,7 +61,7 @@ class WTFCommand(Command):
 
         gpt: GPTCommand = self.gpt_command_class()
         gpt.bot = self.bot
-        gpt.event = self.event
+        gpt.event = self.event  # noqa
         gpt.set_provider_model()
         with ChatActivity(self.bot, ActivitiesEnum.TYPING, self.event.peer_id):
             answer = gpt.completions(messages)  # noqa

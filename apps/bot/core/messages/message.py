@@ -40,7 +40,7 @@ class Message:
         self.kwargs: dict = {}
 
         # Ключи
-        self._short_keys_raw: list = []
+        self.short_keys_raw: list = []
         self.short_keys: list = []
         self.keys: list = []
 

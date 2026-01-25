@@ -51,7 +51,8 @@ class YoutubeVideo:
             }
         )
 
-    def download_video(self, data: VideoData) -> VideoAttachment:
+    @staticmethod
+    def download_video(data: VideoData) -> VideoAttachment:
         if not data.video_download_url or not data.audio_download_url:
             raise ValueError
         _va = VideoAttachment()
@@ -152,7 +153,8 @@ class YoutubeVideo:
 
     # VIDEO DOWNLOAD HELPERS
 
-    def _get_video_info(self, url: str) -> dict:
+    @staticmethod
+    def _get_video_info(url: str) -> dict:
         ydl_params = {
             'logger': NothingLogger(),
             'noplaylist': True,

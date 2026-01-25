@@ -1,5 +1,4 @@
 from apps.bot.consts import RoleEnum
-from apps.bot.core.bot.tg_bot.tg_bot import TgBot
 from apps.bot.core.event.tg_event.tg_event import TgEvent
 from apps.bot.core.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.commands.command import Command
@@ -174,7 +173,6 @@ class Settings(Command):
         return "\n".join(answer)
 
     def get_str_chat_tg_settings(self) -> str:
-        self.bot: TgBot
         chat_admins = self.bot.get_chat_administrators(self.event.chat.chat_id)
         permissions = [x for x in chat_admins if x['user']['id'] == env.int('TG_BOT_GROUP_ID')]
         permissions = permissions[0] if permissions else {}

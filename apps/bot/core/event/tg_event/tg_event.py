@@ -27,7 +27,7 @@ class TgEvent(Event):
 
         self.inline_mode: bool = False
 
-        self.inline_data = {
+        self.inline_data: dict = {
             'query_id': None,
             'query': None,
             'offset': None

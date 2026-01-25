@@ -308,7 +308,7 @@ def split_text_by_n_symbols(text: str, n: int, split_on: list[str] | None = None
     return texts
 
 
-def get_font_by_path(font_path: str, size: int) -> ImageFont:
+def get_font_by_path(font_path: str, size: int) -> type[ImageFont]:
     return ImageFont.truetype(os.path.join(STATIC_ROOT, f'fonts/{font_path}'), size, encoding="unic")
 
 

@@ -71,18 +71,18 @@ class Command(BaseCommand):
 
         is_dev_mode = mode == self.DEV
 
-        apps = options['apps']
-        apps_str = ", ".join(apps)
+        _apps = options['apps']
+        apps_str = ", ".join(_apps)
         self.stdout.write(f'Сброс миграций приложений "{apps_str}" в БД')
-        for app in apps:
-            self.delete_django_migrations_db_app(app)
+        for _app in _apps:
+            self.delete_django_migrations_db_app(_app)
             if is_dev_mode:
-                self.delete_migrations_files_app(app)
-                self.stdout.write(f'Миграции приложения "{app}" успешно удалены из БД')
+                self.delete_migrations_files_app(_app)
+                self.stdout.write(f'Миграции приложения "{_app}" успешно удалены из БД')
 
         if is_dev_mode:
-            for app in apps:
-                call_command('makemigrations', app)
+            for _app in _apps:
+                call_command('makemigrations', _app)
 
-        for app in apps:
-            call_command('migrate', app, '--fake')
+        for _app in _apps:
+            call_command('migrate', _app, '--fake')

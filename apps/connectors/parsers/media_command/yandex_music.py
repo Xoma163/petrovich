@@ -99,7 +99,7 @@ class YandexAlbum(YandexMusicAPI):
 
     def set_tracks(self):
         client = self.get_client()
-        tracks: list[Track] = client.albums_with_tracks(self.id).volumes[0]
+        tracks: list[Track] = client.albums_with_tracks(self.id).volumes[0]  # noqa
         self.tracks = [YandexTrack(track=x) for x in tracks]
 
 

@@ -162,7 +162,7 @@ class GPTImageDrawFunctionality(GPTCommandProtocol):
 
     # COMMON UTILS
 
-    def get_image_draw_model_with_parameters(self) -> type[ImageDrawModel]:
+    def get_image_draw_model_with_parameters(self) -> ImageDrawModel:
         current_image_model = self.get_image_draw_model()
 
         image_quality = self._get_image_quality() or current_image_model.image_quality
@@ -175,8 +175,7 @@ class GPTImageDrawFunctionality(GPTCommandProtocol):
 
         available_models = [
             model for model in image_draw_models
-            if model.image_quality == image_quality and \
-               model.image_format == image_format
+            if model.image_quality == image_quality and model.image_format == image_format
         ]
 
         if len(available_models) == 0:
@@ -187,7 +186,7 @@ class GPTImageDrawFunctionality(GPTCommandProtocol):
             raise PWarning(
                 "Не смог определить какую модель с какими характеристиками нужно использовать. Подходит сразу несколько. Сообщите админу"
             )
-        return available_models[0]
+        return available_models[0]  # noqa
 
     def get_image_draw_model(self) -> ImageDrawModel:
         return self.get_model(ImageDrawModel, "image_draw_model")

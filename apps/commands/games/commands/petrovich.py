@@ -114,6 +114,8 @@ class Petrovich(Command):
             winner_petrovich.save()
 
             winner_gender = "Петровна" if winner_profile.gender == '1' else "Петрович"
+            mention = self.bot.get_mention(winner_profile)
+
             first_answer = random_event([
                 "Такс такс такс, кто тут у нас",
                 "*барабанная дробь*",
@@ -141,22 +143,23 @@ class Petrovich(Command):
                 "Чей это кристалл судьбы блестит ярче всех сегодня?",
                 "Так, стоп, хватит держать вас в напряжении!"
             ])
+
             second_answer = random_event([
-                f"{winner_gender} дня - {self.bot.get_mention(winner_profile)}",
-                f"НЕВЕРОЯТНО, НО {winner_gender} дня - {self.bot.get_mention(winner_profile)}",
-                f"Сначала я не поверил, что {winner_gender} дня - {self.bot.get_mention(winner_profile)}, но куда деваться",
-                f"Мда, и этот человек - {self.bot.get_mention(winner_profile)} сегодня {winner_gender} дня",
-                f"И вот он, крем нашего пирожного — {self.bot.get_mention(winner_profile)}!",
-                f"Аплодируем стоя: {winner_gender} дня — {self.bot.get_mention(winner_profile)}!",
-                f"Игра окончена. Победитель — {self.bot.get_mention(winner_profile)}. Принимайте поздравления, {winner_gender} дня!",
-                f"Кто здесь {winner_gender} дня? Правильно, {self.bot.get_mention(winner_profile)}!",
-                f"Как в казино, только без денег. {winner_gender} дня — {self.bot.get_mention(winner_profile)}, поздравляем!",
-                f"На волне случайности выносится вердикт: {winner_gender} дня — {self.bot.get_mention(winner_profile)}",
-                f"Все путем, {self.bot.get_mention(winner_profile)}. Сегодня ты — звезда, {winner_gender} дня!",
-                f"Забудьте о зодиаках, {winner_gender} дня здесь — {self.bot.get_mention(winner_profile)}",
-                f"Собаки лают, караван идет, а {winner_gender} дня — {self.bot.get_mention(winner_profile)}",
-                f"Расклад таков: {winner_gender} дня почетно присваивается {self.bot.get_mention(winner_profile)}. Ну что, парад готовим?",
-                f"Ладно, примем как данность: {winner_gender} дня – это {self.bot.get_mention(winner_profile)}"
+                f"{winner_gender} дня - {mention}",
+                f"НЕВЕРОЯТНО, НО {winner_gender} дня - {mention}",
+                f"Сначала я не поверил, что {winner_gender} дня - {mention}, но куда деваться",
+                f"Мда, и этот человек - {mention} сегодня {winner_gender} дня",
+                f"И вот он, крем нашего пирожного — {mention}!",
+                f"Аплодируем стоя: {winner_gender} дня — {mention}!",
+                f"Игра окончена. Победитель — {mention}. Принимайте поздравления, {winner_gender} дня!",
+                f"Кто здесь {winner_gender} дня? Правильно, {mention}!",
+                f"Как в казино, только без денег. {winner_gender} дня — {mention}, поздравляем!",
+                f"На волне случайности выносится вердикт: {winner_gender} дня — {mention}",
+                f"Все путем, {mention}. Сегодня ты — звезда, {winner_gender} дня!",
+                f"Забудьте о зодиаках, {winner_gender} дня здесь — {mention}",
+                f"Собаки лают, караван идет, а {winner_gender} дня — {mention}",
+                f"Расклад таков: {winner_gender} дня почетно присваивается {mention}. Ну что, парад готовим?",
+                f"Ладно, примем как данность: {winner_gender} дня – это {mention}"
             ])
 
             return ResponseMessage([

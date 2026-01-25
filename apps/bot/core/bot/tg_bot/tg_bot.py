@@ -226,7 +226,7 @@ class TgBot(Bot):
             params['document'] = document.public_download_url
             r = self.requests.post('sendDocument', params).json()
         else:
-            files = {'document': document.content}
+            files: dict = {'document': document.content}
             if document.thumbnail:
                 files['thumbnail'] = document.thumbnail.get_bytes_io_content()
             r = self.requests.post('sendDocument', params, files=files).json()
@@ -259,7 +259,7 @@ class TgBot(Bot):
                     rmi.attachments = []
                     raise PError(
                         f"Нельзя загружать видео более {self.MAX_VIDEO_SIZE_MB} мб в телеграмм. Ваше видео {round(video.get_size_mb(), 2)} мб")
-                files = {'video': video.content}
+                files: dict = {'video': video.content}
                 if video.thumbnail_url:
                     video.set_thumbnail()
                 if video.thumbnail:
@@ -296,7 +296,7 @@ class TgBot(Bot):
             params['audio'] = audio.public_download_url
             r = self.requests.post('sendAudio', params).json()
         else:
-            files = {'audio': audio.content}
+            files: dict = {'audio': audio.content}
             if audio.thumbnail_url:
                 audio.set_thumbnail()
             if audio.thumbnail:
@@ -638,59 +638,9 @@ class TgBot(Bot):
         ).json()
         return r
 
-    def get_sticker_set(self, name: str) -> list:
-        r = self.requests.post('getStickerSet', json={'name': name}).json()
-        return r['result']['stickers']
-
-    def set_chat_admin_title(self, chat_id: int | str, user_id: int | str, title: str) -> dict:
-        r = self.requests.post('setChatAdministratorCustomTitle', json={
-            'chat_id': chat_id,
-            'user_id': user_id,
-            'custom_title': title
-        }).json()
-        return r
-
-    def promote_chat_member(self, chat_id: int | str, user_id: int | str) -> dict:
-        r = self.requests.post('promoteChatMember', json={
-            'chat_id': chat_id,
-            'user_id': user_id,
-            'can_manage_chat': False,
-            'can_pin_messages': True,
-        }).json()
-        return r
-
-    def get_chat(self, chat_id: int | str) -> dict:
-        r = self.requests.post('getChat', json={
-            'chat_id': chat_id
-        }).json()
-        return r
-
-    def set_chat_title(self, chat_id: int | str, title: str) -> dict:
-        if len(title) > 128:
-            raise PWarning("Максимальная длина названия чата - 128 символов")
-        r = self.requests.post('setChatTitle', json={
-            'chat_id': chat_id,
-            'title': title
-        }).json()
-        return r
-
     def leave_chat(self, chat_id) -> dict:
         r = self.requests.post('leaveChat', json={
             'chat_id': chat_id,
-        }).json()
-        return r
-
-    def set_message_reaction(
-            self, chat_id: int | str, message_id: int, reactions: list[str], is_big: bool = False
-    ):
-        if not isinstance(reactions, list):
-            reactions = [reactions]
-        reactions = [{"type": "emoji", "emoji": x} for x in reactions]
-        r = self.requests.post('setMessageReaction', json={
-            'chat_id': chat_id,
-            'message_id': message_id,
-            'reaction': json.dumps(reactions),
-            'is_big': is_big
         }).json()
         return r
 

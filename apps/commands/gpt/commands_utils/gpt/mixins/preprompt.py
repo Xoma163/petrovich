@@ -54,7 +54,7 @@ class GPTPrepromptMixin(GPTCommandProtocol):
                 preprompt = self.event.message.raw.split(None, args_slice_index + 1)[-1]
                 preprompt_obj, _ = Preprompt.objects.update_or_create(
                     defaults={'text': preprompt},
-                    **dict(q.children)
+                    **dict(q.children)  # noqa
                 )
                 rmi = ResponseMessageItem(f"Обновил {is_for}: {self.bot.get_formatted_text(preprompt_obj.text)}")
         # посмотреть

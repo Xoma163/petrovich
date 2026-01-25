@@ -11,7 +11,7 @@ class VideoCommon:
         self.tmp_output_file = NamedTemporaryFile()
 
     @staticmethod
-    def _place_file(file: NamedTemporaryFile, att: Attachment):
+    def _place_file(file: type[NamedTemporaryFile], att: Attachment):
         with open(file.name, 'wb') as _file:
             if isinstance(att.content, types.GeneratorType):
                 for chunk in att.content:
@@ -20,7 +20,7 @@ class VideoCommon:
                 _file.write(att.content)
 
     @staticmethod
-    def close_file(file: NamedTemporaryFile):
+    def close_file(file: type[NamedTemporaryFile]):
         file.close()
 
     def close_all(self):
@@ -28,7 +28,7 @@ class VideoCommon:
         self.close_file(self.tmp_audio_file)
         self.close_file(self.tmp_output_file)
 
-    def _get_video_bytes(self, file: NamedTemporaryFile):
+    def _get_video_bytes(self, file: type[NamedTemporaryFile]):
         try:
             with open(file.name, 'rb') as _file:
                 file_bytes = _file.read()

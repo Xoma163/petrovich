@@ -57,7 +57,7 @@ def copy_completions_to_vision(modeladmin, request, queryset):
                 for m2m in VisionModel._meta.many_to_many:
                     if hasattr(obj, m2m.name):
                         getattr(vm, m2m.name).set(getattr(obj, m2m.name).all())
-        except Exception as exc:
+        except:
             errors += 1
 
     msg = f"Скопировано: {created}, обновлено: {updated}, ошибок: {errors}"
