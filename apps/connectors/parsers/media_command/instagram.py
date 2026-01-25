@@ -110,8 +110,8 @@ class InstagramParser:
         if caption:
             data.caption = caption.get('text', None)
 
-        if carousel_item := media.get('carousel_media'):
-            for carousel_item in carousel_item:
+        if carousel_items := media.get('carousel_media'):
+            for carousel_item in carousel_items:
                 if video := carousel_item.get('video_versions'):
                     data.add_video(download_url=video[0]['url'], thumbnail_url=carousel_item.get('display_uri'))
                 elif image := carousel_item.get('image_versions2'):

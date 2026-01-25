@@ -243,7 +243,6 @@ class TgBot(Bot):
         if rmi.spoiler:
             params['has_spoiler'] = rmi.spoiler
 
-        r = None
         if video.file_id:
             params['video'] = video.file_id
         elif video.public_download_url and not video.content:

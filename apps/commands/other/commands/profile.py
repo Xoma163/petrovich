@@ -67,7 +67,7 @@ class Profile(Command):
         if not city:
             raise PWarning(
                 "Не нашёл такого города.\n"
-                f"Попросите админа добавить ваш город"
+                "Попросите админа добавить ваш город"
             )
         self.event.sender.city = city
         self.event.sender.save()

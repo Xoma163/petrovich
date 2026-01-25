@@ -497,7 +497,6 @@ class Meme(Command):
         yt_api = YoutubeVideo()
         try:
             # Если видео надо нарезать
-            from apps.bot.core.bot.telegram.tg_bot import TgBot
             data = yt_api.get_video_info(meme.link)
 
             if start_pos:

@@ -97,7 +97,7 @@ class VoiceRecognition(AcceptExtraCommand):
             except VoiceRecognitionModel.DoesNotExist:
                 raise PError("Не установлена модель для обработки аудио. Сообщите админу")
 
-            profile_gpt_settings, created = self.event.sender.gpt_settings.get_or_create(
+            profile_gpt_settings, _ = self.event.sender.gpt_settings.get_or_create(
                 provider=chat_gpt_provider,
                 defaults={'profile': self.event.sender}
             )

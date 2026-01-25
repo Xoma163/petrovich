@@ -4,7 +4,6 @@ import os
 from concurrent.futures import ThreadPoolExecutor
 from io import BytesIO
 from pathlib import Path
-from tempfile import NamedTemporaryFile, _TemporaryFileWrapper  # noqa
 
 import requests
 from urllib3.exceptions import SSLError

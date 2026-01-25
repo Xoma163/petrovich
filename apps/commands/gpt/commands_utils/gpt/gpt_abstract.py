@@ -57,7 +57,7 @@ class GPTCommand(
 
     RESPONSE_MESSAGE_TOO_LONG = "Твой запрос получился слишком большой. Положил ответ в файл"
 
-    DEBUG = "\n\n---------- DEBUG ----------"
+    DEBUG_LINE = "\n\n---------- DEBUG ----------"
 
     @property
     @abstractmethod
@@ -405,7 +405,7 @@ class GPTCommand(
 
         documents: list[DocumentAttachment] = event.get_all_attachments([DocumentAttachment], use_fwd=False)
         text = text if text else ""
-        text = text.split(self.DEBUG, 1)[0]
+        text = text.split(self.DEBUG_LINE, 1)[0]
 
         txt_documents = [document for document in documents if
                          document.mime_type.is_text or document.ext.lower() in ['html', 'txt']]
@@ -413,7 +413,7 @@ class GPTCommand(
             result_text = [text] if text else []
             for document in txt_documents:
                 doc_txt_str = f"\nСодержимое файла:\n{document.read_text()}"
-                doc_txt_str = doc_txt_str.split(self.DEBUG, 1)[0]
+                doc_txt_str = doc_txt_str.split(self.DEBUG_LINE, 1)[0]
                 result_text.append(doc_txt_str)
             return "\n".join(result_text)
         return text
