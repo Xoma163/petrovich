@@ -25,7 +25,7 @@ class LinkAttachment(Attachment):
 
     @classmethod
     def parse_link(cls, text):
-        regexp = "(http|ftp|https|tg)(:\/\/)([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-])"
+        regexp = r"(http|ftp|https|tg)(://)([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])"
         r = re.compile(regexp)
         res = r.findall(text)
         return ["".join(x) for x in res]
