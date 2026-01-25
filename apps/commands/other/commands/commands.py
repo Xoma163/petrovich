@@ -20,9 +20,9 @@ class Commands(Command):
     )
 
     def start(self) -> ResponseMessage:
-        from apps.bot.initial import HELP_TEXTS
+        from apps.commands.registry import registry_help_texts
 
-        help_texts = HELP_TEXTS[self.event.platform]
+        help_texts = registry_help_texts[self.event.platform]
         ordered_roles = [
             {"role": RoleEnum.USER, "text": "общие команды"},
             {"role": RoleEnum.ADMIN, "text": "команды для администраторов"},

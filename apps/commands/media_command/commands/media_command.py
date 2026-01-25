@@ -1,7 +1,7 @@
 import random
 from urllib.parse import urlparse
 
-from apps.bot.consts import RoleEnum, Platform
+from apps.bot.consts import RoleEnum, PlatformEnum
 from apps.bot.core.bot.tg_bot.tg_bot import TgBot
 from apps.bot.core.event.event import Event
 from apps.bot.core.messages.attachments.audio import AudioAttachment
@@ -92,7 +92,7 @@ class Media(AcceptExtraCommand):
         )
     )
 
-    platforms = [Platform.TG]
+    platforms = [PlatformEnum.TG]
     attachments = [LinkAttachment]
 
     bot: TgBot

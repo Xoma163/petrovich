@@ -27,7 +27,7 @@ class RoleEnum(StrEnum):
         return self.value
 
 
-class Platform(StrEnum):
+class PlatformEnum(StrEnum):
     TG = 'tg'
 
     @classmethod

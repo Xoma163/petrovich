@@ -1,6 +1,6 @@
 import copy
 
-from apps.bot.consts import Platform, RoleEnum
+from apps.bot.consts import PlatformEnum, RoleEnum
 from apps.bot.core.messages.attachments.attachment import Attachment
 from apps.bot.core.messages.attachments.audio import AudioAttachment
 from apps.bot.core.messages.attachments.document import DocumentAttachment
@@ -41,7 +41,7 @@ class Event:
         self.chat: Chat | None = None
         self.peer_id: int | None = None  # Куда слать ответ
         self.from_id: int | None = None  # От кого пришло сообщение
-        self.platform: Platform | None = None
+        self.platform: PlatformEnum | None = None
 
         self.payload: dict = {}
         self.action: dict = {}
@@ -111,9 +111,9 @@ class Event:
         """
         Проверка, нужен ли пользователю ответ c учётом особенностей команд
         """
-        from apps.bot.initial import EXTRA_COMMANDS
+        from apps.commands.registry import registry_accept_extra_commands
 
-        for e_command in EXTRA_COMMANDS:
+        for e_command in registry_accept_extra_commands:
             if e_command.accept_extra(self):
                 self.command = e_command.__class__
                 return True

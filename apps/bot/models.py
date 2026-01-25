@@ -3,7 +3,7 @@ from django.db import models
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
 
-from apps.bot.consts import Platform as PlatformEnum, RoleEnum as RoleEnum
+from apps.bot.consts import PlatformEnum as PlatformEnum, RoleEnum as RoleEnum
 from apps.bot.core.messages.attachments.photo import PhotoAttachment
 from apps.shared.mixins import TimeStampModelMixin
 from apps.shared.models import City
@@ -149,8 +149,8 @@ class Profile(TimeStampModelMixin):
         role = self.roles.filter(name=role.name)
         return role.exists()
 
-    def get_roles(self) -> list[Role]:
-        return [getattr(Role, x['name']) for x in self.roles.all().values()]
+    def get_roles(self) -> list[RoleEnum]:
+        return [getattr(RoleEnum, x.name) for x in self.roles.all()]
 
     def get_tg_user(self):
         return self.user.get(platform=PlatformEnum.TG.name)

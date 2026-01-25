@@ -1,7 +1,7 @@
 from collections import OrderedDict
 from itertools import groupby
 
-from apps.bot.consts import RoleEnum, Platform
+from apps.bot.consts import RoleEnum, PlatformEnum
 from apps.bot.core.activities import ActivitiesEnum
 from apps.bot.core.chat_activity import ChatActivity
 from apps.bot.core.event.event import Event
@@ -24,7 +24,7 @@ class WTFCommand(Command):
     names = ['саммари', 'суммаризируй']
     access = RoleEnum.TRUSTED
     abstract = True
-    platforms = [Platform.TG]
+    platforms = [PlatformEnum.TG]
 
     DEFAULT_PROMPT = "Я пришлю тебе переписку участников группы. Суммаризируй её, опиши, что произошло, о чём общались люди?"
     DEFAULT_N = 50

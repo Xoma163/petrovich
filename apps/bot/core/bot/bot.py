@@ -159,10 +159,11 @@ class Bot(Thread):
         Выбор команды
         Если в Event есть команда, поиск не требуется
         """
-        from apps.bot.initial import COMMANDS
+        from apps.commands.registry import registry_commands
+
         if event.command:
             return event.command().check_and_start(self, event)
-        for command in COMMANDS:
+        for command in registry_commands:
             if command.accept(event):
                 try:
                     return command.__class__().check_and_start(self, event)
@@ -182,7 +183,7 @@ class Bot(Thread):
         if event.chat and event.chat.settings.no_mention and event.message and not event.message.mentioned:
             raise PSkip()
 
-        similar_command, keyboard = self.get_similar_command(event, COMMANDS)
+        similar_command, keyboard = self.get_similar_command(event, registry_commands)
         rm = ResponseMessage(
             ResponseMessageItem(
                 text=similar_command,

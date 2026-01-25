@@ -1,4 +1,4 @@
-from apps.bot.consts import RoleEnum, Platform
+from apps.bot.consts import RoleEnum, PlatformEnum
 from apps.bot.core.bot.bot import Bot
 from apps.bot.core.event.event import Event
 from apps.bot.core.messages.attachments.audio import AudioAttachment
@@ -39,7 +39,7 @@ class Command(CommandProtocol):
     args_or_fwd: bool = False  # Должно ли сообщение обрабатываться только с пересланными сообщениями или аргументами
     int_args: list = []  # Список аргументов, которые должны быть целым числом
     float_args: list = []  # Список аргументов, которые должны быть числом
-    platforms: list = list(Platform)  # Список платформ, которые могут обрабатывать команду
+    platforms: list = list(PlatformEnum)  # Список платформ, которые могут обрабатывать команду
     excluded_platforms: list = []  # Список исключённых платформ.
     attachments: list = []  # Должно ли сообщение обрабатываться только с вложениями
     city: bool = False  # Должно ли сообщение обрабатываться только с заданным городом у пользователя

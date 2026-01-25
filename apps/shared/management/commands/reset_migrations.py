@@ -11,8 +11,8 @@ from django.db import connection
 class Command(BaseCommand):
     """
     Пример запуска
-    reset_migrations dev --apps games service shared commands gpt media_command meme notifies bot
-    reset_migrations prod --apps games service shared commands gpt media_command meme notifies bot
+    reset_migrations dev --apps games shared commands gpt media_command meme notifies bot
+    reset_migrations prod --apps games shared commands gpt media_command meme notifies bot
     """
 
     help = 'Сброс миграций и "типа" squah их в одну миграцию'

@@ -3,7 +3,7 @@ from threading import Lock
 
 from PIL import Image, ImageDraw
 
-from apps.bot.consts import Platform, RoleEnum, rus_alphabet
+from apps.bot.consts import PlatformEnum, RoleEnum, rus_alphabet
 from apps.bot.core.bot.tg_bot.tg_bot import TgBot
 from apps.bot.core.messages.response_message import ResponseMessageItem, ResponseMessage
 from apps.commands.command import Command
@@ -33,7 +33,7 @@ class Wordle(Command):
         )
     )
 
-    platforms = [Platform.TG]
+    platforms = [PlatformEnum.TG]
 
     bot: TgBot
 

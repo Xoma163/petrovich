@@ -1,6 +1,6 @@
 import json
 
-from apps.bot.consts import Platform
+from apps.bot.consts import PlatformEnum
 from apps.bot.core.event.event import Event
 from apps.bot.core.messages.attachments.audio import AudioAttachment
 from apps.bot.core.messages.attachments.document import DocumentAttachment, DocumentMimeType
@@ -23,7 +23,7 @@ class TgEvent(Event):
         super().__init__(raw_event, use_db)
 
         self.bot = TgBot()
-        self.platform = Platform.TG
+        self.platform = PlatformEnum.TG
 
         self.inline_mode: bool = False
 

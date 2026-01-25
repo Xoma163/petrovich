@@ -2,7 +2,7 @@ import threading
 
 from django.core.files.base import ContentFile
 
-from apps.bot.consts import RoleEnum, Platform, ATTACHMENT_TYPE_TRANSLATOR
+from apps.bot.consts import RoleEnum, PlatformEnum, ATTACHMENT_TYPE_TRANSLATOR
 from apps.bot.core.bot.bot import send_message_to_moderator_chat
 from apps.bot.core.messages.attachments.gif import GifAttachment
 from apps.bot.core.messages.attachments.link import LinkAttachment
@@ -69,7 +69,7 @@ class Meme(Command):
         LinkAttachment
     ]
 
-    platforms = [Platform.TG]
+    platforms = [PlatformEnum.TG]
 
     MESSAGE_YOUTUBE_STATUS_IN_PROGRESS = "Статус скачивания с ютуба: 🔄 в процессе"
     MESSAGE_YOUTUBE_STATUS_COMPLETE = "Статус скачивания с ютуба: ✅ готово"

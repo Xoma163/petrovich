@@ -6,7 +6,7 @@ from dateutil import parser
 from dateutil.parser import ParserError
 from django.db.models import Q, QuerySet
 
-from apps.bot.consts import RoleEnum, Platform
+from apps.bot.consts import RoleEnum, PlatformEnum
 from apps.bot.core.bot.tg_bot.tg_bot import TgBot
 from apps.bot.core.messages.attachments.audio import AudioAttachment
 from apps.bot.core.messages.attachments.document import DocumentAttachment
@@ -62,7 +62,7 @@ class Notifies(Command):
         )
     )
 
-    platforms = [Platform.TG]
+    platforms = [PlatformEnum.TG]
     city = True
 
     bot: TgBot
@@ -104,7 +104,7 @@ class Notifies(Command):
             if command in self.full_names:
                 raise PWarning("Нельзя добавлять напоминания с напоминаниями. АЛЛО, ТЫ ЧЁ МЕНЯ ХОЧЕШЬ СВАЛИТЬ?")
 
-        tg_att_flag = attachments and self.event.platform == Platform.TG
+        tg_att_flag = attachments and self.event.platform == PlatformEnum.TG
         if not (data['text'] or tg_att_flag):
             raise PWarning("В напоминании должны быть текст или вложения(tg)")
 

@@ -4,7 +4,7 @@ import logging
 from crontab import CronTab
 from django.core.management.base import BaseCommand
 
-from apps.bot.consts import RoleEnum, ATTACHMENT_TYPE_TRANSLATOR, Platform
+from apps.bot.consts import RoleEnum, ATTACHMENT_TYPE_TRANSLATOR, PlatformEnum
 from apps.bot.core.bot.tg_bot.tg_bot import TgBot
 from apps.bot.core.event.event import Event
 from apps.bot.core.messages.response_message import ResponseMessageItem
@@ -92,7 +92,7 @@ class Command(BaseCommand):
     def send_command_notify_message(bot, notify):
         # Если отложенная команда
         event = Event()
-        event.platform = Platform.TG
+        event.platform = PlatformEnum.TG
         event.set_message(notify.text)
         event.sender = notify.user.profile
         event.is_from_user = True

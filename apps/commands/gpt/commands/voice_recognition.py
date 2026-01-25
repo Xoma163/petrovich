@@ -1,4 +1,4 @@
-from apps.bot.consts import Platform, RoleEnum
+from apps.bot.consts import PlatformEnum, RoleEnum
 from apps.bot.core.activities import ActivitiesEnum
 from apps.bot.core.bot.tg_bot.tg_bot import TgBot
 from apps.bot.core.chat_activity import ChatActivity
@@ -43,7 +43,7 @@ class VoiceRecognition(AcceptExtraCommand):
         )
     )
 
-    platforms = [Platform.TG]
+    platforms = [PlatformEnum.TG]
     attachments = [VoiceAttachment, VideoNoteAttachment, AudioAttachment]
     # Обоснование: команда должна запускаться с минимальным приоритетом, потому что может быть любая другая команда,
     #  которая будет обрабатывать эти типы вложений

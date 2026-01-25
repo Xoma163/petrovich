@@ -1,7 +1,8 @@
+from apps.bot.consts import RoleEnum
 from apps.bot.core.event.event import Event
 from apps.bot.core.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.commands.command import Command
-from apps.commands.help_text import HelpText
+from apps.commands.help_text import HelpText, HelpTextItem, HelpTextArgument
 from apps.shared.exceptions import PWarning
 from apps.shared.utils.utils import get_help_texts_for_command
 
@@ -10,8 +11,15 @@ class Help(Command):
     name = "помощь"
     names = ["хелп", "ман", "помоги", "памаги", "спаси", "хелб", "манул", "help", "start"]
 
+
     help_text = HelpText(
         commands_text="помощь по командам и боту",
+        help_texts=[
+            HelpTextItem(RoleEnum.USER, [
+                HelpTextArgument(None, "общая справка"),
+                HelpTextArgument("(команда)", "помощь по команде")
+            ])
+        ]
     )
 
     def accept(self, event: Event) -> bool:
@@ -29,7 +37,6 @@ class Help(Command):
 
         answer = \
             f"{self.bot.get_formatted_text_line('/помощь')} (название команды) - помощь по конкретной команде\n" \
-            f"{self.bot.get_formatted_text_line('/документация')} - документация по боту. Самый подробный мануал по всему в одном месте\n" \
             f"{self.bot.get_formatted_text_line('/команды')} - список всех команд с кратким описанием\n" \
             "\n" \
             "Основы основ:\n" \
@@ -50,8 +57,8 @@ class Help(Command):
         """
         Ищет команду по имени
         """
-        from apps.bot.initial import COMMANDS
-        for command in COMMANDS:
+        from apps.commands.registry import registry_commands
+        for command in registry_commands:
             if name == command.name or (command.names and name in command.names):
                 return command
         raise PWarning("Я не знаю такой команды")

@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from apps.bot.consts import Platform, RoleEnum
+from apps.bot.consts import PlatformEnum, RoleEnum
 from apps.bot.core.activities import ActivitiesEnum
 from apps.bot.core.bot.tg_bot.tg_bot import TgBot
 from apps.bot.core.chat_activity import ChatActivity
@@ -50,7 +50,7 @@ class TrimVideo(Command):
         )
     )
 
-    platforms = [Platform.TG]
+    platforms = [PlatformEnum.TG]
     bot: TgBot
 
     attachments = [LinkAttachment, VideoAttachment, AudioAttachment, VideoNoteAttachment]

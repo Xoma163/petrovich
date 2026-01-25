@@ -3,7 +3,7 @@ import threading
 from copy import copy
 from math import inf
 
-from apps.bot.consts import Platform
+from apps.bot.consts import PlatformEnum
 from apps.bot.core.activities import ActivitiesEnum, TG_ACTIVITIES
 from apps.bot.core.bot.bot import Bot
 from apps.bot.core.bot.tg_bot.request import Request, RequestLocal
@@ -55,7 +55,7 @@ class TgBot(Bot):
     QUOTE_TAG = "blockquote"
 
     def __init__(self):
-        Bot.__init__(self, Platform.TG)
+        Bot.__init__(self, PlatformEnum.TG)
         self.token = env.str("TG_TOKEN")
 
         self.requests = None

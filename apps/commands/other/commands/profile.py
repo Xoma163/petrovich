@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from apps.bot.consts import Platform, RoleEnum
+from apps.bot.consts import PlatformEnum, RoleEnum
 from apps.bot.core.bot.tg_bot.tg_bot import TgBot
 from apps.bot.core.messages.attachments.photo import PhotoAttachment
 from apps.bot.core.messages.response_message import ResponseMessage, ResponseMessageItem
@@ -35,7 +35,7 @@ class Profile(Command):
         ]
     )
 
-    platforms = [Platform.TG]
+    platforms = [PlatformEnum.TG]
 
     bot: TgBot
 
@@ -139,7 +139,7 @@ class Profile(Command):
         if len(images) > 0:
             self.event.sender.set_avatar(images[0])
         else:
-            if self.event.platform not in [Platform.TG]:
+            if self.event.platform not in [PlatformEnum.TG]:
                 raise PWarning("Обновление аватара по пользователю доступно только для ВК/ТГ")
             self.bot.update_profile_avatar(self.event.sender, self.event.user.user_id)
         answer = "Изменил аватарку"
