@@ -7,7 +7,7 @@ readme = "README.md"
 repository = "https://github.com/Xoma163/petrovich"
 package-mode = false
 license = "MIT"
-requires-python = ">=3.13"
+requires-python = ">=3.14"
 
 dependencies = [
     "audioop-lts>=0.2.2",
@@ -27,7 +27,7 @@ dependencies = [
     "python-dateutil>=2.9.0.post0",
     "python-json-logger>=4.0.0",
     "requests>=2.32.5",
-    "selenium>=4.40.0",
+    "selenium>=4.40w.0",
     "sentry-sdk>=2.50.0",
     "twitch-dl>=3.3.0",
     "uwsgi>=2.0.31",
