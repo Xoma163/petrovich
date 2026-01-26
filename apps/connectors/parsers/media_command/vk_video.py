@@ -95,7 +95,7 @@ class VKVideo:
             va.content = vh.mux()
         if va.m3u8_url:
             vd = VideoDownloader(va)
-            va.content = vd.download_m3u8(threads=10)  # ToDo: тут не передаются хедеры, возможно будет проблема
+            va.content = vd.download_m3u8(threads=10)
 
         # va.download_content(headers=self.HEADERS)
         return va

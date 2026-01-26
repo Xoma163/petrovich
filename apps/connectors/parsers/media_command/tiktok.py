@@ -12,6 +12,8 @@ from apps.shared.exceptions import PWarning
 
 class TikTok:
     AGE_RESTRICTION_MESSAGE = r'This post may not be comfortable for some audiences. Log in to make the most of your experience.'
+    AUDIENCE_CONTROL = r'This creator turned on audience controls. Log in to make the most of your TikTok experience.'
+
 
     def __init__(self):
         super().__init__()
@@ -45,6 +47,10 @@ class TikTok:
         bs4 = BeautifulSoup(page_source, "html.parser")
         if any([self.AGE_RESTRICTION_MESSAGE in x.text for x in bs4.find_all("p")]):
             raise PWarning("Не могу скачать контент, так как он недоступен без аутентификации (возрастное ограничение)")
+
+        bs4 = BeautifulSoup(page_source, "html.parser")
+        if any([self.AUDIENCE_CONTROL in x.text for x in bs4.find_all("p")]):
+            raise PWarning("Не могу скачать контент, так как он недоступен без аутентификации")
 
         script_data = bs4.find(id="__UNIVERSAL_DATA_FOR_REHYDRATION__")
         data = json.loads(script_data.text)

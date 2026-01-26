@@ -7,7 +7,6 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import connection
 
 
-# ToDo: test
 class Command(BaseCommand):
     """
     Пример запуска
