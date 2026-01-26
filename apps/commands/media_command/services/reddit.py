@@ -46,7 +46,7 @@ class RedditService(MediaService):
                 .replace("&amp;", "&") \
                 .replace(" ", " ") \
                 .strip()
-            text = markdown_to_html(text, self.bot)
+            text, _ = markdown_to_html(text, self.bot)
             regexps_with_static = (
                 (r"https.*player", "Видео"), (r"https://preview\.redd\.it/(?:\w|\d|\.|\?|\=|&)*", "Фото"))
             for regexp, _text in regexps_with_static:
