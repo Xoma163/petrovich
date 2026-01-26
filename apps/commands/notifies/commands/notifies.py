@@ -216,7 +216,7 @@ class Notifies(Command):
                 delta_days += 7
             arg1 = (datetime.datetime.today().date() + datetime.timedelta(days=delta_days)).strftime("%d.%m.%Y")
 
-        default_datetime = remove_tz(normalize_datetime(datetime.datetime.now(datetime.UTC), tz=timezone.name)) \
+        default_datetime = remove_tz(localize_datetime(datetime.datetime.now(datetime.UTC), tz=timezone.name)) \
             .replace(hour=9, minute=0, second=0, microsecond=0)
         try:
             if arg1.count('.') == 1:
