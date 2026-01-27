@@ -71,7 +71,7 @@ class GPTStatisticsMixin(GPTCommandProtocol):
         plot_bytes = self._get_statistics_plot(plot_data)
 
         statistics_plot_image = PhotoAttachment()
-        statistics_plot_image.parse(plot_bytes)
+        statistics_plot_image.parse(_bytes=plot_bytes)
         return ResponseMessageItem(answer, attachments=[statistics_plot_image])
 
     # HANDLERS

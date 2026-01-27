@@ -348,7 +348,7 @@ def get_admin_profile(exclude_profile: Profile | None = None) -> Profile | None:
 def wrap_text_in_document(text: str, filename: str = 'file.html') -> DocumentAttachment:
     text = text.replace("\n", "<br>")
     document = DocumentAttachment()
-    document.parse(text.encode('utf-8-sig'), filename=filename)
+    document.parse(_bytes=text.encode('utf-8-sig'), filename=filename)
     return document
 
 

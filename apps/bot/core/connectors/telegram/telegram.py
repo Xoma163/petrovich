@@ -127,6 +127,7 @@ class TelegramAPI:
             message_thread_id: int = None,
             reply_to_message_id: int = None,
             parse_mode: str = None,
+            caption: str = None,
             document: str = None,
             files: dict = None
     ):
@@ -137,6 +138,7 @@ class TelegramAPI:
             "message_thread_id": message_thread_id,
             "reply_to_message_id": reply_to_message_id,
             "parse_mode": parse_mode,
+            "caption": caption,
             "document": document
         }
 
