@@ -196,7 +196,7 @@ class GPTCommand(
         Пост-обработка сообщения в completions
         """
         answer = answer if answer else "{пустой ответ}"
-        answer, answer_changed = markdown_to_html(answer, self.bot)
+        answer = markdown_to_html(answer, self.bot)
         pre = f"<{self.bot.PRE_TAG}>"
         # Сворачивание длинных сообщений от GPT в чатах в цитаты для укорачивания высоты сообщения в чате
         if self.event.is_from_chat and pre not in answer and len(answer) > 200:
@@ -215,8 +215,6 @@ class GPTCommand(
                 reply_to=self.event.message.id
             )
         rmi.message_thread_id = self.event.message_thread_id
-        if answer_changed:
-            rmi.kwargs["parse_mode"] = "html"
         return rmi
 
     def send_rmi(self, rmi):

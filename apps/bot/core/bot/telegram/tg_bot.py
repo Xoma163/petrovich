@@ -500,7 +500,7 @@ class TgBot(Bot):
 
         # Если у нас есть форматирование, в таком случае все сначала шлём все медиа, а потом уже форматированный текст
         # Телега не умеет в send_media_group + parse_mode
-        if rmi.text_has_html_code and len(rmi.attachments) > 1:
+        if rmi.parse_mode and len(rmi.attachments) > 1:
             chunks = [""] + split_text_by_n_symbols(params['caption'], self.max_message_text_length)
             params['caption'] = chunks[0]
 

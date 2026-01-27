@@ -20,12 +20,12 @@ def markdown_wrap_symbols(text):
         .replace("&lt;/pre&gt;", "</pre>")
 
 
-def markdown_to_html(text: str, bot) -> tuple[str, bool]:
+def markdown_to_html(text: str, bot) -> str:
     """
     Переводит из Markdown в html теги.
     Возвращает новую строку и флаг были ли сделаны изменения
     """
-    text_copy = text
+    # text_copy = text
     text = markdown_wrap_symbols(text)
     if bot.PRE_TAG:
         if bot.CODE_TAG:
@@ -45,7 +45,7 @@ def markdown_to_html(text: str, bot) -> tuple[str, bool]:
         text = replace_tag(text, '\n&gt;', '\n', f"\n<{bot.CODE_TAG}>", f"</{bot.CODE_TAG}>\n")
     if bot.LINK_TAG:
         text = replace_markdown_links(text, bot)
-    return text, text_copy != text
+    return text  # , text_copy != text
 
 
 def replace_tag(text: str, start_tag: str, end_tag: str, new_start_tag: str, new_end_tag: str):

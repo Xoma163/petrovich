@@ -12,7 +12,7 @@ class GPTPresetMixin(GPTCommandProtocol):
     PRESET_HELP_TEXT_ITEMS = [
         HelpTextArgument(
             "пресет создать (название)\\n[описание]",
-            "создаёт новый пресет на основе текущих настроек GPT"
+            "создаёт новый или обновляет существующий пресет на основе текущих настроек GPT"
         ),
         HelpTextArgument(
             "пресет удалить (название)",
@@ -38,7 +38,7 @@ class GPTPresetMixin(GPTCommandProtocol):
             arg1 = None
 
         menu = [
-            [["добавить", "создать", "сохранить", "add", "save", "create"], self.menu_add_preset],
+            [["добавить", "создать", "сохранить", "обновить", "add", "save", "create"], self.menu_add_preset],
             [["удалить", "сброс", "сбросить", "delete", "reset"], self.menu_delete_preset],
             [["default"], self.menu_select_or_list_preset],
         ]
@@ -99,7 +99,7 @@ class GPTPresetMixin(GPTCommandProtocol):
             preset.save()
 
         answer_parts = [
-            f"Сохранил пресет {self.bot.get_formatted_text_line(name)}:" if created else f"Обновилл пресет {self.bot.get_formatted_text_line(name)}:",
+            f"Сохранил пресет {self.bot.get_formatted_text_line(name)}:" if created else f"Обновил пресет {self.bot.get_formatted_text_line(name)}:",
             f"Описание\n{self.bot.get_formatted_text_line(preset.description)}" if preset.description else None,
             f"Модель обработки текста (completions)\n{self.bot.get_formatted_text_line(preset.completions_model.name)}" if preset.completions_model else None,
             f"Модель обработки изображений (vision)\n{self.bot.get_formatted_text_line(preset.vision_model.name)}" if preset.vision_model else None,

@@ -2,6 +2,8 @@ import json
 import re
 from copy import copy
 
+from apps.bot.core.messages.telegram.parse_mode import TelegramParseMode
+
 
 class ResponseMessageItem:
     TG_TAGS = ['pre', 'code', 'tg-spoiler', 'i', 'b', 'u', 'a', 's', 'blockquote']
@@ -22,7 +24,8 @@ class ResponseMessageItem:
             disable_web_page_preview: bool = False,
             entities: list | None = None,
             send: bool = True,
-            spoiler: bool = False
+            spoiler: bool = False,
+            parse_mode: TelegramParseMode | None = None
     ):
         self.text = text
         self.attachments = attachments if attachments else []
@@ -44,6 +47,7 @@ class ResponseMessageItem:
 
         self.send = send
         self.spoiler = spoiler
+        self.parse_mode = parse_mode
 
     def to_log(self) -> dict:
         """
@@ -70,25 +74,35 @@ class ResponseMessageItem:
 
         return dict_self
 
-    @property
-    def text_has_html_code(self):
-        return self.kwargs.get('parse_mode') == 'html'
-
     def set_telegram_html(self):
         if not self.text:
             return
         p = re.compile(self.URLS_REGEXP)  # Ссылки
         if p.search(self.text):
-            self.kwargs['parse_mode'] = "html"
+            self.parse_mode = TelegramParseMode.HTML
         else:
             for tag in self.TG_TAGS:
                 p = re.compile(rf"<{tag}.*>[\s\S]*</{tag}>")
                 if p.search(self.text):
-                    self.kwargs['parse_mode'] = "html"
+                    self.parse_mode = TelegramParseMode.HTML
                     break
 
         if self.kwargs.get('parse_mode'):
             self.wrap_links()
+
+    # def escape_markdown_v2(self):
+    #     """Экранирует строку под parse_mode=MarkdownV2."""
+    #     SPECIAL_CHARS = set('_*[]()~`>#+-=|{}.!')
+    #
+    #     escaped = []
+    #     for ch in self.text:
+    #         if ch == '\\':
+    #             escaped.append('\\\\')
+    #         elif ch in SPECIAL_CHARS:
+    #             escaped.append(f'\\{ch}')
+    #         else:
+    #             escaped.append(ch)
+    #     self.text = ''.join(escaped)
 
     def wrap_links(self):
         # Врапим ссылки без явного их врапа если у нас уже html
@@ -127,6 +141,9 @@ class ResponseMessageItem:
                 params['caption'] = self.text
             else:
                 params['text'] = self.text
+
+        if self.parse_mode:
+            params['parse_mode'] = self.parse_mode
 
         if self.keyboard:
             params['reply_markup'] = self.keyboard
