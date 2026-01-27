@@ -264,6 +264,8 @@ class TgBot(Bot):
         Отправка видео. Ссылка или файл
         """
         params = copy(default_params)
+        params.pop('parse_mode')  # Не поддерживается телегой
+
         video_note: VideoNoteAttachment = rmi.attachments[0]
         params['video_note'] = video_note.file_id
         return self.api_handler.send_video_note(**params).json()
@@ -318,6 +320,8 @@ class TgBot(Bot):
         Отправка стикера
         """
         params = copy(default_params)
+        params.pop('parse_mode')  # Не поддерживается телегой
+
         sticker: StickerAttachment = rmi.attachments[0]
         params['sticker'] = sticker.file_id
         return self.api_handler.send_sticker(**params)

@@ -56,8 +56,8 @@ class TelegramAPI:
             text: str,
             message_thread_id: int = None,
             reply_to_message_id: int = None,
-            reply_markup: dict = None,
             parse_mode: str = None,
+            reply_markup: dict = None,
             disable_web_page_preview: bool = None,
             entities: list = None
     ):
@@ -65,8 +65,8 @@ class TelegramAPI:
             "chat_id": chat_id,
             "message_thread_id": message_thread_id,
             "reply_to_message_id": reply_to_message_id,
-            "text": text,
             "parse_mode": parse_mode,
+            "text": text,
             "disable_web_page_preview": disable_web_page_preview
         }
         if reply_markup:
@@ -113,9 +113,9 @@ class TelegramAPI:
             "chat_id": chat_id,
             "message_thread_id": message_thread_id,
             "reply_to_message_id": reply_to_message_id,
+            "parse_mode": parse_mode,
             "caption": caption,
             "has_spoiler": has_spoiler,
-            "parse_mode": parse_mode,
             "photo": photo
         }
 
@@ -126,6 +126,7 @@ class TelegramAPI:
             chat_id: int,
             message_thread_id: int = None,
             reply_to_message_id: int = None,
+            parse_mode: str = None,
             document: str = None,
             files: dict = None
     ):
@@ -135,6 +136,7 @@ class TelegramAPI:
             "chat_id": chat_id,
             "message_thread_id": message_thread_id,
             "reply_to_message_id": reply_to_message_id,
+            "parse_mode": parse_mode,
             "document": document
         }
 
@@ -145,10 +147,10 @@ class TelegramAPI:
             chat_id: int,
             message_thread_id: int = None,
             reply_to_message_id: int = None,
+            parse_mode: str = None,
             caption: str = None,
             width: int = None,
             height: int = None,
-            parse_mode: str = None,
             has_spoiler: bool = None,
             video: str = None,
             files: dict = None
@@ -160,11 +162,11 @@ class TelegramAPI:
             "chat_id": chat_id,
             "message_thread_id": message_thread_id,
             "reply_to_message_id": reply_to_message_id,
+            "parse_mode": parse_mode,
             "caption": caption,
             "width": width,
             "height": height,
             "has_spoiler": has_spoiler,
-            "parse_mode": parse_mode,
             "video": video
         }
 
@@ -195,8 +197,8 @@ class TelegramAPI:
             chat_id: int,
             message_thread_id: int = None,
             reply_to_message_id: int = None,
-            caption: str = None,
             parse_mode: str = None,
+            caption: str = None,
             title: str = None,
             duration: int = None,
             performer: str = None,
@@ -210,8 +212,8 @@ class TelegramAPI:
             "chat_id": chat_id,
             "message_thread_id": message_thread_id,
             "reply_to_message_id": reply_to_message_id,
-            "caption": caption,
             "parse_mode": parse_mode,
+            "caption": caption,
             "title": title,
             "duration": duration,
             "performer": performer,
@@ -225,8 +227,8 @@ class TelegramAPI:
             chat_id: int,
             message_thread_id: int = None,
             reply_to_message_id: int = None,
-            caption: str = None,
             parse_mode: str = None,
+            caption: str = None,
             has_spoiler: bool = None,
             animation: str = None,
             files: dict = None
@@ -237,8 +239,8 @@ class TelegramAPI:
             "chat_id": chat_id,
             "message_thread_id": message_thread_id,
             "reply_to_message_id": reply_to_message_id,
-            "caption": caption,
             "parse_mode": parse_mode,
+            "caption": caption,
             "has_spoiler": has_spoiler,
             "animation": animation,
         }
@@ -269,6 +271,7 @@ class TelegramAPI:
             chat_id: int,
             message_thread_id: int = None,
             reply_to_message_id: int = None,
+            parse_mode: str = None,
             voice: str = None,
             files: dict = None
     ):
@@ -278,6 +281,7 @@ class TelegramAPI:
             "chat_id": chat_id,
             "message_thread_id": message_thread_id,
             "reply_to_message_id": reply_to_message_id,
+            "parse_mode": parse_mode,
             "voice": voice,
         }
 
