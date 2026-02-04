@@ -28,7 +28,6 @@ from apps.commands.gpt.protocols import GPTCommandProtocol
 from apps.commands.gpt.providers.base import GPTProvider
 from apps.shared.exceptions import PWarning, PError
 from apps.shared.utils.cache import MessagesCache
-from apps.shared.utils.markdown import markdown_to_html
 from apps.shared.utils.utils import wrap_text_in_document
 from petrovich.settings import env
 
@@ -56,6 +55,7 @@ class GPTCommand(
                                  "Прямо сейчас вы можете просто вручную установить модель и пользоваться ей"
 
     RESPONSE_MESSAGE_TOO_LONG = "Твой запрос получился слишком большой. Положил ответ в файл"
+    TG_CANT_PARSE_RESPONSE_MESSAGE = "Ответ GPT содержит в себе очень много тегов, которые не распарсились. Положил ответ в файл"
 
     DEBUG_LINE = "\n\n---------- DEBUG ----------"
 
@@ -196,13 +196,8 @@ class GPTCommand(
         Пост-обработка сообщения в completions
         """
         answer = answer if answer else "{пустой ответ}"
-        answer = markdown_to_html(answer, self.bot)
-        pre = f"<{self.bot.PRE_TAG}>"
-        # Сворачивание длинных сообщений от GPT в чатах в цитаты для укорачивания высоты сообщения в чате
-        if self.event.is_from_chat and pre not in answer and len(answer) > 200:
-            answer = self.bot.get_quote_text(answer, expandable=True)
-
-        if len(answer) > self.bot.MAX_MESSAGE_TEXT_LENGTH:
+        # answer = markdown_to_html(answer, self.bot)
+        if len(answer) > self.bot.max_message_text_length:
             document = wrap_text_in_document(answer, 'gpt.html')
             rmi = ResponseMessageItem(
                 text=self.RESPONSE_MESSAGE_TOO_LONG,
@@ -214,18 +209,21 @@ class GPTCommand(
                 text=answer,
                 reply_to=self.event.message.id
             )
+        rmi._raw_text = answer
+        rmi.set_telegram_markdown_v2()
         rmi.message_thread_id = self.event.message_thread_id
         return rmi
 
-    def send_rmi(self, rmi):
+    def send_rmi(self, rmi: ResponseMessageItem):
         rmi.peer_id = self.event.peer_id
         r = self.bot.send_response_message_item(rmi)
         if r.success:
             return None
 
-        document = wrap_text_in_document(rmi.text, filename='gpt.html')
+        document = wrap_text_in_document(rmi._raw_text, filename='gpt.html')
         rmi.attachments = [document]
-        rmi.text = "Ответ GPT содержит в себе очень много тегов, которые не распарсились. Положил ответ в файл"
+        rmi.text = self.TG_CANT_PARSE_RESPONSE_MESSAGE
+        rmi.parse_mode = None
         return rmi
 
     def get_api_key(self) -> str:

@@ -27,6 +27,7 @@ class ResponseMessageItem:
             spoiler: bool = False,
             parse_mode: TelegramParseMode | None = None
     ):
+        self._raw_text = text
         self.text = text
         self.attachments = attachments if attachments else []
         if not isinstance(self.attachments, list):
@@ -74,9 +75,25 @@ class ResponseMessageItem:
 
         return dict_self
 
+    def set_telegram_markdown_v2(self):
+        if self.parse_mode:
+            return
+
+        import telegramify_markdown
+        self.text = telegramify_markdown.markdownify(
+            self.text,
+            max_line_length=None,
+            # If you want to change the max line length for links, images, set it to the desired value.
+            normalize_whitespace=False
+        )
+        self.parse_mode = TelegramParseMode.MARKDOWN_V2
+
     def set_telegram_html(self):
         if not self.text:
             return
+        if self.parse_mode:
+            return
+
         p = re.compile(self.URLS_REGEXP)  # Ссылки
         if p.search(self.text):
             self.parse_mode = TelegramParseMode.HTML

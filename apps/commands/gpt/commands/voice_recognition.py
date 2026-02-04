@@ -168,7 +168,7 @@ class VoiceRecognition(AcceptExtraCommand):
 
         # Если ответ слишком длинный - кладём в файл
         rmi = ResponseMessageItem()
-        if len(answer) > self.bot.MAX_MESSAGE_TEXT_LENGTH:
+        if len(answer) > self.bot.max_message_text_length:
             document = wrap_text_in_document(answer, 'Транскрибация.html')
             answer = "Полная транскрибация в одном файле"
             rmi.attachments = [document]

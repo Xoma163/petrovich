@@ -34,8 +34,14 @@ class Bot:
     UNDERLINE_TAG = None
     QUOTE_TAG = None
 
-    MAX_MESSAGE_TEXT_LENGTH = inf
-    MAX_VIDEO_SIZE_MB = inf
+    @property
+    def max_video_size_mb(self):
+        return inf
+
+    @property
+    def max_message_text_length(self):
+        return inf
+
 
     def __init__(self, platform, **kwargs):
         self.log_filter = {}

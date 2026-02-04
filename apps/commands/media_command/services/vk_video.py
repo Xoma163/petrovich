@@ -42,7 +42,7 @@ class VKVideoService(MediaService):
         va.width = data.width
         va.height = data.height
 
-        if self.media_keys.force_cache or va.get_size_mb() > self.bot.MAX_VIDEO_SIZE_MB:
+        if self.media_keys.force_cache or va.get_size_mb() > self.bot.max_video_size_mb:
             return self._cache_video(data.channel_id, data.video_id, data.title, url, va.content)
         return MediaServiceResponse(text=data.title, attachments=[va], video_title=data.title)
 

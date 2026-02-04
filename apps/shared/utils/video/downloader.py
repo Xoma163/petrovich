@@ -26,7 +26,7 @@ class VideoDownloader:
                 args['--http-chunk-size'] = http_chunk_size
             args_str = " ".join([f"{x[0]} {x[1]}" for x in args.items()])
             command = f"yt-dlp {args_str} {self.att.m3u8_url}"
-            do_the_linux_command(command)
+            _ = do_the_linux_command(command)
 
             potential_filename = f"{tmp_video_file}.mp4"
             if os.path.isfile(potential_filename):

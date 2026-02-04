@@ -32,6 +32,7 @@ dependencies = [
     "requests>=2.32.5",
     "selenium>=4.40.0",
     "sentry-sdk>=2.50.0",
+    "telegramify-markdown>=0.5.4",
     "twitch-dl>=3.3.0",
     "uwsgi>=2.0.31",
     "xmltodict>=1.0.2",
