@@ -82,7 +82,12 @@ class InstagramParser:
                 if shortcode_web_info := data.get('xdt_api__v1__media__shortcode__web_info'):
                     return shortcode_web_info['items'][0]
                 elif clips_on_logged_out := data.get('xdt_api__v1__clips__clips_on_logged_out_connection_v2'):
-                    return clips_on_logged_out['edges'][0]['node']['media_command']
+                    node = clips_on_logged_out['edges'][0]['node']
+                    if 'media_command' in node:
+                        return node['media_command']
+                    elif 'media' in node:
+                        return node['media']
+                    raise KeyError()
             except (KeyError, IndexError, AttributeError):
                 continue
 
