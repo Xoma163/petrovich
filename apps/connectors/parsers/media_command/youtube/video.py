@@ -226,12 +226,18 @@ class YoutubeVideo:
             key=self._filesize_key,
             reverse=True
         )
+        is_short_video = video_info['media_type'] == 'short'
 
         vf = video_formats[0]
         if not high_res:
             for vf in video_formats:
-                if int(vf['height']) <= self.DEFAULT_VIDEO_QUALITY_HIGHT:
-                    break
+                # Для коротких видео сравниваем в
+                if is_short_video:
+                    if int(vf['width']) <= self.DEFAULT_VIDEO_QUALITY_HIGHT:
+                        break
+                else:
+                    if int(vf['height']) <= self.DEFAULT_VIDEO_QUALITY_HIGHT:
+                        break
 
         video_filesize = (self._filesize_key(vf) + self._filesize_key(af)) / 1024 / 1024
         return vf, af, video_filesize

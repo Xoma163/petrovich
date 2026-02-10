@@ -76,6 +76,8 @@ class ResponseMessageItem:
         return dict_self
 
     def set_telegram_markdown_v2(self):
+        if not self.text:
+            return
         if self.parse_mode:
             return
 
