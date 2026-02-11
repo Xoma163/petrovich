@@ -64,7 +64,7 @@ class GPTCommandProtocol(
     EXTRA_TEXT: str
     NO_DEFAULT_MODEL_ERROR_MSG: str
     RESPONSE_MESSAGE_TOO_LONG: str
-    DEBUG: str
+    DEBUG_LINE: str
 
     def get_dialog(self) -> GPTMessages: ...
 

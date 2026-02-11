@@ -306,7 +306,7 @@ class GPTCommand(
         if isinstance(response, GPTCompletionsResponse) or isinstance(response, GPTVisionResponse):
 
             return (
-                f"{cls.DEBUG}\n"
+                f"{cls.DEBUG_LINE}\n"
                 f"input_tokens: {response.usage.input_tokens}\n"
                 f"input_cached_tokens: {response.usage.input_cached_tokens}\n"
                 f"output_tokens: {response.usage.output_tokens}\n"
@@ -321,7 +321,7 @@ class GPTCommand(
             )
         elif isinstance(response, GPTImageDrawResponse) or isinstance(response, GPTVoiceRecognitionResponse):
             return (
-                f"{cls.DEBUG}\n"
+                f"{cls.DEBUG_LINE}\n"
                 f"total_cost: ${fmt_cost(response.usage.total_cost)}"
             )
 
