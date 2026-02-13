@@ -164,7 +164,7 @@ class TgBot(Bot):
         if len(rmi.attachments) > 10:
             rmi_copy = copy(rmi)
             params_copy = copy(default_params)
-            params_copy['caption'] = None
+            params_copy['caption'] = ""
             for chunk in get_chunks(rmi.attachments, 10):
                 rmi_copy.attachments = chunk
                 r = self._send_media_group_wrap(rmi_copy, params_copy)
