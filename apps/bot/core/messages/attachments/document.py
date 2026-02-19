@@ -37,7 +37,7 @@ class DocumentMimeType:
 
 class DocumentAttachment(Attachment, ThumbnailMixin):
     TYPE = 'document'
-    ACTIVITY = ChatActionEnum.UPLOAD_DOCUMENT
+    ACTION = ChatActionEnum.UPLOAD_DOCUMENT
 
     def __init__(self):
         super().__init__(self.TYPE)

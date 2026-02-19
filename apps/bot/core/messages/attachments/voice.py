@@ -5,7 +5,7 @@ from apps.bot.core.messages.attachments.mixins.duration_mixin import DurationMix
 
 class VoiceAttachment(Attachment, DurationMixin):
     TYPE = "voice"
-    ACTIVITY = ChatActionEnum.UPLOAD_AUDIO
+    ACTION = ChatActionEnum.UPLOAD_AUDIO
 
     def __init__(self):
         super().__init__(self.TYPE)

@@ -17,7 +17,8 @@ class CoubService(MediaService):
         video_url = data['file_versions']['share']['default']
         video = self.bot.get_video_attachment(
             url=video_url,
-            peer_id=self.event.peer_id
+            peer_id=self.event.peer_id,
+            message_thread_id=self.event.message_thread_id,
         )
         title = data['title']
         return MediaServiceResponse(text=title, attachments=[video])

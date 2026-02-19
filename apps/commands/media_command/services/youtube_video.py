@@ -21,7 +21,7 @@ class YoutubeVideoService(MediaService):
         if not self.media_keys.force and self.event.is_from_chat and video_data.duration > 120 and not self.event.message.mentioned and not video_data.is_short_video:
             raise PSkipContinue()
 
-        with ChatActionSender(self.bot, ChatActionEnum.UPLOAD_VIDEO, self.event.peer_id):
+        with ChatActionSender(self.bot, ChatActionEnum.UPLOAD_VIDEO, self.event.peer_id, self.event.message_thread_id):
             return self._get_content_by_url(video_data, url)
 
     def _get_content_by_url(self, data: VideoData, url: str) -> MediaServiceResponse:

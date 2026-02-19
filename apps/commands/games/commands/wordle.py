@@ -103,7 +103,8 @@ class Wordle(Command):
         image = self.get_keyboard_image(session)
         attachment = self.bot.get_photo_attachment(
             _bytes=image,
-            peer_id=self.event.peer_id
+            peer_id=self.event.peer_id,
+            message_thread_id=self.event.message_thread_id
         )
         rmi = ResponseMessageItem(attachments=[attachment], peer_id=self.event.peer_id,
                                   message_thread_id=self.event.message_thread_id)

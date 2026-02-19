@@ -203,7 +203,8 @@ class Profile(Command):
             attachment = self.bot.get_photo_attachment(
                 path=profile.avatar.path,
                 peer_id=self.event.peer_id,
-                filename="petrovich_user_avatar.png"
+                message_thread_id=self.event.message_thread_id,
+                filename="petrovich_user_avatar.png",
             )
             rmi.attachments = [attachment]
 

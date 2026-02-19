@@ -11,7 +11,7 @@ class SunoAIService(MediaService):
         self.service = SunoAI()
 
     def get_content_by_url(self, url: str) -> MediaServiceResponse:
-        with ChatActionSender(self.bot, ChatActionEnum.UPLOAD_AUDIO, self.event.peer_id):
+        with ChatActionSender(self.bot, ChatActionEnum.UPLOAD_AUDIO, self.event.peer_id, self.event.message_thread_id):
             return self._get_content_by_url(url)
 
     def _get_content_by_url(self, url: str) -> MediaServiceResponse:
@@ -22,6 +22,7 @@ class SunoAIService(MediaService):
             url=data.download_url,
             filename=f"{title}.{data.format}",
             peer_id=self.event.peer_id,
+            message_thread_id=self.event.message_thread_id,
             thumbnail_url=data.thumbnail_url,
             artist=data.artists,
             title=data.title

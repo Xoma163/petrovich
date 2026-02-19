@@ -5,7 +5,7 @@ from apps.bot.core.messages.attachments.mixins.sized_mixin import SizedMixin
 
 class PhotoAttachment(Attachment, SizedMixin):
     TYPE = "photo"
-    ACTIVITY = ChatActionEnum.UPLOAD_PHOTO
+    ACTION = ChatActionEnum.UPLOAD_PHOTO
 
     def __init__(self):
         super().__init__(self.TYPE)

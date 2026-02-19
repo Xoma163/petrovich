@@ -252,7 +252,8 @@ class TgBot(Bot):
                 rmi.attachments = []
                 raise PError(
                     f"Нельзя загружать видео более {self.max_video_size_mb} мб в телеграмм. Ваше видео {round(video.get_size_mb(), 2)} мб")
-            with ChatActionSender(self, ChatActionEnum.UPLOAD_VIDEO, params['chat_id']):
+            with ChatActionSender(self, ChatActionEnum.UPLOAD_VIDEO, params['chat_id'],
+                                  params.get('message_thread_id')):
                 files = {'video': video.get_bytes_io_content()}
                 video.set_thumbnail()
                 if video.thumbnail:
@@ -382,8 +383,6 @@ class TgBot(Bot):
 
             r = self._send_response_message_item(error_rmi)
             return BotResponse(False, r)
-        # finally:
-        #     self.stop_activity_thread(rmi.peer_id)
 
         if r['ok']:
             return BotResponse(True, r)
@@ -472,7 +471,7 @@ class TgBot(Bot):
         chunks = self._get_text_chunks(rmi, params)
 
         if rmi.attachments:
-            with ChatActionSender(self, rmi.attachments[0].ACTIVITY, rmi.peer_id):
+            with ChatActionSender(self, rmi.attachments[0].ACTION, rmi.peer_id, rmi.message_thread_id):
                 # Отправка многих вложениями чанками: сначала вложения, потом текст
                 if len(rmi.attachments) > 1:
                     r = self._send_media_group(rmi, params)
@@ -573,7 +572,7 @@ class TgBot(Bot):
             'inline_keyboard': keyboard
         }
 
-    def set_chat_action(self, chat_id: int | str, chat_action: ChatActionEnum):
+    def set_chat_action(self, chat_id: int | str, chat_action: ChatActionEnum, message_thread_id: int | None = None):
         """
         Метод позволяет указать пользователю, что бот набирает сообщение или записывает голосовое
         Используется при длительном выполнении команд, чтобы был фидбек пользователю, что его запрос принят
@@ -585,7 +584,8 @@ class TgBot(Bot):
             target=self.api_handler.send_chat_action,
             args=(
                 chat_id,
-                tg_chat_action
+                tg_chat_action,
+                message_thread_id
             )
         ).start()
 

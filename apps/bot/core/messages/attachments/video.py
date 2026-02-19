@@ -7,7 +7,7 @@ from apps.bot.core.messages.attachments.mixins.thumbnail_mixin import ThumbnailM
 
 class VideoAttachment(Attachment, ThumbnailMixin, SizedMixin, DurationMixin):
     TYPE = 'video'
-    ACTIVITY = ChatActionEnum.UPLOAD_VIDEO
+    ACTION = ChatActionEnum.UPLOAD_VIDEO
 
     def __init__(self):
         super().__init__(self.TYPE)

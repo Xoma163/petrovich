@@ -10,7 +10,7 @@ from apps.shared.utils.downloader import Downloader
 
 
 class Attachment:
-    ACTIVITY = None
+    ACTION = None
 
     def __init__(self, _type, **kwargs):
         self.type: str | None = _type

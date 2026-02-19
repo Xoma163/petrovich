@@ -6,6 +6,7 @@ from apps.commands.help_text import HelpText, HelpTextItem, HelpTextArgument
 from apps.shared.utils.video.video_handler import VideoHandler
 
 
+# ToDo: mp3
 class AudioTrack(Command):
     name = "аудиодорожка"
     names = ["аудио"]
@@ -30,6 +31,7 @@ class AudioTrack(Command):
         audio_att = self.bot.get_audio_attachment(
             _bytes=audio_track,
             peer_id=self.event.peer_id,
+            message_thread_id=self.event.message_thread_id,
             filename='audiotrack.aac'
         )
         return ResponseMessage(ResponseMessageItem(attachments=[audio_att]))

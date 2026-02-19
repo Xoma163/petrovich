@@ -15,7 +15,7 @@ class BoostyService(MediaService):
 
     @retry(3, Exception, sleep_time=2, except_exceptions=(PWarning,))
     def get_content_by_url(self, url: str) -> MediaServiceResponse:
-        with ChatActionSender(self.bot, ChatActionEnum.UPLOAD_VIDEO, self.event.peer_id):
+        with ChatActionSender(self.bot, ChatActionEnum.UPLOAD_VIDEO, self.event.peer_id, self.event.message_thread_id):
             return self._get_content_by_url(url)
 
     def _get_content_by_url(self, url: str) -> MediaServiceResponse:
@@ -42,6 +42,8 @@ class BoostyService(MediaService):
 
         va = self.bot.get_video_attachment(
             url=video_data.video_download_url,
+            peer_id=self.event.peer_id,
+            message_thread_id=self.event.message_thread_id,
             thumbnail_url=video_data.thumbnail_url,
             width=video_data.width,
             height=video_data.height

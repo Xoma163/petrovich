@@ -61,6 +61,7 @@ class Logs(Command):
             _bytes=_bytes,
             thumbnail_bytes=_bytes,
             peer_id=self.event.peer_id,
+            message_thread_id=self.event.message_thread_id,
             filename='petrovich_logs.png',
         )
         # document.set_thumbnail(document.content)

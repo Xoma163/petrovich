@@ -37,7 +37,7 @@ class GPTVisionFunctionality(GPTCommandProtocol):
             log_filter=self.event.log_filter
         )
 
-        with ChatActionSender(self.bot, ChatActionEnum.TYPING, self.event.peer_id):
+        with ChatActionSender(self.bot, ChatActionEnum.TYPING, self.event.peer_id, self.event.message_thread_id):
             response: GPTVisionResponse = gpt_api.vision(
                 messages=messages,
                 model=self.get_vision_model(),

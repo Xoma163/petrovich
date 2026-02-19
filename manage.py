@@ -4,15 +4,15 @@ import os
 import sys
 
 
-def _delete_cache_activity_keys():
+def _delete_cache_action_keys():
     """
     Удаление активити в кэше при запуске сервера
     """
 
     from django.core.cache import cache
 
-    activity_keys = cache.keys("activity_*")  # noqa
-    for key in activity_keys:
+    action_keys = cache.keys("action_*")  # noqa
+    for key in action_keys:
         cache.delete(key)
 
 
@@ -21,7 +21,7 @@ def one_time_script_on_run_server():
     Метод запускается при старте сервера runserver
     """
 
-    _delete_cache_activity_keys()
+    _delete_cache_action_keys()
 
 
 def main():

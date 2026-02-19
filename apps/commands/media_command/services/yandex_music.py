@@ -14,7 +14,7 @@ class YandexMusicService(MediaService):
         self.service = YandexMusicAPI()
 
     def get_content_by_url(self, url: str) -> MediaServiceResponse:
-        with ChatActionSender(self.bot, ChatActionEnum.UPLOAD_AUDIO, self.event.peer_id):
+        with ChatActionSender(self.bot, ChatActionEnum.UPLOAD_AUDIO, self.event.peer_id, self.event.message_thread_id):
             return self._get_content_by_url(url)
 
     def _get_content_by_url(self, url: str) -> MediaServiceResponse:
@@ -35,6 +35,7 @@ class YandexMusicService(MediaService):
                 _bytes=audiofile,
                 filename=f"{title}.{track.format}",
                 peer_id=self.event.peer_id,
+                message_thread_id=self.event.message_thread_id,
                 thumbnail_url=track.thumbnail_url,
                 artist=track.artists,
                 title=track.title

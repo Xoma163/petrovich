@@ -56,14 +56,14 @@ class WTFCommand(Command):
 
         n, prompt = self._get_n_and_prompt()
 
-        with ChatActionSender(self.bot, ChatActionEnum.TYPING, self.event.peer_id):
+        with ChatActionSender(self.bot, ChatActionEnum.TYPING, self.event.peer_id, self.event.message_thread_id):
             messages = self.get_conversation(n, prompt)
 
         gpt: GPTCommand = self.gpt_command_class()
         gpt.bot = self.bot
         gpt.event = self.event  # noqa
         gpt.set_provider_model()
-        with ChatActionSender(self.bot, ChatActionEnum.TYPING, self.event.peer_id):
+        with ChatActionSender(self.bot, ChatActionEnum.TYPING, self.event.peer_id, self.event.message_thread_id):
             answer = gpt.completions(messages)  # noqa
         return ResponseMessage(answer)
 

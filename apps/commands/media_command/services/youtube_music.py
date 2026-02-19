@@ -14,7 +14,7 @@ class YoutubeMusicService(MediaService):
 
     @retry(3, Exception, sleep_time=2, except_exceptions=(PWarning,))
     def get_content_by_url(self, url: str) -> MediaServiceResponse:
-        with ChatActionSender(self.bot, ChatActionEnum.UPLOAD_AUDIO, self.event.peer_id):
+        with ChatActionSender(self.bot, ChatActionEnum.UPLOAD_AUDIO, self.event.peer_id, self.event.message_thread_id):
             return self._get_content_by_url(url)
 
     def _get_content_by_url(self, url: str) -> MediaServiceResponse:

@@ -6,7 +6,7 @@ from apps.bot.core.messages.attachments.mixins.thumbnail_mixin import ThumbnailM
 
 class AudioAttachment(Attachment, ThumbnailMixin, DurationMixin):
     TYPE = "audio"
-    ACTIVITY = ChatActionEnum.UPLOAD_AUDIO
+    ACTION = ChatActionEnum.UPLOAD_AUDIO
 
     def __init__(self):
         super().__init__(self.TYPE)

@@ -508,6 +508,7 @@ class Meme(Command):
             video = self.bot.get_video_attachment(
                 url=video_content,
                 peer_id=self.event.peer_id,
+                message_thread_id=self.event.message_thread_id,
                 thumbnail_url=data.thumbnail_url
             )
             meme.tg_file_id = video.get_file_id()

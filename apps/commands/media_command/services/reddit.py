@@ -22,19 +22,20 @@ class RedditService(MediaService):
             attachments = [self.bot.get_gif_attachment(
                 _bytes=reddit_data,
                 peer_id=self.event.peer_id,
+                message_thread_id=self.event.message_thread_id,
                 filename=self.service.filename,
             )]
         elif self.service.is_image or self.service.is_images or self.service.is_gallery:
             attachments = [self.bot.get_photo_attachment(
                 url=att,
                 filename=self.service.filename,
-                peer_id=self.event.peer_id,
                 send_chat_action=False
             ) for att in reddit_data]
         elif self.service.is_video:
             attachments = [self.bot.get_video_attachment(
                 _bytes=reddit_data,
                 peer_id=self.event.peer_id,
+                message_thread_id=self.event.message_thread_id,
                 filename=self.service.filename
             )]
         elif self.service.is_text or self.service.is_link:

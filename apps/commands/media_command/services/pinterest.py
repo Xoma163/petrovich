@@ -16,18 +16,19 @@ class PinterestService(MediaService):
         if data.content_type == PinterestDataItem.CONTENT_TYPE_VIDEO:
             attachment = self.bot.get_video_attachment(
                 url=data.download_url,
-                peer_id=self.event.peer_id
+                peer_id=self.event.peer_id,
+                message_thread_id=self.event.message_thread_id,
             )
         elif data.content_type == PinterestDataItem.CONTENT_TYPE_IMAGE:
             attachment = self.bot.get_photo_attachment(
                 url=data.download_url,
-                peer_id=self.event.peer_id,
                 send_chat_action=False
             )
         elif data.content_type == PinterestDataItem.CONTENT_TYPE_GIF:
             attachment = self.bot.get_gif_attachment(
                 url=data.download_url,
-                peer_id=self.event.peer_id
+                peer_id=self.event.peer_id,
+                message_thread_id=self.event.message_thread_id,
             )
         else:
             raise PWarning(Pinterest.ERROR_MSG)

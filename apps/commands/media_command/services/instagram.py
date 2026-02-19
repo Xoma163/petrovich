@@ -18,13 +18,13 @@ class InstagramService(MediaService):
             if item.content_type == InstagramAPIDataItem.CONTENT_TYPE_IMAGE:
                 attachment = self.bot.get_photo_attachment(
                     url=item.download_url,
-                    peer_id=self.event.peer_id,
                     send_chat_action=False
                 )
             elif item.content_type == InstagramAPIDataItem.CONTENT_TYPE_VIDEO:
                 attachment = self.bot.get_video_attachment(
                     url=item.download_url,
                     peer_id=self.event.peer_id,
+                    message_thread_id=self.event.message_thread_id,
                     thumbnail_url=item.thumbnail_url,
                 )
                 attachment.download_content()

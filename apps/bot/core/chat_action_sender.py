@@ -7,10 +7,18 @@ from apps.bot.core.chat_actions import ChatActionEnum
 
 
 class ChatActionSender:
-    def __init__(self, bot, chat_action: ChatActionEnum, peer_id, send_chat_action=True):
+    def __init__(
+            self,
+            bot,
+            chat_action: ChatActionEnum,
+            peer_id,
+            message_thread_id: int | None = None,
+            send_chat_action=True
+    ):
         self.bot = bot
         self.chat_action: ChatActionEnum = chat_action
         self.peer_id = peer_id
+        self.message_thread_id = message_thread_id
         self.send_chat_action: bool = send_chat_action
         self._chat_action_flag: bool = False
 
@@ -42,7 +50,7 @@ class ChatActionSender:
 
     def _set_chat_action_thread(self):
         while self._chat_action_flag and cache.get(self.__get_key()):
-            self.bot.set_chat_action(self.peer_id, self.chat_action)
+            self.bot.set_chat_action(self.peer_id, self.chat_action, self.message_thread_id)
             time.sleep(5)
 
     def __get_key(self):

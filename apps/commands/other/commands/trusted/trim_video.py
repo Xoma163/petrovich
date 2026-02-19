@@ -61,7 +61,7 @@ class TrimVideo(Command):
 
     def start(self) -> ResponseMessage:
         att = self.event.get_all_attachments(self.attachments)[0]
-        with ChatActionSender(self.bot, ChatActionEnum.UPLOAD_VIDEO, self.event.peer_id):
+        with ChatActionSender(self.bot, ChatActionEnum.UPLOAD_VIDEO, self.event.peer_id, self.event.message_thread_id):
             if isinstance(att, LinkAttachment):
                 if not att.is_youtube_link:
                     raise PWarning("Обрезка по ссылке доступна только для YouTube")
@@ -72,12 +72,14 @@ class TrimVideo(Command):
         if isinstance(att, AudioAttachment):
             attachment = self.bot.get_audio_attachment(
                 _bytes=video_bytes,
-                peer_id=self.event.peer_id
+                peer_id=self.event.peer_id,
+                message_thread_id=self.event.message_thread_id,
             )
         else:
             attachment = self.bot.get_video_attachment(
                 _bytes=video_bytes,
-                peer_id=self.event.peer_id
+                peer_id=self.event.peer_id,
+                message_thread_id=self.event.message_thread_id,
             )
         return ResponseMessage(ResponseMessageItem(attachments=[attachment]))
 

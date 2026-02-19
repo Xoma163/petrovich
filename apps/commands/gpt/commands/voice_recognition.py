@@ -82,7 +82,7 @@ class VoiceRecognition(AcceptExtraCommand):
     def start(self) -> ResponseMessage:
         self._check_gpt_access()
 
-        with ChatActionSender(self.bot, ChatActionEnum.TYPING, self.event.peer_id):
+        with ChatActionSender(self.bot, ChatActionEnum.TYPING, self.event.peer_id, self.event.message_thread_id):
             audio_message = self.event.get_all_attachments(self.attachments)[0]
             # ToDo: а точно здесь нужно делать get_file?
             audio_message.get_file()

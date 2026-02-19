@@ -87,7 +87,7 @@ class GPTImageDrawFunctionality(GPTCommandProtocol):
             log_filter=self.event.log_filter
         )
         request_text = self._get_draw_image_request_text()
-        with ChatActionSender(self.bot, ChatActionEnum.UPLOAD_PHOTO, self.event.peer_id):
+        with ChatActionSender(self.bot, ChatActionEnum.UPLOAD_PHOTO, self.event.peer_id, self.event.message_thread_id):
             response: GPTImageDrawResponse = gpt_api.draw_image(
                 prompt=request_text,
                 model=self.get_image_draw_model_with_parameters(),
@@ -129,7 +129,7 @@ class GPTImageDrawFunctionality(GPTCommandProtocol):
     #     use_document_att = self.event.message.is_key_provided({"orig", "original", "ориг", "оригинал"})
     #
     #     gpt_api = self.provider.api_class(log_filter=self.event.log_filter, sender=self.event.sender)
-    #     with ChatActivity(self.bot, ActivitiesEnum.UPLOAD_PHOTO, self.event.peer_id):
+    #     with ChatAction(self.bot, ChatActionEnum.UPLOAD_PHOTO, self.event.peer_id):
     #         image = self.event.get_all_attachments([PhotoAttachment])[0]
     #         cropped_image_bytes_png = crop_image_to_square(convert_jpg_to_png(image.download_content()))
     #         side = min(image.width, image.height)

@@ -53,7 +53,6 @@ class MediaService:
         self.event: Event = event
         self.media_keys: MediaKeys = media_keys
         self.has_command_name: bool = has_command_name
-        self.activity = None
 
     def get_content_by_url(self, url: str) -> MediaServiceResponse:
         """

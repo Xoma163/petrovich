@@ -108,9 +108,6 @@ class Bot:
                 rmi.keyboard = keyboard
             rm = ResponseMessage(rmi)
             self.log_message(rm, "exception")
-        # finally:
-        #     if rm:
-        #         self.stop_activity_thread(rm.messages[0].peer_id)
 
         if rm and send and rm.send:
             self.send_response_message(rm)
@@ -210,13 +207,15 @@ class Bot:
             filename: str | None = None,
 
             peer_id: str | int | None = None,
+            message_thread_id: str | int | None = None,
             send_chat_action: bool = True,
     ) -> PhotoAttachment:
         """
         Получение фото
         """
         pa = PhotoAttachment()
-        with ChatActionSender(self, ChatActionEnum.UPLOAD_PHOTO, peer_id, send_chat_action=send_chat_action):
+        with ChatActionSender(self, ChatActionEnum.UPLOAD_PHOTO, peer_id, message_thread_id,
+                              send_chat_action=send_chat_action):
             pa.parse(url, path, _bytes, filename=filename)
         return pa
 
@@ -228,6 +227,7 @@ class Bot:
             filename: str | None = None,
 
             peer_id: str | int | None = None,
+            message_thread_id: str | int | None = None,
             send_chat_action: bool = True,
 
             thumbnail_bytes: bytes | None = None,
@@ -237,7 +237,8 @@ class Bot:
         Получение документа
         """
         da = DocumentAttachment()
-        with ChatActionSender(self, ChatActionEnum.UPLOAD_DOCUMENT, peer_id, send_chat_action=send_chat_action):
+        with ChatActionSender(self, ChatActionEnum.UPLOAD_DOCUMENT, peer_id, message_thread_id,
+                              send_chat_action=send_chat_action):
             da.parse(url, path, _bytes, filename=filename)
 
         da.thumbnail_bytes = thumbnail_bytes
@@ -253,6 +254,7 @@ class Bot:
             filename: str | None = None,
 
             peer_id: str | int | None = None,
+            message_thread_id: str | int | None = None,
             send_chat_action: bool = True,
 
             title: str | None = None,
@@ -264,7 +266,8 @@ class Bot:
         Получение аудио
         """
         aa = AudioAttachment()
-        with ChatActionSender(self, ChatActionEnum.UPLOAD_AUDIO, peer_id, send_chat_action=send_chat_action):
+        with ChatActionSender(self, ChatActionEnum.UPLOAD_AUDIO, peer_id, message_thread_id,
+                              send_chat_action=send_chat_action):
             aa.parse(url, path, _bytes, filename=filename)
 
         aa.thumbnail_bytes = thumbnail_bytes
@@ -281,6 +284,7 @@ class Bot:
             filename: str | None = None,
 
             peer_id: str | int | None = None,
+            message_thread_id: str | int | None = None,
             send_chat_action: bool = True,
 
             width: int | None = None,
@@ -292,7 +296,8 @@ class Bot:
         Получение видео
         """
         va = VideoAttachment()
-        with ChatActionSender(self, ChatActionEnum.UPLOAD_VIDEO, peer_id, send_chat_action=send_chat_action):
+        with ChatActionSender(self, ChatActionEnum.UPLOAD_VIDEO, peer_id, message_thread_id,
+                              send_chat_action=send_chat_action):
             va.parse(url, path, _bytes, filename=filename)
         va.width = width
         va.height = height
@@ -308,20 +313,22 @@ class Bot:
             filename: str | None = None,
 
             peer_id: str | int | None = None,
+            message_thread_id: str | int | None = None,
             send_chat_action: bool = True,
     ) -> GifAttachment:
         """
         Получение гифки
         """
         ga = GifAttachment()
-        with ChatActionSender(self, ChatActionEnum.UPLOAD_VIDEO, peer_id, send_chat_action=send_chat_action):
+        with ChatActionSender(self, ChatActionEnum.UPLOAD_VIDEO, peer_id, message_thread_id,
+                              send_chat_action=send_chat_action):
             ga.parse(url, path, _bytes, filename=filename)
         return ga
 
     # END ATTACHMENTS
 
     # EXTRA
-    def set_chat_action(self, chat_id: int | str, chat_action: ChatActionEnum):
+    def set_chat_action(self, chat_id: int | str, chat_action: ChatActionEnum, message_thread_id: int | None = None):
         """
         Проставление активности боту (например, отправка сообщения)
         """
