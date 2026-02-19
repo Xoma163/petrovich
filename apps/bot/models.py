@@ -132,9 +132,16 @@ class Profile(TimeStampModelMixin):
             us = ProfileSettings.objects.create(profile=self)
             us.save()
 
-    def set_avatar(self, att: PhotoAttachment = None):
+    def set_avatar(self, att: PhotoAttachment):
+        old_name = None
+        if self.avatar and self.avatar.name:
+            old_name = self.avatar.name
+
         image = att.get_bytes_io_content()
         self.avatar.save(f"avatar_{str(self)}.{att.ext}", File(image))
+
+        if old_name and old_name != self.avatar.name:
+            self.avatar.storage.delete(old_name)
 
     def add_role(self, role: RoleEnum):
         role = Role.objects.get(name=role.name)

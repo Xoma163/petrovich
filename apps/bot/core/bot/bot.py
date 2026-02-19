@@ -42,7 +42,6 @@ class Bot:
     def max_message_text_length(self):
         return inf
 
-
     def __init__(self, platform, **kwargs):
         self.log_filter = {}
 
@@ -68,9 +67,6 @@ class Bot:
             event.setup_event()
             if not event.need_a_response():
                 return None
-
-            if event.sender and not event.sender.check_role(RoleEnum.TRUSTED):
-                raise PWarning("Обратитесь за доступом к создателю бота.")
 
             self.log_filter = event.log_filter
             self.init_requests()
@@ -428,3 +424,6 @@ class Bot:
         return text
 
     # END EXTRA
+
+    def leave_chat(self, chat_id) -> dict:
+        pass

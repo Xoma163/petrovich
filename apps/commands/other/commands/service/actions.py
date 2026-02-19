@@ -1,3 +1,4 @@
+from apps.bot.consts import RoleEnum
 from apps.bot.core.event.event import Event
 from apps.bot.core.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.models import Chat
@@ -55,6 +56,9 @@ class Actions(Command):
         if is_bot:
             bot_group_id = env.int('TG_BOT_GROUP_ID')
             if member_id == bot_group_id:
+                if not self.event.sender.check_role(RoleEnum.TRUSTED):
+                    self.bot.leave_chat(self.event.chat.chat_id)
+                    return None
                 self.edit_chat_title(self.event.raw['message']['chat']['title'])
                 self._set_kicked_state(False)
                 return "Привет!"
@@ -87,6 +91,9 @@ class Actions(Command):
         return "Успешно изменил id вашей группы в базе данных"
 
     def group_chat_created(self):
+        if not self.event.sender.check_role(RoleEnum.TRUSTED):
+            self.bot.leave_chat(self.event.chat.chat_id)
+            return None
         self.edit_chat_title(self.event.raw['message']['chat']['title'])
         return "Привет!"
 
@@ -95,7 +102,7 @@ class Actions(Command):
         self.event.chat.save()
 
     def _set_kicked_state(self, state: bool):
-        # status kicked в my_chat_member == бота забанили
+        # state kicked в my_chat_member == бота забанили
         if not self.event.chat:
             return
         self.event.chat.kicked = state

@@ -27,6 +27,7 @@ from apps.commands.other.commands.moderator.roles import Roles
 from apps.commands.other.commands.profile import Profile
 from apps.commands.other.commands.random import Random
 from apps.commands.other.commands.service.actions import Actions
+from apps.commands.other.commands.service.check_trusted_role import CheckTrustedRole
 from apps.commands.other.commands.service.github_reply import GithubReply
 from apps.commands.other.commands.settings import Settings
 from apps.commands.other.commands.statistics import Statistics
@@ -75,6 +76,7 @@ _commands = [
 
     # service
     Actions,
+    CheckTrustedRole,
     GithubReply,
 
     # Trusted
