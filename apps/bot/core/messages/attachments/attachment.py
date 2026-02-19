@@ -5,7 +5,6 @@ from pathlib import Path
 
 from urllib3.exceptions import SSLError
 
-from apps.bot.core.chat_action_sender import ChatActionSender
 from apps.shared.decorators import retry
 from apps.shared.utils.downloader import Downloader
 
@@ -34,7 +33,7 @@ class Attachment:
         # tg
         self.file_id: str | None = None
 
-    def get_file(self, peer_id=None):
+    def get_file(self):
         from apps.bot.core.bot.telegram.tg_bot import TgBot
         tg_bot = TgBot()
 
@@ -42,8 +41,7 @@ class Attachment:
         if size and size > tg_bot.max_attachment_size_mb:
             return
 
-        with ChatActionSender(tg_bot, self.ACTIVITY, peer_id):
-            r = tg_bot.api_handler.get_file(self.file_id)
+        r = tg_bot.api_handler.get_file(self.file_id)
 
         if not r.get('ok'):
             return
@@ -51,7 +49,7 @@ class Attachment:
         if tg_bot.api_handler.is_local_server_mode:
             self.private_download_path = file_path
         else:
-            self.private_download_url = tg_bot.api_handler.get_private_download_url(file_path)
+            self.private_download_url = tg_bot.api_handler.get_file_download_url(file_path)
         self._set_file_name(file_path)
 
     def _set_file_name(self, file_path: str):
@@ -90,28 +88,26 @@ class Attachment:
                 file_like_object = file.read()
                 self.content = file_like_object
 
-    def _get_download_url(self, peer_id=None):
+    def _get_download_url(self):
         if self.public_download_url:
             return self.public_download_url
         if not self.private_download_url:
-            self.get_file(peer_id)
+            self.get_file()
         return self.private_download_url
-
 
     @retry(3, SSLError, sleep_time=2)
     def download_content(
             self,
-            peer_id: str | int = None,
-            headers: dict | None = None,
             stream: bool = False,
             chunk_size: int | None = None,
+            headers: dict | None = None,
             cookies: dict | None = None,
     ) -> bytes:
         if self.content:
             return self.content
 
         downloader = Downloader(headers=headers, cookies=cookies)
-        download_url = self._get_download_url(peer_id)
+        download_url = self._get_download_url()
 
         if self.private_download_path:
             content = downloader.open_file(self.private_download_path, delete_after_read=True)
@@ -125,8 +121,8 @@ class Attachment:
         self.content = content
         return self.content
 
-    def get_bytes_io_content(self, peer_id=None) -> BytesIO:
-        _bytes = self.download_content(peer_id)
+    def get_bytes_io_content(self) -> BytesIO:
+        _bytes = self.download_content()
         _bytes_io = BytesIO(_bytes)
         if self.file_name_full:
             _bytes_io.name = self.file_name_full
@@ -155,7 +151,6 @@ class Attachment:
             dict_self[ignore_field] = '*' * 5 if dict_self[ignore_field] else dict_self[ignore_field]
         return dict_self
 
-
     def set_file_id(self):
         from apps.bot.core.bot.telegram.tg_bot import TgBot
         tg_bot = TgBot()
@@ -173,3 +168,9 @@ class Attachment:
     @staticmethod
     def decode_base64(encoded_str: str) -> bytes:
         return base64.b64decode(encoded_str)
+
+    def parse_tg(self, event: dict):
+        self.file_id = event['file_id']
+        self.size = event['file_size']
+        if file_name := event.get('file_name'):
+            self._set_file_name(file_name)

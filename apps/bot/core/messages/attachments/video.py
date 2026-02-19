@@ -14,9 +14,7 @@ class VideoAttachment(Attachment, ThumbnailMixin, SizedMixin, DurationMixin):
         self.m3u8_url = None
 
     def parse_tg(self, event):
+        super().parse_tg(event)
         self.duration = event.get('duration')
         self.width = event.get('width')
         self.height = event.get('height')
-        self.size = event['file_size']
-
-        self.file_id = event['file_id']

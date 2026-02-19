@@ -46,7 +46,7 @@ class BoostyService(MediaService):
             width=video_data.width,
             height=video_data.height
         )
-        va.download_content(headers={}, chunk_size=self.service.DOWNLOAD_CHUNK_SIZE)
+        va.download_content(chunk_size=self.service.DOWNLOAD_CHUNK_SIZE)
 
         if self.media_keys.force_cache or va.get_size_mb() > self.bot.max_video_size_mb:
             return self._cache_video(video_data.channel_id, video_data.video_id, video_data.title, url, va.content)

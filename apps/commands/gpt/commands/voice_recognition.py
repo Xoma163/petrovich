@@ -84,6 +84,7 @@ class VoiceRecognition(AcceptExtraCommand):
 
         with ChatActionSender(self.bot, ChatActionEnum.TYPING, self.event.peer_id):
             audio_message = self.event.get_all_attachments(self.attachments)[0]
+            # ToDo: а точно здесь нужно делать get_file?
             audio_message.get_file()
             if not audio_message.ext:
                 raise PWarning("Для вложения не указано расширение (mp3/oga/wav). Сообщите разработчику")

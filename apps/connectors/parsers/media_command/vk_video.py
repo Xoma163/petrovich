@@ -88,16 +88,15 @@ class VKVideo:
 
         va, aa = self._get_video_audio(player_url, high_res=high_res)
 
-        downloader = Downloader()
         if aa is not None:
-            va.content = downloader.download_in_parallel(va.public_download_url)
-            aa.content = downloader.download_in_parallel(aa.public_download_url)
+            va.download_content(stream=True)
+            aa.download_content(stream=True)
             vh = VideoHandler(video=va, audio=aa)
             va.content = vh.mux()
         if va.m3u8_url:
+            downloader = Downloader()
             va.content = downloader.download_by_m3u8_url(va.m3u8_url, threads=10)
 
-        # va.download_content(headers=self.HEADERS)
         return va
 
     # -----------------------------

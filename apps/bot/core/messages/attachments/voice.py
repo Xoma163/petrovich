@@ -12,6 +12,5 @@ class VoiceAttachment(Attachment, DurationMixin):
         self.ext: str = 'ogg'
 
     def parse_tg(self, event):
+        super().parse_tg(event)
         self.duration = event['duration']
-        self.size = event['file_size']
-        self.file_id = event['file_id']

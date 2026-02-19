@@ -11,7 +11,9 @@ class StickerAttachment(Attachment, SizedMixin):
         self.animated: bool = False
 
     def parse_tg(self, event):
-        attrs = ['width', 'height', 'file_id', 'file_size', 'emoji']
-        for attr in attrs:
-            setattr(self, attr, event.get(attr, None))
+        super().parse_tg(event)
+
+        self.width = event.get('width')
+        self.height = event.get('height')
+        self.emoji = event.get('emoji')
         self.animated = event['is_video'] or event['is_animated']

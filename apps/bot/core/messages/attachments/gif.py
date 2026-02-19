@@ -11,7 +11,5 @@ class GifAttachment(Attachment, DurationMixin):
         super().__init__(self.TYPE)
 
     def parse_tg(self, event):
+        super().parse_tg(event)
         self.duration = event.get('duration')
-        self.size = event['file_size']
-
-        self.file_id = event['file_id']

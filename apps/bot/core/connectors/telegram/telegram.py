@@ -420,4 +420,4 @@ class TelegramAPI:
     # ---------- NO API --------- #
 
     def get_file_download_url(self, file_path: str):
-        return f'https://{self.requests}/file/bot{self.token}/{file_path}'
+        return f'{self.requests.PREFIX}://{self.requests.API_TELEGRAM_URL}/file/bot{self.token}/{file_path}'
