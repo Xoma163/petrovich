@@ -10,8 +10,8 @@ from apps.bot.core.messages.attachments.audio import AudioAttachment
 from apps.bot.core.messages.attachments.video import VideoAttachment
 from apps.connectors.parsers.media_command.data import VideoData
 from apps.shared.exceptions import PError
+from apps.shared.utils.downloader import Downloader
 from apps.shared.utils.utils import extract_json
-from apps.shared.utils.video.downloader import VideoDownloader
 from apps.shared.utils.video.video_handler import VideoHandler
 
 
@@ -88,14 +88,14 @@ class VKVideo:
 
         va, aa = self._get_video_audio(player_url, high_res=high_res)
 
+        downloader = Downloader()
         if aa is not None:
-            va.download_content(stream=True)
-            aa.download_content(stream=True)
+            va.content = downloader.download_in_parallel(va.public_download_url)
+            aa.content = downloader.download_in_parallel(aa.public_download_url)
             vh = VideoHandler(video=va, audio=aa)
             va.content = vh.mux()
         if va.m3u8_url:
-            vd = VideoDownloader(va)
-            va.content = vd.download_m3u8(threads=10)
+            va.content = downloader.download_by_m3u8_url(va.m3u8_url, threads=10)
 
         # va.download_content(headers=self.HEADERS)
         return va

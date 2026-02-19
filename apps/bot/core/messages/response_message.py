@@ -62,19 +62,6 @@ class ResponseMessageItem:
         dict_self["attachments"] = [x.to_log() for x in dict_self["attachments"]]
         return dict_self
 
-    def to_api(self) -> dict:
-        """
-        Вывод в API
-        """
-        dict_self = copy(self.__dict__)
-
-        ignore_fields = ['log_level', 'exc_info', "peer_id"]
-        for ignore_field in ignore_fields:
-            del dict_self[ignore_field]
-        dict_self["attachments"] = [x.to_api() for x in dict_self["attachments"]]
-
-        return dict_self
-
     def set_telegram_markdown_v2(self):
         if not self.text:
             return
@@ -197,14 +184,6 @@ class ResponseMessage:
         dict_self["messages"] = [x.to_log() for x in dict_self["messages"]]
         return dict_self
 
-    def to_api(self) -> dict:
-        """
-        Вывод в API
-        """
-        dict_self = copy(self.__dict__)
-        dict_self["messages"] = [x.to_api() for x in dict_self["messages"]]
-
-        return dict_self
 
     def __bool__(self):
         return len(self.messages) > 0

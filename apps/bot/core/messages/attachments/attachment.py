@@ -1,19 +1,16 @@
 import base64
 import copy
-import os
-from concurrent.futures import ThreadPoolExecutor
 from io import BytesIO
 from pathlib import Path
 
-import requests
 from urllib3.exceptions import SSLError
 
 from apps.bot.core.chat_action_sender import ChatActionSender
 from apps.shared.decorators import retry
+from apps.shared.utils.downloader import Downloader
 
 
 class Attachment:
-    CHUNK_SIZE = 2 ** 24  # 16mb
     ACTIVITY = None
 
     def __init__(self, _type, **kwargs):
@@ -100,19 +97,6 @@ class Attachment:
             self.get_file(peer_id)
         return self.private_download_url
 
-    @staticmethod
-    def _download_chunk(
-            url: str,
-            start: int,
-            end: int,
-            headers: dict | None = None,
-            cookies: dict | None = None
-    ) -> bytes:
-        _headers = {'Range': f'bytes={start}-{end}'}
-        _headers.update(headers)
-
-        response = requests.get(url, headers=_headers, stream=True, cookies=cookies)
-        return response.content
 
     @retry(3, SSLError, sleep_time=2)
     def download_content(
@@ -126,49 +110,19 @@ class Attachment:
         if self.content:
             return self.content
 
-        if not cookies:
-            cookies = {}
-
-        from apps.connectors.utils import get_default_headers
-        _headers = get_default_headers()
-        if headers is not None:
-            _headers = headers
-
+        downloader = Downloader(headers=headers, cookies=cookies)
         download_url = self._get_download_url(peer_id)
 
         if self.private_download_path:
-            try:
-                with open(self.private_download_path, 'rb') as file:
-                    self.content = file.read()
-            finally:
-                self.delete_download_path_file()
+            content = downloader.open_file(self.private_download_path, delete_after_read=True)
         else:
             if chunk_size:
-                response = requests.head(download_url, cookies=cookies, headers=_headers)
-                file_size = int(response.headers['Content-Length'])
-                ranges = [(i, min(i + chunk_size - 1, file_size - 1)) for i in range(0, file_size, chunk_size)]
-
-                with ThreadPoolExecutor() as executor:
-                    chunks = executor.map(
-                        lambda r: self._download_chunk(download_url, r[0], r[1], _headers, cookies),
-                        ranges)
-                self.content = b''.join(chunks)
-
+                content = downloader.download_in_parallel(download_url, chunk_size)
             elif stream:
-                chunks = []
-                request = requests.get(download_url, headers=_headers, cookies=cookies, stream=True)
-                for chunk in request.iter_content(self.CHUNK_SIZE):
-                    chunks.append(chunk)
-                self.content = b''.join(chunks)
+                content = downloader.download_in_parallel(download_url)
             else:
-                self.content = requests.get(download_url, headers=_headers, cookies=cookies).content
-
-        # if self.file_name:
-        #     tmp = NamedTemporaryFile()
-        #     tmp.write(self.content)
-        #     tmp.name = self.file_name
-        #     tmp.seek(0)
-        #     self.content = tmp
+                content = downloader.download_by_url(download_url)
+        self.content = content
         return self.content
 
     def get_bytes_io_content(self, peer_id=None) -> BytesIO:
@@ -177,11 +131,6 @@ class Attachment:
         if self.file_name_full:
             _bytes_io.name = self.file_name_full
         return _bytes_io
-
-    def delete_download_path_file(self):
-        if os.path.exists(self.private_download_path):
-            os.remove(self.private_download_path)
-            self.private_download_path = None
 
     def get_size(self) -> float | None:
         if not self.size and self.content:
@@ -206,15 +155,6 @@ class Attachment:
             dict_self[ignore_field] = '*' * 5 if dict_self[ignore_field] else dict_self[ignore_field]
         return dict_self
 
-    def to_api(self) -> dict:
-        """
-        Вывод в API
-        """
-        dict_self = copy.copy(self.__dict__)
-        ignore_fields = ['private_download_url', 'content']
-        for ignore_field in ignore_fields:
-            dict_self[ignore_field] = '*' * 5 if dict_self[ignore_field] else dict_self[ignore_field]
-        return dict_self
 
     def set_file_id(self):
         from apps.bot.core.bot.telegram.tg_bot import TgBot

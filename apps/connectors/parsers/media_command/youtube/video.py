@@ -9,7 +9,7 @@ from apps.bot.core.messages.attachments.video import VideoAttachment
 from apps.connectors.parsers.media_command.data import VideoData
 from apps.connectors.parsers.media_command.youtube.nothing_logger import NothingLogger
 from apps.shared.exceptions import PWarning
-from apps.shared.utils.video.downloader import VideoDownloader
+from apps.shared.utils.downloader import Downloader
 from apps.shared.utils.video.video_handler import VideoHandler
 
 
@@ -55,17 +55,24 @@ class YoutubeVideo:
     def download_video(data: VideoData) -> VideoAttachment:
         if not data.video_download_url or not data.audio_download_url:
             raise ValueError
-        _va = VideoAttachment()
-        _va.m3u8_url = data.video_download_url
-        vd = VideoDownloader(_va)
-        http_chunk_size_video = data.extra_data.get('http_chunk_size_video')
-        _va.content = vd.download_m3u8(threads=16, http_chunk_size=http_chunk_size_video)
 
-        _aa = AudioAttachment()
-        _aa.m3u8_url = data.audio_download_url
-        vd = VideoDownloader(_aa)
+        downloader = Downloader()
+
+        http_chunk_size_video = data.extra_data.get('http_chunk_size_video')
+        _va = VideoAttachment()
+        _va.content = downloader.download_by_m3u8_url(
+            data.video_download_url,
+            threads=16,
+            http_chunk_size=http_chunk_size_video
+        )
+
         http_chunk_size_audio = data.extra_data.get('http_chunk_size_audio')
-        _aa.content = vd.download_m3u8(threads=8, http_chunk_size=http_chunk_size_audio)
+        _aa = AudioAttachment()
+        _aa.content = downloader.download_by_m3u8_url(
+            data.audio_download_url,
+            threads=8,
+            http_chunk_size=http_chunk_size_audio
+        )
 
         vh = VideoHandler(video=_va, audio=_aa)
         content = vh.mux()
@@ -105,8 +112,8 @@ class YoutubeVideo:
             res += f"?v={v}"
         return res
 
-    def _get_video_url(self, video_id) -> str:
-        return f"{self.URL}/watch?v={video_id}"
+    # def _get_video_url(self, video_id) -> str:
+    #     return f"{self.URL}/watch?v={video_id}"
 
     def check_url_is_video(self, url):
         url = self.clear_url(url)
