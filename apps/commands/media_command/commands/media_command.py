@@ -8,6 +8,7 @@ from apps.bot.core.messages.attachments.audio import AudioAttachment
 from apps.bot.core.messages.attachments.link import LinkAttachment
 from apps.bot.core.messages.attachments.video import VideoAttachment
 from apps.bot.core.messages.response_message import ResponseMessage, ResponseMessageItem
+from apps.bot.core.messages.telegram.parse_mode import TelegramParseMode
 from apps.commands.command import AcceptExtraCommand
 from apps.commands.help_text import HelpText, HelpTextArgument, HelpTextKey, HelpTextItem
 from apps.commands.media_command.service import MediaService, MediaServiceResponse, MediaKeys
@@ -256,7 +257,7 @@ class Media(AcceptExtraCommand):
         if not media_response.cache:
             # ToDo: лютый костыль
             if chosen_service == RedditService:
-                answer += f"\nИсточник: [{source_hostname}]({chosen_url})"
+                answer += f"\n\nИсточник: [{source_hostname}]({chosen_url})"
             else:
                 answer += f'\nИсточник: {self.bot.get_formatted_url(source_hostname, chosen_url)}'
 
@@ -278,6 +279,8 @@ class Media(AcceptExtraCommand):
         # Особенная обработка для reddit markdown
         if chosen_service == RedditService:
             rmi.set_telegram_markdown_v2()
+        else:
+            rmi.parse_mode = TelegramParseMode.HTML
 
         br = self.bot.send_response_message_item(rmi)
         if br.success:

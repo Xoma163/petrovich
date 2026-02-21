@@ -136,7 +136,7 @@ class Reddit:
             if any([link.endswith(x) for x in formats]):
                 self.content_type = self.CONTENT_TYPE_VIDEO
                 return self._get_video_from_post()
-            return link
+            return f"{link}\n\n{self._get_text_from_post()}"
         return None
 
     def _get_post_data(self):
@@ -177,7 +177,7 @@ class Reddit:
 
     @property
     def is_video(self):
-        if self.media_data and 'reddit_video' in self.media_data or self.data.get('url_overridden_by_dest'):
+        if self.media_data and 'reddit_video' in self.media_data:
             return True
         return self.content_type in [self.CONTENT_TYPE_VIDEO, self.CONTENT_TYPE_RICH_VIDEO]
 

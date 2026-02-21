@@ -80,19 +80,19 @@ class ResponseMessageItem:
     def set_telegram_html(self):
         if not self.text:
             return
-
-        p = re.compile(self.URLS_REGEXP)  # Ссылки
-        if p.search(self.text):
-            self.parse_mode = TelegramParseMode.HTML
-        else:
-            for tag in self.TG_TAGS:
-                p = re.compile(rf"<{tag}.*>[\s\S]*</{tag}>")
-                if p.search(self.text):
-                    self.parse_mode = TelegramParseMode.HTML
-                    break
-
-        if self.kwargs.get('parse_mode'):
-            self.wrap_links()
+        # ToDo: экспериментально выпилено. Возможно придётся вренуть
+        # p = re.compile(self.URLS_REGEXP)  # Ссылки
+        # if p.search(self.text):
+        #     self.parse_mode = TelegramParseMode.HTML
+        # else:
+        #     for tag in self.TG_TAGS:
+        #         p = re.compile(rf"<{tag}.*>[\s\S]*</{tag}>")
+        #         if p.search(self.text):
+        #             self.parse_mode = TelegramParseMode.HTML
+        #             break
+        #
+        # if self.kwargs.get('parse_mode'):
+        #     self.wrap_links()
 
     def wrap_links(self):
         # Врапим ссылки без явного их врапа если у нас уже html
