@@ -153,7 +153,7 @@ class Meme(Command):
             callback_params_data = {
                 "chat_id": self.event.peer_id,
                 "message_id": response.response['result']['message_id'],
-                "caption": answer
+                "text": answer
             }
 
         if is_youtube_link:
@@ -234,7 +234,7 @@ class Meme(Command):
             callback_params_data = {
                 "chat_id": self.event.peer_id,
                 "message_id": response.response['result']['message_id'],
-                "caption": answer
+                "text": answer
             }
 
         if is_youtube_link:
@@ -506,7 +506,7 @@ class Meme(Command):
                 va = yt_api.download_video(data)
                 video_content = va.content
             video = self.bot.get_video_attachment(
-                url=video_content,
+                _bytes=video_content,
                 peer_id=self.event.peer_id,
                 message_thread_id=self.event.message_thread_id,
                 thumbnail_url=data.thumbnail_url
@@ -516,17 +516,16 @@ class Meme(Command):
             meme.save()
             self._save_meme(meme, video_content, is_update=is_update)
 
-            callback_params_data['caption'] += f"\n{self.MESSAGE_YOUTUBE_STATUS_COMPLETE}"
+            callback_params_data['text'] += f"\n{self.MESSAGE_YOUTUBE_STATUS_COMPLETE}"
             self.bot.edit_message(callback_params_data)
             return
         except PWarning as e:
-            callback_params_data['caption'] = self.MESSAGE_YOUTUBE_STATUS_CUSTOM_ERROR.format(
+            callback_params_data['text'] = self.MESSAGE_YOUTUBE_STATUS_CUSTOM_ERROR.format(
                 error_msg=e.msg
             )
             self.bot.edit_message(callback_params_data)
             return
         except Exception:
-            callback_params_data['caption'] = f"\n{self.MESSAGE_YOUTUBE_STATUS_ERROR}"
             self.bot.edit_message(callback_params_data)
             return
 
