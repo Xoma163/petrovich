@@ -118,7 +118,7 @@ class TgBot(Bot):
 
     def _send_media_group_wrap(self, rmi: ResponseMessageItem, default_params) -> dict:
         params = copy(default_params)
-        params.pop('parse_mode')  # Не поддерживается телегой
+        params.pop('parse_mode', None)  # Не поддерживается телегой
         caption = params.pop('caption')
 
         media_list = []
@@ -265,7 +265,7 @@ class TgBot(Bot):
         Отправка видео. Ссылка или файл
         """
         params = copy(default_params)
-        params.pop('parse_mode')  # Не поддерживается телегой
+        params.pop('parse_mode', None)  # Не поддерживается телегой
 
         video_note: VideoNoteAttachment = rmi.attachments[0]
         params['video_note'] = video_note.file_id
@@ -321,7 +321,7 @@ class TgBot(Bot):
         Отправка стикера
         """
         params = copy(default_params)
-        params.pop('parse_mode')  # Не поддерживается телегой
+        params.pop('parse_mode', None)  # Не поддерживается телегой
 
         sticker: StickerAttachment = rmi.attachments[0]
         params['sticker'] = sticker.file_id
