@@ -149,6 +149,7 @@ class TelegramAPI:
             chat_id: int,
             message_thread_id: int = None,
             reply_to_message_id: int = None,
+            reply_markup: dict = None,
             parse_mode: str = None,
             caption: str = None,
             width: int = None,
@@ -171,7 +172,8 @@ class TelegramAPI:
             "has_spoiler": has_spoiler,
             "video": video
         }
-
+        if reply_markup:
+            params['reply_markup'] = json.dumps(reply_markup)  # noqa
         return self.requests.post('sendVideo', params, files=files).json()
 
     def send_video_note(
