@@ -90,12 +90,12 @@ class Bot:
                     keyboard=e.keyboard
                 )
             )
-            self.log_message(rm, e.level)
+            self.log_message(rm, e.level, e)
         # Если нужно пропустить
         except (PSkip, PIDK):
             return None
         # Непредвиденная ошибка
-        except Exception:
+        except Exception as e:
             self.log_event(event)
             rmi = ResponseMessageItem(
                 text=f"{self.ERROR_MSG}\nКоманда {self.get_formatted_text_line('/баг')}",
@@ -107,7 +107,7 @@ class Bot:
                 keyboard = self.get_inline_keyboard([button])
                 rmi.keyboard = keyboard
             rm = ResponseMessage(rmi)
-            self.log_message(rm, "exception")
+            self.log_message(rm, "exception", e)
 
         if rm and send and rm.send:
             self.send_response_message(rm)
@@ -189,11 +189,11 @@ class Bot:
             log_data.update({'log_filter': self.log_filter})
         self.logger.debug(log_data)
 
-    def log_message(self, message, level="debug"):
+    def log_message(self, message: ResponseMessage | ResponseMessageItem, level="debug", exc_info=None):
         log_data = {"message": message.to_log()}
         if self.log_filter:
             log_data.update({'log_filter': self.log_filter})
-        getattr(self.logger, level)(log_data)
+        getattr(self.logger, level)(log_data, exc_info=exc_info)
 
     # END LOGGING
 

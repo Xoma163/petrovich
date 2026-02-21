@@ -116,6 +116,7 @@ class TgBot(Bot):
             cache_time=0
         )
 
+    # ToDo: мне не нравится, то что в каждом методе то pop, то ещё какая-то история с особенной обработкой. Может можно лучше?
     def _send_media_group_wrap(self, rmi: ResponseMessageItem, default_params) -> dict:
         params = copy(default_params)
         params.pop('parse_mode', None)  # Не поддерживается телегой
@@ -130,7 +131,6 @@ class TgBot(Bot):
                 media = {'type': attachment.type, 'media': attachment.public_download_url}
             else:
                 filename = attachment.file_name if attachment.file_name else str(i)
-                # files.append(attachment.get_bytes_io_content())
                 files.append((filename, attachment.content))
                 media = {'type': attachment.type, "media": f"attach://{filename}"}
 
@@ -381,7 +381,17 @@ class TgBot(Bot):
                 reply_to=e.reply_to,
                 keyboard=e.keyboard
             )
-            self.log_message(error_rmi, e.level)
+            self.log_message(error_rmi, e.level, e)
+
+            r = self._send_response_message_item(error_rmi)
+            return BotResponse(False, r)
+        except Exception as e:
+            error_rmi = ResponseMessageItem(
+                text=self.ERROR_MSG,
+                peer_id=rmi.peer_id,
+                message_thread_id=rmi.message_thread_id,
+            )
+            self.log_message(error_rmi, "error", e)
 
             r = self._send_response_message_item(error_rmi)
             return BotResponse(False, r)
