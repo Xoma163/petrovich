@@ -266,6 +266,7 @@ class TgBot(Bot):
         """
         params = copy(default_params)
         params.pop('parse_mode', None)  # Не поддерживается телегой
+        params.pop('caption', None)  # Не поддерживается телегой
 
         video_note: VideoNoteAttachment = rmi.attachments[0]
         params['video_note'] = video_note.file_id
@@ -322,6 +323,7 @@ class TgBot(Bot):
         """
         params = copy(default_params)
         params.pop('parse_mode', None)  # Не поддерживается телегой
+        params.pop('caption', None)  # Не поддерживается телегой
 
         sticker: StickerAttachment = rmi.attachments[0]
         params['sticker'] = sticker.file_id
