@@ -4,7 +4,6 @@ from apps.commands.media_command.service import MediaServiceResponse, MediaServi
 from apps.connectors.parsers.media_command.reddit import Reddit
 from apps.shared.decorators import retry
 from apps.shared.exceptions import PWarning
-from apps.shared.utils.markdown import markdown_to_html
 
 
 class RedditService(MediaService):
@@ -47,7 +46,6 @@ class RedditService(MediaService):
                 .replace("&amp;", "&") \
                 .replace(" ", " ") \
                 .strip()
-            text = markdown_to_html(text, self.bot)
             regexps_with_static = (
                 (r"https.*player", "Видео"), (r"https://preview\.redd\.it/(?:\w|\d|\.|\?|\=|&)*", "Фото"))
             for regexp, _text in regexps_with_static:

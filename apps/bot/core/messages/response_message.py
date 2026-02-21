@@ -80,8 +80,6 @@ class ResponseMessageItem:
     def set_telegram_html(self):
         if not self.text:
             return
-        if self.parse_mode:
-            return
 
         p = re.compile(self.URLS_REGEXP)  # Ссылки
         if p.search(self.text):
@@ -95,20 +93,6 @@ class ResponseMessageItem:
 
         if self.kwargs.get('parse_mode'):
             self.wrap_links()
-
-    # def escape_markdown_v2(self):
-    #     """Экранирует строку под parse_mode=MarkdownV2."""
-    #     SPECIAL_CHARS = set('_*[]()~`>#+-=|{}.!')
-    #
-    #     escaped = []
-    #     for ch in self.text:
-    #         if ch == '\\':
-    #             escaped.append('\\\\')
-    #         elif ch in SPECIAL_CHARS:
-    #             escaped.append(f'\\{ch}')
-    #         else:
-    #             escaped.append(ch)
-    #     self.text = ''.join(escaped)
 
     def wrap_links(self):
         # Врапим ссылки без явного их врапа если у нас уже html

@@ -173,7 +173,7 @@ class Media(AcceptExtraCommand):
             aa.thumbnail_url = video.thumbnail_url
             media_response.attachments[0] = aa  # noqa
 
-        return self.prepare_media_response(media_response, media_keys, chosen_url)
+        return self.prepare_media_response(media_response, media_keys, chosen_url, service_class)
 
     def _get_service_and_chosen_url(self, source) -> tuple[type[MediaService], str]:
         """
@@ -229,7 +229,8 @@ class Media(AcceptExtraCommand):
             self,
             media_response: MediaServiceResponse,
             media_keys: MediaKeys,
-            chosen_url: str
+            chosen_url: str,
+            chosen_service: type[MediaService],
     ) -> ResponseMessage:
         text = media_response.text or ""
 
@@ -253,7 +254,11 @@ class Media(AcceptExtraCommand):
             answer = self.bot.get_spoiler_text(answer)
 
         if not media_response.cache:
-            answer += f'\nИсточник: {self.bot.get_formatted_url(source_hostname, chosen_url)}'
+            # ToDo: лютый костыль
+            if chosen_service == RedditService:
+                answer += f"\nИсточник: [{source_hostname}]({chosen_url})"
+            else:
+                answer += f'\nИсточник: {self.bot.get_formatted_url(source_hostname, chosen_url)}'
 
         answer = answer.strip()
 
@@ -269,6 +274,10 @@ class Media(AcceptExtraCommand):
 
         if media_keys.spoiler:
             rmi.spoiler = True
+
+        # Особенная обработка для reddit markdown
+        if chosen_service == RedditService:
+            rmi.set_telegram_markdown_v2()
 
         br = self.bot.send_response_message_item(rmi)
         if br.success:

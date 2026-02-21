@@ -468,7 +468,8 @@ class TgBot(Bot):
         Отправка ResponseMessageItem сообщения
         Возвращает Response.json() платформы
         """
-        rmi.set_telegram_html()
+        if not rmi.parse_mode:
+            rmi.set_telegram_html()
 
         params = rmi.get_tg_params()
 

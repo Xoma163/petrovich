@@ -196,7 +196,6 @@ class GPTCommand(
         Пост-обработка сообщения в completions
         """
         answer = answer if answer else "{пустой ответ}"
-        # answer = markdown_to_html(answer, self.bot)
         if len(answer) > self.bot.max_message_text_length:
             document = wrap_text_in_document(answer, 'gpt.html')
             rmi = ResponseMessageItem(

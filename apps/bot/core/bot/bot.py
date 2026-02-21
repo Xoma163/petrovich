@@ -56,9 +56,6 @@ class Bot:
         Thread запуск основного тела команды
         """
 
-    def init_requests(self):
-        pass
-
     def handle_event(self, event: Event, send=True) -> ResponseMessage | None:
         """
         Обработка входящего ивента
@@ -69,7 +66,6 @@ class Bot:
                 return None
 
             self.log_filter = event.log_filter
-            self.init_requests()
 
             rm = self.route(event)
             # Если мы попали в команду и не вылетели по exception
@@ -198,7 +194,7 @@ class Bot:
     # END LOGGING
 
     # ATTACHMENTS
-    # Куда это можно унести? И нужно ли? Технически можно если отказаться от with ChatAction именно здесь
+    # ToDo: Куда это можно унести? И нужно ли? Технически можно если отказаться от with ChatAction именно здесь
     def get_photo_attachment(
             self,
             url: str | None = None,
