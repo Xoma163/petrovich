@@ -101,6 +101,7 @@ class TelegramAPI:
             chat_id: int,
             message_thread_id: int = None,
             reply_to_message_id: int = None,
+            reply_markup: dict = None,
             parse_mode: str = None,
             caption: str = None,
             has_spoiler: bool = None,
@@ -118,6 +119,8 @@ class TelegramAPI:
             "has_spoiler": has_spoiler,
             "photo": photo
         }
+        if reply_markup:
+            params['reply_markup'] = json.dumps(reply_markup)
 
         return self.requests.post('sendPhoto', params, files=files).json()
 
@@ -126,6 +129,7 @@ class TelegramAPI:
             chat_id: int,
             message_thread_id: int = None,
             reply_to_message_id: int = None,
+            reply_markup: dict = None,
             parse_mode: str = None,
             caption: str = None,
             document: str = None,
@@ -141,6 +145,8 @@ class TelegramAPI:
             "caption": caption,
             "document": document
         }
+        if reply_markup:
+            params['reply_markup'] = json.dumps(reply_markup)
 
         return self.requests.post('sendDocument', params, files=files).json()
 
@@ -181,6 +187,7 @@ class TelegramAPI:
             chat_id: int,
             message_thread_id: int = None,
             reply_to_message_id: int = None,
+            reply_markup: dict = None,
             video_note: str = None,
             files: dict = None
     ):
@@ -193,6 +200,8 @@ class TelegramAPI:
             "reply_to_message_id": reply_to_message_id,
             "video_note": video_note,
         }
+        if reply_markup:
+            params['reply_markup'] = json.dumps(reply_markup)
 
         return self.requests.post('sendVideoNote', params, files=files).json()
 
@@ -201,6 +210,7 @@ class TelegramAPI:
             chat_id: int,
             message_thread_id: int = None,
             reply_to_message_id: int = None,
+            reply_markup: dict = None,
             parse_mode: str = None,
             caption: str = None,
             title: str = None,
@@ -223,6 +233,8 @@ class TelegramAPI:
             "performer": performer,
             "audio": audio,
         }
+        if reply_markup:
+            params['reply_markup'] = json.dumps(reply_markup)
 
         return self.requests.post('sendAudio', params, files=files).json()
 
@@ -231,6 +243,7 @@ class TelegramAPI:
             chat_id: int,
             message_thread_id: int = None,
             reply_to_message_id: int = None,
+            reply_markup: dict = None,
             parse_mode: str = None,
             caption: str = None,
             has_spoiler: bool = None,
@@ -248,6 +261,8 @@ class TelegramAPI:
             "has_spoiler": has_spoiler,
             "animation": animation,
         }
+        if reply_markup:
+            params['reply_markup'] = json.dumps(reply_markup)
 
         return self.requests.post('sendAnimation', params, files=files).json()
 
@@ -256,6 +271,7 @@ class TelegramAPI:
             chat_id: int,
             message_thread_id: int = None,
             reply_to_message_id: int = None,
+            reply_markup: dict = None,
             sticker: str = None,
             files: dict = None
     ):
@@ -267,6 +283,8 @@ class TelegramAPI:
             "reply_to_message_id": reply_to_message_id,
             "sticker": sticker,
         }
+        if reply_markup:
+            params['reply_markup'] = json.dumps(reply_markup)
 
         return self.requests.post('sendSticker', params).json()
 
@@ -275,6 +293,7 @@ class TelegramAPI:
             chat_id: int,
             message_thread_id: int = None,
             reply_to_message_id: int = None,
+            reply_markup: dict = None,
             parse_mode: str = None,
             voice: str = None,
             files: dict = None
@@ -288,6 +307,8 @@ class TelegramAPI:
             "parse_mode": parse_mode,
             "voice": voice,
         }
+        if reply_markup:
+            params['reply_markup'] = json.dumps(reply_markup)
 
         return self.requests.post('sendVoice', params).json()
 
