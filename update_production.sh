@@ -1,6 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 
+export PATH="$HOME/.local/bin:$PATH"
+
 git checkout master
 git reset HEAD --hard
 git clean -fd
