@@ -17,7 +17,7 @@ from apps.commands.help_text import HelpText, HelpTextItem, HelpTextArgument
 from apps.commands.meme.models import Meme as MemeModel
 from apps.connectors.parsers.media_command.youtube.video import YoutubeVideo
 from apps.shared.exceptions import PWarning, PSkip
-from apps.shared.utils.utils import get_youtube_video_id, detect_ext
+from apps.shared.utils.utils import get_youtube_video_id, detect_ext, decl_of_num
 from apps.shared.utils.video.video_handler import VideoHandler
 
 
@@ -404,10 +404,7 @@ class Meme(Command):
             meme = self.get_meme(_id=id_name, exclude_trusted=exclude_trusted)
         else:
             memes = self.get_filtered_memes(self.event.message.args, exclude_trusted=exclude_trusted)
-            try:
-                meme = self.get_one_meme(memes, self.event.message.args)
-            except PWarning:
-                raise PWarning("Не нашёл :(")
+            meme = self.get_one_meme(memes, self.event.message.args)
 
         meme.uses += 1
         meme.save()
@@ -438,27 +435,27 @@ class Meme(Command):
                     memes = memes.filter(name__contains=_filter)
         return memes
 
-    @staticmethod
-    def get_one_meme(memes, filter_list, approved=True) -> MemeModel:
+    def get_one_meme(self, memes, filter_list) -> MemeModel:
         if len(memes) == 0:
             raise PWarning("Не нашёл :(")
         elif len(memes) == 1:
             return memes.first()
-        elif not approved:
-            return memes.first()
         else:
             filters_str = " ".join(filter_list)
-            for meme in memes:
-                if meme.name == filters_str:
-                    return meme
-            raise PWarning("Под запрос подходит 2 и более мема")
+
+            memes_count = memes.count()
+            memes_decl = decl_of_num(memes_count, ["мем", "мема", "мемов"])
+
+            button = self.bot.get_button(f"/мемы {filters_str}")
+            keyboard = self.bot.get_inline_keyboard([button])
+            raise PWarning(f"Под запрос подходит {memes_count} {memes_decl}", keyboard=keyboard)
 
     def get_meme(self, filter_list=None, filter_user=None, exclude_trusted=False, approved=True, _id=None) -> MemeModel:
         """
         :return: 1 мем. Если передан параметр use_tanimoto, то список мемов отсортированных по коэфф. Танимото
         """
         memes = self.get_filtered_memes(filter_list, filter_user, exclude_trusted, approved, _id)
-        meme = self.get_one_meme(memes, filter_list, approved)
+        meme = self.get_one_meme(memes, filter_list)
         return meme
 
     def prepare_meme_to_send(self, meme, print_name=False, send_keyboard=False) -> ResponseMessageItem:

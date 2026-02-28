@@ -24,6 +24,7 @@ class Message:
 
         self.has_command_symbols: bool = False
         self.has_mention: bool = False
+        self.is_callback: bool = False
 
         self.raw: str = ""
         self.command: str = ""

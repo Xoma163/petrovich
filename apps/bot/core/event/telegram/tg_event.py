@@ -187,6 +187,7 @@ class TgEvent(Event):
 
         except Exception:
             self.message.parse_raw(payload)
+        self.message.is_callback = True
 
     def setup_attachments(self, message, payload_message_text=None):
         attachment_map = {
