@@ -70,12 +70,13 @@ class GPTCompletionsFunctionality(GPTCommandProtocol):
             log_filter=self.event.log_filter,
         )
 
+        use_callback_and_stream = profile_settings.use_stream and self.event.is_from_pm
         with ChatActionSender(self.bot, ChatActionEnum.TYPING, self.event.peer_id, self.event.message_thread_id):
             response: GPTCompletionsResponse = gpt_api.completions(
                 messages,
                 model=self.get_completions_model(),
                 extra_data=self.get_extra_data(),
-                callback_func=self.__completions_callback if profile_settings.use_stream else None,
+                callback_func=self.__completions_callback if use_callback_and_stream else None,
             )
 
         self.add_statistics(api_response=response)

@@ -38,12 +38,13 @@ class GPTVisionFunctionality(GPTCommandProtocol):
             log_filter=self.event.log_filter
         )
 
+        use_callback_and_stream = profile_settings.use_stream and self.event.is_from_pm
         with ChatActionSender(self.bot, ChatActionEnum.TYPING, self.event.peer_id, self.event.message_thread_id):
             response: GPTVisionResponse = gpt_api.vision(
                 messages=messages,
                 model=self.get_vision_model(),
                 extra_data=self.get_extra_data(),
-                callback_func=self.__vision_callback if profile_settings.use_stream else None,
+                callback_func=self.__vision_callback if use_callback_and_stream else None,
 
             )
 
@@ -58,6 +59,9 @@ class GPTVisionFunctionality(GPTCommandProtocol):
         return self.get_completions_rmi(response_text)
 
     def __vision_callback(self, text: str, draft_id: int):
+        rmi = ResponseMessageItem(text=text)
+        rmi.set_telegram_markdown_v2()
+
         self.bot.send_message_draft(
             chat_id=self.event.peer_id,
             draft_id=draft_id,
