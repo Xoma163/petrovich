@@ -42,7 +42,8 @@ class GPTStatisticsMixin(GPTCommandProtocol):
         """
         Просмотр статистики по использованию
         """
-        self.check_pm()
+        if not (self.event.message.keys and {"f", "force"}.intersection(self.event.message.keys)):
+            self.check_pm()
         custom_range = self._get_custom_range_from_args()
 
         if self.event.message.is_key_provided({"ключ", "key"}):
