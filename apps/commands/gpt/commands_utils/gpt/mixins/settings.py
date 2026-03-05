@@ -1,6 +1,6 @@
 from apps.bot.core.messages.response_message import ResponseMessageItem
 from apps.commands.gpt.commands_utils.gpt.mixins.preprompt import GPTPrepromptMixin
-from apps.commands.gpt.enums import GPTDebug
+from apps.commands.gpt.enums import GPTDebug, GPTStream
 from apps.commands.gpt.models import Preprompt
 from apps.commands.gpt.protocols import GPTCommandProtocol
 from apps.commands.help_text import HelpTextArgument
@@ -23,6 +23,14 @@ class GPTSettingsMixin(GPTCommandProtocol):
         ),
         HelpTextArgument(
             "debug удалить",
+            "удаляет настройку"
+        ),
+        HelpTextArgument(
+            "stream (on/off)",
+            "устанавливает режим потоковой передачи сообщений. По умолчанию false"
+        ),
+        HelpTextArgument(
+            "stream удалить",
             "удаляет настройку"
         )
     ]
@@ -50,6 +58,7 @@ class GPTSettingsMixin(GPTCommandProtocol):
         profile_settings.gpt_5_settings_verbosity_level = None
         profile_settings.gpt_5_settings_web_search = None
         profile_settings.use_debug = None
+        profile_settings.use_stream = None
         profile_settings.save()
 
         if isinstance(self, GPTPrepromptMixin):
@@ -77,6 +86,7 @@ class GPTSettingsMixin(GPTCommandProtocol):
             f"Уровень многословности для моделей семейства GPT-5\n{self.bot.get_formatted_text_line(ps.gpt_5_settings_verbosity_level)}" if ps.gpt_5_settings_verbosity_level else None,
             f"Поиск в интернете для моделей семейства GPT-5\n{self.bot.get_formatted_text_line('Включено') if ps.gpt_5_settings_web_search is True else self.bot.get_formatted_text_line('Выключено')}" if ps.gpt_5_settings_web_search is not None else None,
             f"Дебаг режим\n{self.bot.get_formatted_text_line('Включено') if ps.use_debug is True else self.bot.get_formatted_text_line('Выключено')}" if ps.use_debug is not None else None,
+            f"Стрим режим\n{self.bot.get_formatted_text_line('Включено') if ps.use_stream is True else self.bot.get_formatted_text_line('Выключено')}" if ps.use_stream is not None else None,
             f"Препромпт:\n{self.bot.get_formatted_text(preprompt.text)}" if preprompt else None
         ]
 
@@ -128,4 +138,46 @@ class GPTSettingsMixin(GPTCommandProtocol):
         profile_settings.use_debug = None
         profile_settings.save()
         answer = "Удалил дебаг режим"
+        return ResponseMessageItem(text=answer)
+
+    def stream(self) -> ResponseMessageItem:
+        try:
+            if self.event.message.args[1] in ["удалить", "сброс", "сбросить", "delete", "reset"]:
+                return self._delete_stream()
+            return self._set_stream()
+        except IndexError:
+            return self._get_stream()
+
+    def _set_stream(self) -> ResponseMessageItem:
+        user_value = self.event.message.args[1]
+        try:
+            stream = GPTStream[user_value.upper()]
+        except KeyError:
+            available_levels = ", ".join(self.bot.get_formatted_text_line(x.name.lower()) for x in GPTStream)
+            raise PError(f"Значения {user_value} нет среди доступных.\nДоступные уровни: {available_levels}")
+
+        profile_settings = self.get_profile_gpt_settings()
+        profile_settings.use_stream = stream.value
+        profile_settings.save()
+        answer_value = self.bot.get_formatted_text_line(
+            "Включил") if profile_settings.use_stream else self.bot.get_formatted_text_line("Выключил")
+        answer = f"{answer_value} стрим режим"
+        return ResponseMessageItem(text=answer)
+
+    def _get_stream(self) -> ResponseMessageItem:
+        profile_settings = self.get_profile_gpt_settings()
+        if profile_settings.use_stream is True:  # noqa
+            value_str = self.bot.get_formatted_text_line("Включено")
+        elif profile_settings.use_stream is False:  # noqa
+            value_str = self.bot.get_formatted_text_line("Выключено")
+        else:
+            value_str = f"{self.bot.get_formatted_text_line('Выключено')} (по умолчанию)"
+        answer = f"Стрим режим\n{value_str}"
+        return ResponseMessageItem(text=answer)
+
+    def _delete_stream(self) -> ResponseMessageItem:
+        profile_settings = self.get_profile_gpt_settings()
+        profile_settings.use_stream = None
+        profile_settings.save()
+        answer = "Удалил стрим режим"
         return ResponseMessageItem(text=answer)

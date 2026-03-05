@@ -277,6 +277,10 @@ class ProfileGPTBaseSettings(TimeStampModelMixin):
         "Дебаг режим",
         null=True
     )
+    use_stream = models.BooleanField(
+        "Использовать режим потокового вывода",
+        null=True
+    )
 
     def clean(self):
         super().clean()

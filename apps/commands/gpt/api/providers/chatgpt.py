@@ -1,5 +1,6 @@
 import io
 from decimal import Decimal
+from typing import Callable
 
 from apps.commands.gpt.api.base import (
     CompletionsAPIMixin,
@@ -54,10 +55,19 @@ class ChatGPTAPI(
 
     completions_url = f"{base_url}/responses"
 
-    def completions(self, messages: GPTMessages, model: CompletionsModel, extra_data: dict) -> GPTCompletionsResponse:
+    def completions(
+            self,
+            messages: GPTMessages,
+            model: CompletionsModel,
+            extra_data: dict,
+            callback_func: Callable | None = None,
+    ) -> GPTCompletionsResponse:
         payload: dict = {
             "model": model.name,
         }
+        if callback_func:
+            payload['stream'] = True
+
         preprompt, messages_dict = messages.get_preprompt_and_messages()
         if preprompt:
             payload["instructions"] = preprompt
@@ -71,16 +81,32 @@ class ChatGPTAPI(
             if extra_data.get("web_search"):
                 payload["tools"] = [{"type": "web_search_preview"}]
 
-        return self.do_completions_request(model, self.completions_url, json=payload, headers=self.headers)  # noqa
+        return self.do_completions_request(
+            model,
+            self.completions_url,
+            json=payload,
+            headers=self.headers,
+            stream=True if callback_func else False,
+            callback_func=callback_func
+        )  # noqa
 
     # ---------- vision ---------- #
 
     vision_url = completions_url
 
-    def vision(self, messages: GPTMessages, model: VisionModel, extra_data: dict) -> GPTVisionResponse:
+    def vision(
+            self,
+            messages: GPTMessages,
+            model: VisionModel,
+            extra_data: dict,
+            callback_func: Callable | None = None,
+    ) -> GPTVisionResponse:
         payload: dict = {
             "model": model.name
         }
+        if callback_func:
+            payload['stream'] = True
+
         preprompt, messages_dict = messages.get_preprompt_and_messages()
         if preprompt:
             payload["instructions"] = preprompt
@@ -92,7 +118,14 @@ class ChatGPTAPI(
             if effort_level := extra_data['effort_level']:
                 payload['reasoning'] = {"effort": effort_level}
 
-        return self.do_vision_request(model, self.vision_url, json=payload, headers=self.headers)  # noqa
+        return self.do_vision_request(
+            model,
+            self.vision_url,
+            json=payload,
+            headers=self.headers,
+            stream=True if callback_func else False,
+            callback_func=callback_func
+        )  # noqa
 
     # ---------- image draw ---------- #
 

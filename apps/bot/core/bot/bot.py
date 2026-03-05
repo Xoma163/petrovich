@@ -324,6 +324,17 @@ class Bot:
     # END ATTACHMENTS
 
     # EXTRA
+    def send_message_draft(
+            self,
+            chat_id: int,
+            draft_id: int,
+            text: str,
+            message_thread_id: int = None,
+            parse_mode: str = None
+
+    ):
+        pass
+
     def set_chat_action(self, chat_id: int | str, chat_action: ChatActionEnum, message_thread_id: int | None = None):
         """
         Проставление активности боту (например, отправка сообщения)

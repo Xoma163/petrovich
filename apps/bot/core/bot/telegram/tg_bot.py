@@ -342,6 +342,22 @@ class TgBot(Bot):
         params = copy(default_params)
         return self.api_handler.send_message(**params)
 
+    def send_message_draft(
+            self,
+            chat_id: int,
+            draft_id: int,
+            text: str,
+            message_thread_id: int = None,
+            parse_mode: str = None
+    ):
+        return self.api_handler.send_message_draft(
+            chat_id=chat_id,
+            draft_id=draft_id,
+            text=text,
+            message_thread_id=message_thread_id,
+            parse_mode=parse_mode
+        )
+
     def edit_message(self, default_params) -> dict:
         params = copy(default_params)
         return self.api_handler.edit_message_text(**params)

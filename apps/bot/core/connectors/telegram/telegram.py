@@ -76,6 +76,25 @@ class TelegramAPI:
 
         return self.requests.post('sendMessage', params).json()
 
+    def send_message_draft(
+            self,
+            chat_id: int,
+            draft_id: int,
+            text: str,
+            message_thread_id: int = None,
+            parse_mode: str = None,
+    ):
+        params = {
+            "chat_id": chat_id,
+            "draft_id": draft_id,
+            "text": text,
+            "message_thread_id": message_thread_id,
+            "parse_mode": parse_mode,
+
+        }
+
+        return self.requests.post('sendMessageDraft', params).json()
+
     def send_media_group(
             self,
             chat_id: int,

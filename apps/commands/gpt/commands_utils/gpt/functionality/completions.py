@@ -4,6 +4,7 @@ from apps.bot.core.chat_action_sender import ChatActionSender
 from apps.bot.core.chat_actions import ChatActionEnum
 from apps.bot.core.messages.attachments.document import DocumentAttachment
 from apps.bot.core.messages.response_message import ResponseMessageItem
+from apps.bot.core.messages.telegram.parse_mode import TelegramParseMode
 from apps.commands.gpt.api.base import GPTAPI
 from apps.commands.gpt.api.responses import GPTCompletionsResponse
 from apps.commands.gpt.messages.base import GPTMessages
@@ -62,6 +63,7 @@ class GPTCompletionsFunctionality(GPTCommandProtocol):
         """
         Стандартное общение с моделью
         """
+        profile_settings = self.get_profile_gpt_settings()
 
         gpt_api: GPTAPI | HasCompletions = self.provider.api_class(
             api_key=self.get_api_key(),
@@ -72,7 +74,8 @@ class GPTCompletionsFunctionality(GPTCommandProtocol):
             response: GPTCompletionsResponse = gpt_api.completions(
                 messages,
                 model=self.get_completions_model(),
-                extra_data=self.get_extra_data()
+                extra_data=self.get_extra_data(),
+                callback_func=self.__completions_callback if profile_settings.use_stream else None,
             )
 
         self.add_statistics(api_response=response)
@@ -84,6 +87,18 @@ class GPTCompletionsFunctionality(GPTCommandProtocol):
             response_text += self.get_debug_text(response)
 
         return self.get_completions_rmi(response_text)
+
+    def __completions_callback(self, text: str, draft_id: int):
+        rmi = ResponseMessageItem(text=text)
+        rmi.set_telegram_markdown_v2()
+
+        self.bot.send_message_draft(
+            chat_id=self.event.peer_id,
+            draft_id=draft_id,
+            text=rmi.text,
+            message_thread_id=self.event.message_thread_id,
+            parse_mode=TelegramParseMode.MARKDOWN_V2
+        )
 
     # COMMON UTILS
 

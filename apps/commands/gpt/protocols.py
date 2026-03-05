@@ -1,5 +1,5 @@
 import logging
-from typing import Protocol
+from typing import Protocol, Callable
 
 from apps.bot.core.messages.response_message import ResponseMessageItem, ResponseMessage
 from apps.bot.models import Profile, Chat
@@ -95,7 +95,8 @@ class HasCompletions(Protocol):
             self,
             messages: GPTMessages,
             model: CompletionsModel,
-            extra_data: dict
+            extra_data: dict,
+            callback_func: Callable | None = None,
     ) -> GPTCompletionsResponse:
         ...
 
@@ -105,7 +106,8 @@ class HasVision(Protocol):
             self,
             messages: GPTMessages,
             model: VisionModel,
-            extra_data: dict
+            extra_data: dict,
+            callback_func: Callable | None = None,
     ) -> GPTVisionResponse:
         ...
 

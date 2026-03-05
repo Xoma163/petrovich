@@ -1,4 +1,5 @@
 from abc import abstractmethod, ABC
+from typing import Callable
 
 from apps.commands.gpt.api.responses import (
     GPTCompletionsResponse,
@@ -52,7 +53,8 @@ class CompletionsAPIMixin(HasCompletions):
             self,
             messages: GPTMessages,
             model: CompletionsModel,
-            extra_data: dict
+            extra_data: dict,
+            callback_func: Callable | None = None,
     ) -> GPTCompletionsResponse:
         pass
 
@@ -69,7 +71,8 @@ class VisionAPIMixin(HasVision):
             self,
             messages: GPTMessages,
             model: VisionModel,
-            extra_data: dict
+            extra_data: dict,
+            callback_func: Callable | None = None,
     ) -> GPTVisionResponse:
         pass
 

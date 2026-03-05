@@ -41,3 +41,8 @@ class GPTWebSearch(Enum):
 class GPTDebug(Enum):
     ON = True
     OFF = False
+
+
+class GPTStream(Enum):
+    ON = True
+    OFF = False

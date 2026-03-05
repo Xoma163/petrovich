@@ -29,8 +29,9 @@ class APIHandler:
 
         try:
             r.raise_for_status()
-            r_json = r.json()
-            self._log(r_json)
+            if not kwargs['stream']:
+                r_json = r.json()
+                self._log(r_json)
         except (HTTPError, JSONDecodeError):
             self._log(r.text)
         return r

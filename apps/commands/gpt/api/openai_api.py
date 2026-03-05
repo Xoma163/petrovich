@@ -1,8 +1,12 @@
 import concurrent
+import hashlib
+import json
 import logging
 import re
+import time
 from abc import ABC
 from concurrent.futures import ThreadPoolExecutor
+from typing import Callable
 
 from requests.exceptions import SSLError, JSONDecodeError
 
@@ -99,17 +103,120 @@ class OpenAIAPI(GPTAPI, ABC):
         )
         return response
 
+    def parse_stream_responses(self, url, callback_func: Callable | None = None, **kwargs):
+        with self.requests.post(url, **kwargs) as r:
+            full_text = ""
+            last_call = 0.0
+            try:
+                for line in r.iter_lines(decode_unicode=True):
+                    if not line:
+                        continue
+                    # OpenAI streaming lines look like: "data: {json}"
+                    if not line.startswith("data: "):
+                        continue
+                    print(line)
+                    data = line[len("data: "):].strip()
+
+                    try:
+                        chunk = json.loads(data)
+                    except JSONDecodeError:
+                        continue
+
+                    # print(chunk)
+                    _type = chunk.get('type')
+                    if _type == "response.completed":
+                        return chunk['response']
+                    elif _type == "response.output_text.delta":
+                        full_text += chunk.get('delta')
+                        if not callback_func:
+                            continue
+                        now = time.time()
+                        if now - last_call < 0.5:
+                            continue
+                        last_call = now
+                        sha256_hex = hashlib.sha256(chunk['item_id'].encode('utf-8')).hexdigest()
+                        num64 = int(sha256_hex, 16) % (2 ** 64)
+                        callback_func(text=full_text, draft_id=num64)
+
+            finally:
+                r.close()
+        return None
+
+    def parse_stream_completions(self, url, callback_func: Callable | None = None, **kwargs):
+        with self.requests.post(url, **kwargs) as r:
+            full_text = ""
+            last_call = 0.0
+            try:
+                for line in r.iter_lines(decode_unicode=True):
+                    if not line:
+                        continue
+                    # OpenAI streaming lines look like: "data: {json}"
+                    if not line.startswith("data: "):
+                        continue
+                    data = line[len("data: "):].strip()
+
+                    try:
+                        chunk = json.loads(data)
+                    except:
+                        continue
+
+                    print(chunk)
+                    _type = chunk.get('object')
+                    if _type == "chat.completion.chunk":
+                        # Последний ответ
+                        if len(chunk['choices']) == 0 and 'usage' in chunk:
+                            chunk['choices'] = [{'message': {'content': full_text}}]
+                            return chunk
+                        # Предпоследний ответ
+                        if not chunk['choices'][0]['delta']:
+                            continue
+                        # Стандартный ответ
+                        text = chunk['choices'][0]['delta']['content']
+                        if not text:
+                            continue
+                        decoded_text = text.encode('latin-1', errors='replace').decode('utf-8', errors='replace')
+                        full_text += decoded_text
+                        if not callback_func:
+                            continue
+                        now = time.time()
+                        if now - last_call < 0.5:
+                            continue
+                        last_call = now
+                        sha256_hex = hashlib.sha256(chunk['id'].encode('utf-8')).hexdigest()
+                        num64 = int(sha256_hex, 16) % (2 ** 64)
+                        callback_func(text=full_text, draft_id=num64)
+
+            finally:
+                r.close()
+        return None
+
     @retry(3, SSLError, sleep_time=2)
     def do_request(self, url, **kwargs) -> dict:
-        # kwargs['headers']['Content-Type'] = "application/json"
-        r = self.requests.post(url, **kwargs)
-        if r.status_code != 200:
-            try:
-                r_json = r.json()
-            except JSONDecodeError as e:
-                raise PWarning("Ошибка. Не получилось обработать запрос.") from e
+        callback_func = kwargs.pop('callback_func', None)
+        if kwargs.get('stream'):
+            from apps.commands.gpt.api.openai_responses_api import OpenAIResponsesAPI
+
+            if isinstance(self, OpenAIResponsesAPI):
+                r_json = self.parse_stream_responses(
+                    url,
+                    callback_func,
+                    **kwargs,
+                )
+            else:
+                r_json = self.parse_stream_completions(
+                    url,
+                    callback_func,
+                    **kwargs,
+                )
         else:
-            r_json = r.json()
+            r = self.requests.post(url, **kwargs)
+            if r.status_code != 200:
+                try:
+                    r_json = r.json()
+                except JSONDecodeError as e:
+                    raise PWarning("Ошибка. Не получилось обработать запрос.") from e
+            else:
+                r_json = r.json()
 
         if error := r_json.get('error'):
             logger.error(str(r_json))
@@ -122,6 +229,7 @@ class OpenAIAPI(GPTAPI, ABC):
             # chatgpt
             else:
                 code = error.get('code')
+
             error_str = self.ERRORS_MAP.get(code, "Какая-то ошибка OpenAI API")
 
             if code == "rate_limit_exceeded":

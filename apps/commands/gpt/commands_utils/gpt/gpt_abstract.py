@@ -128,6 +128,7 @@ class GPTCommand(
             if isinstance(self, GPTSettingsMixin):
                 menu.append([["настройки", "настройка", "settings"], self.settings])
                 menu.append([["дебаг", "debug"], self.debug])
+                menu.append([["стрим", "stream"], self.stream])
         # В общем случае Completions (в том числе и при продолжении диалога) должен быть доступен
         if issubclass(self.provider.api_class, CompletionsAPIMixin) and isinstance(self, GPTCompletionsFunctionality):
             menu.append([["_wtf"], self.menu_wtf])
