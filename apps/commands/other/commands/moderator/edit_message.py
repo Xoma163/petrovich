@@ -3,7 +3,9 @@ from apps.bot.core.bot.telegram.tg_bot import TgBot
 from apps.bot.core.messages.response_message import ResponseMessage
 from apps.commands.command import Command
 from apps.commands.help_text import HelpText, HelpTextItem, HelpTextArgument
-from apps.shared.exceptions import PSkip
+from apps.shared.exceptions import PSkip, PWarning
+from apps.shared.utils.cache import MessagesCache
+from petrovich.settings import env
 
 
 class EditMessage(Command):
@@ -24,8 +26,26 @@ class EditMessage(Command):
     bot: TgBot
 
     def start(self) -> ResponseMessage:
+        peer_id = self.event.peer_id
+        message_id = self.event.fwd[0].message.id
+        new_text = self.event.message.args_str
+
+        if self.event.fwd[0].raw['from']['username'] != env.str("TG_BOT_LOGIN"):
+            raise PWarning("Я могу редактировать только свои сообщения")
+
         self.bot.edit_message(
-            {'chat_id': self.event.peer_id, 'message_id': self.event.fwd[0].message.id,
-             'text': self.event.message.args_str}
+            {
+                'chat_id': peer_id,
+                'message_id': message_id,
+                'text': new_text
+            }
         )
+
+        mc = MessagesCache(peer_id)
+        cached_messages = mc.get_messages()
+
+        if cached_message := cached_messages.get(message_id, None):
+            cached_message['text'] = new_text
+            mc.set_message(message_id, cached_message)
+
         raise PSkip()

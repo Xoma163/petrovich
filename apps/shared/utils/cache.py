@@ -37,6 +37,16 @@ class MessagesCache:
         data[message_id] = message
         self.cache.set(self._get_key(), data, timeout=None)
 
+    def set_message(self, message_id, message):
+        if not self.peer_id:
+            return
+        if not message_id:
+            return
+
+        data = self.get_messages()
+        data[message_id] = message
+        self.cache.set(self._get_key(), data, timeout=None)
+
     def clear(self) -> None:
         self.cache.clear()
 
