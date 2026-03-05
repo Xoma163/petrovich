@@ -36,8 +36,6 @@ logger = logging.getLogger(__name__)
 
 class GPTCommand(
     Command,
-    GPTKeyMixin,
-    GPTModelChoiceMixin,
     GPTPrepromptMixin,
     GPTStatisticsMixin,
     GPTPresetMixin,

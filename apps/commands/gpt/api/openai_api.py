@@ -136,10 +136,10 @@ class OpenAIAPI(GPTAPI, ABC):
         return r_json
 
     def _check_key(self, model, headers) -> bool:
-        from apps.commands.gpt.messages.providers.chatgpt import ChatGPTMessages
+        from apps.commands.gpt.messages.openai_responses import OpenAIResponsesMessages
         from apps.commands.gpt.messages.consts import GPTMessageRole
 
-        messages = ChatGPTMessages()
+        messages = OpenAIResponsesMessages()
         messages.add_message(GPTMessageRole.USER, "привет")
         url = f"{self.base_url}/responses"
         json_data = {

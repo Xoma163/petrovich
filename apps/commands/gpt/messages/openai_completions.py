@@ -4,7 +4,7 @@ from apps.commands.gpt.messages.base import GPTMessage, GPTMessages
 
 
 @dataclass
-class GrokMessage(GPTMessage):
+class OpenAICompletionsMessage(GPTMessage):
     def get_message(self) -> dict:
         message = {
             'role': self.role,
@@ -27,8 +27,8 @@ class GrokMessage(GPTMessage):
 
 
 @dataclass
-class GrokMessages(GPTMessages):
-    message_class: type[GPTMessage] = GrokMessage
+class OpenAICompletionsMessage(GPTMessages):
+    message_class: type[GPTMessage] = OpenAICompletionsMessage
 
     def __init__(self):
         super().__init__()

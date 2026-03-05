@@ -17,6 +17,8 @@ from apps.commands.help_text import HelpTextItem, HelpText
 
 class ChatGPTCommand(
     GPTCommand,
+    GPTKeyMixin,
+    GPTModelChoiceMixin,
     GPTCompletionsFunctionality,
     GPTVisionFunctionality,
     GPTImageDrawFunctionality,

@@ -4,6 +4,7 @@ from enum import StrEnum, Enum
 class GPTProviderEnum(StrEnum):
     CHATGPT = 'chatgpt'
     GROK = 'grok'
+    QWEN = 'qwen'
 
 
 class GPTImageFormat(StrEnum):

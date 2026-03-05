@@ -5,7 +5,7 @@ from apps.commands.gpt.messages.consts import GPTMessageRole
 
 
 @dataclass
-class ChatGPTMessage(GPTMessage):
+class OpenAIResponsesMessage(GPTMessage):
     def get_message(self) -> dict:
         text_type = 'input_text'
         if self.role == GPTMessageRole.ASSISTANT:
@@ -37,8 +37,8 @@ class ChatGPTMessage(GPTMessage):
 
 
 @dataclass
-class ChatGPTMessages(GPTMessages):
-    message_class: type[GPTMessage] = ChatGPTMessage
+class OpenAIResponsesMessages(GPTMessages):
+    message_class: type[GPTMessage] = OpenAIResponsesMessage
 
     def __init__(self):
         super().__init__()

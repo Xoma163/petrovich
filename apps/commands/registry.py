@@ -6,6 +6,7 @@ from apps.commands.gpt.commands.chatgpt import ChatGPTCommand
 from apps.commands.gpt.commands.chatgpt_wtf import WTF
 from apps.commands.gpt.commands.grok import GrokCommand
 from apps.commands.gpt.commands.grok_wtf import GWTF
+from apps.commands.gpt.commands.qwen import QwenCommand
 from apps.commands.gpt.commands.voice_recognition import VoiceRecognition
 from apps.commands.media_command.commands.media_command import Media
 from apps.commands.meme.commands.horoscope import Horoscope
@@ -44,6 +45,7 @@ _commands = [
     # gpt
     ChatGPTCommand,
     GrokCommand,
+    QwenCommand,
     WTF,
     GWTF,
     VoiceRecognition,

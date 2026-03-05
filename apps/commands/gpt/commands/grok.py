@@ -16,6 +16,8 @@ from apps.commands.help_text import HelpTextItem, HelpText
 
 class GrokCommand(
     GPTCommand,
+    GPTKeyMixin,
+    GPTModelChoiceMixin,
     GPTCompletionsFunctionality,
     GPTVisionFunctionality,
     GPTImageDrawFunctionality
