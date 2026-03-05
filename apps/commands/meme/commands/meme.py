@@ -1,6 +1,7 @@
 import threading
 
 from django.core.files.base import ContentFile
+from django.db.models import QuerySet
 
 from apps.bot.consts import RoleEnum, PlatformEnum, ATTACHMENT_TYPE_TRANSLATOR
 from apps.bot.core.messages.attachments.gif import GifAttachment
@@ -435,13 +436,16 @@ class Meme(Command):
                     memes = memes.filter(name__contains=_filter)
         return memes
 
-    def get_one_meme(self, memes, filter_list) -> MemeModel:
+    def get_one_meme(self, memes: QuerySet[MemeModel], filter_list: list[str]) -> MemeModel:
         if len(memes) == 0:
             raise PWarning("Не нашёл :(")
         elif len(memes) == 1:
             return memes.first()
         else:
             filters_str = " ".join(filter_list)
+            exact_meme = memes.filter(name=filters_str).first()
+            if exact_meme:
+                return exact_meme
 
             memes_count = memes.count()
             memes_decl = decl_of_num(memes_count, ["мем", "мема", "мемов"])
