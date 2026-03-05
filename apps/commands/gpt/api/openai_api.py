@@ -114,7 +114,6 @@ class OpenAIAPI(GPTAPI, ABC):
                     # OpenAI streaming lines look like: "data: {json}"
                     if not line.startswith("data: "):
                         continue
-                    print(line)
                     data = line[len("data: "):].strip()
 
                     try:
@@ -122,7 +121,6 @@ class OpenAIAPI(GPTAPI, ABC):
                     except JSONDecodeError:
                         continue
 
-                    # print(chunk)
                     _type = chunk.get('type')
                     if _type == "response.completed":
                         return chunk['response']
