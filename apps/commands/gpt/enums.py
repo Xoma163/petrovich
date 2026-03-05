@@ -24,7 +24,7 @@ class GPTReasoningEffortLevel(Enum):
     MEDIUM = "medium"
     LOW = "low"
     MINIMAL = "minimal"
-    NONE = None
+    NONE = "none"
 
 
 class GPTVerbosityLevel(StrEnum):

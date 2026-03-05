@@ -73,7 +73,7 @@ class ChatGPTAPI(
             payload["instructions"] = preprompt
         payload["input"] = messages_dict
 
-        if model.name in ['gpt-5', 'gpt-5-mini', 'gpt-5-nano'] and extra_data:
+        if 'gpt-5' in model.name and extra_data:
             if verbosity_level := extra_data.get('verbosity_level'):
                 payload['text'] = {"verbosity": verbosity_level}
             if effort_level := extra_data.get('effort_level'):
