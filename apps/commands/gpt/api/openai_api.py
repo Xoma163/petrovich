@@ -158,7 +158,6 @@ class OpenAIAPI(GPTAPI, ABC):
                     except:
                         continue
 
-                    print(chunk)
                     _type = chunk.get('object')
                     if _type == "chat.completion.chunk":
                         # Последний ответ
@@ -167,6 +166,8 @@ class OpenAIAPI(GPTAPI, ABC):
                             return chunk
                         # Предпоследний ответ
                         if not chunk['choices'][0]['delta']:
+                            continue
+                        if 'content' not in chunk['choices'][0]['delta']:
                             continue
                         # Стандартный ответ
                         text = chunk['choices'][0]['delta']['content']

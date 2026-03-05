@@ -7,6 +7,7 @@ from apps.commands.gpt.messages.base import GPTMessages
 from apps.commands.gpt.models import (
     CompletionsModel, VisionModel
 )
+from apps.shared.exceptions import PWarning
 
 
 class QwenAPI(
@@ -20,8 +21,27 @@ class QwenAPI(
 
     # ---------- base ---------- #
 
-    # base_url = "http://192.168.1.10:21001"
-    base_url = "http://192.168.1.20:21001"
+    base_url = f"http://192.168.1.10:21001"
+
+    # Мой код к этому не готов, что нужно выбирать из двух серверов
+    def set_base_url(self):
+        variants = [
+            "http://192.168.1.20:21001",
+            "http://192.168.1.10:21001"
+        ]
+
+        import requests
+        for variant in variants:
+            try:
+                r = requests.get(f"{variant}/models", timeout=2)
+                r.raise_for_status()
+                self.completions_url = self.completions_url.replace(self.base_url, variant)
+                self.vision_url = self.vision_url.replace(self.base_url, variant)
+                self.base_url = variant
+                return
+            except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
+                continue
+        raise PWarning("На данный момент нет работающих моделей")
 
     def check_key(self) -> bool:
         return True
@@ -45,6 +65,7 @@ class QwenAPI(
             payload['stream'] = True
             payload['stream_options'] = {"include_usage": True}
 
+        self.set_base_url()
         return self.do_completions_request(
             model,
             self.completions_url,
@@ -52,7 +73,6 @@ class QwenAPI(
             headers=self.headers,
             stream=True if callback_func else False,
             callback_func=callback_func
-
         )  # noqa
 
     # ---------- vision ---------- #
@@ -75,6 +95,7 @@ class QwenAPI(
             payload['stream'] = True
             payload['stream_options'] = {"include_usage": True}
 
+        self.set_base_url()
         return self.do_vision_request(
             model,
             self.vision_url,
