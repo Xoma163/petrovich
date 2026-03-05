@@ -23,6 +23,7 @@ from apps.commands.other.commands.easy.thanks import Thanks
 from apps.commands.other.commands.help import Help
 from apps.commands.other.commands.issue import Issue
 from apps.commands.other.commands.minecraft.minecraft_server import Minecraft
+from apps.commands.other.commands.moderator.edit_message import EditMessage
 from apps.commands.other.commands.moderator.logs import Logs
 from apps.commands.other.commands.moderator.roles import Roles
 from apps.commands.other.commands.profile import Profile
@@ -75,6 +76,7 @@ _commands = [
     # Moderator
     Logs,
     Roles,
+    EditMessage,
 
     # service
     Actions,
