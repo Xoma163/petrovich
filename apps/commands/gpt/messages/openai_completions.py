@@ -20,7 +20,7 @@ class OpenAICompletionsMessage(GPTMessage):
                 message['content'].append({
                     'type': 'image_url',
                     'image_url': {
-                        'url': f"data:image/jpeg;base64,{image}"
+                        'url': f"data:image/jpeg;base64,{image.base64()}"
                     }
                 })
         return message

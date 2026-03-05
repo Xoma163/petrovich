@@ -1,5 +1,6 @@
 from apps.bot.consts import RoleEnum
 from apps.commands.gpt.commands_utils.gpt.functionality.completions import GPTCompletionsFunctionality
+from apps.commands.gpt.commands_utils.gpt.functionality.vision import GPTVisionFunctionality
 from apps.commands.gpt.commands_utils.gpt.gpt_abstract import GPTCommand
 from apps.commands.gpt.commands_utils.gpt.mixins.preprompt import GPTPrepromptMixin
 from apps.commands.gpt.commands_utils.gpt.mixins.preset import GPTPresetMixin
@@ -11,7 +12,8 @@ from apps.commands.help_text import HelpTextItem, HelpText
 
 class QwenCommand(
     GPTCommand,
-    GPTCompletionsFunctionality
+    GPTCompletionsFunctionality,
+    GPTVisionFunctionality,
 ):
     name = "qwen"
     names = ["квен"]
@@ -26,6 +28,7 @@ class QwenCommand(
             HelpTextItem(
                 access,
                 GPTCompletionsFunctionality.COMPLETIONS_HELP_TEXT_ITEMS +
+                GPTVisionFunctionality.VISION_HELP_TEXT_ITEMS +
                 GPTPrepromptMixin.PREPROMPT_HELP_TEXT_ITEMS +
                 GPTStatisticsMixin.STATISTICS_HELP_TEXT_ITEMS +
                 GPTPresetMixin.PRESET_HELP_TEXT_ITEMS +

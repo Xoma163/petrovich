@@ -384,7 +384,11 @@ class GPTCommand(
         """
         from apps.commands.gpt.commands.chatgpt import ChatGPTCommand
 
-        photos = event.get_all_attachments([PhotoAttachment], use_fwd=False)
+        if isinstance(self, GPTVisionFunctionality):
+            photos = event.get_all_attachments([PhotoAttachment], use_fwd=False)
+        else:
+            photos = []
+
         if isinstance(self, ChatGPTCommand):
             documents = [x for x in event.get_all_attachments([DocumentAttachment], use_fwd=False) if
                          x.mime_type.is_pdf]
