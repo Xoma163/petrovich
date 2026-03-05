@@ -241,9 +241,11 @@ class GPTStatisticsMixin(GPTCommandProtocol):
 
         return start_datetime, end_datetime
 
-    @staticmethod
-    def _get_data_for_statistics_plot(profiles: list[Profile],
-                                      custom_range: tuple[datetime.datetime, ...] | None = None):
+    def _get_data_for_statistics_plot(
+            self,
+            profiles: list[Profile],
+            custom_range: tuple[datetime.datetime, ...] | None = None
+    ):
         if not custom_range:
             start = timezone.now() - datetime.timedelta(days=30)
             end = timezone.now()
@@ -252,6 +254,7 @@ class GPTStatisticsMixin(GPTCommandProtocol):
         days_count = (end - start).days + 1
 
         usage_stats = Usage.objects.filter(
+            provider=self.provider_model,
             author__in=profiles,
             created_at__gte=start,
             created_at__lt=end
