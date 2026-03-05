@@ -156,7 +156,7 @@ def get_image_size_by_text(txt: str, font) -> tuple[int, int]:
     box = draw.textbbox((0, 0), txt, font)
     w = box[2] - box[0]  # bottom-top
     h = box[3] - box[1]  # right-left
-    return w, h
+    return int(w), int(h)
 
 
 def draw_text_on_image(text: str):

@@ -1,6 +1,6 @@
 from apps.bot.consts import RoleEnum
 from apps.bot.core.bot.telegram.tg_bot import TgBot
-from apps.bot.core.messages.response_message import ResponseMessage
+from apps.bot.core.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.commands.command import Command
 from apps.commands.help_text import HelpText, HelpTextItem, HelpTextArgument
 from apps.shared.exceptions import PSkip, PWarning
@@ -33,13 +33,8 @@ class EditMessage(Command):
         if self.event.fwd[0].raw['from']['username'] != env.str("TG_BOT_LOGIN"):
             raise PWarning("Я могу редактировать только свои сообщения")
 
-        self.bot.edit_message(
-            {
-                'chat_id': peer_id,
-                'message_id': message_id,
-                'text': new_text
-            }
-        )
+        rmi = ResponseMessageItem(peer_id=peer_id, message_id=message_id, text=new_text)
+        self.bot.edit_message_text(rmi)
 
         mc = MessagesCache(peer_id)
         cached_messages = mc.get_messages()

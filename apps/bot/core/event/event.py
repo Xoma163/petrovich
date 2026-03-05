@@ -4,7 +4,7 @@ from apps.bot.consts import PlatformEnum, RoleEnum
 from apps.bot.core.messages.attachments.attachment import Attachment
 from apps.bot.core.messages.attachments.audio import AudioAttachment
 from apps.bot.core.messages.attachments.document import DocumentAttachment
-from apps.bot.core.messages.attachments.gif import GifAttachment
+from apps.bot.core.messages.attachments.gif import AnimationAttachment
 from apps.bot.core.messages.attachments.link import LinkAttachment
 from apps.bot.core.messages.attachments.photo import PhotoAttachment
 from apps.bot.core.messages.attachments.sticker import StickerAttachment
@@ -149,7 +149,7 @@ class Event:
     def get_all_attachments(self, types: list | None = None, use_fwd=True):
         if types is None:
             types = [
-                AudioAttachment, DocumentAttachment, GifAttachment, LinkAttachment,
+                AudioAttachment, DocumentAttachment, AnimationAttachment, LinkAttachment,
                 PhotoAttachment, StickerAttachment, VideoAttachment, VideoNoteAttachment
             ]
         attachments = []

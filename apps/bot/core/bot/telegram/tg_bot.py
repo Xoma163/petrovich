@@ -14,7 +14,7 @@ from apps.bot.core.event.telegram.tg_event import TgEvent
 from apps.bot.core.messages.attachments.attachment import Attachment
 from apps.bot.core.messages.attachments.audio import AudioAttachment
 from apps.bot.core.messages.attachments.document import DocumentAttachment
-from apps.bot.core.messages.attachments.gif import GifAttachment
+from apps.bot.core.messages.attachments.gif import AnimationAttachment
 from apps.bot.core.messages.attachments.photo import PhotoAttachment
 from apps.bot.core.messages.attachments.sticker import StickerAttachment
 from apps.bot.core.messages.attachments.video import VideoAttachment
@@ -72,14 +72,14 @@ class TgBot(Bot):
         self.api_handler = TelegramAPI(env.str("TG_TOKEN"), TelegramAPIRequestMode.LOCAL_SERVER)
 
         self.att_map = {
-            PhotoAttachment: self._send_photo,
-            GifAttachment: self._send_gif,
-            VideoAttachment: self._send_video,
-            VideoNoteAttachment: self._send_video_note,
-            AudioAttachment: self._send_audio,
-            DocumentAttachment: self._send_document,
-            StickerAttachment: self._send_sticker,
-            VoiceAttachment: self._send_voice,
+            PhotoAttachment: self.send_photo,
+            AnimationAttachment: self.send_animation,
+            VideoAttachment: self.send_video,
+            VideoNoteAttachment: self.send_video_note,
+            AudioAttachment: self.send_audio,
+            DocumentAttachment: self.send_document,
+            StickerAttachment: self.send_sticker,
+            VoiceAttachment: self.send_voice,
         }
 
     # MAIN ROUTING AND MESSAGING
@@ -116,12 +116,7 @@ class TgBot(Bot):
             cache_time=0
         )
 
-    # ToDo: мне не нравится, то что в каждом методе то pop, то ещё какая-то история с особенной обработкой. Может можно лучше?
-    def _send_media_group_wrap(self, rmi: ResponseMessageItem, default_params) -> dict:
-        params = copy(default_params)
-        params.pop('parse_mode', None)  # Не поддерживается телегой
-        caption = params.pop('caption')
-
+    def _send_media_group_wrap(self, rmi: ResponseMessageItem) -> dict:
         media_list = []
         files = []
         for i, attachment in enumerate(rmi.attachments):
@@ -148,12 +143,18 @@ class TgBot(Bot):
 
             media_list.append(media)
 
-        media_list[-1]['caption'] = caption
+        media_list[-1]['caption'] = rmi.text
 
-        params['media'] = media_list
-        return self.api_handler.send_media_group(**params, files=files)
+        media = media_list
+        return self.api_handler.send_media_group(
+            chat_id=rmi.peer_id,
+            message_thread_id=rmi.message_thread_id,
+            reply_to_message_id=rmi.reply_to,
+            media=media,
+            files=files,
+        )
 
-    def _send_media_group(self, rmi: ResponseMessageItem, default_params) -> dict:
+    def _send_media_group(self, rmi: ResponseMessageItem) -> dict:
         """
         Отправка множества вложений. Ссылки
         """
@@ -163,17 +164,16 @@ class TgBot(Bot):
         # Бьём на чанки если вложений больше 10
         if len(rmi.attachments) > 10:
             rmi_copy = copy(rmi)
-            params_copy = copy(default_params)
-            params_copy['caption'] = ""
+            rmi_copy.text = ""
             for chunk in get_chunks(rmi.attachments, 10):
                 rmi_copy.attachments = chunk
-                r = self._send_media_group_wrap(rmi_copy, params_copy)
+                r = self._send_media_group_wrap(rmi_copy)
                 responses.append(r)
-            if default_params['caption']:
-                self._send_text(default_params)
+            if rmi.text:
+                self.send_message(rmi)
         # Отправка одного
         else:
-            r = self._send_media_group_wrap(rmi, default_params)
+            r = self._send_media_group_wrap(rmi)
             responses.append(r)
 
         # Если не получилось отправить media_group, то пытаемся отправить вложения по одному
@@ -181,206 +181,11 @@ class TgBot(Bot):
             if response['ok']:
                 continue
             rmi_copy = copy(rmi)
-            params_copy = copy(default_params)
-            params_copy['caption'] = ""
+            rmi_copy.text = ""
             for chunk in get_chunks(rmi.attachments, 1):
                 rmi_copy.attachments = chunk
-                r = self._send_media_group_wrap(rmi_copy, params_copy)
+                r = self._send_media_group_wrap(rmi_copy)
         return r
-
-    def _send_photo(self, rmi: ResponseMessageItem, default_params) -> dict:
-        """
-        Отправка фото. Ссылка или файл
-        """
-
-        params = copy(default_params)
-        photo: PhotoAttachment = rmi.attachments[0]
-        files = None
-        if rmi.spoiler:
-            params['has_spoiler'] = rmi.spoiler
-        if photo.file_id:
-            params['photo'] = photo.file_id
-        elif photo.public_download_url and not photo.content:
-            params['photo'] = photo.public_download_url
-        else:
-            if photo.get_size_mb() > self.max_photo_size_mb:
-                rmi.attachments = []
-                raise PError(f"Нельзя загружать фото более {self.max_photo_size_mb} мб в телеграмм")
-            files = {'photo': photo.get_bytes_io_content()}
-        return self.api_handler.send_photo(**params, files=files)
-
-    def _send_document(self, rmi: ResponseMessageItem, default_params) -> dict:
-        """
-        Отправка документа. Ссылка или файл
-        """
-        params = copy(default_params)
-        document: DocumentAttachment = rmi.attachments[0]
-        files = None
-        if document.file_id:
-            params['document'] = document.file_id
-        elif document.public_download_url and not document.content:
-            params['document'] = document.public_download_url
-        else:
-            files = {'document': document.get_bytes_io_content()}
-            document.set_thumbnail()
-            if document.thumbnail:
-                files['thumbnail'] = document.thumbnail.get_bytes_io_content()
-
-        return self.api_handler.send_document(**params, files=files)
-
-    def _send_video(self, rmi: ResponseMessageItem, default_params) -> dict:
-        """
-        Отправка видео. Ссылка или файл
-        """
-        params = copy(default_params)
-
-        video: VideoAttachment = rmi.attachments[0]
-        files = None
-        if video.width:
-            params['width'] = video.width
-        if video.height:
-            params['height'] = video.height
-        if rmi.spoiler:
-            params['has_spoiler'] = rmi.spoiler
-
-        if video.file_id:
-            params['video'] = video.file_id
-        elif video.public_download_url and not video.content:
-            params['video'] = video.public_download_url
-        else:
-            if video.get_size_mb() > self.max_video_size_mb:
-                rmi.attachments = []
-                raise PError(
-                    f"Нельзя загружать видео более {self.max_video_size_mb} мб в телеграмм. Ваше видео {round(video.get_size_mb(), 2)} мб")
-            with ChatActionSender(self, ChatActionEnum.UPLOAD_VIDEO, params['chat_id'],
-                                  params.get('message_thread_id')):
-                files = {'video': video.get_bytes_io_content()}
-                video.set_thumbnail()
-                if video.thumbnail:
-                    files['thumbnail'] = video.thumbnail.get_bytes_io_content()
-        return self.api_handler.send_video(**params, files=files)
-
-    def _send_video_note(self, rmi: ResponseMessageItem, default_params) -> dict:
-        """
-        Отправка видео. Ссылка или файл
-        """
-        params = copy(default_params)
-        params.pop('parse_mode', None)  # Не поддерживается телегой
-        params.pop('caption', None)  # Не поддерживается телегой
-
-        video_note: VideoNoteAttachment = rmi.attachments[0]
-        params['video_note'] = video_note.file_id
-        return self.api_handler.send_video_note(**params).json()
-
-    def _send_audio(self, rmi: ResponseMessageItem, default_params) -> dict:
-        """
-        Отправка аудио. Ссылка или файл
-        """
-        params = copy(default_params)
-        audio: AudioAttachment = rmi.attachments[0]
-        files = None
-
-        if audio.artist:
-            params['performer'] = audio.artist
-        if audio.title:
-            params['title'] = audio.title
-
-        # Через public url плохо работает - не тянется название и thumbnail
-        if audio.public_download_url:
-            if audio.thumbnail_url:
-                params['thumbnail'] = audio.thumbnail_url
-            params['audio'] = audio.public_download_url
-        else:
-            files = {'audio': audio.get_bytes_io_content()}
-            audio.set_thumbnail()
-            if audio.thumbnail:
-                files['thumbnail'] = audio.thumbnail.get_bytes_io_content()
-        return self.api_handler.send_audio(**params, files=files)
-
-    def _send_gif(self, rmi: ResponseMessageItem, default_params) -> dict:
-        """
-        Отправка гифы. Ссылка или файл
-        """
-        params = copy(default_params)
-        gif: GifAttachment = rmi.attachments[0]
-        files = None
-        if rmi.spoiler:
-            params['has_spoiler'] = rmi.spoiler
-        if gif.file_id:
-            params['animation'] = gif.file_id
-        elif gif.public_download_url:
-            params['animation'] = gif.public_download_url
-        else:
-            if gif.get_size_mb() > self.max_gif_size_mb:
-                rmi.attachments = []
-                raise PError(f"Нельзя загружать гифы более {self.max_gif_size_mb} мб в телеграмм")
-            files = gif.get_bytes_io_content()
-        return self.api_handler.send_animation(**params, files=files)
-
-    def _send_sticker(self, rmi: ResponseMessageItem, default_params) -> dict:
-        """
-        Отправка стикера
-        """
-        params = copy(default_params)
-        params.pop('parse_mode', None)  # Не поддерживается телегой
-        params.pop('caption', None)  # Не поддерживается телегой
-
-        sticker: StickerAttachment = rmi.attachments[0]
-        params['sticker'] = sticker.file_id
-        return self.api_handler.send_sticker(**params)
-
-    def _send_voice(self, rmi: ResponseMessageItem, default_params) -> dict:
-        """
-        Отправка голосовухи
-        """
-        params = copy(default_params)
-        voice: VoiceAttachment = rmi.attachments[0]
-        params['voice'] = voice.file_id
-        return self.api_handler.send_voice(**params)
-
-    def _send_text(self, default_params) -> dict:
-        params = copy(default_params)
-        return self.api_handler.send_message(**params)
-
-    def send_message_draft(
-            self,
-            chat_id: int,
-            draft_id: int,
-            text: str,
-            message_thread_id: int = None,
-            parse_mode: str = None
-    ):
-        return self.api_handler.send_message_draft(
-            chat_id=chat_id,
-            draft_id=draft_id,
-            text=text,
-            message_thread_id=message_thread_id,
-            parse_mode=parse_mode
-        )
-
-    def edit_message(self, default_params) -> dict:
-        params = copy(default_params)
-        return self.api_handler.edit_message_text(**params)
-
-    def edit_caption(self, default_params) -> dict:
-        params = copy(default_params)
-        return self.api_handler.edit_message_caption(**params)
-
-    def edit_keyboard(self, default_params) -> dict:
-        params = copy(default_params)
-        return self.api_handler.edit_messaage_reply_markup(**params)
-
-    def edit_media(self, rmi: ResponseMessageItem, default_params) -> dict:
-        params = copy(default_params)
-        att: Attachment = rmi.attachments[0]
-        params['media'] = {'type': att.type}
-        if att.file_id:
-            params['media']['media'] = att.file_id
-        elif att.public_download_url:
-            params['media']['media'] = att.public_download_url
-        else:
-            params['media']['media'] = self.get_file_id(att)
-        return self.api_handler.edit_message_media(**params)
 
     def send_response_message_item(self, rmi: ResponseMessageItem) -> BotResponse:
         """
@@ -487,72 +292,332 @@ class TgBot(Bot):
         if not rmi.parse_mode:
             rmi.set_telegram_html()
 
-        params = rmi.get_tg_params()
+        # params = rmi.get_tg_params()
 
         if rmi.message_id:
             if rmi.attachments:
-                return self.edit_media(rmi, params)
+                return self.edit_message_media(rmi)
             if rmi.keyboard and not rmi.text:
-                return self.edit_keyboard(params)
-            return self.edit_message(params)
+                return self.edit_message_keyboard(rmi)
+            return self.edit_message_text(rmi)
 
         # Разбиение длинных сообщений на чанки
-        chunks = self._get_text_chunks(rmi, params)
+        chunks = self._get_text_chunks(rmi)
 
         if rmi.attachments:
             with ChatActionSender(self, rmi.attachments[0].ACTION, rmi.peer_id, rmi.message_thread_id):
                 # Отправка многих вложениями чанками: сначала вложения, потом текст
                 if len(rmi.attachments) > 1:
-                    r = self._send_media_group(rmi, params)
+                    r = self._send_media_group(rmi)
                 else:
-                    r = self.att_map[rmi.attachments[0].__class__](rmi, params)  # noqa
+                    r = self.att_map[rmi.attachments[0].__class__](rmi)  # noqa
         else:
-            r = self._send_text(params)
+            r = self.send_message(rmi)
 
         # Отправка чанков отдельно
         if chunks:
-            params.pop('caption')
             for chunk in chunks[1:]:
-                params['text'] = chunk
-                self._send_text(params)
+                rmi.text = chunk
+                self.send_message(rmi)
         return r
 
-    def _get_text_chunks(self, rmi, params) -> list | None:
+    def _get_text_chunks(self, rmi: ResponseMessageItem) -> list | None:
         """
         Разбивка сообщения на чанки
         """
 
         chunks = None
-        if not params.get('caption'):
+        if not rmi.text:
             return chunks
 
         # Если у нас есть форматирование, в таком случае все сначала шлём все медиа, а потом уже форматированный текст
         # Телега не умеет в send_media_group + parse_mode
         if rmi.parse_mode and len(rmi.attachments) > 1:
-            chunks = [""] + split_text_by_n_symbols(params['caption'], self.max_message_text_length)
-            params['caption'] = chunks[0]
+            chunks = [""] + split_text_by_n_symbols(rmi.text, self.max_message_text_length)
+            rmi.text = chunks[0]
 
         # Шлём длинные сообщения чанками.
-        if rmi.attachments and len(params['caption']) > self.max_message_caption_length:
+        if rmi.attachments and len(rmi.text) > self.max_message_caption_length:
             # Иначё бьём на 1024 символа первое сообщение и на 4096 остальные (ограничения телеги)
-            chunks = split_text_by_n_symbols(params['caption'], self.max_message_caption_length)
+            chunks = split_text_by_n_symbols(rmi.text, self.max_message_caption_length)
             first_chunk = chunks[0]
-            text = params['caption'][len(first_chunk):]
+            text = rmi.text[len(first_chunk):]
             chunks = split_text_by_n_symbols(text, self.max_message_text_length)
             chunks = [first_chunk] + chunks
-            params['caption'] = chunks[0]
+            rmi.text = chunks[0]
         # Обычные длинные текстовые сообщения шлём чанками
-        elif len(params['caption']) > self.max_message_text_length:
-            chunks = split_text_by_n_symbols(params['caption'], self.max_message_text_length)
-            params['caption'] = chunks[0]
+        elif len(rmi.text) > self.max_message_text_length:
+            chunks = split_text_by_n_symbols(rmi.text, self.max_message_text_length)
+            rmi.text = chunks[0]
 
         return chunks
 
-    # END  MAIN ROUTING AND MESSAGING
+    # END MAIN ROUTING AND MESSAGING
 
-    # LOGGING
+    # TELEGRAM SEND/EDIT
 
-    # END LOGGING
+    def send_message(self, rmi: ResponseMessageItem) -> dict:
+        return self.api_handler.send_message(
+            chat_id=rmi.peer_id,
+            text=rmi.text,
+            message_thread_id=rmi.message_thread_id,
+            reply_to_message_id=rmi.reply_to,
+            parse_mode=rmi.parse_mode,
+            reply_markup=rmi.keyboard,
+        )
+
+    def send_message_draft(self, rmi: ResponseMessageItem, draft_id: int):
+        return self.api_handler.send_message_draft(
+            chat_id=rmi.peer_id,
+            draft_id=draft_id,
+            text=rmi.text,
+            message_thread_id=rmi.message_thread_id,
+            parse_mode=rmi.parse_mode
+        )
+
+    def send_photo(self, rmi: ResponseMessageItem) -> dict:
+        """
+        Отправка фото. Ссылка или файл
+        """
+
+        photo_attachment: PhotoAttachment = rmi.attachments[0]
+        files = None
+        photo = None
+        if photo_attachment.file_id:
+            photo = photo_attachment.file_id
+        elif photo_attachment.public_download_url and not photo_attachment.content:
+            photo = photo_attachment.public_download_url
+        else:
+            if photo_attachment.get_size_mb() > self.max_photo_size_mb:
+                rmi.attachments = []
+                raise PError(f"Нельзя загружать фото более {self.max_photo_size_mb} мб в телеграмм")
+            files = {'photo': photo_attachment.get_bytes_io_content()}
+        return self.api_handler.send_photo(
+            chat_id=rmi.peer_id,
+            message_thread_id=rmi.message_thread_id,
+            reply_to_message_id=rmi.reply_to,
+            reply_markup=rmi.keyboard,
+            parse_mode=rmi.parse_mode,
+            caption=rmi.text,
+            has_spoiler=rmi.spoiler,
+            photo=photo,
+            files=files,
+        )
+
+    def send_document(self, rmi: ResponseMessageItem) -> dict:
+        """
+        Отправка документа. Ссылка или файл
+        """
+        document_attachment: DocumentAttachment = rmi.attachments[0]
+        document = None
+        files = None
+        if document_attachment.file_id:
+            document = document_attachment.file_id
+        elif document_attachment.public_download_url and not document_attachment.content:
+            document = document_attachment.public_download_url
+        else:
+            files = {'document': document_attachment.get_bytes_io_content()}
+            document_attachment.set_thumbnail()
+            if document_attachment.thumbnail:
+                files['thumbnail'] = document_attachment.thumbnail.get_bytes_io_content()
+
+        return self.api_handler.send_document(
+            chat_id=rmi.peer_id,
+            message_thread_id=rmi.message_thread_id,
+            reply_to_message_id=rmi.reply_to,
+            reply_markup=rmi.keyboard,
+            parse_mode=rmi.parse_mode,
+            caption=rmi.text,
+            document=document,
+            files=files
+        )
+
+    def send_video(self, rmi: ResponseMessageItem) -> dict:
+        """
+        Отправка видео. Ссылка или файл
+        """
+        video_attachment: VideoAttachment = rmi.attachments[0]
+        video = None
+        files = None
+        if video_attachment.file_id:
+            video = video_attachment.file_id
+        elif video_attachment.public_download_url and not video_attachment.content:
+            video = video_attachment.public_download_url
+        else:
+            if video_attachment.get_size_mb() > self.max_video_size_mb:
+                rmi.attachments = []
+                raise PError(
+                    f"Нельзя загружать видео более {self.max_video_size_mb} мб в телеграмм. Ваше видео {round(video_attachment.get_size_mb(), 2)} мб")
+            with ChatActionSender(self, ChatActionEnum.UPLOAD_VIDEO, rmi.peer_id, rmi.message_thread_id):
+                files = {'video': video_attachment.get_bytes_io_content()}
+                video_attachment.set_thumbnail()
+                if video_attachment.thumbnail:
+                    files['thumbnail'] = video_attachment.thumbnail.get_bytes_io_content()
+        return self.api_handler.send_video(
+            chat_id=rmi.peer_id,
+            message_thread_id=rmi.message_thread_id,
+            reply_to_message_id=rmi.reply_to,
+            reply_markup=rmi.keyboard,
+            parse_mode=rmi.parse_mode,
+            caption=rmi.text,
+            width=rmi.attachments[0].width,
+            height=rmi.attachments[0].height,
+            has_spoiler=rmi.spoiler,
+            video=video,
+            files=files,
+        )
+
+    def send_video_note(self, rmi: ResponseMessageItem) -> dict:
+        """
+        Отправка видео. Ссылка или файл
+        """
+
+        video_note_attachment: VideoNoteAttachment = rmi.attachments[0]
+        video_note = video_note_attachment.file_id
+        return self.api_handler.send_video_note(
+            chat_id=rmi.peer_id,
+            message_thread_id=rmi.message_thread_id,
+            reply_to_message_id=rmi.reply_to,
+            reply_markup=rmi.keyboard,
+            video_note=video_note
+        ).json()
+
+    def send_audio(self, rmi: ResponseMessageItem) -> dict:
+        """
+        Отправка аудио. Ссылка или файл
+        """
+        audio_attachment: AudioAttachment = rmi.attachments[0]
+        thumbnail = None
+        audio = None
+        files = None
+
+        if audio_attachment.thumbnail_url:
+            thumbnail = audio_attachment.thumbnail_url
+
+        if audio_attachment.file_id:
+            audio = audio_attachment.file_id
+        elif audio_attachment.public_download_url and not audio_attachment.content:
+            audio = audio_attachment.public_download_url
+        else:
+            files = {'audio': audio_attachment.get_bytes_io_content()}
+            audio_attachment.set_thumbnail()
+            if audio_attachment.thumbnail:
+                files['thumbnail'] = audio_attachment.thumbnail.get_bytes_io_content()  # noqa
+
+        return self.api_handler.send_audio(
+            chat_id=rmi.peer_id,
+            message_thread_id=rmi.message_thread_id,
+            reply_to_message_id=rmi.reply_to,
+            reply_markup=rmi.keyboard,
+            parse_mode=rmi.parse_mode,
+            caption=rmi.text,
+            title=audio_attachment.title,
+            duration=audio_attachment.duration,
+            performer=audio_attachment.artist,
+            audio=audio,
+            thumbnail=thumbnail,
+            files=files,
+        )
+
+    def send_animation(self, rmi: ResponseMessageItem) -> dict:
+        """
+        Отправка гифы. Ссылка или файл
+        """
+        animation_attachment: AnimationAttachment = rmi.attachments[0]
+        animation = None
+        files = None
+
+        if animation_attachment.file_id:
+            animation = animation_attachment.file_id
+        elif animation_attachment.public_download_url:
+            animation = animation_attachment.public_download_url
+        else:
+            if animation_attachment.get_size_mb() > self.max_gif_size_mb:
+                raise PError(f"Нельзя загружать гифы более {self.max_gif_size_mb} мб в телеграмм")
+            files = {'animation': animation_attachment.get_bytes_io_content()}
+        return self.api_handler.send_animation(
+            chat_id=rmi.peer_id,
+            message_thread_id=rmi.message_thread_id,
+            reply_to_message_id=rmi.reply_to,
+            reply_markup=rmi.keyboard,
+            parse_mode=rmi.parse_mode,
+            caption=rmi.text,
+            has_spoiler=rmi.spoiler,
+            animation=animation,
+            files=files
+        )
+
+    def send_sticker(self, rmi: ResponseMessageItem) -> dict:
+        """
+        Отправка стикера
+        """
+
+        sticker_attachment: StickerAttachment = rmi.attachments[0]
+        sticker = sticker_attachment.file_id
+        return self.api_handler.send_sticker(
+            chat_id=rmi.peer_id,
+            message_thread_id=rmi.message_thread_id,
+            reply_to_message_id=rmi.reply_to,
+            reply_markup=rmi.keyboard,
+            sticker=sticker
+        )
+
+    def send_voice(self, rmi: ResponseMessageItem) -> dict:
+        """
+        Отправка голосовухи
+        """
+        voice_attachment: VoiceAttachment = rmi.attachments[0]
+        voice = voice_attachment.file_id
+        return self.api_handler.send_voice(
+            chat_id=rmi.peer_id,
+            message_thread_id=rmi.message_thread_id,
+            reply_to_message_id=rmi.reply_to,
+            reply_markup=rmi.keyboard,
+            parse_mode=rmi.parse_mode,
+            voice=voice
+        )
+
+    def edit_message_text(self, rmi: ResponseMessageItem) -> dict:
+        return self.api_handler.edit_message_text(
+            chat_id=rmi.peer_id,
+            message_id=rmi.message_id,
+            text=rmi.text,
+            reply_markup=rmi.keyboard,
+            parse_mode=rmi.parse_mode
+        )
+
+    def edit_message_caption(self, rmi: ResponseMessageItem) -> dict:
+        return self.api_handler.edit_message_caption(
+            chat_id=rmi.peer_id,
+            message_id=rmi.message_id,
+            caption=rmi.text,
+            reply_markup=rmi.keyboard,
+            parse_mode=rmi.parse_mode
+        )
+
+    def edit_message_keyboard(self, rmi: ResponseMessageItem) -> dict:
+        return self.api_handler.edit_messaage_reply_markup(
+            chat_id=rmi.peer_id,
+            message_id=rmi.message_id,
+            reply_markup=rmi.keyboard
+        )
+
+    def edit_message_media(self, rmi: ResponseMessageItem) -> dict:
+        attachment = rmi.attachments[0]
+        media = {'type': attachment.type}
+        if attachment.file_id:
+            media['media'] = attachment.file_id
+        elif attachment.public_download_url:
+            media['media'] = attachment.public_download_url
+        else:
+            media['media'] = self.get_file_id(attachment)
+        return self.api_handler.edit_message_media(
+            chat_id=rmi.peer_id,
+            message_id=rmi.message_id,
+            media=media
+        )
+
+    # END TELEGRAM SEND/EDIT
 
     # USERS GROUPS BOTS
     def get_user_profile_photos(self, user_id: int | str) -> dict:
@@ -657,6 +722,10 @@ class TgBot(Bot):
     def answer_callback_query(self, callback_query_id: int) -> dict:
         return self.api_handler.answer_callback_query(callback_query_id)
 
+    # END EXTRA
+
+    # FORMATTING
+
     @classmethod
     def get_formatted_text(cls, text: str, language: str = None) -> str:
         """
@@ -722,4 +791,4 @@ class TgBot(Bot):
         expandable = " expandable" if expandable else ""
         return f'<{cls.QUOTE_TAG}{expandable}>{text}</{cls.QUOTE_TAG}>'
 
-    # END EXTRA
+    # END FORMATTING

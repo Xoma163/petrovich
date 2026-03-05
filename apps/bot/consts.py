@@ -2,7 +2,7 @@ from enum import StrEnum
 
 from apps.bot.core.messages.attachments.audio import AudioAttachment
 from apps.bot.core.messages.attachments.document import DocumentAttachment
-from apps.bot.core.messages.attachments.gif import GifAttachment
+from apps.bot.core.messages.attachments.gif import AnimationAttachment
 from apps.bot.core.messages.attachments.link import LinkAttachment
 from apps.bot.core.messages.attachments.photo import PhotoAttachment
 from apps.bot.core.messages.attachments.sticker import StickerAttachment
@@ -45,6 +45,6 @@ ATTACHMENT_TYPE_TRANSLATOR = {
     'sticker': StickerAttachment,
     'voice': VoiceAttachment,
     # ToDo: в чём разница между gif и animation. Animation - свежее как будто?
-    'gif': GifAttachment,
-    'animation': GifAttachment
+    'gif': AnimationAttachment,
+    'animation': AnimationAttachment
 }

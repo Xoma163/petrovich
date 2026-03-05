@@ -3,7 +3,7 @@ from apps.bot.core.messages.attachments.attachment import Attachment
 from apps.bot.core.messages.attachments.mixins.duration_mixin import DurationMixin
 
 
-class GifAttachment(Attachment, DurationMixin):
+class AnimationAttachment(Attachment, DurationMixin):
     TYPE = 'animation'
     ACTION = ChatActionEnum.UPLOAD_VIDEO
 

@@ -10,7 +10,7 @@ from apps.bot.consts import RoleEnum, PlatformEnum
 from apps.bot.core.bot.telegram.tg_bot import TgBot
 from apps.bot.core.messages.attachments.audio import AudioAttachment
 from apps.bot.core.messages.attachments.document import DocumentAttachment
-from apps.bot.core.messages.attachments.gif import GifAttachment
+from apps.bot.core.messages.attachments.gif import AnimationAttachment
 from apps.bot.core.messages.attachments.photo import PhotoAttachment
 from apps.bot.core.messages.attachments.video import VideoAttachment
 from apps.bot.core.messages.response_message import ResponseMessage, ResponseMessageItem
@@ -93,7 +93,7 @@ class Notifies(Command):
             data = self._add_notify()
 
         attachments = self.event.get_all_attachments(
-            [AudioAttachment, DocumentAttachment, GifAttachment, PhotoAttachment, VideoAttachment]
+            [AudioAttachment, DocumentAttachment, AnimationAttachment, PhotoAttachment, VideoAttachment]
         )
         data.update({
             'attachments': [{x.type: x.file_id} for x in attachments] if attachments else [],

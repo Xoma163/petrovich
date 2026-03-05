@@ -61,13 +61,10 @@ class GPTVisionFunctionality(GPTCommandProtocol):
     def __vision_callback(self, text: str, draft_id: int):
         rmi = ResponseMessageItem(text=text)
         rmi.set_telegram_markdown_v2()
+        rmi.peer_id = self.event.peer_id
+        rmi.message_thread_id = self.event.message_thread_id
 
-        self.bot.send_message_draft(
-            chat_id=self.event.peer_id,
-            draft_id=draft_id,
-            text=text,
-            message_thread_id=self.event.message_thread_id
-        )
+        self.bot.send_message_draft(rmi, draft_id=draft_id)
 
     # COMMON UTILS
 

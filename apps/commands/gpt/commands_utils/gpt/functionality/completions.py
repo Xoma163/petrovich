@@ -4,7 +4,6 @@ from apps.bot.core.chat_action_sender import ChatActionSender
 from apps.bot.core.chat_actions import ChatActionEnum
 from apps.bot.core.messages.attachments.document import DocumentAttachment
 from apps.bot.core.messages.response_message import ResponseMessageItem
-from apps.bot.core.messages.telegram.parse_mode import TelegramParseMode
 from apps.commands.gpt.api.base import GPTAPI
 from apps.commands.gpt.api.responses import GPTCompletionsResponse
 from apps.commands.gpt.messages.base import GPTMessages
@@ -92,14 +91,10 @@ class GPTCompletionsFunctionality(GPTCommandProtocol):
     def __completions_callback(self, text: str, draft_id: int):
         rmi = ResponseMessageItem(text=text)
         rmi.set_telegram_markdown_v2()
+        rmi.peer_id = self.event.peer_id
+        rmi.message_thread_id = self.event.message_thread_id
 
-        self.bot.send_message_draft(
-            chat_id=self.event.peer_id,
-            draft_id=draft_id,
-            text=rmi.text,
-            message_thread_id=self.event.message_thread_id,
-            parse_mode=TelegramParseMode.MARKDOWN_V2
-        )
+        self.bot.send_message_draft(rmi, draft_id=draft_id)
 
     # COMMON UTILS
 

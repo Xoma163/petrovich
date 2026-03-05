@@ -4,7 +4,7 @@ from apps.bot.consts import PlatformEnum
 from apps.bot.core.event.event import Event
 from apps.bot.core.messages.attachments.audio import AudioAttachment
 from apps.bot.core.messages.attachments.document import DocumentAttachment, DocumentMimeType
-from apps.bot.core.messages.attachments.gif import GifAttachment
+from apps.bot.core.messages.attachments.gif import AnimationAttachment
 from apps.bot.core.messages.attachments.link import LinkAttachment
 from apps.bot.core.messages.attachments.photo import PhotoAttachment
 from apps.bot.core.messages.attachments.sticker import StickerAttachment
@@ -247,7 +247,7 @@ class TgEvent(Event):
         self.attachments.append(tg_video)
 
     def setup_gif(self, gif_event):
-        tg_gif = GifAttachment()
+        tg_gif = AnimationAttachment()
         tg_gif.parse_tg(gif_event)
         self.attachments.append(tg_gif)
 

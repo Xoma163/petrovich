@@ -4,7 +4,7 @@ from django.core.files.base import ContentFile
 from django.db.models import QuerySet
 
 from apps.bot.consts import RoleEnum, PlatformEnum, ATTACHMENT_TYPE_TRANSLATOR
-from apps.bot.core.messages.attachments.gif import GifAttachment
+from apps.bot.core.messages.attachments.gif import AnimationAttachment
 from apps.bot.core.messages.attachments.link import LinkAttachment
 from apps.bot.core.messages.attachments.photo import PhotoAttachment
 from apps.bot.core.messages.attachments.sticker import StickerAttachment
@@ -66,7 +66,7 @@ class Meme(Command):
     priority = -10
 
     ALLOWED_ATTACHMENTS = [
-        PhotoAttachment, VideoAttachment, StickerAttachment, GifAttachment, VoiceAttachment, VideoNoteAttachment,
+        PhotoAttachment, VideoAttachment, StickerAttachment, AnimationAttachment, VoiceAttachment, VideoNoteAttachment,
         LinkAttachment
     ]
 
@@ -139,7 +139,7 @@ class Meme(Command):
 
         # Кэш
         is_youtube_link = isinstance(attachment, LinkAttachment) and attachment.is_youtube_link
-        callback_params_data = {}
+        rmi_params = ResponseMessageItem()
 
         if new_meme['approved']:
             answer = "Добавил"
@@ -151,14 +151,12 @@ class Meme(Command):
             response = self.bot.send_response_message_item(
                 ResponseMessageItem(text=answer_with_youtube, peer_id=self.event.peer_id)
             )
-            callback_params_data = {
-                "chat_id": self.event.peer_id,
-                "message_id": response.response['result']['message_id'],
-                "text": answer
-            }
+            rmi_params.peer_id = self.event.peer_id
+            rmi_params.message_id = response.response['result']['message_id']
+            rmi_params.text = answer
 
         if is_youtube_link:
-            self.set_youtube_file_id(new_meme_obj, callback_params_data)
+            self.set_youtube_file_id(new_meme_obj, rmi_params)
         else:
             self._save_meme(new_meme_obj)
 
@@ -216,8 +214,7 @@ class Meme(Command):
             setattr(meme, attr, value)
 
         is_youtube_link = isinstance(attachment, LinkAttachment) and attachment.is_youtube_link
-        callback_params_data = {}
-
+        rmi_params = ResponseMessageItem()
         trusted_user = self.event.sender.check_role(RoleEnum.MODERATOR) or self.event.sender.check_role(
             RoleEnum.TRUSTED)
         # Кэш
@@ -232,14 +229,12 @@ class Meme(Command):
             response = self.bot.send_response_message_item(
                 ResponseMessageItem(text=answer_with_youtube, peer_id=self.event.peer_id)
             )
-            callback_params_data = {
-                "chat_id": self.event.peer_id,
-                "message_id": response.response['result']['message_id'],
-                "text": answer
-            }
+            rmi_params.peer_id = self.event.peer_id
+            rmi_params.message_id = response.response['result']['message_id'],
+            rmi_params.text = answer
 
         if is_youtube_link:
-            self.set_youtube_file_id(meme, callback_params_data, is_update=True)
+            self.set_youtube_file_id(meme, rmi_params, is_update=True)
 
         if trusted_user:
             raise PSkip()
@@ -485,11 +480,11 @@ class Meme(Command):
         if not attachment.is_youtube_link:
             raise PWarning("Это ссылка не на youtube видео")
 
-    def set_youtube_file_id(self, meme: MemeModel, callback_params_data: dict, is_update: bool = False):
-        thread = threading.Thread(target=self._set_youtube_file_id, args=(meme, callback_params_data, is_update))
+    def set_youtube_file_id(self, meme: MemeModel, rmi_params: ResponseMessageItem, is_update: bool = False):
+        thread = threading.Thread(target=self._set_youtube_file_id, args=(meme, rmi_params, is_update))
         thread.start()
 
-    def _set_youtube_file_id(self, meme: MemeModel, callback_params_data: dict, is_update: bool = False):
+    def _set_youtube_file_id(self, meme: MemeModel, rmi_params: ResponseMessageItem, is_update: bool = False):
         from apps.commands.other.commands.trusted.trim_video import TrimVideo
 
         lower_link_index = self.event.message.args.index(meme.link.lower())
@@ -517,17 +512,15 @@ class Meme(Command):
             meme.save()
             self._save_meme(meme, video_content, is_update=is_update)
 
-            callback_params_data['text'] += f"\n{self.MESSAGE_YOUTUBE_STATUS_COMPLETE}"
-            self.bot.edit_message(callback_params_data)
+            rmi_params.text += f"\n{self.MESSAGE_YOUTUBE_STATUS_COMPLETE}"
+            self.bot.edit_message_text(rmi_params)
             return
         except PWarning as e:
-            callback_params_data['text'] = self.MESSAGE_YOUTUBE_STATUS_CUSTOM_ERROR.format(
-                error_msg=e.msg
-            )
-            self.bot.edit_message(callback_params_data)
+            rmi_params.text = self.MESSAGE_YOUTUBE_STATUS_CUSTOM_ERROR.format(error_msg=e.msg)
+            self.bot.edit_message_text(rmi_params)
             return
         except Exception:
-            self.bot.edit_message(callback_params_data)
+            self.bot.edit_message_text(rmi_params)
             return
 
     @staticmethod
@@ -597,7 +590,7 @@ class Meme(Command):
             PhotoAttachment.TYPE: 'photo_file_id',
             StickerAttachment.TYPE: 'sticker_file_id',
             VideoAttachment.TYPE: 'video_file_id',
-            GifAttachment.TYPE: 'gif_file_id',
+            AnimationAttachment.TYPE: 'gif_file_id',
             VoiceAttachment.TYPE: 'voice_file_id',
         }
 
@@ -607,7 +600,7 @@ class Meme(Command):
                 'type': meme.type,
                 att_type_map[meme.type]: meme.tg_file_id
             }
-            if meme.type in [VideoAttachment.TYPE, GifAttachment.TYPE, VoiceAttachment.TYPE]:
+            if meme.type in [VideoAttachment.TYPE, AnimationAttachment.TYPE, VoiceAttachment.TYPE]:
                 qr['title'] = meme.name
 
             # set youtube preview
@@ -685,7 +678,7 @@ class Meme(Command):
         att_types = [
             VoiceAttachment.TYPE,
             VideoAttachment.TYPE,
-            GifAttachment.TYPE,
+            AnimationAttachment.TYPE,
             StickerAttachment.TYPE,
             PhotoAttachment.TYPE
         ]

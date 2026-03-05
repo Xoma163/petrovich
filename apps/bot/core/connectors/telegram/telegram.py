@@ -236,6 +236,7 @@ class TelegramAPI:
             duration: int = None,
             performer: str = None,
             audio: str = None,
+            thumbnail: str = None,
             files: dict = None
     ):
         if not audio and not files.get('audio'):
@@ -251,6 +252,7 @@ class TelegramAPI:
             "duration": duration,
             "performer": performer,
             "audio": audio,
+            "thumbnail": thumbnail,
         }
         if reply_markup:
             params['reply_markup'] = json.dumps(reply_markup)

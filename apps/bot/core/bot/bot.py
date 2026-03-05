@@ -11,7 +11,7 @@ from apps.bot.core.chat_actions import ChatActionEnum
 from apps.bot.core.event.event import Event
 from apps.bot.core.messages.attachments.audio import AudioAttachment
 from apps.bot.core.messages.attachments.document import DocumentAttachment
-from apps.bot.core.messages.attachments.gif import GifAttachment
+from apps.bot.core.messages.attachments.gif import AnimationAttachment
 from apps.bot.core.messages.attachments.photo import PhotoAttachment
 from apps.bot.core.messages.attachments.video import VideoAttachment
 from apps.bot.core.messages.response_message import ResponseMessage, ResponseMessageItem
@@ -311,11 +311,11 @@ class Bot:
             peer_id: str | int | None = None,
             message_thread_id: str | int | None = None,
             send_chat_action: bool = True,
-    ) -> GifAttachment:
+    ) -> AnimationAttachment:
         """
         Получение гифки
         """
-        ga = GifAttachment()
+        ga = AnimationAttachment()
         with ChatActionSender(self, ChatActionEnum.UPLOAD_VIDEO, peer_id, message_thread_id,
                               send_chat_action=send_chat_action):
             ga.parse(url, path, _bytes, filename=filename)
@@ -324,15 +324,7 @@ class Bot:
     # END ATTACHMENTS
 
     # EXTRA
-    def send_message_draft(
-            self,
-            chat_id: int,
-            draft_id: int,
-            text: str,
-            message_thread_id: int = None,
-            parse_mode: str = None
-
-    ):
+    def send_message_draft(self, rmi: ResponseMessageItem, draft_id: int, ):
         pass
 
     def set_chat_action(self, chat_id: int | str, chat_action: ChatActionEnum, message_thread_id: int | None = None):
@@ -365,7 +357,7 @@ class Bot:
         Удаление сообщения
         """
 
-    def edit_message(self, default_params) -> dict:
+    def edit_message_text(self, rmi: ResponseMessageItem) -> dict:
         """
         Редактирование сообщения
         """

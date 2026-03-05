@@ -1,4 +1,3 @@
-import json
 import re
 from copy import copy
 
@@ -16,13 +15,11 @@ class ResponseMessageItem:
             attachments: list | None = None,
             reply_to: str | None = None,
             keyboard: dict | None = None,
-            message_id: str | None = None,
+            message_id: int | None = None,
             message_thread_id: str | int | None = None,
             peer_id: int | None = None,
             log_level: str = 'debug',
             exc_info=None,
-            disable_web_page_preview: bool = False,
-            entities: list | None = None,
             send: bool = True,
             spoiler: bool = False,
             parse_mode: TelegramParseMode | None = None
@@ -40,11 +37,6 @@ class ResponseMessageItem:
 
         self.log_level = log_level
         self.exc_info = exc_info
-
-        self.disable_web_page_preview = disable_web_page_preview
-        self.entities = entities
-
-        self.kwargs = {}
 
         self.send = send
         self.spoiler = spoiler
@@ -90,10 +82,6 @@ class ResponseMessageItem:
                     self.parse_mode = TelegramParseMode.HTML
                     break
 
-        # ToDo: экспериментально выпилено. Возможно придётся вернуть
-        # if self.kwargs.get('parse_mode'):
-        #     self.wrap_links()
-
     def wrap_links(self):
         # Врапим ссылки без явного их врапа если у нас уже html
         url_poss = re.finditer(self.URLS_REGEXP, self.text)  # Ссылки не в скобках
@@ -123,8 +111,7 @@ class ResponseMessageItem:
 
     def get_tg_params(self) -> dict:
         params: dict = {
-            'chat_id': self.peer_id,
-            **self.kwargs
+            'chat_id': self.peer_id
         }
         if self.text:
             if self.attachments:
@@ -139,12 +126,8 @@ class ResponseMessageItem:
             params['reply_markup'] = self.keyboard
         if self.reply_to:
             params['reply_to_message_id'] = self.reply_to
-        if self.disable_web_page_preview:
-            params['disable_web_page_preview'] = True
         if self.message_thread_id:
             params['message_thread_id'] = self.message_thread_id
-        if self.entities:
-            params['entities'] = json.dumps(self.entities)
 
         if self.message_id:
             params['message_id'] = self.message_id
@@ -167,7 +150,6 @@ class ResponseMessage:
         dict_self = copy(self.__dict__)
         dict_self["messages"] = [x.to_log() for x in dict_self["messages"]]
         return dict_self
-
 
     def __bool__(self):
         return len(self.messages) > 0
