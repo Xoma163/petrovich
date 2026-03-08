@@ -129,7 +129,7 @@ class OpenAIAPI(GPTAPI, ABC):
                         if not callback_func:
                             continue
                         now = time.time()
-                        if now - last_call < 0.5:
+                        if now - last_call < 1:
                             continue
                         last_call = now
                         sha256_hex = hashlib.sha256(chunk['item_id'].encode('utf-8')).hexdigest()
@@ -178,11 +178,11 @@ class OpenAIAPI(GPTAPI, ABC):
                         if not callback_func:
                             continue
                         now = time.time()
-                        if now - last_call < 0.5:
+                        if now - last_call < 1:
                             continue
                         last_call = now
                         sha256_hex = hashlib.sha256(chunk['id'].encode('utf-8')).hexdigest()
-                        num64 = int(sha256_hex, 16) % (2 ** 64)
+                        num64 = int(sha256_hex, 16) % (2 ** 16)
                         callback_func(text=full_text, draft_id=num64)
 
             finally:
