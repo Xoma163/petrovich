@@ -14,7 +14,6 @@ class TikTok:
     AGE_RESTRICTION_MESSAGE = r'This post may not be comfortable for some audiences. Log in to make the most of your experience.'
     AUDIENCE_CONTROL = r'This creator turned on audience controls. Log in to make the most of your TikTok experience.'
 
-
     def __init__(self):
         super().__init__()
 
@@ -55,9 +54,9 @@ class TikTok:
         script_data = bs4.find(id="__UNIVERSAL_DATA_FOR_REHYDRATION__")
         data = json.loads(script_data.text)
         video_detail = data['__DEFAULT_SCOPE__'].get('webapp.video-detail')
-        self.raise_on_errors(video_detail)
 
         if video_detail:
+            self.raise_on_errors(video_detail)
             return self.get_video_post(video_detail, cookies, headers)
         else:
             raise PWarning("Не нашёл видео в тиктоке. Если это пост-слайдер, то я не умею их скачивать")
