@@ -24,6 +24,7 @@ class QwenAPI(
     base_url = f"http://192.168.1.10:21001"
 
     # Мой код к этому не готов, что нужно выбирать из двух серверов
+    # Хардкод
     def set_base_url(self):
         variants = [
             "http://192.168.1.20:21001",
@@ -96,6 +97,10 @@ class QwenAPI(
             payload['stream_options'] = {"include_usage": True}
 
         self.set_base_url()
+        # Хардкод
+        if self.base_url == "http://192.168.1.10:21001":
+            raise PWarning("Не работает")
+
         return self.do_vision_request(
             model,
             self.vision_url,
