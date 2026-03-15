@@ -125,7 +125,7 @@ class TgBot(Bot):
             elif attachment.public_download_url and not attachment.content:
                 media = {'type': attachment.type, 'media': attachment.public_download_url}
             else:
-                filename = attachment.file_name if attachment.file_name else str(i)
+                filename = attachment.file_name_full if attachment.file_name_full else str(i)
                 files.append((filename, attachment.content))
                 media = {'type': attachment.type, "media": f"attach://{filename}"}
 
