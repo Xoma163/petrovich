@@ -345,10 +345,16 @@ def get_admin_profile(exclude_profile: Profile | None = None) -> Profile | None:
     return profile
 
 
-def wrap_text_in_document(text: str, filename: str = 'file.html') -> DocumentAttachment:
+def wrap_text_in_html_document(text: str, filename: str = 'file') -> DocumentAttachment:
     text = text.replace("\n", "<br>")
     document = DocumentAttachment()
-    document.parse(_bytes=text.encode('utf-8-sig'), filename=filename)
+    document.parse(_bytes=text.encode('utf-8-sig'), filename=f"{filename}.html")
+    return document
+
+
+def wrap_text_in_markdown_document(text: str, filename: str = 'file') -> DocumentAttachment:
+    document = DocumentAttachment()
+    document.parse(_bytes=text.encode('utf-8-sig'), filename=f"{filename}.md")
     return document
 
 

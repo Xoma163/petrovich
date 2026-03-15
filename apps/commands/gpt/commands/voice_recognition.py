@@ -18,7 +18,7 @@ from apps.commands.gpt.utils import user_has_api_key
 from apps.commands.help_text import HelpText, HelpTextItem, HelpTextArgument
 from apps.shared.exceptions import PWarning, PSkipContinue, PError, PSkip
 from apps.shared.utils.audio.splitter import AudioSplitter
-from apps.shared.utils.utils import wrap_text_in_document
+from apps.shared.utils.utils import wrap_text_in_html_document
 
 
 class VoiceRecognition(AcceptExtraCommand):
@@ -170,7 +170,7 @@ class VoiceRecognition(AcceptExtraCommand):
         # Если ответ слишком длинный - кладём в файл
         rmi = ResponseMessageItem()
         if len(answer) > self.bot.max_message_text_length:
-            document = wrap_text_in_document(answer, 'Транскрибация.html')
+            document = wrap_text_in_html_document(answer, 'Транскрибация')
             answer = "Полная транскрибация в одном файле"
             rmi.attachments = [document]
 

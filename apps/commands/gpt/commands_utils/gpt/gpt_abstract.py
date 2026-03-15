@@ -28,7 +28,7 @@ from apps.commands.gpt.protocols import GPTCommandProtocol
 from apps.commands.gpt.providers.base import GPTProvider
 from apps.shared.exceptions import PWarning, PError
 from apps.shared.utils.cache import MessagesCache
-from apps.shared.utils.utils import wrap_text_in_document
+from apps.shared.utils.utils import wrap_text_in_markdown_document, wrap_text_in_html_document
 from petrovich.settings import env
 
 logger = logging.getLogger(__name__)
@@ -196,10 +196,11 @@ class GPTCommand(
         """
         answer = answer if answer else "{пустой ответ}"
         if len(answer) > self.bot.max_message_text_length:
-            document = wrap_text_in_document(answer, 'gpt.html')
+            document_html = wrap_text_in_html_document(answer, 'gpt')
+            document_markdown = wrap_text_in_markdown_document(answer, 'gpt')
             rmi = ResponseMessageItem(
                 text=self.RESPONSE_MESSAGE_TOO_LONG,
-                attachments=[document],
+                attachments=[document_html, document_markdown],
                 reply_to=self.event.message.id
             )
         else:
@@ -218,7 +219,7 @@ class GPTCommand(
         if r.success:
             return None
 
-        document = wrap_text_in_document(rmi._raw_text, filename='gpt.html')
+        document = wrap_text_in_markdown_document(rmi._raw_text, filename='gpt')
         rmi.attachments = [document]
         rmi.text = self.TG_CANT_PARSE_RESPONSE_MESSAGE
         rmi.parse_mode = None
