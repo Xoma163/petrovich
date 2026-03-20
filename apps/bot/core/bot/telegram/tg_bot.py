@@ -187,7 +187,7 @@ class TgBot(Bot):
                 r = self._send_media_group_wrap(rmi_copy)
         return r
 
-    def send_response_message_item(self, rmi: ResponseMessageItem) -> BotResponse:
+    def send_response_message_item(self, rmi: ResponseMessageItem, _retry=False) -> BotResponse:
         """
         Отправка ResponseMessageItem сообщения
         Возвращает {success:bool, response:Response.json()}
@@ -241,6 +241,9 @@ class TgBot(Bot):
         catch_errors_starts_with = {
             "Bad Request: can't parse entities": "Не смог распарсить markdown/html сущности. Внутренняя ошибка."
         }
+        catch_errors_reply_to_not_found = (
+            'Bad Request: message to be replied not found',
+        )
 
         error = r['description']
 
@@ -271,6 +274,9 @@ class TgBot(Bot):
         elif error in catch_errors:
             msg = catch_errors[error]
             log_level = "warning"
+        elif error in catch_errors_reply_to_not_found and not _retry:
+            rmi.reply_to = None
+            return self.send_response_message_item(rmi, _retry=True)
         else:
             msg = self.ERROR_MSG
             log_level = "error"
