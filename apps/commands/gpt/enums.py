@@ -19,7 +19,8 @@ class GPTImageQuality(StrEnum):
     LOW = "low"
 
 
-class GPTReasoningEffortLevel(Enum):
+class GPTReasoningEffortLevel(StrEnum):
+    XHIGH = "xhigh"
     HIGH = "high"
     MEDIUM = "medium"
     LOW = "low"

@@ -16,6 +16,7 @@ from apps.commands.gpt.api.responses import (
     GPTImageDrawResponse,
     GPTVoiceRecognitionResponse
 )
+from apps.commands.gpt.enums import GPTReasoningEffortLevel
 from apps.commands.gpt.messages.base import GPTMessages
 from apps.commands.gpt.models import (
     CompletionsModel,
@@ -27,6 +28,7 @@ from apps.commands.gpt.models import (
 from apps.commands.gpt.usage import (
     GPTVoiceRecognitionUsage
 )
+from apps.shared.exceptions import PWarning
 
 
 class ChatGPTAPI(
@@ -73,13 +75,7 @@ class ChatGPTAPI(
             payload["instructions"] = preprompt
         payload["input"] = messages_dict
 
-        if 'gpt-5' in model.name and extra_data:
-            if verbosity_level := extra_data.get('verbosity_level'):
-                payload['text'] = {"verbosity": verbosity_level}
-            if effort_level := extra_data.get('effort_level'):
-                payload['reasoning'] = {"effort": effort_level}
-            if extra_data.get("web_search"):
-                payload["tools"] = [{"type": "web_search_preview"}]
+        self._set_gpt_5_payload(payload, model, extra_data)
 
         return self.do_completions_request(
             model,
@@ -112,11 +108,7 @@ class ChatGPTAPI(
             payload["instructions"] = preprompt
         payload["input"] = messages_dict
 
-        if model.name in ['gpt-5', 'gpt-5-mini', 'gpt-5-nano'] and extra_data:
-            if verbosity_level := extra_data['verbosity_level']:
-                payload['text'] = {"verbosity": verbosity_level}
-            if effort_level := extra_data['effort_level']:
-                payload['reasoning'] = {"effort": effort_level}
+        self._set_gpt_5_payload(payload, model, extra_data)
 
         return self.do_vision_request(
             model,
@@ -220,3 +212,22 @@ class ChatGPTAPI(
             usage=usage
         )
         return r
+
+    # ---------- other ---------- #
+
+    @staticmethod
+    def _set_gpt_5_payload(payload, model, extra_data):
+        if 'gpt-5' in model.name and extra_data:
+            if verbosity_level := extra_data.get('verbosity_level'):
+                payload['text'] = {"verbosity": verbosity_level}
+            if effort_level := extra_data.get('effort_level'):
+                if effort_level == GPTReasoningEffortLevel.XHIGH.value and model.name not in (
+                        "gpt-5.4", "gpt-5.4-mini", "gpt-5.4-nano", "gpt-5.4-pro",
+                        "gpt-5.3-codex",
+                        "gpt-5.2", "gpt-5.2-pro", "gpt-5.2-codex",
+                ):
+                    raise PWarning("Для использования xHigh используемая модель должна быть gpt-5.2 и старше")
+                payload['reasoning'] = {"effort": effort_level}
+            if extra_data.get("web_search"):
+                payload["tools"] = [{"type": "web_search_preview"}]
+        return payload

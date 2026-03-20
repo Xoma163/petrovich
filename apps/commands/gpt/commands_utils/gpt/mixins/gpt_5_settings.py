@@ -8,7 +8,7 @@ from apps.shared.exceptions import PError
 class GPT5SettingsMixin(GPTCommandProtocol):
     GPT_5_SETTINGS_HELP_TEXT_ITEMS = [
         HelpTextArgument(
-            "gpt_5_reasoning (high/medium/low/minimal/none)",
+            "gpt_5_reasoning (xhigh/high/medium/low/minimal/none)",
             "устанавливает уровень рассуждений для моделей семейства GPT-5. По умолчанию medium. Для GPT-5.1 по умолчанию none, для GPT-5 - medium"
         ),
         HelpTextArgument(
