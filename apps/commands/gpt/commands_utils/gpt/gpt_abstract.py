@@ -28,6 +28,7 @@ from apps.commands.gpt.protocols import GPTCommandProtocol
 from apps.commands.gpt.providers.base import GPTProvider
 from apps.shared.exceptions import PWarning, PError
 from apps.shared.utils.cache import MessagesCache
+from apps.shared.utils.markdown import has_markdown
 from apps.shared.utils.utils import wrap_text_in_markdown_document, wrap_text_in_html_document
 from petrovich.settings import env
 
@@ -208,13 +209,20 @@ class GPTCommand(
                 text=answer,
                 reply_to=self.event.message.id
             )
-        rmi._raw_text = answer
+        self._prepare_rmi(rmi, answer)
+        return rmi
+
+    def _prepare_rmi(self, rmi: ResponseMessageItem, text: str) -> ResponseMessageItem:
+        rmi._raw_text = text
         rmi.set_telegram_markdown_v2()
+        # Если сообщение из чата и длина сообщения > 200 символов, то в цитату
+        if self.event.chat and len(rmi.text) > 200 and not has_markdown(text):
+            rmi.text = self.bot.get_expandable_quote_markdown(rmi.text)
+        rmi.peer_id = self.event.peer_id
         rmi.message_thread_id = self.event.message_thread_id
         return rmi
 
     def send_rmi(self, rmi: ResponseMessageItem):
-        rmi.peer_id = self.event.peer_id
         r = self.bot.send_response_message_item(rmi)
         if r.success:
             return None

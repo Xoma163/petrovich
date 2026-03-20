@@ -795,4 +795,10 @@ class TgBot(Bot):
         expandable = " expandable" if expandable else ""
         return f'<{cls.QUOTE_TAG}{expandable}>{text}</{cls.QUOTE_TAG}>'
 
+    @staticmethod
+    def get_expandable_quote_markdown(text: str) -> str:
+        lines = text.splitlines() or [""]
+        quoted = "\n".join(f"> {line}" for line in lines)
+        return f"**{quoted}\n>||"
+
     # END FORMATTING

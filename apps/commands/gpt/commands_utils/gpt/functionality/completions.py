@@ -90,10 +90,7 @@ class GPTCompletionsFunctionality(GPTCommandProtocol):
 
     def __completions_callback(self, text: str, draft_id: int):
         rmi = ResponseMessageItem(text=text)
-        rmi.set_telegram_markdown_v2()
-        rmi.peer_id = self.event.peer_id
-        rmi.message_thread_id = self.event.message_thread_id
-
+        self._prepare_rmi(rmi, text)
         self.bot.send_message_draft(rmi, draft_id=draft_id)
 
     # COMMON UTILS

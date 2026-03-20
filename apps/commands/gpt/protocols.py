@@ -89,6 +89,7 @@ class GPTCommandProtocol(
     @classmethod
     def get_debug_text(cls, response: GPTAPIResponse) -> str: ...
 
+    def _prepare_rmi(self, rmi: ResponseMessageItem, text: str) -> ResponseMessageItem: ...
 
 class HasCompletions(Protocol):
     def completions(

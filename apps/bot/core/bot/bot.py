@@ -385,10 +385,16 @@ class Bot:
 
     @classmethod
     def get_formatted_url(cls, name, url) -> str:
+        """
+        Форматированная ссылка
+        """
         return url
 
     @classmethod
     def get_formatted_url_markdown(cls, name, url) -> str:
+        """
+        Форматированная ссылка markdown
+        """
         return url
 
     @classmethod
@@ -430,6 +436,13 @@ class Bot:
     def get_quote_text(cls, text: str, expandable: bool = False) -> str:
         """
         Цитата текст
+        """
+        return text
+
+    @staticmethod
+    def get_expandable_quote_markdown(text: str) -> str:
+        """
+        Разворачиваемая цитата markdown
         """
         return text
 
