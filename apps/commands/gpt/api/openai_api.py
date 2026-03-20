@@ -146,15 +146,18 @@ class OpenAIAPI(GPTAPI, ABC):
 
         try:
             return json.loads("".join(all_lines))
-        except:
+        except JSONDecodeError:
             return None
 
     def parse_stream_completions(self, url, callback_func: Callable | None = None, **kwargs):
         with self.requests.post(url, **kwargs) as r:
             full_text = ""
             last_call = 0.0
+            all_lines = []
             try:
                 for line in r.iter_lines(decode_unicode=True):
+                    all_lines.append(line)
+
                     if not line:
                         continue
                     # OpenAI streaming lines look like: "data: {json}"
@@ -196,7 +199,10 @@ class OpenAIAPI(GPTAPI, ABC):
 
             finally:
                 r.close()
-        return None
+        try:
+            return json.loads("".join(all_lines))
+        except JSONDecodeError:
+            return None
 
     @retry(3, SSLError, sleep_time=2)
     def do_request(self, url, **kwargs) -> dict:
