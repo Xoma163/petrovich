@@ -44,6 +44,6 @@ class APIHandler:
 
 
 class API:
-    def __init__(self, *args, **kwargs):
-        super(API, self).__init__()
-        self.requests = APIHandler(*args, **kwargs)
+    def __init__(self, log_filter: dict, *args, **kwargs):
+        self.log_filter = log_filter
+        self.requests = APIHandler(log_filter)

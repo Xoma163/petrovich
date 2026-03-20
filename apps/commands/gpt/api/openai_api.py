@@ -33,7 +33,7 @@ from apps.commands.gpt.usage import (
 from apps.shared.decorators import retry
 from apps.shared.exceptions import PError, PWarning
 
-logger = logging.getLogger('openai')
+logger = logging.getLogger('api')
 
 
 class OpenAIAPI(GPTAPI, ABC):
@@ -45,6 +45,9 @@ class OpenAIAPI(GPTAPI, ABC):
         'rate_limit_exceeded': "Слишком большой запрос",
         'model_not_found': "Модель не существует или у вас нет к ней доступа"
     }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
     def do_completions_request(self, model: CompletionsModel, url, **kwargs) -> GPTCompletionsResponse:
         return self._do_request(GPTCompletionsUsage, GPTCompletionsResponse, model, url, **kwargs)  # noqa
@@ -107,8 +110,10 @@ class OpenAIAPI(GPTAPI, ABC):
         with self.requests.post(url, **kwargs) as r:
             full_text = ""
             last_call = 0.0
+            all_lines = []
             try:
                 for line in r.iter_lines(decode_unicode=True):
+                    all_lines.append(line)
                     if not line:
                         continue
                     # OpenAI streaming lines look like: "data: {json}"
@@ -138,7 +143,11 @@ class OpenAIAPI(GPTAPI, ABC):
 
             finally:
                 r.close()
-        return None
+
+        try:
+            return json.loads("".join(all_lines))
+        except:
+            return None
 
     def parse_stream_completions(self, url, callback_func: Callable | None = None, **kwargs):
         with self.requests.post(url, **kwargs) as r:
@@ -218,7 +227,7 @@ class OpenAIAPI(GPTAPI, ABC):
                 r_json = r.json()
 
         if error := r_json.get('error'):
-            logger.error(str(r_json))
+            logger.error({"response": error, "log_filter": self.log_filter})
 
             # grok
             if isinstance(error, str):
