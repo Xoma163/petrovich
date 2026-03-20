@@ -749,6 +749,10 @@ class TgBot(Bot):
         return f'<{cls.LINK_TAG} href="{url}">{name}</{cls.LINK_TAG}>'
 
     @classmethod
+    def get_formatted_url_markdown(cls, name: str, url: str) -> str:
+        return f'[{name}]({url})'
+
+    @classmethod
     def get_underline_text(cls, text: str) -> str:
         """
         Текст с нижним подчёркиванием

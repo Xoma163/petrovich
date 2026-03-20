@@ -388,6 +388,10 @@ class Bot:
         return url
 
     @classmethod
+    def get_formatted_url_markdown(cls, name, url) -> str:
+        return url
+
+    @classmethod
     def get_underline_text(cls, text: str) -> str:
         """
         Текст с нижним подчёркиванием

@@ -58,7 +58,7 @@ class RedditService(MediaService):
                         all_photos.append(link)
                     if text[start_pos - 9:start_pos] == "<a href=\"":
                         continue
-                    tg_url = self.bot.get_formatted_url(_text, link)
+                    tg_url = self.bot.get_formatted_url_markdown(_text, link)
                     text = text[:start_pos] + tg_url + text[end_pos:]
 
             all_photos = reversed(all_photos)
