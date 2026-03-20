@@ -15,6 +15,7 @@ from apps.bot.models import Role
 from apps.commands.help_text import HelpTextKey
 from apps.shared.exceptions import PWarning
 from apps.shared.models import Service
+from apps.shared.utils.markdown import markdown_to_html
 from petrovich.settings import STATIC_ROOT
 
 
@@ -346,7 +347,8 @@ def get_admin_profile(exclude_profile: Profile | None = None) -> Profile | None:
 
 
 def wrap_text_in_html_document(text: str, filename: str = 'file') -> DocumentAttachment:
-    text = text.replace("\n", "<br>")
+    # text = text.replace("\n", "<br>")
+    text = markdown_to_html(text)
     document = DocumentAttachment()
     document.parse(_bytes=text.encode('utf-8-sig'), filename=f"{filename}.html")
     return document

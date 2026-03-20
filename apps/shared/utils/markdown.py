@@ -1,5 +1,7 @@
 import re
 
+from markdown_it import MarkdownIt
+
 
 def markdown_wrap_symbols(text):
     return text \
@@ -21,3 +23,8 @@ def has_markdown(text: str) -> bool:
         r'(^|\n)([-*+]|[0-9]+\.)\s+',  # list
     ]
     return any(re.search(p, text, re.M) for p in patterns)
+
+
+def markdown_to_html(text: str):
+    md = MarkdownIt("commonmark", {"html": True, "breaks": True})
+    return md.render(text)
