@@ -269,6 +269,7 @@ This means command behavior is defined not only by `start()`, but also by class 
 
 When changing any command, inspect both:
 
+- its `accept()` logic
 - its `start()` logic
 - its declarative guardrails in class attributes
 
@@ -416,13 +417,14 @@ Behavior includes:
 - one-time reminders
 - crontab-like reminders
 - optional sender mentions
-- attachment re-send
+- re-sending saved Telegram attachments via stored file IDs
 - delayed execution of bot commands by synthesizing an `Event`
 
 Key files:
 
 - `apps/commands/notifies/models.py`
 - `apps/commands/notifies/management/commands/check_notify.py`
+- `apps/commands/notifies/commands/notifies.py`
 
 ## Meme subsystem: `apps/commands/meme/`
 
@@ -435,6 +437,7 @@ Key data concepts:
 - TG file ID reuse
 - usage counters
 - preview assets
+- media content preservation
 
 ## GitHub automation
 
@@ -444,6 +447,7 @@ Capabilities discovered:
 
 - create GitHub issues from bot command `/баг`
 - upload attached images to ImgBB and embed them in GitHub issue/comment bodies
+- notify developer in Telegram when an issue is created
 - notify users in Telegram when issue state/comments/labels change
 - allow users to reply to developer comments through Telegram
 
@@ -512,14 +516,13 @@ From the codebase and example env:
 - `TG_MODERATOR_CHAT_PK`
 - `TG_PHOTO_UPLOADING_CHAT_PK`
 - `DISK_SAVE_PATH`
-- `IMGDB_API_KEY`
+- `IMGBB_API_KEY`
 - `GITHUB_TOKEN`
 
 ## Secrets handling guidance
 
 - Do not print secrets into logs or docs.
 - Do not commit real env files.
-- Treat `secrets/example.env` cautiously; it contains a non-empty ImgBB-looking key value and should not be propagated elsewhere.
 - GPT provider keys are encrypted using `FERNET_SECRET_KEY`; changes in this area can invalidate stored keys if mishandled.
 
 ---
@@ -531,6 +534,12 @@ These commands were discovered from project files. They are documented here beca
 ## Recommended local bootstrap
 
 The repository currently suggests `uv` as the most current dependency workflow.
+
+### 0. Install prerequisites
+
+```bash
+sudo apt install -y python3.14 python3.14-venv python3-venv python3.14-dev python3-wheel postgresql libpq-dev ffmpeg build-essential
+```
 
 ### 1. Install dependencies
 
@@ -718,7 +727,7 @@ The code has abstractions for platforms, but the practical implementation is Tel
 
 ## 5. Logging is structured
 
-The project uses JSON logging with user/chat/message identifiers in `log_filter`. Preserve useful log context when touching core execution paths.
+The project uses JSON logging with user/chat/message identifiers in `log_filter`. It allows filtering logs when calling the corresponding command to restrict access.
 
 ---
 
@@ -774,6 +783,7 @@ Prefer targeted fixes over broad refactors in these areas.
 1. Read the relevant architecture path from ingress to command/output.
 2. Identify whether the change touches:
    - bot core
+   - event core
    - command registry
    - DB models
    - external APIs
@@ -807,10 +817,9 @@ Prefer targeted fixes over broad refactors in these areas.
 Document these carefully rather than treating them as confirmed bugs:
 
 1. `config/setup/setup.sh` installs from `requirements.txt`, but the repo appears to use `uv` now and no `requirements.txt` is present.
-2. `petrovich/settings.py` references `ROOT_HOSTCONF = 'petrovich.hosts'`, but no `petrovich/hosts.py` was found during this scan.
-3. GitHub Actions workflow is named as CI, but the active job is effectively deployment; test steps are commented out.
-4. README is intentionally sparse and points to an external wiki, so local repo docs are incomplete by design.
-5. ASGI exists, but the visible deployment shape is WSGI/uWSGI-oriented.
+2. GitHub Actions workflow is named as CI, but the active job is effectively deployment; test steps are commented out.
+3. README is intentionally sparse and points to an external wiki, so local repo docs are incomplete by design.
+4. ASGI exists, but the visible deployment shape is WSGI/uWSGI-oriented.
 
 Do not “fix” these unless explicitly asked.
 
@@ -857,6 +866,7 @@ Read:
 
 - `apps/commands/notifies/models.py`
 - `apps/commands/notifies/management/commands/check_notify.py`
+- `apps/commands/notifies/commands/notifies.py`
 
 ## Change media behavior
 
