@@ -1,6 +1,6 @@
 from apps.bot.core.messages.attachments.photo import PhotoAttachment
 from apps.connectors.api.handler import API
-from apps.connectors.api.imgdb import ImgdbAPI
+from apps.connectors.api.imgdb import ImgBBAPI
 from petrovich.settings import env
 
 
@@ -24,7 +24,7 @@ class GithubAPI(API):
     @staticmethod
     def get_text_for_images_in_body(images: list[PhotoAttachment], log_filter=None) -> str:
         result = []
-        i_api = ImgdbAPI(log_filter=log_filter)
+        i_api = ImgBBAPI(log_filter=log_filter)
         for image in images:
             image_url = i_api.upload_image(image)
             result.append(f"![image]({image_url})")
