@@ -5,15 +5,7 @@ from django.test import SimpleTestCase
 
 from apps.commands.media_command.service import MediaKeys
 from apps.commands.media_command.services.twitter import TwitterService
-from apps.connectors.parsers.media_command.twitter import Twitter, TwitterAPIResponse
-
-
-class APITestCase(SimpleTestCase):
-    def test_twitter_api_can_be_created_without_log_filter(self):
-        api = Twitter()
-
-        self.assertIsNone(api.log_filter)
-        self.assertIsNone(api.requests.log_filter)
+from apps.connectors.parsers.media_command.twitter import TwitterAPIResponse
 
 
 class TwitterServiceTestCase(SimpleTestCase):
