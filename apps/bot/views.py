@@ -99,7 +99,7 @@ class GithubView(CSRFExemptMixin, View):
 
     def post(self, request):
         data = json.loads(request.body)
-        issue = GithubIssueAPI()
+        issue = GithubIssueAPI(log_filter=None)
         issue.parse_response(data['issue'])
 
         if data['action'] == 'closed':
