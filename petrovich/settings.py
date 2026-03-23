@@ -69,7 +69,6 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 DEFAULT_HOST = 'www'
-ROOT_HOSTCONF = 'petrovich.hosts'
 ROOT_URLCONF = 'petrovich.urls'
 
 TEMPLATES = [

@@ -3,8 +3,8 @@ from apps.connectors.api.handler import API
 from petrovich.settings import env
 
 
-class ImgdbAPI(API):
-    API_KEY = env.str("IMGDB_API_KEY")
+class ImgBBAPI(API):
+    API_KEY = env.str("IMGBB_API_KEY")
 
     BASE_URL = "https://api.imgbb.com"
     IMAGE_UPLOAD_URL = f"{BASE_URL}/1/upload"
