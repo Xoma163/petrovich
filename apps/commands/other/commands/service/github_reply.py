@@ -25,7 +25,7 @@ class GithubReply(Command):
 
     def start(self) -> ResponseMessage | None:
         issue_number = re.search(self.ACCEPT_PATTERN, self.event.fwd[0].message.clear_case).group(1)
-        issue = GithubIssueAPI()
+        issue = GithubIssueAPI(log_filter=self.event.log_filter)
         issue.number = issue_number
         issue.get_from_github()
 

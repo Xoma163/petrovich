@@ -19,8 +19,7 @@ class TwitterService(MediaService):
             return self._get_content_by_url(url)
 
     def _get_content_by_url(self, url: str) -> MediaServiceResponse:
-        t_api = Twitter()
-        data = t_api.get_post_data(url)
+        data = self.service.get_post_data(url)
 
         if not data.items:
             return MediaServiceResponse(text=data.caption, attachments=[])
@@ -38,7 +37,7 @@ class TwitterService(MediaService):
             elif att.content_type == att.CONTENT_TYPE_IMAGE:
                 photo = self.bot.get_photo_attachment(
                     url=att.download_url,
-                    send_chat_action=False
+                    send_chat_action=False,
                 )
                 attachments.append(photo)
 
