@@ -221,7 +221,7 @@ class Meme(Command):
         if trusted_user:
             meme.save()
             self._save_meme(meme, is_update=True)
-            answer = f'Обновил мем "{meme.name}"'
+            answer = f"Обновил мем \"{meme.name}\""
             if not is_youtube_link:
                 return ResponseMessage(ResponseMessageItem(text=answer))
 
@@ -265,8 +265,8 @@ class Meme(Command):
 
         rm = ResponseMessage()
         if meme.author and meme.author != self.event.sender:
-            user_msg = f'Мем с названием "{meme.name}" удалён поскольку он не ' \
-                       f'соответствует правилам, устарел или является дубликатом.'
+            user_msg = f"Мем с названием \"{meme.name}\" удалён поскольку он не " \
+                       f"соответствует правилам, устарел или является дубликатом."
             user = meme.author.get_tg_user()
             rmi = ResponseMessageItem(
                 text=user_msg,
@@ -280,7 +280,7 @@ class Meme(Command):
         meme.file.delete()
         meme.file_preview.delete()
         meme.delete()
-        answer = f'Удалил мем "{meme_name}"'
+        answer = f"Удалил мем \"{meme_name}\""
         rm.messages.append(ResponseMessageItem(text=answer))
         return rm
 
@@ -310,7 +310,7 @@ class Meme(Command):
         if meme.approved:
             raise PWarning("Мем уже подтверждён")
 
-        answer = f'Мем с названием "{meme.name}" подтверждён.'
+        answer = f"Мем с названием \"{meme.name}\" подтверждён."
         user = meme.author.get_tg_user()
 
         meme.approved = True
@@ -329,7 +329,7 @@ class Meme(Command):
         if meme.approved:
             raise PWarning("Нельзя отклонить уже подтверждённый мем")
 
-        answer = f'Мем "{meme.name}" ({meme.id}) отклонён'
+        answer = f"Мем \"{meme.name}\" ({meme.id}) отклонён"
         user = meme.author.get_tg_user()
 
         meme.file.delete()
@@ -363,8 +363,8 @@ class Meme(Command):
         except MemeModel.DoesNotExist:
             pass
 
-        user_msg = f'Мем с названием "{meme.name}" переименован.\n' \
-                   f'Новое название - "{new_name}"'
+        user_msg = f"Мем с названием \"{meme.name}\" переименован.\n" \
+                   f"Новое название - \"{new_name}\""
 
         meme.name = new_name
         meme.save()
@@ -425,7 +425,7 @@ class Meme(Command):
             for _filter in filter_list:
                 if "*" in _filter:
                     _filter = _filter.replace("*", ".")
-                    regex_filter = fr'.*{_filter}.*'
+                    regex_filter = fr".*{_filter}.*"
                     memes = memes.filter(name__iregex=regex_filter)
                 else:
                     memes = memes.filter(name__contains=_filter)

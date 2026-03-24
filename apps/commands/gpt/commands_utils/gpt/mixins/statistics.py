@@ -293,7 +293,7 @@ class GPTStatisticsMixin(GPTCommandProtocol):
         plt.xticks(rotation=45)
 
         # Настройка заголовка и подписей осей
-        plt.title(f'Использование {self.provider.type_enum} за {days_count} {days_decl}', fontsize=16)
+        plt.title(f"Использование {self.provider.type_enum} за {days_count} {days_decl}", fontsize=16)
         plt.xlabel("Дата", fontsize=14)
         plt.ylabel("Стоимость, $", fontsize=14)
 

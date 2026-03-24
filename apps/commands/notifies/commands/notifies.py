@@ -120,7 +120,7 @@ class Notifies(Command):
         else:
             timezone = self.event.sender.city.timezone.name
             localized_dt = localize_datetime(remove_tz(notify.date), timezone)
-            answer = f'Сохранил на дату {localized_dt.strftime("%d.%m.%Y %H:%M")}'
+            answer = f"Сохранил на дату {localized_dt.strftime('%d.%m.%Y %H:%M')}"
 
         return ResponseMessageItem(text=answer)
 
@@ -136,7 +136,9 @@ class Notifies(Command):
 
     def menu_get_notifies(self) -> ResponseMessageItem:
         notifies = self.get_filtered_notifies()
-        rmi = ResponseMessageItem(text=self.get_notifies_str(notifies, self.event.sender.city.timezone.name))
+        rmi = ResponseMessageItem(
+            text=self.get_notifies_str(notifies, self.event.sender.city.timezone.name)
+        )
         return rmi
 
     def get_notifie(self, filters: list) -> Notify:
@@ -145,17 +147,23 @@ class Notifies(Command):
         try:
             pk = int(filters[0])
             return notifies.get(pk=pk)
-        except (ValueError, Notify.DoesNotExist):
+        except ValueError, Notify.DoesNotExist:
             for _filter in filters:
-                q = Q(text__icontains=_filter) | Q(date__icontains=_filter) | Q(crontab__icontains=_filter)
+                q = (
+                        Q(text__icontains=_filter)
+                        | Q(date__icontains=_filter)
+                        | Q(crontab__icontains=_filter)
+                )
                 notifies = notifies.filter(q)
 
         notifies_count = notifies.count()
         if notifies_count == 0:
             raise PWarning("Не нашёл напоминаний по такому тексту")
         elif notifies_count > 1:
-            raise PWarning(f"Нашёл сразу {notifies_count}. Уточните:\n\n"
-                           f"{self.get_notifies_str(notifies, self.event.sender.city.timezone.name)}")
+            raise PWarning(
+                f"Нашёл сразу {notifies_count}. Уточните:\n\n"
+                f"{self.get_notifies_str(notifies, self.event.sender.city.timezone.name)}"
+            )
 
         return notifies.first()
 
@@ -165,7 +173,9 @@ class Notifies(Command):
         result = ""
 
         for notify in notifies_obj:
-            result += f"{notify.user}\n[id:{self.bot.get_formatted_text_line(notify.pk)}] "
+            result += (
+                f"{notify.user}\n[id:{self.bot.get_formatted_text_line(notify.pk)}] "
+            )
 
             if notify.crontab:
                 result += f"{self.bot.get_formatted_text_line(notify.crontab)}"
@@ -176,7 +186,9 @@ class Notifies(Command):
                 result += f" (Конфа - {notify.chat.name})"
 
             if notify.text and notify.attachments:
-                notify_text = f"{self.bot.get_formatted_text_line(notify.text)} (вложения)"
+                notify_text = (
+                    f"{self.bot.get_formatted_text_line(notify.text)} (вложения)"
+                )
             elif notify.text:
                 notify_text = self.bot.get_formatted_text_line(notify.text)
             else:
@@ -196,8 +208,10 @@ class Notifies(Command):
         return notifies.order_by("date")
 
     def check_max_notifies(self):
-        if not self.event.sender.check_role(RoleEnum.TRUSTED) and \
-                len(Notify.objects.filter(user=self.event.user)) >= 5:
+        if (
+                not self.event.sender.check_role(RoleEnum.TRUSTED)
+                and len(Notify.objects.filter(user=self.event.user)) >= 5
+        ):
             raise PWarning("Нельзя добавлять более 5 напоминаний")
 
     @staticmethod
@@ -206,32 +220,46 @@ class Notifies(Command):
         exact_datetime_flag = True
         if arg1 in DELTA_WEEKDAY:
             exact_datetime_flag = False
-            arg1 = (datetime.datetime.today().date() + datetime.timedelta(days=DELTA_WEEKDAY[arg1])).strftime(
-                "%d.%m.%Y")
+            arg1 = (
+                    datetime.datetime.today().date()
+                    + datetime.timedelta(days=DELTA_WEEKDAY[arg1])
+            ).strftime("%d.%m.%Y")
 
         if arg1 in WEEK_TRANSLATOR:
             exact_datetime_flag = False
             delta_days = WEEK_TRANSLATOR[arg1] - datetime.datetime.today().isoweekday()
             if delta_days <= 0:
                 delta_days += 7
-            arg1 = (datetime.datetime.today().date() + datetime.timedelta(days=delta_days)).strftime("%d.%m.%Y")
+            arg1 = (
+                    datetime.datetime.today().date() + datetime.timedelta(days=delta_days)
+            ).strftime("%d.%m.%Y")
 
-        default_datetime = remove_tz(localize_datetime(datetime.datetime.now(datetime.UTC), tz=timezone.name)) \
-            .replace(hour=9, minute=0, second=0, microsecond=0)
+        default_datetime = remove_tz(
+            localize_datetime(datetime.datetime.now(datetime.UTC), tz=timezone.name)
+        ).replace(hour=9, minute=0, second=0, microsecond=0)
         try:
             if arg1.count(".") == 1:
-                if datetime.datetime.strptime(f"{arg1}.{default_datetime.year}", "%d.%m.%Y") < remove_tz(
-                        datetime.datetime.now(datetime.UTC)):
+                if datetime.datetime.strptime(
+                        f"{arg1}.{default_datetime.year}", "%d.%m.%Y"
+                ) < remove_tz(datetime.datetime.now(datetime.UTC)):
                     arg1 = f"{arg1}.{default_datetime.year + 1}"
                 else:
                     arg1 = f"{arg1}.{default_datetime.year}"
             date_str = f"{arg1} {arg2}"
 
-            return parser.parse(date_str, default=default_datetime, dayfirst=True), 2, exact_datetime_flag
+            return (
+                parser.parse(date_str, default=default_datetime, dayfirst=True),
+                2,
+                exact_datetime_flag,
+            )
         except ParserError:
             try:
                 exact_datetime_flag = False
-                return parser.parse(arg1, default=default_datetime, dayfirst=True), 1, exact_datetime_flag
+                return (
+                    parser.parse(arg1, default=default_datetime, dayfirst=True),
+                    1,
+                    exact_datetime_flag,
+                )
             except ParserError:
                 return None, None, None
         except ValueError:
@@ -255,7 +283,9 @@ class Notifies(Command):
         if (date - datetime_now).total_seconds() < 60:
             raise PWarning("Нельзя добавлять напоминание на ближайшую минуту")
 
-        if not exact_time_flag and ((date - datetime_now).days < 0 or (datetime_now - date).seconds < 0):
+        if not exact_time_flag and (
+                (date - datetime_now).days < 0 or (datetime_now - date).seconds < 0
+        ):
             date = date + datetime.timedelta(days=1)
 
         if (date - datetime_now).days < 0 or (datetime_now - date).seconds < 0:

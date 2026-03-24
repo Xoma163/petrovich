@@ -55,7 +55,7 @@ class GPTKeyMixin(GPTCommandProtocol):
             else:
                 error_msg = self.PROVIDE_API_KEY_TEMPLATE.format(
                     provider_name=self.provider.type_enum,
-                    command_name=self.bot.get_formatted_text_line(f'/{self.name}')
+                    command_name=self.bot.get_formatted_text_line(f"/{self.name}")
                 )
                 raise PWarning(error_msg)
         return None

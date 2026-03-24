@@ -31,7 +31,7 @@ class Request:
         return self._do(action, "post", params, **kwargs)
 
     def _do(self, action, method="get", params=None, **kwargs) -> Response:
-        url = f'{self.PREFIX}://{self.API_TELEGRAM_URL}/bot{self.token}/{action}'
+        url = f"{self.PREFIX}://{self.API_TELEGRAM_URL}/bot{self.token}/{action}"
         r = getattr(requests, method)(url, params, **kwargs)
         r_json = r.json()
         self._log(r_json, action)

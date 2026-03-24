@@ -259,7 +259,7 @@ class Media(AcceptExtraCommand):
             if chosen_service == RedditService:
                 answer += f"\n\nИсточник: [{source_hostname}]({chosen_url})"
             else:
-                answer += f'\nИсточник: {self.bot.get_formatted_url(source_hostname, chosen_url)}'
+                answer += f"\nИсточник: {self.bot.get_formatted_url(source_hostname, chosen_url)}"
 
         answer = answer.strip()
 

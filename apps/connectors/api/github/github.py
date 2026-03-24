@@ -15,8 +15,8 @@ class GithubAPI(API):
 
     BASE_API_URL = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}"
 
-    ISSUES_URL = f'{BASE_API_URL}/issues'
-    LABELS_URL = f'{BASE_API_URL}/labels'
+    ISSUES_URL = f"{BASE_API_URL}/issues"
+    LABELS_URL = f"{BASE_API_URL}/labels"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

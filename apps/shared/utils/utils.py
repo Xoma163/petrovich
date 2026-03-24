@@ -309,7 +309,7 @@ def split_text_by_n_symbols(text: str, n: int, split_on: list[str] | None = None
 
 
 def get_font_by_path(font_path: str, size: int) -> type[ImageFont]:
-    return ImageFont.truetype(os.path.join(STATIC_ROOT, f'fonts/{font_path}'), size, encoding="unic")
+    return ImageFont.truetype(os.path.join(STATIC_ROOT, f"fonts/{font_path}"), size, encoding="unic")
 
 
 def prepare_filename(filename: str, replace_symbol=".") -> str:

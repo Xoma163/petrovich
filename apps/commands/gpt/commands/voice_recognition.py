@@ -74,7 +74,7 @@ class VoiceRecognition(AcceptExtraCommand):
             if self.event.message.mentioned:
                 GPTKeyMixin.raise_no_access_exception(
                     ChatGPTProvider.type_enum,
-                    self.bot.get_formatted_text_line(f'/{ChatGPTCommand.name}')
+                    self.bot.get_formatted_text_line(f"/{ChatGPTCommand.name}")
                 )
             else:
                 raise PSkip()

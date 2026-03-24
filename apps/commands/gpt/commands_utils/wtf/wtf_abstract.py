@@ -48,7 +48,7 @@ class WTFCommand(Command):
         if not has_access:
             GPTKeyMixin.raise_no_access_exception(
                 self.gpt_command_class.provider.type_enum,  # noqa
-                self.bot.get_formatted_text_line(f'/{self.gpt_command_class.name}')
+                self.bot.get_formatted_text_line(f"/{self.gpt_command_class.name}")
             )
 
     def start(self) -> ResponseMessage:

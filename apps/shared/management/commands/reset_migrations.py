@@ -48,11 +48,11 @@ class Command(BaseCommand):
         )
 
     def delete_django_migrations_db_app(self, app: str):
-        self.stdout.write(f'Сброс миграций приложения "{app}" в БД')
+        self.stdout.write(f"Сброс миграций приложения \"{app}\" в БД")
         self.cursor.execute(f"DELETE from django_migrations WHERE app = '{app}'")
 
     def delete_migrations_files_app(self, app: str):
-        self.stdout.write(f'Удаление миграций приложения "{app}" в файлах')
+        self.stdout.write(f"Удаление миграций приложения \"{app}\" в файлах")
         app_path = apps.get_app_config(app).path
         migrations_dir = os.path.join(app_path, "migrations")
         if os.path.exists(migrations_dir):
@@ -60,24 +60,24 @@ class Command(BaseCommand):
             files = list(filter(lambda x: x != "__init__.py", files))
             for file in files:
                 os.remove(os.path.join(migrations_dir, file))
-        self.stdout.write(f'Удаление миграций приложения "{app}" выполнено успешно в файлах')
+        self.stdout.write(f"Удаление миграций приложения \"{app}\" выполнено успешно в файлах")
 
     def handle(self, *args, **options):
         mode = options["mode"]
 
         if mode not in [self.PROD, self.DEV]:
-            raise CommandError(f'Некорректный "mode". Выберите "{self.PROD}" или "{self.DEV}"')
+            raise CommandError(f"Некорректный \"mode\". Выберите \"{self.PROD}\" или \"{self.DEV}\"")
 
         is_dev_mode = mode == self.DEV
 
         _apps = options["apps"]
         apps_str = ", ".join(_apps)
-        self.stdout.write(f'Сброс миграций приложений "{apps_str}" в БД')
+        self.stdout.write(f"Сброс миграций приложений \"{apps_str}\" в БД")
         for _app in _apps:
             self.delete_django_migrations_db_app(_app)
             if is_dev_mode:
                 self.delete_migrations_files_app(_app)
-                self.stdout.write(f'Миграции приложения "{_app}" успешно удалены из БД')
+                self.stdout.write(f"Миграции приложения \"{_app}\" успешно удалены из БД")
 
         if is_dev_mode:
             for _app in _apps:

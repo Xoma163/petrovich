@@ -194,7 +194,7 @@ class User(Platform, TimeStampModelMixin):
             safe_nick = escape(self.nickname)
             safe_platform = escape(self.platform)
             url = f"https://t.me/{safe_nick}"
-            return mark_safe(f'<a href="{escape(url)}">{safe_platform}</a>')
+            return mark_safe(f"<a href=\"{escape(url)}\">{safe_platform}</a>")
         return escape(self.platform)
 
     show_url.short_description = "Ссылка"

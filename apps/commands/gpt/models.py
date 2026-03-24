@@ -133,7 +133,7 @@ class GPTImageModel(GPTModel):
 
     @property
     def size(self) -> str:
-        return f'{self.width}x{self.height}'
+        return f"{self.width}x{self.height}"
 
     @property
     def image_format(self) -> GPTImageFormat:

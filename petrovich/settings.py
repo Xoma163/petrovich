@@ -26,9 +26,9 @@ REMOTE_OR_LOCAL_PORT = 10013
 ALLOWED_HOSTS = [PETROVICH_DOMAIN, REMOTE_IP, LOCAL_IP]
 
 if DEBUG:
-    MAIN_SITE = f'http://{REMOTE_IP}:{REMOTE_OR_LOCAL_PORT}'  # noqa
+    MAIN_SITE = f"http://{REMOTE_IP}:{REMOTE_OR_LOCAL_PORT}"  # noqa
 else:
-    MAIN_SITE = f'https://{PETROVICH_DOMAIN}'
+    MAIN_SITE = f"https://{PETROVICH_DOMAIN}"
 
 # Application definition
 DJANGO_APPS = [

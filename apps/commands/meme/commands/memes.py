@@ -66,7 +66,7 @@ class Memes(Command):
             on_last_page = p.per_page * page
         else:
             on_last_page = p.count
-        msg_footer = f'----{p.per_page * (page - 1) + 1}-{on_last_page}----'
+        msg_footer = f"----{p.per_page * (page - 1) + 1}-{on_last_page}----"
         answer = f"{msg_header}\n\n{msg_body}\n\n{msg_footer}"
 
         message_id = self.event.message.id if self.event.message.is_callback else None

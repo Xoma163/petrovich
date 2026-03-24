@@ -752,11 +752,11 @@ class TgBot(Bot):
 
     @classmethod
     def get_formatted_url(cls, name: str, url: str) -> str:
-        return f'<{cls.LINK_TAG} href="{url}">{name}</{cls.LINK_TAG}>'
+        return f"<{cls.LINK_TAG} href=\"{url}\">{name}</{cls.LINK_TAG}>"
 
     @classmethod
     def get_formatted_url_markdown(cls, name: str, url: str) -> str:
-        return f'[{name}]({url})'
+        return f"[{name}]({url})"
 
     @classmethod
     def get_underline_text(cls, text: str) -> str:
@@ -791,7 +791,7 @@ class TgBot(Bot):
         """
         Спойлер-текст
         """
-        return f'<{cls.SPOILER_TAG}>{text}</{cls.SPOILER_TAG}>'
+        return f"<{cls.SPOILER_TAG}>{text}</{cls.SPOILER_TAG}>"
 
     @classmethod
     def get_quote_text(cls, text: str, expandable: bool = False) -> str:
@@ -799,7 +799,7 @@ class TgBot(Bot):
         Цитата текст
         """
         expandable = " expandable" if expandable else ""
-        return f'<{cls.QUOTE_TAG}{expandable}>{text}</{cls.QUOTE_TAG}>'
+        return f"<{cls.QUOTE_TAG}{expandable}>{text}</{cls.QUOTE_TAG}>"
 
     @staticmethod
     def get_expandable_quote_markdown(text: str) -> str:

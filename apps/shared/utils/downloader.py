@@ -25,7 +25,7 @@ class Downloader:
             start: int,
             end: int,
     ) -> bytes:
-        headers = {"Range": f'bytes={start}-{end}'}
+        headers = {"Range": f"bytes={start}-{end}"}
         headers.update(self.headers)
 
         response = requests.get(url, headers=headers, stream=True, cookies=self.cookies)

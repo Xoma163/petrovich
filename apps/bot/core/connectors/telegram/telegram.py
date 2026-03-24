@@ -33,7 +33,7 @@ class TelegramAPI:
         elif self.mode == TelegramAPIRequestMode.LOCAL_SERVER:
             self.requests = RequestLocal(self.token, log_filter=self.log_filter)
         else:
-            raise RuntimeError(f'{self.mode} is not supported')
+            raise RuntimeError(f"{self.mode} is not supported")
 
     # ---------- SEND --------- #
 
@@ -464,4 +464,4 @@ class TelegramAPI:
     # ---------- NO API --------- #
 
     def get_file_download_url(self, file_path: str):
-        return f'{self.requests.PREFIX}://{self.requests.API_TELEGRAM_URL}/file/bot{self.token}/{file_path}'
+        return f"{self.requests.PREFIX}://{self.requests.API_TELEGRAM_URL}/file/bot{self.token}/{file_path}"

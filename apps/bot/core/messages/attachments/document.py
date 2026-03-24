@@ -32,7 +32,7 @@ class DocumentMimeType:
         return self._check_value("audio/")
 
     def _check_value(self, _type):
-        return self.type.startswith(f'{_type}')
+        return self.type.startswith(f"{_type}")
 
 
 class DocumentAttachment(Attachment, ThumbnailMixin):

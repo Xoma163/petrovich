@@ -121,7 +121,7 @@ class ProfileAdmin(TimeStampAdminMixin):
         for chat in chats:
             url = reverse("admin:bot_chat_change", args=[chat.id])
             name = escape(str(chat))
-            links.append(f'<a href="{url}">{name}</a>')
+            links.append(f"<a href=\"{url}\">{name}</a>")
         return mark_safe("<br/>".join(links)) if links else "-"
 
     @admin.display(description="Количество чатов")
@@ -188,7 +188,7 @@ class ChatAdmin(TimeStampAdminMixin):
             url = reverse("admin:bot_profile_change", args=[profile.id])
             safe_url = escape(url)
             safe_name = escape(str(profile))
-            links.append(f'<a href="{safe_url}">{safe_name}</a>')
+            links.append(f"<a href=\"{safe_url}\">{safe_name}</a>")
         return mark_safe("<br/>".join(links)) if links else "-"
 
     @admin.display(description="Количество пользователей")

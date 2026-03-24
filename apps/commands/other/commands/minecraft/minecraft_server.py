@@ -74,7 +74,7 @@ class Minecraft(Command):
         version = server.server_info.version
         player_range = f"({server.server_info.players_online}/{server.server_info.players_max})"
 
-        server_address = server.ip if server.port == server.DEFAULT_PORT else f'{server.ip}:{server.port}'
+        server_address = server.ip if server.port == server.DEFAULT_PORT else f"{server.ip}:{server.port}"
         result = f"Майн {version} ✅ {player_range} - {self.bot.get_formatted_text_line(server_address)}"
 
         players = server.server_info.players

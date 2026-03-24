@@ -30,15 +30,15 @@ class MinecraftServer:
     def _get_service_name(self):
         if self.service_name:
             return self.service_name
-        return f'minecraft_{self.get_version()}'
+        return f"minecraft_{self.get_version()}"
 
     def start(self):
         check_command_time(self._get_service_name(), self.delay)
-        do_the_linux_command(f'sudo systemctl start {self._get_service_name()}')
+        do_the_linux_command(f"sudo systemctl start {self._get_service_name()}")
 
     def stop(self):
         check_command_time(self._get_service_name(), self.delay)
-        do_the_linux_command(f'sudo systemctl stop {self._get_service_name()}')
+        do_the_linux_command(f"sudo systemctl stop {self._get_service_name()}")
 
     def get_server_info(self):
         minecraft_server_status = MinecraftServerStatus(self.ip, self.port)

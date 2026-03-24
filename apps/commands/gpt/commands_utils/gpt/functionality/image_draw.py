@@ -103,7 +103,7 @@ class GPTImageDrawFunctionality(GPTCommandProtocol):
                         _bytes=image,
                         thumbnail_bytes=image,
                         send_chat_action=False,
-                        filename=f'{self.provider.type_enum.name}_draw_{i + 1}.png'
+                        filename=f"{self.provider.type_enum.name}_draw_{i + 1}.png"
                     )
                     att.download_content()
                 else:
@@ -115,7 +115,7 @@ class GPTImageDrawFunctionality(GPTCommandProtocol):
                 attachments.append(att)
 
         image_prompt = response.images_prompt if response.images_prompt else request_text
-        answer = f'Результат генерации по запросу "{image_prompt}"'
+        answer = f"Результат генерации по запросу \"{image_prompt}\""
 
         profile_settings = self.get_profile_gpt_settings()
         if profile_settings.use_debug:
