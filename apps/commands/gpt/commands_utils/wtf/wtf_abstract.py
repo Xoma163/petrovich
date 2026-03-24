@@ -21,7 +21,7 @@ from apps.shared.utils.cache import MessagesCache
 
 
 class WTFCommand(Command):
-    names = ['саммари', 'суммаризируй']
+    names = ["саммари", "суммаризируй"]
     access = RoleEnum.TRUSTED
     abstract = True
     platforms = [PlatformEnum.TG]
@@ -132,7 +132,7 @@ class WTFCommand(Command):
             # не берём последнее сообщение, которым зашли в эту команду :)
             if 1 <= mid - message_id < n + 1:
                 try:
-                    event = TgEvent({'message': message_body}, use_db=False)
+                    event = TgEvent({"message": message_body}, use_db=False)
                     event.setup_event(use_db=False)
 
                     user_id = event.user_id

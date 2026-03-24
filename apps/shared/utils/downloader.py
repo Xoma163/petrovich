@@ -25,7 +25,7 @@ class Downloader:
             start: int,
             end: int,
     ) -> bytes:
-        headers = {'Range': f'bytes={start}-{end}'}
+        headers = {"Range": f'bytes={start}-{end}'}
         headers.update(self.headers)
 
         response = requests.get(url, headers=headers, stream=True, cookies=self.cookies)
@@ -33,7 +33,7 @@ class Downloader:
 
     @staticmethod
     def open_file(path: str, delete_after_read: bool = False):
-        with open(path, 'rb') as file:
+        with open(path, "rb") as file:
             content = file.read()
         if delete_after_read:
             if os.path.exists(path):
@@ -46,7 +46,7 @@ class Downloader:
             chunk_size: int = DEFAULT_CHUNK_SIZE
     ):
         response = requests.head(url, headers=self.headers, cookies=self.cookies)
-        file_size = int(response.headers['Content-Length'])
+        file_size = int(response.headers["Content-Length"])
         ranges = [(i, min(i + chunk_size - 1, file_size - 1)) for i in range(0, file_size, chunk_size)]
 
         with ThreadPoolExecutor() as executor:
@@ -61,12 +61,12 @@ class Downloader:
         tmp_video_file = NamedTemporaryFile().name
         try:
             args = {
-                '-N': threads,
-                '-o': tmp_video_file,
+                "-N": threads,
+                "-o": tmp_video_file,
                 # '--cookies': os.path.join(BASE_DIR, 'secrets', 'youtube_cookies.txt')
             }
             if http_chunk_size is not None:
-                args['--http-chunk-size'] = http_chunk_size
+                args["--http-chunk-size"] = http_chunk_size
             args_str = " ".join([f"{x[0]} {x[1]}" for x in args.items()])
             command = f"yt-dlp {args_str} {m3u8_url}"
             _ = do_the_linux_command(command)
@@ -75,7 +75,7 @@ class Downloader:
             if os.path.isfile(potential_filename):
                 tmp_video_file = potential_filename
 
-            with open(tmp_video_file, 'rb') as file:
+            with open(tmp_video_file, "rb") as file:
                 content = file.read()
         finally:
             os.remove(tmp_video_file)

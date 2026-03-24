@@ -137,7 +137,7 @@ def generate_help_text(cmds):
 
 
 def get_text_for_documentation(cmds):
-    NL = '\n'
+    NL = "\n"
     BR = "<br>"
     BR_NL = f"{BR}\n"
     INS, INS_END = "<ins>", "</ins>"
@@ -184,7 +184,7 @@ def get_text_for_documentation(cmds):
                 command = f"{BOLD}/{command_name}{BOLD}"
                 text = f"{command} - {item.description}{NL}"
                 items.append(
-                    text.replace('[', LEFT_QUOTE).replace(']', RIGHT_QUOTE)
+                    text.replace("[", LEFT_QUOTE).replace("]", RIGHT_QUOTE)
                 )
 
             block = base + BR_NL.join(items)

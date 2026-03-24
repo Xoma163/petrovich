@@ -2,7 +2,7 @@ from django.core.cache import cache
 
 
 class MessagesCache:
-    PRE_KEY = 'messages'
+    PRE_KEY = "messages"
 
     """
     Структура хранения сообщений:

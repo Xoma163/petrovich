@@ -5,7 +5,7 @@ from apps.bot.core.messages.telegram.parse_mode import TelegramParseMode
 
 
 class ResponseMessageItem:
-    TG_TAGS = ['pre', 'code', 'tg-spoiler', 'i', 'b', 'u', 'a', 's', 'blockquote']
+    TG_TAGS = ["pre", "code", "tg-spoiler", "i", "b", "u", "a", "s", "blockquote"]
 
     URLS_REGEXP = r"(http|ftp|https|tg)(:\/\/)([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-])"
 
@@ -18,7 +18,7 @@ class ResponseMessageItem:
             message_id: int | None = None,
             message_thread_id: str | int | None = None,
             peer_id: int | None = None,
-            log_level: str = 'debug',
+            log_level: str = "debug",
             exc_info=None,
             send: bool = True,
             spoiler: bool = False,
@@ -47,7 +47,7 @@ class ResponseMessageItem:
         Вывод в логи
         """
         dict_self = copy(self.__dict__)
-        ignore_fields = ['log_level', 'exc_info']
+        ignore_fields = ["log_level", "exc_info"]
         for ignore_field in ignore_fields:
             del dict_self[ignore_field]
 
@@ -99,7 +99,7 @@ class ResponseMessageItem:
                 left_part = self.text[start_pos - 9:start_pos]
             if len(self.text) > end_pos:
                 right_part = self.text[end_pos:end_pos + 2]
-            if left_part == '<a href="' and right_part == '">':
+            if left_part == "<a href=\"" and right_part == "\">":
                 continue
 
             if len(self.attachments) < 2:
@@ -111,26 +111,26 @@ class ResponseMessageItem:
 
     def get_tg_params(self) -> dict:
         params: dict = {
-            'chat_id': self.peer_id
+            "chat_id": self.peer_id
         }
         if self.text:
             if self.attachments:
-                params['caption'] = self.text
+                params["caption"] = self.text
             else:
-                params['text'] = self.text
+                params["text"] = self.text
 
         if self.parse_mode:
-            params['parse_mode'] = self.parse_mode
+            params["parse_mode"] = self.parse_mode
 
         if self.keyboard:
-            params['reply_markup'] = self.keyboard
+            params["reply_markup"] = self.keyboard
         if self.reply_to:
-            params['reply_to_message_id'] = self.reply_to
+            params["reply_to_message_id"] = self.reply_to
         if self.message_thread_id:
-            params['message_thread_id'] = self.message_thread_id
+            params["message_thread_id"] = self.message_thread_id
 
         if self.message_id:
-            params['message_id'] = self.message_id
+            params["message_id"] = self.message_id
         return params
 
 

@@ -37,8 +37,8 @@ class InstagramParser:
             raise PWarning("Не могу скачать контент. Он недоступен без аутентификации (неприемлимый контент)")
 
         try:
-            all_scripts = bs4.select('script[type="application/json"][data-content-len][data-processed]')
-            api_scripts = [x for x in all_scripts if 'xdt_api__v1__' in x.text]
+            all_scripts = bs4.select("script[type=\"application/json\"][data-content-len][data-processed]")
+            api_scripts = [x for x in all_scripts if "xdt_api__v1__" in x.text]
             media = self._get_media(api_scripts)
         except PError:
             raise
@@ -73,20 +73,20 @@ class InstagramParser:
         for script in api_scripts:
             json_data = json.loads(script.text)
             try:
-                result = json_data['require'][0][3][0]['__bbox']['require'][0][3][1]['__bbox']['result']
-                if result.get('errors'):
+                result = json_data["require"][0][3][0]["__bbox"]["require"][0][3][1]["__bbox"]["result"]
+                if result.get("errors"):
                     # error = result['errors'][0]
                     raise PError("Не могу скачать контент. Ошибка со стороны сервера")
 
-                data = result.get('data')
-                if shortcode_web_info := data.get('xdt_api__v1__media__shortcode__web_info'):
-                    return shortcode_web_info['items'][0]
-                elif clips_on_logged_out := data.get('xdt_api__v1__clips__clips_on_logged_out_connection_v2'):
-                    node = clips_on_logged_out['edges'][0]['node']
-                    if 'media_command' in node:
-                        return node['media_command']
-                    elif 'media' in node:
-                        return node['media']
+                data = result.get("data")
+                if shortcode_web_info := data.get("xdt_api__v1__media__shortcode__web_info"):
+                    return shortcode_web_info["items"][0]
+                elif clips_on_logged_out := data.get("xdt_api__v1__clips__clips_on_logged_out_connection_v2"):
+                    node = clips_on_logged_out["edges"][0]["node"]
+                    if "media_command" in node:
+                        return node["media_command"]
+                    elif "media" in node:
+                        return node["media"]
                     raise KeyError()
             except (KeyError, IndexError, AttributeError):
                 continue
@@ -96,13 +96,13 @@ class InstagramParser:
     def get_media_by_parse_json(self, page_source):
         try:
             json_data = self.extract_json(page_source, "xdt_api__v1__media__shortcode__web_info")
-            return json_data['items'][0]
+            return json_data["items"][0]
         except:
             pass
 
         try:
-            json_data = self.extract_json(page_source, 'xdt_api__v1__clips__clips_on_logged_out_connection_v2')
-            return json_data['edges'][0]['node']['media_command']
+            json_data = self.extract_json(page_source, "xdt_api__v1__clips__clips_on_logged_out_connection_v2")
+            return json_data["edges"][0]["node"]["media_command"]
         except:
             pass
 
@@ -111,20 +111,20 @@ class InstagramParser:
     @staticmethod
     def _parse_media(media):
         data = InstagramAPIData()
-        caption = media.get('caption')
+        caption = media.get("caption")
         if caption:
-            data.caption = caption.get('text', None)
+            data.caption = caption.get("text", None)
 
-        if carousel_items := media.get('carousel_media'):
+        if carousel_items := media.get("carousel_media"):
             for carousel_item in carousel_items:
-                if video := carousel_item.get('video_versions'):
-                    data.add_video(download_url=video[0]['url'], thumbnail_url=carousel_item.get('display_uri'))
-                elif image := carousel_item.get('image_versions2'):
-                    data.add_image(download_url=image['candidates'][0]['url'])
-        elif video := media.get('video_versions'):
-            data.add_video(download_url=video[0]['url'], thumbnail_url=media.get('display_uri'))
-        elif image := media.get('image_versions2'):
-            data.add_image(download_url=image['candidates'][0]['url'])
+                if video := carousel_item.get("video_versions"):
+                    data.add_video(download_url=video[0]["url"], thumbnail_url=carousel_item.get("display_uri"))
+                elif image := carousel_item.get("image_versions2"):
+                    data.add_image(download_url=image["candidates"][0]["url"])
+        elif video := media.get("video_versions"):
+            data.add_video(download_url=video[0]["url"], thumbnail_url=media.get("display_uri"))
+        elif image := media.get("image_versions2"):
+            data.add_image(download_url=image["candidates"][0]["url"])
         return data
 
     @staticmethod
@@ -153,8 +153,8 @@ class InstagramParser:
 
 
 class InstagramAPIDataItem:
-    CONTENT_TYPE_IMAGE = 'image'
-    CONTENT_TYPE_VIDEO = 'video'
+    CONTENT_TYPE_IMAGE = "image"
+    CONTENT_TYPE_VIDEO = "video"
 
     def __init__(self, content_type: str, download_url: str, thumbnail_url: str | None = None):
         if content_type not in (self.CONTENT_TYPE_IMAGE, self.CONTENT_TYPE_VIDEO):

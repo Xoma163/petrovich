@@ -11,7 +11,7 @@ from apps.bot.core.messages.response_message import ResponseMessageItem
 from apps.commands.notifies.models import Notify
 from apps.shared.utils.utils import remove_tz, localize_datetime
 
-logger = logging.getLogger('notifier')
+logger = logging.getLogger("notifier")
 
 
 class Command(BaseCommand):

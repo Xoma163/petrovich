@@ -18,7 +18,7 @@ lock = Lock()
 
 class Wordle(Command):
     name = "wordle"
-    names = ['вордле']
+    names = ["вордле"]
 
     help_text = HelpText(
         commands_text="игра wordle",
@@ -48,8 +48,8 @@ class Wordle(Command):
             arg0 = None
         menu = [
             [[None], self.start_session],
-            [['сдаться'], self.lose],
-            [['default'], self.hypothesis]
+            [["сдаться"], self.lose],
+            [["default"], self.hypothesis]
         ]
         method = self.handle_menu(menu, arg0)
         rmi = method()
@@ -68,9 +68,9 @@ class Wordle(Command):
         }
 
         if self.event.is_from_chat:
-            data['chat'] = self.event.chat
+            data["chat"] = self.event.chat
         else:
-            data['profile'] = self.event.sender
+            data["profile"] = self.event.sender
         WordleModel.objects.create(**data)
 
         answer = "Игра начата. Поехали!"
@@ -112,7 +112,7 @@ class Wordle(Command):
         return ResponseMessage(rmi, send=False)
 
     def get_random_word(self):
-        with open(self.WORDLE_WORDS_PATH, 'r') as f:
+        with open(self.WORDLE_WORDS_PATH, "r") as f:
             words = json.loads(f.read())
         return random_event(words)
 
@@ -238,7 +238,7 @@ class WordleImageGenerator:
 
         width_diff = image_keyboard.width - image_words.width
 
-        dst = Image.new('RGBA', (image_keyboard.width, image_words.height + image_keyboard.height),
+        dst = Image.new("RGBA", (image_keyboard.width, image_words.height + image_keyboard.height),
                         self.COLOR_BACKGROUND)
         dst.paste(image_words, (int(width_diff / 2), 0))
         dst.paste(image_keyboard, (0, image_words.height))
@@ -278,7 +278,7 @@ class WordleImageGenerator:
                     letter_margin = (self.MAIN_WINDOW_CELL_WIDTH - letter_width) / 2
                     draw.text((x1 + letter_margin, y1 + 11), letter.upper(), font=font, fill=self.COLOR_TEXT)
 
-        dst = Image.new('RGBA', (image.width + self.PADDING * 2, image.height + self.PADDING * 2),
+        dst = Image.new("RGBA", (image.width + self.PADDING * 2, image.height + self.PADDING * 2),
                         self.COLOR_BACKGROUND)
         dst.paste(image, (self.PADDING, self.PADDING))
         return dst
@@ -312,7 +312,7 @@ class WordleImageGenerator:
                 letter_margin = (self.KEYBOARD_CELL_WIDTH - letter_width) / 2
                 draw.text((x1 + letter_margin + left_margin, y1 + 10), letter.upper(), font=font, fill=self.COLOR_TEXT)
 
-        dst = Image.new('RGBA', (image.width + self.PADDING * 2, image.height + self.PADDING * 2),
+        dst = Image.new("RGBA", (image.width + self.PADDING * 2, image.height + self.PADDING * 2),
                         self.COLOR_BACKGROUND)
         dst.paste(image, (self.PADDING, self.PADDING))
         return dst
@@ -350,18 +350,18 @@ def send_message_session_or_edit(bot, event, session, rmi: ResponseMessageItem, 
     if delta_messages > max_delta:
         old_msg_id = session.message_id
         br = bot.send_response_message_item(rmi)
-        message_id = br.response['result']['message_id']
+        message_id = br.response["result"]["message_id"]
         session.message_id = message_id
         session.save()
         bot.delete_messages(event.peer_id, old_msg_id)
     else:
         rmi.message_id = session.message_id
         br = bot.send_response_message_item(rmi)
-    if not br.success and br.response.get('description') != \
-            'Bad Request: message is not modified: specified new message content and reply markup are exactly the same as a current content and reply markup of the message':
+    if not br.success and br.response.get("description") != \
+            "Bad Request: message is not modified: specified new message content and reply markup are exactly the same as a current content and reply markup of the message":
         rmi.message_id = None
         br = bot.send_response_message_item(rmi)
-        message_id = br.response['result']['message_id']
+        message_id = br.response["result"]["message_id"]
         session.message_id = message_id
         session.save()
     bot.delete_messages(event.peer_id, event.message.id)

@@ -9,8 +9,8 @@ class VoiceAttachment(Attachment, DurationMixin):
 
     def __init__(self):
         super().__init__(self.TYPE)
-        self.ext: str = 'ogg'
+        self.ext: str = "ogg"
 
     def parse_tg(self, event):
         super().parse_tg(event)
-        self.duration = event['duration']
+        self.duration = event["duration"]

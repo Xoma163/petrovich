@@ -20,7 +20,7 @@ class GrokAPI(
     @property
     def headers(self) -> dict:
         return {
-            'Authorization': f"Bearer {self.api_key}"
+            "Authorization": f"Bearer {self.api_key}"
         }
 
     # ---------- base ---------- #
@@ -47,8 +47,8 @@ class GrokAPI(
             "messages": messages.get_messages()
         }
         if callback_func:
-            payload['stream'] = True
-            payload['stream_options'] = {"include_usage": True}
+            payload["stream"] = True
+            payload["stream_options"] = {"include_usage": True}
 
         return self.do_completions_request(
             model,
@@ -76,8 +76,8 @@ class GrokAPI(
             "messages": messages.get_messages()
         }
         if callback_func:
-            payload['stream'] = True
-            payload['stream_options'] = {"include_usage": True}
+            payload["stream"] = True
+            payload["stream_options"] = {"include_usage": True}
 
         return self.do_vision_request(
             model,
@@ -101,11 +101,11 @@ class GrokAPI(
 
     ) -> GPTImageDrawResponse:
         payload = {
-            'model': model.name,
-            'prompt': prompt,
-            'n': count,
+            "model": model.name,
+            "prompt": prompt,
+            "n": count,
             # 'size': model.size # size are not supported by xAI API at the moment.
-            'response_format': 'b64_json',
+            "response_format": "b64_json",
         }
         return self.do_image_request(
             model=model,  # noqa

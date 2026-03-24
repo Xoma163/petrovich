@@ -133,7 +133,7 @@ class GPTCommand(
         # В общем случае Completions (в том числе и при продолжении диалога) должен быть доступен
         if issubclass(self.provider.api_class, CompletionsAPIMixin) and isinstance(self, GPTCompletionsFunctionality):
             menu.append([["_wtf"], self.menu_wtf])
-            menu.append([['default'], self.menu_completions])
+            menu.append([["default"], self.menu_completions])
 
         arg0 = self.event.message.args[0] if self.event.message.args else None
         method = self.handle_menu(menu, arg0)
@@ -166,7 +166,7 @@ class GPTCommand(
                     self._add_bot_message(history, tg_event)
                 else:
                     self._add_user_message(history, tg_event)
-                reply_to_id = data.get(reply_to_id, {}).get('reply_to_message', {}).get('message_id')
+                reply_to_id = data.get(reply_to_id, {}).get("reply_to_message", {}).get("message_id")
                 if not reply_to_id or tg_event.message.id == first_event.message.id:
                     break
             if first_event.fwd:
@@ -197,8 +197,8 @@ class GPTCommand(
         """
         answer = answer if answer else "{пустой ответ}"
         if len(answer) > self.bot.max_message_text_length:
-            document_html = wrap_text_in_html_document(answer, 'gpt')
-            document_markdown = wrap_text_in_markdown_document(answer, 'gpt')
+            document_html = wrap_text_in_html_document(answer, "gpt")
+            document_markdown = wrap_text_in_markdown_document(answer, "gpt")
             rmi = ResponseMessageItem(
                 text=self.RESPONSE_MESSAGE_TOO_LONG,
                 attachments=[document_html, document_markdown],
@@ -227,7 +227,7 @@ class GPTCommand(
         if r.success:
             return None
 
-        document = wrap_text_in_markdown_document(rmi._raw_text, filename='gpt')
+        document = wrap_text_in_markdown_document(rmi._raw_text, filename="gpt")
         rmi.attachments = [document]
         rmi.text = self.TG_CANT_PARSE_RESPONSE_MESSAGE
         rmi.parse_mode = None
@@ -297,11 +297,11 @@ class GPTCommand(
             profile_settings = self.get_profile_gpt_settings()
             extra_data = {}
             if profile_settings.gpt_5_settings_reasoning_effort_level:
-                extra_data['effort_level'] = profile_settings.gpt_5_settings_reasoning_effort_level
+                extra_data["effort_level"] = profile_settings.gpt_5_settings_reasoning_effort_level
             if profile_settings.gpt_5_settings_verbosity_level:
-                extra_data['verbosity_level'] = profile_settings.gpt_5_settings_verbosity_level
+                extra_data["verbosity_level"] = profile_settings.gpt_5_settings_verbosity_level
             if profile_settings.gpt_5_settings_web_search:
-                extra_data['web_search'] = profile_settings.gpt_5_settings_web_search
+                extra_data["web_search"] = profile_settings.gpt_5_settings_web_search
             return extra_data
         return {}
 
@@ -355,7 +355,7 @@ class GPTCommand(
             tg_event.setup_event()
             if tg_event.message and tg_event.message.command in self.full_names:  # or event.is_from_pm:
                 find_accept_event = tg_event
-            reply_to_id = data.get(reply_to_id, {}).get('reply_to_message', {}).get('message_id')
+            reply_to_id = data.get(reply_to_id, {}).get("reply_to_message", {}).get("message_id")
             if not reply_to_id:
                 break
         return find_accept_event
@@ -417,7 +417,7 @@ class GPTCommand(
         text = text.split(self.DEBUG_LINE, 1)[0]
 
         txt_documents = [document for document in documents if
-                         document.mime_type.is_text or document.ext.lower() in ['html', 'txt']]
+                         document.mime_type.is_text or document.ext.lower() in ["html", "txt"]]
         if txt_documents:
             result_text = [text] if text else []
             for document in txt_documents:

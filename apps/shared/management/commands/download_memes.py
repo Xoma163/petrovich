@@ -24,7 +24,7 @@ class Command(BaseCommand):
     @staticmethod
     def get_meme_files():
         print("get_meme_files")
-        memes = Meme.objects.filter(file="").order_by('id')
+        memes = Meme.objects.filter(file="").order_by("id")
         for i, meme in enumerate(memes):
             print(f"Processing {i + 1} of {len(memes)}. id={meme.id}")
             try:
@@ -51,7 +51,7 @@ class Command(BaseCommand):
     def get_meme_file_previews(self):
         print("get_meme_file_previews")
         no_file_preview_q = Q(file_preview__isnull=True) | Q(file_preview="")
-        memes = Meme.objects.filter(type='video').filter(no_file_preview_q).order_by('id')
+        memes = Meme.objects.filter(type="video").filter(no_file_preview_q).order_by("id")
         for i, meme in enumerate(memes):
             print(f"Processing {i + 1} of {len(memes)}. id={meme.id}")
             try:

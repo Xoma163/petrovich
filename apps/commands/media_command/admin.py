@@ -7,9 +7,9 @@ from apps.shared.mixins import TimeStampAdminMixin
 @admin.register(VideoCache)
 class VideoCacheAdmin(TimeStampAdminMixin):
     list_display = (
-        'filename',
-        'source_url',
+        "filename",
+        "source_url",
     )
     ordering = (
-        'filename',
+        "filename",
     )

@@ -68,7 +68,7 @@ class Horoscope(Command):
     )
 
     zodiac_signs = ZodiacSigns([
-        ZodiacSign("водолей", ['♒', "♒️"], "21.01"),
+        ZodiacSign("водолей", ["♒", "♒️"], "21.01"),
         ZodiacSign("рыбы", ["♓", "♓️"], "19.02"),
         ZodiacSign("овен", ["♈", "♈️"], "21.03"),
         ZodiacSign("телец", ["♉", "♉️"], "21.04"),
@@ -193,10 +193,10 @@ class Horoscope(Command):
             HoroscopeModel.objects.all().delete()
 
             random_memes = Meme.objects \
-                .exclude(type='audio') \
+                .exclude(type="audio") \
                 .exclude(approved=False) \
                 .exclude(for_trusted=True) \
-                .order_by('?')[:MEMES_COUNT]
+                .order_by("?")[:MEMES_COUNT]
             if len(random_memes) != MEMES_COUNT:
                 raise PError("Невозможно составить гороскоп")
 
@@ -205,8 +205,8 @@ class Horoscope(Command):
 
             for meme in random_memes:
                 meme_dict = meme.__dict__
-                del meme_dict['_state']
-                pk = meme_dict.pop('id')
+                del meme_dict["_state"]
+                pk = meme_dict.pop("id")
                 hm = HoroscopeMeme(**meme_dict)
                 hm.meme_pk = pk
                 hm.save()

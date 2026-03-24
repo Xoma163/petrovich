@@ -36,13 +36,13 @@ class GPTCompletionsFunctionality(GPTCommandProtocol):
         return self.send_rmi(rmi)
 
     def menu_wtf(self):
-        message = self.event.raw['callback_query']['message']
+        message = self.event.raw["callback_query"]["message"]
 
         documents: list[DocumentAttachment] = self.event.get_all_attachments([DocumentAttachment])
         if documents and documents[0].mime_type.is_text:
             text = documents[0].read_text()
         else:
-            text = message.get('text')
+            text = message.get("text")
 
         history = self.provider.messages_class()
 

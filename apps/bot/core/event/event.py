@@ -167,25 +167,25 @@ class Event:
         Подготовка ивента к логированию
         """
         dict_self = copy.copy(self.__dict__)
-        ignore_fields = ['bot']
+        ignore_fields = ["bot"]
         for ignore_field in ignore_fields:
             del dict_self[ignore_field]
-        dict_self['message'] = dict_self['message'].to_log() if dict_self['message'] else {}
-        dict_self['fwd'] = [x.to_log() for x in dict_self['fwd']]
-        dict_self['attachments'] = [x.to_log() for x in dict_self['attachments']]
+        dict_self["message"] = dict_self["message"].to_log() if dict_self["message"] else {}
+        dict_self["fwd"] = [x.to_log() for x in dict_self["fwd"]]
+        dict_self["attachments"] = [x.to_log() for x in dict_self["attachments"]]
 
-        if dict_self['command']:
-            dict_self['command'] = dict_self['command'].name
+        if dict_self["command"]:
+            dict_self["command"] = dict_self["command"].name
         return dict_self
 
     def _cache(self):
         mc = MessagesCache(self.peer_id)
-        mc.add_message(self.message.id, self.raw.get('message', self.raw))
+        mc.add_message(self.message.id, self.raw.get("message", self.raw))
 
     @property
     def log_filter(self) -> dict:
         return {
-            'user_id': self.user.user_id if self.user else None,
-            'chat_id': self.chat.chat_id if self.chat else None,
-            'message_id': self.message.id if self.message else None
+            "user_id": self.user.user_id if self.user else None,
+            "chat_id": self.chat.chat_id if self.chat else None,
+            "message_id": self.message.id if self.message else None
         }

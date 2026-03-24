@@ -12,15 +12,15 @@ class Command(BaseCommand):
     URL = "https://gks1frunze.ru"
 
     def add_arguments(self, parser):
-        parser.add_argument('user_pk', nargs='+', type=str, help='chat_id')
+        parser.add_argument("user_pk", nargs="+", type=str, help="chat_id")
 
     def handle(self, *args, **options):
-        user_pk = options['user_pk'][0]
+        user_pk = options["user_pk"][0]
         pasha = User.objects.get(pk=user_pk)
 
         pasha_news_last_id_entity, created = Service.objects.get_or_create(
-            name='pasha_news_last_id',
-            defaults={'value': 0}
+            name="pasha_news_last_id",
+            defaults={"value": 0}
         )
         pasha_news_last_id = int(pasha_news_last_id_entity.value)
         content = requests.get(f"{self.URL}/news").content
@@ -53,10 +53,10 @@ class Command(BaseCommand):
         bs4 = BeautifulSoup(content, "html.parser")
         news_content = bs4.select(".news-detail .col-lg-9")[0].text.strip()
         news_title = bs4.select("h1")[0].text.strip()
-        if news_title in news_content.split('\n')[0]:
+        if news_title in news_content.split("\n")[0]:
             news_content = "\n".join(news_content.split("\n")[1:])
         return news_content, news_url, news_title
 
     @staticmethod
     def get_news_id(x):
-        return int(x.attrs['href'].split('/')[-2])
+        return int(x.attrs["href"].split("/")[-2])

@@ -249,7 +249,7 @@ class Media(AcceptExtraCommand):
         if self.event.is_from_chat:
             answer += f"\nОт {self.event.sender}"
 
-        source_hostname = str(urlparse(chosen_url).hostname).lstrip('www.')
+        source_hostname = str(urlparse(chosen_url).hostname).lstrip("www.")
 
         if media_keys.spoiler:
             answer = self.bot.get_spoiler_text(answer)

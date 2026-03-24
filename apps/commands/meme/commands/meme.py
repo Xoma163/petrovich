@@ -86,14 +86,14 @@ class Meme(Command):
 
         arg0 = self.event.message.args[0]
         menu = [
-            [['добавить'], self.menu_add],
-            [['обновить'], self.menu_refresh],
-            [['удалить'], self.menu_delete],
-            [['подтвердить', 'принять', '+'], self.menu_approve],
-            [['отклонить', 'отменить', '-'], self.menu_reject],
-            [['переименовать', 'правка'], self.menu_rename],
-            [['инфо'], self.menu_info],
-            [['default'], self.menu_default]
+            [["добавить"], self.menu_add],
+            [["обновить"], self.menu_refresh],
+            [["удалить"], self.menu_delete],
+            [["подтвердить", "принять", "+"], self.menu_approve],
+            [["отклонить", "отменить", "-"], self.menu_reject],
+            [["переименовать", "правка"], self.menu_rename],
+            [["инфо"], self.menu_info],
+            [["default"], self.menu_default]
         ]
         method = self.handle_menu(menu, arg0)
         return method()
@@ -118,30 +118,30 @@ class Meme(Command):
         self.check_meme_name(meme_name_list)
 
         new_meme = {
-            'name': meme_name,
-            'type': attachment.type,
-            'author': self.event.sender,
-            'approved': self.event.sender.check_role(RoleEnum.MODERATOR) or self.event.sender.check_role(
+            "name": meme_name,
+            "type": attachment.type,
+            "author": self.event.sender,
+            "approved": self.event.sender.check_role(RoleEnum.MODERATOR) or self.event.sender.check_role(
                 RoleEnum.TRUSTED)
         }
 
         try:
-            MemeModel.objects.get(name=new_meme['name'])
+            MemeModel.objects.get(name=new_meme["name"])
             raise PWarning("Мем с таким названием уже есть в базе")
         except MemeModel.DoesNotExist:
             pass
 
         if isinstance(attachment, LinkAttachment):
-            new_meme['link'] = attachment.url
+            new_meme["link"] = attachment.url
         else:
-            new_meme['tg_file_id'] = attachment.file_id
+            new_meme["tg_file_id"] = attachment.file_id
         new_meme_obj = MemeModel.objects.create(**new_meme)
 
         # Кэш
         is_youtube_link = isinstance(attachment, LinkAttachment) and attachment.is_youtube_link
         rmi_params = ResponseMessageItem()
 
-        if new_meme['approved']:
+        if new_meme["approved"]:
             answer = "Добавил"
             if not is_youtube_link:
                 self._save_meme(new_meme_obj)
@@ -152,7 +152,7 @@ class Meme(Command):
                 ResponseMessageItem(text=answer_with_youtube, peer_id=self.event.peer_id)
             )
             rmi_params.peer_id = self.event.peer_id
-            rmi_params.message_id = response.response['result']['message_id']
+            rmi_params.message_id = response.response["result"]["message_id"]
             rmi_params.text = answer
 
         if is_youtube_link:
@@ -160,7 +160,7 @@ class Meme(Command):
         else:
             self._save_meme(new_meme_obj)
 
-        if new_meme['approved']:
+        if new_meme["approved"]:
             raise PSkip()
 
         meme_to_send = self.prepare_meme_to_send(new_meme_obj)
@@ -194,21 +194,21 @@ class Meme(Command):
 
         meme_filter = {}
         if isinstance(id_name, int):
-            meme_filter['_id'] = id_name
+            meme_filter["_id"] = id_name
         else:
-            meme_filter['filter_list'] = id_name.split(' ')
+            meme_filter["filter_list"] = id_name.split(" ")
         if not (self.event.sender.check_role(RoleEnum.MODERATOR) or self.event.sender.check_role(RoleEnum.TRUSTED)):
-            meme_filter['filter_user'] = self.event.sender
+            meme_filter["filter_user"] = self.event.sender
         if not self.event.sender.check_role(RoleEnum.TRUSTED):
-            meme_filter['exclude_trusted'] = True
+            meme_filter["exclude_trusted"] = True
 
         meme = self.get_meme(**meme_filter)
 
-        fields = {'type': attachment.type}
+        fields = {"type": attachment.type}
         if isinstance(attachment, LinkAttachment):
-            fields['link'] = attachment.url
+            fields["link"] = attachment.url
         else:
-            fields['tg_file_id'] = attachment.file_id
+            fields["tg_file_id"] = attachment.file_id
 
         for attr, value in fields.items():
             setattr(meme, attr, value)
@@ -230,7 +230,7 @@ class Meme(Command):
                 ResponseMessageItem(text=answer_with_youtube, peer_id=self.event.peer_id)
             )
             rmi_params.peer_id = self.event.peer_id
-            rmi_params.message_id = response.response['result']['message_id'],
+            rmi_params.message_id = response.response["result"]["message_id"],
             rmi_params.text = answer
 
         if is_youtube_link:
@@ -254,9 +254,9 @@ class Meme(Command):
         self.check_args(2)
         meme_filter = self.get_default_meme_filter_by_args(self.event.message.args[1:])
         if not self.event.sender.check_role(RoleEnum.MODERATOR):
-            meme_filter['filter_user'] = self.event.sender
+            meme_filter["filter_user"] = self.event.sender
         if not self.event.sender.check_role(RoleEnum.TRUSTED):
-            meme_filter['exclude_trusted'] = True
+            meme_filter["exclude_trusted"] = True
         meme = self.get_meme(**meme_filter)
 
         if not self.event.sender.check_role(RoleEnum.MODERATOR) and meme.author != self.event.sender:
@@ -288,7 +288,7 @@ class Meme(Command):
         memes = MemeModel.objects.filter(approved=True)
         if not self.event.sender.check_role(RoleEnum.TRUSTED):
             memes = memes.exclude(for_trusted=True)
-        meme = memes.order_by('?').first()
+        meme = memes.order_by("?").first()
         rmi = self.prepare_meme_to_send(meme, print_name=True, send_keyboard=True)
         return ResponseMessage(rmi)
 
@@ -423,8 +423,8 @@ class Meme(Command):
         if filter_list:
             filter_list = [x.lower() for x in filter_list]
             for _filter in filter_list:
-                if '*' in _filter:
-                    _filter = _filter.replace('*', '.')
+                if "*" in _filter:
+                    _filter = _filter.replace("*", ".")
                     regex_filter = fr'.*{_filter}.*'
                     memes = memes.filter(name__iregex=regex_filter)
                 else:
@@ -538,7 +538,7 @@ class Meme(Command):
         meme_names_str = ";\n".join(meme_names)
 
         answer = f"Нашёл сразу {total_memes_count}, уточните:\n\n" \
-                 f"{meme_names_str}" + '.'
+                 f"{meme_names_str}" + "."
         if total_memes_count > meme_count_limit:
             answer += "\n..."
         return ResponseMessageItem(text=answer)
@@ -564,15 +564,15 @@ class Meme(Command):
 
         meme_filter = {}
         if isinstance(id_name, int):
-            meme_filter['_id'] = id_name
+            meme_filter["_id"] = id_name
         else:
-            meme_filter['filter_list'] = id_name.split(' ')
+            meme_filter["filter_list"] = id_name.split(" ")
         return meme_filter
 
     @staticmethod
     def check_meme_name(name):
-        ban_list = ['добавить', 'обновить', 'удалить', 'конфа', 'рандом', 'р', 'подтвердить', 'принять', '+',
-                    'отклонить', 'отменить', '-', 'переименовать', 'правка', 'инфо']
+        ban_list = ["добавить", "обновить", "удалить", "конфа", "рандом", "р", "подтвердить", "принять", "+",
+                    "отклонить", "отменить", "-", "переименовать", "правка", "инфо"]
         if name in ban_list:
             raise PWarning("Мем с таким названием нельзя создать")
 
@@ -587,26 +587,26 @@ class Meme(Command):
         _inline_qr = []
 
         att_type_map = {
-            PhotoAttachment.TYPE: 'photo_file_id',
-            StickerAttachment.TYPE: 'sticker_file_id',
-            VideoAttachment.TYPE: 'video_file_id',
-            AnimationAttachment.TYPE: 'gif_file_id',
-            VoiceAttachment.TYPE: 'voice_file_id',
+            PhotoAttachment.TYPE: "photo_file_id",
+            StickerAttachment.TYPE: "sticker_file_id",
+            VideoAttachment.TYPE: "video_file_id",
+            AnimationAttachment.TYPE: "gif_file_id",
+            VoiceAttachment.TYPE: "voice_file_id",
         }
 
         for meme in memes:
             qr = {
-                'id': meme.pk,
-                'type': meme.type,
+                "id": meme.pk,
+                "type": meme.type,
                 att_type_map[meme.type]: meme.tg_file_id
             }
             if meme.type in [VideoAttachment.TYPE, AnimationAttachment.TYPE, VoiceAttachment.TYPE]:
-                qr['title'] = meme.name
+                qr["title"] = meme.name
 
             # set youtube preview
             if meme.type in [VideoAttachment.TYPE] and meme.link:
                 if video_id := get_youtube_video_id(meme.link):
-                    qr['thumb_url'] = f"https://img.youtube.com/vi/{video_id}/default.jpg"
+                    qr["thumb_url"] = f"https://img.youtube.com/vi/{video_id}/default.jpg"
 
             _inline_qr.append(qr)
         return _inline_qr
@@ -654,9 +654,9 @@ class Meme(Command):
         if filter_list:
             filtered_memes = self.get_filtered_memes(filter_list)
         else:
-            filtered_memes = MemeModel.objects.all().order_by('-uses')
+            filtered_memes = MemeModel.objects.all().order_by("-uses")
 
-        memes = filtered_memes.filter(type__in=['photo', 'sticker', 'video', 'voice', 'gif'], approved=True)
+        memes = filtered_memes.filter(type__in=["photo", "sticker", "video", "voice", "gif"], approved=True)
         if not self.event.sender.check_role(RoleEnum.TRUSTED):
             memes = memes.exclude(for_trusted=True)
 

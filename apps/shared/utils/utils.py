@@ -95,7 +95,7 @@ def get_help_texts_for_command(command, roles: list[RoleEnum] = None) -> str:
     if command.access != RoleEnum.USER:
         result += f"Необходимый уровень прав {LONG_DASH} {command.access}\n"
     if result:
-        result += '\n'
+        result += "\n"
     if command.help_text:
         _format = TgBot.get_formatted_text_line
         # help texts
@@ -152,7 +152,7 @@ def get_image_size_by_text(txt: str, font) -> tuple[int, int]:
     """
     Вычисление размеро текста если оно будет изображением
     """
-    img = Image.new('RGB', (1, 1))
+    img = Image.new("RGB", (1, 1))
     draw = ImageDraw.Draw(img)
     box = draw.textbbox((0, 0), txt, font)
     w = box[2] - box[0]  # bottom-top
@@ -176,7 +176,7 @@ def draw_text_on_image(text: str):
     width, height = get_image_size_by_text(text, font)
     width += 10
     height += 10
-    img = Image.new('RGB', (width + 20, height + 20), background_color)
+    img = Image.new("RGB", (width + 20, height + 20), background_color)
     d = ImageDraw.Draw(img)
     d.text((10, 10), text, fill=text_color, font=font)
     return img
@@ -188,13 +188,13 @@ def get_role_by_str(role_str: str):
     """
 
     roles_map = {
-        ('администрация', 'администратор', 'админы', 'админ', 'главный', 'власть', 'господин', 'хозяин', 'admin',
-         'administrator'): RoleEnum.ADMIN,
-        ('moderators', 'moderator', 'модераторы', 'модератор', 'модеры', 'модер', 'moder'): RoleEnum.MODERATOR,
-        ('майнкрафт', 'майн', 'minecraft', 'mine'): RoleEnum.MINECRAFT,
-        ('забанен', 'бан', 'ban', 'banned'): RoleEnum.BANNED,
-        ('доверенный', 'проверенный', 'trust', 'trusted'): RoleEnum.TRUSTED,
-        ('пользователь', 'юзер', 'user'): RoleEnum.USER
+        ("администрация", "администратор", "админы", "админ", "главный", "власть", "господин", "хозяин", "admin",
+         "administrator"): RoleEnum.ADMIN,
+        ("moderators", "moderator", "модераторы", "модератор", "модеры", "модер", "moder"): RoleEnum.MODERATOR,
+        ("майнкрафт", "майн", "minecraft", "mine"): RoleEnum.MINECRAFT,
+        ("забанен", "бан", "ban", "banned"): RoleEnum.BANNED,
+        ("доверенный", "проверенный", "trust", "trusted"): RoleEnum.TRUSTED,
+        ("пользователь", "юзер", "user"): RoleEnum.USER
     }
     for k in roles_map:
         if role_str in k:
@@ -228,14 +228,14 @@ def transform_k(arg: str):
     :return: int
     """
     arg = arg.lower()
-    count_m = arg.count('m') + arg.count('м')
-    count_k = arg.count('k') + arg.count('к') + count_m * 2
+    count_m = arg.count("m") + arg.count("м")
+    count_k = arg.count("k") + arg.count("к") + count_m * 2
     if count_k > 0:
         arg = arg \
-            .replace('k', '') \
-            .replace('к', '') \
-            .replace('м', '') \
-            .replace('m', '')
+            .replace("k", "") \
+            .replace("к", "") \
+            .replace("м", "") \
+            .replace("m", "")
         arg = float(arg)
         arg *= 10 ** (3 * count_k)
     return arg
@@ -263,7 +263,7 @@ def get_flat_list(_list: list[list]) -> list:
 
 
 def get_url_file_ext(url) -> str:
-    return urlparse(url).path.rsplit('.', 1)[-1]
+    return urlparse(url).path.rsplit(".", 1)[-1]
 
 
 def prepend_symbols(string: str, symbol: str, n: int) -> str:
@@ -291,7 +291,7 @@ def split_text_by_n_symbols(text: str, n: int, split_on: list[str] | None = None
     Разбивает текст на чанки с делением по спецсимволам указанным в split_on
     """
     if split_on is None:
-        split_on = ['\n', ',', ' ', '']
+        split_on = ["\n", ",", " ", ""]
     if len(text) < n:
         return [text]
 
@@ -346,51 +346,51 @@ def get_admin_profile(exclude_profile: Profile | None = None) -> Profile | None:
     return profile
 
 
-def wrap_text_in_html_document(text: str, filename: str = 'file') -> DocumentAttachment:
+def wrap_text_in_html_document(text: str, filename: str = "file") -> DocumentAttachment:
     # text = text.replace("\n", "<br>")
     text = markdown_to_html(text)
     document = DocumentAttachment()
-    document.parse(_bytes=text.encode('utf-8-sig'), filename=f"{filename}.html")
+    document.parse(_bytes=text.encode("utf-8-sig"), filename=f"{filename}.html")
     return document
 
 
-def wrap_text_in_markdown_document(text: str, filename: str = 'file') -> DocumentAttachment:
+def wrap_text_in_markdown_document(text: str, filename: str = "file") -> DocumentAttachment:
     document = DocumentAttachment()
-    document.parse(_bytes=text.encode('utf-8-sig'), filename=f"{filename}.md")
+    document.parse(_bytes=text.encode("utf-8-sig"), filename=f"{filename}.md")
     return document
 
 
 def extract_json(text) -> str:
-    start = text.find('{')
+    start = text.find("{")
     if start == -1:
-        raise ValueError('JSON не найден')
+        raise ValueError("JSON не найден")
 
     depth = 0
     for i, char in enumerate(text[start:]):
-        if char == '{':
+        if char == "{":
             depth += 1
-        elif char == '}':
+        elif char == "}":
             depth -= 1
             if depth == 0:
                 end = start + i + 1
                 break
     else:
-        raise ValueError('Некорректный JSON: не сходятся скобки')
+        raise ValueError("Некорректный JSON: не сходятся скобки")
     json_str = text[start:end]
     return json_str
 
 
 def get_youtube_video_id(url) -> str | None:
     parsed_url = urlparse(url)
-    hostname = parsed_url.hostname.replace('www.', '').lower()
+    hostname = parsed_url.hostname.replace("www.", "").lower()
 
-    if hostname == 'youtube.com':
+    if hostname == "youtube.com":
         query_dict = {x[0]: x[1] for x in parse_qsl(parsed_url.query)}
-        if video_id := query_dict.get('v', None):
+        if video_id := query_dict.get("v", None):
             return video_id
         return parsed_url.path.replace("/shorts", "").strip("/")
-    elif hostname == 'youtu.be':
-        return parsed_url.path.strip('/')
+    elif hostname == "youtu.be":
+        return parsed_url.path.strip("/")
     return None
 
 

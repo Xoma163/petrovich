@@ -18,66 +18,66 @@ from apps.shared.mixins import TimeStampAdminMixin, TopFieldsMixin
 @admin.register(Provider)
 class ProviderAdmin(admin.ModelAdmin):
     list_display = (
-        'name',
+        "name",
     )
     ordering = (
-        'name',
+        "name",
     )
 
 
 @admin.register(Preprompt)
 class PrepromptAdmin(TimeStampAdminMixin):
     list_display = (
-        'author',
-        'provider',
-        'chat',
-        'text'
+        "author",
+        "provider",
+        "chat",
+        "text"
     )
     search_fields = (
-        'author__name',
-        'author__surname',
-        'author__nickname_real'
+        "author__name",
+        "author__surname",
+        "author__nickname_real"
     )
     list_filter = (
-        'provider',
-        ('author', admin.RelatedOnlyFieldListFilter),
-        ('chat', admin.RelatedOnlyFieldListFilter),
+        "provider",
+        ("author", admin.RelatedOnlyFieldListFilter),
+        ("chat", admin.RelatedOnlyFieldListFilter),
     )
     list_select_related = (
-        'author',
-        'chat',
-        'provider'
+        "author",
+        "chat",
+        "provider"
     )
     ordering = (
-        'author',
-        'chat',
+        "author",
+        "chat",
     )
 
 
 @admin.register(Usage)
 class UsageAdmin(TimeStampAdminMixin):
     list_display = (
-        'author',
-        'provider',
-        'model_name',
-        'cost'
+        "author",
+        "provider",
+        "model_name",
+        "cost"
     )
     search_fields = (
-        'author__name',
-        'author__surname',
-        'author__nickname_real'
+        "author__name",
+        "author__surname",
+        "author__nickname_real"
     )
     list_filter = (
-        'provider',
-        ('author', admin.RelatedOnlyFieldListFilter),
+        "provider",
+        ("author", admin.RelatedOnlyFieldListFilter),
     )
     list_select_related = (
-        'provider',
-        'author',
+        "provider",
+        "author",
     )
 
     ordering = (
-        '-created_at',
+        "-created_at",
     )
 
 
@@ -106,7 +106,7 @@ class CompletionModelAdmin(admin.ModelAdmin):
         "provider",
     )
     ordering = (
-        'name',
+        "name",
     )
 
     actions = [copy_completions_to_vision]
@@ -137,7 +137,7 @@ class VisionModelAdmin(admin.ModelAdmin):
         "provider",
     )
     ordering = (
-        'name',
+        "name",
     )
 
 
@@ -160,7 +160,7 @@ class ImageDrawModelAdmin(admin.ModelAdmin):
         "provider",
     )
     ordering = (
-        'name',
+        "name",
     )
 
 
@@ -182,7 +182,7 @@ class ImageEditModelAdmin(admin.ModelAdmin):
         "provider",
     )
     ordering = (
-        'name',
+        "name",
     )
 
 
@@ -202,7 +202,7 @@ class VoiceRecognitionModelAdmin(admin.ModelAdmin):
         "provider",
     )
     ordering = (
-        'name',
+        "name",
     )
 
 
@@ -210,8 +210,8 @@ class VoiceRecognitionModelAdmin(admin.ModelAdmin):
 class ProfileGPTSettingsAdmin(TimeStampAdminMixin, TopFieldsMixin):
     TOP_ORDER_FIELDS = ["provider", "profile"]
     list_display = (
-        'profile',
-        'has_key',
+        "profile",
+        "has_key",
         "provider",
         "completions_model",
         "vision_model",
@@ -220,13 +220,13 @@ class ProfileGPTSettingsAdmin(TimeStampAdminMixin, TopFieldsMixin):
         "voice_recognition_model"
     )
     search_fields = (
-        'profile__name',
-        'profile__surname',
-        'profile__nickname_real'
+        "profile__name",
+        "profile__surname",
+        "profile__nickname_real"
     )
     list_filter = (
         "provider",
-        ('profile', admin.RelatedOnlyFieldListFilter),
+        ("profile", admin.RelatedOnlyFieldListFilter),
     )
     list_select_related = (
         "profile",
@@ -238,10 +238,10 @@ class ProfileGPTSettingsAdmin(TimeStampAdminMixin, TopFieldsMixin):
         "voice_recognition_model",
     )
     ordering = (
-        'profile',
+        "profile",
     )
 
-    @admin.display(boolean=True, description='Есть ключ')
+    @admin.display(boolean=True, description="Есть ключ")
     def has_key(self, obj: ProfileGPTSettings) -> bool:
         return bool(obj.key)
 
@@ -256,13 +256,13 @@ class GPTPresetAdmin(TimeStampAdminMixin, TopFieldsMixin):
         "provider",
     )
     search_fields = (
-        'profile__name',
-        'profile__surname',
-        'profile__nickname_real'
+        "profile__name",
+        "profile__surname",
+        "profile__nickname_real"
     )
     list_filter = (
         "provider",
-        ('profile', admin.RelatedOnlyFieldListFilter),
+        ("profile", admin.RelatedOnlyFieldListFilter),
     )
     list_select_related = (
         "profile",
@@ -274,5 +274,5 @@ class GPTPresetAdmin(TimeStampAdminMixin, TopFieldsMixin):
         "voice_recognition_model",
     )
     ordering = (
-        'profile',
+        "profile",
     )

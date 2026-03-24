@@ -36,7 +36,7 @@ class Commands(Command):
             if not role:
                 raise PWarning("Не знаю такой роли")
             for ordered_role in ordered_roles:
-                if ordered_role['role'] == role:
+                if ordered_role["role"] == role:
                     result = self.get_str_for_role(help_texts, ordered_role)
                     if not result:
                         answer = "У вас нет прав для просмотра команд данной роли"
@@ -53,9 +53,9 @@ class Commands(Command):
 
     def get_str_for_role(self, help_texts, role):
         result = ""
-        if self.event.sender.check_role(role['role']) and help_texts[role['role'].name]:
+        if self.event.sender.check_role(role["role"]) and help_texts[role["role"].name]:
             result += f"\n\n— {role['text']} —\n"
-            help_texts_list = help_texts[role['role'].name].split('\n')
+            help_texts_list = help_texts[role["role"].name].split("\n")
             help_texts_list_new = []
             for help_text in help_texts_list:
                 dash_pos = help_text.find("-")

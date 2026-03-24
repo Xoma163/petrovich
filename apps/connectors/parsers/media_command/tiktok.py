@@ -53,7 +53,7 @@ class TikTok:
 
         script_data = bs4.find(id="__UNIVERSAL_DATA_FOR_REHYDRATION__")
         data = json.loads(script_data.text)
-        video_detail = data['__DEFAULT_SCOPE__'].get('webapp.video-detail')
+        video_detail = data["__DEFAULT_SCOPE__"].get("webapp.video-detail")
 
         if video_detail:
             self.raise_on_errors(video_detail)
@@ -62,29 +62,29 @@ class TikTok:
             raise PWarning("Не нашёл видео в тиктоке. Если это пост-слайдер, то я не умею их скачивать")
 
     def raise_on_errors(self, video_detail):
-        if video_detail['statusCode'] in self.errors:
-            raise PWarning(self.errors[video_detail['statusCode']])
+        if video_detail["statusCode"] in self.errors:
+            raise PWarning(self.errors[video_detail["statusCode"]])
 
     @staticmethod
     def get_video_post(video_detail, cookies, headers):
-        video_data = video_detail['itemInfo']['itemStruct']
+        video_data = video_detail["itemInfo"]["itemStruct"]
 
-        cookies = {cookie['name']: cookie['value'] for cookie in cookies}
+        cookies = {cookie["name"]: cookie["value"] for cookie in cookies}
 
-        headers["range"] = 'bytes=0-'
-        headers["accept-encoding"] = 'identity;q=1, *;q=0'
-        headers["referer"] = 'https://www.tiktok.com/'
+        headers["range"] = "bytes=0-"
+        headers["accept-encoding"] = "identity;q=1, *;q=0"
+        headers["referer"] = "https://www.tiktok.com/"
 
         return VideoData(
             title=None,
-            description=video_data.get('desc'),
-            thumbnail_url=video_data['video']['originCover'],
-            width=video_data['video']['width'],
-            height=video_data['video']['height'],
-            duration=video_data['video']['duration'],
-            video_download_url=video_data['video']['playAddr'],
+            description=video_data.get("desc"),
+            thumbnail_url=video_data["video"]["originCover"],
+            width=video_data["video"]["width"],
+            height=video_data["video"]["height"],
+            duration=video_data["video"]["duration"],
+            video_download_url=video_data["video"]["playAddr"],
             extra_data={
-                'cookies': cookies,
-                'headers': headers,
+                "cookies": cookies,
+                "headers": headers,
             }
         )

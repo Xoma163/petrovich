@@ -14,5 +14,5 @@ class PhotoAttachment(Attachment, SizedMixin):
     def parse_tg(self, event):
         super().parse_tg(event)
 
-        self.width = event.get('width')
-        self.height = event.get('height')
+        self.width = event.get("width")
+        self.height = event.get("height")

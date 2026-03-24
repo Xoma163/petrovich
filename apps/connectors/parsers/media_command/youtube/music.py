@@ -14,7 +14,7 @@ class YoutubeMusic:
     @staticmethod
     def clear_url(url):
         parsed = urlparse(url)
-        v = dict(parse_qsl(parsed.query)).get('v')
+        v = dict(parse_qsl(parsed.query)).get("v")
         res = f"{parsed.scheme}://{parsed.hostname}{parsed.path}"
         if v:
             res += f"?v={v}"
@@ -28,14 +28,14 @@ class YoutubeMusic:
 
     def _get_info(self, url) -> AudioData:
         ydl_params = {
-            'format': 'bestaudio/best',
-            'title': True,
-            'logger': NothingLogger(),
+            "format": "bestaudio/best",
+            "title": True,
+            "logger": NothingLogger(),
             # 'outtmpl': '/tmp/yt_dlp_%(title)s-%(id)s.%(ext)s',
-            'postprocessors': [{
-                'key': 'FFmpegExtractAudio',
-                'preferredcodec': 'mp3',
-                'preferredquality': '320',
+            "postprocessors": [{
+                "key": "FFmpegExtractAudio",
+                "preferredcodec": "mp3",
+                "preferredquality": "320",
             }],
         }
 
@@ -43,35 +43,35 @@ class YoutubeMusic:
         url = self.clear_url(url)
 
         info = ytdl.extract_info(url, download=True)
-        self._temp_file_path = info['requested_downloads'][0]['filepath']
-        artist = info.get('artist')
+        self._temp_file_path = info["requested_downloads"][0]["filepath"]
+        artist = info.get("artist")
         if artist:
-            artist = artist.split(',')[0]
-        title = info.get('title')
-        full_title = info.get('fulltitle')
+            artist = artist.split(",")[0]
+        title = info.get("title")
+        full_title = info.get("fulltitle")
 
         if not artist or not title:
             artists = artist
         else:
-            full_title = full_title.replace('—', '-').replace('–', '-').replace('−', '-')
+            full_title = full_title.replace("—", "-").replace("–", "-").replace("−", "-")
             try:
-                artists, title = full_title.split('-')
+                artists, title = full_title.split("-")
             except ValueError:
-                artists = info['uploader']
+                artists = info["uploader"]
                 title = full_title
 
             artists = artists.strip()
             title = title.strip()
 
-        with open(self._temp_file_path, 'rb') as file:
+        with open(self._temp_file_path, "rb") as file:
             content = file.read()
 
         return AudioData(
             artists=artists,
             title=title,
-            duration=info.get('duration'),
+            duration=info.get("duration"),
             thumbnail_url=self._get_thumbnail(info),
-            format=info['requested_downloads'][0]['ext'],
+            format=info["requested_downloads"][0]["ext"],
             content=content,
         )
 
@@ -79,9 +79,9 @@ class YoutubeMusic:
     def _get_thumbnail(info: dict) -> str | None:
         try:
             return list(filter(
-                lambda x: x['url'].endswith("mqdefault.jpg"),
-                info['thumbnails']
-            ))[0]['url']
+                lambda x: x["url"].endswith("mqdefault.jpg"),
+                info["thumbnails"]
+            ))[0]["url"]
         except (IndexError, KeyError):
             return None
 

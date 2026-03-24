@@ -48,30 +48,30 @@ class Settings(Command):
     )
 
     ON_OFF_TRANSLATOR = {
-        'вкл': True,
-        'on': True,
-        '1': True,
-        'true': True,
-        'включить': True,
-        'включи': True,
-        'вруби': True,
-        'подключи': True,
-        'истина': True,
+        "вкл": True,
+        "on": True,
+        "1": True,
+        "true": True,
+        "включить": True,
+        "включи": True,
+        "вруби": True,
+        "подключи": True,
+        "истина": True,
 
-        'выкл': False,
-        'off': False,
-        '0': False,
-        'false': False,
-        'выключить': False,
-        'выключи': False,
-        'выруби': False,
-        'отключи': False,
-        'ложь': False
+        "выкл": False,
+        "off": False,
+        "0": False,
+        "false": False,
+        "выключить": False,
+        "выключи": False,
+        "выруби": False,
+        "отключи": False,
+        "ложь": False
     }
 
     TRUE_FALSE_TRANSLATOR = {
-        True: 'вкл ✅',
-        False: 'выкл ⛔'
+        True: "вкл ✅",
+        False: "выкл ⛔"
     }
 
     def start(self) -> ResponseMessage:
@@ -82,15 +82,15 @@ class Settings(Command):
 
         menu = [
             # chat settings
-            [['триггериться', 'тригериться', 'триггер', 'тригер'], self.menu_no_mention],
-            [['голосовые', 'голос', 'голосовухи', 'голосовуха', 'голосовое'], self.menu_voice],
+            [["триггериться", "тригериться", "триггер", "тригер"], self.menu_no_mention],
+            [["голосовые", "голос", "голосовухи", "голосовуха", "голосовое"], self.menu_voice],
             # user settings
-            [['реагировать', 'реагируй', 'реагирование'], self.menu_reaction],
-            [['упоминание', 'упоминания'], self.menu_use_mention],
+            [["реагировать", "реагируй", "реагирование"], self.menu_reaction],
+            [["упоминание", "упоминания"], self.menu_use_mention],
             # common settings
-            [['др', 'днюха'], self.menu_bday],
+            [["др", "днюха"], self.menu_bday],
             # other
-            [['default'], self.menu_default],
+            [["default"], self.menu_default],
         ]
         method = self.handle_menu(menu, arg0)
         rm = ResponseMessage(method())
@@ -105,17 +105,17 @@ class Settings(Command):
     # CHAT
 
     def menu_no_mention(self) -> ResponseMessageItem:
-        return self.setup_default_chat_setting('no_mention')
+        return self.setup_default_chat_setting("no_mention")
 
     def menu_voice(self) -> ResponseMessageItem:
-        return self.setup_default_chat_setting('recognize_voice')
+        return self.setup_default_chat_setting("recognize_voice")
 
     # END CHAT
 
     # PROFILE
 
     def menu_reaction(self) -> ResponseMessageItem:
-        return self.setup_default_profile_setting('need_reaction')
+        return self.setup_default_profile_setting("need_reaction")
 
     def menu_use_mention(self) -> ResponseMessageItem:
         return self.setup_default_profile_setting("use_mention")
@@ -126,9 +126,9 @@ class Settings(Command):
 
     def menu_bday(self) -> ResponseMessageItem:
         if self.event.is_from_chat:
-            return self.setup_default_chat_setting('celebrate_bday')
+            return self.setup_default_chat_setting("celebrate_bday")
         else:
-            return self.setup_default_profile_setting('celebrate_bday')
+            return self.setup_default_profile_setting("celebrate_bday")
 
     # END COMMON
 
@@ -171,11 +171,11 @@ class Settings(Command):
 
     def get_str_chat_tg_settings(self) -> str:
         chat_admins = self.bot.get_chat_administrators(self.event.chat.chat_id)
-        permissions = [x for x in chat_admins if x['user']['id'] == env.int('TG_BOT_GROUP_ID')]
+        permissions = [x for x in chat_admins if x["user"]["id"] == env.int("TG_BOT_GROUP_ID")]
         permissions = permissions[0] if permissions else {}
 
-        can_manage_chat = permissions.get('can_manage_chat', False)
-        can_delete_messages = permissions.get('can_delete_messages', False)
+        can_manage_chat = permissions.get("can_manage_chat", False)
+        can_delete_messages = permissions.get("can_delete_messages", False)
 
         answer = [
             "Права бота в чате:",

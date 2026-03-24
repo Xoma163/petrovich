@@ -151,9 +151,9 @@ class MessageTestCase(TestCase):
         self.assertEqual(message.clear_case, "Привет\nКарл\nКарлович 123")
 
         self.assertEqual(message.args_str, "карл\nкарлович 123")
-        self.assertEqual(message.args, ['карл', 'карлович', '123'])
+        self.assertEqual(message.args, ["карл", "карлович", "123"])
         self.assertEqual(message.args_str_case, "Карл\nКарлович 123")
-        self.assertEqual(message.args_case, ['Карл', 'Карлович', '123'])
+        self.assertEqual(message.args_case, ["Карл", "Карлович", "123"])
 
         self.assertEqual(message.keys, [])
 
@@ -202,9 +202,9 @@ class MessageTestCase(TestCase):
         self.assertEqual(message.clear_case, "Привет\nКарл\nКарлович 123 --DEBUG\n—PROD")
 
         self.assertEqual(message.args_str, "карл\nкарлович 123")
-        self.assertEqual(message.args, ['карл', 'карлович', '123'])
+        self.assertEqual(message.args, ["карл", "карлович", "123"])
         self.assertEqual(message.args_str_case, "Карл\nКарлович 123")
-        self.assertEqual(message.args_case, ['Карл', 'Карлович', '123'])
+        self.assertEqual(message.args_case, ["Карл", "Карлович", "123"])
 
         self.assertEqual(message.keys, ["debug", "prod"])
 
@@ -219,9 +219,9 @@ class MessageTestCase(TestCase):
         self.assertEqual(message.clear_case, "Привет\nКарл\nКарлович \n 123")
 
         self.assertEqual(message.args_str, "карл\nкарлович \n 123")
-        self.assertEqual(message.args, ['карл', 'карлович', '123'])
+        self.assertEqual(message.args, ["карл", "карлович", "123"])
         self.assertEqual(message.args_str_case, "Карл\nКарлович \n 123")
-        self.assertEqual(message.args_case, ['Карл', 'Карлович', '123'])
+        self.assertEqual(message.args_case, ["Карл", "Карлович", "123"])
 
         self.assertEqual(message.keys, [])
 
@@ -240,4 +240,4 @@ class MessageTestCase(TestCase):
         self.assertEqual(message.args_str_case, "")
         self.assertEqual(message.args_case, [])
 
-        self.assertEqual(message.keys, ['thread'])
+        self.assertEqual(message.keys, ["thread"])

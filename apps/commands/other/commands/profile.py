@@ -49,12 +49,12 @@ class Profile(Command):
         menu = [
             [["город"], self.menu_city],
             [["др", "дата"], self.menu_bd],
-            [['ник', 'никнейм'], self.menu_nickname],
-            [['имя'], self.menu_name],
-            [['фамилия'], self.menu_surname],
-            [['пол'], self.menu_gender],
-            [['аватар'], self.menu_avatar],
-            [['default'], self.menu_default],
+            [["ник", "никнейм"], self.menu_nickname],
+            [["имя"], self.menu_name],
+            [["фамилия"], self.menu_surname],
+            [["пол"], self.menu_gender],
+            [["аватар"], self.menu_avatar],
+            [["default"], self.menu_default],
         ]
         method = self.handle_menu(menu, arg0)
         rmi = method()
@@ -83,7 +83,7 @@ class Profile(Command):
             birthday += ".1900"
             show_birthday_year = False
         try:
-            date_time_obj = datetime.strptime(birthday, '%d.%m.%Y')
+            date_time_obj = datetime.strptime(birthday, "%d.%m.%Y")
         except ValueError:
             raise PWarning("Не смог распарсить дату. Формат ДД.ММ.ГГГГ")
 
@@ -92,7 +92,7 @@ class Profile(Command):
         self.event.sender.save()
 
         new_bday = self.event.sender.birthday.strftime(
-            '%d.%m.%Y') if show_birthday_year else self.event.sender.birthday.strftime('%d.%m')
+            "%d.%m.%Y") if show_birthday_year else self.event.sender.birthday.strftime("%d.%m")
         answer = f"Изменил дату рождения на {new_bday}"
         return ResponseMessageItem(text=answer)
 
@@ -124,9 +124,9 @@ class Profile(Command):
     def menu_gender(self) -> ResponseMessageItem:
         self.check_args(2)
         gender = self.event.message.args[1]
-        if gender in ['мужской', 'м', 'муж']:
+        if gender in ["мужской", "м", "муж"]:
             gender_code = self.event.sender.GENDER_MALE
-        elif gender in ['женский', 'ж', 'жен']:
+        elif gender in ["женский", "ж", "жен"]:
             gender_code = self.event.sender.GENDER_FEMALE
         else:
             gender_code = self.event.sender.GENDER_NONE
@@ -172,9 +172,9 @@ class Profile(Command):
         if profile.settings.celebrate_bday:
             if _bd:
                 if not profile.settings.show_birthday_year:
-                    _bd = _bd.strftime('%d.%m')
+                    _bd = _bd.strftime("%d.%m")
                 else:
-                    _bd = _bd.strftime('%d.%m.%Y')
+                    _bd = _bd.strftime("%d.%m.%Y")
             else:
                 _bd = not_defined
         else:

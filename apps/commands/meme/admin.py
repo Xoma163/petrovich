@@ -8,30 +8,30 @@ from apps.shared.mixins import TimeStampAdminMixin
 @admin.register(Meme)
 class MemeAdmin(TimeStampAdminMixin):
     list_display = (
-        'id',
-        'name',
-        'author',
-        'approved',
-        'type',
-        'uses',
-        'inline_uses',
-        'link',
-        'has_tg_file_id',
+        "id",
+        "name",
+        "author",
+        "approved",
+        "type",
+        "uses",
+        "inline_uses",
+        "link",
+        "has_tg_file_id",
         "for_trusted"
     )
     search_fields = (
-        'name',
-        'link'
+        "name",
+        "link"
     )
     list_filter = (
-        ('author', admin.RelatedOnlyFieldListFilter),
-        'type',
-        'approved',
-        'for_trusted',
-        ('file', admin.EmptyFieldListFilter)
+        ("author", admin.RelatedOnlyFieldListFilter),
+        "type",
+        "approved",
+        "for_trusted",
+        ("file", admin.EmptyFieldListFilter)
     )
     list_select_related = (
-        'author',
+        "author",
     )
     ordering = (
         "name",

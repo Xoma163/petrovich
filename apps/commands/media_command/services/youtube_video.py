@@ -41,4 +41,4 @@ class YoutubeVideoService(MediaService):
 
     @classmethod
     def urls(cls) -> list[str]:
-        return ['www.youtube.com', 'youtube.com', "www.youtu.be", "youtu.be", "m.youtube.com"]
+        return ["www.youtube.com", "youtube.com", "www.youtu.be", "youtu.be", "m.youtube.com"]

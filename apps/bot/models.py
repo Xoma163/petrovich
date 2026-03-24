@@ -10,7 +10,7 @@ from apps.shared.models import City
 
 
 class Platform(models.Model):
-    platform = models.CharField('Тип платформы', max_length=20, choices=PlatformEnum.choices())
+    platform = models.CharField("Тип платформы", max_length=20, choices=PlatformEnum.choices())
 
     def get_platform_enum(self):
         if not self.platform:
@@ -25,9 +25,9 @@ class ChatSettings(TimeStampModelMixin):
     chat = models.OneToOneField("Chat", on_delete=models.CASCADE, verbose_name="Чат", related_name="settings",
                                 blank=True, null=True)
 
-    no_mention = models.BooleanField('Работа без упоминания в конфе', default=False)
-    celebrate_bday = models.BooleanField('Поздравлять с Днём рождения', default=False)
-    recognize_voice = models.BooleanField('Распозновать голосовые автоматически', default=True)
+    no_mention = models.BooleanField("Работа без упоминания в конфе", default=False)
+    celebrate_bday = models.BooleanField("Поздравлять с Днём рождения", default=False)
+    recognize_voice = models.BooleanField("Распозновать голосовые автоматически", default=True)
 
     class Meta:
         verbose_name = "Настройка чата"
@@ -41,11 +41,11 @@ class ProfileSettings(TimeStampModelMixin):
     profile = models.OneToOneField("Profile", on_delete=models.CASCADE, verbose_name="Профиль",
                                    related_name="settings", blank=True, null=True)
 
-    need_reaction = models.BooleanField('Реагировать на неверные команды', default=True)
+    need_reaction = models.BooleanField("Реагировать на неверные команды", default=True)
 
-    celebrate_bday = models.BooleanField('Поздравлять с Днём рождения', default=True)
-    show_birthday_year = models.BooleanField('Показывать год рождения', default=True)
-    use_mention = models.BooleanField('Использовать упоминания', default=True)
+    celebrate_bday = models.BooleanField("Поздравлять с Днём рождения", default=True)
+    show_birthday_year = models.BooleanField("Показывать год рождения", default=True)
+    use_mention = models.BooleanField("Использовать упоминания", default=True)
 
     class Meta:
         verbose_name = "Настройка профиля"
@@ -56,9 +56,9 @@ class ProfileSettings(TimeStampModelMixin):
 
 
 class Chat(Platform, TimeStampModelMixin):
-    chat_id = models.CharField('ID чата', max_length=20, default="")
-    name = models.CharField('Название', max_length=256, default="", blank=True)
-    is_banned = models.BooleanField('Забанен', default=False)
+    chat_id = models.CharField("ID чата", max_length=20, default="")
+    name = models.CharField("Название", max_length=256, default="", blank=True)
+    is_banned = models.BooleanField("Забанен", default=False)
 
     # Для статистики
     kicked = models.BooleanField("Бота кикнули", default=False)
@@ -66,7 +66,7 @@ class Chat(Platform, TimeStampModelMixin):
     class Meta:
         verbose_name = "Чат"
         verbose_name_plural = "Чаты"
-        unique_together = ('chat_id', 'platform',)
+        unique_together = ("chat_id", "platform",)
 
     def save(self, **kwargs):
         is_new = self.id is None
@@ -83,7 +83,7 @@ class Chat(Platform, TimeStampModelMixin):
 
 class Role(models.Model):
     name = models.CharField(
-        'Название',
+        "Название",
         unique=True,
         max_length=32,
         choices=[(role.value, role.name) for role in RoleEnum],  # noqa
@@ -98,21 +98,21 @@ class Role(models.Model):
 
 
 class Profile(TimeStampModelMixin):
-    GENDER_FEMALE = '1'
-    GENDER_MALE = '2'
-    GENDER_NONE = ''
+    GENDER_FEMALE = "1"
+    GENDER_MALE = "2"
+    GENDER_NONE = ""
     GENDER_CHOICES = (
-        (GENDER_FEMALE, 'женский'),
-        (GENDER_MALE, 'мужской'),
-        (GENDER_NONE, 'не указан'))
+        (GENDER_FEMALE, "женский"),
+        (GENDER_MALE, "мужской"),
+        (GENDER_NONE, "не указан"))
 
-    name = models.CharField('Имя', max_length=40, blank=True, null=True)
-    surname = models.CharField('Фамилия', max_length=40, blank=True, null=True)
+    name = models.CharField("Имя", max_length=40, blank=True, null=True)
+    surname = models.CharField("Фамилия", max_length=40, blank=True, null=True)
     nickname_real = models.CharField("Прозвище", max_length=40, blank=True)
-    gender = models.CharField('Пол', max_length=2, blank=True, choices=GENDER_CHOICES)
-    birthday = models.DateField('Дата рождения', null=True, blank=True)
-    city = models.ForeignKey(City, models.SET_NULL, verbose_name='Город', null=True, blank=True)
-    avatar = models.ImageField('Аватар', blank=True, upload_to="bot/users/avatar/")
+    gender = models.CharField("Пол", max_length=2, blank=True, choices=GENDER_CHOICES)
+    birthday = models.DateField("Дата рождения", null=True, blank=True)
+    city = models.ForeignKey(City, models.SET_NULL, verbose_name="Город", null=True, blank=True)
+    avatar = models.ImageField("Аватар", blank=True, upload_to="bot/users/avatar/")
     roles = models.ManyToManyField(Role, verbose_name="Роли")
     chats = models.ManyToManyField(Chat, verbose_name="Чаты", blank=True, related_name="users")
 
@@ -184,8 +184,8 @@ class Profile(TimeStampModelMixin):
 
 
 class User(Platform, TimeStampModelMixin):
-    user_id = models.CharField('ID пользователя', max_length=127)
-    profile = models.ForeignKey(Profile, verbose_name="Профиль", related_name='user', null=True,
+    user_id = models.CharField("ID пользователя", max_length=127)
+    profile = models.ForeignKey(Profile, verbose_name="Профиль", related_name="user", null=True,
                                 blank=True, on_delete=models.SET_NULL)
     nickname = models.CharField("Никнейм", max_length=40, blank=True, null=True)
 
@@ -211,22 +211,22 @@ class User(Platform, TimeStampModelMixin):
         verbose_name = "Пользователь"
         verbose_name_plural = "Пользователи"
 
-        unique_together = ('user_id', 'platform',)
+        unique_together = ("user_id", "platform",)
 
     def __str__(self):
         return f"{self.profile} ({self.platform})"
 
 
 class Bot(Platform, TimeStampModelMixin):
-    bot_id = models.CharField('ID бота', max_length=20)
-    name = models.CharField('Имя', max_length=40)
-    avatar = models.ImageField('Аватар', blank=True, upload_to="bot/bot/avatar/")
+    bot_id = models.CharField("ID бота", max_length=20)
+    name = models.CharField("Имя", max_length=40)
+    avatar = models.ImageField("Аватар", blank=True, upload_to="bot/bot/avatar/")
 
     class Meta:
         verbose_name = "Бот"
         verbose_name_plural = "Боты"
 
-        unique_together = ('bot_id', 'platform',)
+        unique_together = ("bot_id", "platform",)
 
     def __str__(self):
         if self.name:

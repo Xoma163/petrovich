@@ -31,7 +31,7 @@ class GPTStatisticsMixin(GPTCommandProtocol):
     STATISTICS_KEY_ITEMS_KEY = [
         HelpTextKey(
             "ключ",
-            ['key'],
+            ["key"],
             "статистика пришлёт информацию по всем пользователям с этим ключом"
         ),
     ]
@@ -205,7 +205,7 @@ class GPTStatisticsMixin(GPTCommandProtocol):
                 return_custom_data=bool(custom_range),
                 custom_range=custom_range
             )
-            total_statistics = total_statistics.split('\n')
+            total_statistics = total_statistics.split("\n")
             total_statistics[0] = "Сумма по всем:"
             total_statistics = "\n".join(total_statistics)
 
@@ -222,13 +222,13 @@ class GPTStatisticsMixin(GPTCommandProtocol):
         if len(self.event.message.args) > 2:
             end = self.event.message.args[2]
 
-        tz = ZoneInfo('UTC')
+        tz = ZoneInfo("UTC")
         try:
-            start_datetime = datetime.datetime.strptime(start, '%d.%m.%Y')
+            start_datetime = datetime.datetime.strptime(start, "%d.%m.%Y")
             start_datetime = start_datetime.replace(tzinfo=tz)
 
             if end:
-                end_datetime = datetime.datetime.strptime(end, '%d.%m.%Y')
+                end_datetime = datetime.datetime.strptime(end, "%d.%m.%Y")
                 end_datetime = end_datetime.replace(tzinfo=tz)
 
             else:
@@ -259,12 +259,12 @@ class GPTStatisticsMixin(GPTCommandProtocol):
             created_at__gte=start,
             created_at__lt=end
         ).annotate(
-            date=TruncDate('created_at')
-        ).values('date').annotate(
-            total_cost=Sum('cost')
-        ).order_by('date')
+            date=TruncDate("created_at")
+        ).values("date").annotate(
+            total_cost=Sum("cost")
+        ).order_by("date")
 
-        stats_dict = {entry['date']: round(entry['total_cost'], 2) for entry in usage_stats}
+        stats_dict = {entry["date"]: round(entry["total_cost"], 2) for entry in usage_stats}
         all_dates = [start.date() + datetime.timedelta(days=x) for x in range(days_count)]
 
         return {date: stats_dict.get(date, float(0)) for date in all_dates}
@@ -283,10 +283,10 @@ class GPTStatisticsMixin(GPTCommandProtocol):
         _, ax = plt.subplots(figsize=(12, 6))
 
         # Построение графика
-        ax.plot(dates, costs, marker='o')
+        ax.plot(dates, costs, marker="o")
 
         # Настройка оси X для отображения дат
-        ax.xaxis.set_major_formatter(DateFormatter('%d.%m'))
+        ax.xaxis.set_major_formatter(DateFormatter("%d.%m"))
         ax.xaxis.set_major_locator(MaxNLocator(13))
 
         # Поворот меток на оси X для лучшей читаемости
@@ -294,18 +294,18 @@ class GPTStatisticsMixin(GPTCommandProtocol):
 
         # Настройка заголовка и подписей осей
         plt.title(f'Использование {self.provider.type_enum} за {days_count} {days_decl}', fontsize=16)
-        plt.xlabel('Дата', fontsize=14)
-        plt.ylabel('Стоимость, $', fontsize=14)
+        plt.xlabel("Дата", fontsize=14)
+        plt.ylabel("Стоимость, $", fontsize=14)
 
         # Добавление сетки для улучшения читаемости
-        plt.grid(True, linestyle='--', alpha=0.7)
+        plt.grid(True, linestyle="--", alpha=0.7)
 
         # Улучшение расположения меток на оси X
         plt.tight_layout()
 
         # Сохранение графика в байтовый массив
         buf = io.BytesIO()
-        plt.savefig(buf, format='png')
+        plt.savefig(buf, format="png")
         buf.seek(0)
         return buf.getvalue()
 
@@ -314,5 +314,5 @@ class GPTStatisticsMixin(GPTCommandProtocol):
         Получение статистики в БД
         """
         q &= Q(provider=self.provider_model)
-        res = Usage.objects.filter(q).aggregate(Sum('cost')).get('cost__sum')
+        res = Usage.objects.filter(q).aggregate(Sum("cost")).get("cost__sum")
         return res if res else 0

@@ -48,4 +48,4 @@ class VKVideoService(MediaService):
 
     @classmethod
     def urls(cls) -> list[str]:
-        return ['vk.com', 'vkvideo.ru']
+        return ["vk.com", "vkvideo.ru"]

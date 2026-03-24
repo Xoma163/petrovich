@@ -19,12 +19,12 @@ class YandexMusicService(MediaService):
 
     def _get_content_by_url(self, url: str) -> MediaServiceResponse:
         res = self.service.parse_album_and_track_ids(url)
-        if res['album_id'] and not res['track_id']:
-            ya = YandexAlbum(res['album_id'])
+        if res["album_id"] and not res["track_id"]:
+            ya = YandexAlbum(res["album_id"])
             ya.set_tracks()
             tracks = ya.tracks
         else:
-            yt = YandexTrack(res['track_id'])
+            yt = YandexTrack(res["track_id"])
             tracks = [yt]
 
         audios = []

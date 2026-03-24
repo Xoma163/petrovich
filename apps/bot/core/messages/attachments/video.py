@@ -6,7 +6,7 @@ from apps.bot.core.messages.attachments.mixins.thumbnail_mixin import ThumbnailM
 
 
 class VideoAttachment(Attachment, ThumbnailMixin, SizedMixin, DurationMixin):
-    TYPE = 'video'
+    TYPE = "video"
     ACTION = ChatActionEnum.UPLOAD_VIDEO
 
     def __init__(self):
@@ -15,6 +15,6 @@ class VideoAttachment(Attachment, ThumbnailMixin, SizedMixin, DurationMixin):
 
     def parse_tg(self, event):
         super().parse_tg(event)
-        self.duration = event.get('duration')
-        self.width = event.get('width')
-        self.height = event.get('height')
+        self.duration = event.get("duration")
+        self.width = event.get("width")
+        self.height = event.get("height")

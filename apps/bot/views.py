@@ -17,8 +17,8 @@ from petrovich.settings import env
 class TelegramView(CSRFExemptMixin, View):
     @staticmethod
     def post(request, *args, **kwargs):
-        if env.str('TG_WEBHOOK_SECRET') and \
-                request.headers.get('x-telegram-bot-api-secret-token') != env.str('TG_WEBHOOK_SECRET'):
+        if env.str("TG_WEBHOOK_SECRET") and \
+                request.headers.get("x-telegram-bot-api-secret-token") != env.str("TG_WEBHOOK_SECRET"):
             return HttpResponse(status=403)
         raw = json.loads(request.body)
         tg_bot = TgBot()
@@ -46,30 +46,30 @@ class GithubView(CSRFExemptMixin, View):
         bot.send_response_message_item(rmi)
 
     def reopen_issue(self, issue: GithubIssueAPI):
-        problem_str = TgBot.get_formatted_url('Проблема #' + str(issue.number), issue.remote_url)
+        problem_str = TgBot.get_formatted_url("Проблема #" + str(issue.number), issue.remote_url)
         text = f"{problem_str} была переоткрыта"
         self.send_notify_to_user(issue, text)
 
     def closed_issue(self, issue: GithubIssueAPI):
-        problem_str = TgBot.get_formatted_url('Проблема #' + str(issue.number), issue.remote_url)
+        problem_str = TgBot.get_formatted_url("Проблема #" + str(issue.number), issue.remote_url)
         text = f"{problem_str} была закрыта"
         if issue.state_reason_is_not_planned:
             text += " как незапланированная"
         self.send_notify_to_user(issue, text)
 
     def delete_issue(self, issue: GithubIssueAPI):
-        problem_str = TgBot.get_formatted_url('Проблема #' + str(issue.number), issue.remote_url)
+        problem_str = TgBot.get_formatted_url("Проблема #" + str(issue.number), issue.remote_url)
         text = f"{problem_str} была удалена"
         self.send_notify_to_user(issue, text)
 
     def created_comment(self, data, issue: GithubIssueAPI):
-        comment = data['comment']['body']
-        if self.AUTO_GENERATED_COMMENT_STR in data['comment']['body']:
+        comment = data["comment"]["body"]
+        if self.AUTO_GENERATED_COMMENT_STR in data["comment"]["body"]:
             return
 
         photo_attachments, comment = self._get_image_urls_from_text(comment)
 
-        problem_str = TgBot.get_formatted_url('проблемой #' + str(issue.number), issue.remote_url)
+        problem_str = TgBot.get_formatted_url("проблемой #" + str(issue.number), issue.remote_url)
         answer = self.NEW_COMMENT_FROM_DEVELOPER_TEMPLATE.format(problem_str=problem_str, comment=comment)
         self.send_notify_to_user(issue, answer, attachments=photo_attachments)
 
@@ -78,8 +78,8 @@ class GithubView(CSRFExemptMixin, View):
         if (datetime.datetime.now(datetime.UTC) - issue.created_at).seconds < 10:
             return
 
-        label_name = data['label']['name']
-        problem_str = TgBot.get_formatted_url('проблемой #' + str(issue.number), issue.remote_url)
+        label_name = data["label"]["name"]
+        problem_str = TgBot.get_formatted_url("проблемой #" + str(issue.number), issue.remote_url)
         text = f"Новый тег от разработчика под вашей {problem_str}\n\n{label_name}"
         self.send_notify_to_user(issue, text)
 
@@ -94,24 +94,24 @@ class GithubView(CSRFExemptMixin, View):
             pa = PhotoAttachment()
             pa.public_download_url = image_url
             photo_attachments.append(pa)
-        comment = re.sub(IMG_RE, '', comment, flags=re.I)
+        comment = re.sub(IMG_RE, "", comment, flags=re.I)
         return photo_attachments, comment
 
     def post(self, request):
         data = json.loads(request.body)
         issue = GithubIssueAPI(log_filter=None)
-        issue.parse_response(data['issue'])
+        issue.parse_response(data["issue"])
 
-        if data['action'] == 'closed':
+        if data["action"] == "closed":
             self.closed_issue(issue)
-        elif data['action'] == 'reopened':
+        elif data["action"] == "reopened":
             self.reopen_issue(issue)
-        elif data['action'] == 'deleted':
+        elif data["action"] == "deleted":
             self.delete_issue(issue)
-        elif data['action'] == 'created' and \
-                data.get('comment') and \
-                data['comment']['user']['id'] == data['issue']['user']['id']:
+        elif data["action"] == "created" and \
+                data.get("comment") and \
+                data["comment"]["user"]["id"] == data["issue"]["user"]["id"]:
             self.created_comment(data, issue)
-        elif data['action'] == 'labeled':
+        elif data["action"] == "labeled":
             self.new_label(data, issue)
-        return HttpResponse('ok', status=200)
+        return HttpResponse("ok", status=200)

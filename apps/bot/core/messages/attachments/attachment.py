@@ -43,9 +43,9 @@ class Attachment:
 
         r = tg_bot.api_handler.get_file(self.file_id)
 
-        if not r.get('ok'):
+        if not r.get("ok"):
             return
-        file_path = r['result']['file_path']
+        file_path = r["result"]["file_path"]
         if tg_bot.api_handler.is_local_server_mode:
             self.private_download_path = file_path
         else:
@@ -55,7 +55,7 @@ class Attachment:
     def _set_file_name(self, file_path: str):
         path = Path(file_path)
         self.file_name_full = path.name
-        parts = self.file_name_full.split('.')
+        parts = self.file_name_full.split(".")
         if len(parts) > 2:
             self.file_name = ".".join(parts[0])
             self.ext = ".".join(parts[1:])
@@ -84,7 +84,7 @@ class Attachment:
             self.content = _bytes
 
         elif path:
-            with open(path, 'rb') as file:
+            with open(path, "rb") as file:
                 file_like_object = file.read()
                 self.content = file_like_object
 
@@ -148,7 +148,7 @@ class Attachment:
         for ignore_field in ignore_fields:
             if ignore_field not in dict_self:
                 continue
-            dict_self[ignore_field] = '*' * 5 if dict_self[ignore_field] else dict_self[ignore_field]
+            dict_self[ignore_field] = "*" * 5 if dict_self[ignore_field] else dict_self[ignore_field]
         return dict_self
 
     def set_file_id(self):
@@ -163,14 +163,14 @@ class Attachment:
 
     def base64(self) -> str:
         self.download_content()
-        return base64.b64encode(self.content).decode('utf-8')
+        return base64.b64encode(self.content).decode("utf-8")
 
     @staticmethod
     def decode_base64(encoded_str: str) -> bytes:
         return base64.b64decode(encoded_str)
 
     def parse_tg(self, event: dict):
-        self.file_id = event['file_id']
-        self.size = event['file_size']
-        if file_name := event.get('file_name'):
+        self.file_id = event["file_id"]
+        self.size = event["file_size"]
+        if file_name := event.get("file_name"):
             self._set_file_name(file_name)

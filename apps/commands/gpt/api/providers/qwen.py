@@ -63,8 +63,8 @@ class QwenAPI(
             "messages": messages.get_messages()
         }
         if callback_func:
-            payload['stream'] = True
-            payload['stream_options'] = {"include_usage": True}
+            payload["stream"] = True
+            payload["stream_options"] = {"include_usage": True}
 
         self.set_base_url()
         return self.do_completions_request(
@@ -93,8 +93,8 @@ class QwenAPI(
             "messages": messages.get_messages()
         }
         if callback_func:
-            payload['stream'] = True
-            payload['stream_options'] = {"include_usage": True}
+            payload["stream"] = True
+            payload["stream_options"] = {"include_usage": True}
 
         self.set_base_url()
         # Хардкод

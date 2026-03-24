@@ -15,7 +15,7 @@ from apps.shared.utils.fernet import Fernet
 
 class Provider(models.Model):
     name = models.CharField(
-        'Провайдер',
+        "Провайдер",
         unique=True,
         max_length=32,
         choices=[(provider.value, provider.name) for provider in GPTProviderEnum],  # noqa
@@ -42,7 +42,7 @@ class Preprompt(TimeStampModelMixin):
     class Meta:
         verbose_name = "Препромпт"
         verbose_name_plural = "Препромпты"
-        unique_together = ('author', 'chat', 'provider')
+        unique_together = ("author", "chat", "provider")
 
 
 class Usage(TimeStampModelMixin):
@@ -110,7 +110,7 @@ class GPTCompletionsVisionModel(GPTModel):
 class CompletionsModel(GPTCompletionsVisionModel):
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['name', 'provider'], name='unique_name_completion_model')
+            models.UniqueConstraint(fields=["name", "provider"], name="unique_name_completion_model")
         ]
 
         verbose_name = "Модель обработки текста"
@@ -120,7 +120,7 @@ class CompletionsModel(GPTCompletionsVisionModel):
 class VisionModel(GPTCompletionsVisionModel):
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['name', 'provider'], name='unique_name_vision_model')
+            models.UniqueConstraint(fields=["name", "provider"], name="unique_name_vision_model")
         ]
 
         verbose_name = "Модель обработки изображений"
@@ -158,11 +158,11 @@ class ImageDrawModel(GPTImageModel):
     @property
     def image_quality(self) -> GPTImageQuality | None:
         quality = self.quality.lower()
-        if quality in ['high', 'hd']:
+        if quality in ["high", "hd"]:
             return GPTImageQuality.HIGH
-        elif quality in ['medium', 'md', 'standart', 'standard']:
+        elif quality in ["medium", "md", "standart", "standard"]:
             return GPTImageQuality.MEDIUM
-        elif quality in ['low']:
+        elif quality in ["low"]:
             return GPTImageQuality.LOW
         return None
 
@@ -172,8 +172,8 @@ class ImageDrawModel(GPTImageModel):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=['name', 'width', 'height', 'quality', 'provider'],
-                name='unique_name_width_height_quality_img_draw'
+                fields=["name", "width", "height", "quality", "provider"],
+                name="unique_name_width_height_quality_img_draw"
             )
         ]
 
@@ -191,8 +191,8 @@ class ImageEditModel(GPTImageModel):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=['name', 'width', 'height', 'provider'],
-                name='unique_name_width_height_image_edit'
+                fields=["name", "width", "height", "provider"],
+                name="unique_name_width_height_image_edit"
             )
         ]
 
@@ -209,7 +209,7 @@ class VoiceRecognitionModel(GPTModel):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['name', 'provider'], name='unique_name_voice_recognition_model')
+            models.UniqueConstraint(fields=["name", "provider"], name="unique_name_voice_recognition_model")
         ]
 
         verbose_name = "Модель распознования голоса"
@@ -285,11 +285,11 @@ class ProfileGPTBaseSettings(TimeStampModelMixin):
     def clean(self):
         super().clean()
         models_to_check = {
-            'completions_model': self.completions_model,
-            'image_draw_model': self.image_draw_model,
-            'image_edit_model': self.image_edit_model,
-            'vision_model': self.vision_model,
-            'voice_recognition_model': self.voice_recognition_model,
+            "completions_model": self.completions_model,
+            "image_draw_model": self.image_draw_model,
+            "image_edit_model": self.image_edit_model,
+            "vision_model": self.vision_model,
+            "voice_recognition_model": self.voice_recognition_model,
         }
 
         errors = {}
@@ -336,7 +336,7 @@ class ProfileGPTSettings(ProfileGPTBaseSettings):
         return str(self.profile)
 
     class Meta:
-        unique_together = ('profile', 'provider')
+        unique_together = ("profile", "provider")
 
         verbose_name = "Настройка профиля GPT"
         verbose_name_plural = "Настройки профиля GPT"
@@ -357,7 +357,7 @@ class GPTPreset(ProfileGPTBaseSettings):
         return f"{self.profile} | {self.name}"
 
     class Meta:
-        unique_together = ('profile', 'provider', 'name')
+        unique_together = ("profile", "provider", "name")
 
         verbose_name = "Пресет GPT"
         verbose_name_plural = "Пресеты GPT"

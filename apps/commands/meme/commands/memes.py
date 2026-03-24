@@ -61,7 +61,7 @@ class Memes(Command):
         memes_names = self.get_memes_names(memes_on_page)
         msg_body = ";\n".join(memes_names)
         if len(memes_names) > 0:
-            msg_body += '.'
+            msg_body += "."
         if page != p.num_pages:
             on_last_page = p.per_page * page
         else:

@@ -37,7 +37,7 @@ class InstagramService(MediaService):
 
     @classmethod
     def urls(cls) -> list[str]:
-        return ['www.instagram.com', 'instagram.com']
+        return ["www.instagram.com", "instagram.com"]
 
     def check_sender_role(self) -> None:
         if not self.event.sender.check_role(RoleEnum.TRUSTED):

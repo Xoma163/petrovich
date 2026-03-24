@@ -3,7 +3,7 @@ import subprocess
 
 def do_the_linux_command(command):
     try:
-        process = subprocess.Popen(command.split(' '), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        process = subprocess.Popen(command.split(" "), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         output, error = process.communicate()
         output = output.decode("utf-8")
         if error:
@@ -19,4 +19,4 @@ def is_systemd_service_active(service_name):
     index1 = response.find("Active: ") + len("Active: ")
     index2 = response.find("(", index1) - 1
     status = response[index1:index2]
-    return status == 'active'
+    return status == "active"

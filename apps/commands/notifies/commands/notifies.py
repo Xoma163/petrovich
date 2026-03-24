@@ -21,19 +21,19 @@ from apps.shared.exceptions import PWarning
 from apps.shared.utils.utils import localize_datetime, normalize_datetime, remove_tz
 
 DELTA_WEEKDAY = {
-    'сегодня': 0,
-    'завтра': 1,
-    'послезавтра': 2,
+    "сегодня": 0,
+    "завтра": 1,
+    "послезавтра": 2,
 }
 
 WEEK_TRANSLATOR = {
-    'понедельник': 1, 'пн': 1,
-    'вторник': 2, 'вт': 2,
-    'среда': 3, 'ср': 3,
-    'четверг': 4, 'чт': 4,
-    'пятница': 5, 'пт': 5,
-    'суббота': 6, 'сб': 6,
-    'воскресенье': 7, 'воскресение': 7, 'вс': 7,
+    "понедельник": 1, "пн": 1,
+    "вторник": 2, "вт": 2,
+    "среда": 3, "ср": 3,
+    "четверг": 4, "чт": 4,
+    "пятница": 5, "пт": 5,
+    "суббота": 6, "сб": 6,
+    "воскресенье": 7, "воскресение": 7, "вс": 7,
 }
 
 
@@ -76,7 +76,7 @@ class Notifies(Command):
         menu = [
             [["удалить", "удали"], self.menu_delete],
             [["добавить", "добавь"], self.menu_add],
-            [['default'], self.menu_get_notifies],
+            [["default"], self.menu_get_notifies],
         ]
         method = self.handle_menu(menu, arg0)
         rmi = method()
@@ -96,27 +96,27 @@ class Notifies(Command):
             [AudioAttachment, DocumentAttachment, AnimationAttachment, PhotoAttachment, VideoAttachment]
         )
         data.update({
-            'attachments': [{x.type: x.file_id} for x in attachments] if attachments else [],
-            'user': self.event.user,
-            'chat': self.event.chat,
-            'message_thread_id': self.event.message_thread_id
+            "attachments": [{x.type: x.file_id} for x in attachments] if attachments else [],
+            "user": self.event.user,
+            "chat": self.event.chat,
+            "message_thread_id": self.event.message_thread_id
         })
 
-        if data['text'] and data['text'][0] == '/':
-            first_space = data['text'].find(' ')
-            command = data['text'][1:first_space] if first_space > 0 else data['text'][1:]
+        if data["text"] and data["text"][0] == "/":
+            first_space = data["text"].find(" ")
+            command = data["text"][1:first_space] if first_space > 0 else data["text"][1:]
             if command in self.full_names:
                 raise PWarning("Нельзя добавлять напоминания с напоминаниями. АЛЛО, ТЫ ЧЁ МЕНЯ ХОЧЕШЬ СВАЛИТЬ?")
 
         tg_att_flag = attachments and self.event.platform == PlatformEnum.TG
-        if not (data['text'] or tg_att_flag):
+        if not (data["text"] or tg_att_flag):
             raise PWarning("В напоминании должны быть текст или вложения(tg)")
 
         notify = Notify(**data)
         notify.save()
 
         if notify.crontab:
-            answer = 'Добавил напоминание'
+            answer = "Добавил напоминание"
         else:
             timezone = self.event.sender.city.timezone.name
             localized_dt = localize_datetime(remove_tz(notify.date), timezone)
@@ -183,7 +183,7 @@ class Notifies(Command):
                 notify_text = "(вложения)"
             result += f"\n{notify_text}\n\n"
 
-        result_without_mentions = result.replace('@', '@_')
+        result_without_mentions = result.replace("@", "@_")
         return result_without_mentions
 
     def get_filtered_notifies(self) -> QuerySet[Notify]:
@@ -219,8 +219,8 @@ class Notifies(Command):
         default_datetime = remove_tz(localize_datetime(datetime.datetime.now(datetime.UTC), tz=timezone.name)) \
             .replace(hour=9, minute=0, second=0, microsecond=0)
         try:
-            if arg1.count('.') == 1:
-                if datetime.datetime.strptime(f"{arg1}.{default_datetime.year}", '%d.%m.%Y') < remove_tz(
+            if arg1.count(".") == 1:
+                if datetime.datetime.strptime(f"{arg1}.{default_datetime.year}", "%d.%m.%Y") < remove_tz(
                         datetime.datetime.now(datetime.UTC)):
                     arg1 = f"{arg1}.{default_datetime.year + 1}"
                 else:
@@ -240,7 +240,7 @@ class Notifies(Command):
     def _add_notify(self) -> dict:
         timezone = self.event.sender.city.timezone.name
         # remove menu str
-        args_str_case = self.event.message.args_str_case.split(' ', 1)[1]
+        args_str_case = self.event.message.args_str_case.split(" ", 1)[1]
 
         arg0 = self.event.message.args[1]
         arg1 = self.event.message.args[2] if len(self.event.message.args) > 2 else None
@@ -262,13 +262,13 @@ class Notifies(Command):
             raise PWarning("Нельзя указывать дату в прошлом")
 
         text = None
-        args_split = args_str_case.split(' ', args_count)
+        args_split = args_str_case.split(" ", args_count)
         if len(args_split) > args_count:  # Если передан текст
             text = args_split[args_count]
 
         notify_dict = {
-            'date': date,
-            'text': text if text else ""
+            "date": date,
+            "text": text if text else ""
         }
 
         return notify_dict
@@ -284,8 +284,8 @@ class Notifies(Command):
             text = args_split[-1]
 
         notify_dict = {
-            'crontab': crontab,
-            'text': text if text else ""
+            "crontab": crontab,
+            "text": text if text else ""
         }
         return notify_dict
 

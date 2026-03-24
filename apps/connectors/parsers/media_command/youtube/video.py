@@ -32,22 +32,22 @@ class YoutubeVideo:
 
         return VideoData(
             filesize=filesize,
-            video_download_url=video['url'] if video else None,
-            audio_download_url=audio['url'],
-            title=video_info['title'],
-            duration=video_info.get('duration'),
-            width=video.get('width'),
-            height=video.get('height'),
-            start_pos=str(video_info['section_start']) if video_info.get('section_start') else None,
-            end_pos=str(video_info['section_end']) if video_info.get('section_end') else None,
+            video_download_url=video["url"] if video else None,
+            audio_download_url=audio["url"],
+            title=video_info["title"],
+            duration=video_info.get("duration"),
+            width=video.get("width"),
+            height=video.get("height"),
+            start_pos=str(video_info["section_start"]) if video_info.get("section_start") else None,
+            end_pos=str(video_info["section_end"]) if video_info.get("section_end") else None,
             thumbnail_url=self._get_thumbnail(video_info),
-            channel_id=video_info['channel_id'],
-            video_id=video_info['id'],
-            channel_title=video_info['channel'],
-            is_short_video="/shorts/" in url or video_info.get('media_type') == 'short',
+            channel_id=video_info["channel_id"],
+            video_id=video_info["id"],
+            channel_title=video_info["channel"],
+            is_short_video="/shorts/" in url or video_info.get("media_type") == "short",
             extra_data={
-                'http_chunk_size_video': video.get('downloader_options', {}).get('http_chunk_size', 10 * 1024 * 1024),
-                'http_chunk_size_audio': audio.get('downloader_options', {}).get('http_chunk_size', 10 * 1024 * 1024),
+                "http_chunk_size_video": video.get("downloader_options", {}).get("http_chunk_size", 10 * 1024 * 1024),
+                "http_chunk_size_audio": audio.get("downloader_options", {}).get("http_chunk_size", 10 * 1024 * 1024),
             }
         )
 
@@ -58,7 +58,7 @@ class YoutubeVideo:
 
         downloader = Downloader()
 
-        http_chunk_size_video = data.extra_data.get('http_chunk_size_video')
+        http_chunk_size_video = data.extra_data.get("http_chunk_size_video")
         _va = VideoAttachment()
         _va.content = downloader.download_by_m3u8_url(
             data.video_download_url,
@@ -66,7 +66,7 @@ class YoutubeVideo:
             http_chunk_size=http_chunk_size_video
         )
 
-        http_chunk_size_audio = data.extra_data.get('http_chunk_size_audio')
+        http_chunk_size_audio = data.extra_data.get("http_chunk_size_audio")
         _aa = AudioAttachment()
         _aa.content = downloader.download_by_m3u8_url(
             data.audio_download_url,
@@ -94,9 +94,9 @@ class YoutubeVideo:
         """
         Переводит таймкод из секунд в [часы:]минуты:секунды
         """
-        t = dict(parse_qsl(urlparse(url).query)).get('t')
+        t = dict(parse_qsl(urlparse(url).query)).get("t")
         if t:
-            t = t.rstrip('s')
+            t = t.rstrip("s")
             h, m, s = str(timedelta(seconds=int(t))).split(":")
             if h:
                 return f"{h}:{m}:{s}"
@@ -106,7 +106,7 @@ class YoutubeVideo:
     @staticmethod
     def clear_url(url) -> str:
         parsed = urlparse(url)
-        v = dict(parse_qsl(parsed.query)).get('v')
+        v = dict(parse_qsl(parsed.query)).get("v")
         res = f"{parsed.scheme}://{parsed.hostname}{parsed.path}"
         if v:
             res += f"?v={v}"
@@ -124,35 +124,35 @@ class YoutubeVideo:
 
     @staticmethod
     def _filesize_key(x):
-        if filesize := x.get('filesize'):
+        if filesize := x.get("filesize"):
             return filesize
-        if filesize_approx := x.get('filesize_approx'):
+        if filesize_approx := x.get("filesize_approx"):
             return filesize_approx
-        if filesize_approx_vbr := x.get('filesize_approx_vbr'):
+        if filesize_approx_vbr := x.get("filesize_approx_vbr"):
             return filesize_approx_vbr * 100
         return 0
 
     @staticmethod
     def _get_thumbnail(info: dict) -> str | None:
-        video_scale = info['width'] / info['height']
+        video_scale = info["width"] / info["height"]
 
         # Вертикальное видео
         if video_scale < 1:
             thumbnails = list(filter(
-                lambda x: x.get('width') and x.get('height') and x.get('width') / x.get('height') == video_scale,
-                info['thumbnails']
+                lambda x: x.get("width") and x.get("height") and x.get("width") / x.get("height") == video_scale,
+                info["thumbnails"]
             ))
         else:
             thumbnails = list(filter(
-                lambda x: x['url'].endswith("maxresdefault.jpg"),
-                info['thumbnails']
+                lambda x: x["url"].endswith("maxresdefault.jpg"),
+                info["thumbnails"]
             ))
 
         if not thumbnails:
             return None
 
         try:
-            return thumbnails[0]['url']
+            return thumbnails[0]["url"]
         except (IndexError, KeyError):
             return None
 
@@ -163,11 +163,11 @@ class YoutubeVideo:
     @staticmethod
     def _get_video_info(url: str) -> dict:
         ydl_params = {
-            'logger': NothingLogger(),
-            'noplaylist': True,
+            "logger": NothingLogger(),
+            "noplaylist": True,
             # Не забыть закинуть deno в /usr/bin/local
-            'js_runtimes': {'deno': {}},
-            'remote_components': ['ejs:npm', 'ejs:github'],
+            "js_runtimes": {"deno": {}},
+            "remote_components": ["ejs:npm", "ejs:github"],
         }
         ydl = yt_dlp.YoutubeDL(ydl_params)
         ydl.add_default_info_extractors()
@@ -200,14 +200,14 @@ class YoutubeVideo:
         return: video_format, audio_format, video_filesize
         """
         audio_formats = sorted(
-            [x for x in video_info['formats'] if x['resolution'] == 'audio only'],  # abr
+            [x for x in video_info["formats"] if x["resolution"] == "audio only"],  # abr
             key=self._filesize_key,
             reverse=True
         )
 
         # Выбор аудио-формата по языковой дорожке
-        for lang in ('ru', 'en-US'):
-            af = next((x for x in audio_formats if x.get('language') == lang), None)
+        for lang in ("ru", "en-US"):
+            af = next((x for x in audio_formats if x.get("language") == lang), None)
             if af:
                 break
         if not af and audio_formats:
@@ -216,34 +216,34 @@ class YoutubeVideo:
         video_formats = list(
             filter(
                 lambda x: (
-                        x.get('vbr') and  # Это видео
-                        x.get('ext') == 'mp4' and  # С форматом mp4
-                        x.get('vcodec') not in ['vp9'] and  # С кодеками которые поддерживают все платформы
-                        x.get('dynamic_range') == 'SDR' and  # В SDR качестве
-                        not x.get('__working')  # Без тестовых
+                        x.get("vbr") and  # Это видео
+                        x.get("ext") == "mp4" and  # С форматом mp4
+                        x.get("vcodec") not in ["vp9"] and  # С кодеками которые поддерживают все платформы
+                        x.get("dynamic_range") == "SDR" and  # В SDR качестве
+                        not x.get("__working")  # Без тестовых
                     # x.get('format_note')  # Имеют разрешение для просмотра (?)
                 ),
-                video_info['formats']
+                video_info["formats"]
             )
         )
         for _format in video_formats:
-            _format['filesize_approx_vbr'] = video_info['duration'] * _format.get('vbr')
+            _format["filesize_approx_vbr"] = video_info["duration"] * _format.get("vbr")
         video_formats = sorted(
             video_formats,
             key=self._filesize_key,
             reverse=True
         )
-        is_short_video = video_info['media_type'] == 'short'
+        is_short_video = video_info["media_type"] == "short"
 
         vf = video_formats[0]
         if not high_res:
             for vf in video_formats:
                 # Для коротких видео сравниваем в
                 if is_short_video:
-                    if int(vf['width']) <= self.DEFAULT_VIDEO_QUALITY_HIGHT:
+                    if int(vf["width"]) <= self.DEFAULT_VIDEO_QUALITY_HIGHT:
                         break
                 else:
-                    if int(vf['height']) <= self.DEFAULT_VIDEO_QUALITY_HIGHT:
+                    if int(vf["height"]) <= self.DEFAULT_VIDEO_QUALITY_HIGHT:
                         break
 
         video_filesize = (self._filesize_key(vf) + self._filesize_key(af)) / 1024 / 1024

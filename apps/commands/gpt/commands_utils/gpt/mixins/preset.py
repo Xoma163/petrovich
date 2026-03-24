@@ -48,8 +48,8 @@ class GPTPresetMixin(GPTCommandProtocol):
 
     def menu_add_preset(self) -> ResponseMessageItem:
         self.check_args(3)
-        name_and_description = self.event.message.clear_case.split(' ', 3)[3]
-        parts = name_and_description.split('\n', 1)
+        name_and_description = self.event.message.clear_case.split(" ", 3)[3]
+        parts = name_and_description.split("\n", 1)
         name = parts[0]
         description = parts[1] if len(parts) > 1 else ""
 
@@ -84,7 +84,7 @@ class GPTPresetMixin(GPTCommandProtocol):
             )
 
             if not description:
-                defaults.pop('description')
+                defaults.pop("description")
             for key, value in defaults.items():
                 setattr(preset, key, value)
             preset.save()

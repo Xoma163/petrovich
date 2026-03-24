@@ -29,7 +29,7 @@ class Roles(Command):
 
     def start(self) -> ResponseMessage:
         try:
-            action, username, role_str = self.event.message.args_str.split(' ', 3)
+            action, username, role_str = self.event.message.args_str.split(" ", 3)
         except ValueError:
             raise PWarning("Проверьте синтаксис команды. Слишком много аргументов")
 

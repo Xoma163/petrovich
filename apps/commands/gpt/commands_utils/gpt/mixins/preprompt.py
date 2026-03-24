@@ -30,10 +30,10 @@ class GPTPrepromptMixin(GPTCommandProtocol):
         if len(self.event.message.args) > 1 and self.event.message.args[1] in ["chat", "conference", "конфа", "чат"]:
             self.check_conversation()
             q = Q(chat=self.event.chat, author=None)
-            return self._preprompt(2, q, 'препромпт конфы')
+            return self._preprompt(2, q, "препромпт конфы")
         else:
             q = Q(chat=None, author=self.event.sender)
-            return self._preprompt(1, q, 'персональный препромпт')
+            return self._preprompt(1, q, "персональный препромпт")
 
     # HANDLERS
 
@@ -53,7 +53,7 @@ class GPTPrepromptMixin(GPTCommandProtocol):
             else:
                 preprompt = self.event.message.raw.split(None, args_slice_index + 1)[-1]
                 preprompt_obj, _ = Preprompt.objects.update_or_create(
-                    defaults={'text': preprompt},
+                    defaults={"text": preprompt},
                     **dict(q.children)  # noqa
                 )
                 rmi = ResponseMessageItem(f"Обновил {is_for}: {self.bot.get_formatted_text(preprompt_obj.text)}")

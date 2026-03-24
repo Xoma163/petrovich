@@ -3,7 +3,7 @@ from petrovich.settings import env
 
 
 class TgMessage(Message):
-    MENTION = env.str('TG_BOT_LOGIN')
+    MENTION = env.str("TG_BOT_LOGIN")
 
     def __init__(self, raw_str=None, _id=None, entities=None, quote=None):
         self._mention_entities = []
@@ -19,7 +19,7 @@ class TgMessage(Message):
 
         # Это текст который пользователь выделил при reply_to
         if quote:
-            self.quote = quote['text']
+            self.quote = quote["text"]
 
     @property
     def mentioned(self) -> bool:
@@ -34,10 +34,10 @@ class TgMessage(Message):
         """
         if not entities:
             return text
-        bot_commands = list(filter(lambda x: x['type'] in ['bot_command'], entities))
-        bot_commands_positions = [(x['offset'], x['length']) for x in bot_commands]
-        mentions = list(filter(lambda x: x['type'] in ['mention'], entities))
-        mentions_positions = [(x['offset']) for x in mentions]
+        bot_commands = list(filter(lambda x: x["type"] in ["bot_command"], entities))
+        bot_commands_positions = [(x["offset"], x["length"]) for x in bot_commands]
+        mentions = list(filter(lambda x: x["type"] in ["mention"], entities))
+        mentions_positions = [(x["offset"]) for x in mentions]
         if bot_commands_positions:
             text = self.parse_bot_command_entities(text, bot_commands_positions)
         elif mentions_positions:
@@ -68,7 +68,7 @@ class TgMessage(Message):
             start_pos = offset
             end_pos = start_pos + length
             bot_command = text[start_pos:end_pos]
-            if '@' in bot_command:
+            if "@" in bot_command:
                 command, mention = bot_command.split("@", 1)
             else:
                 command, mention = bot_command, None

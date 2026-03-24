@@ -42,8 +42,8 @@ class Statistics(Command):
         else:
             arg0 = self.event.message.args[0]
             menu = [
-                [['петрович'], self.menu_petrovich],
-                [['мемы'], self.menu_memes],
+                [["петрович"], self.menu_petrovich],
+                [["мемы"], self.menu_memes],
             ]
             method = self.handle_menu(menu, arg0)
             answer = method()
@@ -82,9 +82,9 @@ class Statistics(Command):
             profiles = Profile.objects.filter(pk=self.event.sender.pk)
 
         result_list = Meme.objects.filter(author__in=profiles) \
-            .values('author') \
-            .annotate(total=Count('author')) \
-            .order_by('-total')
+            .values("author") \
+            .annotate(total=Count("author")) \
+            .order_by("-total")
 
         msg = "Созданных мемов:"
         if self.event.is_from_pm:

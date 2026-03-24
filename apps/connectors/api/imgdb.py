@@ -14,16 +14,16 @@ class ImgBBAPI(API):
 
     def upload_image(self, image: PhotoAttachment, expire: int | None = None):
         content = image.download_content()
-        params = {'key': self.API_KEY}
+        params = {"key": self.API_KEY}
         if expire is not None:
             expire = max(expire, 60)
             expire = min(expire, 15552000)
         else:
             expire = 15552000
-        params['expiration'] = expire
+        params["expiration"] = expire
 
         files = {
-            'image': (image.file_name_full, content)
+            "image": (image.file_name_full, content)
         }
         response = self.requests.post(self.IMAGE_UPLOAD_URL, params=params, files=files)
-        return response.json()['data']['image']['url']
+        return response.json()["data"]["image"]["url"]

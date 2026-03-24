@@ -28,7 +28,7 @@ class RoleEnum(StrEnum):
 
 
 class PlatformEnum(StrEnum):
-    TG = 'tg'
+    TG = "tg"
 
     @classmethod
     def choices(cls):
@@ -36,15 +36,15 @@ class PlatformEnum(StrEnum):
 
 
 ATTACHMENT_TYPE_TRANSLATOR = {
-    'photo': PhotoAttachment,
-    'video': VideoAttachment,
-    'video_note': VideoNoteAttachment,
-    'audio': AudioAttachment,
-    'doc': DocumentAttachment,
-    'link': LinkAttachment,
-    'sticker': StickerAttachment,
-    'voice': VoiceAttachment,
+    "photo": PhotoAttachment,
+    "video": VideoAttachment,
+    "video_note": VideoNoteAttachment,
+    "audio": AudioAttachment,
+    "doc": DocumentAttachment,
+    "link": LinkAttachment,
+    "sticker": StickerAttachment,
+    "voice": VoiceAttachment,
     # ToDo: в чём разница между gif и animation. Animation - свежее как будто?
-    'gif': AnimationAttachment,
-    'animation': AnimationAttachment
+    "gif": AnimationAttachment,
+    "animation": AnimationAttachment
 }

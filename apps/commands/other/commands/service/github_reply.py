@@ -56,7 +56,7 @@ class GithubReply(Command):
         if not profile:
             return
 
-        problem_str = self.bot.get_formatted_url('проблемой #' + str(issue.number), issue.remote_url)
+        problem_str = self.bot.get_formatted_url("проблемой #" + str(issue.number), issue.remote_url)
         answer = self.NEW_COMMENT_FROM_USER_TEMPLATE.format(problem_str=problem_str, comment=comment)
         rmi = ResponseMessageItem(answer)
         rmi.peer_id = profile.get_tg_user().user_id

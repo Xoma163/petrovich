@@ -37,4 +37,4 @@ class PinterestService(MediaService):
 
     @classmethod
     def urls(cls) -> list[str]:
-        return ['pinterest.com', 'ru.pinterest.com', 'www.pinterest.com', 'pin.it']
+        return ["pinterest.com", "ru.pinterest.com", "www.pinterest.com", "pin.it"]

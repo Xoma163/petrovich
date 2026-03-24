@@ -22,8 +22,8 @@ class AudioConverter:
         o.name = f"audio.{audio.ext}"
 
         input_file_format = audio.ext
-        if audio.ext == 'oga':
-            input_file_format = 'ogg'
+        if audio.ext == "oga":
+            input_file_format = "ogg"
         audio = AudioSegment.from_file(i, input_file_format)
         audio.export(o, format=_format)
         # Если нужно получить длительность трека, то len(audio) / 1000

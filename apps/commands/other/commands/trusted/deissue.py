@@ -28,7 +28,7 @@ class DeIssue(Command):
         issue_id = None
         if self.event.fwd:
             try:
-                url = self.event.fwd[0].message.entities[0]['url']
+                url = self.event.fwd[0].message.entities[0]["url"]
                 m = re.search(r'/issues/(\d+)$', url)
                 issue_id = m.group(1) if m else None
             except:

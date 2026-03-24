@@ -12,7 +12,7 @@ class Birthday(Command):
     conversation = True
 
     def start(self) -> ResponseMessage:
-        users = self.event.chat.users.filter(birthday__isnull=False).order_by('birthday__month', 'birthday__day')
+        users = self.event.chat.users.filter(birthday__isnull=False).order_by("birthday__month", "birthday__day")
 
         this_year_birthday_people = []
         next_year_birthday_people = []

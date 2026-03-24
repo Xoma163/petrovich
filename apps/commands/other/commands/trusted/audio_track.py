@@ -32,6 +32,6 @@ class AudioTrack(Command):
             _bytes=audio_track,
             peer_id=self.event.peer_id,
             message_thread_id=self.event.message_thread_id,
-            filename='audiotrack.aac'
+            filename="audiotrack.aac"
         )
         return ResponseMessage(ResponseMessageItem(attachments=[audio_att]))

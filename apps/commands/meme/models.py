@@ -6,15 +6,15 @@ from apps.shared.mixins import TimeStampModelMixin
 
 class BaseMeme(TimeStampModelMixin):
     ATTACHMENT_NAMES = [
-        ('photo', 'Фото'),
-        ('video', 'Видео'),
-        ('link', 'Ссылка'),
-        ('sticker', 'Стикер'),
+        ("photo", "Фото"),
+        ("video", "Видео"),
+        ("link", "Ссылка"),
+        ("sticker", "Стикер"),
         # ToDo: в чём разница между gif и animation. Animation - свежее как будто?
-        ('gif', 'Гифка'),
-        ('animation', 'Гифка'),
-        ('voice', 'Голосовое'),
-        ('video_note', 'Кружочек'),
+        ("gif", "Гифка"),
+        ("animation", "Гифка"),
+        ("voice", "Голосовое"),
+        ("video_note", "Кружочек"),
     ]
     name = models.CharField("Название", max_length=1000, default="")
     link = models.CharField("Ссылка", max_length=1000, default="", null=True, blank=True)

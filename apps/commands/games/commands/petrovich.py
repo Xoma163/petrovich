@@ -19,7 +19,7 @@ lock = Lock()
 
 class Petrovich(Command):
     name = "петрович"
-    names = ['петровна']
+    names = ["петровна"]
 
     help_text = HelpText(
         commands_text="мини-игра, определяющая кто Петрович дня",
@@ -44,10 +44,10 @@ class Petrovich(Command):
         else:
             arg0 = None
         menu = [
-            [['рег', 'регистрация'], self.menu_reg],
-            [['дерег'], self.menu_dereg],
-            [['игроки'], self.menu_gamers],
-            [['default'], self.menu_play]
+            [["рег", "регистрация"], self.menu_reg],
+            [["дерег"], self.menu_dereg],
+            [["игроки"], self.menu_gamers],
+            [["default"], self.menu_play]
         ]
         method = self.handle_menu(menu, arg0)
         return method()
@@ -89,12 +89,12 @@ class Petrovich(Command):
     def menu_play(self) -> ResponseMessage:
         with lock:
             datetime_now = localize_datetime(datetime.datetime.now(datetime.UTC), DEFAULT_TIME_ZONE)
-            winner_today = PetrovichGame.objects.filter(chat=self.event.chat).order_by('-created_at').first()
+            winner_today = PetrovichGame.objects.filter(chat=self.event.chat).order_by("-created_at").first()
 
             if winner_today:
                 datetime_last = localize_datetime(remove_tz(winner_today.created_at), DEFAULT_TIME_ZONE)
                 if (datetime_now.date() - datetime_last.date()).days <= 0:
-                    winner_gender = "Петровна" if winner_today.profile.gender == '1' else "Петрович"
+                    winner_gender = "Петровна" if winner_today.profile.gender == "1" else "Петрович"
                     answer = f"{winner_gender} дня - {winner_today.profile}"
                     return ResponseMessage(ResponseMessageItem(text=answer))
 
@@ -102,7 +102,7 @@ class Petrovich(Command):
             winner = petrovich_gamers.order_by("?").first()
 
             if not winner:
-                button = self.bot.get_button('Зарегистрироваться', self.name, ['рег'])
+                button = self.bot.get_button("Зарегистрироваться", self.name, ["рег"])
                 keyboard = self.bot.get_inline_keyboard([button])
                 raise PWarning(
                     f"Нет участников игры. Зарегистрируйтесь! {self.bot.get_formatted_text_line('/петрович рег')}",
@@ -113,7 +113,7 @@ class Petrovich(Command):
             winner_petrovich = PetrovichGame(profile=winner_profile, chat=self.event.chat)
             winner_petrovich.save()
 
-            winner_gender = "Петровна" if winner_profile.gender == '1' else "Петрович"
+            winner_gender = "Петровна" if winner_profile.gender == "1" else "Петрович"
             mention = self.bot.get_mention(winner_profile)
 
             first_answer = random_event([

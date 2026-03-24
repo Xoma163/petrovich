@@ -36,17 +36,17 @@ class Reddit:
         Если нашли имя файла, то также проставляем формат файла
         """
         xml = requests.get(url).content
-        bs4 = BeautifulSoup(xml, 'html.parser')
+        bs4 = BeautifulSoup(xml, "html.parser")
         try:
             filename = bs4.find("adaptationset", {
-                'contenttype': 'audio'
-            }).find('representation').find('baseurl').text
+                "contenttype": "audio"
+            }).find("representation").find("baseurl").text
             return filename
         except Exception:
             try:
                 filename = bs4.find("representation", {
-                    'id': 'AUDIO-1'
-                }).find('baseurl').text
+                    "id": "AUDIO-1"
+                }).find("baseurl").text
                 return filename
             except Exception:
                 return None
@@ -54,15 +54,15 @@ class Reddit:
     def _get_reddit_video_audio_urls(self) -> tuple[str, str]:
         audio_url = None
 
-        if self.media_data and self.media_data.get('type') == 'gfycat.com':
-            video_url = self.media_data['oembed']['thumbnail_url'].replace('size_restricted.gif', 'mobile.mp4')
+        if self.media_data and self.media_data.get("type") == "gfycat.com":
+            video_url = self.media_data["oembed"]["thumbnail_url"].replace("size_restricted.gif", "mobile.mp4")
         elif self.media_data and "reddit_video" in self.media_data:
             video_url = self.media_data["reddit_video"]["fallback_url"]
-            audio_filename = self._parse_mpd_audio_filename(self.media_data['reddit_video']['dash_url'])
+            audio_filename = self._parse_mpd_audio_filename(self.media_data["reddit_video"]["dash_url"])
             if audio_filename:
                 audio_url = video_url.split("DASH_")[0] + audio_filename
-        elif self.data.get('url_overridden_by_dest'):
-            video_url = self.data['url_overridden_by_dest']
+        elif self.data.get("url_overridden_by_dest"):
+            video_url = self.data["url_overridden_by_dest"]
         else:
             raise PWarning("Нет видео в посте")
         return video_url, audio_url
@@ -91,22 +91,22 @@ class Reddit:
         return vh.mux()
 
     def _get_text_from_post(self) -> str:
-        return self.data['selftext']
+        return self.data["selftext"]
 
     def _get_link_from_post(self) -> str:
-        return self.data['url_overridden_by_dest']
+        return self.data["url_overridden_by_dest"]
 
     def _get_photo_from_post(self) -> str:
-        photo_url = self.data['url_overridden_by_dest']
+        photo_url = self.data["url_overridden_by_dest"]
         ext = get_url_file_ext(photo_url)
 
         self.filename = f"{self.title.replace(' ', '_')}.{ext}"
         return photo_url
 
     def _get_photos_from_post(self) -> list[str]:
-        gallery_data_items = self.data['gallery_data']['items']
+        gallery_data_items = self.data["gallery_data"]["items"]
         first_url = \
-            self.data["media_metadata"][self.data['gallery_data']['items'][0]["media_id"]]["s"]["u"].partition("?")[0]
+            self.data["media_metadata"][self.data["gallery_data"]["items"][0]["media_id"]]["s"]["u"].partition("?")[0]
         ext = get_url_file_ext(first_url)
         self.filename = f"{self.title.replace(' ', '_')}.{ext}"
 
@@ -153,19 +153,19 @@ class Reddit:
         data = requests.get(url, headers=headers).json()
 
         self.data = data[0]["data"]["children"][0]["data"]
-        self.title = self.data['title']
+        self.title = self.data["title"]
         self.media_data = self.data["media"]
-        self.content_type = self.data.get('post_hint', self.CONTENT_TYPE_TEXT)
+        self.content_type = self.data.get("post_hint", self.CONTENT_TYPE_TEXT)
 
         if not self.media_data:
-            if self.data.get('media'):
+            if self.data.get("media"):
                 self.media_data = self.data["media"]
-            elif 'crosspost_parent_list' in self.data:
-                self.data = self.data['crosspost_parent_list'][0]
+            elif "crosspost_parent_list" in self.data:
+                self.data = self.data["crosspost_parent_list"][0]
                 if isinstance(data, dict):
                     self.media_data = data["media"]
                 else:
-                    self.media_data = self.data['media']
+                    self.media_data = self.data["media"]
 
     def _set_post_url(self, post_url: str):
         parsed_url = urlparse(post_url)
@@ -173,25 +173,25 @@ class Reddit:
 
     @property
     def is_gallery(self):
-        return self.data.get('is_gallery', False)
+        return self.data.get("is_gallery", False)
 
     @property
     def is_video(self):
-        if self.media_data and 'reddit_video' in self.media_data:
+        if self.media_data and "reddit_video" in self.media_data:
             return True
         return self.content_type in [self.CONTENT_TYPE_VIDEO, self.CONTENT_TYPE_RICH_VIDEO]
 
     @property
     def is_gif(self):
-        url = self.data.get('url_overridden_by_dest')
-        if url and (url.endswith('.gif') or url.endswith(".gifv")):
+        url = self.data.get("url_overridden_by_dest")
+        if url and (url.endswith(".gif") or url.endswith(".gifv")):
             return True
         return False
 
     @property
     def is_image(self):
-        return self.content_type == self.CONTENT_TYPE_IMAGE and not self.data.get('url_overridden_by_dest').endswith(
-            '.gif')
+        return self.content_type == self.CONTENT_TYPE_IMAGE and not self.data.get("url_overridden_by_dest").endswith(
+            ".gif")
 
     @property
     def is_images(self):

@@ -16,20 +16,20 @@ class Actions(Command):
         return bool(event.action)
 
     def start(self) -> ResponseMessage | None:
-        my_chat_member = self.event.action.get('my_chat_member')
-        chat_member = self.event.action.get('chat_member')
-        new_chat_members = self.event.action.get('new_chat_members')
-        left_chat_member = self.event.action.get('left_chat_member')
-        migrate_from_chat_id = self.event.action.get('migrate_from_chat_id')
-        group_chat_created = self.event.action.get('group_chat_created')
-        new_chat_title = self.event.action.get('new_chat_title')
+        my_chat_member = self.event.action.get("my_chat_member")
+        chat_member = self.event.action.get("chat_member")
+        new_chat_members = self.event.action.get("new_chat_members")
+        left_chat_member = self.event.action.get("left_chat_member")
+        migrate_from_chat_id = self.event.action.get("migrate_from_chat_id")
+        group_chat_created = self.event.action.get("group_chat_created")
+        new_chat_title = self.event.action.get("new_chat_title")
 
-        forum_topic_created = self.event.action.get('forum_topic_created')
-        forum_topic_edited = self.event.action.get('forum_topic_edited')
+        forum_topic_created = self.event.action.get("forum_topic_created")
+        forum_topic_edited = self.event.action.get("forum_topic_edited")
 
         answer = None
         if new_chat_members:
-            answers = [self.setup_new_chat_member(member['id'], is_bot=member['is_bot']) for member in new_chat_members]
+            answers = [self.setup_new_chat_member(member["id"], is_bot=member["is_bot"]) for member in new_chat_members]
             answers = [x for x in answers if x]
             answer = answers[0] if answers else None
 
@@ -54,12 +54,12 @@ class Actions(Command):
 
     def setup_new_chat_member(self, member_id, is_bot):
         if is_bot:
-            bot_group_id = env.int('TG_BOT_GROUP_ID')
+            bot_group_id = env.int("TG_BOT_GROUP_ID")
             if member_id == bot_group_id:
                 if not self.event.sender.check_role(RoleEnum.TRUSTED):
                     self.bot.leave_chat(self.event.chat.chat_id)
                     return None
-                self.edit_chat_title(self.event.raw['message']['chat']['title'])
+                self.edit_chat_title(self.event.raw["message"]["chat"]["title"])
                 self._set_kicked_state(False)
                 return "Привет!"
             return None
@@ -69,11 +69,11 @@ class Actions(Command):
             return None
 
     def setup_left_chat_member(self, left_chat_member):
-        is_bot = left_chat_member['is_bot']
-        user_id = left_chat_member['id']
+        is_bot = left_chat_member["is_bot"]
+        user_id = left_chat_member["id"]
 
         if is_bot:
-            bot_group_id = env.int('TG_BOT_GROUP_ID')
+            bot_group_id = env.int("TG_BOT_GROUP_ID")
             if user_id == bot_group_id:
                 self._set_kicked_state(True)
         if not is_bot:
@@ -94,7 +94,7 @@ class Actions(Command):
         if not self.event.sender.check_role(RoleEnum.TRUSTED):
             self.bot.leave_chat(self.event.chat.chat_id)
             return None
-        self.edit_chat_title(self.event.raw['message']['chat']['title'])
+        self.edit_chat_title(self.event.raw["message"]["chat"]["title"])
         return "Привет!"
 
     def edit_chat_title(self, new_chat_title):
@@ -109,10 +109,10 @@ class Actions(Command):
         self.event.chat.save()
 
     def chat_member(self, chat_member):
-        chat_member = chat_member['new_chat_member']
-        status = chat_member['status']
+        chat_member = chat_member["new_chat_member"]
+        status = chat_member["status"]
         if status in ["left", "kicked"]:
-            self.setup_left_chat_member(chat_member['user'])
+            self.setup_left_chat_member(chat_member["user"])
 
     # ToDo: peer_id + message_thread_id
     def create_forum_topic(self, forum_topic_created):

@@ -27,7 +27,7 @@ class BoostyService(MediaService):
                 auth_cookie = self.event.message.args_case[1]
 
             if auth_cookie:
-                new_message = self.event.message.raw.replace(auth_cookie + "\n", '').replace(auth_cookie, '')
+                new_message = self.event.message.raw.replace(auth_cookie + "\n", "").replace(auth_cookie, "")
                 self.event.message = Message(new_message)
 
         video_data = self.service.get_video_info(url, auth_cookie)
@@ -56,4 +56,4 @@ class BoostyService(MediaService):
 
     @classmethod
     def urls(cls) -> list[str]:
-        return ['boosty.to']
+        return ["boosty.to"]

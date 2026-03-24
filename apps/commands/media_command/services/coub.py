@@ -13,16 +13,16 @@ class CoubService(MediaService):
         headers = get_default_headers()
         content = requests.get(url, headers=headers).content
         bs4 = BeautifulSoup(content, "html.parser")
-        data = json.loads(bs4.find("script", {'id': 'coubPageCoubJson'}).text)
-        video_url = data['file_versions']['share']['default']
+        data = json.loads(bs4.find("script", {"id": "coubPageCoubJson"}).text)
+        video_url = data["file_versions"]["share"]["default"]
         video = self.bot.get_video_attachment(
             url=video_url,
             peer_id=self.event.peer_id,
             message_thread_id=self.event.message_thread_id,
         )
-        title = data['title']
+        title = data["title"]
         return MediaServiceResponse(text=title, attachments=[video])
 
     @classmethod
     def urls(cls) -> list[str]:
-        return ['coub.com']
+        return ["coub.com"]

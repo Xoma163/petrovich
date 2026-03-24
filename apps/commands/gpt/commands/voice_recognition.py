@@ -22,7 +22,7 @@ from apps.shared.utils.utils import wrap_text_in_html_document
 
 
 class VoiceRecognition(AcceptExtraCommand):
-    name = 'распознай'
+    name = "распознай"
     names = ["голос", "голосовое"]
 
     access = RoleEnum.TRUSTED
@@ -100,7 +100,7 @@ class VoiceRecognition(AcceptExtraCommand):
 
             profile_gpt_settings, _ = self.event.sender.gpt_settings.get_or_create(
                 provider=chat_gpt_provider,
-                defaults={'profile': self.event.sender}
+                defaults={"profile": self.event.sender}
             )
 
             api_key = profile_gpt_settings.get_key()
@@ -164,13 +164,13 @@ class VoiceRecognition(AcceptExtraCommand):
         # Если в тексте более 200 символов, то появляется кнопка саммари
         if len(answer) > 200:
             answer = self.bot.get_quote_text(answer, expandable=True)
-            button = self.bot.get_button("Саммари", "gpt", ['_wtf'])
+            button = self.bot.get_button("Саммари", "gpt", ["_wtf"])
             keyboard = self.bot.get_inline_keyboard([button])
 
         # Если ответ слишком длинный - кладём в файл
         rmi = ResponseMessageItem()
         if len(answer) > self.bot.max_message_text_length:
-            document = wrap_text_in_html_document(answer, 'Транскрибация')
+            document = wrap_text_in_html_document(answer, "Транскрибация")
             answer = "Полная транскрибация в одном файле"
             rmi.attachments = [document]
 

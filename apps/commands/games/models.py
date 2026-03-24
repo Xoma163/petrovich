@@ -7,7 +7,7 @@ from apps.shared.mixins import TimeStampModelMixin
 
 class PetrovichUser(TimeStampModelMixin):
     profile = models.ForeignKey(Profile, models.CASCADE, verbose_name="Профиль", null=True)
-    chat = models.ForeignKey(Chat, models.CASCADE, verbose_name='Чат', null=True, blank=True)
+    chat = models.ForeignKey(Chat, models.CASCADE, verbose_name="Чат", null=True, blank=True)
     active = models.BooleanField("Флаг активности", default=True)
 
     @property
@@ -27,7 +27,7 @@ class PetrovichUser(TimeStampModelMixin):
 
 class PetrovichGame(TimeStampModelMixin):
     profile = models.ForeignKey(Profile, models.CASCADE, verbose_name="Профиль", null=True)
-    chat = models.ForeignKey(Chat, models.CASCADE, verbose_name='Чат', null=True, blank=True)
+    chat = models.ForeignKey(Chat, models.CASCADE, verbose_name="Чат", null=True, blank=True)
 
     class Meta:
         verbose_name = "Петрович игра"
@@ -47,8 +47,8 @@ class Wordle(TimeStampModelMixin):
     message_id = models.IntegerField("id первого сообщения", blank=True, default=0)
 
     class Meta:
-        verbose_name = 'Сессия "Wordle"'
-        verbose_name_plural = 'Сессии "Wordle"'
+        verbose_name = "Сессия \"Wordle\""
+        verbose_name_plural = "Сессии \"Wordle\""
 
     def __str__(self):
         return str(self.pk)

@@ -62,7 +62,7 @@ class Logs(Command):
             thumbnail_bytes=_bytes,
             peer_id=self.event.peer_id,
             message_thread_id=self.event.message_thread_id,
-            filename='petrovich_logs.png',
+            filename="petrovich_logs.png",
         )
         # document.set_thumbnail(document.content)
         return ResponseMessage(ResponseMessageItem(attachments=[document]))
@@ -88,7 +88,7 @@ class Logs(Command):
                     if item in ["null", "*****"]:
                         keys_to_del.append(key)
                     elif isinstance(item, str) and "\n" in item:
-                        items[key] = item.split('\n')
+                        items[key] = item.split("\n")
             for key in keys_to_del:
                 del items[key]
         elif isinstance(items, list):
@@ -103,7 +103,7 @@ class Logs(Command):
         elif isinstance(items, list):
             return [self.wrap_long_texts(item, wrap_val) for item in items]
         elif isinstance(items, str) and len(items) > wrap_val:
-            return textwrap.fill(items, wrap_val).replace('\\n', '\n')
+            return textwrap.fill(items, wrap_val).replace("\\n", "\n")
         return items
 
     def get_bot_logs(self, count, filter_level=None):
@@ -113,57 +113,57 @@ class Logs(Command):
         last_message_id = 0
         for i in range(len(file_rows) - 1, -1, -1):
             item_json = json.loads(file_rows[i])
-            if not item_json.get('log_filter'):
+            if not item_json.get("log_filter"):
                 continue
 
-            log_filter = item_json.pop('log_filter')
+            log_filter = item_json.pop("log_filter")
 
             item_json = self.filter_row(item_json, log_filter, filter_level)
             if not item_json:
                 continue
 
-            if log_filter['message_id'] != last_message_id:
+            if log_filter["message_id"] != last_message_id:
                 found_logs += 1
                 res.append("")
 
-            last_message_id = log_filter['message_id']
+            last_message_id = log_filter["message_id"]
 
             if found_logs > count:
                 break
 
             self.transform_logs_by_values(item_json)
             self.wrap_long_texts(item_json)
-            item_str = json.dumps(item_json, indent=2, ensure_ascii=False).replace('\\n', '\n')
+            item_str = json.dumps(item_json, indent=2, ensure_ascii=False).replace("\\n", "\n")
             res.append(item_str)
         return list(reversed(res))
 
     def filter_row(self, item_json, log_filter, filter_level):
         # filter by chat/user
         if self.event.chat:
-            if log_filter['chat_id'] != self.event.chat.chat_id:
+            if log_filter["chat_id"] != self.event.chat.chat_id:
                 return None
         else:
-            if log_filter['chat_id'] is not None:
+            if log_filter["chat_id"] is not None:
                 return None
-            if log_filter['user_id'] != self.event.user.user_id:
+            if log_filter["user_id"] != self.event.user.user_id:
                 return None
 
         # filter by level
-        if filter_level and item_json['levelname'] not in filter_level:
+        if filter_level and item_json["levelname"] not in filter_level:
             return None
 
         # filter by content
-        if 'action' in item_json and item_json['action'] == 'sendChatAction':
+        if "action" in item_json and item_json["action"] == "sendChatAction":
             return None
 
         # drop trash
-        if 'event' in item_json and 'raw' in item_json['event']:
-            item_json['event'].pop('raw')
+        if "event" in item_json and "raw" in item_json["event"]:
+            item_json["event"].pop("raw")
 
         return item_json
 
     @staticmethod
     def read_file(path):
-        with open(path, 'r') as file:
+        with open(path, "r") as file:
             lines = file.readlines()
         return lines

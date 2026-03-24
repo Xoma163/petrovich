@@ -43,7 +43,7 @@ class Issue(Command):
 
     def start(self) -> ResponseMessage:
         if self.event.message.args:
-            parts = self.event.message.raw.split(' ', 1)
+            parts = self.event.message.raw.split(" ", 1)
             removed_symbols = len(parts[0]) + 1
             msg = parts[1]
         elif self.event.message.quote:
@@ -62,10 +62,10 @@ class Issue(Command):
 
         issue = GithubIssueAPI(log_filter=self.event.log_filter)
 
-        if msg.count('\n') == 0:
+        if msg.count("\n") == 0:
             title = msg
         else:
-            msg_split = msg.split('\n')
+            msg_split = msg.split("\n")
             title = msg_split[0]
             body = ["\n".join(msg_split[1:-1])]
             tags = self._get_tags(msg_split[-1])
@@ -117,13 +117,13 @@ class Issue(Command):
 
     def _wrap_with_pre(self, msg: str, removed_symbols: int) -> str:
         # берем только pre-entities
-        entities = self.event.raw.get('message', {}).get('entities', [])
-        pres = [e for e in entities if e.get('type') == 'pre']
-        pres.sort(key=lambda e: e.get('offset', 0), reverse=True)
+        entities = self.event.raw.get("message", {}).get("entities", [])
+        pres = [e for e in entities if e.get("type") == "pre"]
+        pres.sort(key=lambda e: e.get("offset", 0), reverse=True)
 
         for pre in pres:
-            offset = pre['offset'] - removed_symbols  # + appended_symbols
-            length = pre['length']
+            offset = pre["offset"] - removed_symbols  # + appended_symbols
+            length = pre["length"]
             end = offset + length
             segment = msg[offset:end]
             msg = msg[:offset] + "```\n" + segment + "\n```" + msg[end:]

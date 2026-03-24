@@ -4,7 +4,7 @@ from apps.bot.core.messages.attachments.mixins.duration_mixin import DurationMix
 
 
 class AnimationAttachment(Attachment, DurationMixin):
-    TYPE = 'animation'
+    TYPE = "animation"
     ACTION = ChatActionEnum.UPLOAD_VIDEO
 
     def __init__(self):
@@ -12,4 +12,4 @@ class AnimationAttachment(Attachment, DurationMixin):
 
     def parse_tg(self, event):
         super().parse_tg(event)
-        self.duration = event.get('duration')
+        self.duration = event.get("duration")

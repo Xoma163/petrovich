@@ -93,12 +93,12 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
         arg = self.event.message.args[1]
 
         menu = [
-            [['completion', 'completions', 'текст', 'текстовая', 'чат', 'text', 'chat', 't', 'c'],
+            [["completion", "completions", "текст", "текстовая", "чат", "text", "chat", "t", "c"],
              self._sub_menu_completions_model_choice],
-            [["vision", "вижн", 'зрение', 'v'], self._sub_menu_vision_model_choice],
-            [["draw", "рисования", "рисовать", "изображения", 'd'], self._sub_menu_image_draw_model_choice],
+            [["vision", "вижн", "зрение", "v"], self._sub_menu_vision_model_choice],
+            [["draw", "рисования", "рисовать", "изображения", "d"], self._sub_menu_image_draw_model_choice],
             [["voice", "голос", "голосовая"], self._sub_menu_voice_recognition_model_choice],
-            [['default'], self._get_all_current_models]
+            [["default"], self._get_all_current_models]
         ]
         method = self.handle_menu(menu, arg)
         rmi = method(profile_gpt_settings)
@@ -110,7 +110,7 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
         profile_gpt_settings = self.get_profile_gpt_settings()
         answer = []
         if issubclass(self.provider.api_class, CompletionsAPIMixin):
-            completions_models = CompletionsModel.objects.filter(provider=self.provider_model).order_by('name')
+            completions_models = CompletionsModel.objects.filter(provider=self.provider_model).order_by("name")
             completions_models_str = self._get_models_str(
                 completions_models,
                 profile_gpt_settings,
@@ -121,7 +121,7 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
             )
             answer.append(completions_models_str)
         if issubclass(self.provider.api_class, VisionAPIMixin):
-            vision_models = VisionModel.objects.filter(provider=self.provider_model).order_by('name')
+            vision_models = VisionModel.objects.filter(provider=self.provider_model).order_by("name")
             vision_models_str = self._get_models_str(
                 vision_models,
                 profile_gpt_settings,
@@ -134,7 +134,7 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
         if issubclass(self.provider.api_class, ImageDrawAPIMixin):
             image_draw_models = ImageDrawModel.objects \
                 .filter(provider=self.provider_model) \
-                .order_by('name', '-width', '-height', '-image_cost')
+                .order_by("name", "-width", "-height", "-image_cost")
             image_draw_models_str = self._get_models_str(
                 image_draw_models,
                 profile_gpt_settings,
@@ -147,7 +147,7 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
         if issubclass(self.provider.api_class, VoiceRecognitionAPIMixin):
             voice_recognition_models = VoiceRecognitionModel.objects \
                 .filter(provider=self.provider_model) \
-                .order_by('name')
+                .order_by("name")
             voice_recognition_models_str = self._get_models_str(
                 voice_recognition_models,
                 profile_gpt_settings,
@@ -312,7 +312,7 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
             # ToDo: Особенное получение модели, в будущем будет усложнено данными в .filter
             new_model = ImageDrawModel.objects.filter(name=new_model_name).first()
         except ImageDrawModel.DoesNotExist:
-            button = self.bot.get_button('Список моделей', command=self.name, args=['модели'])
+            button = self.bot.get_button("Список моделей", command=self.name, args=["модели"])
             keyboard = self.bot.get_inline_keyboard([button])
             raise PWarning("Не понял какая модель", keyboard=keyboard)
 
@@ -352,7 +352,7 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
         try:
             return model_class.objects.get(provider=self.provider_model, name=name)
         except model_class.DoesNotExist:
-            button = self.bot.get_button('Список моделей', command=self.name, args=['модели'])
+            button = self.bot.get_button("Список моделей", command=self.name, args=["модели"])
             keyboard = self.bot.get_inline_keyboard([button])
             raise PWarning("Не понял какая модель", keyboard=keyboard)
 
@@ -379,7 +379,7 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
     def _get_current_completions_model_str(self, settings: ProfileGPTSettings):
         current_model_str = self._get_current_model_str(
             settings,
-            'completions_model',
+            "completions_model",
             self.get_default_completions_model  # noqa
         )
         return f"Текстовая (completions)\n{current_model_str}"
@@ -389,7 +389,7 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
         #     raise PWarning("")
         current_model_str = self._get_current_model_str(
             settings,
-            'vision_model',
+            "vision_model",
             self.get_default_vision_model  # noqa
         )
         return f"Зрения (vision)\n{current_model_str}"
@@ -397,7 +397,7 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
     def _get_current_image_draw_model_str(self, settings: ProfileGPTSettings):
         current_model_str = self._get_current_model_str(
             settings,
-            'image_draw_model',
+            "image_draw_model",
             self.get_default_image_draw_model  # noqa
         )
         return f"Генерации изображений (draw)\n{current_model_str}"
@@ -405,7 +405,7 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
     def _get_current_voice_recognition_model_str(self, settings: ProfileGPTSettings):
         current_model_str = self._get_current_model_str(
             settings,
-            'voice_recognition_model',
+            "voice_recognition_model",
             self.get_default_voice_recognition_model  # noqa
         )
         return f"Голосовая (voice)\n{current_model_str}"

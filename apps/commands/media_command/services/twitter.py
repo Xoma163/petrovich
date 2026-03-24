@@ -45,7 +45,7 @@ class TwitterService(MediaService):
 
     @classmethod
     def urls(cls) -> list[str]:
-        return ['www.twitter.com', 'twitter.com', 'x.com']
+        return ["www.twitter.com", "twitter.com", "x.com"]
 
     def check_sender_role(self) -> None:
         if not self.event.sender.check_role(RoleEnum.TRUSTED):

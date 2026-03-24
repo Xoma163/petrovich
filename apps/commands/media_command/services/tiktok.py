@@ -29,8 +29,8 @@ class TikTokService(MediaService):
             height=video_data.height,
         )
         va.download_content(
-            cookies=video_data.extra_data['cookies'],  # noqa
-            headers=video_data.extra_data['headers']  # noqa
+            cookies=video_data.extra_data["cookies"],  # noqa
+            headers=video_data.extra_data["headers"]  # noqa
         )
 
         return MediaServiceResponse(text=None, attachments=[va], video_title="")
@@ -40,9 +40,9 @@ class TikTokService(MediaService):
         if "video/" in path:
             return
 
-        if urlparse(url).path.strip('/')[0] == "@":
+        if urlparse(url).path.strip("/")[0] == "@":
             raise PSkipContinue()
 
     @classmethod
     def urls(cls) -> list[str]:
-        return ["www.tiktok.com", 'vm.tiktok.com', 'm.tiktok.com', 'vt.tiktok.com']
+        return ["www.tiktok.com", "vm.tiktok.com", "m.tiktok.com", "vt.tiktok.com"]

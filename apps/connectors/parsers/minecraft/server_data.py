@@ -99,8 +99,8 @@ class MinecraftServerStatus:
             # Handshake packet
             handshake_packet = b""
             handshake_packet += self.pack_varint(1)  # Protocol version (47 for 1.8.9) Не влияет
-            handshake_packet += self.pack_varint(len(self.host)) + self.host.encode('utf-8')  # Host
-            handshake_packet += struct.pack('>H', self.port)  # Port
+            handshake_packet += self.pack_varint(len(self.host)) + self.host.encode("utf-8")  # Host
+            handshake_packet += struct.pack(">H", self.port)  # Port
             handshake_packet += self.pack_varint(1)  # Next state (1 for status)
 
             # Packet length + packet ID for handshake
@@ -129,7 +129,7 @@ class MinecraftServerStatus:
             response = b""
             while len(response) < length:
                 response += sock.recv(length - len(response))
-            response_data = response.decode('utf-8', errors='ignore')
+            response_data = response.decode("utf-8", errors="ignore")
 
         # Extract JSON from the response
         try:
@@ -147,24 +147,24 @@ class MinecraftServerStatus:
         server_status = self._get_status()
         forge_data = None
         if parse_forge_data:
-            if _forge_data := server_status.get('forgeData'):
+            if _forge_data := server_status.get("forgeData"):
                 forge_data = ForgeData(_forge_data)
                 forge_data.decode_data()
                 forge_data.sort_mods()
 
         players = []
-        if _players := server_status.get('players', {}).get('sample'):
-            players = [MinecraftPlayerData(_id=player_raw['id'], name=player_raw['name']) for player_raw in _players]
+        if _players := server_status.get("players", {}).get("sample"):
+            players = [MinecraftPlayerData(_id=player_raw["id"], name=player_raw["name"]) for player_raw in _players]
 
         return MinecraftServerData(
-            favicon=server_status.get('favicon'),
-            enforces_secure_chat=server_status.get('enforcesSecureChat'),
-            description=server_status.get('description', {}).get('text'),
-            players_online=server_status.get('players', {}).get('online'),
-            players_max=server_status.get('players', {}).get('max'),
-            version=server_status.get('version', {}).get('name'),
-            version_protocol=server_status.get('version', {}).get('protocol'),
-            latency=server_status.get('latency'),
+            favicon=server_status.get("favicon"),
+            enforces_secure_chat=server_status.get("enforcesSecureChat"),
+            description=server_status.get("description", {}).get("text"),
+            players_online=server_status.get("players", {}).get("online"),
+            players_max=server_status.get("players", {}).get("max"),
+            version=server_status.get("version", {}).get("name"),
+            version_protocol=server_status.get("version", {}).get("protocol"),
+            latency=server_status.get("latency"),
             players=players,
             forge_data=forge_data,
         )

@@ -7,7 +7,7 @@ from apps.shared.utils.cache import MessagesCache
 
 
 class Request:
-    API_TELEGRAM_URL = 'api.telegram.org'
+    API_TELEGRAM_URL = "api.telegram.org"
     PREFIX = "https"
 
     LOG_IGNORE_ACTIONS = []
@@ -21,7 +21,7 @@ class Request:
 
     def __init__(self, token, log_filter=None):
         self.token = token
-        self.logger = logging.getLogger('bot')
+        self.logger = logging.getLogger("bot")
         self.log_filter = log_filter
 
     def get(self, action, params=None, **kwargs) -> Response:
@@ -42,35 +42,35 @@ class Request:
         if action in self.LOG_IGNORE_ACTIONS:
             return
 
-        if response['ok']:
+        if response["ok"]:
             level = "debug"
-        elif response['description'] in self.LOG_WARNING_ERRORS:
+        elif response["description"] in self.LOG_WARNING_ERRORS:
             level = "warning"
         else:
             level = "error"
 
         log_data = {"response": response, "action": action}
         if self.log_filter:
-            log_data.update({'log_filter': self.log_filter})
+            log_data.update({"log_filter": self.log_filter})
         getattr(self.logger, level)(log_data)
 
     @staticmethod
     def _cache(response: dict):
-        if not response['ok']:
+        if not response["ok"]:
             return
 
-        message = response['result']
+        message = response["result"]
         if not isinstance(message, dict):
             return
-        if 'chat' not in message:
+        if "chat" not in message:
             return
-        peer_id = message['chat']['id']
-        message_id = message['message_id']
+        peer_id = message["chat"]["id"]
+        message_id = message["message_id"]
 
         mc = MessagesCache(peer_id)
         mc.add_message(message_id, message)
 
 
 class RequestLocal(Request):
-    API_TELEGRAM_URL = '192.168.1.10:10010'
+    API_TELEGRAM_URL = "192.168.1.10:10010"
     PREFIX = "http"

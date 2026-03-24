@@ -13,7 +13,7 @@ class TimeStampModelMixin(models.Model):
 
 
 class TimeStampAdminMixin(admin.ModelAdmin):
-    EXTRA_FIELDS = ['created_at', 'updated_at']
+    EXTRA_FIELDS = ["created_at", "updated_at"]
 
     def __init__(self, model, admin_site):
         self.list_display = list(self.list_display) + self.EXTRA_FIELDS

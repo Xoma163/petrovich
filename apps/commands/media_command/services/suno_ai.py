@@ -34,4 +34,4 @@ class SunoAIService(MediaService):
 
     @classmethod
     def urls(cls) -> list[str]:
-        return ['suno.ai', 'suno.com']
+        return ["suno.ai", "suno.com"]

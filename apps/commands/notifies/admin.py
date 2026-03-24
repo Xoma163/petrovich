@@ -8,25 +8,25 @@ from apps.shared.mixins import TimeStampAdminMixin
 @admin.register(Notify)
 class NotifyAdmin(TimeStampAdminMixin):
     list_display = (
-        'id',
-        'date',
-        'crontab',
-        'text',
-        'user',
-        'chat'
+        "id",
+        "date",
+        "crontab",
+        "text",
+        "user",
+        "chat"
     )
     search_fields = (
-        'date',
-        'crontab',
-        'text'
+        "date",
+        "crontab",
+        "text"
     )
     list_filter = (
-        ('user', admin.RelatedOnlyFieldListFilter),
-        ('chat', admin.RelatedOnlyFieldListFilter),
+        ("user", admin.RelatedOnlyFieldListFilter),
+        ("chat", admin.RelatedOnlyFieldListFilter),
     )
     list_select_related = (
-        'user',
-        'chat'
+        "user",
+        "chat"
     )
     ordering = (
         "user",

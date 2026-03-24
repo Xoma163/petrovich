@@ -48,7 +48,7 @@ class TelegramAPI:
             "message_thread_id": message_thread_id,
             "action": action
         }
-        return self.requests.post('sendChatAction', params).json()
+        return self.requests.post("sendChatAction", params).json()
 
     def send_message(
             self,
@@ -70,11 +70,11 @@ class TelegramAPI:
             "disable_web_page_preview": disable_web_page_preview
         }
         if reply_markup:
-            params['reply_markup'] = json.dumps(reply_markup)
+            params["reply_markup"] = json.dumps(reply_markup)
         if entities:
-            params['reply_markup'] = json.dumps(entities)
+            params["reply_markup"] = json.dumps(entities)
 
-        return self.requests.post('sendMessage', params).json()
+        return self.requests.post("sendMessage", params).json()
 
     def send_message_draft(
             self,
@@ -93,7 +93,7 @@ class TelegramAPI:
 
         }
 
-        return self.requests.post('sendMessageDraft', params).json()
+        return self.requests.post("sendMessageDraft", params).json()
 
     def send_media_group(
             self,
@@ -104,16 +104,16 @@ class TelegramAPI:
             files: list[tuple] = None
     ):
         if not media and not files:
-            raise ValueError('media or files must be provided')
+            raise ValueError("media or files must be provided")
         params = {
             "chat_id": chat_id,
             "message_thread_id": message_thread_id,
             "reply_to_message_id": reply_to_message_id,
         }
         if media:
-            params['media'] = json.dumps(media)  # noqa
+            params["media"] = json.dumps(media)  # noqa
 
-        return self.requests.post('sendMediaGroup', params, files=files).json()
+        return self.requests.post("sendMediaGroup", params, files=files).json()
 
     def send_photo(
             self,
@@ -127,8 +127,8 @@ class TelegramAPI:
             photo: str = None,
             files: dict = None
     ):
-        if not photo and not files.get('photo'):
-            raise ValueError('photo or files["photo"] must be provided')
+        if not photo and not files.get("photo"):
+            raise ValueError("photo or files[\"photo\"] must be provided")
         params = {
             "chat_id": chat_id,
             "message_thread_id": message_thread_id,
@@ -139,9 +139,9 @@ class TelegramAPI:
             "photo": photo
         }
         if reply_markup:
-            params['reply_markup'] = json.dumps(reply_markup)
+            params["reply_markup"] = json.dumps(reply_markup)
 
-        return self.requests.post('sendPhoto', params, files=files).json()
+        return self.requests.post("sendPhoto", params, files=files).json()
 
     def send_document(
             self,
@@ -154,8 +154,8 @@ class TelegramAPI:
             document: str = None,
             files: dict = None
     ):
-        if not document and not files.get('document'):
-            raise ValueError('document or files["document"] must be provided')
+        if not document and not files.get("document"):
+            raise ValueError("document or files[\"document\"] must be provided")
         params = {
             "chat_id": chat_id,
             "message_thread_id": message_thread_id,
@@ -165,9 +165,9 @@ class TelegramAPI:
             "document": document
         }
         if reply_markup:
-            params['reply_markup'] = json.dumps(reply_markup)
+            params["reply_markup"] = json.dumps(reply_markup)
 
-        return self.requests.post('sendDocument', params, files=files).json()
+        return self.requests.post("sendDocument", params, files=files).json()
 
     def send_video(
             self,
@@ -183,8 +183,8 @@ class TelegramAPI:
             video: str = None,
             files: dict = None
     ):
-        if not video and not files.get('video'):
-            raise ValueError('video or files["video"] must be provided')
+        if not video and not files.get("video"):
+            raise ValueError("video or files[\"video\"] must be provided")
 
         params = {
             "chat_id": chat_id,
@@ -198,8 +198,8 @@ class TelegramAPI:
             "video": video
         }
         if reply_markup:
-            params['reply_markup'] = json.dumps(reply_markup)  # noqa
-        return self.requests.post('sendVideo', params, files=files).json()
+            params["reply_markup"] = json.dumps(reply_markup)  # noqa
+        return self.requests.post("sendVideo", params, files=files).json()
 
     def send_video_note(
             self,
@@ -210,8 +210,8 @@ class TelegramAPI:
             video_note: str = None,
             files: dict = None
     ):
-        if not video_note and not files.get('video_note'):
-            raise ValueError('video_note or files["video_note"] must be provided')
+        if not video_note and not files.get("video_note"):
+            raise ValueError("video_note or files[\"video_note\"] must be provided")
 
         params = {
             "chat_id": chat_id,
@@ -220,9 +220,9 @@ class TelegramAPI:
             "video_note": video_note,
         }
         if reply_markup:
-            params['reply_markup'] = json.dumps(reply_markup)
+            params["reply_markup"] = json.dumps(reply_markup)
 
-        return self.requests.post('sendVideoNote', params, files=files).json()
+        return self.requests.post("sendVideoNote", params, files=files).json()
 
     def send_audio(
             self,
@@ -239,8 +239,8 @@ class TelegramAPI:
             thumbnail: str = None,
             files: dict = None
     ):
-        if not audio and not files.get('audio'):
-            raise ValueError('audio or files["audio"] must be provided')
+        if not audio and not files.get("audio"):
+            raise ValueError("audio or files[\"audio\"] must be provided")
 
         params = {
             "chat_id": chat_id,
@@ -255,9 +255,9 @@ class TelegramAPI:
             "thumbnail": thumbnail,
         }
         if reply_markup:
-            params['reply_markup'] = json.dumps(reply_markup)
+            params["reply_markup"] = json.dumps(reply_markup)
 
-        return self.requests.post('sendAudio', params, files=files).json()
+        return self.requests.post("sendAudio", params, files=files).json()
 
     def send_animation(
             self,
@@ -271,8 +271,8 @@ class TelegramAPI:
             animation: str = None,
             files: dict = None
     ):
-        if not animation and not files.get('animation'):
-            raise ValueError('animation or files["animation"] must be provided')
+        if not animation and not files.get("animation"):
+            raise ValueError("animation or files[\"animation\"] must be provided")
         params = {
             "chat_id": chat_id,
             "message_thread_id": message_thread_id,
@@ -283,9 +283,9 @@ class TelegramAPI:
             "animation": animation,
         }
         if reply_markup:
-            params['reply_markup'] = json.dumps(reply_markup)
+            params["reply_markup"] = json.dumps(reply_markup)
 
-        return self.requests.post('sendAnimation', params, files=files).json()
+        return self.requests.post("sendAnimation", params, files=files).json()
 
     def send_sticker(
             self,
@@ -296,8 +296,8 @@ class TelegramAPI:
             sticker: str = None,
             files: dict = None
     ):
-        if not sticker and not files.get('sticker'):
-            raise ValueError('sticker or files["sticker"] must be provided')
+        if not sticker and not files.get("sticker"):
+            raise ValueError("sticker or files[\"sticker\"] must be provided")
         params = {
             "chat_id": chat_id,
             "message_thread_id": message_thread_id,
@@ -305,9 +305,9 @@ class TelegramAPI:
             "sticker": sticker,
         }
         if reply_markup:
-            params['reply_markup'] = json.dumps(reply_markup)
+            params["reply_markup"] = json.dumps(reply_markup)
 
-        return self.requests.post('sendSticker', params).json()
+        return self.requests.post("sendSticker", params).json()
 
     def send_voice(
             self,
@@ -319,8 +319,8 @@ class TelegramAPI:
             voice: str = None,
             files: dict = None
     ):
-        if not voice and not files.get('voice'):
-            raise ValueError('voice or files["voice"] must be provided')
+        if not voice and not files.get("voice"):
+            raise ValueError("voice or files[\"voice\"] must be provided")
         params = {
             "chat_id": chat_id,
             "message_thread_id": message_thread_id,
@@ -329,9 +329,9 @@ class TelegramAPI:
             "voice": voice,
         }
         if reply_markup:
-            params['reply_markup'] = json.dumps(reply_markup)
+            params["reply_markup"] = json.dumps(reply_markup)
 
-        return self.requests.post('sendVoice', params).json()
+        return self.requests.post("sendVoice", params).json()
 
     # ---------- EDIT --------- #
 
@@ -350,9 +350,9 @@ class TelegramAPI:
             "parse_mode": parse_mode
         }
         if reply_markup:
-            params['reply_markup'] = json.dumps(reply_markup)
+            params["reply_markup"] = json.dumps(reply_markup)
 
-        return self.requests.post('editMessageText', params).json()
+        return self.requests.post("editMessageText", params).json()
 
     def edit_message_caption(
             self,
@@ -369,9 +369,9 @@ class TelegramAPI:
             "parse_mode": parse_mode
         }
         if reply_markup:
-            params['reply_markup'] = json.dumps(reply_markup)
+            params["reply_markup"] = json.dumps(reply_markup)
 
-        return self.requests.post('editMessageCaption', params).json()
+        return self.requests.post("editMessageCaption", params).json()
 
     def edit_messaage_reply_markup(self, chat_id: int, message_id: int, reply_markup: dict):
         params = {
@@ -379,9 +379,9 @@ class TelegramAPI:
             "message_id": message_id,
         }
         if reply_markup:
-            params['reply_markup'] = json.dumps(reply_markup)  # noqa
+            params["reply_markup"] = json.dumps(reply_markup)  # noqa
 
-        return self.requests.post('editMessageReplyMarkup', params=params).json()
+        return self.requests.post("editMessageReplyMarkup", params=params).json()
 
     def edit_message_media(self, chat_id: int, message_id: int, media: dict):
         params = {
@@ -390,7 +390,7 @@ class TelegramAPI:
             "media": json.dumps(media),
         }
 
-        return self.requests.post('editMessageMedia', params=params).json()
+        return self.requests.post("editMessageMedia", params=params).json()
 
     # ---------- DELETE --------- #
 
@@ -403,33 +403,33 @@ class TelegramAPI:
         Удаление сообщений
         """
         params = {
-            'chat_id': chat_id,
-            'message_ids': json.dumps(message_ids)
+            "chat_id": chat_id,
+            "message_ids": json.dumps(message_ids)
         }
-        return self.requests.post('deleteMessages', params=params).json()
+        return self.requests.post("deleteMessages", params=params).json()
 
     # ---------- CHAT --------- #
 
     def get_chat_administrators(self, chat_id: int):
         params = {
-            'chat_id': chat_id,
+            "chat_id": chat_id,
         }
-        return self.requests.post('getChatAdministrators', params).json()
+        return self.requests.post("getChatAdministrators", params).json()
 
     def leave_chat(self, chat_id: int):
         params = {
-            'chat_id': chat_id,
+            "chat_id": chat_id,
         }
-        return self.requests.post('leaveChat', params).json()
+        return self.requests.post("leaveChat", params).json()
 
     # ---------- USER --------- #
 
     def get_user_profile_photos(self, user_id: int):
         params = {
-            'user_id': user_id,
+            "user_id": user_id,
         }
         return self.requests.post(
-            'getUserProfilePhotos',
+            "getUserProfilePhotos",
             params=params
         ).json()
 
@@ -437,10 +437,10 @@ class TelegramAPI:
 
     def get_file(self, file_id: int):
         params = {
-            'file_id': file_id,
+            "file_id": file_id,
         }
         return self.requests.post(
-            'getFile',
+            "getFile",
             params=params
         ).json()
 
@@ -448,18 +448,18 @@ class TelegramAPI:
 
     def answer_inline_query(self, inline_query_id: int, results: dict, cache_time: int):
         params = {
-            'inline_query_id': inline_query_id,
-            'results': json.dumps(results, ensure_ascii=False),
-            'cache_time': cache_time
+            "inline_query_id": inline_query_id,
+            "results": json.dumps(results, ensure_ascii=False),
+            "cache_time": cache_time
         }
 
-        return self.requests.post('answerInlineQuery', params).json()
+        return self.requests.post("answerInlineQuery", params).json()
 
     def answer_callback_query(self, callback_query_id: int):
         params = {
-            'callback_query_id': callback_query_id,
+            "callback_query_id": callback_query_id,
         }
-        return self.requests.post('answerCallbackQuery', params).json()
+        return self.requests.post("answerCallbackQuery", params).json()
 
     # ---------- NO API --------- #
 

@@ -13,9 +13,9 @@ class TwitchClipsService(MediaService):
             return self._get_content_by_url(url)
 
     def _get_content_by_url(self, url: str) -> MediaServiceResponse:
-        slug = url.split(self.urls()[0], 1)[-1].lstrip('/')
+        slug = url.split(self.urls()[0], 1)[-1].lstrip("/")
         clip_info = twitch.get_clip(slug)
-        title = clip_info['title']
+        title = clip_info["title"]
         video_url = get_clip_authenticated_url(slug, "source")
         video = self.bot.get_video_attachment(
             url=video_url,
@@ -27,4 +27,4 @@ class TwitchClipsService(MediaService):
 
     @classmethod
     def urls(cls) -> list[str]:
-        return ['clips.twitch.tv']
+        return ["clips.twitch.tv"]

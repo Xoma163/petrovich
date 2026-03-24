@@ -27,9 +27,9 @@ class Pinterest:
 
     def get_post_data(self, url) -> PinterestDataItem:
         content = requests.get(url).content
-        bs4 = BeautifulSoup(content, 'html.parser')
+        bs4 = BeautifulSoup(content, "html.parser")
 
-        if bs4.find("script", {'data-test-id': 'video-snippet'}):
+        if bs4.find("script", {"data-test-id": "video-snippet"}):
             return self._get_video(bs4)
         elif bs4.find("meta", {"name": "og:image"}):
             return self._get_photo(bs4)
@@ -39,20 +39,20 @@ class Pinterest:
     @staticmethod
     def _get_photo(bs4: BeautifulSoup) -> PinterestDataItem:
         try:
-            image_data = json.loads(bs4.find("script", {'data-test-id': 'leaf-snippet'}).text)
-            caption = image_data['headline']
-            image_url = image_data['image']
+            image_data = json.loads(bs4.find("script", {"data-test-id": "leaf-snippet"}).text)
+            caption = image_data["headline"]
+            image_url = image_data["image"]
         except Exception:
             caption = None
-            image_url = bs4.find("meta", {"name": "og:image"}).attrs['content']
+            image_url = bs4.find("meta", {"name": "og:image"}).attrs["content"]
 
         ext = get_url_file_ext(image_url)
-        content_type = PinterestDataItem.CONTENT_TYPE_GIF if ext in ['gif',
-                                                                     'gifv'] else PinterestDataItem.CONTENT_TYPE_IMAGE
+        content_type = PinterestDataItem.CONTENT_TYPE_GIF if ext in ["gif",
+                                                                     "gifv"] else PinterestDataItem.CONTENT_TYPE_IMAGE
         return PinterestDataItem(content_type, image_url, caption)
 
     @staticmethod
     def _get_video(bs4: BeautifulSoup) -> PinterestDataItem:
-        video_url = json.loads(bs4.find("script", {'data-test-id': 'video-snippet'}).text)['contentUrl']
-        caption = bs4.find("meta", {"name": "og:title"}).attrs['content']
+        video_url = json.loads(bs4.find("script", {"data-test-id": "video-snippet"}).text)["contentUrl"]
+        caption = bs4.find("meta", {"name": "og:title"}).attrs["content"]
         return PinterestDataItem(PinterestDataItem.CONTENT_TYPE_VIDEO, video_url, caption)

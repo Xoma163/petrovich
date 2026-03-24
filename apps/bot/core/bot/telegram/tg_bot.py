@@ -104,14 +104,14 @@ class TgBot(Bot):
         """
         data = event.inline_data
 
-        filter_list = event.inline_data['message'].clear.split(' ')
+        filter_list = event.inline_data["message"].clear.split(" ")
         filter_list = filter_list if filter_list[0] else []
 
         meme_cmd = Meme(self, event)
         inline_query_result = meme_cmd.get_tg_inline_memes(filter_list)
 
         return self.api_handler.answer_inline_query(
-            inline_query_id=data['id'],
+            inline_query_id=data["id"],
             results=inline_query_result,
             cache_time=0
         )
@@ -121,29 +121,29 @@ class TgBot(Bot):
         files = []
         for i, attachment in enumerate(rmi.attachments):
             if attachment.file_id:
-                media = {'type': attachment.type, 'media': attachment.file_id}
+                media = {"type": attachment.type, "media": attachment.file_id}
             elif attachment.public_download_url and not attachment.content:
-                media = {'type': attachment.type, 'media': attachment.public_download_url}
+                media = {"type": attachment.type, "media": attachment.public_download_url}
             else:
                 filename = attachment.file_name_full if attachment.file_name_full else str(i)
                 files.append((filename, attachment.content))
-                media = {'type': attachment.type, "media": f"attach://{filename}"}
+                media = {"type": attachment.type, "media": f"attach://{filename}"}
 
-            if getattr(attachment, 'artist', None):
-                media['performer'] = attachment.artist
-            if getattr(attachment, 'title', None):
-                media['title'] = attachment.title
-            if getattr(attachment, 'set_thumbnail', None):
+            if getattr(attachment, "artist", None):
+                media["performer"] = attachment.artist
+            if getattr(attachment, "title", None):
+                media["title"] = attachment.title
+            if getattr(attachment, "set_thumbnail", None):
                 attachment.set_thumbnail()
-            if getattr(attachment, 'thumbnail', None):
+            if getattr(attachment, "thumbnail", None):
                 thumb_file = attachment.thumbnail
                 thumb_filename = f"thumb_{str(i)}"
                 files.append((thumb_filename, thumb_file.get_bytes_io_content()))
-                media['thumbnail'] = f"attach://{thumb_filename}"
+                media["thumbnail"] = f"attach://{thumb_filename}"
 
             media_list.append(media)
 
-        media_list[-1]['caption'] = rmi.text
+        media_list[-1]["caption"] = rmi.text
 
         media = media_list
         return self.api_handler.send_media_group(
@@ -178,7 +178,7 @@ class TgBot(Bot):
 
         # Если не получилось отправить media_group, то пытаемся отправить вложения по одному
         for response in responses:
-            if response['ok']:
+            if response["ok"]:
                 continue
             rmi_copy = copy(rmi)
             rmi_copy.text = ""
@@ -217,7 +217,7 @@ class TgBot(Bot):
             r = self._send_response_message_item(error_rmi)
             return BotResponse(False, r)
 
-        if r['ok']:
+        if r["ok"]:
             return BotResponse(True, r)
 
         # Непредвиденная ошибка телеги
@@ -231,21 +231,21 @@ class TgBot(Bot):
         ]
         BAD_URL_ERROR_MSG = "Ссылка не понравилась серверу телеграмм. Внутренняя ошибка."
         bad_url_catch_errors = {
-            'Bad Request: failed to get HTTP URL content': BAD_URL_ERROR_MSG,
-            'Bad Request: wrong file identifier/HTTP URL specified': BAD_URL_ERROR_MSG,
-            'Bad Request: wrong type of the web page content': BAD_URL_ERROR_MSG
+            "Bad Request: failed to get HTTP URL content": BAD_URL_ERROR_MSG,
+            "Bad Request: wrong file identifier/HTTP URL specified": BAD_URL_ERROR_MSG,
+            "Bad Request: wrong type of the web page content": BAD_URL_ERROR_MSG
         }
         catch_errors = {
-            'Bad Request: VOICE_MESSAGES_FORBIDDEN': "Не могу отправить голосовуху из-за ваших настроек безопасности",
+            "Bad Request: VOICE_MESSAGES_FORBIDDEN": "Не могу отправить голосовуху из-за ваших настроек безопасности",
         }
         catch_errors_starts_with = {
             "Bad Request: can't parse entities": "Не смог распарсить markdown/html сущности. Внутренняя ошибка."
         }
         catch_errors_reply_to_not_found = (
-            'Bad Request: message to be replied not found',
+            "Bad Request: message to be replied not found",
         )
 
-        error = r['description']
+        error = r["description"]
 
         catch_errors_start_error = None
         for key in catch_errors_starts_with:
@@ -397,7 +397,7 @@ class TgBot(Bot):
             if photo_attachment.get_size_mb() > self.max_photo_size_mb:
                 rmi.attachments = []
                 raise PError(f"Нельзя загружать фото более {self.max_photo_size_mb} мб в телеграмм")
-            files = {'photo': photo_attachment.get_bytes_io_content()}
+            files = {"photo": photo_attachment.get_bytes_io_content()}
         return self.api_handler.send_photo(
             chat_id=rmi.peer_id,
             message_thread_id=rmi.message_thread_id,
@@ -422,10 +422,10 @@ class TgBot(Bot):
         elif document_attachment.public_download_url and not document_attachment.content:
             document = document_attachment.public_download_url
         else:
-            files = {'document': document_attachment.get_bytes_io_content()}
+            files = {"document": document_attachment.get_bytes_io_content()}
             document_attachment.set_thumbnail()
             if document_attachment.thumbnail:
-                files['thumbnail'] = document_attachment.thumbnail.get_bytes_io_content()
+                files["thumbnail"] = document_attachment.thumbnail.get_bytes_io_content()
 
         return self.api_handler.send_document(
             chat_id=rmi.peer_id,
@@ -455,10 +455,10 @@ class TgBot(Bot):
                 raise PError(
                     f"Нельзя загружать видео более {self.max_video_size_mb} мб в телеграмм. Ваше видео {round(video_attachment.get_size_mb(), 2)} мб")
             with ChatActionSender(self, ChatActionEnum.UPLOAD_VIDEO, rmi.peer_id, rmi.message_thread_id):
-                files = {'video': video_attachment.get_bytes_io_content()}
+                files = {"video": video_attachment.get_bytes_io_content()}
                 video_attachment.set_thumbnail()
                 if video_attachment.thumbnail:
-                    files['thumbnail'] = video_attachment.thumbnail.get_bytes_io_content()
+                    files["thumbnail"] = video_attachment.thumbnail.get_bytes_io_content()
         return self.api_handler.send_video(
             chat_id=rmi.peer_id,
             message_thread_id=rmi.message_thread_id,
@@ -505,10 +505,10 @@ class TgBot(Bot):
         elif audio_attachment.public_download_url and not audio_attachment.content:
             audio = audio_attachment.public_download_url
         else:
-            files = {'audio': audio_attachment.get_bytes_io_content()}
+            files = {"audio": audio_attachment.get_bytes_io_content()}
             audio_attachment.set_thumbnail()
             if audio_attachment.thumbnail:
-                files['thumbnail'] = audio_attachment.thumbnail.get_bytes_io_content()  # noqa
+                files["thumbnail"] = audio_attachment.thumbnail.get_bytes_io_content()  # noqa
 
         return self.api_handler.send_audio(
             chat_id=rmi.peer_id,
@@ -540,7 +540,7 @@ class TgBot(Bot):
         else:
             if animation_attachment.get_size_mb() > self.max_gif_size_mb:
                 raise PError(f"Нельзя загружать гифы более {self.max_gif_size_mb} мб в телеграмм")
-            files = {'animation': animation_attachment.get_bytes_io_content()}
+            files = {"animation": animation_attachment.get_bytes_io_content()}
         return self.api_handler.send_animation(
             chat_id=rmi.peer_id,
             message_thread_id=rmi.message_thread_id,
@@ -610,13 +610,13 @@ class TgBot(Bot):
 
     def edit_message_media(self, rmi: ResponseMessageItem) -> dict:
         attachment = rmi.attachments[0]
-        media = {'type': attachment.type}
+        media = {"type": attachment.type}
         if attachment.file_id:
-            media['media'] = attachment.file_id
+            media["media"] = attachment.file_id
         elif attachment.public_download_url:
-            media['media'] = attachment.public_download_url
+            media["media"] = attachment.public_download_url
         else:
-            media['media'] = self.get_file_id(attachment)
+            media["media"] = self.get_file_id(attachment)
         return self.api_handler.edit_message_media(
             chat_id=rmi.peer_id,
             message_id=rmi.message_id,
@@ -628,10 +628,10 @@ class TgBot(Bot):
     # USERS GROUPS BOTS
     def get_user_profile_photos(self, user_id: int | str) -> dict:
         r = self.api_handler.get_user_profile_photos(user_id)
-        return r['result']['photos']
+        return r["result"]["photos"]
 
     def get_chat_administrators(self, chat_id: int | str) -> dict:
-        return self.api_handler.get_chat_administrators(chat_id)['result']
+        return self.api_handler.get_chat_administrators(chat_id)["result"]
 
     # END USERS GROUPS BOTS
 
@@ -643,20 +643,20 @@ class TgBot(Bot):
         if command:
             callback_data["c"] = command
         if args:
-            callback_data['a'] = args
+            callback_data["a"] = args
         if kwargs:
-            callback_data['k'] = kwargs
+            callback_data["k"] = kwargs
         callback_data = json.dumps(callback_data, ensure_ascii=False)
 
         callback_data_len = len(callback_data.encode("UTF8"))
         if callback_data_len > 62:
             raise RuntimeError("Нельзя в callback_data передавать данные более 64 байт")
         data = {
-            'text': text,
-            'callback_data': callback_data
+            "text": text,
+            "callback_data": callback_data
         }
         if url:
-            data['url'] = url
+            data["url"] = url
         return data
 
     @staticmethod
@@ -669,7 +669,7 @@ class TgBot(Bot):
         buttons_chunks = get_chunks(buttons, cols)
         keyboard = list(buttons_chunks)
         return {
-            'inline_keyboard': keyboard
+            "inline_keyboard": keyboard
         }
 
     def set_chat_action(self, chat_id: int | str, chat_action: ChatActionEnum, message_thread_id: int | None = None):
@@ -714,13 +714,13 @@ class TgBot(Bot):
         rmi = ResponseMessageItem(attachments=[attachment], peer_id=int(uploading_chat.chat_id))
         br = self.send_response_message_item(rmi)
         r = br.response
-        self.delete_messages(uploading_chat.chat_id, r['result']['message_id'])
+        self.delete_messages(uploading_chat.chat_id, r["result"]["message_id"])
 
         try:
-            att = r['result'][attachment.type]
+            att = r["result"][attachment.type]
             if isinstance(att, list):
                 att = att[0]
-            file_id = att['file_id']
+            file_id = att["file_id"]
         except Exception:
             raise PError()
         return file_id

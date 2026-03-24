@@ -7,7 +7,7 @@ def get_web_driver(headers=None) -> webdriver.Chrome:
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-crash-reporter")
     options.add_argument(
-        'user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36')
+        "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36")
 
     # if proxy:
     #     options.add_argument(f"--proxy-server={proxy}")
@@ -26,5 +26,5 @@ def get_web_driver_headers(web_driver: webdriver.Chrome) -> dict[str, str]:
         "return req.getAllResponseHeaders()"
     )
     return dict(
-        [x.split(': ', 1) for x in headers.strip().split('\r\n') if x]
+        [x.split(": ", 1) for x in headers.strip().split("\r\n") if x]
     )

@@ -29,37 +29,37 @@ class TgEvent(Event):
         self.inline_mode: bool = False
 
         self.inline_data: dict = {
-            'query_id': None,
-            'query': None,
-            'offset': None
+            "query_id": None,
+            "query": None,
+            "offset": None
         }
 
     def setup_event(self, **kwargs):
         self.is_fwd = kwargs.get("is_fwd", False)
-        inline_query = self.raw.get('inline_query')
+        inline_query = self.raw.get("inline_query")
         if inline_query:
             self.setup_inline_query(inline_query)
             return
 
         fwd_message_without_voice = False
-        if not self.is_fwd and self.raw.get('message', {}).get('forward_from') and 'voice' not in self.raw.get(
-                'message', {}):
+        if not self.is_fwd and self.raw.get("message", {}).get("forward_from") and "voice" not in self.raw.get(
+                "message", {}):
             fwd_message_without_voice = True
 
         if self.is_fwd:
             message = self.raw
         else:
-            callback_query = self.raw.get('callback_query')
-            my_chat_member = self.raw.get('my_chat_member')
-            edited_message = self.raw.get('edited_message')
-            poll_answer = self.raw.get('poll_answer')
-            poll = self.raw.get('poll')
+            callback_query = self.raw.get("callback_query")
+            my_chat_member = self.raw.get("my_chat_member")
+            edited_message = self.raw.get("edited_message")
+            poll_answer = self.raw.get("poll_answer")
+            poll = self.raw.get("poll")
 
             if callback_query:
-                self.bot.answer_callback_query(self.raw['callback_query']['id'])
-                message = callback_query['message']
-                message['from'] = callback_query['from']
-                message['payload'] = callback_query['data']
+                self.bot.answer_callback_query(self.raw["callback_query"]["id"])
+                message = callback_query["message"]
+                message["from"] = callback_query["from"]
+                message["payload"] = callback_query["data"]
             elif edited_message:
                 return
             elif my_chat_member:
@@ -69,62 +69,62 @@ class TgEvent(Event):
             elif poll:
                 message = self.raw
             else:
-                message = self.raw.get('message')
+                message = self.raw.get("message")
         if not message:
             return
 
-        is_topic_message = message.get('is_topic_message')
+        is_topic_message = message.get("is_topic_message")
         if is_topic_message:
-            self.message_thread_id = message.get('message_thread_id')
+            self.message_thread_id = message.get("message_thread_id")
 
-        chat = message.get('chat', {})
+        chat = message.get("chat", {})
 
-        self.peer_id = chat.get('id')
-        self.from_id = message.get('from', {}).get('id')
+        self.peer_id = chat.get("id")
+        self.from_id = message.get("from", {}).get("id")
 
         self.chat = None
-        if chat.get('type') == 'private':
+        if chat.get("type") == "private":
             self.is_from_pm = True
-        elif chat.get('type') in ["group", "supergroup", "channel"]:
-            self.chat_id = chat.get('id')
+        elif chat.get("type") in ["group", "supergroup", "channel"]:
+            self.chat_id = chat.get("id")
             self.is_from_chat = True
             if self.use_db:
-                self.chat = get_chat_by_id(chat.get('id'), self.bot.platform)
+                self.chat = get_chat_by_id(chat.get("id"), self.bot.platform)
 
         _from = None
         if self.is_fwd:
-            _from = message.get('forward_from', message['from'])
-        elif 'from' in message:
-            _from = message['from']
+            _from = message.get("forward_from", message["from"])
+        elif "from" in message:
+            _from = message["from"]
         if not _from:
-            if message.get('poll'):
+            if message.get("poll"):
                 _from = None
-            elif message.get('poll_answer'):
-                _from = message.get('poll_answer')['user']
+            elif message.get("poll_answer"):
+                _from = message.get("poll_answer")["user"]
         self.setup_user(_from)
 
         self.setup_action(message)
-        payload = message.get('payload')
+        payload = message.get("payload")
         # Нет нужды парсить вложения и fwd если это просто нажатие на кнопку
         if payload:
             # Если у нас не уместилось содержимое в кнопку и сраные 64 байта, то мы берём и парсим прям текст кнопки
-            first_button_text = message['reply_markup']['inline_keyboard'][0][0]['text']
+            first_button_text = message["reply_markup"]["inline_keyboard"][0][0]["text"]
             self.setup_payload(payload, first_button_text)
             if self.message.raw:
                 self.setup_attachments(message, self.message.raw)
         else:
             self.setup_attachments(message)
-            self.setup_fwd(message.get('reply_to_message'))
-            if message.get('forward_from_chat'):
+            self.setup_fwd(message.get("reply_to_message"))
+            if message.get("forward_from_chat"):
                 self.is_fwd = True
 
-        forward_from_chat = message.get('forward_from_chat')
+        forward_from_chat = message.get("forward_from_chat")
         if forward_from_chat:
             # Не реагируем на пересланные сообщения
             self.force_response = False
 
-        via_bot = message.get('via_bot')
-        if via_bot and via_bot['username'] == env.str("TG_BOT_LOGIN"):
+        via_bot = message.get("via_bot")
+        if via_bot and via_bot["username"] == env.str("TG_BOT_LOGIN"):
             # Не реагируем на сообщения пользователей отправленные via bot
             self.force_response = False
         if self.sender and self.chat and not self.is_fwd and self.use_db:
@@ -140,28 +140,28 @@ class TgEvent(Event):
         if _from is None:
             return
 
-        if _from['is_bot']:
+        if _from["is_bot"]:
             self.is_from_bot = True
-            if _from['id'] == env.int('TG_BOT_GROUP_ID'):
+            if _from["id"] == env.int("TG_BOT_GROUP_ID"):
                 self.is_from_bot_me = True
 
         else:
             defaults = {
-                'name': _from.get('first_name'),
-                'surname': _from.get('last_name'),
-                'nickname': _from.get('username'),
+                "name": _from.get("first_name"),
+                "surname": _from.get("last_name"),
+                "nickname": _from.get("username"),
             }
-            self.user_id = _from['id']
+            self.user_id = _from["id"]
             if self.use_db:
-                self.user = get_user_by_id(self.user_id, self.bot.platform, {'nickname': _from.get('username')})
-            defaults.pop('nickname')
+                self.user = get_user_by_id(self.user_id, self.bot.platform, {"nickname": _from.get("username")})
+            defaults.pop("nickname")
             if self.use_db:
                 self.sender = get_profile_by_user(self.user, _defaults=defaults)
             self.is_from_user = True
 
     def setup_action(self, message):
         actions = [
-            'new_chat_members', "left_chat_member", "migrate_from_chat_id", "group_chat_created", "new_chat_title",
+            "new_chat_members", "left_chat_member", "migrate_from_chat_id", "group_chat_created", "new_chat_title",
             "forum_topic_created", "forum_topic_edited"
         ]
         for action in actions:
@@ -191,26 +191,26 @@ class TgEvent(Event):
 
     def setup_attachments(self, message, payload_message_text=None):
         attachment_map = {
-            'voice': self.setup_voice,
-            'photo': lambda x: self.setup_photo(x[-1]),
-            'video': self.setup_video,
-            'video_note': self.setup_video_note,
-            'animation': self.setup_gif,
-            'sticker': self.setup_sticker,
-            'audio': self.setup_audio,
+            "voice": self.setup_voice,
+            "photo": lambda x: self.setup_photo(x[-1]),
+            "video": self.setup_video,
+            "video_note": self.setup_video_note,
+            "animation": self.setup_gif,
+            "sticker": self.setup_sticker,
+            "audio": self.setup_audio,
         }
 
         for key, setup_function in attachment_map.items():
             attachment = message.get(key)
             if attachment:
                 setup_function(attachment)
-                message_text = message.get('caption')
+                message_text = message.get("caption")
                 break
         else:
-            document = message.get('document')
+            document = message.get("document")
             if document:
-                message_text = message.get('caption')
-                mime_type = DocumentMimeType(document['mime_type'])
+                message_text = message.get("caption")
+                mime_type = DocumentMimeType(document["mime_type"])
                 if mime_type.is_image:
                     self.setup_photo(document)
                 elif mime_type.is_audio:
@@ -218,7 +218,7 @@ class TgEvent(Event):
                 else:
                     self.setup_document(document)
             else:
-                message_text = message.get('text')
+                message_text = message.get("text")
 
         if payload_message_text:
             message_text = payload_message_text
@@ -226,9 +226,9 @@ class TgEvent(Event):
         if message_text:
             self.setup_link(message_text)
 
-        entities = message.get('entities') or message.get('caption_entities')
+        entities = message.get("entities") or message.get("caption_entities")
         self.message = TgMessage(
-            message_text, message.get('message_id'), entities, quote=message.get('quote')
+            message_text, message.get("message_id"), entities, quote=message.get("quote")
         )
 
     def setup_photo(self, photo_event):
@@ -280,7 +280,7 @@ class TgEvent(Event):
 
     def setup_fwd(self, fwd):
         if fwd:
-            if fwd.get('message_id') == fwd.get('message_thread_id'):
+            if fwd.get("message_id") == fwd.get("message_thread_id"):
                 return
             fwd_event = TgEvent(fwd, use_db=self.use_db)
             fwd_event.setup_event(is_fwd=True)
@@ -289,22 +289,22 @@ class TgEvent(Event):
     def setup_inline_query(self, inline_query):
         self.inline_mode = True
 
-        message = Message(inline_query['query'])
+        message = Message(inline_query["query"])
 
-        self.inline_data['query'] = inline_query['query']
-        self.inline_data['message'] = message
-        self.inline_data['id'] = inline_query['id']
-        self.inline_data['offset'] = inline_query['offset']
+        self.inline_data["query"] = inline_query["query"]
+        self.inline_data["message"] = message
+        self.inline_data["id"] = inline_query["id"]
+        self.inline_data["offset"] = inline_query["offset"]
 
-        _from = inline_query['from']
+        _from = inline_query["from"]
         defaults = {
-            'name': _from.get('first_name'),
-            'surname': _from.get('last_name')
+            "name": _from.get("first_name"),
+            "surname": _from.get("last_name")
         }
-        self.user_id = _from['id']
+        self.user_id = _from["id"]
         self.is_from_user = True
         if self.use_db:
-            self.user = get_user_by_id(self.user_id, self.bot.platform, {'nickname': _from.get('username')})
+            self.user = get_user_by_id(self.user_id, self.bot.platform, {"nickname": _from.get("username")})
             self.sender = get_profile_by_user(self.user, _defaults=defaults)
 
     def need_a_response(self):

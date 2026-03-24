@@ -37,23 +37,23 @@ class GPTImageDrawFunctionality(GPTCommandProtocol):
     )
     KEY_ITEM_HD = HelpTextKey(
         "hd",
-        ['xd', 'hq', 'хд'],
+        ["xd", "hq", "хд"],
         "нарисуй пришлёт изображения в высоком качестве"
     )
     KEY_ITEMS_FORMAT = [
         HelpTextKey(
             "квадрат",
-            ['квадратная', 'square'],
+            ["квадратная", "square"],
             "нарисуй пришлёт квадратную картинку"
         ),
         HelpTextKey(
             "альбом",
-            ['альбомная', 'album'],
+            ["альбомная", "album"],
             "нарисуй пришлёт альбомную картинку"
         ),
         HelpTextKey(
             "портрет",
-            ['портретная', 'portair'],
+            ["портретная", "portair"],
             "нарисуй пришлёт портретную картинку"
         )
     ]
@@ -227,11 +227,11 @@ class GPTImageDrawFunctionality(GPTCommandProtocol):
 
         По умолчанию SQUARE
         """
-        if self.event.message.is_key_provided({'square', 'квадрат', 'квадратная', 'квадратную'}):
+        if self.event.message.is_key_provided({"square", "квадрат", "квадратная", "квадратную"}):
             return GPTImageFormat.SQUARE
-        elif self.event.message.is_key_provided({'album', 'альбом', 'альбомная', 'альбомную'}):
+        elif self.event.message.is_key_provided({"album", "альбом", "альбомная", "альбомную"}):
             return GPTImageFormat.LANDSCAPE
-        elif self.event.message.is_key_provided({'portair', 'портрет', 'портретная', 'портретную'}):
+        elif self.event.message.is_key_provided({"portair", "портрет", "портретная", "портретную"}):
             return GPTImageFormat.PORTAIR
         return None
 

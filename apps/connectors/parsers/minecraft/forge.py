@@ -18,7 +18,7 @@ class DataTypes:
     def read_next_string(self, cache: deque) -> str:
         length = self.read_next_varint(cache)
         if length > 0:
-            return ''.join([chr(cache.popleft()) for _ in range(length)]).encode('utf-8').decode('utf-8')
+            return "".join([chr(cache.popleft()) for _ in range(length)]).encode("utf-8").decode("utf-8")
         else:
             return ""
 
@@ -81,9 +81,9 @@ class ForgeData:
     VERSION_FLAG_IGNORE_SERVER_ONLY = 0b1
 
     def __init__(self, forge_data: dict):
-        self.__data_package = forge_data['d']
+        self.__data_package = forge_data["d"]
         self.mods: list[ForgeMod] = []
-        self.fml_version: str = forge_data['fmlNetworkVersion']
+        self.fml_version: str = forge_data["fmlNetworkVersion"]
 
     def _decode_optimized(self) -> deque:
         size0 = ord(self.__data_package[0])

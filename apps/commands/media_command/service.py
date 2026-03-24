@@ -23,13 +23,13 @@ class MediaServiceResponse:
 
 
 class MediaKeys:
-    NO_MEDIA_KEYS = ["nomedia", "no-media", 'n']
-    AUDIO_ONLY_KEYS = ['audio', 'a']
-    SAVE_TO_DISK_KEYS = ['save', 'disk', 's', 'd']
-    HIGH_RESOLUTION_KEYS = ['high', 'best', 'h', 'b']
-    FORCE_CACHE_KEYS = ['cache', 'c']
-    FORCE_KEYS = ['force', 'f']
-    SPOILER_KEYS = ['spoiler']
+    NO_MEDIA_KEYS = ["nomedia", "no-media", "n"]
+    AUDIO_ONLY_KEYS = ["audio", "a"]
+    SAVE_TO_DISK_KEYS = ["save", "disk", "s", "d"]
+    HIGH_RESOLUTION_KEYS = ["high", "best", "h", "b"]
+    FORCE_CACHE_KEYS = ["cache", "c"]
+    FORCE_KEYS = ["force", "f"]
+    SPOILER_KEYS = ["spoiler"]
 
     def __init__(self, keys: list, short_keys: list):
         self.no_media: bool = self.check_key(keys, short_keys, self.NO_MEDIA_KEYS)
@@ -129,7 +129,7 @@ class MediaService:
     def _get_download_cache_text(self, title, cache_video_url, cache_video_source_url):
         url = unquote(cache_video_url)
         formatted_original_video_url = self.bot.get_formatted_url(title, cache_video_source_url)
-        formatted_cached_video_url = self.bot.get_formatted_url('здесь', self._get_cached_url(url))
+        formatted_cached_video_url = self.bot.get_formatted_url("здесь", self._get_cached_url(url))
         return f"{formatted_original_video_url}\n" \
                f"Скачать можно {formatted_cached_video_url}"
 
@@ -139,7 +139,7 @@ class MediaService:
 
     @classmethod
     def save_to_disk(cls, media_response: MediaServiceResponse, folder: str, filename: str):
-        path = env.str('DISK_SAVE_PATH')
+        path = env.str("DISK_SAVE_PATH")
 
         show_name_correct = prepare_filename(str(folder))
         series_name_correct = prepare_filename(str(filename))
@@ -152,5 +152,5 @@ class MediaService:
         if media_response.cache:
             shutil.copyfile(media_response.cache.video.path, os.path.join(str(show_folder), full_path))
         else:
-            with open(full_path, 'wb') as f:
+            with open(full_path, "wb") as f:
                 f.write(media_response.attachments[0].content)  # noqa

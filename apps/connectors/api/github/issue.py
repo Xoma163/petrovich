@@ -29,15 +29,15 @@ class GithubIssueAPI(GithubAPI):
         self.author: Profile | None = None
 
     def parse_response(self, response: dict):
-        self.id: str = response['id']
-        self.number: str = response['number']
-        self.title: str = response['title']
-        self.labels: list[str] = [x['name'] for x in response['labels']]
-        self.body: str = response['body']
-        self.assignee: str = response['assignee']
-        self.remote_url: str = response['html_url']
-        self.created_at: datetime = datetime.strptime(response['created_at'], '%Y-%m-%dT%H:%M:%SZ')
-        self.state_reason: str = response['state_reason']
+        self.id: str = response["id"]
+        self.number: str = response["number"]
+        self.title: str = response["title"]
+        self.labels: list[str] = [x["name"] for x in response["labels"]]
+        self.body: str = response["body"]
+        self.assignee: str = response["assignee"]
+        self.remote_url: str = response["html_url"]
+        self.created_at: datetime = datetime.strptime(response["created_at"], "%Y-%m-%dT%H:%M:%SZ")
+        self.state_reason: str = response["state_reason"]
 
         self.author: Profile | None = None
         match = self.USER_PK_RE.findall(self.body)
@@ -61,10 +61,10 @@ class GithubIssueAPI(GithubAPI):
         """Создание issue."""
 
         issue_data = {
-            'title': self.title,
-            'body': self.body,
-            'assignee': self.assignee,
-            'labels': self.labels
+            "title": self.title,
+            "body": self.body,
+            "assignee": self.assignee,
+            "labels": self.labels
         }
 
         r = self.requests.post(self.ISSUES_URL, json.dumps(issue_data))
@@ -75,13 +75,13 @@ class GithubIssueAPI(GithubAPI):
         except HTTPError:
             raise PWarning("Проблема с созданием issue на github")
 
-        self.remote_url = r_json['html_url']
+        self.remote_url = r_json["html_url"]
 
     def add_comment(self, comment: str):
         """Добавление комментария."""
 
         comment_data = {
-            'body': comment
+            "body": comment
         }
         COMMENT_URL = f"{self.ISSUES_URL}/{self.number}/comments"
         r = self.requests.post(COMMENT_URL, json.dumps(comment_data))
@@ -108,7 +108,7 @@ class GithubIssueAPI(GithubAPI):
 
     def get_all_labels(self) -> list[str]:
         r = self.requests.get(self.LABELS_URL, json.dumps({})).json()
-        return [x['name'] for x in r]
+        return [x["name"] for x in r]
 
     @property
     def state_reason_is_not_planned(self) -> bool:

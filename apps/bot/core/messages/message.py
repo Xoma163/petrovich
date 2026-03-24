@@ -2,7 +2,7 @@ import re
 
 
 class Message:
-    COMMAND_SYMBOLS = ['/']
+    COMMAND_SYMBOLS = ["/"]
     SHORT_KEYS_SYMBOLS = ["-"]
     KEYS_SYMBOLS = ["—", "--"]
     SPACE_REGEX = r' |\n'
@@ -111,8 +111,8 @@ class Message:
     def get_cleared_message(msg) -> str:
         clear_msg = re.sub(" +", " ", msg)
         clear_msg = re.sub("\n+", "\n", clear_msg)
-        clear_msg = clear_msg.strip().strip(',').strip().strip(' ').strip().strip('\n').strip()
-        clear_msg = clear_msg.replace('ё', 'е').replace("Ё", 'Е')
+        clear_msg = clear_msg.strip().strip(",").strip().strip(" ").strip().strip("\n").strip()
+        clear_msg = clear_msg.replace("ё", "е").replace("Ё", "Е")
         return clear_msg
 
     def parse_from_payload(self, payload):
@@ -137,10 +137,10 @@ class Message:
 
     def to_log(self) -> dict:
         return {
-            'id': self.id,
-            'raw': self.raw,
-            'command': self.command,
-            'args_str': self.args_str,
-            'keys': self.keys,
-            'kwargs': self.kwargs
+            "id": self.id,
+            "raw": self.raw,
+            "command": self.command,
+            "args_str": self.args_str,
+            "keys": self.keys,
+            "kwargs": self.kwargs
         }

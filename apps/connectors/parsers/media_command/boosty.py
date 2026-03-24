@@ -14,12 +14,12 @@ class Boosty:
     def get_video_info(post_url, auth_cookie=None) -> VideoData:
         cookies = {}
         if auth_cookie:
-            cookies['auth'] = auth_cookie
+            cookies["auth"] = auth_cookie
         response = requests.get(post_url, cookies=cookies)
-        bs4 = BeautifulSoup(response.text, 'html.parser')
-        data = json.loads(bs4.select_one('#initial-state').text)
-        post = data['posts']['postsList']['data']['posts'][0]
-        post_data = post['data']
+        bs4 = BeautifulSoup(response.text, "html.parser")
+        data = json.loads(bs4.select_one("#initial-state").text)
+        post = data["posts"]["postsList"]["data"]["posts"][0]
+        post_data = post["data"]
         if not post_data:
             raise PWarning(
                 "Скорее всего пост платный и бот не знает ваших доступов для скачивания. Если вы подписаны и сами можете воспроизвести видео, тогда следуйте этой инструкции:\n"
@@ -34,25 +34,25 @@ class Boosty:
                 "https://boosty.to/amazinguser/posts/12345678-aabb-ccdd-eeff-123456789012\n"
                 "...accessToken...refreshToken...expiresAt......"
             )
-        video_info_list = [x for x in post_data if x.get('vid')]
+        video_info_list = [x for x in post_data if x.get("vid")]
         if not video_info_list:
             raise PWarning("Не найдено видео в посте ")
         video_info = video_info_list[0]
 
-        author_id = post['user']['id']
-        author_name = post['user']['name']
-        post_title = post['title']
-        video_id = video_info['vid']
-        width = video_info['width']
-        height = video_info['height']
-        thumbnail = video_info.get('defaultPreview', 'preview')
+        author_id = post["user"]["id"]
+        author_name = post["user"]["name"]
+        post_title = post["title"]
+        video_id = video_info["vid"]
+        width = video_info["width"]
+        height = video_info["height"]
+        thumbnail = video_info.get("defaultPreview", "preview")
 
         try:
-            description = "\n".join([json.loads(x['content'])[0] for x in post_data if x.get('content')])
+            description = "\n".join([json.loads(x["content"])[0] for x in post_data if x.get("content")])
         except:
             description = None
 
-        player_urls_dict = {x['type']: x['url'] for x in video_info['playerUrls'] if x['url']}
+        player_urls_dict = {x["type"]: x["url"] for x in video_info["playerUrls"] if x["url"]}
 
         return VideoData(
             title=post_title,
@@ -63,13 +63,13 @@ class Boosty:
             width=width,
             height=height,
             thumbnail_url=thumbnail,
-            extra_data={'player_urls_dict': player_urls_dict}
+            extra_data={"player_urls_dict": player_urls_dict}
         )
 
     @staticmethod
     def set_download_url(video_data: VideoData, high_res=False):
-        player_urls_dict = video_data.extra_data['player_urls_dict']  # noqa
-        qualities_order = ['ultra_hd', 'quad_hd', 'full_hd', 'high', 'medium', 'low']
+        player_urls_dict = video_data.extra_data["player_urls_dict"]  # noqa
+        qualities_order = ["ultra_hd", "quad_hd", "full_hd", "high", "medium", "low"]
         if not high_res:
             qualities_order = qualities_order[2:]
 

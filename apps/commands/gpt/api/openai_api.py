@@ -33,17 +33,17 @@ from apps.commands.gpt.usage import (
 from apps.shared.decorators import retry
 from apps.shared.exceptions import PError, PWarning
 
-logger = logging.getLogger('api')
+logger = logging.getLogger("api")
 
 
 class OpenAIAPI(GPTAPI, ABC):
     ERRORS_MAP = {
-        'content_policy_violation': "ChatGPT не может обработать запрос по политикам безопасности",
+        "content_policy_violation": "ChatGPT не может обработать запрос по политикам безопасности",
         503: "ChatGPT недоступен",
-        'insufficient_quota': "Закончились деньги((",
-        'invalid_api_key': "Некорректный API KEY. Проверьте свой ключ",
-        'rate_limit_exceeded': "Слишком большой запрос",
-        'model_not_found': "Модель не существует или у вас нет к ней доступа"
+        "insufficient_quota": "Закончились деньги((",
+        "invalid_api_key": "Некорректный API KEY. Проверьте свой ключ",
+        "rate_limit_exceeded": "Слишком большой запрос",
+        "model_not_found": "Модель не существует или у вас нет к ней доступа"
     }
 
     def __init__(self, *args, **kwargs):
@@ -79,9 +79,9 @@ class OpenAIAPI(GPTAPI, ABC):
 
     def fetch_image_request(self, url, **kwargs) -> tuple[bytes, str | None]:
         r_json = self.do_request(url, **kwargs)
-        image_data = r_json['data'][0]
-        base64_image = PhotoAttachment.decode_base64(image_data['b64_json'])
-        return base64_image, image_data.get('revised_prompt')
+        image_data = r_json["data"][0]
+        base64_image = PhotoAttachment.decode_base64(image_data["b64_json"])
+        return base64_image, image_data.get("revised_prompt")
 
     def _do_request(
             self,
@@ -92,14 +92,14 @@ class OpenAIAPI(GPTAPI, ABC):
             **kwargs
     ) -> GPTCompletionsVisionResponse:
         r_json = self.do_request(url, **kwargs)
-        usage_dict = r_json.get('usage')
+        usage_dict = r_json.get("usage")
         usage = usage(
             model=model,  # noqa
-            input_tokens=usage_dict['prompt_tokens'],  # noqa
-            output_tokens=usage_dict['completion_tokens'],  # noqa
+            input_tokens=usage_dict["prompt_tokens"],  # noqa
+            output_tokens=usage_dict["completion_tokens"],  # noqa
         )
 
-        answer = r_json['choices'][0]['message']['content']
+        answer = r_json["choices"][0]["message"]["content"]
         response = response(
             text=answer,  # noqa
             usage=usage  # noqa
@@ -126,18 +126,18 @@ class OpenAIAPI(GPTAPI, ABC):
                     except JSONDecodeError:
                         continue
 
-                    _type = chunk.get('type')
+                    _type = chunk.get("type")
                     if _type == "response.completed":
-                        return chunk['response']
+                        return chunk["response"]
                     elif _type == "response.output_text.delta":
-                        full_text += chunk.get('delta')
+                        full_text += chunk.get("delta")
                         if not callback_func:
                             continue
                         now = time.time()
                         if now - last_call < 1:
                             continue
                         last_call = now
-                        sha256_hex = hashlib.sha256(chunk['item_id'].encode('utf-8')).hexdigest()
+                        sha256_hex = hashlib.sha256(chunk["item_id"].encode("utf-8")).hexdigest()
                         num64 = int(sha256_hex, 16) % (2 ** 64)
                         callback_func(text=full_text, draft_id=num64)
 
@@ -170,22 +170,22 @@ class OpenAIAPI(GPTAPI, ABC):
                     except:
                         continue
 
-                    _type = chunk.get('object')
+                    _type = chunk.get("object")
                     if _type == "chat.completion.chunk":
                         # Последний ответ
-                        if len(chunk['choices']) == 0 and 'usage' in chunk:
-                            chunk['choices'] = [{'message': {'content': full_text}}]
+                        if len(chunk["choices"]) == 0 and "usage" in chunk:
+                            chunk["choices"] = [{"message": {"content": full_text}}]
                             return chunk
                         # Предпоследний ответ
-                        if not chunk['choices'][0]['delta']:
+                        if not chunk["choices"][0]["delta"]:
                             continue
-                        if 'content' not in chunk['choices'][0]['delta']:
+                        if "content" not in chunk["choices"][0]["delta"]:
                             continue
                         # Стандартный ответ
-                        text = chunk['choices'][0]['delta']['content']
+                        text = chunk["choices"][0]["delta"]["content"]
                         if not text:
                             continue
-                        decoded_text = text.encode('latin-1', errors='replace').decode('utf-8', errors='replace')
+                        decoded_text = text.encode("latin-1", errors="replace").decode("utf-8", errors="replace")
                         full_text += decoded_text
                         if not callback_func:
                             continue
@@ -193,7 +193,7 @@ class OpenAIAPI(GPTAPI, ABC):
                         if now - last_call < 1:
                             continue
                         last_call = now
-                        sha256_hex = hashlib.sha256(chunk['id'].encode('utf-8')).hexdigest()
+                        sha256_hex = hashlib.sha256(chunk["id"].encode("utf-8")).hexdigest()
                         num64 = int(sha256_hex, 16) % (2 ** 16)
                         callback_func(text=full_text, draft_id=num64)
 
@@ -206,8 +206,8 @@ class OpenAIAPI(GPTAPI, ABC):
 
     @retry(3, SSLError, sleep_time=2)
     def do_request(self, url, **kwargs) -> dict:
-        callback_func = kwargs.pop('callback_func', None)
-        if kwargs.get('stream'):
+        callback_func = kwargs.pop("callback_func", None)
+        if kwargs.get("stream"):
             from apps.commands.gpt.api.openai_responses_api import OpenAIResponsesAPI
 
             if isinstance(self, OpenAIResponsesAPI):
@@ -232,22 +232,22 @@ class OpenAIAPI(GPTAPI, ABC):
             else:
                 r_json = r.json()
 
-        if error := r_json.get('error'):
+        if error := r_json.get("error"):
             logger.error({"response": error, "log_filter": self.log_filter})
 
             # grok
             if isinstance(error, str):
                 code = None
-                if 'used all available credits' in error:
-                    code = 'insufficient_quota'
+                if "used all available credits" in error:
+                    code = "insufficient_quota"
             # chatgpt
             else:
-                code = error.get('code')
+                code = error.get("code")
 
             error_str = self.ERRORS_MAP.get(code, "Какая-то ошибка OpenAI API")
 
             if code == "rate_limit_exceeded":
-                message = error.get('message')
+                message = error.get("message")
                 _r = re.compile(r'Limit (\d*), Requested (\d+)Visit (.*) to').findall(message)
                 if _r:
                     _r = _r[0]
@@ -275,6 +275,6 @@ class OpenAIAPI(GPTAPI, ABC):
                 json=json_data,
                 headers=headers,
             )
-            return 'usage' in response_json
+            return "usage" in response_json
         except Exception:
             return False

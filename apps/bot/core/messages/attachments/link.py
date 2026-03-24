@@ -13,7 +13,7 @@ class LinkAttachment(Attachment):
 
     @property
     def is_youtube_link(self):
-        return self._check_link(['youtu.be', 'youtube.com'])
+        return self._check_link(["youtu.be", "youtube.com"])
 
     @property
     def is_vk_link(self):
@@ -21,7 +21,7 @@ class LinkAttachment(Attachment):
 
     def _check_link(self, urls):
         parsed_url = urlparse(self.url)
-        return parsed_url.hostname.replace('www.', '').lower() in urls
+        return parsed_url.hostname.replace("www.", "").lower() in urls
 
     @classmethod
     def parse_link(cls, text):

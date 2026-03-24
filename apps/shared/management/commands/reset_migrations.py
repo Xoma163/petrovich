@@ -14,7 +14,7 @@ class Command(BaseCommand):
     reset_migrations prod --apps games shared commands gpt media_command meme notifies bot
     """
 
-    help = 'Сброс миграций и "типа" squah их в одну миграцию'
+    help = "Сброс миграций и \"типа\" squah их в одну миграцию"
 
     PROD = "prod"
     DEV = "dev"
@@ -38,13 +38,13 @@ class Command(BaseCommand):
         parser.add_argument(
             self.MODE,
             type=str,
-            help='Стенд, на котором запускается скрипт. "prod" для продакшена, "dev" для дев стенда и локальной разработки.'
+            help="Стенд, на котором запускается скрипт. \"prod\" для продакшена, \"dev\" для дев стенда и локальной разработки."
         )
         parser.add_argument(
             f"--{self.APPS}",
             type=str,
-            nargs='+',
-            help='Список приложений, в которых нужно произвести сброс миграций'
+            nargs="+",
+            help="Список приложений, в которых нужно произвести сброс миграций"
         )
 
     def delete_django_migrations_db_app(self, app: str):
@@ -54,23 +54,23 @@ class Command(BaseCommand):
     def delete_migrations_files_app(self, app: str):
         self.stdout.write(f'Удаление миграций приложения "{app}" в файлах')
         app_path = apps.get_app_config(app).path
-        migrations_dir = os.path.join(app_path, 'migrations')
+        migrations_dir = os.path.join(app_path, "migrations")
         if os.path.exists(migrations_dir):
             files = [f for f in os.listdir(migrations_dir) if isfile(join(migrations_dir, f))]
-            files = list(filter(lambda x: x != '__init__.py', files))
+            files = list(filter(lambda x: x != "__init__.py", files))
             for file in files:
                 os.remove(os.path.join(migrations_dir, file))
         self.stdout.write(f'Удаление миграций приложения "{app}" выполнено успешно в файлах')
 
     def handle(self, *args, **options):
-        mode = options['mode']
+        mode = options["mode"]
 
         if mode not in [self.PROD, self.DEV]:
             raise CommandError(f'Некорректный "mode". Выберите "{self.PROD}" или "{self.DEV}"')
 
         is_dev_mode = mode == self.DEV
 
-        _apps = options['apps']
+        _apps = options["apps"]
         apps_str = ", ".join(_apps)
         self.stdout.write(f'Сброс миграций приложений "{apps_str}" в БД')
         for _app in _apps:
@@ -81,7 +81,7 @@ class Command(BaseCommand):
 
         if is_dev_mode:
             for _app in _apps:
-                call_command('makemigrations', _app)
+                call_command("makemigrations", _app)
 
         for _app in _apps:
-            call_command('migrate', _app, '--fake')
+            call_command("migrate", _app, "--fake")

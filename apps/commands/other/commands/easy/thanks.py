@@ -5,7 +5,7 @@ from apps.shared.utils.utils import random_event
 
 class Thanks(Command):
     name = "спасибо"
-    names = ["спс", 'ty', 'дякую', 'сяп']
+    names = ["спс", "ty", "дякую", "сяп"]
     mentioned = True
 
     def start(self) -> ResponseMessage:

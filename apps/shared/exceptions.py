@@ -26,8 +26,8 @@ class PIDK(PetrovichException):
 
 
 class PWarning(PetrovichException):
-    level = 'warning'
+    level = "warning"
 
 
 class PError(PetrovichException):
-    level = 'error'
+    level = "error"

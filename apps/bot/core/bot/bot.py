@@ -47,7 +47,7 @@ class Bot:
 
         self.platform = platform
 
-        self.logger = logging.getLogger('bot')
+        self.logger = logging.getLogger("bot")
 
     # MAIN ROUTING AND MESSAGING
 
@@ -99,7 +99,7 @@ class Bot:
                 message_thread_id=event.message_thread_id,
             )
             if event.sender and event.sender.check_role(RoleEnum.TRUSTED):
-                button = self.get_button('Логи', command="логи")
+                button = self.get_button("Логи", command="логи")
                 keyboard = self.get_inline_keyboard([button])
                 rmi.keyboard = keyboard
             rm = ResponseMessage(rmi)
@@ -182,13 +182,13 @@ class Bot:
     def log_event(self, event: Event):
         log_data = {"event": event.to_log()}
         if self.log_filter:
-            log_data.update({'log_filter': self.log_filter})
+            log_data.update({"log_filter": self.log_filter})
         self.logger.debug(log_data)
 
     def log_message(self, message: ResponseMessage | ResponseMessageItem, level="debug", exc_info=None):
         log_data = {"message": message.to_log()}
         if self.log_filter:
-            log_data.update({'log_filter': self.log_filter})
+            log_data.update({"log_filter": self.log_filter})
         getattr(self.logger, level)(log_data, exc_info=exc_info)
 
     # END LOGGING

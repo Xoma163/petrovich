@@ -6,7 +6,7 @@ from apps.commands.help_text import HelpText, HelpTextItem
 
 class WTF(WTFCommand):
     name = "wtf"
-    names = ['втф', 'саммари', 'суммаризируй']
+    names = ["втф", "саммари", "суммаризируй"]
 
     abstract = False
     access = RoleEnum.TRUSTED

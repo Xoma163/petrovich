@@ -9,23 +9,23 @@ from apps.shared.models import Service, City, TimeZone
 @admin.register(Service)
 class ServiceAdmin(TimeStampAdminMixin):
     list_display = (
-        'name',
-        'value',
-        'update_datetime'
+        "name",
+        "value",
+        "update_datetime"
     )
 
 
 @admin.register(City)
 class CityAdmin(admin.ModelAdmin):
     list_display = (
-        'name',
-        'synonyms',
-        'timezone',
-        'lat',
-        'lon'
+        "name",
+        "synonyms",
+        "timezone",
+        "lat",
+        "lon"
     )
     search_fields = (
-        'name',
+        "name",
     )
     ordering = (
         "name",

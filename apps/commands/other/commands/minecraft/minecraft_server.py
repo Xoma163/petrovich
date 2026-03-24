@@ -27,7 +27,7 @@ class Minecraft(Command):
         ip=MAIN_DOMAIN,
         port=25565,
         delay=60,
-        names=['1.20.1', "1.20"],
+        names=["1.20.1", "1.20"],
         service_name="minecraft",
         # map_url=f"https://minecraft-map.{MAIN_DOMAIN}/",
     )
@@ -39,7 +39,7 @@ class Minecraft(Command):
             [["старт", "start"], self.menu_start],
             [["стоп", "stop"], self.menu_stop],
             [["статус", "status"], self.menu_status],
-            [['default'], self.menu_status]
+            [["default"], self.menu_status]
         ]
         method = self.handle_menu(menu, arg0)
         rmi = method()
@@ -62,9 +62,9 @@ class Minecraft(Command):
         self.server.get_server_info()
         answer = self.get_server_info_str(self.server)
 
-        button = self.bot.get_button("Обновить", self.name, args=['статус'])
+        button = self.bot.get_button("Обновить", self.name, args=["статус"])
         keyboard = self.bot.get_inline_keyboard([button])
-        mid = self.event.raw.get('callback_query', {}).get('message', {}).get('message_id')
+        mid = self.event.raw.get("callback_query", {}).get("message", {}).get("message_id")
         return ResponseMessageItem(text=answer, keyboard=keyboard, message_id=mid)
 
     def get_server_info_str(self, server):

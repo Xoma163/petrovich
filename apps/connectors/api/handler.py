@@ -7,7 +7,7 @@ from requests.exceptions import HTTPError, JSONDecodeError
 
 class APIHandler:
     def __init__(self, log_filter=None):
-        self._logger = logging.getLogger('api')
+        self._logger = logging.getLogger("api")
         self.headers = None
         self.log_filter = log_filter
 
@@ -18,9 +18,9 @@ class APIHandler:
         return self._do(url, "post", *args, **kwargs)
 
     def _do(self, url, method, *args, **kwargs) -> Response:
-        log = kwargs.pop('log', True)
-        if not kwargs.get('headers') and self.headers:
-            kwargs['headers'] = self.headers
+        log = kwargs.pop("log", True)
+        if not kwargs.get("headers") and self.headers:
+            kwargs["headers"] = self.headers
 
         r: Response = getattr(requests, method)(url, *args, **kwargs)
 
@@ -29,7 +29,7 @@ class APIHandler:
 
         try:
             r.raise_for_status()
-            if not kwargs.get('stream', False):
+            if not kwargs.get("stream", False):
                 r_json = r.json()
                 self._log(r_json)
         except (HTTPError, JSONDecodeError):
@@ -39,7 +39,7 @@ class APIHandler:
     def _log(self, response):
         log_data = {"response": response}
         if self.log_filter:
-            log_data.update({'log_filter': self.log_filter})
+            log_data.update({"log_filter": self.log_filter})
         self._logger.debug(log_data)
 
 

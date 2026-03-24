@@ -4,11 +4,11 @@ from apps.bot.core.messages.attachments.mixins.thumbnail_mixin import ThumbnailM
 
 
 class VideoNoteAttachment(Attachment, DurationMixin, ThumbnailMixin):
-    TYPE = 'video_note'
+    TYPE = "video_note"
 
     def __init__(self):
         super().__init__(self.TYPE)
 
     def parse_tg(self, event):
         super().parse_tg(event)
-        self.duration = event.get('duration')
+        self.duration = event.get("duration")

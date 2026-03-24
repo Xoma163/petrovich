@@ -14,7 +14,7 @@ class SunoAIData:
         self.thumbnail_url = thumbnail_url
         self.song_text = song_text
         self.author = author
-        self.format = download_url.rsplit('.')[-1]
+        self.format = download_url.rsplit(".")[-1]
 
 
 class SunoAI:
@@ -22,10 +22,10 @@ class SunoAI:
     @staticmethod
     def get_info(url) -> AudioData:
         r = requests.post(url)
-        bs4 = BeautifulSoup(r.content, 'html.parser')
-        title = bs4.find('meta', attrs={'property': 'og:title'}).attrs['content'].replace(" | Suno", "")
-        audio_url = bs4.find('meta', attrs={'property': 'og:audio'}).attrs['content']
-        thumbnail_url = bs4.find('meta', attrs={'property': 'og:image'}).attrs['content']
+        bs4 = BeautifulSoup(r.content, "html.parser")
+        title = bs4.find("meta", attrs={"property": "og:title"}).attrs["content"].replace(" | Suno", "")
+        audio_url = bs4.find("meta", attrs={"property": "og:audio"}).attrs["content"]
+        thumbnail_url = bs4.find("meta", attrs={"property": "og:image"}).attrs["content"]
 
         author = re.findall(r'"display_name\\\"\:\\\"((?:\\\\.|[^\"\\\\])*)\\\"', r.text)
         author = author[-1] if author else None

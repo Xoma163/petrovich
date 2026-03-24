@@ -6,7 +6,7 @@ from apps.commands.help_text import HelpText, HelpTextItem
 
 class GWTF(WTFCommand):
     name = "gwtf"
-    names = ['гвтф']
+    names = ["гвтф"]
 
     abstract = False
     access = RoleEnum.TRUSTED

@@ -30,7 +30,7 @@ class EditMessage(Command):
         message_id = self.event.fwd[0].message.id
         new_text = self.event.message.args_str
 
-        if self.event.fwd[0].raw['from']['username'] != env.str("TG_BOT_LOGIN"):
+        if self.event.fwd[0].raw["from"]["username"] != env.str("TG_BOT_LOGIN"):
             raise PWarning("Я могу редактировать только свои сообщения")
 
         rmi = ResponseMessageItem(peer_id=peer_id, message_id=message_id, text=new_text)
@@ -40,7 +40,7 @@ class EditMessage(Command):
         cached_messages = mc.get_messages()
 
         if cached_message := cached_messages.get(message_id, None):
-            cached_message['text'] = new_text
+            cached_message["text"] = new_text
             mc.set_message(message_id, cached_message)
 
         raise PSkip()
