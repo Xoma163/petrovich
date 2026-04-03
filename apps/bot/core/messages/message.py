@@ -8,6 +8,9 @@ class Message:
     SPACE_REGEX = r' |\n'
 
     def __init__(self, raw_str=None, _id=None):
+        self._init(raw_str, _id)
+
+    def _init(self, raw_str=None, _id=None):
         """
         raw - исходная строка
 
@@ -130,6 +133,19 @@ class Message:
 
     def is_key_provided(self, keys_to_check: set) -> bool:
         return self.keys and bool(keys_to_check.intersection(self.keys))
+
+    # def remove_key_from_message(self, keys: set) -> None:
+    #     raw = self.raw
+    #
+    #     prefixes = self.SHORT_KEYS_SYMBOLS + self.KEYS_SYMBOLS
+    #
+    #     for key in keys:
+    #         if self.is_key_provided({key}):
+    #             variants = [p + key for p in prefixes]
+    #             for variant in variants:
+    #                 raw = raw.replace(variant, "")
+    #
+    #     self._init(raw, self.id)
 
     @property
     def mentioned(self) -> bool:

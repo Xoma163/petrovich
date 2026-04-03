@@ -150,40 +150,58 @@ class GPTCommand(
         """
 
         self.event: TgEvent = self.event  # noqa
-        mc = MessagesCache(self.event.peer_id)
-
+        # Инициализируем класс для истории сообщений в
         history = self.provider.messages_class()
+        # Если первое сообщение в цепочки - обращение к GPT
         if first_event := self._get_first_gpt_event_in_replies(self.event):
+            # Инициализируем кэш сообщений
+            mc = MessagesCache(self.event.peer_id)
+            # Получаем все сообщения
             data = mc.get_messages()
+            # Запоминаем на какое сообщение мы сослались
             reply_to_id = self.event.fwd[0].message.id
 
+            # И тут уже мы бегаем формируем переписку по этим ссылкам reply_to_id
             while True:
+                # Находим сообщение из кэша сообщений
                 raw = data.get(reply_to_id)
+                # Формируем ивент
                 tg_event = TgEvent({"message": raw})
                 tg_event.setup_event()
+
+                # Если сообщение от бота
                 is_me = str(tg_event.from_id) == env.str("TG_BOT_GROUP_ID")
                 if is_me:
                     self._add_bot_message(history, tg_event)
                 else:
                     self._add_user_message(history, tg_event)
+                # Запоминаем следующий reply_to_id
                 reply_to_id = data.get(reply_to_id, {}).get("reply_to_message", {}).get("message_id")
+                # Если не нашли reply_to_id или мы достигли первого сообщения, то можно выйти из цикла
                 if not reply_to_id or tg_event.message.id == first_event.message.id:
                     break
-            if first_event.fwd:
-                is_me = str(first_event.fwd[0].from_id) == env.str("TG_BOT_GROUP_ID")
-                if is_me:
-                    self._add_bot_message(history, tg_event, use_fwd=True)
-                else:
-                    self._add_user_message(history, tg_event, use_fwd=True)
 
-                logger.debug({"message": "gpt:175 unreach"})
-                self._add_user_message(history, self.event, use_fwd=True)
-        # Ответ на сообщение
+            # Если первое сообщение имеет пересланные сообщения (как это возможно?)
+            # if first_event.fwd:
+            #     is_me = str(first_event.fwd[0].from_id) == env.str("TG_BOT_GROUP_ID")
+            #     if is_me:
+            #         self._add_bot_message(history, tg_event, use_fwd=True)
+            #     else:
+            #         self._add_user_message(history, tg_event, use_fwd=True)
+            #
+            #     logger.debug({"message": "gpt:175 unreach"})
+            #     self._add_user_message(history, self.event, use_fwd=True)
+
+        # Если есть пересланное сообщение и (в пересланном сообщение есть текст или есть вложения)
         elif self.event.fwd and (self.event.fwd[0].message.raw or self.event.fwd[0].attachments):
+            # Тогда добавляем наше сообщение
             self._add_user_message(history, self.event, use_fwd=True)
 
+        # Если GPT умеет в препромпты
         if isinstance(self, GPTPrepromptMixin):
+            # Получаем препромпт
             preprompt = self.get_preprompt(self.event.sender, self.event.chat)
+            # И если он есть, то сохраняем
             if preprompt:
                 history.add_message(GPTMessageRole.SYSTEM, preprompt.text)
         history.reverse()
