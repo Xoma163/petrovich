@@ -187,6 +187,8 @@ class YoutubeVideo:
                 raise PWarning("Это видео было удалено за нарушение правил YouTube")
             else:
                 raise PWarning("Не смог найти видео по этой ссылке")
+        if video_info["media_type"] == "livestream":
+            raise PWarning("Это стрим. Я не могу его скачать")
         return video_info
 
     def _get_video_download_urls(
