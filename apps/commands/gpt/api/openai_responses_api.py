@@ -33,8 +33,9 @@ class OpenAIResponsesAPI(OpenAIAPI, ABC):
         )
 
         answer = output[-1]["content"][0]["text"]
-        response = response(
-            text=answer,  # noqa
-            usage=usage  # noqa
+        _response = response(
+            text=answer,
+            usage=usage,
+            raw_response_output=output,
         )
-        return response
+        return _response

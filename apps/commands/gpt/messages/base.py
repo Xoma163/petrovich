@@ -5,18 +5,15 @@ from abc import abstractmethod
 from apps.bot.core.messages.attachments.document import DocumentAttachment
 from apps.bot.core.messages.attachments.photo import PhotoAttachment
 from apps.commands.gpt.messages.consts import GPTMessageRole
+from apps.commands.gpt.messages.protocol import GPTMessageProtocol
 
 
 @dataclasses.dataclass
-class GPTMessage(ABC):
+class GPTMessage(GPTMessageProtocol):
     role: GPTMessageRole
     text: str
     images: list[PhotoAttachment] | None = None
     files: list[DocumentAttachment] | None = None
-
-    @abstractmethod
-    def get_message(self) -> dict:
-        raise NotImplementedError
 
 
 class GPTMessages(ABC):
@@ -27,7 +24,7 @@ class GPTMessages(ABC):
         pass
 
     def __init__(self):
-        self.messages: list[GPTMessage] = []
+        self.messages: list[GPTMessageProtocol] = []
 
     def add_message(
             self,
@@ -40,16 +37,26 @@ class GPTMessages(ABC):
         self.messages.append(message)
 
     def get_messages(self) -> list[dict]:
-        return [x.get_message() for x in self.messages]
+        result_messages = []
+        for message in self.messages:
+            result_message = message.get_message()
+            if isinstance(result_message, dict):
+                result_messages.append(result_message)
+            elif isinstance(result_message, list):
+                for item in result_message:
+                    result_messages.append(item)
+
+        return result_messages
 
     def get_preprompt_and_messages(self) -> tuple[str | None, list[dict]]:
         if self.messages[0].role != GPTMessageRole.SYSTEM:
             return None, self.get_messages()
-        return self.messages[0].text, [x.get_message() for x in self.messages[1:]]
+        preprompt: str = self.messages[0].text  # noqa
+        return preprompt, self.get_messages()[1:]
 
     def reverse(self):
         self.messages.reverse()
 
     @property
-    def last_message(self) -> GPTMessage:
+    def last_message(self) -> GPTMessageProtocol:
         return self.messages[-1]

@@ -19,6 +19,7 @@ class GPTAPIResponse(ABC):
 class GPTCompletionsVisionResponse(GPTAPIResponse):
     text: str
     usage: GPTCompletionsVisionUsage
+    raw_response_output: list[dict] | None
 
 
 @dataclass

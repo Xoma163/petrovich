@@ -93,18 +93,19 @@ class OpenAIAPI(GPTAPI, ABC):
     ) -> GPTCompletionsVisionResponse:
         r_json = self.do_request(url, **kwargs)
         usage_dict = r_json.get("usage")
-        usage = usage(
+        _usage = usage(
             model=model,  # noqa
-            input_tokens=usage_dict["prompt_tokens"],  # noqa
-            output_tokens=usage_dict["completion_tokens"],  # noqa
+            input_tokens=usage_dict["prompt_tokens"],
+            output_tokens=usage_dict["completion_tokens"],
         )
 
         answer = r_json["choices"][0]["message"]["content"]
-        response = response(
-            text=answer,  # noqa
-            usage=usage  # noqa
+        _response = response(
+            text=answer,
+            usage=_usage,
+            raw_response_output=None,
         )
-        return response
+        return _response
 
     def parse_stream_responses(self, url, callback_func: Callable | None = None, **kwargs):
         with self.requests.post(url, **kwargs) as r:

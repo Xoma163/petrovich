@@ -23,11 +23,12 @@ from apps.commands.gpt.commands_utils.gpt.mixins.settings import GPTSettingsMixi
 from apps.commands.gpt.commands_utils.gpt.mixins.statistics import GPTStatisticsMixin
 from apps.commands.gpt.messages.base import GPTMessages
 from apps.commands.gpt.messages.consts import GPTMessageRole
+from apps.commands.gpt.messages.raw import RawGPTMessage
 from apps.commands.gpt.models import Provider, ProfileGPTSettings, GPTModel
 from apps.commands.gpt.protocols import GPTCommandProtocol
 from apps.commands.gpt.providers.base import GPTProvider
 from apps.shared.exceptions import PWarning, PError
-from apps.shared.utils.cache import MessagesCache
+from apps.shared.utils.cache import MessagesCache, GPTResponsesCache
 from apps.shared.utils.markdown import has_markdown
 from apps.shared.utils.utils import wrap_text_in_html_document
 from petrovich.settings import env
@@ -158,6 +159,12 @@ class GPTCommand(
             mc = MessagesCache(self.event.peer_id)
             # Получаем все сообщения
             data = mc.get_messages()
+
+            # Инициализируем кэш респонсов
+            rc = GPTResponsesCache(self.provider.type_enum.name, self.event.peer_id)
+            # Получаем все респонсы
+            output_responses = rc.get_responses()
+
             # Запоминаем на какое сообщение мы сослались
             reply_to_id = self.event.fwd[0].message.id
 
@@ -174,7 +181,14 @@ class GPTCommand(
                 if is_me:
                     self._add_bot_message(history, tg_event)
                 else:
+                    # Так как мы храним респонсы GPT на message_id реквеста пользователя, то нам нужно подменить
+                    # Предыдущий ответ на респонсы из кэша
+                    raw_response_output = output_responses.get(tg_event.message.id)
+                    if raw_response_output:
+                        history.messages[-1] = RawGPTMessage(GPTMessageRole.ASSISTANT, raw_response_output)
+
                     self._add_user_message(history, tg_event)
+
                 # Запоминаем следующий reply_to_id
                 reply_to_id = data.get(reply_to_id, {}).get("reply_to_message", {}).get("message_id")
                 # Если не нашли reply_to_id или мы достигли первого сообщения, то можно выйти из цикла

@@ -7,6 +7,7 @@ from apps.commands.gpt.messages.base import GPTMessages
 from apps.commands.gpt.models import VisionModel
 from apps.commands.gpt.protocols import GPTCommandProtocol, HasVision
 from apps.commands.help_text import HelpTextArgument
+from apps.shared.utils.cache import GPTResponsesCache
 
 
 class GPTVisionFunctionality(GPTCommandProtocol):
@@ -49,6 +50,10 @@ class GPTVisionFunctionality(GPTCommandProtocol):
             )
 
         self.add_statistics(api_response=response)
+
+        # Кэшируем полный ответ GPT
+        r_cache = GPTResponsesCache(self.provider.type_enum.name, self.event.peer_id)
+        r_cache.add_response(self.event.message.id, response.raw_response_output)
 
         response_text = response.text
 

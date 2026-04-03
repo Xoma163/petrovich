@@ -11,6 +11,7 @@ from apps.commands.gpt.messages.consts import GPTMessageRole
 from apps.commands.gpt.models import CompletionsModel, VoiceRecognitionModel
 from apps.commands.gpt.protocols import HasCompletions, GPTCommandProtocol
 from apps.commands.help_text import HelpTextArgument
+from apps.shared.utils.cache import GPTResponsesCache
 
 logger = logging.getLogger()
 
@@ -79,6 +80,10 @@ class GPTCompletionsFunctionality(GPTCommandProtocol):
             )
 
         self.add_statistics(api_response=response)
+
+        # Кэшируем полный ответ GPT
+        r_cache = GPTResponsesCache(self.provider.type_enum.name, self.event.peer_id)
+        r_cache.add_response(self.event.message.id, response.raw_response_output)
 
         response_text = response.text
 
