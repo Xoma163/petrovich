@@ -22,9 +22,9 @@ class VKVideo:
         "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
         "accept-language": "ru-RU,ru;q=0.9",
         "cache-control": "max-age=0",
-        "sec-ch-ua": "\"Google Chrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"\"",
+        "sec-ch-ua": '"Google Chrome";v="143", "Chromium";v="143", "Not A(Brand";v="24""',
         "sec-ch-ua-mobile": "?0",
-        "sec-ch-ua-platform": "\"Windows\"",
+        "sec-ch-ua-platform": '"Windows"',
         "sec-fetch-dest": "document",
         "sec-fetch-mode": "navigate",
         "sec-fetch-site": "none",
@@ -42,7 +42,6 @@ class VKVideo:
         content = requests.get(url, headers=self.HEADERS).content
         bs4 = BeautifulSoup(content, "html.parser")
         try:
-
             og_title = bs4.find("meta", property="og:title")
             video_title = ""
             if og_title:
@@ -54,7 +53,7 @@ class VKVideo:
                 try:
                     a_tag = bs4.select_one(".ui_crumb")
                     channel_title = a_tag.te
-                except:
+                except Exception:
                     channel_title = channel_id
             else:
                 short_video_data = self._get_short_video_data(bs4)
@@ -66,20 +65,14 @@ class VKVideo:
             try:
                 width = bs4.find("meta", {"property": "og:video:width"})["content"]
                 height = bs4.find("meta", {"property": "og:video:height"})["content"]
-            except (AttributeError, KeyError, TypeError):
+            except AttributeError, KeyError, TypeError:
                 width = None
                 height = None
 
             # Лишний текст
             channel_title = channel_title.replace("Видеозаписи ", "")
-            return VideoData(
-                channel_id=channel_id,
-                video_id=video_id,
-                channel_title=channel_title,
-                title=video_title,
-                width=width,
-                height=height
-            )
+            return VideoData(channel_id=channel_id, video_id=video_id, channel_title=channel_title, title=video_title,
+                             width=width, height=height)
         except Exception as e:
             raise PError("Не смог получить информацию о видео") from e
 
@@ -116,7 +109,7 @@ class VKVideo:
 
     def _get_video_audio(self, player_url: str, high_res: bool) -> tuple[VideoAttachment, AudioAttachment | None]:
         r = requests.get(player_url, headers=self.HEADERS)
-        js_code = re.findall(r';window.cur = Object.assign\(window.cur |\| \{\}, ({.*?})\)', r.text)[-1]
+        js_code = re.findall(r";window.cur = Object.assign\(window.cur |\| \{\}, ({.*?})\)", r.text)[-1]
         info = json.loads(extract_json(js_code))
         info = info["apiPrefetchCache"][0]["response"]["items"][0]
 
@@ -151,19 +144,16 @@ class VKVideo:
         if isinstance(adaptation_sets, dict):
             video_representations = adaptation_sets["Representation"]
             video_representations = list(
-                sorted(video_representations, key=lambda x: int(x["@bandwidth"]), reverse=True)
-            )
+                sorted(video_representations, key=lambda x: int(x["@bandwidth"]), reverse=True))
             aa = None
         else:
             video_representations = adaptation_sets[0]["Representation"]
             video_representations = list(
-                sorted(video_representations, key=lambda x: int(x["@bandwidth"]), reverse=True)
-            )
+                sorted(video_representations, key=lambda x: int(x["@bandwidth"]), reverse=True))
 
             audio_representations = adaptation_sets[1]["Representation"]
             audio_representations = list(
-                sorted(audio_representations, key=lambda x: int(x["@bandwidth"]), reverse=True)
-            )
+                sorted(audio_representations, key=lambda x: int(x["@bandwidth"]), reverse=True))
 
             aa = AudioAttachment()
             aa.public_download_url = f"{parsed_url.scheme}://{parsed_url.hostname}/{audio_representations[0]['BaseURL']}"
@@ -198,7 +188,7 @@ class VKVideo:
         pos2_text = ");"
         pos1 = bs4_str.find(pos1_text)
         pos2 = bs4_str.find(pos2_text, pos1)
-        data = json.loads(bs4_str[pos1 + len(pos1_text):pos2])
+        data = json.loads(bs4_str[pos1 + len(pos1_text): pos2])
         return data
 
     @staticmethod
@@ -208,6 +198,6 @@ class VKVideo:
         pos2_text = "};"
         pos1 = bs4_str.find(pos1_text) - 1
         pos2 = bs4_str.find(pos2_text, pos1) + 1
-        data = json.loads(bs4_str[pos1 + len(pos1_text):pos2])
+        data = json.loads(bs4_str[pos1 + len(pos1_text): pos2])
         del data["lang"]
         return data

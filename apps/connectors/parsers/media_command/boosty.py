@@ -49,7 +49,7 @@ class Boosty:
 
         try:
             description = "\n".join([json.loads(x["content"])[0] for x in post_data if x.get("content")])
-        except:
+        except Exception:
             description = None
 
         player_urls_dict = {x["type"]: x["url"] for x in video_info["playerUrls"] if x["url"]}
@@ -63,7 +63,7 @@ class Boosty:
             width=width,
             height=height,
             thumbnail_url=thumbnail,
-            extra_data={"player_urls_dict": player_urls_dict}
+            extra_data={"player_urls_dict": player_urls_dict},
         )
 
     @staticmethod

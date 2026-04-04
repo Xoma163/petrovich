@@ -9,8 +9,7 @@ from apps.bot.core.messages.response_message import ResponseMessageItem, Respons
 from apps.commands.command import Command
 from apps.commands.gpt.api.base import ImageDrawAPIMixin, VisionAPIMixin, CompletionsAPIMixin
 from apps.commands.gpt.api.responses import GPTAPIResponse, GPTCompletionsResponse, GPTVisionResponse, \
-    GPTImageDrawResponse, \
-    GPTVoiceRecognitionResponse
+    GPTImageDrawResponse, GPTVoiceRecognitionResponse
 from apps.commands.gpt.commands_utils.gpt.functionality.completions import GPTCompletionsFunctionality
 from apps.commands.gpt.commands_utils.gpt.functionality.image_draw import GPTImageDrawFunctionality
 from apps.commands.gpt.commands_utils.gpt.functionality.vision import GPTVisionFunctionality
@@ -47,12 +46,10 @@ class GPTCommand(
     abstract = True
 
     EXTRA_TEXT = (
-        "Если отвечать на сообщения бота через кнопку \"Ответить\" то будет продолжаться непрерывный диалог.\n"
-        "В таком случае необязательно писать команду, можно просто текст"
+        'Если отвечать на сообщения бота через кнопку "Ответить" то будет продолжаться непрерывный диалог.\nВ таком случае необязательно писать команду, можно просто текст'
     )
 
-    NO_DEFAULT_MODEL_ERROR_MSG = "Не установлена модель по умолчанию. Сообщите об этом админу.\n" \
-                                 "Прямо сейчас вы можете просто вручную установить модель и пользоваться ей"
+    NO_DEFAULT_MODEL_ERROR_MSG = "Не установлена модель по умолчанию. Сообщите об этом админу.\nПрямо сейчас вы можете просто вручную установить модель и пользоваться ей"
 
     RESPONSE_MESSAGE_TOO_LONG = "Твой запрос получился слишком большой. Положил ответ в файл"
     TG_CANT_PARSE_RESPONSE_MESSAGE = "Ответ GPT содержит в себе очень много тегов, которые не распарсились. Положил ответ в файл"
@@ -234,13 +231,10 @@ class GPTCommand(
             rmi = ResponseMessageItem(
                 text=self.RESPONSE_MESSAGE_TOO_LONG,
                 attachments=[document_html],  # , document_markdown],
-                reply_to=self.event.message.id
+                reply_to=self.event.message.id,
             )
         else:
-            rmi = ResponseMessageItem(
-                text=answer,
-                reply_to=self.event.message.id
-            )
+            rmi = ResponseMessageItem(text=answer, reply_to=self.event.message.id)
         self._prepare_rmi(rmi, answer)
         return rmi
 
@@ -341,10 +335,10 @@ class GPTCommand(
     @classmethod
     def get_debug_text(cls, response: GPTAPIResponse) -> str:
 
-        fmt_cost = lambda x: "0" if round(x, 3) == 0 else f"{x:.3f}"
+        def fmt_cost(x):
+            return "0" if round(x, 3) == 0 else f"{x:.3f}"
 
         if isinstance(response, GPTCompletionsResponse) or isinstance(response, GPTVisionResponse):
-
             return (
                 f"{cls.DEBUG_LINE}\n"
                 f"input_tokens: {response.usage.input_tokens}\n"
@@ -360,10 +354,7 @@ class GPTCommand(
                 f"total_cost: ${fmt_cost(response.usage.total_cost)}"
             )
         elif isinstance(response, GPTImageDrawResponse) or isinstance(response, GPTVoiceRecognitionResponse):
-            return (
-                f"{cls.DEBUG_LINE}\n"
-                f"total_cost: ${fmt_cost(response.usage.total_cost)}"
-            )
+            return f"{cls.DEBUG_LINE}\ntotal_cost: ${fmt_cost(response.usage.total_cost)}"
 
         return ""
 

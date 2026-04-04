@@ -12,24 +12,10 @@ from requests.exceptions import SSLError, JSONDecodeError
 
 from apps.bot.core.messages.attachments.photo import PhotoAttachment
 from apps.commands.gpt.api.base import GPTAPI
-from apps.commands.gpt.api.responses import (
-    GPTCompletionsResponse,
-    GPTCompletionsVisionResponse,
-    GPTVisionResponse,
+from apps.commands.gpt.api.responses import GPTCompletionsResponse, GPTCompletionsVisionResponse, GPTVisionResponse, \
     GPTImageDrawResponse
-)
-from apps.commands.gpt.models import (
-    CompletionsModel,
-    VisionModel,
-    ImageDrawModel,
-    GPTCompletionsVisionModel
-)
-from apps.commands.gpt.usage import (
-    GPTCompletionsUsage,
-    GPTCompletionsVisionUsage,
-    GPTVisionUsage,
-    GPTImageDrawUsage
-)
+from apps.commands.gpt.models import CompletionsModel, VisionModel, ImageDrawModel, GPTCompletionsVisionModel
+from apps.commands.gpt.usage import GPTCompletionsUsage, GPTCompletionsVisionUsage, GPTVisionUsage, GPTImageDrawUsage
 from apps.shared.decorators import retry
 from apps.shared.exceptions import PError, PWarning
 
@@ -43,7 +29,7 @@ class OpenAIAPI(GPTAPI, ABC):
         "insufficient_quota": "Закончились деньги((",
         "invalid_api_key": "Некорректный API KEY. Проверьте свой ключ",
         "rate_limit_exceeded": "Слишком большой запрос",
-        "model_not_found": "Модель не существует или у вас нет к ней доступа"
+        "model_not_found": "Модель не существует или у вас нет к ней доступа",
     }
 
     def __init__(self, *args, **kwargs):
@@ -84,12 +70,8 @@ class OpenAIAPI(GPTAPI, ABC):
         return base64_image, image_data.get("revised_prompt")
 
     def _do_request(
-            self,
-            usage: type[GPTCompletionsVisionUsage],
-            response: type[GPTCompletionsVisionResponse],
-            model: GPTCompletionsVisionModel,
-            url,
-            **kwargs
+            self, usage: type[GPTCompletionsVisionUsage], response: type[GPTCompletionsVisionResponse],
+            model: GPTCompletionsVisionModel, url, **kwargs
     ) -> GPTCompletionsVisionResponse:
         r_json = self.do_request(url, **kwargs)
         usage_dict = r_json.get("usage")
@@ -168,7 +150,7 @@ class OpenAIAPI(GPTAPI, ABC):
 
                     try:
                         chunk = json.loads(data)
-                    except:
+                    except Exception:
                         continue
 
                     _type = chunk.get("object")
@@ -249,7 +231,7 @@ class OpenAIAPI(GPTAPI, ABC):
 
             if code == "rate_limit_exceeded":
                 message = error.get("message")
-                _r = re.compile(r'Limit (\d*), Requested (\d+)Visit (.*) to').findall(message)
+                _r = re.compile(r"Limit (\d*), Requested (\d+)Visit (.*) to").findall(message)
                 if _r:
                     _r = _r[0]
                     error_str += f"\nЗапрошено токенов - {_r[1]}, доступно - {_r[0]}. Подробнее - {_r[2]}"
@@ -265,11 +247,7 @@ class OpenAIAPI(GPTAPI, ABC):
         messages = OpenAIResponsesMessages()
         messages.add_message(GPTMessageRole.USER, "привет")
         url = f"{self.base_url}/responses"
-        json_data = {
-            "model": model,
-            "input": messages.get_messages(),
-            "max_output_tokens": 50
-        }
+        json_data = {"model": model, "input": messages.get_messages(), "max_output_tokens": 50}
         try:
             response_json = self.do_request(
                 url,

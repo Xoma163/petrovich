@@ -17,6 +17,11 @@ venv
 # PyCharm
 .idea/
 
+# Tool caches
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+
 # cloc
 cloc.exe
 
@@ -27,6 +32,6 @@ media/
 # log
 /logs
 
-# uwsgi pid
+# App server runtime files
 config/petrovich.pid
 config/petrovich.sock

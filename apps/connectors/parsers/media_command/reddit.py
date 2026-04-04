@@ -38,15 +38,11 @@ class Reddit:
         xml = requests.get(url).content
         bs4 = BeautifulSoup(xml, "html.parser")
         try:
-            filename = bs4.find("adaptationset", {
-                "contenttype": "audio"
-            }).find("representation").find("baseurl").text
+            filename = bs4.find("adaptationset", {"contenttype": "audio"}).find("representation").find("baseurl").text
             return filename
         except Exception:
             try:
-                filename = bs4.find("representation", {
-                    "id": "AUDIO-1"
-                }).find("baseurl").text
+                filename = bs4.find("representation", {"id": "AUDIO-1"}).find("baseurl").text
                 return filename
             except Exception:
                 return None
@@ -106,15 +102,13 @@ class Reddit:
     def _get_photos_from_post(self) -> list[str]:
         gallery_data_items = self.data["gallery_data"]["items"]
         first_url = \
-            self.data["media_metadata"][self.data["gallery_data"]["items"][0]["media_id"]]["s"]["u"].partition("?")[0]
+        self.data["media_metadata"][self.data["gallery_data"]["items"][0]["media_id"]]["s"]["u"].partition("?")[0]
         ext = get_url_file_ext(first_url)
         self.filename = f"{self.title.replace(' ', '_')}.{ext}"
 
         # Чёрная магия
-        return [
-            self.data["media_metadata"][x["media_id"]]["s"]["u"].partition("?")[0].replace("/preview.", "/i.", 1)
-            for x in gallery_data_items
-        ]
+        return [self.data["media_metadata"][x["media_id"]]["s"]["u"].partition("?")[0].replace("/preview.", "/i.", 1)
+                for x in gallery_data_items]
 
     def get_post_data(self, post_url):
         self._set_post_url(post_url)
@@ -146,7 +140,7 @@ class Reddit:
             post_url_raw = requests.get(self.post_url, headers=headers).history[-1].text
             if match := re.search(r'href="([^"]+)"', post_url_raw):
                 self.post_url = match.group(1)
-        except:
+        except Exception:
             pass
         urlparsed = urlparse(self.post_url)
         url = f"{urlparsed.scheme}://{urlparsed.netloc}{urlparsed.path}.json"

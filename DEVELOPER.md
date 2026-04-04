@@ -68,7 +68,7 @@ Based on the codebase, this is a **personal/community utility bot** rather than 
 - **Framework:** Django `>=6.0.1`
 - **Database:** PostgreSQL
 - **Cache / ephemeral state:** Redis via `django-redis`
-- **Deployment shape:** uWSGI + nginx + systemd-oriented Linux deployment
+- **Deployment shape:** gunicorn + nginx + systemd-oriented Linux deployment
 - **Dependency manager in active use:** `uv` appears current (`uv.lock`, `uv sync` in production update script)
 - **Notable libraries/integrations:**
   - Telegram Bot API integration
@@ -121,7 +121,7 @@ Important: the code strongly suggests a **local Telegram Bot API server mode** a
 ### Infra / operational
 
 - `config/setup/` — machine/bootstrap setup script
-- `config/uwsgi/` — uWSGI configuration
+- `config/gunicorn/` — gunicorn configuration
 - `.github/workflows/` — CI/deploy workflow definitions
 - `secrets/` — committed example env file; real env expected outside git
 
@@ -538,13 +538,20 @@ The repository currently suggests `uv` as the most current dependency workflow.
 ### 0. Install prerequisites
 
 ```bash
-sudo apt install -y python3.14 python3.14-venv python3-venv python3.14-dev python3-wheel postgresql libpq-dev ffmpeg build-essential
+sudo apt install -y python3.14 python3.14-venv python3-venv python3.14-dev python3-wheel postgresql libpq-dev ffmpeg build-essential nginx
 ```
 
 ### 1. Install dependencies
 
 ```bash
 uv sync
+```
+
+If you need the local developer toolchain as well, install the dev dependency group:
+
+```bash
+uv sync --group dev
+pre-commit install
 ```
 
 ### 2. Prepare environment
@@ -605,6 +612,23 @@ There is a small committed test file focused on message parsing:
 
 - `apps/bot/tests/test_message.py`
 
+## Developer tooling
+
+The repository also includes a small local quality toolchain for development:
+
+- `ruff` for linting
+- `mypy` for type checking
+- `add-trailing-comma` for normalizing trailing commas
+- `pre-commit` to run these tools on staged Python files
+
+Typical commands:
+
+```bash
+uv run ruff check .
+uv run mypy .
+uv run pre-commit run --all-files
+```
+
 ## Static collection
 
 ```bash
@@ -628,6 +652,9 @@ sudo systemctl restart petrovich
 ```
 
 Important: this script is destructive to local uncommitted changes and is clearly intended only for the production host.
+
+The repository now contains gunicorn app-server configuration in `config/gunicorn/gunicorn.conf.py` and no longer
+depends on `uWSGI`.
 
 ---
 

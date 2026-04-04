@@ -26,9 +26,7 @@ class InstagramParser:
             page_source = self._get_instagram_request(url)
         except TimeoutException:
             raise PWarning(
-                "Убедитесь в браузере(инкогнито), что по ссылке фото/видео и доступно к просмотру. "
-                "Если это так, то сообщите разработчику"
-            )
+                "Убедитесь в браузере(инкогнито), что по ссылке фото/видео и доступно к просмотру. Если это так, то сообщите разработчику")
         bs4 = BeautifulSoup(page_source, "html.parser")
         spans = bs4.find_all("span")
         if any([re.search(self.AGE_RESTRICTION_RE, x.text) for x in spans]):
@@ -37,7 +35,7 @@ class InstagramParser:
             raise PWarning("Не могу скачать контент. Он недоступен без аутентификации (неприемлимый контент)")
 
         try:
-            all_scripts = bs4.select("script[type=\"application/json\"][data-content-len][data-processed]")
+            all_scripts = bs4.select('script[type="application/json"][data-content-len][data-processed]')
             api_scripts = [x for x in all_scripts if "xdt_api__v1__" in x.text]
             media = self._get_media(api_scripts)
         except PError:
@@ -88,7 +86,7 @@ class InstagramParser:
                     elif "media" in node:
                         return node["media"]
                     raise KeyError()
-            except (KeyError, IndexError, AttributeError):
+            except KeyError, IndexError, AttributeError:
                 continue
 
         raise PWarning("Не могу скачать этот контент. Неизвестный тип. Сообщите разработчику")
@@ -97,13 +95,13 @@ class InstagramParser:
         try:
             json_data = self.extract_json(page_source, "xdt_api__v1__media__shortcode__web_info")
             return json_data["items"][0]
-        except:
+        except Exception:
             pass
 
         try:
             json_data = self.extract_json(page_source, "xdt_api__v1__clips__clips_on_logged_out_connection_v2")
             return json_data["edges"][0]["node"]["media_command"]
-        except:
+        except Exception:
             pass
 
         raise PWarning("Не могу скачать этот контент. Неизвестный тип. Сообщите разработчику")
@@ -174,16 +172,10 @@ class InstagramAPIData:
         self.items.append(item)
 
     def add_video(self, download_url: str, thumbnail_url: str | None):
-        item = InstagramAPIDataItem(
-            content_type=InstagramAPIDataItem.CONTENT_TYPE_VIDEO,
-            download_url=download_url,
-            thumbnail_url=thumbnail_url
-        )
+        item = InstagramAPIDataItem(content_type=InstagramAPIDataItem.CONTENT_TYPE_VIDEO, download_url=download_url,
+                                    thumbnail_url=thumbnail_url)
         self.add_item(item)
 
     def add_image(self, download_url: str):
-        item = InstagramAPIDataItem(
-            content_type=InstagramAPIDataItem.CONTENT_TYPE_IMAGE,
-            download_url=download_url
-        )
+        item = InstagramAPIDataItem(content_type=InstagramAPIDataItem.CONTENT_TYPE_IMAGE, download_url=download_url)
         self.add_item(item)

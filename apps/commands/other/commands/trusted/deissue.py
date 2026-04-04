@@ -15,10 +15,7 @@ class DeIssue(Command):
     help_text = HelpText(
         commands_text="закрывает проблему Петровича без решения",
         help_texts=[
-            HelpTextItem(RoleEnum.TRUSTED, [
-                HelpTextArgument("(id)", "закрывает проблему Петровича без решения")
-            ])
-        ]
+            HelpTextItem(RoleEnum.TRUSTED, [HelpTextArgument("(id)", "закрывает проблему Петровича без решения")])],
     )
 
     # args = 1
@@ -29,9 +26,9 @@ class DeIssue(Command):
         if self.event.fwd:
             try:
                 url = self.event.fwd[0].message.entities[0]["url"]
-                m = re.search(r'/issues/(\d+)$', url)
+                m = re.search(r"/issues/(\d+)$", url)
                 issue_id = m.group(1) if m else None
-            except:
+            except Exception:
                 PWarning("Не смог распарсить присланное сообщение")
         elif self.event.message.args:
             self.int_args = [0]

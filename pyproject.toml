@@ -35,8 +35,54 @@ dependencies = [
     "sentry-sdk>=2.50.0",
     "telegramify-markdown>=0.5.4",
     "twitch-dl>=3.3.0",
-    "uwsgi>=2.0.31",
+    "gunicorn>=23.0.0",
     "xmltodict>=1.0.2",
     "yandex-music>=2.2.0",
     "yt-dlp>=2025.12.8",
 ]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.15.0",
+    "mypy>=1.14.1",
+    "pre-commit>=4.1.0",
+    "add-trailing-comma>=3.1.0",
+]
+
+[tool.ruff]
+target-version = "py314"
+line-length = 180
+extend-exclude = [
+    ".git",
+    ".mypy_cache",
+    ".ruff_cache",
+    ".venv",
+    "media",
+    "staticfiles",
+]
+
+[tool.ruff.lint]
+ignore = [
+    "E501",
+]
+
+[tool.mypy]
+python_version = "3.14"
+plugins = ["mypy_django_plugin.main"]
+exclude = [
+    "^media/",
+    "^staticfiles/",
+]
+ignore_missing_imports = true
+check_untyped_defs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+
+[[tool.mypy.overrides]]
+module = [
+    "*.migrations.*",
+]
+ignore_errors = true
+
+[tool.django-stubs]
+django_settings_module = "petrovich.settings"
