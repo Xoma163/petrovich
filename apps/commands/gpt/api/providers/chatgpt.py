@@ -74,6 +74,12 @@ class ChatGPTAPI(
         if preprompt:
             payload["instructions"] = preprompt
         payload["input"] = messages_dict
+        payload["include"] = [
+            "reasoning.encrypted_content",  # для stateless reasoning
+            "web_search_call.action.sources",  # источники / ссылки web search
+            # "computer_call_output.output.image_url",  # картинки из computer-use
+            # "code_interpreter_call.outputs",  # артефакты / outputs code interpreter
+        ]
 
         self._set_gpt_5_payload(payload, model, extra_data)
 
@@ -107,6 +113,12 @@ class ChatGPTAPI(
         if preprompt:
             payload["instructions"] = preprompt
         payload["input"] = messages_dict
+        payload["include"] = [
+            "reasoning.encrypted_content",  # для stateless reasoning
+            "web_search_call.action.sources",  # источники / ссылки web search
+            # "computer_call_output.output.image_url",  # картинки из computer-use
+            # "code_interpreter_call.outputs",  # артефакты / outputs code interpreter
+        ]
 
         self._set_gpt_5_payload(payload, model, extra_data)
 
