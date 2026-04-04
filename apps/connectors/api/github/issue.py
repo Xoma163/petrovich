@@ -1,6 +1,6 @@
 import json
 import re
-from datetime import datetime
+from datetime import UTC, datetime
 
 from requests import HTTPError
 
@@ -36,7 +36,9 @@ class GithubIssueAPI(GithubAPI):
         self.body: str = response["body"]
         self.assignee: str = response["assignee"]
         self.remote_url: str = response["html_url"]
-        self.created_at: datetime = datetime.strptime(response["created_at"], "%Y-%m-%dT%H:%M:%SZ")
+        self.created_at: datetime = datetime.strptime(
+            response["created_at"], "%Y-%m-%dT%H:%M:%SZ"
+        ).replace(tzinfo=UTC)
         self.state_reason: str = response["state_reason"]
 
         self.author: Profile | None = None
@@ -64,7 +66,7 @@ class GithubIssueAPI(GithubAPI):
             "title": self.title,
             "body": self.body,
             "assignee": self.assignee,
-            "labels": self.labels
+            "labels": self.labels,
         }
 
         r = self.requests.post(self.ISSUES_URL, json.dumps(issue_data))
@@ -80,9 +82,7 @@ class GithubIssueAPI(GithubAPI):
     def add_comment(self, comment: str):
         """Добавление комментария."""
 
-        comment_data = {
-            "body": comment
-        }
+        comment_data = {"body": comment}
         COMMENT_URL = f"{self.ISSUES_URL}/{self.number}/comments"
         r = self.requests.post(COMMENT_URL, json.dumps(comment_data))
 
@@ -92,11 +92,10 @@ class GithubIssueAPI(GithubAPI):
             raise PWarning("Проблема с созданием комментария на github")
 
     def delete_in_github(self) -> dict:
-        issue_data = {
-            "state": "closed",
-            "labels": self.labels + ["Не пофикшу"]
-        }
-        r = self.requests.post(f"{self.ISSUES_URL}/{self.number}", json.dumps(issue_data))
+        issue_data = {"state": "closed", "labels": self.labels + ["Не пофикшу"]}
+        r = self.requests.post(
+            f"{self.ISSUES_URL}/{self.number}", json.dumps(issue_data)
+        )
 
         try:
             r.raise_for_status()

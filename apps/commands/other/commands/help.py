@@ -9,21 +9,34 @@ from apps.shared.utils.utils import get_help_texts_for_command
 
 class Help(Command):
     name = "помощь"
-    names = ["хелп", "ман", "помоги", "памаги", "спаси", "хелб", "манул", "help", "start"]
+    names = [
+        "хелп",
+        "ман",
+        "помоги",
+        "памаги",
+        "спаси",
+        "хелб",
+        "манул",
+        "help",
+        "start",
+    ]
 
     help_text = HelpText(
         commands_text="помощь по командам и боту",
         help_texts=[
-            HelpTextItem(RoleEnum.USER, [
-                HelpTextArgument(None, "общая справка"),
-                HelpTextArgument("(команда)", "помощь по команде")
-            ])
-        ]
+            HelpTextItem(
+                RoleEnum.USER,
+                [
+                    HelpTextArgument(None, "общая справка"),
+                    HelpTextArgument("(команда)", "помощь по команде"),
+                ],
+            )
+        ],
     )
 
     def accept(self, event: Event) -> bool:
         # Самая первая кнопка клавы у бота
-        if event.payload and event.payload["c"] == "start":
+        if event.payload and event.payload.get("c") == "start":
             return True
         return super().accept(event)
 
@@ -34,21 +47,22 @@ class Help(Command):
             answer = get_help_texts_for_command(command, self.event.sender.get_roles())
             return ResponseMessage(ResponseMessageItem(text=answer))
 
-        answer = \
-            f"{self.bot.get_formatted_text_line('/помощь')} (название команды) - помощь по конкретной команде\n" \
-            f"{self.bot.get_formatted_text_line('/команды')} - список всех команд с кратким описанием\n" \
-            "\n" \
-            "Основы основ:\n" \
-            f"Пример конкретной команды: {self.bot.get_formatted_text_line('/рандом 10')}\n" \
-            "* / — упоминание бота\n" \
-            "* рандом — команда\n" \
-            "* 10 — аргумент команды\n" \
-            "\n" \
-            "Формат детальной помощи по командам:\n" \
-            "Команда - выполняет команду\n" \
-            "Команда параметр - выполняет команду с параметром\n" \
-            "Команда (аргумент) - выполняет команду с обязательным аргументом\n" \
+        answer = (
+            f"{self.bot.get_formatted_text_line('/помощь')} (название команды) - помощь по конкретной команде\n"
+            f"{self.bot.get_formatted_text_line('/команды')} - список всех команд с кратким описанием\n"
+            "\n"
+            "Основы основ:\n"
+            f"Пример конкретной команды: {self.bot.get_formatted_text_line('/рандом 10')}\n"
+            "* / — упоминание бота\n"
+            "* рандом — команда\n"
+            "* 10 — аргумент команды\n"
+            "\n"
+            "Формат детальной помощи по командам:\n"
+            "Команда - выполняет команду\n"
+            "Команда параметр - выполняет команду с параметром\n"
+            "Команда (аргумент) - выполняет команду с обязательным аргументом\n"
             "Команда [аргумент=10] - выполняет команду с необязательным аргументом. Если не указать его, будет подставлено значение по умолчанию"
+        )
         return ResponseMessage(ResponseMessageItem(text=answer))
 
     @staticmethod
@@ -57,6 +71,7 @@ class Help(Command):
         Ищет команду по имени
         """
         from apps.commands.registry import registry_commands
+
         for command in registry_commands:
             if name == command.name or (command.names and name in command.names):
                 return command

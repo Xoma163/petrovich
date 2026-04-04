@@ -28,14 +28,24 @@ class Command(CommandProtocol):
     access: RoleEnum = RoleEnum.USER  # Необходимые права для выполнения команды
     pm: bool = False  # Должно ли сообщение обрабатываться только в лс
     conversation: bool = False  # Должно ли сообщение обрабатываться только в конфе
-    fwd: bool = False  # Должно ли сообщение обрабатываться только с пересланными сообщениями
-    args: int = 0  # Должно ли сообщение обрабатываться только с заданным количеством аргументов
+    fwd: bool = (
+        False  # Должно ли сообщение обрабатываться только с пересланными сообщениями
+    )
+    args: int = (
+        0  # Должно ли сообщение обрабатываться только с заданным количеством аргументов
+    )
     args_or_fwd: bool = False  # Должно ли сообщение обрабатываться только с пересланными сообщениями или аргументами
     int_args: list = []  # Список аргументов, которые должны быть целым числом
-    platforms: list = list(PlatformEnum)  # Список платформ, которые могут обрабатывать команду
+    platforms: list = list(
+        PlatformEnum
+    )  # Список платформ, которые могут обрабатывать команду
     attachments: list = []  # Должно ли сообщение обрабатываться только с вложениями
-    mentioned: bool = False  # Должно ли сообщение обрабатываться только с упоминанием бота
-    non_mentioned: bool = False  # Должно ли сообщение обрабатываться только без упоминания бота
+    mentioned: bool = (
+        False  # Должно ли сообщение обрабатываться только с упоминанием бота
+    )
+    non_mentioned: bool = (
+        False  # Должно ли сообщение обрабатываться только без упоминания бота
+    )
 
     ATTACHMENT_TRANSLATOR = {
         AudioAttachment: "аудио",
@@ -45,7 +55,7 @@ class Command(CommandProtocol):
         VoiceAttachment: "голосовое",
         StickerAttachment: "стикер",
         VideoNoteAttachment: "кружочек",
-        LinkAttachment: "ссылка"
+        LinkAttachment: "ссылка",
     }
 
     def __init__(self, bot: Bot = None, event: Event = None):
@@ -68,7 +78,7 @@ class Command(CommandProtocol):
         if self.full_names:
             if event.message.command in self.full_names:
                 return True
-            if event.payload and event.payload["c"] in self.full_names:
+            if event.payload and event.payload.get("c") in self.full_names:
                 return True
         return False
 
@@ -181,7 +191,9 @@ class Command(CommandProtocol):
         raise PWarning(error, keyboard=self._get_help_button_keyboard())
 
     @staticmethod
-    def check_number_arg_range(arg, _min=-float("inf"), _max=float("inf"), banned_list: list = None):
+    def check_number_arg_range(
+        arg, _min=-float("inf"), _max=float("inf"), banned_list: list = None
+    ):
         """
         Проверка на вхождение числа в диапазон и исключение его из заданного списка
         :param arg: число
@@ -215,8 +227,12 @@ class Command(CommandProtocol):
                 if isinstance(self.event.message.args[checked_arg_index], int):
                     continue
                 try:
-                    self.event.message.args[checked_arg_index] = transform_k(self.event.message.args[checked_arg_index])
-                    self.event.message.args[checked_arg_index] = int(self.event.message.args[checked_arg_index])
+                    self.event.message.args[checked_arg_index] = transform_k(
+                        self.event.message.args[checked_arg_index]
+                    )
+                    self.event.message.args[checked_arg_index] = int(
+                        self.event.message.args[checked_arg_index]
+                    )
                 except ValueError:
                     error = "Аргумент должен быть целочисленным"
                     raise PWarning(error)
@@ -278,7 +294,9 @@ class Command(CommandProtocol):
                 if type(att) in self.attachments:
                     return
 
-        allowed_types = ", ".join([self.ATTACHMENT_TRANSLATOR[_type] for _type in self.attachments])
+        allowed_types = ", ".join(
+            [self.ATTACHMENT_TRANSLATOR[_type] for _type in self.attachments]
+        )
         error = f"Для работы команды требуются вложения: {allowed_types}"
         raise PWarning(error)
 
@@ -317,7 +335,9 @@ class Command(CommandProtocol):
                 default_item = item[1]
         if default_item:
             return default_item
-        raise PWarning("Нет такого пункта меню", keyboard=self._get_help_button_keyboard())
+        raise PWarning(
+            "Нет такого пункта меню", keyboard=self._get_help_button_keyboard()
+        )
 
     def _get_help_button_keyboard(self):
         button = self.bot.get_button(f"/помощь {self.name}", "помощь", [self.name])
