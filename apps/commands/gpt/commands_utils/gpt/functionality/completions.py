@@ -42,10 +42,10 @@ class GPTCompletionsFunctionality(GPTCommandProtocol):
         message = self.event.raw["callback_query"]["message"]
 
         documents: list[DocumentAttachment] = self.event.get_all_attachments([DocumentAttachment])
-        if documents and (documents[0].mime_type.is_text or documents[0].ext in ['txt', 'html']):
+        if documents and (documents[0].mime_type.is_text or documents[0].ext in ["txt", "html"]):
             text = documents[0].read_text()
         else:
-            text = message.get("text", message.get('caption'))
+            text = message.get("text", message.get("caption"))
 
         history = self.provider.messages_class()
 
