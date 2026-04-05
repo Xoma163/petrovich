@@ -22,7 +22,7 @@ class AudioTrack(Command):
     def start(self) -> ResponseMessage:
         att = self.event.get_all_attachments([VideoAttachment])[0]
         att.download_content()
-        vh = VideoHandler(video=att)
+        vh = VideoHandler(video=att, log_filter=self.event.log_filter)
         audio_track = vh.get_audio_track()
         audio_att = self.bot.get_audio_attachment(
             _bytes=audio_track,

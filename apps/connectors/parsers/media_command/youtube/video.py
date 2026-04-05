@@ -67,7 +67,7 @@ class YoutubeVideo:
             data.audio_download_url, threads=8, http_chunk_size=http_chunk_size_audio
         )
 
-        vh = VideoHandler(video=_va, audio=_aa)
+        vh = VideoHandler(video=_va, audio=_aa, log_filter=self.log_filter)
         content = vh.mux()
 
         va = VideoAttachment()

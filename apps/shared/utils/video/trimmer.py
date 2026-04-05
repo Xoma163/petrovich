@@ -1,11 +1,10 @@
 from apps.bot.core.messages.attachments.attachment import Attachment
-from apps.shared.utils.do_the_linux_command import do_the_linux_command
 from apps.shared.utils.video.video_common import VideoCommon
 
 
 class VideoTrimmer(VideoCommon):
-    def __init__(self, video: Attachment | None):
-        super().__init__()
+    def __init__(self, video: Attachment | None, log_filter: dict | None = None):
+        super().__init__(log_filter=log_filter)
         self.video = video
 
     def trim(self, start_pos, end_pos=None) -> bytes:
@@ -19,7 +18,7 @@ class VideoTrimmer(VideoCommon):
                 cmd_parts.append(f"-to {end_pos}")
             cmd_parts.append(f"-f mp4 -y {self.tmp_output_file.name}")
             cmd = " ".join(cmd_parts)
-            do_the_linux_command(cmd)
+            self._run_command(cmd)
 
             file_bytes = self._get_video_bytes(self.tmp_output_file)
         finally:

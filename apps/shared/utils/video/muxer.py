@@ -1,12 +1,11 @@
 from apps.bot.core.messages.attachments.audio import AudioAttachment
 from apps.bot.core.messages.attachments.video import VideoAttachment
-from apps.shared.utils.do_the_linux_command import do_the_linux_command
 from apps.shared.utils.video.video_common import VideoCommon
 
 
 class AudioVideoMuxer(VideoCommon):
-    def __init__(self, video: VideoAttachment, audio: AudioAttachment):
-        super().__init__()
+    def __init__(self, video: VideoAttachment, audio: AudioAttachment, log_filter: dict | None = None):
+        super().__init__(log_filter=log_filter)
         self.video: VideoAttachment = video
         self.audio: AudioAttachment = audio
 
@@ -25,4 +24,4 @@ class AudioVideoMuxer(VideoCommon):
 
     def _mux(self):
         cmd = f"ffmpeg6 -i {self.tmp_video_file.name} -i {self.tmp_audio_file.name} -c:v copy -c:a copy -strict -2 -f mp4 -y {self.tmp_output_file.name}"
-        do_the_linux_command(cmd)
+        self._run_command(cmd)

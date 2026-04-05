@@ -1,13 +1,12 @@
 from apps.bot.core.messages.attachments.video import VideoAttachment
-from apps.shared.utils.do_the_linux_command import do_the_linux_command
 from apps.shared.utils.video.video_common import VideoCommon
 
 
 class AudioTrack(VideoCommon):
     CHUNK_SIZE = 2**26  # 64mb
 
-    def __init__(self, video: VideoAttachment):
-        super().__init__()
+    def __init__(self, video: VideoAttachment, log_filter: dict | None = None):
+        super().__init__(log_filter=log_filter)
 
         self.video = video
 
@@ -37,4 +36,4 @@ class AudioTrack(VideoCommon):
             self.tmp_output_file.name,
         ]
         cmd = " ".join(args)
-        do_the_linux_command(cmd)
+        self._run_command(cmd)

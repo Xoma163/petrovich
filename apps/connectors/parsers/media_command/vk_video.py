@@ -91,7 +91,7 @@ class VKVideo:
         if aa is not None:
             va.download_content(stream=True)
             aa.download_content(stream=True)
-            vh = VideoHandler(video=va, audio=aa)
+            vh = VideoHandler(video=va, audio=aa, log_filter=self.log_filter)
             va.content = vh.mux()
         if va.m3u8_url:
             downloader = Downloader(log_filter=self.log_filter)

@@ -175,7 +175,7 @@ class Media(AcceptExtraCommand):
 
         if media_keys.audio_only and att_is_video:
             video: VideoAttachment = media_response.attachments[0]  # noqa
-            vh = VideoHandler(video=video)
+            vh = VideoHandler(video=video, log_filter=self.event.log_filter)
             aa = AudioAttachment()
             aa.title = media_response.video_title
             aa.content = vh.get_audio_track()

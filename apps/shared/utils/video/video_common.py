@@ -1,14 +1,24 @@
+import subprocess
 import types
 from tempfile import NamedTemporaryFile
 
 from apps.bot.core.messages.attachments.attachment import Attachment
+from apps.shared.exceptions import PWarning
+from apps.shared.utils.do_the_linux_command import do_the_linux_command
 
 
 class VideoCommon:
-    def __init__(self):
+    def __init__(self, log_filter: dict | None = None):
+        self.log_filter = log_filter
         self.tmp_video_file = NamedTemporaryFile()
         self.tmp_audio_file = NamedTemporaryFile()
         self.tmp_output_file = NamedTemporaryFile()
+
+    def _run_command(self, cmd: str, error_message: str = "Не получилось обработать видео"):
+        try:
+            do_the_linux_command(cmd, log_filter=self.log_filter, check=True)
+        except subprocess.CalledProcessError as e:
+            raise PWarning(error_message) from e
 
     @staticmethod
     def _place_file(file: type[NamedTemporaryFile], att: Attachment):

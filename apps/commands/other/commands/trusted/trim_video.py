@@ -107,10 +107,11 @@ class TrimVideo(Command):
         self.check_positions(start_pos, end_pos)
         return self.trim(video, start_pos, end_pos)
 
-    @staticmethod
-    def trim(video: VideoAttachment | AudioAttachment | LinkAttachment | None, start_pos: str, end_pos: str) -> bytes:
+    def trim(
+        self, video: VideoAttachment | AudioAttachment | LinkAttachment | None, start_pos: str, end_pos: str
+    ) -> bytes:
         video.download_content()
-        vh = VideoHandler(video)
+        vh = VideoHandler(video, log_filter=self.event.log_filter)
         return vh.trim(start_pos, end_pos)
 
     @classmethod

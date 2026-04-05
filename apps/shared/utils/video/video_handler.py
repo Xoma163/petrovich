@@ -21,9 +21,11 @@ class VideoHandler:
         self,
         video: VideoAttachment | LinkAttachment | None = None,
         audio: AudioAttachment = None,
+        log_filter: dict | None = None,
     ):
         self.video: VideoAttachment | LinkAttachment | None = video
         self.audio: AudioAttachment | None = audio
+        self.log_filter = log_filter
 
     def _check_video_content(self):
         if not self.video:
@@ -53,7 +55,7 @@ class VideoHandler:
     def mux(self) -> bytes:
         self.check_video_and_audio()
 
-        avm = AudioVideoMuxer(self.video, self.audio)
+        avm = AudioVideoMuxer(self.video, self.audio, log_filter=self.log_filter)
         return avm.mux()
 
     def trim(self, start_pos, end_pos=None) -> bytes:
@@ -62,13 +64,13 @@ class VideoHandler:
         att = self.video if self.video else self.audio
         if att is None:
             raise RuntimeError(self.VIDEO_OR_AUDIO_ERROR)
-        vt = VideoTrimmer(att)
+        vt = VideoTrimmer(att, log_filter=self.log_filter)
         return vt.trim(start_pos, end_pos)
 
     def get_audio_track(self) -> bytes:
         self._check_video_content()
 
-        at = AudioTrack(self.video)
+        at = AudioTrack(self.video, log_filter=self.log_filter)
         return at.get_audio_track()
 
     def get_preview(self, second: float = 1.0, max_width=120, max_height=90) -> bytes:
