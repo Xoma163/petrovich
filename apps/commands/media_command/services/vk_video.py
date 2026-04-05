@@ -34,12 +34,12 @@ class VKVideoService(MediaService):
             return cached
 
         va = self.service.download_video(
-            url, author_id=data.channel_id, video_id=data.video_id, high_res=self.media_keys.high_resolution
+            url, author_id=data.channel_id, video_id=data.video_id, high_res=self.media_keys.high_resolution,
         )
         va.width = data.width
         va.height = data.height
 
-        if self.media_keys.force_cache or va.get_size_mb() > self.bot.max_video_size_mb:
+        if self._should_cache_attachment(va):
             return self._cache_video(data.channel_id, data.video_id, data.title, url, va.content)
         return MediaServiceResponse(text=data.title, attachments=[va], video_title=data.title)
 
