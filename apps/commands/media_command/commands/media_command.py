@@ -41,14 +41,14 @@ class Media(AcceptExtraCommand):
             HelpTextItem(
                 RoleEnum.USER,
                 [HelpTextArgument("(ссылка на видео/пост)", "скачивает видео из соцсетей и присылает его")],
-            )
+            ),
         ],
         help_text_keys=[
             HelpTextItem(
                 RoleEnum.USER,
                 [
                     HelpTextKey(
-                        MediaKeys.NO_MEDIA_KEYS[0], MediaKeys.NO_MEDIA_KEYS[1:], "позволяет не запускать команду"
+                        MediaKeys.NO_MEDIA_KEYS[0], MediaKeys.NO_MEDIA_KEYS[1:], "позволяет не запускать команду",
                     ),
                     HelpTextKey(
                         MediaKeys.AUDIO_ONLY_KEYS[0],  # noqa
@@ -164,8 +164,7 @@ class Media(AcceptExtraCommand):
 
         att_is_video = False
         if media_response.attachments:
-            att_is_video = isinstance(media_response.attachments[0],
-                                      VideoAttachment) or media_response.cache_url  # noqa
+            att_is_video = isinstance(media_response.attachments[0], VideoAttachment) or media_response.cache_url  # noqa
 
         if media_keys.save_to_disk and att_is_video:
             self.check_sender(RoleEnum.ADMIN)
@@ -207,14 +206,14 @@ class Media(AcceptExtraCommand):
             args_str = self.event.message.raw
 
         index = args_str.find(chosen_url)
-        extra_text = f"{args_str[:index].strip()}\n{args_str[index + len(chosen_url):].strip()}"
+        extra_text = f"{args_str[:index].strip()}\n{args_str[index + len(chosen_url) :].strip()}"
         extra_text = extra_text if extra_text.strip() else ""
 
         extra_text = self._strip_extra_text_by_keys(
-            self.event.message.keys, self.event.message.KEYS_SYMBOLS, extra_text
+            self.event.message.keys, self.event.message.KEYS_SYMBOLS, extra_text,
         )
         extra_text = self._strip_extra_text_by_keys(
-            self.event.message.short_keys_raw, self.event.message.SHORT_KEYS_SYMBOLS, extra_text
+            self.event.message.short_keys_raw, self.event.message.SHORT_KEYS_SYMBOLS, extra_text,
         )
 
         extra_text = extra_text if extra_text.strip() else ""
@@ -226,7 +225,7 @@ class Media(AcceptExtraCommand):
             for key_symbol in keys_symbols:
                 full_key = key_symbol + key
                 if (index := extra_text.find(full_key)) != -1:
-                    extra_text = f"{extra_text[:index].strip()}\n{extra_text[index + len(full_key):].strip()}"
+                    extra_text = f"{extra_text[:index].strip()}\n{extra_text[index + len(full_key) :].strip()}"
         return extra_text
 
     def prepare_media_response(

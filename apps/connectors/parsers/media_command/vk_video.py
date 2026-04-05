@@ -150,18 +150,18 @@ class VKVideo:
         if isinstance(adaptation_sets, dict):
             video_representations = adaptation_sets["Representation"]
             video_representations = list(
-                sorted(video_representations, key=lambda x: int(x["@bandwidth"]), reverse=True)
+                sorted(video_representations, key=lambda x: int(x["@bandwidth"]), reverse=True),
             )
             aa = None
         else:
             video_representations = adaptation_sets[0]["Representation"]
             video_representations = list(
-                sorted(video_representations, key=lambda x: int(x["@bandwidth"]), reverse=True)
+                sorted(video_representations, key=lambda x: int(x["@bandwidth"]), reverse=True),
             )
 
             audio_representations = adaptation_sets[1]["Representation"]
             audio_representations = list(
-                sorted(audio_representations, key=lambda x: int(x["@bandwidth"]), reverse=True)
+                sorted(audio_representations, key=lambda x: int(x["@bandwidth"]), reverse=True),
             )
 
             aa = AudioAttachment()
@@ -199,7 +199,7 @@ class VKVideo:
         pos2_text = ");"
         pos1 = bs4_str.find(pos1_text)
         pos2 = bs4_str.find(pos2_text, pos1)
-        data = json.loads(bs4_str[pos1 + len(pos1_text): pos2])
+        data = json.loads(bs4_str[pos1 + len(pos1_text) : pos2])
         return data
 
     @staticmethod
@@ -209,6 +209,6 @@ class VKVideo:
         pos2_text = "};"
         pos1 = bs4_str.find(pos1_text) - 1
         pos2 = bs4_str.find(pos2_text, pos1) + 1
-        data = json.loads(bs4_str[pos1 + len(pos1_text): pos2])
+        data = json.loads(bs4_str[pos1 + len(pos1_text) : pos2])
         del data["lang"]
         return data

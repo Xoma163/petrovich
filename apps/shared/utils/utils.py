@@ -254,7 +254,7 @@ def get_urls_from_text(text: str) -> list:
 def get_chunks(lst: list, n: int):
     """Yield successive n-sized chunks from lst."""
     for i in range(0, len(lst), n):
-        yield lst[i: i + n]
+        yield lst[i : i + n]
 
 
 def get_flat_list(_list: list[list]) -> list:
@@ -304,7 +304,7 @@ def split_text_by_n_symbols(text: str, n: int, split_on: list[str] | None = None
             if split_by_pos == -1:
                 continue
             texts.append(text[: split_by_pos + 1])
-            text = text[split_by_pos + 1:]
+            text = text[split_by_pos + 1 :]
             break
     texts.append(text)
     return texts

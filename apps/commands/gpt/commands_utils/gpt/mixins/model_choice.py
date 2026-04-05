@@ -33,19 +33,19 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
     ]
     VISION_HELP_TEXT_ITEMS = [
         HelpTextArgument(
-            "модель vision (название модели)", "Указывает какую модель использовать для обработки изображений (vision)"
+            "модель vision (название модели)", "Указывает какую модель использовать для обработки изображений (vision)",
         ),
         HelpTextArgument("модель vision удалить", "Удаляет выбранную модель для обработки изображений (vision)"),
     ]
     IMAGE_DRAW_HELP_TEXT_ITEMS = [
         HelpTextArgument(
-            "модель draw (название модели)", "Указывает какую модель использовать для генерации изображений (draw)"
+            "модель draw (название модели)", "Указывает какую модель использовать для генерации изображений (draw)",
         ),
         HelpTextArgument("модель draw удалить", "Удаляет выбранную модель для генерации изображений (draw)"),
     ]
     VOICE_RECOGNITION_HELP_TEXT_ITEMS = [
         HelpTextArgument(
-            "модель voice (название модели)", "Указывает какую модель использовать для обработки голоса (voice)"
+            "модель voice (название модели)", "Указывает какую модель использовать для обработки голоса (voice)",
         ),
         HelpTextArgument("модель voice удалить", "Удаляет выбранную модель для обработки голоса (voice)"),
     ]
@@ -120,7 +120,7 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
             answer.append(vision_models_str)
         if issubclass(self.provider.api_class, ImageDrawAPIMixin):
             image_draw_models = ImageDrawModel.objects.filter(provider=self.provider_model).order_by(
-                "name", "-width", "-height", "-image_cost"
+                "name", "-width", "-height", "-image_cost",
             )
             image_draw_models_str = self._get_models_str(
                 image_draw_models,
@@ -133,7 +133,7 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
             answer.append(image_draw_models_str)
         if issubclass(self.provider.api_class, VoiceRecognitionAPIMixin):
             voice_recognition_models = VoiceRecognitionModel.objects.filter(provider=self.provider_model).order_by(
-                "name"
+                "name",
             )
             voice_recognition_models_str = self._get_models_str(
                 voice_recognition_models,
@@ -152,10 +152,10 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
     def _get_models_str(
         self,
         models: QuerySet[CompletionsModel]
-                | QuerySet[VisionModel]
-                | QuerySet[ImageDrawModel]
-                | QuerySet[ImageEditModel]
-                | QuerySet[VoiceRecognitionModel],
+        | QuerySet[VisionModel]
+        | QuerySet[ImageDrawModel]
+        | QuerySet[ImageEditModel]
+        | QuerySet[VoiceRecognitionModel],
         profile_gpt_settings: ProfileGPTSettings,
         _get_row_method,
         _models_for_str: str,
@@ -233,7 +233,7 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
         filler_cost = " " * (max_lens[1] - len(model.name))
 
         return self.VOICE_RECOGNITION_MODEL_ROW.format(
-            model_name=model.name + filler_model_name, cost=cost + filler_cost, extra=extra_text
+            model_name=model.name + filler_model_name, cost=cost + filler_cost, extra=extra_text,
         )
 
     # MENU MODELS
@@ -337,7 +337,7 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
     ## CURRENT MODEL WORKS
 
     def _get_current_model_str(
-        self, settings: ProfileGPTSettings, model_field: str, get_default_model_method: Callable
+        self, settings: ProfileGPTSettings, model_field: str, get_default_model_method: Callable,
     ) -> str:
         """
         Получение текущей модели, которая установлена у пользователя или получение стандартной модели

@@ -37,7 +37,7 @@ class Meme(Command):
                         "присылает нужный мем. Можно использовать * вместо символов поиска. Например /мем ж*па",
                     ),
                     HelpTextArgument(
-                        "добавить (название) (Вложение/Пересланное сообщение с вложением)", "добавляет мем"
+                        "добавить (название) (Вложение/Пересланное сообщение с вложением)", "добавляет мем",
                     ),
                     HelpTextArgument("добавить (название) (ссылка на youtube/coub)", "добавляет мем с youtube/coub"),
                     HelpTextArgument(
@@ -162,7 +162,7 @@ class Meme(Command):
 
             answer_with_youtube = f"{answer}\n{self.MESSAGE_YOUTUBE_STATUS_IN_PROGRESS}"
             response = self.bot.send_response_message_item(
-                ResponseMessageItem(text=answer_with_youtube, peer_id=self.event.peer_id)
+                ResponseMessageItem(text=answer_with_youtube, peer_id=self.event.peer_id),
             )
             rmi_params.peer_id = self.event.peer_id
             rmi_params.message_id = response.response["result"]["message_id"]
@@ -229,7 +229,7 @@ class Meme(Command):
         is_youtube_link = isinstance(attachment, LinkAttachment) and attachment.is_youtube_link
         rmi_params = ResponseMessageItem()
         trusted_user = self.event.sender.check_role(RoleEnum.MODERATOR) or self.event.sender.check_role(
-            RoleEnum.TRUSTED
+            RoleEnum.TRUSTED,
         )
         # Кэш
         if trusted_user:
@@ -241,7 +241,7 @@ class Meme(Command):
 
             answer_with_youtube = f"{answer}\n{self.MESSAGE_YOUTUBE_STATUS_IN_PROGRESS}"
             response = self.bot.send_response_message_item(
-                ResponseMessageItem(text=answer_with_youtube, peer_id=self.event.peer_id)
+                ResponseMessageItem(text=answer_with_youtube, peer_id=self.event.peer_id),
             )
             rmi_params.peer_id = self.event.peer_id
             rmi_params.message_id = (response.response["result"]["message_id"],)
@@ -280,7 +280,7 @@ class Meme(Command):
             user_msg = f'Мем с названием "{meme.name}" удалён поскольку он не соответствует правилам, устарел или является дубликатом.'
             user = meme.author.get_tg_user()
             rmi = ResponseMessageItem(
-                text=user_msg, peer_id=user.user_id, message_thread_id=self.event.message_thread_id
+                text=user_msg, peer_id=user.user_id, message_thread_id=self.event.message_thread_id,
             )
             self.bot.send_response_message_item(rmi)
             rmi.send = False
@@ -325,7 +325,7 @@ class Meme(Command):
         meme.approved = True
         meme.save()
         return ResponseMessage(
-            [ResponseMessageItem(text=answer), ResponseMessageItem(text=answer, peer_id=user.user_id)]
+            [ResponseMessageItem(text=answer), ResponseMessageItem(text=answer, peer_id=user.user_id)],
         )
 
     def menu_reject(self) -> ResponseMessage:
@@ -347,7 +347,7 @@ class Meme(Command):
             [
                 ResponseMessageItem(text=answer),
                 ResponseMessageItem(text=answer, peer_id=user.user_id),
-            ]
+            ],
         )
 
     def menu_rename(self) -> ResponseMessage:
@@ -491,7 +491,7 @@ class Meme(Command):
         from apps.commands.other.commands.trusted.trim_video import TrimVideo
 
         lower_link_index = self.event.message.args.index(meme.link.lower())
-        args = self.event.message.args[lower_link_index + 1:]
+        args = self.event.message.args[lower_link_index + 1 :]
         start_pos, end_pos = TrimVideo.get_timecodes(meme.link, args)
         yt_api = YoutubeVideo()
         try:

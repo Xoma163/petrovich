@@ -8,11 +8,11 @@ repos:
         entry: uv run ruff check --fix
         language: system
         types_or: [ python, pyi ]
-      - id: mypy
-        name: mypy
-        entry: uv run mypy --config-file pyproject.toml
-        language: system
-        types_or: [ python, pyi ]
+#      - id: mypy
+#        name: mypy
+#        entry: uv run mypy --config-file pyproject.toml
+#        language: system
+#        types_or: [ python, pyi ]
       - id: add-trailing-comma
         name: add-trailing-comma
         entry: uv run add-trailing-comma

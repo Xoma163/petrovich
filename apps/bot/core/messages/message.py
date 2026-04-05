@@ -84,8 +84,8 @@ class Message:
         args_split = re.split(self.SPACE_REGEX, args_str)
 
         for arg in filter(None, args_split):
-            key = next((arg[len(ks):].lower() for ks in self.KEYS_SYMBOLS if arg.startswith(ks)), None)
-            short_key = next((arg[len(ks):].lower() for ks in self.SHORT_KEYS_SYMBOLS if arg.startswith(ks)), None)
+            key = next((arg[len(ks) :].lower() for ks in self.KEYS_SYMBOLS if arg.startswith(ks)), None)
+            short_key = next((arg[len(ks) :].lower() for ks in self.SHORT_KEYS_SYMBOLS if arg.startswith(ks)), None)
 
             if key or short_key:
                 index = args_str.find(arg)
@@ -98,7 +98,7 @@ class Message:
                 if index == 0:
                     args_str = args_str[:index]
                 else:
-                    args_str = args_str[: index - 1] + args_str[index + len(arg):]
+                    args_str = args_str[: index - 1] + args_str[index + len(arg) :]
             else:
                 new_args_split.append(arg)
 

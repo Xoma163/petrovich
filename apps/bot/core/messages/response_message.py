@@ -106,9 +106,9 @@ class ResponseMessageItem:
             left_part = None
             right_part = None
             if start_pos >= 9:
-                left_part = text[start_pos - 9: start_pos]
+                left_part = text[start_pos - 9 : start_pos]
             if len(text) > end_pos:
-                right_part = text[end_pos: end_pos + 2]
+                right_part = text[end_pos : end_pos + 2]
             if left_part == '<a href="' and right_part == '">':
                 continue
 

@@ -135,7 +135,7 @@ if not os.path.exists(LOGS_DIR):
 DEBUG_FILE = os.path.join(LOGS_DIR, "debug.log")  # noqa
 ERROR_FILE = os.path.join(LOGS_DIR, "error.log")  # noqa
 
-GB_1 = 2 ** 30  # 1 gb
+GB_1 = 2**30  # 1 gb
 
 LOGGING = {
     "version": 1,
@@ -210,7 +210,7 @@ CACHES = {
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         },
-    }
+    },
 }
 
 sentry_sdk.init(

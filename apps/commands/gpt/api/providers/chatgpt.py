@@ -194,7 +194,7 @@ class ChatGPTAPI(
         return f"{self.base_url}/audio/transcriptions"
 
     def voice_recognition(
-        self, audio_ext: str, content: bytes, model: type[VoiceRecognitionModel]
+        self, audio_ext: str, content: bytes, model: type[VoiceRecognitionModel],
     ) -> GPTVoiceRecognitionResponse:
         data = {
             "model": model.name,
@@ -221,14 +221,14 @@ class ChatGPTAPI(
                 payload["text"] = {"verbosity": verbosity_level}
             if effort_level := extra_data.get("effort_level"):
                 if effort_level == GPTReasoningEffortLevel.XHIGH.value and model.name not in (
-                        "gpt-5.4",
-                        "gpt-5.4-mini",
-                        "gpt-5.4-nano",
-                        "gpt-5.4-pro",
-                        "gpt-5.3-codex",
-                        "gpt-5.2",
-                        "gpt-5.2-pro",
-                        "gpt-5.2-codex",
+                    "gpt-5.4",
+                    "gpt-5.4-mini",
+                    "gpt-5.4-nano",
+                    "gpt-5.4-pro",
+                    "gpt-5.3-codex",
+                    "gpt-5.2",
+                    "gpt-5.2-pro",
+                    "gpt-5.2-codex",
                 ):
                     raise PWarning("Для использования xHigh используемая модель должна быть gpt-5.2 и старше")
                 payload["reasoning"] = {"effort": effort_level}

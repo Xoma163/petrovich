@@ -28,17 +28,17 @@ class TrimVideo(Command):
                 RoleEnum.USER,
                 [
                     HelpTextArgument(
-                        "(вложенное видео/аудио) (таймкод начала)", "обрезает видео с таймкода и до конца"
+                        "(вложенное видео/аудио) (таймкод начала)", "обрезает видео с таймкода и до конца",
                     ),
                     HelpTextArgument(
-                        "(вложенное видео/аудио) (таймкод начала) (таймкод конца)", "обрезает видео по таймкодам"
+                        "(вложенное видео/аудио) (таймкод начала) (таймкод конца)", "обрезает видео по таймкодам",
                     ),
                     HelpTextArgument("(youtube ссылка) (таймкод начала)", "обрезает с таймкода и до конца"),
                     HelpTextArgument("(youtube ссылка) (таймкод начала) (таймкод конца)", "обрезает по таймкодам"),
                     HelpTextArgument("(youtube ссылка с таймкодом)", "обрезает с таймкода и до конца"),
                     HelpTextArgument("(youtube ссылка с таймкодом) (таймкод конца)", "обрезает по таймкодам"),
                 ],
-            )
+            ),
         ],
         extra_text=(
             "Формат для таймкодов: [%H:]%M:%S[.%MS], т.е. валидные таймкоды: 09:04, 9:04, 09:4, 9:4, 01:09:04, 9:04.123"
@@ -128,10 +128,10 @@ class TrimVideo(Command):
                 dot_in_timecode = True
                 numbers.append(int(timecode[last_save_index:i]))
 
-                ms = timecode[i + 1: len(timecode)]
+                ms = timecode[i + 1 : len(timecode)]
                 break
         if not dot_in_timecode:
-            n = int(timecode[last_save_index: len(timecode)])
+            n = int(timecode[last_save_index : len(timecode)])
             numbers.append(n)
         if len(numbers) == 3:
             h, m, s = numbers

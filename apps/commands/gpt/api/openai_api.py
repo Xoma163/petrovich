@@ -110,7 +110,7 @@ class OpenAIAPI(GPTAPI, ABC):
                     # OpenAI streaming lines look like: "data: {json}"
                     if not line.startswith("data: "):
                         continue
-                    data = line[len("data: "):].strip()
+                    data = line[len("data: ") :].strip()
 
                     try:
                         chunk = json.loads(data)
@@ -129,7 +129,7 @@ class OpenAIAPI(GPTAPI, ABC):
                             continue
                         last_call = now
                         sha256_hex = hashlib.sha256(chunk["item_id"].encode("utf-8")).hexdigest()
-                        num64 = int(sha256_hex, 16) % (2 ** 64)
+                        num64 = int(sha256_hex, 16) % (2**64)
                         callback_func(text=full_text, draft_id=num64)
 
             finally:
@@ -154,7 +154,7 @@ class OpenAIAPI(GPTAPI, ABC):
                     # OpenAI streaming lines look like: "data: {json}"
                     if not line.startswith("data: "):
                         continue
-                    data = line[len("data: "):].strip()
+                    data = line[len("data: ") :].strip()
 
                     try:
                         chunk = json.loads(data)
@@ -185,7 +185,7 @@ class OpenAIAPI(GPTAPI, ABC):
                             continue
                         last_call = now
                         sha256_hex = hashlib.sha256(chunk["id"].encode("utf-8")).hexdigest()
-                        num64 = int(sha256_hex, 16) % (2 ** 16)
+                        num64 = int(sha256_hex, 16) % (2**16)
                         callback_func(text=full_text, draft_id=num64)
 
             finally:

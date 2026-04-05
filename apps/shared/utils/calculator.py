@@ -27,7 +27,7 @@ class BinaryOperator(Symbol):
         result = []
         for i in range(1, len(_split)):
             left_expr = self.character.join(_split[0:i])
-            right_expr = self.character.join(_split[i: len(_split)])
+            right_expr = self.character.join(_split[i : len(_split)])
             result.append((left_expr, right_expr))
         return result
 
@@ -72,7 +72,7 @@ class Power(BinaryOperator):
 
     def compute(self, left, right):
         try:
-            return round(left ** right, ACCURACY)
+            return round(left**right, ACCURACY)
         except OverflowError:
             return float("inf")
 
@@ -86,7 +86,7 @@ class Function(Symbol):
         return expr.startswith(self.left) and expr.endswith(self.right)
 
     def separations(self, expr):
-        return [(expr[len(self.left): -len(self.right)], None)]
+        return [(expr[len(self.left) : -len(self.right)], None)]
 
 
 class Brackets(Function):

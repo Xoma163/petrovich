@@ -113,7 +113,7 @@ class TgBot(Bot):
         inline_query_result = meme_cmd.get_tg_inline_memes(filter_list)
 
         return self.api_handler.answer_inline_query(
-            inline_query_id=data["id"], results=inline_query_result, cache_time=0
+            inline_query_id=data["id"], results=inline_query_result, cache_time=0,
         )
 
     def _send_media_group_wrap(self, rmi: ResponseMessageItem) -> dict[str, Any]:
@@ -243,7 +243,7 @@ class TgBot(Bot):
             "Bad Request: VOICE_MESSAGES_FORBIDDEN": "Не могу отправить голосовуху из-за ваших настроек безопасности",
         }
         catch_errors_starts_with = {
-            "Bad Request: can't parse entities": "Не смог распарсить markdown/html сущности. Внутренняя ошибка."
+            "Bad Request: can't parse entities": "Не смог распарсить markdown/html сущности. Внутренняя ошибка.",
         }
         catch_errors_reply_to_not_found = ("Bad Request: message to be replied not found",)
 
@@ -354,7 +354,7 @@ class TgBot(Bot):
             # Иначё бьём на 1024 символа первое сообщение и на 4096 остальные (ограничения телеги)
             chunks = split_text_by_n_symbols(rmi.text, self.max_message_caption_length)
             first_chunk = chunks[0]
-            text = rmi.text[len(first_chunk):]
+            text = rmi.text[len(first_chunk) :]
             chunks = split_text_by_n_symbols(text, self.max_message_text_length)
             chunks = [first_chunk] + chunks
             rmi.text = chunks[0]
@@ -462,7 +462,7 @@ class TgBot(Bot):
             if size_mb and size_mb > self.max_video_size_mb:
                 rmi.attachments = []
                 raise PError(
-                    f"Нельзя загружать видео более {self.max_video_size_mb} мб в телеграмм. Ваше видео {round(size_mb, 2)} мб"
+                    f"Нельзя загружать видео более {self.max_video_size_mb} мб в телеграмм. Ваше видео {round(size_mb, 2)} мб",
                 )
             with ChatActionSender(self, ChatActionEnum.UPLOAD_VIDEO, rmi.peer_id, rmi.message_thread_id):
                 files = {"video": video_attachment.get_bytes_io_content()}
@@ -614,7 +614,7 @@ class TgBot(Bot):
 
     def edit_message_keyboard(self, rmi: ResponseMessageItem) -> dict:
         return self.api_handler.edit_messaage_reply_markup(
-            chat_id=rmi.peer_id, message_id=rmi.message_id, reply_markup=rmi.keyboard
+            chat_id=rmi.peer_id, message_id=rmi.message_id, reply_markup=rmi.keyboard,
         )
 
     def edit_message_media(self, rmi: ResponseMessageItem) -> dict:
@@ -687,7 +687,7 @@ class TgBot(Bot):
 
         # no wait for response
         threading.Thread(
-            target=self.api_handler.send_chat_action, args=(chat_id, tg_chat_action, message_thread_id)
+            target=self.api_handler.send_chat_action, args=(chat_id, tg_chat_action, message_thread_id),
         ).start()
 
     def get_mention(self, profile: Profile) -> str:

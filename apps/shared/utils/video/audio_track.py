@@ -4,7 +4,7 @@ from apps.shared.utils.video.video_common import VideoCommon
 
 
 class AudioTrack(VideoCommon):
-    CHUNK_SIZE = 2 ** 26  # 64mb
+    CHUNK_SIZE = 2**26  # 64mb
 
     def __init__(self, video: VideoAttachment):
         super().__init__()

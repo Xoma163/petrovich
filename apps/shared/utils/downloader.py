@@ -9,7 +9,7 @@ from apps.shared.utils.do_the_linux_command import do_the_linux_command
 
 
 class Downloader:
-    DEFAULT_CHUNK_SIZE = 2 ** 24  # 16 mb
+    DEFAULT_CHUNK_SIZE = 2**24  # 16 mb
 
     def __init__(
         self,

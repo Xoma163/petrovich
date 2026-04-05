@@ -24,7 +24,7 @@ class RedditService(MediaService):
                     peer_id=self.event.peer_id,
                     message_thread_id=self.event.message_thread_id,
                     filename=self.service.filename,
-                )
+                ),
             ]
         elif self.service.is_image or self.service.is_images or self.service.is_gallery:
             attachments = [
@@ -38,7 +38,7 @@ class RedditService(MediaService):
                     peer_id=self.event.peer_id,
                     message_thread_id=self.event.message_thread_id,
                     filename=self.service.filename,
-                )
+                ),
             ]
         elif self.service.is_text or self.service.is_link:
             text = reddit_data
@@ -58,7 +58,7 @@ class RedditService(MediaService):
                     link = text[start_pos:end_pos]
                     if _text == "Фото":
                         all_photos.append(link)
-                    if text[start_pos - 9: start_pos] == '<a href="':
+                    if text[start_pos - 9 : start_pos] == '<a href="':
                         continue
                     tg_url = self.bot.get_formatted_url_markdown(_text, link)
                     text = text[:start_pos] + tg_url + text[end_pos:]
@@ -66,7 +66,7 @@ class RedditService(MediaService):
             all_photos = reversed(all_photos)
             attachments = [
                 self.bot.get_photo_attachment(
-                    url=photo, filename=self.service.filename, peer_id=self.event.peer_id, send_chat_action=False
+                    url=photo, filename=self.service.filename, peer_id=self.event.peer_id, send_chat_action=False,
                 )
                 for photo in all_photos
             ]

@@ -18,7 +18,7 @@ class Commands(Command):
                     HelpTextArgument(None, "список всех команд"),
                     HelpTextArgument("(название роли)", "список команд для роли"),
                 ],
-            )
+            ),
         ],
     )
 
@@ -65,7 +65,7 @@ class Commands(Command):
                 if dash_pos == -1:
                     new_line = help_text
                 else:
-                    new_line = self.bot.get_formatted_text_line(help_text[: dash_pos - 1]) + help_text[dash_pos - 1:]
+                    new_line = self.bot.get_formatted_text_line(help_text[: dash_pos - 1]) + help_text[dash_pos - 1 :]
                 help_texts_list_new.append(new_line)
             result += "\n".join(help_texts_list_new)
         return result
