@@ -6,7 +6,6 @@ from apps.bot.core.messages.attachments.photo import PhotoAttachment
 
 
 class ThumbnailMixin:
-
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.thumbnail: PhotoAttachment | None = None
@@ -30,9 +29,9 @@ class ThumbnailMixin:
 
     @staticmethod
     def make_thumbnail(
-            photo_attachment: PhotoAttachment,
-            max_size: int | None = None,
-            _format: str | None = None,
+        photo_attachment: PhotoAttachment,
+        max_size: int | None = None,
+        _format: str | None = None,
     ) -> bytes:
         """
         Центрирование изображение с блюром в пустотах

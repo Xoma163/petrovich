@@ -10,7 +10,6 @@ from petrovich.settings import TIME_ZONE
 
 
 class Command(BaseCommand):
-
     def handle(self, *args, **options):
         schedule = [
             # Проверка на др

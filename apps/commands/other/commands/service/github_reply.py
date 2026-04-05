@@ -9,8 +9,9 @@ from apps.shared.utils.utils import get_admin_profile
 
 
 class GithubReply(Command):
-    BODY_FINE_PRINT_TEMPLATE = "Комментарий от пользователя {sender} (id={id})\n" \
-                               "Данный комментарий сгенерирован автоматически"
+    BODY_FINE_PRINT_TEMPLATE = (
+        "Комментарий от пользователя {sender} (id={id})\nДанный комментарий сгенерирован автоматически"
+    )
     ACCEPT_PATTERN = r"Новый комментарий от разработчика под вашей проблемой #(\d{3,5})\n"
 
     NEW_COMMENT_FROM_USER_TEMPLATE = "Новый комментарий от пользователей под {problem_str}\n\n{comment}"

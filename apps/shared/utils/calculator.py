@@ -5,7 +5,6 @@ ACCURACY = 15
 
 
 class Symbol:
-
     def match(self, expr):
         raise NotImplementedError
 
@@ -17,7 +16,6 @@ class Symbol:
 
 
 class BinaryOperator(Symbol):
-
     def __init__(self, character):
         self.character = character
 
@@ -29,13 +27,12 @@ class BinaryOperator(Symbol):
         result = []
         for i in range(1, len(_split)):
             left_expr = self.character.join(_split[0:i])
-            right_expr = self.character.join(_split[i:len(_split)])
+            right_expr = self.character.join(_split[i: len(_split)])
             result.append((left_expr, right_expr))
         return result
 
 
 class Plus(BinaryOperator):
-
     def __init__(self):
         super().__init__("+")
 
@@ -44,7 +41,6 @@ class Plus(BinaryOperator):
 
 
 class Minus(BinaryOperator):
-
     def __init__(self):
         super().__init__("-")
 
@@ -53,7 +49,6 @@ class Minus(BinaryOperator):
 
 
 class Multiply(BinaryOperator):
-
     def __init__(self):
         super().__init__("*")
 
@@ -62,7 +57,6 @@ class Multiply(BinaryOperator):
 
 
 class Divide(BinaryOperator):
-
     def __init__(self):
         super().__init__("/")
 
@@ -73,7 +67,6 @@ class Divide(BinaryOperator):
 
 
 class Power(BinaryOperator):
-
     def __init__(self):
         super().__init__("^")
 
@@ -85,7 +78,6 @@ class Power(BinaryOperator):
 
 
 class Function(Symbol):
-
     def __init__(self, left, right):
         self.left = left
         self.right = right
@@ -98,7 +90,6 @@ class Function(Symbol):
 
 
 class Brackets(Function):
-
     def __init__(self):
         super().__init__("(", ")")
 
@@ -179,7 +170,7 @@ class Calculator:
         "G->G^F",
         "G->F",
         "F->(S)",
-        "F->R"
+        "F->R",
     ]
     _COMPILED_GRAMMARS: list = []
 

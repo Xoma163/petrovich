@@ -19,20 +19,30 @@ class Statistics(Command):
     help_text = HelpText(
         commands_text="статистика по победителям игр или по кол-ву созданных мемов",
         help_texts=[
-            HelpTextItem(RoleEnum.USER, [
-                HelpTextArgument("[модуль=все]", "статистика по победителям-петровичам и по кол-ву созданных мемов"),
-                HelpTextArgument("(петрович) [год=текущий]", "статистика по победителям петровича")
-            ])
+            HelpTextItem(
+                RoleEnum.USER,
+                [
+                    HelpTextArgument(
+                        "[модуль=все]", "статистика по победителям-петровичам и по кол-ву созданных мемов"
+                    ),
+                    HelpTextArgument("(петрович) [год=текущий]", "статистика по победителям петровича"),
+                ],
+            )
         ],
         help_text_keys=[
-            HelpTextItem(RoleEnum.USER, [
-                HelpTextKey("all", None,
-                            "если выбран модуль петрович, то выведутся пользователя которые также покинули группу")
-            ])
+            HelpTextItem(
+                RoleEnum.USER,
+                [
+                    HelpTextKey(
+                        "all",
+                        None,
+                        "если выбран модуль петрович, то выведутся пользователя которые также покинули группу",
+                    )
+                ],
+            )
         ],
         extra_text=(
-            "Модули: петрович, мемы, \n"
-            "Если выбран модуль петрович и передан ключ --all, то выведутся пользователи которые также покинули группу"
+            "Модули: петрович, мемы, \nЕсли выбран модуль петрович и передан ключ --all, то выведутся пользователи которые также покинули группу"
         ),
     )
 
@@ -81,10 +91,9 @@ class Statistics(Command):
         else:
             profiles = Profile.objects.filter(pk=self.event.sender.pk)
 
-        result_list = Meme.objects.filter(author__in=profiles) \
-            .values("author") \
-            .annotate(total=Count("author")) \
-            .order_by("-total")
+        result_list = (
+            Meme.objects.filter(author__in=profiles).values("author").annotate(total=Count("author")).order_by("-total")
+        )
 
         msg = "Созданных мемов:"
         if self.event.is_from_pm:

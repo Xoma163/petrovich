@@ -16,10 +16,11 @@ class Calc(Command):
     help_text = HelpText(
         commands_text="калькулятор",
         help_texts=[
-            HelpTextItem(RoleEnum.USER, [
-                HelpTextArgument("(выражение)", "калькулятор выражений. Умеет работать с + - * / ^ ( )")
-            ])
-        ]
+            HelpTextItem(
+                RoleEnum.USER,
+                [HelpTextArgument("(выражение)", "калькулятор выражений. Умеет работать с + - * / ^ ( )")],
+            )
+        ],
     )
 
     MAX_OPERATIONS = 20
@@ -46,14 +47,14 @@ class Calc(Command):
         else:
             self.check_args(1)
             expression = self.event.message.args_str
-        expression = expression \
-            .replace(" ", "") \
-            .replace(",", ".")
-        expression = self.replace_consts(expression) \
-            .replace("k", "000") \
-            .replace("к", "000") \
-            .replace("m", "000000") \
+        expression = expression.replace(" ", "").replace(",", ".")
+        expression = (
+            self.replace_consts(expression)
+            .replace("k", "000")
+            .replace("к", "000")
+            .replace("m", "000000")
             .replace("м", "000000")
+        )
         return expression
 
     @staticmethod

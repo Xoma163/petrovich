@@ -15,16 +15,13 @@ class Issue(Command):
     help_text = HelpText(
         commands_text="добавляет проблему Петровича, которую нужно решить",
         help_texts=[
-            HelpTextItem(RoleEnum.USER, [
-                HelpTextArgument(
-                    "(проблема)\n[описание проблемы]\n[теги]",
-                    "добавляет проблему Петровича"
-                ),
-                HelpTextArgument(
-                    "(пересылаемое сообщение)",
-                    "добавляет проблему Петровича"
-                )
-            ])
+            HelpTextItem(
+                RoleEnum.USER,
+                [
+                    HelpTextArgument("(проблема)\n[описание проблемы]\n[теги]", "добавляет проблему Петровича"),
+                    HelpTextArgument("(пересылаемое сообщение)", "добавляет проблему Петровича"),
+                ],
+            )
         ],
         extra_text=(
             "Возможные теги: #Баг #Фича #Говнокод #Документация #Тест #хелп\n\n"
@@ -32,14 +29,13 @@ class Issue(Command):
             "[Название команды/сервиса] Краткое описание проблемы\n"
             "Описание проблемы в любом формате. Чем подробнее - тем лучше. Если есть логи и скриншоты - отлично\n"
             "Теги"
-        )
+        ),
     )
 
     args_or_fwd = True
     mentioned = True
 
-    BODY_FINE_PRINT_TEMPLATE = "Ишю от пользователя {sender} (id={id})\n" \
-                               "Данное ишю сгенерировано автоматически"
+    BODY_FINE_PRINT_TEMPLATE = "Ишю от пользователя {sender} (id={id})\nДанное ишю сгенерировано автоматически"
 
     def start(self) -> ResponseMessage:
         if self.event.message.args:

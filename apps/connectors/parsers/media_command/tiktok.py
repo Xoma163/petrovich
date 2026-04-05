@@ -11,15 +11,15 @@ from apps.shared.exceptions import PWarning
 
 
 class TikTok:
-    AGE_RESTRICTION_MESSAGE = r'This post may not be comfortable for some audiences. Log in to make the most of your experience.'
-    AUDIENCE_CONTROL = r'This creator turned on audience controls. Log in to make the most of your TikTok experience.'
+    AGE_RESTRICTION_MESSAGE = (
+        "This post may not be comfortable for some audiences. Log in to make the most of your experience."
+    )
+    AUDIENCE_CONTROL = "This creator turned on audience controls. Log in to make the most of your TikTok experience."
 
     def __init__(self):
         super().__init__()
 
-        self.errors = {
-            10231: "Не могу скачать контент. Недоступно в нашей стране"
-        }
+        self.errors = {10231: "Не могу скачать контент. Недоступно в нашей стране"}
 
     @retry(times=5, exceptions=(TimeoutException,))
     def _get_tiktok_request(self, url):
@@ -41,7 +41,7 @@ class TikTok:
         try:
             page_source, cookies, headers = self._get_tiktok_request(url)
         except TimeoutException:
-            raise PWarning("Подозрение на \"странный\" контент. Сообщите разработчику")
+            raise PWarning('Подозрение на "странный" контент. Сообщите разработчику')
 
         bs4 = BeautifulSoup(page_source, "html.parser")
         if any([self.AGE_RESTRICTION_MESSAGE in x.text for x in bs4.find_all("p")]):
@@ -86,5 +86,5 @@ class TikTok:
             extra_data={
                 "cookies": cookies,
                 "headers": headers,
-            }
+            },
         )

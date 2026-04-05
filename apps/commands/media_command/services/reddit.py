@@ -18,36 +18,38 @@ class RedditService(MediaService):
         result_text = self.service.title
 
         if self.service.is_gif:
-            attachments = [self.bot.get_gif_attachment(
-                _bytes=reddit_data,
-                peer_id=self.event.peer_id,
-                message_thread_id=self.event.message_thread_id,
-                filename=self.service.filename,
-            )]
+            attachments = [
+                self.bot.get_gif_attachment(
+                    _bytes=reddit_data,
+                    peer_id=self.event.peer_id,
+                    message_thread_id=self.event.message_thread_id,
+                    filename=self.service.filename,
+                )
+            ]
         elif self.service.is_image or self.service.is_images or self.service.is_gallery:
-            attachments = [self.bot.get_photo_attachment(
-                url=att,
-                filename=self.service.filename,
-                send_chat_action=False
-            ) for att in reddit_data]
+            attachments = [
+                self.bot.get_photo_attachment(url=att, filename=self.service.filename, send_chat_action=False)
+                for att in reddit_data
+            ]
         elif self.service.is_video:
-            attachments = [self.bot.get_video_attachment(
-                _bytes=reddit_data,
-                peer_id=self.event.peer_id,
-                message_thread_id=self.event.message_thread_id,
-                filename=self.service.filename
-            )]
+            attachments = [
+                self.bot.get_video_attachment(
+                    _bytes=reddit_data,
+                    peer_id=self.event.peer_id,
+                    message_thread_id=self.event.message_thread_id,
+                    filename=self.service.filename,
+                )
+            ]
         elif self.service.is_text or self.service.is_link:
             text = reddit_data
             all_photos = []
-            text = text \
-                .replace("&#x200B;", "") \
-                .replace("&amp;#x200B;", "") \
-                .replace("&amp;", "&") \
-                .replace(" ", " ") \
-                .strip()
+            text = (
+                text.replace("&#x200B;", "").replace("&amp;#x200B;", "").replace("&amp;", "&").replace(" ", " ").strip()
+            )
             regexps_with_static = (
-                (r"https.*player", "Видео"), (r"https://preview\.redd\.it/(?:\w|\d|\.|\?|\=|&)*", "Фото"))
+                (r"https.*player", "Видео"),
+                (r"https://preview\.redd\.it/(?:\w|\d|\.|\?|\=|&)*", "Фото"),
+            )
             for regexp, _text in regexps_with_static:
                 p = re.compile(regexp)
                 for item in reversed(list(p.finditer(text))):
@@ -56,7 +58,7 @@ class RedditService(MediaService):
                     link = text[start_pos:end_pos]
                     if _text == "Фото":
                         all_photos.append(link)
-                    if text[start_pos - 9:start_pos] == "<a href=\"":
+                    if text[start_pos - 9: start_pos] == '<a href="':
                         continue
                     tg_url = self.bot.get_formatted_url_markdown(_text, link)
                     text = text[:start_pos] + tg_url + text[end_pos:]
@@ -64,10 +66,7 @@ class RedditService(MediaService):
             all_photos = reversed(all_photos)
             attachments = [
                 self.bot.get_photo_attachment(
-                    url=photo,
-                    filename=self.service.filename,
-                    peer_id=self.event.peer_id,
-                    send_chat_action=False
+                    url=photo, filename=self.service.filename, peer_id=self.event.peer_id, send_chat_action=False
                 )
                 for photo in all_photos
             ]

@@ -22,7 +22,7 @@ class ChatGPTCommand(
     GPTCompletionsFunctionality,
     GPTVisionFunctionality,
     GPTImageDrawFunctionality,
-    GPT5SettingsMixin
+    GPT5SettingsMixin,
 ):
     name = "gpt"
     names = ["гпт", "chatgpt", "чатгпт"]
@@ -36,20 +36,20 @@ class ChatGPTCommand(
         help_texts=[
             HelpTextItem(
                 access,
-                GPTCompletionsFunctionality.COMPLETIONS_HELP_TEXT_ITEMS +
-                GPTVisionFunctionality.VISION_HELP_TEXT_ITEMS +
-                GPTImageDrawFunctionality.IMAGE_DRAW_HELP_TEXT_ITEMS +
-                GPTPrepromptMixin.PREPROMPT_HELP_TEXT_ITEMS +
-                GPTStatisticsMixin.STATISTICS_HELP_TEXT_ITEMS +
-                GPTModelChoiceMixin.MODEL_CHOOSE_HELP_TEXT_ITEMS +
-                GPTModelChoiceMixin.COMPLETIONS_HELP_TEXT_ITEMS +
-                GPTModelChoiceMixin.VISION_HELP_TEXT_ITEMS +
-                GPTModelChoiceMixin.IMAGE_DRAW_HELP_TEXT_ITEMS +
-                GPTModelChoiceMixin.VOICE_RECOGNITION_HELP_TEXT_ITEMS +
-                GPTKeyMixin.KEY_HELP_TEXT_ITEMS +
-                GPT5SettingsMixin.GPT_5_SETTINGS_HELP_TEXT_ITEMS +
-                GPTPresetMixin.PRESET_HELP_TEXT_ITEMS +
-                GPTSettingsMixin.SETTINGS_HELP_TEXT_ITEMS
+                GPTCompletionsFunctionality.COMPLETIONS_HELP_TEXT_ITEMS
+                + GPTVisionFunctionality.VISION_HELP_TEXT_ITEMS
+                + GPTImageDrawFunctionality.IMAGE_DRAW_HELP_TEXT_ITEMS
+                + GPTPrepromptMixin.PREPROMPT_HELP_TEXT_ITEMS
+                + GPTStatisticsMixin.STATISTICS_HELP_TEXT_ITEMS
+                + GPTModelChoiceMixin.MODEL_CHOOSE_HELP_TEXT_ITEMS
+                + GPTModelChoiceMixin.COMPLETIONS_HELP_TEXT_ITEMS
+                + GPTModelChoiceMixin.VISION_HELP_TEXT_ITEMS
+                + GPTModelChoiceMixin.IMAGE_DRAW_HELP_TEXT_ITEMS
+                + GPTModelChoiceMixin.VOICE_RECOGNITION_HELP_TEXT_ITEMS
+                + GPTKeyMixin.KEY_HELP_TEXT_ITEMS
+                + GPT5SettingsMixin.GPT_5_SETTINGS_HELP_TEXT_ITEMS
+                + GPTPresetMixin.PRESET_HELP_TEXT_ITEMS
+                + GPTSettingsMixin.SETTINGS_HELP_TEXT_ITEMS,
             )
         ],
         help_text_keys=[
@@ -58,11 +58,11 @@ class ChatGPTCommand(
                 [
                     GPTImageDrawFunctionality.KEY_ITEM_ORIG,
                     GPTImageDrawFunctionality.KEY_ITEM_COUNT,
-                    GPTImageDrawFunctionality.KEY_ITEM_HD
-                ] +
-                GPTImageDrawFunctionality.KEY_ITEMS_FORMAT +
-                GPTStatisticsMixin.STATISTICS_KEY_ITEMS_KEY
+                    GPTImageDrawFunctionality.KEY_ITEM_HD,
+                ]
+                + GPTImageDrawFunctionality.KEY_ITEMS_FORMAT
+                + GPTStatisticsMixin.STATISTICS_KEY_ITEMS_KEY,
             )
         ],
-        extra_text=f"{GPTCommand.EXTRA_TEXT}\n\n{GPTPrepromptMixin.EXTRA_TEXT}\n\n{GPTImageDrawFunctionality.EXTRA_TEXT}"
+        extra_text=f"{GPTCommand.EXTRA_TEXT}\n\n{GPTPrepromptMixin.EXTRA_TEXT}\n\n{GPTImageDrawFunctionality.EXTRA_TEXT}",
     )

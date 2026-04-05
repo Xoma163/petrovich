@@ -1,6 +1,8 @@
 import re
+from collections.abc import Sequence
 from copy import copy
 
+from apps.bot.core.messages.attachments.attachment import Attachment
 from apps.bot.core.messages.telegram.parse_mode import TelegramParseMode
 
 
@@ -10,25 +12,28 @@ class ResponseMessageItem:
     URLS_REGEXP = r"(http|ftp|https|tg)(:\/\/)([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-])"
 
     def __init__(
-            self,
-            text: str | None = None,
-            attachments: list | None = None,
-            reply_to: str | None = None,
-            keyboard: dict | None = None,
-            message_id: int | None = None,
-            message_thread_id: str | int | None = None,
-            peer_id: int | None = None,
-            log_level: str = "debug",
-            exc_info=None,
-            send: bool = True,
-            spoiler: bool = False,
-            parse_mode: TelegramParseMode | None = None
+        self,
+        text: str | None = None,
+        attachments: Attachment | Sequence[Attachment] | None = None,
+        reply_to: int | None = None,
+        keyboard: dict | None = None,
+        message_id: int | None = None,
+        message_thread_id: int | None = None,
+        peer_id: int | None = None,
+        log_level: str = "debug",
+        exc_info=None,
+        send: bool = True,
+        spoiler: bool = False,
+        parse_mode: TelegramParseMode | None = None,
     ):
         self._raw_text = text
         self.text = text
-        self.attachments = attachments if attachments else []
-        if not isinstance(self.attachments, list):
-            self.attachments = [self.attachments]
+        if attachments is None:
+            self.attachments: list[Attachment] = []
+        elif isinstance(attachments, Sequence):
+            self.attachments = list(attachments)
+        else:
+            self.attachments = [attachments]
         self.reply_to = reply_to
         self.keyboard = keyboard
         self.message_id = message_id
@@ -61,11 +66,12 @@ class ResponseMessageItem:
             return
 
         import telegramify_markdown
+
         self.text = telegramify_markdown.markdownify(
             self.text,
             max_line_length=None,
             # If you want to change the max line length for links, images, set it to the desired value.
-            normalize_whitespace=False
+            normalize_whitespace=False,
         )
         self.parse_mode = TelegramParseMode.MARKDOWN_V2
 
@@ -84,35 +90,40 @@ class ResponseMessageItem:
 
     def wrap_links(self):
         # Врапим ссылки без явного их врапа если у нас уже html
-        url_poss = re.finditer(self.URLS_REGEXP, self.text)  # Ссылки не в скобках
+        if self.text is None:
+            return
+
+        text = self.text
+        url_poss = re.finditer(self.URLS_REGEXP, text)  # Ссылки не в скобках
         url_poss = reversed(list(url_poss))  # Заменяем всё в строке с конца, чтобы были корректные позиции
         for url_pos in url_poss:
             start_pos = url_pos.start()
             end_pos = url_pos.end()
 
-            url = self.text[start_pos:end_pos]
+            url = text[start_pos:end_pos]
 
             # Если ссылка уже враплена, то продолжаем просто дальше
             left_part = None
             right_part = None
             if start_pos >= 9:
-                left_part = self.text[start_pos - 9:start_pos]
-            if len(self.text) > end_pos:
-                right_part = self.text[end_pos:end_pos + 2]
-            if left_part == "<a href=\"" and right_part == "\">":
+                left_part = text[start_pos - 9: start_pos]
+            if len(text) > end_pos:
+                right_part = text[end_pos: end_pos + 2]
+            if left_part == '<a href="' and right_part == '">':
                 continue
 
             if len(self.attachments) < 2:
                 from apps.bot.core.bot.telegram.tg_bot import TgBot
-                self.text = self.text[:start_pos] + TgBot.get_formatted_url(url, url) + self.text[end_pos:]
+
+                text = text[:start_pos] + TgBot.get_formatted_url(url, url) + text[end_pos:]
+
+        self.text = text
 
     def __str__(self):
         return self.text if self.text else ""
 
     def get_tg_params(self) -> dict:
-        params: dict = {
-            "chat_id": self.peer_id
-        }
+        params: dict = {"chat_id": self.peer_id}
         if self.text:
             if self.attachments:
                 params["caption"] = self.text
@@ -124,18 +135,23 @@ class ResponseMessageItem:
 
         if self.keyboard:
             params["reply_markup"] = self.keyboard
-        if self.reply_to:
+        if self.reply_to is not None:
             params["reply_to_message_id"] = self.reply_to
-        if self.message_thread_id:
+        if self.message_thread_id is not None:
             params["message_thread_id"] = self.message_thread_id
 
-        if self.message_id:
+        if self.message_id is not None:
             params["message_id"] = self.message_id
         return params
 
 
 class ResponseMessage:
-    def __init__(self, messages=None, send: bool = True, send_delay: int = 0):
+    def __init__(
+        self,
+        messages: ResponseMessageItem | list[ResponseMessageItem] | None = None,
+        send: bool = True,
+        send_delay: int = 0,
+    ):
         self.send = send
         self.send_delay = send_delay
 

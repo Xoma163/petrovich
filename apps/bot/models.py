@@ -22,8 +22,9 @@ class Platform(models.Model):
 
 
 class ChatSettings(TimeStampModelMixin):
-    chat = models.OneToOneField("Chat", on_delete=models.CASCADE, verbose_name="Чат", related_name="settings",
-                                blank=True, null=True)
+    chat = models.OneToOneField(
+        "Chat", on_delete=models.CASCADE, verbose_name="Чат", related_name="settings", blank=True, null=True
+    )
 
     no_mention = models.BooleanField("Работа без упоминания в конфе", default=False)
     celebrate_bday = models.BooleanField("Поздравлять с Днём рождения", default=False)
@@ -38,8 +39,9 @@ class ChatSettings(TimeStampModelMixin):
 
 
 class ProfileSettings(TimeStampModelMixin):
-    profile = models.OneToOneField("Profile", on_delete=models.CASCADE, verbose_name="Профиль",
-                                   related_name="settings", blank=True, null=True)
+    profile = models.OneToOneField(
+        "Profile", on_delete=models.CASCADE, verbose_name="Профиль", related_name="settings", blank=True, null=True
+    )
 
     need_reaction = models.BooleanField("Реагировать на неверные команды", default=True)
 
@@ -66,7 +68,10 @@ class Chat(Platform, TimeStampModelMixin):
     class Meta:
         verbose_name = "Чат"
         verbose_name_plural = "Чаты"
-        unique_together = ("chat_id", "platform",)
+        unique_together = (
+            "chat_id",
+            "platform",
+        )
 
     def save(self, **kwargs):
         is_new = self.id is None
@@ -101,10 +106,7 @@ class Profile(TimeStampModelMixin):
     GENDER_FEMALE = "1"
     GENDER_MALE = "2"
     GENDER_NONE = ""
-    GENDER_CHOICES = (
-        (GENDER_FEMALE, "женский"),
-        (GENDER_MALE, "мужской"),
-        (GENDER_NONE, "не указан"))
+    GENDER_CHOICES = ((GENDER_FEMALE, "женский"), (GENDER_MALE, "мужской"), (GENDER_NONE, "не указан"))
 
     name = models.CharField("Имя", max_length=40, blank=True, null=True)
     surname = models.CharField("Фамилия", max_length=40, blank=True, null=True)
@@ -185,8 +187,9 @@ class Profile(TimeStampModelMixin):
 
 class User(Platform, TimeStampModelMixin):
     user_id = models.CharField("ID пользователя", max_length=127)
-    profile = models.ForeignKey(Profile, verbose_name="Профиль", related_name="user", null=True,
-                                blank=True, on_delete=models.SET_NULL)
+    profile = models.ForeignKey(
+        Profile, verbose_name="Профиль", related_name="user", null=True, blank=True, on_delete=models.SET_NULL
+    )
     nickname = models.CharField("Никнейм", max_length=40, blank=True, null=True)
 
     def show_url(self):
@@ -194,7 +197,7 @@ class User(Platform, TimeStampModelMixin):
             safe_nick = escape(self.nickname)
             safe_platform = escape(self.platform)
             url = f"https://t.me/{safe_nick}"
-            return mark_safe(f"<a href=\"{escape(url)}\">{safe_platform}</a>")
+            return mark_safe(f'<a href="{escape(url)}">{safe_platform}</a>')
         return escape(self.platform)
 
     show_url.short_description = "Ссылка"
@@ -211,7 +214,10 @@ class User(Platform, TimeStampModelMixin):
         verbose_name = "Пользователь"
         verbose_name_plural = "Пользователи"
 
-        unique_together = ("user_id", "platform",)
+        unique_together = (
+            "user_id",
+            "platform",
+        )
 
     def __str__(self):
         return f"{self.profile} ({self.platform})"
@@ -226,7 +232,10 @@ class Bot(Platform, TimeStampModelMixin):
         verbose_name = "Бот"
         verbose_name_plural = "Боты"
 
-        unique_together = ("bot_id", "platform",)
+        unique_together = (
+            "bot_id",
+            "platform",
+        )
 
     def __str__(self):
         if self.name:

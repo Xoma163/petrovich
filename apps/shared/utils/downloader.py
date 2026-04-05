@@ -12,18 +12,18 @@ class Downloader:
     DEFAULT_CHUNK_SIZE = 2 ** 24  # 16 mb
 
     def __init__(
-            self,
-            headers: dict | None = None,
-            cookies: dict | None = None,
+        self,
+        headers: dict | None = None,
+        cookies: dict | None = None,
     ):
         self.headers = headers if headers else get_default_headers()
         self.cookies = cookies if cookies else {}
 
     def _download_chunk(
-            self,
-            url: str,
-            start: int,
-            end: int,
+        self,
+        url: str,
+        start: int,
+        end: int,
     ) -> bytes:
         headers = {"Range": f"bytes={start}-{end}"}
         headers.update(self.headers)
@@ -40,18 +40,14 @@ class Downloader:
                 os.remove(path)
         return content
 
-    def download_in_parallel(
-            self,
-            url: str,
-            chunk_size: int = DEFAULT_CHUNK_SIZE
-    ):
+    def download_in_parallel(self, url: str, chunk_size: int = DEFAULT_CHUNK_SIZE):
         response = requests.head(url, headers=self.headers, cookies=self.cookies)
         file_size = int(response.headers["Content-Length"])
         ranges = [(i, min(i + chunk_size - 1, file_size - 1)) for i in range(0, file_size, chunk_size)]
 
         with ThreadPoolExecutor() as executor:
             chunks = executor.map(lambda r: self._download_chunk(url, r[0], r[1]), ranges)
-        return b''.join(chunks)
+        return b"".join(chunks)
 
     def download_by_url(self, url: str):
         return requests.get(url, headers=self.headers, cookies=self.cookies).content

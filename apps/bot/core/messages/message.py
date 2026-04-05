@@ -5,7 +5,7 @@ class Message:
     COMMAND_SYMBOLS = ["/"]
     SHORT_KEYS_SYMBOLS = ["-"]
     KEYS_SYMBOLS = ["—", "--"]
-    SPACE_REGEX = r' |\n'
+    SPACE_REGEX = r" |\n"
 
     def __init__(self, raw_str=None, _id=None):
         self._init(raw_str, _id)
@@ -98,7 +98,7 @@ class Message:
                 if index == 0:
                     args_str = args_str[:index]
                 else:
-                    args_str = args_str[:index - 1] + args_str[index + len(arg):]
+                    args_str = args_str[: index - 1] + args_str[index + len(arg):]
             else:
                 new_args_split.append(arg)
 
@@ -132,7 +132,9 @@ class Message:
         self.parse_raw(raw)
 
     def is_key_provided(self, keys_to_check: set) -> bool:
-        return self.keys and bool(keys_to_check.intersection(self.keys))
+        if not self.keys:
+            return False
+        return bool(keys_to_check.intersection(self.keys))
 
     # def remove_key_from_message(self, keys: set) -> None:
     #     raw = self.raw
@@ -158,5 +160,5 @@ class Message:
             "command": self.command,
             "args_str": self.args_str,
             "keys": self.keys,
-            "kwargs": self.kwargs
+            "kwargs": self.kwargs,
         }

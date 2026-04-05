@@ -18,7 +18,13 @@ class YoutubeVideoService(MediaService):
         video_data = self.service.get_video_info(url, high_res=self.media_keys.high_resolution)
 
         # Если нет форс флага, сообщение из чата, длительность видео более 2-х минут, не было упоминания петровича, видео - не шортс тогда скип
-        if not self.media_keys.force and self.event.is_from_chat and video_data.duration > 120 and not self.event.message.mentioned and not video_data.is_short_video:
+        if (
+            not self.media_keys.force
+            and self.event.is_from_chat
+            and video_data.duration > 120
+            and not self.event.message.mentioned
+            and not video_data.is_short_video
+        ):
             raise PSkipContinue()
 
         with ChatActionSender(self.bot, ChatActionEnum.UPLOAD_VIDEO, self.event.peer_id, self.event.message_thread_id):

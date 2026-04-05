@@ -20,7 +20,7 @@ class GrokCommand(
     GPTModelChoiceMixin,
     GPTCompletionsFunctionality,
     GPTVisionFunctionality,
-    GPTImageDrawFunctionality
+    GPTImageDrawFunctionality,
 ):
     name = "grok"
     names = ["грок", "грк", "grk"]
@@ -34,27 +34,29 @@ class GrokCommand(
         help_texts=[
             HelpTextItem(
                 access,
-                GPTCompletionsFunctionality.COMPLETIONS_HELP_TEXT_ITEMS +
-                GPTVisionFunctionality.VISION_HELP_TEXT_ITEMS +
-                GPTImageDrawFunctionality.IMAGE_DRAW_HELP_TEXT_ITEMS +
-                GPTPrepromptMixin.PREPROMPT_HELP_TEXT_ITEMS +
-                GPTStatisticsMixin.STATISTICS_HELP_TEXT_ITEMS +
-                GPTModelChoiceMixin.MODEL_CHOOSE_HELP_TEXT_ITEMS +
-                GPTModelChoiceMixin.COMPLETIONS_HELP_TEXT_ITEMS +
-                GPTModelChoiceMixin.VISION_HELP_TEXT_ITEMS +
-                GPTModelChoiceMixin.IMAGE_DRAW_HELP_TEXT_ITEMS +
-                GPTKeyMixin.KEY_HELP_TEXT_ITEMS +
-                GPTPresetMixin.PRESET_HELP_TEXT_ITEMS +
-                GPTSettingsMixin.SETTINGS_HELP_TEXT_ITEMS
+                GPTCompletionsFunctionality.COMPLETIONS_HELP_TEXT_ITEMS
+                + GPTVisionFunctionality.VISION_HELP_TEXT_ITEMS
+                + GPTImageDrawFunctionality.IMAGE_DRAW_HELP_TEXT_ITEMS
+                + GPTPrepromptMixin.PREPROMPT_HELP_TEXT_ITEMS
+                + GPTStatisticsMixin.STATISTICS_HELP_TEXT_ITEMS
+                + GPTModelChoiceMixin.MODEL_CHOOSE_HELP_TEXT_ITEMS
+                + GPTModelChoiceMixin.COMPLETIONS_HELP_TEXT_ITEMS
+                + GPTModelChoiceMixin.VISION_HELP_TEXT_ITEMS
+                + GPTModelChoiceMixin.IMAGE_DRAW_HELP_TEXT_ITEMS
+                + GPTKeyMixin.KEY_HELP_TEXT_ITEMS
+                + GPTPresetMixin.PRESET_HELP_TEXT_ITEMS
+                + GPTSettingsMixin.SETTINGS_HELP_TEXT_ITEMS,
             )
         ],
         help_text_keys=[
             HelpTextItem(
-                RoleEnum.USER, [
-                                   GPTImageDrawFunctionality.KEY_ITEM_ORIG,
-                                   GPTImageDrawFunctionality.KEY_ITEM_COUNT,
-                               ] + GPTStatisticsMixin.STATISTICS_KEY_ITEMS_KEY
+                RoleEnum.USER,
+                [
+                    GPTImageDrawFunctionality.KEY_ITEM_ORIG,
+                    GPTImageDrawFunctionality.KEY_ITEM_COUNT,
+                ]
+                + GPTStatisticsMixin.STATISTICS_KEY_ITEMS_KEY,
             )
         ],
-        extra_text=f"{GPTCommand.EXTRA_TEXT}\n\n{GPTPrepromptMixin.EXTRA_TEXT}\n\n{GPTImageDrawFunctionality.EXTRA_TEXT}"
+        extra_text=f"{GPTCommand.EXTRA_TEXT}\n\n{GPTPrepromptMixin.EXTRA_TEXT}\n\n{GPTImageDrawFunctionality.EXTRA_TEXT}",
     )

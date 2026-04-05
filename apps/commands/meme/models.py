@@ -30,11 +30,13 @@ class BaseMeme(TimeStampModelMixin):
     tg_file_id = models.CharField("file_id в tg", max_length=128, blank=True)
 
     def get_info(self):
-        info = f"Название: {self.name}\n" \
-               f"ID: {self.pk}\n" \
-               f"Автор: {self.author}\n" \
-               f"Использований: {self.uses}\n" \
-               f"Использований в inline: {self.inline_uses}"
+        info = (
+            f"Название: {self.name}\n"
+            f"ID: {self.pk}\n"
+            f"Автор: {self.author}\n"
+            f"Использований: {self.uses}\n"
+            f"Использований в inline: {self.inline_uses}"
+        )
         if self.link:
             info += f"\nСсылка: {self.link}"
         if self.for_trusted:
@@ -62,11 +64,7 @@ class HoroscopeMeme(BaseMeme):
         verbose_name_plural = "мемы гороскопа"
 
     def get_info(self):
-        info = f"Название: {self.name}\n" \
-               f"ID: {self.meme_pk}\n" \
-               f"Автор: {self.author}\n" \
-               f"Использований: {self.uses}\n" \
-               f"Использований в inline: {self.inline_uses}"
+        info = f"Название: {self.name}\nID: {self.meme_pk}\nАвтор: {self.author}\nИспользований: {self.uses}\nИспользований в inline: {self.inline_uses}"
         if self.link:
             info += f"\nСсылка: {self.link}"
         return info

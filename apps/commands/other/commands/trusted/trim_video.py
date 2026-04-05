@@ -24,30 +24,25 @@ class TrimVideo(Command):
     help_text = HelpText(
         commands_text="обрезание видео/аудио",
         help_texts=[
-            HelpTextItem(RoleEnum.USER, [
-                HelpTextArgument(
-                    "(вложенное видео/аудио) (таймкод начала)",
-                    "обрезает видео с таймкода и до конца"),
-                HelpTextArgument(
-                    "(вложенное видео/аудио) (таймкод начала) (таймкод конца)",
-                    "обрезает видео по таймкодам"),
-                HelpTextArgument(
-                    "(youtube ссылка) (таймкод начала)",
-                    "обрезает с таймкода и до конца"),
-                HelpTextArgument(
-                    "(youtube ссылка) (таймкод начала) (таймкод конца)",
-                    "обрезает по таймкодам"),
-                HelpTextArgument(
-                    "(youtube ссылка с таймкодом)",
-                    "обрезает с таймкода и до конца"),
-                HelpTextArgument(
-                    "(youtube ссылка с таймкодом) (таймкод конца)",
-                    "обрезает по таймкодам"),
-            ])
+            HelpTextItem(
+                RoleEnum.USER,
+                [
+                    HelpTextArgument(
+                        "(вложенное видео/аудио) (таймкод начала)", "обрезает видео с таймкода и до конца"
+                    ),
+                    HelpTextArgument(
+                        "(вложенное видео/аудио) (таймкод начала) (таймкод конца)", "обрезает видео по таймкодам"
+                    ),
+                    HelpTextArgument("(youtube ссылка) (таймкод начала)", "обрезает с таймкода и до конца"),
+                    HelpTextArgument("(youtube ссылка) (таймкод начала) (таймкод конца)", "обрезает по таймкодам"),
+                    HelpTextArgument("(youtube ссылка с таймкодом)", "обрезает с таймкода и до конца"),
+                    HelpTextArgument("(youtube ссылка с таймкодом) (таймкод конца)", "обрезает по таймкодам"),
+                ],
+            )
         ],
         extra_text=(
             "Формат для таймкодов: [%H:]%M:%S[.%MS], т.е. валидные таймкоды: 09:04, 9:04, 09:4, 9:4, 01:09:04, 9:04.123"
-        )
+        ),
     )
 
     platforms = [PlatformEnum.TG]
@@ -133,10 +128,10 @@ class TrimVideo(Command):
                 dot_in_timecode = True
                 numbers.append(int(timecode[last_save_index:i]))
 
-                ms = timecode[i + 1:len(timecode)]
+                ms = timecode[i + 1: len(timecode)]
                 break
         if not dot_in_timecode:
-            n = int(timecode[last_save_index:len(timecode)])
+            n = int(timecode[last_save_index: len(timecode)])
             numbers.append(n)
         if len(numbers) == 3:
             h, m, s = numbers
@@ -157,8 +152,7 @@ class TrimVideo(Command):
             m = m % 60
             h += m_div_60
 
-        res = f"{prepend_symbols(str(h), '0', 2)}:{prepend_symbols(str(m), '0', 2)}:" \
-              f"{prepend_symbols(str(s), '0', 2)}.{append_symbols(str(ms), '0', 3)}"
+        res = f"{prepend_symbols(str(h), '0', 2)}:{prepend_symbols(str(m), '0', 2)}:{prepend_symbols(str(s), '0', 2)}.{append_symbols(str(ms), '0', 3)}"
         return res
 
     @classmethod
@@ -194,6 +188,9 @@ class TrimVideo(Command):
 
     @classmethod
     def check_positions(cls, start_pos, end_pos):
-        if start_pos and end_pos and \
-                datetime.strptime(start_pos, cls.TIMECODE_FORMAT) > datetime.strptime(end_pos, cls.TIMECODE_FORMAT):
+        if (
+            start_pos
+            and end_pos
+            and datetime.strptime(start_pos, cls.TIMECODE_FORMAT) > datetime.strptime(end_pos, cls.TIMECODE_FORMAT)
+        ):
             raise PWarning("Первый таймкод больше второго")

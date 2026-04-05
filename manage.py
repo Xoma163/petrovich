@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """Django's command-line utility for administrative tasks."""
+
 import os
 import sys
 
@@ -11,7 +12,9 @@ def _delete_cache_action_keys():
 
     from django.core.cache import cache
 
-    action_keys = cache.keys("action_*")  # noqa
+    if not hasattr(cache, "keys"):
+        return
+    action_keys = cache.keys("action_*")
     for key in action_keys:
         cache.delete(key)
 

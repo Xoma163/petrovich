@@ -621,6 +621,10 @@ The repository also includes a small local quality toolchain for development:
 - `add-trailing-comma` for normalizing trailing commas
 - `pre-commit` to run these tools on staged Python files
 
+Quality-tooling note:
+
+- Django `migrations/` directories are excluded from formatter/linter flows (`ruff`, `mypy`, pre-commit hooks)
+
 Typical commands:
 
 ```bash

@@ -6,7 +6,6 @@ from apps.bot.core.messages.attachments.audio import AudioAttachment
 
 
 class AudioConverter:
-
     @classmethod
     def convert(cls, audio: AudioAttachment, _format: str) -> BytesIO:
         """

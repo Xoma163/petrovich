@@ -16,11 +16,14 @@ class Roles(Command):
     help_text = HelpText(
         commands_text="добавление и удаление ролей пользователю",
         help_texts=[
-            HelpTextItem(RoleEnum.MODERATOR, [
-                HelpTextArgument("добавить (пользователь) (роль)", "добавляет роль пользователю"),
-                HelpTextArgument("удалить (пользователь) (роль)", "удаляет роль пользователю")
-            ])
-        ]
+            HelpTextItem(
+                RoleEnum.MODERATOR,
+                [
+                    HelpTextArgument("добавить (пользователь) (роль)", "добавляет роль пользователю"),
+                    HelpTextArgument("удалить (пользователь) (роль)", "удаляет роль пользователю"),
+                ],
+            )
+        ],
     )
     conversation = True
     args = 3
@@ -40,31 +43,31 @@ class Roles(Command):
 
         # Нельзя никому
         if role in [RoleEnum.ADMIN, RoleEnum.BANNED, RoleEnum.USER]:
-            raise PWarning(f"Нельзя добавлять/удалять роль \"{role}\"")
+            raise PWarning(f'Нельзя добавлять/удалять роль "{role}"')
 
         # Нельзя модераторам, можно админам
         if self.event.sender.check_role(RoleEnum.MODERATOR) and not self.event.sender.check_role(RoleEnum.ADMIN):
             if role in [RoleEnum.MODERATOR]:
-                raise PWarning(f"Нельзя добавлять/удалять роль \"{role}\"")
+                raise PWarning(f'Нельзя добавлять/удалять роль "{role}"')
 
         if action == "добавить":
             rmi = self.add_role(profile, role)
         elif action == "удалить":
             rmi = self.remove_role(profile, role)
         else:
-            raise PWarning(f"Неизвестное действие - \"{action}\"")
+            raise PWarning(f'Неизвестное действие - "{action}"')
         return ResponseMessage(rmi)
 
     @staticmethod
     def add_role(profile: Profile, role: RoleEnum) -> ResponseMessageItem:
         if profile.check_role(role):
-            raise PWarning(f"У пользователя уже есть роль \"{role}\"")
+            raise PWarning(f'У пользователя уже есть роль "{role}"')
         profile.add_role(role)
-        return ResponseMessageItem(f"Добавил пользователю \"{profile}\" роль \"{role}\"")
+        return ResponseMessageItem(f'Добавил пользователю "{profile}" роль "{role}"')
 
     @staticmethod
     def remove_role(profile: Profile, role: RoleEnum) -> ResponseMessageItem:
         if profile.check_role(role):
-            raise PWarning(f"У пользователя нет роли \"{role}\"")
+            raise PWarning(f'У пользователя нет роли "{role}"')
         profile.remove_role(role)
-        return ResponseMessageItem(f"Удалил пользователю \"{profile}\" роль \"{role}\"")
+        return ResponseMessageItem(f'Удалил пользователю "{profile}" роль "{role}"')

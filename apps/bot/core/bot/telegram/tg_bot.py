@@ -1,7 +1,9 @@
 import json
 import threading
+from collections.abc import Callable
 from copy import copy
 from math import inf
+from typing import Any
 
 from apps.bot.consts import PlatformEnum
 from apps.bot.core.bot.bot import Bot
@@ -71,7 +73,7 @@ class TgBot(Bot):
         Bot.__init__(self, PlatformEnum.TG)
         self.api_handler = TelegramAPI(env.str("TG_TOKEN"), TelegramAPIRequestMode.LOCAL_SERVER)
 
-        self.att_map = {
+        self.att_map: dict[type[Attachment], Callable[[ResponseMessageItem], dict[str, Any]]] = {
             PhotoAttachment: self.send_photo,
             AnimationAttachment: self.send_animation,
             VideoAttachment: self.send_video,
@@ -91,14 +93,14 @@ class TgBot(Bot):
         tg_event = TgEvent(raw_event)
         threading.Thread(target=self.handle_event, args=(tg_event,)).start()
 
-    def route(self, event: Event) -> ResponseMessage:
+    def route(self, event: Event) -> ResponseMessage | None:
         if isinstance(event, TgEvent) and event.inline_mode:
             self.route_inline_mode(event)
             raise PSkip()
 
         return super().route(event)
 
-    def route_inline_mode(self, event) -> dict:
+    def route_inline_mode(self, event: TgEvent) -> dict[str, Any]:
         """
         Режим работы исключительно для поиска мемасов
         """
@@ -111,14 +113,12 @@ class TgBot(Bot):
         inline_query_result = meme_cmd.get_tg_inline_memes(filter_list)
 
         return self.api_handler.answer_inline_query(
-            inline_query_id=data["id"],
-            results=inline_query_result,
-            cache_time=0
+            inline_query_id=data["id"], results=inline_query_result, cache_time=0
         )
 
-    def _send_media_group_wrap(self, rmi: ResponseMessageItem) -> dict:
-        media_list = []
-        files = []
+    def _send_media_group_wrap(self, rmi: ResponseMessageItem) -> dict[str, Any]:
+        media_list: list[dict[str, Any]] = []
+        files: list[tuple[str, Any]] = []
         for i, attachment in enumerate(rmi.attachments):
             if attachment.file_id:
                 media = {"type": attachment.type, "media": attachment.file_id}
@@ -129,14 +129,17 @@ class TgBot(Bot):
                 files.append((filename, attachment.content))
                 media = {"type": attachment.type, "media": f"attach://{filename}"}
 
-            if getattr(attachment, "artist", None):
-                media["performer"] = attachment.artist
-            if getattr(attachment, "title", None):
-                media["title"] = attachment.title
-            if getattr(attachment, "set_thumbnail", None):
-                attachment.set_thumbnail()
-            if getattr(attachment, "thumbnail", None):
-                thumb_file = attachment.thumbnail
+            artist = getattr(attachment, "artist", None)
+            if artist:
+                media["performer"] = artist
+            title = getattr(attachment, "title", None)
+            if title:
+                media["title"] = title
+            set_thumbnail = getattr(attachment, "set_thumbnail", None)
+            if callable(set_thumbnail):
+                set_thumbnail()
+            thumb_file = getattr(attachment, "thumbnail", None)
+            if thumb_file:
                 thumb_filename = f"thumb_{str(i)}"
                 files.append((thumb_filename, thumb_file.get_bytes_io_content()))
                 media["thumbnail"] = f"attach://{thumb_filename}"
@@ -145,22 +148,21 @@ class TgBot(Bot):
 
         media_list[-1]["caption"] = rmi.text
 
-        media = media_list
         return self.api_handler.send_media_group(
             chat_id=rmi.peer_id,
             message_thread_id=rmi.message_thread_id,
             reply_to_message_id=rmi.reply_to,
-            media=media,
+            media=media_list,
             files=files,
         )
 
-    def _send_media_group(self, rmi: ResponseMessageItem) -> dict:
+    def _send_media_group(self, rmi: ResponseMessageItem) -> dict[str, Any]:
         """
         Отправка множества вложений. Ссылки
         """
 
-        responses = []
-        r = None
+        responses: list[dict[str, Any]] = []
+        r: dict[str, Any] | None = None
         # Бьём на чанки если вложений больше 10
         if len(rmi.attachments) > 10:
             rmi_copy = copy(rmi)
@@ -185,6 +187,8 @@ class TgBot(Bot):
             for chunk in get_chunks(rmi.attachments, 1):
                 rmi_copy.attachments = chunk
                 r = self._send_media_group_wrap(rmi_copy)
+        if r is None:
+            raise PError()
         return r
 
     def send_response_message_item(self, rmi: ResponseMessageItem, _retry=False) -> BotResponse:
@@ -200,7 +204,7 @@ class TgBot(Bot):
                 peer_id=rmi.peer_id,
                 message_thread_id=rmi.message_thread_id,
                 reply_to=e.reply_to,
-                keyboard=e.keyboard
+                keyboard=e.keyboard,
             )
             self.log_message(error_rmi, e.level, e)
 
@@ -227,13 +231,13 @@ class TgBot(Bot):
             "Forbidden: bot was blocked by the user",
             "Bad Request: message to edit not found",
             "Bad Request: message can't be deleted",
-            "Bad Request: message can't be deleted for everyone"
+            "Bad Request: message can't be deleted for everyone",
         ]
         BAD_URL_ERROR_MSG = "Ссылка не понравилась серверу телеграмм. Внутренняя ошибка."
         bad_url_catch_errors = {
             "Bad Request: failed to get HTTP URL content": BAD_URL_ERROR_MSG,
             "Bad Request: wrong file identifier/HTTP URL specified": BAD_URL_ERROR_MSG,
-            "Bad Request: wrong type of the web page content": BAD_URL_ERROR_MSG
+            "Bad Request: wrong type of the web page content": BAD_URL_ERROR_MSG,
         }
         catch_errors = {
             "Bad Request: VOICE_MESSAGES_FORBIDDEN": "Не могу отправить голосовуху из-за ваших настроек безопасности",
@@ -241,9 +245,7 @@ class TgBot(Bot):
         catch_errors_starts_with = {
             "Bad Request: can't parse entities": "Не смог распарсить markdown/html сущности. Внутренняя ошибка."
         }
-        catch_errors_reply_to_not_found = (
-            "Bad Request: message to be replied not found",
-        )
+        catch_errors_reply_to_not_found = ("Bad Request: message to be replied not found",)
 
         error = r["description"]
 
@@ -265,10 +267,12 @@ class TgBot(Bot):
             links_str = []
             for i, att in enumerate(rmi.attachments):
                 link = att.public_download_url
+                if not link:
+                    continue
                 link_str = self.get_formatted_url(f"Ссылка #{i + 1}", link)
                 links_str.append(link_str)
-            links_str = "\n".join(links_str)
-            msg = f"{msg}\n\n{links_str}"
+            links_text = "\n".join(links_str)
+            msg = f"{msg}\n\n{links_text}"
             if rmi.text:
                 msg = f"{msg}\n\n{rmi.text}"
         elif error in catch_errors:
@@ -284,7 +288,7 @@ class TgBot(Bot):
         error_rmi = ResponseMessageItem(
             text=msg,
             peer_id=rmi.peer_id,
-            message_thread_id=rmi.message_thread_id
+            message_thread_id=rmi.message_thread_id,
         )
         self.log_message(error_rmi, log_level)
         r = self._send_response_message_item(error_rmi)
@@ -311,7 +315,10 @@ class TgBot(Bot):
         chunks = self._get_text_chunks(rmi)
 
         if rmi.attachments:
-            with ChatActionSender(self, rmi.attachments[0].ACTION, rmi.peer_id, rmi.message_thread_id):
+            chat_action = rmi.attachments[0].ACTION
+            if chat_action is None:
+                raise PError()
+            with ChatActionSender(self, chat_action, rmi.peer_id, rmi.message_thread_id):
                 # Отправка многих вложениями чанками: сначала вложения, потом текст
                 if len(rmi.attachments) > 1:
                     r = self._send_media_group(rmi)
@@ -327,7 +334,7 @@ class TgBot(Bot):
                 self.send_message(rmi)
         return r
 
-    def _get_text_chunks(self, rmi: ResponseMessageItem) -> list | None:
+    def _get_text_chunks(self, rmi: ResponseMessageItem) -> list[str] | None:
         """
         Разбивка сообщения на чанки
         """
@@ -378,7 +385,7 @@ class TgBot(Bot):
             draft_id=draft_id,
             text=rmi.text,
             message_thread_id=rmi.message_thread_id,
-            parse_mode=rmi.parse_mode
+            parse_mode=rmi.parse_mode,
         )
 
     def send_photo(self, rmi: ResponseMessageItem) -> dict:
@@ -394,7 +401,8 @@ class TgBot(Bot):
         elif photo_attachment.public_download_url and not photo_attachment.content:
             photo = photo_attachment.public_download_url
         else:
-            if photo_attachment.get_size_mb() > self.max_photo_size_mb:
+            size_mb = photo_attachment.get_size_mb()
+            if size_mb and size_mb > self.max_photo_size_mb:
                 rmi.attachments = []
                 raise PError(f"Нельзя загружать фото более {self.max_photo_size_mb} мб в телеграмм")
             files = {"photo": photo_attachment.get_bytes_io_content()}
@@ -435,7 +443,7 @@ class TgBot(Bot):
             parse_mode=rmi.parse_mode,
             caption=rmi.text,
             document=document,
-            files=files
+            files=files,
         )
 
     def send_video(self, rmi: ResponseMessageItem) -> dict:
@@ -450,10 +458,12 @@ class TgBot(Bot):
         elif video_attachment.public_download_url and not video_attachment.content:
             video = video_attachment.public_download_url
         else:
-            if video_attachment.get_size_mb() > self.max_video_size_mb:
+            size_mb = video_attachment.get_size_mb()
+            if size_mb and size_mb > self.max_video_size_mb:
                 rmi.attachments = []
                 raise PError(
-                    f"Нельзя загружать видео более {self.max_video_size_mb} мб в телеграмм. Ваше видео {round(video_attachment.get_size_mb(), 2)} мб")
+                    f"Нельзя загружать видео более {self.max_video_size_mb} мб в телеграмм. Ваше видео {round(size_mb, 2)} мб"
+                )
             with ChatActionSender(self, ChatActionEnum.UPLOAD_VIDEO, rmi.peer_id, rmi.message_thread_id):
                 files = {"video": video_attachment.get_bytes_io_content()}
                 video_attachment.set_thumbnail()
@@ -466,8 +476,8 @@ class TgBot(Bot):
             reply_markup=rmi.keyboard,
             parse_mode=rmi.parse_mode,
             caption=rmi.text,
-            width=rmi.attachments[0].width,
-            height=rmi.attachments[0].height,
+            width=video_attachment.width,
+            height=video_attachment.height,
             has_spoiler=rmi.spoiler,
             video=video,
             files=files,
@@ -485,8 +495,8 @@ class TgBot(Bot):
             message_thread_id=rmi.message_thread_id,
             reply_to_message_id=rmi.reply_to,
             reply_markup=rmi.keyboard,
-            video_note=video_note
-        ).json()
+            video_note=video_note,
+        )
 
     def send_audio(self, rmi: ResponseMessageItem) -> dict:
         """
@@ -538,7 +548,8 @@ class TgBot(Bot):
         elif animation_attachment.public_download_url:
             animation = animation_attachment.public_download_url
         else:
-            if animation_attachment.get_size_mb() > self.max_gif_size_mb:
+            size_mb = animation_attachment.get_size_mb()
+            if size_mb and size_mb > self.max_gif_size_mb:
                 raise PError(f"Нельзя загружать гифы более {self.max_gif_size_mb} мб в телеграмм")
             files = {"animation": animation_attachment.get_bytes_io_content()}
         return self.api_handler.send_animation(
@@ -550,7 +561,7 @@ class TgBot(Bot):
             caption=rmi.text,
             has_spoiler=rmi.spoiler,
             animation=animation,
-            files=files
+            files=files,
         )
 
     def send_sticker(self, rmi: ResponseMessageItem) -> dict:
@@ -565,7 +576,7 @@ class TgBot(Bot):
             message_thread_id=rmi.message_thread_id,
             reply_to_message_id=rmi.reply_to,
             reply_markup=rmi.keyboard,
-            sticker=sticker
+            sticker=sticker,
         )
 
     def send_voice(self, rmi: ResponseMessageItem) -> dict:
@@ -580,7 +591,7 @@ class TgBot(Bot):
             reply_to_message_id=rmi.reply_to,
             reply_markup=rmi.keyboard,
             parse_mode=rmi.parse_mode,
-            voice=voice
+            voice=voice,
         )
 
     def edit_message_text(self, rmi: ResponseMessageItem) -> dict:
@@ -589,7 +600,7 @@ class TgBot(Bot):
             message_id=rmi.message_id,
             text=rmi.text,
             reply_markup=rmi.keyboard,
-            parse_mode=rmi.parse_mode
+            parse_mode=rmi.parse_mode,
         )
 
     def edit_message_caption(self, rmi: ResponseMessageItem) -> dict:
@@ -598,14 +609,12 @@ class TgBot(Bot):
             message_id=rmi.message_id,
             caption=rmi.text,
             reply_markup=rmi.keyboard,
-            parse_mode=rmi.parse_mode
+            parse_mode=rmi.parse_mode,
         )
 
     def edit_message_keyboard(self, rmi: ResponseMessageItem) -> dict:
         return self.api_handler.edit_messaage_reply_markup(
-            chat_id=rmi.peer_id,
-            message_id=rmi.message_id,
-            reply_markup=rmi.keyboard
+            chat_id=rmi.peer_id, message_id=rmi.message_id, reply_markup=rmi.keyboard
         )
 
     def edit_message_media(self, rmi: ResponseMessageItem) -> dict:
@@ -617,20 +626,16 @@ class TgBot(Bot):
             media["media"] = attachment.public_download_url
         else:
             media["media"] = self.get_file_id(attachment)
-        return self.api_handler.edit_message_media(
-            chat_id=rmi.peer_id,
-            message_id=rmi.message_id,
-            media=media
-        )
+        return self.api_handler.edit_message_media(chat_id=rmi.peer_id, message_id=rmi.message_id, media=media)
 
     # END TELEGRAM SEND/EDIT
 
     # USERS GROUPS BOTS
     def get_user_profile_photos(self, user_id: int | str) -> dict:
-        r = self.api_handler.get_user_profile_photos(user_id)
+        r = self.api_handler.get_user_profile_photos(int(user_id))
         return r["result"]["photos"]
 
-    def get_chat_administrators(self, chat_id: int | str) -> dict:
+    def get_chat_administrators(self, chat_id: int | str) -> list[dict[str, Any]]:
         return self.api_handler.get_chat_administrators(chat_id)["result"]
 
     # END USERS GROUPS BOTS
@@ -638,23 +643,26 @@ class TgBot(Bot):
     # EXTRA
 
     @staticmethod
-    def get_button(text: str, command: str = None, args: list = None, kwargs: dict = None, url: str = None):
-        callback_data = {}
+    def get_button(
+        text: str,
+        command: str | None = None,
+        args: list | None = None,
+        kwargs: dict | None = None,
+        url: str | None = None,
+    ) -> dict[str, Any]:
+        callback_data: dict[str, Any] = {}
         if command:
             callback_data["c"] = command
         if args:
             callback_data["a"] = args
         if kwargs:
             callback_data["k"] = kwargs
-        callback_data = json.dumps(callback_data, ensure_ascii=False)
+        callback_data_json = json.dumps(callback_data, ensure_ascii=False)
 
-        callback_data_len = len(callback_data.encode("UTF8"))
+        callback_data_len = len(callback_data_json.encode("UTF8"))
         if callback_data_len > 62:
             raise RuntimeError("Нельзя в callback_data передавать данные более 64 байт")
-        data = {
-            "text": text,
-            "callback_data": callback_data
-        }
+        data: dict[str, Any] = {"text": text, "callback_data": callback_data_json}
         if url:
             data["url"] = url
         return data
@@ -668,9 +676,7 @@ class TgBot(Bot):
         """
         buttons_chunks = get_chunks(buttons, cols)
         keyboard = list(buttons_chunks)
-        return {
-            "inline_keyboard": keyboard
-        }
+        return {"inline_keyboard": keyboard}
 
     def set_chat_action(self, chat_id: int | str, chat_action: ChatActionEnum, message_thread_id: int | None = None):
         """
@@ -681,12 +687,7 @@ class TgBot(Bot):
 
         # no wait for response
         threading.Thread(
-            target=self.api_handler.send_chat_action,
-            args=(
-                chat_id,
-                tg_chat_action,
-                message_thread_id
-            )
+            target=self.api_handler.send_chat_action, args=(chat_id, tg_chat_action, message_thread_id)
         ).start()
 
     def get_mention(self, profile: Profile) -> str:
@@ -725,8 +726,8 @@ class TgBot(Bot):
             raise PError()
         return file_id
 
-    def answer_callback_query(self, callback_query_id: int) -> dict:
-        return self.api_handler.answer_callback_query(callback_query_id)
+    def answer_callback_query(self, callback_query_id: int | str) -> dict:
+        return self.api_handler.answer_callback_query(str(callback_query_id))
 
     # END EXTRA
 
@@ -752,7 +753,7 @@ class TgBot(Bot):
 
     @classmethod
     def get_formatted_url(cls, name: str, url: str) -> str:
-        return f"<{cls.LINK_TAG} href=\"{url}\">{name}</{cls.LINK_TAG}>"
+        return f'<{cls.LINK_TAG} href="{url}">{name}</{cls.LINK_TAG}>'
 
     @classmethod
     def get_formatted_url_markdown(cls, name: str, url: str) -> str:
@@ -798,8 +799,8 @@ class TgBot(Bot):
         """
         Цитата текст
         """
-        expandable = " expandable" if expandable else ""
-        return f"<{cls.QUOTE_TAG}{expandable}>{text}</{cls.QUOTE_TAG}>"
+        expandable_attr = " expandable" if expandable else ""
+        return f"<{cls.QUOTE_TAG}{expandable_attr}>{text}</{cls.QUOTE_TAG}>"
 
     @staticmethod
     def get_expandable_quote_markdown(text: str) -> str:

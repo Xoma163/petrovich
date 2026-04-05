@@ -8,12 +8,7 @@ from apps.bot.core.chat_actions import ChatActionEnum
 
 class ChatActionSender:
     def __init__(
-            self,
-            bot,
-            chat_action: ChatActionEnum,
-            peer_id,
-            message_thread_id: int | None = None,
-            send_chat_action=True
+        self, bot, chat_action: ChatActionEnum, peer_id, message_thread_id: int | None = None, send_chat_action=True
     ):
         self.bot = bot
         self.chat_action: ChatActionEnum = chat_action

@@ -1,9 +1,11 @@
+from collections.abc import Sequence
+
 from apps.bot.consts import RoleEnum
 
 
 class HelpTextArgument:
     def __init__(self, args: str | None, description: str):
-        self.args: str = args
+        self.args: str | None = args
         self.description: str = description
 
 
@@ -18,9 +20,9 @@ class HelpTextKey:
 
 
 class HelpTextItem:
-    def __init__(self, role: RoleEnum, texts: list[HelpTextArgument | HelpTextKey]):
+    def __init__(self, role: RoleEnum, texts: Sequence[HelpTextArgument | HelpTextKey]):
         self.role: RoleEnum = role
-        self.items: list[HelpTextArgument] = texts
+        self.items: Sequence[HelpTextArgument | HelpTextKey] = texts
 
 
 class HelpText:
@@ -33,11 +35,11 @@ class HelpText:
     """
 
     def __init__(
-            self,
-            commands_text: str,
-            extra_text: str = None,
-            help_texts: list[HelpTextItem] = None,
-            help_text_keys: list[HelpTextItem] = None,
+        self,
+        commands_text: str,
+        extra_text: str | None = None,
+        help_texts: Sequence[HelpTextItem] | None = None,
+        help_text_keys: Sequence[HelpTextItem] | None = None,
     ):
 
         if help_texts is None:
@@ -46,21 +48,20 @@ class HelpText:
             help_text_keys = []
 
         self.commands_text: str = commands_text
-        self.extra_text: str = extra_text
+        self.extra_text: str | None = extra_text
 
         self.help_texts: dict[RoleEnum, HelpTextItem] = {}
         for hti in help_texts:
-            hti: HelpTextItem
             self.help_texts[hti.role] = hti
 
         self.keys_items: dict[RoleEnum, HelpTextItem] = {}
         for htk in help_text_keys:
             self.keys_items[htk.role] = htk
 
-    def get_help_text_item(self, role: RoleEnum) -> str | None:
+    def get_help_text_item(self, role: RoleEnum) -> HelpTextItem | None:
         hti = self.help_texts.get(role)
         return hti if hti else None
 
-    def get_help_text_key(self, role: RoleEnum) -> str | None:
+    def get_help_text_key(self, role: RoleEnum) -> HelpTextItem | None:
         hti = self.keys_items.get(role)
         return hti if hti else None

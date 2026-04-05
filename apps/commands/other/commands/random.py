@@ -15,13 +15,16 @@ class Random(Command):
     help_text = HelpText(
         commands_text="рандомное число в заданном диапазоне",
         help_texts=[
-            HelpTextItem(RoleEnum.USER, [
-                HelpTextArgument(None, "рандомное число в диапазоне [0:1]"),
-                HelpTextArgument("[N]", "рандомное число в заданном диапазоне [1:N]"),
-                HelpTextArgument("[N,M]", "рандомное число в заданном диапазоне [N:M]"),
-                HelpTextArgument("[Слово_1, Слово_2, ...]", "рандомное слово среди аргументов")
-            ])
-        ]
+            HelpTextItem(
+                RoleEnum.USER,
+                [
+                    HelpTextArgument(None, "рандомное число в диапазоне [0:1]"),
+                    HelpTextArgument("[N]", "рандомное число в заданном диапазоне [1:N]"),
+                    HelpTextArgument("[N,M]", "рандомное число в заданном диапазоне [N:M]"),
+                    HelpTextArgument("[Слово_1, Слово_2, ...]", "рандомное слово среди аргументов"),
+                ],
+            )
+        ],
     )
 
     def start(self) -> ResponseMessage:

@@ -16,10 +16,7 @@ class InstagramService(MediaService):
         attachments = []
         for item in data.items:
             if item.content_type == InstagramAPIDataItem.CONTENT_TYPE_IMAGE:
-                attachment = self.bot.get_photo_attachment(
-                    url=item.download_url,
-                    send_chat_action=False
-                )
+                attachment = self.bot.get_photo_attachment(url=item.download_url, send_chat_action=False)
             elif item.content_type == InstagramAPIDataItem.CONTENT_TYPE_VIDEO:
                 attachment = self.bot.get_video_attachment(
                     url=item.download_url,

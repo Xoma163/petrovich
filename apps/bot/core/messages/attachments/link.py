@@ -20,8 +20,11 @@ class LinkAttachment(Attachment):
         return self._check_link(["vk.com", "vkvideo.ru"])
 
     def _check_link(self, urls):
-        parsed_url = urlparse(self.url)
-        return parsed_url.hostname.replace("www.", "").lower() in urls
+        parsed_url = urlparse(self.url or "")
+        hostname = parsed_url.hostname
+        if hostname is None:
+            return False
+        return hostname.replace("www.", "").lower() in urls
 
     @classmethod
     def parse_link(cls, text):

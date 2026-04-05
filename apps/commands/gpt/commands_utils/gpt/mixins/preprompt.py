@@ -11,14 +11,10 @@ class GPTPrepromptMixin(GPTCommandProtocol):
     PREPROMPT_HELP_TEXT_ITEMS = [
         HelpTextArgument("препромпт [конфа]", "посмотреть текущий препромпт"),
         HelpTextArgument("препромпт [конфа] (текст)", "добавить препромпт"),
-        HelpTextArgument("препромпт [конфа] удалить", "удаляет препромпт")
+        HelpTextArgument("препромпт [конфа] удалить", "удаляет препромпт"),
     ]
 
-    EXTRA_TEXT = (
-        "Порядок использования препромптов в конфах:\n"
-        "1) Персональный препромт\n"
-        "2) Препромпт конфы"
-    )
+    EXTRA_TEXT = "Порядок использования препромптов в конфах:\n1) Персональный препромт\n2) Препромпт конфы"
 
     # MENU
 
@@ -54,7 +50,7 @@ class GPTPrepromptMixin(GPTCommandProtocol):
                 preprompt = self.event.message.raw.split(None, args_slice_index + 1)[-1]
                 preprompt_obj, _ = Preprompt.objects.update_or_create(
                     defaults={"text": preprompt},
-                    **dict(q.children)  # noqa
+                    **dict(q.children),  # noqa
                 )
                 rmi = ResponseMessageItem(f"Обновил {is_for}: {self.bot.get_formatted_text(preprompt_obj.text)}")
         # посмотреть

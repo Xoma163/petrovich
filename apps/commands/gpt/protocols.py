@@ -1,5 +1,5 @@
 import logging
-from typing import Protocol, Callable
+from typing import Callable, Protocol
 
 from apps.bot.core.messages.response_message import ResponseMessageItem, ResponseMessage
 from apps.bot.models import Profile, Chat
@@ -8,7 +8,7 @@ from apps.commands.gpt.api.responses import (
     GPTVisionResponse,
     GPTImageDrawResponse,
     GPTVoiceRecognitionResponse,
-    GPTAPIResponse
+    GPTAPIResponse,
 )
 from apps.commands.gpt.messages.base import GPTMessages
 from apps.commands.gpt.models import (
@@ -19,7 +19,7 @@ from apps.commands.gpt.models import (
     VoiceRecognitionModel,
     Provider,
     GPTModel,
-    Preprompt
+    Preprompt,
 )
 from apps.commands.gpt.models import ProfileGPTSettings
 from apps.commands.protocols import CommandProtocol
@@ -56,7 +56,7 @@ class GPTCommandProtocol(
     GPTKeyProtocol,
     GPTModelChoiceProtocol,
     GPTPrepromptProtocol,
-    GPTStatisticsProtocol
+    GPTStatisticsProtocol,
 ):
     provider: "GPTProvider"  # noqa circular import
     provider_model: Provider
@@ -91,55 +91,43 @@ class GPTCommandProtocol(
 
     def _prepare_rmi(self, rmi: ResponseMessageItem, text: str) -> ResponseMessageItem: ...
 
+
 class HasCompletions(Protocol):
     def completions(
-            self,
-            messages: GPTMessages,
-            model: CompletionsModel,
-            extra_data: dict,
-            callback_func: Callable | None = None,
-    ) -> GPTCompletionsResponse:
-        ...
+        self,
+        messages: GPTMessages,
+        model: CompletionsModel,
+        extra_data: dict,
+        callback_func: Callable | None = None,
+    ) -> GPTCompletionsResponse: ...
 
 
 class HasVision(Protocol):
     def vision(
-            self,
-            messages: GPTMessages,
-            model: VisionModel,
-            extra_data: dict,
-            callback_func: Callable | None = None,
-    ) -> GPTVisionResponse:
-        ...
+        self,
+        messages: GPTMessages,
+        model: VisionModel,
+        extra_data: dict,
+        callback_func: Callable | None = None,
+    ) -> GPTVisionResponse: ...
 
 
 class HasImageDraw(Protocol):
     def draw_image(
-            self,
-            prompt: str,
-            model: ImageDrawModel,
-            count: int = 1,
-    ) -> GPTImageDrawResponse:
-        ...
+        self,
+        prompt: str,
+        model: ImageDrawModel,
+        count: int = 1,
+    ) -> GPTImageDrawResponse: ...
 
 
 class HasImageEdit(Protocol):
     def edit_image(
-            self,
-            prompt: str,
-            model: ImageEditModel,
-            image: bytes,
-            mask: bytes,
-            count: int = 1
-    ) -> GPTImageDrawResponse:
-        ...
+        self, prompt: str, model: ImageEditModel, image: bytes, mask: bytes, count: int = 1
+    ) -> GPTImageDrawResponse: ...
 
 
 class HasVoiceRecognition(Protocol):
     def voice_recognition(
-            self,
-            audio_ext: str,
-            content: bytes,
-            model: VoiceRecognitionModel
-    ) -> GPTVoiceRecognitionResponse:
-        ...
+        self, audio_ext: str, content: bytes, model: VoiceRecognitionModel
+    ) -> GPTVoiceRecognitionResponse: ...

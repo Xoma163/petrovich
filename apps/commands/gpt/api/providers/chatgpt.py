@@ -7,14 +7,14 @@ from apps.commands.gpt.api.base import (
     VisionAPIMixin,
     ImageDrawAPIMixin,
     VoiceRecognitionAPIMixin,
-    ImageEditAPIMixin
+    ImageEditAPIMixin,
 )
 from apps.commands.gpt.api.openai_responses_api import OpenAIResponsesAPI
 from apps.commands.gpt.api.responses import (
     GPTCompletionsResponse,
     GPTVisionResponse,
     GPTImageDrawResponse,
-    GPTVoiceRecognitionResponse
+    GPTVoiceRecognitionResponse,
 )
 from apps.commands.gpt.enums import GPTReasoningEffortLevel
 from apps.commands.gpt.messages.base import GPTMessages
@@ -23,11 +23,9 @@ from apps.commands.gpt.models import (
     VisionModel,
     ImageDrawModel,
     ImageEditModel,
-    VoiceRecognitionModel
+    VoiceRecognitionModel,
 )
-from apps.commands.gpt.usage import (
-    GPTVoiceRecognitionUsage
-)
+from apps.commands.gpt.usage import GPTVoiceRecognitionUsage
 from apps.shared.exceptions import PWarning
 
 
@@ -39,12 +37,9 @@ class ChatGPTAPI(
     ImageEditAPIMixin,
     VoiceRecognitionAPIMixin,
 ):
-
     @property
     def headers(self):
-        return {
-            "Authorization": f"Bearer {self.api_key}"
-        }
+        return {"Authorization": f"Bearer {self.api_key}"}
 
     # ---------- base ---------- #
 
@@ -58,11 +53,11 @@ class ChatGPTAPI(
     completions_url = f"{base_url}/responses"
 
     def completions(
-            self,
-            messages: GPTMessages,
-            model: CompletionsModel,
-            extra_data: dict,
-            callback_func: Callable | None = None,
+        self,
+        messages: GPTMessages,
+        model: CompletionsModel,
+        extra_data: dict,
+        callback_func: Callable | None = None,
     ) -> GPTCompletionsResponse:
         payload: dict = {
             "model": model.name,
@@ -89,7 +84,7 @@ class ChatGPTAPI(
             json=payload,
             headers=self.headers,
             stream=True if callback_func else False,
-            callback_func=callback_func
+            callback_func=callback_func,
         )  # noqa
 
     # ---------- vision ---------- #
@@ -97,15 +92,13 @@ class ChatGPTAPI(
     vision_url = completions_url
 
     def vision(
-            self,
-            messages: GPTMessages,
-            model: VisionModel,
-            extra_data: dict,
-            callback_func: Callable | None = None,
+        self,
+        messages: GPTMessages,
+        model: VisionModel,
+        extra_data: dict,
+        callback_func: Callable | None = None,
     ) -> GPTVisionResponse:
-        payload: dict = {
-            "model": model.name
-        }
+        payload: dict = {"model": model.name}
         if callback_func:
             payload["stream"] = True
 
@@ -128,7 +121,7 @@ class ChatGPTAPI(
             json=payload,
             headers=self.headers,
             stream=True if callback_func else False,
-            callback_func=callback_func
+            callback_func=callback_func,
         )  # noqa
 
     # ---------- image draw ---------- #
@@ -136,10 +129,10 @@ class ChatGPTAPI(
     image_draw_url = f"{base_url}/images/generations"
 
     def draw_image(
-            self,
-            prompt: str,
-            model: ImageDrawModel,
-            count: int = 1,
+        self,
+        prompt: str,
+        model: ImageDrawModel,
+        count: int = 1,
     ) -> GPTImageDrawResponse:
         payload = {
             "model": model.name,
@@ -156,7 +149,7 @@ class ChatGPTAPI(
             json=payload,
             count=count,
             headers=self.headers,
-            log=False
+            log=False,
         )
 
     # ---------- image edit ---------- #
@@ -164,12 +157,12 @@ class ChatGPTAPI(
     image_edit_url = f"{base_url}/images/edits"
 
     def edit_image(
-            self,
-            prompt: str,
-            model: ImageEditModel,
-            image: bytes,
-            mask: bytes,
-            count: int = 1,
+        self,
+        prompt: str,
+        model: ImageEditModel,
+        image: bytes,
+        mask: bytes,
+        count: int = 1,
     ) -> GPTImageDrawResponse:
         payload = {
             "prompt": prompt,
@@ -189,7 +182,7 @@ class ChatGPTAPI(
             count=count,
             headers=self.headers,
             log=False,
-            files=files
+            files=files,
         )
 
     # ---------- voice recognition ---------- #
@@ -201,10 +194,7 @@ class ChatGPTAPI(
         return f"{self.base_url}/audio/transcriptions"
 
     def voice_recognition(
-            self,
-            audio_ext: str,
-            content: bytes,
-            model: type[VoiceRecognitionModel]
+        self, audio_ext: str, content: bytes, model: type[VoiceRecognitionModel]
     ) -> GPTVoiceRecognitionResponse:
         data = {
             "model": model.name,
@@ -216,13 +206,10 @@ class ChatGPTAPI(
 
         usage = GPTVoiceRecognitionUsage(
             model=model,  # noqa
-            voice_duration=Decimal(round(r_json["duration"]))
+            voice_duration=Decimal(round(r_json["duration"])),
         )
 
-        r = GPTVoiceRecognitionResponse(
-            text=r_json["text"],
-            usage=usage
-        )
+        r = GPTVoiceRecognitionResponse(text=r_json["text"], usage=usage)
         return r
 
     # ---------- other ---------- #
@@ -234,9 +221,14 @@ class ChatGPTAPI(
                 payload["text"] = {"verbosity": verbosity_level}
             if effort_level := extra_data.get("effort_level"):
                 if effort_level == GPTReasoningEffortLevel.XHIGH.value and model.name not in (
-                        "gpt-5.4", "gpt-5.4-mini", "gpt-5.4-nano", "gpt-5.4-pro",
+                        "gpt-5.4",
+                        "gpt-5.4-mini",
+                        "gpt-5.4-nano",
+                        "gpt-5.4-pro",
                         "gpt-5.3-codex",
-                        "gpt-5.2", "gpt-5.2-pro", "gpt-5.2-codex",
+                        "gpt-5.2",
+                        "gpt-5.2-pro",
+                        "gpt-5.2-codex",
                 ):
                     raise PWarning("Для использования xHigh используемая модель должна быть gpt-5.2 и старше")
                 payload["reasoning"] = {"effort": effort_level}

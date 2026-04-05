@@ -10,44 +10,28 @@ from apps.commands.gpt.models import (
     VisionModel,
     ImageDrawModel,
     ImageEditModel,
-    VoiceRecognitionModel, GPTPreset
+    VoiceRecognitionModel,
+    GPTPreset,
 )
 from apps.shared.mixins import TimeStampAdminMixin, TopFieldsMixin
 
 
 @admin.register(Provider)
 class ProviderAdmin(admin.ModelAdmin):
-    list_display = (
-        "name",
-    )
-    ordering = (
-        "name",
-    )
+    list_display = ("name",)
+    ordering = ("name",)
 
 
 @admin.register(Preprompt)
 class PrepromptAdmin(TimeStampAdminMixin):
-    list_display = (
-        "author",
-        "provider",
-        "chat",
-        "text"
-    )
-    search_fields = (
-        "author__name",
-        "author__surname",
-        "author__nickname_real"
-    )
+    list_display = ("author", "provider", "chat", "text")
+    search_fields = ("author__name", "author__surname", "author__nickname_real")
     list_filter = (
         "provider",
         ("author", admin.RelatedOnlyFieldListFilter),
         ("chat", admin.RelatedOnlyFieldListFilter),
     )
-    list_select_related = (
-        "author",
-        "chat",
-        "provider"
-    )
+    list_select_related = ("author", "chat", "provider")
     ordering = (
         "author",
         "chat",
@@ -56,17 +40,8 @@ class PrepromptAdmin(TimeStampAdminMixin):
 
 @admin.register(Usage)
 class UsageAdmin(TimeStampAdminMixin):
-    list_display = (
-        "author",
-        "provider",
-        "model_name",
-        "cost"
-    )
-    search_fields = (
-        "author__name",
-        "author__surname",
-        "author__nickname_real"
-    )
+    list_display = ("author", "provider", "model_name", "cost")
+    search_fields = ("author__name", "author__surname", "author__nickname_real")
     list_filter = (
         "provider",
         ("author", admin.RelatedOnlyFieldListFilter),
@@ -76,9 +51,7 @@ class UsageAdmin(TimeStampAdminMixin):
         "author",
     )
 
-    ordering = (
-        "-created_at",
-    )
+    ordering = ("-created_at",)
 
 
 @admin.register(CompletionsModel)
@@ -90,24 +63,20 @@ class CompletionModelAdmin(admin.ModelAdmin):
         "input_1m_token_cost",
         "input_cached_1m_token_cost",
         "output_1m_token_cost",
-        "web_search_1k_token_cost"
+        "web_search_1k_token_cost",
     )
     list_editable = (
         "input_1m_token_cost",
         "input_cached_1m_token_cost",
         "output_1m_token_cost",
-        "web_search_1k_token_cost"
+        "web_search_1k_token_cost",
     )
     list_filter = (
         "provider",
         "is_default",
     )
-    list_select_related = (
-        "provider",
-    )
-    ordering = (
-        "name",
-    )
+    list_select_related = ("provider",)
+    ordering = ("name",)
 
     actions = [copy_completions_to_vision]
 
@@ -121,89 +90,53 @@ class VisionModelAdmin(admin.ModelAdmin):
         "input_1m_token_cost",
         "input_cached_1m_token_cost",
         "output_1m_token_cost",
-        "web_search_1k_token_cost"
+        "web_search_1k_token_cost",
     )
     list_editable = (
         "input_1m_token_cost",
         "input_cached_1m_token_cost",
         "output_1m_token_cost",
-        "web_search_1k_token_cost"
+        "web_search_1k_token_cost",
     )
     list_filter = (
         "provider",
         "is_default",
     )
-    list_select_related = (
-        "provider",
-    )
-    ordering = (
-        "name",
-    )
+    list_select_related = ("provider",)
+    ordering = ("name",)
 
 
 @admin.register(ImageDrawModel)
 class ImageDrawModelAdmin(admin.ModelAdmin):
-    list_display = (
-        "name",
-        "provider",
-        "is_default",
-        "image_cost",
-        "width",
-        "height",
-        "quality"
-    )
+    list_display = ("name", "provider", "is_default", "image_cost", "width", "height", "quality")
     list_filter = (
         "provider",
         "is_default",
     )
-    list_select_related = (
-        "provider",
-    )
-    ordering = (
-        "name",
-    )
+    list_select_related = ("provider",)
+    ordering = ("name",)
 
 
 @admin.register(ImageEditModel)
 class ImageEditModelAdmin(admin.ModelAdmin):
-    list_display = (
-        "name",
-        "provider",
-        "is_default",
-        "image_cost",
-        "width",
-        "height"
-    )
+    list_display = ("name", "provider", "is_default", "image_cost", "width", "height")
     list_filter = (
         "provider",
         "is_default",
     )
-    list_select_related = (
-        "provider",
-    )
-    ordering = (
-        "name",
-    )
+    list_select_related = ("provider",)
+    ordering = ("name",)
 
 
 @admin.register(VoiceRecognitionModel)
 class VoiceRecognitionModelAdmin(admin.ModelAdmin):
-    list_display = (
-        "name",
-        "provider",
-        "is_default",
-        "voice_recognition_1_min_cost"
-    )
+    list_display = ("name", "provider", "is_default", "voice_recognition_1_min_cost")
     list_filter = (
         "provider",
         "is_default",
     )
-    list_select_related = (
-        "provider",
-    )
-    ordering = (
-        "name",
-    )
+    list_select_related = ("provider",)
+    ordering = ("name",)
 
 
 @admin.register(ProfileGPTSettings)
@@ -217,13 +150,9 @@ class ProfileGPTSettingsAdmin(TimeStampAdminMixin, TopFieldsMixin):
         "vision_model",
         "image_draw_model",
         "image_edit_model",
-        "voice_recognition_model"
+        "voice_recognition_model",
     )
-    search_fields = (
-        "profile__name",
-        "profile__surname",
-        "profile__nickname_real"
-    )
+    search_fields = ("profile__name", "profile__surname", "profile__nickname_real")
     list_filter = (
         "provider",
         ("profile", admin.RelatedOnlyFieldListFilter),
@@ -237,9 +166,7 @@ class ProfileGPTSettingsAdmin(TimeStampAdminMixin, TopFieldsMixin):
         "image_edit_model",
         "voice_recognition_model",
     )
-    ordering = (
-        "profile",
-    )
+    ordering = ("profile",)
 
     @admin.display(boolean=True, description="Есть ключ")
     def has_key(self, obj: ProfileGPTSettings) -> bool:
@@ -255,11 +182,7 @@ class GPTPresetAdmin(TimeStampAdminMixin, TopFieldsMixin):
         "description",
         "provider",
     )
-    search_fields = (
-        "profile__name",
-        "profile__surname",
-        "profile__nickname_real"
-    )
+    search_fields = ("profile__name", "profile__surname", "profile__nickname_real")
     list_filter = (
         "provider",
         ("profile", admin.RelatedOnlyFieldListFilter),
@@ -273,6 +196,4 @@ class GPTPresetAdmin(TimeStampAdminMixin, TopFieldsMixin):
         "image_edit_model",
         "voice_recognition_model",
     )
-    ordering = (
-        "profile",
-    )
+    ordering = ("profile",)

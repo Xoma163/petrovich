@@ -18,12 +18,12 @@ class VideoHandler:
     VIDEO_OR_AUDIO_ERROR = "Video or audio must be provided"
 
     def __init__(
-            self,
-            video: VideoAttachment | LinkAttachment | None = None,
-            audio: AudioAttachment = None
+        self,
+        video: VideoAttachment | LinkAttachment | None = None,
+        audio: AudioAttachment = None,
     ):
         self.video: VideoAttachment | LinkAttachment | None = video
-        self.audio: AudioAttachment = audio
+        self.audio: AudioAttachment | None = audio
 
     def _check_video_content(self):
         if not self.video:
@@ -60,6 +60,8 @@ class VideoHandler:
         self.check_video_or_audio()
 
         att = self.video if self.video else self.audio
+        if att is None:
+            raise RuntimeError(self.VIDEO_OR_AUDIO_ERROR)
         vt = VideoTrimmer(att)
         return vt.trim(start_pos, end_pos)
 
@@ -70,19 +72,28 @@ class VideoHandler:
         return at.get_audio_track()
 
     def get_preview(self, second: float = 1.0, max_width=120, max_height=90) -> bytes:
+        self._check_video_content()
         with tempfile.NamedTemporaryFile(suffix=".mp4", delete=False) as tmp:
             tmp.write(self.video.content)
             tmp_path = tmp.name
         out_path = tmp_path + ".jpg"
         try:
             cmd = [
-                "ffmpeg", "-hide_banner", "-loglevel", "error",
-                "-ss", f"{second}",
-                "-i", tmp_path,
-                "-frames:v", "1",
-                "-vf", f"scale={max_width}:{max_height}:flags=lanczos",
-                "-q:v", "2",
-                out_path
+                "ffmpeg",
+                "-hide_banner",
+                "-loglevel",
+                "error",
+                "-ss",
+                f"{second}",
+                "-i",
+                tmp_path,
+                "-frames:v",
+                "1",
+                "-vf",
+                f"scale={max_width}:{max_height}:flags=lanczos",
+                "-q:v",
+                "2",
+                out_path,
             ]
             subprocess.check_call(cmd)
             return Path(out_path).read_bytes()

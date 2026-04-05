@@ -188,13 +188,19 @@ def get_role_by_str(role_str: str):
     """
 
     roles_map = {
-        ("администрация", "администратор", "админы", "админ", "главный", "власть", "господин", "хозяин", "admin",
-         "administrator"): RoleEnum.ADMIN,
+        (
+            "администрация",
+            "администратор",
+            "админы",
+            "админ",
+            "admin",
+            "administrator",
+        ): RoleEnum.ADMIN,
         ("moderators", "moderator", "модераторы", "модератор", "модеры", "модер", "moder"): RoleEnum.MODERATOR,
         ("майнкрафт", "майн", "minecraft", "mine"): RoleEnum.MINECRAFT,
         ("забанен", "бан", "ban", "banned"): RoleEnum.BANNED,
         ("доверенный", "проверенный", "trust", "trusted"): RoleEnum.TRUSTED,
-        ("пользователь", "юзер", "user"): RoleEnum.USER
+        ("пользователь", "юзер", "user"): RoleEnum.USER,
     }
     for k in roles_map:
         if role_str in k:
@@ -231,11 +237,7 @@ def transform_k(arg: str):
     count_m = arg.count("m") + arg.count("м")
     count_k = arg.count("k") + arg.count("к") + count_m * 2
     if count_k > 0:
-        arg = arg \
-            .replace("k", "") \
-            .replace("к", "") \
-            .replace("м", "") \
-            .replace("m", "")
+        arg = arg.replace("k", "").replace("к", "").replace("м", "").replace("m", "")
         arg = float(arg)
         arg *= 10 ** (3 * count_k)
     return arg
@@ -252,7 +254,7 @@ def get_urls_from_text(text: str) -> list:
 def get_chunks(lst: list, n: int):
     """Yield successive n-sized chunks from lst."""
     for i in range(0, len(lst), n):
-        yield lst[i:i + n]
+        yield lst[i: i + n]
 
 
 def get_flat_list(_list: list[list]) -> list:
@@ -301,7 +303,7 @@ def split_text_by_n_symbols(text: str, n: int, split_on: list[str] | None = None
             split_by_pos = text.rfind(split_on_symbol, 0, n)
             if split_by_pos == -1:
                 continue
-            texts.append(text[:split_by_pos + 1])
+            texts.append(text[: split_by_pos + 1])
             text = text[split_by_pos + 1:]
             break
     texts.append(text)
@@ -320,7 +322,7 @@ def prepare_filename(filename: str, replace_symbol=".") -> str:
     escaped_replace_symbol = re.escape(replace_symbol)
 
     # Заменяем "плохие" символы на replace_symbol
-    bad_symbols = ["\\", "/", ":", "*", "?", "\"", "<", ">", "|", "+"]
+    bad_symbols = ["\\", "/", ":", "*", "?", '"', "<", ">", "|", "+"]
     for symbol in bad_symbols:
         # На случай, если символ считался разделителем, добавляем пробел справа
         filename = filename.replace(symbol, f"{replace_symbol} ")
@@ -398,25 +400,25 @@ def detect_ext(b: bytes) -> str | None:
     if not b:
         return None
 
-    if b.startswith(b'\xFF\xD8\xFF'):
+    if b.startswith(b"\xff\xd8\xff"):
         return "jpg"
 
-    if b.startswith(b'GIF87a') or b.startswith(b'GIF89a'):
+    if b.startswith(b"GIF87a") or b.startswith(b"GIF89a"):
         return "gif"
 
-    if len(b) >= 12 and b[4:8] == b'ftyp':
+    if len(b) >= 12 and b[4:8] == b"ftyp":
         return "mp4"
-    idx = b.find(b'ftyp', 0, 64)
+    idx = b.find(b"ftyp", 0, 64)
     if idx != -1 and idx + 4 + 4 <= len(b):
         return "mp4"
 
-    if b.startswith(b'OggS'):
+    if b.startswith(b"OggS"):
         return "ogg"
 
-    if len(b) >= 12 and b[0:4] == b'RIFF' and b[8:12] == b'WEBP':
+    if len(b) >= 12 and b[0:4] == b"RIFF" and b[8:12] == b"WEBP":
         return "webp"
 
-    if b.startswith(b'\x1A\x45\xDF\xA3') and b'webm' in b[:4096].lower():
+    if b.startswith(b"\x1a\x45\xdf\xa3") and b"webm" in b[:4096].lower():
         return "webm"
 
     return None

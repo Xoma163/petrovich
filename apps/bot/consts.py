@@ -46,5 +46,5 @@ ATTACHMENT_TYPE_TRANSLATOR = {
     "voice": VoiceAttachment,
     # ToDo: в чём разница между gif и animation. Animation - свежее как будто?
     "gif": AnimationAttachment,
-    "animation": AnimationAttachment
+    "animation": AnimationAttachment,
 }

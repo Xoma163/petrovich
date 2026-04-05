@@ -32,11 +32,13 @@ class YoutubeMusic:
             "title": True,
             "logger": NothingLogger(),
             # 'outtmpl': '/tmp/yt_dlp_%(title)s-%(id)s.%(ext)s',
-            "postprocessors": [{
-                "key": "FFmpegExtractAudio",
-                "preferredcodec": "mp3",
-                "preferredquality": "320",
-            }],
+            "postprocessors": [
+                {
+                    "key": "FFmpegExtractAudio",
+                    "preferredcodec": "mp3",
+                    "preferredquality": "320",
+                }
+            ],
         }
 
         ytdl = yt_dlp.YoutubeDL(ydl_params)
@@ -78,11 +80,8 @@ class YoutubeMusic:
     @staticmethod
     def _get_thumbnail(info: dict) -> str | None:
         try:
-            return list(filter(
-                lambda x: x["url"].endswith("mqdefault.jpg"),
-                info["thumbnails"]
-            ))[0]["url"]
-        except (IndexError, KeyError):
+            return list(filter(lambda x: x["url"].endswith("mqdefault.jpg"), info["thumbnails"]))[0]["url"]
+        except IndexError, KeyError:
             return None
 
     def delete_temp_file(self):

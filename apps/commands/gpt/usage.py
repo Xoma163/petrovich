@@ -8,7 +8,7 @@ from apps.commands.gpt.models import (
     CompletionsModel,
     VisionModel,
     ImageDrawModel,
-    VoiceRecognitionModel
+    VoiceRecognitionModel,
 )
 
 
@@ -70,10 +70,10 @@ class GPTCompletionsVisionUsage(GPTUsage):
     @property
     def total_cost(self) -> Decimal:
         return (
-                self.input_tokens_cost +
-                self.input_cached_tokens_cost +
-                self.output_tokens_cost +
-                self.web_search_tokens_cost
+            self.input_tokens_cost
+            + self.input_cached_tokens_cost
+            + self.output_tokens_cost
+            + self.web_search_tokens_cost
         )
 
 

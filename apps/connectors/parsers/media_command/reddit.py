@@ -101,14 +101,17 @@ class Reddit:
 
     def _get_photos_from_post(self) -> list[str]:
         gallery_data_items = self.data["gallery_data"]["items"]
-        first_url = \
-        self.data["media_metadata"][self.data["gallery_data"]["items"][0]["media_id"]]["s"]["u"].partition("?")[0]
+        first_url = self.data["media_metadata"][self.data["gallery_data"]["items"][0]["media_id"]]["s"]["u"].partition(
+            "?"
+        )[0]
         ext = get_url_file_ext(first_url)
         self.filename = f"{self.title.replace(' ', '_')}.{ext}"
 
         # Чёрная магия
-        return [self.data["media_metadata"][x["media_id"]]["s"]["u"].partition("?")[0].replace("/preview.", "/i.", 1)
-                for x in gallery_data_items]
+        return [
+            self.data["media_metadata"][x["media_id"]]["s"]["u"].partition("?")[0].replace("/preview.", "/i.", 1)
+            for x in gallery_data_items
+        ]
 
     def get_post_data(self, post_url):
         self._set_post_url(post_url)
@@ -185,7 +188,8 @@ class Reddit:
     @property
     def is_image(self):
         return self.content_type == self.CONTENT_TYPE_IMAGE and not self.data.get("url_overridden_by_dest").endswith(
-            ".gif")
+            ".gif"
+        )
 
     @property
     def is_images(self):

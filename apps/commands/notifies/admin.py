@@ -13,12 +13,12 @@ class NotifyAdmin(TimeStampAdminMixin):
         "crontab",
         "text",
         "user",
-        "chat"
+        "chat",
     )
     search_fields = (
         "date",
         "crontab",
-        "text"
+        "text",
     )
     list_filter = (
         ("user", admin.RelatedOnlyFieldListFilter),
@@ -26,8 +26,6 @@ class NotifyAdmin(TimeStampAdminMixin):
     )
     list_select_related = (
         "user",
-        "chat"
+        "chat",
     )
-    ordering = (
-        "user",
-    )
+    ordering = ("user",)

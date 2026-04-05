@@ -10,6 +10,4 @@ class VideoCacheAdmin(TimeStampAdminMixin):
         "filename",
         "source_url",
     )
-    ordering = (
-        "filename",
-    )
+    ordering = ("filename",)

@@ -28,9 +28,7 @@ class TwitterService(MediaService):
         for att in data.items:
             if att.content_type == att.CONTENT_TYPE_VIDEO:
                 video = self.bot.get_video_attachment(
-                    url=att.download_url,
-                    peer_id=self.event.peer_id,
-                    message_thread_id=self.event.message_thread_id
+                    url=att.download_url, peer_id=self.event.peer_id, message_thread_id=self.event.message_thread_id
                 )
                 video.download_content()
                 attachments.append(video)

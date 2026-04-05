@@ -14,37 +14,37 @@ class Settings(Command):
     help_text = HelpText(
         commands_text="устанавливает настройки пользователя/чата",
         help_texts=[
-            HelpTextItem(RoleEnum.USER, [
-                HelpTextArgument(
-                    None,
-                    "присылает текущие настройки и права бота в чате"),
-                # Chat settings
-                HelpTextArgument(
-                    "триггериться (вкл/выкл)",
-                    "определяет будет ли бот триггериться на команды без упоминания в конфе(требуются админские права)"),
-                HelpTextArgument(
-                    "голосовые (вкл/выкл)",
-                    "определяет, будет ли бот автоматически распознавать голосовые"),
-                HelpTextArgument(
-                    "др (вкл/выкл)",
-                    "определяет, будет ли бот поздравлять с Днём рождения и будет ли ДР отображаться в /профиль"),
-                HelpTextArgument(
-                    "время (вкл/выкл)",
-                    "определяет, будет ли бот автоматически переводить время во все часовые пояса для участников чата"),
-
-                # user settings
-                HelpTextArgument(
-                    "реагировать (вкл/выкл)",
-                    "определяет, будет ли бот реагировать на неправильные команды в конфе. Это сделано для того, чтобы в конфе с несколькими ботами не было ложных срабатываний"),
-                HelpTextArgument(
-                    "ругаться (вкл/выкл)",
-                    "определяет будет ли бот использовать ругательные команды"),
-                HelpTextArgument(
-                    "упоминания (вкл/выкл)",
-                    "определяет будет ли бот использовать упоминания вас"),
-            ])
+            HelpTextItem(
+                RoleEnum.USER,
+                [
+                    HelpTextArgument(None, "присылает текущие настройки и права бота в чате"),
+                    # Chat settings
+                    HelpTextArgument(
+                        "триггериться (вкл/выкл)",
+                        "определяет будет ли бот триггериться на команды без упоминания в конфе(требуются админские права)",
+                    ),
+                    HelpTextArgument(
+                        "голосовые (вкл/выкл)", "определяет, будет ли бот автоматически распознавать голосовые"
+                    ),
+                    HelpTextArgument(
+                        "др (вкл/выкл)",
+                        "определяет, будет ли бот поздравлять с Днём рождения и будет ли ДР отображаться в /профиль",
+                    ),
+                    HelpTextArgument(
+                        "время (вкл/выкл)",
+                        "определяет, будет ли бот автоматически переводить время во все часовые пояса для участников чата",
+                    ),
+                    # user settings
+                    HelpTextArgument(
+                        "реагировать (вкл/выкл)",
+                        "определяет, будет ли бот реагировать на неправильные команды в конфе. Это сделано для того, чтобы в конфе с несколькими ботами не было ложных срабатываний",
+                    ),
+                    HelpTextArgument("ругаться (вкл/выкл)", "определяет будет ли бот использовать ругательные команды"),
+                    HelpTextArgument("упоминания (вкл/выкл)", "определяет будет ли бот использовать упоминания вас"),
+                ],
+            )
         ],
-        extra_text="Если команда запускается в чате, то общие настройки (поздравления с др) будут указываться для текущего чата, если в личные сообщения, то для пользователя."
+        extra_text="Если команда запускается в чате, то общие настройки (поздравления с др) будут указываться для текущего чата, если в личные сообщения, то для пользователя.",
     )
 
     ON_OFF_TRANSLATOR = {
@@ -57,7 +57,6 @@ class Settings(Command):
         "вруби": True,
         "подключи": True,
         "истина": True,
-
         "выкл": False,
         "off": False,
         "0": False,
@@ -66,12 +65,12 @@ class Settings(Command):
         "выключи": False,
         "выруби": False,
         "отключи": False,
-        "ложь": False
+        "ложь": False,
     }
 
     TRUE_FALSE_TRANSLATOR = {
         True: "вкл ✅",
-        False: "выкл ⛔"
+        False: "выкл ⛔",
     }
 
     def start(self) -> ResponseMessage:
@@ -171,8 +170,8 @@ class Settings(Command):
 
     def get_str_chat_tg_settings(self) -> str:
         chat_admins = self.bot.get_chat_administrators(self.event.chat.chat_id)
-        permissions = [x for x in chat_admins if x["user"]["id"] == env.int("TG_BOT_GROUP_ID")]
-        permissions = permissions[0] if permissions else {}
+        permissions_list = [x for x in chat_admins if x["user"]["id"] == env.int("TG_BOT_GROUP_ID")]
+        permissions = permissions_list[0] if permissions_list else {}
 
         can_manage_chat = permissions.get("can_manage_chat", False)
         can_delete_messages = permissions.get("can_delete_messages", False)

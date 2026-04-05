@@ -1,10 +1,6 @@
 from django.contrib import admin
 
-from apps.commands.games.models import (
-    PetrovichUser,
-    PetrovichGame,
-    Wordle
-)
+from apps.commands.games.models import PetrovichUser, PetrovichGame, Wordle
 from apps.shared.mixins import TimeStampAdminMixin
 
 
@@ -19,7 +15,7 @@ class PetrovichUserAdmin(TimeStampAdminMixin):
     search_fields = (
         "profile__name",
         "profile__surname",
-        "profile__nickname_real"
+        "profile__nickname_real",
     )
     list_filter = (
         ("profile", admin.RelatedOnlyFieldListFilter),
@@ -27,11 +23,9 @@ class PetrovichUserAdmin(TimeStampAdminMixin):
     )
     list_select_related = (
         "profile",
-        "chat"
+        "chat",
     )
-    ordering = (
-        "profile",
-    )
+    ordering = ("profile",)
 
 
 @admin.register(PetrovichGame)
@@ -43,7 +37,7 @@ class PetrovichGameAdmin(TimeStampAdminMixin):
     search_fields = (
         "profile__name",
         "profile__surname",
-        "profile__nickname_real"
+        "profile__nickname_real",
     )
     list_filter = (
         ("profile", admin.RelatedOnlyFieldListFilter),
@@ -51,11 +45,9 @@ class PetrovichGameAdmin(TimeStampAdminMixin):
     )
     list_select_related = (
         "profile",
-        "chat"
+        "chat",
     )
-    ordering = (
-        "-created_at",
-    )
+    ordering = ("-created_at",)
 
 
 @admin.register(Wordle)
@@ -65,12 +57,10 @@ class WordleAdmin(TimeStampAdminMixin):
         "chat",
         "word",
         "steps",
-        "hypotheses"
+        "hypotheses",
     )
     list_select_related = (
         "profile",
-        "chat"
-    )
-    ordering = (
         "chat",
     )
+    ordering = ("chat",)

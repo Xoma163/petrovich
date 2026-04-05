@@ -15,7 +15,8 @@ class DeIssue(Command):
     help_text = HelpText(
         commands_text="закрывает проблему Петровича без решения",
         help_texts=[
-            HelpTextItem(RoleEnum.TRUSTED, [HelpTextArgument("(id)", "закрывает проблему Петровича без решения")])],
+            HelpTextItem(RoleEnum.TRUSTED, [HelpTextArgument("(id)", "закрывает проблему Петровича без решения")])
+        ],
     )
 
     # args = 1

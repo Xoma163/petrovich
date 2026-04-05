@@ -19,8 +19,7 @@ class Command(BaseCommand):
         pasha = User.objects.get(pk=user_pk)
 
         pasha_news_last_id_entity, created = Service.objects.get_or_create(
-            name="pasha_news_last_id",
-            defaults={"value": 0}
+            name="pasha_news_last_id", defaults={"value": 0}
         )
         pasha_news_last_id = int(pasha_news_last_id_entity.value)
         content = requests.get(f"{self.URL}/news").content

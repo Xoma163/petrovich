@@ -41,9 +41,7 @@ DJANGO_APPS = [
     "django.contrib.postgres",
 ]
 
-VENDORS_APPS = [
-    "django_extensions"
-]
+VENDORS_APPS = ["django_extensions"]
 
 PROJECT_APPS = [
     "apps.bot",
@@ -92,9 +90,7 @@ WSGI_APPLICATION = "petrovich.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
-DATABASES = {
-    "default": env.db("DATABASE_URL", default="postgres:///petrovich")
-}
+DATABASES = {"default": env.db("DATABASE_URL", default="postgres:///petrovich")}
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
@@ -126,9 +122,7 @@ USE_TZ = True
 
 STATIC_URL = "/static/"
 STATIC_ROOT = "static"
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "staticfiles")
-]
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "staticfiles")]
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
@@ -150,7 +144,7 @@ LOGGING = {
         "json": {
             "()": "pythonjsonlogger.jsonlogger.JsonFormatter",
             "format": "%(levelname)-8s %(asctime)-25s %(name)-10s %(filename)s:%(lineno)d %(message)s",
-            "json_ensure_ascii": False
+            "json_ensure_ascii": False,
         },
         "color_simple": {
             "()": "colorlog.ColoredFormatter",
@@ -162,7 +156,7 @@ LOGGING = {
                 "ERROR": "red",
                 "CRITICAL": "red,bg_white",
             },
-        }
+        },
     },
     "handlers": {
         "file-debug": {
@@ -201,7 +195,7 @@ LOGGING = {
             "level": "DEBUG",
             "propagate": False,
         },
-    }
+    },
 }
 if DEBUG:
     for logger in LOGGING["loggers"]:
@@ -215,7 +209,7 @@ CACHES = {
         "LOCATION": env.str("REDIS_URL"),
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
-        }
+        },
     }
 }
 
@@ -223,5 +217,5 @@ sentry_sdk.init(
     dsn=env.str("SENTRY_URL"),
     traces_sample_rate=1.0,
     profiles_sample_rate=1.0,
-    environment="production" if not DEBUG else "stage"
+    environment="production" if not DEBUG else "stage",
 )

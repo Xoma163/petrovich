@@ -6,9 +6,7 @@ from petrovich.settings import env
 
 class GithubAPI(API):
     TOKEN = env.str("GITHUB_TOKEN")
-    HEADERS = {
-        "Authorization": f"token {TOKEN}"
-    }
+    HEADERS = {"Authorization": f"token {TOKEN}"}
 
     REPO_OWNER = "Xoma163"
     REPO_NAME = "petrovich"

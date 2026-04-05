@@ -25,14 +25,14 @@ class GPTStatisticsMixin(GPTCommandProtocol):
     STATISTICS_HELP_TEXT_ITEMS = [
         HelpTextArgument(
             "стата [дата начала=месяц назад] [дата конца=сегодня]",
-            "статистика по использованию. Если переданы аргументы, то пришлёт статистику за указаный период"
+            "статистика по использованию. Если переданы аргументы, то пришлёт статистику за указаный период",
         ),
     ]
     STATISTICS_KEY_ITEMS_KEY = [
         HelpTextKey(
             "ключ",
             ["key"],
-            "статистика пришлёт информацию по всем пользователям с этим ключом"
+            "статистика пришлёт информацию по всем пользователям с этим ключом",
         ),
     ]
 
@@ -60,9 +60,7 @@ class GPTStatisticsMixin(GPTCommandProtocol):
         else:
             profiles = [self.event.sender]
             answer, _ = self._get_statistics_for_users(
-                profiles,
-                return_custom_data=bool(custom_range),
-                custom_range=custom_range
+                profiles, return_custom_data=bool(custom_range), custom_range=custom_range
             )
 
         if not answer:
@@ -77,15 +75,15 @@ class GPTStatisticsMixin(GPTCommandProtocol):
 
     # HANDLERS
     def _get_statistics_for_users(
-            self,
-            profiles: list[Profile],
-            return_today_data: bool = True,
-            return_7_day_data: bool = True,
-            return_last_month_data: bool = True,
-            return_current_month_data: bool = True,
-            return_total_data: bool = True,
-            return_custom_data: bool = False,
-            custom_range: tuple = None
+        self,
+        profiles: list[Profile],
+        return_today_data: bool = True,
+        return_7_day_data: bool = True,
+        return_last_month_data: bool = True,
+        return_current_month_data: bool = True,
+        return_total_data: bool = True,
+        return_custom_data: bool = False,
+        custom_range: tuple = None,
     ) -> tuple[str | None, float | None]:
         """Получение статистики по пользователям за разные периоды."""
         total_stats = self._get_stat_db_profile(Q(author__in=profiles))
@@ -110,18 +108,15 @@ class GPTStatisticsMixin(GPTCommandProtocol):
         for should_return, label, start, end in periods:
             if not should_return:
                 continue
-            stats = self._get_stat_db_profile(
-                Q(author__in=profiles, created_at__gte=start, created_at__lt=end)
-            )
+            stats = self._get_stat_db_profile(Q(author__in=profiles, created_at__gte=start, created_at__lt=end))
             answer.append(f"{label} - $ {round(stats, 2)}")
 
         if return_custom_data:
             start, end = custom_range
-            stats = self._get_stat_db_profile(
-                Q(author__in=profiles, created_at__gte=start, created_at__lt=end)
-            )
+            stats = self._get_stat_db_profile(Q(author__in=profiles, created_at__gte=start, created_at__lt=end))
             answer.append(
-                f"За период с {start.strftime('%d.%m.%Y')} по {end.strftime('%d.%m.%Y')} - $ {round(stats, 2)}")
+                f"За период с {start.strftime('%d.%m.%Y')} по {end.strftime('%d.%m.%Y')} - $ {round(stats, 2)}"
+            )
 
         total_stats = round(total_stats, 2)
         if return_total_data:
@@ -136,7 +131,7 @@ class GPTStatisticsMixin(GPTCommandProtocol):
             author=self.event.sender,
             cost=api_response.usage.total_cost,
             provider=self.provider_model,
-            model_name=api_response.usage.model.name
+            model_name=api_response.usage.model.name,
         ).save()
 
     # UTILS
@@ -146,39 +141,29 @@ class GPTStatisticsMixin(GPTCommandProtocol):
         if not profile_key:
             raise PWarning("У вас не установлен ключ")
 
-        profiles_gpt_settings = ProfileGPTSettings.objects \
-            .filter(provider=self.provider_model) \
-            .exclude(key="")
-        profiles_with_same_key = [
-            x for x in profiles_gpt_settings
-            if x.get_key() == profile_key
-        ]
+        profiles_gpt_settings = ProfileGPTSettings.objects.filter(provider=self.provider_model).exclude(key="")
+        profiles_with_same_key = [x for x in profiles_gpt_settings if x.get_key() == profile_key]
         profiles = Profile.objects.filter(gpt_settings__in=profiles_with_same_key)
         if profiles.count() == 1:
             raise PWarning("Не найдено других пользователей с вашим ключом")
         return profiles
 
     def _get_profiles_with_no_key(self) -> QuerySet[Profile]:
-        profiles_gpt_settings = ProfileGPTSettings.objects \
-            .filter(provider=self.provider_model) \
-            .filter(key="")
+        profiles_gpt_settings = ProfileGPTSettings.objects.filter(provider=self.provider_model).filter(key="")
         profiles = Profile.objects.filter(gpt_settings__in=profiles_gpt_settings)
         if profiles.count() == 0:
             raise PWarning("Не найдено пользователей без ключа")
         return profiles
 
     def _get_all_profiles(self) -> QuerySet[Profile]:
-        profiles_gpt_settings = ProfileGPTSettings.objects \
-            .filter(provider=self.provider_model)
+        profiles_gpt_settings = ProfileGPTSettings.objects.filter(provider=self.provider_model)
         profiles = Profile.objects.filter(gpt_settings__in=profiles_gpt_settings)
         if profiles.count() == 0:
             raise PWarning("Не найдено пользователей")
         return profiles
 
     def _get_statistics_per_profile(
-            self,
-            profiles: QuerySet[Profile],
-            custom_range: tuple[datetime.datetime, ...] | None = None
+        self, profiles: QuerySet[Profile], custom_range: tuple[datetime.datetime, ...] | None = None
     ) -> str | None:
         stats_with_cost = []
         for profile in profiles:
@@ -187,7 +172,7 @@ class GPTStatisticsMixin(GPTCommandProtocol):
                 return_today_data=False,
                 return_7_day_data=False,
                 return_custom_data=bool(custom_range),
-                custom_range=custom_range
+                custom_range=custom_range,
             )
             if profile_stats:
                 stats_with_cost.append((profile_stats, total_cost))
@@ -203,7 +188,7 @@ class GPTStatisticsMixin(GPTCommandProtocol):
                 return_today_data=False,
                 return_7_day_data=False,
                 return_custom_data=bool(custom_range),
-                custom_range=custom_range
+                custom_range=custom_range,
             )
             total_statistics = total_statistics.split("\n")
             total_statistics[0] = "Сумма по всем:"
@@ -242,9 +227,7 @@ class GPTStatisticsMixin(GPTCommandProtocol):
         return start_datetime, end_datetime
 
     def _get_data_for_statistics_plot(
-            self,
-            profiles: list[Profile],
-            custom_range: tuple[datetime.datetime, ...] | None = None
+        self, profiles: list[Profile], custom_range: tuple[datetime.datetime, ...] | None = None
     ):
         if not custom_range:
             start = timezone.now() - datetime.timedelta(days=30)
@@ -253,16 +236,18 @@ class GPTStatisticsMixin(GPTCommandProtocol):
             start, end = custom_range
         days_count = (end - start).days + 1
 
-        usage_stats = Usage.objects.filter(
-            provider=self.provider_model,
-            author__in=profiles,
-            created_at__gte=start,
-            created_at__lt=end
-        ).annotate(
-            date=TruncDate("created_at")
-        ).values("date").annotate(
-            total_cost=Sum("cost")
-        ).order_by("date")
+        usage_stats = (
+            Usage.objects.filter(
+                provider=self.provider_model,
+                author__in=profiles,
+                created_at__gte=start,
+                created_at__lt=end,
+            )
+            .annotate(date=TruncDate("created_at"))
+            .values("date")
+            .annotate(total_cost=Sum("cost"))
+            .order_by("date")
+        )
 
         stats_dict = {entry["date"]: round(entry["total_cost"], 2) for entry in usage_stats}
         all_dates = [start.date() + datetime.timedelta(days=x) for x in range(days_count)]

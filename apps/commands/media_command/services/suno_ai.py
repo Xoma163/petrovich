@@ -25,7 +25,7 @@ class SunoAIService(MediaService):
             message_thread_id=self.event.message_thread_id,
             thumbnail_url=data.thumbnail_url,
             artist=data.artists,
-            title=data.title
+            title=data.title,
         )
         audio_att.download_content()
         audio_att.public_download_url = None

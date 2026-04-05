@@ -27,13 +27,13 @@ class QwenCommand(
         help_texts=[
             HelpTextItem(
                 access,
-                GPTCompletionsFunctionality.COMPLETIONS_HELP_TEXT_ITEMS +
-                GPTVisionFunctionality.VISION_HELP_TEXT_ITEMS +
-                GPTPrepromptMixin.PREPROMPT_HELP_TEXT_ITEMS +
-                GPTStatisticsMixin.STATISTICS_HELP_TEXT_ITEMS +
-                GPTPresetMixin.PRESET_HELP_TEXT_ITEMS +
-                GPTSettingsMixin.SETTINGS_HELP_TEXT_ITEMS
+                GPTCompletionsFunctionality.COMPLETIONS_HELP_TEXT_ITEMS
+                + GPTVisionFunctionality.VISION_HELP_TEXT_ITEMS
+                + GPTPrepromptMixin.PREPROMPT_HELP_TEXT_ITEMS
+                + GPTStatisticsMixin.STATISTICS_HELP_TEXT_ITEMS
+                + GPTPresetMixin.PRESET_HELP_TEXT_ITEMS
+                + GPTSettingsMixin.SETTINGS_HELP_TEXT_ITEMS,
             )
         ],
-        extra_text=f"{GPTCommand.EXTRA_TEXT}\n\n{GPTPrepromptMixin.EXTRA_TEXT}"
+        extra_text=f"{GPTCommand.EXTRA_TEXT}\n\n{GPTPrepromptMixin.EXTRA_TEXT}",
     )

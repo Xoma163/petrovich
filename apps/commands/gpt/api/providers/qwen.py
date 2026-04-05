@@ -48,11 +48,11 @@ class QwenAPI(
     completions_url = f"{base_url}/chat/completions"
 
     def completions(
-            self,
-            messages: GPTMessages,
-            model: CompletionsModel,
-            extra_data: dict,
-            callback_func: Callable | None = None,
+        self,
+        messages: GPTMessages,
+        model: CompletionsModel,
+        extra_data: dict,
+        callback_func: Callable | None = None,
     ) -> GPTCompletionsResponse:
         payload = {"model": model.name, "messages": messages.get_messages()}
         if callback_func:
@@ -60,19 +60,25 @@ class QwenAPI(
             payload["stream_options"] = {"include_usage": True}
 
         self.set_base_url()
-        return self.do_completions_request(model, self.completions_url, json=payload, headers=self.headers,
-                                           stream=True if callback_func else False, callback_func=callback_func)  # noqa
+        return self.do_completions_request(
+            model,
+            self.completions_url,
+            json=payload,
+            headers=self.headers,
+            stream=True if callback_func else False,
+            callback_func=callback_func,
+        )  # noqa
 
     # ---------- vision ---------- #
 
     vision_url = f"{base_url}/chat/completions"
 
     def vision(
-            self,
-            messages: GPTMessages,
-            model: VisionModel,
-            extra_data: dict,
-            callback_func: Callable | None = None,
+        self,
+        messages: GPTMessages,
+        model: VisionModel,
+        extra_data: dict,
+        callback_func: Callable | None = None,
     ) -> GPTVisionResponse:
         payload = {"model": model.name, "messages": messages.get_messages()}
         if callback_func:
@@ -84,5 +90,11 @@ class QwenAPI(
         if self.base_url == "http://192.168.1.10:21001":
             raise PWarning("Не работает")
 
-        return self.do_vision_request(model, self.vision_url, json=payload, headers=self.headers,
-                                      stream=True if callback_func else False, callback_func=callback_func)  # noqa
+        return self.do_vision_request(
+            model,
+            self.vision_url,
+            json=payload,
+            headers=self.headers,
+            stream=True if callback_func else False,
+            callback_func=callback_func,
+        )  # noqa

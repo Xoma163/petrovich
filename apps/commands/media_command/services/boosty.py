@@ -46,7 +46,7 @@ class BoostyService(MediaService):
             message_thread_id=self.event.message_thread_id,
             thumbnail_url=video_data.thumbnail_url,
             width=video_data.width,
-            height=video_data.height
+            height=video_data.height,
         )
         va.download_content(chunk_size=self.service.DOWNLOAD_CHUNK_SIZE)
 

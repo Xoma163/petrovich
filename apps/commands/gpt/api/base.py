@@ -5,7 +5,7 @@ from apps.commands.gpt.api.responses import (
     GPTCompletionsResponse,
     GPTImageDrawResponse,
     GPTVisionResponse,
-    GPTVoiceRecognitionResponse
+    GPTVoiceRecognitionResponse,
 )
 from apps.commands.gpt.messages.base import GPTMessages
 from apps.commands.gpt.models import (
@@ -13,15 +13,9 @@ from apps.commands.gpt.models import (
     VisionModel,
     ImageDrawModel,
     ImageEditModel,
-    VoiceRecognitionModel
+    VoiceRecognitionModel,
 )
-from apps.commands.gpt.protocols import (
-    HasCompletions,
-    HasVision,
-    HasVoiceRecognition,
-    HasImageEdit,
-    HasImageDraw
-)
+from apps.commands.gpt.protocols import HasCompletions, HasVision, HasVoiceRecognition, HasImageEdit, HasImageDraw
 from apps.connectors.api.handler import API
 
 
@@ -50,17 +44,16 @@ class CompletionsAPIMixin(HasCompletions):
 
     @abstractmethod
     def completions(
-            self,
-            messages: GPTMessages,
-            model: CompletionsModel,
-            extra_data: dict,
-            callback_func: Callable | None = None,
+        self,
+        messages: GPTMessages,
+        model: CompletionsModel,
+        extra_data: dict,
+        callback_func: Callable | None = None,
     ) -> GPTCompletionsResponse:
         pass
 
 
 class VisionAPIMixin(HasVision):
-
     @property
     @abstractmethod
     def vision_url(self) -> str:
@@ -68,11 +61,11 @@ class VisionAPIMixin(HasVision):
 
     @abstractmethod
     def vision(
-            self,
-            messages: GPTMessages,
-            model: VisionModel,
-            extra_data: dict,
-            callback_func: Callable | None = None,
+        self,
+        messages: GPTMessages,
+        model: VisionModel,
+        extra_data: dict,
+        callback_func: Callable | None = None,
     ) -> GPTVisionResponse:
         pass
 
@@ -85,10 +78,10 @@ class ImageDrawAPIMixin(HasImageDraw):
 
     @abstractmethod
     def draw_image(
-            self,
-            prompt: str,
-            model: ImageDrawModel,
-            count: int = 1,
+        self,
+        prompt: str,
+        model: ImageDrawModel,
+        count: int = 1,
     ) -> GPTImageDrawResponse:
         pass
 
@@ -101,24 +94,27 @@ class ImageEditAPIMixin(HasImageEdit):
 
     @abstractmethod
     def edit_image(
-            self,
-            prompt: str,
-            model: ImageEditModel,
-            image: bytes,
-            mask: bytes,
-            count: int = 1
+        self,
+        prompt: str,
+        model: ImageEditModel,
+        image: bytes,
+        mask: bytes,
+        count: int = 1,
     ) -> GPTImageDrawResponse:
         pass
 
 
 class VoiceRecognitionAPIMixin(HasVoiceRecognition):
-
     @property
     @abstractmethod
     def voice_recognition_url(self) -> str:
         pass
 
     @abstractmethod
-    def voice_recognition(self, audio_ext: str, content: bytes,
-                          model: VoiceRecognitionModel) -> GPTVoiceRecognitionResponse:
+    def voice_recognition(
+        self,
+        audio_ext: str,
+        content: bytes,
+        model: VoiceRecognitionModel,
+    ) -> GPTVoiceRecognitionResponse:
         pass

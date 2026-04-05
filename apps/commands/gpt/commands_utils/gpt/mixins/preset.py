@@ -12,20 +12,11 @@ class GPTPresetMixin(GPTCommandProtocol):
     PRESET_HELP_TEXT_ITEMS = [
         HelpTextArgument(
             "пресет создать (название)\\n[описание]",
-            "создаёт новый или обновляет существующий пресет на основе текущих настроек GPT"
+            "создаёт новый или обновляет существующий пресет на основе текущих настроек GPT",
         ),
-        HelpTextArgument(
-            "пресет удалить (название)",
-            "удаляет пресет"
-        ),
-        HelpTextArgument(
-            "пресет (название)",
-            "выбирает пресет"
-        ),
-        HelpTextArgument(
-            "пресет",
-            "показывает все ваши пресеты"
-        )
+        HelpTextArgument("пресет удалить (название)", "удаляет пресет"),
+        HelpTextArgument("пресет (название)", "выбирает пресет"),
+        HelpTextArgument("пресет", "показывает все ваши пресеты"),
     ]
 
     # MENU
@@ -77,11 +68,7 @@ class GPTPresetMixin(GPTCommandProtocol):
 
         try:
             created = False
-            preset = GPTPreset.objects.get(
-                provider=self.provider_model,
-                profile=self.event.sender,
-                name=name
-            )
+            preset = GPTPreset.objects.get(provider=self.provider_model, profile=self.event.sender, name=name)
 
             if not description:
                 defaults.pop("description")
@@ -90,14 +77,10 @@ class GPTPresetMixin(GPTCommandProtocol):
             preset.save()
         except GPTPreset.DoesNotExist:
             created = True
-            preset = GPTPreset(
-                provider=self.provider_model,
-                profile=self.event.sender,
-                name=name,
-                **defaults
-            )
+            preset = GPTPreset(provider=self.provider_model, profile=self.event.sender, name=name, **defaults)
             preset.save()
 
+        # fmt: off
         answer_parts = [
             f"Сохранил пресет {self.bot.get_formatted_text_line(name)}:" if created else f"Обновил пресет {self.bot.get_formatted_text_line(name)}:",
             f"Описание\n{self.bot.get_formatted_text_line(preset.description)}" if preset.description else None,
@@ -112,6 +95,7 @@ class GPTPresetMixin(GPTCommandProtocol):
             f"Дебаг режим\n{self.bot.get_formatted_text_line('Включено') if preset.use_debug is True else self.bot.get_formatted_text_line('Выключено')}" if preset.use_debug is not None else None,
             f"Препромпт:\n{self.bot.get_formatted_text(preset.preprompt_text)}" if preprompt_text else None
         ]
+        # fmt: on
 
         preset.save()
         answer = "\n\n".join(filter(None, answer_parts))
@@ -126,17 +110,14 @@ class GPTPresetMixin(GPTCommandProtocol):
         if len(presets_to_delete) == 0:
             available_presets_names_str = self._format_presets_str(user_presets)
             raise PWarning(
-                f"Не нашёл пресетов по имени \"{name}\" для удаления.\n"
-                f"Доступные варианты:\n\n"
-                f"{available_presets_names_str}"
+                f'Не нашёл пресетов по имени "{name}" для удаления.\nДоступные варианты:\n\n{available_presets_names_str}'
             )
         elif len(presets_to_delete) == 1:
-            answer = f"Удалил пресет \"{presets_to_delete.first().name}\""
+            answer = f'Удалил пресет "{presets_to_delete.first().name}"'
             presets_to_delete.delete()
         else:
             presets_to_delete_names_str = "\n".join([x.name for x in presets_to_delete])
-            answer = f"Удалил пресеты:\n" \
-                     f"{presets_to_delete_names_str}"
+            answer = f"Удалил пресеты:\n{presets_to_delete_names_str}"
             presets_to_delete.delete()
         return ResponseMessageItem(text=answer)
 
@@ -149,6 +130,7 @@ class GPTPresetMixin(GPTCommandProtocol):
         if len(available_presets) > 1:
             raise PWarning("Больше двух пресетов подходят на выбор. Уточните выбор или удалите дубликат")
 
+        # fmt: off
         preset = available_presets.first()
         profile_settings = self.get_profile_gpt_settings()
         profile_settings.completions_model = preset.completions_model if preset.completions_model else None
@@ -161,7 +143,7 @@ class GPTPresetMixin(GPTCommandProtocol):
         profile_settings.gpt_5_settings_web_search = preset.gpt_5_settings_web_search if preset.gpt_5_settings_web_search is not None else None
         profile_settings.use_debug = preset.use_debug if preset.use_debug is not None else None
         profile_settings.save()
-
+        # fmt: on
         if isinstance(self, GPTPrepromptMixin):
             preprompt = self.get_preprompt(self.event.sender, None)
             if preprompt:
@@ -173,13 +155,11 @@ class GPTPresetMixin(GPTCommandProtocol):
             else:
                 if preset.preprompt_text:
                     new_preprompt = Preprompt(
-                        provider=self.provider_model,
-                        author=self.event.sender,
-                        text=preset.preprompt_text
+                        provider=self.provider_model, author=self.event.sender, text=preset.preprompt_text
                     )
                     new_preprompt.save()
 
-        answer = f"Загрузил пресет \"{preset.name}\""
+        answer = f'Загрузил пресет "{preset.name}"'
         return ResponseMessageItem(text=answer)
 
     def menu_select_or_list_preset(self) -> ResponseMessageItem:
@@ -195,8 +175,7 @@ class GPTPresetMixin(GPTCommandProtocol):
             raise PWarning("У вас нет сохранённых пресетов")
 
         presets_names = self._format_presets_str(presets)
-        answer = "Сохранённые пресеты:\n\n" \
-                 f"{presets_names}"
+        answer = f"Сохранённые пресеты:\n\n{presets_names}"
 
         buttons = []
         for preset in presets:

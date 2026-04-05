@@ -28,29 +28,37 @@ class Meme(Command):
     help_text = HelpText(
         commands_text="присылает мем",
         help_texts=[
-            HelpTextItem(RoleEnum.USER, [
-                HelpTextArgument(None, "присылает рандомный мем"),
-                HelpTextArgument(
-                    "(название/id)",
-                    "присылает нужный мем. Можно использовать * вместо символов поиска. Например /мем ж*па"),
-                HelpTextArgument(
-                    "добавить (название) (Вложение/Пересланное сообщение с вложением)",
-                    "добавляет мем"),
-                HelpTextArgument("добавить (название) (ссылка на youtube/coub)", "добавляет мем с youtube/coub"),
-                HelpTextArgument(
-                    "обновить (название/id) (Вложение/Пересланное сообщение с вложением)",
-                    "обновляет созданный вами мем."),
-                HelpTextArgument("обновить (название/id) (ссылка на youtube/coub)", "обновляет созданный вами мем"),
-                HelpTextArgument("удалить (название/id)", "удаляет созданный вами мем"),
-                HelpTextArgument("инфо (название/id)", "присылает информацию по мему")
-            ]),
-            HelpTextItem(RoleEnum.MODERATOR, [
-                HelpTextArgument("подтвердить", "присылает мем на подтверждение"),
-                HelpTextArgument("подтвердить (название/id)", "подтверждает мем"),
-                HelpTextArgument("отклонить (название/id)", "отклоняет мем"),
-                HelpTextArgument("переименовать (id) (новое название)", "переименовывает мем"),
-                HelpTextArgument("удалить (название/id)", "удаляет мем")
-            ])
+            HelpTextItem(
+                RoleEnum.USER,
+                [
+                    HelpTextArgument(None, "присылает рандомный мем"),
+                    HelpTextArgument(
+                        "(название/id)",
+                        "присылает нужный мем. Можно использовать * вместо символов поиска. Например /мем ж*па",
+                    ),
+                    HelpTextArgument(
+                        "добавить (название) (Вложение/Пересланное сообщение с вложением)", "добавляет мем"
+                    ),
+                    HelpTextArgument("добавить (название) (ссылка на youtube/coub)", "добавляет мем с youtube/coub"),
+                    HelpTextArgument(
+                        "обновить (название/id) (Вложение/Пересланное сообщение с вложением)",
+                        "обновляет созданный вами мем.",
+                    ),
+                    HelpTextArgument("обновить (название/id) (ссылка на youtube/coub)", "обновляет созданный вами мем"),
+                    HelpTextArgument("удалить (название/id)", "удаляет созданный вами мем"),
+                    HelpTextArgument("инфо (название/id)", "присылает информацию по мему"),
+                ],
+            ),
+            HelpTextItem(
+                RoleEnum.MODERATOR,
+                [
+                    HelpTextArgument("подтвердить", "присылает мем на подтверждение"),
+                    HelpTextArgument("подтвердить (название/id)", "подтверждает мем"),
+                    HelpTextArgument("отклонить (название/id)", "отклоняет мем"),
+                    HelpTextArgument("переименовать (id) (новое название)", "переименовывает мем"),
+                    HelpTextArgument("удалить (название/id)", "удаляет мем"),
+                ],
+            ),
         ],
         extra_text=(
             "Поддерживается добавление/обновление мемов с нарезкой по аналогии с командами /Медиа и /Нарезка\n\n"
@@ -58,7 +66,7 @@ class Meme(Command):
             "настройки телеги с телефона (это важно) -> Конфиденциальность -> Панель контакты -> "
             "Подсказка людей при поиске. После чего вручную введите имя бота @igor_petrovich_ksta_bot и отправьте 1 мем "
             "в любой чат. После этого вы сможете быстро находить бота через @ и выбирать его"
-        )
+        ),
     )
 
     # Обоснование: команда должна обрабатываться после остальных команд так как могут быть мемы пересекающиеся
@@ -66,8 +74,13 @@ class Meme(Command):
     priority = -10
 
     ALLOWED_ATTACHMENTS = [
-        PhotoAttachment, VideoAttachment, StickerAttachment, AnimationAttachment, VoiceAttachment, VideoNoteAttachment,
-        LinkAttachment
+        PhotoAttachment,
+        VideoAttachment,
+        StickerAttachment,
+        AnimationAttachment,
+        VoiceAttachment,
+        VideoNoteAttachment,
+        LinkAttachment,
     ]
 
     platforms = [PlatformEnum.TG]
@@ -93,7 +106,7 @@ class Meme(Command):
             [["отклонить", "отменить", "-"], self.menu_reject],
             [["переименовать", "правка"], self.menu_rename],
             [["инфо"], self.menu_info],
-            [["default"], self.menu_default]
+            [["default"], self.menu_default],
         ]
         method = self.handle_menu(menu, arg0)
         return method()
@@ -112,17 +125,17 @@ class Meme(Command):
             self._check_allowed_url(attachment)
             att_url_lower = attachment.url.lower()
             if not self.event.fwd and att_url_lower in meme_name_list:
-                meme_name_list = meme_name_list[:meme_name_list.index(att_url_lower)]
+                meme_name_list = meme_name_list[: meme_name_list.index(att_url_lower)]
 
         meme_name = " ".join(meme_name_list)
         self.check_meme_name(meme_name_list)
 
+        approved = self.event.sender.check_role(RoleEnum.MODERATOR) or self.event.sender.check_role(RoleEnum.TRUSTED)
         new_meme = {
             "name": meme_name,
             "type": attachment.type,
             "author": self.event.sender,
-            "approved": self.event.sender.check_role(RoleEnum.MODERATOR) or self.event.sender.check_role(
-                RoleEnum.TRUSTED)
+            "approved": approved,
         }
 
         try:
@@ -164,9 +177,9 @@ class Meme(Command):
             raise PSkip()
 
         meme_to_send = self.prepare_meme_to_send(new_meme_obj)
-        meme_to_send.text = "Запрос на подтверждение мема:\n" \
-                            f"{new_meme_obj.author}\n" \
-                            f"{new_meme_obj.name} ({new_meme_obj.id})"
+        meme_to_send.text = (
+            f"Запрос на подтверждение мема:\n{new_meme_obj.author}\n{new_meme_obj.name} ({new_meme_obj.id})"
+        )
 
         button_approve = self.bot.get_button("Подтвердить", self.name, args=["подтвердить", new_meme_obj.pk])
         button_decline = self.bot.get_button("Отклонить", self.name, args=["отклонить", new_meme_obj.pk])
@@ -189,7 +202,7 @@ class Meme(Command):
             self._check_allowed_url(attachment)
             att_url_lower = attachment.url.lower()
             if not self.event.fwd and att_url_lower in id_name_list:
-                id_name_list = id_name_list[:id_name_list.index(att_url_lower)]
+                id_name_list = id_name_list[: id_name_list.index(att_url_lower)]
         id_name = self.get_id_or_meme_name(id_name_list)
 
         meme_filter = {}
@@ -216,12 +229,13 @@ class Meme(Command):
         is_youtube_link = isinstance(attachment, LinkAttachment) and attachment.is_youtube_link
         rmi_params = ResponseMessageItem()
         trusted_user = self.event.sender.check_role(RoleEnum.MODERATOR) or self.event.sender.check_role(
-            RoleEnum.TRUSTED)
+            RoleEnum.TRUSTED
+        )
         # Кэш
         if trusted_user:
             meme.save()
             self._save_meme(meme, is_update=True)
-            answer = f"Обновил мем \"{meme.name}\""
+            answer = f'Обновил мем "{meme.name}"'
             if not is_youtube_link:
                 return ResponseMessage(ResponseMessageItem(text=answer))
 
@@ -230,7 +244,7 @@ class Meme(Command):
                 ResponseMessageItem(text=answer_with_youtube, peer_id=self.event.peer_id)
             )
             rmi_params.peer_id = self.event.peer_id
-            rmi_params.message_id = response.response["result"]["message_id"],
+            rmi_params.message_id = (response.response["result"]["message_id"],)
             rmi_params.text = answer
 
         if is_youtube_link:
@@ -240,9 +254,7 @@ class Meme(Command):
             raise PSkip()
 
         meme_to_send = self.prepare_meme_to_send(meme)
-        meme_to_send.text = "Запрос на обновление мема:\n" \
-                            f"{meme.author}\n" \
-                            f"{meme.name} ({meme.id})"
+        meme_to_send.text = f"Запрос на обновление мема:\n{meme.author}\n{meme.name} ({meme.id})"
         if meme.link:
             meme_to_send.text += f"\n{meme.link}"
         send_message_to_moderator_chat(meme_to_send)
@@ -265,13 +277,11 @@ class Meme(Command):
 
         rm = ResponseMessage()
         if meme.author and meme.author != self.event.sender:
-            user_msg = f"Мем с названием \"{meme.name}\" удалён поскольку он не " \
-                       f"соответствует правилам, устарел или является дубликатом."
+            user_msg = f'Мем с названием "{meme.name}" удалён поскольку он не соответствует правилам, устарел или является дубликатом.'
             user = meme.author.get_tg_user()
             rmi = ResponseMessageItem(
-                text=user_msg,
-                peer_id=user.user_id,
-                message_thread_id=self.event.message_thread_id)
+                text=user_msg, peer_id=user.user_id, message_thread_id=self.event.message_thread_id
+            )
             self.bot.send_response_message_item(rmi)
             rmi.send = False
             rm.messages.append(rmi)
@@ -280,7 +290,7 @@ class Meme(Command):
         meme.file.delete()
         meme.file_preview.delete()
         meme.delete()
-        answer = f"Удалил мем \"{meme_name}\""
+        answer = f'Удалил мем "{meme_name}"'
         rm.messages.append(ResponseMessageItem(text=answer))
         return rm
 
@@ -298,8 +308,7 @@ class Meme(Command):
         if len(self.event.message.args) == 1:
             meme = self.get_meme(approved=False)
             rmi = self.prepare_meme_to_send(meme)
-            rmi.text = f"{meme.author}\n" \
-                       f"{meme.name} ({meme.id})"
+            rmi.text = f"{meme.author}\n{meme.name} ({meme.id})"
             return ResponseMessage(rmi)
 
         self.check_args(2)
@@ -310,15 +319,14 @@ class Meme(Command):
         if meme.approved:
             raise PWarning("Мем уже подтверждён")
 
-        answer = f"Мем с названием \"{meme.name}\" подтверждён."
+        answer = f'Мем с названием "{meme.name}" подтверждён.'
         user = meme.author.get_tg_user()
 
         meme.approved = True
         meme.save()
-        return ResponseMessage([
-            ResponseMessageItem(text=answer),
-            ResponseMessageItem(text=answer, peer_id=user.user_id)
-        ])
+        return ResponseMessage(
+            [ResponseMessageItem(text=answer), ResponseMessageItem(text=answer, peer_id=user.user_id)]
+        )
 
     def menu_reject(self) -> ResponseMessage:
         self.check_sender(RoleEnum.MODERATOR)
@@ -329,19 +337,18 @@ class Meme(Command):
         if meme.approved:
             raise PWarning("Нельзя отклонить уже подтверждённый мем")
 
-        answer = f"Мем \"{meme.name}\" ({meme.id}) отклонён"
+        answer = f'Мем "{meme.name}" ({meme.id}) отклонён'
         user = meme.author.get_tg_user()
 
         meme.file.delete()
         meme.file_preview.delete()
         meme.delete()
-        return ResponseMessage([
-            ResponseMessageItem(text=answer),
-            ResponseMessageItem(
-                text=answer,
-                peer_id=user.user_id
-            )
-        ])
+        return ResponseMessage(
+            [
+                ResponseMessageItem(text=answer),
+                ResponseMessageItem(text=answer, peer_id=user.user_id),
+            ]
+        )
 
     def menu_rename(self) -> ResponseMessage:
         self.check_sender(RoleEnum.MODERATOR)
@@ -363,8 +370,7 @@ class Meme(Command):
         except MemeModel.DoesNotExist:
             pass
 
-        user_msg = f"Мем с названием \"{meme.name}\" переименован.\n" \
-                   f"Новое название - \"{new_name}\""
+        user_msg = f'Мем с названием "{meme.name}" переименован.\nНовое название - "{new_name}"'
 
         meme.name = new_name
         meme.save()
@@ -373,10 +379,7 @@ class Meme(Command):
         rm.messages.append(ResponseMessageItem(text=user_msg))
         if meme.author != self.event.sender:
             user = meme.author.get_tg_user()
-            rmi = ResponseMessageItem(
-                text=user_msg,
-                peer_id=user.user_id
-            )
+            rmi = ResponseMessageItem(text=user_msg, peer_id=user.user_id)
             rm.messages.append(rmi)
         return rm
 
@@ -425,7 +428,7 @@ class Meme(Command):
             for _filter in filter_list:
                 if "*" in _filter:
                     _filter = _filter.replace("*", ".")
-                    regex_filter = fr".*{_filter}.*"
+                    regex_filter = rf".*{_filter}.*"
                     memes = memes.filter(name__iregex=regex_filter)
                 else:
                     memes = memes.filter(name__contains=_filter)
@@ -505,7 +508,7 @@ class Meme(Command):
                 _bytes=video_content,
                 peer_id=self.event.peer_id,
                 message_thread_id=self.event.message_thread_id,
-                thumbnail_url=data.thumbnail_url
+                thumbnail_url=data.thumbnail_url,
             )
             meme.tg_file_id = video.get_file_id()
             meme.type = VideoAttachment.TYPE
@@ -537,8 +540,7 @@ class Meme(Command):
                 meme_names.append(meme.name[:meme_name_limit] + "...")
         meme_names_str = ";\n".join(meme_names)
 
-        answer = f"Нашёл сразу {total_memes_count}, уточните:\n\n" \
-                 f"{meme_names_str}" + "."
+        answer = f"Нашёл сразу {total_memes_count}, уточните:\n\n{meme_names_str}" + "."
         if total_memes_count > meme_count_limit:
             answer += "\n..."
         return ResponseMessageItem(text=answer)
@@ -571,8 +573,23 @@ class Meme(Command):
 
     @staticmethod
     def check_meme_name(name):
-        ban_list = ["добавить", "обновить", "удалить", "конфа", "рандом", "р", "подтвердить", "принять", "+",
-                    "отклонить", "отменить", "-", "переименовать", "правка", "инфо"]
+        ban_list = [
+            "добавить",
+            "обновить",
+            "удалить",
+            "конфа",
+            "рандом",
+            "р",
+            "подтвердить",
+            "принять",
+            "+",
+            "отклонить",
+            "отменить",
+            "-",
+            "переименовать",
+            "правка",
+            "инфо",
+        ]
         if name in ban_list:
             raise PWarning("Мем с таким названием нельзя создать")
 
@@ -598,7 +615,7 @@ class Meme(Command):
             qr = {
                 "id": meme.pk,
                 "type": meme.type,
-                att_type_map[meme.type]: meme.tg_file_id
+                att_type_map[meme.type]: meme.tg_file_id,
             }
             if meme.type in [VideoAttachment.TYPE, AnimationAttachment.TYPE, VoiceAttachment.TYPE]:
                 qr["title"] = meme.name
@@ -680,7 +697,7 @@ class Meme(Command):
             VideoAttachment.TYPE,
             AnimationAttachment.TYPE,
             StickerAttachment.TYPE,
-            PhotoAttachment.TYPE
+            PhotoAttachment.TYPE,
         ]
         for att_type in att_types:
             all_memes_qr += self._get_inline_qrs(list(filter(lambda x: x.type == att_type, memes)))

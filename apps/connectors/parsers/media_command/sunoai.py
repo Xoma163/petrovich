@@ -7,7 +7,6 @@ from apps.connectors.parsers.media_command.data import AudioData
 
 
 class SunoAIData:
-
     def __init__(self, title, download_url, thumbnail_url, song_text, author=None):
         self.title = title
         self.download_url = download_url
@@ -18,7 +17,6 @@ class SunoAIData:
 
 
 class SunoAI:
-
     @staticmethod
     def get_info(url) -> AudioData:
         r = requests.post(url)
@@ -31,13 +29,13 @@ class SunoAI:
         author = author[-1] if author else None
         # title = title.replace(f"by @{author.lower()}", '').strip()
 
-        match = re.search(r'prompt\\\"\:\\\"(.*?)\\\"\,\\\"edited', r.text)
-        text = "\n".join(match.group(1).split(r'\\n')) if match else None
+        match = re.search(r"prompt\\\"\:\\\"(.*?)\\\"\,\\\"edited", r.text)
+        text = "\n".join(match.group(1).split(r"\\n")) if match else None
 
         return AudioData(
             title=title,
             download_url=audio_url,
             thumbnail_url=thumbnail_url,
             text=text,
-            artists=author
+            artists=author,
         )

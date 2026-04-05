@@ -4,7 +4,7 @@ import socket
 import struct
 import time
 
-from apps.connectors.parsers.minecraft.forge import ForgeMod, ForgeData
+from apps.connectors.parsers.minecraft.forge import ForgeData
 from apps.shared.exceptions import PError
 from apps.shared.utils.utils import extract_json
 
@@ -33,28 +33,28 @@ class MinecraftServerData:
     """
 
     def __init__(
-            self,
-            favicon: str | None = None,
-            enforces_secure_chat: bool | None = None,
-            description: str | None = None,
-            players_online: int | None = None,
-            players_max: int | None = None,
-            version: str | None = None,
-            version_protocol: str | None = None,
-            latency: float | None = None,
-            players: list[MinecraftPlayerData] = None,
-            forge_data: list[ForgeMod] = None,
+        self,
+        favicon: str | None = None,
+        enforces_secure_chat: bool | None = None,
+        description: str | None = None,
+        players_online: int | None = None,
+        players_max: int | None = None,
+        version: str | None = None,
+        version_protocol: str | None = None,
+        latency: float | None = None,
+        players: list[MinecraftPlayerData] | None = None,
+        forge_data: ForgeData | None = None,
     ):
-        self.online = True
-        self.favicon: str = favicon  # base64
-        self.enforces_secure_chat: bool = enforces_secure_chat
-        self.description: str = description
-        self.players_online: int = players_online
-        self.players_max: int = players_max
-        self.version: str = version
-        self.version_protocol: str = version_protocol
-        self.latency: float = latency
-        self.forge_data: ForgeData | None = forge_data if forge_data else None
+        self.online: bool = True
+        self.favicon: str | None = favicon  # base64
+        self.enforces_secure_chat: bool | None = enforces_secure_chat
+        self.description: str | None = description
+        self.players_online: int | None = players_online
+        self.players_max: int | None = players_max
+        self.version: str | None = version
+        self.version_protocol: str | None = version_protocol
+        self.latency: float | None = latency
+        self.forge_data: ForgeData | None = forge_data
         self.players: list[MinecraftPlayerData] = players if players else []
 
     def __str__(self):
@@ -72,7 +72,7 @@ class MinecraftServerStatus:
 
     @staticmethod
     def pack_varint(data):
-        """ Pack an integer as a varint """
+        """Pack an integer as a varint"""
         result = b""
         while True:
             byte = data & 0x7F

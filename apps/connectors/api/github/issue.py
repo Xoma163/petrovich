@@ -29,19 +29,17 @@ class GithubIssueAPI(GithubAPI):
         self.author: Profile | None = None
 
     def parse_response(self, response: dict):
-        self.id: str = response["id"]
-        self.number: str = response["number"]
-        self.title: str = response["title"]
-        self.labels: list[str] = [x["name"] for x in response["labels"]]
-        self.body: str = response["body"]
-        self.assignee: str = response["assignee"]
-        self.remote_url: str = response["html_url"]
-        self.created_at: datetime = datetime.strptime(
-            response["created_at"], "%Y-%m-%dT%H:%M:%SZ"
-        ).replace(tzinfo=UTC)
-        self.state_reason: str = response["state_reason"]
+        self.id = response["id"]
+        self.number = response["number"]
+        self.title = response["title"]
+        self.labels = [x["name"] for x in response["labels"]]
+        self.body = response["body"]
+        self.assignee = response["assignee"]
+        self.remote_url = response["html_url"]
+        self.created_at = datetime.strptime(response["created_at"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=UTC)
+        self.state_reason = response["state_reason"]
 
-        self.author: Profile | None = None
+        self.author = None
         match = self.USER_PK_RE.findall(self.body)
         if match:
             profile_pk = match[-1]
@@ -93,9 +91,7 @@ class GithubIssueAPI(GithubAPI):
 
     def delete_in_github(self) -> dict:
         issue_data = {"state": "closed", "labels": self.labels + ["Не пофикшу"]}
-        r = self.requests.post(
-            f"{self.ISSUES_URL}/{self.number}", json.dumps(issue_data)
-        )
+        r = self.requests.post(f"{self.ISSUES_URL}/{self.number}", json.dumps(issue_data))
 
         try:
             r.raise_for_status()

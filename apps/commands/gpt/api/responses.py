@@ -7,7 +7,7 @@ from apps.commands.gpt.usage import (
     GPTVisionUsage,
     GPTVoiceRecognitionUsage,
     GPTCompletionsVisionUsage,
-    GPTUsage
+    GPTUsage,
 )
 
 

@@ -7,7 +7,6 @@ from apps.commands.media_command.service import MediaServiceResponse, MediaServi
 
 
 class TwitchClipsService(MediaService):
-
     def get_content_by_url(self, url: str) -> MediaServiceResponse:
         with ChatActionSender(self.bot, ChatActionEnum.UPLOAD_VIDEO, self.event.peer_id, self.event.message_thread_id):
             return self._get_content_by_url(url)

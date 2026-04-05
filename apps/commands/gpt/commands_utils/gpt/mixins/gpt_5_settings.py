@@ -9,28 +9,19 @@ class GPT5SettingsMixin(GPTCommandProtocol):
     GPT_5_SETTINGS_HELP_TEXT_ITEMS = [
         HelpTextArgument(
             "gpt_5_reasoning (xhigh/high/medium/low/minimal/none)",
-            "устанавливает уровень рассуждений для моделей семейства GPT-5. По умолчанию medium. Для GPT-5.1 по умолчанию none, для GPT-5 - medium"
+            "устанавливает уровень рассуждений для моделей семейства GPT-5. По умолчанию medium. Для GPT-5.1 по умолчанию none, для GPT-5 - medium",
         ),
-        HelpTextArgument(
-            "gpt_5_reasoning удалить",
-            "удаляет настройку"
-        ),
+        HelpTextArgument("gpt_5_reasoning удалить", "удаляет настройку"),
         HelpTextArgument(
             "gpt_5_verbosity (high/medium/low)",
-            "устанавливает уровень многословности для моделей семейства GPT-5. По умолчанию medium"
+            "устанавливает уровень многословности для моделей семейства GPT-5. По умолчанию medium",
         ),
-        HelpTextArgument(
-            "gpt_5_verbosity удалить",
-            "удаляет настройку"
-        ),
+        HelpTextArgument("gpt_5_verbosity удалить", "удаляет настройку"),
         HelpTextArgument(
             "gpt_5_web_search (on/off)",
-            "устанавливает возможность поиска информации в интернете для моделей семейства GPT-5. По умолчанию false"
+            "устанавливает возможность поиска информации в интернете для моделей семейства GPT-5. По умолчанию false",
         ),
-        HelpTextArgument(
-            "gpt_5_web_search удалить",
-            "удаляет настройку"
-        )
+        HelpTextArgument("gpt_5_web_search удалить", "удаляет настройку"),
     ]
 
     def reasoning(self) -> ResponseMessageItem:
@@ -48,13 +39,16 @@ class GPT5SettingsMixin(GPTCommandProtocol):
             effort_level = GPTReasoningEffortLevel[user_value.upper()]
         except KeyError:
             available_levels = ", ".join(
-                self.bot.get_formatted_text_line(x.name.lower()) for x in GPTReasoningEffortLevel)
+                self.bot.get_formatted_text_line(x.name.lower()) for x in GPTReasoningEffortLevel
+            )
             raise PError(f"Уровня {user_value} нет среди доступных.\nДоступные уровни: {available_levels}")
 
         profile_settings = self.get_profile_gpt_settings()
         profile_settings.gpt_5_settings_reasoning_effort_level = effort_level.value
         profile_settings.save()
-        answer = f"Установил уровень рассуждений {self.bot.get_formatted_text_line(user_value)} для моделей семейства GPT-5"
+        answer = (
+            f"Установил уровень рассуждений {self.bot.get_formatted_text_line(user_value)} для моделей семейства GPT-5"
+        )
         return ResponseMessageItem(text=answer)
 
     def _get_reasoning(self) -> ResponseMessageItem:
@@ -132,8 +126,11 @@ class GPT5SettingsMixin(GPTCommandProtocol):
         profile_settings = self.get_profile_gpt_settings()
         profile_settings.gpt_5_settings_web_search = web_search.value
         profile_settings.save()
-        answer_value = self.bot.get_formatted_text_line(
-            "Включил") if profile_settings.gpt_5_settings_web_search else self.bot.get_formatted_text_line("Выключил")
+        answer_value = (
+            self.bot.get_formatted_text_line("Включил")
+            if profile_settings.gpt_5_settings_web_search
+            else self.bot.get_formatted_text_line("Выключил")
+        )
         answer = f"{answer_value} поиск в интернете для моделей семейства GPT-5"
         return ResponseMessageItem(text=answer)
 

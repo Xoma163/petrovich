@@ -38,48 +38,55 @@ class Media(AcceptExtraCommand):
     help_text = HelpText(
         commands_text="скачивает видео/фото из соцсетей и присылает его",
         help_texts=[
-            HelpTextItem(RoleEnum.USER, [
-                HelpTextArgument("(ссылка на видео/пост)", "скачивает видео из соцсетей и присылает его")
-            ])
+            HelpTextItem(
+                RoleEnum.USER,
+                [HelpTextArgument("(ссылка на видео/пост)", "скачивает видео из соцсетей и присылает его")],
+            )
         ],
         help_text_keys=[
-            HelpTextItem(RoleEnum.USER, [
-                HelpTextKey(
-                    MediaKeys.NO_MEDIA_KEYS[0],
-                    MediaKeys.NO_MEDIA_KEYS[1:],
-                    "позволяет не запускать команду"
-                ),
-                HelpTextKey(
-                    MediaKeys.AUDIO_ONLY_KEYS[0],  # noqa
-                    MediaKeys.AUDIO_ONLY_KEYS[1:],  # noqa
-                    "позволяет скачивать аудиодорожку для видео"
-                ),
-                HelpTextKey(
-                    MediaKeys.HIGH_RESOLUTION_KEYS[0],  # noqa
-                    MediaKeys.HIGH_RESOLUTION_KEYS[1:],  # noqa
-                    "присылает видео в максимальном качестве (VK Video/Youtube Video/Boosty)"
-                ),
-                HelpTextKey(
-                    MediaKeys.FORCE_CACHE_KEYS[0],  # noqa
-                    MediaKeys.FORCE_CACHE_KEYS[1:],  # noqa
-                    "позволяет загрузить видео в онлайн-кэш (VK Video/Youtube Video/Телеканал Ю)"
-                ),
-                HelpTextKey(
-                    MediaKeys.FORCE_KEYS[0],  # noqa
-                    MediaKeys.FORCE_KEYS[1:],  # noqa
-                    "позволяет загрузить видео принудительно (Youtube Video)"
-                ),
-                HelpTextKey(
-                    MediaKeys.SPOILER_KEYS[0],  # noqa
-                    MediaKeys.SPOILER_KEYS[1:],  # noqa
-                    "позволяет скрыть пост спойлером"
-                ),
-            ]),
-            HelpTextItem(RoleEnum.ADMIN, [
-                HelpTextKey(MediaKeys.SAVE_TO_DISK_KEYS[0], MediaKeys.SAVE_TO_DISK_KEYS[1:],  # noqa
-                            "сохраняет видео в локальную директорию"),
-            ]),
-
+            HelpTextItem(
+                RoleEnum.USER,
+                [
+                    HelpTextKey(
+                        MediaKeys.NO_MEDIA_KEYS[0], MediaKeys.NO_MEDIA_KEYS[1:], "позволяет не запускать команду"
+                    ),
+                    HelpTextKey(
+                        MediaKeys.AUDIO_ONLY_KEYS[0],  # noqa
+                        MediaKeys.AUDIO_ONLY_KEYS[1:],  # noqa
+                        "позволяет скачивать аудиодорожку для видео",
+                    ),
+                    HelpTextKey(
+                        MediaKeys.HIGH_RESOLUTION_KEYS[0],  # noqa
+                        MediaKeys.HIGH_RESOLUTION_KEYS[1:],  # noqa
+                        "присылает видео в максимальном качестве (VK Video/Youtube Video/Boosty)",
+                    ),
+                    HelpTextKey(
+                        MediaKeys.FORCE_CACHE_KEYS[0],  # noqa
+                        MediaKeys.FORCE_CACHE_KEYS[1:],  # noqa
+                        "позволяет загрузить видео в онлайн-кэш (VK Video/Youtube Video/Телеканал Ю)",
+                    ),
+                    HelpTextKey(
+                        MediaKeys.FORCE_KEYS[0],  # noqa
+                        MediaKeys.FORCE_KEYS[1:],  # noqa
+                        "позволяет загрузить видео принудительно (Youtube Video)",
+                    ),
+                    HelpTextKey(
+                        MediaKeys.SPOILER_KEYS[0],  # noqa
+                        MediaKeys.SPOILER_KEYS[1:],  # noqa
+                        "позволяет скрыть пост спойлером",
+                    ),
+                ],
+            ),
+            HelpTextItem(
+                RoleEnum.ADMIN,
+                [
+                    HelpTextKey(
+                        MediaKeys.SAVE_TO_DISK_KEYS[0],
+                        MediaKeys.SAVE_TO_DISK_KEYS[1:],  # noqa
+                        "сохраняет видео в локальную директорию",
+                    ),
+                ],
+            ),
         ],
         extra_text=(
             "Поддерживаемые соцсети: Youtube Video/Youtube Music/Reddit/TikTok/Instagram/Twitter/"
@@ -91,7 +98,7 @@ class Media(AcceptExtraCommand):
             "\n"
             "Для работы достаточно прислать только ссылку\n"
             "Для того чтобы бот подчищал ссылки присланные пользователями в группах, необходимо выдать права на удаление сообщений"
-        )
+        ),
     )
 
     platforms = [PlatformEnum.TG]
@@ -204,14 +211,10 @@ class Media(AcceptExtraCommand):
         extra_text = extra_text if extra_text.strip() else ""
 
         extra_text = self._strip_extra_text_by_keys(
-            self.event.message.keys,
-            self.event.message.KEYS_SYMBOLS,
-            extra_text
+            self.event.message.keys, self.event.message.KEYS_SYMBOLS, extra_text
         )
         extra_text = self._strip_extra_text_by_keys(
-            self.event.message.short_keys_raw,
-            self.event.message.SHORT_KEYS_SYMBOLS,
-            extra_text
+            self.event.message.short_keys_raw, self.event.message.SHORT_KEYS_SYMBOLS, extra_text
         )
 
         extra_text = extra_text if extra_text.strip() else ""
@@ -227,11 +230,11 @@ class Media(AcceptExtraCommand):
         return extra_text
 
     def prepare_media_response(
-            self,
-            media_response: MediaServiceResponse,
-            media_keys: MediaKeys,
-            chosen_url: str,
-            chosen_service: type[MediaService],
+        self,
+        media_response: MediaServiceResponse,
+        media_keys: MediaKeys,
+        chosen_url: str,
+        chosen_service: type[MediaService],
     ) -> ResponseMessage:
         text = media_response.text or ""
 
@@ -270,7 +273,7 @@ class Media(AcceptExtraCommand):
             attachments=media_response.attachments,
             reply_to=reply_to,
             peer_id=self.event.peer_id,
-            message_thread_id=self.event.message_thread_id
+            message_thread_id=self.event.message_thread_id,
         )
 
         if media_keys.spoiler:

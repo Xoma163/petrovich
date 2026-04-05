@@ -1,10 +1,6 @@
 from django.contrib import admin
 
-from apps.bot.models import (
-    User,
-    ProfileSettings,
-    ChatSettings
-)
+from apps.bot.models import User, ProfileSettings, ChatSettings
 
 
 class UserInline(admin.StackedInline):

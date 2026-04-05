@@ -11,18 +11,18 @@ class OpenAICompletionsMessage(GPTMessage):
             "content": [
                 {
                     "type": "text",
-                    "text": self.text
-                }
-            ]
+                    "text": self.text,
+                },
+            ],
         }
         if self.images:
             for image in self.images:
-                message["content"].append({
-                    "type": "image_url",
-                    "image_url": {
-                        "url": f"data:image/jpeg;base64,{image.base64()}"
+                message["content"].append(
+                    {
+                        "type": "image_url",
+                        "image_url": {"url": f"data:image/jpeg;base64,{image.base64()}"},
                     }
-                })
+                )
         return message
 
 

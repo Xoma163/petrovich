@@ -17,32 +17,24 @@ class UserAdmin(TimeStampAdminMixin):
         "show_url",
         "platform",
         "profile",
-        "nickname"
+        "nickname",
     )
     search_fields = (
         "profile__name",
         "profile__surname",
         "profile__nickname_real",
         "nickname",
-        "user_id"
+        "user_id",
     )
 
-    list_filter = (
-        "platform",
-    )
-    list_select_related = (
-        "profile",
-    )
-    ordering = (
-        "profile",
-    )
+    list_filter = ("platform",)
+    list_select_related = ("profile",)
+    ordering = ("profile",)
 
 
 @admin.register(Role)
 class RoleAdmin(admin.ModelAdmin):
-    list_display = (
-        "name",
-    )
+    list_display = ("name",)
 
 
 @admin.register(Profile)
@@ -54,21 +46,21 @@ class ProfileAdmin(TimeStampAdminMixin):
         "gender",
         "birthday",
         "city",
-        "get_chats_count"
+        "get_chats_count",
     )
     search_fields = (
         "name",
         "surname",
         "nickname_real",
         "user__user_id",
-        "user__nickname"
+        "user__nickname",
     )
     list_filter = (
         "gender",
         ("city", admin.RelatedOnlyFieldListFilter),
         ("roles", admin.RelatedOnlyFieldListFilter),
         NoSpecificRoleFilter,
-        "chats__name"
+        "chats__name",
     )
     list_select_related = (
         "city",
@@ -78,39 +70,19 @@ class ProfileAdmin(TimeStampAdminMixin):
     inlines = (
         ProfileSettingsInline,
         ProfileGPTSettingsInline,
-        UserInline
+        UserInline,
     )
     fieldsets = (
-        (
-            "Profile Info",
-            {
-                "fields": ("name", "surname", "nickname_real", "gender", "birthday", "city", "avatar")
-            }
-        ),
-        (
-            "Other",
-            {
-                "fields": ("roles",)
-            }
-        ),
-        (
-            "API",
-            {
-                "fields": ("api_token",)
-            }
-        ),
+        ("Profile Info", {"fields": ("name", "surname", "nickname_real", "gender", "birthday", "city", "avatar")}),
+        ("Other", {"fields": ("roles",)}),
+        ("API", {"fields": ("api_token",)}),
         (
             "Chats",
             {
                 "fields": ("get_chats_count", "get_chats", "chats")  # noqa
-            }
+            },
         ),
-        (
-            "Date",
-            {
-                "fields": ("created_at", "updated_at")
-            }
-        ),
+        ("Date", {"fields": ("created_at", "updated_at")}),
     )
     readonly_fields = ("get_chats", "get_chats_count")
 
@@ -121,7 +93,7 @@ class ProfileAdmin(TimeStampAdminMixin):
         for chat in chats:
             url = reverse("admin:bot_chat_change", args=[chat.id])
             name = escape(str(chat))
-            links.append(f"<a href=\"{url}\">{name}</a>")
+            links.append(f'<a href="{url}">{name}</a>')
         return mark_safe("<br/>".join(links)) if links else "-"
 
     @admin.display(description="Количество чатов")
@@ -137,48 +109,41 @@ class ChatAdmin(TimeStampAdminMixin):
         "platform",
         "is_banned",
         "kicked",
-        "get_users_count"
+        "get_users_count",
     )
     search_fields = (
         "name",
-        "chat_id"
+        "chat_id",
     )
     list_filter = (
         "platform",
-        "kicked"
+        "kicked",
     )
-    list_select_related = (
-        "settings",
-    )
-    ordering = (
-        "name",
-    )
+    list_select_related = ("settings",)
+    ordering = ("name",)
     inlines = (ChatSettingsInline,)
     fieldsets = (
         (
             "Chat Info",
             {
-                "fields": ("chat_id", "name", "platform", "is_banned", "kicked",)
-            }
+                "fields": (
+                    "chat_id",
+                    "name",
+                    "platform",
+                    "is_banned",
+                    "kicked",
+                )
+            },
         ),
         (
             "Users",
             {
                 "fields": ("get_users_count", "get_users")  # noqa
-            }
+            },
         ),
-        (
-            "Date",
-            {
-                "fields": ("created_at", "updated_at")
-            }
-        ),
+        ("Date", {"fields": ("created_at", "updated_at")}),
     )
-    readonly_fields = (
-        "get_users_count",
-        "get_users",
-        "chat_id"
-    )
+    readonly_fields = ("get_users_count", "get_users", "chat_id")
 
     @admin.display(description="Пользователи")
     def get_users(self, obj: Chat):
@@ -188,7 +153,7 @@ class ChatAdmin(TimeStampAdminMixin):
             url = reverse("admin:bot_profile_change", args=[profile.id])
             safe_url = escape(url)
             safe_name = escape(str(profile))
-            links.append(f"<a href=\"{safe_url}\">{safe_name}</a>")
+            links.append(f'<a href="{safe_url}">{safe_name}</a>')
         return mark_safe("<br/>".join(links)) if links else "-"
 
     @admin.display(description="Количество пользователей")
@@ -202,12 +167,8 @@ class BotAdmin(TimeStampAdminMixin):
         "name",
         "platform",
     )
-    list_filter = (
-        "platform",
-    )
-    ordering = (
-        "id",
-    )
+    list_filter = ("platform",)
+    ordering = ("id",)
 
 
 @admin.register(ProfileSettings)
@@ -217,20 +178,16 @@ class ProfileSettingsAdmin(TimeStampAdminMixin):
         "need_reaction",
         "celebrate_bday",
         "show_birthday_year",
-        "use_mention"
+        "use_mention",
     )
     list_editable = (
         "need_reaction",
         "celebrate_bday",
         "show_birthday_year",
-        "use_mention"
+        "use_mention",
     )
-    list_select_related = (
-        "profile",
-    )
-    ordering = (
-        "profile",
-    )
+    list_select_related = ("profile",)
+    ordering = ("profile",)
 
 
 @admin.register(ChatSettings)
@@ -246,9 +203,5 @@ class ChatSettingsAdmin(TimeStampAdminMixin):
         "celebrate_bday",
         "recognize_voice",
     )
-    list_select_related = (
-        "chat",
-    )
-    ordering = (
-        "chat",
-    )
+    list_select_related = ("chat",)
+    ordering = ("chat",)

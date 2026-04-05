@@ -17,25 +17,21 @@ class MemeAdmin(TimeStampAdminMixin):
         "inline_uses",
         "link",
         "has_tg_file_id",
-        "for_trusted"
+        "for_trusted",
     )
     search_fields = (
         "name",
-        "link"
+        "link",
     )
     list_filter = (
         ("author", admin.RelatedOnlyFieldListFilter),
         "type",
         "approved",
         "for_trusted",
-        ("file", admin.EmptyFieldListFilter)
+        ("file", admin.EmptyFieldListFilter),
     )
-    list_select_related = (
-        "author",
-    )
-    ordering = (
-        "name",
-    )
+    list_select_related = ("author",)
+    ordering = ("name",)
 
     @admin.display(description="Есть tg_file_id", boolean=True)
     def has_tg_file_id(self, obj: Meme) -> bool:

@@ -7,7 +7,6 @@ from apps.shared.exceptions import PWarning
 
 
 class YandexMusicService(MediaService):
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -38,7 +37,7 @@ class YandexMusicService(MediaService):
                 message_thread_id=self.event.message_thread_id,
                 thumbnail_url=track.thumbnail_url,
                 artist=track.artists,
-                title=track.title
+                title=track.title,
             )
             audios.append(audio)
         return MediaServiceResponse(text=None, attachments=audios)

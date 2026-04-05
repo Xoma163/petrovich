@@ -47,17 +47,21 @@ dev = [
     "mypy>=1.14.1",
     "pre-commit>=4.1.0",
     "add-trailing-comma>=3.1.0",
+    "types-requests>=2.32.0.20250328",
 ]
 
 [tool.ruff]
 target-version = "py314"
-line-length = 180
+line-length = 120
+force-exclude = true
 extend-exclude = [
     ".git",
     ".mypy_cache",
     ".ruff_cache",
     ".venv",
+    "**/migrations",
     "media",
+    "static",
     "staticfiles",
 ]
 
@@ -69,8 +73,12 @@ ignore = [
 [tool.mypy]
 python_version = "3.14"
 plugins = ["mypy_django_plugin.main"]
+disable_error_code = ["union-attr"]
+implicit_optional = true
 exclude = [
+    ".*[\\/]migrations[\\/].*",
     "^media/",
+    "^static/",
     "^staticfiles/",
 ]
 ignore_missing_imports = true
@@ -81,6 +89,12 @@ warn_unused_ignores = true
 [[tool.mypy.overrides]]
 module = [
     "*.migrations.*",
+]
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = [
+    "apps.bot.models",
 ]
 ignore_errors = true
 

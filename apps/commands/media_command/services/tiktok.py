@@ -30,7 +30,7 @@ class TikTokService(MediaService):
         )
         va.download_content(
             cookies=video_data.extra_data["cookies"],  # noqa
-            headers=video_data.extra_data["headers"]  # noqa
+            headers=video_data.extra_data["headers"],  # noqa
         )
 
         return MediaServiceResponse(text=None, attachments=[va], video_title="")

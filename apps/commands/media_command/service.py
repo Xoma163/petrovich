@@ -1,8 +1,10 @@
 import dataclasses
 import os
 import shutil
-from io import BytesIO
+from collections.abc import Sequence
 from urllib.parse import unquote
+
+from django.core.files.base import ContentFile
 
 from apps.bot.core.bot.bot import Bot
 from apps.bot.core.event.event import Event
@@ -15,7 +17,7 @@ from petrovich.settings import MAIN_SITE, env
 @dataclasses.dataclass
 class MediaServiceResponse:
     text: str | None = None
-    attachments: list[Attachment] | None = None
+    attachments: Sequence[Attachment] | None = None
     cache: VideoCache | None = None
     cache_url: str | None = None
     video_title: str | None = None
@@ -89,18 +91,13 @@ class MediaService:
                 attachments=None,
                 cache=cache,
                 cache_url=self._get_cached_url(cache.video.url),
-                video_title=title
+                video_title=title,
             )
         except VideoCache.DoesNotExist:
             return None
 
     def _cache_video(
-            self,
-            channel_id: str,
-            video_id: str,
-            title: str,
-            source_url: str,
-            content: bytes
+        self, channel_id: str, video_id: str, title: str, source_url: str, content: bytes
     ) -> MediaServiceResponse:
         """
         Сохранение видео в кэш
@@ -115,23 +112,18 @@ class MediaService:
             filename=filename,
             source_url=source_url,
         )
-        cache.video.save(filename, content=BytesIO(content))  # noqa
+        cache.video.save(filename, content=ContentFile(content, name=filename))
         cache.save()
         text = self._get_download_cache_text(title, cache.video.url, cache.source_url)
         return MediaServiceResponse(
-            text=text,
-            attachments=None,
-            cache=cache,
-            cache_url=self._get_cached_url(cache.video.url),
-            video_title=title
+            text=text, attachments=None, cache=cache, cache_url=self._get_cached_url(cache.video.url), video_title=title
         )
 
     def _get_download_cache_text(self, title, cache_video_url, cache_video_source_url):
         url = unquote(cache_video_url)
         formatted_original_video_url = self.bot.get_formatted_url(title, cache_video_source_url)
         formatted_cached_video_url = self.bot.get_formatted_url("здесь", self._get_cached_url(url))
-        return f"{formatted_original_video_url}\n" \
-               f"Скачать можно {formatted_cached_video_url}"
+        return f"{formatted_original_video_url}\nСкачать можно {formatted_cached_video_url}"
 
     @staticmethod
     def _get_cached_url(cache_video_url: str) -> str:
@@ -152,5 +144,10 @@ class MediaService:
         if media_response.cache:
             shutil.copyfile(media_response.cache.video.path, os.path.join(str(show_folder), full_path))
         else:
+            if not media_response.attachments:
+                raise ValueError("attachments are required")
+            content = media_response.attachments[0].content
+            if content is None:
+                raise ValueError("attachment content is required")
             with open(full_path, "wb") as f:
-                f.write(media_response.attachments[0].content)  # noqa
+                f.write(content)

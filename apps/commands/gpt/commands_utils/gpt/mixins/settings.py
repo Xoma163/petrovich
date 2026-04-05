@@ -9,30 +9,12 @@ from apps.shared.exceptions import PWarning, PError
 
 class GPTSettingsMixin(GPTCommandProtocol):
     SETTINGS_HELP_TEXT_ITEMS = [
-        HelpTextArgument(
-            "настройки",
-            "посмотреть текущие настройки, модели и препромпт"
-        ),
-        HelpTextArgument(
-            "настройки удалить",
-            "сбрасывает настройки"
-        ),
-        HelpTextArgument(
-            "debug (on/off)",
-            "устанавливает дебаг режим. По умолчанию false"
-        ),
-        HelpTextArgument(
-            "debug удалить",
-            "удаляет настройку"
-        ),
-        HelpTextArgument(
-            "stream (on/off)",
-            "устанавливает режим потоковой передачи сообщений. По умолчанию false"
-        ),
-        HelpTextArgument(
-            "stream удалить",
-            "удаляет настройку"
-        )
+        HelpTextArgument("настройки", "посмотреть текущие настройки, модели и препромпт"),
+        HelpTextArgument("настройки удалить", "сбрасывает настройки"),
+        HelpTextArgument("debug (on/off)", "устанавливает дебаг режим. По умолчанию false"),
+        HelpTextArgument("debug удалить", "удаляет настройку"),
+        HelpTextArgument("stream (on/off)", "устанавливает режим потоковой передачи сообщений. По умолчанию false"),
+        HelpTextArgument("stream удалить", "удаляет настройку"),
     ]
 
     # MENU
@@ -75,6 +57,7 @@ class GPTSettingsMixin(GPTCommandProtocol):
         ps = self.get_profile_gpt_settings()
         preprompt = self.get_preprompt(self.event.sender, None)
 
+        # fmt: off
         answer_parts = [
             "Текущие настройки:",
             f"Модель обработки текста (completions)\n{self.bot.get_formatted_text_line(ps.completions_model.name)}" if ps.completions_model else None,
@@ -89,6 +72,7 @@ class GPTSettingsMixin(GPTCommandProtocol):
             f"Стрим режим\n{self.bot.get_formatted_text_line('Включено') if ps.use_stream is True else self.bot.get_formatted_text_line('Выключено')}" if ps.use_stream is not None else None,
             f"Препромпт:\n{self.bot.get_formatted_text(preprompt.text)}" if preprompt else None
         ]
+        # fmt: on
 
         answer_parts = list(filter(None, answer_parts))
         if len(answer_parts) == 1:
@@ -117,8 +101,11 @@ class GPTSettingsMixin(GPTCommandProtocol):
         profile_settings = self.get_profile_gpt_settings()
         profile_settings.use_debug = debug.value
         profile_settings.save()
-        answer_value = self.bot.get_formatted_text_line(
-            "Включил") if profile_settings.use_debug else self.bot.get_formatted_text_line("Выключил")
+        answer_value = (
+            self.bot.get_formatted_text_line("Включил")
+            if profile_settings.use_debug
+            else self.bot.get_formatted_text_line("Выключил")
+        )
         answer = f"{answer_value} дебаг режим"
         return ResponseMessageItem(text=answer)
 
@@ -159,8 +146,11 @@ class GPTSettingsMixin(GPTCommandProtocol):
         profile_settings = self.get_profile_gpt_settings()
         profile_settings.use_stream = stream.value
         profile_settings.save()
-        answer_value = self.bot.get_formatted_text_line(
-            "Включил") if profile_settings.use_stream else self.bot.get_formatted_text_line("Выключил")
+        answer_value = (
+            self.bot.get_formatted_text_line("Включил")
+            if profile_settings.use_stream
+            else self.bot.get_formatted_text_line("Выключил")
+        )
         answer = f"{answer_value} стрим режим"
         return ResponseMessageItem(text=answer)
 

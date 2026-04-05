@@ -8,8 +8,13 @@ from apps.bot.core.messages.attachments.photo import PhotoAttachment
 from apps.bot.core.messages.response_message import ResponseMessageItem, ResponseMessage
 from apps.commands.command import Command
 from apps.commands.gpt.api.base import ImageDrawAPIMixin, VisionAPIMixin, CompletionsAPIMixin
-from apps.commands.gpt.api.responses import GPTAPIResponse, GPTCompletionsResponse, GPTVisionResponse, \
-    GPTImageDrawResponse, GPTVoiceRecognitionResponse
+from apps.commands.gpt.api.responses import (
+    GPTAPIResponse,
+    GPTCompletionsResponse,
+    GPTVisionResponse,
+    GPTImageDrawResponse,
+    GPTVoiceRecognitionResponse,
+)
 from apps.commands.gpt.commands_utils.gpt.functionality.completions import GPTCompletionsFunctionality
 from apps.commands.gpt.commands_utils.gpt.functionality.image_draw import GPTImageDrawFunctionality
 from apps.commands.gpt.commands_utils.gpt.functionality.vision import GPTVisionFunctionality
@@ -45,14 +50,14 @@ class GPTCommand(
 ):
     abstract = True
 
-    EXTRA_TEXT = (
-        'Если отвечать на сообщения бота через кнопку "Ответить" то будет продолжаться непрерывный диалог.\nВ таком случае необязательно писать команду, можно просто текст'
-    )
+    EXTRA_TEXT = 'Если отвечать на сообщения бота через кнопку "Ответить" то будет продолжаться непрерывный диалог.\nВ таком случае необязательно писать команду, можно просто текст'
 
     NO_DEFAULT_MODEL_ERROR_MSG = "Не установлена модель по умолчанию. Сообщите об этом админу.\nПрямо сейчас вы можете просто вручную установить модель и пользоваться ей"
 
     RESPONSE_MESSAGE_TOO_LONG = "Твой запрос получился слишком большой. Положил ответ в файл"
-    TG_CANT_PARSE_RESPONSE_MESSAGE = "Ответ GPT содержит в себе очень много тегов, которые не распарсились. Положил ответ в файл"
+    TG_CANT_PARSE_RESPONSE_MESSAGE = (
+        "Ответ GPT содержит в себе очень много тегов, которые не распарсились. Положил ответ в файл"
+    )
 
     DEBUG_LINE = "\n\n---------- DEBUG ----------"
 
@@ -111,7 +116,8 @@ class GPTCommand(
                 menu.append([["стат", "стата", "статистика", "stat", "stats", "statistics"], self.menu_statistics])
             if isinstance(self, GPTPrepromptMixin):
                 menu.append(
-                    [["препромпт", "препромт", "промпт", "preprompt", "prepromp", "prompt"], self.menu_preprompt])
+                    [["препромпт", "препромт", "промпт", "preprompt", "prepromp", "prompt"], self.menu_preprompt]
+                )
             if isinstance(self, GPTKeyMixin):
                 menu.append([["ключ", "key"], self.menu_key])
             if isinstance(self, GPTModelChoiceMixin):
@@ -121,7 +127,8 @@ class GPTCommand(
                 menu.append([["gpt_5_reasoning", "reasoning", "r"], self.reasoning])
                 menu.append([["gpt_5_verbosity", "verbosity", "v"], self.verbosity])
                 menu.append(
-                    [["gpt_5_web_search", "web_search", "websearch", "web", "search", "ws", "w", "s"], self.web_search])
+                    [["gpt_5_web_search", "web_search", "websearch", "web", "search", "ws", "w", "s"], self.web_search]
+                )
             if isinstance(self, GPTPresetMixin):
                 menu.append([["пресет", "пресеты", "preset", "presets"], self.preset])
             if isinstance(self, GPTSettingsMixin):
@@ -424,8 +431,9 @@ class GPTCommand(
             photos = []
 
         if isinstance(self, ChatGPTCommand):
-            documents = [x for x in event.get_all_attachments([DocumentAttachment], use_fwd=False) if
-                         x.mime_type.is_pdf]
+            documents = [
+                x for x in event.get_all_attachments([DocumentAttachment], use_fwd=False) if x.mime_type.is_pdf
+            ]
         else:
             documents = []
 
@@ -440,8 +448,9 @@ class GPTCommand(
         text = text if text else ""
         text = text.split(self.DEBUG_LINE, 1)[0]
 
-        txt_documents = [document for document in documents if
-                         document.mime_type.is_text or document.ext.lower() in ["html", "txt"]]
+        txt_documents = [
+            document for document in documents if document.mime_type.is_text or document.ext.lower() in ["html", "txt"]
+        ]
         if txt_documents:
             result_text = [text] if text else []
             for document in txt_documents:

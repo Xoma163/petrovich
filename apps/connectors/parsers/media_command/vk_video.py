@@ -71,8 +71,14 @@ class VKVideo:
 
             # Лишний текст
             channel_title = channel_title.replace("Видеозаписи ", "")
-            return VideoData(channel_id=channel_id, video_id=video_id, channel_title=channel_title, title=video_title,
-                             width=width, height=height)
+            return VideoData(
+                channel_id=channel_id,
+                video_id=video_id,
+                channel_title=channel_title,
+                title=video_title,
+                width=width,
+                height=height,
+            )
         except Exception as e:
             raise PError("Не смог получить информацию о видео") from e
 
@@ -144,19 +150,24 @@ class VKVideo:
         if isinstance(adaptation_sets, dict):
             video_representations = adaptation_sets["Representation"]
             video_representations = list(
-                sorted(video_representations, key=lambda x: int(x["@bandwidth"]), reverse=True))
+                sorted(video_representations, key=lambda x: int(x["@bandwidth"]), reverse=True)
+            )
             aa = None
         else:
             video_representations = adaptation_sets[0]["Representation"]
             video_representations = list(
-                sorted(video_representations, key=lambda x: int(x["@bandwidth"]), reverse=True))
+                sorted(video_representations, key=lambda x: int(x["@bandwidth"]), reverse=True)
+            )
 
             audio_representations = adaptation_sets[1]["Representation"]
             audio_representations = list(
-                sorted(audio_representations, key=lambda x: int(x["@bandwidth"]), reverse=True))
+                sorted(audio_representations, key=lambda x: int(x["@bandwidth"]), reverse=True)
+            )
 
             aa = AudioAttachment()
-            aa.public_download_url = f"{parsed_url.scheme}://{parsed_url.hostname}/{audio_representations[0]['BaseURL']}"
+            aa.public_download_url = (
+                f"{parsed_url.scheme}://{parsed_url.hostname}/{audio_representations[0]['BaseURL']}"
+            )
             aa.download_content(headers=self.HEADERS, stream=True)
 
         vr = video_representations[0]

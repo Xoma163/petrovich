@@ -32,9 +32,7 @@ class YandexMusicAPI:
 
         album_id, track_id = None, None
 
-        r = re.compile(
-            r"https://(?:next.)?music.yandex.(?:ru|com)/album/(\d*)/track/(\d*)"
-        )
+        r = re.compile(r"https://(?:next.)?music.yandex.(?:ru|com)/album/(\d*)/track/(\d*)")
         try:
             album_id, track_id = r.findall(url)[0]
         except IndexError:
@@ -43,9 +41,7 @@ class YandexMusicAPI:
                 track_id = r.findall(url)[0]
             except IndexError:
                 try:
-                    r = re.compile(
-                        r"https://(?:next.)?music.yandex.(?:ru|com)/album/(\d*)"
-                    )
+                    r = re.compile(r"https://(?:next.)?music.yandex.(?:ru|com)/album/(\d*)")
                     album_id = r.findall(url)[0]
                 except IndexError:
                     raise PWarning("Не нашёл песни по этому URL")
@@ -81,9 +77,7 @@ class YandexTrack(YandexMusicAPI):
         self.title = self.track.title
         self.artists = ", ".join([artist.name for artist in self.track.artists])
         if self.track.cover_uri:
-            self.thumbnail_url = (
-                f"https://{self.track.cover_uri.replace('%%', '300x300')}"
-            )
+            self.thumbnail_url = f"https://{self.track.cover_uri.replace('%%', '300x300')}"
         info = self.track.get_download_info()[0]
         self.bitrate = info.bitrate_in_kbps
         self.format = info.codec

@@ -5,7 +5,6 @@ from apps.shared.utils.video.video_common import VideoCommon
 
 
 class AudioVideoMuxer(VideoCommon):
-
     def __init__(self, video: VideoAttachment, audio: AudioAttachment):
         super().__init__()
         self.video: VideoAttachment = video

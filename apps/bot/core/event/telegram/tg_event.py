@@ -18,9 +18,9 @@ from petrovich.settings import env
 
 
 class TgEvent(Event):
-
     def __init__(self, raw_event=None, use_db=True):
         from apps.bot.core.bot.telegram.tg_bot import TgBot
+
         super().__init__(raw_event, use_db)
 
         self.bot = TgBot()
@@ -31,7 +31,7 @@ class TgEvent(Event):
         self.inline_data: dict = {
             "query_id": None,
             "query": None,
-            "offset": None
+            "offset": None,
         }
 
     def setup_event(self, **kwargs):
@@ -42,10 +42,14 @@ class TgEvent(Event):
             return
 
         fwd_message_without_voice = False
-        if not self.is_fwd and self.raw.get("message", {}).get("forward_from") and "voice" not in self.raw.get(
-                "message", {}):
+        if (
+            not self.is_fwd
+            and self.raw.get("message", {}).get("forward_from")
+            and "voice" not in self.raw.get("message", {})
+        ):
             fwd_message_without_voice = True
 
+        message: dict | None
         if self.is_fwd:
             message = self.raw
         else:
@@ -99,8 +103,10 @@ class TgEvent(Event):
         if not _from:
             if message.get("poll"):
                 _from = None
-            elif message.get("poll_answer"):
-                _from = message.get("poll_answer")["user"]
+            else:
+                poll_answer = message.get("poll_answer")
+                if poll_answer:
+                    _from = poll_answer["user"]
         self.setup_user(_from)
 
         self.setup_action(message)
@@ -155,14 +161,19 @@ class TgEvent(Event):
             if self.use_db:
                 self.user = get_user_by_id(self.user_id, self.bot.platform, {"nickname": _from.get("username")})
             defaults.pop("nickname")
-            if self.use_db:
+            if self.use_db and self.user is not None:
                 self.sender = get_profile_by_user(self.user, _defaults=defaults)
             self.is_from_user = True
 
     def setup_action(self, message):
         actions = [
-            "new_chat_members", "left_chat_member", "migrate_from_chat_id", "group_chat_created", "new_chat_title",
-            "forum_topic_created", "forum_topic_edited"
+            "new_chat_members",
+            "left_chat_member",
+            "migrate_from_chat_id",
+            "group_chat_created",
+            "new_chat_title",
+            "forum_topic_created",
+            "forum_topic_edited",
         ]
         for action in actions:
             if action in message:
@@ -227,9 +238,7 @@ class TgEvent(Event):
             self.setup_link(message_text)
 
         entities = message.get("entities") or message.get("caption_entities")
-        self.message = TgMessage(
-            message_text, message.get("message_id"), entities, quote=message.get("quote")
-        )
+        self.message = TgMessage(message_text, message.get("message_id"), entities, quote=message.get("quote"))
 
     def setup_photo(self, photo_event):
         tg_photo = PhotoAttachment()
@@ -299,7 +308,7 @@ class TgEvent(Event):
         _from = inline_query["from"]
         defaults = {
             "name": _from.get("first_name"),
-            "surname": _from.get("last_name")
+            "surname": _from.get("last_name"),
         }
         self.user_id = _from["id"]
         self.is_from_user = True

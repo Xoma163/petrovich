@@ -17,7 +17,6 @@ class GPTMessage(GPTMessageProtocol):
 
 
 class GPTMessages(ABC):
-
     @property
     @abstractmethod
     def message_class(self) -> type[GPTMessage]:
@@ -27,11 +26,11 @@ class GPTMessages(ABC):
         self.messages: list[GPTMessageProtocol] = []
 
     def add_message(
-            self,
-            role: GPTMessageRole,
-            text: str,
-            images: list[PhotoAttachment] | None = None,
-            files: list[DocumentAttachment] | None = None
+        self,
+        role: GPTMessageRole,
+        text: str,
+        images: list[PhotoAttachment] | None = None,
+        files: list[DocumentAttachment] | None = None,
     ):
         message = self.message_class(role, text, images, files)  # noqa
         self.messages.append(message)

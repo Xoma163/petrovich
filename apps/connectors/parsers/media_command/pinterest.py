@@ -15,7 +15,8 @@ class PinterestDataItem:
     def __init__(self, content_type, download_url, caption=""):
         if content_type not in (self.CONTENT_TYPE_IMAGE, self.CONTENT_TYPE_VIDEO, self.CONTENT_TYPE_GIF):
             raise RuntimeError(
-                f"content_type must be {self.CONTENT_TYPE_IMAGE} or {self.CONTENT_TYPE_VIDEO} or {self.CONTENT_TYPE_GIF}")
+                f"content_type must be {self.CONTENT_TYPE_IMAGE} or {self.CONTENT_TYPE_VIDEO} or {self.CONTENT_TYPE_GIF}"
+            )
 
         self.content_type: str = content_type
         self.download_url: str = download_url
@@ -47,8 +48,9 @@ class Pinterest:
             image_url = bs4.find("meta", {"name": "og:image"}).attrs["content"]
 
         ext = get_url_file_ext(image_url)
-        content_type = PinterestDataItem.CONTENT_TYPE_GIF if ext in ["gif",
-                                                                     "gifv"] else PinterestDataItem.CONTENT_TYPE_IMAGE
+        content_type = (
+            PinterestDataItem.CONTENT_TYPE_GIF if ext in ["gif", "gifv"] else PinterestDataItem.CONTENT_TYPE_IMAGE
+        )
         return PinterestDataItem(content_type, image_url, caption)
 
     @staticmethod

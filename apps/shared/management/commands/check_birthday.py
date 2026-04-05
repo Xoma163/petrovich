@@ -16,7 +16,7 @@ class Command(BaseCommand):
         today = datetime.now()
         profiles = Profile.objects.filter(
             birthday__day=today.day,
-            birthday__month=today.month
+            birthday__month=today.month,
         )
         for profile in profiles:
             if not profile.settings.celebrate_bday:
@@ -24,7 +24,7 @@ class Command(BaseCommand):
 
             rmi = ResponseMessageItem(
                 f"С Днём рождения, {tg_bot.get_mention(profile)}!",
-                peer_id=profile.get_tg_user().user_id
+                peer_id=profile.get_tg_user().user_id,
             )
             rm = ResponseMessage(rmi)
             tg_bot.send_response_message(rm)
@@ -33,7 +33,7 @@ class Command(BaseCommand):
             for chat in bday_chats:
                 rmi1 = ResponseMessageItem(
                     f"С Днём рождения, {tg_bot.get_mention(profile)}!",
-                    peer_id=chat.chat_id
+                    peer_id=chat.chat_id,
                 )
                 rm = ResponseMessage(rmi1)
                 tg_bot.send_response_message(rm)

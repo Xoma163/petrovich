@@ -23,15 +23,16 @@ class Wordle(Command):
     help_text = HelpText(
         commands_text="игра wordle",
         help_texts=[
-            HelpTextItem(RoleEnum.USER, [
-                HelpTextArgument(None, "запуск сессии игры"),
-                HelpTextArgument("сдаться", "удаление сессии"),
-                HelpTextArgument("(слово из 5 букв)", "попытка угадать слово")
-            ])
+            HelpTextItem(
+                RoleEnum.USER,
+                [
+                    HelpTextArgument(None, "запуск сессии игры"),
+                    HelpTextArgument("сдаться", "удаление сессии"),
+                    HelpTextArgument("(слово из 5 букв)", "попытка угадать слово"),
+                ],
+            )
         ],
-        extra_text=(
-            "[] означает, что буква стоит на месте\n() означает, что буква присутствует в слове"
-        )
+        extra_text=("[] означает, что буква стоит на месте\n() означает, что буква присутствует в слове"),
     )
 
     platforms = [PlatformEnum.TG]
@@ -46,11 +47,7 @@ class Wordle(Command):
             arg0 = self.event.message.args[0]
         else:
             arg0 = None
-        menu = [
-            [[None], self.start_session],
-            [["сдаться"], self.lose],
-            [["default"], self.hypothesis]
-        ]
+        menu = [[[None], self.start_session], [["сдаться"], self.lose], [["default"], self.hypothesis]]
         method = self.handle_menu(menu, arg0)
         rmi = method()
         return ResponseMessage(rmi)
@@ -61,11 +58,7 @@ class Wordle(Command):
             self.get_current_state(existed_session)
             raise PSkip()
 
-        data = {
-            "word": self.get_random_word(),
-            "steps": 0,
-            "hypotheses": []
-        }
+        data = {"word": self.get_random_word(), "steps": 0, "hypotheses": []}
 
         if self.event.is_from_chat:
             data["chat"] = self.event.chat
@@ -102,12 +95,11 @@ class Wordle(Command):
     def get_current_state(self, session) -> ResponseMessage:
         image = self.get_keyboard_image(session)
         attachment = self.bot.get_photo_attachment(
-            _bytes=image,
-            peer_id=self.event.peer_id,
-            message_thread_id=self.event.message_thread_id
+            _bytes=image, peer_id=self.event.peer_id, message_thread_id=self.event.message_thread_id
         )
-        rmi = ResponseMessageItem(attachments=[attachment], peer_id=self.event.peer_id,
-                                  message_thread_id=self.event.message_thread_id)
+        rmi = ResponseMessageItem(
+            attachments=[attachment], peer_id=self.event.peer_id, message_thread_id=self.event.message_thread_id
+        )
         send_message_session_or_edit(self.bot, self.event, session, rmi, max_delta=8)
         return ResponseMessage(rmi, send=False)
 
@@ -164,8 +156,7 @@ class Wordle(Command):
         session = self.get_session()
         word = session.word
 
-        text = f"Вы победили! Загаданное слово - {word}\n" \
-               f"Начислил 1000 очков рулетки"
+        text = f"Вы победили! Загаданное слово - {word}\nНачислил 1000 очков рулетки"
 
         return self._end_game(session, text)
 
@@ -181,11 +172,10 @@ class Wordle(Command):
         keyboard = self.bot.get_inline_keyboard([button])
 
         image = self.get_keyboard_image(session)
-        attachment = self.bot.get_photo_attachment(
-            _bytes=image
+        attachment = self.bot.get_photo_attachment(_bytes=image)
+        rmi = ResponseMessageItem(
+            attachments=[attachment], peer_id=self.event.peer_id, message_thread_id=self.event.message_thread_id
         )
-        rmi = ResponseMessageItem(attachments=[attachment], peer_id=self.event.peer_id,
-                                  message_thread_id=self.event.message_thread_id)
         send_message_session_or_edit(self.bot, self.event, session, rmi, max_delta=8)
         session.delete()
 
@@ -220,10 +210,13 @@ class WordleImageGenerator:
     MAIN_WINDOW_CELLS_COUNT = 6
     MAIN_WINDOW_CELLS_WORDS_COUNT = 5
 
-    MAIN_WINDOW_WIDTH = MAIN_WINDOW_CELLS_WORDS_COUNT * MAIN_WINDOW_CELL_WIDTH + (
-            MAIN_WINDOW_CELLS_WORDS_COUNT - 1) * MAIN_WINDOW_CELL_MARGIN
-    MAIN_WINDOW_HEIGHT = MAIN_WINDOW_CELLS_COUNT * MAIN_WINDOW_CELL_HEIGHT + (
-            MAIN_WINDOW_CELLS_COUNT - 1) * MAIN_WINDOW_CELL_MARGIN
+    MAIN_WINDOW_WIDTH = (
+        MAIN_WINDOW_CELLS_WORDS_COUNT * MAIN_WINDOW_CELL_WIDTH
+        + (MAIN_WINDOW_CELLS_WORDS_COUNT - 1) * MAIN_WINDOW_CELL_MARGIN
+    )
+    MAIN_WINDOW_HEIGHT = (
+        MAIN_WINDOW_CELLS_COUNT * MAIN_WINDOW_CELL_HEIGHT + (MAIN_WINDOW_CELLS_COUNT - 1) * MAIN_WINDOW_CELL_MARGIN
+    )
 
     KEYBOARD_WIDTH = 12 * KEYBOARD_CELL_WIDTH + (12 - 1) * MAIN_WINDOW_CELL_MARGIN
     KEYBOARD_HEIGHT = 3 * KEYBOARD_CELL_HEIGHT + (3 - 1) * MAIN_WINDOW_CELL_MARGIN
@@ -238,8 +231,9 @@ class WordleImageGenerator:
 
         width_diff = image_keyboard.width - image_words.width
 
-        dst = Image.new("RGBA", (image_keyboard.width, image_words.height + image_keyboard.height),
-                        self.COLOR_BACKGROUND)
+        dst = Image.new(
+            "RGBA", (image_keyboard.width, image_words.height + image_keyboard.height), self.COLOR_BACKGROUND
+        )
         dst.paste(image_words, (int(width_diff / 2), 0))
         dst.paste(image_keyboard, (0, image_words.height))
 
@@ -278,8 +272,9 @@ class WordleImageGenerator:
                     letter_margin = (self.MAIN_WINDOW_CELL_WIDTH - letter_width) / 2
                     draw.text((x1 + letter_margin, y1 + 11), letter.upper(), font=font, fill=self.COLOR_TEXT)
 
-        dst = Image.new("RGBA", (image.width + self.PADDING * 2, image.height + self.PADDING * 2),
-                        self.COLOR_BACKGROUND)
+        dst = Image.new(
+            "RGBA", (image.width + self.PADDING * 2, image.height + self.PADDING * 2), self.COLOR_BACKGROUND
+        )
         dst.paste(image, (self.PADDING, self.PADDING))
         return dst
 
@@ -287,7 +282,7 @@ class WordleImageGenerator:
         layouts = [
             ["й", "ц", "у", "к", "е", "н", "г", "ш", "щ", "з", "х", "ъ"],
             ["ф", "ы", "в", "а", "п", "р", "о", "л", "д", "ж", "э"],
-            ["я", "ч", "с", "м", "и", "т", "ь", "б", "ю"]
+            ["я", "ч", "с", "м", "и", "т", "ь", "б", "ю"],
         ]
 
         image = Image.new("RGBA", (self.KEYBOARD_WIDTH, self.KEYBOARD_HEIGHT), self.COLOR_BACKGROUND)
@@ -295,7 +290,6 @@ class WordleImageGenerator:
         font = get_font_by_path(self.FONT_NAME, self.KEYBOARD_CELL_WIDTH)
 
         for i, row in enumerate(layouts):
-
             total_width = len(row) * self.KEYBOARD_CELL_WIDTH + (len(row) - 1) * self.MAIN_WINDOW_CELL_MARGIN
             left_margin = (self.KEYBOARD_WIDTH - total_width) / 2
             for j, letter in enumerate(row):
@@ -312,8 +306,9 @@ class WordleImageGenerator:
                 letter_margin = (self.KEYBOARD_CELL_WIDTH - letter_width) / 2
                 draw.text((x1 + letter_margin + left_margin, y1 + 10), letter.upper(), font=font, fill=self.COLOR_TEXT)
 
-        dst = Image.new("RGBA", (image.width + self.PADDING * 2, image.height + self.PADDING * 2),
-                        self.COLOR_BACKGROUND)
+        dst = Image.new(
+            "RGBA", (image.width + self.PADDING * 2, image.height + self.PADDING * 2), self.COLOR_BACKGROUND
+        )
         dst.paste(image, (self.PADDING, self.PADDING))
         return dst
 
@@ -357,8 +352,11 @@ def send_message_session_or_edit(bot, event, session, rmi: ResponseMessageItem, 
     else:
         rmi.message_id = session.message_id
         br = bot.send_response_message_item(rmi)
-    if not br.success and br.response.get("description") != \
-            "Bad Request: message is not modified: specified new message content and reply markup are exactly the same as a current content and reply markup of the message":
+    if (
+        not br.success
+        and br.response.get("description")
+        != "Bad Request: message is not modified: specified new message content and reply markup are exactly the same as a current content and reply markup of the message"
+    ):
         rmi.message_id = None
         br = bot.send_response_message_item(rmi)
         message_id = br.response["result"]["message_id"]

@@ -11,9 +11,7 @@ from apps.shared.utils.cache import GPTResponsesCache
 
 
 class GPTVisionFunctionality(GPTCommandProtocol):
-    VISION_HELP_TEXT_ITEMS = [
-        HelpTextArgument("(фраза) [картинка]", "общение с ботом с учётом пересланной картинки")
-    ]
+    VISION_HELP_TEXT_ITEMS = [HelpTextArgument("(фраза) [картинка]", "общение с ботом с учётом пересланной картинки")]
 
     # MENU
 
@@ -35,8 +33,7 @@ class GPTVisionFunctionality(GPTCommandProtocol):
         profile_settings = self.get_profile_gpt_settings()
 
         gpt_api: GPTAPI | HasVision = self.provider.api_class(
-            api_key=self.get_api_key(),
-            log_filter=self.event.log_filter
+            api_key=self.get_api_key(), log_filter=self.event.log_filter
         )
 
         use_callback_and_stream = profile_settings.use_stream and self.event.is_from_pm
@@ -46,7 +43,6 @@ class GPTVisionFunctionality(GPTCommandProtocol):
                 model=self.get_vision_model(),
                 extra_data=self.get_extra_data(),
                 callback_func=self.__vision_callback if use_callback_and_stream else None,
-
             )
 
         self.add_statistics(api_response=response)

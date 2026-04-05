@@ -4,7 +4,6 @@ from apps.shared.exceptions import PWarning
 
 
 class PinterestService(MediaService):
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -20,10 +19,7 @@ class PinterestService(MediaService):
                 message_thread_id=self.event.message_thread_id,
             )
         elif data.content_type == PinterestDataItem.CONTENT_TYPE_IMAGE:
-            attachment = self.bot.get_photo_attachment(
-                url=data.download_url,
-                send_chat_action=False
-            )
+            attachment = self.bot.get_photo_attachment(url=data.download_url, send_chat_action=False)
         elif data.content_type == PinterestDataItem.CONTENT_TYPE_GIF:
             attachment = self.bot.get_gif_attachment(
                 url=data.download_url,

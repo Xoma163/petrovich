@@ -26,7 +26,7 @@ class YoutubeMusicService(MediaService):
             peer_id=self.event.peer_id,
             thumbnail_url=data.thumbnail_url,
             artist=data.artists,
-            title=data.title
+            title=data.title,
         )
         return MediaServiceResponse(text=None, attachments=[audio_att], video_title=data.title)
 

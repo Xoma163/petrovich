@@ -15,13 +15,16 @@ class Memes(Command):
     help_text = HelpText(
         commands_text="список мемов",
         help_texts=[
-            HelpTextItem(RoleEnum.USER, [
-                HelpTextArgument(
-                    "[фраза для поиска] [страница=1]",
-                    "присылает список мемов, подходящих поисковому запросу на странице"
-                )
-            ])
-        ]
+            HelpTextItem(
+                RoleEnum.USER,
+                [
+                    HelpTextArgument(
+                        "[фраза для поиска] [страница=1]",
+                        "присылает список мемов, подходящих поисковому запросу на странице",
+                    )
+                ],
+            )
+        ],
     )
 
     PER_PAGE = 20

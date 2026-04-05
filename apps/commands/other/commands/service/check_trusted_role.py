@@ -6,7 +6,7 @@ from apps.shared.exceptions import PSkipContinue, PWarning
 
 
 class CheckTrustedRole(Command):
-    names = None
+    names = []
     # Обоснование: команда должна запускаться перед всеми остальными командами, но после экшенов
     priority = 99
 

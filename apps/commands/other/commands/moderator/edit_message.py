@@ -14,10 +14,15 @@ class EditMessage(Command):
     help_text = HelpText(
         commands_text="редактирование сообщения бота",
         help_texts=[
-            HelpTextItem(RoleEnum.MODERATOR, [
-                HelpTextArgument("edit_message (пересланное сообщение) (новый текст)", "изменяет текст в сообщении"),
-            ])
-        ]
+            HelpTextItem(
+                RoleEnum.MODERATOR,
+                [
+                    HelpTextArgument(
+                        "edit_message (пересланное сообщение) (новый текст)", "изменяет текст в сообщении"
+                    ),
+                ],
+            )
+        ],
     )
     args = 1
     fwd = True

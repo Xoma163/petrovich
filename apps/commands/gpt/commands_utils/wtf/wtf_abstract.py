@@ -26,17 +26,18 @@ class WTFCommand(Command):
     abstract = True
     platforms = [PlatformEnum.TG]
 
-    DEFAULT_PROMPT = "Я пришлю тебе переписку участников группы. Суммаризируй её, опиши, что произошло, о чём общались люди?"
+    DEFAULT_PROMPT = (
+        "Я пришлю тебе переписку участников группы. Суммаризируй её, опиши, что произошло, о чём общались люди?"
+    )
     DEFAULT_N = 50
     DEFAULT_HELP_TEXT_ITEMS = [
         HelpTextArgument(
-            f"[prompt] [N={DEFAULT_N}]",
-            "обрабатывает последние N сообщений в конфе через GPT по указанному prompt"
+            f"[prompt] [N={DEFAULT_N}]", "обрабатывает последние N сообщений в конфе через GPT по указанному prompt"
         ),
         HelpTextArgument(
             "[prompt] (пересланное сообщение)",
-            "обрабатывает последние сообщения до пересланного в конфе через GPT по указанному prompt"
-        )
+            "обрабатывает последние сообщения до пересланного в конфе через GPT по указанному prompt",
+        ),
     ]
 
     def __init__(self, gpt_command_class: type[GPTCommand]):
@@ -48,7 +49,7 @@ class WTFCommand(Command):
         if not has_access:
             GPTKeyMixin.raise_no_access_exception(
                 self.gpt_command_class.provider.type_enum,  # noqa
-                self.bot.get_formatted_text_line(f"/{self.gpt_command_class.name}")
+                self.bot.get_formatted_text_line(f"/{self.gpt_command_class.name}"),
             )
 
     def start(self) -> ResponseMessage:
@@ -79,7 +80,7 @@ class WTFCommand(Command):
                 last_arg = self.event.message.args[-1]
                 n = int(last_arg)
                 prompt = " ".join(self.event.message.args_case[:-1])
-            except (ValueError, IndexError):
+            except ValueError, IndexError:
                 n = self.DEFAULT_N
                 prompt = self.event.message.args_str_case
 

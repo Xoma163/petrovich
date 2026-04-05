@@ -13,12 +13,15 @@ class Minecraft(Command):
     help_text = HelpText(
         commands_text="действия с сервером майнкрафта",
         help_texts=[
-            HelpTextItem(RoleEnum.MINECRAFT, [
-                HelpTextArgument(None, "статус по всем серверам"),
-                HelpTextArgument("старт", "стартует сервер"),
-                HelpTextArgument("стоп", "останавливает сервер")
-            ])
-        ]
+            HelpTextItem(
+                RoleEnum.MINECRAFT,
+                [
+                    HelpTextArgument(None, "статус по всем серверам"),
+                    HelpTextArgument("старт", "стартует сервер"),
+                    HelpTextArgument("стоп", "останавливает сервер"),
+                ],
+            )
+        ],
     )
 
     access = RoleEnum.MINECRAFT
@@ -39,7 +42,7 @@ class Minecraft(Command):
             [["старт", "start"], self.menu_start],
             [["стоп", "stop"], self.menu_stop],
             [["статус", "status"], self.menu_status],
-            [["default"], self.menu_status]
+            [["default"], self.menu_status],
         ]
         method = self.handle_menu(menu, arg0)
         rmi = method()

@@ -2,15 +2,19 @@ import base64
 import copy
 from io import BytesIO
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from urllib3.exceptions import SSLError
 
 from apps.shared.decorators import retry
 from apps.shared.utils.downloader import Downloader
 
+if TYPE_CHECKING:
+    from apps.bot.core.chat_actions import ChatActionEnum
+
 
 class Attachment:
-    ACTION = None
+    ACTION: "ChatActionEnum | None" = None
 
     def __init__(self, _type, **kwargs):
         self.type: str | None = _type
@@ -35,10 +39,13 @@ class Attachment:
 
     def get_file(self):
         from apps.bot.core.bot.telegram.tg_bot import TgBot
+
         tg_bot = TgBot()
 
         size = self.get_size_mb()
         if size and size > tg_bot.max_attachment_size_mb:
+            return
+        if self.file_id is None:
             return
 
         r = tg_bot.api_handler.get_file(self.file_id)
@@ -63,7 +70,7 @@ class Attachment:
             self.file_name = parts[0]
             self.ext = parts[1] if len(parts) == 2 else None
 
-    def parse(self, url=None, path=None, _bytes: bytes = None, filename=None):
+    def parse(self, url=None, path=None, _bytes: bytes | BytesIO | None = None, filename=None):
         """
         Подготовка объектов(в основном картинок) для загрузки.
         То есть метод позволяет преобразовывать почти из любого формата
@@ -97,11 +104,11 @@ class Attachment:
 
     @retry(3, SSLError, sleep_time=2)
     def download_content(
-            self,
-            stream: bool = False,
-            chunk_size: int | None = None,
-            headers: dict | None = None,
-            cookies: dict | None = None,
+        self,
+        stream: bool = False,
+        chunk_size: int | None = None,
+        headers: dict | None = None,
+        cookies: dict | None = None,
     ) -> bytes:
         if self.content:
             return self.content
@@ -112,6 +119,8 @@ class Attachment:
         if self.private_download_path:
             content = downloader.open_file(self.private_download_path, delete_after_read=True)
         else:
+            if download_url is None:
+                raise ValueError("download url is not available")
             if chunk_size:
                 content = downloader.download_in_parallel(download_url, chunk_size)
             elif stream:
@@ -119,7 +128,7 @@ class Attachment:
             else:
                 content = downloader.download_by_url(download_url)
         self.content = content
-        return self.content
+        return content
 
     def get_bytes_io_content(self) -> BytesIO:
         _bytes = self.download_content()
@@ -153,6 +162,7 @@ class Attachment:
 
     def set_file_id(self):
         from apps.bot.core.bot.telegram.tg_bot import TgBot
+
         tg_bot = TgBot()
         self.file_id = tg_bot.get_file_id(self)
 
@@ -162,8 +172,8 @@ class Attachment:
         return self.file_id
 
     def base64(self) -> str:
-        self.download_content()
-        return base64.b64encode(self.content).decode("utf-8")
+        content = self.download_content()
+        return base64.b64encode(content).decode("utf-8")
 
     @staticmethod
     def decode_base64(encoded_str: str) -> bytes:

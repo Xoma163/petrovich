@@ -42,13 +42,14 @@ class Wordle(TimeStampModelMixin):
     chat = models.ForeignKey(Chat, models.CASCADE, verbose_name="Чат", null=True)
     word = models.CharField("Загаданное слово", max_length=5)
     steps = models.PositiveIntegerField("Количество попыток", default=0)
-    hypotheses = ArrayField(models.CharField(verbose_name="Гипотеза", max_length=5), verbose_name="Гипотезы",
-                            max_length=6)
+    hypotheses = ArrayField(
+        models.CharField(verbose_name="Гипотеза", max_length=5), verbose_name="Гипотезы", max_length=6
+    )
     message_id = models.IntegerField("id первого сообщения", blank=True, default=0)
 
     class Meta:
-        verbose_name = "Сессия \"Wordle\""
-        verbose_name_plural = "Сессии \"Wordle\""
+        verbose_name = 'Сессия "Wordle"'
+        verbose_name_plural = 'Сессии "Wordle"'
 
     def __str__(self):
         return str(self.pk)

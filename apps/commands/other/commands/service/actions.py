@@ -8,7 +8,7 @@ from petrovich.settings import env
 
 
 class Actions(Command):
-    names = None
+    names = []
     # Обоснование: команда должна запускаться с максимальным приоритетом из-за экшенов
     priority = 100
 
@@ -65,7 +65,8 @@ class Actions(Command):
             return None
         else:
             profile = get_profile_by_user_id(member_id, self.bot.platform)
-            add_profile_to_chat(profile, self.event.chat)
+            if self.event.chat is not None:
+                add_profile_to_chat(profile, self.event.chat)
             return None
 
     def setup_left_chat_member(self, left_chat_member):
@@ -78,7 +79,8 @@ class Actions(Command):
                 self._set_kicked_state(True)
         if not is_bot:
             profile = get_profile_by_user_id(user_id, self.bot.platform)
-            remove_profile_from_chat(profile, self.event.chat)
+            if self.event.chat is not None:
+                remove_profile_from_chat(profile, self.event.chat)
 
     def setup_new_chat_id(self, chat_id):
         # Если новый чат каким-то чудом создался - удаляем его

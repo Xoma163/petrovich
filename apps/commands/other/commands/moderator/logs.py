@@ -24,13 +24,16 @@ class Logs(Command):
     help_text = HelpText(
         commands_text="логи бота",
         help_texts=[
-            HelpTextItem(access, [
-                HelpTextArgument(f"[уровень логов = {DEFAULT_LEVEL_NAME}] [кол-во записей = {DEFAULT_COUNT}]", "логи")
-            ])
+            HelpTextItem(
+                access,
+                [
+                    HelpTextArgument(
+                        f"[уровень логов = {DEFAULT_LEVEL_NAME}] [кол-во записей = {DEFAULT_COUNT}]", "логи"
+                    )
+                ],
+            )
         ],
-        extra_text=(
-            f"Макс {MAX_LOGS_COUNT} записей. Возможные уровни логов: DEBUG/INFO/WARNING/ERROR/CRITICAL"
-        )
+        extra_text=f"Макс {MAX_LOGS_COUNT} записей. Возможные уровни логов: DEBUG/INFO/WARNING/ERROR/CRITICAL",
     )
 
     def start(self) -> ResponseMessage:

@@ -8,7 +8,6 @@ from apps.connectors.utils import get_default_headers
 
 
 class CoubService(MediaService):
-
     def get_content_by_url(self, url: str) -> MediaServiceResponse:
         headers = get_default_headers()
         content = requests.get(url, headers=headers).content

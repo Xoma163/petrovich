@@ -30,17 +30,19 @@ class VoiceRecognition(AcceptExtraCommand):
     help_text = HelpText(
         commands_text="распознаёт голосовое сообщение",
         help_texts=[
-            HelpTextItem(access, [
-                HelpTextArgument(
-                    "(Пересланное сообщение с голосовым сообщением)",
-                    "распознаёт голосовое сообщение/кружок/аудиофайл на основе ChatGPT"
-                )
-            ])
+            HelpTextItem(
+                access,
+                [
+                    HelpTextArgument(
+                        "(Пересланное сообщение с голосовым сообщением)",
+                        "распознаёт голосовое сообщение/кружок/аудиофайл на основе ChatGPT",
+                    )
+                ],
+            )
         ],
         extra_text=(
-            "Если указан chatgpt api_key, то распознает автоматически\n"
-            "Поддерживаются форматы: flac, m4a, mp3, mp4, mpeg, mpga, oga, ogg, wav, webm"
-        )
+            "Если указан chatgpt api_key, то распознает автоматически\nПоддерживаются форматы: flac, m4a, mp3, mp4, mpeg, mpga, oga, ogg, wav, webm"
+        ),
     )
 
     platforms = [PlatformEnum.TG]
@@ -73,8 +75,7 @@ class VoiceRecognition(AcceptExtraCommand):
         if not has_access:
             if self.event.message.mentioned:
                 GPTKeyMixin.raise_no_access_exception(
-                    ChatGPTProvider.type_enum,
-                    self.bot.get_formatted_text_line(f"/{ChatGPTCommand.name}")
+                    ChatGPTProvider.type_enum, self.bot.get_formatted_text_line(f"/{ChatGPTCommand.name}")
                 )
             else:
                 raise PSkip()
@@ -99,8 +100,7 @@ class VoiceRecognition(AcceptExtraCommand):
                 raise PError("Не установлена модель для обработки аудио. Сообщите админу")
 
             profile_gpt_settings, _ = self.event.sender.gpt_settings.get_or_create(
-                provider=chat_gpt_provider,
-                defaults={"profile": self.event.sender}
+                provider=chat_gpt_provider, defaults={"profile": self.event.sender}
             )
 
             api_key = profile_gpt_settings.get_key()
@@ -110,9 +110,7 @@ class VoiceRecognition(AcceptExtraCommand):
                 content = attachment.download_content()
                 try:
                     response: GPTVoiceRecognitionResponse = chat_gpt_api.voice_recognition(
-                        attachment.ext,
-                        content,
-                        model=model
+                        attachment.ext, content, model=model
                     )
                 except (PWarning, PError) as e:
                     if not self.event.message.mentioned:
@@ -123,7 +121,7 @@ class VoiceRecognition(AcceptExtraCommand):
                     author=self.event.sender,
                     cost=response.usage.total_cost,
                     provider=chat_gpt_provider,
-                    model_name=response.usage.model.name
+                    model_name=response.usage.model.name,
                 ).save()
 
                 answers.append(answer)
@@ -152,8 +150,8 @@ class VoiceRecognition(AcceptExtraCommand):
         return attachments
 
     def _get_rmi(
-            self,
-            answer: str,
+        self,
+        answer: str,
     ) -> ResponseMessageItem:
         """
         Пост-обработка сообщения

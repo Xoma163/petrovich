@@ -12,8 +12,12 @@ from requests.exceptions import SSLError, JSONDecodeError
 
 from apps.bot.core.messages.attachments.photo import PhotoAttachment
 from apps.commands.gpt.api.base import GPTAPI
-from apps.commands.gpt.api.responses import GPTCompletionsResponse, GPTCompletionsVisionResponse, GPTVisionResponse, \
-    GPTImageDrawResponse
+from apps.commands.gpt.api.responses import (
+    GPTCompletionsResponse,
+    GPTCompletionsVisionResponse,
+    GPTVisionResponse,
+    GPTImageDrawResponse,
+)
 from apps.commands.gpt.models import CompletionsModel, VisionModel, ImageDrawModel, GPTCompletionsVisionModel
 from apps.commands.gpt.usage import GPTCompletionsUsage, GPTCompletionsVisionUsage, GPTVisionUsage, GPTImageDrawUsage
 from apps.shared.decorators import retry
@@ -70,8 +74,12 @@ class OpenAIAPI(GPTAPI, ABC):
         return base64_image, image_data.get("revised_prompt")
 
     def _do_request(
-            self, usage: type[GPTCompletionsVisionUsage], response: type[GPTCompletionsVisionResponse],
-            model: GPTCompletionsVisionModel, url, **kwargs
+        self,
+        usage: type[GPTCompletionsVisionUsage],
+        response: type[GPTCompletionsVisionResponse],
+        model: GPTCompletionsVisionModel,
+        url,
+        **kwargs,
     ) -> GPTCompletionsVisionResponse:
         r_json = self.do_request(url, **kwargs)
         usage_dict = r_json.get("usage")

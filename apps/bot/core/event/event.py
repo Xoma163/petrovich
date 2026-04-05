@@ -1,4 +1,5 @@
 import copy
+from typing import TYPE_CHECKING
 
 from apps.bot.consts import PlatformEnum, RoleEnum
 from apps.bot.core.messages.attachments.attachment import Attachment
@@ -15,12 +16,13 @@ from apps.bot.core.messages.message import Message
 from apps.bot.models import Profile, Chat, User
 from apps.shared.utils.cache import MessagesCache
 
+if TYPE_CHECKING:
+    from apps.commands.command import Command
+
 
 class Event:
     # None тк иногда требуется вручную создать инстанс Event
     def __init__(self, raw_event=None, use_db=True):
-        from apps.commands.command import Command
-
         if not raw_event:
             raw_event = {}
         self.bot = None
@@ -51,7 +53,7 @@ class Event:
         self.attachments: list = []
 
         self.force_response: bool | None = None
-        self.command: Command | None = None
+        self.command: type[Command] | None = None
 
         self.is_fwd: bool = False
 
@@ -149,8 +151,14 @@ class Event:
     def get_all_attachments(self, types: list | None = None, use_fwd=True):
         if types is None:
             types = [
-                AudioAttachment, DocumentAttachment, AnimationAttachment, LinkAttachment,
-                PhotoAttachment, StickerAttachment, VideoAttachment, VideoNoteAttachment
+                AudioAttachment,
+                DocumentAttachment,
+                AnimationAttachment,
+                LinkAttachment,
+                PhotoAttachment,
+                StickerAttachment,
+                VideoAttachment,
+                VideoNoteAttachment,
             ]
         attachments = []
         if self.attachments:
@@ -179,6 +187,9 @@ class Event:
         return dict_self
 
     def _cache(self):
+        if self.peer_id is None or self.message is None or self.message.id is None:
+            return
+
         mc = MessagesCache(self.peer_id)
         mc.add_message(self.message.id, self.raw.get("message", self.raw))
 
@@ -187,5 +198,5 @@ class Event:
         return {
             "user_id": self.user.user_id if self.user else None,
             "chat_id": self.chat.chat_id if self.chat else None,
-            "message_id": self.message.id if self.message else None
+            "message_id": self.message.id if self.message else None,
         }

@@ -20,7 +20,7 @@ class VKVideoService(MediaService):
             return self._get_content_by_url(url)
 
     def _get_content_by_url(self, url: str) -> MediaServiceResponse:
-        r = re.findall(r'\?(list=.*)', url)
+        r = re.findall(r"\?(list=.*)", url)
         if r:
             url = url.replace(r[0], "")
             url = url.rstrip("?")
@@ -34,10 +34,7 @@ class VKVideoService(MediaService):
             return cached
 
         va = self.service.download_video(
-            url,
-            author_id=data.channel_id,
-            video_id=data.video_id,
-            high_res=self.media_keys.high_resolution
+            url, author_id=data.channel_id, video_id=data.video_id, high_res=self.media_keys.high_resolution
         )
         va.width = data.width
         va.height = data.height

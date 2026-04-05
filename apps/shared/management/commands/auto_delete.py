@@ -7,7 +7,6 @@ from apps.commands.media_command.models import VideoCache
 
 
 class Command(BaseCommand):
-
     def handle(self, *args, **options):
         self.delete_video_caches()
         self.delete_unattached_settings()

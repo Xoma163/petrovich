@@ -41,7 +41,6 @@ _commands = [
     # games
     Petrovich,
     Wordle,
-
     # gpt
     ChatGPTCommand,
     GrokCommand,
@@ -49,44 +48,34 @@ _commands = [
     WTF,
     GWTF,
     VoiceRecognition,
-
     # media
     Media,
-
     # Meme
     Meme,
     Memes,
     Horoscope,
-
     # Notifies
     Notifies,
-
     # other
-
     # easy
     Bye,
     Git,
     Hi,
     Thanks,
-
     # minecraft
     # Minecraft,
-
     # Moderator
     Logs,
     Roles,
     EditMessage,
-
     # service
     Actions,
     CheckTrustedRole,
     GithubReply,
-
     # Trusted
     AudioTrack,
     DeIssue,
     TrimVideo,
-
     # other
     Birthday,
     Calc,
@@ -101,7 +90,7 @@ _commands = [
 
 _accept_extra_commands = [
     VoiceRecognition,
-    Media
+    Media,
 ]
 
 
@@ -112,10 +101,7 @@ def get_sorted_commands(cmds):
 
 def generate_help_text(cmds):
     roles = list(Role.objects.values_list("name", flat=True))
-    platform_help = {
-        platform: {role: [] for role in roles}
-        for platform in PlatformEnum
-    }
+    platform_help = {platform: {role: [] for role in roles} for platform in PlatformEnum}
 
     for command in cmds:
         if not command.help_text:
@@ -127,10 +113,7 @@ def generate_help_text(cmds):
                 platform_help[platform][role_name].append(entry)
 
     return {
-        platform: {
-            role: "\n".join(sorted(entries))
-            for role, entries in role_map.items()
-        }
+        platform: {role: "\n".join(sorted(entries)) for role, entries in role_map.items()}
         for platform, role_map in platform_help.items()
     }
 
@@ -141,7 +124,7 @@ def get_text_for_documentation(cmds):
     BR_NL = f"{BR}\n"
     INS, INS_END = "<ins>", "</ins>"
     BOLD, ITALIC = "**", "_"
-    LEFT_QUOTE, RIGHT_QUOTE = r'\[', r'\]'
+    LEFT_QUOTE, RIGHT_QUOTE = r"\[", r"\]"
 
     allowed_roles = {
         RoleEnum.USER: "всех пользователей",
@@ -155,25 +138,16 @@ def get_text_for_documentation(cmds):
     for role, title in allowed_roles.items():
         documentation.append(f"### Команды {title}{NL}")
         role_cmds = sorted(
-            (
-                cmd for cmd in cmds
-                if (
-                    cmd.access == role
-                    and cmd.name
-                    and cmd.help_text
-            )
-            ),
+            (cmd for cmd in cmds if (cmd.access == role and cmd.name and cmd.help_text)),
             key=lambda c: c.name,
         )
 
         for cmd in role_cmds:
             name_cap = cmd.name.capitalize()
             base = f"{BOLD}{INS}{name_cap}{INS_END}{BOLD} - {cmd.help_text.commands_text}{NL}{BR_NL}"
-            help_texts = get_flat_list([
-                cmd.help_text.help_texts.get(r).items
-                for r in cmd.help_text.help_texts
-                if r in allowed_roles
-            ])
+            help_texts = get_flat_list(
+                [cmd.help_text.help_texts.get(r).items for r in cmd.help_text.help_texts if r in allowed_roles]
+            )
             if not help_texts:
                 continue
 
@@ -182,9 +156,7 @@ def get_text_for_documentation(cmds):
                 command_name = f"{name_cap} {item.args}" if item.args else name_cap
                 command = f"{BOLD}/{command_name}{BOLD}"
                 text = f"{command} - {item.description}{NL}"
-                items.append(
-                    text.replace("[", LEFT_QUOTE).replace("]", RIGHT_QUOTE)
-                )
+                items.append(text.replace("[", LEFT_QUOTE).replace("]", RIGHT_QUOTE))
 
             block = base + BR_NL.join(items)
             if cmd.help_text.extra_text:

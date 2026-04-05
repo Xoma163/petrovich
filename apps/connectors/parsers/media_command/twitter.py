@@ -35,7 +35,7 @@ class Twitter(API):
         token = self._get_token(tweet_id)
         post_data = self.requests.get(
             self.URL_TWEET_INFO,
-            params={"id": tweet_id, "token": token}
+            params={"id": tweet_id, "token": token},
         ).json()
 
         if not post_data:
@@ -71,12 +71,12 @@ class Twitter(API):
     def _get_finish_text_pos(post_data: dict) -> int | None:
         try:
             return post_data["entities"]["media_command"][0]["indices"][0]
-        except (KeyError, IndexError):
+        except KeyError, IndexError:
             pass
 
         try:
             return post_data["display_text_range"][1]
-        except (KeyError, IndexError):
+        except KeyError, IndexError:
             pass
 
         return None
@@ -91,7 +91,7 @@ class Twitter(API):
         number = float(_id) / 1e15
         multiplied = number * math.pi
         base36 = self._to_base36(multiplied)
-        result = re.sub(r'(0+|\.)', "", base36)
+        result = re.sub(r"(0+|\.)", "", base36)
         return result
 
     @staticmethod

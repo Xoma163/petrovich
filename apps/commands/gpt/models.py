@@ -7,7 +7,7 @@ from apps.commands.gpt.enums import (
     GPTImageFormat,
     GPTImageQuality,
     GPTReasoningEffortLevel,
-    GPTVerbosityLevel
+    GPTVerbosityLevel,
 )
 from apps.shared.mixins import TimeStampModelMixin
 from apps.shared.utils.fernet import Fernet
@@ -72,9 +72,9 @@ class GPTModel(models.Model):
     def save(self, *args, **kwargs):
         # Если модель сохраняется с полем is_default, значит сбрасываем всем остальным поле default
         if self.is_default:
-            self.__class__.objects \
-                .filter(provider=self.provider, is_default=True) \
-                .exclude(id=self.id).update(is_default=False)
+            self.__class__.objects.filter(provider=self.provider, is_default=True).exclude(id=self.id).update(
+                is_default=Falseddd
+            )
         super().save(*args, **kwargs)
 
     class Meta:
@@ -109,9 +109,7 @@ class GPTCompletionsVisionModel(GPTModel):
 
 class CompletionsModel(GPTCompletionsVisionModel):
     class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=["name", "provider"], name="unique_name_completion_model")
-        ]
+        constraints = [models.UniqueConstraint(fields=["name", "provider"], name="unique_name_completion_model")]
 
         verbose_name = "Модель обработки текста"
         verbose_name_plural = "Модели обработки текста"
@@ -119,9 +117,7 @@ class CompletionsModel(GPTCompletionsVisionModel):
 
 class VisionModel(GPTCompletionsVisionModel):
     class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=["name", "provider"], name="unique_name_vision_model")
-        ]
+        constraints = [models.UniqueConstraint(fields=["name", "provider"], name="unique_name_vision_model")]
 
         verbose_name = "Модель обработки изображений"
         verbose_name_plural = "Модели обработки изображений"
@@ -148,11 +144,7 @@ class GPTImageModel(GPTModel):
 
 
 class ImageDrawModel(GPTImageModel):
-    image_cost = models.DecimalField(
-        "Стоимость генерации одного изображения",
-        max_digits=8,
-        decimal_places=4
-    )
+    image_cost = models.DecimalField("Стоимость генерации одного изображения", max_digits=8, decimal_places=4)
     quality = models.CharField("Название качества модели в API", max_length=32)
 
     @property
@@ -173,7 +165,7 @@ class ImageDrawModel(GPTImageModel):
         constraints = [
             models.UniqueConstraint(
                 fields=["name", "width", "height", "quality", "provider"],
-                name="unique_name_width_height_quality_img_draw"
+                name="unique_name_width_height_quality_img_draw",
             )
         ]
 
@@ -182,17 +174,12 @@ class ImageDrawModel(GPTImageModel):
 
 
 class ImageEditModel(GPTImageModel):
-    image_cost = models.DecimalField(
-        "Стоимость редактирования одного изображения",
-        max_digits=8,
-        decimal_places=4
-    )
+    image_cost = models.DecimalField("Стоимость редактирования одного изображения", max_digits=8, decimal_places=4)
 
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["name", "width", "height", "provider"],
-                name="unique_name_width_height_image_edit"
+                fields=["name", "width", "height", "provider"], name="unique_name_width_height_image_edit"
             )
         ]
 
@@ -208,9 +195,7 @@ class VoiceRecognitionModel(GPTModel):
     )
 
     class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=["name", "provider"], name="unique_name_voice_recognition_model")
-        ]
+        constraints = [models.UniqueConstraint(fields=["name", "provider"], name="unique_name_voice_recognition_model")]
 
         verbose_name = "Модель распознования голоса"
         verbose_name_plural = "Модели распознования голоса"
@@ -269,18 +254,9 @@ class ProfileGPTBaseSettings(TimeStampModelMixin):
         max_length=32,
         choices=[(verbosity_level.value, verbosity_level.name) for verbosity_level in GPTVerbosityLevel],  # noqa
     )
-    gpt_5_settings_web_search = models.BooleanField(
-        "Поиск информации в интернете",
-        null=True
-    )
-    use_debug = models.BooleanField(
-        "Дебаг режим",
-        null=True
-    )
-    use_stream = models.BooleanField(
-        "Использовать режим потокового вывода",
-        null=True
-    )
+    gpt_5_settings_web_search = models.BooleanField("Поиск информации в интернете", null=True)
+    use_debug = models.BooleanField("Дебаг режим", null=True)
+    use_stream = models.BooleanField("Использовать режим потокового вывода", null=True)
 
     def clean(self):
         super().clean()
@@ -297,8 +273,7 @@ class ProfileGPTBaseSettings(TimeStampModelMixin):
         for model_name, model_instance in models_to_check.items():
             if model_instance and model_instance.provider != self.provider:
                 errors[model_name] = error_template.format(
-                    provider_model=model_instance.provider,
-                    provider_self=self.provider
+                    provider_model=model_instance.provider, provider_self=self.provider
                 )
         if len(errors) > 0:
             raise ValidationError(errors)
@@ -308,18 +283,9 @@ class ProfileGPTBaseSettings(TimeStampModelMixin):
 
 
 class ProfileGPTSettings(ProfileGPTBaseSettings):
-    key = models.CharField(
-        "Ключ провайдера",
-        max_length=1024,
-        blank=True
-    )
+    key = models.CharField("Ключ провайдера", max_length=1024, blank=True)
 
-    profile = models.ForeignKey(
-        Profile,
-        models.CASCADE,
-        verbose_name="Профиль",
-        related_name="gpt_settings"
-    )
+    profile = models.ForeignKey(Profile, models.CASCADE, verbose_name="Профиль", related_name="gpt_settings")
 
     def get_key(self) -> str:
         if not self.key:
@@ -345,12 +311,7 @@ class ProfileGPTSettings(ProfileGPTBaseSettings):
 class GPTPreset(ProfileGPTBaseSettings):
     name = models.CharField("Название", max_length=255)
     description = models.CharField("Описание", max_length=1023, blank=True, null=True)
-    profile = models.ForeignKey(
-        Profile,
-        models.CASCADE,
-        verbose_name="Профиль",
-        related_name="gpt_presets"
-    )
+    profile = models.ForeignKey(Profile, models.CASCADE, verbose_name="Профиль", related_name="gpt_presets")
     preprompt_text = models.TextField("Текст препромпта", blank=True, null=True)
 
     def __str__(self):

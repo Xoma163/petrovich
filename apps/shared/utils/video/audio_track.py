@@ -24,10 +24,15 @@ class AudioTrack(VideoCommon):
     def _get_audio_track(self):
         args = [
             "ffmpeg6",
-            "-i", self.tmp_video_file.name,
-            "-vn", "-c:a", "aac",
-            "-b:a", "192k",
-            "-f", "adts",
+            "-i",
+            self.tmp_video_file.name,
+            "-vn",
+            "-c:a",
+            "aac",
+            "-b:a",
+            "192k",
+            "-f",
+            "adts",
             "-y",
             self.tmp_output_file.name,
         ]

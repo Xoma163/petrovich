@@ -13,13 +13,8 @@ class GWTF(WTFCommand):
 
     help_text = HelpText(
         commands_text="обрабатывает сообщения в конфе через Grok",
-        help_texts=[
-            HelpTextItem(
-                access,
-                WTFCommand.DEFAULT_HELP_TEXT_ITEMS
-            )
-        ],
-        extra_text=f"prompt по умолчанию:\n{WTFCommand.DEFAULT_PROMPT}"
+        help_texts=[HelpTextItem(access, WTFCommand.DEFAULT_HELP_TEXT_ITEMS)],
+        extra_text=f"prompt по умолчанию:\n{WTFCommand.DEFAULT_PROMPT}",
     )
 
     def __init__(self):

@@ -18,22 +18,25 @@ class Profile(Command):
     help_text = HelpText(
         commands_text="позволяет управлять вашим профилем",
         help_texts=[
-            HelpTextItem(RoleEnum.USER, [
-                HelpTextArgument(None, "присылает информацию по вашему профилю"),
-                HelpTextArgument(
-                    "(имя, фамилия, логин/id, никнейм)",
-                    "присылает информацию по профилю человека в конфе"),
-                HelpTextArgument("город (название города)", "устанавливает новый город"),
-                HelpTextArgument("город добавить (название города)", "добавляет новый город в базу"),
-                HelpTextArgument("др (дата)", "устанавливает новый др"),
-                HelpTextArgument("имя (имя)", "устанавливает новое имя"),
-                HelpTextArgument("фамилия (фамилия)", "устанавливает новую фамилию"),
-                HelpTextArgument("никнейм (никнейм)", "устанавливает новый никнейм"),
-                HelpTextArgument("пол (мужской/женский)", "устанавливает новый пол"),
-                HelpTextArgument("аватар", "обновляет аватар"),
-                HelpTextArgument("аватар (изображение)", "обновляет аватар из вложения")
-            ])
-        ]
+            HelpTextItem(
+                RoleEnum.USER,
+                [
+                    HelpTextArgument(None, "присылает информацию по вашему профилю"),
+                    HelpTextArgument(
+                        "(имя, фамилия, логин/id, никнейм)", "присылает информацию по профилю человека в конфе"
+                    ),
+                    HelpTextArgument("город (название города)", "устанавливает новый город"),
+                    HelpTextArgument("город добавить (название города)", "добавляет новый город в базу"),
+                    HelpTextArgument("др (дата)", "устанавливает новый др"),
+                    HelpTextArgument("имя (имя)", "устанавливает новое имя"),
+                    HelpTextArgument("фамилия (фамилия)", "устанавливает новую фамилию"),
+                    HelpTextArgument("никнейм (никнейм)", "устанавливает новый никнейм"),
+                    HelpTextArgument("пол (мужской/женский)", "устанавливает новый пол"),
+                    HelpTextArgument("аватар", "обновляет аватар"),
+                    HelpTextArgument("аватар (изображение)", "обновляет аватар из вложения"),
+                ],
+            )
+        ],
     )
 
     platforms = [PlatformEnum.TG]
@@ -65,10 +68,7 @@ class Profile(Command):
         city_name = " ".join(self.event.message.args_case[1:])
         city = City.objects.filter(synonyms__icontains=city_name).first()
         if not city:
-            raise PWarning(
-                "Не нашёл такого города.\n"
-                "Попросите админа добавить ваш город"
-            )
+            raise PWarning("Не нашёл такого города.\nПопросите админа добавить ваш город")
         self.event.sender.city = city
         self.event.sender.save()
         answer = f"Изменил город на {self.event.sender.city.name}"
@@ -91,8 +91,11 @@ class Profile(Command):
         self.event.sender.settings.show_birthday_year = show_birthday_year
         self.event.sender.save()
 
-        new_bday = self.event.sender.birthday.strftime(
-            "%d.%m.%Y") if show_birthday_year else self.event.sender.birthday.strftime("%d.%m")
+        new_bday = (
+            self.event.sender.birthday.strftime("%d.%m.%Y")
+            if show_birthday_year
+            else self.event.sender.birthday.strftime("%d.%m")
+        )
         answer = f"Изменил дату рождения на {new_bday}"
         return ResponseMessageItem(text=answer)
 
@@ -189,14 +192,7 @@ class Profile(Command):
         roles = sorted(roles)
         roles_str = ", ".join(roles)
 
-        answer = \
-            f"Имя: {_name}\n" \
-            f"Фамилия: {_surname}\n" \
-            f"Никнейм: {_nickname}\n" \
-            f"Дата рождения: {_bd}\n" \
-            f"Город: {_city}\n" \
-            f"Пол: {profile.get_gender_display().capitalize()}\n\n" \
-            f"Роли: {roles_str}"
+        answer = f"Имя: {_name}\nФамилия: {_surname}\nНикнейм: {_nickname}\nДата рождения: {_bd}\nГород: {_city}\nПол: {profile.get_gender_display().capitalize()}\n\nРоли: {roles_str}"
         rmi = ResponseMessageItem(text=answer)
 
         if profile.avatar:

@@ -27,13 +27,21 @@ DELTA_WEEKDAY = {
 }
 
 WEEK_TRANSLATOR = {
-    "понедельник": 1, "пн": 1,
-    "вторник": 2, "вт": 2,
-    "среда": 3, "ср": 3,
-    "четверг": 4, "чт": 4,
-    "пятница": 5, "пт": 5,
-    "суббота": 6, "сб": 6,
-    "воскресенье": 7, "воскресение": 7, "вс": 7,
+    "понедельник": 1,
+    "пн": 1,
+    "вторник": 2,
+    "вт": 2,
+    "среда": 3,
+    "ср": 3,
+    "четверг": 4,
+    "чт": 4,
+    "пятница": 5,
+    "пт": 5,
+    "суббота": 6,
+    "сб": 6,
+    "воскресенье": 7,
+    "воскресение": 7,
+    "вс": 7,
 }
 
 
@@ -44,22 +52,22 @@ class Notifies(Command):
     help_text = HelpText(
         commands_text="установка напоминаний",
         help_texts=[
-            HelpTextItem(RoleEnum.USER, [
-                HelpTextArgument(None, "список активных напоминаний в лс, если в конфе, то только общие в конфе"),
-                HelpTextArgument(
-                    "добавить (дата/дата и время/день недели) (сообщение/команда) [вложения]",
-                    "добавляет напоминание"
-                ),
-                HelpTextArgument(
-                    "добавить (crontab) (сообщение/команда) [вложения]",
-                    "добавляет постоянное напоминание"
-                ),
-                HelpTextArgument("удалить (текст/дата/crontab/id)", "удаляет напоминание")
-            ])
+            HelpTextItem(
+                RoleEnum.USER,
+                [
+                    HelpTextArgument(None, "список активных напоминаний в лс, если в конфе, то только общие в конфе"),
+                    HelpTextArgument(
+                        "добавить (дата/дата и время/день недели) (сообщение/команда) [вложения]",
+                        "добавляет напоминание",
+                    ),
+                    HelpTextArgument(
+                        "добавить (crontab) (сообщение/команда) [вложения]", "добавляет постоянное напоминание"
+                    ),
+                    HelpTextArgument("удалить (текст/дата/crontab/id)", "удаляет напоминание"),
+                ],
+            )
         ],
-        extra_text=(
-            "Максимум можно добавить 5 напоминаний\n\nПомощник для добавления crontab: https://crontab.guru/"
-        )
+        extra_text="Максимум можно добавить 5 напоминаний\n\nПомощник для добавления crontab: https://crontab.guru/",
     )
 
     platforms = [PlatformEnum.TG]
@@ -68,8 +76,7 @@ class Notifies(Command):
 
     def start(self) -> ResponseMessage:
         if not self.event.sender.city:
-            error = ("Не указан город в профиле. /профиль город (название) - устанавливает город пользователю.\n"
-                     "Без него я не смогу узнать часовой пояс")
+            error = "Не указан город в профиле. /профиль город (название) - устанавливает город пользователю.\nБез него я не смогу узнать часовой пояс"
             raise PWarning(error)
 
         arg0 = self.event.message.args[0] if self.event.message.args else None
@@ -95,12 +102,14 @@ class Notifies(Command):
         attachments = self.event.get_all_attachments(
             [AudioAttachment, DocumentAttachment, AnimationAttachment, PhotoAttachment, VideoAttachment]
         )
-        data.update({
-            "attachments": [{x.type: x.file_id} for x in attachments] if attachments else [],
-            "user": self.event.user,
-            "chat": self.event.chat,
-            "message_thread_id": self.event.message_thread_id
-        })
+        data.update(
+            {
+                "attachments": [{x.type: x.file_id} for x in attachments] if attachments else [],
+                "user": self.event.user,
+                "chat": self.event.chat,
+                "message_thread_id": self.event.message_thread_id,
+            }
+        )
 
         if data["text"] and data["text"][0] == "/":
             first_space = data["text"].find(" ")
@@ -136,9 +145,7 @@ class Notifies(Command):
 
     def menu_get_notifies(self) -> ResponseMessageItem:
         notifies = self.get_filtered_notifies()
-        rmi = ResponseMessageItem(
-            text=self.get_notifies_str(notifies, self.event.sender.city.timezone.name)
-        )
+        rmi = ResponseMessageItem(text=self.get_notifies_str(notifies, self.event.sender.city.timezone.name))
         return rmi
 
     def get_notifie(self, filters: list) -> Notify:
@@ -149,11 +156,7 @@ class Notifies(Command):
             return notifies.get(pk=pk)
         except ValueError, Notify.DoesNotExist:
             for _filter in filters:
-                q = (
-                        Q(text__icontains=_filter)
-                        | Q(date__icontains=_filter)
-                        | Q(crontab__icontains=_filter)
-                )
+                q = Q(text__icontains=_filter) | Q(date__icontains=_filter) | Q(crontab__icontains=_filter)
                 notifies = notifies.filter(q)
 
         notifies_count = notifies.count()
@@ -161,8 +164,7 @@ class Notifies(Command):
             raise PWarning("Не нашёл напоминаний по такому тексту")
         elif notifies_count > 1:
             raise PWarning(
-                f"Нашёл сразу {notifies_count}. Уточните:\n\n"
-                f"{self.get_notifies_str(notifies, self.event.sender.city.timezone.name)}"
+                f"Нашёл сразу {notifies_count}. Уточните:\n\n{self.get_notifies_str(notifies, self.event.sender.city.timezone.name)}"
             )
 
         return notifies.first()
@@ -173,9 +175,7 @@ class Notifies(Command):
         result = ""
 
         for notify in notifies_obj:
-            result += (
-                f"{notify.user}\n[id:{self.bot.get_formatted_text_line(notify.pk)}] "
-            )
+            result += f"{notify.user}\n[id:{self.bot.get_formatted_text_line(notify.pk)}] "
 
             if notify.crontab:
                 result += f"{self.bot.get_formatted_text_line(notify.crontab)}"
@@ -186,9 +186,7 @@ class Notifies(Command):
                 result += f" (Конфа - {notify.chat.name})"
 
             if notify.text and notify.attachments:
-                notify_text = (
-                    f"{self.bot.get_formatted_text_line(notify.text)} (вложения)"
-                )
+                notify_text = f"{self.bot.get_formatted_text_line(notify.text)} (вложения)"
             elif notify.text:
                 notify_text = self.bot.get_formatted_text_line(notify.text)
             else:
@@ -208,10 +206,7 @@ class Notifies(Command):
         return notifies.order_by("date")
 
     def check_max_notifies(self):
-        if (
-                not self.event.sender.check_role(RoleEnum.TRUSTED)
-                and len(Notify.objects.filter(user=self.event.user)) >= 5
-        ):
+        if not self.event.sender.check_role(RoleEnum.TRUSTED) and len(Notify.objects.filter(user=self.event.user)) >= 5:
             raise PWarning("Нельзя добавлять более 5 напоминаний")
 
     @staticmethod
@@ -220,28 +215,25 @@ class Notifies(Command):
         exact_datetime_flag = True
         if arg1 in DELTA_WEEKDAY:
             exact_datetime_flag = False
-            arg1 = (
-                    datetime.datetime.today().date()
-                    + datetime.timedelta(days=DELTA_WEEKDAY[arg1])
-            ).strftime("%d.%m.%Y")
+            arg1 = (datetime.datetime.today().date() + datetime.timedelta(days=DELTA_WEEKDAY[arg1])).strftime(
+                "%d.%m.%Y"
+            )
 
         if arg1 in WEEK_TRANSLATOR:
             exact_datetime_flag = False
             delta_days = WEEK_TRANSLATOR[arg1] - datetime.datetime.today().isoweekday()
             if delta_days <= 0:
                 delta_days += 7
-            arg1 = (
-                    datetime.datetime.today().date() + datetime.timedelta(days=delta_days)
-            ).strftime("%d.%m.%Y")
+            arg1 = (datetime.datetime.today().date() + datetime.timedelta(days=delta_days)).strftime("%d.%m.%Y")
 
-        default_datetime = remove_tz(
-            localize_datetime(datetime.datetime.now(datetime.UTC), tz=timezone.name)
-        ).replace(hour=9, minute=0, second=0, microsecond=0)
+        default_datetime = remove_tz(localize_datetime(datetime.datetime.now(datetime.UTC), tz=timezone.name)).replace(
+            hour=9, minute=0, second=0, microsecond=0
+        )
         try:
             if arg1.count(".") == 1:
-                if datetime.datetime.strptime(
-                        f"{arg1}.{default_datetime.year}", "%d.%m.%Y"
-                ) < remove_tz(datetime.datetime.now(datetime.UTC)):
+                if datetime.datetime.strptime(f"{arg1}.{default_datetime.year}", "%d.%m.%Y") < remove_tz(
+                    datetime.datetime.now(datetime.UTC)
+                ):
                     arg1 = f"{arg1}.{default_datetime.year + 1}"
                 else:
                     arg1 = f"{arg1}.{default_datetime.year}"
@@ -283,9 +275,7 @@ class Notifies(Command):
         if (date - datetime_now).total_seconds() < 60:
             raise PWarning("Нельзя добавлять напоминание на ближайшую минуту")
 
-        if not exact_time_flag and (
-                (date - datetime_now).days < 0 or (datetime_now - date).seconds < 0
-        ):
+        if not exact_time_flag and ((date - datetime_now).days < 0 or (datetime_now - date).seconds < 0):
             date = date + datetime.timedelta(days=1)
 
         if (date - datetime_now).days < 0 or (datetime_now - date).seconds < 0:
@@ -296,27 +286,21 @@ class Notifies(Command):
         if len(args_split) > args_count:  # Если передан текст
             text = args_split[args_count]
 
-        notify_dict = {
-            "date": date,
-            "text": text if text else ""
-        }
+        notify_dict = {"date": date, "text": text if text else ""}
 
         return notify_dict
 
     def _add_notify_repeat(self, crontab) -> dict:
         text = None
         # remove menu str
-        args_str_case = re.split(r'\s+', self.event.message.args_str_case, 1)[1]
+        args_str_case = re.split(r"\s+", self.event.message.args_str_case, 1)[1]
 
         # remove crontab str
-        args_split = re.split(r'\s+', args_str_case, 5)
+        args_split = re.split(r"\s+", args_str_case, 5)
         if len(args_split) > 5:
             text = args_split[-1]
 
-        notify_dict = {
-            "crontab": crontab,
-            "text": text if text else ""
-        }
+        notify_dict = {"crontab": crontab, "text": text if text else ""}
         return notify_dict
 
     @staticmethod

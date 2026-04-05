@@ -3,6 +3,7 @@ import time
 from io import BytesIO
 from math import inf
 from threading import Lock
+from typing import Any
 
 from apps.bot.consts import RoleEnum
 from apps.bot.core.bot_response import BotResponse
@@ -24,15 +25,15 @@ lock = Lock()
 class Bot:
     ERROR_MSG = "Непредвиденная ошибка. Сообщите разработчику."
 
-    CODE_TAG = None
-    PRE_TAG = None
-    SPOILER_TAG = None
-    BOLD_TAG = None
-    ITALIC_TAG = None
-    LINK_TAG = None
-    STROKE_TAG = None
-    UNDERLINE_TAG = None
-    QUOTE_TAG = None
+    CODE_TAG: str | None = None
+    PRE_TAG: str | None = None
+    SPOILER_TAG: str | None = None
+    BOLD_TAG: str | None = None
+    ITALIC_TAG: str | None = None
+    LINK_TAG: str | None = None
+    STROKE_TAG: str | None = None
+    UNDERLINE_TAG: str | None = None
+    QUOTE_TAG: str | None = None
 
     @property
     def max_video_size_mb(self):
@@ -83,12 +84,12 @@ class Bot:
                     peer_id=event.peer_id,
                     message_thread_id=event.message_thread_id,
                     reply_to=e.reply_to,
-                    keyboard=e.keyboard
+                    keyboard=e.keyboard,
                 )
             )
             self.log_message(rm, e.level, e)
         # Если нужно пропустить
-        except (PSkip, PIDK):
+        except PSkip, PIDK:
             return None
         # Непредвиденная ошибка
         except Exception as e:
@@ -165,14 +166,15 @@ class Bot:
         if not event.message or not event.message.raw:
             answer = "Я не понял, что вы от меня хотите(("
         else:
-            answer = f"Я не понял команды \"{event.message.command}\"\n"
+            answer = f'Я не понял команды "{event.message.command}"\n'
 
         rm = ResponseMessage(
             ResponseMessageItem(
                 text=answer,
                 peer_id=event.peer_id,
-                message_thread_id=event.message_thread_id
-            ))
+                message_thread_id=event.message_thread_id,
+            )
+        )
         return rm
 
     # END MAIN ROUTING AND MESSAGING
@@ -196,45 +198,44 @@ class Bot:
     # ATTACHMENTS
     # ToDo: Куда это можно унести? И нужно ли? Технически можно если отказаться от with ChatAction именно здесь
     def get_photo_attachment(
-            self,
-            url: str | None = None,
-            path: str | None = None,
-            _bytes: bytes | BytesIO | None = None,
-            filename: str | None = None,
-
-            peer_id: str | int | None = None,
-            message_thread_id: str | int | None = None,
-            send_chat_action: bool = True,
+        self,
+        url: str | None = None,
+        path: str | None = None,
+        _bytes: bytes | BytesIO | None = None,
+        filename: str | None = None,
+        peer_id: str | int | None = None,
+        message_thread_id: int | None = None,
+        send_chat_action: bool = True,
     ) -> PhotoAttachment:
         """
         Получение фото
         """
         pa = PhotoAttachment()
-        with ChatActionSender(self, ChatActionEnum.UPLOAD_PHOTO, peer_id, message_thread_id,
-                              send_chat_action=send_chat_action):
+        with ChatActionSender(
+            self, ChatActionEnum.UPLOAD_PHOTO, peer_id, message_thread_id, send_chat_action=send_chat_action
+        ):
             pa.parse(url, path, _bytes, filename=filename)
         return pa
 
     def get_document_attachment(
-            self,
-            url: str | None = None,
-            path: str | None = None,
-            _bytes: bytes | BytesIO | None = None,
-            filename: str | None = None,
-
-            peer_id: str | int | None = None,
-            message_thread_id: str | int | None = None,
-            send_chat_action: bool = True,
-
-            thumbnail_bytes: bytes | None = None,
-            thumbnail_url: str | None = None,
+        self,
+        url: str | None = None,
+        path: str | None = None,
+        _bytes: bytes | BytesIO | None = None,
+        filename: str | None = None,
+        peer_id: str | int | None = None,
+        message_thread_id: int | None = None,
+        send_chat_action: bool = True,
+        thumbnail_bytes: bytes | None = None,
+        thumbnail_url: str | None = None,
     ) -> DocumentAttachment:
         """
         Получение документа
         """
         da = DocumentAttachment()
-        with ChatActionSender(self, ChatActionEnum.UPLOAD_DOCUMENT, peer_id, message_thread_id,
-                              send_chat_action=send_chat_action):
+        with ChatActionSender(
+            self, ChatActionEnum.UPLOAD_DOCUMENT, peer_id, message_thread_id, send_chat_action=send_chat_action
+        ):
             da.parse(url, path, _bytes, filename=filename)
 
         da.thumbnail_bytes = thumbnail_bytes
@@ -243,27 +244,26 @@ class Bot:
         return da
 
     def get_audio_attachment(
-            self,
-            url: str | None = None,
-            path: str | None = None,
-            _bytes: bytes | BytesIO | None = None,
-            filename: str | None = None,
-
-            peer_id: str | int | None = None,
-            message_thread_id: str | int | None = None,
-            send_chat_action: bool = True,
-
-            title: str | None = None,
-            artist: str | None = None,
-            thumbnail_bytes: bytes | None = None,
-            thumbnail_url: str | None = None,
+        self,
+        url: str | None = None,
+        path: str | None = None,
+        _bytes: bytes | BytesIO | None = None,
+        filename: str | None = None,
+        peer_id: str | int | None = None,
+        message_thread_id: int | None = None,
+        send_chat_action: bool = True,
+        title: str | None = None,
+        artist: str | None = None,
+        thumbnail_bytes: bytes | None = None,
+        thumbnail_url: str | None = None,
     ) -> AudioAttachment:
         """
         Получение аудио
         """
         aa = AudioAttachment()
-        with ChatActionSender(self, ChatActionEnum.UPLOAD_AUDIO, peer_id, message_thread_id,
-                              send_chat_action=send_chat_action):
+        with ChatActionSender(
+            self, ChatActionEnum.UPLOAD_AUDIO, peer_id, message_thread_id, send_chat_action=send_chat_action
+        ):
             aa.parse(url, path, _bytes, filename=filename)
 
         aa.thumbnail_bytes = thumbnail_bytes
@@ -273,27 +273,26 @@ class Bot:
         return aa
 
     def get_video_attachment(
-            self,
-            url: str | None = None,
-            path: str | None = None,
-            _bytes: bytes | BytesIO | None = None,
-            filename: str | None = None,
-
-            peer_id: str | int | None = None,
-            message_thread_id: str | int | None = None,
-            send_chat_action: bool = True,
-
-            width: int | None = None,
-            height: int | None = None,
-            thumbnail_bytes: bytes | None = None,
-            thumbnail_url: str | None = None,
+        self,
+        url: str | None = None,
+        path: str | None = None,
+        _bytes: bytes | BytesIO | None = None,
+        filename: str | None = None,
+        peer_id: str | int | None = None,
+        message_thread_id: int | None = None,
+        send_chat_action: bool = True,
+        width: int | None = None,
+        height: int | None = None,
+        thumbnail_bytes: bytes | None = None,
+        thumbnail_url: str | None = None,
     ) -> VideoAttachment:
         """
         Получение видео
         """
         va = VideoAttachment()
-        with ChatActionSender(self, ChatActionEnum.UPLOAD_VIDEO, peer_id, message_thread_id,
-                              send_chat_action=send_chat_action):
+        with ChatActionSender(
+            self, ChatActionEnum.UPLOAD_VIDEO, peer_id, message_thread_id, send_chat_action=send_chat_action
+        ):
             va.parse(url, path, _bytes, filename=filename)
         va.width = width
         va.height = height
@@ -302,49 +301,62 @@ class Bot:
         return va
 
     def get_gif_attachment(
-            self,
-            url: str | None = None,
-            path: str | None = None,
-            _bytes: bytes | BytesIO | None = None,
-            filename: str | None = None,
-
-            peer_id: str | int | None = None,
-            message_thread_id: str | int | None = None,
-            send_chat_action: bool = True,
+        self,
+        url: str | None = None,
+        path: str | None = None,
+        _bytes: bytes | BytesIO | None = None,
+        filename: str | None = None,
+        peer_id: str | int | None = None,
+        message_thread_id: int | None = None,
+        send_chat_action: bool = True,
     ) -> AnimationAttachment:
         """
         Получение гифки
         """
         ga = AnimationAttachment()
-        with ChatActionSender(self, ChatActionEnum.UPLOAD_VIDEO, peer_id, message_thread_id,
-                              send_chat_action=send_chat_action):
+        with ChatActionSender(
+            self, ChatActionEnum.UPLOAD_VIDEO, peer_id, message_thread_id, send_chat_action=send_chat_action
+        ):
             ga.parse(url, path, _bytes, filename=filename)
         return ga
 
     # END ATTACHMENTS
 
     # EXTRA
-    def send_message_draft(self, rmi: ResponseMessageItem, draft_id: int, ):
-        pass
+    def send_message_draft(
+        self,
+        rmi: ResponseMessageItem,
+        draft_id: int,
+    ):
+        raise NotImplementedError
 
     def set_chat_action(self, chat_id: int | str, chat_action: ChatActionEnum, message_thread_id: int | None = None):
         """
         Проставление активности боту (например, отправка сообщения)
         """
+        raise NotImplementedError
 
     @staticmethod
-    def get_button(text: str, command: str = None, args: list = None, kwargs: dict = None, url: str = None):
+    def get_button(
+        text: str,
+        command: str | None = None,
+        args: list | None = None,
+        kwargs: dict | None = None,
+        url: str | None = None,
+    ) -> dict[str, Any]:
         """
         Определение кнопки для клавиатур
         """
+        raise NotImplementedError
 
     @staticmethod
-    def get_inline_keyboard(buttons: list, cols=1):
+    def get_inline_keyboard(buttons: list, cols=1) -> dict[str, list]:
         """
         param buttons: ToDo:
         Получение инлайн-клавиатуры с кнопками
         В основном используется для команд, где нужно запускать много команд и лень набирать заново
         """
+        raise NotImplementedError
 
     def get_mention(self, profile: Profile) -> str:
         """
@@ -356,16 +368,19 @@ class Bot:
         """
         Удаление сообщения
         """
+        raise NotImplementedError
 
     def edit_message_text(self, rmi: ResponseMessageItem) -> dict:
         """
         Редактирование сообщения
         """
+        raise NotImplementedError
 
-    def get_chat_administrators(self, chat_id: int | str) -> list:
+    def get_chat_administrators(self, chat_id: int | str) -> list[dict[str, Any]]:
         """
         Получение администраторов чата
         """
+        raise NotImplementedError
 
     # ToDo думаю это надо куда-то унести
 
@@ -449,4 +464,4 @@ class Bot:
     # END EXTRA
 
     def leave_chat(self, chat_id) -> dict:
-        pass
+        raise NotImplementedError

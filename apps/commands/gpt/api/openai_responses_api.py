@@ -1,25 +1,19 @@
 from abc import ABC
 
 from apps.commands.gpt.api.openai_api import OpenAIAPI
-from apps.commands.gpt.api.responses import (
-    GPTCompletionsVisionResponse
-)
-from apps.commands.gpt.models import (
-    GPTCompletionsVisionModel
-)
-from apps.commands.gpt.usage import (
-    GPTCompletionsVisionUsage
-)
+from apps.commands.gpt.api.responses import GPTCompletionsVisionResponse
+from apps.commands.gpt.models import GPTCompletionsVisionModel
+from apps.commands.gpt.usage import GPTCompletionsVisionUsage
 
 
 class OpenAIResponsesAPI(OpenAIAPI, ABC):
     def _do_request(
-            self,
-            usage: type[GPTCompletionsVisionUsage],
-            response: type[GPTCompletionsVisionResponse],
-            model: GPTCompletionsVisionModel,
-            url,
-            **kwargs
+        self,
+        usage: type[GPTCompletionsVisionUsage],
+        response: type[GPTCompletionsVisionResponse],
+        model: GPTCompletionsVisionModel,
+        url,
+        **kwargs,
     ) -> GPTCompletionsVisionResponse:
         r_json = self.do_request(url, **kwargs)
         usage_dict = r_json.get("usage")

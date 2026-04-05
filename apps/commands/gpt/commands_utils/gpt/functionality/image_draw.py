@@ -11,51 +11,21 @@ from apps.shared.exceptions import PWarning
 
 
 class GPTImageDrawFunctionality(GPTCommandProtocol):
-    IMAGE_DRAW_HELP_TEXT_ITEMS = [
-        HelpTextArgument(
-            "нарисуй (фраза/пересланное сообщение)",
-            "генерация изображения"
-        )
-    ]
+    IMAGE_DRAW_HELP_TEXT_ITEMS = [HelpTextArgument("нарисуй (фраза/пересланное сообщение)", "генерация изображения")]
 
     IMAGE_EDIT_HELP_TEXT_ITEMS = [
-        HelpTextArgument(
-            "фотошоп (фраза) [изображение]",
-            "редактирование и генерация изображения"
-        )
+        HelpTextArgument("фотошоп (фраза) [изображение]", "редактирование и генерация изображения")
     ]
 
     KEY_ITEM_ORIG = HelpTextKey(
-        "orig",
-        ["original", "ориг", "оригинал"],
-        "нарисуй пришлёт документ без сжатия, а не картинку"
+        "orig", ["original", "ориг", "оригинал"], "нарисуй пришлёт документ без сжатия, а не картинку"
     )
-    KEY_ITEM_COUNT = HelpTextKey(
-        "(число)",
-        [],
-        "нарисуй пришлёт несколько изображений. Максимум 10"
-    )
-    KEY_ITEM_HD = HelpTextKey(
-        "hd",
-        ["xd", "hq", "хд"],
-        "нарисуй пришлёт изображения в высоком качестве"
-    )
+    KEY_ITEM_COUNT = HelpTextKey("(число)", [], "нарисуй пришлёт несколько изображений. Максимум 10")
+    KEY_ITEM_HD = HelpTextKey("hd", ["xd", "hq", "хд"], "нарисуй пришлёт изображения в высоком качестве")
     KEY_ITEMS_FORMAT = [
-        HelpTextKey(
-            "квадрат",
-            ["квадратная", "square"],
-            "нарисуй пришлёт квадратную картинку"
-        ),
-        HelpTextKey(
-            "альбом",
-            ["альбомная", "album"],
-            "нарисуй пришлёт альбомную картинку"
-        ),
-        HelpTextKey(
-            "портрет",
-            ["портретная", "portair"],
-            "нарисуй пришлёт портретную картинку"
-        )
+        HelpTextKey("квадрат", ["квадратная", "square"], "нарисуй пришлёт квадратную картинку"),
+        HelpTextKey("альбом", ["альбомная", "album"], "нарисуй пришлёт альбомную картинку"),
+        HelpTextKey("портрет", ["портретная", "portair"], "нарисуй пришлёт портретную картинку"),
     ]
 
     EXTRA_TEXT = (
@@ -83,15 +53,14 @@ class GPTImageDrawFunctionality(GPTCommandProtocol):
         Генерация изображения
         """
         gpt_api: GPTAPI | HasImageDraw = self.provider.api_class(
-            api_key=self.get_api_key(),
-            log_filter=self.event.log_filter
+            api_key=self.get_api_key(), log_filter=self.event.log_filter
         )
         request_text = self._get_draw_image_request_text()
         with ChatActionSender(self.bot, ChatActionEnum.UPLOAD_PHOTO, self.event.peer_id, self.event.message_thread_id):
             response: GPTImageDrawResponse = gpt_api.draw_image(
                 prompt=request_text,
                 model=self.get_image_draw_model_with_parameters(),
-                count=self._get_images_count_by_keys()
+                count=self._get_images_count_by_keys(),
             )
 
             self.add_statistics(api_response=response)
@@ -103,19 +72,16 @@ class GPTImageDrawFunctionality(GPTCommandProtocol):
                         _bytes=image,
                         thumbnail_bytes=image,
                         send_chat_action=False,
-                        filename=f"{self.provider.type_enum.name}_draw_{i + 1}.png"
+                        filename=f"{self.provider.type_enum.name}_draw_{i + 1}.png",
                     )
                     att.download_content()
                 else:
-                    att = self.bot.get_photo_attachment(
-                        _bytes=image,
-                        send_chat_action=False
-                    )
+                    att = self.bot.get_photo_attachment(_bytes=image, send_chat_action=False)
                     att.download_content()
                 attachments.append(att)
 
         image_prompt = response.images_prompt if response.images_prompt else request_text
-        answer = f"Результат генерации по запросу \"{image_prompt}\""
+        answer = f'Результат генерации по запросу "{image_prompt}"'
 
         profile_settings = self.get_profile_gpt_settings()
         if profile_settings.use_debug:
@@ -171,13 +137,11 @@ class GPTImageDrawFunctionality(GPTCommandProtocol):
         image_quality = self._get_image_quality() or current_image_model.image_quality
         image_format = self._get_image_format() or current_image_model.image_format
 
-        image_draw_models = ImageDrawModel.objects.filter(
-            provider=self.provider_model,
-            name=current_image_model.name
-        )
+        image_draw_models = ImageDrawModel.objects.filter(provider=self.provider_model, name=current_image_model.name)
 
         available_models = [
-            model for model in image_draw_models
+            model
+            for model in image_draw_models
             if model.image_quality == image_quality and model.image_format == image_format
         ]
 

@@ -15,7 +15,6 @@ logger = logging.getLogger("notifier")
 
 
 class Command(BaseCommand):
-
     def __init__(self):
         super().__init__()
         self.dt_now = datetime.datetime.now(datetime.UTC)
@@ -50,7 +49,7 @@ class Command(BaseCommand):
             localized_datetime = localize_datetime(remove_tz(self.dt_now), timezone)
 
             entry = CronTab(notify.crontab)
-            prev_seconds_delta = - entry.previous(localized_datetime, default_utc=True)
+            prev_seconds_delta = -entry.previous(localized_datetime, default_utc=True)
             return prev_seconds_delta <= 60
         else:
             delta_time = remove_tz(notify.date) - remove_tz(self.dt_now) + datetime.timedelta(minutes=1)
@@ -60,15 +59,14 @@ class Command(BaseCommand):
     def send_notify_message(bot, notify):
         if notify.date:
             notify_datetime = localize_datetime(remove_tz(notify.date), notify.user.profile.city.timezone.name)
-            user_str = f"{bot.get_mention(notify.user.profile)}:" if notify.mention_sender else f"{notify.user.profile}:"
-            answer = f"Напоминалка на {notify_datetime.strftime('%H:%M')}\n" \
-                     f"{user_str}\n" \
-                     f"{notify.text}"
+            user_str = (
+                f"{bot.get_mention(notify.user.profile)}:" if notify.mention_sender else f"{notify.user.profile}:"
+            )
+            answer = f"Напоминалка на {notify_datetime.strftime('%H:%M')}\n{user_str}\n{notify.text}"
         else:
             answer = f"Напоминалка по {bot.get_formatted_text_line(notify.crontab)}\n"
             user_str = f"{bot.get_mention(notify.user.profile)}" if notify.mention_sender else f"{notify.user.profile}"
-            answer += f"{user_str}\n" \
-                      f"{notify.text}"
+            answer += f"{user_str}\n{notify.text}"
 
         attachments = []
         if notify.attachments:

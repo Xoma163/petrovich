@@ -20,12 +20,7 @@ class YoutubeVideo:
 
     # SERVICE METHODS
 
-    def get_video_info(
-            self,
-            url,
-            high_res=False,
-            _timedelta: float | None = None
-    ) -> VideoData:
+    def get_video_info(self, url, high_res=False, _timedelta: float | None = None) -> VideoData:
         video_info = self._get_video_info(url)
 
         video, audio, filesize = self._get_video_download_urls(video_info, high_res, _timedelta)
@@ -48,7 +43,7 @@ class YoutubeVideo:
             extra_data={
                 "http_chunk_size_video": video.get("downloader_options", {}).get("http_chunk_size", 10 * 1024 * 1024),
                 "http_chunk_size_audio": audio.get("downloader_options", {}).get("http_chunk_size", 10 * 1024 * 1024),
-            }
+            },
         )
 
     @staticmethod
@@ -61,17 +56,13 @@ class YoutubeVideo:
         http_chunk_size_video = data.extra_data.get("http_chunk_size_video")
         _va = VideoAttachment()
         _va.content = downloader.download_by_m3u8_url(
-            data.video_download_url,
-            threads=16,
-            http_chunk_size=http_chunk_size_video
+            data.video_download_url, threads=16, http_chunk_size=http_chunk_size_video
         )
 
         http_chunk_size_audio = data.extra_data.get("http_chunk_size_audio")
         _aa = AudioAttachment()
         _aa.content = downloader.download_by_m3u8_url(
-            data.audio_download_url,
-            threads=8,
-            http_chunk_size=http_chunk_size_audio
+            data.audio_download_url, threads=8, http_chunk_size=http_chunk_size_audio
         )
 
         vh = VideoHandler(video=_va, audio=_aa)
@@ -138,22 +129,21 @@ class YoutubeVideo:
 
         # Вертикальное видео
         if video_scale < 1:
-            thumbnails = list(filter(
-                lambda x: x.get("width") and x.get("height") and x.get("width") / x.get("height") == video_scale,
-                info["thumbnails"]
-            ))
+            thumbnails = list(
+                filter(
+                    lambda x: x.get("width") and x.get("height") and x.get("width") / x.get("height") == video_scale,
+                    info["thumbnails"],
+                )
+            )
         else:
-            thumbnails = list(filter(
-                lambda x: x["url"].endswith("maxresdefault.jpg"),
-                info["thumbnails"]
-            ))
+            thumbnails = list(filter(lambda x: x["url"].endswith("maxresdefault.jpg"), info["thumbnails"]))
 
         if not thumbnails:
             return None
 
         try:
             return thumbnails[0]["url"]
-        except (IndexError, KeyError):
+        except IndexError, KeyError:
             return None
 
     # -----------------------------
@@ -192,10 +182,10 @@ class YoutubeVideo:
         return video_info
 
     def _get_video_download_urls(
-            self,
-            video_info: dict,
-            high_res: bool = False,
-            _timedelta: int | None = None,
+        self,
+        video_info: dict,
+        high_res: bool = False,
+        _timedelta: int | None = None,
     ) -> tuple[dict, dict, int]:
         """
         Метод ищет видео которое максимально может скачать с учётом ограничением платформы
@@ -204,7 +194,7 @@ class YoutubeVideo:
         audio_formats = sorted(
             [x for x in video_info["formats"] if x["resolution"] == "audio only"],  # abr
             key=self._filesize_key,
-            reverse=True
+            reverse=True,
         )
 
         # Выбор аудио-формата по языковой дорожке
@@ -218,23 +208,19 @@ class YoutubeVideo:
         video_formats = list(
             filter(
                 lambda x: (
-                        x.get("vbr") and  # Это видео
-                        x.get("ext") == "mp4" and  # С форматом mp4
-                        x.get("vcodec") not in ["vp9"] and  # С кодеками которые поддерживают все платформы
-                        x.get("dynamic_range") == "SDR" and  # В SDR качестве
-                        not x.get("__working")  # Без тестовых
+                    x.get("vbr")  # Это видео
+                    and x.get("ext") == "mp4"  # С форматом mp4
+                    and x.get("vcodec") not in ["vp9"]  # С кодеками которые поддерживают все платформы
+                    and x.get("dynamic_range") == "SDR"  # В SDR качестве
+                    and not x.get("__working")  # Без тестовых
                     # x.get('format_note')  # Имеют разрешение для просмотра (?)
                 ),
-                video_info["formats"]
+                video_info["formats"],
             )
         )
         for _format in video_formats:
             _format["filesize_approx_vbr"] = video_info["duration"] * _format.get("vbr")
-        video_formats = sorted(
-            video_formats,
-            key=self._filesize_key,
-            reverse=True
-        )
+        video_formats = sorted(video_formats, key=self._filesize_key, reverse=True)
         is_short_video = video_info["media_type"] == "short"
 
         vf = video_formats[0]

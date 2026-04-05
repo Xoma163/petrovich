@@ -22,8 +22,6 @@ class ImgBBAPI(API):
             expire = 15552000
         params["expiration"] = expire
 
-        files = {
-            "image": (image.file_name_full, content)
-        }
+        files = {"image": (image.file_name_full, content)}
         response = self.requests.post(self.IMAGE_UPLOAD_URL, params=params, files=files)
         return response.json()["data"]["image"]["url"]

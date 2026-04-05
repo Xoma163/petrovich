@@ -57,30 +57,36 @@ class Horoscope(Command):
     help_text = HelpText(
         commands_text="мемный гороскоп",
         help_texts=[
-            HelpTextItem(RoleEnum.USER, [
-                HelpTextArgument("[знак зодиака = по др в профиле]",
-                                 "пришлёт мемный гороскоп на день для знака зодиака"),
-                HelpTextArgument("все", "пришлёт мемный гороскоп для всех знаков зодиака"),
-                HelpTextArgument("инфо (знак зодиака)", "пришлёт информацию о мемасе в гороскопе по знаку зодиака"),
-                HelpTextArgument("конфа", "пришлёт гороскоп для всех участников конфы")
-            ])
-        ]
+            HelpTextItem(
+                RoleEnum.USER,
+                [
+                    HelpTextArgument(
+                        "[знак зодиака = по др в профиле]", "пришлёт мемный гороскоп на день для знака зодиака"
+                    ),
+                    HelpTextArgument("все", "пришлёт мемный гороскоп для всех знаков зодиака"),
+                    HelpTextArgument("инфо (знак зодиака)", "пришлёт информацию о мемасе в гороскопе по знаку зодиака"),
+                    HelpTextArgument("конфа", "пришлёт гороскоп для всех участников конфы"),
+                ],
+            )
+        ],
     )
 
-    zodiac_signs = ZodiacSigns([
-        ZodiacSign("водолей", ["♒", "♒️"], "21.01"),
-        ZodiacSign("рыбы", ["♓", "♓️"], "19.02"),
-        ZodiacSign("овен", ["♈", "♈️"], "21.03"),
-        ZodiacSign("телец", ["♉", "♉️"], "21.04"),
-        ZodiacSign("близнецы", ["♊", "♊️"], "22.05"),
-        ZodiacSign("рак", ["♋", "♋️"], "22.06"),
-        ZodiacSign("лев", ["♌", "♌️"], "23.07"),
-        ZodiacSign("дева", ["♍", "♍️"], "24.08"),
-        ZodiacSign("весы", ["♎", "♎️"], "24.09"),
-        ZodiacSign("скорпион", ["♏", "♏️"], "24.10"),
-        ZodiacSign("стрелец", ["♐", "♐️"], "23.11"),
-        ZodiacSign("козерог", ["♑", "♑️"], "22.12"),
-    ])
+    zodiac_signs = ZodiacSigns(
+        [
+            ZodiacSign("водолей", ["♒", "♒️"], "21.01"),
+            ZodiacSign("рыбы", ["♓", "♓️"], "19.02"),
+            ZodiacSign("овен", ["♈", "♈️"], "21.03"),
+            ZodiacSign("телец", ["♉", "♉️"], "21.04"),
+            ZodiacSign("близнецы", ["♊", "♊️"], "22.05"),
+            ZodiacSign("рак", ["♋", "♋️"], "22.06"),
+            ZodiacSign("лев", ["♌", "♌️"], "23.07"),
+            ZodiacSign("дева", ["♍", "♍️"], "24.08"),
+            ZodiacSign("весы", ["♎", "♎️"], "24.09"),
+            ZodiacSign("скорпион", ["♏", "♏️"], "24.10"),
+            ZodiacSign("стрелец", ["♐", "♐️"], "23.11"),
+            ZodiacSign("козерог", ["♑", "♑️"], "22.12"),
+        ]
+    )
 
     def start(self) -> ResponseMessage:
         if self.event.message.args:
@@ -133,8 +139,7 @@ class Horoscope(Command):
                 signs.append(sign)
         if not signs:
             raise PWarning(
-                "Ни у кого в конфе не проставлено ДР\n"
-                f"Укажите дату рождения в профиле: {self.bot.get_formatted_text_line('/профиль др ДД.ММ.ГГГГ')}"
+                f"Ни у кого в конфе не проставлено ДР\nУкажите дату рождения в профиле: {self.bot.get_formatted_text_line('/профиль др ДД.ММ.ГГГГ')}"
             )
         signs = self._reorder_signs(signs)
 
@@ -192,11 +197,12 @@ class Horoscope(Command):
             HoroscopeMeme.objects.all().delete()
             HoroscopeModel.objects.all().delete()
 
-            random_memes = Meme.objects \
-                .exclude(type="audio") \
-                .exclude(approved=False) \
-                .exclude(for_trusted=True) \
+            random_memes = (
+                Meme.objects.exclude(type="audio")
+                .exclude(approved=False)
+                .exclude(for_trusted=True)
                 .order_by("?")[:MEMES_COUNT]
+            )
             if len(random_memes) != MEMES_COUNT:
                 raise PError("Невозможно составить гороскоп")
 

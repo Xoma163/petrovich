@@ -10,13 +10,13 @@ class Request:
     API_TELEGRAM_URL = "api.telegram.org"
     PREFIX = "https"
 
-    LOG_IGNORE_ACTIONS = []
+    LOG_IGNORE_ACTIONS: list[str] = []
 
     LOG_WARNING_ERRORS = [
         "Forbidden: bot was blocked by the user",
         "Bad Request: message to edit not found",
         "Bad Request: message can't be deleted",
-        "Bad Request: message can't be deleted for everyone"
+        "Bad Request: message can't be deleted for everyone",
     ]
 
     def __init__(self, token, log_filter=None):

@@ -10,7 +10,6 @@ class PhotoAttachment(Attachment, SizedMixin):
     def __init__(self):
         super().__init__(self.TYPE)
 
-
     def parse_tg(self, event):
         super().parse_tg(event)
 

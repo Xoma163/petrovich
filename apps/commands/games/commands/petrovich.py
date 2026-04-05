@@ -24,13 +24,16 @@ class Petrovich(Command):
     help_text = HelpText(
         commands_text="мини-игра, определяющая кто Петрович дня",
         help_texts=[
-            HelpTextItem(RoleEnum.USER, [
-                HelpTextArgument(None, "мини-игра, определяющая кто Петрович дня"),
-                HelpTextArgument("рег", "регистрация в игре"),
-                HelpTextArgument("дерег", "дерегистрация в игре"),
-                HelpTextArgument("игроки", "список зарегистрированных участников")
-            ])
-        ]
+            HelpTextItem(
+                RoleEnum.USER,
+                [
+                    HelpTextArgument(None, "мини-игра, определяющая кто Петрович дня"),
+                    HelpTextArgument("рег", "регистрация в игре"),
+                    HelpTextArgument("дерег", "дерегистрация в игре"),
+                    HelpTextArgument("игроки", "список зарегистрированных участников"),
+                ],
+            )
+        ],
     )
 
     conversation = True
@@ -47,7 +50,7 @@ class Petrovich(Command):
             [["рег", "регистрация"], self.menu_reg],
             [["дерег"], self.menu_dereg],
             [["игроки"], self.menu_gamers],
-            [["default"], self.menu_play]
+            [["default"], self.menu_play],
         ]
         method = self.handle_menu(menu, arg0)
         return method()
@@ -106,7 +109,7 @@ class Petrovich(Command):
                 keyboard = self.bot.get_inline_keyboard([button])
                 raise PWarning(
                     f"Нет участников игры. Зарегистрируйтесь! {self.bot.get_formatted_text_line('/петрович рег')}",
-                    keyboard=keyboard
+                    keyboard=keyboard,
                 )
             winner_profile = winner.profile
 
@@ -116,61 +119,63 @@ class Petrovich(Command):
             winner_gender = "Петровна" if winner_profile.gender == "1" else "Петрович"
             mention = self.bot.get_mention(winner_profile)
 
-            first_answer = random_event([
-                "Такс такс такс, кто тут у нас",
-                "*барабанная дробь*",
-                "Вы готовы узнать победителя голодных игр?",
-                "Ну шо, погнали",
-                "Вы не поверите...",
-                "Опять вы в игрульки свои играете да? Ну ладно",
-                "А КТО ЭТО У НАС ТУТ ТАКОЙ СЕГОДНЯ",
-                "Определяем обладателя бесплатного проездного на один день в метро",
-                "Ой, кто это тут у нас такой? Петрович дня, конечно же!",
-                "О, смотрите, кто тут у нас! Петрович дня, выходи!",
-                "Сканирую базу... Оп, нашел Петровича дня!",
-                "Кто просил Рандомную Справедливость™? Держите своего Петровича дня!",
-                "Магический шар говорит: \"Это он, Петрович дня!\"",
-                "Внимание! Система выбрала жертву дня",
-                "Есть контакт! Приземляемся... И вот, на радость нам всем!",
-                "Дамы и господа, вашему вниманию представляется эксклюзивный Петрович дня!",
-                "Итак, кого из вас сегодня почитать?",
-                "Колесо фортуны вращается... останавливается...",
-                "Бинго! Нашлась особь для титула Петрович дня:",
-                "Опа! Сюрприз-мороженое сегодня без очереди получает:",
-                "Свечи гаснут... а suspense растет!",
-                "Ваши ставки, господа. Пора вскрыть карты",
-                "И звезды ночи сегодня замигают для...",
-                "Чей это кристалл судьбы блестит ярче всех сегодня?",
-                "Так, стоп, хватит держать вас в напряжении!"
-            ])
+            first_answer = random_event(
+                [
+                    "Такс такс такс, кто тут у нас",
+                    "*барабанная дробь*",
+                    "Вы готовы узнать победителя голодных игр?",
+                    "Ну шо, погнали",
+                    "Вы не поверите...",
+                    "Опять вы в игрульки свои играете да? Ну ладно",
+                    "А КТО ЭТО У НАС ТУТ ТАКОЙ СЕГОДНЯ",
+                    "Определяем обладателя бесплатного проездного на один день в метро",
+                    "Ой, кто это тут у нас такой? Петрович дня, конечно же!",
+                    "О, смотрите, кто тут у нас! Петрович дня, выходи!",
+                    "Сканирую базу... Оп, нашел Петровича дня!",
+                    "Кто просил Рандомную Справедливость™? Держите своего Петровича дня!",
+                    'Магический шар говорит: "Это он, Петрович дня!"',
+                    "Внимание! Система выбрала жертву дня",
+                    "Есть контакт! Приземляемся... И вот, на радость нам всем!",
+                    "Дамы и господа, вашему вниманию представляется эксклюзивный Петрович дня!",
+                    "Итак, кого из вас сегодня почитать?",
+                    "Колесо фортуны вращается... останавливается...",
+                    "Бинго! Нашлась особь для титула Петрович дня:",
+                    "Опа! Сюрприз-мороженое сегодня без очереди получает:",
+                    "Свечи гаснут... а suspense растет!",
+                    "Ваши ставки, господа. Пора вскрыть карты",
+                    "И звезды ночи сегодня замигают для...",
+                    "Чей это кристалл судьбы блестит ярче всех сегодня?",
+                    "Так, стоп, хватит держать вас в напряжении!",
+                ]
+            )
 
-            second_answer = random_event([
-                f"{winner_gender} дня - {mention}",
-                f"НЕВЕРОЯТНО, НО {winner_gender} дня - {mention}",
-                f"Сначала я не поверил, что {winner_gender} дня - {mention}, но куда деваться",
-                f"Мда, и этот человек - {mention} сегодня {winner_gender} дня",
-                f"И вот он, крем нашего пирожного — {mention}!",
-                f"Аплодируем стоя: {winner_gender} дня — {mention}!",
-                f"Игра окончена. Победитель — {mention}. Принимайте поздравления, {winner_gender} дня!",
-                f"Кто здесь {winner_gender} дня? Правильно, {mention}!",
-                f"Как в казино, только без денег. {winner_gender} дня — {mention}, поздравляем!",
-                f"На волне случайности выносится вердикт: {winner_gender} дня — {mention}",
-                f"Все путем, {mention}. Сегодня ты — звезда, {winner_gender} дня!",
-                f"Забудьте о зодиаках, {winner_gender} дня здесь — {mention}",
-                f"Собаки лают, караван идет, а {winner_gender} дня — {mention}",
-                f"Расклад таков: {winner_gender} дня почетно присваивается {mention}. Ну что, парад готовим?",
-                f"Ладно, примем как данность: {winner_gender} дня – это {mention}"
-            ])
+            second_answer = random_event(
+                [
+                    f"{winner_gender} дня - {mention}",
+                    f"НЕВЕРОЯТНО, НО {winner_gender} дня - {mention}",
+                    f"Сначала я не поверил, что {winner_gender} дня - {mention}, но куда деваться",
+                    f"Мда, и этот человек - {mention} сегодня {winner_gender} дня",
+                    f"И вот он, крем нашего пирожного — {mention}!",
+                    f"Аплодируем стоя: {winner_gender} дня — {mention}!",
+                    f"Игра окончена. Победитель — {mention}. Принимайте поздравления, {winner_gender} дня!",
+                    f"Кто здесь {winner_gender} дня? Правильно, {mention}!",
+                    f"Как в казино, только без денег. {winner_gender} дня — {mention}, поздравляем!",
+                    f"На волне случайности выносится вердикт: {winner_gender} дня — {mention}",
+                    f"Все путем, {mention}. Сегодня ты — звезда, {winner_gender} дня!",
+                    f"Забудьте о зодиаках, {winner_gender} дня здесь — {mention}",
+                    f"Собаки лают, караван идет, а {winner_gender} дня — {mention}",
+                    f"Расклад таков: {winner_gender} дня почетно присваивается {mention}. Ну что, парад готовим?",
+                    f"Ладно, примем как данность: {winner_gender} дня – это {mention}",
+                ]
+            )
 
-            return ResponseMessage([
-                ResponseMessageItem(text=first_answer),
-                ResponseMessageItem(text=second_answer)
-            ])
+            return ResponseMessage([ResponseMessageItem(text=first_answer), ResponseMessageItem(text=second_answer)])
 
     def _get_petrovich_gamers(self) -> QuerySet[PetrovichUser]:
         role_banned = Role.objects.get(name=RoleEnum.BANNED.name)
-        gamers = PetrovichUser.objects \
-            .filter(chat=self.event.chat, active=True) \
-            .exclude(profile__roles=role_banned) \
+        gamers = (
+            PetrovichUser.objects.filter(chat=self.event.chat, active=True)
+            .exclude(profile__roles=role_banned)
             .filter(profile__chats=self.event.chat)
+        )
         return gamers

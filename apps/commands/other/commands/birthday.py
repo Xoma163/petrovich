@@ -19,7 +19,8 @@ class Birthday(Command):
         dt_now = datetime.datetime.now().date()
         for user in users:
             if user.birthday.month < dt_now.month or (
-                    user.birthday.month == dt_now.month and user.birthday.day < dt_now.day):
+                user.birthday.month == dt_now.month and user.birthday.day < dt_now.day
+            ):
                 next_year_birthday_people.append(user)
             else:
                 this_year_birthday_people.append(user)

@@ -4,11 +4,7 @@ from apps.commands.gpt.api.base import CompletionsAPIMixin, VisionAPIMixin, Imag
 from apps.commands.gpt.api.openai_api import OpenAIAPI
 from apps.commands.gpt.api.responses import GPTVisionResponse, GPTImageDrawResponse, GPTCompletionsResponse
 from apps.commands.gpt.messages.base import GPTMessages
-from apps.commands.gpt.models import (
-    CompletionsModel,
-    VisionModel,
-    ImageDrawModel
-)
+from apps.commands.gpt.models import CompletionsModel, VisionModel, ImageDrawModel
 
 
 class GrokAPI(
@@ -19,9 +15,7 @@ class GrokAPI(
 ):
     @property
     def headers(self) -> dict:
-        return {
-            "Authorization": f"Bearer {self.api_key}"
-        }
+        return {"Authorization": f"Bearer {self.api_key}"}
 
     # ---------- base ---------- #
 
@@ -35,17 +29,13 @@ class GrokAPI(
     completions_url = f"{base_url}/chat/completions"
 
     def completions(
-            self,
-            messages: GPTMessages,
-            model: CompletionsModel,
-            extra_data: dict,
-            callback_func: Callable | None = None,
-
+        self,
+        messages: GPTMessages,
+        model: CompletionsModel,
+        extra_data: dict,
+        callback_func: Callable | None = None,
     ) -> GPTCompletionsResponse:
-        payload = {
-            "model": model.name,
-            "messages": messages.get_messages()
-        }
+        payload = {"model": model.name, "messages": messages.get_messages()}
         if callback_func:
             payload["stream"] = True
             payload["stream_options"] = {"include_usage": True}
@@ -56,8 +46,7 @@ class GrokAPI(
             json=payload,
             headers=self.headers,
             stream=True if callback_func else False,
-            callback_func=callback_func
-
+            callback_func=callback_func,
         )  # noqa
 
     # ---------- vision ---------- #
@@ -65,16 +54,13 @@ class GrokAPI(
     vision_url = f"{base_url}/chat/completions"
 
     def vision(
-            self,
-            messages: GPTMessages,
-            model: VisionModel,
-            extra_data: dict,
-            callback_func: Callable | None = None,
+        self,
+        messages: GPTMessages,
+        model: VisionModel,
+        extra_data: dict,
+        callback_func: Callable | None = None,
     ) -> GPTVisionResponse:
-        payload = {
-            "model": model.name,
-            "messages": messages.get_messages()
-        }
+        payload = {"model": model.name, "messages": messages.get_messages()}
         if callback_func:
             payload["stream"] = True
             payload["stream_options"] = {"include_usage": True}
@@ -85,8 +71,7 @@ class GrokAPI(
             json=payload,
             headers=self.headers,
             stream=True if callback_func else False,
-            callback_func=callback_func
-
+            callback_func=callback_func,
         )  # noqa
 
     # ---------- image draw ---------- #
@@ -94,11 +79,10 @@ class GrokAPI(
     image_draw_url = f"{base_url}/images/generations"
 
     def draw_image(
-            self,
-            prompt: str,
-            model: ImageDrawModel,
-            count: int = 1,  # quality are not supported by xAI API at the moment.
-
+        self,
+        prompt: str,
+        model: ImageDrawModel,
+        count: int = 1,  # quality are not supported by xAI API at the moment.
     ) -> GPTImageDrawResponse:
         payload = {
             "model": model.name,
@@ -113,5 +97,5 @@ class GrokAPI(
             json=payload,
             count=count,
             headers=self.headers,
-            log=False
+            log=False,
         )

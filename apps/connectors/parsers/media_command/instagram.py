@@ -26,7 +26,8 @@ class InstagramParser:
             page_source = self._get_instagram_request(url)
         except TimeoutException:
             raise PWarning(
-                "Убедитесь в браузере(инкогнито), что по ссылке фото/видео и доступно к просмотру. Если это так, то сообщите разработчику")
+                "Убедитесь в браузере(инкогнито), что по ссылке фото/видео и доступно к просмотру. Если это так, то сообщите разработчику"
+            )
         bs4 = BeautifulSoup(page_source, "html.parser")
         spans = bs4.find_all("span")
         if any([re.search(self.AGE_RESTRICTION_RE, x.text) for x in spans]):
@@ -172,8 +173,9 @@ class InstagramAPIData:
         self.items.append(item)
 
     def add_video(self, download_url: str, thumbnail_url: str | None):
-        item = InstagramAPIDataItem(content_type=InstagramAPIDataItem.CONTENT_TYPE_VIDEO, download_url=download_url,
-                                    thumbnail_url=thumbnail_url)
+        item = InstagramAPIDataItem(
+            content_type=InstagramAPIDataItem.CONTENT_TYPE_VIDEO, download_url=download_url, thumbnail_url=thumbnail_url
+        )
         self.add_item(item)
 
     def add_image(self, download_url: str):

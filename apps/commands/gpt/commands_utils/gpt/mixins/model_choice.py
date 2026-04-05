@@ -11,7 +11,7 @@ from apps.commands.gpt.models import (
     ImageDrawModel,
     ImageEditModel,
     VoiceRecognitionModel,
-    GPTModel
+    GPTModel,
 )
 from apps.commands.gpt.protocols import GPTCommandProtocol
 from apps.commands.help_text import HelpTextArgument
@@ -21,48 +21,33 @@ from apps.shared.exceptions import PWarning
 class GPTModelChoiceMixin(GPTCommandProtocol):
     MODEL_CHOOSE_HELP_TEXT_ITEMS = [
         HelpTextArgument("модели", "выводит список доступных моделей"),
-        HelpTextArgument("модель", "выведет текущие модели")
+        HelpTextArgument("модель", "выведет текущие модели"),
     ]
 
     COMPLETIONS_HELP_TEXT_ITEMS = [
         HelpTextArgument(
             "модель completions (название модели)",
-            "Указывает какую модель использовать для обработки текста (completions)"
+            "Указывает какую модель использовать для обработки текста (completions)",
         ),
-        HelpTextArgument(
-            "модель completions удалить",
-            "Удаляет выбранную модель для обработки текста (completions)"
-        )
+        HelpTextArgument("модель completions удалить", "Удаляет выбранную модель для обработки текста (completions)"),
     ]
     VISION_HELP_TEXT_ITEMS = [
         HelpTextArgument(
-            "модель vision (название модели)",
-            "Указывает какую модель использовать для обработки изображений (vision)"
+            "модель vision (название модели)", "Указывает какую модель использовать для обработки изображений (vision)"
         ),
-        HelpTextArgument(
-            "модель vision удалить",
-            "Удаляет выбранную модель для обработки изображений (vision)"
-        )
+        HelpTextArgument("модель vision удалить", "Удаляет выбранную модель для обработки изображений (vision)"),
     ]
     IMAGE_DRAW_HELP_TEXT_ITEMS = [
         HelpTextArgument(
-            "модель draw (название модели)",
-            "Указывает какую модель использовать для генерации изображений (draw)"
+            "модель draw (название модели)", "Указывает какую модель использовать для генерации изображений (draw)"
         ),
-        HelpTextArgument(
-            "модель draw удалить",
-            "Удаляет выбранную модель для генерации изображений (draw)"
-        )
+        HelpTextArgument("модель draw удалить", "Удаляет выбранную модель для генерации изображений (draw)"),
     ]
     VOICE_RECOGNITION_HELP_TEXT_ITEMS = [
         HelpTextArgument(
-            "модель voice (название модели)",
-            "Указывает какую модель использовать для обработки голоса (voice)"
+            "модель voice (название модели)", "Указывает какую модель использовать для обработки голоса (voice)"
         ),
-        HelpTextArgument(
-            "модель voice удалить",
-            "Удаляет выбранную модель для обработки голоса (voice)"
-        )
+        HelpTextArgument("модель voice удалить", "Удаляет выбранную модель для обработки голоса (voice)"),
     ]
 
     COMPLETIONS_VISION_MODEL_ROW_TEMPLATE = "{model_name} | {input_cost} | {output_cost} | {extra}"
@@ -93,12 +78,14 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
         arg = self.event.message.args[1]
 
         menu = [
-            [["completion", "completions", "текст", "текстовая", "чат", "text", "chat", "t", "c"],
-             self._sub_menu_completions_model_choice],
+            [
+                ["completion", "completions", "текст", "текстовая", "чат", "text", "chat", "t", "c"],
+                self._sub_menu_completions_model_choice,
+            ],
             [["vision", "вижн", "зрение", "v"], self._sub_menu_vision_model_choice],
             [["draw", "рисования", "рисовать", "изображения", "d"], self._sub_menu_image_draw_model_choice],
             [["voice", "голос", "голосовая"], self._sub_menu_voice_recognition_model_choice],
-            [["default"], self._get_all_current_models]
+            [["default"], self._get_all_current_models],
         ]
         method = self.handle_menu(menu, arg)
         rmi = method(profile_gpt_settings)
@@ -117,7 +104,7 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
                 self._get_completions_vision_row,
                 "обработки текста (completions)",
                 "Название | цена за 1кк входных токенов | цена за 1кк выходных токенов",
-                (6, 6)
+                (6, 6),
             )
             answer.append(completions_models_str)
         if issubclass(self.provider.api_class, VisionAPIMixin):
@@ -128,34 +115,33 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
                 self._get_completions_vision_row,
                 "обработки изображений (vision)",
                 "Название | цена за 1кк входных токенов | цена за 1кк выходных токенов",
-                (6, 6)
+                (6, 6),
             )
             answer.append(vision_models_str)
         if issubclass(self.provider.api_class, ImageDrawAPIMixin):
-            image_draw_models = ImageDrawModel.objects \
-                .filter(provider=self.provider_model) \
-                .order_by("name", "-width", "-height", "-image_cost")
+            image_draw_models = ImageDrawModel.objects.filter(provider=self.provider_model).order_by(
+                "name", "-width", "-height", "-image_cost"
+            )
             image_draw_models_str = self._get_models_str(
                 image_draw_models,
                 profile_gpt_settings,
                 self._get_image_draw_image_edit_row,
                 "генерации изображений (draw)",
                 "Название | размер | качество | цена за 1шт.",
-                (9, 8, 6)
+                (9, 8, 6),
             )
             answer.append(image_draw_models_str)
         if issubclass(self.provider.api_class, VoiceRecognitionAPIMixin):
-            voice_recognition_models = VoiceRecognitionModel.objects \
-                .filter(provider=self.provider_model) \
-                .order_by("name")
+            voice_recognition_models = VoiceRecognitionModel.objects.filter(provider=self.provider_model).order_by(
+                "name"
+            )
             voice_recognition_models_str = self._get_models_str(
                 voice_recognition_models,
                 profile_gpt_settings,
                 self._get_voice_recognition_row,
                 "распознавания голоса (voice)",
                 "Название | цена за минуту",
-                (6,)
-
+                (6,),
             )
             answer.append(voice_recognition_models_str)
 
@@ -164,15 +150,17 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
         return answer
 
     def _get_models_str(
-            self,
-            models: QuerySet[CompletionsModel] | QuerySet[VisionModel] | QuerySet[ImageDrawModel] | QuerySet[
-                ImageEditModel] | QuerySet[VoiceRecognitionModel],
-            profile_gpt_settings: ProfileGPTSettings,
-            _get_row_method,
-            _models_for_str: str,
-            _format: str,
-            _max_lens: tuple[int, ...] | None = None,
-
+        self,
+        models: QuerySet[CompletionsModel]
+                | QuerySet[VisionModel]
+                | QuerySet[ImageDrawModel]
+                | QuerySet[ImageEditModel]
+                | QuerySet[VoiceRecognitionModel],
+        profile_gpt_settings: ProfileGPTSettings,
+        _get_row_method,
+        _models_for_str: str,
+        _format: str,
+        _max_lens: tuple[int, ...] | None = None,
     ) -> str:
         """
         Универсальный генератор списка моделей
@@ -205,11 +193,7 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
             models_list.append(row)
         models_str = "\n".join(models_list)
         models_str = self.bot.get_formatted_text(models_str)
-        return (
-            f"Список доступных моделей {_models_for_str}:\n"
-            f"{_format}\n"
-            f"{models_str}"
-        )
+        return f"Список доступных моделей {_models_for_str}:\n{_format}\n{models_str}"
 
     def _get_completions_vision_row(self, model: CompletionsModel | VisionModel, extra_text="", *max_lens):
         input_cost = f"${float(model.input_1m_token_cost)}"
@@ -223,7 +207,7 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
             model_name=model.name + filler_model_name,
             input_cost=input_cost + filler_input_cost,
             output_cost=output_cost + fillet_output_cost,
-            extra=extra_text
+            extra=extra_text,
         )
 
     def _get_image_draw_image_edit_row(self, model: ImageDrawModel | ImageEditModel, extra_text="", *max_lens):
@@ -239,7 +223,7 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
             size=model.size + filler_size,
             quality=model.quality + filler_quality,
             cost=cost + filler_cost,
-            extra=extra_text
+            extra=extra_text,
         )
 
     def _get_voice_recognition_row(self, model: VoiceRecognitionModel, extra_text="", *max_lens):
@@ -249,9 +233,7 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
         filler_cost = " " * (max_lens[1] - len(model.name))
 
         return self.VOICE_RECOGNITION_MODEL_ROW.format(
-            model_name=model.name + filler_model_name,
-            cost=cost + filler_cost,
-            extra=extra_text
+            model_name=model.name + filler_model_name, cost=cost + filler_cost, extra=extra_text
         )
 
     # MENU MODELS
@@ -339,11 +321,7 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
         answer = f"Поменял модель обработки голоса (voice) на {self.bot.get_formatted_text_line(new_model.name)}"
         return ResponseMessageItem(text=answer)
 
-    def _find_model(
-            self,
-            model_class: type[GPTModel],
-            name: str
-    ):
+    def _find_model(self, model_class: type[GPTModel], name: str):
         """
         Универсальный поиск модели GPT
         :model_class - подкласс django модели GPTModel
@@ -358,8 +336,9 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
 
     ## CURRENT MODEL WORKS
 
-    def _get_current_model_str(self, settings: ProfileGPTSettings, model_field: str,
-                               get_default_model_method: Callable) -> str:
+    def _get_current_model_str(
+        self, settings: ProfileGPTSettings, model_field: str, get_default_model_method: Callable
+    ) -> str:
         """
         Получение текущей модели, которая установлена у пользователя или получение стандартной модели
         Используется для любых функциональностей
@@ -380,7 +359,7 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
         current_model_str = self._get_current_model_str(
             settings,
             "completions_model",
-            self.get_default_completions_model  # noqa
+            self.get_default_completions_model,  # noqa
         )
         return f"Текстовая (completions)\n{current_model_str}"
 
@@ -390,7 +369,7 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
         current_model_str = self._get_current_model_str(
             settings,
             "vision_model",
-            self.get_default_vision_model  # noqa
+            self.get_default_vision_model,  # noqa
         )
         return f"Зрения (vision)\n{current_model_str}"
 
@@ -398,7 +377,7 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
         current_model_str = self._get_current_model_str(
             settings,
             "image_draw_model",
-            self.get_default_image_draw_model  # noqa
+            self.get_default_image_draw_model,  # noqa
         )
         return f"Генерации изображений (draw)\n{current_model_str}"
 
@@ -406,7 +385,7 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
         current_model_str = self._get_current_model_str(
             settings,
             "voice_recognition_model",
-            self.get_default_voice_recognition_model  # noqa
+            self.get_default_voice_recognition_model,  # noqa
         )
         return f"Голосовая (voice)\n{current_model_str}"
 

@@ -14,9 +14,12 @@ class GPTKeyMixin(GPTCommandProtocol):
         HelpTextArgument("ключ удалить", "удаляет персональный API ключ"),
     ]
 
-    KEEP_YOUR_SECRET_KEY_IN_SAFE = "Держите свой ключ в секрете. Я удалил ваше сообщение с ключом (или удалите сами если у меня нет прав)"
-    PROVIDE_API_KEY_TEMPLATE = "Для использования {provider_name} укажите свой ключ (API_KEY)\n" \
-                               "{command_name} ключ (ключ)"
+    KEEP_YOUR_SECRET_KEY_IN_SAFE = (
+        "Держите свой ключ в секрете. Я удалил ваше сообщение с ключом (или удалите сами если у меня нет прав)"
+    )
+    PROVIDE_API_KEY_TEMPLATE = (
+        "Для использования {provider_name} укажите свой ключ (API_KEY)\n{command_name} ключ (ключ)"
+    )
 
     # MENU
 
@@ -55,17 +58,14 @@ class GPTKeyMixin(GPTCommandProtocol):
             else:
                 error_msg = self.PROVIDE_API_KEY_TEMPLATE.format(
                     provider_name=self.provider.type_enum,
-                    command_name=self.bot.get_formatted_text_line(f"/{self.name}")
+                    command_name=self.bot.get_formatted_text_line(f"/{self.name}"),
                 )
                 raise PWarning(error_msg)
         return None
 
     @staticmethod
     def raise_no_access_exception(gpt_type_enum: GPTProviderEnum, command_name: str) -> None:
-        error_msg = GPTKeyMixin.PROVIDE_API_KEY_TEMPLATE.format(
-            provider_name=gpt_type_enum,
-            command_name=command_name
-        )
+        error_msg = GPTKeyMixin.PROVIDE_API_KEY_TEMPLATE.format(provider_name=gpt_type_enum, command_name=command_name)
         raise PWarning(error_msg)
 
     # UTILS

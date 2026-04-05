@@ -16,23 +16,27 @@ class OpenAIResponsesMessage(GPTMessage):
             "content": [
                 {
                     "type": text_type,
-                    "text": self.text
-                }
-            ]
+                    "text": self.text,
+                },
+            ],
         }
         if self.images:
             for image in self.images:
-                message["content"].append({
-                    "type": "input_image",
-                    "image_url": f"data:image/jpeg;base64,{image.base64()}"
-                })
+                message["content"].append(
+                    {
+                        "type": "input_image",
+                        "image_url": f"data:image/jpeg;base64,{image.base64()}",
+                    }
+                )
         if self.files:
             for file in self.files:
-                message["content"].append({
-                    "type": "input_file",
-                    "filename": file.file_name_full,
-                    "file_data": f"data:{file.mime_type};base64,{file.base64()}"
-                })
+                message["content"].append(
+                    {
+                        "type": "input_file",
+                        "filename": file.file_name_full,
+                        "file_data": f"data:{file.mime_type};base64,{file.base64()}",
+                    }
+                )
         return message
 
 

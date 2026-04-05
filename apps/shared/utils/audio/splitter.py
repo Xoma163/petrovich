@@ -6,7 +6,6 @@ from apps.bot.core.messages.attachments.audio import AudioAttachment
 
 
 class AudioSplitter:
-
     @classmethod
     def split(cls, audio: AudioAttachment, max_size_mb: float) -> list[BytesIO]:
         """
@@ -32,9 +31,9 @@ class AudioSplitter:
             chunks.append(chunk)
 
         audios = []
-        for i, chunk in enumerate(chunks):
+        for index, chunk in enumerate(chunks):
             o = BytesIO()
-            o.name = f"audio_part_{i}.{audio.ext}"
+            o.name = f"audio_part_{index}.{audio.ext}"
             chunk.export(o, format="wav")
             audios.append(o)
         return audios

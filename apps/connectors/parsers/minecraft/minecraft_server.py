@@ -8,19 +8,23 @@ class MinecraftServer:
     DEFAULT_PORT = 25565
 
     def __init__(
-            self, ip: str, port: int | None = None, delay: int | None = None, names: list[str] = None,
-            map_url: str = None,
-            service_name: str = None
+        self,
+        ip: str,
+        port: int | None = None,
+        delay: int | None = None,
+        names: list[str] | None = None,
+        map_url: str | None = None,
+        service_name: str | None = None,
     ):
         self.ip: str = ip
         if port is None:
             port = self.DEFAULT_PORT
         self.port: int = port
 
-        self.delay: int = delay
+        self.delay: int | None = delay
         self.names: list[str] = names if names else []
-        self.map_url: str = map_url
-        self.service_name: str = service_name
+        self.map_url: str | None = map_url
+        self.service_name: str | None = service_name
 
         self.server_info: MinecraftServerData | None = None
 

@@ -24,7 +24,7 @@ def get_user_by_id(user_id, platform: PlatformEnum, _defaults: dict = None) -> U
         user, _ = User.objects.get_or_create(
             user_id=user_id,
             platform=platform.name,
-            defaults=defaults
+            defaults=defaults,
         )
     return user
 
@@ -51,6 +51,8 @@ def get_profile_by_user(user: User, _defaults: dict = None) -> Profile:
             user.profile = profile
             user.save()
 
+    if user.profile is None:
+        raise RuntimeError("profile was not created")
     return user.profile
 
 
@@ -80,9 +82,7 @@ def get_chat_by_id(chat_id: int, platform: PlatformEnum) -> Chat:
     Возвращает чат по его id
     """
     with lock:
-        chat, _ = Chat.objects.get_or_create(
-            chat_id=chat_id, platform=platform.name
-        )
+        chat, _ = Chat.objects.get_or_create(chat_id=chat_id, platform=platform.name)
     return chat
 
 
@@ -93,9 +93,7 @@ def get_bot_by_id(bot_id: int, platform: PlatformEnum) -> Bot:
     if bot_id > 0:
         bot_id = -bot_id
     with lock:
-        bot, _ = Bot.objects.get_or_create(
-            bot_id=bot_id, platform=platform.name
-        )
+        bot, _ = Bot.objects.get_or_create(bot_id=bot_id, platform=platform.name)
     return bot
 
 
@@ -124,6 +122,7 @@ def send_message_to_moderator_chat(msg: ResponseMessageItem):
     moderator_chat_id = Chat.objects.get(pk=moderator_chat_pk).chat_id
 
     from apps.bot.core.bot.telegram.tg_bot import TgBot
+
     bot = TgBot()
-    msg.peer_id = moderator_chat_id
+    msg.peer_id = int(moderator_chat_id)
     return bot.send_response_message_item(msg)
