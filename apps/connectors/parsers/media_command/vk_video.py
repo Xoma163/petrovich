@@ -33,8 +33,9 @@ class VKVideo:
         "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
     }
 
-    def __init__(self):
+    def __init__(self, log_filter: dict | None = None):
         super().__init__()
+        self.log_filter = log_filter
 
     # SERVICE METHODS
 
@@ -93,7 +94,7 @@ class VKVideo:
             vh = VideoHandler(video=va, audio=aa)
             va.content = vh.mux()
         if va.m3u8_url:
-            downloader = Downloader()
+            downloader = Downloader(log_filter=self.log_filter)
             va.content = downloader.download_by_m3u8_url(va.m3u8_url, threads=10)
 
         return va

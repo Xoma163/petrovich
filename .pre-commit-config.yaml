@@ -13,8 +13,8 @@ repos:
 #        entry: uv run mypy --config-file pyproject.toml
 #        language: system
 #        types_or: [ python, pyi ]
-      - id: add-trailing-comma
-        name: add-trailing-comma
-        entry: uv run add-trailing-comma
-        language: system
-        types_or: [ python, pyi ]
+#      - id: add-trailing-comma
+#        name: add-trailing-comma
+#        entry: uv run add-trailing-comma
+#        language: system
+#        types_or: [ python, pyi ]

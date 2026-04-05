@@ -103,7 +103,12 @@ class MediaService:
         return attachment.get_size_mb() > self.bot.max_video_size_mb
 
     def _cache_video(
-        self, channel_id: str, video_id: str, title: str, source_url: str, content: bytes,
+        self,
+        channel_id: str,
+        video_id: str,
+        title: str,
+        source_url: str,
+        content: bytes,
     ) -> MediaServiceResponse:
         """
         Сохранение видео в кэш
@@ -122,7 +127,11 @@ class MediaService:
         cache.save()
         text = self._get_download_cache_text(title, cache.video.url, cache.source_url)
         return MediaServiceResponse(
-            text=text, attachments=None, cache=cache, cache_url=self._get_cached_url(cache.video.url), video_title=title,
+            text=text,
+            attachments=None,
+            cache=cache,
+            cache_url=self._get_cached_url(cache.video.url),
+            video_title=title,
         )
 
     def _get_download_cache_text(self, title, cache_video_url, cache_video_source_url):

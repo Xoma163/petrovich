@@ -18,6 +18,9 @@ class YoutubeVideo:
     DOMAIN = "youtube.com"
     URL = f"https://{DOMAIN}"
 
+    def __init__(self, log_filter: dict | None = None):
+        self.log_filter = log_filter
+
     # SERVICE METHODS
 
     def get_video_info(self, url, high_res=False, _timedelta: float | None = None) -> VideoData:
@@ -46,12 +49,11 @@ class YoutubeVideo:
             },
         )
 
-    @staticmethod
-    def download_video(data: VideoData) -> VideoAttachment:
+    def download_video(self, data: VideoData) -> VideoAttachment:
         if not data.video_download_url or not data.audio_download_url:
             raise ValueError
 
-        downloader = Downloader()
+        downloader = Downloader(log_filter=self.log_filter)
 
         http_chunk_size_video = data.extra_data.get("http_chunk_size_video")
         _va = VideoAttachment()

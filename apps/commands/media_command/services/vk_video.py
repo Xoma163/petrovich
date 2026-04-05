@@ -12,7 +12,7 @@ class VKVideoService(MediaService):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.service = VKVideo()
+        self.service = VKVideo(log_filter=self.event.log_filter)
 
     @retry(3, Exception, sleep_time=2, except_exceptions=(PWarning,))
     def get_content_by_url(self, url: str) -> MediaServiceResponse:
@@ -34,7 +34,7 @@ class VKVideoService(MediaService):
             return cached
 
         va = self.service.download_video(
-            url, author_id=data.channel_id, video_id=data.video_id, high_res=self.media_keys.high_resolution,
+            url, author_id=data.channel_id, video_id=data.video_id, high_res=self.media_keys.high_resolution
         )
         va.width = data.width
         va.height = data.height

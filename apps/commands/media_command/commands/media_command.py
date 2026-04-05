@@ -48,7 +48,9 @@ class Media(AcceptExtraCommand):
                 RoleEnum.USER,
                 [
                     HelpTextKey(
-                        MediaKeys.NO_MEDIA_KEYS[0], MediaKeys.NO_MEDIA_KEYS[1:], "позволяет не запускать команду",
+                        MediaKeys.NO_MEDIA_KEYS[0],
+                        MediaKeys.NO_MEDIA_KEYS[1:],
+                        "позволяет не запускать команду",
                     ),
                     HelpTextKey(
                         MediaKeys.AUDIO_ONLY_KEYS[0],  # noqa
@@ -210,10 +212,14 @@ class Media(AcceptExtraCommand):
         extra_text = extra_text if extra_text.strip() else ""
 
         extra_text = self._strip_extra_text_by_keys(
-            self.event.message.keys, self.event.message.KEYS_SYMBOLS, extra_text,
+            self.event.message.keys,
+            self.event.message.KEYS_SYMBOLS,
+            extra_text,
         )
         extra_text = self._strip_extra_text_by_keys(
-            self.event.message.short_keys_raw, self.event.message.SHORT_KEYS_SYMBOLS, extra_text,
+            self.event.message.short_keys_raw,
+            self.event.message.SHORT_KEYS_SYMBOLS,
+            extra_text,
         )
 
         extra_text = extra_text if extra_text.strip() else ""

@@ -113,7 +113,9 @@ class TgBot(Bot):
         inline_query_result = meme_cmd.get_tg_inline_memes(filter_list)
 
         return self.api_handler.answer_inline_query(
-            inline_query_id=data["id"], results=inline_query_result, cache_time=0,
+            inline_query_id=data["id"],
+            results=inline_query_result,
+            cache_time=0,
         )
 
     def _send_media_group_wrap(self, rmi: ResponseMessageItem) -> dict[str, Any]:
@@ -614,7 +616,9 @@ class TgBot(Bot):
 
     def edit_message_keyboard(self, rmi: ResponseMessageItem) -> dict:
         return self.api_handler.edit_messaage_reply_markup(
-            chat_id=rmi.peer_id, message_id=rmi.message_id, reply_markup=rmi.keyboard,
+            chat_id=rmi.peer_id,
+            message_id=rmi.message_id,
+            reply_markup=rmi.keyboard,
         )
 
     def edit_message_media(self, rmi: ResponseMessageItem) -> dict:
@@ -687,7 +691,8 @@ class TgBot(Bot):
 
         # no wait for response
         threading.Thread(
-            target=self.api_handler.send_chat_action, args=(chat_id, tg_chat_action, message_thread_id),
+            target=self.api_handler.send_chat_action,
+            args=(chat_id, tg_chat_action, message_thread_id),
         ).start()
 
     def get_mention(self, profile: Profile) -> str:

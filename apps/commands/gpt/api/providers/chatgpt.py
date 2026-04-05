@@ -194,7 +194,10 @@ class ChatGPTAPI(
         return f"{self.base_url}/audio/transcriptions"
 
     def voice_recognition(
-        self, audio_ext: str, content: bytes, model: type[VoiceRecognitionModel],
+        self,
+        audio_ext: str,
+        content: bytes,
+        model: type[VoiceRecognitionModel],
     ) -> GPTVoiceRecognitionResponse:
         data = {
             "model": model.name,

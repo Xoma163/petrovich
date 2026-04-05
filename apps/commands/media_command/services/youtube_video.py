@@ -11,7 +11,7 @@ class YoutubeVideoService(MediaService):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.service = YoutubeVideo()
+        self.service = YoutubeVideo(log_filter=self.event.log_filter)
 
     @retry(3, Exception, sleep_time=2, except_exceptions=(PWarning,))
     def get_content_by_url(self, url: str) -> MediaServiceResponse:

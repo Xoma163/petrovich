@@ -1,10 +1,12 @@
 import os
+import subprocess
 from concurrent.futures import ThreadPoolExecutor
 from tempfile import NamedTemporaryFile
 
 import requests
 
 from apps.connectors.utils import get_default_headers
+from apps.shared.exceptions import PWarning
 from apps.shared.utils.do_the_linux_command import do_the_linux_command
 
 
@@ -15,9 +17,11 @@ class Downloader:
         self,
         headers: dict | None = None,
         cookies: dict | None = None,
+        log_filter: dict | None = None,
     ):
         self.headers = headers if headers else get_default_headers()
         self.cookies = cookies if cookies else {}
+        self.log_filter = log_filter
 
     def _download_chunk(
         self,
@@ -52,8 +56,7 @@ class Downloader:
     def download_by_url(self, url: str):
         return requests.get(url, headers=self.headers, cookies=self.cookies).content
 
-    @staticmethod
-    def download_by_m3u8_url(m3u8_url: str, threads: int = 1, http_chunk_size: int | None = None) -> bytes:
+    def download_by_m3u8_url(self, m3u8_url: str, threads: int = 1, http_chunk_size: int | None = None) -> bytes:
         tmp_video_file = NamedTemporaryFile().name
         try:
             args = {
@@ -65,14 +68,21 @@ class Downloader:
                 args["--http-chunk-size"] = http_chunk_size
             args_str = " ".join([f"{x[0]} {x[1]}" for x in args.items()])
             command = f"yt-dlp {args_str} {m3u8_url}"
-            _ = do_the_linux_command(command)
+            try:
+                _ = do_the_linux_command(command, log_filter=self.log_filter, check=True)
+            except subprocess.CalledProcessError as e:
+                raise PWarning("Не получилось скачать видео") from e
 
             potential_filename = f"{tmp_video_file}.mp4"
             if os.path.isfile(potential_filename):
                 tmp_video_file = potential_filename
 
+            if not os.path.isfile(tmp_video_file) or os.path.getsize(tmp_video_file) == 0:
+                raise PWarning("Не получилось скачать видео")
+
             with open(tmp_video_file, "rb") as file:
                 content = file.read()
         finally:
-            os.remove(tmp_video_file)
+            if os.path.exists(tmp_video_file):
+                os.remove(tmp_video_file)
         return content

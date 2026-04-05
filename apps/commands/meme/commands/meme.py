@@ -37,7 +37,8 @@ class Meme(Command):
                         "присылает нужный мем. Можно использовать * вместо символов поиска. Например /мем ж*па",
                     ),
                     HelpTextArgument(
-                        "добавить (название) (Вложение/Пересланное сообщение с вложением)", "добавляет мем",
+                        "добавить (название) (Вложение/Пересланное сообщение с вложением)",
+                        "добавляет мем",
                     ),
                     HelpTextArgument("добавить (название) (ссылка на youtube/coub)", "добавляет мем с youtube/coub"),
                     HelpTextArgument(
@@ -280,7 +281,9 @@ class Meme(Command):
             user_msg = f'Мем с названием "{meme.name}" удалён поскольку он не соответствует правилам, устарел или является дубликатом.'
             user = meme.author.get_tg_user()
             rmi = ResponseMessageItem(
-                text=user_msg, peer_id=user.user_id, message_thread_id=self.event.message_thread_id,
+                text=user_msg,
+                peer_id=user.user_id,
+                message_thread_id=self.event.message_thread_id,
             )
             self.bot.send_response_message_item(rmi)
             rmi.send = False

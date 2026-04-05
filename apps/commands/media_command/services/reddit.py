@@ -66,7 +66,10 @@ class RedditService(MediaService):
             all_photos = reversed(all_photos)
             attachments = [
                 self.bot.get_photo_attachment(
-                    url=photo, filename=self.service.filename, peer_id=self.event.peer_id, send_chat_action=False,
+                    url=photo,
+                    filename=self.service.filename,
+                    peer_id=self.event.peer_id,
+                    send_chat_action=False,
                 )
                 for photo in all_photos
             ]
