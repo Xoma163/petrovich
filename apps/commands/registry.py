@@ -16,6 +16,7 @@ from apps.commands.notifies.commands.notifies import Notifies
 from apps.commands.other.commands.birthday import Birthday
 from apps.commands.other.commands.calc import Calc
 from apps.commands.other.commands.commands import Commands
+from apps.commands.other.commands.demotivator import Demotivator
 from apps.commands.other.commands.easy.bye import Bye
 from apps.commands.other.commands.easy.git import Git
 from apps.commands.other.commands.easy.hi import Hi
@@ -80,6 +81,7 @@ _commands = [
     Birthday,
     Calc,
     Commands,
+    Demotivator,
     Help,
     Issue,
     Profile,

@@ -155,6 +155,7 @@ For feature-heavy areas:
 - Media: `apps/commands/media_command/`
 - Reminders: `apps/commands/notifies/`
 - Memes: `apps/commands/meme/`
+- Utility / image-generation commands: `apps/commands/other/`, shared helpers in `apps/shared/utils/`
 - GitHub automation: `apps/commands/other/commands/issue.py`, `apps/commands/other/commands/service/github_reply.py`, `apps/bot/views.py`
 
 ---
