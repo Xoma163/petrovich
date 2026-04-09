@@ -13,8 +13,8 @@ from apps.commands.gpt.commands_utils.gpt.gpt_abstract import GPTCommand
 from apps.commands.gpt.commands_utils.gpt.mixins.key import GPTKeyMixin
 from apps.commands.gpt.messages.base import GPTMessages
 from apps.commands.gpt.messages.consts import GPTMessageRole
+from apps.commands.gpt.oauth import user_has_gpt_auth
 from apps.commands.gpt.providers.providers.chatgpt import ChatGPTProvider
-from apps.commands.gpt.utils import user_has_api_key
 from apps.commands.help_text import HelpTextArgument
 from apps.shared.exceptions import PWarning
 from apps.shared.utils.cache import MessagesCache
@@ -45,12 +45,13 @@ class WTFCommand(Command):
         self.gpt_command_class: type[GPTCommand] = gpt_command_class
 
     def _check_gpt_access(self):
-        has_access = user_has_api_key(self.event.sender, ChatGPTProvider())
+        has_access = user_has_gpt_auth(self.event.sender, ChatGPTProvider())
         if not has_access:
-            GPTKeyMixin.raise_no_access_exception(
-                self.gpt_command_class.provider.type_enum,  # noqa
-                self.bot.get_formatted_text_line(f"/{self.gpt_command_class.name}"),
+            error_msg = GPTKeyMixin.PROVIDE_AUTH_TEMPLATE.format(
+                provider_name=self.gpt_command_class.provider.type_enum,  # noqa
+                command_name=self.bot.get_formatted_text_line(f"/{self.gpt_command_class.name}"),
             )
+            raise PWarning(error_msg)
 
     def start(self) -> ResponseMessage:
         self._check_gpt_access()
@@ -80,7 +81,7 @@ class WTFCommand(Command):
                 last_arg = self.event.message.args[-1]
                 n = int(last_arg)
                 prompt = " ".join(self.event.message.args_case[:-1])
-            except ValueError, IndexError:
+            except (ValueError, IndexError) as _:
                 n = self.DEFAULT_N
                 prompt = self.event.message.args_str_case
 

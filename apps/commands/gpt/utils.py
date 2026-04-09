@@ -15,6 +15,6 @@ def user_has_api_key(sender: Profile, provider: GPTProvider) -> bool:
     chat_gpt_provider = get_gpt_provider(provider)
     try:
         profile_gpt_settings = sender.gpt_settings.get(provider=chat_gpt_provider)
-        return bool(profile_gpt_settings.get_key())
+        return profile_gpt_settings.has_key()
     except ProfileGPTSettings.DoesNotExist:
         return False

@@ -60,12 +60,14 @@ class CompletionModelAdmin(admin.ModelAdmin):
         "name",
         "provider",
         "is_default",
+        "is_enabled_for_oauth",
         "input_1m_token_cost",
         "input_cached_1m_token_cost",
         "output_1m_token_cost",
         "web_search_1k_token_cost",
     )
     list_editable = (
+        "is_enabled_for_oauth",
         "input_1m_token_cost",
         "input_cached_1m_token_cost",
         "output_1m_token_cost",
@@ -144,7 +146,9 @@ class ProfileGPTSettingsAdmin(TimeStampAdminMixin, TopFieldsMixin):
     TOP_ORDER_FIELDS = ["provider", "profile"]
     list_display = (
         "profile",
+        "auth_type_display",
         "has_key",
+        "has_oauth",
         "provider",
         "completions_model",
         "vision_model",
@@ -170,7 +174,15 @@ class ProfileGPTSettingsAdmin(TimeStampAdminMixin, TopFieldsMixin):
 
     @admin.display(boolean=True, description="Есть ключ")
     def has_key(self, obj: ProfileGPTSettings) -> bool:
-        return bool(obj.key)
+        return obj.has_key()
+
+    @admin.display(boolean=True, description="Есть OAuth")
+    def has_oauth(self, obj: ProfileGPTSettings) -> bool:
+        return obj.has_oauth_credentials()
+
+    @admin.display(description="Тип авторизации")
+    def auth_type_display(self, obj: ProfileGPTSettings) -> str:
+        return obj.get_active_auth_type() or "-"
 
 
 @admin.register(GPTPreset)

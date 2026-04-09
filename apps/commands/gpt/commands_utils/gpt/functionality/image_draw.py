@@ -52,9 +52,7 @@ class GPTImageDrawFunctionality(GPTCommandProtocol):
         """
         Генерация изображения
         """
-        gpt_api: GPTAPI | HasImageDraw = self.provider.api_class(
-            api_key=self.get_api_key(), log_filter=self.event.log_filter
-        )
+        gpt_api: GPTAPI | HasImageDraw = self.get_gpt_api()
         request_text = self._get_draw_image_request_text()
         with ChatActionSender(self.bot, ChatActionEnum.UPLOAD_PHOTO, self.event.peer_id, self.event.message_thread_id):
             response: GPTImageDrawResponse = gpt_api.draw_image(

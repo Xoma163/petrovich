@@ -28,9 +28,11 @@ from apps.commands.gpt.commands_utils.gpt.mixins.statistics import GPTStatistics
 from apps.commands.gpt.messages.base import GPTMessages
 from apps.commands.gpt.messages.consts import GPTMessageRole
 from apps.commands.gpt.messages.raw import RawGPTMessage
-from apps.commands.gpt.models import Provider, ProfileGPTSettings, GPTModel
+from apps.commands.gpt.models import Provider, ProfileGPTSettings, GPTModel, CompletionsModel
+from apps.commands.gpt.oauth import resolve_profile_gpt_auth, ResolvedGPTAuth
 from apps.commands.gpt.protocols import GPTCommandProtocol
 from apps.commands.gpt.providers.base import GPTProvider
+from apps.commands.gpt.providers.providers.chatgpt import ChatGPTProvider
 from apps.shared.exceptions import PWarning, PError
 from apps.shared.utils.cache import MessagesCache, GPTResponsesCache
 from apps.shared.utils.markdown import has_markdown
@@ -60,6 +62,12 @@ class GPTCommand(
     )
 
     DEBUG_LINE = "\n\n---------- DEBUG ----------"
+    OAUTH_UNSUPPORTED_COMMANDS = {
+        "нарисуй",
+        "draw",
+        "фотошоп",
+        "photoshop",
+    }
 
     @property
     @abstractmethod
@@ -70,6 +78,7 @@ class GPTCommand(
 
     def __init__(self):
         super().__init__()
+        self._resolved_gpt_auth: ResolvedGPTAuth | None = None
 
     def accept(self, event: Event):
         """
@@ -95,11 +104,21 @@ class GPTCommand(
             if result:
                 return result
 
+        if (
+            self._uses_oauth_auth()
+            and self.event.message.args
+            and self.event.message.args[0] in self.OAUTH_UNSUPPORTED_COMMANDS
+        ):
+            raise PWarning("Через OpenAI OAuth сейчас доступен только обычный чат /gpt. Картинки требуют API key")
+        if self._uses_oauth_auth() and self.event.get_all_attachments([PhotoAttachment]):
+            raise PWarning("Через OpenAI OAuth сейчас доступен только текстовый чат /gpt без изображений")
+
         arg0 = self.event.message.args[0] if self.event.message.args else None
         # edit_image_command_aliases = ["фотошоп", "photoshop"]
         edit_image_command_aliases = []
+        api_class = self.get_api_class()
 
-        if issubclass(self.provider.api_class, VisionAPIMixin) and isinstance(self, GPTVisionFunctionality):
+        if issubclass(api_class, VisionAPIMixin) and isinstance(self, GPTVisionFunctionality):
             if self.event.get_all_attachments([PhotoAttachment]) and arg0 not in edit_image_command_aliases:
                 return ResponseMessage(self.menu_vision())
 
@@ -107,7 +126,7 @@ class GPTCommand(
 
         # Если это не продолжение диалога, то можно пользоваться этим всем
         if not bool(self._get_first_gpt_event_in_replies(self.event)):
-            if issubclass(self.provider.api_class, ImageDrawAPIMixin) and isinstance(self, GPTImageDrawFunctionality):
+            if issubclass(api_class, ImageDrawAPIMixin) and isinstance(self, GPTImageDrawFunctionality):
                 menu.append([["нарисуй", "draw"], self.menu_image_draw])
             # if isinstance(self.provider.api_class, ImageEditAPIMixin):
             #     menu.append([edit_image_command_aliases, self.menu_image_edit])
@@ -136,7 +155,7 @@ class GPTCommand(
                 menu.append([["дебаг", "debug"], self.debug])
                 menu.append([["стрим", "stream"], self.stream])
         # В общем случае Completions (в том числе и при продолжении диалога) должен быть доступен
-        if issubclass(self.provider.api_class, CompletionsAPIMixin) and isinstance(self, GPTCompletionsFunctionality):
+        if issubclass(api_class, CompletionsAPIMixin) and isinstance(self, GPTCompletionsFunctionality):
             menu.append([["_wtf"], self.menu_wtf])
             menu.append([["default"], self.menu_completions])
 
@@ -271,8 +290,40 @@ class GPTCommand(
         """
         Получение api_key
         """
-        profile_gpt_settings = self.get_profile_gpt_settings()
-        return profile_gpt_settings.get_key()
+        return self.get_resolved_auth().access_token
+
+    def get_resolved_auth(self) -> ResolvedGPTAuth:
+        if self._resolved_gpt_auth is None:
+            resolved_auth = resolve_profile_gpt_auth(self.get_profile_gpt_settings(), log_filter=self.event.log_filter)
+            if not resolved_auth:
+                raise PWarning("Не найдены учётные данные GPT")
+            self._resolved_gpt_auth = resolved_auth
+        return self._resolved_gpt_auth
+
+    def get_api_class(self):
+        resolved_auth = self.get_resolved_auth()
+        if (
+            resolved_auth.auth_type == ProfileGPTSettings.AuthType.OAUTH_DEVICE
+            and self.provider.type_enum == ChatGPTProvider.type_enum
+        ):
+            from apps.commands.gpt.api.providers.chatgpt_oauth import ChatGPTOAuthAPI
+
+            return ChatGPTOAuthAPI
+        return self.provider.api_class
+
+    def get_gpt_api(self):
+        resolved_auth = self.get_resolved_auth()
+        api_class = self.get_api_class()
+        kwargs = {
+            "api_key": resolved_auth.access_token,
+            "log_filter": self.event.log_filter,
+        }
+        if resolved_auth.auth_type == ProfileGPTSettings.AuthType.OAUTH_DEVICE:
+            kwargs["account_id"] = resolved_auth.account_id
+        return api_class(**kwargs)
+
+    def _uses_oauth_auth(self) -> bool:
+        return self.get_resolved_auth().auth_type == ProfileGPTSettings.AuthType.OAUTH_DEVICE
 
     def get_profile_gpt_settings(self) -> ProfileGPTSettings:
         """
@@ -296,9 +347,28 @@ class GPTCommand(
         Если не найдено, то берёт стандартную модель
         """
 
-        if user_model := self.get_user_model(field_model_name):
-            return user_model
-        return self.get_default_model(model_class)
+        user_model = self.get_user_model(field_model_name)
+        if user_model:
+            return self._check_oauth_compatible_model(model_class, user_model)
+
+        default_model = self.get_default_model(model_class)
+        return self._check_oauth_compatible_model(model_class, default_model)
+
+    def _check_oauth_compatible_model(self, model_class: type[GPTModel], model: GPTModel) -> GPTModel:
+        if not self._uses_oauth_auth():
+            return model
+        if self.provider.type_enum != ChatGPTProvider.type_enum:
+            return model
+        if model_class is not CompletionsModel:
+            return model
+
+        if model.is_enabled_for_oauth:
+            return model
+
+        raise PWarning(
+            f"Модель {model.name} недоступна для OpenAI OAuth. "
+            "Выберите другую текстовую модель или попросите админа включить для неё OAuth"
+        )
 
     def get_user_model(self, field_model_name: str) -> GPTModel | None:
         """

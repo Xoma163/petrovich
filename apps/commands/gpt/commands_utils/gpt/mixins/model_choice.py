@@ -99,7 +99,7 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
     def _get_models_list_of_str(self) -> list:
         profile_gpt_settings = self.get_profile_gpt_settings()
         answer = []
-        if issubclass(self.provider.api_class, CompletionsAPIMixin):
+        if self._supports_api_mixin(CompletionsAPIMixin):
             completions_models = CompletionsModel.objects.filter(provider=self.provider_model).order_by("name")
             completions_models_str = self._get_models_str(
                 completions_models,
@@ -110,7 +110,7 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
                 (6, 6),
             )
             answer.append(completions_models_str)
-        if issubclass(self.provider.api_class, VisionAPIMixin):
+        if self._supports_api_mixin(VisionAPIMixin):
             vision_models = VisionModel.objects.filter(provider=self.provider_model).order_by("name")
             vision_models_str = self._get_models_str(
                 vision_models,
@@ -121,7 +121,7 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
                 (6, 6),
             )
             answer.append(vision_models_str)
-        if issubclass(self.provider.api_class, ImageDrawAPIMixin):
+        if self._supports_api_mixin(ImageDrawAPIMixin):
             image_draw_models = ImageDrawModel.objects.filter(provider=self.provider_model).order_by(
                 "name",
                 "-width",
@@ -137,7 +137,7 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
                 (9, 8, 6),
             )
             answer.append(image_draw_models_str)
-        if issubclass(self.provider.api_class, VoiceRecognitionAPIMixin):
+        if self._supports_api_mixin(VoiceRecognitionAPIMixin):
             voice_recognition_models = VoiceRecognitionModel.objects.filter(provider=self.provider_model).order_by(
                 "name",
             )
@@ -251,7 +251,7 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
         Подменю выбора конкретной технологии (completions)
         Удаление или изменение модели
         """
-        if not issubclass(self.provider.api_class, CompletionsAPIMixin):
+        if not self._supports_api_mixin(CompletionsAPIMixin):
             raise PWarning(f"{self.provider.type_enum.value} не умеет обрабатывать текст")
         if len(self.event.message.args) < 3:
             return ResponseMessageItem(text=self._get_current_completions_model_str(profile_gpt_settings))
@@ -262,13 +262,18 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
             return ResponseMessageItem(text="Удалил модель обработки текста (completions)")
 
         new_model = self._find_model(CompletionsModel, new_model_name)
+        if self._uses_oauth_auth() and not new_model.is_enabled_for_oauth:
+            raise PWarning(
+                f"Модель {new_model.name} недоступна для OpenAI OAuth. "
+                "Выберите модель, для которой в админке включён OAuth"
+            )
         profile_gpt_settings.completions_model = new_model
         profile_gpt_settings.save()
         answer = f"Поменял модель обработки текста (completions) на {self.bot.get_formatted_text_line(new_model.name)}"
         return ResponseMessageItem(text=answer)
 
     def _sub_menu_vision_model_choice(self, profile_gpt_settings: ProfileGPTSettings):
-        if not issubclass(self.provider.api_class, VisionAPIMixin):
+        if not self._supports_api_mixin(VisionAPIMixin):
             raise PWarning(f"{self.provider.type_enum.value} не умеет обрабатывать изображения")
         if len(self.event.message.args) < 3:
             return ResponseMessageItem(text=self._get_current_vision_model_str(profile_gpt_settings))
@@ -286,7 +291,7 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
         return ResponseMessageItem(text=answer)
 
     def _sub_menu_image_draw_model_choice(self, profile_gpt_settings: ProfileGPTSettings):
-        if not issubclass(self.provider.api_class, ImageDrawAPIMixin):
+        if not self._supports_api_mixin(ImageDrawAPIMixin):
             raise PWarning(f"{self.provider.type_enum.value} не умеет генерировать изображения")
         if len(self.event.message.args) < 3:
             return ResponseMessageItem(text=self._get_current_image_draw_model_str(profile_gpt_settings))
@@ -312,7 +317,7 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
         return ResponseMessageItem(text=answer)
 
     def _sub_menu_voice_recognition_model_choice(self, profile_gpt_settings: ProfileGPTSettings):
-        if not issubclass(self.provider.api_class, VoiceRecognitionAPIMixin):
+        if not self._supports_api_mixin(VoiceRecognitionAPIMixin):
             raise PWarning(f"{self.provider.type_enum.value} не умеет обрабатывать голос")
         if len(self.event.message.args) < 3:
             return ResponseMessageItem(text=self._get_current_voice_recognition_model_str(profile_gpt_settings))
@@ -412,7 +417,10 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
         ]
         answer = []
         for api_mixin, method in mixins_methods:
-            if issubclass(self.provider.api_class, api_mixin):
+            if self._supports_api_mixin(api_mixin):
                 answer.append(method(profile_gpt_settings))
 
         return ResponseMessageItem(text="\n\n".join(answer))
+
+    def _supports_api_mixin(self, api_mixin: type) -> bool:
+        return issubclass(self.get_api_class(), api_mixin)

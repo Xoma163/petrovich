@@ -1,5 +1,8 @@
+from datetime import timedelta
+
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils import timezone
 
 from apps.bot.models import Profile, Chat
 from apps.commands.gpt.enums import (
@@ -73,7 +76,7 @@ class GPTModel(models.Model):
         # Если модель сохраняется с полем is_default, значит сбрасываем всем остальным поле default
         if self.is_default:
             self.__class__.objects.filter(provider=self.provider, is_default=True).exclude(id=self.id).update(
-                is_default=Falseddd
+                is_default=False
             )
         super().save(*args, **kwargs)
 
@@ -108,6 +111,8 @@ class GPTCompletionsVisionModel(GPTModel):
 
 
 class CompletionsModel(GPTCompletionsVisionModel):
+    is_enabled_for_oauth = models.BooleanField(default=False, verbose_name="Доступна через OpenAI OAuth")
+
     class Meta:
         constraints = [models.UniqueConstraint(fields=["name", "provider"], name="unique_name_completion_model")]
 
@@ -283,7 +288,25 @@ class ProfileGPTBaseSettings(TimeStampModelMixin):
 
 
 class ProfileGPTSettings(ProfileGPTBaseSettings):
+    class AuthType(models.TextChoices):
+        API_KEY = "api_key", "API key"
+        OAUTH_DEVICE = "oauth_device", "OpenAI OAuth (device)"
+
     key = models.CharField("Ключ провайдера", max_length=1024, blank=True)
+    auth_type = models.CharField(
+        "Тип авторизации",
+        max_length=32,
+        blank=True,
+        choices=AuthType.choices,
+        default="",
+    )
+    oauth_access_token = models.TextField("OAuth access token", blank=True)
+    oauth_refresh_token = models.TextField("OAuth refresh token", blank=True)
+    oauth_id_token = models.TextField("OAuth id token", blank=True)
+    oauth_account_id = models.CharField("OAuth account id", max_length=255, blank=True)
+    oauth_expires_at = models.DateTimeField("OAuth token expires at", null=True, blank=True)
+    oauth_last_refresh_at = models.DateTimeField("OAuth last refresh at", null=True, blank=True)
+    oauth_last_error = models.CharField("OAuth last error", max_length=1024, blank=True)
 
     profile = models.ForeignKey(Profile, models.CASCADE, verbose_name="Профиль", related_name="gpt_settings")
 
@@ -295,8 +318,91 @@ class ProfileGPTSettings(ProfileGPTBaseSettings):
     def set_key(self, key: str) -> None:
         if key == "":
             self.key = ""
+            if self.auth_type == self.AuthType.API_KEY:
+                self.auth_type = self.AuthType.OAUTH_DEVICE if self.has_oauth_credentials() else ""
         else:
             self.key = Fernet.encrypt(key)
+            self.auth_type = self.AuthType.API_KEY
+
+    def has_key(self) -> bool:
+        return bool(self.key)
+
+    def get_oauth_access_token(self) -> str:
+        if not self.oauth_access_token:
+            return ""
+        return Fernet.decrypt(self.oauth_access_token)
+
+    def set_oauth_access_token(self, token: str) -> None:
+        self.oauth_access_token = Fernet.encrypt(token) if token else ""
+
+    def get_oauth_refresh_token(self) -> str:
+        if not self.oauth_refresh_token:
+            return ""
+        return Fernet.decrypt(self.oauth_refresh_token)
+
+    def set_oauth_refresh_token(self, token: str) -> None:
+        self.oauth_refresh_token = Fernet.encrypt(token) if token else ""
+
+    def get_oauth_id_token(self) -> str:
+        if not self.oauth_id_token:
+            return ""
+        return Fernet.decrypt(self.oauth_id_token)
+
+    def set_oauth_id_token(self, token: str) -> None:
+        self.oauth_id_token = Fernet.encrypt(token) if token else ""
+
+    def has_oauth_credentials(self) -> bool:
+        return bool(self.oauth_access_token or self.oauth_refresh_token)
+
+    def has_any_auth(self) -> bool:
+        return self.has_key() or self.has_oauth_credentials()
+
+    def get_active_auth_type(self) -> str | None:
+        if self.auth_type == self.AuthType.OAUTH_DEVICE and self.has_oauth_credentials():
+            return self.AuthType.OAUTH_DEVICE
+        if self.auth_type == self.AuthType.API_KEY and self.has_key():
+            return self.AuthType.API_KEY
+        if self.has_key():
+            return self.AuthType.API_KEY
+        if self.has_oauth_credentials():
+            return self.AuthType.OAUTH_DEVICE
+        return None
+
+    def set_oauth_tokens(
+        self,
+        access_token: str,
+        refresh_token: str,
+        id_token: str = "",
+        account_id: str = "",
+        expires_at=None,
+        last_refresh_at=None,
+    ) -> None:
+        self.set_oauth_access_token(access_token)
+        self.set_oauth_refresh_token(refresh_token)
+        self.set_oauth_id_token(id_token)
+        self.oauth_account_id = account_id or ""
+        self.oauth_expires_at = expires_at
+        self.oauth_last_refresh_at = last_refresh_at or timezone.now()
+        self.oauth_last_error = ""
+        self.auth_type = self.AuthType.OAUTH_DEVICE
+
+    def clear_oauth_tokens(self) -> None:
+        self.oauth_access_token = ""
+        self.oauth_refresh_token = ""
+        self.oauth_id_token = ""
+        self.oauth_account_id = ""
+        self.oauth_expires_at = None
+        self.oauth_last_refresh_at = None
+        self.oauth_last_error = ""
+        if self.auth_type == self.AuthType.OAUTH_DEVICE:
+            self.auth_type = self.AuthType.API_KEY if self.has_key() else ""
+
+    def oauth_needs_refresh(self, safety_margin_seconds: int = 300) -> bool:
+        if not self.has_oauth_credentials():
+            return False
+        if not self.oauth_expires_at:
+            return True
+        return self.oauth_expires_at <= timezone.now() + timedelta(seconds=safety_margin_seconds)
 
     def __str__(self):
         return str(self.profile)

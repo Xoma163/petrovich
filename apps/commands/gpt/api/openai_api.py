@@ -198,6 +198,7 @@ class OpenAIAPI(GPTAPI, ABC):
     @retry(3, SSLError, sleep_time=2)
     def do_request(self, url, **kwargs) -> dict:
         callback_func = kwargs.pop("callback_func", None)
+        status_code = 200
         if kwargs.get("stream"):
             from apps.commands.gpt.api.openai_responses_api import OpenAIResponsesAPI
 
@@ -215,6 +216,7 @@ class OpenAIAPI(GPTAPI, ABC):
                 )
         else:
             r = self.requests.post(url, **kwargs)
+            status_code = r.status_code
             if r.status_code != 200:
                 try:
                     r_json = r.json()
@@ -222,6 +224,23 @@ class OpenAIAPI(GPTAPI, ABC):
                     raise PWarning("Ошибка. Не получилось обработать запрос.") from e
             else:
                 r_json = r.json()
+
+        if not r_json:
+            raise PWarning("OpenAI вернул пустой ответ")
+
+        if not isinstance(r_json, dict):
+            raise PWarning("OpenAI вернул неожиданный ответ")
+
+        if not r_json.get("error") and status_code != 200:
+            if detail := r_json.get("detail"):
+                logger.error({"response": r_json, "log_filter": self.log_filter})
+                if "not supported when using Codex with a ChatGPT account" in str(detail):
+                    raise PWarning(
+                        "Выбранная модель не поддерживается через OpenAI OAuth. "
+                        "Выберите другую модель командой /gpt модель completions <модель>"
+                    )
+                raise PWarning(str(detail))
+            raise PWarning("OpenAI вернул ошибку")
 
         if error := r_json.get("error"):
             logger.error({"response": error, "log_filter": self.log_filter})

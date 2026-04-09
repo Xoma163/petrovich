@@ -4,6 +4,7 @@ from apps.commands.gpt.api.openai_api import OpenAIAPI
 from apps.commands.gpt.api.responses import GPTCompletionsVisionResponse
 from apps.commands.gpt.models import GPTCompletionsVisionModel
 from apps.commands.gpt.usage import GPTCompletionsVisionUsage
+from apps.shared.exceptions import PWarning
 
 
 class OpenAIResponsesAPI(OpenAIAPI, ABC):
@@ -18,6 +19,8 @@ class OpenAIResponsesAPI(OpenAIAPI, ABC):
         r_json = self.do_request(url, **kwargs)
         usage_dict = r_json.get("usage")
         output = r_json.get("output", [])
+        if not usage_dict or not output:
+            raise PWarning("OpenAI вернул неожиданный ответ без usage/output")
         usage = usage(
             model=model,  # noqa
             input_tokens=usage_dict["input_tokens"] - usage_dict["input_tokens_details"]["cached_tokens"],  # noqa

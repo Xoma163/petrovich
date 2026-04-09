@@ -346,6 +346,7 @@ What it does:
 - image generation
 - voice recognition
 - provider-specific key storage
+- experimental OpenAI device-code OAuth for ChatGPT subscription access
 - per-user provider settings
 - per-user presets/preprompts
 - usage and cost accounting
@@ -355,7 +356,11 @@ What it does:
 Important concepts:
 
 - provider models are stored in the database
-- user API keys are encrypted with Fernet
+- OAuth availability for ChatGPT text models is stored in the database via `CompletionsModel.is_enabled_for_oauth`
+- user API keys and OpenAI OAuth tokens are encrypted with Fernet
+- `ProfileGPTSettings` now stores both API-key auth and OpenAI device-code OAuth state; `auth_type` decides which credential is active
+- the `/gpt oauth` flow is PM-only, starts a background polling thread, stores temporary device auth state in Redis cache, and later persists refresh/access tokens into `ProfileGPTSettings`
+- OpenAI OAuth currently supports only text chat through a Codex/ChatGPT backend path; the command layer blocks any `CompletionsModel` without `is_enabled_for_oauth=True`, while image generation and voice recognition still require API keys
 - GPT conversation history is reconstructed from cached Telegram messages in Redis
 - some GPT provider implementations are OpenAI-compatible, but not all are remote SaaS-only
 
@@ -369,6 +374,7 @@ High-risk files:
 
 - `apps/commands/gpt/commands_utils/gpt/gpt_abstract.py`
 - `apps/commands/gpt/models.py`
+- `apps/commands/gpt/oauth.py`
 - provider API files in `apps/commands/gpt/api/providers/`
 
 ## Media subsystem: `apps/commands/media_command/`

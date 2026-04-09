@@ -67,10 +67,7 @@ class GPTCompletionsFunctionality(GPTCommandProtocol):
         """
         profile_settings = self.get_profile_gpt_settings()
 
-        gpt_api: GPTAPI | HasCompletions = self.provider.api_class(
-            api_key=self.get_api_key(),
-            log_filter=self.event.log_filter,
-        )
+        gpt_api: GPTAPI | HasCompletions = self.get_gpt_api()
 
         use_callback_and_stream = profile_settings.use_stream and self.event.is_from_pm
         with ChatActionSender(self.bot, ChatActionEnum.TYPING, self.event.peer_id, self.event.message_thread_id):
