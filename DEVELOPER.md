@@ -412,6 +412,7 @@ Important files:
 ## Reminder/scheduler subsystem: `apps/commands/notifies/`
 
 This subsystem stores reminders in the database and dispatches them via management command.
+The implementation is split between the user-facing command, shared reminder services, and the background runner.
 
 Behavior includes:
 
@@ -424,6 +425,7 @@ Behavior includes:
 Key files:
 
 - `apps/commands/notifies/models.py`
+- `apps/commands/notifies/services.py`
 - `apps/commands/notifies/management/commands/check_notify.py`
 - `apps/commands/notifies/commands/notifies.py`
 
@@ -897,6 +899,7 @@ Read:
 Read:
 
 - `apps/commands/notifies/models.py`
+- `apps/commands/notifies/services.py`
 - `apps/commands/notifies/management/commands/check_notify.py`
 - `apps/commands/notifies/commands/notifies.py`
 
