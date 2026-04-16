@@ -79,9 +79,9 @@ def get_help_texts_for_command(command, roles: list[RoleEnum] = None) -> str:
     """
     Получает help_texts для команды
     """
-    DASH = "-"
-    LONG_DASH = "—"
-    DOUBLE_DASH = "--"
+    dash = "-"
+    long_dash = "—"
+    double_dash = "--"
 
     from apps.bot.core.bot.telegram.tg_bot import TgBot
     from apps.commands.help_text import HelpTextArgument
@@ -89,63 +89,66 @@ def get_help_texts_for_command(command, roles: list[RoleEnum] = None) -> str:
     if roles is None:
         roles = [RoleEnum.USER]
 
-    result = ""
+    result_parts = []
     if len(command.full_names) > 1:
-        result += f"Названия команды: {', '.join(command.full_names)}\n"
+        result_parts.append(f"Названия команды: {', '.join(command.full_names)}")
     if command.access != RoleEnum.USER:
-        result += f"Необходимый уровень прав {LONG_DASH} {command.access}\n"
-    if result:
-        result += "\n"
-    if command.help_text:
-        _format = TgBot.get_formatted_text_line
-        # help texts
-        items: list[HelpTextArgument] = []
-        for role in roles:
-            if res := command.help_text.get_help_text_item(role):
-                items += res.items
-        full_help_texts_list = []
+        result_parts.append(f"Необходимый уровень прав {long_dash} {command.access}")
 
-        for item in items:
-            if item.args:
-                full_command_name = _format(f"/{command.name} {item.args}")
-            else:
-                full_command_name = _format(f"/{command.name}")
-            line = f"{full_command_name} {LONG_DASH} {item.description}"
-            full_help_texts_list.append(line)
+    if not command.help_text:
+        result_parts.append("У данной команды нет подробного описания")
+        return "\n\n".join(result_parts)
 
-        # Отступ
-        if full_help_texts_list:
-            full_help_texts_list.append("")
+    _format = TgBot.get_formatted_text_line
+    help_lines = []
 
-        # help keys
+    items: list[HelpTextArgument] = []
+    seen_items = set()
+    for role in roles:
+        if res := command.help_text.get_help_text_item(role):
+            for item in res.items:
+                item_key = (item.args, item.description)
+                if item_key in seen_items:
+                    continue
+                seen_items.add(item_key)
+                items.append(item)
 
-        keys: list[HelpTextKey] = []
-        for role in roles:
-            if res := command.help_text.get_help_text_key(role):
-                keys += res.items
-        if keys:
-            full_help_texts_list.append("Возможные ключи:")
-        for key in keys:
-            aliases = [key.key]
-            aliases += key.get_aliases()
-            full_keys = []
-            for key_item in aliases:
-                if len(key_item) == 1:
-                    full_keys.append(_format(DASH + key_item))
-                else:
-                    full_keys.append(_format(DOUBLE_DASH + key_item))
-            full_key = ", ".join(full_keys)
-            line = f"{full_key} {LONG_DASH} {key.description}"
-            full_help_texts_list.append(line)
+    for item in items:
+        command_line = f"/{command.name} {item.args}" if item.args else f"/{command.name}"
+        help_lines.append(f"{_format(command_line)} {long_dash} {item.description}")
 
-        if command.help_text.extra_text:
-            full_help_texts_list.append("")
-            full_help_texts_list.append(command.help_text.extra_text)
-        full_help_texts = "\n".join(full_help_texts_list)
-        result += full_help_texts
-    else:
-        result += "У данной команды нет подробного описания"
-    return result
+    keys: list[HelpTextKey] = []
+    seen_keys = set()
+    for role in roles:
+        if res := command.help_text.get_help_text_key(role):
+            for key in res.items:
+                key_aliases = tuple(key.get_aliases())
+                key_id = (key.key, key_aliases, key.description)
+                if key_id in seen_keys:
+                    continue
+                seen_keys.add(key_id)
+                keys.append(key)
+
+    if help_lines and keys:
+        help_lines.append("")
+
+    if keys:
+        help_lines.append("Возможные ключи:")
+    for key in keys:
+        aliases = [key.key, *key.get_aliases()]
+        formatted_keys = []
+        for key_item in aliases:
+            prefix = dash if len(key_item) == 1 else double_dash
+            formatted_keys.append(_format(prefix + key_item))
+        help_lines.append(f"{', '.join(formatted_keys)} {long_dash} {key.description}")
+
+    if command.help_text.extra_text:
+        if help_lines:
+            help_lines.append("")
+        help_lines.append(command.help_text.extra_text)
+
+    result_parts.append("\n".join(help_lines))
+    return "\n\n".join(filter(None, result_parts))
 
 
 def get_image_size_by_text(txt: str, font) -> tuple[int, int]:
