@@ -5,9 +5,10 @@ from django.test import SimpleTestCase
 
 from apps.bot.consts import PlatformEnum
 from apps.bot.core.messages.message import Message
+from apps.commands.notifies.services import ReminderDateParser
+from apps.commands.notifies.services import NotifyCreateService
 from apps.shared.exceptions import PWarning
 from apps.commands.notifies.services import NotifyExecutionService
-from apps.commands.notifies.services import NotifyCreateService
 
 
 class NotifyExecutionServiceTestCase(SimpleTestCase):
@@ -131,3 +132,28 @@ class NotifyCreateServiceTestCase(SimpleTestCase):
             get_all_attachments=lambda *_args, **_kwargs: [],
         )
         return NotifyCreateService(event, [], dt_now=dt_now or self.dt_now)
+
+
+class ReminderDateParserTestCase(SimpleTestCase):
+    def setUp(self):
+        self.dt_now = datetime.datetime(2026, 4, 16, 12, 34, tzinfo=datetime.UTC)
+        self.parser = ReminderDateParser(self.dt_now, "UTC")
+
+    def test_parse_time_only_sets_rollover_flag(self):
+        parsed_date = self.parser.parse("12:33", None)
+
+        self.assertIsNotNone(parsed_date)
+        self.assertTrue(parsed_date.allow_next_day_rollover)
+        self.assertEqual(parsed_date.args_count, 1)
+
+    def test_parse_explicit_date_time_does_not_set_rollover_flag(self):
+        parsed_date = self.parser.parse("16.04", "12:33")
+
+        self.assertIsNotNone(parsed_date)
+        self.assertFalse(parsed_date.allow_next_day_rollover)
+        self.assertEqual(parsed_date.args_count, 2)
+
+    def test_same_local_minute_ignores_seconds(self):
+        notify_datetime = datetime.datetime(2026, 4, 16, 12, 34, 0, tzinfo=datetime.UTC)
+
+        self.assertTrue(self.parser.is_same_local_minute(notify_datetime))
