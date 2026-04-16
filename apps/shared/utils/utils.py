@@ -92,8 +92,36 @@ def get_help_texts_for_command(command, roles: list[RoleEnum] = None) -> str:
     result_parts = []
     if len(command.full_names) > 1:
         result_parts.append(f"Названия команды: {', '.join(command.full_names)}")
+
+    command_features = []
     if command.access != RoleEnum.USER:
-        result_parts.append(f"Необходимый уровень прав {long_dash} {command.access}")
+        command_features.append(f"Требуются права {long_dash} {command.access}")
+    if command.pm:
+        command_features.append("Работает только в ЛС")
+    if command.conversation:
+        command_features.append("Работает только в беседах")
+    if command.args:
+        command_features.append("Требуются аргументы")
+    if command.args_or_fwd:
+        command_features.append("Требуются аргументы или пересланное сообщение")
+    if command.fwd:
+        command_features.append("Требуется пересланное сообщение")
+    if command.attachments:
+        attachment_types = []
+        for attachment in command.attachments:
+            attachment_name = command.ATTACHMENT_TRANSLATOR.get(attachment)
+            if attachment_name and attachment_name not in attachment_types:
+                attachment_types.append(attachment_name)
+        if attachment_types:
+            command_features.append(f"Требуются вложения: {', '.join(attachment_types)}")
+    if command.mentioned:
+        command_features.append("Работает только с упоминанием бота (через /)")
+    if command.non_mentioned:
+        command_features.append("Работает только без упоминания бота (без /)")
+
+    if command_features:
+        result_parts.append("Особенности команды:")
+        result_parts.extend(f"* {feature}" for feature in command_features)
 
     if not command.help_text:
         result_parts.append("У данной команды нет подробного описания")
