@@ -19,12 +19,12 @@ class QwenAPI(
 
     # ---------- base ---------- #
 
-    base_url = "http://192.168.1.10:21001"
+    base_url = "http://192.168.1.10:11031"
 
     # Мой код к этому не готов, что нужно выбирать из двух серверов
     # Хардкод
     def set_base_url(self):
-        variants = ["http://192.168.1.20:21001", "http://192.168.1.10:21001"]
+        variants = ["http://192.168.1.20:11031", "http://192.168.1.10:11031"]
 
         import requests
 
@@ -87,7 +87,7 @@ class QwenAPI(
 
         self.set_base_url()
         # Хардкод
-        if self.base_url == "http://192.168.1.10:21001":
+        if self.base_url == "http://192.168.1.10:11031":
             raise PWarning("Не работает")
 
         return self.do_vision_request(

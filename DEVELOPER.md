@@ -96,6 +96,12 @@ The application expects all of the following to exist:
 
 Important: the code strongly suggests a **local Telegram Bot API server mode** and some **hardcoded LAN IP** assumptions.
 
+Current hardcoded operational endpoints discovered in code:
+
+- local Telegram Bot API server: `192.168.1.10:11060`
+- Django debug/app port assumption: `10010`
+- Qwen-compatible servers: `192.168.1.20:11031` and `192.168.1.10:11031`
+
 ---
 
 ## Top-level repository map

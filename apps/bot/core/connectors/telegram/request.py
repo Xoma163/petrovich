@@ -72,5 +72,5 @@ class Request:
 
 
 class RequestLocal(Request):
-    API_TELEGRAM_URL = "192.168.1.10:10010"
+    API_TELEGRAM_URL = "192.168.1.10:11060"
     PREFIX = "http"
