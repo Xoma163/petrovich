@@ -35,7 +35,7 @@ from apps.commands.other.commands.settings import Settings
 from apps.commands.other.commands.statistics import Statistics
 from apps.commands.other.commands.trusted.audio_track import AudioTrack
 from apps.commands.other.commands.trusted.deissue import DeIssue
-from apps.commands.other.commands.trusted.trim_video import TrimVideo
+from apps.commands.other.commands.trusted.trim import Trim
 from apps.shared.utils.utils import get_flat_list
 
 _commands = [
@@ -76,7 +76,7 @@ _commands = [
     # Trusted
     AudioTrack,
     DeIssue,
-    TrimVideo,
+    Trim,
     # other
     Birthday,
     Calc,

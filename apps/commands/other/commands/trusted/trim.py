@@ -8,6 +8,7 @@ from apps.bot.core.messages.attachments.audio import AudioAttachment
 from apps.bot.core.messages.attachments.link import LinkAttachment
 from apps.bot.core.messages.attachments.video import VideoAttachment
 from apps.bot.core.messages.attachments.video_note import VideoNoteAttachment
+from apps.bot.core.messages.attachments.voice import VoiceAttachment
 from apps.bot.core.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.commands.command import Command
 from apps.commands.help_text import HelpTextItem, HelpText, HelpTextArgument
@@ -17,7 +18,7 @@ from apps.shared.utils.utils import prepend_symbols, append_symbols
 from apps.shared.utils.video.video_handler import VideoHandler
 
 
-class TrimVideo(Command):
+class Trim(Command):
     name = "обрезка"
     names = ["обрежь", "обрез", "обрезание", "отрежь", "отрезание", "crop", "cut", "trim", "обрезать", "отрезать"]
 
@@ -50,7 +51,7 @@ class TrimVideo(Command):
     platforms = [PlatformEnum.TG]
     bot: TgBot
 
-    attachments = [LinkAttachment, VideoAttachment, AudioAttachment, VideoNoteAttachment]
+    attachments = [LinkAttachment, VideoAttachment, AudioAttachment, VideoNoteAttachment, VoiceAttachment]
     args = 1
     access = RoleEnum.TRUSTED
 
@@ -66,7 +67,7 @@ class TrimVideo(Command):
             else:
                 video_bytes = self.trim_attachment(att)
 
-        if isinstance(att, AudioAttachment):
+        if isinstance(att, AudioAttachment) or isinstance(att, VoiceAttachment):
             attachment = self.bot.get_audio_attachment(
                 _bytes=video_bytes,
                 peer_id=self.event.peer_id,
@@ -168,18 +169,18 @@ class TrimVideo(Command):
 
         end_pos = None
         if start_yt_timecode:
-            start_pos = TrimVideo.parse_timecode(start_yt_timecode)
+            start_pos = Trim.parse_timecode(start_yt_timecode)
             if args:
                 try:
-                    end_pos = TrimVideo.parse_timecode(args[0])
+                    end_pos = Trim.parse_timecode(args[0])
                 except ValueError:
                     end_pos = None
         elif args:
             try:
-                start_pos = TrimVideo.parse_timecode(args[0])
+                start_pos = Trim.parse_timecode(args[0])
                 if len(args) > 1:
                     try:
-                        end_pos = TrimVideo.parse_timecode(args[1])
+                        end_pos = Trim.parse_timecode(args[1])
                     except ValueError:
                         end_pos = None
             except ValueError:

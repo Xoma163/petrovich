@@ -491,18 +491,18 @@ class Meme(Command):
         thread.start()
 
     def _set_youtube_file_id(self, meme: MemeModel, rmi_params: ResponseMessageItem, is_update: bool = False):
-        from apps.commands.other.commands.trusted.trim_video import TrimVideo
+        from apps.commands.other.commands.trusted.trim import Trim
 
         lower_link_index = self.event.message.args.index(meme.link.lower())
         args = self.event.message.args[lower_link_index + 1 :]
-        start_pos, end_pos = TrimVideo.get_timecodes(meme.link, args)
+        start_pos, end_pos = Trim.get_timecodes(meme.link, args)
         yt_api = YoutubeVideo()
         try:
             # Если видео надо нарезать
             data = yt_api.get_video_info(meme.link)
 
             if start_pos:
-                tm = TrimVideo()
+                tm = Trim()
                 video_content = tm.trim_link_pos(meme.link, start_pos, end_pos)
             else:
                 va = yt_api.download_video(data)
