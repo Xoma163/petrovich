@@ -167,6 +167,7 @@ For feature-heavy areas:
 Only a very small set of routes is exposed:
 
 - `/admin/`
+- `/healthcheck`
 - `/bot/tg-webhook`
 - `/bot/github`
 
