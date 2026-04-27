@@ -60,6 +60,8 @@ class GPTVisionFunctionality(GPTCommandProtocol):
         return self.get_completions_rmi(response_text)
 
     def __vision_callback(self, text: str, draft_id: int):
+        if len(text) > self.bot.max_message_text_length:
+            return
         rmi = ResponseMessageItem(text=text)
         self._prepare_rmi(rmi, text)
         self.bot.send_message_draft(rmi, draft_id=draft_id)
