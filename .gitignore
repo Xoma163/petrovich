@@ -11,6 +11,7 @@ coverage.xml
 
 # Environments
 secrets
+.env
 venv
 .venv
 

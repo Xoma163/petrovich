@@ -87,7 +87,7 @@ The application expects all of the following to exist:
 
 - PostgreSQL
 - Redis
-- `secrets/.env`
+- `.env`
 - Telegram bot credentials
 - Sentry DSN
 - GitHub token for issue automation
@@ -503,7 +503,7 @@ Useful mental model:
 
 Important characteristics:
 
-- reads env from `secrets/.env`
+- reads env from `.env`
 - hard-fails on several required settings
 - contains domain/IP assumptions
 - configures installed apps, DB, cache, logging, and Sentry
@@ -520,7 +520,7 @@ From the codebase and example env:
 - `SENTRY_URL`
 - `FERNET_SECRET_KEY`
 - `TG_WEBHOOK_SECRET`
-- `TG_TOKEN`
+- `TG_BOT_TOKEN`
 - `TG_BOT_LOGIN`
 - `TG_BOT_GROUP_ID`
 - `TG_MODERATOR_CHAT_PK`
@@ -566,7 +566,7 @@ pre-commit install
 
 ### 2. Prepare environment
 
-Create `secrets/.env` based on `secrets/example.env`, then provide real values.
+Create `.env` based on `example.env`, then provide real values.
 
 ### 3. Run migrations
 
@@ -778,7 +778,7 @@ These areas deserve extra caution:
 
 ## Secrets and credentials
 
-- `secrets/.env`
+- `.env`
 - Fernet-encrypted GPT keys
 - Telegram/GitHub/ImgBB credentials
 

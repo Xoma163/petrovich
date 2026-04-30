@@ -4,6 +4,7 @@ import requests
 from requests import Response
 
 from apps.shared.utils.cache import MessagesCache
+from petrovich.settings import env
 
 
 class Request:
@@ -72,5 +73,5 @@ class Request:
 
 
 class RequestLocal(Request):
-    API_TELEGRAM_URL = "192.168.1.10:11060"
+    API_TELEGRAM_URL = env.str("API_TELEGRAM_URL")
     PREFIX = "http"

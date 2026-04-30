@@ -71,7 +71,7 @@ class TgBot(Bot):
 
     def __init__(self):
         Bot.__init__(self, PlatformEnum.TG)
-        self.api_handler = TelegramAPI(env.str("TG_TOKEN"), TelegramAPIRequestMode.LOCAL_SERVER)
+        self.api_handler = TelegramAPI(env.str("TG_BOT_TOKEN"), TelegramAPIRequestMode.LOCAL_SERVER)
 
         self.att_map: dict[type[Attachment], Callable[[ResponseMessageItem], dict[str, Any]]] = {
             PhotoAttachment: self.send_photo,

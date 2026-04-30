@@ -46,7 +46,7 @@ jobs:
       #        env:
       #          SECRET_KEY: d7e72d9c61c4774bc5024bdd1434b1b322c62404d01ebc968b
       #          DEBUG: False
-      #          TG_TOKEN: ''
+      #          TG_BOT_TOKEN: ''
       #          TG_BOT_LOGIN: ''
       #          DATABASE_URL: 'postgres://postgres:postgres@localhost:5432/postgres'
       #          TIMEZONEDB_API_KEY: ''
