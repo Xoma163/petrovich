@@ -23,5 +23,5 @@ class AudioVideoMuxer(VideoCommon):
         return video
 
     def _mux(self):
-        cmd = f"ffmpeg6 -i {self.tmp_video_file.name} -i {self.tmp_audio_file.name} -c:v copy -c:a copy -strict -2 -f mp4 -y {self.tmp_output_file.name}"
+        cmd = f"ffmpeg -i {self.tmp_video_file.name} -i {self.tmp_audio_file.name} -c:v copy -c:a copy -strict -2 -f mp4 -y {self.tmp_output_file.name}"
         self._run_command(cmd)

@@ -13,7 +13,7 @@ class VideoTrimmer(VideoCommon):
                 raise RuntimeError("Video must be provided")
             self._place_file(self.tmp_video_file, self.video)
 
-            cmd_parts = [f"ffmpeg6 -i {self.tmp_video_file.name} -ss {start_pos}"]
+            cmd_parts = [f"ffmpeg -i {self.tmp_video_file.name} -ss {start_pos}"]
             if end_pos:
                 cmd_parts.append(f"-to {end_pos}")
             cmd_parts.append(f"-f mp4 -y {self.tmp_output_file.name}")

@@ -22,7 +22,7 @@ class AudioTrack(VideoCommon):
 
     def _get_audio_track(self):
         args = [
-            "ffmpeg6",
+            "ffmpeg",
             "-i",
             self.tmp_video_file.name,
             "-vn",
