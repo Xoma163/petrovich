@@ -17,7 +17,7 @@ DEBUG = env.bool("DEBUG")
 
 MINECRAFT_DOMAIN = env.str("MINECRAFT_DOMAIN")
 PETROVICH_DOMAIN = env.str("PETROVICH_DOMAIN")
-ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
+ALLOWED_HOSTS = list(dict.fromkeys([*env.list("ALLOWED_HOSTS"), "127.0.0.1", "localhost"]))
 
 # Application definition
 DJANGO_APPS = [

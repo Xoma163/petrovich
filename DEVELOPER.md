@@ -94,7 +94,7 @@ The application expects all of the following to exist:
 - ImgBB key for image upload in GitHub issue/comment flows
 - Fernet secret for encrypted stored GPT keys
 
-`ALLOWED_HOSTS` is configurable through `.env` as a comma-separated list. If omitted, Django falls back to `petrovich.andrewsha.net` and `127.0.0.1`.
+`ALLOWED_HOSTS` is configurable through `.env` as a comma-separated list. The application always appends `127.0.0.1` and `localhost` so Telegram webhooks and same-host dashboards can call `http://127.0.0.1:10010/...` without depending on the public domain.
 
 Important: the code strongly suggests a **local Telegram Bot API server mode** and some **hardcoded LAN IP** assumptions.
 
