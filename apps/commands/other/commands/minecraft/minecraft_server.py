@@ -3,7 +3,7 @@ from apps.bot.core.messages.response_message import ResponseMessage, ResponseMes
 from apps.commands.command import Command
 from apps.commands.help_text import HelpText, HelpTextItem, HelpTextArgument
 from apps.connectors.parsers.minecraft.minecraft_server import MinecraftServer
-from petrovich.settings import MAIN_DOMAIN
+from petrovich.settings import MINECRAFT_DOMAIN
 
 
 class Minecraft(Command):
@@ -27,12 +27,11 @@ class Minecraft(Command):
     access = RoleEnum.MINECRAFT
 
     server = MinecraftServer(
-        ip=MAIN_DOMAIN,
+        ip=MINECRAFT_DOMAIN,
         port=25565,
         delay=60,
         names=["1.20.1", "1.20"],
         service_name="minecraft",
-        # map_url=f"https://minecraft-map.{MAIN_DOMAIN}/",
     )
 
     def start(self) -> ResponseMessage:

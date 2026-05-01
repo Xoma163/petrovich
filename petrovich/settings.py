@@ -15,19 +15,9 @@ SECRET_KEY = env.str("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool("DEBUG")
 
-MAIN_DOMAIN = "andrewsha.net"
-PETROVICH_DOMAIN = f"petrovich.{MAIN_DOMAIN}"
-
-LOCAL_IP = "127.0.0.1"
-REMOTE_OR_LOCAL_PORT = 10010
-
-# allowed because local tg server
-ALLOWED_HOSTS = [PETROVICH_DOMAIN, LOCAL_IP]
-
-if DEBUG:
-    MAIN_SITE = f"http://{LOCAL_IP}:{REMOTE_OR_LOCAL_PORT}"  # noqa
-else:
-    MAIN_SITE = f"https://{PETROVICH_DOMAIN}"
+MINECRAFT_DOMAIN = env.str("MINECRAFT_DOMAIN")
+PETROVICH_DOMAIN = env.str("PETROVICH_DOMAIN")
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
 
 # Application definition
 DJANGO_APPS = [

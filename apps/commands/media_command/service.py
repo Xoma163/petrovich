@@ -11,7 +11,7 @@ from apps.bot.core.event.event import Event
 from apps.bot.core.messages.attachments.attachment import Attachment
 from apps.commands.media_command.models import VideoCache
 from apps.shared.utils.utils import prepare_filename
-from petrovich.settings import MAIN_SITE, env
+from petrovich.settings import PETROVICH_DOMAIN, env
 
 
 @dataclasses.dataclass
@@ -142,7 +142,7 @@ class MediaService:
 
     @staticmethod
     def _get_cached_url(cache_video_url: str) -> str:
-        return MAIN_SITE + cache_video_url
+        return PETROVICH_DOMAIN + cache_video_url
 
     @classmethod
     def save_to_disk(cls, media_response: MediaServiceResponse, folder: str, filename: str):
