@@ -96,7 +96,8 @@ The application expects all of the following to exist:
 
 `ALLOWED_HOSTS` is configurable through `.env` as a comma-separated list. The application always appends `127.0.0.1` and `localhost` so Telegram webhooks and same-host dashboards can call `http://127.0.0.1:10010/...` without depending on the public domain.
 
-Gunicorn also reads `.env` directly and takes its bind address from `GUNICORN_BIND` (default `127.0.0.1:10010`).
+Gunicorn also reads `.env` directly and takes its bind settings from `GUNICORN_BIND_ADDRESS`
+and `GUNICORN_BIND_PORT` (defaults: `127.0.0.1` and `10010`).
 
 Important: the code strongly suggests a **local Telegram Bot API server mode** and some **hardcoded LAN IP** assumptions.
 
@@ -658,8 +659,8 @@ python manage.py collectstatic --noinput
 `update_production.sh` currently does:
 
 ```bash
-GUNICORN_BIND_VALUE="$(grep -E '^GUNICORN_BIND=' .env | tail -n 1 | cut -d '=' -f 2- | tr -d '"' || true)"
-DEFAULT_HEALTHCHECK_URL="http://${GUNICORN_BIND_VALUE:-127.0.0.1:10010}/healthcheck"
+GUNICORN_BIND_PORT_VALUE="$(grep -E '^GUNICORN_BIND_PORT=' .env | tail -n 1 | cut -d '=' -f 2- | tr -d '"' || true)"
+DEFAULT_HEALTHCHECK_URL="http://127.0.0.1:${GUNICORN_BIND_PORT_VALUE:-10010}/healthcheck"
 HEALTHCHECK_URL="${HEALTHCHECK_URL:-$DEFAULT_HEALTHCHECK_URL}"
 git checkout master
 git reset --hard HEAD
@@ -681,11 +682,13 @@ Important: this script is destructive to local uncommitted changes and is clearl
 The script now also performs Django system checks before migrations, verifies that the `petrovich`
 systemd unit becomes active after restart, and retries the local `/healthcheck` endpoint with `curl`
 until it returns HTTP 200. The healthcheck target defaults to `127.0.0.1:10010` but will follow
-`GUNICORN_BIND` from `.env` when present. `HEALTHCHECK_URL` can also be overridden explicitly from
-the shell environment before running the script.
+`GUNICORN_BIND_PORT` from `.env` when present; the script intentionally uses loopback instead of the
+gunicorn bind address so it still works when gunicorn listens on `0.0.0.0`. `HEALTHCHECK_URL` can
+also be overridden explicitly from the shell environment before running the script.
 
 The repository now contains gunicorn app-server configuration in `config/gunicorn/gunicorn.conf.py`, reads `.env`,
-binds Django using `GUNICORN_BIND` (default `127.0.0.1:10010`), and no longer depends on `uWSGI`.
+binds Django using `GUNICORN_BIND_ADDRESS` + `GUNICORN_BIND_PORT` (defaults `127.0.0.1` and `10010`),
+and no longer depends on `uWSGI`.
 
 ---
 

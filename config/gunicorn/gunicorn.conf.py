@@ -7,8 +7,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 env = environ.Env()
 env.read_env(os.path.join(BASE_DIR, ".env"))
 
-# Слушаем локальный TCP-порт для nginx, Telegram webhook и локальных healthcheck-запросов.
-bind = env.str("GUNICORN_BIND", default="127.0.0.1:10010")
+# Слушаем TCP-адрес и порт для nginx, Telegram webhook и локальных healthcheck-запросов.
+bind_address = env.str("GUNICORN_BIND_ADDRESS", default="127.0.0.1")
+bind_port = env.int("GUNICORN_BIND_PORT", default=10010)
+bind = f"{bind_address}:{bind_port}"
 
 # Количество worker-процессов для обработки запросов.
 workers = 4

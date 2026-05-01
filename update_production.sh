@@ -7,8 +7,8 @@ SERVICE_NAME="petrovich"
 HEALTHCHECK_ATTEMPTS=30
 HEALTHCHECK_DELAY=2
 
-GUNICORN_BIND_VALUE="$(grep -E '^GUNICORN_BIND=' ".env" | tail -n 1 | cut -d '=' -f 2- | tr -d '"' || true)"
-DEFAULT_HEALTHCHECK_URL="http://${GUNICORN_BIND_VALUE:-127.0.0.1:10010}/healthcheck"
+GUNICORN_BIND_PORT_VALUE="$(grep -E '^GUNICORN_BIND_PORT=' ".env" | tail -n 1 | cut -d '=' -f 2- | tr -d '"' || true)"
+DEFAULT_HEALTHCHECK_URL="http://127.0.0.1:${GUNICORN_BIND_PORT_VALUE:-10010}/healthcheck"
 HEALTHCHECK_URL="${HEALTHCHECK_URL:-$DEFAULT_HEALTHCHECK_URL}"
 
 echo "==> Cleaning local code"
