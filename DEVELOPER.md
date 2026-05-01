@@ -96,6 +96,8 @@ The application expects all of the following to exist:
 
 `ALLOWED_HOSTS` is configurable through `.env` as a comma-separated list. The application always appends `127.0.0.1` and `localhost` so Telegram webhooks and same-host dashboards can call `http://127.0.0.1:10010/...` without depending on the public domain.
 
+Gunicorn also reads `.env` directly and takes its bind address from `GUNICORN_BIND` (default `127.0.0.1:10010`).
+
 Important: the code strongly suggests a **local Telegram Bot API server mode** and some **hardcoded LAN IP** assumptions.
 
 Current hardcoded operational endpoints discovered in code:
@@ -669,8 +671,8 @@ sudo systemctl restart petrovich
 
 Important: this script is destructive to local uncommitted changes and is clearly intended only for the production host.
 
-The repository now contains gunicorn app-server configuration in `config/gunicorn/gunicorn.conf.py` and no longer
-depends on `uWSGI`.
+The repository now contains gunicorn app-server configuration in `config/gunicorn/gunicorn.conf.py`, reads `.env`,
+binds Django using `GUNICORN_BIND` (default `127.0.0.1:10010`), and no longer depends on `uWSGI`.
 
 ---
 

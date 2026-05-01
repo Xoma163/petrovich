@@ -1,5 +1,14 @@
-# Слушаем unix socket, который затем проксирует nginx.
-bind = "unix:config/petrovich.sock"
+import os
+
+import environ
+
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+env = environ.Env()
+env.read_env(os.path.join(BASE_DIR, ".env"))
+
+# Слушаем локальный TCP-порт для nginx, Telegram webhook и локальных healthcheck-запросов.
+bind = env.str("GUNICORN_BIND", default="127.0.0.1:10010")
 
 # Количество worker-процессов для обработки запросов.
 workers = 4
