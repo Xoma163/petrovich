@@ -658,18 +658,31 @@ python manage.py collectstatic --noinput
 `update_production.sh` currently does:
 
 ```bash
+GUNICORN_BIND_VALUE="$(grep -E '^GUNICORN_BIND=' .env | tail -n 1 | cut -d '=' -f 2- | tr -d '"' || true)"
+DEFAULT_HEALTHCHECK_URL="http://${GUNICORN_BIND_VALUE:-127.0.0.1:10010}/healthcheck"
+HEALTHCHECK_URL="${HEALTHCHECK_URL:-$DEFAULT_HEALTHCHECK_URL}"
 git checkout master
-git reset HEAD --hard
+git reset --hard HEAD
 git clean -fd
-git pull
+git fetch origin
+git pull --ff-only origin master
 source .venv/bin/activate
 uv sync
+python manage.py check
 python manage.py migrate --noinput
 python manage.py collectstatic --noinput
 sudo systemctl restart petrovich
+for ((attempt=1; attempt<=HEALTHCHECK_ATTEMPTS; attempt++)); do sudo systemctl is-active --quiet petrovich; done
+for ((attempt=1; attempt<=HEALTHCHECK_ATTEMPTS; attempt++)); do curl --fail "$HEALTHCHECK_URL"; done
 ```
 
 Important: this script is destructive to local uncommitted changes and is clearly intended only for the production host.
+
+The script now also performs Django system checks before migrations, verifies that the `petrovich`
+systemd unit becomes active after restart, and retries the local `/healthcheck` endpoint with `curl`
+until it returns HTTP 200. The healthcheck target defaults to `127.0.0.1:10010` but will follow
+`GUNICORN_BIND` from `.env` when present. `HEALTHCHECK_URL` can also be overridden explicitly from
+the shell environment before running the script.
 
 The repository now contains gunicorn app-server configuration in `config/gunicorn/gunicorn.conf.py`, reads `.env`,
 binds Django using `GUNICORN_BIND` (default `127.0.0.1:10010`), and no longer depends on `uWSGI`.
