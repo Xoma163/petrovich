@@ -198,6 +198,7 @@ Relevant files:
 - hands the raw update to `TgBot.parse()`
 
 `TgBot.parse()` then starts a new thread and calls `handle_event()`.
+That worker explicitly closes Django DB connections before reuse and again when the thread exits; if you add more ad-hoc bot threads that touch ORM state, preserve the same cleanup pattern or PostgreSQL connection slots can be exhausted.
 
 ### GitHub ingress
 

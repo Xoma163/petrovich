@@ -5,6 +5,8 @@ from math import inf
 from threading import Lock
 from typing import Any
 
+from django.db import close_old_connections, connections
+
 from apps.bot.consts import RoleEnum
 from apps.bot.core.bot_response import BotResponse
 from apps.bot.core.chat_action_sender import ChatActionSender
@@ -61,54 +63,62 @@ class Bot:
         """
         Обработка входящего ивента
         """
+        if event.use_db:
+            close_old_connections()
+
+        rm = None
         try:
-            event.setup_event()
-            if not event.need_a_response():
+            try:
+                event.setup_event()
+                if not event.need_a_response():
+                    return None
+
+                self.log_filter = event.log_filter
+
+                rm = self.route(event)
+                # Если мы попали в команду и не вылетели по exception
+                self.log_event(event)
+                if not rm:
+                    return None
+                self.log_message(rm)
+
+            # Если предвиденная ошибка
+            except (PWarning, PError) as e:
+                self.log_event(event)
+                rm = ResponseMessage(
+                    ResponseMessageItem(
+                        text=e.msg,
+                        peer_id=event.peer_id,
+                        message_thread_id=event.message_thread_id,
+                        reply_to=e.reply_to,
+                        keyboard=e.keyboard,
+                    )
+                )
+                self.log_message(rm, e.level, e)
+            # Если нужно пропустить
+            except (PSkip, PIDK):
                 return None
-
-            self.log_filter = event.log_filter
-
-            rm = self.route(event)
-            # Если мы попали в команду и не вылетели по exception
-            self.log_event(event)
-            if not rm:
-                return None
-            self.log_message(rm)
-
-        # Если предвиденная ошибка
-        except (PWarning, PError) as e:
-            self.log_event(event)
-            rm = ResponseMessage(
-                ResponseMessageItem(
-                    text=e.msg,
+            # Непредвиденная ошибка
+            except Exception as e:
+                self.log_event(event)
+                rmi = ResponseMessageItem(
+                    text=f"{self.ERROR_MSG}\nКоманда {self.get_formatted_text_line('/баг')}",
                     peer_id=event.peer_id,
                     message_thread_id=event.message_thread_id,
-                    reply_to=e.reply_to,
-                    keyboard=e.keyboard,
                 )
-            )
-            self.log_message(rm, e.level, e)
-        # Если нужно пропустить
-        except PSkip, PIDK:
-            return None
-        # Непредвиденная ошибка
-        except Exception as e:
-            self.log_event(event)
-            rmi = ResponseMessageItem(
-                text=f"{self.ERROR_MSG}\nКоманда {self.get_formatted_text_line('/баг')}",
-                peer_id=event.peer_id,
-                message_thread_id=event.message_thread_id,
-            )
-            if event.sender and event.sender.check_role(RoleEnum.TRUSTED):
-                button = self.get_button("Логи", command="логи")
-                keyboard = self.get_inline_keyboard([button])
-                rmi.keyboard = keyboard
-            rm = ResponseMessage(rmi)
-            self.log_message(rm, "exception", e)
+                if event.sender and event.sender.check_role(RoleEnum.TRUSTED):
+                    button = self.get_button("Логи", command="логи")
+                    keyboard = self.get_inline_keyboard([button])
+                    rmi.keyboard = keyboard
+                rm = ResponseMessage(rmi)
+                self.log_message(rm, "exception", e)
 
-        if rm and send and rm.send:
-            self.send_response_message(rm)
-        return rm
+            if rm and send and rm.send:
+                self.send_response_message(rm)
+            return rm
+        finally:
+            if event.use_db:
+                connections.close_all()
 
     def send_response_message(self, rm: ResponseMessage) -> list[BotResponse] | None:
         """
