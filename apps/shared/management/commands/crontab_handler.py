@@ -4,6 +4,7 @@ import threading
 from crontab import CronTab
 from django.core.management import call_command
 from django.core.management.base import BaseCommand
+from django.db import close_old_connections, connections
 
 from apps.shared.utils.utils import localize_datetime
 from petrovich.settings import TIME_ZONE
@@ -29,7 +30,7 @@ class Command(BaseCommand):
             # Берём прошедшие события но в пределах 1 минуты
             if item.cron.previous(dt_now) != -60:
                 continue
-            thread = threading.Thread(target=call_command, args=item.thread_args)
+            thread = threading.Thread(target=self._run_command_in_thread, args=item.thread_args)
             threads.append(thread)
 
         for thread in threads:
@@ -37,6 +38,14 @@ class Command(BaseCommand):
 
         for thread in threads:
             thread.join()
+
+    @staticmethod
+    def _run_command_in_thread(*args):
+        close_old_connections()
+        try:
+            call_command(*args)
+        finally:
+            connections.close_all()
 
 
 class ScheduleItem:

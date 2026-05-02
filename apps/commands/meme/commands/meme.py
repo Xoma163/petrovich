@@ -1,6 +1,7 @@
 import threading
 
 from django.core.files.base import ContentFile
+from django.db import close_old_connections, connections
 from django.db.models import QuerySet
 
 from apps.bot.consts import RoleEnum, PlatformEnum, ATTACHMENT_TYPE_TRANSLATOR
@@ -493,41 +494,46 @@ class Meme(Command):
     def _set_youtube_file_id(self, meme: MemeModel, rmi_params: ResponseMessageItem, is_update: bool = False):
         from apps.commands.other.commands.trusted.trim import Trim
 
-        lower_link_index = self.event.message.args.index(meme.link.lower())
-        args = self.event.message.args[lower_link_index + 1 :]
-        start_pos, end_pos = Trim.get_timecodes(meme.link, args)
-        yt_api = YoutubeVideo()
         try:
-            # Если видео надо нарезать
-            data = yt_api.get_video_info(meme.link)
+            close_old_connections()
 
-            if start_pos:
-                tm = Trim()
-                video_content = tm.trim_link_pos(meme.link, start_pos, end_pos)
-            else:
-                va = yt_api.download_video(data)
-                video_content = va.content
-            video = self.bot.get_video_attachment(
-                _bytes=video_content,
-                peer_id=self.event.peer_id,
-                message_thread_id=self.event.message_thread_id,
-                thumbnail_url=data.thumbnail_url,
-            )
-            meme.tg_file_id = video.get_file_id()
-            meme.type = VideoAttachment.TYPE
-            meme.save()
-            self._save_meme(meme, video_content, is_update=is_update)
+            lower_link_index = self.event.message.args.index(meme.link.lower())
+            args = self.event.message.args[lower_link_index + 1 :]
+            start_pos, end_pos = Trim.get_timecodes(meme.link, args)
+            yt_api = YoutubeVideo()
+            try:
+                # Если видео надо нарезать
+                data = yt_api.get_video_info(meme.link)
 
-            rmi_params.text += f"\n{self.MESSAGE_YOUTUBE_STATUS_COMPLETE}"
-            self.bot.edit_message_text(rmi_params)
-            return
-        except PWarning as e:
-            rmi_params.text = self.MESSAGE_YOUTUBE_STATUS_CUSTOM_ERROR.format(error_msg=e.msg)
-            self.bot.edit_message_text(rmi_params)
-            return
-        except Exception:
-            self.bot.edit_message_text(rmi_params)
-            return
+                if start_pos:
+                    tm = Trim()
+                    video_content = tm.trim_link_pos(meme.link, start_pos, end_pos)
+                else:
+                    va = yt_api.download_video(data)
+                    video_content = va.content
+                video = self.bot.get_video_attachment(
+                    _bytes=video_content,
+                    peer_id=self.event.peer_id,
+                    message_thread_id=self.event.message_thread_id,
+                    thumbnail_url=data.thumbnail_url,
+                )
+                meme.tg_file_id = video.get_file_id()
+                meme.type = VideoAttachment.TYPE
+                meme.save()
+                self._save_meme(meme, video_content, is_update=is_update)
+
+                rmi_params.text += f"\n{self.MESSAGE_YOUTUBE_STATUS_COMPLETE}"
+                self.bot.edit_message_text(rmi_params)
+                return
+            except PWarning as e:
+                rmi_params.text = self.MESSAGE_YOUTUBE_STATUS_CUSTOM_ERROR.format(error_msg=e.msg)
+                self.bot.edit_message_text(rmi_params)
+                return
+            except Exception:
+                self.bot.edit_message_text(rmi_params)
+                return
+        finally:
+            connections.close_all()
 
     @staticmethod
     def get_similar_memes_names(memes) -> ResponseMessageItem:
