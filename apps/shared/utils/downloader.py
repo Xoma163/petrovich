@@ -1,7 +1,7 @@
 import os
 import subprocess
 from concurrent.futures import ThreadPoolExecutor
-from tempfile import NamedTemporaryFile
+from tempfile import mkstemp
 
 import requests
 
@@ -57,7 +57,8 @@ class Downloader:
         return requests.get(url, headers=self.headers, cookies=self.cookies).content
 
     def download_by_m3u8_url(self, m3u8_url: str, threads: int = 1, http_chunk_size: int | None = None) -> bytes:
-        tmp_video_file = NamedTemporaryFile().name
+        descriptor, tmp_video_file = mkstemp()
+        os.close(descriptor)
         try:
             args = {
                 "-N": threads,

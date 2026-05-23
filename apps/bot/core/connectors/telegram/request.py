@@ -11,7 +11,7 @@ class Request:
     API_TELEGRAM_URL = "api.telegram.org"
     PREFIX = "https"
 
-    LOG_IGNORE_ACTIONS: list[str] = []
+    LOG_IGNORE_ACTIONS: list[str] = ["getUpdates"]
 
     LOG_WARNING_ERRORS = [
         "Forbidden: bot was blocked by the user",

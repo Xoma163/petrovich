@@ -8,7 +8,7 @@ If you are a new AI agent working in this codebase, optimize for **safe navigati
 
 At a high level, the system works like this:
 
-1. Django exposes webhook endpoints for Telegram and GitHub.
+1. Django exposes webhook endpoints for Telegram and GitHub; Telegram can also be consumed by a local long-polling management command for debug.
 2. Incoming Telegram updates are converted into an internal `Event` object.
 3. The bot routes that event to a command from the command registry.
 4. Commands build one or more `ResponseMessageItem` objects.
@@ -65,10 +65,10 @@ Based on the codebase, this is a **personal/community utility bot** rather than 
 ## Tech stack
 
 - **Language:** Python `>=3.14`
-- **Framework:** Django `>=6.0.1`
+- **Framework:** Django `>=6.0.3`
 - **Database:** PostgreSQL
 - **Cache / ephemeral state:** Redis via `django-redis`
-- **Deployment shape:** gunicorn + nginx + systemd-oriented Linux deployment
+- **Deployment shape:** gunicorn + nginx + systemd-oriented Linux deployment; local debug can use Docker Compose for PostgreSQL and Redis
 - **Dependency manager in active use:** `uv` appears current (`uv.lock`, `uv sync` in production update script)
 - **Notable libraries/integrations:**
   - Telegram Bot API integration
@@ -120,6 +120,7 @@ Current hardcoded operational endpoints discovered in code:
 - `DEVELOPER.md` — this handbook
 - `update_production.sh` — production update script
 - `pg_backup.sh` — PostgreSQL backup helper
+- `docker-compose.local.yml` — loopback-only local PostgreSQL/Redis services for debugging
 
 ### Application code
 
@@ -199,6 +200,8 @@ Relevant files:
 
 `TgBot.parse()` then starts a new thread and calls `handle_event()`.
 That worker explicitly closes Django DB connections before reuse and again when the thread exits; if you add more ad-hoc bot threads that touch ORM state, preserve the same cleanup pattern or PostgreSQL connection slots can be exhausted.
+
+For local debugging without exposing a webhook, `python manage.py poll_tg` runs Telegram `getUpdates` polling through the same `TgBot.parse()` path. Use `--drop-webhook` when Telegram still has a webhook configured; add `--drop-pending-updates` only when old queued updates should be discarded.
 
 ### GitHub ingress
 
@@ -554,7 +557,8 @@ The repository currently suggests `uv` as the most current dependency workflow.
 ### 0. Install prerequisites
 
 ```bash
-sudo apt install -y python3.14 python3.14-venv python3-venv python3.14-dev python3-wheel postgresql libpq-dev ffmpeg build-essential nginx
+curl -LsSf https://astral.sh/uv/install.sh | sh
+sudo apt install -y libpq-dev gcc python3-dev redis ffmpeg chromium chromium-driver
 ```
 
 ### 1. Install dependencies
@@ -572,7 +576,14 @@ pre-commit install
 
 ### 2. Prepare environment
 
-Create `.env` based on `example.env`, then provide real values.
+Create `.env` based on `.env.example`, then provide real values.
+The checked-in local example points PostgreSQL and Redis at `127.0.0.1:15433` and `127.0.0.1:16380`, matching `docker-compose.local.yml`; it also keeps the local Telegram Bot API server at `192.168.1.10:11060`.
+
+For local debug dependencies only:
+
+```bash
+docker compose -f docker-compose.local.yml up -d
+```
 
 ### 3. Run migrations
 
@@ -612,7 +623,10 @@ python manage.py check_pasha_news
 python manage.py download_memes
 python manage.py reset_migrations
 python manage.py check_notify
+python manage.py poll_tg --drop-webhook
 ```
+
+`poll_tg` is intended for local debugging; it keeps webhook behavior untouched unless `--drop-webhook` is provided.
 
 ## Tests
 
@@ -878,10 +892,10 @@ Prefer targeted fixes over broad refactors in these areas.
 
 Document these carefully rather than treating them as confirmed bugs:
 
-1. `config/setup/setup.sh` installs from `requirements.txt`, but the repo appears to use `uv` now and no `requirements.txt` is present.
+1. `config/setup/setup.sh` is a Linux bootstrap script using `uv`; local Windows debugging is better served by `.env` plus `docker-compose.local.yml` for PostgreSQL/Redis.
 2. GitHub Actions workflow is named as CI, but the active job is effectively deployment; test steps are commented out.
 3. README is intentionally sparse and points to an external wiki, so local repo docs are incomplete by design.
-4. ASGI exists, but the visible deployment shape is WSGI/uWSGI-oriented.
+4. ASGI exists, but the visible deployment shape is WSGI/gunicorn-oriented.
 
 Do not “fix” these unless explicitly asked.
 

@@ -37,6 +37,27 @@ class TelegramAPI:
             return RequestLocal(self.token, log_filter=self.log_filter)
         raise RuntimeError(f"{self.mode} is not supported")
 
+    def get_updates(
+        self,
+        offset: int | None = None,
+        limit: int | None = None,
+        timeout: int | None = None,
+        allowed_updates: list[str] | None = None,
+    ) -> TelegramResponse:
+        params: dict[str, object] = {
+            "offset": offset,
+            "limit": limit,
+            "timeout": timeout,
+        }
+        if allowed_updates:
+            params["allowed_updates"] = json.dumps(allowed_updates)
+
+        return self.requests.post("getUpdates", params).json()
+
+    def delete_webhook(self, drop_pending_updates: bool = False) -> TelegramResponse:
+        params: dict[str, object] = {"drop_pending_updates": drop_pending_updates}
+        return self.requests.post("deleteWebhook", params).json()
+
     # ---------- SEND --------- #
 
     def send_chat_action(self, chat_id: int | str, action: str, message_thread_id: int = None) -> TelegramResponse:
