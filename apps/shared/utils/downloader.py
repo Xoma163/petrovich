@@ -1,6 +1,7 @@
 import os
 import subprocess
 from concurrent.futures import ThreadPoolExecutor
+from glob import glob
 from tempfile import mkstemp
 
 import requests
@@ -11,7 +12,7 @@ from apps.shared.utils.do_the_linux_command import do_the_linux_command
 
 
 class Downloader:
-    DEFAULT_CHUNK_SIZE = 2**24  # 16 mb
+    DEFAULT_CHUNK_SIZE = 2 ** 24  # 16 mb
 
     def __init__(
         self,
@@ -59,31 +60,37 @@ class Downloader:
     def download_by_m3u8_url(self, m3u8_url: str, threads: int = 1, http_chunk_size: int | None = None) -> bytes:
         descriptor, tmp_video_file = mkstemp()
         os.close(descriptor)
+        os.remove(tmp_video_file)
+        real_tmp_video_file = None
+
         try:
             args = {
                 "-N": threads,
-                "-o": tmp_video_file,
-                # '--cookies': os.path.join(BASE_DIR, 'secrets', 'youtube_cookies.txt')
+                "-o": f"{tmp_video_file}.%(ext)s",
+                "--force-overwrites": "",
+                "--no-continue": "",
             }
             if http_chunk_size is not None:
                 args["--http-chunk-size"] = http_chunk_size
-            args_str = " ".join([f"{x[0]} {x[1]}" for x in args.items()])
+            args_str = " ".join([f"{key} {value}" if value != "" else key for key, value in args.items()])
             command = f"yt-dlp {args_str} {m3u8_url}"
             try:
                 _ = do_the_linux_command(command, log_filter=self.log_filter, check=True)
             except subprocess.CalledProcessError as e:
                 raise PWarning("Не получилось скачать видео") from e
 
-            potential_filename = f"{tmp_video_file}.mp4"
-            if os.path.isfile(potential_filename):
-                tmp_video_file = potential_filename
+            potential_filenames = [f"{tmp_video_file}.mp4", tmp_video_file, *glob(f"{tmp_video_file}.*"),]
+            for potential_filename in potential_filenames:
+                if os.path.isfile(potential_filename) and os.path.getsize(potential_filename) > 0:
+                    real_tmp_video_file = potential_filename
+                    break
 
-            if not os.path.isfile(tmp_video_file) or os.path.getsize(tmp_video_file) == 0:
+            if real_tmp_video_file is None:
                 raise PWarning("Не получилось скачать видео")
 
-            with open(tmp_video_file, "rb") as file:
+            with open(real_tmp_video_file, "rb") as file:
                 content = file.read()
         finally:
-            if os.path.exists(tmp_video_file):
-                os.remove(tmp_video_file)
+            if real_tmp_video_file and os.path.exists(real_tmp_video_file):
+                os.remove(real_tmp_video_file)
         return content
