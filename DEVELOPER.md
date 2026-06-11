@@ -426,6 +426,8 @@ Important files:
 - `apps/commands/media_command/services/`
 - `apps/commands/media_command/models.py`
 
+Shared Selenium browser sessions from `apps/connectors/parsers/web_driver.py` force English locale through Chrome DevTools Protocol (`Accept-Language: en-US,en;q=0.9` and `Emulation.setLocaleOverride`) so parser-visible site text is less dependent on the host OS locale.
+
 ## Reminder/scheduler subsystem: `apps/commands/notifies/`
 
 This subsystem stores reminders in the database and dispatches them via management command.

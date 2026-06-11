@@ -15,7 +15,19 @@ def get_web_driver(headers=None) -> webdriver.Chrome:
     if headers:
         for header in headers:
             options.add_argument(f"{header}={headers[header]}")
-    return webdriver.Chrome(options=options)
+
+    driver = webdriver.Chrome(options=options)
+    driver.execute_cdp_cmd("Network.enable", {})
+    driver.execute_cdp_cmd(
+        "Network.setExtraHTTPHeaders",
+        {
+            "headers": {
+                "Accept-Language": "en-US,en;q=0.9",
+            },
+        },
+    )
+    driver.execute_cdp_cmd("Emulation.setLocaleOverride", {"locale": "en-US"})
+    return driver
 
 
 # https://stackoverflow.com/a/64630427

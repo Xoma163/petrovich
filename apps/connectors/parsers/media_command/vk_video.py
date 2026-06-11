@@ -81,7 +81,7 @@ class VKVideo:
                 height=height,
             )
         except Exception as e:
-            raise PError("Не смог получить информацию о видео") from e
+             raise PError("Не смог получить информацию о видео") from e
 
     def download_video(self, url: str, author_id: int, video_id: str, high_res: bool = False) -> VideoAttachment:
         player_url = self._get_player_url(url, author_id, video_id)
@@ -205,7 +205,7 @@ class VKVideo:
 
     @staticmethod
     def _get_video_data(bs4) -> dict:
-        bs4_str = str(bs4)
+        bs4_str = bs4.decode()
         pos1_text = "var newCur = "
         pos2_text = "};"
         pos1 = bs4_str.find(pos1_text) - 1

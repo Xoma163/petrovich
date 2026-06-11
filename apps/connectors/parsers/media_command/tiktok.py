@@ -15,6 +15,7 @@ class TikTok:
         "This post may not be comfortable for some audiences. Log in to make the most of your experience."
     )
     AUDIENCE_CONTROL = "This creator turned on audience controls. Log in to make the most of your TikTok experience."
+    UNCOMFOTRABLE_MESSAGE = "This post contains themes that some may find uncomfortable. Log in to make the most of your TikTok experience."
 
     def __init__(self):
         super().__init__()
@@ -49,6 +50,10 @@ class TikTok:
 
         bs4 = BeautifulSoup(page_source, "html.parser")
         if any([self.AUDIENCE_CONTROL in x.text for x in bs4.find_all("p")]):
+            raise PWarning("Не могу скачать контент, так как он недоступен без аутентификации")
+
+        bs4 = BeautifulSoup(page_source, "html.parser")
+        if any([self.UNCOMFOTRABLE_MESSAGE in x.text for x in bs4.find_all("p")]):
             raise PWarning("Не могу скачать контент, так как он недоступен без аутентификации")
 
         script_data = bs4.find(id="__UNIVERSAL_DATA_FOR_REHYDRATION__")
