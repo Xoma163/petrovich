@@ -394,6 +394,7 @@ This is another large, integration-heavy area.
 What it does:
 
 - detects media URLs in user messages
+- normalizes accepted Instagram media URLs inside the Instagram service, converting `/reel/` to `/reels/` and removing tracking query/fragment data
 - chooses a service implementation by hostname
 - downloads or extracts content
 - may cache downloaded videos
@@ -804,6 +805,8 @@ The code has abstractions for platforms, but the practical implementation is Tel
 ## 5. Logging is structured
 
 The project uses JSON logging with user/chat/message identifiers in `log_filter`. It allows filtering logs when calling the corresponding command to restrict access.
+
+`petrovich/settings.py` reconfigures `stdout` and `stderr` to UTF-8 with `backslashreplace` and writes file logs with explicit UTF-8 encoding, so emoji and other non-CP1251 characters do not break local Windows logging.
 
 ---
 

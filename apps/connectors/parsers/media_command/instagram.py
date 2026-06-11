@@ -12,6 +12,7 @@ from apps.shared.exceptions import PWarning, PError
 
 class InstagramParser:
     AGE_RESTRICTION_RE = r"You must be (\d+) years old or over to"
+    AGE_RESTRICTION_2_RE = r"Людям младше (\d+) лет этот контент недоступен"
     INAPPROPRIATE_CONTENT = "This content may be inappropriate"
 
     def get_data(self, url):
@@ -46,7 +47,7 @@ class InstagramParser:
 
         return self._parse_media(media)
 
-    @retry(times=5, exceptions=(TimeoutException,))
+    @retry(times=3, exceptions=(TimeoutException,))
     def _get_instagram_request(self, url):
         web_driver = get_web_driver()
         try:
@@ -63,9 +64,15 @@ class InstagramParser:
             wait = WebDriverWait(web_driver, 5)
             wait.until(lambda x: "xdt_api__v1__" in x.page_source)
             page_content = web_driver.page_source
+        except TimeoutException:
+            self.check_request_errors(web_driver.page_source)
         finally:
             web_driver.quit()
         return page_content
+
+    def check_request_errors(self, page_source):
+        if re.search(self.AGE_RESTRICTION_2_RE, page_source):
+            raise PWarning("Не могу скачать контент. Он недоступен без аутентификации (возрастное ограничение)")
 
     @staticmethod
     def _get_media(api_scripts):

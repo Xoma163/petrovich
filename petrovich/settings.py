@@ -1,7 +1,17 @@
 import os
+import sys
 
 import environ
 import sentry_sdk
+
+
+def _reconfigure_standard_streams():
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8", errors="backslashreplace")
+
+
+_reconfigure_standard_streams()
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -154,12 +164,14 @@ LOGGING = {
             "backupCount": 5,  # keep at most 5 log files
             "maxBytes": GB_1,
             "filename": DEBUG_FILE,
+            "encoding": "utf-8",
             "formatter": "json",
         },
         "file-error": {
             "level": "ERROR",
             "class": "logging.FileHandler",
             "filename": ERROR_FILE,
+            "encoding": "utf-8",
             "formatter": "json",
         },
         "console-debug": {
