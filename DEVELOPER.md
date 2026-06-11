@@ -403,6 +403,11 @@ What it does:
 - reposts content back into Telegram
 - may delete the original user message after successful repost
 
+The trusted `/аудио` (`/аудиодорожка`) command extracts an AAC audio track from an uploaded
+Telegram video. When the command is called as a reply to a video, the returned audio upload uses
+the replied video's caption as the sanitized file name; videos without a usable caption still fall
+back to `audiotrack.aac`.
+
 Supported service families discovered in code include:
 
 - YouTube video
