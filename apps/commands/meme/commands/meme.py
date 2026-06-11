@@ -656,23 +656,29 @@ class Meme(Command):
             meme.file.delete()
         meme.file.save(filename, ContentFile(content))
 
-        # save preview for youtube vieos
-        _content = None
+        if meme.type != VideoAttachment.TYPE:
+            return
+
+        # save preview for videos
+        preview_content = None
         if meme.link:
             if video_id := get_youtube_video_id(meme.link):
                 preview_url = f"https://img.youtube.com/vi/{video_id}/default.jpg"
                 att_pa = PhotoAttachment()
                 att_pa.public_download_url = preview_url
-                _content = att_pa.download_content()
-            if isinstance(att, VideoAttachment) and not _content:
-                vh = VideoHandler(video=att)
-                _content = vh.get_preview()
-            if _content:
-                filename = f"{meme.id}_preview.jpg"
+                preview_content = att_pa.download_content()
 
-                if is_update:
-                    meme.file_preview.delete()
-                meme.file_preview.save(filename, ContentFile(_content))
+        if isinstance(att, VideoAttachment) and not preview_content:
+            vh = VideoHandler(video=att)
+            preview_content = vh.get_preview()
+
+        if preview_content:
+            filename = f"{meme.id}_preview.jpg"
+
+            if is_update:
+                meme.file_preview.delete()
+            meme.file_preview.save(filename, ContentFile(preview_content))
+
 
     # --------------------
 

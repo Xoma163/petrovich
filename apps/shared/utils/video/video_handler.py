@@ -100,8 +100,8 @@ class VideoHandler:
             subprocess.check_call(cmd)
             return Path(out_path).read_bytes()
         finally:
-            Path(tmp_path).unlink()
-            Path(out_path).unlink()
+            Path(tmp_path).unlink(missing_ok=True)
+            Path(out_path).unlink(missing_ok=True)
 
     # def download(self, threads=10) -> bytes:
     #     if not self.video:

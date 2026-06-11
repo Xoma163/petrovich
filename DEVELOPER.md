@@ -461,6 +461,11 @@ Key data concepts:
 - preview assets
 - media content preservation
 
+When approved video memes are saved to disk, `_save_meme()` also stores `file_preview`.
+YouTube links prefer the public YouTube thumbnail; ordinary uploaded videos and fallback cases
+derive a JPEG preview from the already-downloaded video bytes through `VideoHandler.get_preview()`,
+which currently takes a frame from the first second by default.
+
 ## GitHub automation
 
 GitHub is used both as an external integration and as part of the user support flow.
