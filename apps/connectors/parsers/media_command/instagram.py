@@ -14,6 +14,7 @@ class InstagramParser:
     AGE_RESTRICTION_RE = r"You must be (\d+) years old or over to"
     AGE_RESTRICTION_2_RE = r"Людям младше (\d+) лет этот контент недоступен"
     INAPPROPRIATE_CONTENT = "This content may be inappropriate"
+    API_DATA_KEYS = ("xdt_api__v1__", "xig_polaris_media")
 
     def get_data(self, url):
         # is_post = bool(re.search(r"p/([A-Za-z0-9_-]+)", url))
@@ -25,7 +26,9 @@ class InstagramParser:
 
         try:
             page_source = self._get_instagram_request(url)
-        except TimeoutException:
+            if not page_source:
+                raise RuntimeError
+        except (TimeoutException, RuntimeError):
             raise PWarning(
                 "Убедитесь в браузере(инкогнито), что по ссылке фото/видео и доступно к просмотру. Если это так, то сообщите разработчику"
             )
@@ -38,7 +41,7 @@ class InstagramParser:
 
         try:
             all_scripts = bs4.select('script[type="application/json"][data-content-len][data-processed]')
-            api_scripts = [x for x in all_scripts if "xdt_api__v1__" in x.text]
+            api_scripts = [x for x in all_scripts if any(key in x.text for key in self.API_DATA_KEYS)]
             media = self._get_media(api_scripts)
         except PError:
             raise
@@ -50,6 +53,7 @@ class InstagramParser:
     @retry(times=3, exceptions=(TimeoutException,))
     def _get_instagram_request(self, url):
         web_driver = get_web_driver()
+        page_content = None
         try:
             web_driver.get(url)
 
@@ -62,7 +66,7 @@ class InstagramParser:
             # decline_btn.click()
 
             wait = WebDriverWait(web_driver, 5)
-            wait.until(lambda x: "xdt_api__v1__" in x.page_source)
+            wait.until(lambda x: any(key in x.page_source for key in self.API_DATA_KEYS))
             page_content = web_driver.page_source
         except TimeoutException:
             self.check_request_errors(web_driver.page_source)
@@ -76,17 +80,20 @@ class InstagramParser:
 
     @staticmethod
     def _get_media(api_scripts):
+        has_api_error = False
         for script in api_scripts:
             json_data = json.loads(script.text)
             try:
                 result = json_data["require"][0][3][0]["__bbox"]["require"][0][3][1]["__bbox"]["result"]
-                if result.get("errors"):
-                    # error = result['errors'][0]
-                    raise PError("Не могу скачать контент. Ошибка со стороны сервера")
-
                 data = result.get("data")
+                if result.get("errors") and not data:
+                    # error = result['errors'][0]
+                    has_api_error = True
+                    continue
                 if shortcode_web_info := data.get("xdt_api__v1__media__shortcode__web_info"):
                     return shortcode_web_info["items"][0]
+                elif polaris_media := data.get("xig_polaris_media"):
+                    return polaris_media.get("if_not_gated_logged_out") or polaris_media
                 elif clips_on_logged_out := data.get("xdt_api__v1__clips__clips_on_logged_out_connection_v2"):
                     node = clips_on_logged_out["edges"][0]["node"]
                     if "media_command" in node:
@@ -97,12 +104,21 @@ class InstagramParser:
             except KeyError, IndexError, AttributeError:
                 continue
 
+        if has_api_error:
+            raise PError("Не могу скачать контент. Ошибка со стороны сервера")
+
         raise PWarning("Не могу скачать этот контент. Неизвестный тип. Сообщите разработчику")
 
     def get_media_by_parse_json(self, page_source):
         try:
             json_data = self.extract_json(page_source, "xdt_api__v1__media__shortcode__web_info")
             return json_data["items"][0]
+        except Exception:
+            pass
+
+        try:
+            json_data = self.extract_json(page_source, "xig_polaris_media")
+            return json_data.get("if_not_gated_logged_out") or json_data
         except Exception:
             pass
 

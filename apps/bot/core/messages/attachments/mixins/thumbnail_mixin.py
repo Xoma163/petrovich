@@ -25,6 +25,9 @@ class ThumbnailMixin:
         thumbnail_bytes = self.make_thumbnail(thumb_file, max_size=max_size, _format=_format)
         thumbnail_att = PhotoAttachment()
         thumbnail_att.content = thumbnail_bytes
+        with Image.open(io.BytesIO(thumbnail_bytes)) as image:
+            thumbnail_att.width = image.width
+            thumbnail_att.height = image.height
         self.thumbnail = thumbnail_att
 
     @staticmethod
