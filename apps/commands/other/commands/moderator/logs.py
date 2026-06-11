@@ -167,6 +167,6 @@ class Logs(Command):
 
     @staticmethod
     def read_file(path):
-        with open(path, "r") as file:
+        with open(path, "r", encoding="utf-8", errors="replace") as file:
             lines = file.readlines()
         return lines
