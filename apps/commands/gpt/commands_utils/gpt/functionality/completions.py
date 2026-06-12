@@ -96,7 +96,7 @@ class GPTCompletionsFunctionality(GPTCommandProtocol):
         return self.get_completions_rmi(response_text)
 
     def __completions_callback(self, text: str, draft_id: int):
-        if len(text) > self.bot.max_message_text_length:
+        if len(text) > self.bot.max_rich_message_text_length:
             return
         rmi = ResponseMessageItem(text=text)
         self._prepare_rmi(rmi, text)

@@ -25,6 +25,7 @@ class ResponseMessageItem:
         send: bool = True,
         spoiler: bool = False,
         parse_mode: TelegramParseMode | None = None,
+        rich_markdown: str | None = None,
     ):
         self._raw_text = text
         self.text = text
@@ -46,6 +47,18 @@ class ResponseMessageItem:
         self.send = send
         self.spoiler = spoiler
         self.parse_mode = parse_mode
+        self.rich_markdown = rich_markdown
+
+    @property
+    def has_rich_message(self) -> bool:
+        return bool(self.rich_markdown)
+
+    def set_rich_markdown(self, text: str | None = None):
+        text = self.text if text is None else text
+        if not text or self.rich_markdown:
+            return
+
+        self.rich_markdown = text
 
     def to_log(self) -> dict:
         """
@@ -59,6 +72,7 @@ class ResponseMessageItem:
         dict_self["attachments"] = [x.to_log() for x in dict_self["attachments"]]
         return dict_self
 
+    # TODO: unused
     def set_telegram_markdown_v2(self):
         if not self.text:
             return
@@ -132,6 +146,8 @@ class ResponseMessageItem:
 
         if self.parse_mode:
             params["parse_mode"] = self.parse_mode
+        if self.rich_markdown:
+            params["rich_markdown"] = self.rich_markdown
 
         if self.keyboard:
             params["reply_markup"] = self.keyboard

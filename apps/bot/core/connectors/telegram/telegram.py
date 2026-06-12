@@ -108,6 +108,42 @@ class TelegramAPI:
 
         return self.requests.post("sendMessageDraft", params).json()
 
+    def send_rich_message(
+        self,
+        chat_id: int | str,
+        rich_message: dict,
+        message_thread_id: int = None,
+        reply_to_message_id: int = None,
+        reply_markup: dict = None,
+    ) -> TelegramResponse:
+        params: dict[str, object] = {
+            "chat_id": chat_id,
+            "message_thread_id": message_thread_id,
+            "rich_message": json.dumps(rich_message),
+        }
+        if reply_to_message_id:
+            params["reply_parameters"] = json.dumps({"message_id": reply_to_message_id})
+        if reply_markup:
+            params["reply_markup"] = json.dumps(reply_markup)
+
+        return self.requests.post("sendRichMessage", params).json()
+
+    def send_rich_message_draft(
+        self,
+        chat_id: int | str,
+        draft_id: int,
+        rich_message: dict,
+        message_thread_id: int = None,
+    ) -> TelegramResponse:
+        params: dict[str, object] = {
+            "chat_id": chat_id,
+            "draft_id": draft_id,
+            "rich_message": json.dumps(rich_message),
+            "message_thread_id": message_thread_id,
+        }
+
+        return self.requests.post("sendRichMessageDraft", params).json()
+
     def send_media_group(
         self,
         chat_id: int | str,
@@ -355,6 +391,7 @@ class TelegramAPI:
         text: str | None,
         reply_markup: dict = None,
         parse_mode: str = None,
+        rich_message: dict | None = None,
     ) -> TelegramResponse:
         params: dict[str, object] = {
             "chat_id": chat_id,
@@ -362,6 +399,8 @@ class TelegramAPI:
             "text": text,
             "parse_mode": parse_mode,
         }
+        if rich_message:
+            params["rich_message"] = json.dumps(rich_message)
         if reply_markup:
             params["reply_markup"] = json.dumps(reply_markup)
 

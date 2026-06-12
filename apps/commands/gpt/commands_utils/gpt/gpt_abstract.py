@@ -33,7 +33,6 @@ from apps.commands.gpt.protocols import GPTCommandProtocol
 from apps.commands.gpt.providers.base import GPTProvider
 from apps.shared.exceptions import PWarning, PError
 from apps.shared.utils.cache import MessagesCache, GPTResponsesCache
-from apps.shared.utils.markdown import has_markdown
 from apps.shared.utils.utils import wrap_text_in_html_document
 from petrovich.settings import env
 
@@ -232,12 +231,12 @@ class GPTCommand(
         Пост-обработка сообщения в completions
         """
         answer = answer if answer else "{пустой ответ}"
-        if len(answer) > self.bot.max_message_text_length:
+        if len(answer) > self._get_max_completions_message_text_length(answer):
             document_html = wrap_text_in_html_document(answer, "gpt")
             # document_markdown = wrap_text_in_markdown_document(answer, "gpt")
             rmi = ResponseMessageItem(
                 text=self.RESPONSE_MESSAGE_TOO_LONG,
-                attachments=[document_html],  # , document_markdown],
+                attachments=[document_html],
                 reply_to=self.event.message.id,
             )
         else:
@@ -245,12 +244,13 @@ class GPTCommand(
         self._prepare_rmi(rmi, answer)
         return rmi
 
+    def _get_max_completions_message_text_length(self, text: str) -> int:
+        return self.bot.max_rich_message_text_length
+
     def _prepare_rmi(self, rmi: ResponseMessageItem, text: str) -> ResponseMessageItem:
         rmi._raw_text = text
-        rmi.set_telegram_markdown_v2()
-        # Если сообщение из чата и длина сообщения > 200 символов, то в цитату
-        if self.event.chat and len(rmi.text) > 200 and not has_markdown(text):
-            rmi.text = self.bot.get_expandable_quote_markdown(rmi.text)
+        # rmi.set_telegram_markdown_v2()
+        rmi.set_rich_markdown(text)
         rmi.peer_id = self.event.peer_id
         rmi.message_thread_id = self.event.message_thread_id
         return rmi

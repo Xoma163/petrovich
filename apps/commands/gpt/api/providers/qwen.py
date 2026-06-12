@@ -6,6 +6,7 @@ from apps.commands.gpt.api.responses import GPTCompletionsResponse, GPTVisionRes
 from apps.commands.gpt.messages.base import GPTMessages
 from apps.commands.gpt.models import CompletionsModel, VisionModel
 from apps.shared.exceptions import PWarning
+from petrovich.settings import env
 
 
 class QwenAPI(
@@ -18,25 +19,23 @@ class QwenAPI(
         return {}
 
     # ---------- base ---------- #
+    base_url = None
 
-    base_url = "http://192.168.1.10:11031"
-
-    # Мой код к этому не готов, что нужно выбирать из двух серверов
-    # Хардкод
     def set_base_url(self):
-        variants = ["http://192.168.1.20:11031", "http://192.168.1.10:11031"]
+        variants = env.list("QWEN_API_BASE_URLS")
 
         import requests
 
         for variant in variants:
+            variant = variant.rstrip("/")
             try:
                 r = requests.get(f"{variant}/models", timeout=2)
                 r.raise_for_status()
-                self.completions_url = self.completions_url.replace(self.base_url, variant)
-                self.vision_url = self.vision_url.replace(self.base_url, variant)
                 self.base_url = variant
+                self.completions_url = f"{variant}/chat/completions"
+                self.vision_url = f"{variant}/chat/completions"
                 return
-            except requests.exceptions.ConnectionError, requests.exceptions.Timeout:
+            except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
                 continue
         raise PWarning("На данный момент нет работающих моделей")
 

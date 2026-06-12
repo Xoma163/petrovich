@@ -105,7 +105,7 @@ Current hardcoded operational endpoints discovered in code:
 
 - local Telegram Bot API server: `192.168.1.10:11060`
 - Django debug/app port assumption: `10010`
-- Qwen-compatible servers: `192.168.1.20:11031` and `192.168.1.10:11031`
+- Qwen/llama.cpp-compatible servers. `QWEN_API_BASE_URLS`
 
 ---
 
@@ -366,6 +366,7 @@ What it does:
 - per-user presets/preprompts
 - usage and cost accounting
 - optional streaming behavior
+- Telegram Bot API 10.1 rich-message output for GPT text/vision replies
 - reply-chain conversation continuation
 
 Important concepts:
@@ -374,6 +375,8 @@ Important concepts:
 - user API keys are encrypted with Fernet
 - GPT conversation history is reconstructed from cached Telegram messages in Redis
 - some GPT provider implementations are OpenAI-compatible, but not all are remote SaaS-only
+- Qwen/llama.cpp server discovery uses `QWEN_API_BASE_URLS`, a comma-separated list of base URLs;
+  local debugging can point it at a locally reachable tunnel/proxy while production can keep LAN hosts
 
 Providers discovered in code:
 
@@ -386,6 +389,11 @@ High-risk files:
 - `apps/commands/gpt/commands_utils/gpt/gpt_abstract.py`
 - `apps/commands/gpt/models.py`
 - provider API files in `apps/commands/gpt/api/providers/`
+
+GPT text and vision responses are prepared as both Telegram MarkdownV2 text and Bot API 10.1
+`InputRichMessage` markdown. `TgBot.send_message()` and `send_message_draft()` prefer
+`sendRichMessage` / `sendRichMessageDraft` when `ResponseMessageItem.rich_markdown` is set. This assumes
+the local Telegram Bot API server supports Bot API 10.1 or newer.
 
 ## Media subsystem: `apps/commands/media_command/`
 
@@ -548,6 +556,7 @@ From the codebase and example env:
 - `TG_BOT_GROUP_ID`
 - `TG_MODERATOR_CHAT_PK`
 - `TG_PHOTO_UPLOADING_CHAT_PK`
+- `QWEN_API_BASE_URLS`
 - `DISK_SAVE_PATH`
 - `IMGBB_API_KEY`
 - `GITHUB_TOKEN`

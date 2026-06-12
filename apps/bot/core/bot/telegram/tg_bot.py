@@ -62,6 +62,10 @@ class TgBot(Bot):
         return 4096
 
     @property
+    def max_rich_message_text_length(self):
+        return 32768
+
+    @property
     def max_message_caption_length(self):
         return 1024
 
@@ -345,6 +349,9 @@ class TgBot(Bot):
         if not rmi.text:
             return chunks
 
+        if rmi.has_rich_message and not rmi.attachments:
+            return chunks
+
         # Если у нас есть форматирование, в таком случае все сначала шлём все медиа, а потом уже форматированный текст
         # Телега не умеет в send_media_group + parse_mode
         if rmi.parse_mode and len(rmi.attachments) > 1:
@@ -372,6 +379,9 @@ class TgBot(Bot):
     # TELEGRAM SEND/EDIT
 
     def send_message(self, rmi: ResponseMessageItem) -> dict:
+        if rmi.has_rich_message and not rmi.attachments:
+            return self.send_rich_message(rmi)
+
         return self.api_handler.send_message(
             chat_id=rmi.peer_id,
             text=rmi.text,
@@ -381,7 +391,24 @@ class TgBot(Bot):
             reply_markup=rmi.keyboard,
         )
 
+    def send_rich_message(self, rmi: ResponseMessageItem) -> dict:
+        return self.api_handler.send_rich_message(
+            chat_id=rmi.peer_id,
+            rich_message={"markdown": rmi.rich_markdown},
+            message_thread_id=rmi.message_thread_id,
+            reply_to_message_id=rmi.reply_to,
+            reply_markup=rmi.keyboard,
+        )
+
     def send_message_draft(self, rmi: ResponseMessageItem, draft_id: int):
+        if rmi.has_rich_message:
+            return self.api_handler.send_rich_message_draft(
+                chat_id=rmi.peer_id,
+                draft_id=draft_id,
+                rich_message={"markdown": rmi.rich_markdown},
+                message_thread_id=rmi.message_thread_id,
+            )
+
         return self.api_handler.send_message_draft(
             chat_id=rmi.peer_id,
             draft_id=draft_id,
@@ -603,6 +630,7 @@ class TgBot(Bot):
             text=rmi.text,
             reply_markup=rmi.keyboard,
             parse_mode=rmi.parse_mode,
+            rich_message={"markdown": rmi.rich_markdown} if rmi.has_rich_message else None,
         )
 
     def edit_message_caption(self, rmi: ResponseMessageItem) -> dict:
