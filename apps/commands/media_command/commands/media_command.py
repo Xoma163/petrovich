@@ -286,7 +286,8 @@ class Media(AcceptExtraCommand):
 
         # Особенная обработка для reddit markdown
         if chosen_service == RedditService:
-            rmi.set_telegram_markdown_v2()
+            rmi.set_rich_markdown()
+            # rmi.set_telegram_markdown_v2()
         else:
             rmi.parse_mode = TelegramParseMode.HTML
 
