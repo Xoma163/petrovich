@@ -395,6 +395,10 @@ GPT text and vision responses are prepared as both Telegram MarkdownV2 text and 
 `sendRichMessage` / `sendRichMessageDraft` when `ResponseMessageItem.rich_markdown` is set. This assumes
 the local Telegram Bot API server supports Bot API 10.1 or newer.
 
+The user-facing `/markdown` command (alias `/md`) reuses that rich-message path directly: it removes the
+command token from the original message text and sends the remaining user input as `rich_markdown` so
+users can ask the bot to render arbitrary Markdown-formatted text.
+
 ## Media subsystem: `apps/commands/media_command/`
 
 This is another large, integration-heavy area.
