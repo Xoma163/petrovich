@@ -59,3 +59,15 @@ class YtDlpVideoDownloaderTests(SimpleTestCase):
             ),
             10,
         )
+
+    def test_concurrent_fragment_downloads_default(self):
+        self.assertEqual(
+            YtDlpVideoDownloader.DEFAULT_CONCURRENT_FRAGMENT_DOWNLOADS,
+            10,
+        )
+
+    def test_http_chunk_size_default(self):
+        self.assertEqual(
+            YtDlpVideoDownloader.DEFAULT_HTTP_CHUNK_SIZE,
+            10 * 1024 * 1024,
+        )

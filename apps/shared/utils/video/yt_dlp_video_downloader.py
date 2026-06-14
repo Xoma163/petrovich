@@ -20,6 +20,9 @@ class _NothingLogger:
 
 
 class YtDlpVideoDownloader:
+    DEFAULT_CONCURRENT_FRAGMENT_DOWNLOADS = 10
+    DEFAULT_HTTP_CHUNK_SIZE = 10 * 1024 * 1024
+
     def __init__(
         self,
         ytdlp_error_handler: Callable[[yt_dlp.utils.DownloadError], PWarning] | None = None,
@@ -44,6 +47,8 @@ class YtDlpVideoDownloader:
                     "outtmpl": f"{tmp_video_file}.%(ext)s",
                     "force_overwrites": True,
                     "continuedl": False,
+                    "concurrent_fragment_downloads": self.DEFAULT_CONCURRENT_FRAGMENT_DOWNLOADS,
+                    "http_chunk_size": self.DEFAULT_HTTP_CHUNK_SIZE,
                 } | (ydl_params or {}),
             )
 
