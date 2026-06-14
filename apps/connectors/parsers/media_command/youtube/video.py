@@ -2,15 +2,10 @@ import re
 from datetime import timedelta
 from urllib.parse import urlparse, parse_qsl
 
-import yt_dlp
-
-from apps.bot.core.messages.attachments.audio import AudioAttachment
 from apps.bot.core.messages.attachments.video import VideoAttachment
 from apps.connectors.parsers.media_command.data import VideoData
-from apps.connectors.parsers.media_command.youtube.nothing_logger import NothingLogger
 from apps.shared.exceptions import PWarning
-from apps.shared.utils.downloader import Downloader
-from apps.shared.utils.video.video_handler import VideoHandler
+from apps.shared.utils.video.yt_dlp_video_downloader import YtDlpVideoDownloader
 
 
 class YoutubeVideo:
@@ -20,16 +15,17 @@ class YoutubeVideo:
 
     def __init__(self, log_filter: dict | None = None):
         self.log_filter = log_filter
+        self.downloader = YtDlpVideoDownloader(ytdlp_error_handler=self._prepare_ytdlp_error)
 
     # SERVICE METHODS
 
     def get_video_info(self, url, high_res=False, _timedelta: float | None = None) -> VideoData:
         video_info = self._get_video_info(url)
 
-        video, audio, filesize = self._get_video_download_urls(video_info, high_res, _timedelta)
+        video, audio, filesize_mb = self._get_video_download_urls(video_info, high_res, _timedelta)
 
         return VideoData(
-            filesize=filesize,
+            filesize_mb=filesize_mb,
             video_download_url=video["url"] if video else None,
             audio_download_url=audio["url"],
             title=video_info["title"],
@@ -44,31 +40,24 @@ class YoutubeVideo:
             channel_title=video_info["channel"],
             is_short_video="/shorts/" in url or video_info.get("media_type") == "short",
             extra_data={
-                "http_chunk_size_video": video.get("downloader_options", {}).get("http_chunk_size", 10 * 1024 * 1024),
-                "http_chunk_size_audio": audio.get("downloader_options", {}).get("http_chunk_size", 10 * 1024 * 1024),
+                "source_url": url,
+                "video_format_id": video["format_id"],
+                "audio_format_id": audio["format_id"],
             },
         )
 
     def download_video(self, data: VideoData) -> VideoAttachment:
-        if not data.video_download_url or not data.audio_download_url:
+        if not data.extra_data:
+            raise ValueError
+        source_url = data.extra_data.get("source_url")
+        if not source_url:
             raise ValueError
 
-        downloader = Downloader(log_filter=self.log_filter)
-
-        http_chunk_size_video = data.extra_data.get("http_chunk_size_video")
-        _va = VideoAttachment()
-        _va.content = downloader.download_by_m3u8_url(
-            data.video_download_url, threads=16, http_chunk_size=http_chunk_size_video
-        )
-
-        http_chunk_size_audio = data.extra_data.get("http_chunk_size_audio")
-        _aa = AudioAttachment()
-        _aa.content = downloader.download_by_m3u8_url(
-            data.audio_download_url, threads=8, http_chunk_size=http_chunk_size_audio
-        )
-
-        vh = VideoHandler(video=_va, audio=_aa, log_filter=self.log_filter)
-        content = vh.mux()
+        ydl_params = self._get_ydl_params() | {
+            "format": f"{data.extra_data['video_format_id']}+{data.extra_data['audio_format_id']}",
+            "merge_output_format": "mp4",
+        }
+        content = self.downloader.download_to_bytes(source_url, ydl_params=ydl_params)
 
         va = VideoAttachment()
         va.content = content
@@ -152,36 +141,35 @@ class YoutubeVideo:
 
     # VIDEO DOWNLOAD HELPERS
 
+    def _get_video_info(self, url: str) -> dict:
+        video_info = self.downloader.extract_info(url, ydl_params=self._get_ydl_params())
+        if video_info["media_type"] == "livestream":
+            raise PWarning("Это стрим. Я не могу его скачать")
+        return video_info
+
     @staticmethod
-    def _get_video_info(url: str) -> dict:
-        ydl_params = {
-            "logger": NothingLogger(),
+    def _get_ydl_params() -> dict:
+        return {
             "noplaylist": True,
             # Не забыть закинуть deno в /usr/bin/local
             "js_runtimes": {"deno": {}},
             "remote_components": ["ejs:npm", "ejs:github"],
         }
-        ydl = yt_dlp.YoutubeDL(ydl_params)
-        ydl.add_default_info_extractors()
 
-        try:
-            video_info = ydl.extract_info(url, download=False)
-        except yt_dlp.utils.DownloadError as e:
-            if "Sign in to confirm your age" in e.msg:
-                raise PWarning("К сожалению видос доступен только залогиненым пользователям")
-            elif "Sign in to confirm you’re not a bot" in e.msg:
-                raise PWarning("Ютуб думает что я бот (да я бот). Попробуйте скачать видео позже")
-            elif "The following content is not available on this app" in e.msg:
-                raise PWarning("Это видео скачать не получится. ПАТАМУШТА")
-            elif "Requested format is not available." in e.msg:
-                raise PWarning("Ютуб отвалился. Создайте ишу, чтобы разраб обновил библиотечку плиз c:")
-            elif "This video has been removed for violating YouTube's Community Guidelines" in e.msg:
-                raise PWarning("Это видео было удалено за нарушение правил YouTube")
-            else:
-                raise PWarning("Не смог найти видео по этой ссылке")
-        if video_info["media_type"] == "livestream":
-            raise PWarning("Это стрим. Я не могу его скачать")
-        return video_info
+    @staticmethod
+    def _prepare_ytdlp_error(error) -> PWarning:
+        msg = error.msg
+        if "Sign in to confirm your age" in msg:
+            return PWarning("К сожалению видос доступен только залогиненым пользователям")
+        if "Sign in to confirm you’re not a bot" in msg:
+            return PWarning("Ютуб думает что я бот (да я бот). Попробуйте скачать видео позже")
+        if "The following content is not available on this app" in msg:
+            return PWarning("Это видео скачать не получится. ПАТАМУШТА")
+        if "Requested format is not available." in msg:
+            return PWarning("Ютуб отвалился. Создайте ишу, чтобы разраб обновил библиотечку плиз c:")
+        if "This video has been removed for violating YouTube's Community Guidelines" in msg:
+            return PWarning("Это видео было удалено за нарушение правил YouTube")
+        return PWarning("Не смог найти видео по этой ссылке")
 
     def _get_video_download_urls(
         self,
@@ -194,7 +182,7 @@ class YoutubeVideo:
         return: video_format, audio_format, video_filesize
         """
         audio_formats = sorted(
-            [x for x in video_info["formats"] if x["resolution"] == "audio only"],  # abr
+            [x for x in video_info["formats"] if x.get("resolution") == "audio only"],  # abr
             key=self._filesize_key,
             reverse=True,
         )
@@ -206,6 +194,8 @@ class YoutubeVideo:
                 break
         if not af and audio_formats:
             af = audio_formats[0]
+        if not af:
+            raise PWarning("Не получилось найти аудиодорожку")
 
         video_formats = list(
             filter(
@@ -223,6 +213,8 @@ class YoutubeVideo:
         for _format in video_formats:
             _format["filesize_approx_vbr"] = video_info["duration"] * _format.get("vbr")
         video_formats = sorted(video_formats, key=self._filesize_key, reverse=True)
+        if not video_formats:
+            raise PWarning("Не получилось найти видеофайл")
         is_short_video = video_info["media_type"] == "short"
 
         vf = video_formats[0]

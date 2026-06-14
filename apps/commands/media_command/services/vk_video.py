@@ -1,5 +1,3 @@
-import re
-
 from apps.bot.core.chat_action_sender import ChatActionSender
 from apps.bot.core.chat_actions import ChatActionEnum
 from apps.commands.media_command.service import MediaService, MediaServiceResponse
@@ -20,12 +18,9 @@ class VKVideoService(MediaService):
             return self._get_content_by_url(url)
 
     def _get_content_by_url(self, url: str) -> MediaServiceResponse:
-        r = re.findall(r"\?(list=.*)", url)
-        if r:
-            url = url.replace(r[0], "")
-            url = url.rstrip("?")
+        url = self.service.clear_url(url)
 
-        data = self.service.get_video_info(url)
+        data = self.service.get_video_info(url, high_res=self.media_keys.high_resolution)
 
         if not data:
             raise PWarning("Не получилось распарсить ссылку")
@@ -33,15 +28,14 @@ class VKVideoService(MediaService):
         if cached := self._get_cached(data.channel_id, data.video_id, data.title):
             return cached
 
-        va = self.service.download_video(
-            url, author_id=data.channel_id, video_id=data.video_id, high_res=self.media_keys.high_resolution
-        )
-        va.width = data.width
-        va.height = data.height
+        va = self.service.download_video(url, data=data, high_res=self.media_keys.high_resolution)
 
         if self._should_cache_attachment(va):
             return self._cache_video(data.channel_id, data.video_id, data.title, url, va.content)
         return MediaServiceResponse(text=data.title, attachments=[va], video_title=data.title)
+
+    def check_valid_url(self, url: str) -> None:
+        self.service.check_url_is_video(url)
 
     @classmethod
     def urls(cls) -> list[str]:

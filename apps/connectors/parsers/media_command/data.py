@@ -12,7 +12,7 @@ class VideoData:
     video_download_chunk_size: int | None = None
     audio_download_url: str | None = None
     audio_download_chunk_size: int | None = None
-    filesize: int | None = None
+    filesize_mb: float | None = None
     duration: int | None = None
     width: int | None = None
     height: int | None = None

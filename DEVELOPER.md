@@ -425,6 +425,12 @@ Telegram video. When the command is called as a reply to a video, the returned a
 the replied video's caption as the sanitized file name; videos without a usable caption still fall
 back to `audiotrack.aac`.
 
+Shared `yt-dlp` extraction/download helpers live in
+`apps/shared/utils/video/yt_dlp_video_downloader.py`. VK Video and YouTube Video use that helper
+from their parser modules. YouTube still keeps service-specific format selection, Russian/English
+audio preference, Shorts handling, cache decisions, and user-facing error mapping, but final download
+and merge now go through the shared `yt-dlp` byte downloader.
+
 Supported service families discovered in code include:
 
 - YouTube video
