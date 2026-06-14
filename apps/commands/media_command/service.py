@@ -157,7 +157,7 @@ class MediaService:
         full_path = os.path.join(show_folder, f"{series_name_correct}.mp4")
 
         if media_response.cache:
-            shutil.copyfile(media_response.cache.video.path, os.path.join(str(show_folder), full_path))
+            shutil.copyfile(media_response.cache.video.path, full_path)
         else:
             if not media_response.attachments:
                 raise ValueError("attachments are required")

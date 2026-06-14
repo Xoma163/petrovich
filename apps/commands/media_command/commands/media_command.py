@@ -164,9 +164,9 @@ class Media(AcceptExtraCommand):
 
         media_response = service.get_content_by_url(chosen_url)
 
-        att_is_video = False
+        att_is_video = bool(media_response.cache_url)
         if media_response.attachments:
-            att_is_video = isinstance(media_response.attachments[0], VideoAttachment) or media_response.cache_url  # noqa
+            att_is_video = isinstance(media_response.attachments[0], VideoAttachment) or att_is_video  # noqa
 
         if media_keys.save_to_disk and att_is_video:
             self.check_sender(RoleEnum.ADMIN)
