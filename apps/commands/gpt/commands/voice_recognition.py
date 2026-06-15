@@ -162,7 +162,7 @@ class VoiceRecognition(AcceptExtraCommand):
 
         if cls._whisper_transcriber is None:
             cls._whisper_transcriber = Transcribe(
-                model_path="base",
+                model_path="large-v3-turbo",
                 device="cpu",
                 device_index=0,
                 compute_type="int8",
