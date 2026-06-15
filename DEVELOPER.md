@@ -76,6 +76,7 @@ Based on the codebase, this is a **personal/community utility bot** rather than 
   - `yandex-music`
   - `selenium`
   - `pydub`
+  - `whisper-ctranslate2` / Faster Whisper for local CPU voice transcription
   - `pillow`
   - `sentry-sdk`
   - `python-json-logger`
@@ -360,7 +361,10 @@ What it does:
 - text completions
 - vision flows
 - image generation
-- voice recognition
+- voice recognition; `/голосовое` / `/голос` now uses local CPU `whisper-ctranslate2` with the `base` model
+  as the primary path, keeps the previous ChatGPT transcription implementation in `process_voice_gpt()` as a
+  fallback/reserve code path, and asks Qwen to restore punctuation after local transcription; if Qwen is not
+  configured or unavailable, the raw local transcription is returned unchanged
 - provider-specific key storage
 - per-user provider settings
 - per-user presets/preprompts
