@@ -429,7 +429,13 @@ Shared `yt-dlp` extraction/download helpers live in
 `apps/shared/utils/video/yt_dlp_video_downloader.py`. VK Video and YouTube Video use that helper
 from their parser modules. YouTube still keeps service-specific format selection, Russian/English
 audio preference, Shorts handling, cache decisions, and user-facing error mapping, but final download
-and merge now go through the shared `yt-dlp` byte downloader.
+and merge now go through the shared `yt-dlp` byte downloader. The shared downloader intentionally
+lets `yt-dlp` choose its own HTTP chunking defaults; do not reintroduce a project-wide forced
+`http_chunk_size` without re-checking media download performance and service compatibility.
+
+When media is saved to disk from an already-populated cache entry, the media command should reuse
+cached bytes instead of trying to resolve a fresh downloader/parser result. This matters for privileged
+`save_to_disk` flows because cached media may be the only stable source available by then.
 
 Supported service families discovered in code include:
 
