@@ -361,7 +361,7 @@ What it does:
 - text completions
 - vision flows
 - image generation
-- voice recognition; `/голосовое` / `/голос` now uses local CPU `whisper-ctranslate2` with the `base` model
+- voice recognition; `/голосовое` / `/голос` now uses local CPU `whisper-ctranslate2` with the `large-v3-turbo` model
   as the primary path, keeps the previous ChatGPT transcription implementation in `process_voice_gpt()` as a
   fallback/reserve code path, and asks Qwen to restore punctuation after local transcription; if Qwen is not
   configured or unavailable, the raw local transcription is returned unchanged
