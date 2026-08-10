@@ -352,6 +352,14 @@ Feature groups:
 
 If you add a command but forget the registry, it will not run.
 
+`apps/commands/other/commands/service/check_trusted_role.py` is a high-priority global access barrier:
+non-`TRUSTED` users receive the access-denied message before ordinary commands run. That barrier also owns
+the inline access request flow: users can press “Запросить доступ”, the admin receives approve/reject buttons
+in PM with the originating chat/thread encoded in callback data, and approving adds the `TRUSTED` role to the
+requesting profile before notifying that original chat/thread.
+Telegram callback data is capped at 64 bytes; `TgBot.get_button()` serializes callback JSON without spaces, and
+access approval callbacks intentionally use very short command/key names to stay under that limit.
+
 ## GPT subsystem: `apps/commands/gpt/`
 
 This is one of the most complex parts of the repo.

@@ -689,7 +689,7 @@ class TgBot(Bot):
             callback_data["a"] = args
         if kwargs:
             callback_data["k"] = kwargs
-        callback_data_json = json.dumps(callback_data, ensure_ascii=False)
+        callback_data_json = json.dumps(callback_data, ensure_ascii=False, separators=(",", ":"))
 
         callback_data_len = len(callback_data_json.encode("UTF8"))
         if callback_data_len > 62:
