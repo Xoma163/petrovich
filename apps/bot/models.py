@@ -59,7 +59,7 @@ class ProfileSettings(TimeStampModelMixin):
 
 class Chat(Platform, TimeStampModelMixin):
     chat_id = models.CharField("ID чата", max_length=20, default="")
-    name = models.CharField("Название", max_length=256, default="", blank=True)
+    name = models.CharField("Название", max_length=255, default="", blank=True)
     is_banned = models.BooleanField("Забанен", default=False)
 
     # Для статистики
@@ -108,9 +108,9 @@ class Profile(TimeStampModelMixin):
     GENDER_NONE = ""
     GENDER_CHOICES = ((GENDER_FEMALE, "женский"), (GENDER_MALE, "мужской"), (GENDER_NONE, "не указан"))
 
-    name = models.CharField("Имя", max_length=40, blank=True, null=True)
-    surname = models.CharField("Фамилия", max_length=40, blank=True, null=True)
-    nickname_real = models.CharField("Прозвище", max_length=40, blank=True)
+    name = models.CharField("Имя", max_length=255, blank=True, null=True)
+    surname = models.CharField("Фамилия", max_length=255, blank=True, null=True)
+    nickname_real = models.CharField("Прозвище", max_length=255, blank=True)
     gender = models.CharField("Пол", max_length=2, blank=True, choices=GENDER_CHOICES)
     birthday = models.DateField("Дата рождения", null=True, blank=True)
     city = models.ForeignKey(City, models.SET_NULL, verbose_name="Город", null=True, blank=True)
@@ -190,7 +190,7 @@ class User(Platform, TimeStampModelMixin):
     profile = models.ForeignKey(
         Profile, verbose_name="Профиль", related_name="user", null=True, blank=True, on_delete=models.SET_NULL
     )
-    nickname = models.CharField("Никнейм", max_length=40, blank=True, null=True)
+    nickname = models.CharField("Никнейм", max_length=255, blank=True, null=True)
 
     def show_url(self):
         if self.get_platform_enum() == PlatformEnum.TG and self.nickname:
@@ -225,7 +225,7 @@ class User(Platform, TimeStampModelMixin):
 
 class Bot(Platform, TimeStampModelMixin):
     bot_id = models.CharField("ID бота", max_length=20)
-    name = models.CharField("Имя", max_length=40)
+    name = models.CharField("Имя", max_length=255)
     avatar = models.ImageField("Аватар", blank=True, upload_to="bot/bot/avatar/")
 
     class Meta:

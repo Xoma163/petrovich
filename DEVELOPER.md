@@ -335,6 +335,10 @@ Core domain entities in `apps/bot/models.py`:
 - `Role` — permission model
 - `ProfileSettings` / `ChatSettings` — bot behavior toggles
 
+Telegram-facing display fields on bot identities (`Profile.name`, `Profile.surname`,
+`Profile.nickname_real`, `User.nickname`, `Chat.name`, `Bot.name`) are sized for long platform-provided
+names and should remain at 255 characters unless a platform-specific limit is deliberately rechecked.
+
 ## Commands: `apps/commands/`
 
 This is the feature layer.
