@@ -26,3 +26,9 @@ class ZomboidServerTest(SimpleTestCase):
 
         self.assertIsNone(data.players_online)
         self.assertNotIn("\x1b", data.raw_status)
+
+    def test_parse_players_from_rcon_output(self):
+        data = ZomboidServer.parse_players("Players connected (1):\r\n-AndrewSha\r\n")
+
+        self.assertEqual(data.players_online, 1)
+        self.assertEqual(data.players, ["AndrewSha"])

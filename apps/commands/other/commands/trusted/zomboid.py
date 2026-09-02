@@ -4,6 +4,7 @@ from apps.commands.command import Command
 from apps.commands.help_text import HelpText, HelpTextArgument, HelpTextItem, HelpTextKey
 from apps.connectors.parsers.zomboid.zomboid_server import ZomboidServer, ZomboidServerData
 from apps.shared.utils.utils import check_command_time
+from petrovich.settings import ZOMBOID_RCON_HOST, ZOMBOID_RCON_PASSWORD, ZOMBOID_RCON_PORT
 
 
 class Zomboid(Command):
@@ -28,7 +29,7 @@ class Zomboid(Command):
                 [
                     HelpTextArgument("рестарт", "перезапускает сервер"),
                 ],
-            )
+            ),
         ],
         help_text_keys=[
             HelpTextItem(
@@ -36,7 +37,7 @@ class Zomboid(Command):
                 [
                     HelpTextKey("force", None, "форсированно перезапускает сервер"),
                 ],
-            )
+            ),
         ],
     )
 
@@ -55,7 +56,7 @@ class Zomboid(Command):
     def menu_restart(self) -> ResponseMessageItem:
         self.check_args(1)
         force = self.event.message.is_key_provided({"force"})
-        server = ZomboidServer(log_filter=self.event.log_filter)
+        server = self.get_server()
         if force:
             self.check_sender(RoleEnum.ADMIN)
             server.force_restart()
@@ -66,7 +67,7 @@ class Zomboid(Command):
         return ResponseMessageItem(text="Рестартим Zomboid")
 
     def menu_status(self) -> ResponseMessageItem:
-        server = ZomboidServer(log_filter=self.event.log_filter)
+        server = self.get_server()
         server_info = server.get_server_info()
         answer = self.get_server_info_str(server_info)
 
@@ -85,3 +86,11 @@ class Zomboid(Command):
             players = [self.bot.get_formatted_text_line(player) for player in players]
             answer += f"\nИгроки: {', '.join(players)}"
         return answer
+
+    def get_server(self) -> ZomboidServer:
+        return ZomboidServer(
+            rcon_host=ZOMBOID_RCON_HOST,
+            rcon_port=ZOMBOID_RCON_PORT,
+            rcon_password=ZOMBOID_RCON_PASSWORD,
+            log_filter=self.event.log_filter,
+        )
