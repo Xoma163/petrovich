@@ -77,10 +77,7 @@ class Zomboid(Command):
 
     def get_server_info_str(self, server_info: ZomboidServerData) -> str:
         if server_info.players_online is None:
-            answer = "Zomboid: статус получен"
-            if server_info.raw_status:
-                answer += f"\n{server_info.raw_status}"
-            return answer
+            return "Zomboid: не нашёл список игроков в ответе сервера"
 
         answer = f"Zomboid ✅ Игроков: {server_info.players_online}"
         if server_info.players:

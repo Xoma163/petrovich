@@ -18,6 +18,7 @@ class ZomboidServerData:
 
 class ZomboidServer:
     COMMAND_TIMEOUT = 300
+    ANSI_ESCAPE_RE = re.compile(r"\x1b(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
     RESTART_COMMAND = ["sudo", "/usr/local/sbin/zomboid-restart-if-empty-updates", "--force"]
     FORCE_RESTART_COMMAND = ["sudo", "systemctl", "restart", "zomboid"]
     STATUS_COMMAND = ["sudo", "-u", "zomboid", "-H", "bash", "-lc", "cd /opt/zomboid && ./pzserver send players"]
@@ -37,6 +38,7 @@ class ZomboidServer:
 
     @classmethod
     def parse_players(cls, output: str) -> ZomboidServerData:
+        output = cls.strip_ansi(output)
         players_online = None
         players = []
 
@@ -54,6 +56,10 @@ class ZomboidServer:
             players_online = len(players)
 
         return ZomboidServerData(players_online=players_online, players=players, raw_status=output.strip())
+
+    @classmethod
+    def strip_ansi(cls, output: str) -> str:
+        return cls.ANSI_ESCAPE_RE.sub("", output)
 
     def _run_command(self, command: list[str], error_message: str) -> str:
         try:
