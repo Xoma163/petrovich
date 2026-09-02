@@ -37,6 +37,7 @@ from apps.commands.other.commands.statistics import Statistics
 from apps.commands.other.commands.trusted.audio_track import AudioTrack
 from apps.commands.other.commands.trusted.deissue import DeIssue
 from apps.commands.other.commands.trusted.trim import Trim
+from apps.commands.other.commands.trusted.zomboid import Zomboid
 from apps.shared.utils.utils import get_flat_list
 
 _commands = [
@@ -78,6 +79,7 @@ _commands = [
     AudioTrack,
     DeIssue,
     Trim,
+    Zomboid,
     # other
     Birthday,
     Calc,

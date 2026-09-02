@@ -1,0 +1,90 @@
+from apps.bot.consts import RoleEnum
+from apps.bot.core.messages.response_message import ResponseMessage, ResponseMessageItem
+from apps.commands.command import Command
+from apps.commands.help_text import HelpText, HelpTextArgument, HelpTextItem, HelpTextKey
+from apps.connectors.parsers.zomboid.zomboid_server import ZomboidServer, ZomboidServerData
+from apps.shared.utils.utils import check_command_time
+
+
+class Zomboid(Command):
+    RESTART_DELAY = 180
+
+    name = "зомбоид"
+    names = ["zomboid"]
+    access = RoleEnum.TRUSTED
+
+    help_text = HelpText(
+        commands_text="статус и рестарт сервера Project Zomboid",
+        help_texts=[
+            HelpTextItem(
+                access,
+                [
+                    HelpTextArgument(None, "статус сервера"),
+                    HelpTextArgument("рестарт", "перезапускает сервер"),
+                ],
+            ),
+            HelpTextItem(
+                RoleEnum.ADMIN,
+                [
+                    HelpTextArgument("рестарт", "перезапускает сервер"),
+                ],
+            )
+        ],
+        help_text_keys=[
+            HelpTextItem(
+                RoleEnum.ADMIN,
+                [
+                    HelpTextKey("force", None, "форсированно перезапускает сервер"),
+                ],
+            )
+        ],
+    )
+
+    def start(self) -> ResponseMessage:
+        arg0 = self.event.message.args[0] if self.event.message.args else None
+
+        menu = [
+            [["рестарт", "restart"], self.menu_restart],
+            [["статус", "status"], self.menu_status],
+            [["default"], self.menu_status],
+        ]
+        method = self.handle_menu(menu, arg0)
+        rmi = method()
+        return ResponseMessage(rmi)
+
+    def menu_restart(self) -> ResponseMessageItem:
+        self.check_args(1)
+        force = self.event.message.is_key_provided({"force"})
+        server = ZomboidServer(log_filter=self.event.log_filter)
+        if force:
+            self.check_sender(RoleEnum.ADMIN)
+            server.force_restart()
+            return ResponseMessageItem(text="Форсированно рестартим Zomboid")
+
+        check_command_time("zomboid", self.RESTART_DELAY)
+        server.restart()
+        return ResponseMessageItem(text="Рестартим Zomboid")
+
+    def menu_status(self) -> ResponseMessageItem:
+        server = ZomboidServer(log_filter=self.event.log_filter)
+        server_info = server.get_server_info()
+        answer = self.get_server_info_str(server_info)
+
+        button = self.bot.get_button("Обновить", self.name, args=["статус"])
+        keyboard = self.bot.get_inline_keyboard([button])
+        mid = self.event.raw.get("callback_query", {}).get("message", {}).get("message_id")
+        return ResponseMessageItem(text=answer, keyboard=keyboard, message_id=mid)
+
+    def get_server_info_str(self, server_info: ZomboidServerData) -> str:
+        if server_info.players_online is None:
+            answer = "Zomboid: статус получен"
+            if server_info.raw_status:
+                answer += f"\n{server_info.raw_status}"
+            return answer
+
+        answer = f"Zomboid ✅ Игроков: {server_info.players_online}"
+        if server_info.players:
+            players = sorted(server_info.players)
+            players = [self.bot.get_formatted_text_line(player) for player in players]
+            answer += f"\nИгроки: {', '.join(players)}"
+        return answer

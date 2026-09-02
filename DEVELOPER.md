@@ -24,6 +24,7 @@ This project is heavily centered on:
 - meme storage / inline search
 - GitHub issue/comment automation
 - some host-specific operational automation such as Minecraft service control
+- some host-specific operational automation such as Minecraft and Project Zomboid service control
 
 The code and user-facing strings are predominantly **Russian**, and several operational assumptions are clearly tailored to the maintainer's own infrastructure.
 
@@ -542,6 +543,10 @@ Some code performs machine-level or host-level actions.
 Example:
 
 - Minecraft server control uses `sudo systemctl start/stop ...`
+- Project Zomboid control uses local `sudo` commands from the trusted `/зомбоид` (`/zomboid`) command:
+  status runs `sudo -u zomboid -H bash -lc 'cd /opt/zomboid && ./pzserver send players'`, ordinary restart runs
+  `sudo /usr/local/sbin/zomboid-restart-if-empty-updates --force` with a 3-minute cooldown, and admin-only
+  `/зомбоид рестарт --force` runs `sudo systemctl restart zomboid` without that cooldown.
 
 Treat this area as operationally sensitive.
 
