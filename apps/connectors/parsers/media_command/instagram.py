@@ -13,6 +13,7 @@ from apps.shared.exceptions import PWarning, PError
 class InstagramParser:
     AGE_RESTRICTION_RE = r"You must be (\d+) years old or over to"
     AGE_RESTRICTION_2_RE = r"Людям младше (\d+) лет этот контент недоступен"
+    AGE_RESTRICTION_3_RE = r"People under (\d+) can['’]t see this content"
     INAPPROPRIATE_CONTENT = "This content may be inappropriate"
     API_DATA_KEYS = ("xdt_api__v1__", "xig_polaris_media")
 
@@ -34,7 +35,7 @@ class InstagramParser:
             )
         bs4 = BeautifulSoup(page_source, "html.parser")
         spans = bs4.find_all("span")
-        if any([re.search(self.AGE_RESTRICTION_RE, x.text) for x in spans]):
+        if self._has_age_restriction(page_source):
             raise PWarning("Не могу скачать контент. Он недоступен без аутентификации (возрастное ограничение)")
         elif any(self.INAPPROPRIATE_CONTENT in x.text for x in spans):
             raise PWarning("Не могу скачать контент. Он недоступен без аутентификации (неприемлимый контент)")
@@ -75,8 +76,18 @@ class InstagramParser:
         return page_content
 
     def check_request_errors(self, page_source):
-        if re.search(self.AGE_RESTRICTION_2_RE, page_source):
+        if self._has_age_restriction(page_source):
             raise PWarning("Не могу скачать контент. Он недоступен без аутентификации (возрастное ограничение)")
+
+    def _has_age_restriction(self, page_source):
+        return any(
+            re.search(pattern, page_source)
+            for pattern in (
+                self.AGE_RESTRICTION_RE,
+                self.AGE_RESTRICTION_2_RE,
+                self.AGE_RESTRICTION_3_RE,
+            )
+        )
 
     @staticmethod
     def _get_media(api_scripts):
@@ -101,7 +112,7 @@ class InstagramParser:
                     elif "media" in node:
                         return node["media"]
                     raise KeyError()
-            except KeyError, IndexError, AttributeError:
+            except (KeyError, IndexError, AttributeError):
                 continue
 
         if has_api_error:
