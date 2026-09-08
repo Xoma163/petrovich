@@ -20,7 +20,7 @@ class InstagramParser:
     def get_data(self, url):
         # is_post = bool(re.search(r"p/([A-Za-z0-9_-]+)", url))
         is_story = bool(re.search(r"stories/.*/(\d+)", url))
-        # is_reel = bool(re.search(r"reels?/([A-Za-z0-9_-]+)/", url))
+        is_reel = bool(re.search(r"reels?/([A-Za-z0-9_-]+)/?", url))
 
         if is_story:
             raise PWarning("Парсинг сторей не работает")
@@ -49,7 +49,7 @@ class InstagramParser:
         except Exception:
             media = self.get_media_by_parse_json(page_source)
 
-        return self._parse_media(media)
+        return self._parse_media(media, skip_caption=is_reel)
 
     @retry(times=3, exceptions=(TimeoutException,))
     def _get_instagram_request(self, url):
@@ -141,11 +141,11 @@ class InstagramParser:
 
         raise PWarning("Не могу скачать этот контент. Неизвестный тип. Сообщите разработчику")
 
-    @staticmethod
-    def _parse_media(media):
+    @classmethod
+    def _parse_media(cls, media, skip_caption=False):
         data = InstagramAPIData()
         caption = media.get("caption")
-        if caption:
+        if caption and not skip_caption and not cls._is_reels_media(media):
             data.caption = caption.get("text", None)
 
         if carousel_items := media.get("carousel_media"):
@@ -159,6 +159,14 @@ class InstagramParser:
         elif image := media.get("image_versions2"):
             data.add_image(download_url=image["candidates"][0]["url"])
         return data
+
+    @staticmethod
+    def _is_reels_media(media):
+        return (
+            media.get("product_type") == "clips"
+            or media.get("media_product_type") == "REELS"
+            or bool(media.get("clips_metadata"))
+        )
 
     @staticmethod
     def extract_json(text, key):

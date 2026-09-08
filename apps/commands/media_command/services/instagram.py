@@ -29,8 +29,7 @@ class InstagramService(MediaService):
                 continue
             attachments.append(attachment)
 
-        text = "" if "/reels/" in url else data.caption
-        return MediaServiceResponse(text=text, attachments=attachments)
+        return MediaServiceResponse(text=data.caption, attachments=attachments)
 
     @classmethod
     def urls(cls) -> list[str]:

@@ -5,6 +5,7 @@ from django.test import SimpleTestCase
 
 from apps.commands.media_command.service import MediaKeys
 from apps.commands.media_command.services.twitter import TwitterService
+from apps.connectors.parsers.media_command.instagram import InstagramParser
 from apps.connectors.parsers.media_command.twitter import TwitterAPIResponse
 
 
@@ -28,3 +29,37 @@ class TwitterServiceTestCase(SimpleTestCase):
         service.service.get_post_data.assert_called_once_with("https://x.com/test/status/1")
         self.assertEqual(result.text, "caption")
         self.assertEqual(result.attachments, [])
+
+
+class InstagramParserTestCase(SimpleTestCase):
+    def test_parse_media_keeps_caption_for_regular_media(self):
+        data = InstagramParser._parse_media(
+            {
+                "caption": {"text": "caption"},
+                "image_versions2": {"candidates": [{"url": "https://example.com/image.jpg"}]},
+            }
+        )
+
+        self.assertEqual(data.caption, "caption")
+
+    def test_parse_media_skips_caption_for_reels_media(self):
+        data = InstagramParser._parse_media(
+            {
+                "caption": {"text": "caption"},
+                "product_type": "clips",
+                "video_versions": [{"url": "https://example.com/video.mp4"}],
+            }
+        )
+
+        self.assertEqual(data.caption, "")
+
+    def test_parse_media_can_skip_caption_by_url_type(self):
+        data = InstagramParser._parse_media(
+            {
+                "caption": {"text": "caption"},
+                "video_versions": [{"url": "https://example.com/video.mp4"}],
+            },
+            skip_caption=True,
+        )
+
+        self.assertEqual(data.caption, "")
