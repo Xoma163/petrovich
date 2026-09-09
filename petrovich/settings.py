@@ -172,7 +172,9 @@ LOGGING = {
         },
         "file-error": {
             "level": "ERROR",
-            "class": "logging.FileHandler",
+            "class": "logging.handlers.RotatingFileHandler",
+            "backupCount": 10,
+            "maxBytes": 100 * 2**20,  # 100 mb
             "filename": ERROR_FILE,
             "encoding": "utf-8",
             "formatter": "json",

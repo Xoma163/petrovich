@@ -22,6 +22,8 @@ class APIHandler:
         if not kwargs.get("headers") and self.headers:
             kwargs["headers"] = self.headers
 
+        kwargs.setdefault("timeout", 30)
+
         r: Response = getattr(requests, method)(url, *args, **kwargs)
 
         if not log:

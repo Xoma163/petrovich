@@ -3,6 +3,8 @@ import re
 import string
 from urllib.parse import urlparse
 
+import requests
+
 from apps.connectors.api.handler import API
 from apps.shared.exceptions import PWarning
 
@@ -33,10 +35,14 @@ class Twitter(API):
     def get_post_data(self, url) -> TwitterAPIResponse:
         tweet_id = urlparse(url).path.strip("/").split("/")[-1]
         token = self._get_token(tweet_id)
-        post_data = self.requests.get(
-            self.URL_TWEET_INFO,
-            params={"id": tweet_id, "token": token},
-        ).json()
+        try:
+            post_data = self.requests.get(
+                self.URL_TWEET_INFO,
+                params={"id": tweet_id, "token": token},
+                timeout=20,
+            ).json()
+        except requests.RequestException as exc:
+            raise PWarning("Не получилось получить данные X/Twitter. Попробуйте позже") from exc
 
         if not post_data:
             raise PWarning("Ошибка. В посте нет данных. Заведите ишу, плиз, гляну чё там")
