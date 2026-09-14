@@ -7,6 +7,7 @@ from apps.commands.media_command.service import MediaKeys
 from apps.commands.media_command.services.twitter import TwitterService
 from apps.connectors.parsers.media_command.instagram import InstagramParser
 from apps.connectors.parsers.media_command.twitter import TwitterAPIResponse
+from apps.shared.exceptions import PWarning
 
 
 class TwitterServiceTestCase(SimpleTestCase):
@@ -63,3 +64,24 @@ class InstagramParserTestCase(SimpleTestCase):
         )
 
         self.assertEqual(data.caption, "")
+
+    def test_get_polaris_media_rejects_api_age_gate(self):
+        with self.assertRaisesMessage(PWarning, "возрастное ограничение"):
+            InstagramParser._get_polaris_media(
+                {
+                    "__typename": "XIGPolarisVideoMedia",
+                    "if_not_gated_logged_out": None,
+                    "gating_ruling": {
+                        "gating_type": 3,
+                        "title": "Age-restricted content",
+                    },
+                }
+            )
+
+    def test_get_polaris_media_returns_ungated_payload(self):
+        media = {"video_versions": [{"url": "https://example.com/video.mp4"}]}
+
+        self.assertIs(
+            InstagramParser._get_polaris_media({"if_not_gated_logged_out": media}),
+            media,
+        )

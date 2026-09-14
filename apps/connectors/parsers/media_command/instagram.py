@@ -44,12 +44,15 @@ class InstagramParser:
             all_scripts = bs4.select('script[type="application/json"][data-content-len][data-processed]')
             api_scripts = [x for x in all_scripts if any(key in x.text for key in self.API_DATA_KEYS)]
             media = self._get_media(api_scripts)
-        except PError:
+        except (PError, PWarning):
             raise
         except Exception:
             media = self.get_media_by_parse_json(page_source)
 
-        return self._parse_media(media, skip_caption=is_reel)
+        data = self._parse_media(media, skip_caption=is_reel)
+        if not data.items:
+            raise PWarning("Не могу скачать этот контент. Неизвестный тип. Сообщите разработчику")
+        return data
 
     @retry(times=3, exceptions=(TimeoutException,))
     def _get_instagram_request(self, url):
@@ -104,7 +107,7 @@ class InstagramParser:
                 if shortcode_web_info := data.get("xdt_api__v1__media__shortcode__web_info"):
                     return shortcode_web_info["items"][0]
                 elif polaris_media := data.get("xig_polaris_media"):
-                    return polaris_media.get("if_not_gated_logged_out") or polaris_media
+                    return InstagramParser._get_polaris_media(polaris_media)
                 elif clips_on_logged_out := data.get("xdt_api__v1__clips__clips_on_logged_out_connection_v2"):
                     node = clips_on_logged_out["edges"][0]["node"]
                     if "media_command" in node:
@@ -129,7 +132,9 @@ class InstagramParser:
 
         try:
             json_data = self.extract_json(page_source, "xig_polaris_media")
-            return json_data.get("if_not_gated_logged_out") or json_data
+            return self._get_polaris_media(json_data)
+        except PWarning:
+            raise
         except Exception:
             pass
 
@@ -140,6 +145,14 @@ class InstagramParser:
             pass
 
         raise PWarning("Не могу скачать этот контент. Неизвестный тип. Сообщите разработчику")
+
+    @staticmethod
+    def _get_polaris_media(polaris_media):
+        if media := polaris_media.get("if_not_gated_logged_out"):
+            return media
+        if polaris_media.get("gating_ruling"):
+            raise PWarning("Не могу скачать контент. Он недоступен без аутентификации (возрастное ограничение)")
+        return polaris_media
 
     @classmethod
     def _parse_media(cls, media, skip_caption=False):

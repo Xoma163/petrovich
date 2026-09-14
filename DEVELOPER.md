@@ -427,6 +427,8 @@ What it does:
 - extracts Instagram media from both older `xdt_api__v1__...` page JSON and newer `xig_polaris_media` page JSON
 - detects Instagram logged-out age-gate messages during page loading and returns a user-facing warning instead of
   falling through to the generic unknown-content parser error
+- also detects age gates exposed only as `xig_polaris_media.gating_ruling`, where
+  `if_not_gated_logged_out` is null, and never returns an empty media response for unsupported payloads
 - intentionally leaves Instagram Reels captions empty while preserving captions for other Instagram media types
 - chooses a service implementation by hostname
 - downloads or extracts content
