@@ -473,6 +473,10 @@ Supported service families discovered in code include:
 - Suno AI
 - Boosty
 
+Boosty post pages and subsequent OK CDN video downloads must use the same project-wide User-Agent: Boosty signs
+the returned player URLs for the User-Agent that requested the post, and a mismatch can produce a two-byte,
+zero-duration upload instead of the video. Boosty also propagates the post's duration to Telegram explicitly.
+
 Important files:
 
 - `apps/commands/media_command/commands/media_command.py`
@@ -481,6 +485,7 @@ Important files:
 - `apps/commands/media_command/models.py`
 
 Shared Selenium browser sessions from `apps/connectors/parsers/web_driver.py` force English locale through Chrome DevTools Protocol (`Accept-Language: en-US,en;q=0.9` and `Emulation.setLocaleOverride`) so parser-visible site text is less dependent on the host OS locale.
+The browser helper can use explicit `CHROME_BINARY` and `CHROMEDRIVER_BINARY` environment variables; on the production host it also checks Selenium's cache under `/home/andrewsha/.cache/selenium/` before falling back to system Chrome/ChromeDriver paths. It runs modern headless Chrome with `--disable-dev-shm-usage`, which is important on memory-constrained hosts and containers.
 
 ## Reminder/scheduler subsystem: `apps/commands/notifies/`
 
@@ -607,6 +612,8 @@ From the codebase and example env:
 - `DISK_SAVE_PATH`
 - `IMGBB_API_KEY`
 - `GITHUB_TOKEN`
+- `CHROME_BINARY` (optional explicit Selenium Chrome executable)
+- `CHROMEDRIVER_BINARY` (optional explicit Selenium ChromeDriver executable)
 
 ## Secrets handling guidance
 
@@ -876,6 +883,7 @@ The code has abstractions for platforms, but the practical implementation is Tel
 The project uses JSON logging with user/chat/message identifiers in `log_filter`. It allows filtering logs when calling the corresponding command to restrict access.
 
 `petrovich/settings.py` reconfigures `stdout` and `stderr` to UTF-8 with `backslashreplace` and writes file logs with explicit UTF-8 encoding, so emoji and other non-CP1251 characters do not break local Windows logging.
+The error log uses a rotating file handler (10 backups, 100 MiB each) rather than an unbounded file.
 
 ---
 

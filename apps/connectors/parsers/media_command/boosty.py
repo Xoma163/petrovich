@@ -3,6 +3,7 @@ import json
 import requests
 from bs4 import BeautifulSoup
 
+from apps.connectors.utils import get_default_headers
 from apps.connectors.parsers.media_command.data import VideoData
 from apps.shared.exceptions import PWarning, PError
 
@@ -15,7 +16,11 @@ class Boosty:
         cookies = {}
         if auth_cookie:
             cookies["auth"] = auth_cookie
-        response = requests.get(post_url, cookies=cookies)
+        # Boosty signs OK CDN URLs for the User-Agent used to request the post.
+        # Downloader uses the same project-wide headers, otherwise the CDN can
+        # return an empty two-byte response instead of the video.
+        response = requests.get(post_url, cookies=cookies, headers=get_default_headers(), timeout=30)
+        response.raise_for_status()
         bs4 = BeautifulSoup(response.text, "html.parser")
         data = json.loads(bs4.select_one("#initial-state").text)
         post = data["posts"]["postsList"]["data"]["posts"][0]
@@ -60,6 +65,7 @@ class Boosty:
             channel_id=author_id,
             channel_title=author_name,
             video_id=video_id,
+            duration=video_info.get("duration"),
             width=width,
             height=height,
             thumbnail_url=thumbnail,
@@ -68,7 +74,9 @@ class Boosty:
 
     @staticmethod
     def set_download_url(video_data: VideoData, high_res=False):
-        player_urls_dict = video_data.extra_data["player_urls_dict"]  # noqa
+        if video_data.extra_data is None:
+            raise PError("Не смог найти видео")
+        player_urls_dict = video_data.extra_data["player_urls_dict"]
         qualities_order = ["ultra_hd", "quad_hd", "full_hd", "high", "medium", "low"]
         if not high_res:
             qualities_order = qualities_order[2:]

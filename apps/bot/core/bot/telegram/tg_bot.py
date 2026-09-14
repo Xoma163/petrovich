@@ -505,6 +505,7 @@ class TgBot(Bot):
             reply_markup=rmi.keyboard,
             parse_mode=rmi.parse_mode,
             caption=rmi.text,
+            duration=video_attachment.duration,
             width=video_attachment.width,
             height=video_attachment.height,
             has_spoiler=rmi.spoiler,

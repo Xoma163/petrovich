@@ -291,6 +291,7 @@ class Bot:
         peer_id: str | int | None = None,
         message_thread_id: int | None = None,
         send_chat_action: bool = True,
+        duration: int | None = None,
         width: int | None = None,
         height: int | None = None,
         thumbnail_bytes: bytes | None = None,
@@ -304,6 +305,7 @@ class Bot:
             self, ChatActionEnum.UPLOAD_VIDEO, peer_id, message_thread_id, send_chat_action=send_chat_action
         ):
             va.parse(url, path, _bytes, filename=filename)
+        va.duration = duration
         va.width = width
         va.height = height
         va.thumbnail_bytes = thumbnail_bytes
