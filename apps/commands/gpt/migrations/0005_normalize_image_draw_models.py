@@ -27,6 +27,9 @@ def consolidate_image_draw_models(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
+    # PostgreSQL must commit the data consolidation before adding the new
+    # unique constraint, otherwise deferred FK triggers remain pending.
+    atomic = False
 
     dependencies = [
         ('gpt', '0004_alter_gptpreset_gpt_5_settings_reasoning_effort_level_and_more'),
@@ -82,7 +85,7 @@ class Migration(migrations.Migration):
             name='quality',
             field=models.CharField(max_length=32, verbose_name='Качество по умолчанию'),
         ),
-        migrations.RunPython(consolidate_image_draw_models, migrations.RunPython.noop),
+        migrations.RunPython(consolidate_image_draw_models, migrations.RunPython.noop, atomic=True),
         migrations.AddConstraint(
             model_name='imagedrawmodel',
             constraint=models.UniqueConstraint(fields=('name', 'provider'), name='unique_name_provider_img_draw'),
