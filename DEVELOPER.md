@@ -551,6 +551,8 @@ derive a JPEG preview from the already-downloaded video bytes through `VideoHand
 which currently takes a frame from the first second by default.
 `StickerAttachment` uses Telegram's `choose_sticker` chat action; without an attachment action the shared
 Telegram sender rejects sticker memes before calling `sendSticker`, including stickers selected for horoscopes.
+Telegram inline meme results normalize both the legacy database type `gif` and the current attachment type
+`animation` to Bot API result type `gif`; both use the `gif_file_id` field and remain searchable.
 
 ## GitHub automation
 

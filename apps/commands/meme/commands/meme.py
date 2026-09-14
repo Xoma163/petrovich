@@ -613,20 +613,22 @@ class Meme(Command):
         _inline_qr = []
 
         att_type_map = {
-            PhotoAttachment.TYPE: "photo_file_id",
-            StickerAttachment.TYPE: "sticker_file_id",
-            VideoAttachment.TYPE: "video_file_id",
-            AnimationAttachment.TYPE: "gif_file_id",
-            VoiceAttachment.TYPE: "voice_file_id",
+            PhotoAttachment.TYPE: (PhotoAttachment.TYPE, "photo_file_id"),
+            StickerAttachment.TYPE: (StickerAttachment.TYPE, "sticker_file_id"),
+            VideoAttachment.TYPE: (VideoAttachment.TYPE, "video_file_id"),
+            AnimationAttachment.TYPE: ("gif", "gif_file_id"),
+            "gif": ("gif", "gif_file_id"),
+            VoiceAttachment.TYPE: (VoiceAttachment.TYPE, "voice_file_id"),
         }
 
         for meme in memes:
+            inline_type, file_id_field = att_type_map[meme.type]
             qr = {
                 "id": meme.pk,
-                "type": meme.type,
-                att_type_map[meme.type]: meme.tg_file_id,
+                "type": inline_type,
+                file_id_field: meme.tg_file_id,
             }
-            if meme.type in [VideoAttachment.TYPE, AnimationAttachment.TYPE, VoiceAttachment.TYPE]:
+            if meme.type in [VideoAttachment.TYPE, AnimationAttachment.TYPE, "gif", VoiceAttachment.TYPE]:
                 qr["title"] = meme.name
 
             # set youtube preview
@@ -688,7 +690,17 @@ class Meme(Command):
         else:
             filtered_memes = MemeModel.objects.all().order_by("-uses")
 
-        memes = filtered_memes.filter(type__in=["photo", "sticker", "video", "voice", "gif"], approved=True)
+        memes = filtered_memes.filter(
+            type__in=[
+                PhotoAttachment.TYPE,
+                StickerAttachment.TYPE,
+                VideoAttachment.TYPE,
+                VoiceAttachment.TYPE,
+                AnimationAttachment.TYPE,
+                "gif",
+            ],
+            approved=True,
+        )
         if not self.event.sender.check_role(RoleEnum.TRUSTED):
             memes = memes.exclude(for_trusted=True)
 
@@ -711,6 +723,7 @@ class Meme(Command):
             VoiceAttachment.TYPE,
             VideoAttachment.TYPE,
             AnimationAttachment.TYPE,
+            "gif",
             StickerAttachment.TYPE,
             PhotoAttachment.TYPE,
         ]
