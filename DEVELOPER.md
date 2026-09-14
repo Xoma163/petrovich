@@ -394,6 +394,8 @@ What it does:
 Important concepts:
 
 - provider models are stored in the database
+- saving any GPT model with `is_default=True` atomically clears the previous default of the same concrete model
+  type and provider; the provider row is locked so concurrent admin saves cannot leave multiple defaults
 - user API keys are encrypted with Fernet
 - GPT conversation history is reconstructed from cached Telegram messages in Redis
 - some GPT provider implementations are OpenAI-compatible, but not all are remote SaaS-only

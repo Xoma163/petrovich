@@ -1,5 +1,5 @@
 from django.core.exceptions import ValidationError
-from django.db import models
+from django.db import models, transaction
 
 from apps.bot.models import Profile, Chat
 from apps.commands.gpt.enums import (
@@ -70,12 +70,20 @@ class GPTModel(models.Model):
         return self.name
 
     def save(self, *args, **kwargs):
-        # Если модель сохраняется с полем is_default, значит сбрасываем всем остальным поле default
-        if self.is_default:
-            self.__class__.objects.filter(provider=self.provider, is_default=True).exclude(id=self.id).update(
-                is_default=Falseddd
+        update_fields = kwargs.get("update_fields")
+        setting_as_default = self.is_default and (update_fields is None or "is_default" in update_fields)
+        if not setting_as_default:
+            return super().save(*args, **kwargs)
+
+        # Lock the provider so concurrent saves cannot leave multiple default
+        # models for the same provider. The transaction also restores the old
+        # default if saving the new one fails.
+        with transaction.atomic():
+            Provider.objects.select_for_update().get(pk=self.provider_id)
+            self.__class__.objects.filter(provider_id=self.provider_id, is_default=True).exclude(pk=self.pk).update(
+                is_default=False
             )
-        super().save(*args, **kwargs)
+            return super().save(*args, **kwargs)
 
     class Meta:
         abstract = True
