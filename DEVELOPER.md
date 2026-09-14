@@ -415,6 +415,9 @@ Each `ImageDrawModel` row now represents one API model rather than one size/qual
 and `quality` are the defaults; `supported_sizes` and `supported_qualities` validate per-request overrides. The
 `0005_normalize_image_draw_models` migration consolidates legacy variants and repoints profile and preset foreign
 keys before enforcing uniqueness by provider and model name.
+GPT model selection uses one shared set/reset path for completions, vision, image generation, and voice recognition.
+Lookups are scoped to the active provider, and each model list compares its rows with the matching profile field when
+displaying the `выбрано` marker; supported model types with no configured rows are shown as empty instead of failing.
 Image editing is not part of the GPT subsystem: migration `0006` removes `ImageEditModel` and its profile/preset
 references, and provider APIs expose image generation only.
 For GPT Image responses, generation cost is calculated from the API's actual text-input, image-input, and

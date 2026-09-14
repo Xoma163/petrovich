@@ -18,6 +18,8 @@ from apps.shared.exceptions import PWarning
 
 
 class GPTModelChoiceMixin(GPTCommandProtocol):
+    RESET_MODEL_NAMES = {"удалить", "сброс", "сбросить", "delete", "reset"}
+
     MODEL_CHOOSE_HELP_TEXT_ITEMS = [
         HelpTextArgument("модели", "выводит список доступных моделей"),
         HelpTextArgument("модель", "выведет текущие модели"),
@@ -102,7 +104,7 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
             completions_models = CompletionsModel.objects.filter(provider=self.provider_model).order_by("name")
             completions_models_str = self._get_models_str(
                 completions_models,
-                profile_gpt_settings,
+                profile_gpt_settings.completions_model,
                 self._get_completions_vision_row,
                 "обработки текста (completions)",
                 "Название | цена за 1кк входных токенов | цена за 1кк выходных токенов",
@@ -113,7 +115,7 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
             vision_models = VisionModel.objects.filter(provider=self.provider_model).order_by("name")
             vision_models_str = self._get_models_str(
                 vision_models,
-                profile_gpt_settings,
+                profile_gpt_settings.vision_model,
                 self._get_completions_vision_row,
                 "обработки изображений (vision)",
                 "Название | цена за 1кк входных токенов | цена за 1кк выходных токенов",
@@ -124,7 +126,7 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
             image_draw_models = ImageDrawModel.objects.filter(provider=self.provider_model).order_by("name")
             image_draw_models_str = self._get_models_str(
                 image_draw_models,
-                profile_gpt_settings,
+                profile_gpt_settings.image_draw_model,
                 self._get_image_draw_row,
                 "генерации изображений (draw)",
                 "Название | размер по умолчанию | качество по умолчанию | цена за 1млн output-токенов",
@@ -137,7 +139,7 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
             )
             voice_recognition_models_str = self._get_models_str(
                 voice_recognition_models,
-                profile_gpt_settings,
+                profile_gpt_settings.voice_recognition_model,
                 self._get_voice_recognition_row,
                 "распознавания голоса (voice)",
                 "Название | цена за минуту",
@@ -155,7 +157,7 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
         | QuerySet[VisionModel]
         | QuerySet[ImageDrawModel]
         | QuerySet[VoiceRecognitionModel],
-        profile_gpt_settings: ProfileGPTSettings,
+        selected_model: GPTModel | None,
         _get_row_method,
         _models_for_str: str,
         _format: str,
@@ -165,7 +167,7 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
         Универсальный генератор списка моделей
 
         :models - QuerySet моделей
-        :profile_gpt_settings - настройки профиля GPT
+        :selected_model - выбранная пользователем модель этого типа
         :_get_row_method - метод для получения строки в цикле по моделям
         :_models_for_str - текст для пользователя, который указывает какие это были модели
         :_format - текст для пользователя, в котором указан порядок столбцов
@@ -177,12 +179,16 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
             _max_lens = ()
         models_list = []
 
-        max_len_model_name = max((len(x.name) for x in models))
-        for model in models:
+        models_list_for_provider = list(models)
+        if not models_list_for_provider:
+            return f"Список доступных моделей {_models_for_str} пуст"
+
+        max_len_model_name = max(len(x.name) for x in models_list_for_provider)
+        for model in models_list_for_provider:
             extra = []
             if model.is_default:
                 extra.append("по-умолчанию")
-            if model == profile_gpt_settings.completions_model:
+            if model == selected_model:
                 extra.append("выбрано")
             extra = ", ".join(extra)
 
@@ -239,81 +245,80 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
 
     # MENU MODELS
 
+    def _sub_menu_model_choice(
+        self,
+        profile_gpt_settings: ProfileGPTSettings,
+        api_mixin,
+        model_class: type[GPTModel],
+        settings_field: str,
+        current_model_method: Callable,
+        unsupported_action: str,
+        model_description: str,
+    ) -> ResponseMessageItem:
+        if not issubclass(self.provider.api_class, api_mixin):
+            raise PWarning(f"{self.provider.type_enum.value} не умеет {unsupported_action}")
+        if len(self.event.message.args) < 3:
+            return ResponseMessageItem(text=current_model_method(profile_gpt_settings))
+
+        new_model_name = self.event.message.args[2]
+        if new_model_name in self.RESET_MODEL_NAMES:
+            setattr(profile_gpt_settings, settings_field, None)
+            profile_gpt_settings.save()
+            return ResponseMessageItem(text=f"Удалил {model_description}")
+
+        new_model = self._find_model(model_class, new_model_name)
+        setattr(profile_gpt_settings, settings_field, new_model)
+        profile_gpt_settings.save()
+        answer = f"Поменял {model_description} на {self.bot.get_formatted_text_line(new_model.name)}"
+        return ResponseMessageItem(text=answer)
+
     def _sub_menu_completions_model_choice(self, profile_gpt_settings: ProfileGPTSettings):
         """
         Подменю выбора конкретной технологии (completions)
         Удаление или изменение модели
         """
-        if not issubclass(self.provider.api_class, CompletionsAPIMixin):
-            raise PWarning(f"{self.provider.type_enum.value} не умеет обрабатывать текст")
-        if len(self.event.message.args) < 3:
-            return ResponseMessageItem(text=self._get_current_completions_model_str(profile_gpt_settings))
-        new_model_name = self.event.message.args[2]
-        if new_model_name in ["удалить", "сброс", "сбросить", "delete", "reset"]:
-            profile_gpt_settings.completions_model = None
-            profile_gpt_settings.save()
-            return ResponseMessageItem(text="Удалил модель обработки текста (completions)")
-
-        new_model = self._find_model(CompletionsModel, new_model_name)
-        profile_gpt_settings.completions_model = new_model
-        profile_gpt_settings.save()
-        answer = f"Поменял модель обработки текста (completions) на {self.bot.get_formatted_text_line(new_model.name)}"
-        return ResponseMessageItem(text=answer)
+        return self._sub_menu_model_choice(
+            profile_gpt_settings,
+            CompletionsAPIMixin,
+            CompletionsModel,
+            "completions_model",
+            self._get_current_completions_model_str,
+            "обрабатывать текст",
+            "модель обработки текста (completions)",
+        )
 
     def _sub_menu_vision_model_choice(self, profile_gpt_settings: ProfileGPTSettings):
-        if not issubclass(self.provider.api_class, VisionAPIMixin):
-            raise PWarning(f"{self.provider.type_enum.value} не умеет обрабатывать изображения")
-        if len(self.event.message.args) < 3:
-            return ResponseMessageItem(text=self._get_current_vision_model_str(profile_gpt_settings))
-
-        new_model_name = self.event.message.args[2]
-        if new_model_name in ["удалить", "сброс", "сбросить", "delete", "reset"]:
-            profile_gpt_settings.vision_model = None
-            profile_gpt_settings.save()
-            return ResponseMessageItem(text="Удалил модель обработки изображений (vision)")
-
-        new_model = self._find_model(VisionModel, new_model_name)
-        profile_gpt_settings.vision_model = new_model
-        profile_gpt_settings.save()
-        answer = f"Поменял модель обработки изображений (vision) на {self.bot.get_formatted_text_line(new_model.name)}"
-        return ResponseMessageItem(text=answer)
+        return self._sub_menu_model_choice(
+            profile_gpt_settings,
+            VisionAPIMixin,
+            VisionModel,
+            "vision_model",
+            self._get_current_vision_model_str,
+            "обрабатывать изображения",
+            "модель обработки изображений (vision)",
+        )
 
     def _sub_menu_image_draw_model_choice(self, profile_gpt_settings: ProfileGPTSettings):
-        if not issubclass(self.provider.api_class, ImageDrawAPIMixin):
-            raise PWarning(f"{self.provider.type_enum.value} не умеет генерировать изображения")
-        if len(self.event.message.args) < 3:
-            return ResponseMessageItem(text=self._get_current_image_draw_model_str(profile_gpt_settings))
-
-        new_model_name = self.event.message.args[2]
-        if new_model_name in ["удалить", "сброс", "сбросить", "delete", "reset"]:
-            profile_gpt_settings.image_draw_model = None
-            profile_gpt_settings.save()
-            return ResponseMessageItem(text="Удалил модель генерации изображений (draw)")
-
-        new_model = self._find_model(ImageDrawModel, self.event.message.args[2])
-
-        profile_gpt_settings.image_draw_model = new_model
-        profile_gpt_settings.save()
-        answer = f"Поменял модель генерации изображения (draw) на {self.bot.get_formatted_text_line(new_model.name)}"
-        return ResponseMessageItem(text=answer)
+        return self._sub_menu_model_choice(
+            profile_gpt_settings,
+            ImageDrawAPIMixin,
+            ImageDrawModel,
+            "image_draw_model",
+            self._get_current_image_draw_model_str,
+            "генерировать изображения",
+            "модель генерации изображений (draw)",
+        )
 
     def _sub_menu_voice_recognition_model_choice(self, profile_gpt_settings: ProfileGPTSettings):
-        if not issubclass(self.provider.api_class, VoiceRecognitionAPIMixin):
-            raise PWarning(f"{self.provider.type_enum.value} не умеет обрабатывать голос")
-        if len(self.event.message.args) < 3:
-            return ResponseMessageItem(text=self._get_current_voice_recognition_model_str(profile_gpt_settings))
-
-        new_model_name = self.event.message.args[2]
-        if new_model_name in ["удалить", "сброс", "сбросить", "delete", "reset"]:
-            profile_gpt_settings.voice_recognition_model = None
-            profile_gpt_settings.save()
-            return ResponseMessageItem(text="Удалил модель обработки голоса (voice)")
-
-        new_model = self._find_model(VoiceRecognitionModel, new_model_name)
-        profile_gpt_settings.voice_recognition_model = new_model
-        profile_gpt_settings.save()
-        answer = f"Поменял модель обработки голоса (voice) на {self.bot.get_formatted_text_line(new_model.name)}"
-        return ResponseMessageItem(text=answer)
+        return self._sub_menu_model_choice(
+            profile_gpt_settings,
+            VoiceRecognitionAPIMixin,
+            VoiceRecognitionModel,
+            "voice_recognition_model",
+            self._get_current_voice_recognition_model_str,
+            "обрабатывать голос",
+            "модель обработки голоса (voice)",
+        )
 
     def _find_model(self, model_class: type[GPTModel], name: str):
         """
