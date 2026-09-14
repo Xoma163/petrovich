@@ -19,6 +19,7 @@ class Roles(Command):
             HelpTextItem(
                 RoleEnum.MODERATOR,
                 [
+                    HelpTextArgument("список", "показывает доступные для управления роли"),
                     HelpTextArgument("добавить (пользователь) (роль)", "добавляет роль пользователю"),
                     HelpTextArgument("удалить (пользователь) (роль)", "удаляет роль пользователю"),
                 ],
@@ -26,29 +27,27 @@ class Roles(Command):
         ],
     )
     conversation = True
-    args = 3
 
     bot: TgBot
 
     def start(self) -> ResponseMessage:
+        manageable_roles = self.get_manageable_roles()
+        if not self.event.message.args or self.event.message.args == ["список"]:
+            roles = "\n".join(f"- {role}" for role in manageable_roles)
+            return ResponseMessage(ResponseMessageItem(f"Доступные для добавления и удаления роли:\n{roles}"))
+
         try:
-            action, username, role_str = self.event.message.args_str.split(" ", 3)
+            action, username, role_str = self.event.message.args_str.split(" ", 2)
         except ValueError:
-            raise PWarning("Проверьте синтаксис команды. Слишком много аргументов")
+            raise PWarning("Проверьте синтаксис команды. Ожидаются действие, пользователь и роль")
 
         profile = get_profile_by_name([username], self.event.chat)
         role = get_role_by_str(role_str)
         if role is None:
             raise PWarning(f"Я не знаю роли {role_str}")
 
-        # Нельзя никому
-        if role in [RoleEnum.ADMIN, RoleEnum.BANNED, RoleEnum.USER]:
+        if role not in manageable_roles:
             raise PWarning(f'Нельзя добавлять/удалять роль "{role}"')
-
-        # Нельзя модераторам, можно админам
-        if self.event.sender.check_role(RoleEnum.MODERATOR) and not self.event.sender.check_role(RoleEnum.ADMIN):
-            if role in [RoleEnum.MODERATOR]:
-                raise PWarning(f'Нельзя добавлять/удалять роль "{role}"')
 
         if action == "добавить":
             rmi = self.add_role(profile, role)
@@ -57,6 +56,12 @@ class Roles(Command):
         else:
             raise PWarning(f'Неизвестное действие - "{action}"')
         return ResponseMessage(rmi)
+
+    def get_manageable_roles(self) -> list[RoleEnum]:
+        roles = [RoleEnum.MINECRAFT, RoleEnum.TRUSTED]
+        if self.event.sender.check_role(RoleEnum.ADMIN):
+            roles.insert(0, RoleEnum.MODERATOR)
+        return roles
 
     @staticmethod
     def add_role(profile: Profile, role: RoleEnum) -> ResponseMessageItem:
@@ -67,7 +72,7 @@ class Roles(Command):
 
     @staticmethod
     def remove_role(profile: Profile, role: RoleEnum) -> ResponseMessageItem:
-        if profile.check_role(role):
+        if not profile.check_role(role):
             raise PWarning(f'У пользователя нет роли "{role}"')
         profile.remove_role(role)
         return ResponseMessageItem(f'Удалил пользователю "{profile}" роль "{role}"')

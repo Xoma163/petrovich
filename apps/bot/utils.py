@@ -65,8 +65,14 @@ def get_profile_by_name(filters: list, filter_chat=None) -> Profile:
         users = users.filter(chats=filter_chat)
 
     for _filter in filters:
-        q = Q(name__icontains=_filter) | Q(surname__icontains=_filter) | Q(nickname_real__icontains=_filter)
-        users = users.filter(q)
+        telegram_username = _filter.removeprefix("@")
+        q = (
+            Q(name__icontains=_filter)
+            | Q(surname__icontains=_filter)
+            | Q(nickname_real__icontains=_filter)
+            | Q(user__platform=PlatformEnum.TG.name, user__nickname__icontains=telegram_username)
+        )
+        users = users.filter(q).distinct()
 
     if len(users) == 0:
         filters_str = " ".join(filters)

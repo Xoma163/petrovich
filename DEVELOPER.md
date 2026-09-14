@@ -336,6 +336,10 @@ Core domain entities in `apps/bot/models.py`:
 - `Role` — permission model
 - `ProfileSettings` / `ChatSettings` — bot behavior toggles
 
+Profile lookup by name also searches Telegram usernames through `User.nickname`; both `username` and `@username`
+forms are accepted. The moderator `/роль` command lists the roles manageable by the current sender when called
+without arguments or as `/роль список`; administrators can additionally manage the moderator role.
+
 Telegram-facing display fields on bot identities (`Profile.name`, `Profile.surname`,
 `Profile.nickname_real`, `User.nickname`, `Chat.name`, `Bot.name`) are sized for long platform-provided
 names and should remain at 255 characters unless a platform-specific limit is deliberately rechecked.
