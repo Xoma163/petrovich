@@ -34,7 +34,6 @@ class GPTSettingsMixin(GPTCommandProtocol):
         profile_settings.completions_model = None
         profile_settings.vision_model = None
         profile_settings.image_draw_model = None
-        profile_settings.image_edit_model = None
         profile_settings.voice_recognition_model = None
         profile_settings.gpt_5_settings_reasoning_effort_level = None
         profile_settings.gpt_5_settings_verbosity_level = None
@@ -63,7 +62,6 @@ class GPTSettingsMixin(GPTCommandProtocol):
             f"Модель обработки текста (completions)\n{self.bot.get_formatted_text_line(ps.completions_model.name)}" if ps.completions_model else None,
             f"Модель обработки изображений (vision)\n{self.bot.get_formatted_text_line(ps.vision_model.name)}" if ps.vision_model else None,
             f"Модель генерации изображений (draw)\n{self.bot.get_formatted_text_line(ps.image_draw_model.name)}" if ps.image_draw_model else None,
-            f"Модель редактирования изображений (edit)\n{self.bot.get_formatted_text_line(ps.image_edit_model.name)}" if ps.image_edit_model else None,
             f"Модель обработки голоса (voice)\n{self.bot.get_formatted_text_line(ps.voice_recognition_model.name)}" if ps.voice_recognition_model else None,
             f"Уровень рассуждений для моделей семейства GPT-5\n{self.bot.get_formatted_text_line(ps.gpt_5_settings_reasoning_effort_level)}" if ps.gpt_5_settings_reasoning_effort_level else None,
             f"Уровень многословности для моделей семейства GPT-5\n{self.bot.get_formatted_text_line(ps.gpt_5_settings_verbosity_level)}" if ps.gpt_5_settings_verbosity_level else None,

@@ -4,7 +4,7 @@ from apps.bot.core.messages.response_message import ResponseMessageItem
 from apps.commands.gpt.api.base import GPTAPI
 from apps.commands.gpt.api.responses import GPTImageDrawResponse
 from apps.commands.gpt.enums import GPTImageFormat, GPTImageQuality
-from apps.commands.gpt.models import ImageDrawModel, ImageEditModel
+from apps.commands.gpt.models import ImageDrawModel
 from apps.commands.gpt.protocols import GPTCommandProtocol, HasImageDraw
 from apps.commands.help_text import HelpTextArgument, HelpTextKey
 from apps.shared.exceptions import PWarning
@@ -12,10 +12,6 @@ from apps.shared.exceptions import PWarning
 
 class GPTImageDrawFunctionality(GPTCommandProtocol):
     IMAGE_DRAW_HELP_TEXT_ITEMS = [HelpTextArgument("нарисуй (фраза/пересланное сообщение)", "генерация изображения")]
-
-    IMAGE_EDIT_HELP_TEXT_ITEMS = [
-        HelpTextArgument("фотошоп (фраза) [изображение]", "редактирование и генерация изображения")
-    ]
 
     KEY_ITEM_ORIG = HelpTextKey(
         "orig", ["original", "ориг", "оригинал"], "нарисуй пришлёт документ без сжатия, а не картинку"
@@ -42,15 +38,6 @@ class GPTImageDrawFunctionality(GPTCommandProtocol):
 
     def menu_image_draw(self) -> ResponseMessageItem:
         return self.image_draw()
-
-    # def menu_image_edit(self) -> ResponseMessageItem:
-    #     """
-    #     Редактирование изображения
-    #     """
-    #     self.attachments = [PhotoAttachment]
-    #     self.check_attachments()
-    #
-    #     return self._image_edit()
 
     # HANDLERS
 
@@ -94,46 +81,6 @@ class GPTImageDrawFunctionality(GPTCommandProtocol):
             answer += self.get_debug_text(response)
 
         return ResponseMessageItem(text=answer, attachments=attachments, reply_to=self.event.message.id)
-
-    # def _image_edit(self):
-    #     request_text = self._get_draw_image_request_text()
-    #     count = self._get_images_count_by_keys()
-    #     use_document_att = self.event.message.is_key_provided({"orig", "original", "ориг", "оригинал"})
-    #
-    #     gpt_api = self.provider.api_class(log_filter=self.event.log_filter, sender=self.event.sender)
-    #     with ChatAction(self.bot, ChatActionEnum.UPLOAD_PHOTO, self.event.peer_id):
-    #         image = self.event.get_all_attachments([PhotoAttachment])[0]
-    #         cropped_image_bytes_png = crop_image_to_square(convert_jpg_to_png(image.download_content()))
-    #         side = min(image.width, image.height)
-    #         mask_bytes = get_transparent_rgba_png(side, side)
-    #
-    #         response: GPTImageDrawResponse = gpt_api.edit_image(
-    #             request_text,
-    #             cropped_image_bytes_png,
-    #             mask_bytes,
-    #             count=count
-    #         )
-    #
-    #         self.add_statistics(api_response=response)
-    #
-    #         attachments = []
-    #         for i, image in enumerate(response.images_bytes):
-    #             if use_document_att:
-    #                 att = self.bot.get_document_attachment(
-    #                     _bytes=image,
-    #                     send_chat_action=False,
-    #                     filename=f'gpt_draw_{i + 1}.png'
-    #                 )
-    #                 att.download_content()
-    #               #  att.set_thumbnail(att.content)
-    #             else:
-    #                 att = self.bot.get_photo_attachment(_bytes=image, send_chat_action=False)
-    #                 att.download_content()
-    #                 attachments.append(att)
-    #
-    #     image_prompt = response.images_prompt if response.images_prompt else request_text
-    #     answer = f'Результат редактирования изображения по запросу "{image_prompt}"'
-    #     return ResponseMessageItem(text=answer, attachments=attachments, reply_to=self.event.message.id)
 
     # COMMON UTILS
 
@@ -179,12 +126,6 @@ class GPTImageDrawFunctionality(GPTCommandProtocol):
 
     def get_default_image_draw_model(self) -> ImageDrawModel:
         return self.get_default_model(ImageDrawModel)
-
-    def get_image_edit_model(self) -> ImageEditModel:
-        return self.get_model(ImageEditModel, "image_edit_model")
-
-    def get_default_image_edit_model(self) -> ImageEditModel:
-        return self.get_default_model(ImageEditModel)
 
     # UTILS
 

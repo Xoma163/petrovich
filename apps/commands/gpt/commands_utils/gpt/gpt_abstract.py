@@ -94,12 +94,8 @@ class GPTCommand(
             if result:
                 return result
 
-        arg0 = self.event.message.args[0] if self.event.message.args else None
-        # edit_image_command_aliases = ["фотошоп", "photoshop"]
-        edit_image_command_aliases = []
-
         if issubclass(self.provider.api_class, VisionAPIMixin) and isinstance(self, GPTVisionFunctionality):
-            if self.event.get_all_attachments([PhotoAttachment]) and arg0 not in edit_image_command_aliases:
+            if self.event.get_all_attachments([PhotoAttachment]):
                 return ResponseMessage(self.menu_vision())
 
         menu = []
@@ -108,9 +104,6 @@ class GPTCommand(
         if not bool(self._get_first_gpt_event_in_replies(self.event)):
             if issubclass(self.provider.api_class, ImageDrawAPIMixin) and isinstance(self, GPTImageDrawFunctionality):
                 menu.append([["нарисуй", "draw"], self.menu_image_draw])
-            # if isinstance(self.provider.api_class, ImageEditAPIMixin):
-            #     menu.append([edit_image_command_aliases, self.menu_image_edit])
-
             if isinstance(self, GPTStatisticsMixin):
                 menu.append([["стат", "стата", "статистика", "stat", "stats", "statistics"], self.menu_statistics])
             if isinstance(self, GPTPrepromptMixin):

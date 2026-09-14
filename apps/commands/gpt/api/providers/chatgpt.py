@@ -1,4 +1,3 @@
-import io
 from decimal import Decimal
 from typing import Callable
 
@@ -7,7 +6,6 @@ from apps.commands.gpt.api.base import (
     VisionAPIMixin,
     ImageDrawAPIMixin,
     VoiceRecognitionAPIMixin,
-    ImageEditAPIMixin,
 )
 from apps.commands.gpt.api.openai_responses_api import OpenAIResponsesAPI
 from apps.commands.gpt.api.responses import (
@@ -22,7 +20,6 @@ from apps.commands.gpt.models import (
     CompletionsModel,
     VisionModel,
     ImageDrawModel,
-    ImageEditModel,
     VoiceRecognitionModel,
 )
 from apps.commands.gpt.usage import GPTVoiceRecognitionUsage
@@ -34,7 +31,6 @@ class ChatGPTAPI(
     CompletionsAPIMixin,
     VisionAPIMixin,
     ImageDrawAPIMixin,
-    ImageEditAPIMixin,
     VoiceRecognitionAPIMixin,
 ):
     @property
@@ -149,39 +145,6 @@ class ChatGPTAPI(
             count=count,
             headers=self.headers,
             log=False,
-        )
-
-    # ---------- image edit ---------- #
-
-    image_edit_url = f"{base_url}/images/edits"
-
-    def edit_image(
-        self,
-        prompt: str,
-        model: ImageEditModel,
-        image: bytes,
-        mask: bytes,
-        count: int = 1,
-    ) -> GPTImageDrawResponse:
-        payload = {
-            "prompt": prompt,
-            "model": model.name,
-            "n": count,
-            "response_format": "b64_json",
-            # "size": model.size
-        }
-        files = {
-            "image": ("image.png", io.BytesIO(image), "image/png"),
-            "mask": ("image.png", io.BytesIO(mask), "image/png"),
-        }
-        return self.do_image_request(
-            model,  # noqa
-            url=self.image_edit_url,
-            data=payload,
-            count=count,
-            headers=self.headers,
-            log=False,
-            files=files,
         )
 
     # ---------- voice recognition ---------- #

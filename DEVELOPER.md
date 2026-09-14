@@ -415,6 +415,8 @@ Each `ImageDrawModel` row now represents one API model rather than one size/qual
 and `quality` are the defaults; `supported_sizes` and `supported_qualities` validate per-request overrides. The
 `0005_normalize_image_draw_models` migration consolidates legacy variants and repoints profile and preset foreign
 keys before enforcing uniqueness by provider and model name.
+Image editing is not part of the GPT subsystem: migration `0006` removes `ImageEditModel` and its profile/preset
+references, and provider APIs expose image generation only.
 For GPT Image responses, generation cost is calculated from the API's actual text-input, image-input, and
 image-output token usage and the per-million rates stored on the model. `image_cost` remains only as a nullable
 fallback for legacy providers whose image endpoint does not report token usage.

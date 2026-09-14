@@ -12,10 +12,9 @@ from apps.commands.gpt.models import (
     CompletionsModel,
     VisionModel,
     ImageDrawModel,
-    ImageEditModel,
     VoiceRecognitionModel,
 )
-from apps.commands.gpt.protocols import HasCompletions, HasVision, HasVoiceRecognition, HasImageEdit, HasImageDraw
+from apps.commands.gpt.protocols import HasCompletions, HasVision, HasVoiceRecognition, HasImageDraw
 from apps.connectors.api.handler import API
 
 
@@ -81,24 +80,6 @@ class ImageDrawAPIMixin(HasImageDraw):
         self,
         prompt: str,
         model: ImageDrawModel,
-        count: int = 1,
-    ) -> GPTImageDrawResponse:
-        pass
-
-
-class ImageEditAPIMixin(HasImageEdit):
-    @property
-    @abstractmethod
-    def image_edit_url(self) -> str:
-        pass
-
-    @abstractmethod
-    def edit_image(
-        self,
-        prompt: str,
-        model: ImageEditModel,
-        image: bytes,
-        mask: bytes,
         count: int = 1,
     ) -> GPTImageDrawResponse:
         pass

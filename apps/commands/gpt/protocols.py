@@ -15,7 +15,6 @@ from apps.commands.gpt.models import (
     CompletionsModel,
     VisionModel,
     ImageDrawModel,
-    ImageEditModel,
     VoiceRecognitionModel,
     Provider,
     GPTModel,
@@ -118,12 +117,6 @@ class HasImageDraw(Protocol):
         prompt: str,
         model: ImageDrawModel,
         count: int = 1,
-    ) -> GPTImageDrawResponse: ...
-
-
-class HasImageEdit(Protocol):
-    def edit_image(
-        self, prompt: str, model: ImageEditModel, image: bytes, mask: bytes, count: int = 1
     ) -> GPTImageDrawResponse: ...
 
 

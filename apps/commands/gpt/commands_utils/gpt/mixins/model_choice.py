@@ -9,7 +9,6 @@ from apps.commands.gpt.models import (
     ProfileGPTSettings,
     VisionModel,
     ImageDrawModel,
-    ImageEditModel,
     VoiceRecognitionModel,
     GPTModel,
 )
@@ -126,7 +125,7 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
             image_draw_models_str = self._get_models_str(
                 image_draw_models,
                 profile_gpt_settings,
-                self._get_image_draw_image_edit_row,
+                self._get_image_draw_row,
                 "генерации изображений (draw)",
                 "Название | размер по умолчанию | качество по умолчанию | цена за 1млн output-токенов",
                 (9, 8, 6),
@@ -155,7 +154,6 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
         models: QuerySet[CompletionsModel]
         | QuerySet[VisionModel]
         | QuerySet[ImageDrawModel]
-        | QuerySet[ImageEditModel]
         | QuerySet[VoiceRecognitionModel],
         profile_gpt_settings: ProfileGPTSettings,
         _get_row_method,
@@ -211,11 +209,8 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
             extra=extra_text,
         )
 
-    def _get_image_draw_image_edit_row(self, model: ImageDrawModel | ImageEditModel, extra_text="", *max_lens):
-        if isinstance(model, ImageDrawModel):
-            cost = f"${float(model.image_output_1m_token_cost)}"
-        else:
-            cost = f"${float(model.image_cost)}"
+    def _get_image_draw_row(self, model: ImageDrawModel, extra_text="", *max_lens):
+        cost = f"${float(model.image_output_1m_token_cost)}"
 
         filler_model_name = " " * (max_lens[0] - len(model.name))
         filler_size = " " * (max_lens[1] - len(model.size))

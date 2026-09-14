@@ -57,7 +57,6 @@ class GPTPresetMixin(GPTCommandProtocol):
             "completions_model": profile_settings.completions_model,
             "vision_model": profile_settings.vision_model,
             "image_draw_model": profile_settings.image_draw_model,
-            "image_edit_model": profile_settings.image_edit_model,
             "voice_recognition_model": profile_settings.voice_recognition_model,
             "gpt_5_settings_reasoning_effort_level": profile_settings.gpt_5_settings_reasoning_effort_level,
             "gpt_5_settings_verbosity_level": profile_settings.gpt_5_settings_verbosity_level,
@@ -87,7 +86,6 @@ class GPTPresetMixin(GPTCommandProtocol):
             f"Модель обработки текста (completions)\n{self.bot.get_formatted_text_line(preset.completions_model.name)}" if preset.completions_model else None,
             f"Модель обработки изображений (vision)\n{self.bot.get_formatted_text_line(preset.vision_model.name)}" if preset.vision_model else None,
             f"Модель генерации изображений (draw)\n{self.bot.get_formatted_text_line(preset.image_draw_model.name)}" if preset.image_draw_model else None,
-            f"Модель редактирования изображений (edit)\n{self.bot.get_formatted_text_line(preset.image_edit_model.name)}" if preset.image_edit_model else None,
             f"Модель обработки голоса (voice)\n{self.bot.get_formatted_text_line(preset.voice_recognition_model.name)}" if preset.voice_recognition_model else None,
             f"Уровень рассуждений для моделей семейства GPT-5\n{self.bot.get_formatted_text_line(preset.gpt_5_settings_reasoning_effort_level)}" if preset.gpt_5_settings_reasoning_effort_level else None,
             f"Уровень многословности для моделей семейства GPT-5\n{self.bot.get_formatted_text_line(preset.gpt_5_settings_verbosity_level)}" if preset.gpt_5_settings_verbosity_level else None,
@@ -136,7 +134,6 @@ class GPTPresetMixin(GPTCommandProtocol):
         profile_settings.completions_model = preset.completions_model if preset.completions_model else None
         profile_settings.vision_model = preset.vision_model if preset.vision_model else None
         profile_settings.image_draw_model = preset.image_draw_model if preset.image_draw_model else None
-        profile_settings.image_edit_model = preset.image_edit_model if preset.image_edit_model else None
         profile_settings.voice_recognition_model = preset.voice_recognition_model if preset.voice_recognition_model else None
         profile_settings.gpt_5_settings_reasoning_effort_level = preset.gpt_5_settings_reasoning_effort_level if preset.gpt_5_settings_reasoning_effort_level else None
         profile_settings.gpt_5_settings_verbosity_level = preset.gpt_5_settings_verbosity_level if preset.gpt_5_settings_verbosity_level else None

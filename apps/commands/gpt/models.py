@@ -208,20 +208,6 @@ class ImageDrawModel(GPTImageModel):
         verbose_name_plural = "Модели генерации изображений"
 
 
-class ImageEditModel(GPTImageModel):
-    image_cost = models.DecimalField("Стоимость редактирования одного изображения", max_digits=8, decimal_places=4)
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["name", "width", "height", "provider"], name="unique_name_width_height_image_edit"
-            )
-        ]
-
-        verbose_name = "Модель редактирования изображений"
-        verbose_name_plural = "Модели редактирования изображений"
-
-
 class VoiceRecognitionModel(GPTModel):
     voice_recognition_1_min_cost = models.DecimalField(
         "Стоимость за 1 минуту распознования голоса",
@@ -260,13 +246,6 @@ class ProfileGPTBaseSettings(TimeStampModelMixin):
         blank=True,
         verbose_name="Модель рисования изображений",
     )
-    image_edit_model = models.ForeignKey(
-        ImageEditModel,
-        models.SET_NULL,
-        null=True,
-        blank=True,
-        verbose_name="Модель редактирования изображений",
-    )
     voice_recognition_model = models.ForeignKey(
         VoiceRecognitionModel,
         models.SET_NULL,
@@ -298,7 +277,6 @@ class ProfileGPTBaseSettings(TimeStampModelMixin):
         models_to_check = {
             "completions_model": self.completions_model,
             "image_draw_model": self.image_draw_model,
-            "image_edit_model": self.image_edit_model,
             "vision_model": self.vision_model,
             "voice_recognition_model": self.voice_recognition_model,
         }

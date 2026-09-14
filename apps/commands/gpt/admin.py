@@ -9,7 +9,6 @@ from apps.commands.gpt.models import (
     CompletionsModel,
     VisionModel,
     ImageDrawModel,
-    ImageEditModel,
     VoiceRecognitionModel,
     GPTPreset,
 )
@@ -125,17 +124,6 @@ class ImageDrawModelAdmin(admin.ModelAdmin):
     ordering = ("name",)
 
 
-@admin.register(ImageEditModel)
-class ImageEditModelAdmin(admin.ModelAdmin):
-    list_display = ("name", "provider", "is_default", "image_cost", "width", "height")
-    list_filter = (
-        "provider",
-        "is_default",
-    )
-    list_select_related = ("provider",)
-    ordering = ("name",)
-
-
 @admin.register(VoiceRecognitionModel)
 class VoiceRecognitionModelAdmin(admin.ModelAdmin):
     list_display = ("name", "provider", "is_default", "voice_recognition_1_min_cost")
@@ -157,7 +145,6 @@ class ProfileGPTSettingsAdmin(TimeStampAdminMixin, TopFieldsMixin):
         "completions_model",
         "vision_model",
         "image_draw_model",
-        "image_edit_model",
         "voice_recognition_model",
     )
     search_fields = ("profile__name", "profile__surname", "profile__nickname_real")
@@ -171,7 +158,6 @@ class ProfileGPTSettingsAdmin(TimeStampAdminMixin, TopFieldsMixin):
         "completions_model",
         "vision_model",
         "image_draw_model",
-        "image_edit_model",
         "voice_recognition_model",
     )
     ordering = ("profile",)
@@ -201,7 +187,6 @@ class GPTPresetAdmin(TimeStampAdminMixin, TopFieldsMixin):
         "completions_model",
         "vision_model",
         "image_draw_model",
-        "image_edit_model",
         "voice_recognition_model",
     )
     ordering = ("profile",)
