@@ -406,6 +406,10 @@ Providers discovered in code:
 - xAI / Grok
 - local-network Qwen-compatible server
 
+OpenAI image-generation payloads are model-family-specific: `dall-e-*` requests explicitly ask for
+`response_format=b64_json`, while GPT Image models must omit `response_format` because their API always returns
+base64 data and rejects that parameter as unknown.
+
 High-risk files:
 
 - `apps/commands/gpt/commands_utils/gpt/gpt_abstract.py`
@@ -980,9 +984,10 @@ Prefer targeted fixes over broad refactors in these areas.
 Document these carefully rather than treating them as confirmed bugs:
 
 1. `config/setup/setup.sh` is a Linux bootstrap script using `uv`; local Windows debugging is better served by `.env` plus `docker-compose.local.yml` for PostgreSQL/Redis.
-2. GitHub Actions workflow is named as CI, but the active job is effectively deployment; test steps are commented out.
-3. README is intentionally sparse and points to an external wiki, so local repo docs are incomplete by design.
-4. ASGI exists, but the visible deployment shape is WSGI/gunicorn-oriented.
+2. Keep repository text files on LF line endings as enforced by `.gitattributes`; configure Windows IDEs to save Python, Markdown, YAML, TOML, and shell files with LF.
+3. GitHub Actions workflow is named as CI, but the active job is effectively deployment; test steps are commented out.
+4. README is intentionally sparse and points to an external wiki, so local repo docs are incomplete by design.
+5. ASGI exists, but the visible deployment shape is WSGI/gunicorn-oriented.
 
 Do not “fix” these unless explicitly asked.
 
