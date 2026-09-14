@@ -9,6 +9,7 @@ class ChatActionEnum(StrEnum):
     RECORD_AUDIO = "record_audio"
     UPLOAD_AUDIO = "upload_audio"
     UPLOAD_VIDEO_NOTE = "upload_video_note"
+    CHOOSE_STICKER = "choose_sticker"
 
 
 TG_CHAT_ACTIONS = {
@@ -19,4 +20,5 @@ TG_CHAT_ACTIONS = {
     ChatActionEnum.RECORD_AUDIO: "record_audio",
     ChatActionEnum.UPLOAD_AUDIO: "upload_audio",
     ChatActionEnum.UPLOAD_VIDEO_NOTE: "upload_video_note",
+    ChatActionEnum.CHOOSE_STICKER: "choose_sticker",
 }

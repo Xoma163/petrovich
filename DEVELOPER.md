@@ -549,6 +549,8 @@ When approved video memes are saved to disk, `_save_meme()` also stores `file_pr
 YouTube links prefer the public YouTube thumbnail; ordinary uploaded videos and fallback cases
 derive a JPEG preview from the already-downloaded video bytes through `VideoHandler.get_preview()`,
 which currently takes a frame from the first second by default.
+`StickerAttachment` uses Telegram's `choose_sticker` chat action; without an attachment action the shared
+Telegram sender rejects sticker memes before calling `sendSticker`, including stickers selected for horoscopes.
 
 ## GitHub automation
 

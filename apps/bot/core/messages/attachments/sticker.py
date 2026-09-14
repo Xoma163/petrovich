@@ -1,9 +1,11 @@
+from apps.bot.core.chat_actions import ChatActionEnum
 from apps.bot.core.messages.attachments.attachment import Attachment
 from apps.bot.core.messages.attachments.mixins.sized_mixin import SizedMixin
 
 
 class StickerAttachment(Attachment, SizedMixin):
     TYPE = "sticker"
+    ACTION = ChatActionEnum.CHOOSE_STICKER
 
     def __init__(self):
         super().__init__(self.TYPE)
