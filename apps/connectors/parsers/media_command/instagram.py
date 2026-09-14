@@ -92,36 +92,42 @@ class InstagramParser:
             )
         )
 
-    @staticmethod
-    def _get_media(api_scripts):
+    @classmethod
+    def _get_media(cls, api_scripts):
         has_api_error = False
         for script in api_scripts:
             json_data = json.loads(script.text)
-            try:
-                result = json_data["require"][0][3][0]["__bbox"]["require"][0][3][1]["__bbox"]["result"]
-                data = result.get("data")
-                if result.get("errors") and not data:
-                    # error = result['errors'][0]
+            for data in cls._iter_dicts(json_data):
+                if data.get("errors") and not data.get("data"):
                     has_api_error = True
+                try:
+                    if shortcode_web_info := data.get("xdt_api__v1__media__shortcode__web_info"):
+                        return shortcode_web_info["items"][0]
+                    if polaris_media := data.get("xig_polaris_media"):
+                        return cls._get_polaris_media(polaris_media)
+                    if clips_on_logged_out := data.get("xdt_api__v1__clips__clips_on_logged_out_connection_v2"):
+                        node = clips_on_logged_out["edges"][0]["node"]
+                        if "media_command" in node:
+                            return node["media_command"]
+                        if "media" in node:
+                            return node["media"]
+                except (KeyError, IndexError, AttributeError):
                     continue
-                if shortcode_web_info := data.get("xdt_api__v1__media__shortcode__web_info"):
-                    return shortcode_web_info["items"][0]
-                elif polaris_media := data.get("xig_polaris_media"):
-                    return InstagramParser._get_polaris_media(polaris_media)
-                elif clips_on_logged_out := data.get("xdt_api__v1__clips__clips_on_logged_out_connection_v2"):
-                    node = clips_on_logged_out["edges"][0]["node"]
-                    if "media_command" in node:
-                        return node["media_command"]
-                    elif "media" in node:
-                        return node["media"]
-                    raise KeyError()
-            except (KeyError, IndexError, AttributeError):
-                continue
 
         if has_api_error:
             raise PError("Не могу скачать контент. Ошибка со стороны сервера")
 
         raise PWarning("Не могу скачать этот контент. Неизвестный тип. Сообщите разработчику")
+
+    @classmethod
+    def _iter_dicts(cls, value):
+        if isinstance(value, dict):
+            yield value
+            for child in value.values():
+                yield from cls._iter_dicts(child)
+        elif isinstance(value, list):
+            for child in value:
+                yield from cls._iter_dicts(child)
 
     def get_media_by_parse_json(self, page_source):
         try:

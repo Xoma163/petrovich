@@ -1,3 +1,4 @@
+import json
 from types import SimpleNamespace
 from unittest.mock import Mock
 
@@ -33,6 +34,24 @@ class TwitterServiceTestCase(SimpleTestCase):
 
 
 class InstagramParserTestCase(SimpleTestCase):
+    def test_get_media_finds_polaris_payload_at_any_require_position(self):
+        media = {"video_versions": [{"url": "https://example.com/video.mp4"}]}
+        page_data = {
+            "require": [
+                ["unrelated", None, None, [{"__bbox": {"result": {"data": {"other": {}}}}}]],
+                [
+                    "PolarisLoggedOutReelsPage",
+                    None,
+                    None,
+                    [{"__bbox": {"result": {"data": {"xig_polaris_media": {"if_not_gated_logged_out": media}}}}}],
+                ],
+            ]
+        }
+
+        result = InstagramParser._get_media([SimpleNamespace(text=json.dumps(page_data))])
+
+        self.assertEqual(result, media)
+
     def test_parse_media_keeps_caption_for_regular_media(self):
         data = InstagramParser._parse_media(
             {

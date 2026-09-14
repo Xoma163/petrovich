@@ -447,6 +447,7 @@ What it does:
 - detects media URLs in user messages
 - normalizes accepted Instagram media URLs inside the Instagram service, converting `/reel/` to `/reels/` and removing tracking query/fragment data
 - extracts Instagram media from both older `xdt_api__v1__...` page JSON and newer `xig_polaris_media` page JSON
+- searches Instagram's nested bootstrap JSON recursively because media payloads can move between `require` entries
 - detects Instagram logged-out age-gate messages during page loading and returns a user-facing warning instead of
   falling through to the generic unknown-content parser error
 - also detects age gates exposed only as `xig_polaris_media.gating_ruling`, where
