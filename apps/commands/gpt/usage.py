@@ -91,14 +91,25 @@ class GPTVisionUsage(GPTCompletionsVisionUsage):
 class GPTImageDrawUsage(GPTUsage):
     model: ImageDrawModel
     images_count: int
+    text_input_tokens: int = 0
+    image_input_tokens: int = 0
+    image_output_tokens: int | None = None
 
     @property
     def image_cost(self) -> Decimal:
-        return self.model.image_cost
+        if self.image_output_tokens is None:
+            return self.model.image_cost or Decimal(0)
+        return (
+            Decimal(self.text_input_tokens) * self.model.text_input_1m_token_cost
+            + Decimal(self.image_input_tokens) * self.model.image_input_1m_token_cost
+            + Decimal(self.image_output_tokens) * self.model.image_output_1m_token_cost
+        ) / Decimal(1_000_000)
 
     @property
     def total_cost(self) -> Decimal:
-        return self.image_cost * self.images_count
+        if self.image_output_tokens is None:
+            return self.image_cost * self.images_count
+        return self.image_cost
 
 
 @dataclass

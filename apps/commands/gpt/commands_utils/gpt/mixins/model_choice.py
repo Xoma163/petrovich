@@ -122,18 +122,13 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
             )
             answer.append(vision_models_str)
         if issubclass(self.provider.api_class, ImageDrawAPIMixin):
-            image_draw_models = ImageDrawModel.objects.filter(provider=self.provider_model).order_by(
-                "name",
-                "-width",
-                "-height",
-                "-image_cost",
-            )
+            image_draw_models = ImageDrawModel.objects.filter(provider=self.provider_model).order_by("name")
             image_draw_models_str = self._get_models_str(
                 image_draw_models,
                 profile_gpt_settings,
                 self._get_image_draw_image_edit_row,
                 "генерации изображений (draw)",
-                "Название | размер | качество | цена за 1шт.",
+                "Название | размер по умолчанию | качество по умолчанию | цена за 1млн output-токенов",
                 (9, 8, 6),
             )
             answer.append(image_draw_models_str)
@@ -217,7 +212,10 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
         )
 
     def _get_image_draw_image_edit_row(self, model: ImageDrawModel | ImageEditModel, extra_text="", *max_lens):
-        cost = f"${float(model.image_cost)}"
+        if isinstance(model, ImageDrawModel):
+            cost = f"${float(model.image_output_1m_token_cost)}"
+        else:
+            cost = f"${float(model.image_cost)}"
 
         filler_model_name = " " * (max_lens[0] - len(model.name))
         filler_size = " " * (max_lens[1] - len(model.size))
@@ -297,14 +295,7 @@ class GPTModelChoiceMixin(GPTCommandProtocol):
             profile_gpt_settings.save()
             return ResponseMessageItem(text="Удалил модель генерации изображений (draw)")
 
-        new_model_name = self.event.message.args[2]
-        try:
-            # ToDo: Особенное получение модели, в будущем будет усложнено данными в .filter
-            new_model = ImageDrawModel.objects.filter(name=new_model_name).first()
-        except ImageDrawModel.DoesNotExist:
-            button = self.bot.get_button("Список моделей", command=self.name, args=["модели"])
-            keyboard = self.bot.get_inline_keyboard([button])
-            raise PWarning("Не понял какая модель", keyboard=keyboard)
+        new_model = self._find_model(ImageDrawModel, self.event.message.args[2])
 
         profile_gpt_settings.image_draw_model = new_model
         profile_gpt_settings.save()

@@ -152,13 +152,40 @@ class GPTImageModel(GPTModel):
 
 
 class ImageDrawModel(GPTImageModel):
-    image_cost = models.DecimalField("Стоимость генерации одного изображения", max_digits=8, decimal_places=4)
-    quality = models.CharField("Название качества модели в API", max_length=32)
+    image_cost = models.DecimalField(
+        "Резервная фиксированная стоимость изображения",
+        max_digits=8,
+        decimal_places=4,
+        null=True,
+        blank=True,
+    )
+    quality = models.CharField("Качество по умолчанию", max_length=32)
+    supported_qualities = models.JSONField("Поддерживаемые качества", default=list, blank=True)
+    supported_sizes = models.JSONField("Поддерживаемые размеры", default=list, blank=True)
+    text_input_1m_token_cost = models.DecimalField(
+        "Стоимость 1млн. входных текстовых токенов", max_digits=8, decimal_places=4, default=0
+    )
+    text_cached_input_1m_token_cost = models.DecimalField(
+        "Стоимость 1млн. кэшированных входных текстовых токенов", max_digits=8, decimal_places=4, default=0
+    )
+    image_input_1m_token_cost = models.DecimalField(
+        "Стоимость 1млн. входных токенов изображений", max_digits=8, decimal_places=4, default=0
+    )
+    image_cached_input_1m_token_cost = models.DecimalField(
+        "Стоимость 1млн. кэшированных входных токенов изображений", max_digits=8, decimal_places=4, default=0
+    )
+    image_output_1m_token_cost = models.DecimalField(
+        "Стоимость 1млн. выходных токенов изображений", max_digits=8, decimal_places=4, default=0
+    )
 
     @property
     def image_quality(self) -> GPTImageQuality | None:
         quality = self.quality.lower()
-        if quality in ["high", "hd"]:
+        if quality == "max":
+            return GPTImageQuality.MAX
+        elif quality in ["xhigh", "xhd"]:
+            return GPTImageQuality.XHIGH
+        elif quality in ["high", "hd"]:
             return GPTImageQuality.HIGH
         elif quality in ["medium", "md", "standart", "standard"]:
             return GPTImageQuality.MEDIUM
@@ -172,8 +199,8 @@ class ImageDrawModel(GPTImageModel):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["name", "width", "height", "quality", "provider"],
-                name="unique_name_width_height_quality_img_draw",
+                fields=["name", "provider"],
+                name="unique_name_provider_img_draw",
             )
         ]
 

@@ -58,8 +58,8 @@ class ChatGPTCommand(
                 [
                     GPTImageDrawFunctionality.KEY_ITEM_ORIG,
                     GPTImageDrawFunctionality.KEY_ITEM_COUNT,
-                    GPTImageDrawFunctionality.KEY_ITEM_HD,
                 ]
+                + GPTImageDrawFunctionality.KEY_ITEMS_QUALITY
                 + GPTImageDrawFunctionality.KEY_ITEMS_FORMAT
                 + GPTStatisticsMixin.STATISTICS_KEY_ITEMS_KEY,
             )

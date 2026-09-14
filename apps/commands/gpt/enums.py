@@ -14,6 +14,8 @@ class GPTImageFormat(StrEnum):
 
 
 class GPTImageQuality(StrEnum):
+    MAX = "max"
+    XHIGH = "xhigh"
     HIGH = "high"
     MEDIUM = "medium"
     LOW = "low"

@@ -360,7 +360,16 @@ class GPTCommand(
                 f"---\n"
                 f"total_cost: ${fmt_cost(response.usage.total_cost)}"
             )
-        elif isinstance(response, GPTImageDrawResponse) or isinstance(response, GPTVoiceRecognitionResponse):
+        elif isinstance(response, GPTImageDrawResponse):
+            return (
+                f"{cls.DEBUG_LINE}\n"
+                f"text_input_tokens: {response.usage.text_input_tokens}\n"
+                f"image_input_tokens: {response.usage.image_input_tokens}\n"
+                f"image_output_tokens: {response.usage.image_output_tokens}\n"
+                f"---\n"
+                f"total_cost: ${fmt_cost(response.usage.total_cost)}"
+            )
+        elif isinstance(response, GPTVoiceRecognitionResponse):
             return f"{cls.DEBUG_LINE}\ntotal_cost: ${fmt_cost(response.usage.total_cost)}"
 
         return ""

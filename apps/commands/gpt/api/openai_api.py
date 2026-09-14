@@ -50,16 +50,32 @@ class OpenAIAPI(GPTAPI, ABC):
             with ThreadPoolExecutor() as executor:
                 futures = [executor.submit(self.fetch_image_request, url, **kwargs) for _ in range(count)]
                 results = [f.result() for f in concurrent.futures.as_completed(futures)]
-            images_bytes = [image_bytes for image_bytes, _ in results]
+            images_bytes = [image_bytes for image_bytes, _, _ in results]
             images_prompt = results[0][1]
         else:
-            image_bytes, prompt = self.fetch_image_request(url, **kwargs)
+            image_bytes, prompt, usage_response = self.fetch_image_request(url, **kwargs)
+            results = [(image_bytes, prompt, usage_response)]
             images_bytes = [image_bytes]
             images_prompt = prompt
+
+        usage_responses = [result[2] for result in results]
+        has_token_usage = all(usage_response is not None for usage_response in usage_responses)
+        text_input_tokens = 0
+        image_input_tokens = 0
+        image_output_tokens = 0
+        if has_token_usage:
+            for usage_response in usage_responses:
+                input_details = usage_response.get("input_tokens_details", {})
+                text_input_tokens += input_details.get("text_tokens", 0)
+                image_input_tokens += input_details.get("image_tokens", 0)
+                image_output_tokens += usage_response.get("output_tokens", 0)
 
         usage = GPTImageDrawUsage(
             model=model,  # noqa
             images_count=count,
+            text_input_tokens=text_input_tokens,
+            image_input_tokens=image_input_tokens,
+            image_output_tokens=image_output_tokens if has_token_usage else None,
         )
         return GPTImageDrawResponse(
             images_bytes=images_bytes,
@@ -67,7 +83,7 @@ class OpenAIAPI(GPTAPI, ABC):
             usage=usage,
         )
 
-    def fetch_image_request(self, url, **kwargs) -> tuple[bytes, str | None]:
+    def fetch_image_request(self, url, **kwargs) -> tuple[bytes, str | None, dict | None]:
         r_json = self.do_request(url, **kwargs)
         image_data = r_json["data"][0]
         if base64_image := image_data.get("b64_json"):
@@ -78,7 +94,7 @@ class OpenAIAPI(GPTAPI, ABC):
             image_bytes = image_response.content
         else:
             raise PError("OpenAI API не вернул изображение")
-        return image_bytes, image_data.get("revised_prompt")
+        return image_bytes, image_data.get("revised_prompt"), r_json.get("usage")
 
     def _do_request(
         self,

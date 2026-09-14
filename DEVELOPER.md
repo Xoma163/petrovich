@@ -411,6 +411,15 @@ Providers discovered in code:
 OpenAI image-generation requests omit the deprecated `response_format` parameter for every model family. The
 response parser accepts both GPT Image base64 payloads and DALL-E URL payloads, downloading the latter before
 constructing the bot attachment.
+Each `ImageDrawModel` row now represents one API model rather than one size/quality combination. `width`, `height`,
+and `quality` are the defaults; `supported_sizes` and `supported_qualities` validate per-request overrides. The
+`0005_normalize_image_draw_models` migration consolidates legacy variants and repoints profile and preset foreign
+keys before enforcing uniqueness by provider and model name.
+For GPT Image responses, generation cost is calculated from the API's actual text-input, image-input, and
+image-output token usage and the per-million rates stored on the model. `image_cost` remains only as a nullable
+fallback for legacy providers whose image endpoint does not report token usage.
+Users can select `low`, `medium`, `high`/`hd`, `xhigh`, or `max` quality and square, landscape, or portrait output
+with command keys; unsupported combinations produce a warning, and image count must be between 1 and 10.
 
 High-risk files:
 

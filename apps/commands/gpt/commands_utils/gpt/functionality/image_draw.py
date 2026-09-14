@@ -21,7 +21,13 @@ class GPTImageDrawFunctionality(GPTCommandProtocol):
         "orig", ["original", "ориг", "оригинал"], "нарисуй пришлёт документ без сжатия, а не картинку"
     )
     KEY_ITEM_COUNT = HelpTextKey("(число)", [], "нарисуй пришлёт несколько изображений. Максимум 10")
-    KEY_ITEM_HD = HelpTextKey("hd", ["xd", "hq", "хд"], "нарисуй пришлёт изображения в высоком качестве")
+    KEY_ITEMS_QUALITY = [
+        HelpTextKey("low", ["низкое"], "низкое качество"),
+        HelpTextKey("medium", ["среднее"], "среднее качество"),
+        HelpTextKey("high", ["hd", "xd", "hq", "хд", "высокое"], "высокое качество"),
+        HelpTextKey("xhigh", ["xhd", "очень-высокое"], "очень высокое качество"),
+        HelpTextKey("max", ["максимальное"], "максимальное качество"),
+    ]
     KEY_ITEMS_FORMAT = [
         HelpTextKey("квадрат", ["квадратная", "square"], "нарисуй пришлёт квадратную картинку"),
         HelpTextKey("альбом", ["альбомная", "album"], "нарисуй пришлёт альбомную картинку"),
@@ -29,7 +35,7 @@ class GPTImageDrawFunctionality(GPTCommandProtocol):
     ]
 
     EXTRA_TEXT = (
-        "По умолчанию для генерации изображения выбирается модель с качеством Standard и квадратным разрешением"
+        "Качество и размер по умолчанию задаются выбранной моделью. Их можно изменить ключами команды"
     )
 
     # MENU
@@ -136,24 +142,37 @@ class GPTImageDrawFunctionality(GPTCommandProtocol):
 
         image_quality = self._get_image_quality() or current_image_model.image_quality
         image_format = self._get_image_format() or current_image_model.image_format
-
-        image_draw_models = ImageDrawModel.objects.filter(provider=self.provider_model, name=current_image_model.name)
-
-        available_models = [
-            model
-            for model in image_draw_models
-            if model.image_quality == image_quality and model.image_format == image_format
-        ]
-
-        if len(available_models) == 0:
+        if image_quality is None:
             raise PWarning(
-                "Не смог определить какую модель с какими характеристиками нужно использовать. Проверьте ваш запрос и доступные модели"
+                f'У модели "{current_image_model.name}" некорректно настроено качество по умолчанию'
             )
-        if len(available_models) > 1:
+
+        quality = image_quality.value
+        supported_qualities = current_image_model.supported_qualities or [current_image_model.quality]
+        if quality not in supported_qualities:
             raise PWarning(
-                "Не смог определить какую модель с какими характеристиками нужно использовать. Подходит сразу несколько. Сообщите админу"
+                f'Модель "{current_image_model.name}" не поддерживает качество "{quality}"'
             )
-        return available_models[0]  # noqa
+
+        supported_sizes = current_image_model.supported_sizes or [current_image_model.size]
+        available_sizes = [size for size in supported_sizes if self._get_size_format(size) == image_format]
+        if not available_sizes:
+            raise PWarning(f'Модель "{current_image_model.name}" не поддерживает выбранный формат изображения')
+
+        width, height = map(int, available_sizes[0].split("x", maxsplit=1))
+        current_image_model.width = width
+        current_image_model.height = height
+        current_image_model.quality = quality
+        return current_image_model
+
+    @staticmethod
+    def _get_size_format(size: str) -> GPTImageFormat:
+        width, height = map(int, size.split("x", maxsplit=1))
+        if width > height:
+            return GPTImageFormat.LANDSCAPE
+        if width < height:
+            return GPTImageFormat.PORTAIR
+        return GPTImageFormat.SQUARE
 
     def get_image_draw_model(self) -> ImageDrawModel:
         return self.get_model(ImageDrawModel, "image_draw_model")
@@ -206,8 +225,16 @@ class GPTImageDrawFunctionality(GPTCommandProtocol):
         По умолчанию MEDIUM
         """
 
-        if self.event.message.is_key_provided({"hd", "xd", "hq", "хд"}):
+        if self.event.message.is_key_provided({"max", "максимальное"}):
+            return GPTImageQuality.MAX
+        if self.event.message.is_key_provided({"xhigh", "xhd", "очень-высокое"}):
+            return GPTImageQuality.XHIGH
+        if self.event.message.is_key_provided({"high", "hd", "xd", "hq", "хд", "высокое"}):
             return GPTImageQuality.HIGH
+        if self.event.message.is_key_provided({"medium", "среднее"}):
+            return GPTImageQuality.MEDIUM
+        if self.event.message.is_key_provided({"low", "низкое"}):
+            return GPTImageQuality.LOW
         return None
 
     def _get_images_count_by_keys(self) -> int:
@@ -222,6 +249,8 @@ class GPTImageDrawFunctionality(GPTCommandProtocol):
                     count = int(key)
                     break
         MAX_IMAGES_COUNT = 10
+        if count < 1:
+            raise PWarning("Минимальное число изображений в запросе - 1")
         if count > MAX_IMAGES_COUNT:
             raise PWarning(f"Максимальное число изображений в запросе - {MAX_IMAGES_COUNT}")
         return count

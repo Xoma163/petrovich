@@ -108,7 +108,15 @@ class VisionModelAdmin(admin.ModelAdmin):
 
 @admin.register(ImageDrawModel)
 class ImageDrawModelAdmin(admin.ModelAdmin):
-    list_display = ("name", "provider", "is_default", "image_cost", "width", "height", "quality")
+    list_display = (
+        "name",
+        "provider",
+        "is_default",
+        "width",
+        "height",
+        "quality",
+        "image_output_1m_token_cost",
+    )
     list_filter = (
         "provider",
         "is_default",
