@@ -553,6 +553,8 @@ which currently takes a frame from the first second by default.
 Telegram sender rejects sticker memes before calling `sendSticker`, including stickers selected for horoscopes.
 Telegram inline meme results normalize both the legacy database type `gif` and the current attachment type
 `animation` to Bot API result type `gif`; both use the `gif_file_id` field and remain searchable.
+Inline result IDs are serialized as strings, as required by the Bot API; do not pass numeric database primary keys
+directly because Telegram client behavior is inconsistent for invalid result ID types.
 
 ## GitHub automation
 

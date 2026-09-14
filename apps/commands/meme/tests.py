@@ -21,7 +21,7 @@ class MemeInlineSearchTestCase(TestCase):
 
         self.assertEqual(
             results[0],
-            {"id": meme.pk, "type": "gif", "gif_file_id": "legacy-gif-file-id", "title": meme.name},
+            {"id": str(meme.pk), "type": "gif", "gif_file_id": "legacy-gif-file-id", "title": meme.name},
         )
 
     def test_exact_search_converts_animation_to_telegram_gif_type(self):
@@ -36,5 +36,5 @@ class MemeInlineSearchTestCase(TestCase):
 
         self.assertEqual(
             results[0],
-            {"id": meme.pk, "type": "gif", "gif_file_id": "animation-file-id", "title": meme.name},
+            {"id": str(meme.pk), "type": "gif", "gif_file_id": "animation-file-id", "title": meme.name},
         )

@@ -624,7 +624,7 @@ class Meme(Command):
         for meme in memes:
             inline_type, file_id_field = att_type_map[meme.type]
             qr = {
-                "id": meme.pk,
+                "id": str(meme.pk),
                 "type": inline_type,
                 file_id_field: meme.tg_file_id,
             }
