@@ -70,8 +70,15 @@ class OpenAIAPI(GPTAPI, ABC):
     def fetch_image_request(self, url, **kwargs) -> tuple[bytes, str | None]:
         r_json = self.do_request(url, **kwargs)
         image_data = r_json["data"][0]
-        base64_image = PhotoAttachment.decode_base64(image_data["b64_json"])
-        return base64_image, image_data.get("revised_prompt")
+        if base64_image := image_data.get("b64_json"):
+            image_bytes = PhotoAttachment.decode_base64(base64_image)
+        elif image_url := image_data.get("url"):
+            image_response = self.requests.get(image_url, log=False)
+            image_response.raise_for_status()
+            image_bytes = image_response.content
+        else:
+            raise PError("OpenAI API не вернул изображение")
+        return image_bytes, image_data.get("revised_prompt")
 
     def _do_request(
         self,

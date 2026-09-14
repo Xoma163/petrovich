@@ -408,9 +408,9 @@ Providers discovered in code:
 - xAI / Grok
 - local-network Qwen-compatible server
 
-OpenAI image-generation payloads are model-family-specific: `dall-e-*` requests explicitly ask for
-`response_format=b64_json`, while GPT Image models must omit `response_format` because their API always returns
-base64 data and rejects that parameter as unknown.
+OpenAI image-generation requests omit the deprecated `response_format` parameter for every model family. The
+response parser accepts both GPT Image base64 payloads and DALL-E URL payloads, downloading the latter before
+constructing the bot attachment.
 
 High-risk files:
 

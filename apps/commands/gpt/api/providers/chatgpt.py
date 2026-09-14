@@ -141,8 +141,6 @@ class ChatGPTAPI(
             "size": model.size,
             "quality": model.quality,
         }
-        if model.name.startswith("dall-e-"):
-            payload["response_format"] = "b64_json"
 
         return self.do_image_request(
             model=model,  # noqa
