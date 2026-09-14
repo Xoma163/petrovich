@@ -2,7 +2,7 @@ from apps.bot.consts import RoleEnum
 from apps.bot.core.bot.telegram.tg_bot import TgBot
 from apps.bot.core.messages.response_message import ResponseMessage, ResponseMessageItem
 from apps.bot.models import Profile
-from apps.bot.utils import get_profile_by_name
+from apps.bot.utils import get_profile_by_name, get_profile_by_tg_id
 from apps.commands.command import Command
 from apps.commands.help_text import HelpText, HelpTextItem, HelpTextArgument
 from apps.shared.exceptions import PWarning
@@ -27,6 +27,7 @@ class Roles(Command):
         ],
     )
     conversation = True
+    args = 1
 
     bot: TgBot
 
@@ -41,7 +42,10 @@ class Roles(Command):
         except ValueError:
             raise PWarning("Проверьте синтаксис команды. Ожидаются действие, пользователь и роль")
 
-        profile = get_profile_by_name([username], self.event.chat)
+        if username.isdigit():
+            profile = get_profile_by_tg_id(username, self.event.chat)
+        else:
+            profile = get_profile_by_name([username], self.event.chat)
         role = get_role_by_str(role_str)
         if role is None:
             raise PWarning(f"Я не знаю роли {role_str}")

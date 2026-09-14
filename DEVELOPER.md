@@ -337,8 +337,9 @@ Core domain entities in `apps/bot/models.py`:
 - `ProfileSettings` / `ChatSettings` — bot behavior toggles
 
 Profile lookup by name also searches Telegram usernames through `User.nickname`; both `username` and `@username`
-forms are accepted. The moderator `/роль` command lists the roles manageable by the current sender when called
-without arguments or as `/роль список`; administrators can additionally manage the moderator role.
+forms are accepted. The moderator `/роль список` command lists the roles manageable by the current sender;
+administrators can additionally manage the moderator role. A numeric user argument is resolved through the
+separate `get_profile_by_tg_id()` lookup and therefore accepts Telegram IDs.
 
 Telegram-facing display fields on bot identities (`Profile.name`, `Profile.surname`,
 `Profile.nickname_real`, `User.nickname`, `Chat.name`, `Bot.name`) are sized for long platform-provided

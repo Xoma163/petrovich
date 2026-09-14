@@ -83,6 +83,24 @@ def get_profile_by_name(filters: list, filter_chat=None) -> Profile:
     return users.first()
 
 
+def get_profile_by_tg_id(tg_id: int | str, filter_chat=None) -> Profile:
+    """Return an existing profile by its Telegram user ID."""
+    users = Profile.objects.filter(
+        user__platform=PlatformEnum.TG.name,
+        user__user_id=str(tg_id),
+    )
+    if filter_chat:
+        users = users.filter(chats=filter_chat)
+    users = users.distinct()
+
+    if len(users) == 0:
+        raise PWarning(f"Пользователь с Telegram ID {tg_id} не найден. Возможно, он мне ещё ни разу не писал")
+    if len(users) > 1:
+        raise PWarning(f"2 и более пользователей имеют Telegram ID {tg_id}")
+
+    return users.first()
+
+
 def get_chat_by_id(chat_id: int, platform: PlatformEnum) -> Chat:
     """
     Возвращает чат по его id

@@ -1,5 +1,5 @@
 from types import SimpleNamespace
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 from django.test import SimpleTestCase
 
@@ -12,7 +12,7 @@ class RolesTests(SimpleTestCase):
     def test_moderator_can_list_manageable_roles(self):
         command = Roles()
         command.event = SimpleNamespace(
-            message=SimpleNamespace(args=[], args_str=""),
+            message=SimpleNamespace(args=["список"], args_str="список"),
             sender=Mock(),
         )
         command.event.sender.check_role.return_value = False
@@ -50,3 +50,24 @@ class RolesTests(SimpleTestCase):
         Roles.remove_role(profile, RoleEnum.TRUSTED)
 
         profile.remove_role.assert_called_once_with(RoleEnum.TRUSTED)
+
+    @patch("apps.commands.other.commands.moderator.roles.Roles.add_role")
+    @patch("apps.commands.other.commands.moderator.roles.get_profile_by_tg_id")
+    def test_finds_role_target_by_telegram_id(self, get_profile_by_tg_id, add_role):
+        profile = Mock()
+        get_profile_by_tg_id.return_value = profile
+        command = Roles()
+        command.event = SimpleNamespace(
+            message=SimpleNamespace(
+                args=["добавить", "123456", "доверенный"],
+                args_str="добавить 123456 доверенный",
+            ),
+            sender=Mock(),
+            chat=Mock(),
+        )
+        command.event.sender.check_role.return_value = False
+
+        command.start()
+
+        get_profile_by_tg_id.assert_called_once_with("123456", command.event.chat)
+        add_role.assert_called_once_with(profile, RoleEnum.TRUSTED)
