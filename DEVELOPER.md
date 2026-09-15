@@ -558,6 +558,10 @@ Telegram inline meme results normalize both the legacy database type `gif` and t
 `animation` to Bot API result type `gif`; both use the `gif_file_id` field and remain searchable.
 Inline result IDs are serialized as strings, as required by the Bot API; do not pass numeric database primary keys
 directly because Telegram client behavior is inconsistent for invalid result ID types.
+Inline search returns homogeneous media pages to avoid the macOS Telegram client's broken rendering of mixed cached
+video/photo results. The empty offset selects the first available page in video, photo, GIF, sticker, voice order;
+`next_offset` names the next non-empty page, and inline responses are marked `is_personal` because trusted users can
+receive a different result set for the same query.
 
 ## GitHub automation
 

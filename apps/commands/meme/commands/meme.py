@@ -684,7 +684,7 @@ class Meme(Command):
 
     # --------------------
 
-    def get_tg_inline_memes(self, filter_list, max_count=10):
+    def get_tg_inline_memes(self, filter_list, max_count=10, offset=""):
         if filter_list:
             filtered_memes = self.get_filtered_memes(filter_list)
         else:
@@ -704,29 +704,42 @@ class Meme(Command):
         if not self.event.sender.check_role(RoleEnum.TRUSTED):
             memes = memes.exclude(for_trusted=True)
 
-        all_memes_qr = []
-        try:
-            this_meme = self.get_one_meme(memes, filter_list)
-            this_meme_qr = self._get_inline_qrs([this_meme])
-            all_memes_qr += this_meme_qr
-            memes = memes.exclude(pk=this_meme.pk)
-        except PWarning:
-            pass
+        page_types = [
+            ("videos", [VideoAttachment.TYPE]),
+            ("photos", [PhotoAttachment.TYPE]),
+            ("gifs", [AnimationAttachment.TYPE, "gif"]),
+            ("stickers", [StickerAttachment.TYPE]),
+            ("voices", [VoiceAttachment.TYPE]),
+        ]
+        available_types = set(memes.values_list("type", flat=True).distinct())
+        available_pages = [
+            (page_name, types) for page_name, types in page_types if available_types.intersection(types)
+        ]
+        if not available_pages:
+            return [], ""
 
-        memes = memes[:max_count]
+        requested_page = offset or available_pages[0][0]
+        page_index = next(
+            (index for index, (page_name, _) in enumerate(available_pages) if page_name == requested_page),
+            0,
+        )
+        _, current_types = available_pages[page_index]
+        page_memes = memes.filter(type__in=current_types)
+        page_memes = page_memes.order_by("-uses", "pk") if not filter_list else page_memes.order_by("inline_uses", "pk")
+
+        selected_memes = []
         if filter_list:
-            for meme in memes:
+            exact_meme = page_memes.filter(name=" ".join(filter_list)).first()
+            if exact_meme:
+                selected_memes.append(exact_meme)
+                page_memes = page_memes.exclude(pk=exact_meme.pk)
+
+        selected_memes.extend(page_memes[: max_count - len(selected_memes)])
+
+        if filter_list:
+            for meme in selected_memes:
                 meme.inline_uses += 1
                 meme.save()
 
-        att_types = [
-            VoiceAttachment.TYPE,
-            VideoAttachment.TYPE,
-            AnimationAttachment.TYPE,
-            "gif",
-            StickerAttachment.TYPE,
-            PhotoAttachment.TYPE,
-        ]
-        for att_type in att_types:
-            all_memes_qr += self._get_inline_qrs(list(filter(lambda x: x.type == att_type, memes)))
-        return all_memes_qr
+        next_offset = available_pages[page_index + 1][0] if page_index + 1 < len(available_pages) else ""
+        return self._get_inline_qrs(selected_memes), next_offset

@@ -114,12 +114,14 @@ class TgBot(Bot):
         filter_list = filter_list if filter_list[0] else []
 
         meme_cmd = Meme(self, event)
-        inline_query_result = meme_cmd.get_tg_inline_memes(filter_list)
+        inline_query_result, next_offset = meme_cmd.get_tg_inline_memes(filter_list, offset=data["offset"])
 
         return self.api_handler.answer_inline_query(
             inline_query_id=data["id"],
             results=inline_query_result,
             cache_time=0,
+            next_offset=next_offset,
+            is_personal=True,
         )
 
     def _send_media_group_wrap(self, rmi: ResponseMessageItem) -> dict[str, Any]:

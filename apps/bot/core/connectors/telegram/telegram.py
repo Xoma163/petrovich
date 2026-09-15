@@ -490,12 +490,19 @@ class TelegramAPI:
     # ---------- OTHER --------- #
 
     def answer_inline_query(
-        self, inline_query_id: str, results: list[dict[str, Any]], cache_time: int
+        self,
+        inline_query_id: str,
+        results: list[dict[str, Any]],
+        cache_time: int,
+        next_offset: str = "",
+        is_personal: bool = False,
     ) -> TelegramResponse:
         params: dict[str, object] = {
             "inline_query_id": inline_query_id,
             "results": json.dumps(results, ensure_ascii=False),
             "cache_time": cache_time,
+            "next_offset": next_offset,
+            "is_personal": is_personal,
         }
 
         return self.requests.post("answerInlineQuery", params).json()
