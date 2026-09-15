@@ -72,7 +72,7 @@ class YoutubeVideo:
 
         format_id = data.extra_data["video_format_id"]
         if audio_format_id := data.extra_data.get("audio_format_id"):
-            format_id = f"{format_id}+{audio_format_id}"
+            format_id = f"{format_id}+{audio_format_id}/best[ext=mp4][vcodec!=none][acodec!=none]"
         ydl_params = self._get_ydl_params() | {"format": format_id, "merge_output_format": "mp4"}
         content = self.downloader.download_to_bytes(source_url, ydl_params=ydl_params)
 

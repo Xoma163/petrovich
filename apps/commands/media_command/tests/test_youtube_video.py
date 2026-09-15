@@ -137,7 +137,7 @@ class YoutubeVideoTests(SimpleTestCase):
                 "noplaylist": True,
                 "js_runtimes": {"deno": {"path": "/opt/projects/petrovich/.venv/bin/deno"}},
                 "remote_components": ["ejs:npm", "ejs:github"],
-                "format": "video-720+audio-ru",
+                "format": "video-720+audio-ru/best[ext=mp4][vcodec!=none][acodec!=none]",
                 "merge_output_format": "mp4",
             },
         )

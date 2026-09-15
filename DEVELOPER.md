@@ -485,7 +485,8 @@ runtime for some otherwise public videos. The YouTube parser first checks `PATH`
 `deno` executable beside the active virtualenv Python so systemd services do not depend on a global Deno install.
 YouTube can intermittently return only a progressive MP4 and no separate audio-only formats. The parser retries
 metadata extraction three times for the preferred split video/audio formats, then falls back to the progressive MP4
-instead of rejecting a playable video with `Не получилось найти аудиодорожку`.
+instead of rejecting a playable video with `Не получилось найти аудиодорожку`. The download format selector also
+includes a progressive MP4 fallback because yt-dlp performs a fresh extraction when the actual download starts.
 
 When media is saved to disk from an already-populated cache entry, the media command should reuse
 cached bytes instead of trying to resolve a fresh downloader/parser result. This matters for privileged
