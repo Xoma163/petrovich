@@ -11,8 +11,13 @@ from apps.shared.exceptions import PWarning
 from apps.shared.utils.video.yt_dlp_video_downloader import YtDlpVideoDownloader
 
 
+class _IncompleteYoutubeFormats(Exception):
+    pass
+
+
 class YoutubeVideo:
     DEFAULT_VIDEO_QUALITY_HIGHT = 720
+    VIDEO_INFO_EXTRACTION_ATTEMPTS = 3
     DOMAIN = "youtube.com"
     URL = f"https://{DOMAIN}"
 
@@ -23,14 +28,23 @@ class YoutubeVideo:
     # SERVICE METHODS
 
     def get_video_info(self, url, high_res=False, _timedelta: float | None = None) -> VideoData:
-        video_info = self._get_video_info(url)
-
-        video, audio, filesize_mb = self._get_video_download_urls(video_info, high_res, _timedelta)
+        for attempt in range(self.VIDEO_INFO_EXTRACTION_ATTEMPTS):
+            video_info = self._get_video_info(url)
+            try:
+                video, audio, filesize_mb = self._get_video_download_urls(
+                    video_info,
+                    high_res,
+                    _timedelta,
+                    allow_progressive=attempt == self.VIDEO_INFO_EXTRACTION_ATTEMPTS - 1,
+                )
+                break
+            except _IncompleteYoutubeFormats:
+                continue
 
         return VideoData(
             filesize_mb=filesize_mb,
             video_download_url=video["url"] if video else None,
-            audio_download_url=audio["url"],
+            audio_download_url=audio["url"] if audio else None,
             title=video_info["title"],
             duration=video_info.get("duration"),
             width=video.get("width"),
@@ -45,7 +59,7 @@ class YoutubeVideo:
             extra_data={
                 "source_url": url,
                 "video_format_id": video["format_id"],
-                "audio_format_id": audio["format_id"],
+                "audio_format_id": audio["format_id"] if audio else None,
             },
         )
 
@@ -56,10 +70,10 @@ class YoutubeVideo:
         if not source_url:
             raise ValueError
 
-        ydl_params = self._get_ydl_params() | {
-            "format": f"{data.extra_data['video_format_id']}+{data.extra_data['audio_format_id']}",
-            "merge_output_format": "mp4",
-        }
+        format_id = data.extra_data["video_format_id"]
+        if audio_format_id := data.extra_data.get("audio_format_id"):
+            format_id = f"{format_id}+{audio_format_id}"
+        ydl_params = self._get_ydl_params() | {"format": format_id, "merge_output_format": "mp4"}
         content = self.downloader.download_to_bytes(source_url, ydl_params=ydl_params)
 
         va = VideoAttachment()
@@ -185,7 +199,8 @@ class YoutubeVideo:
         video_info: dict,
         high_res: bool = False,
         _timedelta: int | None = None,
-    ) -> tuple[dict, dict, int]:
+        allow_progressive: bool = False,
+    ) -> tuple[dict, dict | None, int]:
         """
         Метод ищет видео которое максимально может скачать с учётом ограничением платформы
         return: video_format, audio_format, video_filesize
@@ -203,25 +218,39 @@ class YoutubeVideo:
                 break
         if not af and audio_formats:
             af = audio_formats[0]
-        if not af:
-            raise PWarning("Не получилось найти аудиодорожку")
+        if not af and not allow_progressive:
+            raise _IncompleteYoutubeFormats
 
-        video_formats = list(
-            filter(
-                lambda x: (
-                    x.get("vbr")  # Это видео
-                    and x.get("ext") == "mp4"  # С форматом mp4
-                    and x.get("vcodec") not in ["vp9"]  # С кодеками которые поддерживают все платформы
-                    and x.get("dynamic_range") == "SDR"  # В SDR качестве
-                    and not x.get("__working")  # Без тестовых
-                    # x.get('format_note')  # Имеют разрешение для просмотра (?)
-                ),
-                video_info["formats"],
+        if not af:
+            progressive_formats = [
+                _format
+                for _format in video_info["formats"]
+                if _format.get("ext") == "mp4"
+                and _format.get("vcodec") not in (None, "none")
+                and _format.get("acodec") not in (None, "none")
+                and _format.get("dynamic_range") == "SDR"
+            ]
+            if not progressive_formats:
+                raise PWarning("Не получилось найти аудиодорожку")
+            video_formats = sorted(progressive_formats, key=self._filesize_key, reverse=True)
+        else:
+            video_formats = list(
+                filter(
+                    lambda x: (
+                        x.get("vbr")  # Это видео
+                        and x.get("ext") == "mp4"  # С форматом mp4
+                        and x.get("vcodec") not in ["vp9"]  # С кодеками которые поддерживают все платформы
+                        and x.get("dynamic_range") == "SDR"  # В SDR качестве
+                        and not x.get("__working")  # Без тестовых
+                        # x.get('format_note')  # Имеют разрешение для просмотра (?)
+                    ),
+                    video_info["formats"],
+                )
             )
-        )
-        for _format in video_formats:
-            _format["filesize_approx_vbr"] = video_info["duration"] * _format.get("vbr")
-        video_formats = sorted(video_formats, key=self._filesize_key, reverse=True)
+            for _format in video_formats:
+                _format["filesize_approx_vbr"] = video_info["duration"] * _format.get("vbr")
+            video_formats = sorted(video_formats, key=self._filesize_key, reverse=True)
+
         if not video_formats:
             raise PWarning("Не получилось найти видеофайл")
         is_short_video = video_info["media_type"] == "short"
@@ -237,5 +266,5 @@ class YoutubeVideo:
                     if int(vf["height"]) <= self.DEFAULT_VIDEO_QUALITY_HIGHT:
                         break
 
-        video_filesize = (self._filesize_key(vf) + self._filesize_key(af)) / 1024 / 1024
+        video_filesize = (self._filesize_key(vf) + (self._filesize_key(af) if af else 0)) / 1024 / 1024
         return vf, af, video_filesize

@@ -7,6 +7,21 @@ from apps.connectors.parsers.media_command.youtube.video import YoutubeVideo
 
 
 class YoutubeVideoTests(SimpleTestCase):
+    @staticmethod
+    def _get_video_info_with_formats(formats):
+        return {
+            "id": "video-id",
+            "title": "Video",
+            "duration": 10,
+            "width": 640,
+            "height": 360,
+            "channel_id": "channel-id",
+            "channel": "Channel",
+            "media_type": "video",
+            "thumbnails": [],
+            "formats": formats,
+        }
+
     def test_get_video_download_urls_prefers_ru_audio_and_limited_video(self):
         service = YoutubeVideo()
 
@@ -134,3 +149,103 @@ class YoutubeVideoTests(SimpleTestCase):
         params = YoutubeVideo._get_ydl_params()
 
         self.assertEqual(params["js_runtimes"], {"deno": {"path": "C:\\app\\.venv\\Scripts\\deno.exe"}})
+
+    def test_get_video_info_retries_incomplete_format_response(self):
+        service = YoutubeVideo()
+        incomplete_info = self._get_video_info_with_formats(
+            [
+                {
+                    "format_id": "18",
+                    "ext": "mp4",
+                    "vcodec": "avc1",
+                    "acodec": "mp4a",
+                    "dynamic_range": "SDR",
+                    "width": 640,
+                    "height": 360,
+                    "url": "https://example.com/progressive.mp4",
+                    "filesize": 100,
+                }
+            ]
+        )
+        complete_info = self._get_video_info_with_formats(
+            [
+                {
+                    "format_id": "audio",
+                    "resolution": "audio only",
+                    "filesize": 10,
+                    "url": "https://example.com/audio.m4a",
+                },
+                {
+                    "format_id": "video",
+                    "vbr": 100,
+                    "ext": "mp4",
+                    "vcodec": "avc1",
+                    "dynamic_range": "SDR",
+                    "height": 720,
+                    "width": 1280,
+                    "url": "https://example.com/video.mp4",
+                },
+            ]
+        )
+        service._get_video_info = Mock(side_effect=[incomplete_info, complete_info])
+
+        data = service.get_video_info("https://www.youtube.com/watch?v=video-id")
+
+        self.assertEqual(service._get_video_info.call_count, 2)
+        self.assertEqual(data.extra_data["video_format_id"], "video")
+        self.assertEqual(data.extra_data["audio_format_id"], "audio")
+
+    def test_get_video_info_falls_back_to_progressive_format(self):
+        service = YoutubeVideo()
+        incomplete_info = self._get_video_info_with_formats(
+            [
+                {
+                    "format_id": "18",
+                    "ext": "mp4",
+                    "vcodec": "avc1",
+                    "acodec": "mp4a",
+                    "dynamic_range": "SDR",
+                    "width": 640,
+                    "height": 360,
+                    "url": "https://example.com/progressive.mp4",
+                    "filesize": 100,
+                }
+            ]
+        )
+        service._get_video_info = Mock(return_value=incomplete_info)
+
+        data = service.get_video_info("https://www.youtube.com/watch?v=video-id")
+
+        self.assertEqual(service._get_video_info.call_count, service.VIDEO_INFO_EXTRACTION_ATTEMPTS)
+        self.assertEqual(data.extra_data["video_format_id"], "18")
+        self.assertIsNone(data.extra_data["audio_format_id"])
+        self.assertIsNone(data.audio_download_url)
+
+    @patch(
+        "apps.connectors.parsers.media_command.youtube.video.shutil.which",
+        return_value="/opt/projects/petrovich/.venv/bin/deno",
+    )
+    def test_download_video_uses_progressive_format_without_audio_merge(self, _):
+        service = YoutubeVideo()
+        service.downloader.download_to_bytes = Mock(return_value=b"video-content")
+
+        service.download_video(
+            VideoData(
+                extra_data={
+                    "source_url": "https://www.youtube.com/watch?v=video-id",
+                    "video_format_id": "18",
+                    "audio_format_id": None,
+                }
+            )
+        )
+
+        service.downloader.download_to_bytes.assert_called_once_with(
+            "https://www.youtube.com/watch?v=video-id",
+            ydl_params={
+                "noplaylist": True,
+                "js_runtimes": {"deno": {"path": "/opt/projects/petrovich/.venv/bin/deno"}},
+                "remote_components": ["ejs:npm", "ejs:github"],
+                "format": "18",
+                "merge_output_format": "mp4",
+            },
+        )

@@ -483,6 +483,9 @@ lets `yt-dlp` choose its own HTTP chunking defaults; do not reintroduce a projec
 The project installs the `yt-dlp[deno]` extra because current YouTube extraction requires a JavaScript challenge
 runtime for some otherwise public videos. The YouTube parser first checks `PATH`, then explicitly checks for the
 `deno` executable beside the active virtualenv Python so systemd services do not depend on a global Deno install.
+YouTube can intermittently return only a progressive MP4 and no separate audio-only formats. The parser retries
+metadata extraction three times for the preferred split video/audio formats, then falls back to the progressive MP4
+instead of rejecting a playable video with `Не получилось найти аудиодорожку`.
 
 When media is saved to disk from an already-populated cache entry, the media command should reuse
 cached bytes instead of trying to resolve a fresh downloader/parser result. This matters for privileged
