@@ -1,4 +1,4 @@
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 from django.test import SimpleTestCase
 
@@ -91,7 +91,11 @@ class YoutubeVideoTests(SimpleTestCase):
 
         self.assertEqual(video["format_id"], "video-1080")
 
-    def test_download_video_uses_selected_format_ids(self):
+    @patch(
+        "apps.connectors.parsers.media_command.youtube.video.shutil.which",
+        return_value="/opt/projects/petrovich/.venv/bin/deno",
+    )
+    def test_download_video_uses_selected_format_ids(self, _):
         service = YoutubeVideo()
         service.downloader.download_to_bytes = Mock(return_value=b"video-content")
 
@@ -116,9 +120,17 @@ class YoutubeVideoTests(SimpleTestCase):
             "https://www.youtube.com/watch?v=video-id",
             ydl_params={
                 "noplaylist": True,
-                "js_runtimes": {"deno": {}},
+                "js_runtimes": {"deno": {"path": "/opt/projects/petrovich/.venv/bin/deno"}},
                 "remote_components": ["ejs:npm", "ejs:github"],
                 "format": "video-720+audio-ru",
                 "merge_output_format": "mp4",
             },
         )
+
+    @patch("apps.connectors.parsers.media_command.youtube.video.Path.is_file", return_value=True)
+    @patch("apps.connectors.parsers.media_command.youtube.video.sys.executable", "C:\\app\\.venv\\Scripts\\python.exe")
+    @patch("apps.connectors.parsers.media_command.youtube.video.shutil.which", return_value=None)
+    def test_ydl_params_find_deno_next_to_virtualenv_python(self, _, __):
+        params = YoutubeVideo._get_ydl_params()
+
+        self.assertEqual(params["js_runtimes"], {"deno": {"path": "C:\\app\\.venv\\Scripts\\deno.exe"}})

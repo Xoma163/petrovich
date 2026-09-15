@@ -1,5 +1,8 @@
 import re
+import shutil
+import sys
 from datetime import timedelta
+from pathlib import Path
 from urllib.parse import urlparse, parse_qsl
 
 from apps.bot.core.messages.attachments.video import VideoAttachment
@@ -149,10 +152,16 @@ class YoutubeVideo:
 
     @staticmethod
     def _get_ydl_params() -> dict:
+        deno_path = shutil.which("deno")
+        if not deno_path:
+            executable_name = "deno.exe" if sys.platform == "win32" else "deno"
+            venv_deno_path = Path(sys.executable).with_name(executable_name)
+            if venv_deno_path.is_file():
+                deno_path = str(venv_deno_path)
+
         return {
             "noplaylist": True,
-            # Не забыть закинуть deno в /usr/bin/local
-            "js_runtimes": {"deno": {}},
+            "js_runtimes": {"deno": {"path": deno_path} if deno_path else {}},
             "remote_components": ["ejs:npm", "ejs:github"],
         }
 

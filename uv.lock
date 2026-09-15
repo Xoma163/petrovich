@@ -464,6 +464,19 @@ wheels = [
 ]
 
 [[package]]
+name = "deno"
+version = "2.9.6"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/3b/fa/04bdb9b54ee425a9708c82c61e3acf5796405718756600c7aab79910b712/deno-2.9.6.tar.gz", hash = "sha256:0dba7666e7d3db62ff1e73f7f69fc74b63a551a198c311d2ffb409d1dc96167f", size = 8167, upload-time = "2026-08-27T17:32:04.397Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/f6/89/a50877162323e98129329a3a54555ac164d8cc911b2a6b8e5ccefc498c54/deno-2.9.6-py3-none-macosx_10_12_x86_64.whl", hash = "sha256:845831e26d98553fb17b7baf9af4949857c5d78965c35890e7a0af9425e63734", size = 42274922, upload-time = "2026-08-27T17:31:43.39Z" },
+    { url = "https://files.pythonhosted.org/packages/8e/09/c46e566dd9f8dbc09c376c9c273e27da61d89e4e7e7d03b5be35720ecfb3/deno-2.9.6-py3-none-macosx_11_0_arm64.whl", hash = "sha256:ecf7b5d938562e4227a5ee5b5b1025094ad44cf92d829917a3d3060bface5093", size = 38462382, upload-time = "2026-08-27T17:31:48.132Z" },
+    { url = "https://files.pythonhosted.org/packages/5b/22/7cccf9010e036a8d9be61cf8c2747a3e429d25e20dceace43f2c399522fc/deno-2.9.6-py3-none-manylinux_2_27_aarch64.whl", hash = "sha256:f8e1f6c053d3376388b61e658a2438ba45904a62b261988f2b858efefdc0aaad", size = 39823223, upload-time = "2026-08-27T17:31:52.629Z" },
+    { url = "https://files.pythonhosted.org/packages/49/22/f3cb68c5b46140eafec610c763062d147bf73050c1d24ab8180902d8ba93/deno-2.9.6-py3-none-manylinux_2_27_x86_64.whl", hash = "sha256:037458003a1c76382e41baa1cd152b3325d9a13b2678f75cc653c893c0b2dfec", size = 41593942, upload-time = "2026-08-27T17:31:57.197Z" },
+    { url = "https://files.pythonhosted.org/packages/9b/d1/085d2f83ec0a55346c9b6cd96f74fc5b69d4edbdd9575f84ee1b08b4218f/deno-2.9.6-py3-none-win_amd64.whl", hash = "sha256:ad65ac596e53f7275d783070be2fd96a47f4a478e67ecd0584e6b744804ed863", size = 41516258, upload-time = "2026-08-27T17:32:01.818Z" },
+]
+
+[[package]]
 name = "distlib"
 version = "0.4.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1181,7 +1194,7 @@ dependencies = [
     { name = "whisper-ctranslate2" },
     { name = "xmltodict" },
     { name = "yandex-music" },
-    { name = "yt-dlp" },
+    { name = "yt-dlp", extra = ["deno"] },
 ]
 
 [package.dev-dependencies]
@@ -1222,7 +1235,7 @@ requires-dist = [
     { name = "whisper-ctranslate2", specifier = ">=0.5.7" },
     { name = "xmltodict", specifier = ">=1.0.4" },
     { name = "yandex-music", specifier = ">=2.2.0" },
-    { name = "yt-dlp", specifier = ">=2026.8.19" },
+    { name = "yt-dlp", extras = ["deno"], specifier = ">=2026.8.19" },
 ]
 
 [package.metadata.requires-dev]
@@ -2018,4 +2031,9 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/1e/e0/832fa4ca334b766a06933a196066edc3dba37cdb6f14cd98d59bcc69a4b4/yt_dlp-2026.8.19.tar.gz", hash = "sha256:9e213e48cea35c66b378e4447903f118f6392a5fa380a2b6d7070ec86f4e0af1", size = 3052025, upload-time = "2026-08-19T23:48:59.291Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/69/b2/8cd1613f56eed7ceb64fbd4df3f1c01246bfb098e6f398228bafda22b80b/yt_dlp-2026.8.19-py3-none-any.whl", hash = "sha256:1d57897e94c6665a0a6f9bc54b34e584284e32c034ffab3a7df25d8f7b24eedf", size = 3185533, upload-time = "2026-08-19T23:48:56.925Z" },
+]
+
+[package.optional-dependencies]
+deno = [
+    { name = "deno" },
 ]

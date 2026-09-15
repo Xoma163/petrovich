@@ -480,6 +480,9 @@ audio preference, Shorts handling, cache decisions, and user-facing error mappin
 and merge now go through the shared `yt-dlp` byte downloader. The shared downloader intentionally
 lets `yt-dlp` choose its own HTTP chunking defaults; do not reintroduce a project-wide forced
 `http_chunk_size` without re-checking media download performance and service compatibility.
+The project installs the `yt-dlp[deno]` extra because current YouTube extraction requires a JavaScript challenge
+runtime for some otherwise public videos. The YouTube parser first checks `PATH`, then explicitly checks for the
+`deno` executable beside the active virtualenv Python so systemd services do not depend on a global Deno install.
 
 When media is saved to disk from an already-populated cache entry, the media command should reuse
 cached bytes instead of trying to resolve a fresh downloader/parser result. This matters for privileged
