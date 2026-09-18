@@ -26,9 +26,6 @@ SECRET_KEY = env.str("SECRET_KEY")
 DEBUG = env.bool("DEBUG")
 
 MINECRAFT_DOMAIN = env.str("MINECRAFT_DOMAIN")
-ZOMBOID_RCON_HOST = env.str("ZOMBOID_RCON_HOST", default="127.0.0.1")
-ZOMBOID_RCON_PORT = env.int("ZOMBOID_RCON_PORT", default=27015)
-ZOMBOID_RCON_PASSWORD = env.str("ZOMBOID_RCON_PASSWORD", default="")
 PETROVICH_DOMAIN = env.str("PETROVICH_DOMAIN")
 ALLOWED_HOSTS = list(dict.fromkeys([*env.list("ALLOWED_HOSTS"), "127.0.0.1", "localhost"]))
 

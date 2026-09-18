@@ -24,7 +24,6 @@ This project is heavily centered on:
 - meme storage / inline search
 - GitHub issue/comment automation
 - some host-specific operational automation such as Minecraft service control
-- some host-specific operational automation such as Minecraft and Project Zomboid service control
 
 The code and user-facing strings are predominantly **Russian**, and several operational assumptions are clearly tailored to the maintainer's own infrastructure.
 
@@ -599,10 +598,6 @@ Some code performs machine-level or host-level actions.
 Example:
 
 - Minecraft server control uses `sudo systemctl start/stop ...`
-- Project Zomboid control uses the trusted `/зомбоид` (`/zomboid`) command: status asks the local Project
-  Zomboid RCON endpoint (`ZOMBOID_RCON_HOST`, `ZOMBOID_RCON_PORT`, `ZOMBOID_RCON_PASSWORD`) for `players`,
-  ordinary restart runs `sudo /usr/local/sbin/zomboid-restart-if-empty-updates --force` with a 3-minute cooldown,
-  and admin-only `/зомбоид рестарт --force` runs `sudo systemctl restart zomboid` without that cooldown.
 
 Treat this area as operationally sensitive.
 
@@ -654,9 +649,6 @@ From the codebase and example env:
 - `TG_MODERATOR_CHAT_PK`
 - `TG_PHOTO_UPLOADING_CHAT_PK`
 - `QWEN_API_BASE_URLS`
-- `ZOMBOID_RCON_HOST`
-- `ZOMBOID_RCON_PORT`
-- `ZOMBOID_RCON_PASSWORD`
 - `DISK_SAVE_PATH`
 - `IMGBB_API_KEY`
 - `GITHUB_TOKEN`
