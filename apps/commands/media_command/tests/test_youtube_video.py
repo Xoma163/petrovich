@@ -272,7 +272,24 @@ class YtDlpVideoDownloaderTests(SimpleTestCase):
         self.assertEqual(download.call_count, 2)
         sleep.assert_called_once_with(downloader.DEFAULT_DOWNLOAD_RETRY_DELAY)
 
-    def test_download_to_bytes_does_not_retry_non_timeout_error(self):
+    def test_download_to_bytes_retries_truncated_response_with_fresh_download(self):
+        downloader = YtDlpVideoDownloader()
+        with patch("apps.shared.utils.video.yt_dlp_video_downloader.time.sleep") as sleep:
+            with patch.object(
+                downloader,
+                "_download_to_bytes",
+                side_effect=[
+                    yt_dlp.utils.DownloadError("1130496 bytes read, 688189 more expected"),
+                    b"video-content",
+                ],
+            ) as download:
+                content = downloader.download_to_bytes("https://example.com/video")
+
+        self.assertEqual(content, b"video-content")
+        self.assertEqual(download.call_count, 2)
+        sleep.assert_called_once_with(downloader.DEFAULT_DOWNLOAD_RETRY_DELAY)
+
+    def test_download_to_bytes_does_not_retry_non_transient_error(self):
         downloader = YtDlpVideoDownloader()
         with patch.object(
             downloader,

@@ -43,7 +43,7 @@ class YtDlpVideoDownloader:
             try:
                 return self._download_to_bytes(url, ydl_params)
             except yt_dlp.utils.DownloadError as e:
-                if attempt == self.DEFAULT_DOWNLOAD_ATTEMPTS - 1 or not self._is_timeout_error(e):
+                if attempt == self.DEFAULT_DOWNLOAD_ATTEMPTS - 1 or not self._is_retryable_download_error(e):
                     raise self._prepare_ytdlp_error(e) from e
                 time.sleep(self.DEFAULT_DOWNLOAD_RETRY_DELAY)
 
@@ -77,8 +77,9 @@ class YtDlpVideoDownloader:
             self._remove_tmp_files(tmp_video_file)
 
     @staticmethod
-    def _is_timeout_error(error: yt_dlp.utils.DownloadError) -> bool:
-        return "timed out" in error.msg.lower()
+    def _is_retryable_download_error(error: yt_dlp.utils.DownloadError) -> bool:
+        message = error.msg.lower()
+        return "timed out" in message or ("bytes read" in message and "more expected" in message)
 
     @staticmethod
     def get_first_playlist_entry(video_info: dict) -> dict:
