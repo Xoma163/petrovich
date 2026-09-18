@@ -1,4 +1,5 @@
 import os
+import time
 from collections.abc import Callable
 from glob import glob
 from tempfile import mkstemp
@@ -21,6 +22,8 @@ class _NothingLogger:
 
 class YtDlpVideoDownloader:
     DEFAULT_CONCURRENT_FRAGMENT_DOWNLOADS = 10
+    DEFAULT_DOWNLOAD_ATTEMPTS = 3
+    DEFAULT_DOWNLOAD_RETRY_DELAY = 2
 
     def __init__(
         self,
@@ -36,6 +39,17 @@ class YtDlpVideoDownloader:
             raise self._prepare_ytdlp_error(e) from e
 
     def download_to_bytes(self, url: str, ydl_params: dict | None = None) -> bytes:
+        for attempt in range(self.DEFAULT_DOWNLOAD_ATTEMPTS):
+            try:
+                return self._download_to_bytes(url, ydl_params)
+            except yt_dlp.utils.DownloadError as e:
+                if attempt == self.DEFAULT_DOWNLOAD_ATTEMPTS - 1 or not self._is_timeout_error(e):
+                    raise self._prepare_ytdlp_error(e) from e
+                time.sleep(self.DEFAULT_DOWNLOAD_RETRY_DELAY)
+
+        raise RuntimeError
+
+    def _download_to_bytes(self, url: str, ydl_params: dict | None = None) -> bytes:
         descriptor, tmp_video_file = mkstemp()
         os.close(descriptor)
         os.remove(tmp_video_file)
@@ -59,10 +73,12 @@ class YtDlpVideoDownloader:
 
             with open(real_tmp_video_file, "rb") as file:
                 return file.read()
-        except yt_dlp.utils.DownloadError as e:
-            raise self._prepare_ytdlp_error(e) from e
         finally:
             self._remove_tmp_files(tmp_video_file)
+
+    @staticmethod
+    def _is_timeout_error(error: yt_dlp.utils.DownloadError) -> bool:
+        return "timed out" in error.msg.lower()
 
     @staticmethod
     def get_first_playlist_entry(video_info: dict) -> dict:
