@@ -292,21 +292,28 @@ class VoiceRecognition(AcceptExtraCommand):
         """
         answer = answer if answer else "{пустой ответ}"
         keyboard = None
+        rich_answer = answer
 
         # Если в тексте более 200 символов, то появляется кнопка саммари
         if len(answer) > 200:
-            answer = self.bot.get_quote_text(answer, expandable=True)
+            rich_answer = self.bot.get_expandable_quote_markdown(answer)
+            formatted_answer = self.bot.get_quote_text(answer, expandable=True)
             button = self.bot.get_button("Саммари", "gpt", ["_wtf"])
             keyboard = self.bot.get_inline_keyboard([button])
+        else:
+            formatted_answer = answer
 
-        # Если ответ слишком длинный - кладём в файл
         rmi = ResponseMessageItem()
-        if len(answer) > self.bot.max_message_text_length:
+        if len(formatted_answer) <= self.bot.max_message_text_length:
+            rmi.text = formatted_answer
+        elif len(rich_answer) <= self.bot.max_rich_message_text_length:
+            rmi.text = answer
+            rmi.set_rich_markdown(rich_answer)
+        else:
             document = wrap_text_in_html_document(answer, "Транскрибация")
-            answer = "Полная транскрибация в одном файле"
+            rmi.text = "Полная транскрибация в одном файле"
             rmi.attachments = [document]
 
-        rmi.text = answer
         rmi.reply_to = self.event.message.id
         rmi.keyboard = keyboard
         return rmi
