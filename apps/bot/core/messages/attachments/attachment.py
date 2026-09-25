@@ -4,7 +4,7 @@ from io import BytesIO
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from urllib3.exceptions import SSLError
+from requests.exceptions import RequestException
 
 from apps.shared.decorators import retry
 from apps.shared.utils.downloader import Downloader
@@ -102,7 +102,7 @@ class Attachment:
             self.get_file()
         return self.private_download_url
 
-    @retry(3, SSLError, sleep_time=2)
+    @retry(3, RequestException, sleep_time=2)
     def download_content(
         self,
         stream: bool = False,

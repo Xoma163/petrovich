@@ -4,6 +4,7 @@ import re
 from bs4 import BeautifulSoup
 from selenium.common import TimeoutException
 from selenium.webdriver.support.ui import WebDriverWait
+from urllib3.exceptions import ReadTimeoutError
 
 from apps.connectors.parsers.web_driver import get_web_driver
 from apps.shared.decorators import retry
@@ -29,7 +30,7 @@ class InstagramParser:
             page_source = self._get_instagram_request(url)
             if not page_source:
                 raise RuntimeError
-        except (TimeoutException, RuntimeError):
+        except (TimeoutException, ReadTimeoutError, RuntimeError):
             raise PWarning(
                 "Убедитесь в браузере(инкогнито), что по ссылке фото/видео и доступно к просмотру. Если это так, то сообщите разработчику"
             )
@@ -54,7 +55,7 @@ class InstagramParser:
             raise PWarning("Не могу скачать этот контент. Неизвестный тип. Сообщите разработчику")
         return data
 
-    @retry(times=3, exceptions=(TimeoutException,))
+    @retry(times=3, exceptions=(TimeoutException, ReadTimeoutError))
     def _get_instagram_request(self, url):
         web_driver = get_web_driver()
         page_content = None
