@@ -474,8 +474,8 @@ back to `audiotrack.aac`.
 
 Shared `yt-dlp` extraction/download helpers live in
 `apps/shared/utils/video/yt_dlp_video_downloader.py`. VK Video and YouTube Video use that helper
-from their parser modules. YouTube still keeps service-specific format selection, Russian/English
-audio preference, Shorts handling, cache decisions, and user-facing error mapping, but final download
+from their parser modules. YouTube still keeps service-specific format selection, original-first audio
+selection with explicit Russian/English command overrides, Shorts handling, cache decisions, and user-facing error mapping, but final download
 and merge now go through the shared `yt-dlp` byte downloader. The shared downloader intentionally
 lets `yt-dlp` choose its own HTTP chunking defaults; do not reintroduce a project-wide forced
 `http_chunk_size` without re-checking media download performance and service compatibility.
