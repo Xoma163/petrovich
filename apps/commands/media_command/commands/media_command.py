@@ -77,6 +77,16 @@ class Media(AcceptExtraCommand):
                         MediaKeys.SPOILER_KEYS[1:],  # noqa
                         "позволяет скрыть пост спойлером",
                     ),
+                    HelpTextKey(
+                        MediaKeys.LANGUAGE_RU_KEYS[0],
+                        MediaKeys.LANGUAGE_RU_KEYS[1:],
+                        "выбирает русскую аудиодорожку YouTube",
+                    ),
+                    HelpTextKey(
+                        MediaKeys.LANGUAGE_EN_KEYS[0],
+                        MediaKeys.LANGUAGE_EN_KEYS[1:],
+                        "выбирает английскую аудиодорожку YouTube",
+                    ),
                 ],
             ),
             HelpTextItem(

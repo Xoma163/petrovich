@@ -18,6 +18,9 @@ class _IncompleteYoutubeFormats(Exception):
 class YoutubeVideo:
     DEFAULT_VIDEO_QUALITY_HIGHT = 720
     VIDEO_INFO_EXTRACTION_ATTEMPTS = 3
+    ORIGINAL_AUDIO_LANGUAGE_PREFERENCE = 10
+    ORIGINAL_AUDIO_LANGUAGE = "original"
+    AUDIO_LANGUAGE_PATTERN = re.compile(r"^[a-z]{2,3}(?:-[a-z0-9]{2,8})*$", re.IGNORECASE)
     DOMAIN = "youtube.com"
     URL = f"https://{DOMAIN}"
 
@@ -27,7 +30,14 @@ class YoutubeVideo:
 
     # SERVICE METHODS
 
-    def get_video_info(self, url, high_res=False, _timedelta: float | None = None) -> VideoData:
+    def get_video_info(
+        self,
+        url,
+        high_res=False,
+        _timedelta: float | None = None,
+        audio_language: str | None = None,
+    ) -> VideoData:
+        audio_language = self._normalize_audio_language(audio_language)
         for attempt in range(self.VIDEO_INFO_EXTRACTION_ATTEMPTS):
             video_info = self._get_video_info(url)
             try:
@@ -36,6 +46,7 @@ class YoutubeVideo:
                     high_res,
                     _timedelta,
                     allow_progressive=attempt == self.VIDEO_INFO_EXTRACTION_ATTEMPTS - 1,
+                    audio_language=audio_language,
                 )
                 break
             except _IncompleteYoutubeFormats:
@@ -60,6 +71,7 @@ class YoutubeVideo:
                 "source_url": url,
                 "video_format_id": video["format_id"],
                 "audio_format_id": audio["format_id"] if audio else None,
+                "audio_language": audio_language,
             },
         )
 
@@ -194,12 +206,49 @@ class YoutubeVideo:
             return PWarning("Это видео было удалено за нарушение правил YouTube")
         return PWarning("Не смог найти видео по этой ссылке")
 
+    @classmethod
+    def _normalize_audio_language(cls, language: str | None) -> str | None:
+        if language is None:
+            return None
+        language = language.strip().lower()
+        if language == cls.ORIGINAL_AUDIO_LANGUAGE:
+            return language
+        if not language or not cls.AUDIO_LANGUAGE_PATTERN.fullmatch(language):
+            raise PWarning("Неверный язык аудиодорожки. Пример: --lang-ru или --lang-en")
+        return language
+
+    @classmethod
+    def _get_audio_format_by_language(cls, audio_formats: list[dict], language: str) -> dict | None:
+        if language == cls.ORIGINAL_AUDIO_LANGUAGE:
+            return next(
+                (
+                    audio_format
+                    for audio_format in audio_formats
+                    if audio_format.get("language_preference") == cls.ORIGINAL_AUDIO_LANGUAGE_PREFERENCE
+                ),
+                None,
+            )
+
+        def language_matches(audio_format: dict) -> bool:
+            format_language = (audio_format.get("language") or "").lower()
+            if "-" in language:
+                return format_language == language
+            return format_language == language or format_language.startswith(f"{language}-")
+
+        return next((audio_format for audio_format in audio_formats if language_matches(audio_format)), None)
+
+    @staticmethod
+    def _get_available_audio_languages(audio_formats: list[dict]) -> str:
+        languages = sorted({x["language"] for x in audio_formats if x.get("language")})
+        return ", ".join(languages)
+
     def _get_video_download_urls(
         self,
         video_info: dict,
         high_res: bool = False,
         _timedelta: int | None = None,
         allow_progressive: bool = False,
+        audio_language: str | None = None,
     ) -> tuple[dict, dict | None, int]:
         """
         Метод ищет видео которое максимально может скачать с учётом ограничением платформы
@@ -211,12 +260,26 @@ class YoutubeVideo:
             reverse=True,
         )
 
-        # Выбор аудио-формата по языковой дорожке
-        for lang in ("ru", "en-US"):
-            af = next((x for x in audio_formats if x.get("language") == lang), None)
-            if af:
-                break
-        if not af and audio_formats:
+        if not audio_formats and not allow_progressive:
+            raise _IncompleteYoutubeFormats
+
+        if audio_language:
+            af = self._get_audio_format_by_language(audio_formats, audio_language)
+            if not af:
+                available_languages = self._get_available_audio_languages(audio_formats)
+                available_text = f" Доступны: {available_languages}." if available_languages else ""
+                raise PWarning(f'Аудиодорожка с языком "{audio_language}" не найдена.{available_text}')
+        else:
+            # YouTube may make an automatically dubbed track the viewer's default.
+            # yt-dlp marks the source track with the highest language preference.
+            af = self._get_audio_format_by_language(audio_formats, self.ORIGINAL_AUDIO_LANGUAGE)
+
+        if not af and not audio_language:
+            af = next(
+                (x for x in audio_formats if (x.get("language") or "").lower().startswith("en")),
+                None,
+            )
+        if not af and audio_formats and not audio_language:
             af = audio_formats[0]
         if not af and not allow_progressive:
             raise _IncompleteYoutubeFormats

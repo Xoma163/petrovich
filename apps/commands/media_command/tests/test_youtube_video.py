@@ -1,8 +1,12 @@
+from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
 import yt_dlp
 from django.test import SimpleTestCase
 
+from apps.bot.core.messages.message import Message
+from apps.commands.media_command.service import MediaKeys, MediaServiceResponse
+from apps.commands.media_command.services.youtube_video import YoutubeVideoService
 from apps.connectors.parsers.media_command.data import VideoData
 from apps.connectors.parsers.media_command.youtube.video import YoutubeVideo
 from apps.shared.exceptions import PWarning
@@ -25,7 +29,7 @@ class YoutubeVideoTests(SimpleTestCase):
             "formats": formats,
         }
 
-    def test_get_video_download_urls_prefers_ru_audio_and_limited_video(self):
+    def test_get_video_download_urls_prefers_english_and_limited_video_when_original_is_not_marked(self):
         service = YoutubeVideo()
 
         video, audio, filesize_mb = service._get_video_download_urls(
@@ -36,13 +40,13 @@ class YoutubeVideoTests(SimpleTestCase):
                     {
                         "format_id": "audio-en",
                         "resolution": "audio only",
-                        "filesize": 20,
+                        "filesize": 10,
                         "language": "en-US",
                     },
                     {
                         "format_id": "audio-ru",
                         "resolution": "audio only",
-                        "filesize": 10,
+                        "filesize": 20,
                         "language": "ru",
                     },
                     {
@@ -68,8 +72,124 @@ class YoutubeVideoTests(SimpleTestCase):
         )
 
         self.assertEqual(video["format_id"], "video-720")
-        self.assertEqual(audio["format_id"], "audio-ru")
+        self.assertEqual(audio["format_id"], "audio-en")
         self.assertGreater(filesize_mb, 0)
+
+    def test_get_video_download_urls_prefers_original_audio_over_russian_dub(self):
+        service = YoutubeVideo()
+
+        _, audio, _ = service._get_video_download_urls(
+            {
+                "duration": 10,
+                "media_type": "video",
+                "formats": [
+                    {
+                        "format_id": "audio-ru-dub",
+                        "resolution": "audio only",
+                        "filesize": 20,
+                        "language": "ru",
+                        "language_preference": -1,
+                    },
+                    {
+                        "format_id": "audio-en-original",
+                        "resolution": "audio only",
+                        "filesize": 10,
+                        "language": "en-US",
+                        "language_preference": 10,
+                    },
+                    {
+                        "format_id": "video-720",
+                        "vbr": 100,
+                        "ext": "mp4",
+                        "vcodec": "avc1",
+                        "dynamic_range": "SDR",
+                        "height": 720,
+                        "width": 1280,
+                    },
+                ],
+            },
+        )
+
+        self.assertEqual(audio["format_id"], "audio-en-original")
+
+    def test_get_video_download_urls_uses_explicit_language(self):
+        service = YoutubeVideo()
+        video_info = self._get_video_info_with_formats(
+            [
+                {
+                    "format_id": "audio-en-original",
+                    "resolution": "audio only",
+                    "filesize": 20,
+                    "language": "en-US",
+                    "language_preference": 10,
+                },
+                {
+                    "format_id": "audio-ru",
+                    "resolution": "audio only",
+                    "filesize": 10,
+                    "language": "ru",
+                },
+                {
+                    "format_id": "video-720",
+                    "vbr": 100,
+                    "ext": "mp4",
+                    "vcodec": "avc1",
+                    "dynamic_range": "SDR",
+                    "height": 720,
+                    "width": 1280,
+                },
+            ]
+        )
+
+        _, audio, _ = service._get_video_download_urls(video_info, audio_language="ru")
+
+        self.assertEqual(audio["format_id"], "audio-ru")
+
+    def test_get_video_download_urls_matches_base_language_to_regional_track(self):
+        service = YoutubeVideo()
+        video_info = self._get_video_info_with_formats(
+            [
+                {
+                    "format_id": "audio-en-us",
+                    "resolution": "audio only",
+                    "filesize": 10,
+                    "language": "en-US",
+                },
+                {
+                    "format_id": "video-720",
+                    "vbr": 100,
+                    "ext": "mp4",
+                    "vcodec": "avc1",
+                    "dynamic_range": "SDR",
+                    "height": 720,
+                    "width": 1280,
+                },
+            ]
+        )
+
+        _, audio, _ = service._get_video_download_urls(video_info, audio_language="en")
+
+        self.assertEqual(audio["format_id"], "audio-en-us")
+
+    def test_get_video_download_urls_reports_available_languages(self):
+        service = YoutubeVideo()
+        video_info = self._get_video_info_with_formats(
+            [
+                {
+                    "format_id": "audio-en",
+                    "resolution": "audio only",
+                    "filesize": 10,
+                    "language": "en-US",
+                }
+            ]
+        )
+
+        with self.assertRaisesMessage(PWarning, "Доступны: en-US"):
+            service._get_video_download_urls(video_info, audio_language="ru")
+
+    def test_normalize_audio_language_rejects_invalid_value(self):
+        with self.assertRaisesMessage(PWarning, "Неверный язык аудиодорожки"):
+            YoutubeVideo._normalize_audio_language("russian!")
 
     def test_get_video_download_urls_uses_high_resolution_when_requested(self):
         service = YoutubeVideo()
@@ -252,6 +372,39 @@ class YoutubeVideoTests(SimpleTestCase):
                 "merge_output_format": "mp4",
             },
         )
+
+
+class YoutubeVideoLanguageOptionTests(SimpleTestCase):
+    def test_media_keys_extracts_audio_language(self):
+        message = Message("/медиа --lang-en https://youtube.com/watch?v=video-id")
+        media_keys = MediaKeys(message.keys, message.short_keys)
+
+        self.assertTrue(media_keys.language_en)
+        self.assertFalse(media_keys.language_ru)
+
+    def test_language_specific_download_uses_separate_cache_identity(self):
+        event = SimpleNamespace(log_filter={})
+        service = YoutubeVideoService(
+            Mock(),
+            event,
+            media_keys=MediaKeys([], []),
+            has_command_name=True,
+        )
+        cached_response = MediaServiceResponse(text="cached")
+        service._get_cached = Mock(return_value=cached_response)
+
+        result = service._get_content_by_url(
+            VideoData(
+                channel_id="channel-id",
+                video_id="video-id",
+                title="Video",
+                extra_data={"audio_language": "ru"},
+            ),
+            "https://www.youtube.com/watch?v=video-id",
+        )
+
+        self.assertIs(result, cached_response)
+        service._get_cached.assert_called_once_with("channel-id", "video-id:ru", "Video")
 
 
 class YtDlpVideoDownloaderTests(SimpleTestCase):

@@ -489,6 +489,15 @@ YouTube can intermittently return only a progressive MP4 and no separate audio-o
 metadata extraction three times for the preferred split video/audio formats, then falls back to the progressive MP4
 instead of rejecting a playable video with `Не получилось найти аудиодорожку`. The download format selector also
 includes a progressive MP4 fallback because yt-dlp performs a fresh extraction when the actual download starts.
+For videos with multiple audio tracks, the parser prefers the source track that `yt-dlp` marks with
+`language_preference=10` (YouTube's "original" track). If YouTube does not mark an original track, it prefers an
+English-language track and then falls back to the highest-quality audio format. This prevents a Russian language
+preference from replacing the creator's original audio with an automatically dubbed track.
+Users can override this with the fixed `/медиа` keys `--lang-ru` or `--lang-en`. The `en` selection matches
+regional tracks such as `en-US`. Explicit language requests fail with the available language list instead of
+silently falling back.
+Language-specific downloads use `<video_id>:<language>` as the cache identity so they cannot return a cached video
+with a different audio track.
 
 When media is saved to disk from an already-populated cache entry, the media command should reuse
 cached bytes instead of trying to resolve a fresh downloader/parser result. This matters for privileged

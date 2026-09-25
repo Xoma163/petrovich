@@ -15,7 +15,17 @@ class YoutubeVideoService(MediaService):
 
     @retry(3, Exception, sleep_time=2, except_exceptions=(PWarning,))
     def get_content_by_url(self, url: str) -> MediaServiceResponse:
-        video_data = self.service.get_video_info(url, high_res=self.media_keys.high_resolution)
+        audio_language = None
+        if self.media_keys.language_ru:
+            audio_language = "ru"
+        elif self.media_keys.language_en:
+            audio_language = "en"
+
+        video_data = self.service.get_video_info(
+            url,
+            high_res=self.media_keys.high_resolution,
+            audio_language=audio_language,
+        )
 
         # Если нет форс флага, сообщение из чата, длительность видео более 2-х минут, не было вызова команды, видео - не шортс тогда скип
         if (
@@ -31,14 +41,18 @@ class YoutubeVideoService(MediaService):
             return self._get_content_by_url(video_data, url)
 
     def _get_content_by_url(self, data: VideoData, url: str) -> MediaServiceResponse:
+        cache_video_id = data.video_id
+        selected_audio_language = (data.extra_data or {}).get("audio_language")
+        if selected_audio_language:
+            cache_video_id = f"{cache_video_id}:{selected_audio_language}"
 
-        if cached := self._get_cached(data.channel_id, data.video_id, data.title):
+        if cached := self._get_cached(data.channel_id, cache_video_id, data.title):
             return cached
 
         va = self.service.download_video(data)
 
         if self._should_cache_attachment(va):
-            return self._cache_video(data.channel_id, data.video_id, data.title, url, va.content)
+            return self._cache_video(data.channel_id, cache_video_id, data.title, url, va.content)
 
         return MediaServiceResponse(text=data.title, attachments=[va], video_title=data.title)
 

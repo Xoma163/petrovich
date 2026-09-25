@@ -32,6 +32,8 @@ class MediaKeys:
     FORCE_CACHE_KEYS = ["cache", "c"]
     FORCE_KEYS = ["force", "f"]
     SPOILER_KEYS = ["spoiler"]
+    LANGUAGE_RU_KEYS = ["lang-ru"]
+    LANGUAGE_EN_KEYS = ["lang-en"]
 
     def __init__(self, keys: list, short_keys: list):
         self.no_media: bool = self.check_key(keys, short_keys, self.NO_MEDIA_KEYS)
@@ -41,6 +43,8 @@ class MediaKeys:
         self.force_cache: bool = self.check_key(keys, short_keys, self.FORCE_CACHE_KEYS)
         self.force: bool = self.check_key(keys, short_keys, self.FORCE_KEYS)
         self.spoiler: bool = self.check_key(keys, short_keys, self.SPOILER_KEYS)
+        self.language_ru: bool = self.check_key(keys, short_keys, self.LANGUAGE_RU_KEYS)
+        self.language_en: bool = self.check_key(keys, short_keys, self.LANGUAGE_EN_KEYS)
 
     @staticmethod
     def check_key(keys_event: list, short_keys_event: list, keys_values: list) -> bool:
