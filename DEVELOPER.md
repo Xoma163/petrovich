@@ -412,6 +412,8 @@ Providers discovered in code:
 OpenAI image-generation requests omit the deprecated `response_format` parameter for every model family. The
 response parser accepts both GPT Image base64 payloads and DALL-E URL payloads, downloading the latter before
 constructing the bot attachment.
+OpenAI quota errors can use either `insufficient_quota` or `credit_balance_exhausted`; both are mapped to the same
+user-facing balance warning rather than the generic OpenAI API error.
 Each `ImageDrawModel` row now represents one API model rather than one size/quality combination. `width`, `height`,
 and `quality` are the defaults; `supported_sizes` and `supported_qualities` validate per-request overrides. The
 `0005_normalize_image_draw_models` migration consolidates legacy variants and repoints profile and preset foreign

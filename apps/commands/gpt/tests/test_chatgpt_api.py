@@ -6,6 +6,7 @@ from unittest.mock import Mock
 from django.test import SimpleTestCase
 
 from apps.commands.gpt.api.providers.chatgpt import ChatGPTAPI
+from apps.shared.exceptions import PError
 
 
 class ChatGPTImageGenerationTests(SimpleTestCase):
@@ -102,3 +103,20 @@ class ChatGPTImageGenerationTests(SimpleTestCase):
         self.assertEqual(response.usage.text_input_tokens, 100)
         self.assertEqual(response.usage.image_output_tokens, 439)
         self.assertEqual(response.usage.total_cost, Decimal("0.01367"))
+
+
+class ChatGPTErrorTests(SimpleTestCase):
+    def test_credit_balance_exhausted_returns_quota_error(self):
+        api = ChatGPTAPI(api_key="test-key", log_filter={})
+        response = Mock(status_code=429)
+        response.json.return_value = {
+            "error": {
+                "message": "You have no credits remaining.",
+                "type": "insufficient_quota",
+                "code": "credit_balance_exhausted",
+            }
+        }
+        api.requests.post = Mock(return_value=response)
+
+        with self.assertRaisesMessage(PError, "Закончились деньги(("):
+            api.do_request("https://api.openai.com/v1/responses", json={})

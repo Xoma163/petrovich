@@ -30,6 +30,7 @@ class OpenAIAPI(GPTAPI, ABC):
     ERRORS_MAP = {
         "content_policy_violation": "ChatGPT не может обработать запрос по политикам безопасности",
         503: "ChatGPT недоступен",
+        "credit_balance_exhausted": "Закончились деньги((",
         "insufficient_quota": "Закончились деньги((",
         "invalid_api_key": "Некорректный API KEY. Проверьте свой ключ",
         "rate_limit_exceeded": "Слишком большой запрос",
