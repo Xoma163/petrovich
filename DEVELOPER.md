@@ -135,7 +135,7 @@ Current hardcoded operational endpoints discovered in code:
 
 - `config/setup/` — machine/bootstrap setup script
 - `config/gunicorn/` — gunicorn configuration
-- `.github/workflows/` — CI/deploy workflow definitions
+- Production updates are run with `update_production.sh`; no GitHub Actions workflow is currently checked in
 - `secrets/` — committed example env file; real env expected outside git
 
 ### Runtime / generated directories
@@ -589,6 +589,9 @@ Inline search returns homogeneous media pages to avoid the macOS Telegram client
 video/photo results. The empty offset selects the first available page in video, photo, GIF, sticker, voice order;
 `next_offset` names the next non-empty page, and inline responses are marked `is_personal` because trusted users can
 receive a different result set for the same query.
+At most ten memes are selected for an entire inline query, then split across these media pages (not ten per type).
+Selection prioritizes an exact name match and otherwise orders by usage count and ID; the order must stay stable as
+`inline_uses` is incremented while users fetch subsequent pages.
 
 ## GitHub automation
 
@@ -1032,7 +1035,7 @@ Document these carefully rather than treating them as confirmed bugs:
 
 1. `config/setup/setup.sh` is a Linux bootstrap script using `uv`; local Windows debugging is better served by `.env` plus `docker-compose.yml` for PostgreSQL/Redis.
 2. Keep repository text files on LF line endings as enforced by `.gitattributes`; configure Windows IDEs to save Python, Markdown, YAML, TOML, and shell files with LF.
-3. GitHub Actions workflow is named as CI, but the active job is effectively deployment; test steps are commented out.
+3. No GitHub Actions workflow is currently checked in; production deployment uses `update_production.sh` on the host.
 4. README is intentionally sparse and points to an external wiki, so local repo docs are incomplete by design.
 5. ASGI exists, but the visible deployment shape is WSGI/gunicorn-oriented.
 

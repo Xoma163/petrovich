@@ -80,3 +80,77 @@ class MemeInlineSearchTestCase(TestCase):
 
         self.assertEqual([result["id"] for result in results], [str(photo.pk)])
         self.assertEqual(next_offset, "")
+
+    def test_search_has_ten_results_total_across_media_pages(self):
+        videos = [
+            Meme.objects.create(
+                name=f"привет видео {index}",
+                type=VideoAttachment.TYPE,
+                approved=True,
+                tg_file_id=f"video-{index}",
+                uses=20 - index,
+            )
+            for index in range(9)
+        ]
+        photo = Meme.objects.create(
+            name="привет фото",
+            type=PhotoAttachment.TYPE,
+            approved=True,
+            tg_file_id="photo",
+            uses=10,
+        )
+        Meme.objects.create(
+            name="привет лишнее видео",
+            type=VideoAttachment.TYPE,
+            approved=True,
+            tg_file_id="extra-video",
+            uses=1,
+        )
+        command = self._get_command()
+
+        first_page, next_offset = command.get_tg_inline_memes(["привет"], max_count=50)
+        second_page, final_offset = command.get_tg_inline_memes(["привет"], max_count=50, offset=next_offset)
+
+        self.assertEqual([result["id"] for result in first_page], [str(video.pk) for video in videos])
+        self.assertEqual(next_offset, "photos")
+        self.assertEqual([result["id"] for result in second_page], [str(photo.pk)])
+        self.assertEqual(final_offset, "")
+        self.assertEqual(len(first_page) + len(second_page), 10)
+
+    def test_exact_match_stays_in_first_ten_results(self):
+        for index in range(10):
+            Meme.objects.create(
+                name=f"привет {index}",
+                type=VideoAttachment.TYPE,
+                approved=True,
+                tg_file_id=f"video-{index}",
+                uses=10,
+            )
+        exact = Meme.objects.create(
+            name="привет",
+            type=PhotoAttachment.TYPE,
+            approved=True,
+            tg_file_id="exact-photo",
+        )
+
+        first_page, next_offset = self._get_command().get_tg_inline_memes(["привет"])
+        second_page, final_offset = self._get_command().get_tg_inline_memes(["привет"], offset=next_offset)
+
+        self.assertEqual(len(first_page), 9)
+        self.assertEqual(next_offset, "photos")
+        self.assertEqual([result["id"] for result in second_page], [str(exact.pk)])
+        self.assertEqual(final_offset, "")
+
+    def test_empty_search_is_also_limited_to_ten_results(self):
+        for index in range(11):
+            Meme.objects.create(
+                name=f"мем {index}",
+                type=PhotoAttachment.TYPE,
+                approved=True,
+                tg_file_id=f"photo-{index}",
+            )
+
+        results, next_offset = self._get_command().get_tg_inline_memes([])
+
+        self.assertEqual(len(results), 10)
+        self.assertEqual(next_offset, "")
