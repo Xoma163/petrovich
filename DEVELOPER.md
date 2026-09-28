@@ -351,7 +351,7 @@ This is the feature layer.
 Feature groups:
 
 - `games/` — Petrovich game and Wordle
-- `gpt/` — ChatGPT/Grok/Qwen integrations, models, presets, keys, stats, preprompts
+- `gpt/` — ChatGPT/Grok/Qwen/Hermes integrations, models, presets, keys, stats, preprompts
 - `media_command/` — URL-driven media extraction/download/caching/reposting
 - `meme/` — meme storage, approval, inline meme search
 - `notifies/` — reminders and delayed command execution
@@ -408,6 +408,38 @@ Providers discovered in code:
 - OpenAI / ChatGPT
 - xAI / Grok
 - local-network Qwen-compatible server
+- Hermes Agent's OpenAI-compatible API server (administrator-only `/hermes`)
+
+`/hermes` reuses GPT reply-chain history, but sends text-only, non-streaming chat completions to
+`HERMES_API_BASE_URL` (including `/v1`) with `HERMES_API_KEY` as a bearer token. Migration `0007`
+creates the provider and a default `hermes-agent` completions model; the alias can be adjusted in
+the Django admin if the gateway uses a different model route. The seeded token prices are zero
+placeholders, not a claim that Hermes's upstream model is free; update the model prices before
+relying on usage cost statistics. Unlike Qwen, this gateway executes agent tools on its host:
+keep the API private, and do not broaden the command's admin access without reviewing tool permissions.
+The Hermes gateway embeds locally generated images into chat completion text as Markdown
+`![image](data:image/...;base64,...)` (up to 5 MiB per image). `HermesCommand.get_completions_rmi()`
+extracts and verifies supported images, converts GIF/WebP to JPEG for Telegram, and sends them as
+photo attachments with the remaining text as the caption. Do not route this image-bearing text
+through the generic GPT long-text-to-HTML fallback before extracting the inline media.
+The Hermes API adapter also prepends a system instruction asking the agent to use
+`image_generate` for image requests rather than replying with ASCII art or an invented URL;
+this is guidance, not a guarantee that every upstream model will call the tool.
+The Hermes dashboard (port 9119 in its container) is not this API: the gateway's API server
+defaults to port 8642 inside the container and binds container loopback by default. If using
+Docker port mapping, configure the Hermes API server to bind `0.0.0.0` inside the container but
+publish its port only on host loopback (or use a private container network), and point
+`HERMES_API_BASE_URL` at an address reachable by the Petrovich process. On the
+current production host, the Hermes Compose file at `/opt/services/hermes-agent/compose.yaml`
+binds the gateway on container `0.0.0.0:8642` and publishes it on host
+`127.0.0.1:11101` and LAN `192.168.1.10:11101` (not on other host interfaces);
+local development can use `http://192.168.1.10:11101/v1` without SSH forwarding.
+The Hermes dashboard remains on port 11100. The
+API key must match the Hermes gateway's `API_SERVER_KEY`; do not put it in the repository.
+The production Petrovich `.env` at `/opt/projects/petrovich/.env` already contains the
+Hermes API URL and key and is restricted to mode `0600`; do not copy Hermes's full `.env`
+into Petrovich or expose the key in logs. Deploying the command code and running migration
+`0007` are separate steps from configuring these environment variables.
 
 OpenAI image-generation requests omit the deprecated `response_format` parameter for every model family. The
 response parser accepts both GPT Image base64 payloads and DALL-E URL payloads, downloading the latter before
@@ -670,6 +702,8 @@ From the codebase and example env:
 - `TG_MODERATOR_CHAT_PK`
 - `TG_PHOTO_UPLOADING_CHAT_PK`
 - `QWEN_API_BASE_URLS`
+- `HERMES_API_BASE_URL` (optional; required to use `/hermes`; production host: `http://127.0.0.1:11101/v1`)
+- `HERMES_API_KEY` (optional; required to use `/hermes`, equal to the Hermes API server key)
 - `DISK_SAVE_PATH`
 - `IMGBB_API_KEY`
 - `GITHUB_TOKEN`

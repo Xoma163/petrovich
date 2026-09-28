@@ -5,6 +5,7 @@ class GPTProviderEnum(StrEnum):
     CHATGPT = "chatgpt"
     GROK = "grok"
     QWEN = "qwen"
+    HERMES = "hermes"
 
 
 class GPTImageFormat(StrEnum):
