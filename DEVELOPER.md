@@ -121,7 +121,7 @@ Current hardcoded operational endpoints discovered in code:
 - `DEVELOPER.md` — this handbook
 - `update_production.sh` — production update script
 - `pg_backup.sh` — PostgreSQL backup helper
-- `docker-compose.local.yml` — loopback-only local PostgreSQL/Redis services for debugging
+- `docker-compose.yml` — loopback-only local PostgreSQL/Redis services for debugging
 
 ### Application code
 
@@ -712,12 +712,12 @@ pre-commit install
 ### 2. Prepare environment
 
 Create `.env` based on `.env.example`, then provide real values.
-The checked-in local example points PostgreSQL and Redis at `127.0.0.1:15433` and `127.0.0.1:16380`, matching `docker-compose.local.yml`; it also keeps the local Telegram Bot API server at `192.168.1.10:11060`.
+The checked-in local example points PostgreSQL and Redis at `127.0.0.1:15433` and `127.0.0.1:16380`, matching `docker-compose.yml`; it also keeps the local Telegram Bot API server at `192.168.1.10:11060`.
 
 For local debug dependencies only:
 
 ```bash
-docker compose -f docker-compose.local.yml up -d
+docker compose up -d
 ```
 
 ### 3. Run migrations
@@ -1030,7 +1030,7 @@ Prefer targeted fixes over broad refactors in these areas.
 
 Document these carefully rather than treating them as confirmed bugs:
 
-1. `config/setup/setup.sh` is a Linux bootstrap script using `uv`; local Windows debugging is better served by `.env` plus `docker-compose.local.yml` for PostgreSQL/Redis.
+1. `config/setup/setup.sh` is a Linux bootstrap script using `uv`; local Windows debugging is better served by `.env` plus `docker-compose.yml` for PostgreSQL/Redis.
 2. Keep repository text files on LF line endings as enforced by `.gitattributes`; configure Windows IDEs to save Python, Markdown, YAML, TOML, and shell files with LF.
 3. GitHub Actions workflow is named as CI, but the active job is effectively deployment; test steps are commented out.
 4. README is intentionally sparse and points to an external wiki, so local repo docs are incomplete by design.
