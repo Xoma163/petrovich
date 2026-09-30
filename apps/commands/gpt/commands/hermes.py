@@ -9,13 +9,14 @@ from apps.bot.consts import RoleEnum
 from apps.bot.core.messages.attachments.photo import PhotoAttachment
 from apps.bot.core.messages.response_message import ResponseMessageItem
 from apps.commands.gpt.commands_utils.gpt.functionality.completions import GPTCompletionsFunctionality
+from apps.commands.gpt.commands_utils.gpt.functionality.vision import GPTVisionFunctionality
 from apps.commands.gpt.commands_utils.gpt.gpt_abstract import GPTCommand
 from apps.commands.gpt.providers.providers.hermes import HermesProvider
 from apps.commands.help_text import HelpTextItem, HelpText
 from petrovich.settings import env
 
 
-class HermesCommand(GPTCommand, GPTCompletionsFunctionality):
+class HermesCommand(GPTCommand, GPTCompletionsFunctionality, GPTVisionFunctionality):
     INLINE_IMAGE = re.compile(
         r"!\[[^\]\n]*\]\(data:image/(?P<format>png|jpeg|webp|gif);base64,(?P<data>[A-Za-z0-9+/=]+)\)",
         re.IGNORECASE,
@@ -32,7 +33,13 @@ class HermesCommand(GPTCommand, GPTCompletionsFunctionality):
 
     help_text = HelpText(
         commands_text="чат с Hermes Agent",
-        help_texts=[HelpTextItem(access, GPTCompletionsFunctionality.COMPLETIONS_HELP_TEXT_ITEMS)],
+        help_texts=[
+            HelpTextItem(
+                access,
+                GPTCompletionsFunctionality.COMPLETIONS_HELP_TEXT_ITEMS
+                + GPTVisionFunctionality.VISION_HELP_TEXT_ITEMS,
+            ),
+        ],
         extra_text=GPTCommand.EXTRA_TEXT,
     )
 

@@ -6,6 +6,8 @@ import requests
 from django.test import SimpleTestCase
 from PIL import Image
 
+from apps.bot.core.messages.attachments.document import DocumentAttachment
+from apps.bot.core.messages.attachments.photo import PhotoAttachment
 from apps.commands.gpt.api.providers.hermes import HermesAPI
 from apps.commands.gpt.commands.hermes import HermesCommand
 from apps.commands.gpt.messages.consts import GPTMessageRole
@@ -78,6 +80,57 @@ class HermesAPITest(SimpleTestCase):
 
     def test_command_is_admin_only(self):
         self.assertEqual(HermesCommand.access.name, "ADMIN")
+
+    @patch("apps.commands.gpt.api.providers.hermes.env.str", return_value="http://localhost:8642/v1")
+    @patch("apps.commands.gpt.api.providers.hermes.requests.post")
+    def test_photo_and_caption_are_sent_to_hermes(self, post, env_str):
+        image = PhotoAttachment()
+        image.parse(_bytes=b"photo bytes")
+        command = HermesCommand()
+        event = Mock()
+        event.message.command = "hermes"
+        event.message.args_str_case = "Что на фото?"
+        event.get_all_attachments.side_effect = lambda types, **kwargs: [] if DocumentAttachment in types else [image]
+
+        command._add_user_message(self.messages, event)
+        post.return_value.json.return_value = {
+            "choices": [{"message": {"content": "На фото кот"}, "finish_reason": "stop"}],
+        }
+        self.api.completions(self.messages, self.model, {})
+
+        content = post.call_args.kwargs["json"]["messages"][-1]["content"]
+        self.assertEqual(content[0], {"type": "text", "text": "Что на фото?"})
+        self.assertEqual(
+            content[1],
+            {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{image.base64()}"}},
+        )
+
+    def test_replied_photo_is_kept_in_dialog(self):
+        image = PhotoAttachment()
+        image.parse(_bytes=b"photo bytes")
+        command = HermesCommand()
+        event = Mock()
+        event.fwd = [Mock()]
+        event.fwd[0].message.command = None
+        event.fwd[0].message.raw = "Посмотри сюда"
+        event.fwd[0].get_all_attachments.side_effect = lambda types, **kwargs: [] if DocumentAttachment in types else [image]
+
+        command._add_user_message(self.messages, event, use_fwd=True)
+
+        self.assertEqual(self.messages.get_messages()[-1]["content"][0]["text"], "Посмотри сюда")
+        self.assertEqual(self.messages.messages[-1].images, [image])
+
+    def test_photo_uses_completions_without_separate_vision_model(self):
+        command = HermesCommand()
+        command.event = Mock()
+        command.event.message.args = []
+        command.event.get_all_attachments.return_value = [PhotoAttachment()]
+        with patch.object(command, "set_provider_model"), patch.object(
+            command, "_get_first_gpt_event_in_replies", return_value=None
+        ), patch.object(command, "menu_completions", return_value=None) as completions:
+            command.start()
+
+        completions.assert_called_once_with()
 
 
 class HermesImageTest(SimpleTestCase):
