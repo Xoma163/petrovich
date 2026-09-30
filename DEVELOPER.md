@@ -533,6 +533,12 @@ YouTube can intermittently return only a progressive MP4 and no separate audio-o
 metadata extraction three times for the preferred split video/audio formats, then falls back to the progressive MP4
 instead of rejecting a playable video with `Не получилось найти аудиодорожку`. The download format selector also
 includes a progressive MP4 fallback because yt-dlp performs a fresh extraction when the actual download starts.
+At a chosen resolution, YouTube prefers a direct HTTPS video stream over an HLS (`m3u8_native`) variant if both are
+available. Some Shorts advertise an HLS manifest that returns 404 even though the corresponding HTTPS stream works;
+keep HLS when there is no direct stream of the same dimensions. If the selected format fails with HTTP 403/404 or
+becomes unavailable between metadata extraction and download, YouTube tries up to two other MP4 formats of the same
+codec family, preferring direct HTTPS and not increasing the resolution. It keeps the selected audio format/language;
+other failures are reported without trying a different video format.
 For videos with multiple audio tracks, the parser prefers the source track that `yt-dlp` marks with
 `language_preference=10` (YouTube's "original" track). If YouTube does not mark an original track, it prefers an
 English-language track and then falls back to the highest-quality audio format. This prevents a Russian language
