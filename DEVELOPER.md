@@ -410,9 +410,12 @@ Providers discovered in code:
 - local-network Qwen-compatible server
 - Hermes Agent's OpenAI-compatible API server (administrator-only `/hermes`)
 
-`/hermes` reuses GPT reply-chain history, but sends text-only, non-streaming chat completions to
-`HERMES_API_BASE_URL` (including `/v1`) with `HERMES_API_KEY` as a bearer token. Migration `0007`
-creates the provider and a default `hermes-agent` completions model; the alias can be adjusted in
+`/hermes` reuses GPT reply-chain history and sends non-streaming chat completions to
+`HERMES_API_BASE_URL` (including `/v1`) with `HERMES_API_KEY` as a bearer token. `/hermes` also
+passes Telegram photos (including captions and replied-to photos) as OpenAI-compatible `image_url`
+parts in that same completions request; it uses the existing completions model, not a separate
+`VisionModel` or vision endpoint. Image analysis requires a Hermes backend configured for vision.
+Migration `0007` creates the provider and a default `hermes-agent` completions model; the alias can be adjusted in
 the Django admin if the gateway uses a different model route. The seeded token prices are zero
 placeholders, not a claim that Hermes's upstream model is free; update the model prices before
 relying on usage cost statistics. Unlike Qwen, this gateway executes agent tools on its host:
