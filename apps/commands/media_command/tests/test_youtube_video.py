@@ -229,6 +229,185 @@ class YoutubeVideoTests(SimpleTestCase):
 
         self.assertEqual(video["format_id"], "video-1080")
 
+    def test_shorts_prefer_direct_stream_over_hls_at_same_resolution(self):
+        service = YoutubeVideo()
+        info = self._get_video_info_with_formats(
+            [
+                {"format_id": "audio", "resolution": "audio only", "filesize": 10},
+                {
+                    "format_id": "hls-1080",
+                    "vbr": 4000,
+                    "ext": "mp4",
+                    "vcodec": "avc1",
+                    "dynamic_range": "SDR",
+                    "width": 1080,
+                    "height": 1920,
+                    "protocol": "m3u8_native",
+                },
+                {
+                    "format_id": "hls-720",
+                    "vbr": 2400,
+                    "ext": "mp4",
+                    "vcodec": "avc1",
+                    "dynamic_range": "SDR",
+                    "width": 720,
+                    "height": 1280,
+                    "protocol": "m3u8_native",
+                },
+                {
+                    "format_id": "https-720",
+                    "vbr": 1900,
+                    "ext": "mp4",
+                    "vcodec": "avc1",
+                    "dynamic_range": "SDR",
+                    "width": 720,
+                    "height": 1280,
+                    "protocol": "https",
+                },
+                {
+                    "format_id": "https-480",
+                    "vbr": 1000,
+                    "ext": "mp4",
+                    "vcodec": "avc1",
+                    "dynamic_range": "SDR",
+                    "width": 480,
+                    "height": 854,
+                    "protocol": "https",
+                },
+            ]
+        )
+        info["media_type"] = "short"
+
+        video, _, _ = service._get_video_download_urls(info)
+
+        self.assertEqual(video["format_id"], "https-720")
+
+    def test_hls_is_kept_when_no_direct_stream_has_matching_resolution(self):
+        service = YoutubeVideo()
+        info = self._get_video_info_with_formats(
+            [
+                {"format_id": "audio", "resolution": "audio only", "filesize": 10},
+                {
+                    "format_id": "hls-720",
+                    "vbr": 2400,
+                    "ext": "mp4",
+                    "vcodec": "avc1",
+                    "dynamic_range": "SDR",
+                    "width": 720,
+                    "height": 1280,
+                    "protocol": "m3u8_native",
+                },
+                {
+                    "format_id": "https-480",
+                    "vbr": 1000,
+                    "ext": "mp4",
+                    "vcodec": "avc1",
+                    "dynamic_range": "SDR",
+                    "width": 480,
+                    "height": 854,
+                    "protocol": "https",
+                },
+            ]
+        )
+        info["media_type"] = "short"
+
+        video, _, _ = service._get_video_download_urls(info)
+
+        self.assertEqual(video["format_id"], "hls-720")
+
+    def test_unavailable_video_format_falls_back_to_lower_direct_stream_with_same_audio(self):
+        service = YoutubeVideo()
+        info = self._get_video_info_with_formats(
+            [
+                {"format_id": "audio-en", "resolution": "audio only", "filesize": 10, "language": "en", "url": "https://example.com/audio"},
+                {
+                    "format_id": "https-720", "vbr": 2000, "ext": "mp4", "vcodec": "avc1", "dynamic_range": "SDR",
+                    "width": 720, "height": 1280, "protocol": "https", "url": "https://example.com/video",
+                },
+                {
+                    "format_id": "https-480", "vbr": 1000, "ext": "mp4", "vcodec": "avc1", "dynamic_range": "SDR",
+                    "width": 480, "height": 854, "protocol": "https", "url": "https://example.com/video-low",
+                },
+                {
+                    "format_id": "hls-720", "vbr": 2400, "ext": "mp4", "vcodec": "avc1", "dynamic_range": "SDR",
+                    "width": 720, "height": 1280, "protocol": "m3u8_native", "url": "https://example.com/hls",
+                },
+            ]
+        )
+        info["media_type"] = "short"
+        service._get_video_info = Mock(return_value=info)
+        data = service.get_video_info("https://www.youtube.com/shorts/video-id", audio_language="en")
+        self.assertEqual(data.extra_data["fallback_video_format_ids"], ["https-480", "hls-720"])
+
+        unavailable = PWarning("Не смог найти видео")
+        unavailable.__cause__ = yt_dlp.utils.DownloadError("HTTP Error 404: Not Found")
+        service.downloader.download_to_bytes = Mock(side_effect=[unavailable, b"video-content"])
+
+        attachment = service.download_video(data)
+
+        self.assertEqual(attachment.content, b"video-content")
+        self.assertEqual(
+            [call.kwargs["ydl_params"]["format"] for call in service.downloader.download_to_bytes.call_args_list],
+            [
+                "https-720+audio-en/best[ext=mp4][vcodec!=none][acodec!=none]",
+                "https-480+audio-en/best[ext=mp4][vcodec!=none][acodec!=none]",
+            ],
+        )
+
+    def test_unrelated_download_error_does_not_try_other_format(self):
+        service = YoutubeVideo()
+        unavailable = PWarning("Не смог найти видео")
+        unavailable.__cause__ = yt_dlp.utils.DownloadError("Video unavailable")
+        service.downloader.download_to_bytes = Mock(side_effect=unavailable)
+        with self.assertRaises(PWarning):
+            service.download_video(
+                VideoData(extra_data={
+                    "source_url": "https://www.youtube.com/shorts/video-id",
+                    "video_format_id": "video-720",
+                    "fallback_video_format_ids": ["video-480"],
+                })
+            )
+
+        service.downloader.download_to_bytes.assert_called_once()
+
+    def test_fallback_stops_after_two_alternatives(self):
+        service = YoutubeVideo()
+        unavailable = PWarning("Не смог найти видео")
+        unavailable.__cause__ = yt_dlp.utils.DownloadError("HTTP Error 404: Not Found")
+        service.downloader.download_to_bytes = Mock(side_effect=unavailable)
+
+        with self.assertRaises(PWarning):
+            service.download_video(
+                VideoData(extra_data={
+                    "source_url": "https://www.youtube.com/shorts/video-id",
+                    "video_format_id": "video-720",
+                    "fallback_video_format_ids": ["video-480", "video-360", "video-240"],
+                })
+            )
+
+        self.assertEqual(service.downloader.download_to_bytes.call_count, 3)
+
+    def test_progressive_fallback_does_not_select_silent_video(self):
+        info = self._get_video_info_with_formats([
+            {
+                "format_id": "progressive-720", "vbr": 1000, "ext": "mp4", "vcodec": "avc1",
+                "acodec": "mp4a", "dynamic_range": "SDR", "width": 1280, "height": 720, "protocol": "https",
+            },
+            {
+                "format_id": "silent-720", "vbr": 900, "ext": "mp4", "vcodec": "avc1",
+                "acodec": "none", "dynamic_range": "SDR", "width": 1280, "height": 720, "protocol": "https",
+            },
+            {
+                "format_id": "progressive-480", "vbr": 500, "ext": "mp4", "vcodec": "avc1",
+                "acodec": "mp4a", "dynamic_range": "SDR", "width": 854, "height": 480, "protocol": "https",
+            },
+        ])
+
+        self.assertEqual(
+            YoutubeVideo._get_fallback_video_format_ids(info, info["formats"][0]),
+            ["progressive-480"],
+        )
+
     @patch(
         "apps.connectors.parsers.media_command.youtube.video.shutil.which",
         return_value="/opt/projects/petrovich/.venv/bin/deno",

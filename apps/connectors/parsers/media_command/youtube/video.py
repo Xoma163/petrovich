@@ -5,6 +5,8 @@ from datetime import timedelta
 from pathlib import Path
 from urllib.parse import urlparse, parse_qsl
 
+import yt_dlp
+
 from apps.bot.core.messages.attachments.video import VideoAttachment
 from apps.connectors.parsers.media_command.data import VideoData
 from apps.shared.exceptions import PWarning
@@ -70,6 +72,7 @@ class YoutubeVideo:
             extra_data={
                 "source_url": url,
                 "video_format_id": video["format_id"],
+                "fallback_video_format_ids": self._get_fallback_video_format_ids(video_info, video),
                 "audio_format_id": audio["format_id"] if audio else None,
                 "audio_language": audio_language,
             },
@@ -86,7 +89,26 @@ class YoutubeVideo:
         if audio_format_id := data.extra_data.get("audio_format_id"):
             format_id = f"{format_id}+{audio_format_id}/best[ext=mp4][vcodec!=none][acodec!=none]"
         ydl_params = self._get_ydl_params() | {"format": format_id, "merge_output_format": "mp4"}
-        content = self.downloader.download_to_bytes(source_url, ydl_params=ydl_params)
+        try:
+            content = self.downloader.download_to_bytes(source_url, ydl_params=ydl_params)
+        except PWarning as error:
+            if not self._is_unavailable_format(error):
+                raise
+            for fallback_id in data.extra_data.get("fallback_video_format_ids", [])[:2]:
+                fallback_format = fallback_id
+                if audio_format_id:
+                    fallback_format = f"{fallback_id}+{audio_format_id}/best[ext=mp4][vcodec!=none][acodec!=none]"
+                try:
+                    content = self.downloader.download_to_bytes(
+                        source_url, ydl_params=ydl_params | {"format": fallback_format}
+                    )
+                    break
+                except PWarning as fallback_error:
+                    if not self._is_unavailable_format(fallback_error):
+                        raise
+                    error = fallback_error
+            else:
+                raise error
 
         va = VideoAttachment()
         va.content = content
@@ -169,6 +191,40 @@ class YoutubeVideo:
     # -----------------------------
 
     # VIDEO DOWNLOAD HELPERS
+
+    @staticmethod
+    def _is_unavailable_format(error: PWarning) -> bool:
+        cause = error.__cause__
+        if not isinstance(cause, yt_dlp.utils.DownloadError):
+            return False
+        message = cause.msg.lower()
+        return any(text in message for text in ("http error 403", "http error 404", "requested format is not available"))
+
+    @classmethod
+    def _get_fallback_video_format_ids(cls, info: dict, selected: dict) -> list[str]:
+        candidates = [
+            video
+            for video in info["formats"]
+            if video.get("format_id") != selected["format_id"]
+            and video.get("vbr")
+            and video.get("ext") == "mp4"
+            and video.get("vcodec") not in (None, "none", "vp9")
+            and video["vcodec"].split(".", 1)[0] == selected["vcodec"].split(".", 1)[0]
+            and (video.get("acodec") not in (None, "none")) == (selected.get("acodec") not in (None, "none"))
+            and video.get("dynamic_range") == "SDR"
+            and not video.get("__working")
+            and video.get("width", 0) <= selected["width"]
+            and video.get("height", 0) <= selected["height"]
+        ]
+        candidates.sort(
+            key=lambda video: (
+                video.get("protocol") == "https",
+                video.get("width", 0) * video.get("height", 0),
+                cls._filesize_key(video),
+            ),
+            reverse=True,
+        )
+        return [video["format_id"] for video in candidates[:2]]
 
     def _get_video_info(self, url: str) -> dict:
         video_info = self.downloader.extract_info(url, ydl_params=self._get_ydl_params())
@@ -328,6 +384,19 @@ class YoutubeVideo:
                 else:
                     if int(vf["height"]) <= self.DEFAULT_VIDEO_QUALITY_HIGHT:
                         break
+
+        # HLS variants of the same resolution can have stale manifests while the direct
+        # HTTPS video stream is still available (notably for YouTube Shorts).
+        if vf.get("protocol") == "m3u8_native":
+            direct_formats = [
+                _format
+                for _format in video_formats
+                if _format.get("protocol") == "https"
+                and _format.get("width") == vf.get("width")
+                and _format.get("height") == vf.get("height")
+            ]
+            if direct_formats:
+                vf = direct_formats[0]
 
         video_filesize = (self._filesize_key(vf) + (self._filesize_key(af) if af else 0)) / 1024 / 1024
         return vf, af, video_filesize
