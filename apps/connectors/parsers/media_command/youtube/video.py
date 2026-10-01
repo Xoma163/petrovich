@@ -339,6 +339,17 @@ class YoutubeVideo:
             af = audio_formats[0]
         if not af and not allow_progressive:
             raise _IncompleteYoutubeFormats
+        if af:
+            # Keep the selected original/language track, but prefer an AAC encoding of that track.
+            af = next(
+                (
+                    audio for audio in audio_formats
+                    if (audio.get("acodec") or "").startswith("mp4a")
+                    and audio.get("language") == af.get("language")
+                    and audio.get("language_preference") == af.get("language_preference")
+                ),
+                af,
+            )
 
         if not af:
             progressive_formats = [
@@ -369,6 +380,12 @@ class YoutubeVideo:
             for _format in video_formats:
                 _format["filesize_approx_vbr"] = video_info["duration"] * _format.get("vbr")
             video_formats = sorted(video_formats, key=self._filesize_key, reverse=True)
+
+        # MP4 can contain AV1 video, which Telegram clients on macOS may not play.
+        # Prefer H.264 when available, including when a higher-bitrate AV1 format exists.
+        avc_formats = [x for x in video_formats if (x.get("vcodec") or "").startswith("avc1")]
+        if avc_formats:
+            video_formats = avc_formats
 
         if not video_formats:
             raise PWarning("Не получилось найти видеофайл")

@@ -112,6 +112,84 @@ class YoutubeVideoTests(SimpleTestCase):
 
         self.assertEqual(audio["format_id"], "audio-en-original")
 
+    def test_get_video_download_urls_prefers_h264_and_aac_for_telegram(self):
+        service = YoutubeVideo()
+        info = self._get_video_info_with_formats(
+            [
+                {
+                    "format_id": "251", "resolution": "audio only", "filesize": 303652,
+                    "acodec": "opus", "language": "ar",
+                },
+                {
+                    "format_id": "140", "resolution": "audio only", "filesize": 302904,
+                    "acodec": "mp4a.40.2", "language": "ar", "url": "https://example.com/aac",
+                },
+                {
+                    "format_id": "395", "vbr": 110, "ext": "mp4", "vcodec": "av01.0.00M.08",
+                    "acodec": "none", "dynamic_range": "SDR", "width": 322, "height": 214,
+                    "protocol": "https", "url": "https://example.com/av1",
+                },
+                {
+                    "format_id": "133", "vbr": 90, "ext": "mp4", "vcodec": "avc1.4d400d",
+                    "acodec": "none", "dynamic_range": "SDR", "width": 322, "height": 214,
+                    "protocol": "https", "url": "https://example.com/h264",
+                },
+            ]
+        )
+        service._get_video_info = Mock(return_value=info)
+
+        data = service.get_video_info("https://youtu.be/xhMYPSnO7ro")
+
+        self.assertEqual(data.extra_data["video_format_id"], "133")
+        self.assertEqual(data.extra_data["audio_format_id"], "140")
+        self.assertEqual(data.extra_data["fallback_video_format_ids"], [])
+
+    def test_original_audio_is_kept_even_if_only_dub_has_aac(self):
+        service = YoutubeVideo()
+        info = self._get_video_info_with_formats(
+            [
+                {
+                    "format_id": "original", "resolution": "audio only", "filesize": 100,
+                    "acodec": "opus", "language": "ar", "language_preference": 10,
+                },
+                {
+                    "format_id": "dub", "resolution": "audio only", "filesize": 100,
+                    "acodec": "mp4a.40.2", "language": "en", "language_preference": -1,
+                },
+                {
+                    "format_id": "video", "vbr": 100, "ext": "mp4", "vcodec": "avc1",
+                    "dynamic_range": "SDR", "width": 640, "height": 360,
+                },
+            ]
+        )
+
+        _, audio, _ = service._get_video_download_urls(info)
+
+        self.assertEqual(audio["format_id"], "original")
+
+    def test_original_aac_is_preferred_over_original_opus(self):
+        service = YoutubeVideo()
+        info = self._get_video_info_with_formats(
+            [
+                {
+                    "format_id": "original-opus", "resolution": "audio only", "filesize": 110,
+                    "acodec": "opus", "language": "ar", "language_preference": 10,
+                },
+                {
+                    "format_id": "original-aac", "resolution": "audio only", "filesize": 100,
+                    "acodec": "mp4a.40.2", "language": "ar", "language_preference": 10,
+                },
+                {
+                    "format_id": "video", "vbr": 100, "ext": "mp4", "vcodec": "avc1",
+                    "dynamic_range": "SDR", "width": 640, "height": 360,
+                },
+            ]
+        )
+
+        _, audio, _ = service._get_video_download_urls(info)
+
+        self.assertEqual(audio["format_id"], "original-aac")
+
     def test_get_video_download_urls_uses_explicit_language(self):
         service = YoutubeVideo()
         video_info = self._get_video_info_with_formats(
