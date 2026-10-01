@@ -539,6 +539,9 @@ keep HLS when there is no direct stream of the same dimensions. If the selected 
 becomes unavailable between metadata extraction and download, YouTube tries up to two other MP4 formats of the same
 codec family, preferring direct HTTPS and not increasing the resolution. It keeps the selected audio format/language;
 other failures are reported without trying a different video format.
+For Telegram/macOS playback, YouTube prefers H.264 (`avc1`) MP4 video over AV1 when available and AAC (`mp4a`) audio
+over Opus within the selected audio language/track preference. The original audio track still takes priority over an
+AAC dub; if compatible formats are unavailable, the parser retains its existing formats rather than transcoding.
 For videos with multiple audio tracks, the parser prefers the source track that `yt-dlp` marks with
 `language_preference=10` (YouTube's "original" track). If YouTube does not mark an original track, it prefers an
 English-language track and then falls back to the highest-quality audio format. This prevents a Russian language
