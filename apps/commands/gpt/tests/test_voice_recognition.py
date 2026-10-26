@@ -1,5 +1,5 @@
 from types import SimpleNamespace
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 from django.test import SimpleTestCase
 
@@ -19,6 +19,29 @@ class VoiceRecognitionResponseTests(SimpleTestCase):
         command.bot.get_inline_keyboard.return_value = {"keyboard": "summary"}
         command.event = SimpleNamespace(message=SimpleNamespace(id=123))
         return command
+
+    @patch("apps.commands.gpt.commands.voice_recognition.ChatActionSender")
+    @patch("apps.commands.gpt.commands.voice_recognition.WhisperAPI")
+    def test_start_delegates_to_whisper_then_restores_punctuation(self, api, chat_action_sender):
+        command = self._get_command()
+        audio = Mock(ext="ogg")
+        command.event.peer_id = 123
+        command.event.message_thread_id = None
+        command.event.log_filter = {"peer_id": 123}
+        command.event.get_all_attachments = Mock(return_value=[audio])
+        api.return_value.transcribe.return_value = "привет"
+        command.restore_punctuation_qwen = Mock(return_value="Привет.")
+        command._get_rmi = Mock(return_value=command._get_rmi("Привет."))
+
+        command.start()
+
+        chat_action_sender.assert_called_once()
+        command.event.get_all_attachments.assert_called_once_with(command.attachments)
+        audio.get_file.assert_called_once_with()
+        api.assert_called_once_with(log_filter=command.event.log_filter)
+        api.return_value.transcribe.assert_called_once_with(audio)
+        command.restore_punctuation_qwen.assert_called_once_with("привет")
+        command._get_rmi.assert_called_once_with("Привет.")
 
     def test_long_transcription_uses_rich_text_instead_of_document(self):
         command = self._get_command()

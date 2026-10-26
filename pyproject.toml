@@ -39,7 +39,6 @@ dependencies = [
     "xmltodict>=1.0.4",
     "yandex-music>=2.2.0",
     "yt-dlp[deno]>=2026.8.19",
-    "whisper-ctranslate2>=0.5.7",
 ]
 
 [dependency-groups]

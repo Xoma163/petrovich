@@ -76,7 +76,7 @@ Based on the codebase, this is a **personal/community utility bot** rather than 
   - `yandex-music`
   - `selenium`
   - `pydub`
-  - `whisper-ctranslate2` / Faster Whisper for local CPU voice transcription
+  - standalone Faster Whisper HTTP service for CPU voice transcription (not loaded in the bot process)
   - `pillow`
   - `sentry-sdk`
   - `python-json-logger`
@@ -378,9 +378,10 @@ What it does:
 - text completions
 - vision flows
 - image generation
-- voice recognition; `/голосовое` / `/голос` now uses local CPU `whisper-ctranslate2` with the `large-v3-turbo` model
-  as the primary path, keeps the previous ChatGPT transcription implementation in `process_voice_gpt()` as a
-  fallback/reserve code path, and asks Qwen to restore punctuation after local transcription; if Qwen is not
+- voice recognition; `/голосовое` / `/голос` uses the standalone Whisper HTTP API with the `large-v3-turbo` model
+  (CPU/int8). The bot no longer loads Whisper or depends on its inference libraries. The previous ChatGPT
+  implementation remains in `process_voice_gpt()` as unused reserve code, not an automatic fallback.
+  The bot asks Qwen to restore punctuation after transcription; if Qwen is not
   configured or unavailable, the raw local transcription is returned unchanged. Transcriptions that exceed the
   regular 4096-character Telegram message limit use Bot API rich text up to its 32768-character limit; only larger
   results fall back to an HTML document
@@ -714,6 +715,10 @@ From the codebase and example env:
 - `TG_MODERATOR_CHAT_PK`
 - `TG_PHOTO_UPLOADING_CHAT_PK`
 - `QWEN_API_BASE_URLS`
+- `WHISPER_API_BASE_URL` (default `http://127.0.0.1:11033/v1`)
+- `WHISPER_API_KEY` (required for voice recognition; must match the standalone service)
+- `WHISPER_API_MODEL` (default `mobiuslabsgmbh/faster-whisper-large-v3-turbo`, the model ID accepted by Speaches)
+- `WHISPER_API_TIMEOUT` (read timeout in seconds; default 600, connect timeout 5 seconds)
 - `HERMES_API_BASE_URL` (optional; required to use `/hermes`; production host: `http://127.0.0.1:11101/v1`)
 - `HERMES_API_KEY` (optional; required to use `/hermes`, equal to the Hermes API server key)
 - `DISK_SAVE_PATH`
@@ -854,6 +859,30 @@ python manage.py collectstatic --noinput
 ```
 
 ## Production update flow
+
+### Standalone Whisper service
+
+The service is maintained independently in `/opt/ai/whisper`; its source, model, and Docker Compose
+configuration are not part of this repository. Petrovich contains only the HTTP client and its settings.
+Its Docker Compose project uses the official `ghcr.io/speaches-ai/speaches` CPU image, pinned by digest,
+and a Faster Whisper `large-v3-turbo` CPU/int8 model. Port `11033` is published on host loopback only. Bearer authentication is required
+for `POST /v1/audio/transcriptions` and `/health` in the pinned image. The Compose healthcheck supplies the key.
+`/health` checks the server, not model readiness; verify an actual
+transcription after deployment. The model is loaded on first use and `STT_MODEL_TTL=-1` keeps it loaded.
+Docker's `restart: unless-stopped` handles host reboots; no additional systemd unit is needed.
+The Hugging Face model cache is in `/opt/ai/whisper/hf-cache`, and the API key is in the service's private `.env`.
+The original model snapshot lacked discovery metadata. `/opt/ai/whisper/model-card.md` is copied to its cached
+snapshot as `README.md`, adding `library_name: ctranslate2` and `pipeline_tag: automatic-speech-recognition`.
+Weights are unchanged. Preserve this local model card when rebuilding the cache; upstream metadata alone
+does not currently let Speaches discover this model ID.
+Petrovich stays in `/opt/projects/petrovich`, managed by its existing systemd unit.
+Do not expose the Whisper port publicly. Remote development can use an SSH tunnel and the API key.
+`apps/connectors/api/whisper.py` owns API configuration, upload, response validation, and error mapping.
+The voice command only calls `WhisperAPI.transcribe()` and then restores punctuation through Qwen.
+The connector uses the shared `APIHandler` with response logging disabled to avoid logging transcriptions.
+The bot does not retry failed requests automatically. The container has four CPUs and a 5 GiB memory cap.
+The old custom service's four-slot queue and 100 MiB upload limit do not apply to Speaches.
+See `/opt/ai/whisper/README.md` on the server for operation and rollback instructions.
 
 `update_production.sh` currently does:
 

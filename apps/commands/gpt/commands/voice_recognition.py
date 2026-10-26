@@ -1,6 +1,4 @@
 import logging
-from io import BytesIO
-from threading import Lock
 
 from apps.bot.consts import PlatformEnum, RoleEnum
 from apps.bot.core.bot.telegram.tg_bot import TgBot
@@ -24,6 +22,7 @@ from apps.commands.gpt.providers.providers.chatgpt import ChatGPTProvider
 from apps.commands.gpt.providers.providers.qwen import QwenProvider
 from apps.commands.gpt.utils import user_has_api_key
 from apps.commands.help_text import HelpText, HelpTextItem, HelpTextArgument
+from apps.connectors.api.whisper import WhisperAPI
 from apps.shared.exceptions import PWarning, PSkipContinue, PError, PSkip
 from apps.shared.utils.audio.splitter import AudioSplitter
 from apps.shared.utils.utils import wrap_text_in_html_document
@@ -52,7 +51,7 @@ class VoiceRecognition(AcceptExtraCommand):
             )
         ],
         extra_text=(
-            "Голос распознаётся локально через whisper-ctranslate2, затем Qwen пытается восстановить пунктуацию\n"
+            "Голос распознаётся отдельным сервисом Whisper, затем Qwen пытается восстановить пунктуацию\n"
             "Поддерживаются форматы: flac, m4a, mp3, mp4, mpeg, mpga, oga, ogg, wav, webm"
         ),
     )
@@ -65,8 +64,6 @@ class VoiceRecognition(AcceptExtraCommand):
     priority = -100
 
     bot: TgBot
-    _whisper_transcriber = None
-    _whisper_lock = Lock()
 
     @staticmethod
     def accept_extra(event: Event) -> bool:
@@ -98,80 +95,12 @@ class VoiceRecognition(AcceptExtraCommand):
             if not audio_message.ext:
                 raise PWarning("Для вложения не указано расширение (mp3/oga/wav). Сообщите разработчику")
 
-            answer = self.process_voice_local(audio_message)
+            answer = WhisperAPI(log_filter=self.event.log_filter).transcribe(audio_message)
             answer = self.restore_punctuation_qwen(answer)
 
         rmi = self._get_rmi(answer)
 
         return ResponseMessage(rmi)
-
-    def process_voice_local(self, audio_message: AudioAttachment) -> str:
-        from whisper_ctranslate2.transcribe import TranscriptionOptions
-
-        content = BytesIO(audio_message.download_content())
-        content.name = f"voice.{audio_message.ext}"
-        options = TranscriptionOptions(
-            beam_size=5,
-            best_of=5,
-            patience=1,
-            length_penalty=1,
-            repetition_penalty=1,
-            no_repeat_ngram_size=0,
-            log_prob_threshold=-1.0,
-            no_speech_threshold=0.6,
-            compression_ratio_threshold=2.4,
-            condition_on_previous_text=True,
-            prompt_reset_on_temperature=0.5,
-            temperature=[0.0, 0.2, 0.4, 0.6, 0.8, 1.0],
-            initial_prompt=None,
-            prefix=None,
-            hotwords=None,
-            suppress_blank=True,
-            suppress_tokens=[-1],
-            word_timestamps=False,
-            print_colors=False,
-            prepend_punctuations='"\'“¿([{-',
-            append_punctuations='"\'.。,，!！?？:：”)]}、',
-            hallucination_silence_threshold=None,
-            vad_filter=True,
-            vad_threshold=None,
-            vad_min_speech_duration_ms=None,
-            vad_max_speech_duration_s=None,
-            vad_min_silence_duration_ms=None,
-            multilingual=False,
-        )
-        try:
-            with self._whisper_lock:
-                response = self._get_whisper_transcriber().inference(
-                    audio=content,
-                    task="transcribe",
-                    language="ru",
-                    verbose=False,
-                    live=True,
-                    options=options,
-                )
-        except Exception as e:
-            logger.exception("Local voice recognition failed", extra=self.event.log_filter)
-            raise PError("Не получилось локально распознать голосовое сообщение") from e
-
-        return response.get("text", "").strip()
-
-    @classmethod
-    def _get_whisper_transcriber(cls):
-        from whisper_ctranslate2.transcribe import Transcribe
-
-        if cls._whisper_transcriber is None:
-            cls._whisper_transcriber = Transcribe(
-                model_path="large-v3-turbo",
-                device="cpu",
-                device_index=0,
-                compute_type="int8",
-                threads=0,
-                cache_directory=None,
-                local_files_only=False,
-                batched=False,
-            )
-        return cls._whisper_transcriber
 
     def process_voice_gpt(self, audio_message: AudioAttachment) -> tuple[str, GPTVoiceRecognitionResponse | None]:
         self._check_gpt_access()
