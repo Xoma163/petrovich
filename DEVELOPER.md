@@ -404,6 +404,16 @@ Important concepts:
 - Qwen/llama.cpp server discovery uses `QWEN_API_BASE_URLS`, a comma-separated list of base URLs;
   local debugging can point it at a locally reachable tunnel/proxy while production can keep LAN hosts
 
+The production OpenAI catalog (`Provider.name="chatgpt"`) includes `gpt-6.1-sol`, `gpt-6.1-terra`,
+and `gpt-6-luna` in both `CompletionsModel` and `VisionModel` following issue #1118. These were added
+directly through the ORM, not seeded by a migration; existing rows and defaults were preserved.
+Prices use OpenAI's Standard short-context rates, checked against
+https://developers.openai.com/api/docs/pricing on 2026-11-03 (Samara time).
+The current cost schema does not represent cache-write rates or long-context surcharges.
+The existing `_set_gpt_5_payload()` guard only applies reasoning, verbosity, and web-search settings
+to names containing `gpt-5`; GPT-6 models currently use API defaults without those overrides.
+Adding catalog rows does not verify access for each user's API key.
+
 Providers discovered in code:
 
 - OpenAI / ChatGPT
