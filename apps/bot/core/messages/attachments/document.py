@@ -9,11 +9,11 @@ logger = logging.getLogger()
 
 
 class DocumentMimeType:
-    def __init__(self, _type: str):
+    def __init__(self, _type: str | None):
         self.type = _type
 
     def __str__(self):
-        return self.type
+        return self.type or ""
 
     @property
     def is_image(self):
@@ -32,7 +32,7 @@ class DocumentMimeType:
         return self._check_value("audio/")
 
     def _check_value(self, _type):
-        return self.type.startswith(f"{_type}")
+        return self.type is not None and self.type.startswith(_type)
 
 
 class DocumentAttachment(Attachment, ThumbnailMixin):
@@ -42,12 +42,12 @@ class DocumentAttachment(Attachment, ThumbnailMixin):
     def __init__(self):
         super().__init__(self.TYPE)
 
-        self.mime_type: DocumentMimeType | None = None
+        self.mime_type = DocumentMimeType(None)
 
     def parse_tg(self, event):
         super().parse_tg(event)
 
-        self.mime_type = DocumentMimeType(event["mime_type"])
+        self.mime_type = DocumentMimeType(event.get("mime_type") or None)
 
     def read_text(self):
         content = self.download_content()

@@ -221,7 +221,7 @@ class TgEvent(Event):
             document = message.get("document")
             if document:
                 message_text = message.get("caption")
-                mime_type = DocumentMimeType(document["mime_type"])
+                mime_type = DocumentMimeType(document.get("mime_type") or None)
                 if mime_type.is_image:
                     self.setup_photo(document)
                 elif mime_type.is_audio:

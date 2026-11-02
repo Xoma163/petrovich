@@ -69,11 +69,12 @@ class Bot:
         rm = None
         try:
             try:
-                event.setup_event()
+                try:
+                    event.setup_event()
+                finally:
+                    self.log_filter = event.log_filter
                 if not event.need_a_response():
                     return None
-
-                self.log_filter = event.log_filter
 
                 rm = self.route(event)
                 # Если мы попали в команду и не вылетели по exception

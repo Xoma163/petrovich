@@ -17,5 +17,5 @@ class AudioAttachment(Attachment, ThumbnailMixin, DurationMixin):
         super().parse_tg(event)
 
         self.duration = event.get("duration")
-        if event["mime_type"] == "audio/mpeg":
+        if event.get("mime_type") == "audio/mpeg":
             self.ext = "mp3"

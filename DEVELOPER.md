@@ -231,6 +231,15 @@ Important behavior:
 - forwarded messages from chats are often intentionally ignored
 - message data is cached into Redis for later reply-chain reconstruction
 
+Telegram document `mime_type` is optional. `DocumentAttachment.mime_type` always contains a
+`DocumentMimeType` object, whose `type` is `None` for missing or empty metadata, including replied-to
+documents. Its shared `_check_value()` returns false for unknown MIME types, so consumers can
+inspect MIME properties without separate null checks. Existing `.txt`/`.html` text-reading
+fallbacks still work without MIME metadata; unknown-MIME files are not sent as OpenAI file inputs.
+Audio parsing also accepts absent MIME metadata. `Bot.handle_event()` captures the
+event's log filter even when setup raises, so setup errors remain visible in the chat-scoped `/логи`
+command instead of appearing only in the raw log files.
+
 ## 3. Routing
 
 `Bot.handle_event()` is the central high-level execution pipeline:

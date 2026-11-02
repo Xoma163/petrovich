@@ -30,6 +30,8 @@ class OpenAIResponsesMessage(GPTMessage):
                 )
         if self.files:
             for file in self.files:
+                if not file.mime_type.type:
+                    continue
                 message["content"].append(
                     {
                         "type": "input_file",
