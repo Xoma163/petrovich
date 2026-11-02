@@ -337,7 +337,7 @@ Core domain entities in `apps/bot/models.py`:
 
 Profile lookup by name also searches Telegram usernames through `User.nickname`; both `username` and `@username`
 forms are accepted. The moderator `/роль список` command lists the roles manageable by the current sender;
-administrators can additionally manage the moderator role. A numeric user argument is resolved through the
+administrators can additionally manage the moderator and Hermes roles. A numeric user argument is resolved through the
 separate `get_profile_by_tg_id()` lookup and therefore accepts Telegram IDs.
 
 Telegram-facing display fields on bot identities (`Profile.name`, `Profile.surname`,
@@ -419,7 +419,7 @@ Providers discovered in code:
 - OpenAI / ChatGPT
 - xAI / Grok
 - local-network Qwen-compatible server
-- Hermes Agent's OpenAI-compatible API server (administrator-only `/hermes`)
+- Hermes Agent's OpenAI-compatible API server (`/hermes` requires the dedicated `HERMES` role)
 
 `/hermes` reuses GPT reply-chain history and sends non-streaming chat completions to
 `HERMES_API_BASE_URL` (including `/v1`) with `HERMES_API_KEY` as a bearer token. `/hermes` also
@@ -430,7 +430,11 @@ Migration `0007` creates the provider and a default `hermes-agent` completions m
 the Django admin if the gateway uses a different model route. The seeded token prices are zero
 placeholders, not a claim that Hermes's upstream model is free; update the model prices before
 relying on usage cost statistics. Unlike Qwen, this gateway executes agent tools on its host:
-keep the API private, and do not broaden the command's admin access without reviewing tool permissions.
+keep the API private and grant the `HERMES` role only to users trusted with those tools.
+Only administrators can grant or revoke it with `/роли добавить <user> hermes` and
+`/роли удалить <user> hermes`; `гермес` is also accepted as the role name. The global
+`TRUSTED` barrier still applies independently. Bot migration `0003` creates the role and grants
+it to existing administrators to preserve access; new administrators need an explicit Hermes grant.
 The Hermes gateway embeds locally generated images into chat completion text as Markdown
 `![image](data:image/...;base64,...)` (up to 5 MiB per image). `HermesCommand.get_completions_rmi()`
 extracts and verifies supported images, converts GIF/WebP to JPEG for Telegram, and sends them as

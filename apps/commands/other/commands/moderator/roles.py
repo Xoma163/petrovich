@@ -64,6 +64,7 @@ class Roles(Command):
     def get_manageable_roles(self) -> list[RoleEnum]:
         roles = [RoleEnum.MINECRAFT, RoleEnum.TRUSTED]
         if self.event.sender.check_role(RoleEnum.ADMIN):
+            roles.insert(0, RoleEnum.HERMES)
             roles.insert(0, RoleEnum.MODERATOR)
         return roles
 

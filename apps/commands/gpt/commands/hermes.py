@@ -26,7 +26,7 @@ class HermesCommand(GPTCommand, GPTCompletionsFunctionality, GPTVisionFunctional
 
     name = "hermes"
     names = ["гермес"]
-    access = RoleEnum.ADMIN
+    access = RoleEnum.HERMES
     abstract = False
 
     provider: HermesProvider = HermesProvider()

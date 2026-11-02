@@ -229,6 +229,7 @@ def get_role_by_str(role_str: str):
         ): RoleEnum.ADMIN,
         ("moderators", "moderator", "модераторы", "модератор", "модеры", "модер", "moder"): RoleEnum.MODERATOR,
         ("майнкрафт", "майн", "minecraft", "mine"): RoleEnum.MINECRAFT,
+        ("hermes", "гермес"): RoleEnum.HERMES,
         ("забанен", "бан", "ban", "banned"): RoleEnum.BANNED,
         ("доверенный", "проверенный", "trust", "trusted"): RoleEnum.TRUSTED,
         ("пользователь", "юзер", "user"): RoleEnum.USER,

@@ -78,8 +78,25 @@ class HermesAPITest(SimpleTestCase):
             self.api.completions(self.messages, self.model, {})
         post.assert_not_called()
 
-    def test_command_is_admin_only(self):
-        self.assertEqual(HermesCommand.access.name, "ADMIN")
+    def test_command_requires_hermes_role(self):
+        self.assertEqual(HermesCommand.access.name, "HERMES")
+
+    def test_command_checks_hermes_access(self):
+        command = HermesCommand()
+        command.event = Mock()
+        command.event.sender.check_role.return_value = True
+
+        command.check_sender(command.access)
+
+        command.event.sender.check_role.assert_called_once_with(command.access)
+
+    def test_command_denies_access_without_hermes_role(self):
+        command = HermesCommand()
+        command.event = Mock()
+        command.event.sender.check_role.return_value = False
+
+        with self.assertRaises(PWarning):
+            command.check_sender(command.access)
 
     @patch("apps.commands.gpt.api.providers.hermes.env.str", return_value="http://localhost:8642/v1")
     @patch("apps.commands.gpt.api.providers.hermes.requests.post")

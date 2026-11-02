@@ -18,6 +18,7 @@ class RoleEnum(StrEnum):
     USER = "пользователь"
     BANNED = "забанен"
     TRUSTED = "доверенный"
+    HERMES = "hermes"
 
     @classmethod
     def has_value(cls, value):
