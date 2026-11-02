@@ -391,6 +391,7 @@ class TgBot(Bot):
             reply_to_message_id=rmi.reply_to,
             parse_mode=rmi.parse_mode,
             reply_markup=rmi.keyboard,
+            disable_web_page_preview=rmi.disable_web_page_preview,
         )
 
     def send_rich_message(self, rmi: ResponseMessageItem) -> dict:

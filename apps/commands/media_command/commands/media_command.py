@@ -286,6 +286,7 @@ class Media(AcceptExtraCommand):
         rmi = ResponseMessageItem(
             text=answer,
             attachments=media_response.attachments,
+            disable_web_page_preview=True,
             reply_to=reply_to,
             peer_id=self.event.peer_id,
             message_thread_id=self.event.message_thread_id,

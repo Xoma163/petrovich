@@ -26,6 +26,7 @@ class ResponseMessageItem:
         spoiler: bool = False,
         parse_mode: TelegramParseMode | None = None,
         rich_markdown: str | None = None,
+        disable_web_page_preview: bool | None = None,
     ):
         self._raw_text = text
         self.text = text
@@ -48,6 +49,7 @@ class ResponseMessageItem:
         self.spoiler = spoiler
         self.parse_mode = parse_mode
         self.rich_markdown = rich_markdown
+        self.disable_web_page_preview = disable_web_page_preview
 
     @property
     def has_rich_message(self) -> bool:
