@@ -32,5 +32,5 @@ class InstagramParserTests(SimpleTestCase):
         side_effect=ReadTimeoutError(None, "/session", "timed out"),
     )
     def test_get_data_converts_webdriver_read_timeout_to_warning(self, _get_instagram_request):
-        with self.assertRaisesMessage(PWarning, "Убедитесь в браузере"):
+        with self.assertRaisesMessage(PWarning, "Не удалось дождаться данных Instagram"):
             InstagramParser().get_data("https://www.instagram.com/reel/DdUMTjbNbzH/")

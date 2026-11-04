@@ -250,17 +250,23 @@ class YoutubeVideo:
     @staticmethod
     def _prepare_ytdlp_error(error) -> PWarning:
         msg = error.msg
+        if "timed out" in msg.lower():
+            return PWarning("YouTube не отвечает при скачивании. Попробуйте позже")
+        if "bytes read" in msg.lower() and "more expected" in msg.lower():
+            return PWarning("Загрузка с YouTube оборвалась. Попробуйте ещё раз")
+        if "private video" in msg.lower():
+            return PWarning("Это закрытое видео. Скачать без доступа нельзя")
         if "Sign in to confirm your age" in msg:
-            return PWarning("К сожалению видос доступен только залогиненым пользователям")
-        if "Sign in to confirm you’re not a bot" in msg:
-            return PWarning("Ютуб думает что я бот (да я бот). Попробуйте скачать видео позже")
+            return PWarning("YouTube требует подтверждения возраста. Бот не может скачать это видео")
+        if "Sign in to confirm you're not a bot" in msg.replace("’", "'"):
+            return PWarning("YouTube заблокировал автоматическое скачивание. Попробуйте позже")
         if "The following content is not available on this app" in msg:
-            return PWarning("Это видео скачать не получится. ПАТАМУШТА")
+            return PWarning("Не удалось скачать видео с YouTube. Попробуйте позже")
         if "Requested format is not available." in msg:
-            return PWarning("Ютуб отвалился. Создайте ишу, чтобы разраб обновил библиотечку плиз c:")
-        if "This video has been removed for violating YouTube's Community Guidelines" in msg:
-            return PWarning("Это видео было удалено за нарушение правил YouTube")
-        return PWarning("Не смог найти видео по этой ссылке")
+            return PWarning("Не удалось получить доступный формат видео. Попробуйте позже")
+        if "video has been removed" in msg.lower():
+            return PWarning("Видео удалено с YouTube")
+        return PWarning("Не удалось скачать видео с YouTube. Попробуйте позже")
 
     @classmethod
     def _normalize_audio_language(cls, language: str | None) -> str | None:

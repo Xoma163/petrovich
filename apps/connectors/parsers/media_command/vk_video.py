@@ -156,10 +156,16 @@ class VKVideo:
     @staticmethod
     def _prepare_ytdlp_error(error: yt_dlp.utils.DownloadError) -> PWarning:
         msg = error.msg
+        if "timed out" in msg.lower():
+            return PWarning("VK Видео не отвечает при скачивании. Попробуйте позже")
+        if "bytes read" in msg.lower() and "more expected" in msg.lower():
+            return PWarning("Загрузка с VK Видео оборвалась. Попробуйте ещё раз")
         if "Private video" in msg or "This video is private" in msg:
-            return PWarning("Это приватное видео. Я не могу его скачать")
+            return PWarning("Это закрытое видео. Скачать без доступа нельзя")
         if "Video unavailable" in msg:
-            return PWarning("Это видео недоступно")
+            return PWarning("VK Видео сообщает, что видео недоступно")
         if "Unsupported URL" in msg:
-            return PWarning("Ссылка должна быть на видео, не на канал")
-        return PWarning("Не смог найти видео по этой ссылке")
+            return PWarning("Эта ссылка VK Видео не поддерживается. Пришлите прямую ссылку на видео")
+        if "Requested format is not available" in msg:
+            return PWarning("Не удалось получить доступный формат видео VK. Попробуйте позже")
+        return PWarning("Не удалось скачать видео с VK Видео. Попробуйте позже")

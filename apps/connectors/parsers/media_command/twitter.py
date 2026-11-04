@@ -42,10 +42,10 @@ class Twitter(API):
                 timeout=20,
             ).json()
         except requests.RequestException as exc:
-            raise PWarning("Не получилось получить данные X/Twitter. Попробуйте позже") from exc
+            raise PWarning("Не удалось получить данные X/Twitter. Попробуйте позже") from exc
 
         if not post_data:
-            raise PWarning("Ошибка. В посте нет данных. Заведите ишу, плиз, гляну чё там")
+            raise PWarning("Не удалось получить данные публикации X/Twitter. Проверьте ссылку или заведите ишу")
 
         return self._get_text_and_attachments(post_data)
 

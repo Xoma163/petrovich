@@ -75,7 +75,7 @@ class RedditService(MediaService):
             ]
             result_text = f"{self.service.title}\n\n{text}"
         else:
-            raise PWarning("Я хз чё за контент")
+            raise PWarning("Не удалось получить медиа из Reddit. Возможно, этот тип публикации не поддерживается")
         return MediaServiceResponse(text=result_text, attachments=attachments, need_to_wrap_html_tags=False)
 
     @classmethod

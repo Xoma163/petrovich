@@ -27,6 +27,7 @@ from apps.commands.media_command.services.youtube_music import YoutubeMusicServi
 from apps.commands.media_command.services.youtube_video import YoutubeVideoService
 from apps.shared.exceptions import PWarning
 from apps.shared.utils.markdown import markdown_wrap_symbols
+from apps.shared.utils.media_errors import media_request_errors
 from apps.shared.utils.utils import get_urls_from_text, get_flat_list
 from apps.shared.utils.video.video_handler import VideoHandler
 
@@ -172,7 +173,8 @@ class Media(AcceptExtraCommand):
         service.check_sender_role()
         service.check_valid_url(chosen_url)
 
-        media_response = service.get_content_by_url(chosen_url)
+        with media_request_errors():
+            media_response = service.get_content_by_url(chosen_url)
 
         att_is_video = bool(media_response.cache_url)
         if media_response.attachments:
@@ -204,7 +206,7 @@ class Media(AcceptExtraCommand):
         for service in self.SERVICES:
             if hostname in service.urls():
                 return service, source
-        raise PWarning("Не медиа ссылка")
+        raise PWarning("Эта ссылка не поддерживается. Пришлите ссылку на медиа из поддерживаемого сервиса")
 
     def _get_extra_text(self, chosen_url) -> str:
         """

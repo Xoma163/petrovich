@@ -20,7 +20,7 @@ class TikTok:
     def __init__(self):
         super().__init__()
 
-        self.errors = {10231: "Не могу скачать контент. Недоступно в нашей стране"}
+        self.errors = {10231: "TikTok сообщает, что публикация недоступна в регионе сервера"}
 
     @retry(times=5, exceptions=(TimeoutException,))
     def _get_tiktok_request(self, url):
@@ -41,20 +41,20 @@ class TikTok:
 
         try:
             page_source, cookies, headers = self._get_tiktok_request(url)
-        except TimeoutException:
-            raise PWarning('Подозрение на "странный" контент. Сообщите разработчику')
+        except TimeoutException as error:
+            raise PWarning("Не удалось дождаться данных публикации TikTok. Попробуйте позже") from error
 
         bs4 = BeautifulSoup(page_source, "html.parser")
         if any([self.AGE_RESTRICTION_MESSAGE in x.text for x in bs4.find_all("p")]):
-            raise PWarning("Не могу скачать контент, так как он недоступен без аутентификации (возрастное ограничение)")
+            raise PWarning("TikTok требует входа для просмотра этой публикации. Бот не может её скачать")
 
         bs4 = BeautifulSoup(page_source, "html.parser")
         if any([self.AUDIENCE_CONTROL in x.text for x in bs4.find_all("p")]):
-            raise PWarning("Не могу скачать контент, так как он недоступен без аутентификации")
+            raise PWarning("TikTok требует входа для просмотра этой публикации. Бот не может её скачать")
 
         bs4 = BeautifulSoup(page_source, "html.parser")
         if any([self.UNCOMFOTRABLE_MESSAGE in x.text for x in bs4.find_all("p")]):
-            raise PWarning("Не могу скачать контент, так как он недоступен без аутентификации")
+            raise PWarning("TikTok требует входа для просмотра этой публикации. Бот не может её скачать")
 
         script_data = bs4.find(id="__UNIVERSAL_DATA_FOR_REHYDRATION__")
         data = json.loads(script_data.text)
@@ -64,7 +64,7 @@ class TikTok:
             self.raise_on_errors(video_detail)
             return self.get_video_post(video_detail, cookies, headers)
         else:
-            raise PWarning("Не нашёл видео в тиктоке. Если это пост-слайдер, то я не умею их скачивать")
+            raise PWarning("Не удалось получить видео из TikTok. Публикации со слайдами пока не поддерживаются")
 
     def raise_on_errors(self, video_detail):
         if video_detail["statusCode"] in self.errors:

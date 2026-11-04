@@ -27,13 +27,13 @@ class Boosty:
         post_data = post["data"]
         if not post_data:
             raise PWarning(
-                "Скорее всего пост платный и бот не знает ваших доступов для скачивания. Если вы подписаны и сами можете воспроизвести видео, тогда следуйте этой инструкции:\n"
+                "Boosty не вернул содержимое публикации. Проверьте ссылку и доступ к посту. Если пост требует подписки, а у Вас есть доступ, можно передать данные входа:\n"
                 "1. Откройте пост в любом браузере\n"
                 "2. Нажмите F12 и перейдите во вкладку Application(Приложение)\n"
                 "3. Слева во вкладке Storage(Хранилище) найдите вкладку Cookies, выберите там сайт boosty.to\n"
                 "4. Скопируйте содержимое auth\n"
                 "5. Пришлите мне снова ссылку на видео и на следующей строчке содержимое auth\n"
-                "6. Ваши данные нигде не сохраняются и единственное место где они будут лежать - этот чат. Поэтому не забывайте удалять сообщение с вашими куками. Куки меняются раз в 7 дней\n"
+                "6. Cookies дают доступ к аккаунту. Не отправляйте их в групповой чат. Сообщение может попасть в логи бота; удаление из чата не удаляет логи\n"
                 "\n"
                 "Пример (вместо точек будет набор символов):\n"
                 "https://boosty.to/amazinguser/posts/12345678-aabb-ccdd-eeff-123456789012\n"
@@ -41,7 +41,7 @@ class Boosty:
             )
         video_info_list = [x for x in post_data if x.get("vid")]
         if not video_info_list:
-            raise PWarning("Не найдено видео в посте ")
+            raise PWarning("В полученных данных публикации Boosty нет видео")
         video_info = video_info_list[0]
 
         author_id = post["user"]["id"]
@@ -75,7 +75,7 @@ class Boosty:
     @staticmethod
     def set_download_url(video_data: VideoData, high_res=False):
         if video_data.extra_data is None:
-            raise PError("Не смог найти видео")
+            raise PError("Не удалось получить данные видео Boosty. Попробуйте позже")
         player_urls_dict = video_data.extra_data["player_urls_dict"]
         qualities_order = ["ultra_hd", "quad_hd", "full_hd", "high", "medium", "low"]
         if not high_res:
@@ -87,4 +87,4 @@ class Boosty:
                 video_data.video_download_url = video_url
                 break
         else:
-            raise PError("Не смог найти видео")
+            raise PError("Не удалось получить доступный формат видео Boosty. Попробуйте позже")

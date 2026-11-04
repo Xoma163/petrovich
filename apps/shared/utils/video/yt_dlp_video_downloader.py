@@ -126,4 +126,8 @@ class YtDlpVideoDownloader:
     def _prepare_ytdlp_error(self, error: yt_dlp.utils.DownloadError) -> PWarning:
         if self.ytdlp_error_handler:
             return self.ytdlp_error_handler(error)
-        return PWarning("Не смог найти видео по этой ссылке")
+        if "timed out" in error.msg.lower():
+            return PWarning("Медиасервис не отвечает при скачивании. Попробуйте позже")
+        if "bytes read" in error.msg.lower() and "more expected" in error.msg.lower():
+            return PWarning("Загрузка медиа оборвалась. Попробуйте ещё раз")
+        return PWarning("Не удалось скачать видео. Попробуйте позже")

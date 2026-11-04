@@ -23,7 +23,7 @@ class VKVideoService(MediaService):
         data = self.service.get_video_info(url, high_res=self.media_keys.high_resolution)
 
         if not data:
-            raise PWarning("Не получилось распарсить ссылку")
+            raise PWarning("Не удалось распознать ссылку VK Видео. Пришлите прямую ссылку на видео")
 
         if cached := self._get_cached(data.channel_id, data.video_id, data.title):
             return cached

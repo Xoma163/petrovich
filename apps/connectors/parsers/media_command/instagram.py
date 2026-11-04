@@ -24,22 +24,24 @@ class InstagramParser:
         is_reel = bool(re.search(r"reels?/([A-Za-z0-9_-]+)/?", url))
 
         if is_story:
-            raise PWarning("Парсинг сторей не работает")
+            raise PWarning("Скачивание историй Instagram пока не поддерживается")
 
         try:
             page_source = self._get_instagram_request(url)
             if not page_source:
                 raise RuntimeError
-        except (TimeoutException, ReadTimeoutError, RuntimeError):
+        except (TimeoutException, ReadTimeoutError) as error:
+            raise PWarning("Не удалось дождаться данных Instagram. Попробуйте позже") from error
+        except RuntimeError as error:
             raise PWarning(
-                "Убедитесь в браузере(инкогнито), что по ссылке фото/видео и доступно к просмотру. Если это так, то сообщите разработчику"
-            )
+                "Не удалось получить данные Instagram. Проверьте, открывается ли публикация без входа в аккаунт"
+            ) from error
         bs4 = BeautifulSoup(page_source, "html.parser")
         spans = bs4.find_all("span")
         if self._has_age_restriction(page_source):
-            raise PWarning("Не могу скачать контент. Он недоступен без аутентификации (возрастное ограничение)")
+            raise PWarning("Instagram требует подтверждения возраста. Бот не может скачать эту публикацию")
         elif any(self.INAPPROPRIATE_CONTENT in x.text for x in spans):
-            raise PWarning("Не могу скачать контент. Он недоступен без аутентификации (неприемлимый контент)")
+            raise PWarning("Instagram ограничил просмотр этой публикации. Бот не может её скачать без входа")
 
         try:
             all_scripts = bs4.select('script[type="application/json"][data-content-len][data-processed]')
@@ -52,7 +54,7 @@ class InstagramParser:
 
         data = self._parse_media(media, skip_caption=is_reel)
         if not data.items:
-            raise PWarning("Не могу скачать этот контент. Неизвестный тип. Сообщите разработчику")
+            raise PWarning("Не удалось получить медиа из Instagram. Возможно, этот тип публикации не поддерживается")
         return data
 
     @retry(times=3, exceptions=(TimeoutException, ReadTimeoutError))
@@ -81,7 +83,7 @@ class InstagramParser:
 
     def check_request_errors(self, page_source):
         if self._has_age_restriction(page_source):
-            raise PWarning("Не могу скачать контент. Он недоступен без аутентификации (возрастное ограничение)")
+            raise PWarning("Instagram требует подтверждения возраста. Бот не может скачать эту публикацию")
 
     def _has_age_restriction(self, page_source):
         return any(
@@ -116,9 +118,9 @@ class InstagramParser:
                     continue
 
         if has_api_error:
-            raise PError("Не могу скачать контент. Ошибка со стороны сервера")
+            raise PError("Instagram вернул ошибку при получении публикации. Попробуйте позже")
 
-        raise PWarning("Не могу скачать этот контент. Неизвестный тип. Сообщите разработчику")
+        raise PWarning("Не удалось получить медиа из Instagram. Возможно, этот тип публикации не поддерживается")
 
     @classmethod
     def _iter_dicts(cls, value):
@@ -151,14 +153,14 @@ class InstagramParser:
         except Exception:
             pass
 
-        raise PWarning("Не могу скачать этот контент. Неизвестный тип. Сообщите разработчику")
+        raise PWarning("Не удалось получить медиа из Instagram. Возможно, этот тип публикации не поддерживается")
 
     @staticmethod
     def _get_polaris_media(polaris_media):
         if media := polaris_media.get("if_not_gated_logged_out"):
             return media
         if polaris_media.get("gating_ruling"):
-            raise PWarning("Не могу скачать контент. Он недоступен без аутентификации (возрастное ограничение)")
+            raise PWarning("Instagram ограничил просмотр этой публикации. Бот не может её скачать без входа")
         return polaris_media
 
     @classmethod

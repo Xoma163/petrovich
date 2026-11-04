@@ -85,7 +85,7 @@ class InstagramParserTestCase(SimpleTestCase):
         self.assertEqual(data.caption, "")
 
     def test_get_polaris_media_rejects_api_age_gate(self):
-        with self.assertRaisesMessage(PWarning, "возрастное ограничение"):
+        with self.assertRaisesMessage(PWarning, "Instagram ограничил просмотр"):
             InstagramParser._get_polaris_media(
                 {
                     "__typename": "XIGPolarisVideoMedia",

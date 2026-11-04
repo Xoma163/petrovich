@@ -557,11 +557,20 @@ runtime for some otherwise public videos. The YouTube parser first checks `PATH`
 The shared byte downloader retries the complete `yt-dlp` download up to three times after network read timeouts or
 truncated HTTP responses, with a two-second delay between attempts. Each attempt performs a fresh extraction so a
 subsequent attempt can select another media CDN host.
-YouTube timeout errors are shown as `YouTube не отвечает при скачивании. Попробуй позже` rather than the
+YouTube timeout errors are shown as `YouTube не отвечает при скачивании. Попробуйте позже` rather than the
 generic video-not-found warning. Retry behavior is unchanged.
 The YouTube error mapper also distinguishes private videos, age verification, bot checks, unavailable formats,
 removed videos, and truncated downloads. Unknown failures use a generic download-failed message rather than
 claiming that the video was not found; original exceptions remain chained for logging.
+The media command wraps only `get_content_by_url()` in `media_request_errors()` to translate Requests,
+Selenium, and urllib3 transport failures into user-facing warnings. HTTP 401/403 indicate an access refusal,
+429 indicates request limiting, and 404 does not imply deletion (it may come from a CDN or API endpoint).
+Existing application warnings and programming errors pass through unchanged; exception causes are preserved.
+VK, Instagram, TikTok, Pinterest, Reddit, X/Twitter, Boosty, and Yandex Music use clearer parser messages.
+User-facing media messages use formal Russian address (Вы): `Попробуйте`, `Проверьте`, `Пришлите`.
+An Instagram gate without a specific age signal is described as a viewing restriction, not an age restriction.
+These changes do not alter retries, permissions, or lazy attachment downloads outside the content-fetch stage.
+Boosty cookie guidance warns that credentials may be logged and must not be sent in group chats.
 YouTube can intermittently return only a progressive MP4 and no separate audio-only formats. The parser retries
 metadata extraction three times for the preferred split video/audio formats, then falls back to the progressive MP4
 instead of rejecting a playable video with `Не получилось найти аудиодорожку`. The download format selector also

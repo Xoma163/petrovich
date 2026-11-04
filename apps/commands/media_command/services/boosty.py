@@ -32,7 +32,7 @@ class BoostyService(MediaService):
         video_data = self.service.get_video_info(url, auth_cookie)
 
         if not video_data:
-            raise PWarning("Не получилось распарсить ссылку")
+            raise PWarning("Не удалось распознать ссылку Boosty. Пришлите ссылку на публикацию")
 
         if cached := self._get_cached(video_data.channel_id, video_data.video_id, video_data.title):
             return cached

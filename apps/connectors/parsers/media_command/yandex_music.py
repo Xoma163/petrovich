@@ -44,7 +44,7 @@ class YandexMusicAPI:
                     r = re.compile(r"https://(?:next.)?music.yandex.(?:ru|com)/album/(\d*)")
                     album_id = r.findall(url)[0]
                 except IndexError:
-                    raise PWarning("Не нашёл песни по этому URL")
+                    raise PWarning("Не удалось получить трек Яндекс Музыки по этой ссылке. Проверьте ссылку на трек")
 
         return {"album_id": album_id, "track_id": track_id}
 

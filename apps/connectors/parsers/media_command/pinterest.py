@@ -24,7 +24,7 @@ class PinterestDataItem:
 
 
 class Pinterest:
-    ERROR_MSG = "Ссылка на pinterest не является видео/фото/gif"
+    ERROR_MSG = "Не удалось получить фото, видео или GIF из Pinterest. Проверьте ссылку на публикацию"
 
     def get_post_data(self, url) -> PinterestDataItem:
         content = requests.get(url).content
