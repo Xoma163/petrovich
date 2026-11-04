@@ -557,6 +557,11 @@ runtime for some otherwise public videos. The YouTube parser first checks `PATH`
 The shared byte downloader retries the complete `yt-dlp` download up to three times after network read timeouts or
 truncated HTTP responses, with a two-second delay between attempts. Each attempt performs a fresh extraction so a
 subsequent attempt can select another media CDN host.
+YouTube timeout errors are shown as `YouTube не отвечает при скачивании. Попробуй позже` rather than the
+generic video-not-found warning. Retry behavior is unchanged.
+The YouTube error mapper also distinguishes private videos, age verification, bot checks, unavailable formats,
+removed videos, and truncated downloads. Unknown failures use a generic download-failed message rather than
+claiming that the video was not found; original exceptions remain chained for logging.
 YouTube can intermittently return only a progressive MP4 and no separate audio-only formats. The parser retries
 metadata extraction three times for the preferred split video/audio formats, then falls back to the progressive MP4
 instead of rejecting a playable video with `Не получилось найти аудиодорожку`. The download format selector also
