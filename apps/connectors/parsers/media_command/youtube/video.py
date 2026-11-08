@@ -254,6 +254,8 @@ class YoutubeVideo:
             return PWarning("YouTube не отвечает при скачивании. Попробуйте позже")
         if "bytes read" in msg.lower() and "more expected" in msg.lower():
             return PWarning("Загрузка с YouTube оборвалась. Попробуйте ещё раз")
+        if YtDlpVideoDownloader.is_temporary_http_error(error):
+            return PWarning("Сервер YouTube временно недоступен. Попробуйте позже")
         if "private video" in msg.lower():
             return PWarning("Это закрытое видео. Скачать без доступа нельзя")
         if "Sign in to confirm your age" in msg:

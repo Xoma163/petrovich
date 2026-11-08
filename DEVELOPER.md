@@ -569,9 +569,11 @@ lets `yt-dlp` choose its own HTTP chunking defaults; do not reintroduce a projec
 The project installs the `yt-dlp[deno]` extra because current YouTube extraction requires a JavaScript challenge
 runtime for some otherwise public videos. The YouTube parser first checks `PATH`, then explicitly checks for the
 `deno` executable beside the active virtualenv Python so systemd services do not depend on a global Deno install.
-The shared byte downloader retries the complete `yt-dlp` download up to three times after network read timeouts or
-truncated HTTP responses, with a two-second delay between attempts. Each attempt performs a fresh extraction so a
+The shared byte downloader retries the complete `yt-dlp` download up to three times after network read timeouts,
+truncated HTTP responses, or HTTP 500/502/503/504 errors, with a two-second delay between attempts. Each attempt performs a fresh extraction so a
 subsequent attempt can select another media CDN host.
+If temporary HTTP server errors persist, the bot reports temporary service unavailability rather than the generic
+download failure. Authentication, rate-limit, and missing-resource HTTP errors do not trigger these full-download retries.
 YouTube timeout errors are shown as `YouTube не отвечает при скачивании. Попробуйте позже` rather than the
 generic video-not-found warning. Retry behavior is unchanged.
 The YouTube error mapper also distinguishes private videos, age verification, bot checks, unavailable formats,

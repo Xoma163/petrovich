@@ -665,6 +665,52 @@ class YoutubeVideoLanguageOptionTests(SimpleTestCase):
 
 
 class YtDlpVideoDownloaderTests(SimpleTestCase):
+    def test_download_retries_temporary_http_errors_with_fresh_download(self):
+        for status in (500, 502, 503, 504):
+            with self.subTest(status=status):
+                downloader = YtDlpVideoDownloader()
+                with patch("apps.shared.utils.video.yt_dlp_video_downloader.time.sleep") as sleep:
+                    with patch.object(
+                        downloader,
+                        "_download_to_bytes",
+                        side_effect=[yt_dlp.utils.DownloadError(f"HTTP Error {status}"), b"video-content"],
+                    ) as download:
+                        content = downloader.download_to_bytes("https://example.com/video", {"format": "298+140-1"})
+
+                self.assertEqual(content, b"video-content")
+                self.assertEqual(download.call_count, 2)
+                download.assert_called_with("https://example.com/video", {"format": "298+140-1"})
+                sleep.assert_called_once_with(downloader.DEFAULT_DOWNLOAD_RETRY_DELAY)
+
+    def test_temporary_http_error_retries_are_bounded_and_preserve_cause(self):
+        for handler in (None, YoutubeVideo._prepare_ytdlp_error):
+            with self.subTest(handler=handler):
+                downloader = YtDlpVideoDownloader(ytdlp_error_handler=handler)
+                error = yt_dlp.utils.DownloadError("HTTP Error 503: Service Unavailable")
+                with patch("apps.shared.utils.video.yt_dlp_video_downloader.time.sleep") as sleep:
+                    with patch.object(downloader, "_download_to_bytes", side_effect=error) as download:
+                        with self.assertRaises(PWarning) as caught:
+                            downloader.download_to_bytes("https://example.com/video")
+
+                self.assertIs(caught.exception.__cause__, error)
+                self.assertIn("временно недоступен", caught.exception.msg)
+                self.assertEqual(download.call_count, downloader.DEFAULT_DOWNLOAD_ATTEMPTS)
+                self.assertEqual(sleep.call_count, downloader.DEFAULT_DOWNLOAD_ATTEMPTS - 1)
+
+    def test_client_http_errors_do_not_trigger_full_download_retries(self):
+        for status in (401, 403, 404, 429, 501):
+            with self.subTest(status=status):
+                downloader = YtDlpVideoDownloader()
+                with patch("apps.shared.utils.video.yt_dlp_video_downloader.time.sleep") as sleep:
+                    with patch.object(
+                        downloader, "_download_to_bytes", side_effect=yt_dlp.utils.DownloadError(f"HTTP Error {status}")
+                    ) as download:
+                        with self.assertRaises(PWarning):
+                            downloader.download_to_bytes("https://example.com/video")
+
+                download.assert_called_once()
+                sleep.assert_not_called()
+
     def test_download_to_bytes_retries_timeout_with_fresh_download(self):
         downloader = YtDlpVideoDownloader()
         with patch("apps.shared.utils.video.yt_dlp_video_downloader.time.sleep") as sleep:

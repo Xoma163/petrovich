@@ -1,4 +1,5 @@
 import os
+import re
 import time
 from collections.abc import Callable
 from glob import glob
@@ -79,7 +80,15 @@ class YtDlpVideoDownloader:
     @staticmethod
     def _is_retryable_download_error(error: yt_dlp.utils.DownloadError) -> bool:
         message = error.msg.lower()
-        return "timed out" in message or ("bytes read" in message and "more expected" in message)
+        return (
+            "timed out" in message
+            or ("bytes read" in message and "more expected" in message)
+            or YtDlpVideoDownloader.is_temporary_http_error(error)
+        )
+
+    @staticmethod
+    def is_temporary_http_error(error: yt_dlp.utils.DownloadError) -> bool:
+        return bool(re.search(r"\bHTTP Error (500|502|503|504)\b", error.msg, re.IGNORECASE))
 
     @staticmethod
     def get_first_playlist_entry(video_info: dict) -> dict:
@@ -130,4 +139,6 @@ class YtDlpVideoDownloader:
             return PWarning("Медиасервис не отвечает при скачивании. Попробуйте позже")
         if "bytes read" in error.msg.lower() and "more expected" in error.msg.lower():
             return PWarning("Загрузка медиа оборвалась. Попробуйте ещё раз")
+        if self.is_temporary_http_error(error):
+            return PWarning("Сервер медиасервиса временно недоступен. Попробуйте позже")
         return PWarning("Не удалось скачать видео. Попробуйте позже")
