@@ -15,6 +15,7 @@ from apps.commands.gpt.api.responses import (
     GPTImageDrawResponse,
     GPTVoiceRecognitionResponse,
 )
+from apps.commands.gpt.commands_utils.gpt.functionality.chat_history import GPTChatHistoryFunctionality
 from apps.commands.gpt.commands_utils.gpt.functionality.completions import GPTCompletionsFunctionality
 from apps.commands.gpt.commands_utils.gpt.functionality.image_draw import GPTImageDrawFunctionality
 from apps.commands.gpt.commands_utils.gpt.functionality.vision import GPTVisionFunctionality
@@ -93,6 +94,9 @@ class GPTCommand(
             result = self.check_key()
             if result:
                 return result
+
+        if isinstance(self, GPTChatHistoryFunctionality) and self.event.message.args[:1] == ["wtf"]:
+            return ResponseMessage(self.menu_chat_history())
 
         if issubclass(self.provider.api_class, VisionAPIMixin) and isinstance(self, GPTVisionFunctionality):
             if self.event.get_all_attachments([PhotoAttachment]):

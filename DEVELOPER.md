@@ -430,9 +430,18 @@ Active chat providers:
 
 Qwen remains an internal API client for punctuation restoration after Whisper transcription, using
 `QWEN_API_BASE_URLS` and the default Qwen `CompletionsModel` in the database. It has no chat command
-or provider wrapper. `/qwen`, `/grok`, and `/gwtf` have been removed; ChatGPT's `/wtf` remains.
+or provider wrapper. `/qwen`, `/grok`, and `/gwtf` have been removed.
 Migration `0008` removes Grok from provider choices without deleting existing provider rows,
 models, encrypted keys, presets, or usage history. Historical migrations remain unchanged.
+
+Chat history summaries use `/gpt wtf [prompt] [N=50]`; a trailing integer is also accepted.
+Without a prompt, the bot summarizes the conversation. A replied-to/forwarded message selects the
+history boundary instead of N, preserving the previous message-ID window behavior. The standalone
+`/wtf` command and its `/саммари` and `/суммаризируй` aliases have been removed. The subcommand
+uses the current GPT instance, API key check, selected model, preprompt, and usage accounting.
+Explicit `wtf` takes priority over photo analysis and reply-chain continuation. The internal `_wtf`
+callback remains separate: voice-transcription “Саммари” buttons still summarize the transcription,
+not the chat history.
 
 `/hermes` reuses GPT reply-chain history and sends non-streaming chat completions to
 `HERMES_API_BASE_URL` (including `/v1`) with `HERMES_API_KEY` as a bearer token. `/hermes` also

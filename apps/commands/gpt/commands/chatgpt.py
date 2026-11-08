@@ -1,4 +1,5 @@
 from apps.bot.consts import RoleEnum
+from apps.commands.gpt.commands_utils.gpt.functionality.chat_history import GPTChatHistoryFunctionality
 from apps.commands.gpt.commands_utils.gpt.functionality.completions import GPTCompletionsFunctionality
 from apps.commands.gpt.commands_utils.gpt.functionality.image_draw import GPTImageDrawFunctionality
 from apps.commands.gpt.commands_utils.gpt.functionality.vision import GPTVisionFunctionality
@@ -20,6 +21,7 @@ class ChatGPTCommand(
     GPTKeyMixin,
     GPTModelChoiceMixin,
     GPTCompletionsFunctionality,
+    GPTChatHistoryFunctionality,
     GPTVisionFunctionality,
     GPTImageDrawFunctionality,
     GPT5SettingsMixin,
@@ -40,6 +42,7 @@ class ChatGPTCommand(
                 + GPTVisionFunctionality.VISION_HELP_TEXT_ITEMS
                 + GPTImageDrawFunctionality.IMAGE_DRAW_HELP_TEXT_ITEMS
                 + GPTPrepromptMixin.PREPROMPT_HELP_TEXT_ITEMS
+                + GPTChatHistoryFunctionality.CHAT_HISTORY_HELP_TEXT_ITEMS
                 + GPTStatisticsMixin.STATISTICS_HELP_TEXT_ITEMS
                 + GPTModelChoiceMixin.MODEL_CHOOSE_HELP_TEXT_ITEMS
                 + GPTModelChoiceMixin.COMPLETIONS_HELP_TEXT_ITEMS
@@ -64,5 +67,8 @@ class ChatGPTCommand(
                 + GPTStatisticsMixin.STATISTICS_KEY_ITEMS_KEY,
             )
         ],
-        extra_text=f"{GPTCommand.EXTRA_TEXT}\n\n{GPTPrepromptMixin.EXTRA_TEXT}\n\n{GPTImageDrawFunctionality.EXTRA_TEXT}",
+        extra_text=(
+            f"{GPTCommand.EXTRA_TEXT}\n\n{GPTPrepromptMixin.EXTRA_TEXT}\n\n{GPTImageDrawFunctionality.EXTRA_TEXT}"
+            f"\n\nwtf: prompt по умолчанию:\n{GPTChatHistoryFunctionality.DEFAULT_PROMPT}"
+        ),
     )

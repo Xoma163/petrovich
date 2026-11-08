@@ -3,7 +3,6 @@ from apps.bot.models import Role
 from apps.commands.games.commands.petrovich import Petrovich
 from apps.commands.games.commands.wordle import Wordle
 from apps.commands.gpt.commands.chatgpt import ChatGPTCommand
-from apps.commands.gpt.commands.chatgpt_wtf import WTF
 from apps.commands.gpt.commands.hermes import HermesCommand
 from apps.commands.gpt.commands.voice_recognition import VoiceRecognition
 from apps.commands.media_command.commands.media_command import Media
@@ -44,7 +43,6 @@ _commands = [
     # gpt
     ChatGPTCommand,
     HermesCommand,
-    WTF,
     VoiceRecognition,
     # media
     Media,
