@@ -525,6 +525,8 @@ What it does:
 - detects media URLs in user messages
 - extracts Instagram media from both older `xdt_api__v1__...` page JSON and newer `xig_polaris_media` page JSON
 - searches Instagram's nested bootstrap JSON recursively because media payloads can move between `require` entries
+- supports the logged-out `xig_logged_out_reels_feed.edges[].node` payload used by Reels pages;
+  selects the node matching the URL shortcode rather than downloading a recommended reel
 - detects Instagram logged-out age-gate messages during page loading and returns a user-facing warning instead of
   falling through to the generic unknown-content parser error
 - retries Selenium's local-driver read timeout and maps final failure to the same user-facing availability warning

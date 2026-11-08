@@ -16,12 +16,14 @@ class InstagramParser:
     AGE_RESTRICTION_2_RE = r"Людям младше (\d+) лет этот контент недоступен"
     AGE_RESTRICTION_3_RE = r"People under (\d+) can['’]t see this content"
     INAPPROPRIATE_CONTENT = "This content may be inappropriate"
-    API_DATA_KEYS = ("xdt_api__v1__", "xig_polaris_media")
+    API_DATA_KEYS = ("xdt_api__v1__", "xig_polaris_media", "xig_logged_out_reels_feed")
 
     def get_data(self, url):
         # is_post = bool(re.search(r"p/([A-Za-z0-9_-]+)", url))
         is_story = bool(re.search(r"stories/.*/(\d+)", url))
         is_reel = bool(re.search(r"reels?/([A-Za-z0-9_-]+)/?", url))
+        shortcode_match = re.search(r"/(?:p|reels?)/([A-Za-z0-9_-]+)", url)
+        shortcode = shortcode_match.group(1) if shortcode_match else None
 
         if is_story:
             raise PWarning("Скачивание историй Instagram пока не поддерживается")
@@ -46,11 +48,11 @@ class InstagramParser:
         try:
             all_scripts = bs4.select('script[type="application/json"][data-content-len][data-processed]')
             api_scripts = [x for x in all_scripts if any(key in x.text for key in self.API_DATA_KEYS)]
-            media = self._get_media(api_scripts)
+            media = self._get_media(api_scripts, shortcode=shortcode)
         except (PError, PWarning):
             raise
         except Exception:
-            media = self.get_media_by_parse_json(page_source)
+            media = self.get_media_by_parse_json(page_source, shortcode=shortcode)
 
         data = self._parse_media(media, skip_caption=is_reel)
         if not data.items:
@@ -96,7 +98,7 @@ class InstagramParser:
         )
 
     @classmethod
-    def _get_media(cls, api_scripts):
+    def _get_media(cls, api_scripts, shortcode=None):
         has_api_error = False
         for script in api_scripts:
             json_data = json.loads(script.text)
@@ -108,6 +110,9 @@ class InstagramParser:
                         return shortcode_web_info["items"][0]
                     if polaris_media := data.get("xig_polaris_media"):
                         return cls._get_polaris_media(polaris_media)
+                    if reels_feed := data.get("xig_logged_out_reels_feed"):
+                        if media := cls._get_reels_feed_media(reels_feed, shortcode):
+                            return media
                     if clips_on_logged_out := data.get("xdt_api__v1__clips__clips_on_logged_out_connection_v2"):
                         node = clips_on_logged_out["edges"][0]["node"]
                         if "media_command" in node:
@@ -132,7 +137,7 @@ class InstagramParser:
             for child in value:
                 yield from cls._iter_dicts(child)
 
-    def get_media_by_parse_json(self, page_source):
+    def get_media_by_parse_json(self, page_source, shortcode=None):
         try:
             json_data = self.extract_json(page_source, "xdt_api__v1__media__shortcode__web_info")
             return json_data["items"][0]
@@ -153,7 +158,22 @@ class InstagramParser:
         except Exception:
             pass
 
+        try:
+            json_data = self.extract_json(page_source, "xig_logged_out_reels_feed")
+            if media := self._get_reels_feed_media(json_data, shortcode):
+                return media
+        except (ValueError, KeyError, TypeError, AttributeError):
+            pass
+
         raise PWarning("Не удалось получить медиа из Instagram. Возможно, этот тип публикации не поддерживается")
+
+    @staticmethod
+    def _get_reels_feed_media(feed, shortcode):
+        for edge in feed.get("edges", []):
+            media = edge.get("node")
+            if isinstance(media, dict) and shortcode and media.get("code") == shortcode:
+                return media
+        return None
 
     @staticmethod
     def _get_polaris_media(polaris_media):
