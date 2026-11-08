@@ -250,14 +250,7 @@ class OpenAIAPI(GPTAPI, ABC):
         if error := r_json.get("error"):
             logger.error({"response": error, "log_filter": self.log_filter})
 
-            # grok
-            if isinstance(error, str):
-                code = None
-                if "used all available credits" in error:
-                    code = "insufficient_quota"
-            # chatgpt
-            else:
-                code = error.get("code")
+            code = error.get("code") if isinstance(error, dict) else None
 
             error_str = self.ERRORS_MAP.get(code, "Какая-то ошибка OpenAI API")
 

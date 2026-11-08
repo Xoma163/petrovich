@@ -16,10 +16,11 @@ from apps.commands.gpt.api.responses import GPTCompletionsResponse
 from apps.commands.gpt.api.responses import GPTVoiceRecognitionResponse
 from apps.commands.gpt.commands.chatgpt import ChatGPTCommand
 from apps.commands.gpt.commands_utils.gpt.mixins.key import GPTKeyMixin
+from apps.commands.gpt.enums import GPTProviderEnum
 from apps.commands.gpt.messages.consts import GPTMessageRole
+from apps.commands.gpt.messages.openai_completions import OpenAICompletionsMessage
 from apps.commands.gpt.models import Usage, Provider, VoiceRecognitionModel, CompletionsModel
 from apps.commands.gpt.providers.providers.chatgpt import ChatGPTProvider
-from apps.commands.gpt.providers.providers.qwen import QwenProvider
 from apps.commands.gpt.utils import user_has_api_key
 from apps.commands.help_text import HelpText, HelpTextItem, HelpTextArgument
 from apps.connectors.api.whisper import WhisperAPI
@@ -148,13 +149,13 @@ class VoiceRecognition(AcceptExtraCommand):
             return text
 
         try:
-            qwen_provider = Provider.objects.get(name=QwenProvider.type_enum.value)
+            qwen_provider = Provider.objects.get(name=GPTProviderEnum.QWEN.value)
             model = CompletionsModel.objects.get(provider=qwen_provider, is_default=True)
         except (Provider.DoesNotExist, CompletionsModel.DoesNotExist):
             logger.warning("Qwen punctuation model is not configured", extra=self.event.log_filter)
             return text
 
-        messages = QwenProvider.messages_class()
+        messages = OpenAICompletionsMessage()
         messages.add_message(
             GPTMessageRole.SYSTEM,
             (

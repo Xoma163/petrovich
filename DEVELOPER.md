@@ -360,7 +360,7 @@ This is the feature layer.
 Feature groups:
 
 - `games/` — Petrovich game and Wordle
-- `gpt/` — ChatGPT/Grok/Qwen/Hermes integrations, models, presets, keys, stats, preprompts
+- `gpt/` — ChatGPT/Hermes commands, internal Qwen API for voice punctuation, models, presets, keys, stats, preprompts
 - `media_command/` — URL-driven media extraction/download/caching/reposting
 - `meme/` — meme storage, approval, inline meme search
 - `notifies/` — reminders and delayed command execution
@@ -423,12 +423,16 @@ The existing `_set_gpt_5_payload()` guard only applies reasoning, verbosity, and
 to names containing `gpt-5`; GPT-6 models currently use API defaults without those overrides.
 Adding catalog rows does not verify access for each user's API key.
 
-Providers discovered in code:
+Active chat providers:
 
 - OpenAI / ChatGPT
-- xAI / Grok
-- local-network Qwen-compatible server
 - Hermes Agent's OpenAI-compatible API server (`/hermes` requires the dedicated `HERMES` role)
+
+Qwen remains an internal API client for punctuation restoration after Whisper transcription, using
+`QWEN_API_BASE_URLS` and the default Qwen `CompletionsModel` in the database. It has no chat command
+or provider wrapper. `/qwen`, `/grok`, and `/gwtf` have been removed; ChatGPT's `/wtf` remains.
+Migration `0008` removes Grok from provider choices without deleting existing provider rows,
+models, encrypted keys, presets, or usage history. Historical migrations remain unchanged.
 
 `/hermes` reuses GPT reply-chain history and sends non-streaming chat completions to
 `HERMES_API_BASE_URL` (including `/v1`) with `HERMES_API_KEY` as a bearer token. `/hermes` also

@@ -55,6 +55,39 @@ class VoiceRecognitionResponseTests(SimpleTestCase):
         self.assertEqual(result.reply_to, 123)
         self.assertEqual(result.keyboard, {"keyboard": "summary"})
 
+    @patch("apps.commands.gpt.commands.voice_recognition.Usage")
+    @patch("apps.commands.gpt.commands.voice_recognition.QwenAPI")
+    @patch("apps.commands.gpt.commands.voice_recognition.CompletionsModel.objects.get")
+    @patch("apps.commands.gpt.commands.voice_recognition.Provider.objects.get")
+    def test_punctuation_uses_qwen_api_without_chat_provider(self, get_provider, get_model, api, usage):
+        command = self._get_command()
+        command.event.log_filter = {"peer_id": 123}
+        command.event.sender = Mock()
+        response = api.return_value.completions.return_value
+        response.text = "Привет."
+
+        self.assertEqual(command.restore_punctuation_qwen("привет"), "Привет.")
+
+        get_provider.assert_called_once_with(name="qwen")
+        get_model.assert_called_once_with(provider=get_provider.return_value, is_default=True)
+        api.assert_called_once_with(log_filter=command.event.log_filter, api_key="")
+        messages = api.return_value.completions.call_args.args[0].get_messages()
+        self.assertEqual(messages[0]["role"], "system")
+        self.assertEqual(messages[1]["role"], "user")
+        self.assertIn("привет", messages[1]["content"][0]["text"])
+        usage.return_value.save.assert_called_once_with()
+
+    @patch("apps.commands.gpt.commands.voice_recognition.QwenAPI")
+    @patch("apps.commands.gpt.commands.voice_recognition.CompletionsModel.objects.get")
+    @patch("apps.commands.gpt.commands.voice_recognition.Provider.objects.get")
+    def test_punctuation_keeps_whisper_text_when_qwen_fails(self, get_provider, get_model, api):
+        command = self._get_command()
+        command.event.log_filter = {"peer_id": 123}
+        api.return_value.completions.side_effect = RuntimeError("Qwen unavailable")
+
+        with self.assertLogs("apps.commands.gpt.commands.voice_recognition", level="WARNING"):
+            self.assertEqual(command.restore_punctuation_qwen("привет"), "привет")
+
     def test_short_transcription_keeps_regular_expandable_quote(self):
         command = self._get_command()
         answer = "а" * 500
