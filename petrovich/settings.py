@@ -1,8 +1,10 @@
 import os
 import sys
+from urllib.parse import quote
 
 import environ
 import sentry_sdk
+from django.core.exceptions import ImproperlyConfigured
 
 
 def _reconfigure_standard_streams():
@@ -89,7 +91,13 @@ WSGI_APPLICATION = "petrovich.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
-DATABASES = {"default": env.db("DATABASE_URL", default="postgres:///petrovich")}
+database_url = env.str("DATABASE_URL", default="postgres:///petrovich")
+if "${POSTGRES_PASSWORD}" in database_url:
+    database_password = os.environ.get("POSTGRES_PASSWORD")
+    if not database_password:
+        raise ImproperlyConfigured("Set POSTGRES_PASSWORD when DATABASE_URL references it")
+    database_url = database_url.replace("${POSTGRES_PASSWORD}", quote(database_password, safe=""))
+DATABASES = {"default": env.db_url_config(database_url)}
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators

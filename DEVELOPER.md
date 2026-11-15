@@ -65,11 +65,11 @@ Based on the codebase, this is a **personal/community utility bot** rather than 
 ## Tech stack
 
 - **Language:** Python `>=3.14`
-- **Framework:** Django `>=6.0.3`
+- **Framework:** Django `>=6.0.8,<6.1` (security updates stay on the 6.0 release line)
 - **Database:** PostgreSQL
 - **Cache / ephemeral state:** Redis via `django-redis`
 - **Deployment shape:** gunicorn + nginx + systemd-oriented Linux deployment; local debug can use Docker Compose for PostgreSQL and Redis
-- **Dependency manager in active use:** `uv` appears current (`uv.lock`, `uv sync` in production update script)
+- **Dependency manager in active use:** `uv` (`uv.lock`; deployment exports the lock and runs hash-checked `uv pip sync`)
 - **Notable libraries/integrations:**
   - Telegram Bot API integration
   - `yt-dlp`
@@ -117,6 +117,7 @@ Current hardcoded operational endpoints discovered in code:
 - `manage.py` — Django CLI entrypoint; `runserver` also clears some cached action keys
 - `pyproject.toml` — project metadata and Python dependencies
 - `uv.lock` — locked dependency graph
+- `config/setup/sync_dependencies.sh` — shared lock-only, hash-checked installation for setup and production updates
 - `README.md` — very short overview and external wiki pointer
 - `DEVELOPER.md` — this handbook
 - `update_production.sh` — production update script
@@ -763,6 +764,7 @@ From the codebase and example env:
 - `SECRET_KEY`
 - `DEBUG`
 - `DATABASE_URL`
+- `POSTGRES_PASSWORD` (local Compose password; Django expands `${POSTGRES_PASSWORD}` in `DATABASE_URL` when present)
 - `REDIS_URL`
 - `SENTRY_URL`
 - `FERNET_SECRET_KEY`
@@ -804,7 +806,7 @@ The repository currently suggests `uv` as the most current dependency workflow.
 ### 0. Install prerequisites
 
 ```bash
-curl -LsSf https://astral.sh/uv/install.sh | sh
+curl --proto '=https' --proto-redir '=https' -LsSf https://astral.sh/uv/install.sh | sh
 sudo apt install -y libpq-dev gcc python3-dev redis ffmpeg chromium chromium-driver
 ```
 
@@ -813,6 +815,25 @@ sudo apt install -y libpq-dev gcc python3-dev redis ffmpeg chromium chromium-dri
 ```bash
 uv sync
 ```
+
+Setup and production scripts use `bash config/setup/sync_dependencies.sh` after creating `.venv`.
+This helper exports `uv.lock` with `--locked` and installs it with `uv pip sync --require-hashes`.
+It preserves uv's default dev group. Installation requires wheels except for the explicit source-build
+allowlist: `crontab`, `yandex-music` (no published wheels at the locked versions), and `psycopg2`
+(Linux builds link to the host's libpq). Do not replace this with unconditional `uv sync --no-build`:
+a clean Linux installation would fail. Source builds still execute code for those three packages and
+their build dependencies; the allowlist narrows that trust, it does not eliminate it. Hashes authenticate
+the locked package artifacts, not all isolated build dependencies. Review exceptions before adding any.
+The helper fails on a stale lockfile rather than resolving new versions during deployment.
+Its standalone regression tests run with `python config/setup/test_sync_dependencies.py` and mock uv
+instead of installing packages. On Windows, set `TEST_BASH` to Git Bash's executable when the default
+`bash` command points to WSL. The tests verify lock/hash flags, the build allowlist, fail-fast behavior,
+and cleanup of temporary exports.
+
+Security floors for direct dependencies are declared in `project.dependencies`; floors for transitive
+dependencies are in `tool.uv.constraint-dependencies`. The November 2026 refresh upgrades the vulnerable
+dependency families without upgrading Django to 6.1. Regenerate and commit `uv.lock` with changes to these
+constraints, and validate the Linux install as well as the local Windows environment.
 
 If you need the local developer toolchain as well, install the dev dependency group:
 
@@ -825,6 +846,14 @@ pre-commit install
 
 Create `.env` based on `.env.example`, then provide real values.
 The checked-in local example points PostgreSQL and Redis at `127.0.0.1:15433` and `127.0.0.1:16380`, matching `docker-compose.yml`; it also keeps the local Telegram Bot API server at `192.168.1.10:11060`.
+Set `POSTGRES_PASSWORD` once in the untracked `.env` before starting Compose. Keep the literal
+`${POSTGRES_PASSWORD}` placeholder in the single-quoted `DATABASE_URL`, as shown in `.env.example`.
+Django explicitly expands that placeholder and URL-encodes the raw password, including special characters.
+Single quotes stop Docker Compose from expanding the URL itself. Existing complete database URLs remain
+supported and do not require `POSTGRES_PASSWORD`. Compose intentionally has no default database password. For an existing
+PostgreSQL volume, changing `POSTGRES_PASSWORD` does not change the stored role password: rotate it inside
+PostgreSQL first and update `.env` consistently. Never delete the volume to apply a password change.
+The previous committed password was for local development only; rotate it if it was reused elsewhere.
 
 For local debug dependencies only:
 
@@ -954,7 +983,7 @@ git clean -fd
 git fetch origin
 git pull --ff-only origin master
 source .venv/bin/activate
-uv sync
+bash config/setup/sync_dependencies.sh
 python manage.py check
 python manage.py migrate --noinput
 python manage.py collectstatic --noinput

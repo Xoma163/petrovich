@@ -5,7 +5,7 @@ services:
     environment:
       POSTGRES_DB: petrovich
       POSTGRES_USER: petrovich
-      POSTGRES_PASSWORD: petrovich
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env for the local database}
     ports:
       - "127.0.0.1:15433:5432"
     volumes:

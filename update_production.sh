@@ -22,7 +22,7 @@ git pull --ff-only origin master
 
 source .venv/bin/activate
 
-uv sync
+bash "$(dirname "${BASH_SOURCE[0]}")/config/setup/sync_dependencies.sh"
 
 echo "==> Running Django checks"
 python manage.py check
