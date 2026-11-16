@@ -34,6 +34,7 @@ class Downloader:
         headers.update(self.headers)
 
         response = requests.get(url, headers=headers, stream=True, cookies=self.cookies)
+        response.raise_for_status()
         return response.content
 
     @staticmethod
@@ -47,6 +48,7 @@ class Downloader:
 
     def download_in_parallel(self, url: str, chunk_size: int = DEFAULT_CHUNK_SIZE):
         response = requests.head(url, headers=self.headers, cookies=self.cookies)
+        response.raise_for_status()
         file_size = int(response.headers["Content-Length"])
         ranges = [(i, min(i + chunk_size - 1, file_size - 1)) for i in range(0, file_size, chunk_size)]
 
@@ -55,7 +57,9 @@ class Downloader:
         return b"".join(chunks)
 
     def download_by_url(self, url: str):
-        return requests.get(url, headers=self.headers, cookies=self.cookies).content
+        response = requests.get(url, headers=self.headers, cookies=self.cookies)
+        response.raise_for_status()
+        return response.content
 
     def download_by_m3u8_url(self, m3u8_url: str, threads: int = 1, http_chunk_size: int | None = None) -> bytes:
         descriptor, tmp_video_file = mkstemp()

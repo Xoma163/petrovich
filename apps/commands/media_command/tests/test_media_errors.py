@@ -1,5 +1,5 @@
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import requests
 from django.test import SimpleTestCase
@@ -8,6 +8,7 @@ from urllib3.exceptions import ReadTimeoutError
 
 from apps.connectors.parsers.media_command.instagram import InstagramParser
 from apps.connectors.parsers.media_command.tiktok import TikTok
+from apps.commands.media_command.services.tiktok import TikTokService
 from apps.connectors.parsers.media_command.vk_video import VKVideo
 from apps.connectors.parsers.media_command.youtube.video import YoutubeVideo
 from apps.shared.exceptions import PWarning
@@ -94,6 +95,35 @@ class MediaErrorTests(SimpleTestCase):
                 TikTok().get_video("https://www.tiktok.com/@user/video/1")
         self.assertEqual(caught.exception.msg, "Не удалось дождаться данных публикации TikTok. Попробуйте позже")
         self.assertIs(caught.exception.__cause__, error)
+
+    def test_tiktok_rejects_non_video_download(self):
+        for content in (b"", b"<HTML><HEAD><TITLE>Access Denied</TITLE></HEAD></HTML>", b"  <!doctype html><html></html>"):
+            with self.subTest(content=content):
+                service = TikTokService.__new__(TikTokService)
+                service.service = Mock()
+                service.service.get_video.return_value = SimpleNamespace(
+                    video_download_url="https://example.com/video", thumbnail_url=None,
+                    width=100, height=100, extra_data={"cookies": {}, "headers": {}},
+                )
+                service.event = SimpleNamespace(peer_id=1, message_thread_id=None)
+                attachment = Mock(content=content)
+                service.bot = Mock()
+                service.bot.get_video_attachment.return_value = attachment
+                with self.assertRaises(PWarning):
+                    service._get_content_by_url("https://www.tiktok.com/@user/video/1")
+
+    def test_tiktok_accepts_video_download(self):
+        service = TikTokService.__new__(TikTokService)
+        service.service = Mock()
+        service.service.get_video.return_value = SimpleNamespace(
+            video_download_url="https://example.com/video", thumbnail_url=None,
+            width=100, height=100, extra_data={"cookies": {}, "headers": {}},
+        )
+        service.event = SimpleNamespace(peer_id=1, message_thread_id=None)
+        attachment = Mock(content=b"\x00\x00\x00\x18ftypmp42")
+        service.bot = Mock()
+        service.bot.get_video_attachment.return_value = attachment
+        self.assertEqual(service._get_content_by_url("https://www.tiktok.com/@user/video/1").attachments, [attachment])
 
     def test_instagram_empty_page_is_not_reported_as_deleted(self):
         with patch.object(InstagramParser, "_get_instagram_request", return_value=None):

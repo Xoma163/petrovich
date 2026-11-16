@@ -5,7 +5,7 @@ from apps.bot.core.chat_actions import ChatActionEnum
 from apps.commands.media_command.service import MediaServiceResponse, MediaService
 from apps.connectors.parsers.media_command.data import VideoData
 from apps.connectors.parsers.media_command.tiktok import TikTok
-from apps.shared.exceptions import PSkipContinue
+from apps.shared.exceptions import PSkipContinue, PWarning
 
 
 class TikTokService(MediaService):
@@ -32,6 +32,9 @@ class TikTokService(MediaService):
             cookies=video_data.extra_data["cookies"],  # noqa
             headers=video_data.extra_data["headers"],  # noqa
         )
+        content = va.content
+        if not content or content.lstrip()[:32].lower().startswith((b"<!doctype html", b"<html")):
+            raise PWarning("TikTok не отдал видео. Попробуйте позже")
 
         return MediaServiceResponse(text=None, attachments=[va], video_title="")
 
