@@ -37,15 +37,15 @@ class Reddit:
         """
         xml = requests.get(url).content
         bs4 = BeautifulSoup(xml, "html.parser")
-        try:
-            filename = bs4.find("adaptationset", {"contenttype": "audio"}).find("representation").find("baseurl").text
-            return filename
-        except Exception:
-            try:
-                filename = bs4.find("representation", {"id": "AUDIO-1"}).find("baseurl").text
-                return filename
-            except Exception:
-                return None
+        adaptation = bs4.find("adaptationset", {"contenttype": "audio"})
+        representation = adaptation.find("representation") if adaptation is not None else None
+        base_url = representation.find("baseurl") if representation is not None else None
+        if base_url is not None:
+            return base_url.text
+
+        representation = bs4.find("representation", {"id": "AUDIO-1"})
+        base_url = representation.find("baseurl") if representation is not None else None
+        return base_url.text if base_url is not None else None
 
     def _get_reddit_video_audio_urls(self) -> tuple[str, str]:
         audio_url = None
@@ -129,8 +129,8 @@ class Reddit:
             return self._get_text_from_post()
         elif self.is_link:
             link = self._get_link_from_post()
-            formats = ["gif", "webm", "mp4"]
-            if any([link.endswith(x) for x in formats]):
+            formats = ("gif", "webm", "mp4")
+            if link.endswith(formats):
                 self.content_type = self.CONTENT_TYPE_VIDEO
                 return self._get_video_from_post()
             return f"{link}\n\n{self._get_text_from_post()}"
@@ -181,7 +181,7 @@ class Reddit:
     @property
     def is_gif(self):
         url = self.data.get("url_overridden_by_dest")
-        if url and (url.endswith(".gif") or url.endswith(".gifv")):
+        if url and url.endswith((".gif", ".gifv")):
             return True
         return False
 

@@ -14,7 +14,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         schedule = [
             # Проверка на др
-            ScheduleItem("0 10 * * *", "check_birthday"),
+            # ScheduleItem("0 10 * * *", "check_birthday"),
             # Проверка оповещений
             ScheduleItem("*/1 * * * *", "check_notify"),
             # Отправка новостей Паше

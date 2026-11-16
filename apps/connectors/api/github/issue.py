@@ -10,7 +10,7 @@ from apps.shared.exceptions import PWarning
 
 
 class GithubIssueAPI(GithubAPI):
-    USER_PK_RE = re.compile(r"Ишю от пользователя .* \(id=(.*)\)")
+    USER_PK_RE = re.compile(r"^Ишю от пользователя [^\r\n]* \(id=([0-9]+)\)\r?$", re.MULTILINE)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -33,7 +33,7 @@ class GithubIssueAPI(GithubAPI):
         self.number = response["number"]
         self.title = response["title"]
         self.labels = [x["name"] for x in response["labels"]]
-        self.body = response["body"]
+        self.body = response["body"] or ""
         self.assignee = response["assignee"]
         self.remote_url = response["html_url"]
         self.created_at = datetime.strptime(response["created_at"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=UTC)

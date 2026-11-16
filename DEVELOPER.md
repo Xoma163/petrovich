@@ -586,6 +586,11 @@ Selenium, and urllib3 transport failures into user-facing warnings. HTTP 401/403
 Existing application warnings and programming errors pass through unchanged; exception causes are preserved.
 VK, Instagram, TikTok, Pinterest, Reddit, X/Twitter, Boosty, and Yandex Music use clearer parser messages.
 User-facing media messages use formal Russian address (Вы): `Попробуйте`, `Проверьте`, `Пришлите`.
+Boosty, Coub, Pinterest, and Suno explicitly validate the HTML metadata they consume. Missing required
+media metadata produces a user-facing warning rather than an attribute/key error; malformed embedded
+JSON is also mapped to a warning where it is parsed. Pinterest can return a video without a title;
+Suno can return audio without a title or cover image. Reddit DASH audio parsing keeps its two supported
+manifest layouts and treats missing audio as a normal silent-video case, using explicit element checks.
 An Instagram gate without a specific age signal is described as a viewing restriction, not an age restriction.
 These changes do not alter retries, permissions, or lazy attachment downloads outside the content-fetch stage.
 Boosty cookie guidance warns that credentials may be logged and must not be sent in group chats.
@@ -709,6 +714,10 @@ Capabilities discovered:
 - notify users in Telegram when issue state/comments/labels change
 - allow users to reply to developer comments through Telegram
 
+GitHub issue authors are recovered only from a standalone, generated footer line with a numeric profile
+ID. Keep that regex anchored to lines so malformed issue bodies cannot cause quadratic backtracking;
+an empty/null GitHub body has no author. This footer lookup is metadata parsing, not authentication.
+
 Key files:
 
 - `apps/connectors/api/github/github.py`
@@ -725,6 +734,12 @@ Example:
 - Minecraft server control uses `sudo systemctl start/stop ...`
 
 Treat this area as operationally sensitive.
+
+`check_birthday` is not included in `crontab_handler`'s schedule; it remains available for manual runs.
+The `check_birthday` management command loads profile settings and eligible chats with the birthday
+profiles. Each profile uses its own prefetched chat list: never overwrite the shared eligible-chat
+queryset inside the loop, because doing so suppresses messages for subsequent birthday profiles with
+different chat memberships. Telegram user lookups remain separate from that prefetch.
 
 ---
 

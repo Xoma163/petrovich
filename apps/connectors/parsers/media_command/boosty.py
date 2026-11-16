@@ -22,9 +22,15 @@ class Boosty:
         response = requests.get(post_url, cookies=cookies, headers=get_default_headers(), timeout=30)
         response.raise_for_status()
         bs4 = BeautifulSoup(response.text, "html.parser")
-        data = json.loads(bs4.select_one("#initial-state").text)
-        post = data["posts"]["postsList"]["data"]["posts"][0]
-        post_data = post["data"]
+        initial_state = bs4.select_one("#initial-state")
+        if initial_state is None:
+            raise PWarning("Boosty не вернул данные публикации. Проверьте ссылку и доступ к посту")
+        try:
+            data = json.loads(initial_state.text)
+            post = data["posts"]["postsList"]["data"]["posts"][0]
+            post_data = post["data"]
+        except (json.JSONDecodeError, KeyError, IndexError, TypeError) as exc:
+            raise PWarning("Не удалось прочитать данные публикации Boosty. Попробуйте позже") from exc
         if not post_data:
             raise PWarning(
                 "Boosty не вернул содержимое публикации. Проверьте ссылку и доступ к посту. Если пост требует подписки, а у Вас есть доступ, можно передать данные входа:\n"

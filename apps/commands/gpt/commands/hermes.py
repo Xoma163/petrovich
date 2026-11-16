@@ -1,9 +1,8 @@
 import base64
-import binascii
 import re
 from io import BytesIO
 
-from PIL import Image, UnidentifiedImageError
+from PIL import Image
 
 from apps.bot.consts import RoleEnum
 from apps.bot.core.messages.attachments.photo import PhotoAttachment
@@ -18,11 +17,12 @@ from petrovich.settings import env
 
 class HermesCommand(GPTCommand, GPTCompletionsFunctionality, GPTVisionFunctionality):
     INLINE_IMAGE = re.compile(
-        r"!\[[^\]\n]*\]\(data:image/(?P<format>png|jpeg|webp|gif);base64,(?P<data>[A-Za-z0-9+/=]+)\)",
+        r"!\[[^\]\n]*\]\(data:image/(?P<format>png|jpeg|webp|gif);base64,(?P<data>[a-z0-9+/=]+)\)",
         re.IGNORECASE,
     )
     MAX_IMAGE_BYTES = 5 * 1024 * 1024
     MAX_IMAGES = 10
+    IMAGE_TOO_LARGE = "[Изображение слишком большое]"
 
     name = "hermes"
     names = ["гермес"]
@@ -54,11 +54,11 @@ class HermesCommand(GPTCommand, GPTCompletionsFunctionality, GPTVisionFunctional
                 return "[Слишком много изображений]"
             encoded = match.group("data")
             if len(encoded) > (self.MAX_IMAGE_BYTES + 2) // 3 * 4:
-                return "[Изображение слишком большое]"
+                return self.IMAGE_TOO_LARGE
             try:
                 image_bytes = base64.b64decode(encoded, validate=True)
                 if not image_bytes or len(image_bytes) > self.MAX_IMAGE_BYTES:
-                    return "[Изображение слишком большое]"
+                    return self.IMAGE_TOO_LARGE
                 with Image.open(BytesIO(image_bytes)) as image:
                     image.verify()
                     if image.format.lower() != match.group("format").lower():
@@ -72,8 +72,8 @@ class HermesCommand(GPTCommand, GPTCompletionsFunctionality, GPTVisionFunctional
                 else:
                     extension = "jpg" if match.group("format").lower() == "jpeg" else "png"
                 if len(image_bytes) > self.MAX_IMAGE_BYTES:
-                    return "[Изображение слишком большое]"
-            except (binascii.Error, OSError, UnidentifiedImageError, ValueError):
+                    return self.IMAGE_TOO_LARGE
+            except (OSError, ValueError):
                 return "[Не удалось прочитать изображение]"
 
             attachment = PhotoAttachment()

@@ -12,12 +12,15 @@ from apps.shared.exceptions import PWarning
 
 class _NothingLogger:
     def debug(self, msg):
+        # Suppress yt-dlp console diagnostics; callers handle results and exceptions.
         pass
 
     def warning(self, msg):
+        # Suppress yt-dlp warnings instead of emitting unsolicited bot process output.
         pass
 
     def error(self, msg):
+        # DownloadError is handled by the downloader; printing it here would duplicate it.
         pass
 
 

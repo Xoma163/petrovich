@@ -35,7 +35,6 @@ class GithubReply(Command):
         if comment:
             body.append(comment)
 
-        error_msg = None
         photos = self.event.get_all_attachments([PhotoAttachment], use_fwd=False)
         if photos:
             body.append(issue.get_text_for_images_in_body(photos, log_filter=self.event.log_filter))
@@ -48,8 +47,6 @@ class GithubReply(Command):
             comment = "Изображение(я)"
         self.send_comment_info_to_admin(issue, comment)
         answer = "Успешно оставил ваш комментарий"
-        if error_msg:
-            answer += f"\n{error_msg}"
         return ResponseMessage(ResponseMessageItem(text=answer))
 
     def send_comment_info_to_admin(self, issue: GithubIssueAPI, comment):

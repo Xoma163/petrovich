@@ -69,7 +69,6 @@ class Issue(Command):
             if not labels_in_github:
                 body = ["\n".join(msg_split[1:])]
 
-        error_msg = None
         photos = self.event.get_all_attachments([PhotoAttachment])
         if photos:
             body.append(issue.get_text_for_images_in_body(photos, log_filter=self.event.log_filter))
@@ -87,8 +86,6 @@ class Issue(Command):
         self.send_issue_info_to_admin(issue)
 
         answer = f"Отслеживать созданное ишю можно по {self.bot.get_formatted_url('ссылке', issue.remote_url)}"
-        if error_msg:
-            answer += f"\n{error_msg}"
         return ResponseMessage(ResponseMessageItem(text=answer))
 
     @staticmethod

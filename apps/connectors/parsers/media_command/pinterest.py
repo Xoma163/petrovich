@@ -39,13 +39,21 @@ class Pinterest:
 
     @staticmethod
     def _get_photo(bs4: BeautifulSoup) -> PinterestDataItem:
-        try:
-            image_data = json.loads(bs4.find("script", {"data-test-id": "leaf-snippet"}).text)
-            caption = image_data["headline"]
-            image_url = image_data["image"]
-        except Exception:
-            caption = None
-            image_url = bs4.find("meta", {"name": "og:image"}).attrs["content"]
+        caption = None
+        image_url = None
+        snippet = bs4.find("script", {"data-test-id": "leaf-snippet"})
+        if snippet is not None:
+            try:
+                image_data = json.loads(snippet.text)
+                caption = image_data["headline"]
+                image_url = image_data["image"]
+            except (json.JSONDecodeError, KeyError, TypeError):
+                caption = None
+        if not isinstance(image_url, str) or not image_url:
+            image = bs4.find("meta", {"name": "og:image"})
+            image_url = image.get("content") if image is not None else None
+        if not image_url:
+            raise PWarning(Pinterest.ERROR_MSG)
 
         ext = get_url_file_ext(image_url)
         content_type = (
@@ -55,6 +63,15 @@ class Pinterest:
 
     @staticmethod
     def _get_video(bs4: BeautifulSoup) -> PinterestDataItem:
-        video_url = json.loads(bs4.find("script", {"data-test-id": "video-snippet"}).text)["contentUrl"]
-        caption = bs4.find("meta", {"name": "og:title"}).attrs["content"]
+        snippet = bs4.find("script", {"data-test-id": "video-snippet"})
+        if snippet is None:
+            raise PWarning(Pinterest.ERROR_MSG)
+        try:
+            video_url = json.loads(snippet.text)["contentUrl"]
+        except (json.JSONDecodeError, KeyError, TypeError) as exc:
+            raise PWarning(Pinterest.ERROR_MSG) from exc
+        if not isinstance(video_url, str) or not video_url:
+            raise PWarning(Pinterest.ERROR_MSG)
+        title = bs4.find("meta", {"name": "og:title"})
+        caption = title.get("content", "") if title is not None else ""
         return PinterestDataItem(PinterestDataItem.CONTENT_TYPE_VIDEO, video_url, caption)

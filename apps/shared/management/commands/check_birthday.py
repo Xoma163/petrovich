@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from django.core.management.base import BaseCommand
+from django.db.models import Prefetch
 
 from apps.bot.core.bot.telegram.tg_bot import TgBot
 from apps.bot.core.messages.response_message import ResponseMessageItem, ResponseMessage
@@ -17,6 +18,8 @@ class Command(BaseCommand):
         profiles = Profile.objects.filter(
             birthday__day=today.day,
             birthday__month=today.month,
+        ).select_related("settings").prefetch_related(
+            Prefetch("chats", queryset=bday_chats, to_attr="birthday_chats"),
         )
         for profile in profiles:
             if not profile.settings.celebrate_bday:
@@ -29,8 +32,7 @@ class Command(BaseCommand):
             rm = ResponseMessage(rmi)
             tg_bot.send_response_message(rm)
 
-            bday_chats = profile.chats.filter(pk__in=[x.pk for x in bday_chats])
-            for chat in bday_chats:
+            for chat in profile.birthday_chats:
                 rmi1 = ResponseMessageItem(
                     f"С Днём рождения, {tg_bot.get_mention(profile)}!",
                     peer_id=chat.chat_id,
