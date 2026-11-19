@@ -205,8 +205,6 @@ That worker explicitly closes Django DB connections before reuse and again when 
 
 For local debugging without exposing a webhook, `python manage.py poll_tg` runs Telegram `getUpdates` polling through the same `TgBot.parse()` path. Use `--drop-webhook` when Telegram still has a webhook configured; add `--drop-pending-updates` only when old queued updates should be discarded.
 
-For media diagnostics without contacting Telegram, start the local Docker PostgreSQL and Redis, run migrations and `initial`, then use `python manage.py simulate_media https://vt.tiktok.com/.../`. This command builds a private Telegram-style text update and runs the real `TgEvent` / `handle_event` / media routing path synchronously. It records text and attachment byte counts as JSON instead of sending messages, chat actions, or deletions to Telegram. It reports HTTP exception status and CDN hostname without exposing signed media URLs. It accepts only one supported media link (optionally `/медиа <URL>`), uses a synthetic trusted user in the local database, and refuses databases or Redis outside the local Docker ports `15433` and `16380`. This is not a generic command simulator; it can still contact the linked media service and write synthetic user/cache state to the local containers.
-
 ### GitHub ingress
 
 `GithubView` handles issue/comment/label lifecycle webhooks and sends Telegram notifications back to users. This means GitHub automation is not isolated to a connector layer; webhook behavior directly affects user messaging.
