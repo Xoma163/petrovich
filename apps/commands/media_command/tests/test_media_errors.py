@@ -125,6 +125,146 @@ class MediaErrorTests(SimpleTestCase):
         service.bot.get_video_attachment.return_value = attachment
         self.assertEqual(service._get_content_by_url("https://www.tiktok.com/@user/video/1").attachments, [attachment])
 
+    def test_tiktok_refreshes_page_after_cdn_403(self):
+        service = TikTokService.__new__(TikTokService)
+        service.service = Mock()
+        service.service.get_video.side_effect = [
+            SimpleNamespace(
+                video_download_url=f"https://example.com/video-{i}",
+                thumbnail_url=None,
+                width=100,
+                height=100,
+                extra_data={"cookies": {"session": str(i)}, "headers": {"referer": "https://www.tiktok.com/"}},
+            )
+            for i in (1, 2)
+        ]
+        service.event = SimpleNamespace(peer_id=1, message_thread_id=None)
+        error_response = requests.Response()
+        error_response.status_code = 403
+        first = Mock()
+        first.download_content.side_effect = requests.HTTPError(response=error_response)
+        second = Mock(content=b"\x00\x00\x00\x18ftypmp42")
+        service.bot = Mock()
+        service.bot.get_video_attachment.side_effect = [first, second]
+
+        result = service._get_content_by_url("https://www.tiktok.com/@user/video/1")
+
+        self.assertEqual(result.attachments, [second])
+        self.assertEqual(
+            [call.kwargs["url"] for call in service.bot.get_video_attachment.call_args_list],
+            ["https://example.com/video-1", "https://example.com/video-2"],
+        )
+        self.assertEqual(first.download_content.call_args.kwargs["cookies"], {"session": "1"})
+        self.assertEqual(second.download_content.call_args.kwargs["cookies"], {"session": "2"})
+        self.assertEqual(service.service.get_video.call_count, 2)
+
+    def test_tiktok_retries_same_url_without_chain_token_before_refreshing_page(self):
+        service = TikTokService.__new__(TikTokService)
+        service.service = Mock()
+        service.service.get_video.return_value = SimpleNamespace(
+            video_download_url="https://example.com/video",
+            thumbnail_url=None,
+            width=100,
+            height=100,
+            extra_data={"cookies": {"tt_chain_token": "bad", "session": "keep"}, "headers": {"referer": "TikTok"}},
+        )
+        service.event = SimpleNamespace(peer_id=1, message_thread_id=None)
+        response = requests.Response()
+        response.status_code = 403
+        attachment = Mock(content=b"\x00\x00\x00\x18ftypmp42")
+        attachment.download_content.side_effect = [requests.HTTPError(response=response), attachment.content]
+        service.bot = Mock()
+        service.bot.get_video_attachment.return_value = attachment
+
+        result = service._get_content_by_url("https://www.tiktok.com/@user/video/1")
+
+        self.assertEqual(result.attachments, [attachment])
+        service.service.get_video.assert_called_once()
+        self.assertEqual(attachment.download_content.call_count, 2)
+        self.assertEqual(
+            [call.kwargs["cookies"] for call in attachment.download_content.call_args_list],
+            [{"tt_chain_token": "bad", "session": "keep"}, {"session": "keep"}],
+        )
+        self.assertEqual(service.service.get_video.return_value.extra_data["cookies"]["tt_chain_token"], "bad")
+
+    def test_tiktok_refreshes_page_when_cookie_fallback_also_gets_403(self):
+        service = TikTokService.__new__(TikTokService)
+        service.service = Mock()
+        service.service.get_video.return_value = SimpleNamespace(
+            video_download_url="https://example.com/video",
+            thumbnail_url=None,
+            width=100,
+            height=100,
+            extra_data={"cookies": {"tt_chain_token": "bad"}, "headers": {}},
+        )
+        service.event = SimpleNamespace(peer_id=1, message_thread_id=None)
+        response = requests.Response()
+        response.status_code = 403
+        error = requests.HTTPError(response=response)
+        first = Mock()
+        first.download_content.side_effect = [error, error]
+        second = Mock(content=b"\x00\x00\x00\x18ftypmp42")
+        service.bot = Mock()
+        service.bot.get_video_attachment.side_effect = [first, second]
+
+        result = service._get_content_by_url("https://www.tiktok.com/@user/video/1")
+
+        self.assertEqual(result.attachments, [second])
+        self.assertEqual(first.download_content.call_count, 2)
+        self.assertEqual(service.service.get_video.call_count, 2)
+
+    def test_tiktok_403_refresh_is_bounded_and_preserves_error(self):
+        service = TikTokService.__new__(TikTokService)
+        service.service = Mock()
+        service.service.get_video.return_value = SimpleNamespace(
+            video_download_url="https://example.com/video",
+            thumbnail_url=None,
+            width=100,
+            height=100,
+            extra_data={"cookies": {}, "headers": {}},
+        )
+        service.event = SimpleNamespace(peer_id=1, message_thread_id=None)
+        response = requests.Response()
+        response.status_code = 403
+        error = requests.HTTPError(response=response)
+        attachment = Mock()
+        attachment.download_content.side_effect = error
+        service.bot = Mock()
+        service.bot.get_video_attachment.return_value = attachment
+
+        with self.assertRaises(PWarning) as caught:
+            with media_request_errors():
+                service._get_content_by_url("https://www.tiktok.com/@user/video/1")
+
+        self.assertEqual(caught.exception.msg, "Медиасервис отказал в доступе. Не удалось загрузить медиа")
+        self.assertIs(caught.exception.__cause__, error)
+        self.assertEqual(service.service.get_video.call_count, 3)
+        self.assertEqual(attachment.download_content.call_count, 3)
+
+    def test_tiktok_does_not_refresh_page_for_other_http_errors(self):
+        for status in (401, 404, 429, 500):
+            with self.subTest(status=status):
+                service = TikTokService.__new__(TikTokService)
+                service.service = Mock()
+                service.service.get_video.return_value = SimpleNamespace(
+                    video_download_url="https://example.com/video",
+                    thumbnail_url=None,
+                    width=100,
+                    height=100,
+                    extra_data={"cookies": {}, "headers": {}},
+                )
+                service.event = SimpleNamespace(peer_id=1, message_thread_id=None)
+                response = requests.Response()
+                response.status_code = status
+                attachment = Mock()
+                attachment.download_content.side_effect = requests.HTTPError(response=response)
+                service.bot = Mock()
+                service.bot.get_video_attachment.return_value = attachment
+
+                with self.assertRaises(requests.HTTPError):
+                    service._get_content_by_url("https://www.tiktok.com/@user/video/1")
+                service.service.get_video.assert_called_once()
+
     def test_instagram_empty_page_is_not_reported_as_deleted(self):
         with patch.object(InstagramParser, "_get_instagram_request", return_value=None):
             with self.assertRaises(PWarning) as caught:
