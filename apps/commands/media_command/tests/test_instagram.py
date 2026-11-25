@@ -2,6 +2,7 @@ import json
 from unittest.mock import Mock, patch
 
 from django.test import SimpleTestCase
+from selenium.common import TimeoutException
 from urllib3.exceptions import ReadTimeoutError
 
 from apps.connectors.parsers.media_command.instagram import InstagramParser
@@ -88,6 +89,26 @@ class InstagramParserTests(SimpleTestCase):
         successful_driver.quit.assert_called_once_with()
         web_driver_wait.assert_called_once_with(successful_driver, 5)
         sleep.assert_not_called()
+
+    @patch("apps.connectors.parsers.media_command.instagram.WebDriverWait")
+    @patch("apps.connectors.parsers.media_command.instagram.get_web_driver")
+    def test_missing_data_retries_then_logs_only_page_context(self, get_driver, wait):
+        driver = Mock(page_source='<html></html>', title='Instagram', current_url='https://instagram.com/login/?private#secret')
+        get_driver.return_value = driver
+        wait.return_value.until.side_effect = TimeoutException()
+        with self.assertLogs('bot', 'WARNING') as logs, self.assertRaisesMessage(PWarning, 'Не удалось дождаться'):
+            InstagramParser().get_data('https://instagram.com/reel/example/')
+        self.assertEqual(driver.quit.call_count, 4)
+        self.assertEqual(logs.output, ["WARNING:bot:Instagram page timed out: path='/login/' title='Instagram'"])
+
+    @patch("apps.connectors.parsers.media_command.instagram.WebDriverWait")
+    @patch("apps.connectors.parsers.media_command.instagram.get_web_driver")
+    def test_known_age_gate_does_not_retry(self, get_driver, wait):
+        get_driver.return_value.page_source = 'You must be 18 years old or over to view this post'
+        wait.return_value.until.side_effect = TimeoutException()
+        with self.assertRaisesMessage(PWarning, 'подтверждения возраста'):
+            InstagramParser().get_data('https://instagram.com/reel/example/')
+        get_driver.assert_called_once_with()
 
     @patch.object(
         InstagramParser,

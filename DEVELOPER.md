@@ -532,6 +532,9 @@ What it does:
   falling through to the generic unknown-content parser error
 - retries Selenium's local-driver read timeout and maps final failure to the same user-facing availability warning
   instead of an internal error
+- retries unrecognized Instagram page-load or data-wait timeouts in a fresh browser (four attempts total),
+  but reports recognized viewing restrictions immediately. On the last Selenium timeout it logs the page
+  title and URL path, not query parameters, fragments, or page HTML.
 - also detects age gates exposed only as `xig_polaris_media.gating_ruling`, where
   `if_not_gated_logged_out` is null, and never returns an empty media response for unsupported payloads
 - intentionally leaves Instagram Reels captions empty while preserving captions for other Instagram media types

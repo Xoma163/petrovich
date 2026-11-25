@@ -1,13 +1,14 @@
 import json
+import logging
 import re
+from urllib.parse import urlsplit
 
 from bs4 import BeautifulSoup
-from selenium.common import TimeoutException
+from selenium.common import TimeoutException, WebDriverException
 from selenium.webdriver.support.ui import WebDriverWait
 from urllib3.exceptions import ReadTimeoutError
 
 from apps.connectors.parsers.web_driver import get_web_driver
-from apps.shared.decorators import retry
 from apps.shared.exceptions import PWarning, PError
 
 
@@ -59,10 +60,16 @@ class InstagramParser:
             raise PWarning("Не удалось получить медиа из Instagram. Возможно, этот тип публикации не поддерживается")
         return data
 
-    @retry(times=3, exceptions=(TimeoutException, ReadTimeoutError))
     def _get_instagram_request(self, url):
+        for _ in range(3):
+            try:
+                return self._load_page(url)
+            except (TimeoutException, ReadTimeoutError):
+                continue
+        return self._load_page(url, log_timeout=True)
+
+    def _load_page(self, url, log_timeout=False):
         web_driver = get_web_driver()
-        page_content = None
         try:
             web_driver.get(url)
 
@@ -76,14 +83,23 @@ class InstagramParser:
 
             wait = WebDriverWait(web_driver, 5)
             wait.until(lambda x: any(key in x.page_source for key in self.API_DATA_KEYS))
-            page_content = web_driver.page_source
+            return web_driver.page_source
         except TimeoutException:
             self.check_request_errors(web_driver.page_source)
+            if log_timeout:
+                try:
+                    path = urlsplit(web_driver.current_url).path
+                    title = web_driver.title
+                except (WebDriverException, ReadTimeoutError, ValueError):
+                    path = title = '<unavailable>'
+                logging.getLogger('bot').warning('Instagram page timed out: path=%r title=%r', path[:256], title[:160])
+            raise
         finally:
             web_driver.quit()
-        return page_content
 
     def check_request_errors(self, page_source):
+        if self.INAPPROPRIATE_CONTENT in BeautifulSoup(page_source, 'html.parser').get_text():
+            raise PWarning("Instagram ограничил просмотр этой публикации. Бот не может её скачать без входа")
         if self._has_age_restriction(page_source):
             raise PWarning("Instagram требует подтверждения возраста. Бот не может скачать эту публикацию")
 
